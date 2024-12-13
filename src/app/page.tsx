@@ -1,22 +1,41 @@
+"use client"
+
 import { LeftSidebar } from "@/migrate/components/left-sidebar";
 import { MainContent } from "@/migrate/components/main-content";
 import { RightSidebar } from "@/migrate/components/right-sidebar";
-import { ThemeToggle } from "@/migrate/components/theme-toggle";
+import { SettingsSidebar } from "@/migrate/components/settings-sidebar";
+import { useState } from "react";
+import { useFiles } from "@/lib/contexts/file-context";
 
 export default function Home() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeSettingsTab, setActiveSettingsTab] = useState("profiles");
+  const { selectedFiles, files } = useFiles();
+
+  // Obtener el elemento seleccionado para el panel derecho
+  const selectedItem = selectedFiles.length === 1
+    ? files.find(f => f.id === selectedFiles[0])
+    : null;
+
   return (
     <main className="flex min-h-screen flex-col">
       <div className="flex h-screen">
         <LeftSidebar />
         <div className="flex-1 overflow-hidden">
-          <div className="flex h-16 items-center justify-between border-b px-4">
-            <h1 className="text-xl font-semibold">Image Manager</h1>
-            <ThemeToggle />
-          </div>
-          <MainContent />
+          <MainContent onOpenSettings={() => setIsSettingsOpen(true)} />
         </div>
-        <RightSidebar />
+        <RightSidebar
+          selectedItem={selectedItem}
+          isCollapsed={false}
+        />
       </div>
+
+      <SettingsSidebar
+        isOpen={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        activeTab={activeSettingsTab}
+        onTabChange={setActiveSettingsTab}
+      />
     </main>
   );
 }
