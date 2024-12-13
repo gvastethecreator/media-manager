@@ -1,0 +1,16 @@
+@layer base {
+  :root {
+    --font-scale: 0.95;
+  }
+
+  html {
+    font-size: calc(100% * var(--font-scale));
+  }
+
+  * {
+    @apply transition-all duration-200 ease-in-out;
+  }
+}
+
+/* Rest of your global styles */
+

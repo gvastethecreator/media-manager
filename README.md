@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Image Manager
+
+A modern image management application built with Next.js 15, React 19, and Motion One.
+
+## Migration Progress
+
+### Completed Components
+
+#### Main Toolbar
+- ✅ SearchBar - Basic search input with responsive width
+- ✅ ViewToggle - Grid/List view switcher
+- ✅ ThumbnailSizeToggle - Image size controls (small/medium/large)
+- ✅ CompactMenu - Mobile-friendly dropdown menu
+- ✅ ActionButtons - Quick action buttons for desktop
+- ✅ MainToolbar - Container component integrating all toolbar elements
+
+#### Viewers & Views
+- ✅ AdvancedImageViewer - Full-featured image viewer with zoom, pan, and gestures
+- ✅ CardView - Grid layout for collections and folders with animations
+- ✅ FileView - Virtualized grid/list view for files with context menu
+
+#### Navigation
+- ✅ LeftSidebar - Main navigation with collections, folders, and tags
+- ✅ RightSidebar - Resizable details panel with metadata and preview
+
+#### Management
+- ✅ Collections - Collection management with card layout and creation dialog
+- ✅ Folders - Hierarchical folder structure with nested navigation
+
+### Context Providers
+- ✅ ProfileContext - User profile and preferences
+- ⏳ FileContext - File management state
+- ⏳ SettingsContext - Application settings
+
+## Project Structure
+
+```
+src/
+├── app/                 # Next.js app router
+├── components/
+│   ├── ui/             # shadcn/ui components
+│   ├── main-toolbar/   # Toolbar components
+│   └── ...            # Other components
+├── lib/
+│   ├── contexts/       # React contexts
+│   ├── hooks/         # Custom hooks
+│   ├── types/         # TypeScript types
+│   └── utils/         # Utility functions
+└── styles/            # Global styles
+```
+
+## Dependencies
+
+### Core
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+
+### UI Components
+- shadcn/ui - Component library
+- Lucide Icons - Icon set
+- Framer Motion - Animations
+- TanStack Virtual - Virtualization
+
+### Styling
+- Tailwind CSS
+- CSS Variables
+- Geist Font Family
+
+### Development
+- ESLint
+- Prettier
+- PostCSS
+
+## Theme Customization
+
+The application uses shadcn/ui's theming system with:
+- Light/Dark mode support
+- System theme detection
+- Custom color schemes
+- Responsive design patterns
+
+## Development Progress
+
+### Phase 1: Basic Structure ✅
+- Project setup
+- Component architecture
+- Basic routing
+
+### Phase 2: Core Components ✅
+- Main toolbar migration
+- Image viewer implementation
+- Context setup
+- View components (Card, File)
+- Navigation components (Left/Right sidebars)
+- Management components (Collections, Folders)
+
+### Phase 3: Pending
+- File management state
+- Settings management
+- Performance optimizations
 
 ## Getting Started
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Clone the repository
+2. Install dependencies: `pnpm install`
+3. Run development server: `pnpm dev`
+4. Open http://localhost:3000
