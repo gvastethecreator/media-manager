@@ -1,41 +1,19 @@
 "use client"
 
-import { LeftSidebar } from "@/migrate/components/left-sidebar";
-import { MainContent } from "@/migrate/components/main-content";
-import { RightSidebar } from "@/migrate/components/right-sidebar";
-import { SettingsSidebar } from "@/migrate/components/settings-sidebar";
-import { useState } from "react";
-import { useFiles } from "@/lib/contexts/file-context";
+import dynamic from 'next/dynamic'
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { ThemeProvider } from "@/components/theme-provider"
 
-export default function Home() {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeSettingsTab, setActiveSettingsTab] = useState("profiles");
-  const { selectedFiles, files } = useFiles();
+const DynamicMainContent = dynamic(() => import('@/components/main-content/main-content'), { ssr: false })
 
-  // Obtener el elemento seleccionado para el panel derecho
-  const selectedItem = selectedFiles.length === 1
-    ? files.find(f => f.id === selectedFiles[0])
-    : null;
-
+export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col">
-      <div className="flex h-screen">
-        <LeftSidebar />
-        <div className="flex-1 overflow-hidden">
-          <MainContent onOpenSettings={() => setIsSettingsOpen(true)} />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <DynamicMainContent />
         </div>
-        <RightSidebar
-          selectedItem={selectedItem}
-          isCollapsed={false}
-        />
-      </div>
-
-      <SettingsSidebar
-        isOpen={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        activeTab={activeSettingsTab}
-        onTabChange={setActiveSettingsTab}
-      />
-    </main>
-  );
+      </SidebarProvider>
+    </ThemeProvider>
+  )
 }
