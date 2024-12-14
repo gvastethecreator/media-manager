@@ -10,8 +10,6 @@ import { Breadcrumbs } from "@/components/breadcrumbs/breadcrumbs"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { useFiles } from "@/context/FilesContext"
 import type { FileItem } from "@/components/file-view/file-view"
-import { EmptyState } from "@/components/empty-state/empty-state"
-import { LoadingState } from "@/components/loading-state/loading-state"
 
 export function MainContent() {
   const {
@@ -37,7 +35,6 @@ export function MainContent() {
   const [navigationHistory, setNavigationHistory] = useState<string[]>(['/'])
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(100)
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleSelectItem = (item: FileItem) => {
     setSelectedItem(item)
@@ -97,71 +94,9 @@ export function MainContent() {
   }
 
   const renderContent = () => {
-    if (isLoading) {
-      return <LoadingState />
-    }
-
     switch (currentView) {
-      case 'cards':
-        const allCards = [
-          ...collections.map(c => ({
-            id: c.id,
-            name: c.name,
-            description: c.description,
-            thumbnails: c.thumbnails,
-            count: c.count,
-            totalSize: c.totalSize,
-            tags: c.tags,
-            color: c.color,
-            emoji: c.emoji,
-            type: 'collections' as const
-          })),
-          ...folders.map(f => ({
-            id: f.id,
-            name: f.name,
-            description: f.description,
-            thumbnails: f.thumbnails,
-            count: f.count,
-            totalSize: f.totalSize,
-            tags: [],
-            color: f.color,
-            type: 'folders' as const
-          })),
-          ...tags.map(t => ({
-            id: t.id,
-            name: t.name,
-            description: t.description,
-            thumbnails: t.thumbnails,
-            count: t.count,
-            totalSize: t.totalSize,
-            tags: [t.name],
-            color: t.color,
-            type: 'tags' as const
-          }))
-        ]
-
-        return (
-          <CardView
-            items={allCards}
-            type="cards"
-            onSelect={(item) => {
-              switch (item.type) {
-                case 'collections':
-                  handleSelectCollection(item.id)
-                  break
-                case 'folders':
-                  handleSelectFolder(item.id)
-                  break
-                case 'tags':
-                  handleSelectTag(item.name)
-                  break
-              }
-            }}
-          />
-        )
-
       case 'collections':
-        return collections.length > 0 ? (
+        return (
           <CardView
             items={collections.map(c => ({
               id: c.id,
@@ -175,14 +110,11 @@ export function MainContent() {
               emoji: c.emoji
             }))}
             type="collections"
-            onSelect={item => handleSelectCollection(item.id)}
+            onSelect={handleSelectCollection}
           />
-        ) : (
-          <EmptyState type="collections" />
         )
-
       case 'folders':
-        return folders.length > 0 ? (
+        return (
           <CardView
             items={folders.map(f => ({
               id: f.id,
@@ -195,14 +127,11 @@ export function MainContent() {
               color: f.color
             }))}
             type="folders"
-            onSelect={item => handleSelectFolder(item.id)}
+            onSelect={handleSelectFolder}
           />
-        ) : (
-          <EmptyState type="folders" />
         )
-
       case 'tags':
-        return tags.length > 0 ? (
+        return (
           <CardView
             items={tags.map(t => ({
               id: t.id,
@@ -215,22 +144,18 @@ export function MainContent() {
               color: t.color
             }))}
             type="tags"
-            onSelect={item => handleSelectTag(item.name)}
+            onSelect={handleSelectTag}
           />
-        ) : (
-          <EmptyState type="tags" />
         )
-
-      default:
-        return currentItems.length > 0 ? (
+      case 'files':
+        return (
           <FileView
-            items={currentItems}
-            onSelectItem={handleSelectItem}
             view={view}
             thumbnailSize={thumbnailSize}
+            onSelectItem={handleSelectItem}
+            selectedItem={selectedItem}
+            items={currentItems}
           />
-        ) : (
-          <EmptyState type="files" />
         )
     }
   }

@@ -1,9 +1,9 @@
 'use client'
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface SidebarItemProps {
   icon: React.ElementType
@@ -23,33 +23,34 @@ export function SidebarItem({
   onAdd
 }: SidebarItemProps) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="relative group">
       <Button
         variant="ghost"
-        size="sm"
-        onClick={onClick}
         className={cn(
-          "sidebar-item flex-1 justify-start gap-2",
-          isActive && "sidebar-item-active"
+          "w-full justify-start gap-2 h-9",
+          isActive && "bg-muted"
         )}
+        onClick={onClick}
       >
-        <Icon className="h-4 w-4 shrink-0" />
-        <span className="flex-1 truncate">{label}</span>
-        {count !== undefined && (
-          <span className="ml-auto text-xs text-muted-foreground">
-            {count}
-          </span>
+        <Icon className="h-4 w-4" />
+        <span className="flex-1 text-left truncate">{label}</span>
+        {typeof count !== 'undefined' && (
+          <span className="text-muted-foreground text-xs">{count}</span>
         )}
       </Button>
       {onAdd && (
         <Button
           variant="ghost"
           size="icon"
+          className={cn(
+            "absolute right-1 top-1 h-7 w-7",
+            "opacity-0 group-hover:opacity-100",
+            "focus:opacity-100"
+          )}
           onClick={onAdd}
-          className="h-8 w-8 shrink-0"
         >
           <Plus className="h-4 w-4" />
-          <span className="sr-only">Añadir {label}</span>
+          <span className="sr-only">Agregar {label}</span>
         </Button>
       )}
     </div>
