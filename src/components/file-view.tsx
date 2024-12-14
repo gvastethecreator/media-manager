@@ -1,26 +1,10 @@
-"use client"
+'use client'
 
-import { useEffect, useRef, useState } from "react"
-import { useVirtualizer } from "@tanstack/react-virtual"
-import { animate, spring, stagger } from "motion"
-import {
-  Copy,
-  Download,
-  FolderIcon,
-  ImageIcon,
-  Info,
-  Pencil,
-  Share2,
-  Trash2,
-} from "lucide-react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import * as React from "react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { FolderIcon, ImageIcon, Copy, Download, Share2, Trash2, Pencil, Info } from 'lucide-react'
+import { animate, stagger, spring } from "motion"
+import { useVirtualizer } from '@tanstack/react-virtual'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -29,15 +13,22 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { cn } from "@/lib/utils"
-import { AdvancedImageViewer } from "./advanced-image-viewer"
+import { AdvancedImageViewer } from './advanced-image-viewer'
+import { useState } from 'react';
+
+type FileViewProps = {
+  view: 'grid' | 'list' | 'details'
+  thumbnailSize: 'small' | 'medium' | 'large'
+  onSelectItem: (item: FileItem) => void
+  selectedItem: FileItem | null
+}
 
 export type FileItem = {
   id: string
   name: string
   extension: string
   size: string
-  type: "folder" | "image"
+  type: 'folder' | 'image'
   thumbnail?: string
   dateModified: string
   dateCreated: string
@@ -45,36 +36,62 @@ export type FileItem = {
   children?: FileItem[]
 }
 
-interface FileViewProps {
-  view: "grid" | "list" | "details"
-  thumbnailSize: "small" | "medium" | "large"
-  onSelectItem: (item: FileItem) => void
-  selectedItem: FileItem | null
-  files: FileItem[]
-}
+// Generate sample files with folders first
+const files: FileItem[] = [
+  // Folders
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `folder-${i + 1}`,
+    name: `Folder ${i + 1}`,
+    extension: '',
+    size: `${Math.floor(Math.random() * 10) + 1} items`,
+    type: 'folder' as const,
+    dateModified: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
+    dateCreated: new Date(Date.now() - Math.floor(Math.random() * 20000000000)).toISOString(),
+    children: Array.from({ length: Math.floor(Math.random() * 20) + 5 }, (_, j) => ({
+      id: `folder-${i + 1}-image-${j + 1}`,
+      name: `Image ${j + 1}`,
+      extension: j % 2 === 0 ? '.jpg' : '.png',
+      size: `${Math.floor(Math.random() * 10) + 1} MB`,
+      type: 'image' as const,
+      thumbnail: `/placeholder.svg?height=400&width=400`,
+      dateModified: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
+      dateCreated: new Date(Date.now() - Math.floor(Math.random() * 20000000000)).toISOString(),
+      dimensions: `${1920 + j}x${1080 + j}`,
+    }))
+  })),
+  // Images
+  ...Array.from({ length: 90 }, (_, i) => ({
+    id: `image-${i + 1}`,
+    name: `Image ${i + 1}`,
+    extension: i % 2 === 0 ? '.jpg' : '.png',
+    size: `${Math.floor(Math.random() * 10) + 1} MB`,
+    type: 'image' as const,
+    thumbnail: `/placeholder.svg?height=400&width=400`,
+    dateModified: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
+    dateCreated: new Date(Date.now() - Math.floor(Math.random() * 20000000000)).toISOString(),
+    dimensions: `${1920 + i}x${1080 + i}`,
+  })),
+]
 
-export function FileView({
-  view,
-  thumbnailSize,
-  onSelectItem,
-  selectedItem,
-  files,
-}: FileViewProps) {
-  const parentRef = useRef<HTMLDivElement>(null)
-  const [containerWidth, setContainerWidth] = useState(0)
+export function FileView({ view, thumbnailSize, onSelectItem, selectedItem }: FileViewProps) {
+  const parentRef = React.useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = React.useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [viewerIndex, setViewerIndex] = useState(0)
 
-  const gap = 1
-  const itemWidth =
-    thumbnailSize === "small" ? 120 : thumbnailSize === "medium" ? 150 : 180
-  const itemHeight =
-    thumbnailSize === "small" ? 120 : thumbnailSize === "medium" ? 150 : 180
+  const gap = 1 // Reduced gap between items to 1px
 
+  // Calculate item dimensions based on thumbnail size
+  const itemWidth = thumbnailSize === 'small' ? 120 : thumbnailSize === 'medium' ? 150 : 180
+  const itemHeight = thumbnailSize === 'small' ? 120 : thumbnailSize === 'medium' ? 150 : 180
+
+
+  // Calculate columns based on container width
   const columns = Math.max(1, Math.floor((containerWidth - gap) / (itemWidth + gap)))
   const rows = Math.ceil(files.length / columns)
 
-  useEffect(() => {
+  // Update container width on mount and resize
+  React.useEffect(() => {
     const updateWidth = () => {
       if (parentRef.current) {
         setContainerWidth(parentRef.current.clientWidth)
@@ -97,50 +114,41 @@ export function FileView({
 
   const getThumbnailSize = () => {
     switch (thumbnailSize) {
-      case "small":
-        return "h-20 w-20"
-      case "medium":
-        return "h-28 w-28"
-      case "large":
-        return "h-36 w-36"
-      default:
-        return "h-28 w-28"
+      case 'small': return 'h-20 w-20'
+      case 'medium': return 'h-28 w-28'
+      case 'large': return 'h-36 w-36'
+      default: return 'h-28 w-28'
     }
   }
 
   const renderFileIcon = (file: FileItem) => {
     const iconSize = getThumbnailSize()
-    return file.type === "folder" ? (
+    return file.type === 'folder' ? (
       <FolderIcon className={`${iconSize} p-4 text-blue-500`} />
     ) : (
-      <img
-        src={file.thumbnail}
-        alt={file.name}
-        className={`${iconSize} rounded-md object-cover`}
-        loading="lazy"
+      <img 
+        src={file.thumbnail} 
+        alt={file.name} 
+        className={`${iconSize} object-cover rounded-md`}
       />
     )
   }
 
-  useEffect(() => {
-    // Esperar a que los elementos estén en el DOM
-    const elements = document.querySelectorAll(".file-item")
-    if (elements.length > 0) {
-      animate(
-        elements,
-        { opacity: [0, 1], scale: [0.9, 1] },
-        { delay: stagger(0.05), duration: 0.3, easing: spring() }
-      )
-    }
-  }, [view, thumbnailSize, files.length])
+  React.useEffect(() => {
+    animate(
+      ".file-item",
+      { opacity: [0, 1], scale: [0.9, 1] },
+      { delay: stagger(0.05), duration: 0.3, easing: spring() }
+    )
+  }, [view, thumbnailSize])
 
   const handleItemClick = (item: FileItem) => {
     onSelectItem(item)
   }
 
   const handleItemDoubleClick = (item: FileItem) => {
-    if (item.type === "image") {
-      const index = files.findIndex((file) => file.id === item.id)
+    if (item.type === 'image') {
+      const index = files.findIndex(file => file.id === item.id)
       setViewerIndex(index)
       setIsViewerOpen(true)
     }
@@ -148,25 +156,25 @@ export function FileView({
 
   const handleItemAction = (action: string, item: FileItem) => {
     switch (action) {
-      case "open":
+      case 'open':
         handleItemClick(item)
         break
-      case "download":
-        console.log("Downloading:", item.name)
+      case 'download':
+        console.log('Downloading:', item.name)
         break
-      case "share":
-        console.log("Sharing:", item.name)
+      case 'share':
+        console.log('Sharing:', item.name)
         break
-      case "copy":
-        console.log("Copying:", item.name)
+      case 'copy':
+        console.log('Copying:', item.name)
         break
-      case "rename":
-        console.log("Renaming:", item.name)
+      case 'rename':
+        console.log('Renaming:', item.name)
         break
-      case "delete":
-        console.log("Deleting:", item.name)
+      case 'delete':
+        console.log('Deleting:', item.name)
         break
-      case "info":
+      case 'info':
         handleItemClick(item)
         break
     }
@@ -177,75 +185,57 @@ export function FileView({
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className={cn(
-              "file-item group cursor-pointer rounded-sm p-0.5 transition-all hover:scale-105 hover:bg-muted/70",
-              selectedItem?.id === file.id && "bg-muted"
-            )}
+            className={`file-item rounded-sm transition-all hover:scale-105 cursor-pointer p-0.5 hover:bg-muted/70 group ${selectedItem?.id === file.id ? 'bg-muted' : ''}`}
             style={{
               width: itemWidth,
               height: itemHeight,
             }}
             onClick={() => handleItemClick(file)}
             onDoubleClick={() => handleItemDoubleClick(file)}
-            role="button"
-            tabIndex={0}
-            aria-label={`${file.name} ${file.type === "folder" ? "folder" : "image"}`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleItemDoubleClick(file)
-              if (e.key === " ") {
-                e.preventDefault()
-                handleItemClick(file)
-              }
-            }}
           >
-            <div className="flex h-full flex-col items-center justify-center">
-              <div className="flex flex-1 items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="flex-1 flex items-center justify-center">
                 {renderFileIcon(file)}
               </div>
-              <div className="mt-1 w-full text-center">
-                <span className="block truncate px-1 text-xs font-medium">
-                  {file.name}
-                </span>
+              <div className="w-full text-center mt-1">
+                <span className="text-xs font-medium truncate block px-1">{file.name}</span>
               </div>
             </div>
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-64">
-          <ContextMenuItem onClick={() => handleItemAction("open", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('open', file)}>
             Open
             <ContextMenuShortcut>⏎</ContextMenuShortcut>
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => handleItemAction("download", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('download', file)}>
             <Download className="mr-2 h-4 w-4" />
             Download
             <ContextMenuShortcut>⌘D</ContextMenuShortcut>
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => handleItemAction("share", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('share', file)}>
             <Share2 className="mr-2 h-4 w-4" />
             Share
             <ContextMenuShortcut>⌘S</ContextMenuShortcut>
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => handleItemAction("copy", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('copy', file)}>
             <Copy className="mr-2 h-4 w-4" />
             Copy
             <ContextMenuShortcut>⌘C</ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={() => handleItemAction("rename", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('rename', file)}>
             <Pencil className="mr-2 h-4 w-4" />
             Rename
             <ContextMenuShortcut>⌘R</ContextMenuShortcut>
           </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => handleItemAction("delete", file)}
-            className="text-red-600"
-          >
+          <ContextMenuItem onClick={() => handleItemAction('delete', file)} className="text-red-600">
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
             <ContextMenuShortcut>⌘⌫</ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={() => handleItemAction("info", file)}>
+          <ContextMenuItem onClick={() => handleItemAction('info', file)}>
             <Info className="mr-2 h-4 w-4" />
             Properties
             <ContextMenuShortcut>⌘I</ContextMenuShortcut>
@@ -255,115 +245,131 @@ export function FileView({
     )
   }
 
-  const renderListView = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Size</TableHead>
-          <TableHead>Modified</TableHead>
-          <TableHead>Type</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {files.map((file) => (
-          <TableRow
-            key={file.id}
-            className={cn(
-              "cursor-pointer",
-              selectedItem?.id === file.id && "bg-muted"
-            )}
-            onClick={() => handleItemClick(file)}
-            onDoubleClick={() => handleItemDoubleClick(file)}
+  const renderContent = () => {
+    switch (view) {
+      case 'grid':
+        return (
+          <div 
+            ref={parentRef}
+            className="h-full overflow-auto px-1"
           >
-            <TableCell className="font-medium">
-              <div className="flex items-center gap-2">
-                {file.type === "folder" ? (
-                  <FolderIcon className="h-4 w-4 text-blue-500" />
-                ) : (
-                  <ImageIcon className="h-4 w-4 text-green-500" />
-                )}
-                {file.name}
-              </div>
-            </TableCell>
-            <TableCell>{file.size}</TableCell>
-            <TableCell>
-              {new Date(file.dateModified).toLocaleDateString()}
-            </TableCell>
-            <TableCell>
-              {file.type === "folder" ? "Folder" : file.extension.toUpperCase()}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-
-  const renderGridView = () => {
-    const virtualRows = rowVirtualizer.getVirtualItems()
-    const totalHeight = rowVirtualizer.getTotalSize()
-
-    return (
-      <div
-        ref={parentRef}
-        className="h-full overflow-auto"
-        style={{
-          width: "100%",
-          height: "100%",
-          contain: "strict",
-        }}
-      >
-        <div
-          className="relative w-full"
-          style={{
-            height: `${totalHeight}px`,
-          }}
-        >
-          {virtualRows.map((virtualRow) => {
-            const start = virtualRow.index * columns
-            const end = Math.min(start + columns, files.length)
-            const rowFiles = files.slice(start, end)
-
-            return (
-              <div
-                key={virtualRow.index}
-                className="absolute flex w-full gap-0.5 p-0.5"
-                style={{
-                  top: 0,
-                  transform: `translateY(${virtualRow.start}px)`,
-                  height: `${itemHeight}px`,
-                }}
-              >
-                {rowFiles.map((file) => (
-                  <div key={file.id}>{renderGridItem(file)}</div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fill, minmax(${itemWidth}px, 1fr))`,
+                gap: `${gap}px`,
+                padding: `${gap}px`,
+              }}
+            >
+              {files.map((file) => (
+                <React.Fragment key={file.id}>
+                  {renderGridItem(file)}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )
+      case 'list':
+        return (
+          <div 
+            ref={parentRef}
+            className="h-full overflow-auto px-4"
+          >
+            <div className="space-y-2">
+              {files.map((file) => (
+                <div
+                  key={file.id}
+                  className={`file-item flex items-center p-2 rounded-lg hover:bg-muted/70 transition-all group cursor-pointer ${false ? 'bg-muted' : ''}`}
+                  onClick={() => handleItemClick(file)}
+                >
+                  <div className="w-8 h-8 mr-2 flex items-center justify-center">
+                    {file.type === 'folder' ? (
+                      <FolderIcon className="w-6 h-6 text-blue-500" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-green-500" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium truncate">
+                      {file.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    {file.size}
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    {new Date(file.dateModified).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      case 'details':
+        return (
+          <div 
+            ref={parentRef}
+            className="h-full overflow-auto"
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[300px]">Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Size</TableHead>
+                  <TableHead>Modified</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {files.map((file) => (
+                  <TableRow 
+                    key={file.id}
+                    className={`file-item group cursor-pointer ${false ? 'bg-muted' : ''}`}
+                    onClick={() => handleItemClick(file)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center">
+                        <div className="w-6 h-6 mr-2 flex items-center justify-center">
+                          {file.type === 'folder' ? (
+                            <FolderIcon className="w-4 h-4 text-blue-500" />
+                          ) : (
+                            <ImageIcon className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
+                        <span className="text-sm truncate">
+                          {file.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {file.type}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {file.size}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(file.dateModified).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
+              </TableBody>
+            </Table>
+          </div>
+        )
+    }
   }
 
   return (
-    <>
-      <div className="h-full w-full">
-        {view === "grid" && renderGridView()}
-        {view === "list" && renderListView()}
-      </div>
-
+    <div className="h-full overflow-hidden">
+      {renderContent()}
       {isViewerOpen && (
         <AdvancedImageViewer
-          images={files.filter((f) => f.type === "image").map((f) => ({
-            id: f.id,
-            name: f.name,
-            thumbnail: f.thumbnail || "",
-            url: f.thumbnail || "",
-          }))}
+          images={files.filter(file => file.type === 'image')}
           currentIndex={viewerIndex}
           onClose={() => setIsViewerOpen(false)}
         />
       )}
-    </>
+    </div>
   )
 }
+
