@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { motion, Variants, LazyMotion, domAnimation, m } from "framer-motion"
 import { FolderIcon, TagIcon, BookmarkIcon } from "lucide-react"
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { ImageFallback } from "@/components/ui/image-fallback"
 
 export interface CardItem {
   id: string
@@ -74,12 +75,16 @@ const ThumbnailGrid = React.memo(({ thumbnails, cardId, name }: { thumbnails: st
         key={`${cardId}-thumb-${index}`}
         className="relative overflow-hidden aspect-[3/4]"
       >
-        <img
+        <ImageFallback
           src={thumbnail}
           alt={`${name} thumbnail ${index + 1}`}
           className="w-full h-full object-cover rounded-md transition-transform duration-300 hover:scale-105"
           loading="lazy"
           decoding="async"
+          gradientColors={[
+            `hsl(${(index * 40) % 360}, 95%, 75%)`,
+            `hsl(${((index * 40) + 60) % 360}, 95%, 75%)`
+          ]}
         />
       </div>
     )), [thumbnails, cardId, name])
@@ -107,26 +112,28 @@ const CardItemComponent = React.memo(({
   type,
   Icon,
   onSelect,
+  style
 }: {
   item: CardItem & { type?: 'collections' | 'folders' | 'tags' }
   type: 'collections' | 'folders' | 'tags' | 'cards'
   Icon: React.ElementType
   onSelect?: (item: CardItem & { type?: 'collections' | 'folders' | 'tags' }) => void
+  style?: React.CSSProperties
 }) => {
   // Determine the icon based on the item type for unified view
   const ItemIcon = type === 'cards' && item.type ? getIcon(type, item.type) : Icon
 
   return (
-    <m.div variants={itemAnimation} className="w-full">
+    <m.div variants={itemAnimation} style={style} className="h-[600px]">
       <Card
         className={cn(
-          "group overflow-hidden hover:shadow-md cursor-pointer border-2",
-          "hover:scale-[1.01] transition-all duration-150 bg-card/50 h-[520px]"
+          "group overflow-hidden hover:shadow-md cursor-pointer border-2 h-full",
+          "hover:scale-[1.01] transition-all duration-150 bg-card/50"
         )}
         style={{ borderColor: `${item.color}40` }}
         onClick={() => onSelect?.(item)}
       >
-        <CardHeader className="pb-2 px-4 pt-4 space-y-2">
+        <CardHeader className="pb-2 px-4 pt-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             {type === 'collections' && item.emoji ? (
               <span className="text-2xl">{item.emoji}</span>
@@ -141,14 +148,14 @@ const CardItemComponent = React.memo(({
             </CardDescription>
           )}
         </CardHeader>
-        <CardContent className="px-4">
+        <CardContent className="px-4 flex-grow">
           <ThumbnailGrid
             thumbnails={item.thumbnails}
             cardId={item.id}
             name={item.name}
           />
         </CardContent>
-        <CardFooter className="flex flex-col items-start gap-2 px-4 pb-4">
+        <CardFooter className="flex flex-col items-start gap-2 px-4 pb-4 mt-auto">
           <div className="flex justify-between w-full text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <ItemIcon className="h-4 w-4" />
@@ -174,6 +181,7 @@ const CardItemComponent = React.memo(({
     </m.div>
   )
 })
+CardItemComponent.displayName = "CardItemComponent"
 
 export function CardView({ items, type, onSelect }: CardViewProps) {
   const Icon = React.useMemo(() => getIcon(type), [type])
@@ -196,9 +204,9 @@ export function CardView({ items, type, onSelect }: CardViewProps) {
   }, [])
 
   // Calculate columns based on container width
-  const columns = Math.max(1, Math.floor((containerWidth - 48) / 320)) // 48px for padding
+  const columns = Math.max(1, Math.floor(containerWidth / 350))
   const rows = Math.ceil(items.length / columns)
-  const rowHeight = 560 // Card height (520px) + gap (40px)
+  const rowHeight = 650 // Fixed height for each row including gap
 
   const rowVirtualizer = useVirtualizer({
     count: rows,
@@ -209,14 +217,15 @@ export function CardView({ items, type, onSelect }: CardViewProps) {
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <div ref={parentRef} className="h-full overflow-auto">
+      <div ref={parentRef} className="h-full overflow-auto px-6 py-6">
         <m.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="relative w-full p-6"
+          className="relative w-full"
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -228,15 +237,16 @@ export function CardView({ items, type, onSelect }: CardViewProps) {
               <div
                 key={virtualRow.index}
                 className={cn(
-                  "absolute left-0 right-0 grid gap-x-6 gap-y-10 px-6",
+                  "absolute left-0 right-0 grid gap-6",
                   columns === 1 ? "grid-cols-1" :
                   columns === 2 ? "grid-cols-2" :
                   columns === 3 ? "grid-cols-3" :
                   "grid-cols-4"
                 )}
                 style={{
+                  top: 0,
                   transform: `translateY(${virtualRow.start}px)`,
-                  width: '100%',
+                  height: `${rowHeight}px`,
                 }}
               >
                 {rowItems.map((item) => (
