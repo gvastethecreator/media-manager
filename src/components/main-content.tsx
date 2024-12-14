@@ -8,16 +8,30 @@ import { useFiles } from "@/context/FilesContext"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
-import { FolderIcon, TagIcon, ImageIcon, CollectionIcon } from "lucide-react"
+import { FolderIcon, TagIcon, ImageIcon, BookmarkIcon } from "lucide-react"
 
 const EmptyState = ({ type }: { type: string }) => {
   const icons = {
-    collections: CollectionIcon,
+    collections: BookmarkIcon,
     folders: FolderIcon,
     tags: TagIcon,
     files: ImageIcon,
   }
   const Icon = icons[type as keyof typeof icons] || ImageIcon
+
+  const messages = {
+    collections: "No hay colecciones",
+    folders: "No hay carpetas",
+    tags: "No hay etiquetas",
+    files: "No hay archivos"
+  }
+
+  const descriptions = {
+    collections: "Crea una nueva colección para organizar tus imágenes",
+    folders: "Agrega una carpeta para organizar tus archivos",
+    tags: "Crea etiquetas para clasificar tus imágenes",
+    files: "Agrega algunos archivos para empezar"
+  }
 
   return (
     <motion.div
@@ -26,8 +40,8 @@ const EmptyState = ({ type }: { type: string }) => {
       className="flex flex-col items-center justify-center h-[50vh] text-muted-foreground"
     >
       <Icon className="w-12 h-12 mb-4" />
-      <h3 className="text-lg font-medium mb-2">No {type} found</h3>
-      <p className="text-sm">Start adding some {type} to see them here</p>
+      <h3 className="text-lg font-medium mb-2">{messages[type as keyof typeof messages]}</h3>
+      <p className="text-sm">{descriptions[type as keyof typeof descriptions]}</p>
     </motion.div>
   )
 }
@@ -37,20 +51,26 @@ const LoadingState = () => (
     {Array.from({ length: 6 }).map((_, i) => (
       <div key={i} className="space-y-4">
         <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        </div>
       </div>
     ))}
   </div>
 )
 
 const Breadcrumbs = ({ path }: { path: string[] }) => (
-  <div className="flex items-center gap-2 px-6 py-2 text-sm text-muted-foreground">
+  <div className="flex items-center gap-2 px-6 py-2 text-sm text-muted-foreground border-b">
     {path.map((item, index) => (
       <React.Fragment key={index}>
-        {index > 0 && <span>/</span>}
+        {index > 0 && <span className="text-muted-foreground/50">/</span>}
         <span className={cn(
-          "hover:text-foreground cursor-pointer",
+          "hover:text-foreground cursor-pointer transition-colors",
           index === path.length - 1 && "text-foreground font-medium"
         )}>
           {item}
@@ -114,7 +134,7 @@ export function MainContent() {
               thumbnails: f.thumbnails,
               count: f.count,
               totalSize: f.totalSize,
-              tags: f.tags,
+              tags: [],
               color: f.color
             }))}
             type="folders"
@@ -170,6 +190,7 @@ export function MainContent() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
           className={cn(
             "flex-1 overflow-auto",
             "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"

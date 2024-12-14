@@ -1,19 +1,17 @@
 "use client"
 
-import dynamic from 'next/dynamic'
+import { MainContent } from "@/components/main-content/main-content"
+import { FilesProvider } from "@/context/FilesContext"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { ThemeProvider } from "@/components/theme-provider"
 
-const DynamicMainContent = dynamic(() => import('@/components/main-content/main-content'), { ssr: false })
-
-export default function Page() {
+export default function Home() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <FilesProvider>
       <SidebarProvider>
-        <div className="flex h-screen w-full">
-          <DynamicMainContent />
-        </div>
+        <main className="h-[100vh] w-full overflow-hidden">
+          <MainContent />
+        </main>
       </SidebarProvider>
-    </ThemeProvider>
+    </FilesProvider>
   )
 }
