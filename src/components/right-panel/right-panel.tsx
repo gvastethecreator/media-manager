@@ -49,7 +49,7 @@ export function RightPanel({
 
   if (isCollapsed) {
     return (
-      <div className="flex flex-col h-full border-l items-center justify-center text-muted-foreground p-2">
+        <div className="flex flex-col h-full border-l items-center justify-center text-muted-foreground p-2">
         <Button
           variant="ghost"
           size="icon"
@@ -57,9 +57,9 @@ export function RightPanel({
           className="h-full"
         >
           <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Expandir panel</span>
-        </Button>
-      </div>
+            <span className="sr-only">Expandir panel</span>
+          </Button>
+        </div>
     )
   }
 
@@ -77,32 +77,32 @@ export function RightPanel({
         <h3 className="text-sm font-medium">
           {showSettings ? "Configuración" : "Detalles"}
         </h3>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSettings}
+            <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onToggleSettings}
             className={cn(
               "h-8 w-8",
               showSettings && "bg-accent text-accent-foreground"
             )}
-          >
-            <Settings2 className="h-4 w-4" />
+                  >
+                    <Settings2 className="h-4 w-4" />
             <span className="sr-only">Alternar configuración</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
             onClick={onToggleCollapse}
-            className="h-8 w-8"
-          >
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Colapsar panel</span>
-          </Button>
-        </div>
-      </div>
+                    className="h-8 w-8"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                    <span className="sr-only">Colapsar panel</span>
+                  </Button>
+            </div>
+          </div>
 
-      {showSettings ? (
+            {showSettings ? (
         <TooltipProvider>
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-4">
@@ -349,7 +349,7 @@ export function RightPanel({
                   </Card>
                 </TabsContent>
               </Tabs>
-            </div>
+          </div>
           </ScrollArea>
         </TooltipProvider>
       ) : selectedItem ? (
@@ -400,7 +400,9 @@ export function RightPanel({
                     </div>
                     <div className="flex flex-col space-y-1">
                       <span className="text-sm font-medium text-muted-foreground">Modificado</span>
-                      <span className="text-sm">{selectedItem.modified.toLocaleString()}</span>
+                      <span className="text-sm">
+                        {selectedItem.modified ? new Date(selectedItem.modified).toLocaleString() : 'No disponible'}
+                      </span>
                     </div>
                     {selectedItem.tags && (
                       <div className="flex flex-col space-y-1">
@@ -466,7 +468,7 @@ export function RightPanel({
       ) : (
         <div className="flex flex-1 items-center justify-center text-muted-foreground">
           No hay ningún elemento seleccionado
-        </div>
+      </div>
       )}
     </ResizablePanel>
   )

@@ -1,422 +1,328 @@
 'use client'
 
 import * as React from "react"
-import { motion, Variants, LazyMotion, domAnimation, m } from "framer-motion"
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { AnimatePresence } from "framer-motion"
+import { FolderIcon, ImageIcon } from 'lucide-react'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationLink } from "@/components/ui/pagination"
 import { cn } from "@/lib/utils"
-import { FileIcon, FolderIcon } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 
-export interface FileItem {
+import { AdvancedImageViewer } from '@/components/image-viewer/advanced-image-viewer'
+import { ImageFallback } from "@/components/ui/image-fallback"
+import { mockFiles } from "@/lib/mock-data"
+
+import { GridView } from './grid-view'
+import { ListView } from './list-view'
+import { DetailsView } from './details-view'
+
+type FileViewProps = {
+  view: 'grid' | 'list' | 'details'
+  thumbnailSize: 'small' | 'medium' | 'large'
+  onSelectItem: (item: FileItem) => void
+  selectedItem: FileItem | null
+  files: FileItem[]
+}
+
+export type FileItem = {
   id: string
   name: string
-  type: 'file' | 'folder'
+  extension: string
   size: string
-  modified: Date
+  type: 'folder' | 'image'
   thumbnail?: string
-  selected?: boolean
-  favorite?: boolean
-  tags?: string[]
-  collections?: string[]
+  dateModified: string
+  dateCreated: string
+  dimensions?: string
+  children?: FileItem[]
 }
 
-interface FileViewProps {
-  items: FileItem[]
-  onSelectItem?: (item: FileItem) => void
-  onToggleSelect?: (item: FileItem) => void
-  selectedItems?: string[]
-  view?: 'grid' | 'list'
-  thumbnailSize?: 'small' | 'medium' | 'large'
-  itemsPerPage?: number
-}
+const ITEMS_PER_PAGE = 50
 
-const container: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.03,
-      delayChildren: 0.05
-    }
-  }
-}
-
-const itemAnimation: Variants = {
-  hidden: { opacity: 0, y: 5 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "tween",
-      duration: 0.2,
-      ease: "easeOut"
-    }
-  }
-}
-
-// Optimized thumbnail component with better memoization
-const Thumbnail = React.memo(({ item }: { item: FileItem }) => {
-  const content = React.useMemo(() => {
-    if (item.type === 'folder') {
-      return (
-        <div className="flex items-center justify-center w-full h-full bg-muted/30 rounded-lg">
-          <FolderIcon className="w-12 h-12 text-muted-foreground" />
-        </div>
-      )
-    }
-
-    return item.thumbnail ? (
-      <img
-        src={item.thumbnail}
-        alt={item.name}
-        className="w-full h-full object-cover rounded-lg"
-        loading="lazy"
-        decoding="async"
-      />
-    ) : (
-      <div className="flex items-center justify-center w-full h-full bg-muted/30 rounded-lg">
-        <FileIcon className="w-12 h-12 text-muted-foreground" />
-      </div>
-    )
-  }, [item.type, item.thumbnail, item.name])
-
-  return content
-}, (prevProps, nextProps) => {
-  return prevProps.item.type === nextProps.item.type &&
-         prevProps.item.thumbnail === nextProps.item.thumbnail &&
-         prevProps.item.name === nextProps.item.name
-})
-Thumbnail.displayName = "Thumbnail"
-
-// Optimized grid item component
-const GridItem = React.memo(({
-  item,
-  isSelected,
-  onSelect,
-  onToggleSelect,
-  thumbnailSize = 'medium',
-  style
-}: {
-  item: FileItem
-  isSelected?: boolean
-  onSelect?: (item: FileItem) => void
-  onToggleSelect?: (item: FileItem) => void
-  thumbnailSize?: 'small' | 'medium' | 'large'
-  style?: React.CSSProperties
-}) => {
-  const handleClick = React.useCallback((e: React.MouseEvent) => {
-    if (e.ctrlKey || e.shiftKey) {
-      onToggleSelect?.(item)
-    } else {
-      onSelect?.(item)
-    }
-  }, [item, onSelect, onToggleSelect])
-
-  const sizes = {
-    small: 'w-32 h-32',
-    medium: 'w-48 h-48',
-    large: 'w-64 h-64'
-  }
-
-  return (
-    <m.div variants={itemAnimation} style={style}>
-      <div
-        className={cn(
-          "group relative cursor-pointer rounded-lg overflow-hidden",
-          "hover:ring-2 hover:ring-primary",
-          isSelected && "ring-2 ring-primary",
-          sizes[thumbnailSize]
-        )}
-        onClick={handleClick}
-      >
-        <Thumbnail item={item} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="absolute bottom-0 left-0 right-0 p-2">
-            <div className="flex items-center justify-between">
-              <span className="text-white truncate text-sm">{item.name}</span>
-              {onToggleSelect && (
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={() => onToggleSelect(item)}
-                  className="data-[state=checked]:bg-primary"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </m.div>
-  )
-}, (prevProps, nextProps) => {
-  return prevProps.item === nextProps.item &&
-         prevProps.isSelected === nextProps.isSelected &&
-         prevProps.thumbnailSize === nextProps.thumbnailSize
-})
-GridItem.displayName = "GridItem"
-
-// Optimized list item component
-const ListItem = React.memo(({
-  item,
-  isSelected,
-  onSelect,
-  onToggleSelect,
-  style
-}: {
-  item: FileItem
-  isSelected?: boolean
-  onSelect?: (item: FileItem) => void
-  onToggleSelect?: (item: FileItem) => void
-  style?: React.CSSProperties
-}) => {
-  const handleClick = React.useCallback((e: React.MouseEvent) => {
-    if (e.ctrlKey || e.shiftKey) {
-      onToggleSelect?.(item)
-    } else {
-      onSelect?.(item)
-    }
-  }, [item, onSelect, onToggleSelect])
-
-  return (
-    <m.div variants={itemAnimation} style={style}>
-      <div
-        className={cn(
-          "group flex items-center gap-4 p-2 rounded-lg cursor-pointer",
-          "hover:bg-muted/50",
-          isSelected && "bg-muted"
-        )}
-        onClick={handleClick}
-      >
-        <div className="w-10 h-10 shrink-0">
-          <Thumbnail item={item} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{item.name}</span>
-            {item.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary" className="hidden sm:inline-flex">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{item.size}</span>
-            <span>{item.modified.toLocaleString()}</span>
-          </div>
-        </div>
-        {onToggleSelect && (
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect(item)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-          />
-        )}
-      </div>
-    </m.div>
-  )
-}, (prevProps, nextProps) => {
-  return prevProps.item === nextProps.item &&
-         prevProps.isSelected === nextProps.isSelected
-})
-ListItem.displayName = "ListItem"
-
-export function FileView({
-  items,
-  onSelectItem,
-  onToggleSelect,
-  selectedItems = [],
-  view = 'grid',
-  thumbnailSize = 'medium',
-  itemsPerPage = 24
-}: FileViewProps) {
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const totalPages = Math.ceil(items.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentItems = items.slice(startIndex, endIndex)
-
+export const FileView = React.memo(function FileView({ view, thumbnailSize, onSelectItem, selectedItem, files = mockFiles }: FileViewProps) {
+  const [isViewerOpen, setIsViewerOpen] = React.useState(false)
+  const [viewerIndex, setViewerIndex] = React.useState(0)
   const parentRef = React.useRef<HTMLDivElement>(null)
-  const [containerWidth, setContainerWidth] = React.useState(0)
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const [currentPage, setCurrentPage] = React.useState(1)
+  const [isAtBottom, setIsAtBottom] = React.useState(false)
 
-  // Update container width on mount and resize
-  React.useEffect(() => {
-    const updateWidth = () => {
-      if (parentRef.current) {
-        setContainerWidth(parentRef.current.clientWidth)
-      }
+  const itemWidth = React.useMemo(() =>
+    thumbnailSize === 'small' ? 120 : thumbnailSize === 'medium' ? 160 : 200
+  , [thumbnailSize])
+
+  const itemHeight = React.useMemo(() =>
+    thumbnailSize === 'small' ? 120 : thumbnailSize === 'medium' ? 160 : 200
+  , [thumbnailSize])
+
+  const gap = React.useMemo(() =>
+    thumbnailSize === 'small' ? 8 : thumbnailSize === 'medium' ? 12 : 16
+  , [thumbnailSize])
+
+  const handleItemClick = React.useCallback((item: FileItem) => {
+    onSelectItem(item)
+  }, [onSelectItem])
+
+  const handleItemDoubleClick = React.useCallback((item: FileItem) => {
+    if (item.type === 'image') {
+      const index = files.findIndex(file => file.id === item.id)
+      setViewerIndex(index)
+      setIsViewerOpen(true)
+    } else if (item.type === 'folder') {
+      console.log('Navigating to folder:', item.name)
     }
-    updateWidth()
-    const observer = new ResizeObserver(updateWidth)
-    if (parentRef.current) {
-      observer.observe(parentRef.current)
+  }, [files])
+
+  const handleItemAction = React.useCallback((action: string, item: FileItem) => {
+    switch (action) {
+      case 'open':
+        if (item.type === 'image') {
+          const index = files.findIndex(file => file.id === item.id)
+          setViewerIndex(index)
+          setIsViewerOpen(true)
+        } else if (item.type === 'folder') {
+          console.log('Navigating to folder:', item.name)
+        }
+        break
+      case 'preview':
+        if (item.type === 'image') {
+          const index = files.findIndex(file => file.id === item.id)
+          setViewerIndex(index)
+          setIsViewerOpen(true)
+        }
+        break
+      case 'download':
+        console.log('Downloading:', item.name)
+        break
+      case 'share':
+        console.log('Sharing:', item.name)
+        break
+      case 'copy':
+        console.log('Copying:', item.name)
+        break
+      case 'rename':
+        console.log('Renaming:', item.name)
+        break
+      case 'delete':
+        console.log('Deleting:', item.name)
+        break
+      case 'info':
+        onSelectItem(item)
+        break
     }
-    return () => observer.disconnect()
-  }, [])
+  }, [files, onSelectItem])
 
-  // Calculate columns based on container width and thumbnail size
-  const itemWidth = thumbnailSize === 'small' ? 128 : thumbnailSize === 'medium' ? 192 : 256
-  const columns = view === 'grid' ? Math.max(1, Math.floor((containerWidth - 32) / (itemWidth + 16))) : 1
-  const rows = Math.ceil(currentItems.length / columns)
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => view === 'grid' ? itemWidth + 16 : 64,
-    overscan: 3
-  })
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null
-
-    const maxVisible = 5
-    const pages = []
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2))
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1)
-
-    if (endPage - startPage + 1 < maxVisible) {
-      startPage = Math.max(1, endPage - maxVisible + 1)
-    }
-
-    if (startPage > 1) {
-      pages.push(
-        <PaginationItem key="1">
-          <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
-        </PaginationItem>
-      )
-      if (startPage > 2) {
-        pages.push(
-          <PaginationItem key="ellipsis1">
-            <PaginationEllipsis />
-          </PaginationItem>
-        )
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            isActive={currentPage === i}
-            onClick={() => setCurrentPage(i)}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      )
+  const renderFileIcon = React.useCallback((file: FileItem) => {
+    if (file.type === 'folder') {
+      return <FolderIcon className="w-12 h-12 text-blue-500" />
     }
 
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pages.push(
-          <PaginationItem key="ellipsis2">
-            <PaginationEllipsis />
-          </PaginationItem>
-        )
-      }
-      pages.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLink onClick={() => setCurrentPage(totalPages)}>
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      )
-    }
+    const gradientColors = [
+      `hsl(${parseInt(file.id.split('-')[1] || '0') * 40 % 360}, 95%, 75%)`,
+      `hsl(${(parseInt(file.id.split('-')[1] || '0') * 40 + 60) % 360}, 95%, 75%)`
+    ]
 
     return (
-      <Pagination className="py-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className={cn(currentPage === 1 && "pointer-events-none opacity-50")}
-            />
-          </PaginationItem>
-          {pages}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className={cn(currentPage === totalPages && "pointer-events-none opacity-50")}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <div className="w-full h-full">
+        <ImageFallback
+          src={file.thumbnail}
+          alt={file.name}
+          width={itemWidth - 32}
+          height={itemHeight - 48}
+          className="w-full h-full object-cover rounded-md"
+          loading="lazy"
+          gradientColors={gradientColors}
+          showPlaceholder={!file.thumbnail}
+        />
+      </div>
     )
-  }
+  }, [itemWidth, itemHeight])
+
+  const renderContent = React.useCallback(() => {
+    if (!files?.length) {
+      return (
+        <div className="h-full flex items-center justify-center text-muted-foreground">
+          No hay archivos para mostrar
+        </div>
+      )
+    }
+
+    switch (view) {
+      case 'grid':
+        return (
+          <div ref={parentRef} className="h-full overflow-auto px-1">
+            <GridView
+              files={files}
+              selectedItem={selectedItem}
+              itemWidth={itemWidth}
+              itemHeight={itemHeight}
+              gap={gap}
+              onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
+              onItemAction={handleItemAction}
+              renderFileIcon={renderFileIcon}
+            />
+          </div>
+        )
+      case 'list':
+        return (
+          <div ref={parentRef} className="h-full overflow-auto px-4">
+            <ListView
+              files={files}
+              selectedItem={selectedItem}
+              onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
+              onItemAction={handleItemAction}
+            />
+          </div>
+        )
+      case 'details':
+        return (
+          <div ref={parentRef} className="h-full overflow-auto">
+            <DetailsView
+              files={files}
+              selectedItem={selectedItem}
+              onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
+              onItemAction={handleItemAction}
+            />
+          </div>
+        )
+    }
+  }, [
+    files,
+    view,
+    selectedItem,
+    itemWidth,
+    itemHeight,
+    gap,
+    handleItemClick,
+    handleItemDoubleClick,
+    handleItemAction,
+    renderFileIcon
+  ])
+
+  const totalPages = React.useMemo(() =>
+    Math.ceil(files.length / ITEMS_PER_PAGE)
+  , [files.length])
+
+  const currentFiles = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    const end = start + ITEMS_PER_PAGE
+    return files.slice(start, end)
+  }, [files, currentPage])
+
+  const handleScroll = React.useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const element = event.currentTarget
+    const scrollTop = element.scrollTop
+    const scrollHeight = element.scrollHeight
+    const clientHeight = element.clientHeight
+    const isBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 100
+    setIsAtBottom(isBottom)
+  }, [])
 
   return (
-    <LazyMotion features={domAnimation} strict>
-      <div className="flex flex-col h-full">
-        <div
-          ref={parentRef}
-          className="flex-1 overflow-auto"
-          style={{
-            contain: 'strict'
-          }}
-        >
-          <m.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="relative"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
-            }}
-          >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const rowItems = currentItems.slice(
-                virtualRow.index * columns,
-                Math.min((virtualRow.index + 1) * columns, currentItems.length)
-              )
-
-              return (
-                <div
-                  key={virtualRow.index}
-                  className={cn(
-                    "absolute top-0 left-0 w-full p-4",
-                    view === 'grid' && "grid gap-4",
-                    view === 'grid' && `grid-cols-${columns}`
-                  )}
-                  style={{
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  {rowItems.map((item) => (
-                    view === 'grid' ? (
-                      <GridItem
-                        key={item.id}
-                        item={item}
-                        isSelected={selectedItems.includes(item.id)}
-                        onSelect={onSelectItem}
-                        onToggleSelect={onToggleSelect}
-                        thumbnailSize={thumbnailSize}
-                      />
-                    ) : (
-                      <ListItem
-                        key={item.id}
-                        item={item}
-                        isSelected={selectedItems.includes(item.id)}
-                        onSelect={onSelectItem}
-                        onToggleSelect={onToggleSelect}
-                      />
-                    )
-                  ))}
-                </div>
-              )
-            })}
-          </m.div>
+    <div className="relative flex flex-col h-full">
+      <ScrollArea
+        ref={scrollRef}
+        className="flex-1"
+        onScrollCapture={handleScroll}
+      >
+        <div className="px-1 pb-20">
+          <AnimatePresence mode="wait">
+            {renderContent()}
+          </AnimatePresence>
         </div>
-        {renderPagination()}
-      </div>
-    </LazyMotion>
+      </ScrollArea>
+
+      {totalPages > 1 && (
+        <div className={cn(
+          "fixed left-1/2 -translate-x-1/2 bottom-6 z-10",
+          "bg-background/95 backdrop-blur-sm",
+          "px-3 py-1.5 rounded-full shadow-lg border",
+          "transition-all duration-200",
+          isAtBottom && "relative bottom-0 mt-4 mb-2"
+        )}>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setCurrentPage(p => Math.max(1, p - 1))
+                    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                />
+              </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  // Mostrar siempre primera y última página
+                  if (page === 1 || page === totalPages) return true
+                  // Mostrar páginas cercanas a la actual
+                  return Math.abs(page - currentPage) <= 1
+                })
+                .map((page, i, arr) => {
+                  // Agregar elipsis si hay saltos
+                  if (i > 0 && page - arr[i - 1] > 1) {
+                    return (
+                      <React.Fragment key={`ellipsis-${page}`}>
+                        <PaginationItem>
+                          <span className="px-2 text-muted-foreground">...</span>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === page}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setCurrentPage(page)
+                              scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                            }}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      </React.Fragment>
+                    )
+                  }
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === page}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setCurrentPage(page)
+                          scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                })}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setCurrentPage(p => Math.min(totalPages, p + 1))
+                    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+
+      <AdvancedImageViewer
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        images={files.filter(f => f.type === 'image')}
+        initialIndex={viewerIndex}
+      />
+    </div>
   )
-}
+})
+
