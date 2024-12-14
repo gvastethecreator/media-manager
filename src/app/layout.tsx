@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/migrate/components/theme-provider";
-import { ProfileProvider } from "@/lib/contexts/profile-context";
-import { FileProvider } from "@/lib/contexts/file-context";
-import { SettingsProvider } from "@/lib/contexts/settings-context";
+import { ThemeProvider } from "@/components/theme-provider";
+import { FilesProvider } from "@/context/FilesContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Image Manager",
@@ -27,21 +17,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="es" suppressHydrationWarning>
+      <body className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <SettingsProvider>
-            <FileProvider>
-              <ProfileProvider>
-                {children}
-              </ProfileProvider>
-            </FileProvider>
-          </SettingsProvider>
+          <FilesProvider>
+            {children}
+          </FilesProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,11 +1,35 @@
+'use client'
+
+import * as React from "react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
-export function SearchBar() {
+interface SearchBarProps {
+  onSearch: (term: string) => void
+}
+
+export function SearchBar({ onSearch }: SearchBarProps) {
+  const [searchTerm, setSearchTerm] = React.useState("")
+
+  const handleSearch = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setSearchTerm(value)
+      onSearch(value)
+    },
+    [onSearch]
+  )
+
   return (
-    <Input
-      type="search"
-      placeholder="Search..."
-      className="h-9 md:w-[300px] lg:w-[400px]"
-    />
+    <div className="relative w-full max-w-sm">
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        type="search"
+        placeholder="Buscar archivos..."
+        className="pl-9"
+        value={searchTerm}
+        onChange={handleSearch}
+      />
+    </div>
   )
 }

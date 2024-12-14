@@ -1,15 +1,6 @@
-"use client"
-
+import React from 'react'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 
 export interface CardItem {
   id: string
@@ -25,86 +16,50 @@ export interface CardItem {
 
 interface CardViewProps {
   items: CardItem[]
-  type: "collections" | "folders" | "tags"
-  onItemClick?: (item: CardItem) => void
+  type: 'collections' | 'folders' | 'tags'
 }
 
-export function CardView({ items, type, onItemClick }: CardViewProps) {
+export function CardView({ items, type }: CardViewProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
       {items.map((item) => (
-        <Card
-          key={item.id}
-          style={{ borderColor: item.color }}
-          className={cn(
-            "group overflow-hidden border-2 transition-all hover:scale-[1.02] hover:shadow-lg",
-            onItemClick && "cursor-pointer"
-          )}
-          onClick={() => onItemClick?.(item)}
-          role={onItemClick ? "button" : "article"}
-          tabIndex={onItemClick ? 0 : undefined}
-          onKeyDown={(e) => {
-            if (onItemClick && (e.key === "Enter" || e.key === " ")) {
-              e.preventDefault()
-              onItemClick(item)
-            }
-          }}
-        >
+        <Card key={item.id} className={`overflow-hidden transition-all hover:shadow-lg hover:scale-105 border-2`} style={{borderColor: item.color}}>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center text-2xl font-bold">
-              {type === "collections" && item.emoji && (
-                <span className="mr-2" role="img" aria-label={`Emoji ${item.emoji}`}>
-                  {item.emoji}
-                </span>
+            <CardTitle className="text-2xl font-bold flex items-center">
+              {type === 'collections' && item.emoji && (
+                <span className="mr-2">{item.emoji}</span>
               )}
               {item.name}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-3 gap-1 mb-4">
               {item.thumbnails.slice(0, 9).map((thumbnail, index) => (
-                <div
-                  key={index}
-                  className="aspect-square overflow-hidden rounded-md shadow-sm transition-transform group-hover:scale-105"
-                >
-                  <img
-                    src={thumbnail}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
+                <div key={index} className="aspect-square rounded-md overflow-hidden shadow-sm">
+                  <img src={thumbnail} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
-            <CardDescription className="line-clamp-2 text-sm">
-              {item.description}
-            </CardDescription>
+            <CardDescription className="text-sm truncate">{item.description}</CardDescription>
           </CardContent>
           <CardFooter className="flex flex-col items-start">
-            <div className="mb-2 flex w-full justify-between text-sm text-muted-foreground">
-              <span>
-                {item.fileCount} {item.fileCount === 1 ? "archivo" : "archivos"}
-              </span>
+            <div className="flex justify-between w-full text-sm text-muted-foreground mb-2">
+              <span>{item.fileCount} archivos</span>
               <span>{item.totalSize}</span>
             </div>
-            {item.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {item.tags.map((tag) => {
-                  const textColor = getContrastColor(item.color)
-                  return (
-                    <Badge
-                      key={tag}
-                      style={{
-                        backgroundColor: item.color,
-                        color: textColor,
-                      }}
-                    >
-                      {tag}
-                    </Badge>
-                  )
-                })}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-2">
+              {item.tags.map((tag) => (
+                <Badge 
+                  key={tag} 
+                  className={`text-${getContrastColor(item.color)}`}
+                  style={{
+                    backgroundColor: item.color,
+                  }}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </CardFooter>
         </Card>
       ))}
@@ -112,15 +67,13 @@ export function CardView({ items, type, onItemClick }: CardViewProps) {
   )
 }
 
-function getContrastColor(hexColor: string): string {
-  // Remove # if present
-  const hex = hexColor.replace("#", "")
-  const r = parseInt(hex.slice(0, 2), 16)
-  const g = parseInt(hex.slice(2, 4), 16)
-  const b = parseInt(hex.slice(4, 6), 16)
-
-  // Calculate relative luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-
-  return luminance > 0.5 ? "#000000" : "#ffffff"
+function getContrastColor(hexColor: string) {
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  return luminance > 0.5 ? 'black' : 'white';
 }
+
