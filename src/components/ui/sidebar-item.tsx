@@ -23,34 +23,29 @@ export function SidebarItem({
   onAdd
 }: SidebarItemProps) {
   return (
-    <div className="relative group">
+    <div className="flex items-center justify-between gap-2">
       <Button
         variant="ghost"
         className={cn(
-          "w-full justify-start gap-2 h-9",
+          "justify-start gap-2 h-9 flex-1",
           isActive && "bg-muted"
         )}
         onClick={onClick}
       >
         <Icon className="h-4 w-4" />
-        <span className="flex-1 text-left truncate">{label}</span>
-        {typeof count !== 'undefined' && (
-          <span className="text-muted-foreground text-xs">{count}</span>
+        <span className="text-base font-semibold">{label}</span>
+        {count !== undefined && (
+          <span className="text-xs text-muted-foreground ml-auto">{count}</span>
         )}
       </Button>
       {onAdd && (
         <Button
           variant="ghost"
           size="icon"
-          className={cn(
-            "absolute right-1 top-1 h-7 w-7",
-            "opacity-0 group-hover:opacity-100",
-            "focus:opacity-100"
-          )}
+          className="h-8 w-8"
           onClick={onAdd}
         >
           <Plus className="h-4 w-4" />
-          <span className="sr-only">Agregar {label}</span>
         </Button>
       )}
     </div>
