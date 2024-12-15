@@ -27,3 +27,10 @@ export const ProfileContext = React.createContext<ProfileContextType>({
   setCurrentView: () => {},
 });
 
+export const useProfile = () => {
+  const context = React.useContext(ProfileContext);
+  if (context === undefined) {
+    throw new Error('useProfile must be used within a ProfileProvider');
+  }
+  return context;
+};
