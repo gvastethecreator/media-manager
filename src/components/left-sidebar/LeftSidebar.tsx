@@ -44,7 +44,6 @@ export function LeftSidebar() {
   }
 
   const handleOpenSettings = (tab: string) => {
-    // TODO: Implement settings panel
     console.log('Open settings tab:', tab)
   }
 
@@ -59,112 +58,43 @@ export function LeftSidebar() {
     >
       <div className="flex h-full flex-col">
         <header className="px-3 py-2 border-b">
-          <div className={cn(
-            "flex items-center justify-between px-4 mb-4",
-            sidebar.state === "collapsed" && "justify-center px-2"
-          )}>
-            <div className="flex items-center gap-2">
-              <Avatar>
-                <AvatarImage src="/avatars/01.png" alt="@usuario" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-              {sidebar.state !== "collapsed" && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">Usuario</span>
-                  <span className="text-xs text-muted-foreground">{stats.totalFiles} imágenes</span>
-                </div>
-              )}
-            </div>
-            {sidebar.state !== "collapsed" && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Settings2 className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Perfil</DropdownMenuItem>
-                  <DropdownMenuItem>Configuración</DropdownMenuItem>
-                  <DropdownMenuItem>Tema</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Cerrar sesión</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full h-auto p-2",
+              "flex items-center",
+              sidebar.state === "collapsed"
+                ? "justify-center"
+                : "justify-start gap-3"
             )}
-          </div>
-          {sidebar.state === "collapsed" ? (
-            <div className="space-y-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn("w-full h-9", currentView === 'collections' && "bg-muted")}
-                onClick={() => handleViewChange('collections')}
-              >
-                <BookmarkIcon className="h-4 w-4" />
-                <span className="sr-only">Colecciones</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn("w-full h-9", currentView === 'folders' && "bg-muted")}
-                onClick={() => handleViewChange('folders')}
-              >
-                <FolderIcon className="h-4 w-4" />
-                <span className="sr-only">Carpetas</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn("w-full h-9", currentView === 'tags' && "bg-muted")}
-                onClick={() => handleViewChange('tags')}
-              >
-                <TagIcon className="h-4 w-4" />
-                <span className="sr-only">Etiquetas</span>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <SidebarItem
-                icon={BookmarkIcon}
-                label="Colecciones"
-                count={stats.totalCollections}
-                isActive={currentView === 'collections'}
-                onClick={() => handleViewChange('collections')}
-                onAdd={() => handleOpenSettings('collections')}
-              />
-              <SidebarItem
-                icon={FolderIcon}
-                label="Carpetas"
-                count={stats.totalFolders}
-                isActive={currentView === 'folders'}
-                onClick={() => handleViewChange('folders')}
-                onAdd={() => handleOpenSettings('folders')}
-              />
-              <SidebarItem
-                icon={TagIcon}
-                label="Etiquetas"
-                count={stats.totalTags}
-                isActive={currentView === 'tags'}
-                onClick={() => handleViewChange('tags')}
-                onAdd={() => handleOpenSettings('tags')}
-              />
-            </div>
-          )}
+            onClick={() => handleOpenSettings('profile')}
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="/avatars/01.png" alt="@usuario" />
+              <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+            {sidebar.state !== "collapsed" && (
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium truncate">Usuario</span>
+                <span className="text-xs text-muted-foreground">{stats.totalFiles} imágenes</span>
+              </div>
+            )}
+          </Button>
         </header>
         {sidebar.state !== "collapsed" ? (
           <>
             <ScrollArea className="flex-1">
               <div className="space-y-4 py-4">
                 <div className="px-3 py-2">
-                  <div className="mb-2 px-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">Colecciones</h2>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenSettings('collections')}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="space-y-1">
+                  <SidebarItem
+                    icon={BookmarkIcon}
+                    label="Colecciones"
+                    count={stats.totalCollections}
+                    isActive={currentView === 'collections'}
+                    onClick={() => handleViewChange('collections')}
+                    onAdd={() => handleOpenSettings('collections')}
+                  />
+                  <div className="space-y-1 mt-2">
                     {collections.map((collection) => (
                       <Button
                         key={collection.id}
@@ -179,14 +109,17 @@ export function LeftSidebar() {
                     ))}
                   </div>
                 </div>
+
                 <div className="px-3 py-2">
-                  <div className="mb-2 px-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">Carpetas</h2>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenSettings('folders')}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="space-y-1">
+                  <SidebarItem
+                    icon={FolderIcon}
+                    label="Carpetas"
+                    count={stats.totalFolders}
+                    isActive={currentView === 'folders'}
+                    onClick={() => handleViewChange('folders')}
+                    onAdd={() => handleOpenSettings('folders')}
+                  />
+                  <div className="space-y-1 mt-2">
                     {folders.map((folder) => (
                       <Button
                         key={folder.id}
@@ -201,73 +134,35 @@ export function LeftSidebar() {
                     ))}
                   </div>
                 </div>
+
                 <div className="px-3 py-2">
-                  <div className="mb-2 px-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">Etiquetas</h2>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenSettings('tags')}>
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsTagsExpanded(!isTagsExpanded)}>
-                        <ChevronDown className={cn("h-4 w-4 transition-transform", !isTagsExpanded && "rotate-180")} />
-                      </Button>
-                    </div>
+                  <SidebarItem
+                    icon={TagIcon}
+                    label="Etiquetas"
+                    count={stats.totalTags}
+                    isActive={currentView === 'tags'}
+                    onClick={() => handleViewChange('tags')}
+                    onAdd={() => handleOpenSettings('tags')}
+                  />
+                  <div className="flex flex-wrap gap-1 px-4 mt-2">
+                    {tags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-muted"
+                        style={{ backgroundColor: `${tag.color}20` }}
+                        onClick={() => handleSelectTag(tag.name)}
+                      >
+                        {tag.name}
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          {tag.count}
+                        </span>
+                      </Badge>
+                    ))}
                   </div>
-                  {isTagsExpanded && (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-1 px-4">
-                        {tags.slice(0, 5).map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="secondary"
-                            className="cursor-pointer hover:bg-muted"
-                            style={{ backgroundColor: `${tag.color}20` }}
-                            onClick={() => handleSelectTag(tag.name)}
-                          >
-                            {tag.name}
-                            <span className="ml-1 text-xs text-muted-foreground">
-                              {tag.count}
-                            </span>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="space-y-1">
-                        {tags.map((tag) => (
-                          <Button
-                            key={tag.id}
-                            variant="ghost"
-                            className="w-full justify-start gap-2 h-9"
-                            onClick={() => handleSelectTag(tag.name)}
-                          >
-                            <TagIcon className="h-4 w-4" style={{ color: tag.color }} />
-                            <span className="flex-1 text-left truncate">{tag.name}</span>
-                            <span className="text-muted-foreground text-xs">{tag.count}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </ScrollArea>
-            <footer className="mt-auto border-t p-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Seleccionar fecha</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </footer>
           </>
         ) : (
           <div className="mt-auto p-2">
