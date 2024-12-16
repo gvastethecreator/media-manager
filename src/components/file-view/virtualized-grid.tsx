@@ -27,23 +27,23 @@ export function VirtualizedGrid({
   const { openViewer } = useImageViewer()
 
   const mediaItems = items.filter(item =>
-    item.mimeType?.startsWith('image/') ||
-    item.mimeType?.startsWith('video/')
+    (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) &&
+    (item.url || item.thumbnailUrl)
   )
 
   const getThumbnailDimensions = useCallback(() => {
     switch (thumbnailSize) {
       case 'small':
-        return { width: 160, height: 160, gap: 12 }
+        return { width: 180, height: 180, gap: 16 }
       case 'large':
-        return { width: 320, height: 320, gap: 24 }
+        return { width: 360, height: 360, gap: 24 }
       default:
-        return { width: 240, height: 240, gap: 16 }
+        return { width: 260, height: 260, gap: 20 }
     }
   }, [thumbnailSize])
 
   const { width: itemWidth, height: itemHeight, gap } = getThumbnailDimensions()
-  const padding = gap
+  const padding = gap * 2
 
   useEffect(() => {
     const element = parentRef.current
@@ -63,7 +63,11 @@ export function VirtualizedGrid({
 
   const availableWidth = dimensions.width - (padding * 2)
   const columnCount = Math.max(1, Math.floor((availableWidth + gap) / (itemWidth + gap)))
-  const rowCount = Math.ceil(items.length / columnCount)
+  const totalItemsWidth = columnCount * itemWidth + (columnCount - 1) * gap
+  const extraSpace = Math.max(0, availableWidth - totalItemsWidth)
+  const sidePadding = Math.max(padding, padding + (extraSpace / 2))
+
+  const rowCount = Math.ceil(mediaItems.length / columnCount)
 
   const virtualizer = useVirtualizer({
     count: rowCount,
@@ -75,16 +79,23 @@ export function VirtualizedGrid({
 
   const getItemsForRow = useCallback((rowIndex: number) => {
     const startIndex = rowIndex * columnCount
-    const endIndex = Math.min(startIndex + columnCount, items.length)
-    return items.slice(startIndex, endIndex)
-  }, [columnCount, items])
+    const endIndex = Math.min(startIndex + columnCount, mediaItems.length)
+    return mediaItems.slice(startIndex, endIndex)
+  }, [columnCount, mediaItems])
 
   const handleItemDoubleClick = useCallback((item: FileItem) => {
+    console.log('VirtualizedGrid: Double click on item:', item)
     if (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) {
+      console.log('VirtualizedGrid: Item is media, opening viewer')
       const currentIndex = mediaItems.findIndex(i => i.id === item.id)
+      console.log('VirtualizedGrid: Current index:', currentIndex, 'Total media items:', mediaItems.length)
       if (currentIndex !== -1) {
         openViewer(item, mediaItems)
+      } else {
+        console.warn('VirtualizedGrid: Item not found in mediaItems:', item)
       }
+    } else {
+      console.warn('VirtualizedGrid: Item is not media:', item)
     }
   }, [openViewer, mediaItems])
 
@@ -99,7 +110,7 @@ export function VirtualizedGrid({
             height: `${virtualizer.getTotalSize()}px`,
             width: '100%',
             position: 'relative',
-            padding: `${padding}px`
+            padding: `${padding}px ${sidePadding}px`
           }}
         >
           <AnimatePresence mode="popLayout" initial={false}>

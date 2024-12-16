@@ -38,6 +38,13 @@ export function FileView({
   onSelectItem,
   selectedItem
 }: FileViewProps) {
+  console.log('FileView: render', { view, thumbnailSize, selectedItem })
+
+  const handleSelectItem = (item: FileItem) => {
+    console.log('FileView: handleSelectItem', item)
+    onSelectItem(item)
+  }
+
   const direction = view === 'grid' ? 1 : -1
 
   return (
@@ -59,7 +66,7 @@ export function FileView({
           >
             <VirtualizedList
               items={items}
-              onSelectItem={onSelectItem}
+              onSelectItem={handleSelectItem}
               selectedItem={selectedItem}
             />
           </motion.div>
@@ -80,7 +87,7 @@ export function FileView({
             <VirtualizedGrid
               items={items}
               thumbnailSize={thumbnailSize}
-              onSelectItem={onSelectItem}
+              onSelectItem={handleSelectItem}
               selectedItem={selectedItem}
             />
           </motion.div>
