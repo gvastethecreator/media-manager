@@ -27,6 +27,9 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { SortMenu } from "./sort-menu"
+import { ColumnMenu } from "./column-menu"
+import type { Column } from "../file-view/file-view"
+
 interface MainToolbarProps {
   view: 'grid' | 'list' | 'details'
   onViewChange: (view: 'grid' | 'list' | 'details') => void
@@ -46,6 +49,8 @@ interface MainToolbarProps {
   sortBy: 'name' | 'date' | 'size' | 'type'
   sortOrder: 'asc' | 'desc'
   onSortChange: (by: 'name' | 'date' | 'size' | 'type', order: 'asc' | 'desc') => void
+  columns?: Column[]
+  onColumnsChange?: (columns: Column[]) => void
 }
 
 export function MainToolbar({
@@ -67,6 +72,8 @@ export function MainToolbar({
   sortBy,
   sortOrder,
   onSortChange,
+  columns,
+  onColumnsChange
 }: MainToolbarProps) {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
 
@@ -129,6 +136,12 @@ export function MainToolbar({
               sortOrder={sortOrder}
               onSortChange={onSortChange}
             />
+            {(view === 'list' || view === 'details') && columns && onColumnsChange && (
+              <ColumnMenu
+                columns={columns}
+                onColumnChange={onColumnsChange}
+              />
+            )}
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center space-x-1">
