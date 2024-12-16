@@ -47,7 +47,10 @@ export function ColumnMenu({ columns, onColumnChange }: ColumnMenuProps) {
             onCheckedChange={() => handleColumnToggle(column.id)}
             disabled={!column.isHideable}
           >
-            {column.label}
+            <div className="flex items-center gap-2">
+              {column.icon}
+              <span>{column.label}</span>
+            </div>
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
