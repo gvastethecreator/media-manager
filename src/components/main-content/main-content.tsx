@@ -100,23 +100,23 @@ export function MainContent() {
               onSearchChange={setSearchQuery}
             />
             {currentPath.length > 0 && (
-              <Breadcrumbs
-                segments={currentPath}
-                onNavigate={handleBreadcrumbNavigate}
-                containerClassName="border-b px-4 py-2"
-              />
+              <div className="border-b border-border/40">
+                <Breadcrumbs
+                  path={currentPath}
+                  onNavigate={handleBreadcrumbNavigate}
+                />
+              </div>
             )}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden relative">
               <div className="h-full overflow-auto">
                 {renderContent()}
               </div>
-            </div>
-            <footer className="h-8 border-t bg-muted/50 px-4 text-[10px] flex items-center justify-between">
-              <div>Ruta: {currentPath.join(' / ')}</div>
-              <div>
-                {currentItems.length} elementos | Zoom: {zoomLevel}%
+              <div className="absolute bottom-4 right-4 bg-background/40 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/30 border border-border/50 rounded-lg px-3 py-1.5 text-[10px] flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-background/50">
+                <div>{currentItems.length} elementos</div>
+                <div className="w-[1px] h-3 bg-border/50"></div>
+                <div>Zoom: {zoomLevel}%</div>
               </div>
-            </footer>
+            </div>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
