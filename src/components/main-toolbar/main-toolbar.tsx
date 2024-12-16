@@ -117,20 +117,7 @@ export function MainToolbar({
               </TooltipTrigger>
               <TooltipContent>Vista de lista</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onViewChange('details')}
-                  className={view === 'details' ? 'bg-muted' : ''}
-                >
-                  <Table2 className="h-4 w-4" />
-                  <span className="sr-only">Vista de detalles</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Vista de detalles</TooltipContent>
-            </Tooltip>
+   
             <SortMenu
               sortBy={sortBy}
               sortOrder={sortOrder}

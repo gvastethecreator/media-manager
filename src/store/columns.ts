@@ -1,7 +1,9 @@
+'use client'
+
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { Column } from '@/components/file-view/file-view'
-import { defaultColumns } from '@/components/file-view/file-view'
+import type { Column } from '@/config/columns'
+import { defaultColumns } from '@/config/columns'
 
 interface ColumnsState {
   columns: Column[]
@@ -28,8 +30,8 @@ const reconstructColumns = (storedColumns: StoredColumn[]): Column[] => {
       return defaultColumns[0] // Fallback a la primera columna por defecto
     }
     return {
+      ...defaultColumn,
       ...stored,
-      accessor: defaultColumn.accessor
     }
   })
 }
@@ -38,10 +40,7 @@ export const useColumns = create<ColumnsState>()(
   persist(
     (set) => ({
       columns: defaultColumns,
-      setColumns: (columns) => {
-        console.log('Setting columns:', columns)
-        set({ columns: reconstructColumns(columns) })
-      },
+      setColumns: (columns) => set({ columns: reconstructColumns(columns) }),
       toggleColumn: (columnId) =>
         set((state) => {
           const newColumns = state.columns.map((col) =>
@@ -49,23 +48,26 @@ export const useColumns = create<ColumnsState>()(
               ? { ...col, isVisible: !col.isVisible }
               : col
           )
-          console.log('Toggling column:', columnId, newColumns)
-          return { columns: reconstructColumns(newColumns) }
+          return { columns: newColumns }
         }),
-      resetColumns: () => {
-        console.log('Resetting columns to default')
-        set({ columns: defaultColumns })
-      },
+      resetColumns: () => set({ columns: defaultColumns })
     }),
     {
       name: 'columns-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        columns: state.columns.map(({ accessor, ...rest }) => rest)
+        columns: state.columns.map(col => ({
+          id: col.id,
+          label: col.label,
+          width: col.width,
+          minWidth: col.minWidth,
+          isResizable: col.isResizable,
+          isHideable: col.isHideable,
+          isVisible: col.isVisible
+        }))
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          console.log('Rehydrated state:', state)
           state.columns = reconstructColumns(state.columns)
         }
       }
