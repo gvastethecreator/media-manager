@@ -17,8 +17,8 @@ export function Providers({ children }: ProvidersProps) {
       disableTransitionOnChange
     >
       {children}
-      <Toaster />
       <ImageViewer />
+      <Toaster />
     </ThemeProvider>
   )
 }

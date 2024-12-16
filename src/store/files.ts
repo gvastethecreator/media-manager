@@ -11,7 +11,13 @@ export interface FileItem {
   size: number
   modified: Date
   created: Date
+  url?: string
   thumbnailUrl?: string
+  mimeType?: string
+  width?: number
+  height?: number
+  duration?: number // Para videos
+  fps?: number // Para videos y GIFs
   tags: string[]
 }
 

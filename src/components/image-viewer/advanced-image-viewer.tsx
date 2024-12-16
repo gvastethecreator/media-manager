@@ -12,10 +12,15 @@ import { ImageFallback } from "@/components/ui/image-fallback"
 interface ImageItem {
   id: string
   name: string
-  type: 'folder' | 'image'
+  type: 'image'
   thumbnail?: string
   src?: string
   alt?: string
+  width?: number
+  height?: number
+  duration?: number
+  fps?: number
+  mimeType?: string
 }
 
 interface AdvancedImageViewerProps {
