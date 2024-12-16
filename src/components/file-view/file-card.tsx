@@ -171,8 +171,9 @@ export function FileCard({
         <motion.div
           className={cn(
             "group relative w-full aspect-square rounded-lg border bg-card overflow-hidden transition-all duration-300 ease-out",
-            "hover:ring-2 hover:ring-primary/50 hover:ring-offset-2 hover:ring-offset-background",
-            isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+            "shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.16)]",
+            "hover:ring-2 hover:ring-primary/50 hover:ring-offset-2 hover:ring-offset-background hover:-translate-y-0.5",
+            isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_4px_16px_rgba(0,0,0,0.16)]",
             gradient // Aplicamos el gradiente a toda la tarjeta
           )}
           style={{
