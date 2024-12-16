@@ -35,6 +35,17 @@ export interface FileItem {
   duration?: number // Para videos
   fps?: number // Para videos y GIFs
   tags: string[]
+  extension?: string
+  prompt?: string
+  model?: string
+  loras?: string[]
+  source?: string
+  metadata?: {
+    width?: number
+    height?: number
+    format?: string
+    [key: string]: any
+  }
 }
 
 export interface Collection {

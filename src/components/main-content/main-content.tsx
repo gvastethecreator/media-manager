@@ -12,6 +12,7 @@ import { useUIStore } from "@/store/ui"
 import { EmptyState } from '@/components/empty-state/empty-state'
 import { LoadingScreen } from '@/components/loading/loading-screen'
 import { AnimatePresence } from 'framer-motion'
+import { useColumns } from '@/store/columns'
 
 export function MainContent() {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
@@ -40,6 +41,8 @@ export function MainContent() {
     setSearchQuery,
     thumbnailSize
   } = useUIStore()
+
+  const { columns, setColumns } = useColumns()
 
   useEffect(() => {
     if (!isInitialLoad) return
@@ -72,14 +75,24 @@ export function MainContent() {
         thumbnailSize={thumbnailSize}
         selectedItems={selectedItems}
         onSelectItem={handleSelectItem}
+        columns={columns}
+        onColumnsChange={setColumns}
       />
     )
-  }, [currentItems, currentView, view, selectedItems, thumbnailSize, handleSelectItem])
+  }, [currentItems, currentView, view, selectedItems, thumbnailSize, handleSelectItem, columns, setColumns])
 
   const selectedItem = useMemo(() => {
     if (selectedItems.size !== 1) return null
     return currentItems.find(item => selectedItems.has(item.id)) || null
   }, [currentItems, selectedItems])
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(Math.min(zoomLevel + 10, 200))
+  }, [zoomLevel, setZoomLevel])
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(Math.max(zoomLevel - 10, 50))
+  }, [zoomLevel, setZoomLevel])
 
   if (isInitialLoad) {
     return <LoadingScreen message="Iniciando aplicación..." />
@@ -106,16 +119,18 @@ export function MainContent() {
               <MainToolbar
                 view={view}
                 onViewChange={setView}
-                onZoomIn={() => setZoomLevel(Math.min(zoomLevel + 10, 200))}
-                onZoomOut={() => setZoomLevel(Math.max(zoomLevel - 10, 50))}
-                onOpenSettings={toggleSettings}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onToggleRightPanel={toggleRightPanel}
                 canZoomIn={zoomLevel < 200}
                 canZoomOut={zoomLevel > 50}
+                isRightPanelOpen={!isRightPanelCollapsed}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSortChange={setSorting}
-                search={searchQuery}
-                onSearchChange={setSearchQuery}
+                onSearch={() => setSearchQuery('')}
+                columns={columns}
+                onColumnsChange={setColumns}
               />
               <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <Breadcrumbs

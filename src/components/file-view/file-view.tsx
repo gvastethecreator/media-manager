@@ -5,13 +5,114 @@ import type { FileItem } from '@/store/files'
 import { VirtualizedGrid } from './virtualized-grid'
 import { VirtualizedList } from './virtualized-list'
 import type { ThumbnailSize } from '@/store/ui'
+import { useColumns } from '@/store/columns'
+import { Image, FileText, Calendar, Scale, Wand2, Layers, Share2, Clock } from 'lucide-react'
 
-interface FileViewProps {
+export interface Column {
+  id: string
+  label: string
+  width: number
+  minWidth?: number
+  isResizable?: boolean
+  isHideable?: boolean
+  isVisible: boolean
+  accessor: (item: FileItem) => string | number
+}
+
+export const defaultColumns: Column[] = [
+  {
+    id: 'thumbnail',
+    label: '👁️',
+    width: 48,
+    minWidth: 48,
+    isResizable: false,
+    isHideable: false,
+    isVisible: true,
+    accessor: (item: FileItem) => item.thumbnailUrl || ''
+  },
+  {
+    id: 'name',
+    label: '📄 Nombre',
+    width: 250,
+    minWidth: 120,
+    isResizable: true,
+    isHideable: false,
+    isVisible: true,
+    accessor: (item: FileItem) => item.name
+  },
+  {
+    id: 'type',
+    label: '📁 Tipo',
+    width: 100,
+    minWidth: 80,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => item.type
+  },
+  {
+    id: 'prompt',
+    label: '✨ Prompt',
+    width: 200,
+    minWidth: 100,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => item.prompt || '-'
+  },
+  {
+    id: 'model',
+    label: '🤖 Modelo',
+    width: 150,
+    minWidth: 100,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => item.model || '-'
+  },
+  {
+    id: 'loras',
+    label: '⚡ LoRAs',
+    width: 150,
+    minWidth: 100,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => item.loras?.join(', ') || '-'
+  },
+  {
+    id: 'source',
+    label: '🔗 Fuente',
+    width: 120,
+    minWidth: 80,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => item.source || '-'
+  },
+  {
+    id: 'date',
+    label: '📅 Fecha',
+    width: 150,
+    minWidth: 100,
+    isResizable: true,
+    isHideable: true,
+    isVisible: true,
+    accessor: (item: FileItem) => {
+      if (!item.modified) return '-'
+      return new Date(item.modified).toLocaleDateString()
+    }
+  }
+]
+
+export interface FileViewProps {
   items: FileItem[]
   view: 'grid' | 'list' | 'details'
   thumbnailSize: ThumbnailSize
   selectedItems: Set<string>
   onSelectItem: (item: FileItem | string) => void
+  columns?: Column[]
+  onColumnsChange?: (columns: Column[]) => void
 }
 
 const variants = {
@@ -107,7 +208,9 @@ export function FileView({
   view,
   thumbnailSize,
   selectedItems,
-  onSelectItem
+  onSelectItem,
+  columns = defaultColumns,
+  onColumnsChange
 }: FileViewProps) {
   const selectedItem = items.find(item => selectedItems.has(item.id)) || null
 
@@ -127,6 +230,7 @@ export function FileView({
               items={items}
               onSelectItem={onSelectItem}
               selectedItem={selectedItem}
+              columns={columns}
             />
           </motion.div>
         ) : (
