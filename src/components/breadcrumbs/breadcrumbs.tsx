@@ -12,22 +12,22 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ path, onNavigate }: BreadcrumbsProps) {
   return (
-    <div className="flex items-center gap-1 px-6 py-2 text-sm text-muted-foreground border-b">
+    <div className="flex items-center gap-0.5 px-4 py-1.5 text-xs text-muted-foreground border-b">
       <Button
         variant="ghost"
         size="icon"
-        className="h-5 w-5"
+        className="h-6 w-6 hover:bg-muted"
         onClick={() => onNavigate?.(0)}
       >
         <Home className="h-4 w-4" />
       </Button>
       {path.slice(1).map((item, index) => (
         <React.Fragment key={index}>
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+          <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
           <Button
             variant="ghost"
             className={cn(
-              "px-2 h-6 hover:text-foreground transition-colors",
+              "px-1.5 h-5 hover:text-foreground transition-colors text-xs",
               index === path.length - 2 && "text-foreground font-medium"
             )}
             onClick={() => onNavigate?.(index + 1)}
