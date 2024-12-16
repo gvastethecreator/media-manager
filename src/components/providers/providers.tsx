@@ -1,12 +1,24 @@
 'use client'
 
-import * as React from 'react'
 import { ThemeProvider } from './theme-provider'
+import { Toaster } from '@/components/ui/toaster'
+import { ImageViewer } from '@/components/image-viewer/image-viewer'
 
-export function Providers({ children }: { children: React.ReactNode }) {
+interface ProvidersProps {
+  children: React.ReactNode
+}
+
+export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       {children}
+      <Toaster />
+      <ImageViewer />
     </ThemeProvider>
   )
 }
