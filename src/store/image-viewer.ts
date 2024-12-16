@@ -18,25 +18,31 @@ export const useImageViewer = create<ImageViewerState>((set) => ({
   currentImage: null,
   images: [],
   currentIndex: 0,
-  openViewer: (image, allImages) => set(() => {
-    const validImages = (allImages || [image]).filter(img =>
-      Boolean(img.url || img.thumbnailUrl)
-    )
-    const currentIndex = validImages.findIndex(img => img.id === image.id)
+  openViewer: (image, allImages) => {
+    console.log('Opening viewer with:', { image, allImages }) // Debug
+    set(() => {
+      const validImages = (allImages || [image]).filter(img =>
+        Boolean(img.url || img.thumbnailUrl)
+      )
+      const currentIndex = validImages.findIndex(img => img.id === image.id)
 
-    return {
-      isOpen: true,
-      currentImage: image,
-      images: validImages,
-      currentIndex: Math.max(0, currentIndex)
-    }
-  }),
-  closeViewer: () => set({
-    isOpen: false,
-    currentImage: null,
-    images: [],
-    currentIndex: 0
-  }),
+      return {
+        isOpen: true,
+        currentImage: image,
+        images: validImages,
+        currentIndex: Math.max(0, currentIndex)
+      }
+    })
+  },
+  closeViewer: () => {
+    console.log('Closing viewer') // Debug
+    set({
+      isOpen: false,
+      currentImage: null,
+      images: [],
+      currentIndex: 0
+    })
+  },
   setCurrentImage: (image) => set((state) => {
     const currentIndex = state.images.findIndex(img => img.id === image.id)
     return {
