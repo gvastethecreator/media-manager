@@ -8,8 +8,8 @@ export default function Home() {
   return (
     <FilesProvider>
       <SidebarProvider>
-        <main className="h-[100vh] w-full overflow-hidden" data-testid="home-container">
-          <MainContent data-testid="main-content-component" />
+        <main className="h-[100vh] w-full overflow-hidden">
+          <MainContent />
         </main>
       </SidebarProvider>
     </FilesProvider>
