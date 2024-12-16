@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useCallback, Suspense, useState, useEffect } from 'react'
+import { useMemo, useCallback, useState, useEffect } from 'react'
 import { RightPanel } from "@/components/right-panel/right-panel"
 import { LeftSidebar } from '@/components/left-sidebar/LeftSidebar'
 import { FileView } from "@/components/file-view/file-view"
@@ -20,9 +20,6 @@ export function MainContent() {
     currentItems,
     currentPath,
     selectedItems,
-    handleSelectCollection,
-    handleSelectFolder,
-    handleSelectTag,
     setCurrentPath,
     sortBy,
     sortOrder,
@@ -44,19 +41,24 @@ export function MainContent() {
     thumbnailSize
   } = useUIStore()
 
-  // Efecto para manejar la carga inicial
   useEffect(() => {
-    if (isInitialLoad) {
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false)
-      }, 500) // Tiempo suficiente para que la UI se monte
-      return () => clearTimeout(timer)
-    }
+    if (!isInitialLoad) return
+
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false)
+    }, 500)
+
+    return () => clearTimeout(timer)
   }, [isInitialLoad])
 
   const handleBreadcrumbNavigate = useCallback((index: number) => {
     setCurrentPath(currentPath.slice(0, index + 1))
   }, [currentPath, setCurrentPath])
+
+  const handleSelectItem = useCallback((item: string | { id: string }) => {
+    const id = typeof item === 'string' ? item : item.id
+    selectedItems.has(id) ? selectedItems.delete(id) : selectedItems.add(id)
+  }, [selectedItems])
 
   const renderContent = useCallback(() => {
     if (currentItems.length === 0) {
@@ -69,17 +71,10 @@ export function MainContent() {
         view={view}
         thumbnailSize={thumbnailSize}
         selectedItems={selectedItems}
-        onSelectItem={(item) => {
-          const id = typeof item === 'string' ? item : item.id
-          if (selectedItems.has(id)) {
-            selectedItems.delete(id)
-          } else {
-            selectedItems.add(id)
-          }
-        }}
+        onSelectItem={handleSelectItem}
       />
     )
-  }, [currentItems, currentView, view, selectedItems, thumbnailSize])
+  }, [currentItems, currentView, view, selectedItems, thumbnailSize, handleSelectItem])
 
   const selectedItem = useMemo(() => {
     if (selectedItems.size !== 1) return null
@@ -122,14 +117,12 @@ export function MainContent() {
                 search={searchQuery}
                 onSearchChange={setSearchQuery}
               />
-              {currentPath.length > 0 && (
-                <div className="border-b border-border/40">
-                  <Breadcrumbs
-                    path={currentPath}
-                    onNavigate={handleBreadcrumbNavigate}
-                  />
-                </div>
-              )}
+              <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <Breadcrumbs
+                  path={currentPath}
+                  onNavigate={handleBreadcrumbNavigate}
+                />
+              </div>
               <div className="flex-1 overflow-hidden relative">
                 <div className="h-full overflow-auto">
                   {renderContent()}
