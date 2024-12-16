@@ -17,18 +17,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning data-testid="root-layout">
-      <body
-        data-testid="main-body"
-        className={cn(
+    <html lang="es" className="dark" suppressHydrationWarning>
+      <body className={cn(
         inter.className,
         "min-h-screen bg-background text-foreground antialiased",
         "selection:bg-primary selection:text-primary-foreground"
       )}>
-        <main data-testid="main-content">
-          {children}
-        </main>
-        <Toaster data-testid="toaster-container" />
+        {children}
+        <Toaster />
       </body>
     </html>
   );
