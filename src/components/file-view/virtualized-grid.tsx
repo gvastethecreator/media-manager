@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/store/files'
 import type { ThumbnailSize } from '@/store/ui'
@@ -16,6 +16,32 @@ interface VirtualizedGridProps {
   selectedItem: FileItem | null
 }
 
+const itemVariants = {
+  initial: {
+    scale: 0.8,
+    opacity: 0,
+    y: 20
+  },
+  enter: {
+    scale: 1,
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: [0, 0, 0.2, 1]
+    }
+  },
+  exit: {
+    scale: 0.8,
+    opacity: 0,
+    y: -20,
+    transition: {
+      duration: 0.15,
+      ease: [0.4, 0, 1, 1]
+    }
+  }
+}
+
 export function VirtualizedGrid({
   items,
   thumbnailSize,
@@ -26,24 +52,28 @@ export function VirtualizedGrid({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const { openViewer } = useImageViewer()
 
-  const mediaItems = items.filter(item =>
-    (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) &&
-    (item.url || item.thumbnailUrl)
-  )
-
   const getThumbnailDimensions = useCallback(() => {
     switch (thumbnailSize) {
       case 'small':
-        return { width: 180, height: 180, gap: 16 }
+        return { width: 140, height: 140, gap: 12 }
       case 'large':
-        return { width: 360, height: 360, gap: 24 }
+        return { width: 280, height: 280, gap: 20 }
       default:
-        return { width: 260, height: 260, gap: 20 }
+        return { width: 200, height: 200, gap: 16 }
     }
   }, [thumbnailSize])
 
-  const { width: itemWidth, height: itemHeight, gap } = getThumbnailDimensions()
-  const padding = gap * 2
+  const { width: itemWidth, height: itemHeight, gap } = useMemo(() =>
+    getThumbnailDimensions(),
+    [getThumbnailDimensions]
+  )
+
+  const padding = useMemo(() => gap, [gap])
+
+  const mediaItems = useMemo(() => items.filter(item =>
+    (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) &&
+    (item.url || item.thumbnailUrl)
+  ), [items])
 
   useEffect(() => {
     const element = parentRef.current
@@ -61,41 +91,42 @@ export function VirtualizedGrid({
     return () => resizeObserver.disconnect()
   }, [])
 
-  const availableWidth = dimensions.width - (padding * 2)
-  const columnCount = Math.max(1, Math.floor((availableWidth + gap) / (itemWidth + gap)))
-  const totalItemsWidth = columnCount * itemWidth + (columnCount - 1) * gap
-  const extraSpace = Math.max(0, availableWidth - totalItemsWidth)
-  const sidePadding = Math.max(padding, padding + (extraSpace / 2))
+  const layoutConfig = useMemo(() => {
+    const availableWidth = dimensions.width - (padding * 2)
+    const columnCount = Math.max(1, Math.floor((availableWidth + gap) / (itemWidth + gap)))
+    const rowCount = Math.ceil(mediaItems.length / columnCount)
+    const totalItemsWidth = columnCount * itemWidth + (columnCount - 1) * gap
+    const extraSpace = Math.max(0, availableWidth - totalItemsWidth)
+    const sidePadding = Math.max(padding, padding + (extraSpace / 2))
 
-  const rowCount = Math.ceil(mediaItems.length / columnCount)
+    return {
+      columnCount,
+      rowCount,
+      sidePadding,
+      itemsPerPage: columnCount * 3 // Precarga 3 filas
+    }
+  }, [dimensions.width, padding, gap, itemWidth, mediaItems.length])
 
   const virtualizer = useVirtualizer({
-    count: rowCount,
+    count: layoutConfig.rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => itemHeight + gap,
-    overscan: 5,
+    overscan: layoutConfig.itemsPerPage,
     scrollMargin: padding
   })
 
   const getItemsForRow = useCallback((rowIndex: number) => {
-    const startIndex = rowIndex * columnCount
-    const endIndex = Math.min(startIndex + columnCount, mediaItems.length)
+    const startIndex = rowIndex * layoutConfig.columnCount
+    const endIndex = Math.min(startIndex + layoutConfig.columnCount, mediaItems.length)
     return mediaItems.slice(startIndex, endIndex)
-  }, [columnCount, mediaItems])
+  }, [layoutConfig.columnCount, mediaItems])
 
   const handleItemDoubleClick = useCallback((item: FileItem) => {
-    console.log('VirtualizedGrid: Double click on item:', item)
     if (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) {
-      console.log('VirtualizedGrid: Item is media, opening viewer')
       const currentIndex = mediaItems.findIndex(i => i.id === item.id)
-      console.log('VirtualizedGrid: Current index:', currentIndex, 'Total media items:', mediaItems.length)
       if (currentIndex !== -1) {
         openViewer(item, mediaItems)
-      } else {
-        console.warn('VirtualizedGrid: Item not found in mediaItems:', item)
       }
-    } else {
-      console.warn('VirtualizedGrid: Item is not media:', item)
     }
   }, [openViewer, mediaItems])
 
@@ -110,7 +141,7 @@ export function VirtualizedGrid({
             height: `${virtualizer.getTotalSize()}px`,
             width: '100%',
             position: 'relative',
-            padding: `${padding}px ${sidePadding}px`
+            padding: `${padding}px ${layoutConfig.sidePadding}px`
           }}
         >
           <AnimatePresence mode="popLayout" initial={false}>
@@ -118,7 +149,7 @@ export function VirtualizedGrid({
               const rowItems = getItemsForRow(virtualRow.index)
 
               return (
-                <div
+                <motion.div
                   key={virtualRow.index}
                   style={{
                     position: 'absolute',
@@ -127,23 +158,32 @@ export function VirtualizedGrid({
                     width: '100%',
                     transform: `translateY(${virtualRow.start}px)`,
                     display: 'grid',
-                    gridTemplateColumns: `repeat(${columnCount}, ${itemWidth}px)`,
+                    gridTemplateColumns: `repeat(${layoutConfig.columnCount}, minmax(0, ${itemWidth}px))`,
                     gap: `${gap}px`,
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    padding: `0 ${gap/2}px`
                   }}
                 >
-                  {rowItems.map((item) => (
-                    <FileCard
+                  {rowItems.map((item, index) => (
+                    <motion.div
                       key={item.id}
-                      item={item}
-                      width={itemWidth}
-                      height={itemHeight}
-                      isSelected={selectedItem?.id === item.id}
-                      onSelect={onSelectItem}
-                      onDoubleClick={handleItemDoubleClick}
-                    />
+                      variants={itemVariants}
+                      custom={index}
+                      transition={{
+                        delay: index * 0.05
+                      }}
+                    >
+                      <FileCard
+                        item={item}
+                        width={itemWidth}
+                        height={itemHeight}
+                        isSelected={selectedItem?.id === item.id}
+                        onSelect={onSelectItem}
+                        onDoubleClick={handleItemDoubleClick}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )
             })}
           </AnimatePresence>

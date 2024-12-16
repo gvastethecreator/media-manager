@@ -1,10 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { produce } from 'immer'
 
-type ViewMode = 'grid' | 'list' | 'details'
-type ThumbnailSize = 'small' | 'medium' | 'large'
-type SortBy = 'name' | 'date' | 'size' | 'type'
-type SortOrder = 'asc' | 'desc'
+export type ViewMode = 'grid' | 'list' | 'details'
+export type ThumbnailSize = 'small' | 'medium' | 'large'
 
 interface UIState {
   view: ViewMode
@@ -13,10 +12,7 @@ interface UIState {
   isSettingsOpen: boolean
   isRightPanelCollapsed: boolean
   searchQuery: string
-  navigationHistory: string[]
-  currentHistoryIndex: number
-  sortBy: SortBy
-  sortOrder: SortOrder
+  theme: 'light' | 'dark' | 'system'
 
   // Acciones
   setView: (view: ViewMode) => void
@@ -25,67 +21,77 @@ interface UIState {
   toggleSettings: () => void
   toggleRightPanel: () => void
   setSearchQuery: (query: string) => void
-  navigateBack: () => void
-  navigateForward: () => void
-  addToHistory: (path: string) => void
-  setSorting: (by: SortBy, order: SortOrder) => void
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
 }
+
+// Constantes
+const MIN_ZOOM = 50
+const MAX_ZOOM = 200
+const DEFAULT_ZOOM = 100
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       view: 'grid',
       thumbnailSize: 'medium',
-      zoomLevel: 100,
+      zoomLevel: DEFAULT_ZOOM,
       isSettingsOpen: false,
       isRightPanelCollapsed: false,
       searchQuery: '',
-      navigationHistory: ['/'],
-      currentHistoryIndex: 0,
-      sortBy: 'name',
-      sortOrder: 'asc',
+      theme: 'system',
 
       setView: (view) => set({ view }),
-      setThumbnailSize: (thumbnailSize) => set({ thumbnailSize }),
-      setZoomLevel: (zoomLevel) => {
-        const size = zoomLevel >= 150 ? 'large' : zoomLevel >= 75 ? 'medium' : 'small'
-        set({ zoomLevel, thumbnailSize: size as ThumbnailSize })
-      },
+
+      setThumbnailSize: (thumbnailSize) => set(
+        produce((state: UIState) => {
+          state.thumbnailSize = thumbnailSize
+          // Ajustar zoom según el tamaño de miniatura
+          if (thumbnailSize === 'small') state.zoomLevel = 75
+          else if (thumbnailSize === 'large') state.zoomLevel = 150
+          else state.zoomLevel = 100
+        })
+      ),
+
+      setZoomLevel: (zoomLevel) => set(
+        produce((state: UIState) => {
+          const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel))
+          state.zoomLevel = clampedZoom
+          // Ajustar tamaño de miniatura según el zoom
+          if (clampedZoom <= 75) state.thumbnailSize = 'small'
+          else if (clampedZoom >= 150) state.thumbnailSize = 'large'
+          else state.thumbnailSize = 'medium'
+        })
+      ),
+
       toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
       toggleRightPanel: () => set((state) => ({ isRightPanelCollapsed: !state.isRightPanelCollapsed })),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
-      navigateBack: () => {
-        const { currentHistoryIndex } = get()
-        if (currentHistoryIndex > 0) {
-          set({ currentHistoryIndex: currentHistoryIndex - 1 })
-        }
-      },
-      navigateForward: () => {
-        const { currentHistoryIndex, navigationHistory } = get()
-        if (currentHistoryIndex < navigationHistory.length - 1) {
-          set({ currentHistoryIndex: currentHistoryIndex + 1 })
-        }
-      },
-      addToHistory: (path) => {
-        const { navigationHistory, currentHistoryIndex } = get()
-        const newHistory = [...navigationHistory.slice(0, currentHistoryIndex + 1), path]
-        set({
-          navigationHistory: newHistory,
-          currentHistoryIndex: newHistory.length - 1
-        })
-      },
-      setSorting: (sortBy, sortOrder) => set({ sortBy, sortOrder })
+      setTheme: (theme) => set({ theme })
     }),
     {
       name: 'ui-storage',
       partialize: (state) => ({
         view: state.view,
         thumbnailSize: state.thumbnailSize,
-        zoomLevel: state.zoomLevel,
         isRightPanelCollapsed: state.isRightPanelCollapsed,
-        sortBy: state.sortBy,
-        sortOrder: state.sortOrder
+        theme: state.theme
       })
     }
   )
 )
+
+// Selectores memoizados
+export const useViewSettings = () => {
+  const { view, thumbnailSize, zoomLevel } = useUIStore()
+  return { view, thumbnailSize, zoomLevel }
+}
+
+export const usePanelSettings = () => {
+  const { isSettingsOpen, isRightPanelCollapsed } = useUIStore()
+  return { isSettingsOpen, isRightPanelCollapsed }
+}
+
+export const useThemeSetting = () => {
+  const { theme } = useUIStore()
+  return theme
+}
