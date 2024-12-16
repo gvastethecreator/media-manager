@@ -1,18 +1,156 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, forwardRef, useEffect, useState, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { motion, AnimatePresence } from 'framer-motion'
 import type { FileItem } from '@/store/files'
 import { formatFileSize } from '@/lib/utils'
-import { FileIcon, FolderIcon } from 'lucide-react'
+import { FileIcon, FolderIcon, MoreHorizontal, ChevronUpIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useImageViewer } from '@/store/image-viewer'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface VirtualizedListProps {
   items: FileItem[]
-  onSelectItem: (item: FileItem) => void
+  onSelectItem: (item: FileItem | string) => void
   selectedItem: FileItem | null
 }
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('es', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(date))
+}
+
+const FileItemIcon = ({ item }: { item: FileItem }) => {
+  if (item.type === 'folder') {
+    return <FolderIcon className="h-4 w-4" />
+  }
+
+  if (item.thumbnailUrl || item.url) {
+    return (
+      <div className="relative w-6 h-6 rounded-sm overflow-hidden bg-muted">
+        <img
+          src={item.thumbnailUrl || item.url}
+          alt={item.name}
+          className="object-cover w-full h-full"
+          onError={(e) => {
+            const fallback = document.createElement('div')
+            fallback.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="h-4 w-4"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>'
+            e.currentTarget.parentElement?.replaceChild(fallback.firstChild!, e.currentTarget)
+          }}
+        />
+      </div>
+    )
+  }
+
+  return <FileIcon className="h-4 w-4" />
+}
+
+const ListItem = forwardRef<HTMLTableRowElement, {
+  item: FileItem
+  isSelected: boolean
+  onSelect: (item: FileItem) => void
+  onDoubleClick: (item: FileItem) => void
+  index: number
+  style?: React.CSSProperties
+}>(({ item, isSelected, onSelect, onDoubleClick, index, style }, ref) => (
+  <ContextMenu>
+    <ContextMenuTrigger asChild>
+      <TableRow
+        ref={ref}
+        className={cn(
+          "cursor-pointer h-10",
+          "hover:bg-accent/50 hover:text-accent-foreground",
+          "transition-colors duration-150",
+          isSelected && "bg-accent/40 text-accent-foreground",
+          index % 2 === 0 ? "bg-muted/30" : "bg-background"
+        )}
+        onClick={() => onSelect(item)}
+        onDoubleClick={() => onDoubleClick(item)}
+        style={style}
+      >
+        <TableCell className="w-[5%] p-0 min-w-[40px]">
+          <div className="flex items-center justify-center h-full">
+            <FileItemIcon item={item} />
+          </div>
+        </TableCell>
+        <TableCell className="py-0 pl-2 w-[45%] min-w-[200px]">
+          <p className="text-sm truncate">
+            {item.name}
+          </p>
+        </TableCell>
+        <TableCell className="text-right text-xs text-muted-foreground w-[25%] min-w-[120px] py-0 px-4">
+          {formatDate(item.modified)}
+        </TableCell>
+        <TableCell className="text-right text-xs text-muted-foreground w-[12.5%] min-w-[80px] py-0 px-4 capitalize">
+          {item.type}
+        </TableCell>
+        <TableCell className="text-right text-xs text-muted-foreground w-[12.5%] min-w-[80px] py-0 pl-4 pr-6">
+          {formatFileSize(item.size)}
+        </TableCell>
+      </TableRow>
+    </ContextMenuTrigger>
+    <ContextMenuContent className="w-64">
+      <ContextMenuItem onSelect={() => onDoubleClick(item)}>
+        Abrir
+        <ContextMenuShortcut>↵</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem>
+        Descargar
+        <ContextMenuShortcut>⌘D</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuSub>
+        <ContextMenuSubTrigger>
+          <span className="flex items-center">
+            Más acciones
+            <MoreHorizontal className="ml-2 h-4 w-4" />
+          </span>
+        </ContextMenuSubTrigger>
+        <ContextMenuSubContent className="w-48">
+          <ContextMenuItem>
+            Copiar
+            <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            Mover
+            <ContextMenuShortcut>⌘X</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem className="text-red-600">
+            Eliminar
+            <ContextMenuShortcut>⌫</ContextMenuShortcut>
+          </ContextMenuItem>
+        </ContextMenuSubContent>
+      </ContextMenuSub>
+    </ContextMenuContent>
+  </ContextMenu>
+))
+
+ListItem.displayName = 'ListItem'
 
 export function VirtualizedList({
   items,
@@ -20,102 +158,157 @@ export function VirtualizedList({
   selectedItem
 }: VirtualizedListProps) {
   const parentRef = useRef<HTMLDivElement>(null)
-  const padding = 16 // Padding del contenedor
-  const itemHeight = 56 // Altura de cada item
-  const gap = 4 // Espacio entre items
+  const itemHeight = 40
+  const { openViewer } = useImageViewer()
+  const [sorting, setSorting] = useState<{ column: keyof FileItem; direction: 'asc' | 'desc' }>({
+    column: 'name',
+    direction: 'asc'
+  })
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const value1 = a[sorting.column]
+      const value2 = b[sorting.column]
+
+      if (value1 === value2) return 0
+
+      const direction = sorting.direction === 'asc' ? 1 : -1
+      if (value1 < value2) return -1 * direction
+      return 1 * direction
+    })
+  }, [items, sorting])
 
   const virtualizer = useVirtualizer({
-    count: items.length,
+    count: sortedItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => itemHeight + gap,
+    estimateSize: () => itemHeight,
     overscan: 5
   })
 
-  return (
-    <div
-      ref={parentRef}
-      className="h-full overflow-auto"
-    >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-          padding: `${padding}px`
-        }}
-      >
-        <AnimatePresence mode="popLayout">
-          {virtualizer.getVirtualItems().map(virtualRow => {
-            const item = items[virtualRow.index]
-            const isSelected = selectedItem?.id === item.id
+  const handleSort = (column: keyof FileItem) => {
+    setSorting(prev => ({
+      column,
+      direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+    }))
+  }
 
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${itemHeight}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                  marginBottom: `${gap}px`
-                }}
+  const handleDoubleClick = (item: FileItem) => {
+    if (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) {
+      openViewer(item, items)
+    }
+  }
+
+  return (
+    <ScrollArea className="h-full w-full">
+      <div ref={parentRef} className="h-full w-full relative">
+        <Table>
+          <TableHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <TableRow>
+              <TableHead className="w-[5%] p-0 min-w-[40px]" />
+              <TableHead
+                className="py-0 pl-2 w-[45%] min-w-[200px] cursor-pointer hover:bg-accent/50"
+                onClick={() => handleSort('name')}
               >
-                <motion.div
-                  layoutId={item.id}
-                  className={cn(
-                    "flex items-center h-full px-4 gap-4 cursor-pointer rounded-md",
-                    "hover:bg-accent hover:text-accent-foreground",
-                    isSelected && "bg-accent/50"
+                <div className="flex items-center gap-2">
+                  Nombre
+                  {sorting.column === 'name' && (
+                    <ChevronUpIcon
+                      className={cn(
+                        "h-4 w-4 transition-transform",
+                        sorting.direction === 'desc' && "rotate-180"
+                      )}
+                    />
                   )}
-                  onClick={() => onSelectItem(item)}
-                  whileHover={{ scale: 1.01, x: 4 }}
-                  whileTap={{ scale: 0.99 }}
+                </div>
+              </TableHead>
+              <TableHead
+                className="text-right w-[25%] min-w-[120px] py-0 px-4 cursor-pointer hover:bg-accent/50"
+                onClick={() => handleSort('modified')}
+              >
+                <div className="flex items-center justify-end gap-2">
+                  Modificado
+                  {sorting.column === 'modified' && (
+                    <ChevronUpIcon
+                      className={cn(
+                        "h-4 w-4 transition-transform",
+                        sorting.direction === 'desc' && "rotate-180"
+                      )}
+                    />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead
+                className="text-right w-[12.5%] min-w-[80px] py-0 px-4 cursor-pointer hover:bg-accent/50"
+                onClick={() => handleSort('type')}
+              >
+                <div className="flex items-center justify-end gap-2">
+                  Tipo
+                  {sorting.column === 'type' && (
+                    <ChevronUpIcon
+                      className={cn(
+                        "h-4 w-4 transition-transform",
+                        sorting.direction === 'desc' && "rotate-180"
+                      )}
+                    />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead
+                className="text-right w-[12.5%] min-w-[80px] py-0 pl-4 pr-6 cursor-pointer hover:bg-accent/50"
+                onClick={() => handleSort('size')}
+              >
+                <div className="flex items-center justify-end gap-2">
+                  Tamaño
+                  {sorting.column === 'size' && (
+                    <ChevronUpIcon
+                      className={cn(
+                        "h-4 w-4 transition-transform",
+                        sorting.direction === 'desc' && "rotate-180"
+                      )}
+                    />
+                  )}
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={5} className="p-0">
+                <div
+                  className="relative w-full"
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                  }}
                 >
-                  <motion.div
-                    className="flex-shrink-0"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {item.type === 'folder' ? (
-                      <FolderIcon className="h-5 w-5" />
-                    ) : (
-                      <FileIcon className="h-5 w-5" />
-                    )}
-                  </motion.div>
-                  <motion.div
-                    className="flex-grow min-w-0"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: 0.1 }}
-                  >
-                    <p className="text-sm font-medium truncate">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {formatFileSize(item.size)}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className="flex-shrink-0 text-xs text-muted-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2, delay: 0.2 }}
-                  >
-                    {new Date(item.modified).toLocaleDateString()}
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
+                  {virtualizer.getVirtualItems().map(virtualRow => {
+                    const item = sortedItems[virtualRow.index]
+                    if (!item) return null
+                    const isSelected = selectedItem?.id === item.id
+
+                    return (
+                      <ListItem
+                        key={item.id}
+                        item={item}
+                        index={virtualRow.index}
+                        isSelected={isSelected}
+                        onSelect={onSelectItem}
+                        onDoubleClick={handleDoubleClick}
+                        style={{
+                          position: 'absolute',
+                          top: `${virtualRow.start}px`,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualRow.size}px`
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
-    </div>
+    </ScrollArea>
   )
 }
