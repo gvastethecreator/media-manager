@@ -50,6 +50,7 @@ export function MainContent() {
   } = useUIStore()
 
   const handleSelectItem = (item: FileItem) => {
+    console.log('MainContent: handleSelectItem', item)
     setSelectedItem(item)
     toggleSettings()
 
@@ -74,6 +75,7 @@ export function MainContent() {
   }
 
   const renderContent = () => {
+    console.log('MainContent: renderContent', { currentView, view, thumbnailSize })
     switch (currentView) {
       case 'collections':
         return (

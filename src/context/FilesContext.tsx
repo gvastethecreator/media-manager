@@ -1,18 +1,19 @@
 'use client'
 
-import * as React from 'react'
-import { FileItem } from '@/components/file-view/file-view'
-import { ViewMode } from '@/lib/constants/sample-data'
-import { sampleViewData, sampleCollections, sampleFolders, sampleTags, sampleStats } from '@/lib/constants/sample-data'
+import React from 'react'
+import { mockCollections, mockFolders, mockTags, mockStats, mockFiles } from '@/lib/mock-data'
+import type { FileItem } from '@/store/files'
+
+type ViewMode = 'files' | 'collections' | 'folders' | 'tags' | 'cards'
 
 interface FilesContextType {
   currentView: ViewMode
   currentItems: FileItem[]
   selectedItem: FileItem | null
-  collections: typeof sampleCollections
-  folders: typeof sampleFolders
-  tags: typeof sampleTags
-  stats: typeof sampleStats
+  collections: typeof mockCollections
+  folders: typeof mockFolders
+  tags: typeof mockTags
+  stats: typeof mockStats
   view: 'grid' | 'list' | 'details'
   thumbnailSize: 'small' | 'medium' | 'large'
   isLoading: boolean
@@ -28,7 +29,15 @@ interface FilesContextType {
   setThumbnailSize: (size: 'small' | 'medium' | 'large') => void
 }
 
-const FilesContext = React.createContext<FilesContextType | undefined>(undefined)
+const FilesContext = React.createContext<FilesContextType | null>(null)
+
+export function useFiles() {
+  const context = React.useContext(FilesContext)
+  if (!context) {
+    throw new Error('useFiles must be used within a FilesProvider')
+  }
+  return context
+}
 
 export function FilesProvider({ children }: { children: React.ReactNode }) {
   const [currentView, setCurrentView] = React.useState<ViewMode>('files')
@@ -41,14 +50,8 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
 
   // Cargar todas las imágenes al iniciar
   React.useEffect(() => {
-    const allImages = [
-      ...Object.values(sampleViewData.collections).flat(),
-      ...Object.values(sampleViewData.folders).flat(),
-      ...Object.values(sampleViewData.tags).flat()
-    ]
-    // Filtrar duplicados por id
-    const uniqueImages = Array.from(new Map(allImages.map(item => [item.id, item])).values())
-    setCurrentItems(uniqueImages)
+    // Inicializar con todos los archivos
+    setCurrentItems(mockFiles)
     setCurrentPath(['Inicio', 'Todas las imágenes'])
   }, [])
 
@@ -60,42 +63,46 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
 
   const handleSelectCollection = async (id: string) => {
     await simulateLoading()
-    const collection = sampleCollections.find(c => c.id === id)
+    const collection = mockCollections.find(c => c.id === id)
     if (collection) {
+      const collectionFiles = mockFiles.filter(file =>
+        collection.tags.some(tag => file.tags.includes(tag))
+      )
       setCurrentPath(['Inicio', 'Colecciones', collection.name])
-      setCurrentItems(sampleViewData.collections[id] || [])
+      setCurrentItems(collectionFiles)
       setCurrentView('files')
     }
   }
 
   const handleSelectFolder = async (id: string) => {
     await simulateLoading()
-    const folder = sampleFolders.find(f => f.id === id)
+    const folder = mockFolders.find(f => f.id === id)
     if (folder) {
+      const folderFiles = mockFiles.filter(file =>
+        file.path.startsWith(`/${folder.name}/`)
+      )
       setCurrentPath(['Inicio', 'Carpetas', folder.name])
-      setCurrentItems(sampleViewData.folders[id] || [])
+      setCurrentItems(folderFiles)
       setCurrentView('files')
     }
   }
 
   const handleSelectTag = async (name: string) => {
     await simulateLoading()
-    const tag = sampleTags.find(t => t.name === name)
+    const tag = mockTags.find(t => t.name === name)
     if (tag) {
+      const tagFiles = mockFiles.filter(file =>
+        file.tags.includes(tag.name)
+      )
       setCurrentPath(['Inicio', 'Etiquetas', tag.name])
-      setCurrentItems(sampleViewData.tags[name] || [])
+      setCurrentItems(tagFiles)
       setCurrentView('files')
     }
   }
 
   const handleSelectItem = (item: FileItem) => {
+    console.log('FilesContext: handleSelectItem', item)
     setSelectedItem(item)
-    if (item.type === 'folder') {
-      const currentFolder = currentPath[currentPath.length - 1]
-      setCurrentPath([...currentPath, item.name])
-      // Aquí simularíamos cargar los archivos de la carpeta
-      setCurrentItems(item.children || [])
-    }
   }
 
   React.useEffect(() => {
@@ -103,19 +110,15 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
     switch (currentView) {
       case 'cards':
         setCurrentPath(['Inicio', 'Tarjetas'])
-        // No limpiamos los items para mantener las tarjetas visibles
         break
       case 'collections':
         setCurrentPath(['Inicio', 'Colecciones'])
-        setCurrentItems([]) // No limpiamos los items para mantener las tarjetas visibles
         break
       case 'folders':
         setCurrentPath(['Inicio', 'Carpetas'])
-        setCurrentItems([]) // No limpiamos los items para mantener las tarjetas visibles
         break
       case 'tags':
         setCurrentPath(['Inicio', 'Etiquetas'])
-        setCurrentItems([]) // No limpiamos los items para mantener las tarjetas visibles
         break
       case 'files':
         // No actualizamos la ruta aquí ya que se maneja en los handlers
@@ -129,10 +132,10 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
         currentView,
         currentItems,
         selectedItem,
-        collections: sampleCollections,
-        folders: sampleFolders,
-        tags: sampleTags,
-        stats: sampleStats,
+        collections: mockCollections,
+        folders: mockFolders,
+        tags: mockTags,
+        stats: mockStats,
         view,
         thumbnailSize,
         isLoading,
@@ -151,12 +154,4 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
       {children}
     </FilesContext.Provider>
   )
-}
-
-export function useFiles() {
-  const context = React.useContext(FilesContext)
-  if (context === undefined) {
-    throw new Error('useFiles must be used within a FileProvider')
-  }
-  return context
 }

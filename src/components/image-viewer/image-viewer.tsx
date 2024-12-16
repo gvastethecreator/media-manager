@@ -7,10 +7,19 @@ import type { FileItem } from '@/store/files'
 export function ImageViewer() {
   const { isOpen, images, currentIndex, closeViewer } = useImageViewer()
 
+  console.log('ImageViewer render:', {
+    isOpen,
+    currentIndex,
+    totalImages: images.length,
+    currentImage: images[currentIndex]
+  })
+
   // Asegurarnos de que solo mostramos imágenes válidas
   const validImages = images.filter((img): img is FileItem & { url: string } =>
     Boolean(img.url || img.thumbnailUrl)
   )
+
+  console.log('Valid images:', validImages.length)
 
   const mappedImages = validImages.map(img => ({
     id: img.id,
@@ -26,7 +35,12 @@ export function ImageViewer() {
     mimeType: img.mimeType
   }))
 
-  if (!mappedImages.length || !isOpen) return null
+  console.log('Mapped images:', mappedImages.length)
+
+  if (!mappedImages.length || !isOpen) {
+    console.log('ImageViewer not rendering:', { noImages: !mappedImages.length, notOpen: !isOpen })
+    return null
+  }
 
   return (
     <AdvancedImageViewer
