@@ -1,19 +1,32 @@
 'use client'
 
 import * as React from "react"
-import { Settings2, LayoutGrid, List, Table2, Plus, Search, ZoomIn, ZoomOut, ArrowLeft, ArrowRight } from 'lucide-react'
+import {
+  LayoutGrid,
+  List,
+  Table2,
+  ZoomIn,
+  ZoomOut,
+  ArrowLeft,
+  ArrowRight,
+  SortAsc,
+  CalendarDays,
+  Search,
+  PanelRightClose
+} from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
+import { cn } from "@/lib/utils"
+import { SortMenu } from "./sort-menu"
 interface MainToolbarProps {
   view: 'grid' | 'list' | 'details'
   onViewChange: (view: 'grid' | 'list' | 'details') => void
@@ -21,13 +34,18 @@ interface MainToolbarProps {
   onZoomOut?: () => void
   onNavigateBack?: () => void
   onNavigateForward?: () => void
-  searchQuery: string
-  onSearchChange: (query: string) => void
-  onOpenSettings: () => void
+  onSort?: () => void
+  onSearch?: () => void
+  onToggleRightPanel?: () => void
+  onDateSelect?: (date: Date | undefined) => void
   canNavigateBack?: boolean
   canNavigateForward?: boolean
   canZoomIn?: boolean
   canZoomOut?: boolean
+  isRightPanelOpen?: boolean
+  sortBy: 'name' | 'date' | 'size' | 'type'
+  sortOrder: 'asc' | 'desc'
+  onSortChange: (by: 'name' | 'date' | 'size' | 'type', order: 'asc' | 'desc') => void
 }
 
 export function MainToolbar({
@@ -37,28 +55,40 @@ export function MainToolbar({
   onZoomOut,
   onNavigateBack,
   onNavigateForward,
-  searchQuery,
-  onSearchChange,
-  onOpenSettings,
+  onSort,
+  onSearch,
+  onToggleRightPanel,
+  onDateSelect,
   canNavigateBack = false,
   canNavigateForward = false,
   canZoomIn = true,
   canZoomOut = true,
+  isRightPanelOpen = true,
+  sortBy,
+  sortOrder,
+  onSortChange,
 }: MainToolbarProps) {
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setDate(date)
+    onDateSelect?.(date)
+  }
+
   return (
     <TooltipProvider>
-      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center border-b bg-background px-4 lg:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-2" />
+      <header className="sticky top-0 z-10 flex h-11 shrink-0 items-center justify-between border-b bg-background px-4">
+        <div className="flex items-center gap-1.5">
+          <SidebarTrigger className="-ml-1.5" />
           <Separator orientation="vertical" className="h-4" />
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => onViewChange('grid')}
-                  className={view === 'grid' ? 'bg-muted' : ''}
+                  className={cn("h-8 w-8", view === 'grid' && 'bg-muted')}
                 >
                   <LayoutGrid className="h-4 w-4" />
                   <span className="sr-only">Vista de cuadrícula</span>
@@ -94,6 +124,11 @@ export function MainToolbar({
               </TooltipTrigger>
               <TooltipContent>Vista de detalles</TooltipContent>
             </Tooltip>
+            <SortMenu
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={onSortChange}
+            />
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center space-x-1">
@@ -157,32 +192,60 @@ export function MainToolbar({
               <TooltipContent>Ampliar</TooltipContent>
             </Tooltip>
           </div>
+          <Separator orientation="vertical" className="h-4" />
         </div>
-        <div className="flex-1 px-4">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar..."
-              className="w-full pl-8"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo
-          </Button>
-          <ThemeToggle />
+
+        <div className="flex items-center gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onOpenSettings}>
-                <Settings2 className="h-4 w-4" />
-                <span className="sr-only">Configuración</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <CalendarDays className="h-4 w-4" />
+                    <span className="sr-only">Calendario</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    className="rounded-md border shadow-md"
+                  />
+                </PopoverContent>
+              </Popover>
+            </TooltipTrigger>
+            <TooltipContent>Calendario</TooltipContent>
+          </Tooltip>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSearch}
+            className="h-8 gap-1.5"
+          >
+            <Search className="h-4 w-4" />
+            <span className="text-xs font-medium">Buscar</span>
+          </Button>
+
+          <Separator orientation="vertical" className="h-4" />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onToggleRightPanel}
+              >
+                <PanelRightClose
+                  className={`h-4 w-4 transition-transform ${!isRightPanelOpen ? 'rotate-180' : ''}`}
+                />
+                <span className="sr-only">Panel lateral</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Configuración</TooltipContent>
+            <TooltipContent>Panel lateral</TooltipContent>
           </Tooltip>
         </div>
       </header>
