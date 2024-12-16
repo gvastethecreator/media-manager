@@ -2,12 +2,13 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/store/files'
 import type { ThumbnailSize } from '@/store/ui'
 import { useImageViewer } from '@/store/image-viewer'
 import { FileCard } from './file-card'
+import { Loader2 } from 'lucide-react'
 
 interface VirtualizedGridProps {
   items: FileItem[]
@@ -18,28 +19,20 @@ interface VirtualizedGridProps {
 
 const itemVariants = {
   initial: {
-    scale: 0.8,
     opacity: 0,
-    y: 20
+    scale: 0.95
   },
-  enter: {
-    scale: 1,
+  animate: (i: number) => ({
     opacity: 1,
-    y: 0,
+    scale: 1,
     transition: {
-      duration: 0.2,
-      ease: [0, 0, 0.2, 1]
+      type: "spring",
+      stiffness: 300,
+      damping: 25,
+      mass: 0.5,
+      delay: Math.min(i * 0.025, 0.15)
     }
-  },
-  exit: {
-    scale: 0.8,
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.15,
-      ease: [0.4, 0, 1, 1]
-    }
-  }
+  })
 }
 
 export function VirtualizedGrid({
@@ -50,6 +43,7 @@ export function VirtualizedGrid({
 }: VirtualizedGridProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [isGridReady, setIsGridReady] = useState(false)
   const { openViewer } = useImageViewer()
 
   const getThumbnailDimensions = useCallback(() => {
@@ -68,8 +62,6 @@ export function VirtualizedGrid({
     [getThumbnailDimensions]
   )
 
-  const padding = useMemo(() => gap, [gap])
-
   const mediaItems = useMemo(() => items.filter(item =>
     (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) &&
     (item.url || item.thumbnailUrl)
@@ -78,6 +70,16 @@ export function VirtualizedGrid({
   useEffect(() => {
     const element = parentRef.current
     if (!element) return
+
+    const rect = element.getBoundingClientRect()
+    setDimensions({
+      width: rect.width,
+      height: rect.height
+    })
+
+    const timer = setTimeout(() => {
+      setIsGridReady(true)
+    }, 50)
 
     const resizeObserver = new ResizeObserver(entries => {
       const entry = entries[0]
@@ -88,31 +90,49 @@ export function VirtualizedGrid({
     })
 
     resizeObserver.observe(element)
-    return () => resizeObserver.disconnect()
+
+    return () => {
+      resizeObserver.disconnect()
+      clearTimeout(timer)
+    }
   }, [])
 
   const layoutConfig = useMemo(() => {
-    const availableWidth = dimensions.width - (padding * 2)
-    const columnCount = Math.max(1, Math.floor((availableWidth + gap) / (itemWidth + gap)))
+    if (dimensions.width === 0) return {
+      columnCount: 1,
+      rowCount: 1,
+      sidePadding: 0,
+      gap: 16,
+      itemsPerPage: 2
+    }
+
+    const scrollbarWidth = 12
+    const availableWidth = dimensions.width - scrollbarWidth
+    const minGap = gap
+
+    const columnCount = Math.max(1, Math.floor((availableWidth + minGap) / (itemWidth + minGap)))
+    const totalGapSpace = availableWidth - (columnCount * itemWidth)
+    const optimalGap = Math.floor(totalGapSpace / (columnCount + 1))
+    const contentWidth = (columnCount * itemWidth) + ((columnCount - 1) * optimalGap)
+    const sidePadding = Math.floor((availableWidth - contentWidth) / 2)
     const rowCount = Math.ceil(mediaItems.length / columnCount)
-    const totalItemsWidth = columnCount * itemWidth + (columnCount - 1) * gap
-    const extraSpace = Math.max(0, availableWidth - totalItemsWidth)
-    const sidePadding = Math.max(padding, padding + (extraSpace / 2))
 
     return {
       columnCount,
       rowCount,
       sidePadding,
-      itemsPerPage: columnCount * 3 // Precarga 3 filas
+      gap: optimalGap,
+      itemsPerPage: columnCount * 2
     }
-  }, [dimensions.width, padding, gap, itemWidth, mediaItems.length])
+  }, [dimensions.width, itemWidth, gap, mediaItems.length])
 
   const virtualizer = useVirtualizer({
     count: layoutConfig.rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => itemHeight + gap,
+    estimateSize: () => itemHeight + layoutConfig.gap,
     overscan: layoutConfig.itemsPerPage,
-    scrollMargin: padding
+    paddingStart: layoutConfig.gap,
+    paddingEnd: layoutConfig.gap
   })
 
   const getItemsForRow = useCallback((rowIndex: number) => {
@@ -136,58 +156,85 @@ export function VirtualizedGrid({
         ref={parentRef}
         className="h-full relative"
       >
-        <div
+        {!isGridReady && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 20
+              }}
+            >
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </motion.div>
+          </motion.div>
+        )}
+        <motion.div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
             width: '100%',
-            position: 'relative',
-            padding: `${padding}px ${layoutConfig.sidePadding}px`
+            position: 'relative'
           }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isGridReady ? 1 : 0 }}
+          transition={{ duration: 0.15 }}
         >
-          <AnimatePresence mode="popLayout" initial={false}>
-            {virtualizer.getVirtualItems().map(virtualRow => {
-              const rowItems = getItemsForRow(virtualRow.index)
+          {virtualizer.getVirtualItems().map(virtualRow => {
+            const rowItems = getItemsForRow(virtualRow.index)
+            const rowStartIndex = virtualRow.index * layoutConfig.columnCount
 
-              return (
-                <motion.div
-                  key={virtualRow.index}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualRow.start}px)`,
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${layoutConfig.columnCount}, minmax(0, ${itemWidth}px))`,
-                    gap: `${gap}px`,
-                    justifyContent: 'center',
-                    padding: `0 ${gap/2}px`
-                  }}
-                >
-                  {rowItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      variants={itemVariants}
-                      custom={index}
-                      transition={{
-                        delay: index * 0.05
-                      }}
-                    >
-                      <FileCard
-                        item={item}
-                        width={itemWidth}
-                        height={itemHeight}
-                        isSelected={selectedItem?.id === item.id}
-                        onSelect={onSelectItem}
-                        onDoubleClick={handleItemDoubleClick}
-                      />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </div>
+            return (
+              <div
+                key={virtualRow.index}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${itemHeight}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                  padding: `0 ${layoutConfig.sidePadding}px`,
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${layoutConfig.columnCount}, ${itemWidth}px)`,
+                  gap: `${layoutConfig.gap}px`,
+                  justifyContent: 'center',
+                  willChange: 'transform'
+                }}
+              >
+                {rowItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    variants={itemVariants}
+                    initial="initial"
+                    animate={isGridReady ? "animate" : "initial"}
+                    custom={rowStartIndex + index}
+                    style={{
+                      height: itemHeight,
+                      willChange: 'transform, opacity'
+                    }}
+                  >
+                    <FileCard
+                      item={item}
+                      width={itemWidth}
+                      height={itemHeight}
+                      isSelected={selectedItem?.id === item.id}
+                      onSelect={onSelectItem}
+                      onDoubleClick={handleItemDoubleClick}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            )
+          })}
+        </motion.div>
       </div>
     </ScrollArea>
   )
