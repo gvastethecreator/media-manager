@@ -4,11 +4,12 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useFiles } from "@/context/FilesContext"
+import { useFilesStore } from "@/store/files"
+import { useUIStore } from "@/store/ui"
+import { useTheme } from "next-themes"
 import { FolderIcon, BookmarkIcon, TagIcon, ImageIcon, Settings2, Sun, Moon, RefreshCcw } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-
 import { SidebarItem } from "@/components/ui/sidebar-item"
 import { useSidebar } from "@/components/ui/sidebar"
 
@@ -27,18 +28,20 @@ const getContrastText = (bgColor: string) => {
 export function LeftSidebar() {
   const {
     currentView,
-    setCurrentView,
     collections,
     folders,
     tags,
     stats,
+    setCurrentView,
     handleSelectCollection,
     handleSelectFolder,
     handleSelectTag
-  } = useFiles()
+  } = useFilesStore()
+
+  const { toggleSettings } = useUIStore()
+  const { theme, setTheme } = useTheme()
 
   const sidebar = useSidebar()
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [isTagsExpanded, setIsTagsExpanded] = React.useState(true)
 
   const handleViewChange = (view: 'collections' | 'folders' | 'tags') => {
@@ -46,7 +49,7 @@ export function LeftSidebar() {
   }
 
   const handleOpenSettings = (tab: string) => {
-    console.log('Open settings tab:', tab)
+    toggleSettings()
   }
 
   const categories = [
@@ -95,7 +98,7 @@ export function LeftSidebar() {
           {sidebar.state !== "collapsed" && (
             <div className="flex flex-col min-w-0">
               <span className="text-[11px] font-medium leading-tight truncate">Nombre Usuario Largo</span>
-              <span className="text-[10px] text-muted-foreground leading-tight">{stats.totalFiles} imágenes</span>
+              <span className="text-[10px] text-muted-foreground leading-tight">{stats.totalFiles} archivos</span>
             </div>
           )}
         </div>
@@ -174,7 +177,7 @@ export function LeftSidebar() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0"
-            onClick={() => console.log('TODO: Toggle theme')}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -183,7 +186,7 @@ export function LeftSidebar() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0"
-            onClick={() => console.log('TODO: Open settings panel')}
+            onClick={() => toggleSettings()}
           >
             <Settings2 className="h-4 w-4" />
           </Button>
@@ -200,7 +203,6 @@ export function LeftSidebar() {
     </aside>
   )
 }
-
 // Ejemplo de colores variados para tags
 const tagColors = [
   '#ef4444', // rojo
@@ -216,3 +218,4 @@ const tagColors = [
   '#f43f5e', // rosa rojo
   '#64748b', // slate
 ]
+

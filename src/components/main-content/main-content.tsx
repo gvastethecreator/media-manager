@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { RightPanel } from "@/components/right-panel/right-panel"
 import { LeftSidebar } from '@/components/left-sidebar/LeftSidebar'
 import { CardView } from '@/components/card-view/card-view'
@@ -8,8 +7,9 @@ import { FileView } from "@/components/file-view/file-view"
 import { MainToolbar } from "@/components/main-toolbar/main-toolbar"
 import { Breadcrumbs } from "@/components/breadcrumbs/breadcrumbs"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
-import { useFiles } from "@/context/FilesContext"
-import type { FileItem } from "@/components/file-view/file-view"
+import { useFilesStore } from "@/store/files"
+import { useUIStore } from "@/store/ui"
+import type { FileItem } from "@/store/files"
 
 export function MainContent() {
   const {
@@ -25,42 +25,36 @@ export function MainContent() {
     handleSelectFolder,
     handleSelectTag,
     currentPath
-  } = useFiles()
+  } = useFilesStore()
 
-  const [view, setView] = useState<'grid' | 'list' | 'details'>('grid')
-  const [thumbnailSize, setThumbnailSize] = useState<'small' | 'medium' | 'large'>('medium')
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [navigationHistory, setNavigationHistory] = useState<string[]>(['/'])
-  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0)
-  const [zoomLevel, setZoomLevel] = useState(100)
+  const {
+    view,
+    thumbnailSize,
+    zoomLevel,
+    isSettingsOpen,
+    isRightPanelCollapsed,
+    searchQuery,
+    navigationHistory,
+    currentHistoryIndex,
+    sortBy,
+    sortOrder,
+    setView,
+    setZoomLevel,
+    toggleSettings,
+    toggleRightPanel,
+    setSearchQuery,
+    navigateBack,
+    navigateForward,
+    addToHistory,
+    setSorting
+  } = useUIStore()
 
   const handleSelectItem = (item: FileItem) => {
     setSelectedItem(item)
-    setIsSettingsOpen(false)
+    toggleSettings()
 
     if (item.type === 'folder') {
-      const newPath = [...navigationHistory.slice(0, currentHistoryIndex + 1), item.id]
-      setNavigationHistory(newPath)
-      setCurrentHistoryIndex(newPath.length - 1)
-    }
-  }
-
-  const handleOpenSettings = () => {
-    setIsSettingsOpen(true)
-    setSelectedItem(null)
-  }
-
-  const handleNavigateBack = () => {
-    if (currentHistoryIndex > 0) {
-      setCurrentHistoryIndex(currentHistoryIndex - 1)
-    }
-  }
-
-  const handleNavigateForward = () => {
-    if (currentHistoryIndex < navigationHistory.length - 1) {
-      setCurrentHistoryIndex(currentHistoryIndex + 1)
+      addToHistory(item.id)
     }
   }
 
@@ -77,20 +71,6 @@ export function MainContent() {
       else if (section.includes('etiquetas')) setCurrentView('tags')
       return
     }
-  }
-
-  const handleZoomIn = () => {
-    setZoomLevel(Math.min(zoomLevel + 10, 200))
-    setThumbnailSize(zoomLevel >= 150 ? 'large' : zoomLevel >= 75 ? 'medium' : 'small')
-  }
-
-  const handleZoomOut = () => {
-    setZoomLevel(Math.max(zoomLevel - 10, 50))
-    setThumbnailSize(zoomLevel <= 75 ? 'small' : zoomLevel <= 150 ? 'medium' : 'large')
-  }
-
-  const handleToggleRightPanel = () => {
-    setIsRightPanelCollapsed(!isRightPanelCollapsed)
   }
 
   const renderContent = () => {
@@ -176,18 +156,21 @@ export function MainContent() {
             <MainToolbar
               view={view}
               onViewChange={setView}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onNavigateBack={handleNavigateBack}
-              onNavigateForward={handleNavigateForward}
+              onZoomIn={() => setZoomLevel(Math.min(zoomLevel + 10, 200))}
+              onZoomOut={() => setZoomLevel(Math.max(zoomLevel - 10, 50))}
+              onNavigateBack={navigateBack}
+              onNavigateForward={navigateForward}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              onOpenSettings={handleOpenSettings}
+              onOpenSettings={() => toggleSettings()}
               canNavigateBack={currentHistoryIndex > 0}
               canNavigateForward={currentHistoryIndex < navigationHistory.length - 1}
               canZoomIn={zoomLevel < 200}
               canZoomOut={zoomLevel > 50}
               className="border-b"
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={setSorting}
             />
             {currentPath.length > 0 && (
               <Breadcrumbs
@@ -214,8 +197,8 @@ export function MainContent() {
           selectedItem={selectedItem}
           isCollapsed={isRightPanelCollapsed}
           showSettings={isSettingsOpen}
-          onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
-          onToggleCollapse={handleToggleRightPanel}
+          onToggleSettings={toggleSettings}
+          onToggleCollapse={toggleRightPanel}
           defaultSize={isRightPanelCollapsed ? 5 : 25}
           minSize={isRightPanelCollapsed ? 5 : 15}
           maxSize={isRightPanelCollapsed ? 5 : 40}

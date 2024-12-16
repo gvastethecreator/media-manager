@@ -17,7 +17,7 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { FileItem } from "../file-view/file-view"
+import type { FileItem } from '@/store/files'
 
 interface RightPanelProps {
   selectedItem: FileItem | null
@@ -408,7 +408,7 @@ export function RightPanel({
                       <div className="flex flex-col space-y-1">
                         <span className="text-sm font-medium text-muted-foreground">Etiquetas</span>
                         <div className="flex flex-wrap gap-1">
-                          {selectedItem.tags.map((tag) => (
+                          {selectedItem.tags.map((tag: string) => (
                             <Badge key={tag} variant="secondary">
                               {tag}
                             </Badge>

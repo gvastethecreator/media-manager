@@ -12,6 +12,7 @@ interface SidebarItemProps {
   isActive?: boolean
   onClick?: () => void
   onAdd?: () => void
+  className?: string
 }
 
 export function SidebarItem({
@@ -20,7 +21,8 @@ export function SidebarItem({
   count,
   isActive,
   onClick,
-  onAdd
+  onAdd,
+  className
 }: SidebarItemProps) {
   return (
     <div className="flex items-center justify-between gap-2">
@@ -28,7 +30,8 @@ export function SidebarItem({
         variant="ghost"
         className={cn(
           "justify-start gap-2 h-9 flex-1",
-          isActive && "bg-muted"
+          isActive && "bg-muted",
+          className
         )}
         onClick={onClick}
       >
