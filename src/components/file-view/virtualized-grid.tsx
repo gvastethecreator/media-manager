@@ -2,13 +2,12 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/store/files'
 import type { ThumbnailSize } from '@/store/ui'
-import { cn } from '@/lib/utils'
-import { formatFileSize } from '@/lib/format'
 import { useImageViewer } from '@/store/image-viewer'
+import { FileCard } from './file-card'
 
 interface VirtualizedGridProps {
   items: FileItem[]
@@ -27,20 +26,24 @@ export function VirtualizedGrid({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const { openViewer } = useImageViewer()
 
+  const mediaItems = items.filter(item =>
+    item.mimeType?.startsWith('image/') ||
+    item.mimeType?.startsWith('video/')
+  )
+
   const getThumbnailDimensions = useCallback(() => {
     switch (thumbnailSize) {
       case 'small':
-        return { width: 160, height: 160 }
+        return { width: 160, height: 160, gap: 12 }
       case 'large':
-        return { width: 320, height: 320 }
+        return { width: 320, height: 320, gap: 24 }
       default:
-        return { width: 240, height: 240 }
+        return { width: 240, height: 240, gap: 16 }
     }
   }, [thumbnailSize])
 
-  const { width: itemWidth, height: itemHeight } = getThumbnailDimensions()
-  const gap = 16
-  const padding = 16
+  const { width: itemWidth, height: itemHeight, gap } = getThumbnailDimensions()
+  const padding = gap
 
   useEffect(() => {
     const element = parentRef.current
@@ -76,13 +79,14 @@ export function VirtualizedGrid({
     return items.slice(startIndex, endIndex)
   }, [columnCount, items])
 
-  const handleItemClick = useCallback((item: FileItem) => {
-    onSelectItem(item)
-  }, [onSelectItem])
-
   const handleItemDoubleClick = useCallback((item: FileItem) => {
-    openViewer(item)
-  }, [openViewer])
+    if (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) {
+      const currentIndex = mediaItems.findIndex(i => i.id === item.id)
+      if (currentIndex !== -1) {
+        openViewer(item, mediaItems)
+      }
+    }
+  }, [openViewer, mediaItems])
 
   return (
     <ScrollArea className="h-full w-full">
@@ -112,63 +116,21 @@ export function VirtualizedGrid({
                     width: '100%',
                     transform: `translateY(${virtualRow.start}px)`,
                     display: 'grid',
-                    gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                    gridTemplateColumns: `repeat(${columnCount}, ${itemWidth}px)`,
                     gap: `${gap}px`,
-                    padding: `0 ${gap}px`,
-                    marginBottom: gap
+                    justifyContent: 'center'
                   }}
                 >
                   {rowItems.map((item) => (
-                    <motion.div
+                    <FileCard
                       key={item.id}
-                      layoutId={item.id}
-                      className={cn(
-                        "group relative aspect-square rounded-lg border bg-card hover:bg-accent cursor-pointer overflow-hidden",
-                        selectedItem?.id === item.id && "ring-2 ring-primary"
-                      )}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{
-                        duration: 0.2,
-                        ease: [0.4, 0, 0.2, 1]
-                      }}
-                      onClick={() => handleItemClick(item)}
-                      onDoubleClick={() => handleItemDoubleClick(item)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {item.thumbnailUrl ? (
-                        <motion.img
-                          src={item.thumbnailUrl}
-                          alt={item.name}
-                          className="h-full w-full object-cover"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.2 }}
-                          loading="lazy"
-                          draggable={false}
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-muted">
-                          <span className="text-2xl">📄</span>
-                        </div>
-                      )}
-                      <motion.div
-                        className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent p-4 opacity-0 group-hover:opacity-100"
-                        initial={false}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-white truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-white/70">
-                            {item.extension} • {formatFileSize(item.size)}
-                          </p>
-                        </div>
-                      </motion.div>
-                    </motion.div>
+                      item={item}
+                      width={itemWidth}
+                      height={itemHeight}
+                      isSelected={selectedItem?.id === item.id}
+                      onSelect={onSelectItem}
+                      onDoubleClick={handleItemDoubleClick}
+                    />
                   ))}
                 </div>
               )

@@ -18,10 +18,15 @@ export function ImageViewer() {
     type: 'image' as const,
     thumbnail: img.thumbnailUrl || img.url,
     src: img.url || img.thumbnailUrl,
-    alt: img.name
+    alt: img.name,
+    width: img.width,
+    height: img.height,
+    duration: img.duration,
+    fps: img.fps,
+    mimeType: img.mimeType
   }))
 
-  if (!mappedImages.length) return null
+  if (!mappedImages.length || !isOpen) return null
 
   return (
     <AdvancedImageViewer
