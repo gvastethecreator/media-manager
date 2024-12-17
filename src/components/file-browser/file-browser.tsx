@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FileItem } from '@/store/files'
-import { VirtualizedGrid } from './virtualized-grid'
+import { VirtualizedGrid } from './virtualized-view'
 import { VirtualizedList } from './virtualized-list'
 import type { ThumbnailSize } from '@/store/ui'
 import { useColumns } from '@/store/columns'

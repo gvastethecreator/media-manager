@@ -1,4 +1,4 @@
-import { FileItem } from "@/components/file-view/file-view"
+import { FileItem } from "@/components/file-browser/file-browser"
 
 export type ViewMode = 'files' | 'collections' | 'folders' | 'tags' | 'cards'
 
