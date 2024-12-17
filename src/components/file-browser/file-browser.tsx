@@ -6,7 +6,8 @@ import type { FileItem } from '@/store/files'
 import { VirtualizedView } from './virtualized-view'
 import type { ThumbnailSize } from '@/store/ui'
 import { useColumns } from '@/store/columns'
-import { Image, FileText, Calendar, Scale, Wand2, Layers, Share2, Clock } from 'lucide-react'
+import { useImageViewer } from '@/store/image-viewer'
+import { useSelectedItem, useSelectedIds, useFilesStore } from '@/store/files'
 
 export interface Column {
   id: string
@@ -89,7 +90,7 @@ export const defaultColumns: Column[] = [
     isHideable: true,
     isVisible: true,
     accessor: (item: FileItem) => {
-      const date = new Date(item.date)
+      const date = new Date(item.modified)
       return date.toLocaleDateString()
     }
   }
@@ -97,9 +98,9 @@ export const defaultColumns: Column[] = [
 
 interface FileViewProps {
   items: FileItem[]
-  viewMode?: 'grid' | 'list' | 'details'
+  viewMode: 'grid' | 'list' | 'details'
   thumbnailSize: ThumbnailSize
-  onViewModeChange?: () => void
+  onItemSelect: (item: FileItem | null) => void
 }
 
 const variants = {
@@ -115,12 +116,28 @@ const variants = {
   }
 }
 
-export function FileView({ items, viewMode = "grid", onViewModeChange }: FileViewProps) {
-  const [selectedItem, setSelectedItem] = React.useState<FileItem | null>(null)
+export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect }: FileViewProps) {
+  const { columns } = useColumns()
+  const selectedItem = useSelectedItem()
+  const selectedIds = useSelectedIds()
+  const { selectItem, deselectItem } = useFilesStore()
+  const { openViewer } = useImageViewer()
 
-  const handleItemClick = (item: FileItem) => {
-    setSelectedItem(item === selectedItem ? null : item)
-  }
+  const handleItemClick = React.useCallback((item: FileItem) => {
+    if (selectedIds.includes(item.id)) {
+      deselectItem(item.id)
+      onItemSelect(null)
+    } else {
+      selectItem(item.id)
+      onItemSelect(item)
+    }
+  }, [onItemSelect, selectedIds, selectItem, deselectItem])
+
+  const handleItemDoubleClick = React.useCallback((item: FileItem) => {
+    if (item.type === 'image' || (item.mimeType?.startsWith('image/'))) {
+      openViewer(item, items)
+    }
+  }, [openViewer, items])
 
   return (
     <div className="relative h-full">
@@ -135,8 +152,12 @@ export function FileView({ items, viewMode = "grid", onViewModeChange }: FileVie
           <VirtualizedView
             items={items}
             viewMode={viewMode}
-            selectedItem={selectedItem}
+            thumbnailSize={thumbnailSize}
             onItemClick={handleItemClick}
+            onItemDoubleClick={handleItemDoubleClick}
+            selectedItem={selectedItem}
+            selectedIds={selectedIds}
+            columns={columns}
           />
         </motion.div>
       </AnimatePresence>

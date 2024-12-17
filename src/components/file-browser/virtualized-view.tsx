@@ -16,7 +16,9 @@ interface VirtualizedViewProps {
   viewMode: 'grid' | 'list'
   thumbnailSize: ThumbnailSize
   selectedItem: FileItem | null
+  selectedIds: string[]
   onItemClick: (item: FileItem) => void
+  onItemDoubleClick: (item: FileItem) => void
   columns?: Column[]
 }
 
@@ -43,7 +45,9 @@ export function VirtualizedView({
   viewMode,
   thumbnailSize,
   selectedItem,
+  selectedIds,
   onItemClick,
+  onItemDoubleClick,
   columns
 }: VirtualizedViewProps) {
   const parentRef = useRef<HTMLDivElement>(null)
@@ -60,9 +64,9 @@ export function VirtualizedView({
       case 'small':
         return { width: 120, height: 120, gap: 8 }
       case 'large':
-        return { width: 280, height: 280, gap: 14 }
+        return { width: 280, height: 280, gap: 10 }
       default:
-        return { width: 180, height: 180, gap: 10 }
+        return { width: 180, height: 180, gap: 5 }
     }
   }, [thumbnailSize, viewMode, dimensions.width])
 
@@ -162,11 +166,13 @@ export function VirtualizedView({
         key={item.id}
         item={item}
         viewMode={viewMode}
-        isSelected={selectedItem?.id === item.id}
+        thumbnailSize={thumbnailSize}
+        isSelected={selectedIds.includes(item.id)}
         onClick={() => onItemClick(item)}
+        onDoubleClick={() => onItemDoubleClick(item)}
       />
     )
-  }, [items, viewMode, selectedItem, onItemClick])
+  }, [items, viewMode, thumbnailSize, selectedIds, onItemClick, onItemDoubleClick])
 
   const handleItemDoubleClick = useCallback((item: FileItem) => {
     if (item.type === 'image') {
