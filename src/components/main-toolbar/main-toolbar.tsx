@@ -222,24 +222,7 @@ export function MainToolbar({
             <span className="text-xs font-medium">Buscar</span>
           </Button>
 
-          <Separator orientation="vertical" className="h-4" />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={onToggleRightPanel}
-              >
-                <PanelRightClose
-                  className={`h-4 w-4 transition-transform ${!isRightPanelOpen ? 'rotate-180' : ''}`}
-                />
-                <span className="sr-only">Panel lateral</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Panel lateral</TooltipContent>
-          </Tooltip>
         </div>
       </header>
     </TooltipProvider>
