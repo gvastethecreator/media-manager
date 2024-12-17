@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FileItem } from '@/store/files'
 import { VirtualizedView } from './virtualized-view'
@@ -96,12 +97,9 @@ export const defaultColumns: Column[] = [
 
 interface FileViewProps {
   items: FileItem[]
-  view: 'grid' | 'list' | 'details'
+  viewMode?: 'grid' | 'list' | 'details'
   thumbnailSize: ThumbnailSize
-  selectedItems: Set<string>
-  onSelectItem: (item: FileItem | string) => void
-  columns?: Column[]
-  onColumnsChange?: (columns: Column[]) => void
+  onViewModeChange?: () => void
 }
 
 const variants = {
@@ -117,36 +115,31 @@ const variants = {
   }
 }
 
-export function FileView({
-  items,
-  view,
-  thumbnailSize,
-  selectedItems,
-  onSelectItem,
-  columns = defaultColumns,
-  onColumnsChange
-}: FileViewProps) {
-  const selectedItem = items.find(item => selectedItems.has(item.id)) || null
+export function FileView({ items, viewMode = "grid", onViewModeChange }: FileViewProps) {
+  const [selectedItem, setSelectedItem] = React.useState<FileItem | null>(null)
+
+  const handleItemClick = (item: FileItem) => {
+    setSelectedItem(item === selectedItem ? null : item)
+  }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={view}
-        className="h-full w-full"
-        variants={variants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        <VirtualizedView
-          items={items}
-          view={view}
-          thumbnailSize={thumbnailSize}
-          selectedItem={selectedItem}
-          onSelectItem={onSelectItem}
-          columns={columns}
-        />
-      </motion.div>
-    </AnimatePresence>
+    <div className="relative h-full">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={viewMode}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="h-full"
+        >
+          <VirtualizedView
+            items={items}
+            viewMode={viewMode}
+            selectedItem={selectedItem}
+            onItemClick={handleItemClick}
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
   )
 }
