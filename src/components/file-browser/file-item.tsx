@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { FileContextMenu } from './context-menu'
 import { Copy, Download, Eye, Share2, Trash2, Play, AlertCircle } from 'lucide-react'
 import type { FileItem } from '@/store/files'
+import type { ThumbnailSize } from '@/store/ui'
 import { cn } from '@/lib/utils'
 import { formatFileSize } from '@/lib/format'
 import { useToast } from '@/components/ui/use-toast'
@@ -14,8 +15,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 interface FileCardProps {
   item: FileItem
   viewMode: 'grid' | 'list'
+  thumbnailSize: ThumbnailSize
   isSelected: boolean
   onClick: () => void
+  onDoubleClick: () => void
 }
 
 const imageVariants = {
@@ -65,28 +68,26 @@ const getRandomGradient = () => {
 export function FileCard({
   item,
   viewMode,
+  thumbnailSize,
   isSelected,
-  onClick
+  onClick,
+  onDoubleClick
 }: FileCardProps) {
-  const { toast } = useToast()
-  const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [gradient] = useState(getRandomGradient())
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [gradient] = useState(getRandomGradient)
+  const { toast } = useToast()
 
   const handleContextMenu = useCallback((action: string) => {
     switch (action) {
       case 'copy':
-        navigator.clipboard.writeText(item.path).then(() => {
-          toast({
-            title: "Copiado al portapapeles",
-            description: item.path
-          })
+        navigator.clipboard.writeText(item.url || item.thumbnailUrl || '')
+        toast({
+          title: 'URL copiada',
+          description: 'La URL ha sido copiada al portapapeles'
         })
         break
-      case 'preview':
-        // Implementar acción de vista previa
-        break
-      // Implementar otras acciones
+      // ... otros casos
     }
   }, [item, toast])
 
@@ -195,9 +196,10 @@ export function FileCard({
       <motion.div
         className={cn(
           "group relative transition-all",
-          viewMode === 'grid' ? 'aspect-[3/4] p-1' : 'h-12 p-2'
+          viewMode === 'grid' ? getThumbnailSizeClass(thumbnailSize) : 'h-12 p-2'
         )}
         onClick={onClick}
+        onDoubleClick={onDoubleClick}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
@@ -207,4 +209,15 @@ export function FileCard({
       </motion.div>
     </FileContextMenu>
   )
+}
+
+function getThumbnailSizeClass(size: ThumbnailSize) {
+  switch (size) {
+    case 'small':
+      return 'w-[120px] h-[120px]'
+    case 'large':
+      return 'w-[280px] h-[280px]'
+    default:
+      return 'w-[180px] h-[180px]'
+  }
 }

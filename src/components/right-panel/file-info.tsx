@@ -2,18 +2,20 @@
 
 import * as React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { FileItem } from "./right-panel"
-import { formatBytes } from "@/lib/utils"
-import { ImageOff } from "lucide-react"
+import type { FileItem } from '@/store/files'
+import { formatFileSize } from "@/lib/utils"
+import { ImageOff, Calendar, FileText, Hash, Tag, Info, ImageIcon } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface FileInfoProps {
   selectedItem: FileItem | null
 }
 
 export function FileInfo({ selectedItem }: FileInfoProps) {
+  const [activeTab, setActiveTab] = React.useState('info')
   const [isImageViewerOpen, setIsImageViewerOpen] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
 
@@ -23,14 +25,20 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
 
   if (!selectedItem) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-muted-foreground">
-        No hay ningún elemento seleccionado
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              Sin selección
+            </CardTitle>
+            <CardDescription>
+              Selecciona un archivo para ver su información
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     )
-  }
-
-  const handleImageError = () => {
-    setImageError(true)
   }
 
   const renderImage = (src?: string, alt = "") => {
@@ -48,102 +56,192 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
         src={src}
         alt={alt}
         className="w-full h-full object-cover transition-transform hover:scale-105"
-        onError={handleImageError}
+        onError={() => setImageError(true)}
       />
     )
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {selectedItem.type === 'image' && (
-        <div className="p-4">
-          <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
-            <DialogTrigger asChild>
-              <div className="aspect-square w-full rounded-lg bg-muted/50 overflow-hidden cursor-pointer">
-                {renderImage(selectedItem.thumbnail, selectedItem.name)}
-              </div>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              {renderImage(selectedItem.thumbnail, selectedItem.name)}
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-      {selectedItem.type === 'folder' && selectedItem.children && (
-        <div className="p-4">
-          <div className="grid grid-cols-3 gap-2">
-            {selectedItem.children.slice(0, 9).map((item, index) => (
-              <div key={index} className="aspect-square rounded-lg bg-muted/50 overflow-hidden">
-                {renderImage(item.thumbnail, item.name)}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      <Separator />
-      <ScrollArea className="flex-1 px-4">
+    <ScrollArea className="flex-1">
+      <div className="p-4 space-y-4">
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="info">Información</TabsTrigger>
-            <TabsTrigger value="metadata">Metadatos</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="info" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Información
+            </TabsTrigger>
+            <TabsTrigger value="metadata" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Metadatos
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="info" className="space-y-4 py-4">
-            <div className="space-y-2 animate-in fade-in-50 duration-500">
-              <MetadataItem label="Nombre" value={selectedItem.name} />
-              <MetadataItem label="Tipo" value={selectedItem.type} />
-              <MetadataItem label="Tamaño" value={selectedItem.size} />
-              <MetadataItem label="Creado" value={new Date(selectedItem.dateCreated).toLocaleString()} />
-              <MetadataItem label="Modificado" value={new Date(selectedItem.dateModified).toLocaleString()} />
-              {selectedItem.type === 'image' && selectedItem.dimensions && (
-                <MetadataItem label="Dimensiones" value={selectedItem.dimensions} />
-              )}
-              {selectedItem.type === 'folder' && selectedItem.children && (
-                <>
-                  <MetadataItem label="Elementos" value={selectedItem.children.length.toString()} />
-                  <MetadataItem label="Tamaño total" value={calculateFolderSize(selectedItem)} />
-                </>
-              )}
-            </div>
-          </TabsContent>
-          <TabsContent value="metadata" className="space-y-4 py-4">
-            <div className="space-y-2 animate-in fade-in-50 duration-500">
-              {selectedItem.metadata ? (
-                Object.entries(selectedItem.metadata).map(([key, value]) => (
-                  <MetadataItem
-                    key={key}
-                    label={key}
-                    value={Array.isArray(value) ? value.join(", ") : value?.toString() || ""}
-                  />
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground text-center py-4">
-                  No hay metadatos disponibles
+
+          <TabsContent value="info" className="space-y-4 mt-4">
+            {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
+              <Card>
+                <CardContent className="pt-6">
+                  <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
+                    <DialogTrigger asChild>
+                      <div className="aspect-square w-full rounded-lg bg-muted/50 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity">
+                        {renderImage(selectedItem.thumbnailUrl, selectedItem.name)}
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      {renderImage(selectedItem.url || selectedItem.thumbnailUrl, selectedItem.name)}
+                    </DialogContent>
+                  </Dialog>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Información básica
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Nombre</span>
+                  <Badge variant="secondary">{selectedItem.name}</Badge>
                 </div>
-              )}
-            </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Tipo</span>
+                  <Badge variant="secondary">{selectedItem.mimeType || selectedItem.type}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Tamaño</span>
+                  <Badge variant="secondary">{formatFileSize(selectedItem.size)}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Modificado</span>
+                  <Badge variant="secondary">
+                    {new Date(selectedItem.modified).toLocaleDateString()}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Creado</span>
+                  <Badge variant="secondary">
+                    {new Date(selectedItem.created).toLocaleDateString()}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {selectedItem.model && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hash className="h-4 w-4" />
+                    Modelo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline" className="w-full justify-center">
+                    {selectedItem.model}
+                  </Badge>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedItem.loras && selectedItem.loras.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    LoRAs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedItem.loras.map((lora, index) => (
+                      <Badge key={index} variant="secondary">
+                        {lora}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="metadata" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Fechas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Creación</span>
+                  <Badge variant="secondary">
+                    {new Date(selectedItem.created).toLocaleDateString()}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Modificación</span>
+                  <Badge variant="secondary">
+                    {new Date(selectedItem.modified).toLocaleDateString()}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Dimensiones
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Ancho</span>
+                    <Badge variant="secondary">{selectedItem.width || selectedItem.metadata?.width}px</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Alto</span>
+                    <Badge variant="secondary">{selectedItem.height || selectedItem.metadata?.height}px</Badge>
+                  </div>
+                  {selectedItem.metadata?.format && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Formato</span>
+                      <Badge variant="secondary">{selectedItem.metadata.format}</Badge>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedItem.metadata && Object.keys(selectedItem.metadata).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Otros metadatos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {Object.entries(selectedItem.metadata)
+                    .filter(([key]) => !['width', 'height', 'format'].includes(key))
+                    .map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{key}</span>
+                        <Badge variant="secondary">
+                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        </Badge>
+                      </div>
+                    ))}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
-      </ScrollArea>
-    </div>
+      </div>
+    </ScrollArea>
   )
-}
-
-function MetadataItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-muted/30 p-2 rounded-md">
-      <label className="text-[10px] font-medium text-muted-foreground">{label}</label>
-      <p className="text-xs break-words">{value}</p>
-    </div>
-  )
-}
-
-function calculateFolderSize(folder: FileItem): string {
-  if (!folder.children) return '0 B'
-  const totalBytes = folder.children.reduce((acc, item) => {
-    if (item.type === 'folder' && item.children) {
-      return acc + parseInt(calculateFolderSize(item))
-    }
-    return acc + parseInt(item.size)
-  }, 0)
-  return formatBytes(totalBytes)
 }

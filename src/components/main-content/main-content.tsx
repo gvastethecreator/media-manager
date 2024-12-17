@@ -20,12 +20,14 @@ export function MainContent() {
     currentView,
     currentItems,
     currentPath,
-    selectedItems,
+    selectedIds,
     setCurrentPath,
     sortBy,
     sortOrder,
     setSorting,
-    isLoading
+    isLoading,
+    selectItem,
+    deselectItem
   } = useFilesStore()
 
   const {
@@ -58,10 +60,14 @@ export function MainContent() {
     setCurrentPath(currentPath.slice(0, index + 1))
   }, [currentPath, setCurrentPath])
 
-  const handleSelectItem = useCallback((item: string | { id: string }) => {
-    const id = typeof item === 'string' ? item : item.id
-    selectedItems.has(id) ? selectedItems.delete(id) : selectedItems.add(id)
-  }, [selectedItems])
+  const handleSelectItem = useCallback((item: FileItem | null) => {
+    if (!item) return
+    if (selectedIds.includes(item.id)) {
+      deselectItem(item.id)
+    } else {
+      selectItem(item.id)
+    }
+  }, [selectedIds, selectItem, deselectItem])
 
   const renderContent = useCallback(() => {
     if (currentItems.length === 0) {
@@ -71,20 +77,17 @@ export function MainContent() {
     return (
       <FileView
         items={currentItems}
-        view={view}
+        viewMode={view}
         thumbnailSize={thumbnailSize}
-        selectedItems={selectedItems}
-        onSelectItem={handleSelectItem}
-        columns={columns}
-        onColumnsChange={setColumns}
+        onItemSelect={handleSelectItem}
       />
     )
-  }, [currentItems, currentView, view, selectedItems, thumbnailSize, handleSelectItem, columns, setColumns])
+  }, [currentItems, currentView, view, thumbnailSize, handleSelectItem])
 
   const selectedItem = useMemo(() => {
-    if (selectedItems.size !== 1) return null
-    return currentItems.find(item => selectedItems.has(item.id)) || null
-  }, [currentItems, selectedItems])
+    if (selectedIds.length !== 1) return null
+    return currentItems.find(item => selectedIds.includes(item.id)) || null
+  }, [currentItems, selectedIds])
 
   const handleZoomIn = useCallback(() => {
     setZoomLevel(Math.min(zoomLevel + 10, 200))

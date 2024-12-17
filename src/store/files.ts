@@ -1,7 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { produce } from 'immer'
+import { enableMapSet } from 'immer'
 import { mockCollections, mockFiles, mockFolders, mockTags, mockStats } from '@/lib/mock-data'
+
+// Habilitar el plugin MapSet
+enableMapSet()
 
 export type ViewType = 'collections' | 'folders' | 'tags' | 'files'
 export type SortBy = 'name' | 'date' | 'size' | 'type'
@@ -83,7 +87,7 @@ export interface Tag {
 interface FilesState {
   currentView: ViewType
   currentItems: FileItem[]
-  selectedItems: Set<string>
+  selectedIds: string[]
   collections: Collection[]
   folders: Folder[]
   tags: Tag[]
@@ -94,6 +98,7 @@ interface FilesState {
   sortBy: SortBy
   sortOrder: SortOrder
   searchQuery: string
+  selectedItem: FileItem | null
 
   // Acciones
   setCurrentView: (view: ViewType) => void
@@ -115,7 +120,7 @@ export const useFilesStore = create<FilesState>()(
     (set, get) => ({
       currentView: 'collections',
       currentItems: mockFiles,
-      selectedItems: new Set(),
+      selectedIds: [],
       collections: mockCollections,
       folders: mockFolders,
       tags: mockTags,
@@ -126,22 +131,27 @@ export const useFilesStore = create<FilesState>()(
       sortBy: 'name',
       sortOrder: 'asc',
       searchQuery: '',
+      selectedItem: null,
 
       setCurrentView: (currentView) => set({ currentView }),
 
       selectItem: (id, multiSelect = false) => set(produce((state: FilesState) => {
         if (!multiSelect) {
-          state.selectedItems.clear()
+          state.selectedIds = [id]
+        } else if (!state.selectedIds.includes(id)) {
+          state.selectedIds.push(id)
         }
-        state.selectedItems.add(id)
+        state.selectedItem = state.currentItems.find(item => item.id === id) || null
       })),
 
       deselectItem: (id) => set(produce((state: FilesState) => {
-        state.selectedItems.delete(id)
+        state.selectedIds = state.selectedIds.filter(selectedId => selectedId !== id)
+        state.selectedItem = null
       })),
 
       clearSelection: () => set(produce((state: FilesState) => {
-        state.selectedItems.clear()
+        state.selectedIds = []
+        state.selectedItem = null
       })),
 
       handleSelectCollection: async (id) => {
@@ -154,7 +164,8 @@ export const useFilesStore = create<FilesState>()(
             currentItems: currentItems.filter(f =>
               collection.tags.some(tag => f.tags.includes(tag))
             ),
-            selectedItems: new Set()
+            selectedIds: [],
+            selectedItem: null
           })
         }
       },
@@ -169,7 +180,8 @@ export const useFilesStore = create<FilesState>()(
             currentItems: currentItems.filter(f =>
               f.path.startsWith(`/${folder.name}`)
             ),
-            selectedItems: new Set()
+            selectedIds: [],
+            selectedItem: null
           })
         }
       },
@@ -184,7 +196,8 @@ export const useFilesStore = create<FilesState>()(
             currentItems: currentItems.filter(f =>
               f.tags.includes(tag.name)
             ),
-            selectedItems: new Set()
+            selectedIds: [],
+            selectedItem: null
           })
         }
       },
@@ -208,30 +221,25 @@ export const useFilesStore = create<FilesState>()(
   )
 )
 
-// Selectores memoizados
-export const useFilteredAndSortedItems = () => {
-  const { currentItems, sortBy, sortOrder, searchQuery } = useFilesStore()
+// Selectores
+export const useFilteredItems = () => {
+  const store = useFilesStore()
+  const { currentItems, searchQuery } = store
 
-  return useMemo(() => {
-    let filtered = currentItems
+  if (!searchQuery) return currentItems
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(query) ||
-        item.tags.some(tag => tag.toLowerCase().includes(query))
-      )
-    }
-
-    return [...filtered].sort((a, b) => sortFunctions[sortBy](a, b, sortOrder))
-  }, [currentItems, sortBy, sortOrder, searchQuery])
+  const query = searchQuery.toLowerCase()
+  return currentItems.filter(item =>
+    item.name.toLowerCase().includes(query) ||
+    item.tags.some(tag => tag.toLowerCase().includes(query))
+  )
 }
 
-export const useSelectedItem = () => {
-  const { currentItems, selectedItems } = useFilesStore()
-
-  return useMemo(() => {
-    if (selectedItems.size !== 1) return null
-    return currentItems.find(item => selectedItems.has(item.id)) || null
-  }, [currentItems, selectedItems])
+export const useSortedItems = (items: FileItem[]) => {
+  const { sortBy, sortOrder } = useFilesStore()
+  return [...items].sort((a, b) => sortFunctions[sortBy](a, b, sortOrder))
 }
+
+export const useSelectedItem = () => useFilesStore(state => state.selectedItem)
+
+export const useSelectedIds = () => useFilesStore(state => state.selectedIds)
