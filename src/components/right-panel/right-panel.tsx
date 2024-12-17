@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { ResizablePanel } from "@/components/ui/resizable"
-import { ChevronLeft, ChevronRight, Settings2, FolderIcon, ImageIcon, DatabaseIcon, TagIcon, BookmarkIcon, UserIcon, InfoIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from "lucide-react"
+import { ChevronLeft, ChevronRight, Settings2, FolderIcon, ImageIcon, DatabaseIcon, TagIcon, BookmarkIcon, UserIcon, InfoIcon, PlusIcon, RefreshCwIcon, Trash2Icon, PanelRightClose } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -47,21 +47,6 @@ export function RightPanel({
   const [thumbnailQuality, setThumbnailQuality] = React.useState(75)
   const [isImageViewerOpen, setIsImageViewerOpen] = React.useState(false)
 
-  if (isCollapsed) {
-    return (
-        <div className="flex flex-col h-full border-l items-center justify-center text-muted-foreground p-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggleCollapse}
-          className="h-full"
-        >
-          <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Expandir panel</span>
-          </Button>
-        </div>
-    )
-  }
 
   return (
     <ResizablePanel
@@ -73,36 +58,31 @@ export function RightPanel({
         showSettings ? "bg-muted/50" : "bg-background"
       )}
     >
-      <div className="flex items-center justify-between p-2 border-b">
+      <div className="flex items-center justify-between p-2 border-b h-11">
         <h3 className="text-sm font-medium">
-          {showSettings ? "Configuración" : "Detalles"}
+          TOOLBAR DEL PANEL DERECHO
         </h3>
-            <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onToggleSettings}
-            className={cn(
-              "h-8 w-8",
-              showSettings && "bg-accent text-accent-foreground"
-            )}
-                  >
-                    <Settings2 className="h-4 w-4" />
-            <span className="sr-only">Alternar configuración</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-            onClick={onToggleCollapse}
-                    className="h-8 w-8"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                    <span className="sr-only">Colapsar panel</span>
-                  </Button>
-            </div>
-          </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onToggleCollapse}
+              >
+                <PanelRightClose
+                  className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+                />
+                <span className="sr-only">Panel lateral</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Panel lateral</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
-            {showSettings ? (
+      {showSettings ? (
         <TooltipProvider>
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-4">
