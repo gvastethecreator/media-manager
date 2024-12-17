@@ -11,7 +11,7 @@ import {
   DropdownMenuCheckboxItem
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import type { Column } from '@/components/file-view/file-view'
+import type { Column } from '@/components/file-browser/file-browser'
 
 interface ColumnMenuProps {
   columns: Column[]
