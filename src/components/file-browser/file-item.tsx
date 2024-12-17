@@ -33,6 +33,7 @@ const overlayVariants = {
   hidden: {
     opacity: 0,
     y: 10,
+    backdropFilter: 'blur(0px)',
     transition: {
       duration: 0.15,
       ease: [0.4, 0, 0.2, 1]
@@ -41,6 +42,7 @@ const overlayVariants = {
   visible: {
     opacity: 1,
     y: 0,
+    backdropFilter: 'blur(2px)',
     transition: {
       duration: 0.15,
       ease: [0.4, 0, 0.2, 1]
@@ -132,7 +134,10 @@ export function FileCard({
     }
 
     return (
-      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gradient-to-br">
+      <div className={cn(
+        "relative w-full aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all border border-accent/10",
+        (isHovered || isSelected) && "border-2 border-white/40"
+      )}>
         {item.thumbnailUrl ? (
           <motion.img
             src={item.thumbnailUrl}
@@ -166,10 +171,14 @@ export function FileCard({
           </div>
         )}
         <motion.div
-          className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/50 to-transparent"
+          className={cn(
+            "absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent",
+            "border-t border-white/10",
+            isSelected && "opacity-100"
+          )}
           variants={overlayVariants}
           initial="hidden"
-          animate={isHovered ? "visible" : "hidden"}
+          animate={isHovered || isSelected ? "visible" : "hidden"}
         >
           <p className="text-sm text-white truncate">{item.name}</p>
           <p className="text-xs text-white/80">{formatFileSize(item.size)}</p>
@@ -185,10 +194,8 @@ export function FileCard({
     >
       <motion.div
         className={cn(
-          "group relative rounded-lg border transition-colors",
-          "hover:bg-accent hover:text-accent-foreground",
-          isSelected && "bg-accent/50 text-accent-foreground",
-          viewMode === 'grid' ? 'aspect-square p-2' : 'h-12 p-2'
+          "group relative transition-all",
+          viewMode === 'grid' ? 'aspect-[3/4] p-1' : 'h-12 p-2'
         )}
         onClick={onClick}
         whileHover={{ scale: 1.02 }}
