@@ -136,7 +136,7 @@ export function FileCard({
     return (
       <div className={cn(
         "relative w-full aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all border border-accent/10",
-        (isHovered || isSelected) && "border-2 border-white/40"
+        (isHovered || isSelected) && "border-2 border-white/60"
       )}>
         {item.thumbnailUrl ? (
           <motion.img
@@ -172,8 +172,8 @@ export function FileCard({
         )}
         <motion.div
           className={cn(
-            "absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent",
-            "border-t border-white/10",
+            "absolute inset-x-0 -bottom-1 p-2 pb-3 bg-gradient-to-t from-black/80 to-transparent",
+            "border-t-2 border-white/80 opacity-10",
             isSelected && "opacity-100"
           )}
           variants={overlayVariants}
@@ -181,7 +181,7 @@ export function FileCard({
           animate={isHovered || isSelected ? "visible" : "hidden"}
         >
           <p className="text-sm text-white truncate">{item.name}</p>
-          <p className="text-xs text-white/80">{formatFileSize(item.size)}</p>
+          <p className="text-xs text-white/60">{formatFileSize(item.size)}</p>
         </motion.div>
       </div>
     )
