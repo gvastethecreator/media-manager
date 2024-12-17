@@ -28,7 +28,7 @@ import {
 import { cn } from "@/lib/utils"
 import { SortMenu } from "./sort-menu"
 import { ColumnMenu } from "./column-menu"
-import type { Column } from "../file-view/file-view"
+import type { Column } from "../file-browser/file-browser"
 
 interface MainToolbarProps {
   view: 'grid' | 'list' | 'details'
@@ -117,7 +117,7 @@ export function MainToolbar({
               </TooltipTrigger>
               <TooltipContent>Vista de lista</TooltipContent>
             </Tooltip>
-   
+
             <SortMenu
               sortBy={sortBy}
               sortOrder={sortOrder}

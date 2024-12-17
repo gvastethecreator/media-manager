@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/store/files'
 import type { ThumbnailSize } from '@/store/ui'
 import { useImageViewer } from '@/store/image-viewer'
-import { FileCard } from './file-card'
+import { FileCard } from './file-item'
 import { Loader2 } from 'lucide-react'
 
 interface VirtualizedGridProps {

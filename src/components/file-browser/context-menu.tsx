@@ -9,7 +9,7 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { FileItem } from "./file-view"
+import { FileItem } from "./file-browser"
 
 interface FileContextMenuProps {
   file: FileItem

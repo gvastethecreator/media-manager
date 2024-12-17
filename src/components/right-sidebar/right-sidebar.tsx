@@ -4,7 +4,7 @@ import React from 'react'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileItem } from '@/components/file-view/file-view'
+import { FileItem } from '@/components/file-browser/file-browser'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Download, Share2, Pencil, Trash2, Copy, Eye, Info, ExternalLink } from 'lucide-react'

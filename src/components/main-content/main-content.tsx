@@ -3,7 +3,7 @@
 import { useMemo, useCallback, useState, useEffect } from 'react'
 import { RightPanel } from "@/components/right-panel/right-panel"
 import { LeftSidebar } from '@/components/left-sidebar/LeftSidebar'
-import { FileView } from "@/components/file-view/file-view"
+import { FileView } from "@/components/file-browser/file-browser"
 import { MainToolbar } from "@/components/main-toolbar/main-toolbar"
 import { Breadcrumbs } from "@/components/breadcrumbs/breadcrumbs"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
