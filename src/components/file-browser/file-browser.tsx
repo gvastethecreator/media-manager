@@ -2,8 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FileItem } from '@/store/files'
-import { VirtualizedGrid } from './virtualized-view'
-import { VirtualizedList } from './virtualized-list'
+import { VirtualizedView } from './virtualized-view'
 import type { ThumbnailSize } from '@/store/ui'
 import { useColumns } from '@/store/columns'
 import { Image, FileText, Calendar, Scale, Wand2, Layers, Share2, Clock } from 'lucide-react'
@@ -22,7 +21,7 @@ export interface Column {
 export const defaultColumns: Column[] = [
   {
     id: 'thumbnail',
-    label: '👁️',
+    label: '',
     width: 48,
     minWidth: 48,
     isResizable: false,
@@ -32,7 +31,7 @@ export const defaultColumns: Column[] = [
   },
   {
     id: 'name',
-    label: '📄 Nombre',
+    label: ' Nombre',
     width: 250,
     minWidth: 120,
     isResizable: true,
@@ -42,7 +41,7 @@ export const defaultColumns: Column[] = [
   },
   {
     id: 'type',
-    label: '📁 Tipo',
+    label: ' Tipo',
     width: 100,
     minWidth: 80,
     isResizable: true,
@@ -51,61 +50,51 @@ export const defaultColumns: Column[] = [
     accessor: (item: FileItem) => item.type
   },
   {
-    id: 'prompt',
-    label: '✨ Prompt',
-    width: 200,
-    minWidth: 100,
-    isResizable: true,
-    isHideable: true,
-    isVisible: true,
-    accessor: (item: FileItem) => item.prompt || '-'
-  },
-  {
     id: 'model',
-    label: '🤖 Modelo',
+    label: ' Modelo',
     width: 150,
     minWidth: 100,
     isResizable: true,
     isHideable: true,
     isVisible: true,
-    accessor: (item: FileItem) => item.model || '-'
+    accessor: (item: FileItem) => item.model || ''
   },
   {
     id: 'loras',
-    label: '⚡ LoRAs',
+    label: ' LoRAs',
     width: 150,
     minWidth: 100,
     isResizable: true,
     isHideable: true,
     isVisible: true,
-    accessor: (item: FileItem) => item.loras?.join(', ') || '-'
+    accessor: (item: FileItem) => item.loras?.join(', ') || ''
   },
   {
     id: 'source',
-    label: '🔗 Fuente',
+    label: ' Fuente',
     width: 120,
     minWidth: 80,
     isResizable: true,
     isHideable: true,
     isVisible: true,
-    accessor: (item: FileItem) => item.source || '-'
+    accessor: (item: FileItem) => item.source || ''
   },
   {
     id: 'date',
-    label: '📅 Fecha',
+    label: ' Fecha',
     width: 150,
     minWidth: 100,
     isResizable: true,
     isHideable: true,
     isVisible: true,
     accessor: (item: FileItem) => {
-      if (!item.modified) return '-'
-      return new Date(item.modified).toLocaleDateString()
+      const date = new Date(item.date)
+      return date.toLocaleDateString()
     }
   }
 ]
 
-export interface FileViewProps {
+interface FileViewProps {
   items: FileItem[]
   view: 'grid' | 'list' | 'details'
   thumbnailSize: ThumbnailSize
@@ -117,89 +106,14 @@ export interface FileViewProps {
 
 const variants = {
   grid: {
-    initial: {
-      scale: 0.95,
-      opacity: 0,
-      y: 20,
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    enter: {
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: [0, 0, 0.2, 1]
-      }
-    },
-    exit: {
-      scale: 0.95,
-      opacity: 0,
-      y: -20,
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 1, 1]
-      }
-    }
+    initial: { scale: 0.95, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0.95, opacity: 0 }
   },
   list: {
-    initial: {
-      scale: 0.98,
-      opacity: 0,
-      y: -20,
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    enter: {
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: [0, 0, 0.2, 1]
-      }
-    },
-    exit: {
-      scale: 0.98,
-      opacity: 0,
-      y: 20,
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 1, 1]
-      }
-    }
-  }
-}
-
-const containerVariants = {
-  initial: {
-    opacity: 0,
-    scale: 0.98
-  },
-  enter: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: [0.4, 0, 0.2, 1],
-      staggerChildren: 0.05,
-      delayChildren: 0.1
-    }
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.98,
-    transition: {
-      duration: 0.2,
-      ease: [0.4, 0, 1, 1],
-      staggerChildren: 0.02,
-      staggerDirection: -1
-    }
+    initial: { x: -20, opacity: 0 },
+    animate: { x: 0, opacity: 1 },
+    exit: { x: 20, opacity: 0 }
   }
 }
 
@@ -215,43 +129,24 @@ export function FileView({
   const selectedItem = items.find(item => selectedItems.has(item.id)) || null
 
   return (
-    <div className="relative h-full overflow-hidden">
-      <AnimatePresence mode="wait" initial={false}>
-        {(view === 'list' || view === 'details') ? (
-          <motion.div
-            key="list"
-            className="absolute inset-0"
-            variants={variants.list}
-            initial="initial"
-            animate="enter"
-            exit="exit"
-          >
-            <VirtualizedList
-              items={items}
-              onSelectItem={onSelectItem}
-              selectedItem={selectedItem}
-              columns={columns}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="grid"
-            className="absolute inset-0"
-            variants={containerVariants}
-            initial="initial"
-            animate="enter"
-            exit="exit"
-          >
-            <VirtualizedGrid
-              items={items}
-              thumbnailSize={thumbnailSize}
-              onSelectItem={onSelectItem}
-              selectedItem={selectedItem}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={view}
+        className="h-full w-full"
+        variants={variants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <VirtualizedView
+          items={items}
+          view={view}
+          thumbnailSize={thumbnailSize}
+          selectedItem={selectedItem}
+          onSelectItem={onSelectItem}
+          columns={columns}
+        />
+      </motion.div>
+    </AnimatePresence>
   )
 }
-
