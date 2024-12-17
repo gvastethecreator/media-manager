@@ -13,11 +13,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 interface FileCardProps {
   item: FileItem
-  width: number
-  height: number
+  viewMode: 'grid' | 'list'
   isSelected: boolean
-  onSelect: (item: FileItem) => void
-  onDoubleClick: (item: FileItem) => void
+  onClick: () => void
 }
 
 const imageVariants = {
@@ -64,11 +62,9 @@ const getRandomGradient = () => {
 
 export function FileCard({
   item,
-  width,
-  height,
+  viewMode,
   isSelected,
-  onSelect,
-  onDoubleClick
+  onClick
 }: FileCardProps) {
   const { toast } = useToast()
   const [isImageLoaded, setIsImageLoaded] = useState(false)
@@ -86,16 +82,14 @@ export function FileCard({
         })
         break
       case 'preview':
-        onDoubleClick(item)
+        // Implementar acción de vista previa
         break
       // Implementar otras acciones
     }
-  }, [item, onDoubleClick, toast])
-
-  const isListView = height === 48
+  }, [item, toast])
 
   const renderThumbnail = () => {
-    if (isListView) {
+    if (viewMode === 'list') {
       return (
         <div className="flex items-center gap-3 px-4">
           <div className="relative w-6 h-6 rounded-sm overflow-hidden bg-muted">
@@ -191,17 +185,16 @@ export function FileCard({
     >
       <motion.div
         className={cn(
-          "relative rounded-lg cursor-pointer",
-          "hover:bg-accent/50 hover:text-accent-foreground",
-          "transition-colors duration-150",
-          isSelected && "bg-accent/40 text-accent-foreground",
-          isListView && "h-12"
+          "group relative rounded-lg border transition-colors",
+          "hover:bg-accent hover:text-accent-foreground",
+          isSelected && "bg-accent/50 text-accent-foreground",
+          viewMode === 'grid' ? 'aspect-square p-2' : 'h-12 p-2'
         )}
-        onClick={() => onSelect(item)}
-        onDoubleClick={() => onDoubleClick(item)}
+        onClick={onClick}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        style={{ width: isListView ? '100%' : width }}
       >
         {renderThumbnail()}
       </motion.div>
