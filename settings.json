@@ -1,0 +1,100 @@
+{
+  "version": "1.0.0",
+  "lastUpdate": "2024-12-17T05:28:50.610Z",
+  "appearance": {
+    "darkMode": false,
+    "compactMode": false,
+    "potatoMode": false,
+    "thumbnailSize": 2,
+    "sortBy": "name",
+    "collectionPagination": {
+      "enabled": false,
+      "itemsPerPage": 50
+    },
+    "folderPagination": {
+      "enabled": false,
+      "itemsPerPage": 50
+    },
+    "startPage": "dashboard",
+    "autoUpdate": true
+  },
+  "folders": [],
+  "collections": [],
+  "tags": [],
+  "shortcuts": [
+    {
+      "id": "1",
+      "action": "Abrir configuración",
+      "keys": "Ctrl + ,",
+      "category": "navigation"
+    },
+    {
+      "id": "2",
+      "action": "Alternar panel derecho",
+      "keys": "Ctrl + B",
+      "category": "navigation"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "default",
+      "name": "Usuario Principal",
+      "emoji": "👤",
+      "color": "blue",
+      "theme": "system",
+      "language": "es",
+      "syncSettings": true,
+      "notifications": false,
+      "customSettings": {
+        "appearance": {},
+        "folders": [],
+        "collections": [],
+        "tags": [],
+        "shortcuts": []
+      }
+    }
+  ],
+  "system": {
+    "info": {
+      "os": "",
+      "version": "1.0.0",
+      "lastUpdate": "2024-12-17T05:28:50.610Z",
+      "database": "SQLite",
+      "memory": {
+        "used": 0,
+        "total": 0,
+        "percentage": 0
+      },
+      "storage": {
+        "used": 0,
+        "total": 0,
+        "percentage": 0
+      }
+    },
+    "backup": {
+      "autoBackup": true,
+      "frequency": "daily",
+      "location": "./backups",
+      "maxBackups": 10,
+      "compressBackups": true
+    },
+    "maintenance": {
+      "autoClean": false,
+      "cleanupRules": {
+        "tempFiles": true,
+        "emptyFolders": true,
+        "unusedThumbnails": true,
+        "oldBackups": true
+      },
+      "optimizationSchedule": "weekly"
+    },
+    "logging": {
+      "debugMode": false,
+      "logLevel": "info",
+      "maxLogSize": 10,
+      "rotateLogsAfterDays": 7,
+      "exportFormat": "json"
+    }
+  },
+  "activeProfile": "default"
+}
