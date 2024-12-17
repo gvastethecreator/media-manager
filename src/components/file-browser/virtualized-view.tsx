@@ -13,10 +13,10 @@ import type { Column } from './file-browser'
 
 interface VirtualizedViewProps {
   items: FileItem[]
-  view: 'grid' | 'list' | 'details'
+  viewMode: 'grid' | 'list'
   thumbnailSize: ThumbnailSize
   selectedItem: FileItem | null
-  onSelectItem: (item: FileItem) => void
+  onItemClick: (item: FileItem) => void
   columns?: Column[]
 }
 
@@ -40,10 +40,10 @@ const itemVariants = {
 
 export function VirtualizedView({
   items,
-  view,
+  viewMode,
   thumbnailSize,
   selectedItem,
-  onSelectItem,
+  onItemClick,
   columns
 }: VirtualizedViewProps) {
   const parentRef = useRef<HTMLDivElement>(null)
@@ -52,7 +52,7 @@ export function VirtualizedView({
   const { openViewer } = useImageViewer()
 
   const getThumbnailDimensions = useCallback(() => {
-    if (view === 'list' || view === 'details') {
+    if (viewMode === 'list') {
       return { width: dimensions.width, height: 48, gap: 0 }
     }
 
@@ -64,7 +64,7 @@ export function VirtualizedView({
       default:
         return { width: 200, height: 200, gap: 16 }
     }
-  }, [thumbnailSize, view, dimensions.width])
+  }, [thumbnailSize, viewMode, dimensions.width])
 
   const { width: itemWidth, height: itemHeight, gap } = useMemo(() =>
     getThumbnailDimensions(),
@@ -113,7 +113,7 @@ export function VirtualizedView({
     const scrollbarWidth = 12
     const availableWidth = dimensions.width - scrollbarWidth
 
-    if (view === 'list' || view === 'details') {
+    if (viewMode === 'list') {
       return {
         columnCount: 1,
         rowCount: items.length,
@@ -138,7 +138,7 @@ export function VirtualizedView({
       gap: optimalGap,
       itemsPerPage: columnCount * 2
     }
-  }, [dimensions, itemWidth, itemHeight, gap, items.length, view])
+  }, [dimensions, itemWidth, itemHeight, gap, items.length, viewMode])
 
   const virtualizer = useVirtualizer({
     count: layoutConfig.rowCount,
@@ -154,6 +154,19 @@ export function VirtualizedView({
     const endIndex = Math.min(startIndex + layoutConfig.columnCount, items.length)
     return items.slice(startIndex, endIndex)
   }, [layoutConfig.columnCount, items])
+
+  const itemContent = useCallback((index: number) => {
+    const item = items[index]
+    return (
+      <FileCard
+        key={item.id}
+        item={item}
+        viewMode={viewMode}
+        isSelected={selectedItem?.id === item.id}
+        onClick={() => onItemClick(item)}
+      />
+    )
+  }, [items, viewMode, selectedItem, onItemClick])
 
   const handleItemDoubleClick = useCallback((item: FileItem) => {
     if (item.type === 'image') {
@@ -214,11 +227,11 @@ export function VirtualizedView({
                   transform: `translateY(${virtualRow.start}px)`,
                   padding: `0 ${layoutConfig.sidePadding}px`,
                   display: 'grid',
-                  gridTemplateColumns: view === 'grid'
+                  gridTemplateColumns: viewMode === 'grid'
                     ? `repeat(${layoutConfig.columnCount}, ${itemWidth}px)`
                     : '1fr',
                   gap: `${layoutConfig.gap}px`,
-                  justifyContent: view === 'grid' ? 'center' : 'start',
+                  justifyContent: viewMode === 'grid' ? 'center' : 'start',
                   willChange: 'transform'
                 }}
               >
@@ -234,14 +247,7 @@ export function VirtualizedView({
                       willChange: 'transform, opacity'
                     }}
                   >
-                    <FileCard
-                      item={item}
-                      width={itemWidth}
-                      height={itemHeight}
-                      isSelected={selectedItem?.id === item.id}
-                      onSelect={onSelectItem}
-                      onDoubleClick={handleItemDoubleClick}
-                    />
+                    {itemContent(rowStartIndex + index)}
                   </motion.div>
                 ))}
               </div>
