@@ -123,12 +123,7 @@ export function MainToolbar({
               sortOrder={sortOrder}
               onSortChange={onSortChange}
             />
-            {(view === 'list' || view === 'details') && columns && onColumnsChange && (
-              <ColumnMenu
-                columns={columns}
-                onColumnChange={onColumnsChange}
-              />
-            )}
+
           </div>
           <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center space-x-1">
