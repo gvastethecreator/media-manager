@@ -58,11 +58,11 @@ export function VirtualizedView({
 
     switch (thumbnailSize) {
       case 'small':
-        return { width: 140, height: 140, gap: 12 }
+        return { width: 120, height: 120, gap: 8 }
       case 'large':
-        return { width: 280, height: 280, gap: 20 }
+        return { width: 280, height: 280, gap: 14 }
       default:
-        return { width: 200, height: 200, gap: 16 }
+        return { width: 180, height: 180, gap: 10 }
     }
   }, [thumbnailSize, viewMode, dimensions.width])
 

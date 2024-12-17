@@ -9,7 +9,6 @@ import {
   ZoomOut,
   ArrowLeft,
   ArrowRight,
-  SortAsc,
   CalendarDays,
   Search,
   PanelRightClose
@@ -27,7 +26,6 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { SortMenu } from "./sort-menu"
-import { ColumnMenu } from "./column-menu"
 import type { Column } from "../file-browser/file-browser"
 
 interface MainToolbarProps {
