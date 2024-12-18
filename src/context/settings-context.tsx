@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext } from 'react'
-import { useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/use-settings'
 import type { AppSettings } from '@/types/settings'
 
 interface SettingsContextValue {
