@@ -54,7 +54,7 @@ export function RightPanel({
         </div>
       ) : (
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 pb-2">
+          <div className="flex items-center justify-between p-2 h-11">
             <div className="flex items-center gap-2">
               <InfoIcon className="h-4 w-4" />
               <span className="text-sm font-medium">Detalles</span>
