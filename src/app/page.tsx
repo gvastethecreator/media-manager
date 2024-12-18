@@ -1,7 +1,7 @@
 "use client"
 
-import { MainContent } from "@/components/main-content/main-content"
-import { FilesProvider } from "@/context/FilesContext"
+import { MainLayout } from "@/components/main-layout/main-layout"
+import { FilesProvider } from "@/context/file-context"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Providers } from "@/components/providers/providers"
 
@@ -11,7 +11,7 @@ export default function Home() {
       <FilesProvider>
         <SidebarProvider>
           <main className="h-[100vh] w-full overflow-hidden">
-            <MainContent />
+            <MainLayout />
           </main>
         </SidebarProvider>
       </FilesProvider>
