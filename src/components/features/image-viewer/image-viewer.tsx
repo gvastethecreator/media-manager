@@ -2,8 +2,17 @@
 
 import { useMemo } from 'react'
 import { useImageViewer } from '@/store/image-viewer'
-import { AdvancedImageViewer } from './components/advanced-image-viewer'
+import dynamic from 'next/dynamic'
 import type { FileItem } from '@/store/files'
+
+// Lazy load del AdvancedImageViewer
+const AdvancedImageViewer = dynamic(
+  () => import('./components/advanced-image-viewer').then(mod => mod.AdvancedImageViewer),
+  {
+    loading: () => null, // El componente ya tiene su propio loading state
+    ssr: false // Este componente solo debe renderizarse en el cliente
+  }
+)
 
 export function ImageViewer() {
   const { isOpen, images, currentIndex, closeViewer } = useImageViewer()
