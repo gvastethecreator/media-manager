@@ -2,14 +2,15 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { motion } from 'framer-motion'
+import { motion, usePresence } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/store/files'
 import type { ThumbnailSize } from '@/store/ui'
 import { useImageViewer } from '@/store/image-viewer'
 import { FileCard } from './file-item'
 import { Loader2 } from 'lucide-react'
-import type { Column } from './file-browser'
+import type { Column } from '../file-browser'
+import { useWindowSize } from '@/hooks/use-window-size'
 
 interface VirtualizedViewProps {
   items: FileItem[]
@@ -51,53 +52,32 @@ export function VirtualizedView({
   columns
 }: VirtualizedViewProps) {
   const parentRef = useRef<HTMLDivElement>(null)
+  const [isPresent] = usePresence()
+  const { width: windowWidth } = useWindowSize()
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [isViewReady, setIsViewReady] = useState(false)
   const { openViewer } = useImageViewer()
 
-  const getThumbnailDimensions = useCallback(() => {
-    if (viewMode === 'list') {
-      return { width: dimensions.width, height: 48, gap: 0 }
-    }
-
-    switch (thumbnailSize) {
-      case 'small':
-        return { width: 120, height: 120, gap: 8 }
-      case 'large':
-        return { width: 280, height: 280, gap: 10 }
-      default:
-        return { width: 180, height: 180, gap: 5 }
-    }
-  }, [thumbnailSize, viewMode, dimensions.width])
-
-  const { width: itemWidth, height: itemHeight, gap } = useMemo(() =>
-    getThumbnailDimensions(),
-    [getThumbnailDimensions]
-  )
-
   useEffect(() => {
-    const element = parentRef.current
-    if (!element) return
+    const updateDimensions = () => {
+      if (!parentRef.current) return
+      const rect = parentRef.current.getBoundingClientRect()
+      setDimensions({
+        width: rect.width,
+        height: rect.height
+      })
+    }
 
-    const rect = element.getBoundingClientRect()
-    setDimensions({
-      width: rect.width,
-      height: rect.height
-    })
+    const resizeObserver = new ResizeObserver(updateDimensions)
+    if (parentRef.current) {
+      resizeObserver.observe(parentRef.current)
+      updateDimensions()
+    }
 
     const timer = setTimeout(() => {
+      updateDimensions()
       setIsViewReady(true)
-    }, 50)
-
-    const resizeObserver = new ResizeObserver(entries => {
-      const entry = entries[0]
-      setDimensions({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height
-      })
-    })
-
-    resizeObserver.observe(element)
+    }, 100)
 
     return () => {
       resizeObserver.disconnect()
@@ -105,59 +85,63 @@ export function VirtualizedView({
     }
   }, [])
 
-  const layoutConfig = useMemo(() => {
+  const { gridItemWidth, gridItemHeight, columnCount, rowCount } = useMemo(() => {
     if (dimensions.width === 0) return {
+      gridItemWidth: 200,
+      gridItemHeight: 200,
       columnCount: 1,
-      rowCount: 1,
-      sidePadding: 0,
-      gap: 16,
-      itemsPerPage: 2
+      rowCount: items.length
     }
 
-    const scrollbarWidth = 12
-    const availableWidth = dimensions.width - scrollbarWidth
+    const gap = 16
+    const minPadding = 16
+    const availableWidth = dimensions.width - (minPadding * 2)
+
+    const getBaseSize = () => {
+      if (viewMode === 'list') return availableWidth
+      switch (thumbnailSize) {
+        case 'small': return 160
+        case 'large': return 240
+        default: return 200
+      }
+    }
+    
+    const baseSize = getBaseSize()
+    const baseHeight = viewMode === 'grid' ? baseSize + 32 : 48
 
     if (viewMode === 'list') {
       return {
+        gridItemWidth: availableWidth,
+        gridItemHeight: baseHeight,
         columnCount: 1,
-        rowCount: items.length,
-        sidePadding: 0,
-        gap: 0,
-        itemsPerPage: Math.ceil(dimensions.height / itemHeight) + 2
+        rowCount: items.length
       }
     }
 
-    const minGap = gap
-    const columnCount = Math.max(1, Math.floor((availableWidth + minGap) / (itemWidth + minGap)))
-    const totalGapSpace = availableWidth - (columnCount * itemWidth)
-    const optimalGap = Math.floor(totalGapSpace / (columnCount + 1))
-    const contentWidth = (columnCount * itemWidth) + ((columnCount - 1) * optimalGap)
-    const sidePadding = Math.floor((availableWidth - contentWidth) / 2)
-    const rowCount = Math.ceil(items.length / columnCount)
+    const maxColumns = Math.max(1, Math.floor((availableWidth + gap) / (baseSize + gap)))
+    const totalGapWidth = (maxColumns - 1) * gap
+    const adjustedWidth = Math.floor((availableWidth - totalGapWidth) / maxColumns)
 
     return {
-      columnCount,
-      rowCount,
-      sidePadding,
-      gap: optimalGap,
-      itemsPerPage: columnCount * 2
+      gridItemWidth: adjustedWidth,
+      gridItemHeight: baseHeight,
+      columnCount: maxColumns,
+      rowCount: Math.ceil(items.length / maxColumns)
     }
-  }, [dimensions, itemWidth, itemHeight, gap, items.length, viewMode])
+  }, [dimensions.width, viewMode, thumbnailSize, items.length])
 
   const virtualizer = useVirtualizer({
-    count: layoutConfig.rowCount,
+    count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => itemHeight + layoutConfig.gap,
-    overscan: layoutConfig.itemsPerPage,
-    paddingStart: layoutConfig.gap,
-    paddingEnd: layoutConfig.gap
+    estimateSize: () => gridItemHeight + 16,
+    overscan: 5
   })
 
   const getItemsForRow = useCallback((rowIndex: number) => {
-    const startIndex = rowIndex * layoutConfig.columnCount
-    const endIndex = Math.min(startIndex + layoutConfig.columnCount, items.length)
+    const startIndex = rowIndex * columnCount
+    const endIndex = Math.min(startIndex + columnCount, items.length)
     return items.slice(startIndex, endIndex)
-  }, [layoutConfig.columnCount, items])
+  }, [columnCount, items])
 
   const itemContent = useCallback((index: number) => {
     const item = items[index]
@@ -184,7 +168,7 @@ export function VirtualizedView({
     <ScrollArea className="h-full w-full">
       <div
         ref={parentRef}
-        className="h-full relative"
+        className="h-full w-full relative px-4"
       >
         {!isViewReady && (
           <motion.div
@@ -219,7 +203,7 @@ export function VirtualizedView({
         >
           {virtualizer.getVirtualItems().map(virtualRow => {
             const rowItems = getItemsForRow(virtualRow.index)
-            const rowStartIndex = virtualRow.index * layoutConfig.columnCount
+            const rowStartIndex = virtualRow.index * columnCount
 
             return (
               <div
@@ -229,15 +213,14 @@ export function VirtualizedView({
                   top: 0,
                   left: 0,
                   width: '100%',
-                  height: `${itemHeight}px`,
+                  height: `${gridItemHeight}px`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  padding: `0 ${layoutConfig.sidePadding}px`,
                   display: 'grid',
                   gridTemplateColumns: viewMode === 'grid'
-                    ? `repeat(${layoutConfig.columnCount}, ${itemWidth}px)`
+                    ? `repeat(${columnCount}, ${gridItemWidth}px)`
                     : '1fr',
-                  gap: `${layoutConfig.gap}px`,
-                  justifyContent: viewMode === 'grid' ? 'center' : 'start',
+                  gap: '16px',
+                  justifyContent: 'center',
                   willChange: 'transform'
                 }}
               >
@@ -249,7 +232,8 @@ export function VirtualizedView({
                     animate={isViewReady ? "animate" : "initial"}
                     custom={rowStartIndex + index}
                     style={{
-                      height: itemHeight,
+                      height: gridItemHeight,
+                      width: '100%',
                       willChange: 'transform, opacity'
                     }}
                   >

@@ -1,109 +1,102 @@
 # Image Manager
 
-A modern image management application built with Next.js 15, React 19, and Motion One.
+A modern image management application built with Next.js 15, React 19, and Tailwind CSS.
 
-## Migration Progress
+## Features
 
-### Completed Components
-
-#### Main Toolbar
-- ✅ SearchBar - Basic search input with responsive width
-- ✅ ViewToggle - Grid/List view switcher
-- ✅ ThumbnailSizeToggle - Image size controls (small/medium/large)
-- ✅ CompactMenu - Mobile-friendly dropdown menu
-- ✅ ActionButtons - Quick action buttons for desktop
-- ✅ MainToolbar - Container component integrating all toolbar elements
-
-#### Viewers & Views
-- ✅ AdvancedImageViewer - Full-featured image viewer with zoom, pan, and gestures
-- ✅ CardView - Grid layout for collections and folders with animations
-- ✅ FileView - Virtualized grid/list view for files with context menu
-
-#### Navigation
-- ✅ LeftSidebar - Main navigation with collections, folders, and tags
-- ✅ RightSidebar - Resizable details panel with metadata and preview
-
-#### Management
-- ✅ Collections - Collection management with card layout and creation dialog
-- ✅ Folders - Hierarchical folder structure with nested navigation
-
-### Context Providers
-- ✅ ProfileContext - User profile and preferences
-- ⏳ FileContext - File management state
-- ⏳ SettingsContext - Application settings
+- 🖼️ Advanced image viewing with zoom, pan, and gestures
+- 📂 Hierarchical folder organization
+- 🏷️ Tag-based organization
+- 📱 Responsive design
+- 🎨 Dark/Light theme
+- ⚡ Fast and efficient file browsing
+- 🔍 Advanced search capabilities
 
 ## Project Structure
 
 ```
 src/
-├── app/                 # Next.js app router
+├── app/                    # Next.js app router
 ├── components/
-│   ├── ui/             # shadcn/ui components
-│   ├── main-toolbar/   # Toolbar components
-│   └── ...            # Other components
-├── lib/
-│   ├── contexts/       # React contexts
-│   ├── hooks/         # Custom hooks
-│   ├── types/         # TypeScript types
-│   └── utils/         # Utility functions
-└── styles/            # Global styles
+│   ├── core/              # Base components
+│   │   ├── data-display/  # Cards, empty states
+│   │   ├── feedback/      # Loading states
+│   │   ├── layout/       # Layouts
+│   │   ├── navigation/   # Navigation components
+│   │   ├── providers/    # Context providers
+│   │   └── theme/        # Theme utilities
+│   ├── features/         # Feature components
+│   │   ├── collections/  # Collection management
+│   │   ├── file-management/
+│   │   │   ├── file-browser/
+│   │   │   ├── file-details/
+│   │   │   └── folders/
+│   │   └── image-viewer/ # Image viewing
+│   └── ui/              # UI components (shadcn/ui)
+├── lib/                 # Utilities and configurations
+├── store/              # Global state management
+└── styles/             # Global styles
 ```
 
-## Dependencies
+## Development Status
 
-### Core
-- Next.js 15
-- React 19
-- TypeScript
-- Tailwind CSS
+### Completed Features ✅
+- Core component structure
+- File browsing and viewing
+- Image viewer with advanced features
+- Theme switching
+- Responsive layouts
+- Basic file management
 
-### UI Components
-- shadcn/ui - Component library
-- Lucide Icons - Icon set
-- Framer Motion - Animations
-- TanStack Virtual - Virtualization
+### In Progress 🚧
+- Collection management
+- Tag system
+- Search functionality
+- Settings panel
+- File metadata handling
 
-### Styling
-- Tailwind CSS
-- CSS Variables
-- Geist Font Family
-
-### Development
-- ESLint
-- Prettier
-- PostCSS
-
-## Theme Customization
-
-The application uses shadcn/ui's theming system with:
-- Light/Dark mode support
-- System theme detection
-- Custom color schemes
-- Responsive design patterns
-
-## Development Progress
-
-### Phase 1: Basic Structure ✅
-- Project setup
-- Component architecture
-- Basic routing
-
-### Phase 2: Core Components ✅
-- Main toolbar migration
-- Image viewer implementation
-- Context setup
-- View components (Card, File)
-- Navigation components (Left/Right sidebars)
-- Management components (Collections, Folders)
-
-### Phase 3: Pending
-- File management state
-- Settings management
-- Performance optimizations
+### Planned Features 🎯
+- Drag & drop functionality
+- Keyboard shortcuts
+- Offline mode
+- Advanced search filters
+- AI-powered features
+- Image processing capabilities
 
 ## Getting Started
 
 1. Clone the repository
-2. Install dependencies: `pnpm install`
-3. Run development server: `pnpm dev`
-4. Open http://localhost:3000
+```bash
+git clone https://github.com/yourusername/image-manager.git
+cd image-manager
+```
+
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Icons by [Lucide](https://lucide.dev/)

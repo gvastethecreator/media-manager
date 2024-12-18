@@ -28,9 +28,19 @@ src/
 │   ├── ui/                # Componentes shadcn/ui (NO MODIFICAR)
 │   ├── core/              # Componentes base personalizados
 │   │   ├── data-display/  # Tablas, cards, listas personalizadas
+│   │   ├── feedback/       # Loading states
 │   │   ├── inputs/        # Inputs personalizados
-│   │   └── layout/        # Layouts personalizados
+│   │   ├── layout/        # Layouts personalizados
+│   │   ├── navigation/    # Breadcrumbs, toolbar
+│   │   ├── providers/     # Theme, settings
+│   │   └── theme/         # Theme utilities
 │   └── features/          # Componentes específicos de características
+│       ├── collections/   # Collection management
+│       ├── file-management/
+│       │   ├── file-browser/
+│       │   ├── file-details/
+│       │   └── folders/
+│       └── image-viewer/  # Image viewing capabilities
 ├── lib/                   # Utilidades y configuraciones
 ├── hooks/                 # Hooks personalizados
 ├── store/                 # Estado global (Zustand)
@@ -162,3 +172,42 @@ describe('FileBrowser', () => {
 - Optimizar assets y carga de imágenes
 - Utilizar Server Components donde sea posible
 - Implementar caching efectivo con Next.js
+
+## 8. Próximas Mejoras Propuestas
+
+### 8.1 Optimización de Rendimiento
+- [ ] Implementar lazy loading para componentes pesados
+  - AdvancedImageViewer
+  - FileGrid con virtualización mejorada
+- [ ] Optimizar carga de imágenes
+  - Implementar blur placeholder
+  - Carga progresiva
+  - Caché de imágenes
+
+### 8.2 Mejoras de UX
+- [ ] Implementar drag & drop para:
+  - Reordenar archivos
+  - Mover a colecciones
+  - Subir archivos
+- [ ] Añadir atajos de teclado
+- [ ] Mejorar accesibilidad (ARIA labels, roles)
+
+### 8.3 Gestión de Estado
+- [ ] Migrar a Zustand para estado global
+- [ ] Implementar persistencia de preferencias
+- [ ] Mejorar manejo de caché
+
+### 8.4 Infraestructura
+- [ ] Configurar testing
+  - Jest para pruebas unitarias
+  - Playwright para E2E
+- [ ] Implementar error boundaries
+- [ ] Agregar logging y monitoreo
+- [ ] Optimizar build y bundling
+
+### 8.5 Características Nuevas
+- [ ] Modo offline
+- [ ] Búsqueda avanzada
+- [ ] Filtros dinámicos
+- [ ] Integración con APIs de IA
+- [ ] Sistema de etiquetas mejorado
