@@ -1,216 +1,171 @@
-'use client'
-
-import * as React from "react"
+import { 
+  Moon, 
+  Sun, 
+  Monitor, 
+  Laptop2, 
+  Layout, 
+  ArrowDownAZ, 
+  Hash, 
+  Home, 
+  Image, 
+  Folder, 
+  Bookmark,
+  RefreshCw
+} from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
+import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useTheme } from "next-themes"
 import { useSettingsContext } from "@/context/settings-context"
-import type { SortBy, StartPage } from "@/types/settings"
+import { StartPage } from "@/types/settings"
+
+const startPageOptions: { value: StartPage; label: string; icon: any }[] = [
+  { value: "dashboard", label: "Dashboard", icon: Home },
+  { value: "all-images", label: "Galería", icon: Image },
+  { value: "folders", label: "Carpetas", icon: Folder },
+  { value: "collections", label: "Colecciones", icon: Bookmark }
+]
 
 export function AppearanceSection() {
-  const { settings, updateAppearance } = useSettingsContext()
-  const { appearance } = settings
-
-  const handleUpdateAppearance = async <K extends keyof typeof appearance>(
-    key: K,
-    value: typeof appearance[K]
-  ) => {
-    await updateAppearance({ [key]: value })
-  }
+  const { theme, setTheme } = useTheme()
+  const { settings, updateSettings } = useSettingsContext()
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="dark-mode" className="flex flex-col gap-1">
-            <span>Modo oscuro</span>
-            <span className="text-sm text-muted-foreground">
-              Cambia entre tema claro y oscuro
-            </span>
-          </Label>
-          <Switch
-            id="dark-mode"
-            checked={appearance.darkMode}
-            onCheckedChange={(checked) => handleUpdateAppearance('darkMode', checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="compact-mode" className="flex flex-col gap-1">
-            <span>Modo compacto</span>
-            <span className="text-sm text-muted-foreground">
-              Reduce el espacio entre elementos
-            </span>
-          </Label>
-          <Switch
-            id="compact-mode"
-            checked={appearance.compactMode}
-            onCheckedChange={(checked) => handleUpdateAppearance('compactMode', checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="potato-mode" className="flex flex-col gap-1">
-            <span>Modo potato</span>
-            <span className="text-sm text-muted-foreground">
-              Desactiva transiciones y animaciones
-            </span>
-          </Label>
-          <Switch
-            id="potato-mode"
-            checked={appearance.potatoMode}
-            onCheckedChange={(checked) => handleUpdateAppearance('potatoMode', checked)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="thumbnail-size">Tamaño de miniaturas</Label>
-          <div className="pt-2">
-            <Slider
-              id="thumbnail-size"
-              value={[appearance.thumbnailSize]}
-              onValueChange={([value]) => handleUpdateAppearance('thumbnailSize', value)}
-              max={4}
-              min={0}
-              step={1}
-              marks={[
-                { value: 0, label: 'XS' },
-                { value: 1, label: 'S' },
-                { value: 2, label: 'M' },
-                { value: 3, label: 'L' },
-                { value: 4, label: 'XL' }
-              ]}
-            />
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-center gap-2">
+            <Monitor className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Tema</CardTitle>
           </div>
-        </div>
+          <CardDescription className="text-xs">
+            Personaliza la apariencia de la aplicación
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-2">
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              variant={theme === 'light' ? 'default' : 'outline'}
+              className="w-full h-8 text-xs"
+              onClick={() => setTheme('light')}
+            >
+              <Sun className="h-3.5 w-3.5 mr-1" /> Claro
+            </Button>
+            <Button
+              variant={theme === 'dark' ? 'default' : 'outline'}
+              className="w-full h-8 text-xs"
+              onClick={() => setTheme('dark')}
+            >
+              <Moon className="h-3.5 w-3.5 mr-1" /> Oscuro
+            </Button>
+            <Button
+              variant={theme === 'system' ? 'default' : 'outline'}
+              className="w-full h-8 text-xs"
+              onClick={() => setTheme('system')}
+            >
+              <Laptop2 className="h-3.5 w-3.5 mr-1" /> Sistema
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-2">
-          <Label htmlFor="sort-by">Ordenamiento</Label>
-          <Select
-            value={appearance.sortBy}
-            onValueChange={(value) => handleUpdateAppearance('sortBy', value as SortBy)}
-          >
-            <SelectTrigger id="sort-by">
-              <SelectValue placeholder="Selecciona un criterio" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Nombre</SelectItem>
-              <SelectItem value="date">Fecha</SelectItem>
-              <SelectItem value="size">Tamaño</SelectItem>
-              <SelectItem value="type">Tipo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <Card>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-center gap-2">
+            <Layout className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Visualización</CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Ajusta cómo se muestran los elementos
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-2 space-y-4">
+          <div className="space-y-2">
+            <Label className="text-xs">Tamaño de miniaturas</Label>
+            <div className="flex items-center gap-4">
+              <Slider
+                value={[settings.thumbnailSize || 150]}
+                onValueChange={([value]) => updateSettings({ thumbnailSize: value })}
+                max={300}
+                min={100}
+                step={10}
+                className="flex-1"
+              />
+              <Badge variant="outline" className="text-[10px] font-mono w-12 text-center">
+                {settings.thumbnailSize || 150}px
+              </Badge>
+            </div>
+          </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="collection-pagination" className="flex flex-col gap-1">
-              <span>Paginado en colecciones</span>
-              <span className="text-sm text-muted-foreground">
-                Activar paginación para colecciones
-              </span>
-            </Label>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center justify-between p-2 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <ArrowDownAZ className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs">Ordenar por nombre</span>
+              </div>
+              <Switch
+                checked={settings.sortByName}
+                onCheckedChange={(checked) => updateSettings({ sortByName: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-2 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs">Modo compacto</span>
+              </div>
+              <Switch
+                checked={settings.compactMode}
+                onCheckedChange={(checked) => updateSettings({ compactMode: checked })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Página de inicio</Label>
+            <Select
+              value={settings.startPage || "dashboard"}
+              onValueChange={(value: StartPage) => updateSettings({ startPage: value })}
+            >
+              <SelectTrigger className="w-full h-8 text-xs">
+                <SelectValue placeholder="Selecciona la página de inicio" />
+              </SelectTrigger>
+              <SelectContent>
+                {startPageOptions.map((option) => (
+                  <SelectItem 
+                    key={option.value} 
+                    value={option.value}
+                    className="text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <option.icon className="h-3.5 w-3.5" />
+                      {option.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
+              <div>
+                <span className="text-xs">Actualización automática</span>
+                <p className="text-[10px] text-muted-foreground">Mantener sincronizado</p>
+              </div>
+            </div>
             <Switch
-              id="collection-pagination"
-              checked={appearance.collectionPagination.enabled}
-              onCheckedChange={(checked) =>
-                handleUpdateAppearance('collectionPagination', {
-                  ...appearance.collectionPagination,
-                  enabled: checked
-                })
-              }
+              checked={settings.autoUpdate}
+              onCheckedChange={(checked) => updateSettings({ autoUpdate: checked })}
             />
           </div>
-          <div className="pl-6">
-            <Slider
-              disabled={!appearance.collectionPagination.enabled}
-              value={[appearance.collectionPagination.itemsPerPage]}
-              onValueChange={([value]) =>
-                handleUpdateAppearance('collectionPagination', {
-                  ...appearance.collectionPagination,
-                  itemsPerPage: value
-                })
-              }
-              max={200}
-              min={10}
-              step={10}
-              className="w-[60%]"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="folder-pagination" className="flex flex-col gap-1">
-              <span>Paginado en carpetas</span>
-              <span className="text-sm text-muted-foreground">
-                Activar paginación para carpetas
-              </span>
-            </Label>
-            <Switch
-              id="folder-pagination"
-              checked={appearance.folderPagination.enabled}
-              onCheckedChange={(checked) =>
-                handleUpdateAppearance('folderPagination', {
-                  ...appearance.folderPagination,
-                  enabled: checked
-                })
-              }
-            />
-          </div>
-          <div className="pl-6">
-            <Slider
-              disabled={!appearance.folderPagination.enabled}
-              value={[appearance.folderPagination.itemsPerPage]}
-              onValueChange={([value]) =>
-                handleUpdateAppearance('folderPagination', {
-                  ...appearance.folderPagination,
-                  itemsPerPage: value
-                })
-              }
-              max={200}
-              min={10}
-              step={10}
-              className="w-[60%]"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="start-page">Página de inicio</Label>
-          <Select
-            value={appearance.startPage}
-            onValueChange={(value) => handleUpdateAppearance('startPage', value as StartPage)}
-          >
-            <SelectTrigger id="start-page">
-              <SelectValue placeholder="Selecciona página inicial" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="dashboard">Dashboard</SelectItem>
-              <SelectItem value="all-images">Todas las imágenes</SelectItem>
-              <SelectItem value="library">Biblioteca</SelectItem>
-              <SelectItem value="collections">Colecciones</SelectItem>
-              <SelectItem value="folders">Carpetas</SelectItem>
-              <SelectItem value="last-view">Última vista</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="auto-update" className="flex flex-col gap-1">
-            <span>Actualización automática</span>
-            <span className="text-sm text-muted-foreground">
-              Actualizar vista con nuevos archivos
-            </span>
-          </Label>
-          <Switch
-            id="auto-update"
-            checked={appearance.autoUpdate}
-            onCheckedChange={(checked) => handleUpdateAppearance('autoUpdate', checked)}
-          />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

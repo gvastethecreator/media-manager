@@ -1,277 +1,114 @@
-'use client'
-
-import * as React from "react"
+import { Activity, HardDrive, RefreshCw, Trash2, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, RefreshCw, DatabaseIcon } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
+import { Progress } from "@/components/ui/progress"
 import { useSettingsContext } from "@/context/settings-context"
-import type { BackupFrequency, LogLevel } from "@/types/settings"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 export function SystemSection() {
-  const { settings, updateSystem } = useSettingsContext()
-  const { system } = settings
-
-  const handleUpdateSystem = async (updates: Partial<typeof system>) => {
-    await updateSystem(updates)
-  }
-
-  const handleCreateBackup = async () => {
-    // Implementar creación de respaldo
-    console.log("Creando respaldo...")
-  }
-
-  const handleRestoreBackup = async () => {
-    // Implementar restauración de respaldo
-    console.log("Restaurando respaldo...")
-  }
-
-  const handleReindex = async () => {
-    // Implementar reindexado
-    console.log("Reindexando base de datos...")
-  }
-
-  const handleOptimize = async () => {
-    // Implementar optimización
-    console.log("Optimizando base de datos...")
-  }
-
-  const handleExportLogs = async () => {
-    // Implementar exportación de logs
-    console.log("Exportando registros...")
-  }
+  const { settings } = useSettingsContext()
 
   return (
-    <div className="space-y-6">
-      <Card className="p-4">
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">Información del Sistema</h4>
-
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Sistema Operativo</span>
-              <span>{system.info.os}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Versión</span>
-              <span>{system.info.version}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Última actualización</span>
-              <span>{system.info.lastUpdate}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Base de datos</span>
-              <Badge variant="outline">{system.info.database}</Badge>
-            </div>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Estado del Sistema</CardTitle>
           </div>
-
-          <Separator />
-
+          <CardDescription className="text-xs">
+            Monitorea el rendimiento y uso de recursos
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-2 space-y-3">
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Uso de memoria</span>
-              <span className="text-sm">{system.info.memory.used} MB</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs">CPU</span>
+              <Badge variant="outline" className="text-[10px] font-mono">
+                {settings.cpuUsage || "0"}%
+              </Badge>
             </div>
-            <div className="w-full bg-secondary rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full"
-                style={{ width: `${system.info.memory.percentage}%` }}
-              />
-            </div>
+            <Progress value={settings.cpuUsage || 0} className="h-1.5" />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Almacenamiento</span>
-              <span className="text-sm">{system.info.storage.used} GB / {system.info.storage.total} GB</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs">Memoria</span>
+              <Badge variant="outline" className="text-[10px] font-mono">
+                {settings.memoryUsage || "0"}%
+              </Badge>
             </div>
-            <div className="w-full bg-secondary rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full"
-                style={{ width: `${system.info.storage.percentage}%` }}
-              />
-            </div>
+            <Progress value={settings.memoryUsage || 0} className="h-1.5" />
           </div>
-        </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs">Caché</span>
+              <Badge variant="outline" className="text-[10px] font-mono">
+                {settings.cacheSize || "0"}MB
+              </Badge>
+            </div>
+            <Progress value={(settings.cacheSize || 0) / 10} className="h-1.5" />
+          </div>
+        </CardContent>
       </Card>
 
-      <Card className="p-4">
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">Base de Datos</h4>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="auto-backup" className="flex flex-col gap-1">
-                <span>Respaldo automático</span>
-                <span className="text-sm text-muted-foreground">
-                  Crear respaldos periódicamente
-                </span>
-              </Label>
-              <Switch
-                id="auto-backup"
-                checked={system.backup.autoBackup}
-                onCheckedChange={(checked) =>
-                  handleUpdateSystem({
-                    backup: { ...system.backup, autoBackup: checked }
-                  })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Frecuencia de respaldo</Label>
-              <Select
-                value={system.backup.frequency}
-                onValueChange={(value) =>
-                  handleUpdateSystem({
-                    backup: { ...system.backup, frequency: value as BackupFrequency }
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona la frecuencia" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hourly">Cada hora</SelectItem>
-                  <SelectItem value="daily">Diario</SelectItem>
-                  <SelectItem value="weekly">Semanal</SelectItem>
-                  <SelectItem value="monthly">Mensual</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={handleCreateBackup}
-              >
-                Crear Respaldo
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={handleRestoreBackup}
-              >
-                Restaurar
-              </Button>
-            </div>
+      <Card>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-center gap-2">
+            <HardDrive className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Mantenimiento</CardTitle>
           </div>
-        </div>
-      </Card>
-
-      <Card className="p-4">
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">Mantenimiento</h4>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="auto-clean" className="flex flex-col gap-1">
-                <span>Limpieza automática</span>
-                <span className="text-sm text-muted-foreground">
-                  Eliminar archivos temporales
-                </span>
-              </Label>
-              <Switch
-                id="auto-clean"
-                checked={system.maintenance.autoClean}
-                onCheckedChange={(checked) =>
-                  handleUpdateSystem({
-                    maintenance: { ...system.maintenance, autoClean: checked }
-                  })
-                }
-              />
+          <CardDescription className="text-xs">
+            Herramientas para mantener el sistema optimizado
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-2 grid gap-2">
+          <div className="flex items-center justify-between p-2 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
+              <div>
+                <span className="text-xs font-medium">Reparar sistema</span>
+                <p className="text-[10px] text-muted-foreground">Corrige problemas comunes</p>
+              </div>
             </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex gap-2 flex-1"
-                onClick={handleReindex}
-              >
-                <RefreshCw className="h-4 w-4" />
-                Reindexar
-              </Button>
-              <Button
-                variant="outline"
-                className="flex gap-2 flex-1"
-                onClick={handleOptimize}
-              >
-                <DatabaseIcon className="h-4 w-4" />
-                Optimizar
-              </Button>
-            </div>
-
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="ml-2">
-                Las operaciones de mantenimiento pueden tomar varios minutos.
-              </AlertDescription>
-            </Alert>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-4">
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">Registro de Eventos</h4>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="debug-mode" className="flex flex-col gap-1">
-                <span>Modo debug</span>
-                <span className="text-sm text-muted-foreground">
-                  Registrar eventos detallados
-                </span>
-              </Label>
-              <Switch
-                id="debug-mode"
-                checked={system.logging.debugMode}
-                onCheckedChange={(checked) =>
-                  handleUpdateSystem({
-                    logging: { ...system.logging, debugMode: checked }
-                  })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Nivel de registro</Label>
-              <Select
-                value={system.logging.logLevel}
-                onValueChange={(value) =>
-                  handleUpdateSystem({
-                    logging: { ...system.logging, logLevel: value as LogLevel }
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el nivel" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="error">Error</SelectItem>
-                  <SelectItem value="warn">Advertencia</SelectItem>
-                  <SelectItem value="info">Información</SelectItem>
-                  <SelectItem value="debug">Debug</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleExportLogs}
-            >
-              Exportar Registros
+            <Button variant="outline" size="sm" className="h-7 text-xs">
+              Reparar
             </Button>
           </div>
-        </div>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <div className="flex items-center justify-between p-2 rounded-lg border cursor-pointer hover:bg-accent">
+                <div className="flex items-center gap-2">
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  <div>
+                    <span className="text-xs font-medium">Resetear base de datos</span>
+                    <p className="text-[10px] text-muted-foreground">Elimina todos los datos</p>
+                  </div>
+                </div>
+                <Button variant="destructive" size="sm" className="h-7 text-xs">
+                  Resetear
+                </Button>
+              </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                <AlertDialogDescription className="text-xs">
+                  Esta acción no se puede deshacer. Se eliminarán permanentemente todos los datos de la base de datos.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-xs">Cancelar</AlertDialogCancel>
+                <AlertDialogAction className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Eliminar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
       </Card>
     </div>
   )

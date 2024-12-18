@@ -3,10 +3,11 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { ResizablePanel } from "@/components/ui/resizable"
-import { ChevronLeft, ChevronRight, Settings2, InfoIcon, PanelRightClose } from "lucide-react"
+import { ChevronLeft, Settings2, InfoIcon, PanelRightClose } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { FileInfo } from "./file-info"
+import { SettingsPanel } from "./settings-panel"
 import type { FileItem } from '@/store/files'
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,20 @@ export function RightPanel({
   minSize = 15,
   maxSize = 40
 }: RightPanelProps) {
+  const [isTransitioning, setIsTransitioning] = React.useState(false)
+
+  const handleToggleCollapse = () => {
+    setIsTransitioning(true)
+    onToggleCollapse()
+  }
+
+  React.useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => setIsTransitioning(false), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isTransitioning])
+
   return (
     <ResizablePanel
       defaultSize={defaultSize}
@@ -38,7 +53,8 @@ export function RightPanel({
       maxSize={maxSize}
       className={cn(
         "bg-muted/30 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/60",
-        isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out"
+        isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",
+        isTransitioning && "pointer-events-none"
       )}
     >
       {isCollapsed ? (
@@ -46,40 +62,57 @@ export function RightPanel({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleCollapse}
-            className="h-8 w-8"
+            onClick={handleToggleCollapse}
+            className="h-8 w-8 hover:bg-accent"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </div>
       ) : (
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-2 h-11">
+          <div className="flex items-center justify-between p-2 h-11 border-b">
             <div className="flex items-center gap-2">
-              <InfoIcon className="h-4 w-4" />
-              <span className="text-sm font-medium">Detalles</span>
+              {showSettings ? (
+                <>
+                  <Settings2 className="h-4 w-4" />
+                  <span className="text-sm font-medium">Configuración</span>
+                </>
+              ) : (
+                <>
+                  <InfoIcon className="h-4 w-4" />
+                  <span className="text-sm font-medium">Detalles</span>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onToggleSettings}
-                className="h-8 w-8"
+                className={cn(
+                  "h-8 w-8 hover:bg-accent",
+                  showSettings && "bg-accent"
+                )}
               >
                 <Settings2 className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onToggleCollapse}
-                className="h-8 w-8"
+                onClick={handleToggleCollapse}
+                className="h-8 w-8 hover:bg-accent"
               >
                 <PanelRightClose className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          <Separator className="mb-4" />
-          <FileInfo selectedItem={selectedItem} />
+          <div className="flex-1 overflow-hidden">
+            {showSettings ? (
+              <SettingsPanel />
+            ) : (
+              <FileInfo selectedItem={selectedItem} />
+            )}
+          </div>
         </div>
       )}
     </ResizablePanel>

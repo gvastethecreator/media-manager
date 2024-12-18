@@ -61,10 +61,17 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
     )
   }
 
+  const renderInfoItem = (label: string, value: string | number) => (
+    <div className="flex justify-between items-center py-1.5 border-b last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <Badge variant="secondary" className="font-mono">{value}</Badge>
+    </div>
+  )
+
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="h-full">
       <div className="p-4 space-y-4">
-        <Tabs defaultValue="info" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="info" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -95,72 +102,33 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
             )}
 
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <FileText className="h-4 w-4" />
                   Información básica
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Nombre</span>
-                  <Badge variant="secondary">{selectedItem.name}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Tipo</span>
-                  <Badge variant="secondary">{selectedItem.mimeType || selectedItem.type}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Tamaño</span>
-                  <Badge variant="secondary">{formatFileSize(selectedItem.size)}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Modificado</span>
-                  <Badge variant="secondary">
-                    {new Date(selectedItem.modified).toLocaleDateString()}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Creado</span>
-                  <Badge variant="secondary">
-                    {new Date(selectedItem.created).toLocaleDateString()}
-                  </Badge>
-                </div>
+              <CardContent className="space-y-1">
+                {renderInfoItem("Nombre", selectedItem.name)}
+                {renderInfoItem("Tipo", selectedItem.mimeType || selectedItem.type)}
+                {renderInfoItem("Tamaño", formatFileSize(selectedItem.size))}
+                {renderInfoItem("Modificado", new Date(selectedItem.modified).toLocaleDateString())}
+                {renderInfoItem("Creado", new Date(selectedItem.created).toLocaleDateString())}
               </CardContent>
             </Card>
 
             {selectedItem.model && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
                     <Hash className="h-4 w-4" />
                     Modelo
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <Badge variant="outline" className="w-full justify-center">
-                    {selectedItem.model}
-                  </Badge>
-                </CardContent>
-              </Card>
-            )}
-
-            {selectedItem.loras && selectedItem.loras.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-4 w-4" />
-                    LoRAs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.loras.map((lora, index) => (
-                      <Badge key={index} variant="secondary">
-                        {lora}
-                      </Badge>
-                    ))}
-                  </div>
+                <CardContent className="space-y-1">
+                  {renderInfoItem("Nombre", selectedItem.model.name)}
+                  {renderInfoItem("Versión", selectedItem.model.version)}
+                  {renderInfoItem("Parámetros", selectedItem.model.parameters)}
                 </CardContent>
               </Card>
             )}
@@ -168,77 +136,23 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
 
           <TabsContent value="metadata" className="space-y-4 mt-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Fechas
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Tag className="h-4 w-4" />
+                  Metadatos
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Creación</span>
-                  <Badge variant="secondary">
-                    {new Date(selectedItem.created).toLocaleDateString()}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Modificación</span>
-                  <Badge variant="secondary">
-                    {new Date(selectedItem.modified).toLocaleDateString()}
-                  </Badge>
-                </div>
+              <CardContent className="space-y-1">
+                {selectedItem.metadata && Object.entries(selectedItem.metadata).map(([key, value]) => (
+                  renderInfoItem(key, value as string)
+                ))}
+                {(!selectedItem.metadata || Object.keys(selectedItem.metadata).length === 0) && (
+                  <div className="text-sm text-muted-foreground text-center py-2">
+                    No hay metadatos disponibles
+                  </div>
+                )}
               </CardContent>
             </Card>
-
-            {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    Dimensiones
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Ancho</span>
-                    <Badge variant="secondary">{selectedItem.width || selectedItem.metadata?.width}px</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Alto</span>
-                    <Badge variant="secondary">{selectedItem.height || selectedItem.metadata?.height}px</Badge>
-                  </div>
-                  {selectedItem.metadata?.format && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Formato</span>
-                      <Badge variant="secondary">{selectedItem.metadata.format}</Badge>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {selectedItem.metadata && Object.keys(selectedItem.metadata).length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-4 w-4" />
-                    Otros metadatos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {Object.entries(selectedItem.metadata)
-                    .filter(([key]) => !['width', 'height', 'format'].includes(key))
-                    .map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{key}</span>
-                        <Badge variant="secondary">
-                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                        </Badge>
-                      </div>
-                    ))}
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
         </Tabs>
       </div>
