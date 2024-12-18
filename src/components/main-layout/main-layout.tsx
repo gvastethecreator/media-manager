@@ -14,7 +14,7 @@ import { LoadingScreen } from '@/components/loading/loading-screen'
 import { AnimatePresence } from 'framer-motion'
 import { useColumns } from '@/store/columns'
 
-export function MainContent() {
+export function MainLayout() {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const {
     currentView,

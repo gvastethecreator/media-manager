@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { KeyboardIcon, Trash2 } from "lucide-react"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 
 const emojiOptions = ["🌟", "📸", "🎨", "🎵", "📚", "🎮", "🎬", "🖼️", "📷", "🎞️"]
 const colorOptions = [

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, UserIcon, Trash2 } from "lucide-react"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 import type { ThemeMode, Language } from "@/types/settings"
 
 const emojiOptions = ["👤", "💼", "🏠", "🎮", "📚", "🎨", "🎵", "🎬", "📷", "🖥️"]
