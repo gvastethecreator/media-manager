@@ -42,222 +42,32 @@ src/
 ## 3. Plan de Migración por Fases
 
 ### Fase 1: Configuración Base
-- [ ] Actualizar dependencias a las últimas versiones estables
+- [x] Actualizar dependencias a las últimas versiones estables
 - [ ] Configurar Prisma con PostgreSQL
 - [ ] Configurar shadcn/ui con tema personalizado
 - [ ] Configurar Tailwind con diseño sistema
-- [ ] Actualizar tsconfig.json con paths
-```json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/store/*": ["./src/store/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/server/*": ["./src/server/*"]
-    }
-  }
-}
-```
+- [x] Actualizar tsconfig.json con paths
 
 ### Fase 2: Migración de Componentes
+- [x] Crear estructura base de directorios
+- [x] Mover componentes a sus nuevas ubicaciones
+- [x] Crear archivos index.ts básicos
+- [ ] Actualizar todas las importaciones
+- [ ] Verificar y corregir tipos
+- [ ] Crear pruebas unitarias
 
-#### 2.1 Componentes Core (Personalizados)
-```
-src/components/core/
-├── data-display/
-│   ├── image-card/
-│   │   ├── image-card.tsx
-│   │   └── index.ts
-│   ├── file-grid/
-│   └── file-list/
-├── inputs/
-│   ├── search-bar/
-│   └── file-upload/
-└── layout/
-    ├── main-container/
-    └── split-view/
-```
+### Fase 3: Mejoras y Optimizaciones
+- [ ] Implementar lazy loading para componentes pesados
+- [ ] Optimizar manejo de imágenes
+- [ ] Mejorar sistema de caché
+- [ ] Implementar error boundaries
+- [ ] Agregar logging y monitoreo
 
-#### 2.2 Componentes Features
-```
-src/components/features/
-├── file-management/
-│   ├── file-browser/
-│   │   ├── components/
-│   │   │   ├── file-item.tsx      # Usa componentes de ui/ y core/
-│   │   │   ├── file-grid.tsx
-│   │   │   └── file-list.tsx
-│   │   ├── hooks/
-│   │   │   └── use-file-browser.ts
-│   │   └── index.tsx
-│   └── file-upload/
-├── image-viewer/
-│   ├── components/
-│   │   ├── viewer-controls.tsx
-│   │   └── viewer-toolbar.tsx
-│   └── hooks/
-│       └── use-image-viewer.ts
-├── navigation/
-│   ├── left-sidebar/
-│   │   ├── components/
-│   │   │   ├── category-list.tsx
-│   │   │   ├── collection-item.tsx
-│   │   │   └── tag-cloud.tsx
-│   │   └── index.tsx
-│   └── breadcrumbs/
-└── settings/
-    ├── components/
-    └── hooks/
-```
-
-### Guía de Uso de Componentes
-
-1. **Componentes UI (shadcn)**:
-   - NO modificar los componentes en `components/ui/`
-   - Usar como base para construir componentes más complejos
-   - Ejemplo: Button, Dialog, DropdownMenu, etc.
-
-2. **Componentes Core**:
-   - Componentes personalizados reutilizables
-   - Pueden usar componentes de shadcn/ui como base
-   - Mantener independientes de la lógica de negocio
-   ```typescript
-   // src/components/core/data-display/image-card/image-card.tsx
-   import { Card } from "@/components/ui/card"
-   import { OptimizedImage } from "@/components/core/data-display/optimized-image"
-
-   export interface ImageCardProps {
-     src: string
-     alt: string
-     title: string
-     onSelect?: () => void
-   }
-
-   export function ImageCard({ src, alt, title, onSelect }: ImageCardProps) {
-     return (
-       <Card
-         onClick={onSelect}
-         className="group hover:bg-accent transition-colors"
-       >
-         <OptimizedImage
-           src={src}
-           alt={alt}
-           className="aspect-square rounded-t-lg"
-         />
-         <div className="p-3">
-           <h3 className="text-sm font-medium">{title}</h3>
-         </div>
-       </Card>
-     )
-   }
-   ```
-
-3. **Componentes Features**:
-   - Usar componentes de `ui/` y `core/`
-   - Contener lógica específica de la característica
-   - Mantener la composición sobre la herencia
-   ```typescript
-   // src/components/features/file-management/file-browser/components/file-item.tsx
-   import { ImageCard } from "@/components/core/data-display/image-card"
-   import { useFileSelection } from "../hooks/use-file-selection"
-
-   export function FileItem({ file }) {
-     const { handleSelect } = useFileSelection()
-
-     return (
-       <ImageCard
-         src={file.thumbnailUrl}
-         alt={file.name}
-         title={file.name}
-         onSelect={() => handleSelect(file.id)}
-       />
-     )
-   }
-   ```
-
-### Mejores Prácticas
-
-1. **Composición de Componentes**:
-   - Construir componentes complejos usando componentes más simples
-   - Mantener la separación de responsabilidades
-   - Usar props para personalización
-
-2. **Reutilización**:
-   - Componentes en `core/` deben ser altamente reutilizables
-   - Evitar dependencias directas con el estado global
-   - Usar render props o componentes hijos cuando sea necesario
-
-3. **Tipado**:
-   - Exportar interfaces de props
-   - Usar tipos estrictos
-   - Documentar props complejas
-
-### Fase 3: Estado Global con Zustand
-
-```typescript
-// src/store/slices/files.ts
-interface FileState {
-  files: File[];
-  selectedFiles: string[];
-  actions: {
-    addFiles: (files: File[]) => void;
-    selectFiles: (ids: string[]) => void;
-  }
-}
-
-// src/store/index.ts
-import { create } from 'zustand'
-import { fileSlice } from './slices/files'
-import { uiSlice } from './slices/ui'
-
-export const useStore = create<FileState & UIState>()((...a) => ({
-  ...fileSlice(...a),
-  ...uiSlice(...a),
-}))
-```
-
-### Fase 4: Optimizaciones de Rendimiento
-
-#### 4.1 Implementación de React Suspense
-```typescript
-// src/app/layout.tsx
-import { Suspense } from 'react'
-import { Loading } from '@/components/ui/loading'
-
-export default function Layout({ children }) {
-  return (
-    <Suspense fallback={<Loading />}>
-      {children}
-    </Suspense>
-  )
-}
-```
-
-#### 4.2 Optimización de Imágenes
-```typescript
-// src/components/features/image-viewer/components/image.tsx
-import NextImage from 'next/image'
-import { cn } from '@/lib/utils'
-
-export function OptimizedImage({ src, alt, className }) {
-  return (
-    <NextImage
-      src={src}
-      alt={alt}
-      className={cn('object-cover', className)}
-      quality={85}
-      loading="lazy"
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-    />
-  )
-}
-```
+### Fase 4: Documentación y Mantenimiento
+- [ ] Documentar componentes principales
+- [ ] Crear guías de contribución
+- [ ] Establecer estándares de código
+- [ ] Configurar CI/CD
 
 ## 4. Mejoras Específicas
 

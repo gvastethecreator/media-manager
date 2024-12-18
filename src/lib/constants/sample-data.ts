@@ -1,6 +1,6 @@
-import { FileItem } from "@/components/file-browser/file-browser"
+import { FileItem } from "@/components/features/file-management/file-browser/file-browser”
 
-export type ViewMode = 'files' | 'collections' | 'folders' | 'tags' | 'cards'
+export type ViewMode = 'files' | 'collections' | 'folders' | 'tags' | 'cards’
 
 export const sampleCollections = [
   {

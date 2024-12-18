@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { FileItem } from '@/store/files'
-import { VirtualizedView } from './virtualized-view'
+import { VirtualizedView } from './components/virtualized-view'
 import type { ThumbnailSize } from '@/store/ui'
 import { useColumns } from '@/store/columns'
 import { useImageViewer } from '@/store/image-viewer'

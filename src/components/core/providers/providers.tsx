@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from './theme-provider'
 import { Toaster } from '@/components/ui/toaster'
-import { ImageViewer } from '@/components/image-viewer/image-viewer'
+import { ImageViewer } from '@/components/features/image-viewer/image-viewer'
 import { SettingsProvider } from '@/context/settings-context'
 
 interface ProvidersProps {
