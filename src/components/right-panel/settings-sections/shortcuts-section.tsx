@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 
 export function ShortcutsSection() {
   const { settings, updateShortcut } = useSettingsContext()

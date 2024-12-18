@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 import type { SortBy, StartPage } from "@/types/settings"
 
 export function AppearanceSection() {

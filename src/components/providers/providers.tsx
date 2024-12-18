@@ -3,6 +3,7 @@
 import { ThemeProvider } from './theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { ImageViewer } from '@/components/image-viewer/image-viewer'
+import { SettingsProvider } from '@/context/settings-context'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -16,9 +17,11 @@ export function Providers({ children }: ProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
-      <ImageViewer />
-      <Toaster />
+      <SettingsProvider>
+        {children}
+        <ImageViewer />
+        <Toaster />
+      </SettingsProvider>
     </ThemeProvider>
   )
 }

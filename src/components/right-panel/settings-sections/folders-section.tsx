@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, FolderPlus, RefreshCw, Trash2 } from "lucide-react"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 
 export function FoldersSection() {
   const { settings, updateFolder } = useSettingsContext()

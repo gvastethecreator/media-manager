@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, RefreshCw, DatabaseIcon } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import { useSettingsContext } from "@/contexts/SettingsContext"
+import { useSettingsContext } from "@/context/settings-context"
 import type { BackupFrequency, LogLevel } from "@/types/settings"
 
 export function SystemSection() {

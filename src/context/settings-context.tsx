@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useCallback } from 'react'
+import React, { createContext, useContext } from 'react'
 import { useSettings } from '@/hooks/useSettings'
 import type { AppSettings } from '@/types/settings'
 
@@ -25,62 +25,10 @@ interface SettingsContextValue {
 const SettingsContext = createContext<SettingsContextValue | null>(null)
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const {
-    settings,
-    loading,
-    error,
-    updateSettings,
-    resetSettings,
-    exportSettings,
-    importSettings,
-    updateAppearance,
-    updateFolder,
-    updateCollection,
-    updateTag,
-    updateShortcut,
-    updateProfile,
-    updateSystem,
-    setActiveProfile
-  } = useSettings()
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-destructive">
-          Error al cargar la configuración: {error.message}
-        </div>
-      </div>
-    )
-  }
-
-  const contextValue: SettingsContextValue = {
-    settings,
-    loading,
-    error,
-    updateSettings,
-    resetSettings,
-    exportSettings,
-    importSettings,
-    updateAppearance,
-    updateFolder,
-    updateCollection,
-    updateTag,
-    updateShortcut,
-    updateProfile,
-    updateSystem,
-    setActiveProfile
-  }
+  const settingsData = useSettings()
 
   return (
-    <SettingsContext.Provider value={contextValue}>
+    <SettingsContext.Provider value={settingsData}>
       {children}
     </SettingsContext.Provider>
   )
