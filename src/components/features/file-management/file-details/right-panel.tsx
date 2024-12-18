@@ -3,13 +3,14 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { ResizablePanel } from "@/components/ui/resizable"
-import { ChevronLeft, Settings2, InfoIcon, PanelRightClose } from "lucide-react"
+import { ChevronRight, Settings2, Moon, Sun, RefreshCw } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { FileInfo } from "./file-info"
 import { SettingsPanel } from "./settings-panel"
-import type { FileItem } from '@/store/files'
+import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
+import type { FileItem } from '@/store/files'
 
 interface RightPanelProps {
   selectedItem: FileItem | null
@@ -32,11 +33,16 @@ export function RightPanel({
   minSize = 15,
   maxSize = 40
 }: RightPanelProps) {
+  const { theme, setTheme } = useTheme()
   const [isTransitioning, setIsTransitioning] = React.useState(false)
 
   const handleToggleCollapse = () => {
     setIsTransitioning(true)
     onToggleCollapse()
+  }
+
+  const handleRestart = () => {
+    window.location.reload()
   }
 
   React.useEffect(() => {
@@ -53,56 +59,70 @@ export function RightPanel({
       maxSize={maxSize}
       className={cn(
         "bg-muted/30 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/60",
-        isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",
+        isCollapsed && "max-w-[40px] transition-all duration-0 ease-in-out",
         isTransitioning && "pointer-events-none"
       )}
     >
       {isCollapsed ? (
-        <div className="h-full flex flex-col items-center justify-start pt-4 gap-2">
+        <div className="flex items-center justify-between p-2 h-11 border-b">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleToggleCollapse}
-            className="h-8 w-8 hover:bg-accent"
+            className="h-7 w-7"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rotate-180" />
           </Button>
         </div>
       ) : (
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-2 h-11 border-b">
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleToggleCollapse}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
               {showSettings ? (
-                <>
-                  <Settings2 className="h-4 w-4" />
-                  <span className="text-sm font-medium">Configuración</span>
-                </>
+                <span className="text-xs font-medium">Configuración</span>
               ) : (
-                <>
-                  <InfoIcon className="h-4 w-4" />
-                  <span className="text-sm font-medium">Detalles</span>
-                </>
+                <span className="text-xs font-medium">Detalles</span>
               )}
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onToggleSettings}
-                className={cn(
-                  "h-8 w-8 hover:bg-accent",
-                  showSettings && "bg-accent"
-                )}
+                className="h-7 w-7"
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               >
-                <Settings2 className="h-4 w-4" />
+                {theme === 'light' ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleToggleCollapse}
-                className="h-8 w-8 hover:bg-accent"
+                className="h-7 w-7"
+                onClick={handleRestart}
               >
-                <PanelRightClose className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleSettings}
+                className={cn(
+                  "h-7 w-7",
+                  showSettings && "bg-accent"
+                )}
+              >
+                <Settings2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
