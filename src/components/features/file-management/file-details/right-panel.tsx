@@ -23,34 +23,78 @@ interface RightPanelProps {
   maxSize?: number
 }
 
+// Componente separado para los botones de acción para evitar re-renders innecesarios
+const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggleSettings }: { showSettings: boolean; onToggleSettings: () => void }) {
+  const { theme, setTheme } = useTheme()
+
+  const handleRestart = React.useCallback(() => {
+    window.location.reload()
+  }, [])
+
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7"
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      >
+        {theme === 'light' ? (
+          <Moon className="h-4 w-4" />
+        ) : (
+          <Sun className="h-4 w-4" />
+        )}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7"
+        onClick={handleRestart}
+      >
+        <RefreshCw className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onToggleSettings}
+        className={cn(
+          "h-7 w-7",
+          showSettings && "bg-accent"
+        )}
+      >
+        <Settings2 className="h-4 w-4" />
+      </Button>
+    </>
+  )
+})
+
 export function RightPanel({
   selectedItem,
   isCollapsed,
   showSettings,
   onToggleSettings,
   onToggleCollapse,
-  defaultSize = 25,
-  minSize = 15,
-  maxSize = 40
+  defaultSize = 60,
+  minSize = 20,
+  maxSize = 70
 }: RightPanelProps) {
-  const { theme, setTheme } = useTheme()
   const [isTransitioning, setIsTransitioning] = React.useState(false)
 
-  const handleToggleCollapse = () => {
+  const handleToggleCollapse = React.useCallback(() => {
     setIsTransitioning(true)
     onToggleCollapse()
-  }
-
-  const handleRestart = () => {
-    window.location.reload()
-  }
+  }, [onToggleCollapse])
 
   React.useEffect(() => {
     if (isTransitioning) {
-      const timer = setTimeout(() => setIsTransitioning(false), 300)
+      const timer = setTimeout(() => setIsTransitioning(false), 100)
       return () => clearTimeout(timer)
     }
   }, [isTransitioning])
+
+  const panelContent = React.useMemo(() => {
+    return showSettings ? <SettingsPanel /> : <FileInfo selectedItem={selectedItem} />
+  }, [showSettings, selectedItem])
 
   return (
     <ResizablePanel
@@ -64,15 +108,20 @@ export function RightPanel({
       )}
     >
       {isCollapsed ? (
-        <div className="flex items-center justify-between p-2 h-11 border-b">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleToggleCollapse}
-            className="h-7 w-7"
-          >
-            <ChevronRight className="h-4 w-4 rotate-180" />
-          </Button>
+        <div className="flex flex-col h-full">
+          <div className="flex flex-col items-center gap-2 p-2 border-b">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleCollapse}
+              className="h-7 w-7"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+            </Button>
+          </div>
+          <div className="flex flex-col items-center gap-2 p-2">
+            <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
+          </div>
         </div>
       ) : (
         <div className="flex flex-col h-full">
@@ -86,52 +135,16 @@ export function RightPanel({
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              {showSettings ? (
-                <span className="text-xs font-medium">Configuración</span>
-              ) : (
-                <span className="text-xs font-medium">Detalles</span>
-              )}
+              <span className="text-xs font-medium">
+                {showSettings ? "Configuración" : "Detalles"}
+              </span>
             </div>
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              >
-                {theme === 'light' ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={handleRestart}
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggleSettings}
-                className={cn(
-                  "h-7 w-7",
-                  showSettings && "bg-accent"
-                )}
-              >
-                <Settings2 className="h-4 w-4" />
-              </Button>
+              <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
             </div>
           </div>
           <div className="flex-1 overflow-hidden">
-            {showSettings ? (
-              <SettingsPanel />
-            ) : (
-              <FileInfo selectedItem={selectedItem} />
-            )}
+            {panelContent}
           </div>
         </div>
       )}
