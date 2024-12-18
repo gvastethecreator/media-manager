@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useCallback, useState, useEffect } from "react";
-import { RightPanel } from "@/components/right-panel/right-panel";
-import { LeftSidebar } from "@/components/left-sidebar/left-sidebar";
-import { FileView } from "@/components/file-browser/file-browser";
-import { MainToolbar } from "@/components/main-toolbar/main-toolbar";
-import { Breadcrumbs } from "@/components/breadcrumbs/breadcrumbs";
+import { RightPanel } from "@/components/features/file-management/file-details/right-panel";
+import { LeftSidebar } from "@/components/core/layout/left-sidebar/left-sidebar";
+import { FileView } from "@/components/features/file-management/file-browser/file-browser";
+import { MainToolbar } from "@/components/core/navigation/toolbar/main-toolbar";
+import { Breadcrumbs } from "@/components/core/navigation/breadcrumbs/breadcrumbs";
 import {
 	ResizablePanelGroup,
 	ResizablePanel,
@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/resizable";
 import { useFilesStore } from "@/store/files";
 import { useUIStore } from "@/store/ui";
-import { EmptyState } from "@/components/empty-state/empty-state";
-import { LoadingScreen } from "@/components/loading/loading-screen";
+import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
+import { LoadingScreen } from "@/components/core/feedback/loading/loading-screen";
 import { AnimatePresence } from "framer-motion";
 import { useColumns } from "@/store/columns";
 

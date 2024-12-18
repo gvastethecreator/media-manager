@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useImageViewer } from '@/store/image-viewer'
-import { AdvancedImageViewer } from './advanced-image-viewer'
+import { AdvancedImageViewer } from './components/advanced-image-viewer'
 import type { FileItem } from '@/store/files'
 
 export function ImageViewer() {
