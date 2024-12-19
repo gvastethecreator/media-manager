@@ -4,18 +4,11 @@ import * as React from "react"
 import {
   LayoutGrid,
   List,
-  Table2,
-  ZoomIn,
-  ZoomOut,
-  ArrowLeft,
-  ArrowRight,
   CalendarDays,
   Search,
-  PanelRightClose
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -31,19 +24,8 @@ import type { Column } from "../file-browser/file-browser"
 interface MainToolbarProps {
   view: 'grid' | 'list' | 'details'
   onViewChange: (view: 'grid' | 'list' | 'details') => void
-  onZoomIn?: () => void
-  onZoomOut?: () => void
-  onNavigateBack?: () => void
-  onNavigateForward?: () => void
-  onSort?: () => void
   onSearch?: () => void
-  onToggleRightPanel?: () => void
   onDateSelect?: (date: Date | undefined) => void
-  canNavigateBack?: boolean
-  canNavigateForward?: boolean
-  canZoomIn?: boolean
-  canZoomOut?: boolean
-  isRightPanelOpen?: boolean
   sortBy: 'name' | 'date' | 'size' | 'type'
   sortOrder: 'asc' | 'desc'
   onSortChange: (by: 'name' | 'date' | 'size' | 'type', order: 'asc' | 'desc') => void
@@ -54,19 +36,8 @@ interface MainToolbarProps {
 export function MainToolbar({
   view,
   onViewChange,
-  onZoomIn,
-  onZoomOut,
-  onNavigateBack,
-  onNavigateForward,
-  onSort,
   onSearch,
-  onToggleRightPanel,
   onDateSelect,
-  canNavigateBack = false,
-  canNavigateForward = false,
-  canZoomIn = true,
-  canZoomOut = true,
-  isRightPanelOpen = true,
   sortBy,
   sortOrder,
   onSortChange,
@@ -84,8 +55,6 @@ export function MainToolbar({
     <TooltipProvider>
       <header className="sticky top-0 z-10 flex h-11 shrink-0 items-center justify-between border-b bg-background px-4">
         <div className="flex items-center gap-1.5">
-          <SidebarTrigger className="-ml-1.5" />
-          <Separator orientation="vertical" className="h-4" />
           <div className="flex items-center gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -121,71 +90,7 @@ export function MainToolbar({
               sortOrder={sortOrder}
               onSortChange={onSortChange}
             />
-
           </div>
-          <Separator orientation="vertical" className="h-4" />
-          <div className="flex items-center space-x-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onNavigateBack}
-                  disabled={!canNavigateBack}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="sr-only">Atrás</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Atrás</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onNavigateForward}
-                  disabled={!canNavigateForward}
-                >
-                  <ArrowRight className="h-4 w-4" />
-                  <span className="sr-only">Adelante</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Adelante</TooltipContent>
-            </Tooltip>
-          </div>
-          <Separator orientation="vertical" className="h-4" />
-          <div className="flex items-center space-x-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onZoomOut}
-                  disabled={!canZoomOut}
-                >
-                  <ZoomOut className="h-4 w-4" />
-                  <span className="sr-only">Reducir</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reducir</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onZoomIn}
-                  disabled={!canZoomIn}
-                >
-                  <ZoomIn className="h-4 w-4" />
-                  <span className="sr-only">Ampliar</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Ampliar</TooltipContent>
-            </Tooltip>
-          </div>
-          <Separator orientation="vertical" className="h-4" />
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -221,8 +126,6 @@ export function MainToolbar({
             <Search className="h-4 w-4" />
             <span className="text-xs font-medium">Buscar</span>
           </Button>
-
-
         </div>
       </header>
     </TooltipProvider>
