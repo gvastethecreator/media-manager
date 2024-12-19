@@ -43,26 +43,7 @@ const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggle
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7"
-        onClick={handleThemeToggle}
-      >
-        {theme === 'light' ? (
-          <Moon className="h-4 w-4" />
-        ) : (
-          <Sun className="h-4 w-4" />
-        )}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7"
-        onClick={handleRestart}
-      >
-        <RefreshCw className="h-4 w-4" />
-      </Button>
+
       <Button
         variant="ghost"
         size="icon"
@@ -86,8 +67,8 @@ export function RightPanel({
   showSettings,
   onToggleSettings,
   onToggleCollapse,
-  defaultSize = 60,
-  minSize = 20,
+  defaultSize = 20,
+  minSize = 15,
   maxSize = 70,
   isResizing
 }: RightPanelProps) {
@@ -104,7 +85,7 @@ export function RightPanel({
   }, [onToggleCollapse, isResizing])
 
   return (
-    <ResizablePanel 
+    <ResizablePanel
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
