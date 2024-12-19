@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdate": "2024-12-18T23:50:04.237Z",
+  "lastUpdate": "2024-12-19T00:10:18.438Z",
   "appearance": {
     "darkMode": false,
     "compactMode": false,
@@ -97,7 +97,7 @@
     }
   },
   "activeProfile": "default",
-  "thumbnailSize": 170,
+  "thumbnailSize": 210,
   "sortByName": false,
   "compactMode": false,
   "autoUpdate": false
