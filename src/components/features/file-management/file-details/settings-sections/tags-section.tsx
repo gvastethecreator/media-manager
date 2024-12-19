@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Trash2, Palette } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
 import type { FileProperty, FilterCondition } from "@/types/settings"
-import { Compact } from 'react-color'
+import { GithubPicker } from 'react-color'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const colorOptions = [
@@ -110,7 +110,7 @@ export function TagsSection() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Compact
+                    <GithubPicker
                       color={newTag.color}
                       onChange={handleColorChange}
                     />
@@ -201,7 +201,7 @@ export function TagsSection() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="end">
-                        <Compact
+                        <GithubPicker
                           color={tag.color}
                           onChange={(color) =>
                             handleUpdateTag(tag.id, { color: color.hex })
