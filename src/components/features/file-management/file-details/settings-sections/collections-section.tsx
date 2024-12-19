@@ -7,13 +7,13 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { KeyboardIcon, Trash2, Smile } from "lucide-react"
-import { useSettingsContext } from "@/context/settings-context"
+import { useCollectionTagContext } from "@/context/settings-context"
 import { GithubPicker } from 'react-color'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 
 export function CollectionsSection() {
-  const { settings, updateCollection } = useSettingsContext()
+  const { settings, updateCollection } = useCollectionTagContext()
   const { collections } = settings
   const [newCollection, setNewCollection] = React.useState({
     name: "",

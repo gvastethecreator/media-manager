@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Palette } from "lucide-react"
-import { useSettingsContext } from "@/context/settings-context"
+import { useCollectionTagContext } from "@/context/settings-context"
 import type { FileProperty, FilterCondition } from "@/types/settings"
 import { GithubPicker } from 'react-color'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -27,7 +27,7 @@ const colorOptions = [
 ]
 
 export function TagsSection() {
-  const { settings, updateTag } = useSettingsContext()
+  const { settings, updateTag } = useCollectionTagContext()
   const { tags } = settings
   const [newTag, setNewTag] = React.useState({
     name: "",
