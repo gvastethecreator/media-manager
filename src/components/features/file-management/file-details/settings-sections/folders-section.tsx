@@ -47,11 +47,27 @@ export function FoldersSection() {
   const [error, setError] = React.useState<string | null>(null)
   const [folderPath, setFolderPath] = useState("")
   const [isAdding, setIsAdding] = useState(false)
+  const [folders, setFolders] = useState<any[]>([])
 
-  // Cargar estadísticas al montar el componente
+  // Cargar carpetas al montar el componente
   React.useEffect(() => {
-    loadStats()
+    loadFolders()
   }, [])
+
+  const loadFolders = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const folders = await folderService.getFolders()
+      setFolders(folders)
+      await loadStats()
+    } catch (error) {
+      console.error('Error cargando carpetas:', error)
+      setError('No se pudieron cargar las carpetas')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const loadStats = async () => {
     try {
@@ -84,11 +100,8 @@ export function FoldersSection() {
       setIsAdding(true)
       const folder = await folderService.addFolder(folderPath)
       
-      // Iniciar el monitoreo de la carpeta
-      await watcherService.watchFolder(folder.id)
-      
-      // Actualizar estadísticas
-      await loadStats()
+      // Recargar carpetas y estadísticas
+      await loadFolders()
       
       toast({
         title: "Carpeta agregada",
@@ -148,14 +161,10 @@ export function FoldersSection() {
   const handleRemoveFolder = async (folderId: string) => {
     try {
       setError(null)
-      // Detener el monitoreo
-      await watcherService.stopWatching(folderId)
-      
-      // Eliminar la carpeta
       await folderService.removeFolder(folderId)
       
-      // Actualizar estadísticas
-      await loadStats()
+      // Recargar carpetas y estadísticas
+      await loadFolders()
       
       toast({
         title: "Carpeta eliminada",
@@ -175,7 +184,9 @@ export function FoldersSection() {
     try {
       setError(null)
       await folderService.reindexFolder(folderId)
-      await loadStats()
+      
+      // Recargar carpetas y estadísticas
+      await loadFolders()
       
       toast({
         title: "Reindexación completada",
@@ -298,9 +309,9 @@ export function FoldersSection() {
               <RefreshCw className="h-4 w-4 animate-spin mx-auto mb-2" />
               Cargando carpetas...
             </div>
-          ) : settings.folders && settings.folders.length > 0 ? (
+          ) : folders.length > 0 ? (
             <div className="space-y-2">
-              {settings.folders.map((folder) => (
+              {folders.map((folder) => (
                 <div 
                   key={folder.id}
                   className="flex items-center justify-between p-2 rounded-lg border bg-card"
@@ -331,9 +342,9 @@ export function FoldersSection() {
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => handleReindexFolder(folder.id)}
-                      disabled={isLoading || folder.isIndexing}
+                      disabled={isLoading}
                     >
-                      <RefreshCw className={cn("h-4 w-4", folder.isIndexing && "animate-spin")} />
+                      <RefreshCw className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
