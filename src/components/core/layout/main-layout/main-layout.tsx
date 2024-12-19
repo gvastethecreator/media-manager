@@ -20,6 +20,7 @@ import { useColumns } from "@/store/columns";
 
 export function MainLayout() {
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
+	const [isResizing, setIsResizing] = useState(false);
 	const {
 		currentView,
 		currentItems,
@@ -90,9 +91,10 @@ export function MainLayout() {
 				viewMode={view}
 				thumbnailSize={thumbnailSize}
 				onItemSelect={handleSelectItem}
+				isResizing={isResizing}
 			/>
 		);
-	}, [currentItems, currentView, view, thumbnailSize, handleSelectItem]);
+	}, [currentItems, currentView, view, thumbnailSize, handleSelectItem, isResizing]);
 
 	const selectedItem = useMemo(() => {
 		if (selectedIds.length !== 1) return null;
@@ -158,7 +160,10 @@ export function MainLayout() {
 							</div>
 						</div>
 					</ResizablePanel>
-					<ResizableHandle withHandle />
+					<ResizableHandle
+						withHandle
+						onDragging={(isDragging) => setIsResizing(isDragging)}
+					/>
 					<RightPanel
 						selectedItem={selectedItem}
 						isCollapsed={isRightPanelCollapsed}
@@ -168,6 +173,7 @@ export function MainLayout() {
 						defaultSize={isRightPanelCollapsed ? 5 : 25}
 						minSize={isRightPanelCollapsed ? 5 : 15}
 						maxSize={isRightPanelCollapsed ? 5 : 40}
+						isResizing={isResizing}
 					/>
 				</ResizablePanelGroup>
 			</div>
