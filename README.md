@@ -1,102 +1,139 @@
 # Image Manager
 
-A modern image management application built with Next.js 15, React 19, and Tailwind CSS.
+Una aplicación moderna de gestión de imágenes construida con Next.js 15, React 19, Prisma y SQLite.
 
-## Features
+## Características
 
-- 🖼️ Advanced image viewing with zoom, pan, and gestures
-- 📂 Hierarchical folder organization
-- 🏷️ Tag-based organization
-- 📱 Responsive design
-- 🎨 Dark/Light theme
-- ⚡ Fast and efficient file browsing
-- 🔍 Advanced search capabilities
+- 🖼️ Visualización avanzada de imágenes con zoom, pan y gestos
+- 📂 Organización jerárquica de carpetas con monitoreo automático
+- 🔄 Indexación automática de imágenes
+- 🏷️ Organización basada en etiquetas
+- 📱 Diseño responsive
+- 🎨 Tema claro/oscuro
+- ⚡ Navegación rápida y eficiente
+- 🔍 Capacidades avanzadas de búsqueda
+- 💾 Base de datos local SQLite
+- 📊 Estadísticas de carpetas y archivos
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 src/
-├── app/                    # Next.js app router
+├── app/                    # Next.js app router y API routes
 ├── components/
-│   ├── core/              # Base components
+│   ├── core/              # Componentes base
 │   │   ├── data-display/  # Cards, empty states
 │   │   ├── feedback/      # Loading states
-│   │   ├── layout/       # Layouts
-│   │   ├── navigation/   # Navigation components
-│   │   ├── providers/    # Context providers
-│   │   └── theme/        # Theme utilities
-│   ├── features/         # Feature components
-│   │   ├── collections/  # Collection management
+│   │   ├── layout/        # Layouts
+│   │   ├── navigation/    # Navigation components
+│   │   ├── providers/     # Context providers
+│   │   └── theme/         # Theme utilities
+│   ├── features/          # Componentes de características
+│   │   ├── collections/   # Gestión de colecciones
 │   │   ├── file-management/
 │   │   │   ├── file-browser/
 │   │   │   ├── file-details/
 │   │   │   └── folders/
-│   │   └── image-viewer/ # Image viewing
-│   └── ui/              # UI components (shadcn/ui)
-├── lib/                 # Utilities and configurations
-├── store/              # Global state management
-└── styles/             # Global styles
+│   │   └── image-viewer/  # Visualizador de imágenes
+│   └── ui/               # Componentes UI (shadcn/ui)
+├── config/               # Configuraciones
+├── context/             # Contextos de React
+├── hooks/               # Hooks personalizados
+├── lib/                 # Utilidades y configuraciones
+├── services/            # Servicios (fs, watcher, etc)
+├── store/              # Estado global (Zustand)
+└── types/              # TypeScript types
 ```
 
-## Development Status
+## Estado del Desarrollo
 
-### Completed Features ✅
-- Core component structure
-- File browsing and viewing
-- Image viewer with advanced features
-- Theme switching
-- Responsive layouts
-- Basic file management
+### Características Completadas ✅
+- Estructura base de componentes
+- Navegación y visualización de archivos
+- Visualizador de imágenes con características avanzadas
+- Cambio de tema
+- Layouts responsivos
+- Gestión básica de archivos
+- Indexación automática de carpetas
+- Monitoreo de cambios en carpetas
+- Base de datos local con SQLite
+- Estadísticas de carpetas
 
-### In Progress 🚧
-- Collection management
-- Tag system
-- Search functionality
-- Settings panel
-- File metadata handling
+### En Progreso 🚧
+- Gestión de colecciones
+- Sistema de etiquetas
+- Funcionalidad de búsqueda
+- Panel de configuración
+- Manejo de metadatos de archivos
+- Caché de miniaturas
+- Optimización de rendimiento
 
-### Planned Features 🎯
-- Drag & drop functionality
-- Keyboard shortcuts
-- Offline mode
-- Advanced search filters
-- AI-powered features
-- Image processing capabilities
+### Características Planeadas 🎯
+- Arrastrar y soltar
+- Atajos de teclado
+- Modo sin conexión
+- Filtros de búsqueda avanzados
+- Características basadas en IA
+- Capacidades de procesamiento de imágenes
+- Exportación/Importación de datos
 
-## Getting Started
+## Comenzando
 
-1. Clone the repository
+1. Clonar el repositorio
 ```bash
 git clone https://github.com/yourusername/image-manager.git
 cd image-manager
 ```
 
-2. Install dependencies
+2. Instalar dependencias
 ```bash
-npm install
-# or
-yarn install
+pnpm install
 ```
 
-3. Run the development server
+3. Configurar la base de datos
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm prisma generate
+pnpm prisma db push
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. Iniciar el servidor de desarrollo
+```bash
+pnpm dev
+```
 
-## Contributing
+5. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+## Requisitos del Sistema
 
-## License
+- Node.js 18 o superior
+- Windows 11 (recomendado para mejor compatibilidad)
+- SQLite 3
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Características Técnicas
 
-## Acknowledgments
+### Base de Datos
+- SQLite para almacenamiento local
+- Prisma como ORM
+- Esquema optimizado para rendimiento
 
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Icons by [Lucide](https://lucide.dev/)
+### Frontend
+- Next.js 15 con App Router
+- React 19 con Server Components
+- Tailwind CSS para estilos
+- shadcn/ui para componentes de UI
+- Zustand para gestión de estado
+
+### Backend
+- API Routes de Next.js
+- Sistema de archivos nativo
+- Monitoreo de carpetas en tiempo real
+- Caché de metadatos
+- Procesamiento de imágenes optimizado
+
+## Contribuir
+
+Las contribuciones son bienvenidas. Por favor, lee nuestra [Guía de Contribución](CONTRIBUTING.md) para más detalles.
+
+## Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
