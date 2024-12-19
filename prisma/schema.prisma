@@ -11,72 +11,62 @@ datasource db {
 }
 
 model Folder {
-  id           String    @id @default(cuid())
-  path         String    @unique
-  name         String
-  parentId     String?
-  parent       Folder?   @relation("FolderToFolder", fields: [parentId], references: [id])
-  children     Folder[]  @relation("FolderToFolder")
-  isWatched    Boolean   @default(false)
-  lastIndexed  DateTime  @default(now())
-  totalFiles   Int       @default(0)
-  totalSize    Int       @default(0)
-  images       Image[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  path      String   @unique
+  isWatched Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  images    Image[]
 }
 
 model Image {
-  id               String       @id @default(cuid())
-  name             String
-  description      String?
-  path             String       @unique
-  hash             String       @unique
-  size             Int
-  mimeType         String
-  width            Int?
-  height           Int?
-  metadata         String?      @default("{}")
-  isPublic         Boolean      @default(false)
-  thumbnail        String?      // Base64 encoded thumbnail
-  thumbnailSize    Int?        // Size of the thumbnail in bytes
-  thumbnailError   String?     // Error message if thumbnail generation failed
-  thumbnailErrorAt DateTime?   // When the error occurred
-  folderId         String
-  folder           Folder       @relation(fields: [folderId], references: [id])
-  tags             Tag[]
-  collections      Collection[]
-  favorites        Favorite[]
-  stats            ImageStats?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id          String       @id @default(cuid())
+  name        String
+  path        String       @unique
+  size        Int
+  hash        String       @unique
+  metadata    String?      // JSON string for metadata
+  thumbnail   String?      // base64 encoded thumbnail
+  folderId    String
+  folder      Folder       @relation(fields: [folderId], references: [id])
+  collections Collection[] @relation("CollectionToImage")
+  tags        Tag[]        @relation("TagToImage")
+  favorites   Favorite[]
+  stats       ImageStats?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([folderId])
 }
 
 model Tag {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String       @unique
-  color       String?
+  id          String    @id @default(cuid())
+  name        String    @unique
+  color       String    @default("#3b82f6")
   description String?
-  type        String?
-  metadata    String?      @default("{}")
-  images      Image[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  shortcut    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  images      Image[]   @relation("TagToImage")
+
+  @@index([name])
 }
 
 model Collection {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String       @unique
+  id          String    @id @default(cuid())
+  name        String    @unique
+  emoji       String    @default("🌟")
   description String?
-  coverImage  String?
-  color       String?      @default("#94a3b8")
-  emoji       String?
-  isPublic    Boolean      @default(false)
-  images      Image[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  color       String    @default("#3b82f6")
+  shortcut    String?
+  sortBy      String    @default("name")
+  filters     String    @default("[]") // JSON string for filters
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  images      Image[]   @relation("CollectionToImage")
+
+  @@index([name])
 }
 
 model Favorite {
@@ -84,15 +74,19 @@ model Favorite {
   imageId   String
   image     Image    @relation(fields: [imageId], references: [id])
   createdAt DateTime @default(now())
+
+  @@index([imageId])
 }
 
 model ImageStats {
-  id          String   @id @default(cuid())
-  imageId     String   @unique
-  image       Image    @relation(fields: [imageId], references: [id])
-  views       Int      @default(0)
-  downloads   Int      @default(0)
-  lastViewed  DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  imageId    String   @unique
+  image      Image    @relation(fields: [imageId], references: [id])
+  views      Int      @default(0)
+  downloads  Int      @default(0)
+  lastViewed DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([imageId])
 }

@@ -177,47 +177,6 @@ export async function GET() {
     await prisma.$connect()
     console.log('✅ Conexión a base de datos establecida')
 
-    // Verificamos que la tabla Folder existe
-    try {
-      const tableExists = await prisma.$queryRaw`
-        SELECT name
-        FROM sqlite_master
-        WHERE type='table'
-        AND name='Folder'
-      `
-      if (!Array.isArray(tableExists) || tableExists.length === 0) {
-        console.log('⚠️ Tabla Folder no encontrada, creando...')
-        try {
-          await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS Folder (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            path TEXT NOT NULL UNIQUE,
-            isWatched BOOLEAN NOT NULL DEFAULT false,
-            totalFiles INTEGER NOT NULL DEFAULT 0,
-            totalSize INTEGER NOT NULL DEFAULT 0,
-            lastIndexed DATETIME,
-            createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME NOT NULL
-          )`
-          console.log('✅ Tabla Folder creada')
-        } catch (migrationError) {
-          console.error('❌ Error creando tabla:', migrationError)
-          return NextResponse.json(
-            { error: 'Error creando tabla Folder', details: migrationError instanceof Error ? migrationError.message : String(migrationError) },
-            { status: 500 }
-          )
-        }
-      } else {
-        console.log('✅ Tabla Folder verificada')
-      }
-    } catch (tableCheckError) {
-      console.error('❌ Error verificando tabla:', tableCheckError)
-      return NextResponse.json(
-        { error: 'Error verificando tabla Folder', details: tableCheckError instanceof Error ? tableCheckError.message : String(tableCheckError) },
-        { status: 500 }
-      )
-    }
-
     console.log('🔄 Consultando carpetas...')
     const folders = await prisma.folder.findMany({
       select: {
@@ -225,8 +184,8 @@ export async function GET() {
         name: true,
         path: true,
         isWatched: true,
-        totalFiles: true,
-        totalSize: true,
+        createdAt: true,
+        updatedAt: true,
         _count: {
           select: {
             images: true
@@ -234,26 +193,36 @@ export async function GET() {
         }
       }
     })
+
     console.log('✅ Carpetas encontradas:', folders.length)
 
-    return NextResponse.json(folders)
+    // Transformar los resultados para incluir el conteo de imágenes
+    const transformedFolders = folders.map(folder => ({
+      ...folder,
+      totalFiles: folder._count.images,
+      totalSize: 0, // Este valor se calculará cuando sea necesario
+    }))
+
+    return NextResponse.json(transformedFolders)
   } catch (error) {
     console.error('❌ Error obteniendo carpetas:', error)
     
     // Verificar si es un error de Prisma
-    if (error.code === 'P1001') {
-      return NextResponse.json(
-        { error: 'Error de conexión a la base de datos', details: error.message },
-        { status: 503 }
-      )
-    }
+    if (error && typeof error === 'object' && 'code' in error) {
+      if (error.code === 'P1001') {
+        return NextResponse.json(
+          { error: 'Error de conexión a la base de datos', details: error.message },
+          { status: 503 }
+        )
+      }
 
-    // Para otros errores de Prisma
-    if (error.code?.startsWith('P')) {
-      return NextResponse.json(
-        { error: 'Error de base de datos', details: error.message },
-        { status: 500 }
-      )
+      // Para otros errores de Prisma
+      if (typeof error.code === 'string' && error.code.startsWith('P')) {
+        return NextResponse.json(
+          { error: 'Error de base de datos', details: error.message },
+          { status: 500 }
+        )
+      }
     }
 
     // Error genérico

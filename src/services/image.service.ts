@@ -12,7 +12,12 @@ export type CreateImageInput = {
   width: number
   height: number
   userId: string
-  metadata?: string
+  metadata?: {
+    width?: number
+    height?: number
+    description?: string
+    [key: string]: any
+  }
   hash?: string
   isPublic?: boolean
 }
@@ -34,6 +39,7 @@ export const imageService = {
     const image = await prisma.image.create({
       data: {
         ...data,
+        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -66,7 +72,10 @@ export const imageService = {
       await statsService.incrementViewCount(image.id)
     }
 
-    return image
+    return {
+      ...image,
+      metadata: image.metadata ? JSON.parse(image.metadata) : null,
+    }
   },
 
   // Get images by user ID
@@ -99,7 +108,13 @@ export const imageService = {
       prisma.image.count({ where }),
     ])
 
-    return { images, total }
+    return {
+      images: images.map((image) => ({
+        ...image,
+        metadata: image.metadata ? JSON.parse(image.metadata) : null,
+      })),
+      total,
+    }
   },
 
   // Create thumbnail for image
@@ -121,11 +136,11 @@ export const imageService = {
   },
 
   // Update image metadata
-  async updateImageMetadata(id: string, metadata: string): Promise<Image> {
+  async updateImageMetadata(id: string, metadata: { [key: string]: any }): Promise<Image> {
     return prisma.image.update({
       where: { id },
       data: {
-        metadata,
+        metadata: JSON.stringify(metadata),
         updatedAt: new Date(),
       },
     })
@@ -199,7 +214,13 @@ export const imageService = {
       prisma.image.count({ where }),
     ])
 
-    return { images, total }
+    return {
+      images: images.map((image) => ({
+        ...image,
+        metadata: image.metadata ? JSON.parse(image.metadata) : null,
+      })),
+      total,
+    }
   },
 
   // Search images by text
@@ -236,7 +257,13 @@ export const imageService = {
       prisma.image.count({ where }),
     ])
 
-    return { images, total }
+    return {
+      images: images.map((image) => ({
+        ...image,
+        metadata: image.metadata ? JSON.parse(image.metadata) : null,
+      })),
+      total,
+    }
   },
 
   // Get similar images based on tags
@@ -272,7 +299,10 @@ export const imageService = {
       },
     })
 
-    return similarImages
+    return similarImages.map((image) => ({
+      ...image,
+      metadata: image.metadata ? JSON.parse(image.metadata) : null,
+    }))
   },
 
   // Update image privacy

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdate": "2024-12-19T00:10:18.438Z",
+  "lastUpdate": "2024-12-19T23:10:42.487Z",
   "appearance": {
     "darkMode": false,
     "compactMode": false,
@@ -40,7 +40,7 @@
       "id": "default",
       "name": "Usuario Principal",
       "emoji": "👤",
-      "color": "blue",
+      "color": "red",
       "theme": "system",
       "language": "es",
       "syncSettings": true,

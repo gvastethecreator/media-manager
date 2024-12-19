@@ -1,34 +1,161 @@
-'use client'
+import { createContext, useContext, useEffect, useState } from "react"
+import { Collection, Tag } from "@prisma/client"
+import { collectionService, CollectionCreate, CollectionUpdate } from "@/services/collection.service"
+import { tagService, TagCreate, TagUpdate } from "@/services/tag.service"
+import { useToast } from "@/components/ui/use-toast"
 
-import React, { createContext, useContext } from 'react'
-import { useSettings } from '@/hooks/use-settings'
-import type { AppSettings } from '@/types/settings'
-
-interface SettingsContextValue {
-  settings: AppSettings
-  loading: boolean
-  error: Error | null
-  updateSettings: (settings: Partial<AppSettings>) => Promise<void>
-  resetSettings: () => Promise<void>
-  exportSettings: () => Promise<string>
-  importSettings: (settingsJson: string) => Promise<void>
-  updateAppearance: (settings: Partial<AppSettings['appearance']>) => Promise<void>
-  updateFolder: (folderId: string, settings: Partial<AppSettings['folders'][0]>) => Promise<void>
-  updateCollection: (collectionId: string, settings: Partial<AppSettings['collections'][0]>) => Promise<void>
-  updateTag: (tagId: string, settings: Partial<AppSettings['tags'][0]>) => Promise<void>
-  updateShortcut: (shortcutId: string, settings: Partial<AppSettings['shortcuts'][0]>) => Promise<void>
-  updateProfile: (profileId: string, settings: Partial<AppSettings['profiles'][0]>) => Promise<void>
-  updateSystem: (settings: Partial<AppSettings['system']>) => Promise<void>
-  setActiveProfile: (profileId: string) => Promise<void>
+interface CollectionWithStats extends Collection {
+  count: number
+  size: string
 }
 
-const SettingsContext = createContext<SettingsContextValue | null>(null)
+interface TagWithStats extends Tag {
+  count: number
+  size: string
+}
+
+interface SettingsContextType {
+  settings: {
+    collections: CollectionWithStats[]
+    tags: TagWithStats[]
+  }
+  updateCollection: (id: string, data: CollectionCreate | CollectionUpdate) => Promise<void>
+  updateTag: (id: string, data: TagCreate | TagUpdate) => Promise<void>
+  deleteCollection: (id: string) => Promise<void>
+  deleteTag: (id: string) => Promise<void>
+}
+
+const SettingsContext = createContext<SettingsContextType>({
+  settings: {
+    collections: [],
+    tags: []
+  },
+  updateCollection: async () => {},
+  updateTag: async () => {},
+  deleteCollection: async () => {},
+  deleteTag: async () => {}
+})
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const settingsData = useSettings()
+  const [settings, setSettings] = useState<SettingsContextType["settings"]>({
+    collections: [],
+    tags: []
+  })
+  const { toast } = useToast()
+
+  const loadCollections = async () => {
+    try {
+      const collections = await collectionService.getCollections()
+      setSettings(prev => ({ ...prev, collections }))
+    } catch (error) {
+      console.error('Error loading collections:', error)
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las colecciones",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const loadTags = async () => {
+    try {
+      const tags = await tagService.getTags()
+      setSettings(prev => ({ ...prev, tags }))
+    } catch (error) {
+      console.error('Error loading tags:', error)
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las etiquetas",
+        variant: "destructive"
+      })
+    }
+  }
+
+  useEffect(() => {
+    loadCollections()
+    loadTags()
+  }, [])
+
+  const updateCollection = async (id: string, data: CollectionCreate | CollectionUpdate) => {
+    try {
+      await collectionService.updateCollection(id, data)
+      await loadCollections()
+      toast({
+        title: "Éxito",
+        description: "Colección actualizada correctamente"
+      })
+    } catch (error) {
+      console.error('Error updating collection:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la colección",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const updateTag = async (id: string, data: TagCreate | TagUpdate) => {
+    try {
+      await tagService.updateTag(id, data)
+      await loadTags()
+      toast({
+        title: "Éxito",
+        description: "Etiqueta actualizada correctamente"
+      })
+    } catch (error) {
+      console.error('Error updating tag:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la etiqueta",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const deleteCollection = async (id: string) => {
+    try {
+      await collectionService.deleteCollection(id)
+      await loadCollections()
+      toast({
+        title: "Éxito",
+        description: "Colección eliminada correctamente"
+      })
+    } catch (error) {
+      console.error('Error deleting collection:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la colección",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const deleteTag = async (id: string) => {
+    try {
+      await tagService.deleteTag(id)
+      await loadTags()
+      toast({
+        title: "Éxito",
+        description: "Etiqueta eliminada correctamente"
+      })
+    } catch (error) {
+      console.error('Error deleting tag:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la etiqueta",
+        variant: "destructive"
+      })
+    }
+  }
 
   return (
-    <SettingsContext.Provider value={settingsData}>
+    <SettingsContext.Provider value={{
+      settings,
+      updateCollection,
+      updateTag,
+      deleteCollection,
+      deleteTag
+    }}>
       {children}
     </SettingsContext.Provider>
   )
@@ -37,7 +164,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettingsContext() {
   const context = useContext(SettingsContext)
   if (!context) {
-    throw new Error('useSettingsContext debe ser usado dentro de un SettingsProvider')
+    throw new Error('useSettingsContext must be used within a SettingsProvider')
   }
   return context
 }
+
+// Alias para mantener compatibilidad
+export const useCollectionTagContext = useSettingsContext
