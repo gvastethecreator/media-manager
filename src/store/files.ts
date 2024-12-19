@@ -228,6 +228,12 @@ export const useFilesStore = create<FilesState>()(
     {
       name: 'files-storage',
       version: 1,
+      partialize: (state) => ({
+        currentView: state.currentView,
+        currentPath: state.currentPath,
+        sortBy: state.sortBy,
+        sortOrder: state.sortOrder,
+      }),
     }
   )
 )

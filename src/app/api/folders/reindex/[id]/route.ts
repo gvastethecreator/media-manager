@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { fsService } from '@/services/fs.server'
 import path from 'path'
+import { getImageMetadata } from '@/lib/image.server'
+import { computeHash } from '@/lib/server-utils'
 
 export async function POST(
   request: Request,
@@ -33,37 +35,59 @@ export async function POST(
 
     let totalSize = 0
     let totalFiles = 0
+    let processedFiles = 0
+
+    // Filtrar solo archivos de imagen
+    const imageFiles = files.filter(file => 
+      /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file.path)
+    )
 
     // Indexar archivos
-    for (const file of files) {
-      if (await fsService.isImage(file.path)) {
-        try {
-          const hash = await fsService.calculateFileHash(file.path)
-          const metadata = await fsService.getFileMetadata(file.path)
+    for (const file of imageFiles) {
+      try {
+        const hash = await computeHash(file.path)
+        const metadata = await getImageMetadata(file.path)
+        
+        // Limpiar la metadata eliminando valores undefined
+        const cleanMetadata = JSON.parse(JSON.stringify(metadata))
 
-          await prisma.image.create({
+        await prisma.image.create({
+          data: {
+            name: file.name,
+            path: file.path,
+            hash,
+            size: file.size,
+            mimeType: `image/${path.extname(file.path).slice(1)}`,
+            metadata: JSON.stringify(cleanMetadata),
+            folderId: folder.id,
+            isPublic: false,
+            width: metadata.dimensions?.width || 0,
+            height: metadata.dimensions?.height || 0
+          }
+        })
+
+        totalSize += file.size
+        totalFiles++
+        processedFiles++
+
+        // Actualizar progreso parcial cada 10 archivos
+        if (processedFiles % 10 === 0) {
+          await prisma.folder.update({
+            where: { id: folderId },
             data: {
-              name: file.name,
-              path: file.path,
-              hash,
-              size: file.size,
-              mimeType: `image/${path.extname(file.path).slice(1)}`,
-              metadata: JSON.stringify(metadata),
-              folderId: folder.id,
-              isPublic: false
+              totalFiles: processedFiles,
+              totalSize,
+              lastIndexed: new Date()
             }
           })
-
-          totalSize += file.size
-          totalFiles++
-        } catch (error) {
-          console.error('Error indexando imagen:', file.path, error)
-          // Continuar con el siguiente archivo
         }
+      } catch (error) {
+        console.error('Error indexando imagen:', file.path, error)
+        // Continuar con el siguiente archivo
       }
     }
 
-    // Actualizar estadísticas de la carpeta
+    // Actualizar estadísticas finales de la carpeta
     const updatedFolder = await prisma.folder.update({
       where: { id: folderId },
       data: {
@@ -73,7 +97,15 @@ export async function POST(
       }
     })
 
-    return NextResponse.json(updatedFolder)
+    return NextResponse.json({
+      folder: updatedFolder,
+      stats: {
+        totalFiles,
+        processedFiles,
+        totalSize,
+        success: true
+      }
+    })
   } catch (error) {
     console.error('Error en POST /api/folders/reindex/[id]:', error)
     return NextResponse.json(

@@ -1,9 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useImageViewer } from '@/stores/use-image-viewer'
+import { useImageViewer } from '@/store/image-viewer'
 import dynamic from 'next/dynamic'
-import type { FileItem } from '@/types'
+import type { FileItem } from '@/types/file-item'
 
 // Lazy load del AdvancedImageViewer
 const AdvancedImageViewer = dynamic(
@@ -26,10 +26,10 @@ export function ImageViewer() {
       name: img.name,
       type: 'image' as const,
       thumbnail: img.thumbnailUrl || '',
-      src: img.url || img.thumbnailUrl || '',
+      src: img.previewUrl || img.thumbnailUrl || '',
       alt: img.name,
-      width: img.width,
-      height: img.height,
+      width: img.metadata?.dimensions?.width,
+      height: img.metadata?.dimensions?.height,
       mimeType: img.mimeType
     }))
   }, [images])

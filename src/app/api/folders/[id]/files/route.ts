@@ -6,7 +6,8 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params
+    const params = await Promise.resolve(context.params)
+    const { id } = params
     if (!id) {
       return NextResponse.json(
         { error: 'ID de carpeta no proporcionado' },
@@ -26,7 +27,8 @@ export async function GET(
       name: image.name,
       path: image.path,
       size: image.size,
-      type: image.mimeType,
+      type: image.mimeType?.startsWith('image/') ? 'image' : 'file',
+      mimeType: image.mimeType,
       lastModified: image.updatedAt,
       isDirectory: false,
       metadata: image.metadata ? JSON.parse(image.metadata) : null,

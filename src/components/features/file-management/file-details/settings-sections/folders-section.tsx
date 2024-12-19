@@ -2,23 +2,24 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Folder, RefreshCw, AlertCircle, FolderPlus, FolderX, Eye, EyeOff } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
 import { folderService } from "@/services/folder.service"
-import { watcherService } from "@/services/watcher.service"
-import { formatBytes, cn } from "@/lib/utils"
 import { useToast } from "@/components/ui/use-toast"
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
+import { Folder, FolderX, RefreshCw, FolderPlus, AlertCircle } from "lucide-react"
+import { formatBytes } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { Progress } from "@/components/ui/progress"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
@@ -41,12 +42,13 @@ const initialStats: FolderStats = {
 export function FoldersSection() {
   const { settings, updateSettings } = useSettingsContext()
   const { toast } = useToast()
-  const [isIndexing, setIsIndexing] = React.useState(false)
-  const [stats, setStats] = React.useState<FolderStats>(initialStats)
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processProgress, setProcessProgress] = useState(0)
+  const [currentFolder, setCurrentFolder] = useState<string | null>(null)
+  const [stats, setStats] = useState<FolderStats>(initialStats)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [folderPath, setFolderPath] = useState("")
-  const [isAdding, setIsAdding] = useState(false)
   const [folders, setFolders] = useState<any[]>([])
 
   // Cargar carpetas al montar el componente
@@ -97,20 +99,20 @@ export function FoldersSection() {
         return
       }
 
-      setIsAdding(true)
+      setIsProcessing(true)
       const folder = await folderService.addFolder(folderPath)
+      setCurrentFolder(folder.id)
       
       // Recargar carpetas y estadísticas
       await loadFolders()
       
       toast({
         title: "Carpeta agregada",
-        description: `Se ha agregado la carpeta ${folder.name} correctamente.`
+        description: `Se han procesado ${folder.stats?.processedFiles || 0} archivos correctamente.`
       })
 
       // Limpiar el input
       setFolderPath("")
-      setIsAdding(false)
     } catch (error) {
       console.error('Error agregando carpeta:', error)
       toast({
@@ -118,43 +120,40 @@ export function FoldersSection() {
         description: error instanceof Error ? error.message : 'Error al agregar la carpeta',
         variant: "destructive"
       })
-      setIsAdding(false)
+    } finally {
+      setIsProcessing(false)
+      setProcessProgress(0)
+      setCurrentFolder(null)
     }
   }
 
-  const handleSelectFolder = async () => {
+  const handleReindexFolder = async (folderId: string) => {
     try {
-      // Crear un elemento input de tipo file
-      const input = document.createElement('input')
-      input.type = 'file'
-      
-      // Configurar para selección de carpetas
-      input.setAttribute('webkitdirectory', '')
-      input.setAttribute('directory', '')
-      
-      // Manejar el cambio
-      input.onchange = (e) => {
-        const files = (e.target as HTMLInputElement).files
-        if (files && files.length > 0) {
-          const file = files[0]
-          // En Windows, file.path contiene la ruta completa al archivo
-          if (file.path) {
-            // Obtener la ruta de la carpeta (eliminando el último segmento que es el archivo)
-            const folderPath = file.path.split('\\').slice(0, -1).join('\\')
-            setFolderPath(folderPath)
-          }
-        }
-      }
+      setError(null)
+      setIsProcessing(true)
+      setProcessProgress(0)
+      setCurrentFolder(folderId)
 
-      // Simular click
-      input.click()
+      const response = await folderService.reindexFolder(folderId)
+      
+      // Recargar carpetas y estadísticas
+      await loadFolders()
+      
+      toast({
+        title: "Reindexación completada",
+        description: `Se han procesado ${response.stats?.processedFiles || 0} archivos correctamente.`
+      })
     } catch (error) {
-      console.error('Error seleccionando carpeta:', error)
+      console.error('Error reindexando carpeta:', error)
       toast({
         title: "Error",
-        description: "No se pudo abrir el selector de carpetas",
+        description: error instanceof Error ? error.message : 'Error al reindexar la carpeta',
         variant: "destructive"
       })
+    } finally {
+      setIsProcessing(false)
+      setProcessProgress(0)
+      setCurrentFolder(null)
     }
   }
 
@@ -180,34 +179,12 @@ export function FoldersSection() {
     }
   }
 
-  const handleReindexFolder = async (folderId: string) => {
-    try {
-      setError(null)
-      await folderService.reindexFolder(folderId)
-      
-      // Recargar carpetas y estadísticas
-      await loadFolders()
-      
-      toast({
-        title: "Reindexación completada",
-        description: "Se ha actualizado la carpeta correctamente."
-      })
-    } catch (error) {
-      console.error('Error reindexando carpeta:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Error al reindexar la carpeta',
-        variant: "destructive"
-      })
-    }
-  }
-
   const handleReindex = async () => {
-    if (isIndexing) return
+    if (isProcessing) return
 
     try {
       setError(null)
-      setIsIndexing(true)
+      setIsProcessing(true)
       await folderService.reindexAll()
       await loadStats()
       
@@ -223,30 +200,7 @@ export function FoldersSection() {
         variant: "destructive"
       })
     } finally {
-      setIsIndexing(false)
-    }
-  }
-
-  const toggleWatching = async (folderId: string, isWatched: boolean) => {
-    try {
-      setError(null)
-      if (isWatched) {
-        await watcherService.watchFolder(folderId)
-      } else {
-        await watcherService.stopWatching(folderId)
-      }
-      
-      toast({
-        title: isWatched ? "Monitoreo iniciado" : "Monitoreo detenido",
-        description: `Se ha ${isWatched ? 'iniciado' : 'detenido'} el monitoreo de la carpeta.`
-      })
-    } catch (error) {
-      console.error('Error cambiando estado de monitoreo:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Error al cambiar el estado de monitoreo',
-        variant: "destructive"
-      })
+      setIsProcessing(false)
     }
   }
 
@@ -264,16 +218,7 @@ export function FoldersSection() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="p-4 pb-3">
-          <div className="flex items-center gap-2">
-            <Folder className="h-4 w-4" />
-            <CardTitle className="text-sm font-medium">Carpetas Indexadas</CardTitle>
-          </div>
-          <CardDescription className="text-xs">
-            Administra las carpetas que quieres mantener indexadas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-2 space-y-3">
+        <CardContent className="p-4">
           <div className="flex items-center gap-2 p-2 rounded-lg border">
             <div className="flex-1">
               <Input
@@ -284,13 +229,12 @@ export function FoldersSection() {
               />
             </div>
             <Button
-              variant="default"
               size="sm"
               className="h-7"
               onClick={handleAddFolder}
-              disabled={isLoading || isAdding || !folderPath.trim()}
+              disabled={isLoading || isProcessing || !folderPath.trim()}
             >
-              {isAdding ? (
+              {isProcessing ? (
                 <>
                   <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                   Agregando...
@@ -312,71 +256,86 @@ export function FoldersSection() {
           ) : folders.length > 0 ? (
             <div className="space-y-2">
               {folders.map((folder) => (
-                <div 
-                  key={folder.id}
-                  className="flex items-center justify-between p-2 rounded-lg border bg-card"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-muted">
-                      <Folder className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-xs font-medium block truncate">{folder.name}</span>
-                      <p className="text-[10px] text-muted-foreground truncate">{folder.path}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] text-muted-foreground">
-                          {folder._count?.images || 0} imágenes
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {formatBytes(folder.totalSize || 0)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleString() : 'No indexado'}
-                        </span>
+                <Card key={folder.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-md bg-muted">
+                          <Folder className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium block truncate">{folder.name}</span>
+                          <p className="text-[10px] text-muted-foreground truncate">{folder.path}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-muted-foreground">
+                              {folder._count?.images || 0} imágenes
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatBytes(folder.totalSize || 0)}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleString() : 'No indexado'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => handleReindexFolder(folder.id)}
-                      disabled={isLoading}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                      <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-destructive hover:text-destructive"
-                          disabled={isLoading}
+                          className="h-7 w-7"
+                          onClick={() => handleReindexFolder(folder.id)}
+                          disabled={isProcessing}
                         >
-                          <FolderX className="h-4 w-4" />
+                          <RefreshCw className={cn(
+                            "h-4 w-4",
+                            isProcessing && currentFolder === folder.id && "animate-spin"
+                          )} />
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar carpeta?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción eliminará la carpeta "{folder.name}" de la lista de indexación.
-                            No se eliminarán los archivos del disco.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleRemoveFolder(folder.id)}
-                          >
-                            Eliminar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              disabled={isProcessing}
+                            >
+                              <FolderX className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar carpeta?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción eliminará la carpeta "{folder.name}" de la lista de indexación.
+                                No se eliminarán los archivos del disco.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleRemoveFolder(folder.id)}
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+
+                    {/* Barra de progreso */}
+                    {isProcessing && currentFolder === folder.id && (
+                      <div className="mt-4 space-y-2">
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>Procesando archivos...</span>
+                          <span>{Math.round(processProgress)}%</span>
+                        </div>
+                        <Progress value={processProgress} className="h-2" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (
@@ -421,9 +380,9 @@ export function FoldersSection() {
             size="sm"
             className="w-full h-8 text-xs mt-2"
             onClick={handleReindex}
-            disabled={isIndexing || isLoading}
+            disabled={isProcessing || isLoading}
           >
-            {isIndexing ? (
+            {isProcessing ? (
               <>
                 <RefreshCw className="h-3 w-3 mr-2 animate-spin" />
                 Reindexando...
