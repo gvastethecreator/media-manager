@@ -3,6 +3,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import { Image, Folder } from '@prisma/client'
+import { ThumbnailQuality } from './thumbnail.service'
 
 // Lista de extensiones de imagen soportadas
 const SUPPORTED_IMAGE_EXTENSIONS = [
@@ -45,15 +46,27 @@ interface FolderStats {
   lastIndexed: Date | null
 }
 
+export interface FolderProgress {
+  current: number
+  total: number
+  progress: number
+  currentFile: string
+}
+
 export const folderService = {
-  async addFolder(path: string): Promise<Folder> {
+  async addFolder(
+    path: string,
+    thumbnailQuality: ThumbnailQuality = 'mid',
+    onProgress?: (progress: FolderProgress) => void,
+    onError?: (error: { file: string, error: string }) => void
+  ): Promise<Folder> {
     try {
       const response = await fetch('/api/folders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path }),
+        body: JSON.stringify({ path, thumbnailQuality }),
       })
 
       if (!response.ok) {
@@ -61,7 +74,44 @@ export const folderService = {
         throw new Error(error.error || 'Error al agregar la carpeta')
       }
 
-      return response.json()
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No se pudo leer la respuesta del servidor')
+      }
+
+      let folder: Folder | null = null
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const lines = decoder.decode(value).split('\n').filter(Boolean)
+        for (const line of lines) {
+          try {
+            const message = JSON.parse(line)
+            switch (message.type) {
+              case 'progress':
+                onProgress?.(message.data)
+                break
+              case 'error':
+                onError?.(message.data)
+                break
+              case 'complete':
+                folder = message.data.folder
+                break
+            }
+          } catch (e) {
+            console.error('Error parsing message:', e)
+          }
+        }
+      }
+
+      if (!folder) {
+        throw new Error('No se recibió la información de la carpeta')
+      }
+
+      return folder
     } catch (error) {
       console.error('Error en addFolder:', error)
       throw error

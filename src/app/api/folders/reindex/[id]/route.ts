@@ -46,10 +46,13 @@ export async function POST(
     for (const file of imageFiles) {
       try {
         const hash = await computeHash(file.path)
+        console.log('🔄 Procesando archivo:', file.path)
         const metadata = await getImageMetadata(file.path)
+        console.log('📝 Metadata extraída:', metadata)
         
         // Limpiar la metadata eliminando valores undefined
         const cleanMetadata = JSON.parse(JSON.stringify(metadata))
+        console.log('🧹 Metadata limpia:', cleanMetadata)
 
         await prisma.image.create({
           data: {
