@@ -1,12 +1,12 @@
 'use client'
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { ResizablePanel } from "@/components/ui/resizable";
+import { Button } from "@/components/ui/button";
+import { useFilesStore } from "@/store/files";
+import { useUIStore } from "@/store/ui";
+import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ResizablePanel } from "@/components/ui/resizable"
-import { useFilesStore } from "@/store/files"
-import { useUIStore } from "@/store/ui"
 import { useTheme } from "next-themes"
 import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,6 +20,9 @@ interface LeftPanelProps {
   minSize?: number
   maxSize?: number
   isResizing?: boolean
+  onTransitionStart?: () => void
+  onTransitionEnd?: () => void
+  className?: string
 }
 
 // Función auxiliar para determinar el color del texto basado en el contraste
@@ -37,7 +40,10 @@ export function LeftPanel({
   defaultSize = 25,
   minSize = 15,
   maxSize = 40,
-  isResizing
+  isResizing,
+  onTransitionStart,
+  onTransitionEnd,
+  className
 }: LeftPanelProps) {
   const {
     currentView,
@@ -61,9 +67,9 @@ export function LeftPanel({
 
   const handleToggleCollapse = React.useCallback(() => {
     if (isResizing) return
-    setIsTransitioning(true)
+    onTransitionStart?.()
     onToggleCollapse()
-  }, [onToggleCollapse, isResizing])
+  }, [onToggleCollapse, isResizing, onTransitionStart])
 
   const handleOpenSettings = React.useCallback(() => {
     toggleSettings()
@@ -107,78 +113,122 @@ export function LeftPanel({
       minSize={minSize}
       maxSize={maxSize}
       className={cn(
-        "border-r transition-[flex-basis] duration-300 ease-in-out",
-        isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",
-        isResizing && "select-none pointer-events-none"
+        "flex flex-col",
+        isCollapsed ? "items-center p-2" : "p-4",
+        className
       )}
+      onTransitionStart={onTransitionStart}
+      onTransitionEnd={onTransitionEnd}
     >
-      <div className="h-full flex flex-col">
-        <div className="px-2 h-10 flex items-center justify-between border-b">
+      <div className={cn(
+        "flex items-center gap-2 border-b pb-2",
+        isCollapsed ? "flex-col w-full" : "w-full justify-between"
+      )}>
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6 shrink-0">
+            <AvatarImage src="/avatars/01.png" alt="@usuario" />
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] font-medium leading-tight truncate">Nombre Usuario Largo</span>
+              <span className="text-[10px] text-muted-foreground leading-tight">{stats.totalFiles} archivos</span>
+            </div>
+          )}
+        </div>
+        {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 shrink-0">
-              <AvatarImage src="/avatars/01.png" alt="@usuario" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-medium leading-tight truncate">Nombre Usuario Largo</span>
-                <span className="text-[10px] text-muted-foreground leading-tight">{stats.totalFiles} archivos</span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            {!isCollapsed && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={handleThemeToggle}
-                >
-                  {theme === 'light' ? (
-                    <Moon className="h-4 w-4" />
-                  ) : (
-                    <Sun className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={handleRestart}
-                >
-                  <RefreshCcw className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleOpenSettings}
-                  className="h-7 w-7"
-                >
-                  <Settings2 className="h-4 w-4" />
-                </Button>
-              </>
-            )}
             <Button
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              onClick={handleToggleCollapse}
-              disabled={isResizing}
+              onClick={handleThemeToggle}
             >
-              <ChevronLeft className={cn(
-                "h-4 w-4 transition-transform",
-                isCollapsed && "rotate-180"
-              )} />
+              {theme === 'light' ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleRestart}
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-7 w-7",
+                isCollapsed && "rotate-90 transform"
+              )}
+              onClick={handleToggleCollapse}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+      {isCollapsed ? (
+        <div className="flex flex-col gap-4 mt-4 w-full">
+          {/* Botones de navegación */}
+          {categories.map(({ id, icon: Icon, color }) => (
+            <Button
+              key={id}
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-7 w-7",
+                currentView === id && "bg-accent"
+              )}
+              onClick={() => setCurrentView(id)}
+            >
+              <Icon 
+                className="h-4 w-4" 
+                style={{ color: currentView === id ? color : undefined }}
+              />
+            </Button>
+          ))}
+
+          <div className="mt-auto flex flex-col gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleThemeToggle}
+            >
+              {theme === 'light' ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleRestart}
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-7 w-7",
+                "rotate-90 transform"
+              )}
+              onClick={handleToggleCollapse}
+            >
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <ScrollArea
-          className={cn(
-            "flex-1",
-            isResizing && "pointer-events-none"
-          )}
-        >
+      ) : (
+        <ScrollArea className="flex-1 w-full">
           <div className="py-2">
             {categories.map(({ id, icon: Icon, label, color, count }) => (
               <div key={id} className="py-1">
@@ -247,7 +297,7 @@ export function LeftPanel({
             ))}
           </div>
         </ScrollArea>
-      </div>
+      )}
     </ResizablePanel>
   )
 }
