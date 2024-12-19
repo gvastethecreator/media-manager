@@ -164,8 +164,8 @@ export function LeftPanel({
                   )}
                   onClick={() => setCurrentView(id)}
                 >
-                  <Icon 
-                    className="h-4 w-4" 
+                  <Icon
+                    className="h-4 w-4"
                     style={{ color: currentView === id ? color : undefined }}
                   />
                 </Button>

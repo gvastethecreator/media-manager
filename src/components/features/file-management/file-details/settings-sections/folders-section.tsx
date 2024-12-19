@@ -23,6 +23,15 @@ import {
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ThumbnailQuality } from "@/services/thumbnail.service"
 import { useState } from "react"
 
 interface FolderStats {
@@ -50,6 +59,7 @@ export function FoldersSection() {
   const [error, setError] = useState<string | null>(null)
   const [folderPath, setFolderPath] = useState("")
   const [folders, setFolders] = useState<any[]>([])
+  const [thumbnailQuality, setThumbnailQuality] = useState<ThumbnailQuality>('mid')
 
   // Cargar carpetas al montar el componente
   React.useEffect(() => {
@@ -87,43 +97,48 @@ export function FoldersSection() {
   }
 
   const handleAddFolder = async () => {
+    if (!folderPath.trim()) return
+    
     try {
       setError(null)
-      
-      if (!folderPath.trim()) {
-        toast({
-          title: "Error",
-          description: "Por favor ingresa una ruta de carpeta válida",
-          variant: "destructive"
-        })
-        return
-      }
-
       setIsProcessing(true)
-      const folder = await folderService.addFolder(folderPath)
-      setCurrentFolder(folder.id)
+      setCurrentFolder(folderPath)
+      setProcessProgress(0)
       
-      // Recargar carpetas y estadísticas
-      await loadFolders()
+      const folder = await folderService.addFolder(
+        folderPath,
+        thumbnailQuality,
+        (progress) => {
+          setProcessProgress(progress.progress)
+          setCurrentFolder(`${progress.currentFile} (${progress.current}/${progress.total})`)
+        },
+        (error) => {
+          toast({
+            title: "Error procesando archivo",
+            description: `Error en ${error.file}: ${error.error}`,
+            variant: "destructive"
+          })
+        }
+      )
       
       toast({
         title: "Carpeta agregada",
-        description: `Se han procesado ${folder.stats?.processedFiles || 0} archivos correctamente.`
+        description: `Se agregó la carpeta ${folder.name} correctamente`
       })
-
-      // Limpiar el input
+      
       setFolderPath("")
+      await loadFolders()
     } catch (error) {
       console.error('Error agregando carpeta:', error)
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : 'Error al agregar la carpeta',
+        description: "No se pudo agregar la carpeta",
         variant: "destructive"
       })
     } finally {
       setIsProcessing(false)
-      setProcessProgress(0)
       setCurrentFolder(null)
+      setProcessProgress(0)
     }
   }
 
@@ -218,7 +233,7 @@ export function FoldersSection() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="flex items-center gap-2 p-2 rounded-lg border">
             <div className="flex-1">
               <Input
@@ -246,6 +261,21 @@ export function FoldersSection() {
                 </>
               )}
             </Button>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Calidad de miniaturas</Label>
+            <Select value={thumbnailQuality} onValueChange={(value: ThumbnailQuality) => setThumbnailQuality(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona la calidad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="compressed">Comprimida (más rápido, menos espacio)</SelectItem>
+                <SelectItem value="low">Baja (balance entre calidad y espacio)</SelectItem>
+                <SelectItem value="mid">Media (recomendado)</SelectItem>
+                <SelectItem value="high">Alta (mejor calidad, más espacio)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {isLoading ? (

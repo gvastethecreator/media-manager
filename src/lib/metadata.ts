@@ -3,6 +3,34 @@ import sharp from 'sharp'
 import { promises as fs } from 'fs'
 import path from 'path'
 
+// Configurar exifr para extraer toda la metadata
+const configureExifr = () => {
+  try {
+    if (!exifr.options) {
+      exifr.options = {}
+    }
+    
+    Object.assign(exifr.options, {
+      tiff: true,
+      xmp: true,
+      icc: true,
+      iptc: true,
+      jfif: true,
+      ihdr: true,
+      mergeOutput: false,
+      sanitize: false,
+      reviveValues: true,
+      translateValues: true,
+      translateKeys: true,
+      pick: ['*']
+    })
+  } catch (error) {
+    console.error('Error configurando exifr:', error)
+  }
+}
+
+configureExifr()
+
 export interface ImageMetadata {
   // Dimensiones de la imagen
   dimensions?: {
@@ -155,80 +183,121 @@ export async function extractImageMetadata(filePath: string): Promise<ImageMetad
     }
 
     // Extraer metadata EXIF con todas las opciones habilitadas
-    const exifData = await exifr.parse(filePath, true)
-    if (exifData) {
-      // Convertir la metadata EXIF a un objeto plano
-      const exifObj: Record<string, any> = {}
-      
-      // Lista de campos EXIF que queremos mantener
-      const relevantFields = [
-        'Make', 'Model', 'Software', 'DateTime', 'DateTimeOriginal',
-        'CreateDate', 'ModifyDate', 'Artist', 'Copyright', 'ExposureTime',
-        'FNumber', 'ISO', 'FocalLength', 'LensModel', 'Description',
-        'UserComment', 'ImageDescription', 'Orientation', 'ColorSpace',
-        'ExposureMode', 'WhiteBalance', 'GPSLatitude', 'GPSLongitude'
-      ]
+    console.log('🔍 Intentando extraer EXIF de:', filePath)
+    try {
+      // Primero intentamos obtener la metadata con sharp
+      const sharpMetadata = await sharp(filePath).metadata()
+      console.log('📊 Sharp metadata:', sharpMetadata)
 
-      /**
-       * Decodifica un Buffer a string, intentando varios encodings
-       */
-      const decodeBuffer = (buffer: Buffer): string => {
-        // Primero intentamos UTF-16 (común en EXIF)
-        if (buffer.length >= 8 && buffer.slice(0, 8).toString() === 'UNICODE\0') {
-          return buffer.slice(8).toString('utf16le').replace(/\0/g, '');
-        }
+      // Luego intentamos con exifr
+      const exifData = await exifr.parse(filePath, {
+        // Habilitar todos los segmentos
+        tiff: true,
+        xmp: true,
+        icc: true,
+        iptc: true,
+        jfif: true,
+        ihdr: true,
+        // Incluir thumbnails
+        mergeOutput: false,
+        // Obtener toda la metadata
+        pick: ['*'],
+        // No sanitizar los valores
+        sanitize: false,
+        // Mantener los valores originales
+        reviveValues: true,
+        translateValues: true,
+        translateKeys: true
+      })
+
+      console.log('📝 EXIF Data raw:', JSON.stringify(exifData, null, 2))
+
+      if (exifData) {
+        // Convertir la metadata EXIF a un objeto plano
+        const exifObj: Record<string, any> = {}
         
-        // Si no es UTF-16, intentamos varios encodings comunes
-        const encodings = ['utf8', 'utf16le', 'ascii'];
-        for (const encoding of encodings) {
-          try {
-            const decoded = buffer.toString(encoding as BufferEncoding).trim();
-            // Si la decodificación produce texto legible, lo usamos
-            if (decoded && !/[\x00-\x08\x0E-\x1F\x7F]/.test(decoded)) {
-              return decoded;
-            }
-          } catch (e) {
-            continue;
+        // Procesar todos los campos encontrados
+        const processValue = (key: string, value: any) => {
+          if (value === null || value === undefined || typeof value === 'function') {
+            return false
           }
-        }
-        
-        // Si todo falla, usamos UTF-8 por defecto
-        return buffer.toString('utf8').replace(/\0/g, '');
-      }
-      
-      // Procesar solo los campos relevantes
-      for (const [key, value] of Object.entries(exifData)) {
-        if (relevantFields.includes(key) && value != null && typeof value !== 'function') {
-          // Convertir Buffers a string usando la función de decodificación
+
+          // Convertir Buffers a string
           if (Buffer.isBuffer(value)) {
-            const decoded = decodeBuffer(value);
-            if (decoded.trim()) { // Solo guardar si no está vacío
-              exifObj[key] = decoded;
+            const decoded = decodeBuffer(value)
+            if (decoded.trim()) {
+              exifObj[key] = decoded
+              return true
             }
           }
           // Convertir fechas a ISO string
           else if (value instanceof Date) {
             exifObj[key] = value.toISOString()
+            return true
           }
-          // Para arrays de números (como coordenadas GPS), convertir a número
+          // Para arrays de números (como coordenadas GPS), mantener el array
           else if (Array.isArray(value) && value.every(v => typeof v === 'number')) {
-            exifObj[key] = value[0] // Tomamos el primer valor para simplificar
-          }
-          // Mantener otros valores como están
-          else {
             exifObj[key] = value
+            return true
+          }
+          // Para otros tipos de arrays, convertir a string
+          else if (Array.isArray(value)) {
+            const str = value.join(', ')
+            if (str.trim()) {
+              exifObj[key] = str
+              return true
+            }
+          }
+          // Para objetos, procesarlos recursivamente
+          else if (typeof value === 'object') {
+            const subObj: Record<string, any> = {}
+            let hasValues = false
+            for (const [subKey, subValue] of Object.entries(value)) {
+              if (processValue(subKey, subValue)) {
+                subObj[subKey] = exifObj[subKey]
+                delete exifObj[subKey]
+                hasValues = true
+              }
+            }
+            if (hasValues) {
+              exifObj[key] = subObj
+              return true
+            }
+          }
+          // Mantener otros valores como están si no están vacíos
+          else if (value !== '') {
+            exifObj[key] = value
+            return true
+          }
+
+          return false
+        }
+
+        // Procesar todos los campos
+        for (const [key, value] of Object.entries(exifData)) {
+          processValue(key, value)
+        }
+
+        console.log('🔧 Metadata procesada:', JSON.stringify(exifObj, null, 2))
+
+        // Combinar metadata de sharp y exifr
+        if (Object.keys(exifObj).length > 0) {
+          metadata.exif = {
+            ...exifObj,
+            format: sharpMetadata.format,
+            space: sharpMetadata.space,
+            channels: sharpMetadata.channels,
+            depth: sharpMetadata.depth,
+            density: sharpMetadata.density,
+            chromaSubsampling: sharpMetadata.chromaSubsampling,
+            isProgressive: sharpMetadata.isProgressive,
+            hasProfile: sharpMetadata.hasProfile,
+            hasAlpha: sharpMetadata.hasAlpha
           }
         }
       }
-
-      // Limpiar campos vacíos
-      Object.keys(exifObj).forEach(key => {
-        if (exifObj[key] === '' || exifObj[key] === null || exifObj[key] === undefined) {
-          delete exifObj[key];
-        }
-      });
-
-      metadata.exif = Object.keys(exifObj).length > 0 ? exifObj : undefined;
+    } catch (error) {
+      console.error('❌ Error extrayendo EXIF:', error)
     }
 
     // Intentar extraer metadata de generación AI del nombre del archivo
@@ -239,8 +308,8 @@ export async function extractImageMetadata(filePath: string): Promise<ImageMetad
     }
 
     // Si no se encontró en el nombre, intentar extraer de los comentarios EXIF
-    if (!metadata.generation && exifData?.Comment) {
-      const commentMetadata = extractGenerationMetadata(exifData.Comment)
+    if (!metadata.generation && metadata.exif?.Comment) {
+      const commentMetadata = extractGenerationMetadata(metadata.exif.Comment)
       if (commentMetadata) {
         metadata.generation = commentMetadata
       }
@@ -249,9 +318,9 @@ export async function extractImageMetadata(filePath: string): Promise<ImageMetad
     // Si no se encontró en los comentarios, intentar extraer de UserComment o ImageDescription
     if (!metadata.generation) {
       const otherComments = [
-        exifData?.UserComment,
-        exifData?.ImageDescription,
-        exifData?.Description
+        metadata.exif?.UserComment,
+        metadata.exif?.ImageDescription,
+        metadata.exif?.Description
       ].filter(Boolean)
 
       for (const comment of otherComments) {
@@ -268,4 +337,31 @@ export async function extractImageMetadata(filePath: string): Promise<ImageMetad
   }
 
   return metadata
+}
+
+/**
+ * Decodifica un Buffer a string, intentando varios encodings
+ */
+const decodeBuffer = (buffer: Buffer): string => {
+  // Primero intentamos UTF-16 (común en EXIF)
+  if (buffer.length >= 8 && buffer.slice(0, 8).toString() === 'UNICODE\0') {
+    return buffer.slice(8).toString('utf16le').replace(/\0/g, '');
+  }
+  
+  // Si no es UTF-16, intentamos varios encodings comunes
+  const encodings = ['utf8', 'utf16le', 'ascii'];
+  for (const encoding of encodings) {
+    try {
+      const decoded = buffer.toString(encoding as BufferEncoding).trim();
+      // Si la decodificación produce texto legible, lo usamos
+      if (decoded && !/[\x00-\x08\x0E-\x1F\x7F]/.test(decoded)) {
+        return decoded;
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  
+  // Si todo falla, usamos UTF-8 por defecto
+  return buffer.toString('utf8').replace(/\0/g, '');
 }

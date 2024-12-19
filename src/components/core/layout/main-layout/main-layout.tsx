@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { ImageViewer } from "@/components/features/image-viewer/image-viewer";
 
 export function MainLayout() {
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isResizing, setIsResizing] = useState(false);
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | undefined>();
@@ -54,7 +53,7 @@ export function MainLayout() {
 
   const { columns, setColumns } = useColumns();
   const { searchQuery, setSearchQuery } = useSearchStore();
-  
+
   // Convertir el nivel de zoom a un tamaño de thumbnail
   const thumbnailSize = useMemo(() => {
     if (zoomLevel <= 50) return 'small';    // 100px
@@ -70,7 +69,7 @@ export function MainLayout() {
   const handleSelectItem = useCallback(
     (item: FileItem | null, event?: React.MouseEvent) => {
       if (!item) return;
-      
+
       if (event?.ctrlKey) {
         if (selectedIds.includes(item.id)) {
           deselectItem(item.id);
@@ -193,38 +192,18 @@ export function MainLayout() {
 
   // Inicializar la aplicación
   useEffect(() => {
-    const init = async () => {
-      try {
-        await initialize();
-      } catch (error) {
-        console.error('Error initializing app:', error);
-      } finally {
-        // Dar un pequeño delay para mostrar la pantalla de carga
-        setTimeout(() => {
-          setIsInitialLoad(false);
-        }, 500);
-      }
-    };
-
-    init();
+    initialize().catch((error) => {
+      console.error('Error initializing app:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo inicializar la aplicación",
+        variant: "destructive",
+      });
+    });
   }, [initialize]);
-
-  // Si hay error de carga, también salir del estado inicial
-  useEffect(() => {
-    if (isInitialLoad && !isLoading) {
-      setIsInitialLoad(false);
-    }
-  }, [isLoading, isInitialLoad]);
-
-  if (isInitialLoad) {
-    return <LoadingScreen message="Iniciando aplicación..." />;
-  }
 
   return (
     <div className="h-full flex flex-col">
-      <AnimatePresence>
-        {isLoading && <LoadingScreen message="Cargando vista..." />}
-      </AnimatePresence>
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <LeftPanel
           isCollapsed={isLeftPanelCollapsed}

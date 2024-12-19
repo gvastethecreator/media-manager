@@ -7,9 +7,11 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Trash2 } from "lucide-react"
+import { Trash2, Palette } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
 import type { FileProperty, FilterCondition } from "@/types/settings"
+import { Compact } from 'react-color'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const colorOptions = [
   { value: "blue", label: "Azul" },
@@ -29,11 +31,15 @@ export function TagsSection() {
   const { tags } = settings
   const [newTag, setNewTag] = React.useState({
     name: "",
-    color: "blue",
+    color: "#3b82f6",
     property: "name" as FileProperty,
     condition: "contains" as FilterCondition,
     value: ""
   })
+
+  const handleColorChange = (color: { hex: string }) => {
+    setNewTag({ ...newTag, color: color.hex })
+  }
 
   const handleAddTag = async () => {
     if (!newTag.name) return
@@ -45,7 +51,7 @@ export function TagsSection() {
     await updateTag(newTagData.id, newTagData)
     setNewTag({
       name: "",
-      color: "blue",
+      color: "#3b82f6",
       property: "name",
       condition: "contains",
       value: ""
@@ -90,18 +96,26 @@ export function TagsSection() {
           <div className="grid gap-4">
             <div className="flex gap-2">
               <div className="flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => {
-                    const currentIndex = colorOptions.findIndex(c => c.value === newTag.color)
-                    const nextIndex = (currentIndex + 1) % colorOptions.length
-                    setNewTag({ ...newTag, color: colorOptions[nextIndex].value })
-                  }}
-                >
-                  <span className={`h-4 w-4 rounded-full bg-${newTag.color}-500`} />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      <div
+                        className="h-4 w-4 rounded-full"
+                        style={{ backgroundColor: newTag.color }}
+                      />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Compact
+                      color={newTag.color}
+                      onChange={handleColorChange}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex-1">
                 <Input
@@ -177,9 +191,24 @@ export function TagsSection() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <span className={`h-4 w-4 rounded-full bg-${tag.color}-500`} />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Compact
+                          color={tag.color}
+                          onChange={(color) =>
+                            handleUpdateTag(tag.id, { color: color.hex })
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <div className="flex-1">
                       <Input
                         value={tag.name}

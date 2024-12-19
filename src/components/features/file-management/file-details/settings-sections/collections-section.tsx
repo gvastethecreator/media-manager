@@ -6,22 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { KeyboardIcon, Trash2 } from "lucide-react"
+import { KeyboardIcon, Trash2, Smile } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
-
-const emojiOptions = ["🌟", "📸", "🎨", "🎵", "📚", "🎮", "🎬", "🖼️", "📷", "🎞️"]
-const colorOptions = [
-  { value: "blue", label: "Azul" },
-  { value: "red", label: "Rojo" },
-  { value: "green", label: "Verde" },
-  { value: "yellow", label: "Amarillo" },
-  { value: "purple", label: "Morado" },
-  { value: "pink", label: "Rosa" },
-  { value: "orange", label: "Naranja" },
-  { value: "cyan", label: "Cian" },
-  { value: "indigo", label: "Índigo" },
-  { value: "teal", label: "Verde azulado" }
-]
+import { Compact } from '@uiw/react-color'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { EmojiPicker } from "@/components/ui/emoji-picker"
 
 export function CollectionsSection() {
   const { settings, updateCollection } = useSettingsContext()
@@ -30,8 +19,16 @@ export function CollectionsSection() {
     name: "",
     emoji: "🌟",
     description: "",
-    color: "blue"
+    color: "#3b82f6"
   })
+
+  const handleEmojiSelect = (emoji: string) => {
+    setNewCollection({ ...newCollection, emoji })
+  }
+
+  const handleColorChange = (color: { hex: string }) => {
+    setNewCollection({ ...newCollection, color: color.hex })
+  }
 
   const handleAddCollection = async () => {
     if (!newCollection.name) return
@@ -49,7 +46,7 @@ export function CollectionsSection() {
       name: "",
       emoji: "🌟",
       description: "",
-      color: "blue"
+      color: "#3b82f6"
     })
   }
 
@@ -69,18 +66,24 @@ export function CollectionsSection() {
 
           <div className="flex gap-2">
             <div className="flex-shrink-0">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => {
-                  const currentIndex = emojiOptions.indexOf(newCollection.emoji)
-                  const nextIndex = (currentIndex + 1) % emojiOptions.length
-                  setNewCollection({ ...newCollection, emoji: emojiOptions[nextIndex] })
-                }}
-              >
-                <span className="text-lg">{newCollection.emoji}</span>
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                  >
+                    {newCollection.emoji ? (
+                      <span className="text-lg">{newCollection.emoji}</span>
+                    ) : (
+                      <Smile className="h-4 w-4" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[320px] p-0" align="start">
+                  <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex-1">
               <Input
@@ -90,18 +93,26 @@ export function CollectionsSection() {
               />
             </div>
             <div className="flex-shrink-0">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => {
-                  const currentIndex = colorOptions.findIndex(c => c.value === newCollection.color)
-                  const nextIndex = (currentIndex + 1) % colorOptions.length
-                  setNewCollection({ ...newCollection, color: colorOptions[nextIndex].value })
-                }}
-              >
-                <span className={`h-4 w-4 rounded-full bg-${newCollection.color}-500`} />
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                  >
+                    <div
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: newCollection.color }}
+                    />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Compact
+                    color={newCollection.color}
+                    onChange={handleColorChange}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
@@ -132,9 +143,20 @@ export function CollectionsSection() {
             <Card key={collection.id} className="p-4">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                    {collection.emoji}
-                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                        {collection.emoji}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[320px] p-0" align="start">
+                      <EmojiPicker
+                        onEmojiSelect={(emoji) =>
+                          handleUpdateCollection(collection.id, { emoji })
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <div className="flex-1 space-y-1">
                     <Input
                       value={collection.name}
@@ -152,9 +174,24 @@ export function CollectionsSection() {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <span className={`h-4 w-4 rounded-full bg-${collection.color}-500`} />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: collection.color }}
+                          />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Compact
+                          color={collection.color}
+                          onChange={(color) =>
+                            handleUpdateCollection(collection.id, { color: color.hex })
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <Button
                       variant="ghost"
                       size="icon"
