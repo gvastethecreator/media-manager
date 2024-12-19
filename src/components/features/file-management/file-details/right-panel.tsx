@@ -95,29 +95,16 @@ export function RightPanel({
 }: RightPanelProps) {
   const [isTransitioning, setIsTransitioning] = React.useState(false)
   const [isResizing, setIsResizing] = React.useState(false)
-  const resizeTimeoutRef = React.useRef<NodeJS.Timeout>()
 
-  const handleResize = React.useCallback((size: number) => {
+  const handleResizeStart = React.useCallback(() => {
     setIsResizing(true);
     onResizeStart?.();
+  }, [onResizeStart]);
 
-    if (resizeTimeoutRef.current) {
-      clearTimeout(resizeTimeoutRef.current);
-    }
-    
-    resizeTimeoutRef.current = setTimeout(() => {
-      setIsResizing(false);
-      onResizeEnd?.();
-    }, 200);
-  }, [onResizeStart, onResizeEnd]);
-
-  React.useEffect(() => {
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-    };
-  }, []);
+  const handleResizeEnd = React.useCallback(() => {
+    setIsResizing(false);
+    onResizeEnd?.();
+  }, [onResizeEnd]);
 
   const handleTransitionEnd = React.useCallback(() => {
     setIsTransitioning(false);
@@ -134,7 +121,8 @@ export function RightPanel({
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
-      onResize={handleResize}
+      onResizeStart={handleResizeStart}
+      onResizeEnd={handleResizeEnd}
       className={cn(
         "border-l transition-[flex-basis] duration-300 ease-in-out",
         isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",
