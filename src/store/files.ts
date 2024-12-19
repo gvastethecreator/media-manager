@@ -118,7 +118,7 @@ interface FilesState {
 export const useFilesStore = create<FilesState>()(
   persist(
     (set, get) => ({
-      currentView: 'collections',
+      currentView: 'files',
       currentItems: mockFiles,
       selectedIds: [],
       collections: mockCollections,
@@ -133,7 +133,37 @@ export const useFilesStore = create<FilesState>()(
       searchQuery: '',
       selectedItem: null,
 
-      setCurrentView: (currentView) => set({ currentView }),
+      setCurrentView: async (currentView) => {
+        console.log('Setting current view:', { currentView });
+        set({ isLoading: true });
+
+        // Simular carga asíncrona
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        let items: FileItem[] = [];
+        switch (currentView) {
+          case 'files':
+            items = mockFiles;
+            break;
+          case 'collections':
+            items = [];
+            break;
+          case 'folders':
+            items = mockFiles.filter(f => f.type === 'folder');
+            break;
+          case 'tags':
+            items = [];
+            break;
+        }
+        console.log('Loaded items for view:', { currentView, count: items.length });
+        
+        set({
+          currentView,
+          currentItems: items,
+          isLoading: false,
+          selectedIds: []
+        });
+      },
 
       selectItem: (id, multiSelect = false) => set(produce((state: FilesState) => {
         if (!multiSelect) {
