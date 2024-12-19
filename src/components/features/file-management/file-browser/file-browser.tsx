@@ -198,7 +198,12 @@ export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect
 
   const handleItemDoubleClick = React.useCallback((item: FileItem) => {
     if (item.type === 'image' || (item.mimeType?.startsWith('image/'))) {
-      openViewer(item, items)
+      // Filtramos solo las imágenes del array de items
+      const imageItems = items.filter(i => 
+        i.type === 'image' || i.mimeType?.startsWith('image/')
+      )
+      const initialIndex = imageItems.findIndex(i => i.id === item.id)
+      openViewer(imageItems, initialIndex)
     }
   }, [openViewer, items])
 

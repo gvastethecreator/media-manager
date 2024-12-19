@@ -1,37 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { fsService } from '@/services/fs.server'
+import { readdirSync, statSync } from 'node:fs'
+import { join, extname } from 'node:path'
+import { computeHash } from '@/lib/server-utils'
+import { getImageMetadata } from '@/lib/image.server'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json()
-    const { path: folderPath } = data
-
-    console.log('Agregando carpeta:', folderPath)
-
-    // Validar la ruta
-    const validation = await fsService.validatePath(folderPath)
-    if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 400 })
-    }
-
-    // Normalizar la ruta
-    const normalizedPath = fsService.normalizePath(folderPath)
+    const { path: folderPath } = await request.json()
 
     // Verificar si la carpeta ya existe
-    const existingFolder = await prisma.folder.findFirst({
-      where: {
-        OR: [
-          { path: normalizedPath },
-          { path: { endsWith: normalizedPath } },
-          { path: { startsWith: normalizedPath } }
-        ]
-      }
+    const existingFolder = await prisma.folder.findUnique({
+      where: { path: folderPath }
     })
 
     if (existingFolder) {
       return NextResponse.json(
-        { error: `La carpeta "${normalizedPath}" o una carpeta que la contiene ya está indexada` },
+        { error: 'Folder already exists' },
         { status: 400 }
       )
     }
@@ -39,65 +24,64 @@ export async function POST(request: Request) {
     // Crear la carpeta en la base de datos
     const folder = await prisma.folder.create({
       data: {
-        path: normalizedPath,
-        name: normalizedPath.split('\\').pop() || normalizedPath,
-        isWatched: true
+        path: folderPath,
+        name: folderPath.split('\\').pop() || folderPath,
       }
     })
 
-    console.log('Carpeta creada:', folder)
-
-    // Iniciar la indexación de archivos
-    const files = await fsService.listFiles(normalizedPath)
-    console.log('Archivos encontrados:', files.length)
-
-    let totalSize = 0
-    let totalFiles = 0
-
-    for (const file of files) {
-      if (await fsService.isImage(file.path)) {
-        try {
-          const hash = await fsService.calculateFileHash(file.path)
-          const metadata = await fsService.getFileMetadata(file.path)
-
-          await prisma.image.create({
-            data: {
-              name: file.name,
-              path: file.path,
-              hash,
-              size: file.size,
-              mimeType: `image/${path.extname(file.path).slice(1)}`,
-              metadata: JSON.stringify(metadata),
-              folderId: folder.id,
-              isPublic: false
-            }
-          })
-
-          totalSize += file.size
-          totalFiles++
-          console.log('Imagen indexada:', file.name)
-        } catch (error) {
-          console.error('Error indexando imagen:', file.path, error)
-          // Continuar con el siguiente archivo
+    // Leer los archivos de la carpeta
+    const files = readdirSync(folderPath)
+      .map(file => {
+        const filePath = join(folderPath, file)
+        const stats = statSync(filePath)
+        return {
+          path: filePath,
+          name: file,
+          size: stats.size,
+          isDirectory: stats.isDirectory()
         }
-      }
-    }
+      })
+      .filter(file => !file.isDirectory && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
 
     // Actualizar estadísticas de la carpeta
     await prisma.folder.update({
       where: { id: folder.id },
       data: {
-        totalFiles,
-        totalSize,
-        lastIndexed: new Date()
+        totalFiles: files.length,
+        totalSize: files.reduce((acc, file) => acc + file.size, 0)
       }
     })
 
+    // Indexar las imágenes
+    for (const file of files) {
+      try {
+        const hash = await computeHash(file.path)
+        const metadata = await getImageMetadata(file.path)
+
+        await prisma.image.create({
+          data: {
+            name: file.name,
+            path: file.path,
+            hash,
+            size: file.size,
+            mimeType: `image/${extname(file.path).slice(1)}`,
+            metadata: JSON.stringify(metadata),
+            folderId: folder.id,
+            isPublic: false,
+            width: metadata.width,
+            height: metadata.height
+          }
+        })
+      } catch (error) {
+        console.error(`Error indexando imagen: ${file.path}`, error)
+      }
+    }
+
     return NextResponse.json(folder)
   } catch (error) {
-    console.error('Error en POST /api/folders:', error)
+    console.error('Error creating folder:', error)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: 'Error creating folder' },
       { status: 500 }
     )
   }
@@ -106,39 +90,32 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const folders = await prisma.folder.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        path: true,
+        isWatched: true,
+        totalFiles: true,
+        totalSize: true,
         _count: {
-          select: { images: true }
-        },
-        images: {
           select: {
-            size: true
+            images: true
           }
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     })
 
-    // Calcular el tamaño total por carpeta
-    const foldersWithStats = folders.map(folder => ({
-      ...folder,
-      totalSize: folder.images.reduce((acc, img) => acc + (img.size || 0), 0),
-      images: undefined // No enviar la lista de imágenes
-    }))
-
-    return NextResponse.json(foldersWithStats)
+    return NextResponse.json(folders)
   } catch (error) {
-    console.error('Error en GET /api/folders:', error)
+    console.error('Error fetching folders:', error)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: 'Error fetching folders' },
       { status: 500 }
     )
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const folderId = searchParams.get('id')

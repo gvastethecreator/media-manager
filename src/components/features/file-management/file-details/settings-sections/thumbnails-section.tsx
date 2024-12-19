@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { RefreshCw, AlertCircle } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
+import { thumbnailService, type ThumbnailStats } from "@/services/thumbnail.service"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from "@/components/ui/use-toast"
 
 const thumbnailQualityOptions = [
   { value: "compressed", label: "Comprimida (más rápido, menos espacio)" },
@@ -20,8 +24,32 @@ const thumbnailQualityOptions = [
 
 export function ThumbnailsSection() {
   const { settings, updateSettings } = useSettingsContext()
+  const { toast } = useToast()
   const [processingProgress, setProcessingProgress] = React.useState(0)
   const [isProcessing, setIsProcessing] = React.useState(false)
+  const [stats, setStats] = React.useState<ThumbnailStats | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [showErrors, setShowErrors] = React.useState(false)
+
+  const loadStats = React.useCallback(async () => {
+    try {
+      const data = await thumbnailService.getStats()
+      setStats(data)
+    } catch (error) {
+      console.error('Error loading stats:', error)
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las estadísticas de miniaturas",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
+  React.useEffect(() => {
+    loadStats()
+  }, [loadStats])
 
   const handleQualityChange = (value: string) => {
     updateSettings({ thumbnailQuality: value })
@@ -32,14 +60,30 @@ export function ThumbnailsSection() {
   }
 
   const handleReprocessThumbnails = async () => {
-    setIsProcessing(true)
-    // Simular progreso
-    for (let i = 0; i <= 100; i += 10) {
-      setProcessingProgress(i)
-      await new Promise(resolve => setTimeout(resolve, 500))
+    try {
+      setIsProcessing(true)
+      await thumbnailService.reprocessAll((progress) => {
+        setProcessingProgress(progress)
+      })
+      
+      // Recargar estadísticas
+      await loadStats()
+      
+      toast({
+        title: "Éxito",
+        description: "Las miniaturas han sido reprocesadas correctamente"
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al reprocesar las miniaturas",
+        variant: "destructive"
+      })
+    } finally {
+      setIsProcessing(false)
+      setProcessingProgress(0)
     }
-    setIsProcessing(false)
-    setProcessingProgress(0)
   }
 
   return (
@@ -113,44 +157,96 @@ export function ThumbnailsSection() {
           <CardTitle className="text-lg font-semibold">Estado de Miniaturas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Total Miniaturas</Label>
-              <div className="flex items-center justify-between bg-muted p-2 rounded-md">
-                <span className="text-sm font-medium">1,234</span>
-                <Badge variant="secondary">100%</Badge>
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center p-4">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
+          ) : stats ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Total Miniaturas</Label>
+                <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                  <span className="text-sm font-medium">{stats.total}</span>
+                  <Badge variant="secondary">
+                    {stats.total > 0 
+                      ? `${Math.round(((stats.total - stats.pending) / stats.total) * 100)}%` 
+                      : '0%'}
+                  </Badge>
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <Label>Peso en Base de Datos</Label>
-              <div className="flex items-center justify-between bg-muted p-2 rounded-md">
-                <span className="text-sm font-medium">500 MB</span>
-                <Badge variant="secondary">Optimizado</Badge>
+              <div className="space-y-2">
+                <Label>Peso en Base de Datos</Label>
+                <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                  <span className="text-sm font-medium">{thumbnailService.formatSize(stats.totalSize)}</span>
+                  <Badge variant="secondary">Optimizado</Badge>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Pendientes</Label>
-              <div className="flex items-center justify-between bg-muted p-2 rounded-md">
-                <span className="text-sm font-medium">0</span>
-                <Badge variant="secondary" className="bg-green-500">Al día</Badge>
+              <div className="space-y-2">
+                <Label>Pendientes</Label>
+                <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                  <span className="text-sm font-medium">{stats.pending}</span>
+                  <Badge 
+                    variant="secondary" 
+                    className={stats.pending === 0 ? "bg-green-500" : undefined}
+                  >
+                    {stats.pending === 0 ? 'Al día' : 'Pendiente'}
+                  </Badge>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Con Error</Label>
-              <div className="flex items-center justify-between bg-muted p-2 rounded-md">
-                <span className="text-sm font-medium">2</span>
-                <Button variant="ghost" size="sm" className="h-6 text-red-500 hover:text-red-600">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  Ver detalles
-                </Button>
+              <div className="space-y-2">
+                <Label>Con Error</Label>
+                <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                  <span className="text-sm font-medium">{stats.errors.length}</span>
+                  {stats.errors.length > 0 ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-red-500 hover:text-red-600"
+                      onClick={() => setShowErrors(true)}
+                    >
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Ver detalles
+                    </Button>
+                  ) : (
+                    <Badge variant="secondary" className="bg-green-500">Sin errores</Badge>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
         </CardContent>
       </Card>
+
+      <Dialog open={showErrors} onOpenChange={setShowErrors}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Errores en Miniaturas</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] mt-4">
+            <div className="space-y-4">
+              {stats?.errors.map((error) => (
+                <div 
+                  key={error.imageId} 
+                  className="p-4 rounded-lg border bg-muted"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium">
+                      {error.imagePath}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(error.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-red-500">{error.error}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
