@@ -2,7 +2,7 @@
 
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { RightPanel } from "@/components/features/file-management/file-details/right-panel";
-import { LeftSidebar } from "@/components/core/layout/left-sidebar/left-sidebar";
+import { LeftPanel } from "@/components/core/layout/left-panel/left-panel";
 import { FileView } from "@/components/features/file-management/file-browser/file-browser";
 import { MainToolbar } from "@/components/core/navigation/toolbar/main-toolbar";
 import { Breadcrumbs } from "@/components/core/navigation/breadcrumbs/breadcrumbs";
@@ -21,6 +21,8 @@ import { useColumns } from "@/store/columns";
 export function MainLayout() {
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
 	const [isResizing, setIsResizing] = useState(false);
+	const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
+
 	const {
 		currentView,
 		currentItems,
@@ -119,64 +121,76 @@ export function MainLayout() {
 				{isLoading && <LoadingScreen message="Cargando vista..." />}
 			</AnimatePresence>
 
-			<div className="flex h-full">
-				<LeftSidebar />
-				<ResizablePanelGroup direction="horizontal" className="flex-1">
-					<ResizablePanel
-						defaultSize={isRightPanelCollapsed ? 95 : 75}
-						minSize={isRightPanelCollapsed ? 90 : 30}
-						maxSize={isRightPanelCollapsed ? 95 : 85}
-					>
-						<div className="flex flex-col h-full">
-							<MainToolbar
-								view={view}
-								onViewChange={setView}
-								onZoomIn={handleZoomIn}
-								onZoomOut={handleZoomOut}
-								onToggleRightPanel={toggleRightPanel}
-								canZoomIn={zoomLevel < 200}
-								canZoomOut={zoomLevel > 50}
-								isRightPanelOpen={!isRightPanelCollapsed}
-								sortBy={sortBy}
-								sortOrder={sortOrder}
-								onSortChange={setSorting}
-								onSearch={() => setSearchQuery("")}
-								columns={columns}
-								onColumnsChange={setColumns}
+			<ResizablePanelGroup
+				direction="horizontal"
+				className="h-full"
+			>
+				<LeftPanel
+					isCollapsed={isLeftPanelCollapsed}
+					onToggleCollapse={() => setIsLeftPanelCollapsed(!isLeftPanelCollapsed)}
+					defaultSize={isLeftPanelCollapsed ? 5 : 25}
+					minSize={isLeftPanelCollapsed ? 5 : 15}
+					maxSize={isLeftPanelCollapsed ? 5 : 40}
+					isResizing={isResizing}
+				/>
+				<ResizableHandle
+					withHandle
+					onDragging={(isDragging) => setIsResizing(isDragging)}
+				/>
+				<ResizablePanel
+					defaultSize={isRightPanelCollapsed ? 90 : 50}
+					minSize={30}
+					maxSize={90}
+				>
+					<div className="flex flex-col h-full">
+						<MainToolbar
+							view={view}
+							onViewChange={setView}
+							onZoomIn={handleZoomIn}
+							onZoomOut={handleZoomOut}
+							onToggleRightPanel={toggleRightPanel}
+							canZoomIn={zoomLevel < 200}
+							canZoomOut={zoomLevel > 50}
+							isRightPanelOpen={!isRightPanelCollapsed}
+							sortBy={sortBy}
+							sortOrder={sortOrder}
+							onSortChange={setSorting}
+							onSearch={() => setSearchQuery("")}
+							columns={columns}
+							onColumnsChange={setColumns}
+						/>
+						<div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+							<Breadcrumbs
+								path={currentPath}
+								onNavigate={handleBreadcrumbNavigate}
 							/>
-							<div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-								<Breadcrumbs
-									path={currentPath}
-									onNavigate={handleBreadcrumbNavigate}
-								/>
-							</div>
-							<div className="flex-1 overflow-hidden relative">
-								<div className="h-full overflow-auto">{renderContent()}</div>
-								<div className="absolute bottom-4 right-4 bg-background/40 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/30 border border-border/50 rounded-lg px-3 py-1.5 text-[10px] flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-background/50">
-									<div>{currentItems.length} elementos</div>
-									<div className="w-[1px] h-3 bg-border/50"></div>
-									<div>Zoom: {zoomLevel}%</div>
-								</div>
+						</div>
+						<div className="flex-1 overflow-hidden relative">
+							<div className="h-full overflow-auto">{renderContent()}</div>
+							<div className="absolute bottom-4 right-4 bg-background/40 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/30 border border-border/50 rounded-lg px-3 py-1.5 text-[10px] flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-background/50">
+								<div>{currentItems.length} elementos</div>
+								<div className="w-[1px] h-3 bg-border/50"></div>
+								<div>Zoom: {zoomLevel}%</div>
 							</div>
 						</div>
-					</ResizablePanel>
-					<ResizableHandle
-						withHandle
-						onDragging={(isDragging) => setIsResizing(isDragging)}
-					/>
-					<RightPanel
-						selectedItem={selectedItem}
-						isCollapsed={isRightPanelCollapsed}
-						showSettings={isSettingsOpen}
-						onToggleSettings={toggleSettings}
-						onToggleCollapse={toggleRightPanel}
-						defaultSize={isRightPanelCollapsed ? 5 : 25}
-						minSize={isRightPanelCollapsed ? 5 : 15}
-						maxSize={isRightPanelCollapsed ? 5 : 40}
-						isResizing={isResizing}
-					/>
-				</ResizablePanelGroup>
-			</div>
+					</div>
+				</ResizablePanel>
+				<ResizableHandle
+					withHandle
+					onDragging={(isDragging) => setIsResizing(isDragging)}
+				/>
+				<RightPanel
+					selectedItem={selectedItem}
+					isCollapsed={isRightPanelCollapsed}
+					showSettings={isSettingsOpen}
+					onToggleSettings={toggleSettings}
+					onToggleCollapse={toggleRightPanel}
+					defaultSize={isRightPanelCollapsed ? 5 : 25}
+					minSize={isRightPanelCollapsed ? 5 : 15}
+					maxSize={isRightPanelCollapsed ? 5 : 40}
+					isResizing={isResizing}
+				/>
+			</ResizablePanelGroup>
 		</>
 	);
 }
