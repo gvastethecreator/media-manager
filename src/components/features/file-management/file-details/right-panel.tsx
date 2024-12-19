@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
+import { ResizablePanel } from "@/components/ui/resizable"
 import { ChevronRight, Settings2, Moon, Sun, RefreshCw } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -10,7 +10,7 @@ import { FileInfo } from "./file-info"
 import { SettingsPanel } from "./settings-panel"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
-import type { FileItem } from '@/store/files'
+import type { FileItem } from '@/types/files'
 
 interface RightPanelProps {
   selectedItem: FileItem | null
@@ -25,13 +25,22 @@ interface RightPanelProps {
   maxSize?: number
 }
 
+interface ActionButtonsProps {
+  showSettings: boolean
+  onToggleSettings: () => void
+}
+
 // Componente separado para los botones de acción para evitar re-renders innecesarios
-const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggleSettings }: { showSettings: boolean; onToggleSettings: () => void }) {
+const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggleSettings }: ActionButtonsProps) {
   const { theme, setTheme } = useTheme()
 
   const handleRestart = React.useCallback(() => {
     window.location.reload()
   }, [])
+
+  const handleThemeToggle = React.useCallback(() => {
+    setTheme(theme === 'light' ? 'dark' : 'light')
+  }, [theme, setTheme])
 
   return (
     <>
@@ -39,7 +48,7 @@ const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggle
         variant="ghost"
         size="icon"
         className="h-7 w-7"
-        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        onClick={handleThemeToggle}
       >
         {theme === 'light' ? (
           <Moon className="h-4 w-4" />
@@ -70,6 +79,8 @@ const ActionButtons = React.memo(function ActionButtons({ showSettings, onToggle
   )
 })
 
+ActionButtons.displayName = 'ActionButtons'
+
 export function RightPanel({
   selectedItem,
   isCollapsed,
@@ -83,37 +94,51 @@ export function RightPanel({
   maxSize = 70
 }: RightPanelProps) {
   const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const [isResizing, setIsResizing] = React.useState(false)
+  const resizeTimeoutRef = React.useRef<NodeJS.Timeout>()
 
-  const handleToggleCollapse = React.useCallback(() => {
-    setIsTransitioning(true)
-    onToggleCollapse()
-  }, [onToggleCollapse])
+  const handleResize = React.useCallback((size: number) => {
+    setIsResizing(true);
+    onResizeStart?.();
+
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
+    
+    resizeTimeoutRef.current = setTimeout(() => {
+      setIsResizing(false);
+      onResizeEnd?.();
+    }, 200);
+  }, [onResizeStart, onResizeEnd]);
 
   React.useEffect(() => {
-    if (isTransitioning) {
-      const timer = setTimeout(() => setIsTransitioning(false), 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isTransitioning])
+    return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  const panelContent = React.useMemo(() => {
-    return showSettings ? <SettingsPanel /> : <FileInfo selectedItem={selectedItem} />
-  }, [showSettings, selectedItem])
+  const handleTransitionEnd = React.useCallback(() => {
+    setIsTransitioning(false);
+  }, []);
+
+  const handleToggleCollapse = React.useCallback(() => {
+    if (isResizing) return
+    setIsTransitioning(true)
+    onToggleCollapse()
+  }, [onToggleCollapse, isResizing])
 
   return (
-    <ResizablePanel
+    <ResizablePanel 
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
-      onResize={(size) => {
-        if (size < minSize + 5) {
-          handleToggleCollapse()
-        }
-      }}
+      onResize={handleResize}
       className={cn(
-        "bg-muted/30 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/60",
-        isCollapsed && "max-w-[40px] transition-all duration-0 ease-in-out",
-        isTransitioning && "pointer-events-none"
+        "border-l transition-[flex-basis] duration-300 ease-in-out",
+        isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",
+        isResizing && "select-none pointer-events-none"
       )}
     >
       <div className="h-full flex flex-col">
@@ -123,17 +148,25 @@ export function RightPanel({
             size="icon"
             className="h-7 w-7"
             onClick={handleToggleCollapse}
+            disabled={isResizing}
           >
             <ChevronRight className={cn(
               "h-4 w-4 transition-transform",
               !isCollapsed && "rotate-180"
             )} />
           </Button>
-          <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
+          {!isCollapsed && (
+            <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
+          )}
         </div>
         <Separator />
-        <ScrollArea className="flex-1">
-          {panelContent}
+        <ScrollArea
+          className={cn(
+            "flex-1",
+            isResizing && "pointer-events-none"
+          )}
+        >
+          {isCollapsed ? null : showSettings ? <SettingsPanel /> : <FileInfo selectedItem={selectedItem} />}
         </ScrollArea>
       </div>
     </ResizablePanel>
