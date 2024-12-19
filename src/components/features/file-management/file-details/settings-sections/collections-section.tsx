@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { KeyboardIcon, Trash2, Smile } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
-import { Compact } from '@uiw/react-color'
+import { GithubPicker } from 'react-color'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 
@@ -107,7 +107,7 @@ export function CollectionsSection() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="end">
-                  <Compact
+                  <GithubPicker
                     color={newCollection.color}
                     onChange={handleColorChange}
                   />
@@ -184,7 +184,7 @@ export function CollectionsSection() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="end">
-                        <Compact
+                        <GithubPicker
                           color={collection.color}
                           onChange={(color) =>
                             handleUpdateCollection(collection.id, { color: color.hex })
