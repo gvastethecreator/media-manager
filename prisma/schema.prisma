@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Folder {
+  id           String    @id @default(cuid())
+  path         String    @unique
+  name         String
+  parentId     String?
+  parent       Folder?   @relation("FolderToFolder", fields: [parentId], references: [id])
+  children     Folder[]  @relation("FolderToFolder")
+  isWatched    Boolean   @default(false)
+  lastIndexed  DateTime  @default(now())
+  totalFiles   Int       @default(0)
+  totalSize    Int       @default(0)
+  images       Image[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Image {
+  id           String       @id @default(cuid())
+  name         String
+  description  String?
+  path         String       @unique
+  hash         String       @unique
+  size         Int
+  mimeType     String
+  width        Int?
+  height       Int?
+  metadata     String?      @default("{}")
+  isPublic     Boolean      @default(false)
+  folderId     String
+  folder       Folder       @relation(fields: [folderId], references: [id])
+  thumbnails   Thumbnail[]
+  tags         Tag[]
+  collections  Collection[]
+  favorites    Favorite[]
+  stats        ImageStats?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Thumbnail {
+  id        String   @id @default(cuid())
+  size      String
+  width     Int
+  height    Int
+  filePath  String
+  fileSize  Int
+  quality   Int      @default(80)
+  format    String   @default("webp")
+  imageId   String
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  color       String?
+  description String?
+  type        String?
+  metadata    String?      @default("{}")
+  images      Image[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Collection {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  coverImage  String?
+  isPublic    Boolean      @default(false)
+  images      Image[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  imageId   String
+  image     Image    @relation(fields: [imageId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model ImageStats {
+  id            String    @id @default(cuid())
+  viewCount     Int       @default(0)
+  downloadCount Int       @default(0)
+  averageRating Float?
+  lastViewed    DateTime?
+  lastDownloaded DateTime?
+  imageId       String    @unique
+  image         Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

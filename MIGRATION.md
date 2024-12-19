@@ -1,213 +1,209 @@
-# Plan de Migración y Reestructuración del Proyecto
+# Plan de Migración y Estado del Proyecto
 
-## 1. Tecnologías y Convenciones
+## 1. Stack Tecnológico Actual
 
-### 1.1 Stack Tecnológico
+### 1.1 Frontend
 - Next.js 15
 - React 19
 - Tailwind CSS
 - Shadcn/ui
-- Zustand
-- Prisma
+- Zustand para estado global
+- Framer Motion para animaciones
 
-### 1.2 Convenciones
+### 1.2 Backend
+- Next.js API Routes
+- Prisma ORM
+- SQLite (base de datos local)
+- Sistema de archivos nativo
+- Sistema de monitoreo de carpetas
+
+### 1.3 Convenciones
 - Nomenclatura: kebab-case para archivos y directorios
-- Componentes: PascalCase para nombres de componentes
+- Componentes: PascalCase
 - Hooks: camelCase comenzando con 'use'
 - Types/Interfaces: PascalCase
 - Constantes: SCREAMING_SNAKE_CASE
 
-## 2. Nueva Estructura del Proyecto
+## 2. Estructura Actual del Proyecto
 
 ```
 src/
-├── app/                    # App router pages
-│   ├── (auth)/            # Rutas autenticadas
-│   └── api/               # API routes
+├── app/                    # App router y API routes
+│   ├── api/               # API endpoints
+│   │   ├── folders/       # Gestión de carpetas
+│   │   ├── images/        # Gestión de imágenes
+│   │   └── thumbnails/    # Gestión de miniaturas
+│   └── (routes)/          # Rutas de la aplicación
 ├── components/
 │   ├── ui/                # Componentes shadcn/ui (NO MODIFICAR)
 │   ├── core/              # Componentes base personalizados
-│   │   ├── data-display/  # Tablas, cards, listas personalizadas
-│   │   ├── feedback/       # Loading states
+│   │   ├── data-display/  # Tablas, cards, listas
+│   │   ├── feedback/      # Loading states, errores
 │   │   ├── inputs/        # Inputs personalizados
-│   │   ├── layout/        # Layouts personalizados
+│   │   ├── layout/        # Layouts
 │   │   ├── navigation/    # Breadcrumbs, toolbar
 │   │   ├── providers/     # Theme, settings
 │   │   └── theme/         # Theme utilities
-│   └── features/          # Componentes específicos de características
-│       ├── collections/   # Collection management
+│   └── features/          # Componentes específicos
+│       ├── collections/   # Gestión de colecciones
 │       ├── file-management/
 │       │   ├── file-browser/
 │       │   ├── file-details/
 │       │   └── folders/
-│       └── image-viewer/  # Image viewing capabilities
-├── lib/                   # Utilidades y configuraciones
-├── hooks/                 # Hooks personalizados
-├── store/                 # Estado global (Zustand)
-├── types/                 # TypeScript types
-├── styles/                # Estilos globales
-└── server/                # Lógica del servidor
+│       └── image-viewer/  # Visualizador
+├── config/                # Configuraciones
+├── context/              # Contextos de React
+├── hooks/                # Hooks personalizados
+├── lib/                  # Utilidades
+├── services/             # Servicios
+│   ├── fs.server.ts      # Operaciones de archivos
+│   ├── watcher.server.ts # Monitoreo de carpetas
+│   └── folder.service.ts # Gestión de carpetas
+├── store/               # Estado global
+└── types/               # TypeScript types
 ```
 
-## 3. Plan de Migración por Fases
+## 3. Estado Actual y Próximos Pasos
 
-### Fase 1: Configuración Base
-- [x] Actualizar dependencias a las últimas versiones estables
-- [ ] Configurar Prisma con PostgreSQL
-- [ ] Configurar shadcn/ui con tema personalizado
-- [ ] Configurar Tailwind con diseño sistema
-- [x] Actualizar tsconfig.json con paths
+### 3.1 Completado 
+- Migración a Next.js 15
+- Implementación de shadcn/ui
+- Estructura base de componentes
+- Sistema de archivos básico
+- Monitoreo de carpetas
+- Base de datos SQLite con Prisma
+- Indexación de imágenes
+- Visualizador básico de imágenes
 
-### Fase 2: Migración de Componentes
-- [x] Crear estructura base de directorios
-- [x] Mover componentes a sus nuevas ubicaciones
-- [x] Crear archivos index.ts básicos
-- [ ] Actualizar todas las importaciones
-- [ ] Verificar y corregir tipos
-- [ ] Crear pruebas unitarias
+### 3.2 En Progreso 
+- Sistema de caché de miniaturas
+- Optimización de rendimiento
+- Mejoras en el visualizador
+- Sistema de colecciones
+- Panel de configuración
 
-### Fase 3: Mejoras y Optimizaciones
-- [ ] Implementar lazy loading para componentes pesados
-- [ ] Optimizar manejo de imágenes
-- [ ] Mejorar sistema de caché
-- [ ] Implementar error boundaries
-- [ ] Agregar logging y monitoreo
+### 3.3 Pendiente 
+- Sistema de etiquetas
+- Búsqueda avanzada
+- Exportación/Importación
+- Tests unitarios
+- Documentación de componentes
 
-### Fase 4: Documentación y Mantenimiento
-- [ ] Documentar componentes principales
-- [ ] Crear guías de contribución
-- [ ] Establecer estándares de código
-- [ ] Configurar CI/CD
+## 4. Mejoras Técnicas Planificadas
 
-## 4. Mejoras Específicas
+### 4.1 Optimización de Rendimiento
+- Implementar virtualización para listas largas
+- Mejorar el sistema de caché
+- Optimizar la carga de imágenes
+- Implementar lazy loading
+- Mejorar el manejo de memoria
 
-### 4.1 Server Actions y API Routes
+### 4.2 Mejoras de UX
+- Atajos de teclado
+- Drag & drop
+- Gestos táctiles
+- Mejores transiciones
+- Feedback visual mejorado
+
+### 4.3 Arquitectura
+- Mejorar el manejo de errores
+- Implementar logging
+- Optimizar consultas a la base de datos
+- Mejorar la estructura de carpetas
+- Implementar patrones de diseño
+
+## 5. Ejemplos de Implementación
+
+### 5.1 Servicio de Archivos
 ```typescript
-// src/app/api/files/route.ts
-import { NextResponse } from 'next/server'
-import { db } from '@/server/db'
+// src/services/fs.server.ts
+import { promises as fs } from 'fs'
+import path from 'path'
+import crypto from 'crypto'
 
-export async function GET() {
-  const files = await db.file.findMany()
-  return NextResponse.json(files)
-}
-```
+export const fsService = {
+  async validatePath(path: string) {
+    try {
+      await fs.access(path)
+      return { valid: true }
+    } catch {
+      return { valid: false, error: 'Path not accessible' }
+    }
+  },
 
-### 4.2 Hooks Personalizados
-```typescript
-// src/hooks/use-debounced-callback.ts
-import { useCallback, useRef } from 'react'
-
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
-): T {
-  const timeoutRef = useRef<NodeJS.Timeout>()
-
-  return useCallback(
-    (...args: Parameters<T>) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        callback(...args)
-      }, delay)
-    },
-    [callback, delay]
-  ) as T
-}
-```
-
-## 5. Control de Calidad
-
-### 5.1 ESLint y Prettier
-```javascript
-// eslint.config.mjs
-export default {
-  extends: [
-    'next/core-web-vitals',
-    'plugin:@typescript-eslint/recommended',
-  ],
-  rules: {
-    '@typescript-eslint/no-unused-vars': 'error',
-    'import/order': ['error', {
-      groups: ['builtin', 'external', 'internal'],
-      'newlines-between': 'always',
-      alphabetize: { order: 'asc' }
-    }]
+  async listFiles(dirPath: string) {
+    const files = await fs.readdir(dirPath)
+    return Promise.all(
+      files.map(async (file) => {
+        const fullPath = path.join(dirPath, file)
+        const stats = await fs.stat(fullPath)
+        return {
+          name: file,
+          path: fullPath,
+          size: stats.size,
+          isDirectory: stats.isDirectory()
+        }
+      })
+    )
   }
 }
 ```
 
-### 5.2 Testing con Vitest
+### 5.2 Componente de Carpeta
 ```typescript
-// src/components/features/file-browser/__tests__/file-browser.test.tsx
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { FileBrowser } from '../file-browser'
+// src/components/features/file-management/folders/folder-card.tsx
+import { Card, CardContent } from '@/components/ui/card'
+import { formatBytes } from '@/lib/utils'
 
-describe('FileBrowser', () => {
-  it('renders file list correctly', () => {
-    render(<FileBrowser />)
-    expect(screen.getByRole('list')).toBeInTheDocument()
-  })
-})
+interface FolderCardProps {
+  folder: {
+    name: string
+    path: string
+    totalFiles: number
+    totalSize: number
+  }
+}
+
+export function FolderCard({ folder }: FolderCardProps) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <h3 className="text-lg font-medium">{folder.name}</h3>
+        <p className="text-sm text-muted-foreground">{folder.path}</p>
+        <div className="mt-2 text-sm">
+          <p>{folder.totalFiles} archivos</p>
+          <p>{formatBytes(folder.totalSize)}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 ```
 
-## 6. Orden de Implementación
+## 6. Consideraciones de Seguridad
 
-1. Configuración del proyecto y dependencias
-2. Migración de componentes UI base
-3. Implementación de store con Zustand
-4. Migración de features principales
-5. Optimizaciones de rendimiento
-6. Testing y documentación
+### 6.1 Sistema de Archivos
+- Validación de rutas
+- Sanitización de nombres de archivo
+- Límites de tamaño
+- Verificación de permisos
 
-## 7. Consideraciones de Rendimiento
+### 6.2 Base de Datos
+- Validación de entrada
+- Sanitización de datos
+- Manejo de transacciones
+- Backups automáticos
 
-- Implementar virtualización para listas largas (react-virtual)
-- Usar React.memo para componentes puros
-- Implementar lazy loading para rutas y componentes pesados
-- Optimizar assets y carga de imágenes
-- Utilizar Server Components donde sea posible
-- Implementar caching efectivo con Next.js
+## 7. Mantenimiento
 
-## 8. Próximas Mejoras Propuestas
+### 7.1 Tareas Regulares
+- Limpieza de caché
+- Verificación de integridad
+- Optimización de base de datos
+- Actualización de dependencias
 
-### 8.1 Optimización de Rendimiento
-- [ ] Implementar lazy loading para componentes pesados
-  - AdvancedImageViewer
-  - FileGrid con virtualización mejorada
-- [ ] Optimizar carga de imágenes
-  - Implementar blur placeholder
-  - Carga progresiva
-  - Caché de imágenes
-
-### 8.2 Mejoras de UX
-- [ ] Implementar drag & drop para:
-  - Reordenar archivos
-  - Mover a colecciones
-  - Subir archivos
-- [ ] Añadir atajos de teclado
-- [ ] Mejorar accesibilidad (ARIA labels, roles)
-
-### 8.3 Gestión de Estado
-- [ ] Migrar a Zustand para estado global
-- [ ] Implementar persistencia de preferencias
-- [ ] Mejorar manejo de caché
-
-### 8.4 Infraestructura
-- [ ] Configurar testing
-  - Jest para pruebas unitarias
-  - Playwright para E2E
-- [ ] Implementar error boundaries
-- [ ] Agregar logging y monitoreo
-- [ ] Optimizar build y bundling
-
-### 8.5 Características Nuevas
-- [ ] Modo offline
-- [ ] Búsqueda avanzada
-- [ ] Filtros dinámicos
-- [ ] Integración con APIs de IA
-- [ ] Sistema de etiquetas mejorado
+### 7.2 Monitoreo
+- Logs de errores
+- Métricas de rendimiento
+- Uso de recursos
+- Estado del sistema
