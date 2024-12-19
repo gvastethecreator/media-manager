@@ -2,22 +2,96 @@
 
 import * as React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import type { FileItem } from '@/store/files'
 import { formatFileSize } from "@/lib/utils"
-import { ImageOff, Calendar, FileText, Hash, Tag, Info, ImageIcon } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { 
+  ImageOff, 
+  Info, 
+  Maximize2, 
+  Folder, 
+  Download, 
+  Copy, 
+  BookmarkPlus,
+  Heart,
+  Tag as TagIcon,
+  Trash2,
+  FileText,
+  Calendar,
+  Image as ImageIcon,
+  Hash,
+  Cpu,
+  Clock,
+  Info as InfoIcon,
+  Wand2,
+  Layers,
+  Scale,
+  Dice5,
+  Box,
+  GitBranch,
+  Gauge,
+  HardDrive,
+  Timer,
+  Bug,
+  Camera,
+  Aperture,
+  Focus,
+  MessageSquare,
+  MessageSquareOff
+} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useImageViewer } from "@/store/image-viewer"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface FileInfoProps {
   selectedItem: FileItem | null
 }
 
+interface InfoItemProps {
+  icon: React.ReactNode
+  label: string
+  value: string | number | null | undefined
+  tooltip?: string
+}
+
+const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
+  if (!value) return null
+  
+  const content = (
+    <div className="flex items-center justify-between py-1.5">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <Badge variant="secondary" className="font-mono text-xs">
+        {value}
+      </Badge>
+    </div>
+  )
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {content}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return content
+}
+
 export function FileInfo({ selectedItem }: FileInfoProps) {
-  const [activeTab, setActiveTab] = React.useState('info')
-  const [isImageViewerOpen, setIsImageViewerOpen] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
+  const { openViewer } = useImageViewer()
 
   React.useEffect(() => {
     setImageError(false)
@@ -27,18 +101,21 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              Sin selección
-            </CardTitle>
-            <CardDescription>
-              Selecciona un archivo para ver su información
-            </CardDescription>
-          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <Info className="h-8 w-8" />
+              <p className="text-sm">Selecciona un archivo para ver su información</p>
+            </div>
+          </CardContent>
         </Card>
       </div>
     )
+  }
+
+  const handleOpenViewer = () => {
+    if (selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) {
+      openViewer(selectedItem)
+    }
   }
 
   const renderImage = (src?: string, alt = "") => {
@@ -61,102 +138,362 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
     )
   }
 
-  const renderInfoItem = (label: string, value: string | number) => (
-    <div className="flex justify-between items-center py-1.5 border-b last:border-0">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <Badge variant="secondary" className="font-mono">{value}</Badge>
-    </div>
-  )
+  const metadata = selectedItem.metadata || {}
+  
+  console.log('Selected Item:', selectedItem)
+  console.log('Metadata:', metadata)
+
+  // Intentar parsear la metadata si viene como string
+  let parsedMetadata = metadata
+  if (typeof metadata === 'string') {
+    try {
+      parsedMetadata = JSON.parse(metadata)
+    } catch (e) {
+      console.error('Error parsing metadata:', e)
+      parsedMetadata = {}
+    }
+  }
+
+  // Extraer información relevante
+  const {
+    dimensions = {},
+    exif = {},
+    fileSystem = {},
+    generation = {}
+  } = parsedMetadata
+
+  // Formatear fechas
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleString()
+    } catch (e) {
+      return dateStr
+    }
+  }
+
+  // Función para formatear valores
+  const formatValue = (value: any): string => {
+    if (value === null || value === undefined) return ''
+    if (typeof value === 'number') return value.toString()
+    if (typeof value === 'boolean') return value ? 'Sí' : 'No'
+    if (value instanceof Date) return value.toLocaleString()
+    if (typeof value === 'object') return JSON.stringify(value)
+    return value.toString()
+  }
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="info" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Información
-            </TabsTrigger>
-            <TabsTrigger value="metadata" className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Metadatos
-            </TabsTrigger>
-          </TabsList>
+      <div className="space-y-4">
+        {/* Vista previa de imagen */}
+        {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
+          <div className="relative group">
+            <div 
+              className="aspect-square w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={handleOpenViewer}
+            >
+              {renderImage(selectedItem.previewUrl || selectedItem.thumbnailUrl, selectedItem.name)}
+            </div>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleOpenViewer}
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
-          <TabsContent value="info" className="space-y-4 mt-4">
-            {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
-              <Card>
-                <CardContent className="pt-6">
-                  <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
-                    <DialogTrigger asChild>
-                      <div className="aspect-square w-full rounded-lg bg-muted/50 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity">
-                        {renderImage(selectedItem.thumbnailUrl, selectedItem.name)}
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl">
-                      {renderImage(selectedItem.url || selectedItem.thumbnailUrl, selectedItem.name)}
-                    </DialogContent>
-                  </Dialog>
-                </CardContent>
-              </Card>
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-4 py-2 bg-muted/50 rounded-lg">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Folder className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Abrir carpeta</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Descargar</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Copiar imagen</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <BookmarkPlus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Agregar a colección</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Heart className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Agregar a favoritos</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <TagIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Marcar</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Eliminar</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Información básica */}
+        <Card>
+          <CardContent className="pt-4 space-y-2">
+            <InfoItem 
+              icon={<FileText className="h-4 w-4" />}
+              label="Nombre"
+              value={selectedItem.name}
+            />
+            <InfoItem 
+              icon={<ImageIcon className="h-4 w-4" />}
+              label="Tipo"
+              value={selectedItem.mimeType}
+            />
+            <InfoItem 
+              icon={<HardDrive className="h-4 w-4" />}
+              label="Tamaño"
+              value={formatFileSize(fileSystem.size)}
+            />
+            {dimensions.width && dimensions.height && (
+              <InfoItem 
+                icon={<Maximize2 className="h-4 w-4" />}
+                label="Dimensiones"
+                value={`${dimensions.width} × ${dimensions.height}`}
+              />
             )}
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="h-4 w-4" />
-                  Información básica
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                {renderInfoItem("Nombre", selectedItem.name)}
-                {renderInfoItem("Tipo", selectedItem.mimeType || selectedItem.type)}
-                {renderInfoItem("Tamaño", formatFileSize(selectedItem.size))}
-                {renderInfoItem("Modificado", new Date(selectedItem.modified).toLocaleDateString())}
-                {renderInfoItem("Creado", new Date(selectedItem.created).toLocaleDateString())}
-              </CardContent>
-            </Card>
+        {/* Información EXIF */}
+        {Object.keys(exif).length > 0 && (
+          <Card>
+            <CardContent className="pt-4 space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Cpu className="h-4 w-4" />
+                <h3 className="font-medium">Información EXIF</h3>
+              </div>
+              {exif.Make && (
+                <InfoItem 
+                  icon={<Box className="h-4 w-4" />}
+                  label="Fabricante"
+                  value={exif.Make}
+                />
+              )}
+              {exif.Model && (
+                <InfoItem 
+                  icon={<Camera className="h-4 w-4" />}
+                  label="Modelo"
+                  value={exif.Model}
+                />
+              )}
+              {exif.Software && (
+                <InfoItem 
+                  icon={<Layers className="h-4 w-4" />}
+                  label="Software"
+                  value={exif.Software}
+                />
+              )}
+              {exif.DateTime && (
+                <InfoItem 
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Fecha"
+                  value={formatDate(exif.DateTime)}
+                />
+              )}
+              {exif.ExposureTime && (
+                <InfoItem 
+                  icon={<Timer className="h-4 w-4" />}
+                  label="Tiempo de exposición"
+                  value={`${exif.ExposureTime}s`}
+                />
+              )}
+              {exif.FNumber && (
+                <InfoItem 
+                  icon={<Aperture className="h-4 w-4" />}
+                  label="Apertura"
+                  value={`f/${exif.FNumber}`}
+                />
+              )}
+              {exif.ISO && (
+                <InfoItem 
+                  icon={<Scale className="h-4 w-4" />}
+                  label="ISO"
+                  value={exif.ISO}
+                />
+              )}
+              {exif.FocalLength && (
+                <InfoItem 
+                  icon={<Focus className="h-4 w-4" />}
+                  label="Distancia focal"
+                  value={`${exif.FocalLength}mm`}
+                />
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-            {selectedItem.model && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Hash className="h-4 w-4" />
-                    Modelo
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  {renderInfoItem("Nombre", selectedItem.model.name)}
-                  {renderInfoItem("Versión", selectedItem.model.version)}
-                  {renderInfoItem("Parámetros", selectedItem.model.parameters)}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+        {/* Información de generación AI */}
+        {Object.keys(generation).length > 0 && (
+          <Card>
+            <CardContent className="pt-4 space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Wand2 className="h-4 w-4" />
+                <h3 className="font-medium">Información de generación</h3>
+              </div>
+              {generation.prompt && (
+                <InfoItem 
+                  icon={<MessageSquare className="h-4 w-4" />}
+                  label="Prompt"
+                  value={generation.prompt}
+                />
+              )}
+              {generation.negative_prompt && (
+                <InfoItem 
+                  icon={<MessageSquareOff className="h-4 w-4" />}
+                  label="Prompt negativo"
+                  value={generation.negative_prompt}
+                />
+              )}
+              {generation.model && (
+                <InfoItem 
+                  icon={<Box className="h-4 w-4" />}
+                  label="Modelo"
+                  value={generation.model}
+                />
+              )}
+              {generation.steps && (
+                <InfoItem 
+                  icon={<GitBranch className="h-4 w-4" />}
+                  label="Pasos"
+                  value={generation.steps}
+                />
+              )}
+              {generation.cfg_scale && (
+                <InfoItem 
+                  icon={<Scale className="h-4 w-4" />}
+                  label="Escala CFG"
+                  value={generation.cfg_scale}
+                />
+              )}
+              {generation.seed && (
+                <InfoItem 
+                  icon={<Dice5 className="h-4 w-4" />}
+                  label="Semilla"
+                  value={generation.seed}
+                />
+              )}
+              {generation.sampler && (
+                <InfoItem 
+                  icon={<Gauge className="h-4 w-4" />}
+                  label="Sampler"
+                  value={generation.sampler}
+                />
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          <TabsContent value="metadata" className="space-y-4 mt-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Tag className="h-4 w-4" />
-                  Metadatos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                {selectedItem.metadata && Object.entries(selectedItem.metadata).map(([key, value]) => (
-                  <div key={key}>
-                    {renderInfoItem(key, value as string)}
-                  </div>
-                ))}
-                {(!selectedItem.metadata || Object.keys(selectedItem.metadata).length === 0) && (
-                  <div className="text-sm text-muted-foreground text-center py-2">
-                    No hay metadatos disponibles
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        {/* Información del sistema de archivos */}
+        <Card>
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <HardDrive className="h-4 w-4" />
+              <h3 className="font-medium">Información del sistema</h3>
+            </div>
+            <InfoItem 
+              icon={<Calendar className="h-4 w-4" />}
+              label="Creado"
+              value={formatDate(fileSystem.created)}
+            />
+            <InfoItem 
+              icon={<Clock className="h-4 w-4" />}
+              label="Modificado"
+              value={formatDate(fileSystem.modified)}
+            />
+            <InfoItem 
+              icon={<Clock className="h-4 w-4" />}
+              label="Último acceso"
+              value={formatDate(fileSystem.accessed)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Debug */}
+        {process.env.NODE_ENV === 'development' && (
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Bug className="h-4 w-4" />
+                <h3 className="font-medium">Debug</h3>
+              </div>
+              <pre className="text-xs overflow-x-auto p-2 bg-muted rounded-md">
+                {JSON.stringify(parsedMetadata, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </ScrollArea>
   )

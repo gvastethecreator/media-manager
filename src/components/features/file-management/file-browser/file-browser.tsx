@@ -202,8 +202,7 @@ export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect
       const imageItems = items.filter(i => 
         i.type === 'image' || i.mimeType?.startsWith('image/')
       )
-      const initialIndex = imageItems.findIndex(i => i.id === item.id)
-      openViewer(imageItems, initialIndex)
+      openViewer(item, imageItems)
     }
   }, [openViewer, items])
 

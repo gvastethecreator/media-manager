@@ -21,25 +21,25 @@ export const useImageViewer = create<ImageViewerState>((set, get) => ({
   openViewer: (image, allImages) => {
     console.log('Opening viewer with:', {
       image,
-      hasUrl: !!image.url,
+      hasPreview: !!image.previewUrl,
       hasThumbnail: !!image.thumbnailUrl,
       totalImages: allImages?.length,
       currentState: get()
     })
 
-    if (!image.url && !image.thumbnailUrl) {
+    if (!image.previewUrl && !image.thumbnailUrl) {
       console.warn('Cannot open viewer: image has no URL')
       return
     }
 
-    if (!image.mimeType?.startsWith('image/') && !image.mimeType?.startsWith('video/')) {
-      console.warn('Cannot open viewer: unsupported file type:', image.mimeType)
+    if (image.type !== 'image' && !image.mimeType?.startsWith('image/')) {
+      console.warn('Cannot open viewer: unsupported file type:', image.type, image.mimeType)
       return
     }
 
     const validImages = (allImages || [image]).filter(img =>
-      (img.url || img.thumbnailUrl) &&
-      (img.mimeType?.startsWith('image/') || img.mimeType?.startsWith('video/'))
+      (img.previewUrl || img.thumbnailUrl) &&
+      (img.type === 'image' || img.mimeType?.startsWith('image/'))
     )
 
     console.log('Valid images for viewer:', validImages.length)
@@ -74,7 +74,7 @@ export const useImageViewer = create<ImageViewerState>((set, get) => ({
     const state = get()
     console.log('Setting current image:', { image, currentState: state })
 
-    if (!image.url && !image.thumbnailUrl) {
+    if (!image.previewUrl && !image.thumbnailUrl) {
       console.warn('Cannot set current image: no URL available')
       return
     }
@@ -96,8 +96,8 @@ export const useImageViewer = create<ImageViewerState>((set, get) => ({
   setImages: (images) => {
     console.log('Setting images:', { count: images.length, currentState: get() })
     const validImages = images.filter(img =>
-      (img.url || img.thumbnailUrl) &&
-      (img.mimeType?.startsWith('image/') || img.mimeType?.startsWith('video/'))
+      (img.previewUrl || img.thumbnailUrl) &&
+      (img.type === 'image' || img.mimeType?.startsWith('image/'))
     )
     console.log('Valid images after filtering:', validImages.length)
     set({ images: validImages })

@@ -133,7 +133,7 @@ export const folderService = {
     }
   },
 
-  async reindexFolder(folderId: string): Promise<void> {
+  async reindexFolder(folderId: string) {
     try {
       const response = await fetch(`/api/folders/reindex/${folderId}`, {
         method: 'POST',
@@ -141,8 +141,10 @@ export const folderService = {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Error al reindexar la carpeta')
+        throw new Error(error.error || 'Error interno del servidor')
       }
+
+      return await response.json()
     } catch (error) {
       console.error('Error en reindexFolder:', error)
       throw error

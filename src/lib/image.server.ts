@@ -1,34 +1,11 @@
 import sharp from 'sharp'
+import { extractImageMetadata } from './metadata'
 
-export interface ImageMetadata {
-  width: number
-  height: number
-  format: string
-  space: string
-  channels: number
-  depth: string
-  density: number
-  isProgressive: boolean
-  hasProfile: boolean
-  hasAlpha: boolean
-}
+export type { ImageMetadata } from './metadata'
 
-export async function getImageMetadata(path: string): Promise<ImageMetadata> {
+export async function getImageMetadata(path: string) {
   try {
-    const metadata = await sharp(path).metadata()
-    
-    return {
-      width: metadata.width || 0,
-      height: metadata.height || 0,
-      format: metadata.format || '',
-      space: metadata.space || '',
-      channels: metadata.channels || 0,
-      depth: metadata.depth || '',
-      density: metadata.density || 0,
-      isProgressive: metadata.isProgressive || false,
-      hasProfile: metadata.hasProfile || false,
-      hasAlpha: metadata.hasAlpha || false
-    }
+    return await extractImageMetadata(path)
   } catch (error) {
     console.error('Error getting image metadata:', error)
     throw error

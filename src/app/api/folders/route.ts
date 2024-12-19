@@ -58,6 +58,9 @@ export async function POST(request: NextRequest) {
         const hash = await computeHash(file.path)
         const metadata = await getImageMetadata(file.path)
 
+        // Limpiar la metadata eliminando valores undefined
+        const cleanMetadata = JSON.parse(JSON.stringify(metadata))
+
         await prisma.image.create({
           data: {
             name: file.name,
@@ -65,11 +68,11 @@ export async function POST(request: NextRequest) {
             hash,
             size: file.size,
             mimeType: `image/${extname(file.path).slice(1)}`,
-            metadata: JSON.stringify(metadata),
+            metadata: JSON.stringify(cleanMetadata),
             folderId: folder.id,
             isPublic: false,
-            width: metadata.width,
-            height: metadata.height
+            width: metadata.dimensions?.width || 0,
+            height: metadata.dimensions?.height || 0
           }
         })
       } catch (error) {
