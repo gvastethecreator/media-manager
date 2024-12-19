@@ -5,6 +5,7 @@ import { ResizablePanel } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { useFilesStore } from "@/store/files";
 import { useUIStore } from "@/store/ui";
+import { useStatsStore } from '@/store/stats'
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useTheme } from "next-themes"
@@ -12,6 +13,8 @@ import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, R
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { SidebarItem } from "@/components/ui/sidebar-item"
+import { FolderList } from "@/components/features/file-management/folders/folder-list"
+import { BookmarkIcon, ChevronLeft, FolderIcon, ImageIcon, Moon, RefreshCcw, Sun, TagIcon } from "lucide-react"
 
 interface LeftPanelProps {
   isCollapsed: boolean
@@ -25,15 +28,6 @@ interface LeftPanelProps {
   className?: string
 }
 
-// Función auxiliar para determinar el color del texto basado en el contraste
-const getContrastText = (bgColor: string) => {
-  const r = parseInt(bgColor.slice(1, 3), 16)
-  const g = parseInt(bgColor.slice(3, 5), 16)
-  const b = parseInt(bgColor.slice(5, 7), 16)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.5 ? '#000000' : '#ffffff'
-}
-
 export function LeftPanel({
   isCollapsed,
   onToggleCollapse,
@@ -45,31 +39,32 @@ export function LeftPanel({
   onTransitionEnd,
   className
 }: LeftPanelProps) {
+  const { stats } = useStatsStore()
   const {
     currentView,
     collections,
     folders,
     tags,
-    stats,
     setCurrentView,
     handleSelectCollection,
     handleSelectFolder,
-    handleSelectTag
+    handleSelectTag,
+    initialize
   } = useFilesStore()
 
   const { toggleSettings } = useUIStore()
   const { theme, setTheme } = useTheme()
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const [selectedFolderId, setSelectedFolderId] = React.useState<string | undefined>()
 
-  const handleTransitionEnd = React.useCallback(() => {
-    setIsTransitioning(false)
-  }, [])
+  React.useEffect(() => {
+    useStatsStore.getState().initialize()
+    initialize()
+  }, [initialize])
 
-  const handleToggleCollapse = React.useCallback(() => {
-    if (isResizing) return
-    onTransitionStart?.()
-    onToggleCollapse()
-  }, [onToggleCollapse, isResizing, onTransitionStart])
+  const handleFolderSelect = React.useCallback((folderId: string) => {
+    setSelectedFolderId(folderId)
+    handleSelectFolder(folderId)
+  }, [handleSelectFolder])
 
   const handleOpenSettings = React.useCallback(() => {
     toggleSettings()
@@ -83,221 +78,185 @@ export function LeftPanel({
     window.location.reload()
   }, [])
 
-  const categories = [
+  const categories = React.useMemo(() => [
+    {
+      id: 'all',
+      icon: ImageIcon,
+      label: 'Todos',
+      color: '#3b82f6',
+      count: stats?.totalFiles || 0
+    },
     {
       id: 'collections',
       icon: BookmarkIcon,
       label: 'Colecciones',
       color: '#ef4444',
-      count: stats.totalCollections
+      count: stats?.totalCollections || 0
     },
     {
       id: 'folders',
       icon: FolderIcon,
       label: 'Carpetas',
-      color: '#f59e0b',
-      count: stats.totalFolders
+      color: '#22c55e',
+      count: stats?.totalFolders || 0
     },
     {
       id: 'tags',
       icon: TagIcon,
       label: 'Etiquetas',
-      color: '#0ea5e9',
-      count: stats.totalTags
+      color: '#f59e0b',
+      count: stats?.totalTags || 0
     }
-  ]
+  ], [stats])
+
+  const handleItemClick = React.useCallback((id: string, itemId?: string) => {
+    if (itemId) {
+      switch (id) {
+        case 'collections':
+          handleSelectCollection(itemId);
+          break;
+        case 'folders':
+          handleSelectFolder(itemId);
+          break;
+        case 'tags':
+          handleSelectTag(itemId);
+          break;
+      }
+    } else {
+      setCurrentView(id);
+    }
+  }, [handleSelectCollection, handleSelectFolder, handleSelectTag, setCurrentView]);
 
   return (
     <ResizablePanel
       defaultSize={defaultSize}
+      collapsible={true}
+      collapsedSize={5}
       minSize={minSize}
       maxSize={maxSize}
+      onCollapse={onToggleCollapse}
       className={cn(
-        "flex flex-col",
-        isCollapsed ? "items-center p-2" : "p-4",
+        "flex flex-col border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         className
       )}
-      onTransitionStart={onTransitionStart}
-      onTransitionEnd={onTransitionEnd}
     >
-      <div className={cn(
-        "flex items-center gap-2 border-b pb-2",
-        isCollapsed ? "flex-col w-full" : "w-full justify-between"
-      )}>
+      <div className="flex h-[52px] items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6 shrink-0">
-            <AvatarImage src="/avatars/01.png" alt="@usuario" />
-            <AvatarFallback>U</AvatarFallback>
+          <Avatar className="h-6 w-6">
+            <AvatarImage src="/app-logo.png" alt="Logo" />
+            <AvatarFallback>IM</AvatarFallback>
           </Avatar>
           {!isCollapsed && (
-            <div className="flex flex-col min-w-0">
-              <span className="text-[11px] font-medium leading-tight truncate">Nombre Usuario Largo</span>
-              <span className="text-[10px] text-muted-foreground leading-tight">{stats.totalFiles} archivos</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Image Manager</span>
+              <Badge variant="outline" className="text-[10px]">Beta</Badge>
             </div>
           )}
         </div>
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleThemeToggle}
-            >
-              {theme === 'light' ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleRestart}
-            >
-              <RefreshCcw className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-7 w-7",
-                isCollapsed && "rotate-90 transform"
-              )}
-              onClick={handleToggleCollapse}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      </div>
-      {isCollapsed ? (
-        <div className="flex flex-col gap-4 mt-4 w-full">
-          {/* Botones de navegación */}
-          {categories.map(({ id, icon: Icon, color }) => (
-            <Button
-              key={id}
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-7 w-7",
-                currentView === id && "bg-accent"
-              )}
-              onClick={() => setCurrentView(id)}
-            >
-              <Icon 
-                className="h-4 w-4" 
-                style={{ color: currentView === id ? color : undefined }}
-              />
-            </Button>
-          ))}
-
-          <div className="mt-auto flex flex-col gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleThemeToggle}
-            >
-              {theme === 'light' ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleRestart}
-            >
-              <RefreshCcw className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-7 w-7",
-                "rotate-90 transform"
-              )}
-              onClick={handleToggleCollapse}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={handleThemeToggle}
+          >
+            {theme === "light" ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={onToggleCollapse}
+          >
+            <ChevronLeft className={cn(
+              "h-4 w-4 transition-transform",
+              isCollapsed && "rotate-180"
+            )} />
+          </Button>
         </div>
-      ) : (
-        <ScrollArea className="flex-1 w-full">
-          <div className="py-2">
-            {categories.map(({ id, icon: Icon, label, color, count }) => (
-              <div key={id} className="py-1">
-                <SidebarItem
-                  icon={(props) => <Icon {...props} className="h-5 w-5" style={{ color }} />}
-                  label={label}
-                  count={count}
-                  isActive={currentView === id}
-                  onClick={() => setCurrentView(id as any)}
-                  onAdd={() => handleOpenSettings(id)}
-                  className="px-2"
-                />
-                <div className="mt-1 space-y-0.5">
-                  {id === 'collections' && collections.map((collection) => (
-                    <Button
-                      key={collection.id}
-                      variant="ghost"
-                      className="w-full justify-start gap-2 h-8 text-sm px-2"
-                      onClick={() => handleSelectCollection(collection.id)}
-                    >
-                      <span className="text-base">{collection.emoji}</span>
-                      <span className="flex-1 text-left truncate">{collection.name}</span>
-                      <span className="text-muted-foreground text-xs">{collection.count}</span>
-                    </Button>
-                  ))}
-                  {id === 'folders' && folders.map((folder) => (
-                    <Button
-                      key={folder.id}
-                      variant="ghost"
-                      className="w-full justify-start gap-2 h-8 text-sm px-2"
-                      onClick={() => handleSelectFolder(folder.id)}
-                    >
-                      <FolderIcon className="h-4 w-4" style={{ color: folder.color }} />
-                      <span className="flex-1 text-left truncate">{folder.name}</span>
-                      <span className="text-muted-foreground text-xs">{folder.count}</span>
-                    </Button>
-                  ))}
-                  {id === 'tags' && (
-                    <div className="flex flex-wrap gap-1 px-2 mt-1">
-                      {tags.map((tag) => {
-                        const bgColor = tag.color
-                        const textColor = getContrastText(bgColor)
-                        return (
-                          <Badge
-                            key={tag.id}
-                            variant="secondary"
-                            className="cursor-pointer hover:opacity-90 text-xs"
-                            style={{
-                              backgroundColor: bgColor,
-                              color: textColor,
-                              boxShadow: `0 1px 2px ${bgColor}40`
-                            }}
-                            onClick={() => handleSelectTag(tag.name)}
-                          >
-                            {tag.name}
-                            <span className="ml-1 text-[10px]" style={{ color: textColor, opacity: 0.9 }}>
-                              {tag.count}
-                            </span>
-                          </Badge>
-                        )
-                      })}
-                    </div>
+      </div>
+
+      <ScrollArea className="flex-1 px-2">
+        <div className="space-y-4 p-2">
+          {isCollapsed ? (
+            <div className="flex flex-col gap-4 mt-4 w-full">
+              {categories.map(({ id, icon: Icon, color }) => (
+                <Button
+                  key={id}
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-7 w-7",
+                    currentView === id && "bg-accent"
                   )}
+                  onClick={() => handleItemClick(id)}
+                >
+                  <Icon 
+                    className="h-4 w-4" 
+                    style={{ color: currentView === id ? color : undefined }}
+                  />
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <div className="py-2">
+              {categories.map(({ id, icon: Icon, label, color, count }) => (
+                <div key={id} className="py-1">
+                  <SidebarItem
+                    icon={Icon}
+                    label={label}
+                    count={count}
+                    isActive={currentView === id}
+                    onClick={() => handleItemClick(id)}
+                  />
+                  <div className="mt-1 space-y-0.5">
+                    {id === 'collections' && collections?.map((collection) => (
+                      <Button
+                        key={collection.id}
+                        variant="ghost"
+                        className="w-full justify-start gap-2 h-8 text-sm px-2"
+                        onClick={() => handleItemClick('collections', collection.id)}
+                      >
+                        <span className="text-base">{collection.emoji}</span>
+                        <span className="flex-1 text-left truncate">{collection.name}</span>
+                        <span className="text-muted-foreground text-xs">{collection.count}</span>
+                      </Button>
+                    ))}
+                    {id === 'folders' && folders?.map((folder) => (
+                      <Button
+                        key={folder.id}
+                        variant="ghost"
+                        className="w-full justify-start gap-2 h-8 text-sm px-2"
+                        onClick={() => handleItemClick('folders', folder.id)}
+                      >
+                        <FolderIcon className="h-4 w-4" style={{ color: folder.color }} />
+                        <span className="flex-1 text-left truncate">{folder.name}</span>
+                        <span className="text-muted-foreground text-xs">{folder.count}</span>
+                      </Button>
+                    ))}
+                    {id === 'tags' && tags?.map((tag) => (
+                      <Button
+                        key={tag.id}
+                        variant="ghost"
+                        className="w-full justify-start gap-2 h-8 text-sm px-2"
+                        onClick={() => handleItemClick('tags', tag.name)}
+                      >
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                        <span className="flex-1 text-left truncate">{tag.name}</span>
+                        <span className="text-muted-foreground text-xs">{tag.count}</span>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
+              ))}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </ResizablePanel>
   )
 }

@@ -26,3 +26,8 @@ export function formatFileSize(bytes: number): string {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
+
+export function zoomLevelToThumbnailSize(zoomLevel: number) {
+  // Convertir el nivel de zoom (50-200) a un tamaño de thumbnail (100-400)
+  return Math.floor((zoomLevel / 100) * 200);
+}
