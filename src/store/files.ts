@@ -54,19 +54,20 @@ export const useFilesStore = create<FilesState>()(
             get().loadFolders(),
             get().loadTags()
           ]);
-          const files = await getFiles();
-          set({ 
+          const currentPath = get().currentPath;
+          const path = currentPath.length > 1 ? currentPath.join('/') : undefined;
+          const files = await getFiles(path);
+          set({
             currentView: 'files',
-            currentPath: ['Home'],
             currentItems: files,
             selectedIds: [],
-            isLoading: false 
+            isLoading: false
           });
         } catch (error) {
           console.error('Error initializing files store:', error);
-          set({ 
+          set({
             error: 'Error al cargar los archivos',
-            isLoading: false 
+            isLoading: false
           });
         }
       },
@@ -114,7 +115,9 @@ export const useFilesStore = create<FilesState>()(
 
           switch (currentView) {
             case 'files':
-              items = await getFiles();
+              const currentPath = get().currentPath;
+              const path = currentPath.length > 1 ? currentPath.join('/') : undefined;
+              items = await getFiles(path);
               break;
             case 'folders':
               const folders = await folderService.getFolders();
@@ -137,7 +140,7 @@ export const useFilesStore = create<FilesState>()(
               items = [];
               break;
           }
-          
+
           set({
             currentView,
             currentItems: items,
@@ -146,22 +149,22 @@ export const useFilesStore = create<FilesState>()(
           });
         } catch (error) {
           console.error('Error setting current view:', error);
-          set({ 
+          set({
             error: 'Error al cambiar de vista',
-            isLoading: false 
+            isLoading: false
           });
         }
       },
 
       setCurrentPath: (currentPath) => set({ currentPath }),
       setSorting: (sortBy, sortOrder) => set({ sortBy, sortOrder }),
-      
-      selectItem: (id, clearSelection = false) => 
+
+      selectItem: (id, clearSelection = false) =>
         set((state) => ({
           selectedIds: clearSelection ? [id] : [...state.selectedIds, id]
         })),
-        
-      deselectItem: (id) => 
+
+      deselectItem: (id) =>
         set((state) => ({
           selectedIds: state.selectedIds.filter(selectedId => selectedId !== id)
         })),
@@ -179,9 +182,9 @@ export const useFilesStore = create<FilesState>()(
           });
         } catch (error) {
           console.error('Error loading collection files:', error);
-          set({ 
+          set({
             error: 'Error al cargar la colección',
-            isLoading: false 
+            isLoading: false
           });
         }
       },
@@ -197,9 +200,9 @@ export const useFilesStore = create<FilesState>()(
           });
         } catch (error) {
           console.error('Error loading folder files:', error);
-          set({ 
+          set({
             error: 'Error al cargar la carpeta',
-            isLoading: false 
+            isLoading: false
           });
         }
       },
@@ -215,9 +218,9 @@ export const useFilesStore = create<FilesState>()(
           });
         } catch (error) {
           console.error('Error loading tagged files:', error);
-          set({ 
+          set({
             error: 'Error al cargar los archivos etiquetados',
-            isLoading: false 
+            isLoading: false
           });
         }
       }

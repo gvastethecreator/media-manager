@@ -17,6 +17,7 @@ import { LoadingScreen } from "@/components/core/feedback/loading/loading-screen
 import { AnimatePresence } from "framer-motion";
 import { RefreshCw, Folder } from "lucide-react";
 import { toast } from "sonner";
+import { ImageViewer } from "@/components/features/image-viewer/image-viewer";
 
 export function MainLayout() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -67,8 +68,10 @@ export function MainLayout() {
   }, []);
 
   const handleSelectItem = useCallback(
-    (item: FileItem, event: React.MouseEvent) => {
-      if (event.ctrlKey) {
+    (item: FileItem | null, event?: React.MouseEvent) => {
+      if (!item) return;
+      
+      if (event?.ctrlKey) {
         if (selectedIds.includes(item.id)) {
           deselectItem(item.id);
         } else {
@@ -218,11 +221,10 @@ export function MainLayout() {
   }
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <AnimatePresence>
         {isLoading && <LoadingScreen message="Cargando vista..." />}
       </AnimatePresence>
-
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <LeftPanel
           isCollapsed={isLeftPanelCollapsed}
@@ -283,6 +285,7 @@ export function MainLayout() {
           isResizing={isResizing}
         />
       </ResizablePanelGroup>
-    </>
+      <ImageViewer />
+    </div>
   );
 }
