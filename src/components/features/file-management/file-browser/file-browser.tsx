@@ -8,6 +8,8 @@ import type { ThumbnailSize } from '@/store/ui'
 import { useColumns } from '@/store/columns'
 import { useImageViewer } from '@/store/image-viewer'
 import { useSelectedItem, useSelectedIds, useFilesStore } from '@/store/files'
+import { useState, useCallback } from 'react'
+import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable"
 
 export interface Column {
   id: string
@@ -101,6 +103,7 @@ interface FileViewProps {
   viewMode: 'grid' | 'list' | 'details'
   thumbnailSize: ThumbnailSize
   onItemSelect: (item: FileItem | null) => void
+  isResizing: boolean
 }
 
 const variants = {
@@ -116,7 +119,67 @@ const variants = {
   }
 }
 
-export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect }: FileViewProps) {
+export function FileBrowser() {
+  const { items, selectedItem, selectedIds, selectItem } = useFilesStore()
+  const { viewMode, thumbnailSize } = useColumns()
+  const [showSettings, setShowSettings] = useState(false)
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+
+  const handleItemClick = useCallback((item: FileItem) => {
+    selectItem(item)
+  }, [selectItem])
+
+  const handleResizeStart = useCallback((e: any) => {
+    if (!isResizing) {
+      console.log('resize start')
+      setIsResizing(true)
+    }
+  }, [isResizing])
+
+  const handleResizeEnd = useCallback(() => {
+    if (isResizing) {
+      console.log('resize end')
+      setIsResizing(false)
+    }
+  }, [isResizing])
+
+  return (
+    <div className="h-full flex">
+      <ResizablePanelGroup
+        direction="horizontal"
+        onDragStart={handleResizeStart}
+        onDragEnd={handleResizeEnd}
+      >
+        <ResizablePanel defaultSize={75} minSize={30}>
+          <div className="h-full">
+            <VirtualizedView
+              items={items}
+              viewMode={viewMode}
+              thumbnailSize={thumbnailSize}
+              selectedItem={selectedItem}
+              selectedIds={selectedIds}
+              onItemClick={handleItemClick}
+              isResizing={isResizing}
+            />
+          </div>
+        </ResizablePanel>
+        <RightPanel
+          selectedItem={selectedItem}
+          isCollapsed={isRightPanelCollapsed}
+          showSettings={showSettings}
+          onToggleSettings={() => setShowSettings(!showSettings)}
+          onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+          defaultSize={25}
+          minSize={20}
+          maxSize={40}
+        />
+      </ResizablePanelGroup>
+    </div>
+  )
+}
+
+export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect, isResizing }: FileViewProps) {
   const { columns } = useColumns()
   const selectedItem = useSelectedItem()
   const selectedIds = useSelectedIds()
@@ -158,6 +221,7 @@ export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect
             selectedItem={selectedItem}
             selectedIds={selectedIds}
             columns={columns}
+            isResizing={isResizing}
           />
         </motion.div>
       </AnimatePresence>

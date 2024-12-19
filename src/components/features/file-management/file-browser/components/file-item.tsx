@@ -94,7 +94,7 @@ export function FileCard({
   const renderThumbnail = () => {
     if (viewMode === 'list') {
       return (
-        <div className="flex items-center gap-3 px-4">
+        <div className="flex items-center gap-3 px-4 h-full">
           <div className="relative w-6 h-6 rounded-sm overflow-hidden bg-muted">
             {item.thumbnailUrl ? (
               <motion.img
@@ -135,55 +135,58 @@ export function FileCard({
     }
 
     return (
-      <div className={cn(
-        "relative w-full aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all border border-accent/10",
-        (isHovered || isSelected) && "border-2 border-white/60"
-      )}>
-        {item.thumbnailUrl ? (
-          <motion.img
-            src={item.thumbnailUrl}
-            alt={item.name}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-200",
-              isImageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-            )}
-            variants={imageVariants}
-            initial="hidden"
-            animate={isImageLoaded ? "visible" : "hidden"}
-            onLoad={() => setIsImageLoaded(true)}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none'
-            }}
-          />
-        ) : (
-          <div className={cn(
-            "absolute inset-0 bg-gradient-to-br",
-            gradient
-          )}>
-            <div className="absolute inset-0 flex items-center justify-center">
-              {item.type === 'image' ? (
-                <Eye className="w-8 h-8" />
-              ) : item.type === 'video' ? (
-                <Play className="w-8 h-8" />
-              ) : (
-                <AlertCircle className="w-8 h-8" />
+      <div className="relative w-full h-full">
+        <div className={cn(
+          "relative w-full aspect-square overflow-hidden rounded-lg border border-accent/10 transition-all",
+          (isHovered || isSelected) && "border-2 border-white/60"
+        )}>
+          {item.thumbnailUrl ? (
+            <motion.img
+              src={item.thumbnailUrl}
+              alt={item.name}
+              className={cn(
+                "w-full h-full object-cover transition-all duration-200",
+                isImageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
+                item.metadata?.orientation === 'portrait' && "object-contain"
               )}
+              variants={imageVariants}
+              initial="hidden"
+              animate={isImageLoaded ? "visible" : "hidden"}
+              onLoad={() => setIsImageLoaded(true)}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+          ) : (
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-br",
+              gradient
+            )}>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {item.type === 'image' ? (
+                  <Eye className="w-8 h-8" />
+                ) : item.type === 'video' ? (
+                  <Play className="w-8 h-8" />
+                ) : (
+                  <AlertCircle className="w-8 h-8" />
+                )}
+              </div>
             </div>
-          </div>
-        )}
-        <motion.div
-          className={cn(
-            "absolute inset-x-0 -bottom-1 p-2 pb-3 bg-gradient-to-t from-black/80 to-transparent",
-            "border-t-2 border-white/80 opacity-10",
-            isSelected && "opacity-100"
           )}
-          variants={overlayVariants}
-          initial="hidden"
-          animate={isHovered || isSelected ? "visible" : "hidden"}
-        >
-          <p className="text-sm text-white truncate">{item.name}</p>
-          <p className="text-xs text-white/60">{formatFileSize(item.size)}</p>
-        </motion.div>
+          <motion.div
+            className={cn(
+              "absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent",
+              "border-t border-white/20",
+              isSelected ? "opacity-100" : "opacity-0"
+            )}
+            variants={overlayVariants}
+            initial="hidden"
+            animate={isHovered || isSelected ? "visible" : "hidden"}
+          >
+            <p className="text-sm text-white truncate">{item.name}</p>
+            <p className="text-xs text-white/60">{formatFileSize(item.size)}</p>
+          </motion.div>
+        </div>
       </div>
     )
   }
@@ -196,7 +199,7 @@ export function FileCard({
       <motion.div
         className={cn(
           "group relative transition-all",
-          viewMode === 'grid' ? getThumbnailSizeClass(thumbnailSize) : 'h-12 p-2'
+          viewMode === 'grid' && "w-full h-full"
         )}
         onClick={onClick}
         onDoubleClick={onDoubleClick}

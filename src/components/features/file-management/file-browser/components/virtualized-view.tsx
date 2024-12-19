@@ -4,13 +4,14 @@ import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { motion, usePresence } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import type { FileItem } from '@/store/files'
-import type { ThumbnailSize } from '@/store/ui'
+import type { FileItem } from '@/types/file-item'
+import type { ThumbnailSize } from '@/types/ui'
 import { useImageViewer } from '@/store/image-viewer'
 import { FileCard } from './file-item'
 import { Loader2 } from 'lucide-react'
 import type { Column } from '../file-browser'
 import { useWindowSize } from '@/hooks/use-window-size'
+import { cn } from '@/lib/utils'
 
 interface VirtualizedViewProps {
   items: FileItem[]
@@ -21,6 +22,7 @@ interface VirtualizedViewProps {
   onItemClick: (item: FileItem) => void
   onItemDoubleClick: (item: FileItem) => void
   columns?: Column[]
+  isResizing?: boolean
 }
 
 const itemVariants = {
@@ -49,7 +51,8 @@ export function VirtualizedView({
   selectedIds,
   onItemClick,
   onItemDoubleClick,
-  columns
+  columns,
+  isResizing
 }: VirtualizedViewProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const [isPresent] = usePresence()
@@ -58,34 +61,18 @@ export function VirtualizedView({
   const [isViewReady, setIsViewReady] = useState(false)
   const { openViewer } = useImageViewer()
 
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (!parentRef.current) return
-      const rect = parentRef.current.getBoundingClientRect()
-      setDimensions({
-        width: rect.width,
-        height: rect.height
-      })
-    }
-
-    const resizeObserver = new ResizeObserver(updateDimensions)
-    if (parentRef.current) {
-      resizeObserver.observe(parentRef.current)
-      updateDimensions()
-    }
-
-    const timer = setTimeout(() => {
-      updateDimensions()
-      setIsViewReady(true)
-    }, 100)
-
-    return () => {
-      resizeObserver.disconnect()
-      clearTimeout(timer)
-    }
-  }, [])
-
+  // Congelamos todos los cálculos durante el resize
   const { gridItemWidth, gridItemHeight, columnCount, rowCount } = useMemo(() => {
+    // Si está resizing, mantenemos los valores anteriores
+    if (isResizing) {
+      return {
+        gridItemWidth: dimensions.width || 200,
+        gridItemHeight: dimensions.width || 200,
+        columnCount: Math.floor((dimensions.width || 800) / 200),
+        rowCount: Math.ceil(items.length / Math.floor((dimensions.width || 800) / 200))
+      }
+    }
+
     if (dimensions.width === 0) return {
       gridItemWidth: 200,
       gridItemHeight: 200,
@@ -93,21 +80,49 @@ export function VirtualizedView({
       rowCount: items.length
     }
 
-    const gap = 16
-    const minPadding = 16
-    const availableWidth = dimensions.width - (minPadding * 2)
+    const gap = 15
+    const containerPadding = 15
+    const availableWidth = dimensions.width - (containerPadding * 2)
 
     const getBaseSize = () => {
       if (viewMode === 'list') return availableWidth
-      switch (thumbnailSize) {
-        case 'small': return 160
-        case 'large': return 240
-        default: return 200
+
+      const baseSizes = {
+        small: 150,
+        medium: 190,
+        large: 230
       }
+
+      const baseSize = baseSizes[thumbnailSize]
+      
+      // Calculamos cuántas columnas caben con el tamaño exacto
+      const maxColumns = Math.floor((availableWidth + gap) / (baseSize + gap))
+      const totalGaps = (maxColumns - 1) * gap
+      const itemWidth = Math.floor((availableWidth - totalGaps) / maxColumns)
+      
+      // Nos aseguramos que el tamaño esté dentro de los límites (±20%)
+      const minSize = baseSize * 0.8
+      const maxSize = baseSize * 1.2
+      
+      if (itemWidth < minSize) {
+        const reducedColumns = maxColumns - 1
+        const reducedGaps = (reducedColumns - 1) * gap
+        return Math.floor((availableWidth - reducedGaps) / reducedColumns)
+      }
+      
+      if (itemWidth > maxSize) {
+        const increasedColumns = maxColumns + 1
+        const increasedGaps = (increasedColumns - 1) * gap
+        return Math.floor((availableWidth - increasedGaps) / increasedColumns)
+      }
+      
+      return itemWidth
     }
+
+    const itemWidth = getBaseSize()
     
-    const baseSize = getBaseSize()
-    const baseHeight = viewMode === 'grid' ? baseSize + 32 : 48
+    // Calculamos la altura base y agregamos el espacio para el título
+    const baseHeight = viewMode === 'grid' ? itemWidth : 48
 
     if (viewMode === 'list') {
       return {
@@ -118,23 +133,46 @@ export function VirtualizedView({
       }
     }
 
-    const maxColumns = Math.max(1, Math.floor((availableWidth + gap) / (baseSize + gap)))
-    const totalGapWidth = (maxColumns - 1) * gap
-    const adjustedWidth = Math.floor((availableWidth - totalGapWidth) / maxColumns)
+    // Calculamos el número exacto de columnas que caben
+    const maxColumns = Math.floor((availableWidth + gap) / (itemWidth + gap))
 
     return {
-      gridItemWidth: adjustedWidth,
+      gridItemWidth: itemWidth,
       gridItemHeight: baseHeight,
       columnCount: maxColumns,
       rowCount: Math.ceil(items.length / maxColumns)
     }
-  }, [dimensions.width, viewMode, thumbnailSize, items.length])
+  }, [dimensions.width, viewMode, thumbnailSize, items, isResizing])
 
+  // Desactivamos el ResizeObserver durante el resize
+  useEffect(() => {
+    if (isResizing || !parentRef.current) return
+
+    const updateDimensions = () => {
+      if (!parentRef.current) return
+      const rect = parentRef.current.getBoundingClientRect()
+      setDimensions({
+        width: rect.width,
+        height: rect.height
+      })
+    }
+
+    const resizeObserver = new ResizeObserver(updateDimensions)
+    resizeObserver.observe(parentRef.current)
+    updateDimensions()
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [isResizing])
+
+  // Congelamos el virtualizer durante el resize
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => gridItemHeight + 16,
-    overscan: 5
+    estimateSize: useCallback(() => gridItemHeight + 15, [gridItemHeight]),
+    overscan: 3,
+    scrollingDelay: isResizing ? 1000 : 50 // Aumentamos el delay durante el resize
   })
 
   const getItemsForRow = useCallback((rowIndex: number) => {
@@ -168,7 +206,14 @@ export function VirtualizedView({
     <ScrollArea className="h-full w-full">
       <div
         ref={parentRef}
-        className="h-full w-full relative px-4"
+        className={cn(
+          "h-full w-full relative px-[15px]",
+          isResizing && "transition-[filter] duration-100 blur-[2px] pointer-events-none select-none"
+        )}
+        style={{
+          willChange: isResizing ? 'filter' : undefined,
+          transform: isResizing ? 'translateZ(0)' : undefined, // Forzamos GPU rendering
+        }}
       >
         {!isViewReady && (
           <motion.div
@@ -219,9 +264,12 @@ export function VirtualizedView({
                   gridTemplateColumns: viewMode === 'grid'
                     ? `repeat(${columnCount}, ${gridItemWidth}px)`
                     : '1fr',
-                  gap: '16px',
-                  justifyContent: 'center',
-                  willChange: 'transform'
+                  gap: '15px',
+                  justifyContent: 'start',
+                  alignItems: 'start',
+                  willChange: 'transform',
+                  contain: 'layout style paint',
+                  marginBottom: viewMode === 'grid' ? '15px' : undefined // Gap vertical fijo
                 }}
               >
                 {rowItems.map((item, index) => (
@@ -232,8 +280,15 @@ export function VirtualizedView({
                     animate={isViewReady ? "animate" : "initial"}
                     custom={rowStartIndex + index}
                     style={{
-                      height: gridItemHeight,
-                      width: '100%',
+                      height: item.gridInfo?.rowSpan 
+                        ? `${(gridItemHeight * item.gridInfo.rowSpan) + (gap * (item.gridInfo.rowSpan - 1))}px`
+                        : gridItemHeight,
+                      gridColumn: item.gridInfo?.colSpan 
+                        ? `span ${item.gridInfo.colSpan}`
+                        : undefined,
+                      gridRow: item.gridInfo?.rowSpan 
+                        ? `span ${item.gridInfo.rowSpan}`
+                        : undefined,
                       willChange: 'transform, opacity'
                     }}
                   >

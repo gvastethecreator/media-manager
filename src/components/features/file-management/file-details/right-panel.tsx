@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { ResizablePanel } from "@/components/ui/resizable"
+import { ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { ChevronRight, Settings2, Moon, Sun, RefreshCw } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -18,6 +18,8 @@ interface RightPanelProps {
   showSettings: boolean
   onToggleSettings: () => void
   onToggleCollapse: () => void
+  onResizeStart?: () => void
+  onResizeEnd?: () => void
   defaultSize?: number
   minSize?: number
   maxSize?: number
@@ -74,6 +76,8 @@ export function RightPanel({
   showSettings,
   onToggleSettings,
   onToggleCollapse,
+  onResizeStart,
+  onResizeEnd,
   defaultSize = 60,
   minSize = 20,
   maxSize = 70
@@ -101,53 +105,37 @@ export function RightPanel({
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
+      onResize={(size) => {
+        if (size < minSize + 5) {
+          handleToggleCollapse()
+        }
+      }}
       className={cn(
         "bg-muted/30 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/60",
         isCollapsed && "max-w-[40px] transition-all duration-0 ease-in-out",
         isTransitioning && "pointer-events-none"
       )}
     >
-      {isCollapsed ? (
-        <div className="flex flex-col h-full">
-          <div className="flex flex-col items-center gap-2 p-2 border-b">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleToggleCollapse}
-              className="h-7 w-7"
-            >
-              <ChevronRight className="h-4 w-4 rotate-180" />
-            </Button>
-          </div>
-          <div className="flex flex-col items-center gap-2 p-2">
-            <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
-          </div>
+      <div className="h-full flex flex-col">
+        <div className="px-2 h-10 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={handleToggleCollapse}
+          >
+            <ChevronRight className={cn(
+              "h-4 w-4 transition-transform",
+              !isCollapsed && "rotate-180"
+            )} />
+          </Button>
+          <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
         </div>
-      ) : (
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-2 h-11 border-b">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={handleToggleCollapse}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <span className="text-xs font-medium">
-                {showSettings ? "Configuración" : "Detalles"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <ActionButtons showSettings={showSettings} onToggleSettings={onToggleSettings} />
-            </div>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            {panelContent}
-          </div>
-        </div>
-      )}
+        <Separator />
+        <ScrollArea className="flex-1">
+          {panelContent}
+        </ScrollArea>
+      </div>
     </ResizablePanel>
   )
 }
