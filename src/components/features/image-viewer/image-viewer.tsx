@@ -1,43 +1,40 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useImageViewer } from '@/store/image-viewer'
+import { useImageViewer } from '@/stores/use-image-viewer'
 import dynamic from 'next/dynamic'
-import type { FileItem } from '@/store/files'
+import type { FileItem } from '@/types'
 
 // Lazy load del AdvancedImageViewer
 const AdvancedImageViewer = dynamic(
   () => import('./components/advanced-image-viewer').then(mod => mod.AdvancedImageViewer),
   {
-    loading: () => null, // El componente ya tiene su propio loading state
-    ssr: false // Este componente solo debe renderizarse en el cliente
+    loading: () => null,
+    ssr: false
   }
 )
 
 export function ImageViewer() {
   const { isOpen, images, currentIndex, closeViewer } = useImageViewer()
 
-  // Optimizamos el filtrado y mapeo de imágenes con useMemo
+  // Optimizamos el mapeo de imágenes con useMemo
   const mappedImages = useMemo(() => {
-    const validImages = images.filter((img): img is FileItem & { url: string } =>
-      Boolean(img.url || img.thumbnailUrl)
-    )
+    if (!images || !images.length) return []
 
-    return validImages.map(img => ({
+    return images.map(img => ({
       id: img.id,
       name: img.name,
       type: 'image' as const,
-      thumbnail: img.thumbnailUrl || img.url,
-      src: img.url || img.thumbnailUrl,
+      thumbnail: img.thumbnailUrl || '',
+      src: img.url || img.thumbnailUrl || '',
       alt: img.name,
       width: img.width,
       height: img.height,
-      duration: img.duration,
-      fps: img.fps,
       mimeType: img.mimeType
     }))
   }, [images])
 
+  // Si no hay imágenes o el visor está cerrado, no renderizamos nada
   if (!mappedImages.length || !isOpen) {
     return null
   }

@@ -3,14 +3,20 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const folderId = params.id
+    const { id } = context.params
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de carpeta no proporcionado' },
+        { status: 400 }
+      )
+    }
 
     // Obtener imágenes de la carpeta
     const images = await prisma.image.findMany({
-      where: { folderId },
+      where: { folderId: id },
       orderBy: { name: 'asc' }
     })
 

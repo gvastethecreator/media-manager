@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -8,9 +8,10 @@ export async function GET() {
         id: true,
         name: true,
         emoji: true,
+        color: true,
         _count: {
           select: {
-            files: true
+            images: true
           }
         }
       }
@@ -20,7 +21,8 @@ export async function GET() {
       id: collection.id,
       name: collection.name,
       emoji: collection.emoji,
-      count: collection._count.files
+      color: collection.color || '#94a3b8', 
+      count: collection._count.images
     })))
   } catch (error) {
     console.error('Error fetching collections:', error)

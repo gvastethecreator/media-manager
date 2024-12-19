@@ -1,20 +1,18 @@
 'use client'
 
-import * as React from "react"
-import { ResizablePanel } from "@/components/ui/resizable";
-import { Button } from "@/components/ui/button";
-import { useFilesStore } from "@/store/files";
-import { useUIStore } from "@/store/ui";
+import { useCallback, useEffect, useMemo } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { useFilesStore } from "@/store/files"
+import { useUIStore } from "@/store/ui"
 import { useStatsStore } from '@/store/stats'
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useTheme } from "next-themes"
-import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { SidebarItem } from "@/components/ui/sidebar-item"
-import { FolderList } from "@/components/features/file-management/folders/folder-list"
-import { BookmarkIcon, ChevronLeft, FolderIcon, ImageIcon, Moon, RefreshCcw, Sun, TagIcon } from "lucide-react"
+import { ResizablePanel } from "@/components/ui/resizable"
+import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw, ImageIcon } from "lucide-react"
 
 interface LeftPanelProps {
   isCollapsed: boolean
@@ -54,31 +52,20 @@ export function LeftPanel({
 
   const { toggleSettings } = useUIStore()
   const { theme, setTheme } = useTheme()
-  const [selectedFolderId, setSelectedFolderId] = React.useState<string | undefined>()
 
-  React.useEffect(() => {
-    useStatsStore.getState().initialize()
+  useEffect(() => {
     initialize()
   }, [initialize])
 
-  const handleFolderSelect = React.useCallback((folderId: string) => {
-    setSelectedFolderId(folderId)
-    handleSelectFolder(folderId)
-  }, [handleSelectFolder])
-
-  const handleOpenSettings = React.useCallback(() => {
-    toggleSettings()
-  }, [toggleSettings])
-
-  const handleThemeToggle = React.useCallback(() => {
+  const handleThemeToggle = useCallback(() => {
     setTheme(theme === 'light' ? 'dark' : 'light')
   }, [theme, setTheme])
 
-  const handleRestart = React.useCallback(() => {
-    window.location.reload()
-  }, [])
+  const handleOpenSettings = useCallback(() => {
+    toggleSettings()
+  }, [toggleSettings])
 
-  const categories = React.useMemo(() => [
+  const categories = useMemo(() => [
     {
       id: 'all',
       icon: ImageIcon,
@@ -108,24 +95,6 @@ export function LeftPanel({
       count: stats?.totalTags || 0
     }
   ], [stats])
-
-  const handleItemClick = React.useCallback((id: string, itemId?: string) => {
-    if (itemId) {
-      switch (id) {
-        case 'collections':
-          handleSelectCollection(itemId);
-          break;
-        case 'folders':
-          handleSelectFolder(itemId);
-          break;
-        case 'tags':
-          handleSelectTag(itemId);
-          break;
-      }
-    } else {
-      setCurrentView(id);
-    }
-  }, [handleSelectCollection, handleSelectFolder, handleSelectTag, setCurrentView]);
 
   return (
     <ResizablePanel
@@ -193,7 +162,7 @@ export function LeftPanel({
                     "h-7 w-7",
                     currentView === id && "bg-accent"
                   )}
-                  onClick={() => handleItemClick(id)}
+                  onClick={() => setCurrentView(id)}
                 >
                   <Icon 
                     className="h-4 w-4" 
@@ -211,7 +180,7 @@ export function LeftPanel({
                     label={label}
                     count={count}
                     isActive={currentView === id}
-                    onClick={() => handleItemClick(id)}
+                    onClick={() => setCurrentView(id)}
                   />
                   <div className="mt-1 space-y-0.5">
                     {id === 'collections' && collections?.map((collection) => (
@@ -219,7 +188,7 @@ export function LeftPanel({
                         key={collection.id}
                         variant="ghost"
                         className="w-full justify-start gap-2 h-8 text-sm px-2"
-                        onClick={() => handleItemClick('collections', collection.id)}
+                        onClick={() => handleSelectCollection(collection.id)}
                       >
                         <span className="text-base">{collection.emoji}</span>
                         <span className="flex-1 text-left truncate">{collection.name}</span>
@@ -231,7 +200,7 @@ export function LeftPanel({
                         key={folder.id}
                         variant="ghost"
                         className="w-full justify-start gap-2 h-8 text-sm px-2"
-                        onClick={() => handleItemClick('folders', folder.id)}
+                        onClick={() => handleSelectFolder(folder.id)}
                       >
                         <FolderIcon className="h-4 w-4" style={{ color: folder.color }} />
                         <span className="flex-1 text-left truncate">{folder.name}</span>
@@ -243,7 +212,7 @@ export function LeftPanel({
                         key={tag.id}
                         variant="ghost"
                         className="w-full justify-start gap-2 h-8 text-sm px-2"
-                        onClick={() => handleItemClick('tags', tag.name)}
+                        onClick={() => handleSelectTag(tag.name)}
                       >
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }} />
                         <span className="flex-1 text-left truncate">{tag.name}</span>

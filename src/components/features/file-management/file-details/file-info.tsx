@@ -144,7 +144,9 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
               </CardHeader>
               <CardContent className="space-y-1">
                 {selectedItem.metadata && Object.entries(selectedItem.metadata).map(([key, value]) => (
-                  renderInfoItem(key, value as string)
+                  <div key={key}>
+                    {renderInfoItem(key, value as string)}
+                  </div>
                 ))}
                 {(!selectedItem.metadata || Object.keys(selectedItem.metadata).length === 0) && (
                   <div className="text-sm text-muted-foreground text-center py-2">

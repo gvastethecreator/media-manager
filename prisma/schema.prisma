@@ -27,41 +27,29 @@ model Folder {
 }
 
 model Image {
-  id           String       @id @default(cuid())
-  name         String
-  description  String?
-  path         String       @unique
-  hash         String       @unique
-  size         Int
-  mimeType     String
-  width        Int?
-  height       Int?
-  metadata     String?      @default("{}")
-  isPublic     Boolean      @default(false)
-  folderId     String
-  folder       Folder       @relation(fields: [folderId], references: [id])
-  thumbnails   Thumbnail[]
-  tags         Tag[]
-  collections  Collection[]
-  favorites    Favorite[]
-  stats        ImageStats?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-}
-
-model Thumbnail {
-  id        String   @id @default(cuid())
-  size      String
-  width     Int
-  height    Int
-  filePath  String
-  fileSize  Int
-  quality   Int      @default(80)
-  format    String   @default("webp")
-  imageId   String
-  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String       @id @default(cuid())
+  name             String
+  description      String?
+  path             String       @unique
+  hash             String       @unique
+  size             Int
+  mimeType         String
+  width            Int?
+  height           Int?
+  metadata         String?      @default("{}")
+  isPublic         Boolean      @default(false)
+  thumbnail        String?      // Base64 encoded thumbnail
+  thumbnailSize    Int?        // Size of the thumbnail in bytes
+  thumbnailError   String?     // Error message if thumbnail generation failed
+  thumbnailErrorAt DateTime?   // When the error occurred
+  folderId         String
+  folder           Folder       @relation(fields: [folderId], references: [id])
+  tags             Tag[]
+  collections      Collection[]
+  favorites        Favorite[]
+  stats            ImageStats?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
 
 model Tag {
@@ -83,6 +71,8 @@ model Collection {
   slug        String       @unique
   description String?
   coverImage  String?
+  color       String?      @default("#94a3b8")
+  emoji       String?
   isPublic    Boolean      @default(false)
   images      Image[]
   createdAt   DateTime     @default(now())
@@ -97,14 +87,12 @@ model Favorite {
 }
 
 model ImageStats {
-  id            String    @id @default(cuid())
-  viewCount     Int       @default(0)
-  downloadCount Int       @default(0)
-  averageRating Float?
-  lastViewed    DateTime?
-  lastDownloaded DateTime?
-  imageId       String    @unique
-  image         Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String   @id @default(cuid())
+  imageId     String   @unique
+  image       Image    @relation(fields: [imageId], references: [id])
+  views       Int      @default(0)
+  downloads   Int      @default(0)
+  lastViewed  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
