@@ -18,11 +18,10 @@ interface RightPanelProps {
   showSettings: boolean
   onToggleSettings: () => void
   onToggleCollapse: () => void
-  onResizeStart?: () => void
-  onResizeEnd?: () => void
   defaultSize?: number
   minSize?: number
   maxSize?: number
+  isResizing?: boolean
 }
 
 interface ActionButtonsProps {
@@ -87,24 +86,12 @@ export function RightPanel({
   showSettings,
   onToggleSettings,
   onToggleCollapse,
-  onResizeStart,
-  onResizeEnd,
   defaultSize = 60,
   minSize = 20,
-  maxSize = 70
+  maxSize = 70,
+  isResizing
 }: RightPanelProps) {
   const [isTransitioning, setIsTransitioning] = React.useState(false)
-  const [isResizing, setIsResizing] = React.useState(false)
-
-  const handleResizeStart = React.useCallback(() => {
-    setIsResizing(true);
-    onResizeStart?.();
-  }, [onResizeStart]);
-
-  const handleResizeEnd = React.useCallback(() => {
-    setIsResizing(false);
-    onResizeEnd?.();
-  }, [onResizeEnd]);
 
   const handleTransitionEnd = React.useCallback(() => {
     setIsTransitioning(false);
@@ -121,8 +108,6 @@ export function RightPanel({
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
-      onResizeStart={handleResizeStart}
-      onResizeEnd={handleResizeEnd}
       className={cn(
         "border-l transition-[flex-basis] duration-300 ease-in-out",
         isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out",

@@ -9,7 +9,7 @@ import { useColumns } from '@/store/columns'
 import { useImageViewer } from '@/store/image-viewer'
 import { useSelectedItem, useSelectedIds, useFilesStore } from '@/store/files'
 import { useState, useCallback } from 'react'
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 
 export interface Column {
   id: string
@@ -130,7 +130,7 @@ export function FileBrowser() {
     selectItem(item)
   }, [selectItem])
 
-  const handleResizeStart = useCallback((e: any) => {
+  const handleResizeStart = useCallback(() => {
     if (!isResizing) {
       console.log('resize start')
       setIsResizing(true)
@@ -148,8 +148,6 @@ export function FileBrowser() {
     <div className="h-full flex">
       <ResizablePanelGroup
         direction="horizontal"
-        onDragStart={handleResizeStart}
-        onDragEnd={handleResizeEnd}
       >
         <ResizablePanel defaultSize={75} minSize={30}>
           <div className="h-full">
@@ -164,6 +162,7 @@ export function FileBrowser() {
             />
           </div>
         </ResizablePanel>
+        <ResizableHandle onDragStart={handleResizeStart} onDragEnd={handleResizeEnd} />
         <RightPanel
           selectedItem={selectedItem}
           isCollapsed={isRightPanelCollapsed}
@@ -173,6 +172,7 @@ export function FileBrowser() {
           defaultSize={25}
           minSize={20}
           maxSize={40}
+          isResizing={isResizing}
         />
       </ResizablePanelGroup>
     </div>
