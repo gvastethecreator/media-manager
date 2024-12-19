@@ -6,11 +6,7 @@ import path from 'path'
 // Configurar exifr para extraer toda la metadata
 const configureExifr = () => {
   try {
-    if (!exifr.options) {
-      exifr.options = {}
-    }
-    
-    Object.assign(exifr.options, {
+    const options = {
       tiff: true,
       xmp: true,
       icc: true,
@@ -23,7 +19,9 @@ const configureExifr = () => {
       translateValues: true,
       translateKeys: true,
       pick: ['*']
-    })
+    }
+
+    exifr.options = options
   } catch (error) {
     console.error('Error configurando exifr:', error)
   }

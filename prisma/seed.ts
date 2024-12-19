@@ -5,6 +5,14 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed...')
 
+  // Limpiar la base de datos
+  await prisma.imageStats.deleteMany()
+  await prisma.favorite.deleteMany()
+  await prisma.image.deleteMany()
+  await prisma.folder.deleteMany()
+  await prisma.collection.deleteMany()
+  await prisma.tag.deleteMany()
+
   // Crear carpeta Home
   const homeFolder = await prisma.folder.create({
     data: {
@@ -21,21 +29,29 @@ async function main() {
     data: [
       {
         name: 'Favoritos',
-        slug: 'favoritos',
         emoji: '⭐',
-        color: '#fbbf24'
+        color: '#fbbf24',
+        description: 'Mis imágenes favoritas',
+        shortcut: 'Ctrl+F',
+        sortBy: 'name',
+        filters: '[]'
       },
       {
         name: 'Archivados',
-        slug: 'archivados',
         emoji: '📦',
-        color: '#94a3b8'
+        color: '#94a3b8',
+        description: 'Imágenes archivadas',
+        sortBy: 'name',
+        filters: '[]'
       },
       {
         name: 'Importantes',
-        slug: 'importantes',
         emoji: '🎯',
-        color: '#ef4444'
+        color: '#ef4444',
+        description: 'Imágenes importantes',
+        shortcut: 'Ctrl+I',
+        sortBy: 'name',
+        filters: '[]'
       }
     ]
   })
@@ -47,18 +63,21 @@ async function main() {
     data: [
       {
         name: 'Vacaciones',
-        slug: 'vacaciones',
-        color: '#22c55e'
+        color: '#22c55e',
+        description: 'Fotos de vacaciones',
+        shortcut: 'Ctrl+V'
       },
       {
         name: 'Trabajo',
-        slug: 'trabajo',
-        color: '#3b82f6'
+        color: '#3b82f6',
+        description: 'Imágenes relacionadas con el trabajo',
+        shortcut: 'Ctrl+T'
       },
       {
         name: 'Familia',
-        slug: 'familia',
-        color: '#ec4899'
+        color: '#ec4899',
+        description: 'Fotos familiares',
+        shortcut: 'Ctrl+L'
       }
     ]
   })
@@ -73,7 +92,6 @@ async function main() {
         path: 'Home/test1.jpg',
         hash: 'hash1',
         size: 1024,
-        mimeType: 'image/jpeg',
         folderId: homeFolder.id,
         metadata: JSON.stringify({
           width: 800,
@@ -86,7 +104,6 @@ async function main() {
         path: 'Home/test2.png',
         hash: 'hash2',
         size: 2048,
-        mimeType: 'image/png',
         folderId: homeFolder.id,
         metadata: JSON.stringify({
           width: 1024,
@@ -98,6 +115,78 @@ async function main() {
   })
 
   console.log('🖼️ Imágenes creadas:', images)
+
+  // Obtener las colecciones y etiquetas creadas
+  const [favoritosCollection] = await prisma.collection.findMany({
+    where: { name: 'Favoritos' }
+  })
+
+  const [vacacionesTag, trabajoTag] = await prisma.tag.findMany({
+    where: { name: { in: ['Vacaciones', 'Trabajo'] } }
+  })
+
+  // Obtener las imágenes creadas
+  const [imagen1, imagen2] = await prisma.image.findMany({
+    where: { name: { in: ['test1.jpg', 'test2.png'] } }
+  })
+
+  // Asociar imágenes con colecciones y etiquetas
+  if (favoritosCollection && imagen1) {
+    await prisma.collection.update({
+      where: { id: favoritosCollection.id },
+      data: {
+        images: {
+          connect: { id: imagen1.id }
+        }
+      }
+    })
+  }
+
+  if (vacacionesTag && trabajoTag && imagen1 && imagen2) {
+    await prisma.tag.update({
+      where: { id: vacacionesTag.id },
+      data: {
+        images: {
+          connect: { id: imagen1.id }
+        }
+      }
+    })
+
+    await prisma.tag.update({
+      where: { id: trabajoTag.id },
+      data: {
+        images: {
+          connect: { id: imagen2.id }
+        }
+      }
+    })
+  }
+
+  // Crear estadísticas para las imágenes
+  if (imagen1 && imagen2) {
+    await prisma.imageStats.createMany({
+      data: [
+        {
+          imageId: imagen1.id,
+          views: 5,
+          downloads: 2
+        },
+        {
+          imageId: imagen2.id,
+          views: 3,
+          downloads: 1
+        }
+      ]
+    })
+
+    // Marcar una imagen como favorita
+    await prisma.favorite.create({
+      data: {
+        imageId: imagen1.id
+      }
+    })
+  }
+
   console.log('✅ Seed completado')
 }
 

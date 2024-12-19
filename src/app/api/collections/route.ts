@@ -1,31 +1,53 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
     const collections = await prisma.collection.findMany({
-      select: {
-        id: true,
-        name: true,
-        emoji: true,
-        color: true,
+      include: {
         _count: {
-          select: {
-            images: true
-          }
+          select: { images: true }
         }
       }
     })
 
-    return NextResponse.json(collections.map(collection => ({
-      id: collection.id,
-      name: collection.name,
-      emoji: collection.emoji,
-      color: collection.color || '#94a3b8', 
-      count: collection._count.images
-    })))
+    const collectionsWithStats = collections.map(collection => ({
+      ...collection,
+      count: collection._count.images,
+      size: '0 B', // TODO: Calcular el tamaño real
+    }))
+
+    return NextResponse.json(collectionsWithStats)
   } catch (error) {
-    console.error('Error fetching collections:', error)
-    return NextResponse.json({ error: 'Error fetching collections' }, { status: 500 })
+    console.error('Error getting collections:', error)
+    return NextResponse.json(
+      { error: 'Error getting collections' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json()
+    const collection = await prisma.collection.create({
+      data: {
+        name: data.name,
+        emoji: data.emoji || '🌟',
+        description: data.description,
+        color: data.color || '#3b82f6',
+        shortcut: data.shortcut,
+        sortBy: 'name',
+        filters: []
+      }
+    })
+
+    return NextResponse.json(collection)
+  } catch (error) {
+    console.error('Error creating collection:', error)
+    return NextResponse.json(
+      { error: 'Error creating collection' },
+      { status: 500 }
+    )
   }
 }
