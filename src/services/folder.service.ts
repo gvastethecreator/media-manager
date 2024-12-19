@@ -75,12 +75,7 @@ export const folderService = {
         const error = await response.json()
         throw new Error(error.error || 'Error al obtener las carpetas')
       }
-
-      const folders = await response.json()
-      return folders.map((folder: any) => ({
-        ...folder,
-        lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null
-      }))
+      return await response.json()
     } catch (error) {
       console.error('Error en getFolders:', error)
       throw error
