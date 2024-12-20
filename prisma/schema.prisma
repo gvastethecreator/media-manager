@@ -26,23 +26,27 @@ model Folder {
 }
 
 model Image {
-  id            String       @id @default(cuid())
-  name          String
-  path          String      @unique
-  size          Int
-  hash          String      @unique
-  metadata      String?     // JSON string for metadata
-  thumbnail     String?     // base64 encoded thumbnail
-  thumbnailSize Int?        // size of the thumbnail in bytes
-  isPublic      Boolean     @default(false)
-  folderId      String
-  folder        Folder      @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  collections   Collection[] @relation("CollectionToImage")
-  tags          Tag[]       @relation("TagToImage")
-  favorites     Favorite[]
-  stats         ImageStats?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id              String       @id @default(cuid())
+  name            String
+  path            String       @unique
+  size            Int
+  width           Int         @default(0)
+  height          Int         @default(0)
+  hash            String       @unique
+  metadata        String?      // JSON string for metadata
+  thumbnail       Bytes?      // Binary thumbnail data
+  thumbnailSize   Int?        // size of the thumbnail in bytes
+  thumbnailWidth  Int?
+  thumbnailHeight Int?
+  isPublic        Boolean      @default(false)
+  folderId        String
+  folder          Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  collections     Collection[] @relation("CollectionToImage")
+  tags            Tag[]        @relation("TagToImage")
+  favorites       Favorite[]
+  stats           ImageStats?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   @@index([folderId])
   @@index([hash])
