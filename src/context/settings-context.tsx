@@ -19,7 +19,7 @@ interface SettingsContextType {
     collections: CollectionWithStats[]
     tags: TagWithStats[]
   }
-  updateCollection: (id: string, data: CollectionCreate | CollectionUpdate) => Promise<void>
+  updateCollection: (id: string | null, data: CollectionCreate | CollectionUpdate) => Promise<void>
   updateTag: (id: string, data: TagCreate | TagUpdate) => Promise<void>
   deleteCollection: (id: string) => Promise<void>
   deleteTag: (id: string) => Promise<void>
@@ -76,19 +76,26 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     loadTags()
   }, [])
 
-  const updateCollection = async (id: string, data: CollectionCreate | CollectionUpdate) => {
+  const updateCollection = async (id: string | null, data: CollectionCreate | CollectionUpdate) => {
     try {
-      await collectionService.updateCollection(id, data)
+      if (!id) {
+        // Crear nueva colección
+        await collectionService.createCollection(data as CollectionCreate)
+      } else {
+        // Actualizar colección existente
+        await collectionService.updateCollection(id, data as CollectionUpdate)
+      }
+      
       await loadCollections()
       toast({
         title: "Éxito",
-        description: "Colección actualizada correctamente"
+        description: id ? "Colección actualizada correctamente" : "Colección creada correctamente"
       })
     } catch (error) {
       console.error('Error updating collection:', error)
       toast({
         title: "Error",
-        description: "No se pudo actualizar la colección",
+        description: id ? "No se pudo actualizar la colección" : "No se pudo crear la colección",
         variant: "destructive"
       })
     }
