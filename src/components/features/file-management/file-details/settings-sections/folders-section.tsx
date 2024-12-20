@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/select"
 import { ThumbnailQuality } from "@/services/thumbnail.service"
 import { useState, useEffect } from "react"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Trash2, Plus, Loader2 } from "lucide-react"
 
 interface FolderStats {
   totalFolders: number
@@ -70,6 +72,7 @@ export function FoldersSection() {
   const [folders, setFolders] = useState<any[]>([])
   const [thumbnailQuality, setThumbnailQuality] = useState<ThumbnailQuality>('mid')
   const [processStatus, setProcessStatus] = useState<ProcessStatus>({})
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
 
   // Cargar carpetas al montar el componente
   useEffect(() => {
@@ -124,7 +127,15 @@ export function FoldersSection() {
       setError(null)
       setIsProcessing(true)
       setProcessProgress(0)
-      setProcessStatus({})
+      setProcessStatus({
+        status: 'Iniciando proceso...',
+        currentFile: '',
+        current: 0,
+        total: 0,
+        progress: 0
+      })
+      
+      console.log('Intentando agregar carpeta:', folderPath)
       
       const response = await fetch('/api/folders', {
         method: 'POST',
@@ -137,16 +148,19 @@ export function FoldersSection() {
         }),
       })
 
+      const contentType = response.headers.get('content-type')
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Error adding folder')
+        const errorData = contentType?.includes('application/json') 
+          ? await response.json()
+          : { error: 'Error desconocido' }
+        throw new Error(errorData.error || 'Error adding folder')
       }
 
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('No response body')
+      if (!response.body) {
+        throw new Error('No response body received')
       }
 
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let isComplete = false
 
@@ -156,12 +170,16 @@ export function FoldersSection() {
           if (done) break
 
           const chunk = decoder.decode(value)
+          console.log('Chunk received:', chunk)
+
           const events = chunk
             .split('\n')
             .filter(Boolean)
             .map(line => {
               try {
-                return JSON.parse(line)
+                const parsed = JSON.parse(line)
+                console.log('Parsed event:', parsed)
+                return parsed
               } catch (error) {
                 console.error('Error parsing event:', error)
                 return null
@@ -170,20 +188,27 @@ export function FoldersSection() {
             .filter(event => event !== null)
 
           for (const event of events) {
-            if (!event || !event.type || !event.data) continue
+            if (!event?.type || !event?.data) {
+              console.warn('Invalid event received:', event)
+              continue
+            }
 
             switch (event.type) {
               case 'progress':
-                if (event.data.progress !== undefined) {
+                if (typeof event.data.progress === 'number') {
                   setProcessProgress(event.data.progress)
                 }
-                setProcessStatus(event.data)
+                setProcessStatus(prevStatus => ({
+                  ...prevStatus,
+                  ...event.data,
+                  status: event.data.status || 'Procesando...'
+                }))
                 // Añadir un pequeño delay para que el UI se actualice
                 await new Promise(resolve => setTimeout(resolve, 50))
                 break
               case 'error':
                 if (event.data.error) {
-                  console.error('Error processing file:', event.data.file, event.data.error)
+                  console.error('Error procesando archivo:', event.data.file, event.data.error)
                   toast({
                     title: "Error",
                     description: event.data.error,
@@ -351,6 +376,37 @@ export function FoldersSection() {
     }
   }
 
+  const handleFolderClick = async (folderId: string) => {
+    if (selectedFolder === folderId) {
+      try {
+        const response = await fetch(`/api/folders/${folderId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar la carpeta')
+        }
+
+        toast({
+          title: "Carpeta eliminada",
+          description: "La carpeta se eliminó correctamente"
+        })
+
+        await loadStats()
+        setSelectedFolder(null)
+      } catch (error) {
+        console.error('Error deleting folder:', error)
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar la carpeta",
+          variant: "destructive"
+        })
+      }
+    } else {
+      setSelectedFolder(folderId)
+    }
+  }
+
   if (error) {
     return (
       <Card className="p-6">
@@ -374,6 +430,7 @@ export function FoldersSection() {
                 value={folderPath}
                 onChange={(e) => setFolderPath(e.target.value)}
                 className="h-7 text-xs"
+                disabled={isProcessing}
               />
             </div>
             <Button
@@ -395,6 +452,16 @@ export function FoldersSection() {
               )}
             </Button>
           </div>
+
+          {isProcessing && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{processStatus.status || 'Procesando...'}</span>
+                <span>{processStatus.current}/{processStatus.total} archivos</span>
+              </div>
+              <Progress value={processProgress} className="h-2" />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Calidad de miniaturas</Label>
@@ -447,7 +514,6 @@ export function FoldersSection() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          size="icon"
                           className="h-7 w-7"
                           onClick={() => handleReindexFolder(folder.id)}
                           disabled={isProcessing}
@@ -457,36 +523,32 @@ export function FoldersSection() {
                             isProcessing && processStatus.folderId === folder.id && "animate-spin"
                           )} />
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-destructive hover:text-destructive"
-                              disabled={isProcessing}
-                            >
-                              <FolderPlus className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar carpeta?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción eliminará la carpeta "{folder.name}" de la lista de indexación.
-                                No se eliminarán los archivos del disco.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleRemoveFolder(folder.id)}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className={cn(
+                                  "h-7 w-7",
+                                  selectedFolder === folder.id && "bg-destructive hover:bg-destructive/90"
+                                )}
+                                onClick={() => handleFolderClick(folder.id)}
+                                disabled={isProcessing}
                               >
-                                Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                                <Trash2 className={cn(
+                                  "h-4 w-4",
+                                  selectedFolder === folder.id && "text-destructive-foreground"
+                                )} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {selectedFolder === folder.id 
+                                ? "Haz clic de nuevo para eliminar"
+                                : "Haz clic para eliminar"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
 

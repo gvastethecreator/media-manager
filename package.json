@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:clean": "del prisma\\dev.db && prisma migrate deploy"
   },
   "dependencies": {
     "@bull-board/api": "^6.5.3",
