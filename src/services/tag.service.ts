@@ -56,7 +56,8 @@ export const tagService = {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create tag')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create tag')
       }
 
       return response.json()
@@ -69,7 +70,7 @@ export const tagService = {
   async updateTag(id: string, data: TagUpdate): Promise<Tag> {
     try {
       const response = await fetch(`/api/tags/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -77,7 +78,8 @@ export const tagService = {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update tag')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update tag')
       }
 
       return response.json()
@@ -94,7 +96,8 @@ export const tagService = {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete tag')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to delete tag')
       }
     } catch (error) {
       console.error('Error deleting tag:', error)
@@ -109,7 +112,8 @@ export const tagService = {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to add image to tag')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to add image to tag')
       }
     } catch (error) {
       console.error('Error adding image to tag:', error)
@@ -124,7 +128,8 @@ export const tagService = {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to remove image from tag')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to remove image from tag')
       }
     } catch (error) {
       console.error('Error removing image from tag:', error)

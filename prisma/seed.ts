@@ -13,6 +13,30 @@ async function main() {
   await prisma.collection.deleteMany()
   await prisma.tag.deleteMany()
 
+  try {
+    // Desactivar todos los perfiles existentes
+    await prisma.profile.updateMany({
+      where: { isActive: true },
+      data: { isActive: false }
+    })
+  } catch (error) {
+    console.log('No hay perfiles que desactivar')
+  }
+
+  // Crear perfil por defecto
+  const defaultProfile = await prisma.profile.create({
+    data: {
+      name: 'Usuario Principal',
+      emoji: '👤',
+      color: '#3b82f6',
+      theme: 'system',
+      language: 'es',
+      isActive: true
+    }
+  })
+
+  console.log('👤 Perfil por defecto creado:', defaultProfile)
+
   // Crear carpeta Home
   const homeFolder = await prisma.folder.create({
     data: {
@@ -62,130 +86,27 @@ async function main() {
   const tags = await prisma.tag.createMany({
     data: [
       {
-        name: 'Vacaciones',
+        name: 'Familia',
         color: '#22c55e',
-        description: 'Fotos de vacaciones',
-        shortcut: 'Ctrl+V'
+        description: 'Fotos familiares',
+        shortcut: 'Ctrl+1'
       },
       {
         name: 'Trabajo',
         color: '#3b82f6',
         description: 'Imágenes relacionadas con el trabajo',
-        shortcut: 'Ctrl+T'
+        shortcut: 'Ctrl+2'
       },
       {
-        name: 'Familia',
-        color: '#ec4899',
-        description: 'Fotos familiares',
-        shortcut: 'Ctrl+L'
+        name: 'Vacaciones',
+        color: '#f59e0b',
+        description: 'Fotos de vacaciones',
+        shortcut: 'Ctrl+3'
       }
     ]
   })
 
   console.log('🏷️ Etiquetas creadas:', tags)
-
-  // Crear algunas imágenes de prueba
-  const images = await prisma.image.createMany({
-    data: [
-      {
-        name: 'test1.jpg',
-        path: 'Home/test1.jpg',
-        hash: 'hash1',
-        size: 1024,
-        folderId: homeFolder.id,
-        metadata: JSON.stringify({
-          width: 800,
-          height: 600,
-          description: 'Imagen de prueba 1'
-        })
-      },
-      {
-        name: 'test2.png',
-        path: 'Home/test2.png',
-        hash: 'hash2',
-        size: 2048,
-        folderId: homeFolder.id,
-        metadata: JSON.stringify({
-          width: 1024,
-          height: 768,
-          description: 'Imagen de prueba 2'
-        })
-      }
-    ]
-  })
-
-  console.log('🖼️ Imágenes creadas:', images)
-
-  // Obtener las colecciones y etiquetas creadas
-  const [favoritosCollection] = await prisma.collection.findMany({
-    where: { name: 'Favoritos' }
-  })
-
-  const [vacacionesTag, trabajoTag] = await prisma.tag.findMany({
-    where: { name: { in: ['Vacaciones', 'Trabajo'] } }
-  })
-
-  // Obtener las imágenes creadas
-  const [imagen1, imagen2] = await prisma.image.findMany({
-    where: { name: { in: ['test1.jpg', 'test2.png'] } }
-  })
-
-  // Asociar imágenes con colecciones y etiquetas
-  if (favoritosCollection && imagen1) {
-    await prisma.collection.update({
-      where: { id: favoritosCollection.id },
-      data: {
-        images: {
-          connect: { id: imagen1.id }
-        }
-      }
-    })
-  }
-
-  if (vacacionesTag && trabajoTag && imagen1 && imagen2) {
-    await prisma.tag.update({
-      where: { id: vacacionesTag.id },
-      data: {
-        images: {
-          connect: { id: imagen1.id }
-        }
-      }
-    })
-
-    await prisma.tag.update({
-      where: { id: trabajoTag.id },
-      data: {
-        images: {
-          connect: { id: imagen2.id }
-        }
-      }
-    })
-  }
-
-  // Crear estadísticas para las imágenes
-  if (imagen1 && imagen2) {
-    await prisma.imageStats.createMany({
-      data: [
-        {
-          imageId: imagen1.id,
-          views: 5,
-          downloads: 2
-        },
-        {
-          imageId: imagen2.id,
-          views: 3,
-          downloads: 1
-        }
-      ]
-    })
-
-    // Marcar una imagen como favorita
-    await prisma.favorite.create({
-      data: {
-        imageId: imagen1.id
-      }
-    })
-  }
 
   console.log('✅ Seed completado')
 }
