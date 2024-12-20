@@ -16,12 +16,19 @@ export function formatFileSize(bytes: number): string {
   return `${formattedSize} ${units[unitIndex]}`
 }
 
-export function formatDate(date: Date | string | number): string {
-  const d = new Date(date)
-  return new Intl.DateTimeFormat('es', {
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+}
+
+export function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat('es-ES', {
     dateStyle: 'medium',
     timeStyle: 'short'
-  }).format(d)
+  }).format(date)
 }
 
 export function formatFileName(name: string): string {

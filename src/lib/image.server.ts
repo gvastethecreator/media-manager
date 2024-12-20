@@ -1,11 +1,11 @@
 import sharp from 'sharp'
-import { extractImageMetadata } from './metadata'
+import { getImageMetadata as getMetadata } from './metadata'
 
 export type { ImageMetadata } from './metadata'
 
 export async function getImageMetadata(path: string) {
   try {
-    return await extractImageMetadata(path)
+    return await getMetadata(path)
   } catch (error) {
     console.error('Error getting image metadata:', error)
     throw error

@@ -1,118 +1,192 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { fsService } from '@/services/fs.server'
-import path from 'path'
-import { getImageMetadata } from '@/lib/image.server'
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 import { computeHash } from '@/lib/server-utils'
+import { getImageMetadata } from '@/lib/image.server'
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const dynamic = 'force-dynamic'
+
+type RouteParams = { params: { id: string } }
+
+export async function POST(request: NextRequest, context: RouteParams) {
   try {
-    const folderId = params.id
+    // Verificar la conexión a la base de datos
+    await prisma.$connect()
 
     // Obtener la carpeta
     const folder = await prisma.folder.findUnique({
-      where: { id: folderId }
+      where: { id: context.params.id }
     })
 
     if (!folder) {
       return NextResponse.json(
-        { error: 'Carpeta no encontrada' },
+        { error: 'Folder not found' },
         { status: 404 }
       )
     }
 
-    // Eliminar imágenes existentes
-    await prisma.image.deleteMany({
-      where: { folderId }
-    })
+    // Verificar si la carpeta existe en el sistema de archivos
+    try {
+      const stats = statSync(folder.path)
+      if (!stats.isDirectory()) {
+        return NextResponse.json(
+          { error: 'Path is not a directory' },
+          { status: 400 }
+        )
+      }
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Directory not found' },
+        { status: 404 }
+      )
+    }
 
-    // Listar archivos
-    const files = await fsService.listFiles(folder.path)
-    console.log('Archivos encontrados:', files.length)
+    // Crear un TransformStream para enviar actualizaciones de progreso
+    const stream = new TransformStream()
+    const writer = stream.writable.getWriter()
+    const encoder = new TextEncoder()
 
-    let totalSize = 0
-    let totalFiles = 0
-    let processedFiles = 0
-
-    // Filtrar solo archivos de imagen
-    const imageFiles = files.filter(file => 
-      /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file.path)
-    )
-
-    // Indexar archivos
-    for (const file of imageFiles) {
+    // Iniciar el procesamiento en segundo plano
+    const processPromise = (async () => {
       try {
-        const hash = await computeHash(file.path)
-        console.log('🔄 Procesando archivo:', file.path)
-        const metadata = await getImageMetadata(file.path)
-        console.log('📝 Metadata extraída:', metadata)
-        
-        // Limpiar la metadata eliminando valores undefined
-        const cleanMetadata = JSON.parse(JSON.stringify(metadata))
-        console.log('🧹 Metadata limpia:', cleanMetadata)
+        // Leer los archivos de la carpeta
+        const files = readdirSync(folder.path)
+          .map(file => {
+            const filePath = join(folder.path, file)
+            const stats = statSync(filePath)
+            return {
+              path: filePath,
+              name: file,
+              size: stats.size,
+              isDirectory: stats.isDirectory()
+            }
+          })
+          .filter(file => !file.isDirectory && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
 
-        await prisma.image.create({
+        console.log(' Reindexing images:', files.length)
+
+        let totalSize = 0
+        let processedFiles = 0
+
+        // Procesar cada archivo
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+          try {
+            // Enviar actualización de progreso
+            const progress = Math.round(((i + 1) / files.length) * 100)
+            await writer.write(encoder.encode(JSON.stringify({
+              type: 'progress',
+              data: {
+                current: i + 1,
+                total: files.length,
+                progress,
+                currentFile: file.name
+              }
+            }) + '\n'))
+
+            // Verificar si la imagen ya existe
+            const existingImage = await prisma.image.findFirst({
+              where: {
+                OR: [
+                  { path: file.path },
+                  { name: file.name, folderId: folder.id }
+                ]
+              }
+            })
+
+            // Obtener metadata y generar hash
+            const metadata = await getImageMetadata(file.path)
+            const hash = await computeHash(file.path)
+
+            if (existingImage) {
+              // Actualizar imagen existente
+              await prisma.image.update({
+                where: { id: existingImage.id },
+                data: {
+                  size: file.size,
+                  hash,
+                  metadata: JSON.stringify(metadata),
+                  path: file.path,
+                  name: file.name
+                }
+              })
+            } else {
+              // Crear nueva imagen
+              await prisma.image.create({
+                data: {
+                  path: file.path,
+                  name: file.name,
+                  size: file.size,
+                  hash,
+                  metadata: JSON.stringify(metadata),
+                  folderId: folder.id,
+                  isPublic: false
+                }
+              })
+            }
+
+            totalSize += file.size
+            processedFiles++
+
+            console.log(' Processed:', file.name)
+          } catch (error) {
+            console.error(' Error processing file:', file.name, error)
+            // Enviar error pero continuar con el siguiente archivo
+            await writer.write(encoder.encode(JSON.stringify({
+              type: 'error',
+              data: {
+                file: file.name,
+                error: error instanceof Error ? error.message : 'Unknown error'
+              }
+            }) + '\n'))
+          }
+        }
+
+        // Actualizar estadísticas de la carpeta
+        await prisma.folder.update({
+          where: { id: folder.id },
           data: {
-            name: file.name,
-            path: file.path,
-            hash,
-            size: file.size,
-            mimeType: `image/${path.extname(file.path).slice(1)}`,
-            metadata: JSON.stringify(cleanMetadata),
-            folderId: folder.id,
-            isPublic: false,
-            width: metadata.dimensions?.width || 0,
-            height: metadata.dimensions?.height || 0
+            totalFiles: processedFiles,
+            totalSize,
+            lastIndexed: new Date()
           }
         })
 
-        totalSize += file.size
-        totalFiles++
-        processedFiles++
+        // Enviar mensaje de finalización
+        await writer.write(encoder.encode(JSON.stringify({
+          type: 'complete',
+          data: { folder }
+        }) + '\n'))
 
-        // Actualizar progreso parcial cada 10 archivos
-        if (processedFiles % 10 === 0) {
-          await prisma.folder.update({
-            where: { id: folderId },
-            data: {
-              totalFiles: processedFiles,
-              totalSize,
-              lastIndexed: new Date()
-            }
-          })
-        }
       } catch (error) {
-        console.error('Error indexando imagen:', file.path, error)
-        // Continuar con el siguiente archivo
+        console.error('Error reindexing folder:', error)
+        await writer.write(encoder.encode(JSON.stringify({
+          type: 'error',
+          data: {
+            file: 'folder',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }
+        }) + '\n'))
+      } finally {
+        await writer.close()
       }
-    }
+    })()
 
-    // Actualizar estadísticas finales de la carpeta
-    const updatedFolder = await prisma.folder.update({
-      where: { id: folderId },
-      data: {
-        totalFiles,
-        totalSize,
-        lastIndexed: new Date()
-      }
+    // Iniciar el procesamiento y devolver el stream
+    processPromise.catch(console.error)
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     })
 
-    return NextResponse.json({
-      folder: updatedFolder,
-      stats: {
-        totalFiles,
-        processedFiles,
-        totalSize,
-        success: true
-      }
-    })
   } catch (error) {
-    console.error('Error en POST /api/folders/reindex/[id]:', error)
+    console.error('Error in POST /api/folders/reindex:', error)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

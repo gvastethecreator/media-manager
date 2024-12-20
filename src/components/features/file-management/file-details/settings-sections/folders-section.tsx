@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useSettingsContext } from "@/context/settings-context"
-import { folderService } from "@/services/folder.service"
+import { addFolder, reindexFolder, getFolders, type IndexStats } from "@/services/folder.service"
 import { useToast } from "@/components/ui/use-toast"
-import { Folder, FolderX, RefreshCw, FolderPlus, AlertCircle } from "lucide-react"
+import { Folder, FolderPlus, AlertCircle, RefreshCw } from "lucide-react"
 import { formatBytes } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
@@ -32,13 +32,22 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ThumbnailQuality } from "@/services/thumbnail.service"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface FolderStats {
   totalFolders: number
   totalFiles: number
   totalSize: number
   lastIndexed: Date | null
+}
+
+interface ProcessStatus {
+  status?: string;
+  currentFile?: string;
+  current?: number;
+  total?: number;
+  progress?: number;
+  folderId?: string;
 }
 
 const initialStats: FolderStats = {
@@ -51,26 +60,27 @@ const initialStats: FolderStats = {
 export function FoldersSection() {
   const { settings, updateSettings } = useSettingsContext()
   const { toast } = useToast()
+
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [processProgress, setProcessProgress] = useState(0)
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null)
   const [stats, setStats] = useState<FolderStats>(initialStats)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [folderPath, setFolderPath] = useState("")
   const [folders, setFolders] = useState<any[]>([])
   const [thumbnailQuality, setThumbnailQuality] = useState<ThumbnailQuality>('mid')
+  const [processStatus, setProcessStatus] = useState<ProcessStatus>({})
 
   // Cargar carpetas al montar el componente
-  React.useEffect(() => {
-    loadFolders()
+  useEffect(() => {
+    loadStats()
   }, [])
 
   const loadFolders = async () => {
     try {
       setIsLoading(true)
       setError(null)
-      const folders = await folderService.getFolders()
+      const folders = await getFolders()
       setFolders(folders)
       await loadStats()
     } catch (error) {
@@ -85,8 +95,19 @@ export function FoldersSection() {
     try {
       setIsLoading(true)
       setError(null)
-      const indexStats = await folderService.getIndexStats()
+      const folders = await getFolders()
+      const indexStats: FolderStats = {
+        totalFolders: folders.length,
+        totalFiles: folders.reduce((acc, folder) => acc + (folder._count?.images || 0), 0),
+        totalSize: folders.reduce((acc, folder) => acc + Number(folder.totalSize || 0), 0),
+        lastIndexed: folders.reduce((acc, folder) => {
+          if (!acc || !folder.lastIndexed) return acc
+          const date = new Date(folder.lastIndexed)
+          return acc > date ? acc : date
+        }, null as Date | null)
+      }
       setStats(indexStats)
+      setFolders(folders)
     } catch (error) {
       console.error('Error cargando estadísticas:', error)
       setError('No se pudieron cargar las estadísticas')
@@ -102,43 +123,104 @@ export function FoldersSection() {
     try {
       setError(null)
       setIsProcessing(true)
-      setCurrentFolder(folderPath)
       setProcessProgress(0)
+      setProcessStatus({})
       
-      const folder = await folderService.addFolder(
-        folderPath,
-        thumbnailQuality,
-        (progress) => {
-          setProcessProgress(progress.progress)
-          setCurrentFolder(`${progress.currentFile} (${progress.current}/${progress.total})`)
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        (error) => {
-          toast({
-            title: "Error procesando archivo",
-            description: `Error en ${error.file}: ${error.error}`,
-            variant: "destructive"
-          })
-        }
-      )
-      
-      toast({
-        title: "Carpeta agregada",
-        description: `Se agregó la carpeta ${folder.name} correctamente`
+        body: JSON.stringify({ 
+          path: folderPath,
+          thumbnailQuality: thumbnailQuality 
+        }),
       })
-      
-      setFolderPath("")
-      await loadFolders()
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Error adding folder')
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No response body')
+      }
+
+      const decoder = new TextDecoder()
+      let isComplete = false
+
+      try {
+        while (!isComplete) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          const events = chunk
+            .split('\n')
+            .filter(Boolean)
+            .map(line => {
+              try {
+                return JSON.parse(line)
+              } catch (error) {
+                console.error('Error parsing event:', error)
+                return null
+              }
+            })
+            .filter(event => event !== null)
+
+          for (const event of events) {
+            if (!event || !event.type || !event.data) continue
+
+            switch (event.type) {
+              case 'progress':
+                if (event.data.progress !== undefined) {
+                  setProcessProgress(event.data.progress)
+                }
+                setProcessStatus(event.data)
+                // Añadir un pequeño delay para que el UI se actualice
+                await new Promise(resolve => setTimeout(resolve, 50))
+                break
+              case 'error':
+                if (event.data.error) {
+                  console.error('Error processing file:', event.data.file, event.data.error)
+                  toast({
+                    title: "Error",
+                    description: event.data.error,
+                    variant: "destructive"
+                  })
+                }
+                break
+              case 'complete':
+                isComplete = true
+                toast({
+                  title: "Carpeta agregada",
+                  description: `Se agregó la carpeta correctamente`
+                })
+                setFolderPath("")
+                // Esperar un momento antes de actualizar la lista
+                await new Promise(resolve => setTimeout(resolve, 500))
+                await loadStats()
+                break
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock()
+      }
     } catch (error) {
       console.error('Error agregando carpeta:', error)
       toast({
         title: "Error",
-        description: "No se pudo agregar la carpeta",
+        description: error instanceof Error ? error.message : "No se pudo agregar la carpeta",
         variant: "destructive"
       })
     } finally {
+      // Esperar un momento antes de limpiar el estado
+      await new Promise(resolve => setTimeout(resolve, 500))
       setIsProcessing(false)
-      setCurrentFolder(null)
       setProcessProgress(0)
+      setProcessStatus({})
     }
   }
 
@@ -147,17 +229,85 @@ export function FoldersSection() {
       setError(null)
       setIsProcessing(true)
       setProcessProgress(0)
-      setCurrentFolder(folderId)
-
-      const response = await folderService.reindexFolder(folderId)
+      setProcessStatus({ folderId })
       
-      // Recargar carpetas y estadísticas
-      await loadFolders()
-      
-      toast({
-        title: "Reindexación completada",
-        description: `Se han procesado ${response.stats?.processedFiles || 0} archivos correctamente.`
+      const response = await fetch(`/api/folders/reindex/${folderId}`, {
+        method: 'POST',
       })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Error reindexing folder')
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No response body')
+      }
+
+      const decoder = new TextDecoder()
+      let isComplete = false
+
+      try {
+        while (!isComplete) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          const events = chunk
+            .split('\n')
+            .filter(Boolean)
+            .map(line => {
+              try {
+                return JSON.parse(line)
+              } catch (error) {
+                console.error('Error parsing event:', error)
+                return null
+              }
+            })
+            .filter(event => event !== null)
+
+          for (const event of events) {
+            if (!event || !event.type || !event.data) continue
+
+            switch (event.type) {
+              case 'progress':
+                if (event.data.progress !== undefined) {
+                  setProcessProgress(event.data.progress)
+                }
+                setProcessStatus({
+                  ...event.data,
+                  folderId
+                })
+                // Añadir un pequeño delay para que el UI se actualice
+                await new Promise(resolve => setTimeout(resolve, 50))
+                break
+              case 'error':
+                if (event.data.error) {
+                  console.error('Error processing file:', event.data.file, event.data.error)
+                  toast({
+                    title: "Error",
+                    description: event.data.error,
+                    variant: "destructive"
+                  })
+                }
+                break
+              case 'complete':
+                isComplete = true
+                toast({
+                  title: "Reindexación completada",
+                  description: "Se ha completado la reindexación correctamente"
+                })
+                // Esperar un momento antes de actualizar la lista
+                await new Promise(resolve => setTimeout(resolve, 500))
+                await loadStats()
+                break
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock()
+      }
     } catch (error) {
       console.error('Error reindexando carpeta:', error)
       toast({
@@ -166,16 +316,23 @@ export function FoldersSection() {
         variant: "destructive"
       })
     } finally {
+      // Esperar un momento antes de limpiar el estado
+      await new Promise(resolve => setTimeout(resolve, 500))
       setIsProcessing(false)
       setProcessProgress(0)
-      setCurrentFolder(null)
+      setProcessStatus({})
     }
   }
 
   const handleRemoveFolder = async (folderId: string) => {
     try {
       setError(null)
-      await folderService.removeFolder(folderId)
+      await reindexFolder({
+        id: folderId,
+        onProgress: () => {},
+        onError: () => {},
+        onComplete: () => {}
+      })
       
       // Recargar carpetas y estadísticas
       await loadFolders()
@@ -191,31 +348,6 @@ export function FoldersSection() {
         description: error instanceof Error ? error.message : 'Error al eliminar la carpeta',
         variant: "destructive"
       })
-    }
-  }
-
-  const handleReindex = async () => {
-    if (isProcessing) return
-
-    try {
-      setError(null)
-      setIsProcessing(true)
-      await folderService.reindexAll()
-      await loadStats()
-      
-      toast({
-        title: "Reindexación completada",
-        description: "Se han actualizado todas las carpetas correctamente."
-      })
-    } catch (error) {
-      console.error('Error reindexando:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Error al reindexar las carpetas',
-        variant: "destructive"
-      })
-    } finally {
-      setIsProcessing(false)
     }
   }
 
@@ -237,6 +369,7 @@ export function FoldersSection() {
           <div className="flex items-center gap-2 p-2 rounded-lg border">
             <div className="flex-1">
               <Input
+                type="text"
                 placeholder="Ruta de la carpeta (ej: C:\Users\Usuario\Imágenes)"
                 value={folderPath}
                 onChange={(e) => setFolderPath(e.target.value)}
@@ -250,15 +383,15 @@ export function FoldersSection() {
               disabled={isLoading || isProcessing || !folderPath.trim()}
             >
               {isProcessing ? (
-                <>
+                <React.Fragment>
                   <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                   Agregando...
-                </>
+                </React.Fragment>
               ) : (
-                <>
+                <React.Fragment>
                   <FolderPlus className="h-3 w-3 mr-1" />
                   Agregar
-                </>
+                </React.Fragment>
               )}
             </Button>
           </div>
@@ -301,7 +434,7 @@ export function FoldersSection() {
                               {folder._count?.images || 0} imágenes
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {formatBytes(folder.totalSize || 0)}
+                              {formatBytes(Number(folder.totalSize || 0))}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
                               {folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleString() : 'No indexado'}
@@ -309,8 +442,10 @@ export function FoldersSection() {
                           </div>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-1">
                         <Button
+                          size="icon"
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
@@ -319,18 +454,19 @@ export function FoldersSection() {
                         >
                           <RefreshCw className={cn(
                             "h-4 w-4",
-                            isProcessing && currentFolder === folder.id && "animate-spin"
+                            isProcessing && processStatus.folderId === folder.id && "animate-spin"
                           )} />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
+                              size="icon"
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7 text-destructive hover:text-destructive"
                               disabled={isProcessing}
                             >
-                              <FolderX className="h-4 w-4" />
+                              <FolderPlus className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -355,13 +491,25 @@ export function FoldersSection() {
                     </div>
 
                     {/* Barra de progreso */}
-                    {isProcessing && currentFolder === folder.id && (
+                    {isProcessing && processStatus.folderId === folder.id && (
                       <div className="mt-4 space-y-2">
                         <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>Procesando archivos...</span>
+                          <span>{processStatus.status || 'Procesando...'}</span>
                           <span>{Math.round(processProgress)}%</span>
                         </div>
                         <Progress value={processProgress} className="h-2" />
+                        <div className="flex flex-col gap-1">
+                          {processStatus.currentFile && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              Archivo actual: {processStatus.currentFile}
+                            </p>
+                          )}
+                          {processStatus.current !== undefined && processStatus.total !== undefined && (
+                            <p className="text-xs text-muted-foreground">
+                              {processStatus.current} de {processStatus.total} archivos procesados
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -400,30 +548,10 @@ export function FoldersSection() {
             <div className="flex items-center justify-between">
               <span className="text-xs">Última indexación</span>
               <Badge variant="outline" className="text-[10px] font-mono">
-                {stats.lastIndexed ? new Date(stats.lastIndexed).toLocaleString() : 'Nunca'}
+                {stats.lastIndexed ? stats.lastIndexed.toLocaleString() : 'Nunca'}
               </Badge>
             </div>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full h-8 text-xs mt-2"
-            onClick={handleReindex}
-            disabled={isProcessing || isLoading}
-          >
-            {isProcessing ? (
-              <>
-                <RefreshCw className="h-3 w-3 mr-2 animate-spin" />
-                Reindexando...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-3 w-3 mr-2" />
-                Reindexar todo
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
     </div>

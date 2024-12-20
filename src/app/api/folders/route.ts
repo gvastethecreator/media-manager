@@ -8,6 +8,7 @@ import { THUMBNAIL_QUALITY_CONFIG, type ThumbnailQuality } from '@/services/thum
 import sharp from 'sharp'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300 // 5 minutes
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,14 +18,31 @@ export async function POST(request: NextRequest) {
     const { path: folderPath, thumbnailQuality = 'mid' } = await request.json() as { path: string, thumbnailQuality?: ThumbnailQuality }
     console.log('📥 Adding folder:', { folderPath, thumbnailQuality })
 
-    // Verificar si la carpeta ya existe
+    // Verificar si la carpeta existe en el sistema de archivos
+    try {
+      const stats = statSync(folderPath)
+      if (!stats.isDirectory()) {
+        return NextResponse.json(
+          { error: 'La ruta no es un directorio válido' },
+          { status: 400 }
+        )
+      }
+    } catch (error) {
+      console.error('Error verificando directorio:', error)
+      return NextResponse.json(
+        { error: 'No se encontró el directorio o no se tiene acceso' },
+        { status: 404 }
+      )
+    }
+
+    // Verificar si la carpeta ya existe en la base de datos
     const existingFolder = await prisma.folder.findUnique({
       where: { path: folderPath }
     })
 
     if (existingFolder) {
       return NextResponse.json(
-        { error: 'Folder already exists' },
+        { error: 'La carpeta ya existe en la base de datos' },
         { status: 400 }
       )
     }
@@ -61,110 +79,147 @@ export async function POST(request: NextRequest) {
 
         console.log('📸 Processing images:', files.length)
 
+        let totalSize = 0
+        let processedFiles = 0
+
         // Procesar cada archivo
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
+        for (const file of files) {
           try {
-            // Enviar actualización de progreso
-            const progress = Math.round(((i + 1) / files.length) * 100)
+            // Enviar evento de inicio de procesamiento del archivo
             await writer.write(encoder.encode(JSON.stringify({
               type: 'progress',
               data: {
-                current: i + 1,
+                current: processedFiles + 1,
                 total: files.length,
-                progress,
-                currentFile: file.name
+                progress: Math.round(((processedFiles + 1) / files.length) * 100),
+                currentFile: file.name,
+                status: 'Analizando metadata...'
               }
             }) + '\n'))
 
-            // Obtener metadata y generar hash
             const metadata = await getImageMetadata(file.path)
             const hash = await computeHash(file.path)
 
-            // Crear entrada en la base de datos
-            const image = await prisma.image.create({
+            // Enviar evento de generación de thumbnail
+            await writer.write(encoder.encode(JSON.stringify({
+              type: 'progress',
               data: {
-                path: file.path,
-                name: file.name,
-                size: file.size,
+                current: processedFiles + 1,
+                total: files.length,
+                progress: Math.round(((processedFiles + 1) / files.length) * 100),
+                currentFile: file.name,
+                status: 'Generando thumbnail...'
+              }
+            }) + '\n'))
+
+            // Generar thumbnail
+            const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
+            const image = sharp(file.path)
+            const metadata_thumb = await image.metadata()
+            
+            const resizedImage = image.resize({
+              width: thumbnailConfig.width,
+              height: thumbnailConfig.height,
+              fit: 'inside',
+              withoutEnlargement: true
+            })
+
+            const thumbnailBuffer = await resizedImage.toBuffer()
+
+            // Guardar imagen en la base de datos
+            await prisma.image.create({
+              data: {
                 hash,
-                metadata: metadata as any,
-                folderId: folder.id
+                name: file.name,
+                path: file.path,
+                size: file.size,
+                width: metadata.width || 0,
+                height: metadata.height || 0,
+                thumbnail: thumbnailBuffer,
+                thumbnailWidth: metadata_thumb.width || 0,
+                thumbnailHeight: metadata_thumb.height || 0,
+                folderId: folder.id,
               }
             })
 
-            // Generar thumbnail con la calidad configurada
-            const qualityConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
-            const imageBuffer = await sharp(file.path)
-              .resize(qualityConfig.width, qualityConfig.height, {
-                fit: 'inside',
-                withoutEnlargement: true
-              })
-              .webp({ quality: qualityConfig.quality })
-              .toBuffer()
+            totalSize += file.size
+            processedFiles++
 
-            // Actualizar imagen con thumbnail
-            await prisma.image.update({
-              where: { id: image.id },
+            // Enviar evento de archivo completado
+            await writer.write(encoder.encode(JSON.stringify({
+              type: 'progress',
               data: {
-                thumbnail: imageBuffer.toString('base64'),
-                thumbnailSize: imageBuffer.length
+                current: processedFiles,
+                total: files.length,
+                progress: Math.round((processedFiles / files.length) * 100),
+                currentFile: file.name,
+                status: 'Completado'
               }
-            })
+            }) + '\n'))
 
-            console.log('✅ Processed:', file.name)
+            // Pequeña pausa para que el UI pueda actualizarse
+            await new Promise(resolve => setTimeout(resolve, 100))
+
           } catch (error) {
-            console.error('❌ Error processing file:', file.name, error)
-            // Enviar error pero continuar con el siguiente archivo
+            console.error('Error processing file:', file.path, error)
             await writer.write(encoder.encode(JSON.stringify({
               type: 'error',
               data: {
                 file: file.name,
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : 'Error procesando archivo'
               }
             }) + '\n'))
           }
         }
 
-        // Actualizar estadísticas de la carpeta
-        const totalSize = files.reduce((acc, file) => acc + file.size, 0)
+        // Actualizar el tamaño total de la carpeta
         await prisma.folder.update({
           where: { id: folder.id },
           data: {
-            totalFiles: files.length,
             totalSize,
             lastIndexed: new Date()
           }
         })
 
-        // Enviar mensaje de finalización
+        // Enviar evento de completado
         await writer.write(encoder.encode(JSON.stringify({
           type: 'complete',
-          data: { folder }
+          data: {
+            folder: {
+              ...folder,
+              totalSize,
+              _count: { images: processedFiles }
+            }
+          }
         }) + '\n'))
+
       } catch (error) {
         console.error('Error processing folder:', error)
         await writer.write(encoder.encode(JSON.stringify({
           type: 'error',
-          data: { error: error instanceof Error ? error.message : String(error) }
+          data: {
+            error: error instanceof Error ? error.message : 'Error procesando carpeta'
+          }
         }) + '\n'))
       } finally {
         await writer.close()
       }
     })()
 
-    // Devolver el stream como respuesta
-    return new Response(stream.readable, {
+    // Iniciar el procesamiento y devolver el stream
+    processPromise.catch(console.error)
+    return new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
+        'Connection': 'keep-alive',
+      },
     })
+
   } catch (error) {
-    console.error('Error initiating folder processing:', error)
+    console.error('Error in POST /api/folders:', error)
     return NextResponse.json(
-      { error: 'Error adding folder', details: error instanceof Error ? error.message : String(error) },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
