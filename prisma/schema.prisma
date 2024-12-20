@@ -11,33 +11,42 @@ datasource db {
 }
 
 model Folder {
-  id        String   @id @default(cuid())
-  name      String
-  path      String   @unique
-  isWatched Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  images    Image[]
+  id          String    @id @default(cuid())
+  name        String
+  path        String    @unique
+  isWatched   Boolean   @default(false)
+  totalFiles  Int       @default(0)
+  totalSize   Int       @default(0)
+  lastIndexed DateTime? @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  images      Image[]
+
+  @@index([path])
 }
 
 model Image {
-  id          String       @id @default(cuid())
-  name        String
-  path        String       @unique
-  size        Int
-  hash        String       @unique
-  metadata    String?      // JSON string for metadata
-  thumbnail   String?      // base64 encoded thumbnail
-  folderId    String
-  folder      Folder       @relation(fields: [folderId], references: [id])
-  collections Collection[] @relation("CollectionToImage")
-  tags        Tag[]        @relation("TagToImage")
-  favorites   Favorite[]
-  stats       ImageStats?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            String       @id @default(cuid())
+  name          String
+  path          String      @unique
+  size          Int
+  hash          String      @unique
+  metadata      String?     // JSON string for metadata
+  thumbnail     String?     // base64 encoded thumbnail
+  thumbnailSize Int?        // size of the thumbnail in bytes
+  isPublic      Boolean     @default(false)
+  folderId      String
+  folder        Folder      @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  collections   Collection[] @relation("CollectionToImage")
+  tags          Tag[]       @relation("TagToImage")
+  favorites     Favorite[]
+  stats         ImageStats?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@index([folderId])
+  @@index([hash])
+  @@index([name])
 }
 
 model Tag {
