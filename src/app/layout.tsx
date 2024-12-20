@@ -3,7 +3,9 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryProvider } from '@/providers/query-provider';
+import { InitializeProvider } from '@/providers/initialize-provider';
 import { Toaster } from "@/components/ui/toaster";
+import { LoadingScreen } from '@/components/core/loading-screen';
 import { cn } from '@/lib/utils';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -32,7 +34,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
+            <InitializeProvider>
+              <LoadingScreen />
+              {children}
+            </InitializeProvider>
             <Toaster />
           </QueryProvider>
         </ThemeProvider>
