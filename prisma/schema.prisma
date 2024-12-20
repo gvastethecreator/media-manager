@@ -102,3 +102,22 @@ model Profile {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+// Modelo para el sistema de colas
+model QueueJob {
+  id          String    @id @default(cuid())
+  queue       String    // Nombre de la cola (ej: 'thumbnails')
+  data        String    // Datos del trabajo en JSON
+  status      String    @default("pending") // pending, active, completed, failed
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  error       String?   // Mensaje de error si falla
+  progress    Int       @default(0)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([queue, status])
+  @@index([status, createdAt])
+}
