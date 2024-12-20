@@ -69,7 +69,7 @@ export function VirtualizedView({
         gridItemWidth: dimensions.width || 200,
         gridItemHeight: dimensions.width || 200,
         columnCount: Math.floor((dimensions.width || 800) / 200),
-        rowCount: Math.ceil(items.length / Math.floor((dimensions.width || 800) / 200))
+        rowCount: Math.ceil((items?.length || 0) / Math.floor((dimensions.width || 800) / 200))
       }
     }
 
@@ -77,7 +77,7 @@ export function VirtualizedView({
       gridItemWidth: 200,
       gridItemHeight: 200,
       columnCount: 1,
-      rowCount: items.length
+      rowCount: items?.length || 0
     }
 
     const gap = 15
@@ -129,7 +129,7 @@ export function VirtualizedView({
         gridItemWidth: availableWidth,
         gridItemHeight: baseHeight,
         columnCount: 1,
-        rowCount: items.length
+        rowCount: items?.length || 0
       }
     }
 
@@ -140,7 +140,7 @@ export function VirtualizedView({
       gridItemWidth: itemWidth,
       gridItemHeight: baseHeight,
       columnCount: maxColumns,
-      rowCount: Math.ceil(items.length / maxColumns)
+      rowCount: Math.ceil((items?.length || 0) / maxColumns)
     }
   }, [dimensions.width, viewMode, thumbnailSize, items, isResizing])
 
@@ -182,19 +182,19 @@ export function VirtualizedView({
 
   const getItemsForRow = useCallback((rowIndex: number) => {
     const startIndex = rowIndex * columnCount
-    const endIndex = Math.min(startIndex + columnCount, items.length)
-    return items.slice(startIndex, endIndex)
+    const endIndex = Math.min(startIndex + columnCount, items?.length || 0)
+    return items?.slice(startIndex, endIndex) || []
   }, [columnCount, items])
 
   const itemContent = useCallback((index: number) => {
-    const item = items[index]
+    const item = items?.[index]
     return (
       <FileCard
-        key={item.id}
+        key={item?.id}
         item={item}
         viewMode={viewMode}
         thumbnailSize={thumbnailSize}
-        isSelected={selectedIds.includes(item.id)}
+        isSelected={selectedIds.includes(item?.id)}
         onClick={() => onItemClick(item)}
         onDoubleClick={() => onItemDoubleClick(item)}
       />
@@ -273,19 +273,19 @@ export function VirtualizedView({
                 >
                   {rowItems.map((item, index) => (
                     <motion.div
-                      key={item.id}
+                      key={item?.id}
                       variants={itemVariants}
                       initial="initial"
                       animate="animate"
                       custom={rowStartIndex + index}
                       style={{
-                        height: item.gridInfo?.rowSpan 
+                        height: item?.gridInfo?.rowSpan 
                           ? `${(gridItemHeight * item.gridInfo.rowSpan) + (gap * (item.gridInfo.rowSpan - 1))}px`
                           : gridItemHeight,
-                        gridColumn: item.gridInfo?.colSpan 
+                        gridColumn: item?.gridInfo?.colSpan 
                           ? `span ${item.gridInfo.colSpan}`
                           : undefined,
-                        gridRow: item.gridInfo?.rowSpan 
+                        gridRow: item?.gridInfo?.rowSpan 
                           ? `span ${item.gridInfo.rowSpan}`
                           : undefined,
                         willChange: 'transform, opacity'
