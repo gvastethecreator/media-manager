@@ -4,24 +4,44 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 // Configurar exifr para extraer toda la metadata
-const configureExifr = () => {
-  try {
-    const options = {
-      tiff: true,
-      xmp: true,
-      icc: true,
-      iptc: true,
-      jfif: true,
-      ihdr: true,
-      mergeOutput: false,
-      sanitize: false,
-      reviveValues: true,
-      translateValues: true,
-      translateKeys: true,
-      pick: ['*']
-    }
+const defaultOptions = {
+  ifd0: true,
+  ifd1: false,
+  exif: true,
+  gps: true,
+  interop: false,
+  jfif: true,
+  ihdr: true,
+  xmp: true,
+  iptc: true,
+  icc: false,
+  makerNote: false,
+  userComment: false,
+  multiSegment: false,
+  skip: [],
+  pick: [],
+  translateKeys: true,
+  translateValues: true,
+  reviveValues: true,
+  sanitize: true,
+  mergeOutput: true,
+  silentErrors: true,
+  chunked: true,
+  firstChunkSize: 65536,
+  firstChunkSizeNode: 65536,
+  firstChunkSizeBrowser: 65536,
+  chunkSize: 65536,
+  chunkLimit: 5
+}
 
-    exifr.options = options
+export function configureExifr() {
+  try {
+    // En lugar de modificar el objeto options directamente,
+    // creamos un nuevo objeto con las opciones por defecto
+    const options = { ...defaultOptions }
+
+    // Asignamos las opciones al exifr de manera segura
+    Object.assign(exifr, { options })
   } catch (error) {
     console.error('Error configurando exifr:', error)
   }
