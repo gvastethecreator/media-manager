@@ -1,7 +1,7 @@
 'use client';
 
 import { MainToolbar } from "@/components/core/navigation/toolbar/main-toolbar";
-import { Breadcrumbs } from "@/components/core/navigation/breadcrumbs/breadcrumbs";
+import { NavigationBar } from "@/components/core/navigation/breadcrumbs/breadcrumbs";
 import { FileView } from "@/components/features/file-management/file-browser/file-browser";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { useFilesStore } from "@/store/files";
@@ -117,6 +117,14 @@ export function MainContent({
 
   return (
     <div className={className}>
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <NavigationBar 
+          path={currentPath} 
+          onNavigate={handleBreadcrumbNavigate}
+          onSearch={() => setSearchQuery("")}
+          onDateSelect={() => {}}
+        />
+      </div>
       <MainToolbar
         view={view}
         onViewChange={() => {}}
@@ -133,9 +141,6 @@ export function MainContent({
         columns={columns}
         onColumnsChange={setColumns}
       />
-      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <Breadcrumbs path={currentPath} onNavigate={handleBreadcrumbNavigate} />
-      </div>
       <div className="flex-1 overflow-hidden relative">
         <div className="h-full overflow-auto">{renderContent()}</div>
         <div className="absolute bottom-4 right-4 bg-background/40 backdrop-blur-[8px] supports-[backdrop-filter]:bg-background/30 border border-border/50 rounded-lg px-3 py-1.5 text-[10px] flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-background/50">
