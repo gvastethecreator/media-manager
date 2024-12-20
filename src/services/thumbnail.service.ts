@@ -57,12 +57,12 @@ class ThumbnailService {
         return cached
       }
 
-      const response = await this.fetchWithTimeout('/api/images/thumbnail-stats')
+      const response = await this.fetchWithTimeout('/api/thumbnails/stats')
       if (!response.ok) {
         throw new Error('Error obteniendo estadísticas de miniaturas')
       }
       const stats = await response.json()
-      
+
       // Guardar en caché por 5 minutos
       await thumbnailCache.set('thumbnail_stats', stats, 1000 * 60 * 5)
       return stats
@@ -79,10 +79,10 @@ class ThumbnailService {
 
   async reprocessAll(onProgress?: (progress: number) => void): Promise<void> {
     try {
-      const response = await this.fetchWithTimeout('/api/images/reprocess-thumbnails', {
+      const response = await this.fetchWithTimeout('/api/thumbnails/reprocess', {
         method: 'POST'
       })
-      
+
       if (!response.ok) {
         throw new Error('Error reprocesando miniaturas')
       }
@@ -96,7 +96,7 @@ class ThumbnailService {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
-          
+
           const progress = new TextDecoder().decode(value)
           onProgress(parseInt(progress))
         }
@@ -110,7 +110,7 @@ class ThumbnailService {
   async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {
     try {
       const cacheKey = `thumbnail:${imageId}:${quality}`
-      
+
       // Intentar obtener del caché
       const cached = await thumbnailCache.get(cacheKey)
       if (cached) {
@@ -118,7 +118,7 @@ class ThumbnailService {
       }
 
       // Si no está en caché, generarlo
-      const response = await this.fetchWithTimeout(`/api/images/${imageId}/thumbnail`, {
+      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}`, {
         headers: {
           'Accept': 'image/webp'
         }
@@ -130,10 +130,10 @@ class ThumbnailService {
 
       const blob = await response.blob()
       const base64 = await this.blobToBase64(blob)
-      
+
       // Guardar en caché
       await thumbnailCache.set(cacheKey, base64)
-      
+
       return base64
     } catch (error) {
       console.error('Error en getThumbnail:', error)
@@ -143,14 +143,14 @@ class ThumbnailService {
 
   async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
     try {
-      const response = await this.fetchWithTimeout(`/api/images/${imageId}/thumbnail/generate`, {
+      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ quality })
       })
-      
+
       if (!response.ok) {
         throw new Error('Error generando miniatura')
       }

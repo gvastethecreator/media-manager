@@ -2,6 +2,7 @@
 
 import { AppSettings, DEFAULT_SETTINGS } from '@/types/settings'
 import { debounce } from 'lodash'
+import { prisma } from '@/lib/db'
 
 class SettingsService {
   private static instance: SettingsService
@@ -230,3 +231,36 @@ class SettingsService {
 }
 
 export const settingsService = SettingsService.getInstance()
+
+export async function initializeSettings() {
+  try {
+    // Verificar si existe un perfil activo
+    const activeProfile = await prisma.profile.findFirst({
+      where: { isActive: true }
+    })
+
+    // Si no hay perfil activo, crear uno por defecto
+    if (!activeProfile) {
+      await prisma.profile.create({
+        data: {
+          name: 'Default',
+          emoji: '👤',
+          color: '#3b82f6',
+          theme: 'system',
+          language: 'es',
+          isActive: true
+        }
+      })
+      console.log('⚙️ [Settings] Perfil por defecto creado')
+    }
+
+    // Cargar configuraciones adicionales si es necesario
+    // TODO: Agregar más configuraciones según sea necesario
+
+    console.log('⚙️ [Settings] Configuraciones inicializadas')
+    return true
+  } catch (error) {
+    console.error('❌ [Settings] Error al inicializar:', error)
+    throw error
+  }
+}
