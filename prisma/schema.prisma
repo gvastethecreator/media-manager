@@ -90,3 +90,15 @@ model ImageStats {
 
   @@index([imageId])
 }
+
+model Profile {
+  id            String   @id @default(cuid())
+  name          String
+  emoji         String   @default("👤")
+  color         String   @default("#3b82f6")
+  theme         String   @default("system")
+  language      String   @default("es")
+  isActive      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
