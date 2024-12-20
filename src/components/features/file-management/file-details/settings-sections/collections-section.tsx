@@ -32,22 +32,25 @@ export function CollectionsSection() {
 
   const handleAddCollection = async () => {
     if (!newCollection.name) return
-    const newCollectionData = {
-      id: Date.now().toString(),
-      ...newCollection,
-      shortcut: "",
-      count: 0,
-      size: "0 B",
-      sortBy: "name" as const,
-      filters: []
+    
+    try {
+      const newCollectionData = {
+        ...newCollection,
+        sortBy: "name" as const,
+        filters: []
+      }
+      
+      await updateCollection(null, newCollectionData)
+      
+      setNewCollection({
+        name: "",
+        emoji: "🌟",
+        description: "",
+        color: "#3b82f6"
+      })
+    } catch (error) {
+      console.error('Error al crear la colección:', error)
     }
-    await updateCollection(newCollectionData.id, newCollectionData)
-    setNewCollection({
-      name: "",
-      emoji: "🌟",
-      description: "",
-      color: "#3b82f6"
-    })
   }
 
   const handleRemoveCollection = async (id: string) => {

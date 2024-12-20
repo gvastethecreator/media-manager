@@ -1,5 +1,4 @@
 import { Tag } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 
 export interface TagCreate {
   name: string
@@ -8,8 +7,9 @@ export interface TagCreate {
   shortcut?: string
 }
 
-export interface TagUpdate extends Partial<TagCreate> {
+export interface TagUpdate extends Partial<Omit<TagCreate, 'name'>> {
   id: string
+  name?: string
 }
 
 export interface TagWithStats extends Tag {
@@ -19,88 +19,117 @@ export interface TagWithStats extends Tag {
 
 export const tagService = {
   async getTags(): Promise<TagWithStats[]> {
-    const tags = await prisma.tag.findMany({
-      include: {
-        _count: {
-          select: { images: true }
-        },
-        images: {
-          select: { size: true }
-        }
+    try {
+      const response = await fetch('/api/tags')
+      if (!response.ok) {
+        throw new Error('Failed to fetch tags')
       }
-    })
-
-    return tags.map(tag => ({
-      ...tag,
-      count: tag._count.images,
-      size: formatBytes(tag.images.reduce((acc, img) => acc + img.size, 0))
-    }))
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching tags:', error)
+      throw error
+    }
   },
 
   async getTag(id: string): Promise<TagWithStats | null> {
-    const tag = await prisma.tag.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { images: true }
-        },
-        images: {
-          select: { size: true }
-        }
+    try {
+      const response = await fetch(`/api/tags/${id}`)
+      if (!response.ok) {
+        if (response.status === 404) return null
+        throw new Error('Failed to fetch tag')
       }
-    })
-
-    if (!tag) return null
-
-    return {
-      ...tag,
-      count: tag._count.images,
-      size: formatBytes(tag.images.reduce((acc, img) => acc + img.size, 0))
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching tag:', error)
+      throw error
     }
   },
 
   async createTag(data: TagCreate): Promise<Tag> {
-    return prisma.tag.create({
-      data
-    })
+    try {
+      const response = await fetch('/api/tags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create tag')
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('Error creating tag:', error)
+      throw error
+    }
   },
 
   async updateTag(id: string, data: TagUpdate): Promise<Tag> {
-    const updateData = { ...data }
-    delete updateData.id
+    try {
+      const response = await fetch(`/api/tags/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-    return prisma.tag.update({
-      where: { id },
-      data: updateData
-    })
+      if (!response.ok) {
+        throw new Error('Failed to update tag')
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('Error updating tag:', error)
+      throw error
+    }
   },
 
   async deleteTag(id: string): Promise<void> {
-    await prisma.tag.delete({
-      where: { id }
-    })
+    try {
+      const response = await fetch(`/api/tags/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete tag')
+      }
+    } catch (error) {
+      console.error('Error deleting tag:', error)
+      throw error
+    }
   },
 
   async addImageToTag(tagId: string, imageId: string): Promise<void> {
-    await prisma.tag.update({
-      where: { id: tagId },
-      data: {
-        images: {
-          connect: { id: imageId }
-        }
+    try {
+      const response = await fetch(`/api/tags/${tagId}/images/${imageId}`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add image to tag')
       }
-    })
+    } catch (error) {
+      console.error('Error adding image to tag:', error)
+      throw error
+    }
   },
 
   async removeImageFromTag(tagId: string, imageId: string): Promise<void> {
-    await prisma.tag.update({
-      where: { id: tagId },
-      data: {
-        images: {
-          disconnect: { id: imageId }
-        }
+    try {
+      const response = await fetch(`/api/tags/${tagId}/images/${imageId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove image from tag')
       }
-    })
+    } catch (error) {
+      console.error('Error removing image from tag:', error)
+      throw error
+    }
   }
 }
 

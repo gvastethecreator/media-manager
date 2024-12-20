@@ -1,5 +1,4 @@
 import { Collection } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 
 export interface CollectionCreate {
   name: string
@@ -11,8 +10,9 @@ export interface CollectionCreate {
   filters?: any[]
 }
 
-export interface CollectionUpdate extends Partial<CollectionCreate> {
+export interface CollectionUpdate extends Partial<Omit<CollectionCreate, 'name'>> {
   id: string
+  name?: string
 }
 
 export interface CollectionWithStats extends Collection {
@@ -22,96 +22,117 @@ export interface CollectionWithStats extends Collection {
 
 export const collectionService = {
   async getCollections(): Promise<CollectionWithStats[]> {
-    const collections = await prisma.collection.findMany({
-      include: {
-        _count: {
-          select: { images: true }
-        },
-        images: {
-          select: { size: true }
-        }
+    try {
+      const response = await fetch('/api/collections')
+      if (!response.ok) {
+        throw new Error('Failed to fetch collections')
       }
-    })
-
-    return collections.map(collection => ({
-      ...collection,
-      filters: collection.filters ? JSON.parse(collection.filters) : [],
-      count: collection._count.images,
-      size: formatBytes(collection.images.reduce((acc, img) => acc + img.size, 0))
-    }))
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching collections:', error)
+      throw error
+    }
   },
 
   async getCollection(id: string): Promise<CollectionWithStats | null> {
-    const collection = await prisma.collection.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { images: true }
-        },
-        images: {
-          select: { size: true }
-        }
+    try {
+      const response = await fetch(`/api/collections/${id}`)
+      if (!response.ok) {
+        if (response.status === 404) return null
+        throw new Error('Failed to fetch collection')
       }
-    })
-
-    if (!collection) return null
-
-    return {
-      ...collection,
-      filters: collection.filters ? JSON.parse(collection.filters) : [],
-      count: collection._count.images,
-      size: formatBytes(collection.images.reduce((acc, img) => acc + img.size, 0))
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching collection:', error)
+      throw error
     }
   },
 
   async createCollection(data: CollectionCreate): Promise<Collection> {
-    return prisma.collection.create({
-      data: {
-        ...data,
-        filters: JSON.stringify(data.filters || [])
+    try {
+      const response = await fetch('/api/collections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create collection')
       }
-    })
+
+      return response.json()
+    } catch (error) {
+      console.error('Error creating collection:', error)
+      throw error
+    }
   },
 
   async updateCollection(id: string, data: CollectionUpdate): Promise<Collection> {
-    const updateData: any = { ...data }
-    if (data.filters) {
-      updateData.filters = JSON.stringify(data.filters)
-    }
-    delete updateData.id
+    try {
+      const response = await fetch(`/api/collections/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-    return prisma.collection.update({
-      where: { id },
-      data: updateData
-    })
+      if (!response.ok) {
+        throw new Error('Failed to update collection')
+      }
+
+      return response.json()
+    } catch (error) {
+      console.error('Error updating collection:', error)
+      throw error
+    }
   },
 
   async deleteCollection(id: string): Promise<void> {
-    await prisma.collection.delete({
-      where: { id }
-    })
+    try {
+      const response = await fetch(`/api/collections/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete collection')
+      }
+    } catch (error) {
+      console.error('Error deleting collection:', error)
+      throw error
+    }
   },
 
   async addImageToCollection(collectionId: string, imageId: string): Promise<void> {
-    await prisma.collection.update({
-      where: { id: collectionId },
-      data: {
-        images: {
-          connect: { id: imageId }
-        }
+    try {
+      const response = await fetch(`/api/collections/${collectionId}/images/${imageId}`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add image to collection')
       }
-    })
+    } catch (error) {
+      console.error('Error adding image to collection:', error)
+      throw error
+    }
   },
 
   async removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
-    await prisma.collection.update({
-      where: { id: collectionId },
-      data: {
-        images: {
-          disconnect: { id: imageId }
-        }
+    try {
+      const response = await fetch(`/api/collections/${collectionId}/images/${imageId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove image from collection')
       }
-    })
+    } catch (error) {
+      console.error('Error removing image from collection:', error)
+      throw error
+    }
   }
 }
 
