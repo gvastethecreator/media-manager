@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { Collection, Tag } from "@prisma/client"
+import { Collection, Tag, Profile } from "@prisma/client"
 import { collectionService, CollectionCreate, CollectionUpdate } from "@/services/collection.service"
 import { tagService, TagCreate, TagUpdate } from "@/services/tag.service"
+import { profileService, ProfileCreate, ProfileUpdate } from "@/services/profile.service"
 import { useToast } from "@/components/ui/use-toast"
 
 interface CollectionWithStats extends Collection {
@@ -18,28 +19,40 @@ interface SettingsContextType {
   settings: {
     collections: CollectionWithStats[]
     tags: TagWithStats[]
+    profiles: Profile[]
+    activeProfile: string | null
   }
   updateCollection: (id: string | null, data: CollectionCreate | CollectionUpdate) => Promise<void>
-  updateTag: (id: string, data: TagCreate | TagUpdate) => Promise<void>
+  updateTag: (id: string | null, data: TagCreate | TagUpdate) => Promise<void>
+  updateProfile: (id: string | null, data: ProfileCreate | ProfileUpdate) => Promise<void>
+  setActiveProfile: (id: string) => Promise<void>
   deleteCollection: (id: string) => Promise<void>
   deleteTag: (id: string) => Promise<void>
+  deleteProfile: (id: string) => Promise<void>
 }
 
 const SettingsContext = createContext<SettingsContextType>({
   settings: {
     collections: [],
-    tags: []
+    tags: [],
+    profiles: [],
+    activeProfile: null
   },
   updateCollection: async () => {},
   updateTag: async () => {},
+  updateProfile: async () => {},
+  setActiveProfile: async () => {},
   deleteCollection: async () => {},
-  deleteTag: async () => {}
+  deleteTag: async () => {},
+  deleteProfile: async () => {}
 })
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsContextType["settings"]>({
     collections: [],
-    tags: []
+    tags: [],
+    profiles: [],
+    activeProfile: null
   })
   const { toast } = useToast()
 
@@ -71,9 +84,29 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const loadProfiles = async () => {
+    try {
+      const profiles = await profileService.getProfiles()
+      const activeProfile = profiles.find(p => p.isActive)
+      setSettings(prev => ({ 
+        ...prev, 
+        profiles,
+        activeProfile: activeProfile?.id || null
+      }))
+    } catch (error) {
+      console.error('Error loading profiles:', error)
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los perfiles",
+        variant: "destructive"
+      })
+    }
+  }
+
   useEffect(() => {
     loadCollections()
     loadTags()
+    loadProfiles()
   }, [])
 
   const updateCollection = async (id: string | null, data: CollectionCreate | CollectionUpdate) => {
@@ -101,19 +134,67 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const updateTag = async (id: string, data: TagCreate | TagUpdate) => {
+  const updateTag = async (id: string | null, data: TagCreate | TagUpdate) => {
     try {
-      await tagService.updateTag(id, data)
+      if (!id) {
+        // Crear nuevo tag
+        await tagService.createTag(data as TagCreate)
+      } else {
+        // Actualizar tag existente
+        await tagService.updateTag(id, data as TagUpdate)
+      }
       await loadTags()
       toast({
         title: "Éxito",
-        description: "Etiqueta actualizada correctamente"
+        description: id ? "Etiqueta actualizada correctamente" : "Etiqueta creada correctamente"
       })
     } catch (error) {
       console.error('Error updating tag:', error)
       toast({
         title: "Error",
-        description: "No se pudo actualizar la etiqueta",
+        description: id ? "No se pudo actualizar la etiqueta" : "No se pudo crear la etiqueta",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
+    try {
+      if (!id) {
+        // Crear nuevo perfil
+        await profileService.createProfile(data as ProfileCreate)
+      } else {
+        // Actualizar perfil existente
+        await profileService.updateProfile(id, data as ProfileUpdate)
+      }
+      await loadProfiles()
+      toast({
+        title: "Éxito",
+        description: id ? "Perfil actualizado correctamente" : "Perfil creado correctamente"
+      })
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      toast({
+        title: "Error",
+        description: id ? "No se pudo actualizar el perfil" : "No se pudo crear el perfil",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const setActiveProfile = async (id: string) => {
+    try {
+      await profileService.setActiveProfile(id)
+      await loadProfiles()
+      toast({
+        title: "Éxito",
+        description: "Perfil activo actualizado correctamente"
+      })
+    } catch (error) {
+      console.error('Error setting active profile:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el perfil activo",
         variant: "destructive"
       })
     }
@@ -155,14 +236,37 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const deleteProfile = async (id: string) => {
+    try {
+      await profileService.deleteProfile(id)
+      await loadProfiles()
+      toast({
+        title: "Éxito",
+        description: "Perfil eliminado correctamente"
+      })
+    } catch (error) {
+      console.error('Error deleting profile:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el perfil",
+        variant: "destructive"
+      })
+    }
+  }
+
   return (
-    <SettingsContext.Provider value={{
-      settings,
-      updateCollection,
-      updateTag,
-      deleteCollection,
-      deleteTag
-    }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateCollection,
+        updateTag,
+        updateProfile,
+        setActiveProfile,
+        deleteCollection,
+        deleteTag,
+        deleteProfile
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   )
