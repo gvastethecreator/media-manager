@@ -52,6 +52,14 @@ export async function POST(request: NextRequest) {
     const writer = stream.writable.getWriter()
     const encoder = new TextEncoder()
 
+    const writeEvent = async (event: any) => {
+      try {
+        await writer.write(encoder.encode(JSON.stringify(event) + '\n'))
+      } catch (error) {
+        console.error('Error writing event:', error)
+      }
+    }
+
     // Iniciar el procesamiento en segundo plano
     const processPromise = (async () => {
       try {
@@ -79,6 +87,18 @@ export async function POST(request: NextRequest) {
 
         console.log('📸 Processing images:', files.length)
 
+        // Enviar evento inicial
+        await writeEvent({
+          type: 'progress',
+          data: {
+            current: 0,
+            total: files.length,
+            progress: 0,
+            currentFile: '',
+            status: 'Iniciando procesamiento...'
+          }
+        })
+
         let totalSize = 0
         let processedFiles = 0
 
@@ -86,36 +106,34 @@ export async function POST(request: NextRequest) {
         for (const file of files) {
           try {
             // Enviar evento de inicio de procesamiento del archivo
-            await writer.write(encoder.encode(JSON.stringify({
+            await writeEvent({
               type: 'progress',
               data: {
                 current: processedFiles + 1,
                 total: files.length,
-                progress: Math.round(((processedFiles + 1) / files.length) * 100),
+                progress: Math.min(Math.round(((processedFiles + 1) / files.length) * 100), 100),
                 currentFile: file.name,
                 status: 'Analizando metadata...'
               }
-            }) + '\n'))
+            })
 
             const metadata = await getImageMetadata(file.path)
             const hash = await computeHash(file.path)
 
-            // Enviar evento de generación de thumbnail
-            await writer.write(encoder.encode(JSON.stringify({
+            await writeEvent({
               type: 'progress',
               data: {
                 current: processedFiles + 1,
                 total: files.length,
-                progress: Math.round(((processedFiles + 1) / files.length) * 100),
+                progress: Math.min(Math.round(((processedFiles + 1) / files.length) * 100), 100),
                 currentFile: file.name,
                 status: 'Generando thumbnail...'
               }
-            }) + '\n'))
+            })
 
-            // Generar thumbnail
             const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
             const image = sharp(file.path)
-            const metadata_thumb = await image.metadata()
+            const imageMetadata = await image.metadata()
             
             const resizedImage = image.resize({
               width: thumbnailConfig.width,
@@ -125,19 +143,19 @@ export async function POST(request: NextRequest) {
             })
 
             const thumbnailBuffer = await resizedImage.toBuffer()
+            const thumbnailMetadata = await sharp(thumbnailBuffer).metadata()
 
-            // Guardar imagen en la base de datos
             await prisma.image.create({
               data: {
                 hash,
                 name: file.name,
                 path: file.path,
                 size: file.size,
-                width: metadata.width || 0,
-                height: metadata.height || 0,
+                width: imageMetadata.width || 0,
+                height: imageMetadata.height || 0,
                 thumbnail: thumbnailBuffer,
-                thumbnailWidth: metadata_thumb.width || 0,
-                thumbnailHeight: metadata_thumb.height || 0,
+                thumbnailWidth: thumbnailMetadata.width || 0,
+                thumbnailHeight: thumbnailMetadata.height || 0,
                 folderId: folder.id,
               }
             })
@@ -146,29 +164,29 @@ export async function POST(request: NextRequest) {
             processedFiles++
 
             // Enviar evento de archivo completado
-            await writer.write(encoder.encode(JSON.stringify({
+            await writeEvent({
               type: 'progress',
               data: {
                 current: processedFiles,
                 total: files.length,
-                progress: Math.round((processedFiles / files.length) * 100),
+                progress: Math.min(Math.round((processedFiles / files.length) * 100), 100),
                 currentFile: file.name,
-                status: 'Completado'
+                status: 'Archivo procesado'
               }
-            }) + '\n'))
+            })
 
             // Pequeña pausa para que el UI pueda actualizarse
             await new Promise(resolve => setTimeout(resolve, 100))
 
           } catch (error) {
             console.error('Error processing file:', file.path, error)
-            await writer.write(encoder.encode(JSON.stringify({
+            await writeEvent({
               type: 'error',
               data: {
                 file: file.name,
                 error: error instanceof Error ? error.message : 'Error procesando archivo'
               }
-            }) + '\n'))
+            })
           }
         }
 
@@ -182,7 +200,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Enviar evento de completado
-        await writer.write(encoder.encode(JSON.stringify({
+        await writeEvent({
           type: 'complete',
           data: {
             folder: {
@@ -191,16 +209,16 @@ export async function POST(request: NextRequest) {
               _count: { images: processedFiles }
             }
           }
-        }) + '\n'))
+        })
 
       } catch (error) {
         console.error('Error processing folder:', error)
-        await writer.write(encoder.encode(JSON.stringify({
+        await writeEvent({
           type: 'error',
           data: {
             error: error instanceof Error ? error.message : 'Error procesando carpeta'
           }
-        }) + '\n'))
+        })
       } finally {
         await writer.close()
       }
@@ -219,7 +237,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in POST /api/folders:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
       { status: 500 }
     )
   }
