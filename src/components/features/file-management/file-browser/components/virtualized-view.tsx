@@ -12,6 +12,8 @@ import { Loader2 } from 'lucide-react'
 import type { Column } from '../file-browser'
 import { useWindowSize } from '@/hooks/use-window-size'
 import { cn } from '@/lib/utils'
+import { useInView } from 'react-intersection-observer'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface VirtualizedViewProps {
   items: FileItem[]
@@ -49,6 +51,7 @@ const itemVariants = {
 // Constantes para el layout
 const GAP = 15
 const CONTAINER_PADDING = 15
+const MIN_COLUMN_WIDTH = 280
 
 // Hook personalizado para manejar la carga infinita
 function useInfiniteLoader(
@@ -90,15 +93,18 @@ export function VirtualizedView({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [isViewReady, setIsViewReady] = useState(false)
   const { openViewer } = useImageViewer()
+  const [columnCount, setColumnCount] = useState(3)
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0.1
+  })
 
   // Congelamos todos los cálculos durante el resize
-  const { gridItemWidth, gridItemHeight, columnCount, rowCount } = useMemo(() => {
+  const { gridItemWidth, gridItemHeight, rowCount } = useMemo(() => {
     // Si está resizing, mantenemos los valores anteriores
     if (isResizing) {
       return {
         gridItemWidth: dimensions.width || 200,
         gridItemHeight: dimensions.width || 200,
-        columnCount: Math.floor((dimensions.width || 800) / 200),
         rowCount: Math.ceil((items?.length || 0) / Math.floor((dimensions.width || 800) / 200))
       }
     }
@@ -106,7 +112,6 @@ export function VirtualizedView({
     if (dimensions.width === 0) return {
       gridItemWidth: 200,
       gridItemHeight: 200,
-      columnCount: 1,
       rowCount: items?.length || 0
     }
 
@@ -156,7 +161,6 @@ export function VirtualizedView({
       return {
         gridItemWidth: availableWidth,
         gridItemHeight: baseHeight,
-        columnCount: 1,
         rowCount: items?.length || 0
       }
     }
@@ -167,7 +171,6 @@ export function VirtualizedView({
     return {
       gridItemWidth: itemWidth,
       gridItemHeight: baseHeight,
-      columnCount: maxColumns,
       rowCount: Math.ceil((items?.length || 0) / maxColumns)
     }
   }, [dimensions.width, viewMode, thumbnailSize, items, isResizing])
@@ -242,6 +245,34 @@ export function VirtualizedView({
 
   // Usar el hook personalizado fuera del map
   useInfiniteLoader(hasMore, isLoading, onLoadMore, lastVisibleRowIndex, rowCount)
+
+  const calculateLayout = useCallback(() => {
+    if (!parentRef.current) return
+
+    const containerWidth = parentRef.current.offsetWidth - CONTAINER_PADDING * 2
+    const columns = Math.max(1, Math.floor((containerWidth + GAP) / (MIN_COLUMN_WIDTH + GAP)))
+    setColumnCount(columns)
+  }, [])
+
+  useEffect(() => {
+    calculateLayout()
+    window.addEventListener('resize', calculateLayout)
+    return () => window.removeEventListener('resize', calculateLayout)
+  }, [calculateLayout])
+
+  useEffect(() => {
+    if (inView && !isLoading && hasMore && onLoadMore) {
+      onLoadMore()
+    }
+  }, [inView, isLoading, hasMore, onLoadMore])
+
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+    gap: GAP,
+    padding: CONTAINER_PADDING,
+    width: '100%'
+  }
 
   return (
     <ScrollArea className="h-full w-full">
@@ -341,6 +372,7 @@ export function VirtualizedView({
           </motion.div>
         )}
       </div>
+      {hasMore && <div ref={loadMoreRef} style={{ height: 20 }} />}
     </ScrollArea>
   )
 }

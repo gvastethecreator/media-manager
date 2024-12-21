@@ -12,7 +12,7 @@ import { useTheme } from "next-themes"
 import { Badge } from "@/components/ui/badge"
 import { SidebarItem } from "@/components/ui/sidebar-item"
 import { ResizablePanel } from "@/components/ui/resizable"
-import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw, ImageIcon } from "lucide-react"
+import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw, ImageIcon, LibraryBig } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 
 interface LeftPanelProps {
@@ -69,7 +69,7 @@ export function LeftPanel({
   const categories = useMemo(() => [
     {
       id: 'collections',
-      icon: BookmarkIcon,
+      icon: LibraryBig,
       label: 'Colecciones',
       color: '#ef4444',
       count: stats?.totalCollections || 0
