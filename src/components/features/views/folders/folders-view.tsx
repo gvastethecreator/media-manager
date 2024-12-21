@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
+import { useFilesStore } from "@/store/files"
 
 interface FolderItem {
   id: string
@@ -25,11 +26,13 @@ export function FoldersView() {
   const { toast } = useToast()
   const [folders, setFolders] = useState<FolderItem[]>([])
   const [loading, setLoading] = useState(true)
+  const { handleSelectFolder, setCurrentView } = useFilesStore()
 
   useEffect(() => {
     const loadFolders = async () => {
       try {
         const data = await getFolders()
+        console.log('Carpetas cargadas:', data)
         setFolders(data)
       } catch (error) {
         console.error('Error cargando carpetas:', error)
@@ -45,6 +48,12 @@ export function FoldersView() {
 
     loadFolders()
   }, [toast])
+
+  const handleFolderClick = async (folderId: string) => {
+    console.log('Click en carpeta:', folderId)
+    setCurrentView('folder')
+    await handleSelectFolder(folderId)
+  }
 
   if (loading) {
     return (
@@ -113,7 +122,7 @@ export function FoldersView() {
               <Button
                 variant="ghost"
                 className="w-full"
-                onClick={() => router.push(`/folders/${folder.id}/view`)}
+                onClick={() => handleFolderClick(folder.id)}
               >
                 Ver contenido
               </Button>

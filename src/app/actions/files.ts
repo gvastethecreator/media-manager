@@ -1,5 +1,7 @@
-import { FileItem } from "@/types/files";
+'use server'
+
 import { prisma } from '@/lib/prisma'
+import { FileItem } from '@/types/files'
 
 export async function getFiles(path?: string): Promise<FileItem[]> {
   const files = await prisma.image.findMany({
