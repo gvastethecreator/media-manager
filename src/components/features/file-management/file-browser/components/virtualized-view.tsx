@@ -6,10 +6,8 @@ import { motion, usePresence } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/types/file-item'
 import type { ThumbnailSize } from '@/types/ui'
-import { useImageViewer } from '@/store/image-viewer'
 import { FileCard } from './file-item'
 import { Loader2 } from 'lucide-react'
-import type { Column } from '../file-browser'
 import { useWindowSize } from '@/hooks/use-window-size'
 import { cn } from '@/lib/utils'
 import { useInView } from 'react-intersection-observer'
@@ -23,55 +21,16 @@ interface VirtualizedViewProps {
   selectedIds: string[]
   onItemClick: (item: FileItem) => void
   onItemDoubleClick: (item: FileItem) => void
-  columns?: Column[]
   isResizing?: boolean
   hasMore?: boolean
   isLoading?: boolean
   onLoadMore?: () => void
 }
 
-const itemVariants = {
-  initial: {
-    opacity: 0,
-    scale: 0.95
-  },
-  animate: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 25,
-      mass: 0.5,
-      delay: Math.min(i * 0.025, 0.15)
-    }
-  })
-}
-
 // Constantes para el layout
 const GAP = 15
 const CONTAINER_PADDING = 15
 const MIN_COLUMN_WIDTH = 280
-
-// Hook personalizado para manejar la carga infinita
-function useInfiniteLoader(
-  hasMore: boolean | undefined,
-  isLoading: boolean | undefined,
-  onLoadMore: (() => void) | undefined,
-  currentIndex: number,
-  totalRows: number
-) {
-  useEffect(() => {
-    if (
-      hasMore &&
-      !isLoading &&
-      onLoadMore &&
-      currentIndex > totalRows - 3
-    ) {
-      onLoadMore()
-    }
-  }, [hasMore, isLoading, onLoadMore, currentIndex, totalRows])
-}
 
 export function VirtualizedView({
   items,
@@ -81,7 +40,6 @@ export function VirtualizedView({
   selectedIds,
   onItemClick,
   onItemDoubleClick,
-  columns,
   isResizing,
   hasMore,
   isLoading,
@@ -92,7 +50,6 @@ export function VirtualizedView({
   const { width: windowWidth } = useWindowSize()
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [isViewReady, setIsViewReady] = useState(false)
-  const { openViewer } = useImageViewer()
   const [columnCount, setColumnCount] = useState(3)
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1
@@ -153,8 +110,6 @@ export function VirtualizedView({
     }
 
     const itemWidth = getBaseSize()
-
-    // Calculamos la altura base y agregamos el espacio para el título
     const baseHeight = viewMode === 'grid' ? itemWidth : 48
 
     if (viewMode === 'list') {
@@ -167,6 +122,7 @@ export function VirtualizedView({
 
     // Calculamos el número exacto de columnas que caben
     const maxColumns = Math.floor((availableWidth + GAP) / (itemWidth + GAP))
+    setColumnCount(maxColumns)
 
     return {
       gridItemWidth: itemWidth,
@@ -189,7 +145,6 @@ export function VirtualizedView({
         width: rect.width,
         height: rect.height
       })
-      // Una vez que tenemos las dimensiones, la vista está lista
       setIsViewReady(true)
     }
 
@@ -202,13 +157,12 @@ export function VirtualizedView({
     }
   }, [isResizing])
 
-  // Congelamos el virtualizer durante el resize
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: useCallback(() => gridItemHeight + GAP, [gridItemHeight]),
     overscan: 3,
-    scrollingDelay: isResizing ? 1000 : 50 // Aumentamos el delay durante el resize
+    scrollingDelay: isResizing ? 1000 : 50
   })
 
   const getItemsForRow = useCallback((rowIndex: number) => {
@@ -217,62 +171,11 @@ export function VirtualizedView({
     return items?.slice(startIndex, endIndex) || []
   }, [columnCount, items])
 
-  const itemContent = useCallback((index: number) => {
-    const item = items?.[index]
-    return (
-      <FileCard
-        key={item?.id}
-        item={item}
-        viewMode={viewMode}
-        thumbnailSize={thumbnailSize}
-        isSelected={selectedIds.includes(item?.id)}
-        onClick={() => onItemClick(item)}
-        onDoubleClick={() => onItemDoubleClick(item)}
-      />
-    )
-  }, [items, viewMode, thumbnailSize, selectedIds, onItemClick, onItemDoubleClick])
-
-  const handleItemDoubleClick = useCallback((item: FileItem) => {
-    if (item.type === 'image') {
-      openViewer(item, items)
-    }
-  }, [openViewer, items])
-
-  const lastVisibleRowIndex = useMemo(() => {
-    const virtualItems = virtualizer.getVirtualItems()
-    return virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : 0
-  }, [virtualizer.getVirtualItems()])
-
-  // Usar el hook personalizado fuera del map
-  useInfiniteLoader(hasMore, isLoading, onLoadMore, lastVisibleRowIndex, rowCount)
-
-  const calculateLayout = useCallback(() => {
-    if (!parentRef.current) return
-
-    const containerWidth = parentRef.current.offsetWidth - CONTAINER_PADDING * 2
-    const columns = Math.max(1, Math.floor((containerWidth + GAP) / (MIN_COLUMN_WIDTH + GAP)))
-    setColumnCount(columns)
-  }, [])
-
-  useEffect(() => {
-    calculateLayout()
-    window.addEventListener('resize', calculateLayout)
-    return () => window.removeEventListener('resize', calculateLayout)
-  }, [calculateLayout])
-
   useEffect(() => {
     if (inView && !isLoading && hasMore && onLoadMore) {
       onLoadMore()
     }
   }, [inView, isLoading, hasMore, onLoadMore])
-
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
-    gap: GAP,
-    padding: CONTAINER_PADDING,
-    width: '100%'
-  }
 
   return (
     <ScrollArea className="h-full w-full">
@@ -328,48 +231,34 @@ export function VirtualizedView({
                     transform: `translateY(${virtualRow.start}px)`,
                     display: 'grid',
                     gridTemplateColumns: viewMode === 'grid'
-                      ? `repeat(${columnCount}, ${gridItemWidth}px)`
+                      ? `repeat(${columnCount}, minmax(0, 1fr))`
                       : '1fr',
                     gap: `${GAP}px`,
-                    justifyContent: 'start',
-                    alignItems: 'start',
+                    padding: `${CONTAINER_PADDING}px`,
                     willChange: 'transform',
-                    contain: 'layout style paint',
-                    marginBottom: viewMode === 'grid' ? `${GAP}px` : undefined
+                    contain: 'layout style paint'
                   }}
                 >
                   {rowItems.map((item, index) => (
-                    <motion.div
-                      key={item?.id}
-                      variants={itemVariants}
-                      initial="initial"
-                      animate="animate"
-                      custom={rowStartIndex + index}
-                      style={{
-                        height: item?.gridInfo?.rowSpan
-                          ? `${(gridItemHeight * item.gridInfo.rowSpan) + (GAP * (item.gridInfo.rowSpan - 1))}px`
-                          : gridItemHeight,
-                        gridColumn: item?.gridInfo?.colSpan
-                          ? `span ${item.gridInfo.colSpan}`
-                          : undefined,
-                        gridRow: item?.gridInfo?.rowSpan
-                          ? `span ${item.gridInfo.rowSpan}`
-                          : undefined,
-                        willChange: 'transform, opacity'
-                      }}
-                    >
-                      {itemContent(rowStartIndex + index)}
-                    </motion.div>
+                    <FileCard
+                      key={item.id}
+                      item={item}
+                      viewMode={viewMode}
+                      thumbnailSize={thumbnailSize}
+                      isSelected={selectedIds.includes(item.id)}
+                      onClick={() => onItemClick(item)}
+                      onDoubleClick={() => onItemDoubleClick(item)}
+                    />
                   ))}
                 </div>
               )
             })}
-            {isLoading && (
-              <div className="flex justify-center py-4">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            )}
           </motion.div>
+        )}
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
         )}
       </div>
       {hasMore && <div ref={loadMoreRef} style={{ height: 20 }} />}
