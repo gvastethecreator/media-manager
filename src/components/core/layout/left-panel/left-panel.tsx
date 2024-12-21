@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { SidebarItem } from "@/components/ui/sidebar-item"
 import { ResizablePanel } from "@/components/ui/resizable"
 import { FolderIcon, BookmarkIcon, TagIcon, ChevronLeft, Settings2, Sun, Moon, RefreshCcw, ImageIcon } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 
 interface LeftPanelProps {
   isCollapsed: boolean
@@ -67,13 +68,6 @@ export function LeftPanel({
 
   const categories = useMemo(() => [
     {
-      id: 'all',
-      icon: ImageIcon,
-      label: 'Todos',
-      color: '#3b82f6',
-      count: stats?.totalFiles || 0
-    },
-    {
       id: 'collections',
       icon: BookmarkIcon,
       label: 'Colecciones',
@@ -109,45 +103,66 @@ export function LeftPanel({
         className
       )}
     >
-      <div className="flex h-[52px] items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src="/app-logo.png" alt="Logo" />
-            <AvatarFallback>IM</AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Image Manager</span>
-              <Badge variant="outline" className="text-[10px]">Beta</Badge>
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col p-2">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={handleThemeToggle}
+            className={cn(
+              "flex-1 justify-start gap-2 px-2",
+              currentView === 'dashboard' && "bg-accent"
+            )}
+            onClick={() => setCurrentView('dashboard')}
           >
-            {theme === "light" ? (
-              <Moon className="h-4 w-4" />
+            {isCollapsed ? (
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/app-logo.png" alt="Logo" />
+                <AvatarFallback>IM</AvatarFallback>
+              </Avatar>
             ) : (
-              <Sun className="h-4 w-4" />
+              <>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/app-logo.png" alt="Logo" />
+                  <AvatarFallback>IM</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium">Image Manager</span>
+                  <span className="text-xs text-muted-foreground">
+                    {stats?.totalImages || 0} imágenes
+                  </span>
+                </div>
+              </>
             )}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={onToggleCollapse}
-          >
-            <ChevronLeft className={cn(
-              "h-4 w-4 transition-transform",
-              isCollapsed && "rotate-180"
-            )} />
-          </Button>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleThemeToggle}
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onToggleCollapse}
+            >
+              <ChevronLeft className={cn(
+                "h-4 w-4 transition-transform",
+                isCollapsed && "rotate-180"
+              )} />
+            </Button>
+          </div>
         </div>
       </div>
+
+      <Separator className="my-2" />
 
       <ScrollArea className="flex-1 px-2">
         <div className="space-y-4 p-2">
