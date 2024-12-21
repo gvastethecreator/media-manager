@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
             const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
             const image = sharp(file.path)
             const imageMetadata = await image.metadata()
-            
+
             const resizedImage = image.resize({
               width: thumbnailConfig.width,
               height: thumbnailConfig.height,
@@ -243,70 +243,111 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
-  console.log('📥 GET /api/folders - Iniciando solicitud')
+export async function GET(request: NextRequest) {
   try {
-    // Verificar la conexión a la base de datos
-    await prisma.$connect()
-    console.log('✅ Conexión a base de datos establecida')
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const page = parseInt(searchParams.get('page') || '0');
+    const pageSize = parseInt(searchParams.get('pageSize') || '50');
 
-    console.log('🔄 Consultando carpetas...')
-    const folders = await prisma.folder.findMany({
-      select: {
-        id: true,
-        name: true,
-        path: true,
-        isWatched: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            images: true
+    // Si tenemos un id, devolvemos las imágenes de esa carpeta
+    if (id) {
+      console.log('Buscando imágenes para carpeta:', id);
+
+      const folder = await prisma.folder.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: { images: true }
           }
         }
-      }
-    })
+      });
 
-    console.log('✅ Carpetas encontradas:', folders.length)
-
-    // Transformar los resultados para incluir el conteo de imágenes
-    const transformedFolders = folders.map(folder => ({
-      ...folder,
-      totalFiles: folder._count.images,
-      totalSize: 0, // Este valor se calculará cuando sea necesario
-    }))
-
-    return NextResponse.json(transformedFolders)
-  } catch (error) {
-    console.error('❌ Error obteniendo carpetas:', error)
-    
-    // Verificar si es un error de Prisma
-    if (error && typeof error === 'object' && 'code' in error) {
-      if (error.code === 'P1001') {
+      if (!folder) {
+        console.log('Carpeta no encontrada:', id);
         return NextResponse.json(
-          { error: 'Error de conexión a la base de datos', details: error.message },
-          { status: 503 }
-        )
+          { error: 'Carpeta no encontrada' },
+          { status: 404 }
+        );
       }
 
-      // Para otros errores de Prisma
-      if (typeof error.code === 'string' && error.code.startsWith('P')) {
-        return NextResponse.json(
-          { error: 'Error de base de datos', details: error.message },
-          { status: 500 }
-        )
-      }
+      console.log('Carpeta encontrada:', {
+        id: folder.id,
+        name: folder.name,
+        imageCount: folder._count.images
+      });
+
+      const images = await prisma.image.findMany({
+        where: { folderId: id },
+        orderBy: [
+          { updatedAt: 'desc' },
+          { name: 'asc' }
+        ],
+        skip: page * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          name: true,
+          path: true,
+          size: true,
+          width: true,
+          height: true,
+          hash: true,
+          metadata: true,
+          thumbnailSize: true,
+          thumbnailWidth: true,
+          thumbnailHeight: true,
+          isPublic: true,
+          createdAt: true,
+          updatedAt: true,
+          folderId: true,
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              color: true
+            }
+          },
+          stats: {
+            select: {
+              views: true,
+              downloads: true,
+              lastViewed: true
+            }
+          }
+        }
+      });
+
+      console.log(`Encontradas ${images.length} imágenes`);
+
+      const headers = new Headers();
+      headers.set('x-total-count', folder._count.images.toString());
+      headers.set('x-page-size', pageSize.toString());
+      headers.set('x-current-page', page.toString());
+
+      return NextResponse.json(images, {
+        headers,
+        status: 200
+      });
     }
 
-    // Error genérico
+    // Si no hay folderId, devolvemos la lista de carpetas
+    const folders = await prisma.folder.findMany({
+      include: {
+        _count: {
+          select: { images: true }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    return NextResponse.json(folders);
+  } catch (error) {
+    console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Error obteniendo carpetas', details: error instanceof Error ? error.message : String(error) },
+      { error: 'Error en el servidor' },
       { status: 500 }
-    )
-  } finally {
-    // Asegurarse de desconectar
-    await prisma.$disconnect()
-    console.log('✅ Conexión a base de datos cerrada')
+    );
   }
 }
 
@@ -345,7 +386,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error en DELETE /api/folders:', error)
-    
+
     // Verificar si es un error de Prisma
     if (error.code === 'P1001') {
       return NextResponse.json(

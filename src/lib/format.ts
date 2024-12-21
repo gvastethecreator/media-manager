@@ -32,18 +32,5 @@ export function formatDate(date: Date): string {
 }
 
 export function formatFileName(name: string): string {
-  if (!name) return ''
-  const MAX_LENGTH = 32
-
-  if (name.length <= MAX_LENGTH) return name
-
-  const extension = name.split('.').pop()
-  const baseName = name.slice(0, name.lastIndexOf('.'))
-
-  if (!extension) return name.slice(0, MAX_LENGTH) + '...'
-
-  const availableLength = MAX_LENGTH - extension.length - 3 // 3 por '...' y '.'
-  const truncatedName = baseName.slice(0, availableLength) + '...' + '.' + extension
-
-  return truncatedName
+  return name.replace(/\.[^/.]+$/, "")
 }
