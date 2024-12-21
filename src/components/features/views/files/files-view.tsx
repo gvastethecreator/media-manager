@@ -7,28 +7,40 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { FileImage } from 'lucide-react'
 import { useImageViewer } from '@/store/image-viewer'
 import { useUIStore } from '@/store/ui'
+import { useNavigationStore } from '@/store/navigation'
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state'
 
-export function FolderView() {
-  const { currentItems, isLoading, currentFolderId, selectItem, selectedIds } = useFilesStore()
+export function FilesView() {
+  const {
+    currentItems,
+    isLoading,
+    currentFolderId,
+    selectItem,
+    selectedIds,
+    handleSelectFolder
+  } = useFilesStore()
   const { openViewer } = useImageViewer()
   const { zoomLevel } = useUIStore()
+  const { currentView } = useNavigationStore()
+
+  // Inicializar los archivos cuando se monta el componente o cambia el folderId
+  useEffect(() => {
+    console.log('FilesView - currentFolderId:', currentFolderId)
+    if (currentFolderId) {
+      handleSelectFolder(currentFolderId)
+    }
+  }, [currentFolderId, handleSelectFolder])
 
   // Convertir el nivel de zoom a un tamaño de thumbnail
   const thumbnailSize = zoomLevel <= 50 ? 'small' : zoomLevel <= 100 ? 'medium' : 'large'
 
-  console.log('FolderView - currentItems:', currentItems.length)
-  console.log('FolderView - isLoading:', isLoading)
-  console.log('FolderView - currentFolderId:', currentFolderId)
-
   if (!currentFolderId) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <FileImage className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">No hay carpeta seleccionada</h2>
-        <p className="text-muted-foreground">
-          Selecciona una carpeta para ver su contenido
-        </p>
-      </div>
+      <EmptyState
+        icon={FileImage}
+        title="No hay carpeta seleccionada"
+        description="Selecciona una carpeta para ver su contenido"
+      />
     )
   }
 
@@ -42,13 +54,11 @@ export function FolderView() {
 
   if (currentItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <FileImage className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">Carpeta vacía</h2>
-        <p className="text-muted-foreground">
-          Esta carpeta no contiene imágenes
-        </p>
-      </div>
+      <EmptyState
+        icon={FileImage}
+        title="Carpeta vacía"
+        description="Esta carpeta no contiene imágenes"
+      />
     )
   }
 

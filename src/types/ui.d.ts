@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { HTMLAttributes, RefAttributes } from 'react'
+import { LucideIcon } from 'lucide-react'
 
 declare module '@/components/ui/label' {
   export interface LabelProps {
@@ -80,16 +81,16 @@ declare module '@/components/ui/tabs' {
 
 declare module '@/components/ui/scroll-area' {
   export interface ScrollAreaProps {
-    className?: string
-    children: ReactNode
-    orientation?: "horizontal" | "vertical"
+    children?: React.ReactNode;
+    className?: string;
+    orientation?: "horizontal" | "vertical";
   }
 }
 
 declare module '@/components/ui/separator' {
   export interface SeparatorProps {
-    className?: string
-    orientation?: "horizontal" | "vertical"
+    className?: string;
+    orientation?: "horizontal" | "vertical";
   }
 }
 
@@ -189,4 +190,93 @@ declare module '@/components/ui/input' {
     defaultValue?: string
     type?: string
   }
+}
+
+declare module '@/components/ui/avatar' {
+  export interface AvatarProps {
+    children?: React.ReactNode;
+    className?: string;
+  }
+
+  export interface AvatarImageProps {
+    src?: string;
+    alt?: string;
+    className?: string;
+  }
+
+  export interface AvatarFallbackProps {
+    children?: React.ReactNode;
+    className?: string;
+  }
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  emoji?: string;
+  color?: string;
+  count: number;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  path: string;
+  color?: string;
+  count: number;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  count: number;
+}
+
+export interface LeftPanelProps {
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  defaultSize?: number;
+  minSize?: number;
+  maxSize?: number;
+  isResizing?: boolean;
+  onTransitionStart?: () => void;
+  onTransitionEnd?: () => void;
+  className?: string;
+}
+
+export interface SidebarItemProps {
+  icon: LucideIcon;
+  label: string;
+  count?: number;
+  isActive?: boolean;
+  onClick?: () => void;
+  className?: string;
+}
+
+export interface ViewProps {
+  isResizing?: boolean;
+}
+
+export interface NavigationItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  color?: string;
+}
+
+export interface CategoryItem extends NavigationItem {
+  count?: number;
+  items?: Array<Collection | Folder | Tag>;
+}
+
+export interface MainContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export interface RightPanelProps {
+  selectedItem: any;
+  showSettings: boolean;
+  onToggleSettings: () => void;
 }

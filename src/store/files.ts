@@ -30,6 +30,7 @@ interface FilesState {
   handleSelectCollection: (id: string) => void
   handleSelectFolder: (id: string) => Promise<void>
   handleSelectTag: (name: string) => void
+  selectedItem: FileItem | null
 }
 
 export const useFilesStore = create<FilesState>()(
@@ -47,6 +48,7 @@ export const useFilesStore = create<FilesState>()(
       isLoading: false,
       error: null,
       currentFolderId: null,
+      selectedItem: null,
 
       initialize: async () => {
         try {
