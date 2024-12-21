@@ -34,55 +34,62 @@ function EmptyState() {
   );
 }
 
-function FolderCard({ folder, onDelete }: { folder: FolderWithStats; onDelete: (folder: FolderWithStats) => void }) {
+interface FolderCardProps {
+  folder: FolderWithStats;
+  onDelete: (folder: FolderWithStats) => void;
+}
+
+function FolderCard({ folder, onDelete }: FolderCardProps) {
   const router = useRouter();
 
   const handleClick = useCallback(() => {
     router.push(`/folders/${folder.id}/view`);
   }, [router, folder.id]);
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
+  const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     onDelete(folder);
   }, [folder, onDelete]);
 
   return (
-    <Card
-      className="relative overflow-hidden hover:border-primary transition-colors cursor-pointer group"
-      onClick={handleClick}
-    >
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="truncate">{folder.name}</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={handleDelete}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </Button>
-        </div>
-        <CardDescription className="truncate">{folder.path}</CardDescription>
-      </CardHeader>
+    <div onClick={handleClick} className="cursor-pointer">
+      <Card className="relative overflow-hidden hover:border-primary transition-colors group">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="truncate">{folder.name}</CardTitle>
+            <div onClick={e => e.stopPropagation()}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={handleDelete}
+              >
+                <TrashIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          <CardDescription className="truncate">{folder.path}</CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        <div className="flex items-center gap-4 mb-4">
-          <Badge variant="secondary" className="gap-1">
-            <ImageIcon className="w-3 h-3" />
-            {folder._count.images} imágenes
-          </Badge>
-          <Badge variant="secondary">
-            {formatBytes(Number(folder.totalSize || 0))}
-          </Badge>
-        </div>
-      </CardContent>
+        <CardContent>
+          <div className="flex items-center gap-4 mb-4">
+            <Badge variant="secondary" className="gap-1">
+              <ImageIcon className="w-3 h-3" />
+              {folder._count.images} imágenes
+            </Badge>
+            <Badge variant="secondary">
+              {formatBytes(Number(folder.totalSize || 0))}
+            </Badge>
+          </div>
+        </CardContent>
 
-      <CardFooter className="text-sm text-muted-foreground">
-        Última actualización: {formatDate(folder.updatedAt)}
-      </CardFooter>
-    </Card>
+        <CardFooter className="text-sm text-muted-foreground">
+          Última actualización: {formatDate(folder.updatedAt)}
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
 
@@ -98,7 +105,8 @@ export function FoldersView() {
         const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
         throw new Error(errorData.error || 'Error al cargar las carpetas');
       }
-      return response.json();
+      const data = await response.json();
+      return data as FolderWithStats[];
     }
   });
 
