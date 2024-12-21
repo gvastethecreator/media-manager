@@ -1,14 +1,14 @@
-import { 
-  Moon, 
-  Sun, 
-  Monitor, 
-  Laptop2, 
-  Layout, 
-  ArrowDownAZ, 
-  Hash, 
-  Home, 
-  Image, 
-  Folder, 
+import {
+  Moon,
+  Sun,
+  Monitor,
+  Laptop2,
+  Layout,
+  ArrowDownAZ,
+  Hash,
+  Home,
+  Image,
+  Folder,
   Bookmark,
   RefreshCw
 } from "lucide-react"
@@ -23,16 +23,42 @@ import { useTheme } from "next-themes"
 import { useSettingsContext } from "@/context/settings-context"
 import { StartPage } from "@/types/settings"
 
-const startPageOptions: { value: StartPage; label: string; icon: any }[] = [
-  { value: "dashboard", label: "Dashboard", icon: Home },
-  { value: "all-images", label: "Galería", icon: Image },
-  { value: "folders", label: "Carpetas", icon: Folder },
-  { value: "collections", label: "Colecciones", icon: Bookmark }
+const startPageOptions: { value: StartPage; label: string; icon: any; description: string }[] = [
+  {
+    value: "dashboard",
+    label: "Dashboard",
+    icon: Home,
+    description: "Vista general con estadísticas y actividad reciente"
+  },
+  {
+    value: "all-images",
+    label: "Galería",
+    icon: Image,
+    description: "Todas las imágenes en vista de cuadrícula"
+  },
+  {
+    value: "folders",
+    label: "Carpetas",
+    icon: Folder,
+    description: "Explorador de carpetas monitoreadas"
+  },
+  {
+    value: "collections",
+    label: "Colecciones",
+    icon: Bookmark,
+    description: "Colecciones organizadas manualmente"
+  }
 ]
 
 export function AppearanceSection() {
   const { theme, setTheme } = useTheme()
   const { settings, updateSettings } = useSettingsContext()
+
+  const handleStartPageChange = (value: StartPage) => {
+    updateSettings({ startPage: value })
+    // Guardar en localStorage para que persista
+    localStorage.setItem('preferred-start-page', value)
+  }
 
   return (
     <div className="space-y-4">
@@ -125,31 +151,46 @@ export function AppearanceSection() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-xs">Página de inicio</Label>
-            <Select
-              value={settings.startPage || "dashboard"}
-              onValueChange={(value: StartPage) => updateSettings({ startPage: value })}
-            >
-              <SelectTrigger className="w-full h-8 text-xs">
-                <SelectValue placeholder="Selecciona la página de inicio" />
-              </SelectTrigger>
-              <SelectContent>
-                {startPageOptions.map((option) => (
-                  <SelectItem 
-                    key={option.value} 
-                    value={option.value}
-                    className="text-xs"
-                  >
-                    <div className="flex items-center gap-2">
-                      <option.icon className="h-3.5 w-3.5" />
-                      {option.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Card>
+            <CardHeader className="p-4 pb-3">
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                <CardTitle className="text-sm font-medium">Página de Inicio</CardTitle>
+              </div>
+              <CardDescription className="text-xs">
+                Selecciona la vista que se mostrará al iniciar la aplicación
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-2">
+              <Select
+                value={settings.startPage || "dashboard"}
+                onValueChange={handleStartPageChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona la página de inicio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {startPageOptions.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="py-3"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <option.icon className="h-4 w-4" />
+                          <span className="font-medium">{option.label}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground pl-6">
+                          {option.description}
+                        </p>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
 
           <div className="flex items-center justify-between p-2 rounded-lg border">
             <div className="flex items-center gap-2">
