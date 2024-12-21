@@ -23,6 +23,9 @@ interface VirtualizedViewProps {
   onItemDoubleClick: (item: FileItem) => void
   columns?: Column[]
   isResizing?: boolean
+  hasMore?: boolean
+  isLoading?: boolean
+  onLoadMore?: () => void
 }
 
 const itemVariants = {
@@ -43,6 +46,30 @@ const itemVariants = {
   })
 }
 
+// Constantes para el layout
+const GAP = 15
+const CONTAINER_PADDING = 15
+
+// Hook personalizado para manejar la carga infinita
+function useInfiniteLoader(
+  hasMore: boolean | undefined,
+  isLoading: boolean | undefined,
+  onLoadMore: (() => void) | undefined,
+  currentIndex: number,
+  totalRows: number
+) {
+  useEffect(() => {
+    if (
+      hasMore &&
+      !isLoading &&
+      onLoadMore &&
+      currentIndex > totalRows - 3
+    ) {
+      onLoadMore()
+    }
+  }, [hasMore, isLoading, onLoadMore, currentIndex, totalRows])
+}
+
 export function VirtualizedView({
   items,
   viewMode,
@@ -52,7 +79,10 @@ export function VirtualizedView({
   onItemClick,
   onItemDoubleClick,
   columns,
-  isResizing
+  isResizing,
+  hasMore,
+  isLoading,
+  onLoadMore
 }: VirtualizedViewProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const [isPresent] = usePresence()
@@ -80,9 +110,7 @@ export function VirtualizedView({
       rowCount: items?.length || 0
     }
 
-    const gap = 15
-    const containerPadding = 15
-    const availableWidth = dimensions.width - (containerPadding * 2)
+    const availableWidth = dimensions.width - (CONTAINER_PADDING * 2)
 
     const getBaseSize = () => {
       if (viewMode === 'list') return availableWidth
@@ -94,33 +122,33 @@ export function VirtualizedView({
       }
 
       const baseSize = baseSizes[thumbnailSize]
-      
+
       // Calculamos cuántas columnas caben con el tamaño exacto
-      const maxColumns = Math.floor((availableWidth + gap) / (baseSize + gap))
-      const totalGaps = (maxColumns - 1) * gap
+      const maxColumns = Math.floor((availableWidth + GAP) / (baseSize + GAP))
+      const totalGaps = (maxColumns - 1) * GAP
       const itemWidth = Math.floor((availableWidth - totalGaps) / maxColumns)
-      
+
       // Nos aseguramos que el tamaño esté dentro de los límites (±20%)
       const minSize = baseSize * 0.8
       const maxSize = baseSize * 1.2
-      
+
       if (itemWidth < minSize) {
         const reducedColumns = maxColumns - 1
-        const reducedGaps = (reducedColumns - 1) * gap
+        const reducedGaps = (reducedColumns - 1) * GAP
         return Math.floor((availableWidth - reducedGaps) / reducedColumns)
       }
-      
+
       if (itemWidth > maxSize) {
         const increasedColumns = maxColumns + 1
-        const increasedGaps = (increasedColumns - 1) * gap
+        const increasedGaps = (increasedColumns - 1) * GAP
         return Math.floor((availableWidth - increasedGaps) / increasedColumns)
       }
-      
+
       return itemWidth
     }
 
     const itemWidth = getBaseSize()
-    
+
     // Calculamos la altura base y agregamos el espacio para el título
     const baseHeight = viewMode === 'grid' ? itemWidth : 48
 
@@ -134,7 +162,7 @@ export function VirtualizedView({
     }
 
     // Calculamos el número exacto de columnas que caben
-    const maxColumns = Math.floor((availableWidth + gap) / (itemWidth + gap))
+    const maxColumns = Math.floor((availableWidth + GAP) / (itemWidth + GAP))
 
     return {
       gridItemWidth: itemWidth,
@@ -175,7 +203,7 @@ export function VirtualizedView({
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: useCallback(() => gridItemHeight + 15, [gridItemHeight]),
+    estimateSize: useCallback(() => gridItemHeight + GAP, [gridItemHeight]),
     overscan: 3,
     scrollingDelay: isResizing ? 1000 : 50 // Aumentamos el delay durante el resize
   })
@@ -206,6 +234,14 @@ export function VirtualizedView({
       openViewer(item, items)
     }
   }, [openViewer, items])
+
+  const lastVisibleRowIndex = useMemo(() => {
+    const virtualItems = virtualizer.getVirtualItems()
+    return virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : 0
+  }, [virtualizer.getVirtualItems()])
+
+  // Usar el hook personalizado fuera del map
+  useInfiniteLoader(hasMore, isLoading, onLoadMore, lastVisibleRowIndex, rowCount)
 
   return (
     <ScrollArea className="h-full w-full">
@@ -263,12 +299,12 @@ export function VirtualizedView({
                     gridTemplateColumns: viewMode === 'grid'
                       ? `repeat(${columnCount}, ${gridItemWidth}px)`
                       : '1fr',
-                    gap: '15px',
+                    gap: `${GAP}px`,
                     justifyContent: 'start',
                     alignItems: 'start',
                     willChange: 'transform',
                     contain: 'layout style paint',
-                    marginBottom: viewMode === 'grid' ? '15px' : undefined
+                    marginBottom: viewMode === 'grid' ? `${GAP}px` : undefined
                   }}
                 >
                   {rowItems.map((item, index) => (
@@ -279,13 +315,13 @@ export function VirtualizedView({
                       animate="animate"
                       custom={rowStartIndex + index}
                       style={{
-                        height: item?.gridInfo?.rowSpan 
-                          ? `${(gridItemHeight * item.gridInfo.rowSpan) + (gap * (item.gridInfo.rowSpan - 1))}px`
+                        height: item?.gridInfo?.rowSpan
+                          ? `${(gridItemHeight * item.gridInfo.rowSpan) + (GAP * (item.gridInfo.rowSpan - 1))}px`
                           : gridItemHeight,
-                        gridColumn: item?.gridInfo?.colSpan 
+                        gridColumn: item?.gridInfo?.colSpan
                           ? `span ${item.gridInfo.colSpan}`
                           : undefined,
-                        gridRow: item?.gridInfo?.rowSpan 
+                        gridRow: item?.gridInfo?.rowSpan
                           ? `span ${item.gridInfo.rowSpan}`
                           : undefined,
                         willChange: 'transform, opacity'
@@ -297,6 +333,11 @@ export function VirtualizedView({
                 </div>
               )
             })}
+            {isLoading && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </motion.div>
         )}
       </div>
