@@ -1,106 +1,50 @@
 'use client';
 
-import { useEffect, useState, useCallback } from "react"
-import { useParams } from "next/navigation"
-import { FileImage } from "lucide-react"
-import { VirtualizedView } from "@/components/features/file-management/file-browser/components/virtualized-view"
-import { FileItem } from "@/types/file-item"
-import { useToast } from "@/components/ui/use-toast"
-import { useImageViewer } from "@/store/image-viewer"
-
-const PAGE_SIZE = 50
+import { useEffect } from 'react'
+import { useFilesStore } from '@/store/files'
+import { VirtualizedView } from '@/components/features/file-management/file-browser/components/virtualized-view'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { FileImage } from 'lucide-react'
+import { useImageViewer } from '@/store/image-viewer'
+import { useUIStore } from '@/store/ui'
 
 export function FolderView() {
-  const params = useParams()
-  const { toast } = useToast()
+  const { currentItems, isLoading, currentFolderId, selectItem, selectedIds } = useFilesStore()
   const { openViewer } = useImageViewer()
-  const [loading, setLoading] = useState(true)
-  const [images, setImages] = useState<FileItem[]>([])
-  const [selectedItem, setSelectedItem] = useState<FileItem | null>(null)
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(1)
+  const { zoomLevel } = useUIStore()
 
-  const loadImages = async (pageNum: number, append = false) => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/folders/${params.id}/images?page=${pageNum}&limit=${PAGE_SIZE}`)
-      if (!response.ok) {
-        throw new Error('Error al cargar las imágenes')
-      }
-      const data = await response.json()
+  // Convertir el nivel de zoom a un tamaño de thumbnail
+  const thumbnailSize = zoomLevel <= 50 ? 'small' : zoomLevel <= 100 ? 'medium' : 'large'
 
-      // Convertir las imágenes al formato FileItem
-      const fileItems: FileItem[] = data.images.map((image: any) => ({
-        id: image.id,
-        name: image.name,
-        type: 'image',
-        size: image.size,
-        path: image.path,
-        url: `/api/files/${image.id}`,
-        thumbnailUrl: `/api/thumbnails/${image.id}`,
-        metadata: {
-          dimensions: {
-            width: image.width,
-            height: image.height
-          },
-          orientation: image.width > image.height ? 'landscape' : 'portrait',
-          created: image.createdAt,
-          modified: image.updatedAt,
-          tags: image.tags?.map((tag: any) => ({
-            id: tag.id,
-            name: tag.name,
-            color: tag.color
-          })) || []
-        },
-        gridInfo: {
-          rowSpan: image.height > image.width * 1.5 ? 2 : 1,
-          colSpan: image.width > image.height * 1.5 ? 2 : 1,
-          priority: (image.width * image.height) / 1000000
-        }
-      }))
+  console.log('FolderView - currentItems:', currentItems.length)
+  console.log('FolderView - isLoading:', isLoading)
+  console.log('FolderView - currentFolderId:', currentFolderId)
 
-      setImages(prev => append ? [...prev, ...fileItems] : fileItems)
-      setHasMore(data.hasMore)
-      setPage(pageNum)
-    } catch (error) {
-      console.error('Error cargando imágenes:', error)
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las imágenes",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadImages(1)
-  }, [params.id])
-
-  const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      loadImages(page + 1, true)
-    }
-  }, [loading, hasMore, page])
-
-  const handleItemClick = useCallback((item: FileItem) => {
-    setSelectedItem(item)
-    setSelectedIds([item.id])
-  }, [])
-
-  const handleItemDoubleClick = useCallback((item: FileItem) => {
-    if (item.type === 'image') {
-      openViewer(item, images)
-    }
-  }, [openViewer, images])
-
-  if (!loading && images.length === 0) {
+  if (!currentFolderId) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
         <FileImage className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">No hay imágenes</h2>
+        <h2 className="text-2xl font-semibold mb-2">No hay carpeta seleccionada</h2>
+        <p className="text-muted-foreground">
+          Selecciona una carpeta para ver su contenido
+        </p>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary" />
+      </div>
+    )
+  }
+
+  if (currentItems.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4">
+        <FileImage className="h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Carpeta vacía</h2>
         <p className="text-muted-foreground">
           Esta carpeta no contiene imágenes
         </p>
@@ -108,20 +52,29 @@ export function FolderView() {
     )
   }
 
+  const handleItemClick = (item: any) => {
+    selectItem(item.id)
+  }
+
+  const handleItemDoubleClick = (item: any) => {
+    if (item.type === 'image') {
+      openViewer(item, currentItems)
+    }
+  }
+
   return (
-    <div className="h-full w-full">
+    <ScrollArea className="h-full w-full">
       <VirtualizedView
-        items={images}
+        items={currentItems}
         viewMode="grid"
-        thumbnailSize="medium"
-        selectedItem={selectedItem}
+        thumbnailSize={thumbnailSize}
+        selectedItem={null}
         selectedIds={selectedIds}
         onItemClick={handleItemClick}
         onItemDoubleClick={handleItemDoubleClick}
-        hasMore={hasMore}
-        isLoading={loading}
-        onLoadMore={handleLoadMore}
+        loading={isLoading}
+        hasMore={false}
       />
-    </div>
+    </ScrollArea>
   )
 }

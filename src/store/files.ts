@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { FileItem } from '@/types/files'
-import { getFiles, getFilesByFolder, getCollectionFiles, getTaggedFiles } from '@/services/files.service'
+import { getFiles, getFilesByFolder, getCollectionFiles, getTaggedFiles } from '@/app/actions/files'
 import { folderService } from '@/services/folder.service'
 
 interface FilesState {
@@ -16,6 +16,7 @@ interface FilesState {
   sortOrder: 'asc' | 'desc'
   isLoading: boolean
   error: string | null
+  currentFolderId: string | null
   initialize: () => Promise<void>
   loadCollections: () => Promise<void>
   loadFolders: () => Promise<void>
@@ -27,14 +28,14 @@ interface FilesState {
   deselectItem: (id: string) => void
   clearSelection: () => void
   handleSelectCollection: (id: string) => void
-  handleSelectFolder: (id: string) => void
+  handleSelectFolder: (id: string) => Promise<void>
   handleSelectTag: (name: string) => void
 }
 
 export const useFilesStore = create<FilesState>()(
   persist(
     (set, get) => ({
-      currentView: 'files',
+      currentView: 'folders',
       currentPath: ['Home'],
       currentItems: [],
       selectedIds: [],
@@ -45,6 +46,7 @@ export const useFilesStore = create<FilesState>()(
       sortOrder: 'asc',
       isLoading: false,
       error: null,
+      currentFolderId: null,
 
       initialize: async () => {
         try {
@@ -54,13 +56,8 @@ export const useFilesStore = create<FilesState>()(
             get().loadFolders(),
             get().loadTags()
           ]);
-          const currentPath = get().currentPath;
-          const path = currentPath.length > 1 ? currentPath.join('/') : undefined;
-          const files = await getFiles(path);
           set({
-            currentView: 'files',
-            currentItems: files,
-            selectedIds: [],
+            currentView: 'folders',
             isLoading: false
           });
         } catch (error) {
@@ -92,7 +89,7 @@ export const useFilesStore = create<FilesState>()(
               id: folder.id,
               name: folder.name,
               path: folder.path,
-              count: folder.totalFiles || 0
+              count: folder._count.images
             }))
           });
         } catch (error) {
@@ -118,6 +115,7 @@ export const useFilesStore = create<FilesState>()(
       },
 
       setCurrentView: async (currentView) => {
+        console.log('Cambiando vista a:', currentView);
         try {
           set({ isLoading: true, error: null });
           let items: FileItem[] = [];
@@ -139,7 +137,7 @@ export const useFilesStore = create<FilesState>()(
                 size: folder.totalSize || 0,
                 lastModified: folder.updatedAt,
                 metadata: {
-                  totalFiles: folder.totalFiles || 0
+                  totalFiles: folder._count.images
                 }
               }));
               break;
@@ -185,6 +183,7 @@ export const useFilesStore = create<FilesState>()(
           set({ isLoading: true, error: null });
           const files = await getCollectionFiles(id);
           set({
+            currentView: 'collection',
             currentItems: files,
             selectedIds: [],
             isLoading: false
@@ -200,9 +199,12 @@ export const useFilesStore = create<FilesState>()(
 
       handleSelectFolder: async (id) => {
         try {
-          set({ isLoading: true, error: null });
+          console.log('Cargando archivos de la carpeta:', id);
+          set({ isLoading: true, error: null, currentFolderId: id });
           const files = await getFilesByFolder(id);
+          console.log('Archivos cargados:', files);
           set({
+            currentView: 'folder',
             currentItems: files,
             selectedIds: [],
             isLoading: false
@@ -221,6 +223,7 @@ export const useFilesStore = create<FilesState>()(
           set({ isLoading: true, error: null });
           const files = await getTaggedFiles(name);
           set({
+            currentView: 'tag',
             currentItems: files,
             selectedIds: [],
             isLoading: false
