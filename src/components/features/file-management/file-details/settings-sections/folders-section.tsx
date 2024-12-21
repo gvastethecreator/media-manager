@@ -11,19 +11,9 @@ import { Folder, FolderPlus, AlertCircle, RefreshCw } from "lucide-react"
 import { formatBytes } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger 
-} from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
   SelectContent,
@@ -73,6 +63,7 @@ export function FoldersSection() {
   const [thumbnailQuality, setThumbnailQuality] = useState<ThumbnailQuality>('mid')
   const [processStatus, setProcessStatus] = useState<ProcessStatus>({})
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [generateThumbnails, setGenerateThumbnails] = useState(true)
 
   // Cargar carpetas al montar el componente
   useEffect(() => {
@@ -122,7 +113,7 @@ export function FoldersSection() {
 
   const handleAddFolder = async () => {
     if (!folderPath.trim()) return
-    
+
     try {
       setError(null)
       setIsProcessing(true)
@@ -134,23 +125,24 @@ export function FoldersSection() {
         total: 0,
         progress: 0
       })
-      
+
       console.log('Intentando agregar carpeta:', folderPath)
-      
+
       const response = await fetch('/api/folders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           path: folderPath,
-          thumbnailQuality: thumbnailQuality 
+          thumbnailQuality: thumbnailQuality,
+          generateThumbnails
         }),
       })
 
       const contentType = response.headers.get('content-type')
       if (!response.ok) {
-        const errorData = contentType?.includes('application/json') 
+        const errorData = contentType?.includes('application/json')
           ? await response.json()
           : { error: 'Error desconocido' }
         throw new Error(errorData.error || 'Error adding folder')
@@ -255,9 +247,16 @@ export function FoldersSection() {
       setIsProcessing(true)
       setProcessProgress(0)
       setProcessStatus({ folderId })
-      
+
       const response = await fetch(`/api/folders/reindex/${folderId}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          generateThumbnails,
+          thumbnailQuality
+        }),
       })
 
       if (!response.ok) {
@@ -358,10 +357,10 @@ export function FoldersSection() {
         onError: () => {},
         onComplete: () => {}
       })
-      
+
       // Recargar carpetas y estadísticas
       await loadFolders()
-      
+
       toast({
         title: "Carpeta eliminada",
         description: "Se ha eliminado la carpeta correctamente."
@@ -464,18 +463,32 @@ export function FoldersSection() {
           )}
 
           <div className="space-y-2">
-            <Label>Calidad de miniaturas</Label>
-            <Select value={thumbnailQuality} onValueChange={(value: ThumbnailQuality) => setThumbnailQuality(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona la calidad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="compressed">Comprimida (más rápido, menos espacio)</SelectItem>
-                <SelectItem value="low">Baja (balance entre calidad y espacio)</SelectItem>
-                <SelectItem value="mid">Media (recomendado)</SelectItem>
-                <SelectItem value="high">Alta (mejor calidad, más espacio)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Label>Calidad de miniaturas</Label>
+                <Select value={thumbnailQuality} onValueChange={(value: ThumbnailQuality) => setThumbnailQuality(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona la calidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="compressed">Comprimida (más rápido, menos espacio)</SelectItem>
+                    <SelectItem value="low">Baja (balance entre calidad y espacio)</SelectItem>
+                    <SelectItem value="mid">Media (recomendado)</SelectItem>
+                    <SelectItem value="high">Alta (mejor calidad, más espacio)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="generateThumbnails"
+                  checked={generateThumbnails}
+                  onCheckedChange={(checked) => setGenerateThumbnails(checked as boolean)}
+                />
+                <Label htmlFor="generateThumbnails" className="text-sm">
+                  Generar miniaturas
+                </Label>
+              </div>
+            </div>
           </div>
 
           {isLoading ? (
@@ -543,7 +556,7 @@ export function FoldersSection() {
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              {selectedFolder === folder.id 
+                              {selectedFolder === folder.id
                                 ? "Haz clic de nuevo para eliminar"
                                 : "Haz clic para eliminar"}
                             </TooltipContent>

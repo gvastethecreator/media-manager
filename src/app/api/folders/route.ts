@@ -15,8 +15,17 @@ export async function POST(request: NextRequest) {
     // Verificar la conexión a la base de datos
     await prisma.$connect()
 
-    const { path: folderPath, thumbnailQuality = 'mid' } = await request.json() as { path: string, thumbnailQuality?: ThumbnailQuality }
-    console.log('📥 Adding folder:', { folderPath, thumbnailQuality })
+    const {
+      path: folderPath,
+      thumbnailQuality = 'mid',
+      generateThumbnails = true
+    } = await request.json() as {
+      path: string,
+      thumbnailQuality?: ThumbnailQuality,
+      generateThumbnails?: boolean
+    };
+
+    console.log('📥 Adding folder:', { folderPath, thumbnailQuality, generateThumbnails });
 
     // Verificar si la carpeta existe en el sistema de archivos
     try {
@@ -127,23 +136,31 @@ export async function POST(request: NextRequest) {
                 total: files.length,
                 progress: Math.min(Math.round(((processedFiles + 1) / files.length) * 100), 100),
                 currentFile: file.name,
-                status: 'Generando thumbnail...'
+                status: generateThumbnails ? 'Generando thumbnail...' : 'Procesando...'
               }
             })
 
-            const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
-            const image = sharp(file.path)
-            const imageMetadata = await image.metadata()
+            let thumbnailBuffer: Buffer | null = null
+            let thumbnailWidth: number | null = null
+            let thumbnailHeight: number | null = null
 
-            const resizedImage = image.resize({
-              width: thumbnailConfig.width,
-              height: thumbnailConfig.height,
-              fit: 'inside',
-              withoutEnlargement: true
-            })
+            if (generateThumbnails) {
+              const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
+              const image = sharp(file.path)
+              const imageMetadata = await image.metadata()
 
-            const thumbnailBuffer = await resizedImage.toBuffer()
-            const thumbnailMetadata = await sharp(thumbnailBuffer).metadata()
+              const resizedImage = image.resize({
+                width: thumbnailConfig.width,
+                height: thumbnailConfig.height,
+                fit: 'inside',
+                withoutEnlargement: true
+              })
+
+              thumbnailBuffer = await resizedImage.toBuffer()
+              const thumbnailMetadata = await sharp(thumbnailBuffer).metadata()
+              thumbnailWidth = thumbnailMetadata.width || 0
+              thumbnailHeight = thumbnailMetadata.height || 0
+            }
 
             await prisma.image.create({
               data: {
@@ -151,11 +168,11 @@ export async function POST(request: NextRequest) {
                 name: file.name,
                 path: file.path,
                 size: file.size,
-                width: imageMetadata.width || 0,
-                height: imageMetadata.height || 0,
+                width: metadata.width || 0,
+                height: metadata.height || 0,
                 thumbnail: thumbnailBuffer,
-                thumbnailWidth: thumbnailMetadata.width || 0,
-                thumbnailHeight: thumbnailMetadata.height || 0,
+                thumbnailWidth: thumbnailWidth || 0,
+                thumbnailHeight: thumbnailHeight || 0,
                 folderId: folder.id,
               }
             })
@@ -176,7 +193,7 @@ export async function POST(request: NextRequest) {
             })
 
             // Pequeña pausa para que el UI pueda actualizarse
-            await new Promise(resolve => setTimeout(resolve, 100))
+            await new Promise(resolve => setTimeout(resolve, 50))
 
           } catch (error) {
             console.error('Error processing file:', file.path, error)
