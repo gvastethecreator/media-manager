@@ -13,6 +13,7 @@ interface UIState {
   isRightPanelCollapsed: boolean
   searchQuery: string
   theme: 'light' | 'dark' | 'system'
+  showSettings: boolean
 
   // Acciones
   setView: (view: ViewMode) => void
@@ -39,6 +40,7 @@ export const useUIStore = create<UIState>()(
       isRightPanelCollapsed: false,
       searchQuery: '',
       theme: 'system',
+      showSettings: false,
 
       setView: (view) => set({ view }),
 
@@ -66,7 +68,8 @@ export const useUIStore = create<UIState>()(
       toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
       toggleRightPanel: () => set((state) => ({ isRightPanelCollapsed: !state.isRightPanelCollapsed })),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
-      setTheme: (theme) => set({ theme })
+      setTheme: (theme) => set({ theme }),
+      toggleSettings: () => set((state) => ({ showSettings: !state.showSettings })),
     }),
     {
       name: 'ui-storage',
