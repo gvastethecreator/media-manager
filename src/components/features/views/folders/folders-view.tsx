@@ -1,168 +1,126 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { FolderIcon, ImageIcon, TrashIcon } from 'lucide-react';
-import { formatBytes, formatDate } from '@/lib/format';
-import { type FolderWithStats } from '@/services/folder.service';
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { Folder, FolderOpen, Plus } from "lucide-react"
+import { getFolders } from "@/services/folder.service"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/components/ui/use-toast"
 
-function LoadingSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-[200px] rounded-lg" />
-      ))}
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="h-full flex flex-col items-center justify-center text-center p-8">
-      <FolderIcon className="w-16 h-16 text-muted-foreground mb-4" />
-      <h3 className="text-2xl font-bold mb-2">No hay carpetas</h3>
-      <p className="text-muted-foreground max-w-[500px] mb-8">
-        No hay carpetas indexadas. Agrega una carpeta para comenzar a gestionar tus imágenes.
-      </p>
-    </div>
-  );
-}
-
-interface FolderCardProps {
-  folder: FolderWithStats;
-  onDelete: (folder: FolderWithStats) => void;
-}
-
-function FolderCard({ folder, onDelete }: FolderCardProps) {
-  const router = useRouter();
-
-  const handleClick = useCallback(() => {
-    router.push(`/folders/${folder.id}/view`);
-  }, [router, folder.id]);
-
-  const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-    onDelete(folder);
-  }, [folder, onDelete]);
-
-  return (
-    <div onClick={handleClick} className="cursor-pointer">
-      <Card className="relative overflow-hidden hover:border-primary transition-colors group">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="truncate">{folder.name}</CardTitle>
-            <div onClick={e => e.stopPropagation()}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={handleDelete}
-              >
-                <TrashIcon className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          <CardDescription className="truncate">{folder.path}</CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <div className="flex items-center gap-4 mb-4">
-            <Badge variant="secondary" className="gap-1">
-              <ImageIcon className="w-3 h-3" />
-              {folder._count.images} imágenes
-            </Badge>
-            <Badge variant="secondary">
-              {formatBytes(Number(folder.totalSize || 0))}
-            </Badge>
-          </div>
-        </CardContent>
-
-        <CardFooter className="text-sm text-muted-foreground">
-          Última actualización: {formatDate(folder.updatedAt)}
-        </CardFooter>
-      </Card>
-    </div>
-  );
+interface FolderItem {
+  id: string
+  name: string
+  path: string
+  totalSize: number
+  _count: {
+    images: number
+  }
 }
 
 export function FoldersView() {
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const { data: folders, isLoading, error, refetch } = useQuery<FolderWithStats[]>({
-    queryKey: ['folders'],
-    queryFn: async () => {
-      const response = await fetch('/api/folders');
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-        throw new Error(errorData.error || 'Error al cargar las carpetas');
-      }
-      const data = await response.json();
-      return data as FolderWithStats[];
-    }
-  });
-
-  const handleDelete = useCallback(async (folder: FolderWithStats) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta carpeta?')) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/folders?id=${folder.id}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-        throw new Error(errorData.error || 'Error al eliminar la carpeta');
-      }
-
-      toast.success('Carpeta eliminada correctamente');
-      refetch();
-    } catch (error) {
-      console.error('Error deleting folder:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al eliminar la carpeta');
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [refetch]);
+  const router = useRouter()
+  const { toast } = useToast()
+  const [folders, setFolders] = useState<FolderItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (error) {
-      toast.error('Error al cargar las carpetas', {
-        description: error instanceof Error ? error.message : 'Error desconocido'
-      });
+    const loadFolders = async () => {
+      try {
+        const data = await getFolders()
+        setFolders(data)
+      } catch (error) {
+        console.error('Error cargando carpetas:', error)
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las carpetas",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [error]);
 
-  if (isLoading) {
-    return <LoadingSkeleton />;
+    loadFolders()
+  }, [toast])
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} className="w-full">
+            <CardHeader>
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
+            <CardFooter>
+              <Skeleton className="h-3 w-1/4" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
-  if (!folders?.length) {
-    return <EmptyState />;
+  if (folders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+        <Folder className="h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">No hay carpetas indexadas</h2>
+        <p className="text-muted-foreground mb-4">
+          Agrega una carpeta para comenzar a gestionar tus imágenes
+        </p>
+        <Button onClick={() => router.push('/settings')}>
+          <Plus className="mr-2 h-4 w-4" />
+          Agregar Carpeta
+        </Button>
+      </div>
+    )
   }
 
   return (
-    <div className="h-full overflow-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <ScrollArea className="h-[calc(100vh-4rem)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
         {folders.map((folder) => (
-          <FolderCard
-            key={folder.id}
-            folder={folder}
-            onDelete={handleDelete}
-          />
+          <Card key={folder.id} className="w-full hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                {folder.name}
+              </CardTitle>
+              <CardDescription className="truncate" title={folder.path}>
+                {folder.path}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Imágenes:</span>
+                  <span>{folder._count.images}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tamaño total:</span>
+                  <span>{(folder.totalSize / (1024 * 1024)).toFixed(2)} MB</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => router.push(`/folders/${folder.id}/view`)}
+              >
+                Ver contenido
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
-    </div>
-  );
+    </ScrollArea>
+  )
 }

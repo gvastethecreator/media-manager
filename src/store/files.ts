@@ -85,15 +85,24 @@ export const useFilesStore = create<FilesState>()(
 
       loadFolders: async () => {
         try {
+          set({ isLoading: true, error: null });
           const folders = await folderService.getFolders();
-          set({ folders: folders.map(folder => ({
-            id: folder.id,
-            name: folder.name,
-            path: folder.path,
-            count: folder.totalFiles || 0
-          })) });
+          set({
+            folders: folders.map(folder => ({
+              id: folder.id,
+              name: folder.name,
+              path: folder.path,
+              count: folder.totalFiles || 0
+            }))
+          });
         } catch (error) {
           console.error('Error loading folders:', error);
+          set({
+            error: 'Error al cargar las carpetas',
+            isLoading: false
+          });
+        } finally {
+          set({ isLoading: false });
         }
       },
 

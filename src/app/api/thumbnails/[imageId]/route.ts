@@ -1,21 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/prisma'
+import { existsSync, mkdirSync } from 'fs'
+import { join } from 'path'
+import { readFile } from 'fs/promises'
+
+// Asegurarnos de que el directorio de thumbnails existe
+const THUMBNAILS_DIR = join(process.cwd(), 'thumbnails')
+if (!existsSync(THUMBNAILS_DIR)) {
+  mkdirSync(THUMBNAILS_DIR, { recursive: true })
+}
+
+// Función auxiliar para obtener la ruta del thumbnail
+function getThumbnailPath(imageId: string) {
+  return join(THUMBNAILS_DIR, `${imageId}.webp`)
+}
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { imageId: string } }
+  context: { params: { imageId: string } }
 ) {
-  try {
-    const { imageId } = params
+  if (!context?.params?.imageId) {
+    return NextResponse.json(
+      { error: 'ID de imagen no proporcionado' },
+      { status: 400 }
+    )
+  }
 
+  const imageId = context.params.imageId
+
+  try {
     // Obtener la imagen
     const image = await prisma.image.findUnique({
       where: { id: imageId },
       select: {
-        thumbnail: true,
-        thumbnailError: true
+        id: true,
+        path: true,
+        thumbnail: true
       }
     })
 
@@ -26,37 +46,31 @@ export async function GET(
       )
     }
 
-    if (image.thumbnailError) {
+    // Si la imagen tiene un thumbnail en la base de datos, usarlo
+    if (image.thumbnail) {
+      return new NextResponse(image.thumbnail, {
+        headers: {
+          'Content-Type': 'image/webp',
+          'Cache-Control': 'public, max-age=31536000'
+        }
+      })
+    }
+
+    // Si no, intentar leer del sistema de archivos
+    const thumbnailPath = getThumbnailPath(image.id)
+    if (!existsSync(thumbnailPath)) {
       return NextResponse.json(
-        { error: image.thumbnailError },
-        { status: 500 }
+        { error: 'Thumbnail no encontrado' },
+        { status: 404 }
       )
     }
 
-    if (!image.thumbnail) {
-      // Intentar leer del sistema de archivos
-      const thumbnailPath = path.join(process.cwd(), 'thumbnails', `${imageId}.webp`)
-      try {
-        const thumbnail = await fs.readFile(thumbnailPath)
-        return new NextResponse(thumbnail, {
-          headers: {
-            'Content-Type': 'image/webp',
-            'Cache-Control': 'public, max-age=31536000, immutable'
-          }
-        })
-      } catch {
-        return NextResponse.json(
-          { error: 'Miniatura no encontrada' },
-          { status: 404 }
-        )
-      }
-    }
-
-    // Devolver la miniatura desde la base de datos
-    return new NextResponse(image.thumbnail, {
+    const thumbnailBuffer = await readFile(thumbnailPath)
+    return new NextResponse(thumbnailBuffer, {
       headers: {
         'Content-Type': 'image/webp',
-        'Cache-Control': 'public, max-age=31536000, immutable'
+        'Cache-Control': 'public, max-age=31536000',
+        'Content-Length': thumbnailBuffer.length.toString()
       }
     })
   } catch (error) {

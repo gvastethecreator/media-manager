@@ -11,6 +11,7 @@ import { formatFileSize } from '@/lib/format'
 import { useToast } from '@/components/ui/use-toast'
 import { useCallback } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useInView } from 'react-intersection-observer'
 
 interface FileCardProps {
   item: FileItem
@@ -78,6 +79,12 @@ export function FileCard({
   const [gradient] = useState(getRandomGradient)
   const { toast } = useToast()
 
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0,
+    rootMargin: '200px'
+  })
+
   const handleContextMenu = useCallback((action: string) => {
     switch (action) {
       case 'copy':
@@ -95,8 +102,8 @@ export function FileCard({
     if (viewMode === 'list') {
       return (
         <div className="flex items-center gap-3 px-4 h-full">
-          <div className="relative w-6 h-6 rounded-sm overflow-hidden bg-muted">
-            {item.thumbnailUrl ? (
+          <div ref={ref} className="relative w-6 h-6 rounded-sm overflow-hidden bg-muted">
+            {item.thumbnailUrl && inView ? (
               <motion.img
                 src={item.thumbnailUrl}
                 alt={item.name}
@@ -111,6 +118,7 @@ export function FileCard({
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                 }}
+                loading="lazy"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -135,12 +143,12 @@ export function FileCard({
     }
 
     return (
-      <div className="relative w-full h-full">
+      <div ref={ref} className="relative w-full h-full">
         <div className={cn(
           "relative w-full aspect-square overflow-hidden rounded-lg border border-accent/10 transition-all",
           (isHovered || isSelected) && "border-2 border-white/60"
         )}>
-          {item.thumbnailUrl ? (
+          {item.thumbnailUrl && inView ? (
             <motion.img
               src={item.thumbnailUrl}
               alt={item.name}
@@ -156,6 +164,7 @@ export function FileCard({
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
               }}
+              loading="lazy"
             />
           ) : (
             <div className={cn(
