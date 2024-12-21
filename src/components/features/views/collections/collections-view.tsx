@@ -95,19 +95,20 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      className="h-full"
     >
       <Card
         className={cn(
-          "w-full cursor-pointer overflow-hidden group",
+          "w-full h-full cursor-pointer overflow-hidden group",
           "transition-all duration-200 hover:shadow-lg",
-          "border-2"
+          "border-2 flex flex-col"
         )}
         style={{
           borderColor: `${bgColor}50`,
           background: `linear-gradient(160deg, ${bgColor}10 0%, ${bgColor}05 100%)`,
         }}
       >
-        <CardHeader className="relative p-4 pb-2">
+        <CardHeader className="relative p-4 pb-2 flex-none">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-3xl">{collection.emoji}</span>
@@ -158,13 +159,13 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="p-4 pt-2">
+        <CardContent className="p-4 pt-2 flex-1 flex flex-col">
           {/* Grid de imágenes recientes */}
-          <div className="relative group/grid">
-            <div className="grid grid-cols-3 gap-1.5 aspect-[16/9] mb-4 bg-background/50 rounded-lg p-1.5">
-              {collection.recentImages ? (
+          <div className="relative group/grid flex-1">
+            <div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
+              {collection.recentImages && collection.recentImages.length > 0 ? (
                 collection.recentImages.map((src, i) => (
-                  <div key={i} className="relative aspect-square rounded-md overflow-hidden">
+                  <div key={i} className="relative rounded-md overflow-hidden aspect-square">
                     {src ? (
                       <Image
                         src={src}
@@ -177,20 +178,24 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
                         "w-full h-full flex items-center justify-center bg-gradient-to-br",
                         getRandomGradient()
                       )}>
-                        <ImageIcon className="w-4 h-4 text-white/80" />
+                        <ImageIcon className="w-5 h-5 text-white/80" />
                       </div>
                     )}
                   </div>
                 ))
               ) : (
-                Array(9).fill(0).map((_, i) => (
-                  <div key={i} className={cn(
-                    "relative aspect-square rounded-md overflow-hidden",
-                    "flex items-center justify-center",
-                    "bg-gradient-to-br",
-                    getRandomGradient()
-                  )}>
-                    <ImageIcon className="w-4 h-4 text-white/80" />
+                // Mostrar 9 placeholders cuando no hay imágenes
+                Array.from({ length: 9 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "relative rounded-md overflow-hidden aspect-square",
+                      "flex items-center justify-center",
+                      "bg-gradient-to-br transition-transform hover:scale-105",
+                      getRandomGradient()
+                    )}
+                  >
+                    <ImageIcon className="w-5 h-5 text-white/80" />
                   </div>
                 ))
               )}
@@ -203,67 +208,72 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
             >
               <Button variant="secondary" size="sm" className="gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Ver todas las imágenes
+                {collection.recentImages && collection.recentImages.length > 0
+                  ? "Ver todas las imágenes"
+                  : "Colección vacía"}
               </Button>
             </div>
           </div>
 
-          {/* Estadísticas */}
-          <div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <HoverCard openDelay={200}>
-                <HoverCardTrigger asChild>
-                  <div className="flex items-center gap-1.5 cursor-help">
-                    <FolderIcon className="w-4 h-4" />
-                    <span>{collection.count}</span>
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent side="top" className="text-sm">
-                  Esta colección contiene {collection.count} imágenes
-                </HoverCardContent>
-              </HoverCard>
+          {/* Footer con stats */}
+          <div className="mt-4 space-y-3">
+            {/* Estadísticas */}
+            <div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <HoverCard openDelay={200}>
+                  <HoverCardTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <FolderIcon className="w-4 h-4" />
+                      <span>{collection.count}</span>
+                    </div>
+                  </HoverCardTrigger>
+                  <HoverCardContent side="top" className="text-sm">
+                    Esta colección contiene {collection.count} imágenes
+                  </HoverCardContent>
+                </HoverCard>
+
+                <HoverCard openDelay={200}>
+                  <HoverCardTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help">
+                      <TagIcon className="w-4 h-4" />
+                      <span>{collection.topTags?.length || 0}</span>
+                    </div>
+                  </HoverCardTrigger>
+                  <HoverCardContent side="top" className="text-sm">
+                    Etiquetas más usadas en esta colección
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
 
               <HoverCard openDelay={200}>
                 <HoverCardTrigger asChild>
                   <div className="flex items-center gap-1.5 cursor-help">
-                    <TagIcon className="w-4 h-4" />
-                    <span>{collection.topTags?.length || 0}</span>
+                    <span>{collection.size}</span>
                   </div>
                 </HoverCardTrigger>
                 <HoverCardContent side="top" className="text-sm">
-                  Etiquetas más usadas en esta colección
+                  Espacio total usado por las imágenes
                 </HoverCardContent>
               </HoverCard>
             </div>
 
-            <HoverCard openDelay={200}>
-              <HoverCardTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-help">
-                  <span>{collection.size}</span>
+            {collection.topTags && collection.topTags.length > 0 && (
+              <>
+                <Separator />
+                <div className="flex flex-wrap gap-1">
+                  {collection.topTags.map((tag, i) => (
+                    <Badge
+                      key={i}
+                      variant="secondary"
+                      className="text-xs hover:bg-accent transition-colors"
+                    >
+                      {tag.name} ({tag.count})
+                    </Badge>
+                  ))}
                 </div>
-              </HoverCardTrigger>
-              <HoverCardContent side="top" className="text-sm">
-                Espacio total usado por las imágenes
-              </HoverCardContent>
-            </HoverCard>
+              </>
+            )}
           </div>
-
-          {collection.topTags && collection.topTags.length > 0 && (
-            <>
-              <Separator className="my-3" />
-              <div className="flex flex-wrap gap-1">
-                {collection.topTags.map((tag, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="text-xs hover:bg-accent transition-colors"
-                  >
-                    {tag.name} ({tag.count})
-                  </Badge>
-                ))}
-              </div>
-            </>
-          )}
         </CardContent>
       </Card>
     </motion.div>
@@ -274,7 +284,7 @@ function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       {Array(4).fill(0).map((_, i) => (
-        <Skeleton key={i} className="w-full aspect-[3/2]" />
+        <Skeleton key={i} className="w-full aspect-[4/3]" />
       ))}
     </div>
   );
