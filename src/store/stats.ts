@@ -1,69 +1,84 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { formatBytes } from '@/lib/utils'
+import { Image, FolderOpen, Tag, BookmarkIcon, Star, Eye, Download } from 'lucide-react'
+
+interface FolderStat {
+  name: string
+  size: number
+  percentage: number
+}
+
+interface TagStat {
+  name: string
+  color: string
+  count: number
+}
+
+interface Activity {
+  description: string
+  timestamp: string
+  iconName: string
+}
 
 interface Stats {
-  totalFiles: number
-  totalSize: number
-  totalCollections: number
+  // Estadísticas principales
+  totalImages: number
   totalFolders: number
   totalTags: number
-  recentlyAdded: number
-  recentlyModified: number
-  duplicates: number
+  totalCollections: number
+
+  // Estadísticas adicionales
+  totalFavorites: number
+  totalViews: number
+  totalDownloads: number
+  totalSize: number
+
+  // Estadísticas detalladas
+  folderStats: FolderStat[]
+  topTags: TagStat[]
+  recentActivity: Activity[]
 }
 
 interface StatsState {
-  stats: Stats
+  stats: Stats | null
   isLoading: boolean
   error: string | null
+  fetchStats: () => Promise<void>
   initialize: () => Promise<void>
-  updateStats: (newStats: Partial<Stats>) => void
 }
 
-const initialStats: Stats = {
-  totalFiles: 0,
-  totalSize: 0,
-  totalCollections: 0,
-  totalFolders: 0,
-  totalTags: 0,
-  recentlyAdded: 0,
-  recentlyModified: 0,
-  duplicates: 0
-}
+export const useStatsStore = create<StatsState>((set, get) => ({
+  stats: null,
+  isLoading: false,
+  error: null,
 
-export const useStatsStore = create<StatsState>()(
-  persist(
-    (set) => ({
-      stats: initialStats,
-      isLoading: false,
-      error: null,
+  initialize: async () => {
+    const { fetchStats } = get()
+    await fetchStats()
 
-      initialize: async () => {
-        try {
-          set({ isLoading: true, error: null });
-          const response = await fetch('/api/stats');
-          if (!response.ok) {
-            throw new Error('Error al obtener las estadísticas');
-          }
-          const stats = await response.json();
-          set({ stats, isLoading: false });
-        } catch (error) {
-          console.error('Error initializing stats:', error);
-          set({ 
-            error: 'Error al cargar las estadísticas',
-            isLoading: false 
-          });
-        }
-      },
+    // Configurar actualización periódica cada 30 segundos
+    setInterval(() => {
+      fetchStats()
+    }, 30000)
+  },
 
-      updateStats: (newStats) => 
-        set((state) => ({
-          stats: { ...state.stats, ...newStats }
-        }))
-    }),
-    {
-      name: 'stats-storage',
-      version: 1,
+  fetchStats: async () => {
+    try {
+      set({ isLoading: true, error: null })
+
+      const response = await fetch('/api/stats')
+      if (!response.ok) {
+        throw new Error('Error al obtener estadísticas')
+      }
+
+      const stats = await response.json()
+      set({ stats, isLoading: false })
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+      set({
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        isLoading: false
+      })
     }
-  )
-)
+  }
+}))
