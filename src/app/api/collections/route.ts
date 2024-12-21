@@ -13,27 +13,66 @@ export async function GET() {
   try {
     const collections = await prisma.collection.findMany({
       include: {
-        _count: {
-          select: { images: true }
-        },
         images: {
-          select: { size: true }
+          select: {
+            id: true,
+            path: true,
+            size: true,
+            tags: {
+              select: {
+                name: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 9
+        },
+        _count: {
+          select: {
+            images: true
+          }
         }
       }
     })
 
-    const collectionsWithStats = collections.map(collection => ({
-      ...collection,
-      filters: collection.filters ? JSON.parse(collection.filters) : [],
-      count: collection._count.images,
-      size: formatBytes(collection.images.reduce((acc, img) => acc + img.size, 0))
+    const processedCollections = await Promise.all(collections.map(async (collection) => {
+      const totalSize = collection.images.reduce((sum, img) => sum + img.size, 0)
+
+      const tagCounts = collection.images.reduce((acc, img) => {
+        img.tags.forEach(tag => {
+          acc[tag.name] = (acc[tag.name] || 0) + 1
+        })
+        return acc
+      }, {} as Record<string, number>)
+
+      const topTags = Object.entries(tagCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([name, count]) => ({ name, count }))
+
+      const recentImages = collection.images.map(img => `/api/thumbnails/${img.id}`)
+
+      return {
+        id: collection.id,
+        name: collection.name,
+        emoji: collection.emoji || '📁',
+        color: collection.color || '#3b82f6',
+        description: collection.description || '',
+        shortcut: collection.shortcut,
+        count: collection._count.images,
+        size: formatBytes(totalSize),
+        recentImages,
+        topTags
+      }
     }))
 
-    return NextResponse.json(collectionsWithStats)
+    return NextResponse.json(processedCollections)
   } catch (error) {
-    console.error('Error getting collections:', error)
+    console.error('Error al obtener colecciones:', error)
     return NextResponse.json(
-      { error: 'Error getting collections' },
+      { error: 'Error al obtener colecciones' },
       { status: 500 }
     )
   }
@@ -68,7 +107,7 @@ export async function PUT(request: NextRequest) {
   try {
     const data = await request.json()
     const { id, ...updateData } = data
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Collection ID is required' },
@@ -98,7 +137,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Collection ID is required' },
