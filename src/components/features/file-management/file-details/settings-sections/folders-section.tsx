@@ -378,33 +378,25 @@ export function FoldersSection() {
   const handleFolderClick = async (folderId: string) => {
     if (selectedFolder === folderId) {
       try {
-        const response = await fetch(`/api/folders/${folderId}`, {
-          method: 'DELETE',
-        })
-
-        if (!response.ok) {
-          throw new Error('Error al eliminar la carpeta')
-        }
-
+        await deleteFolder(folderId);
         toast({
           title: "Carpeta eliminada",
           description: "La carpeta se eliminó correctamente"
-        })
-
-        await loadStats()
-        setSelectedFolder(null)
+        });
+        await loadStats();
+        setSelectedFolder(null);
       } catch (error) {
-        console.error('Error deleting folder:', error)
+        console.error('Error deleting folder:', error);
         toast({
           title: "Error",
           description: "No se pudo eliminar la carpeta",
           variant: "destructive"
-        })
+        });
       }
     } else {
-      setSelectedFolder(folderId)
+      setSelectedFolder(folderId);
     }
-  }
+  };
 
   if (error) {
     return (

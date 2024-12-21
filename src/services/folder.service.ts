@@ -1,220 +1,133 @@
-import { prisma } from '@/lib/prisma'
+import { ThumbnailQuality } from "./thumbnail.service"
 
-// Interfaces
 export interface IndexStats {
-  totalFiles: number;
-  processedFiles: number;
-  currentFile?: string;
-  error?: string;
+  current: number
+  total: number
+  currentFile: string
+  status: string
 }
 
-export interface FolderWithStats {
-  id: string;
-  name: string;
-  path: string;
-  totalSize: bigint;
-  lastIndexed: Date | null;
-  updatedAt: Date;
-  _count: {
-    images: number;
-  };
+export interface IndexOptions {
+  id: string
+  onProgress?: (stats: IndexStats) => void
+  onError?: (error: Error) => void
+  onComplete?: () => void
 }
 
-export interface FolderStats {
-  totalFolders: number;
-  totalFiles: number;
-  totalSize: number;
-  lastIndexed: Date | null;
-}
-
-export interface ReindexOptions {
-  id: string;
-  onProgress: (stats: IndexStats) => void;
-  onError: (error: Error) => void;
-  onComplete: () => void;
-}
-
-// Funciones
-/**
- * Obtener todas las carpetas
- */
 export async function getFolders() {
   try {
-    const folders = await prisma.folder.findMany({
-      include: {
-        _count: {
-          select: { images: true }
-        }
-      },
-      orderBy: { updatedAt: 'desc' }
-    });
-
-    // Convertir BigInt a número para que sea serializable
-    return folders.map(folder => ({
-      ...folder,
-      totalSize: Number(folder.totalSize || 0)
-    }));
+    const response = await fetch('/api/folders')
+    if (!response.ok) {
+      throw new Error('Error al obtener carpetas')
+    }
+    return await response.json()
   } catch (error) {
-    console.error('Error obteniendo carpetas:', error);
-    throw new Error('No se pudieron obtener las carpetas');
+    console.error('Error en getFolders:', error)
+    throw error
   }
 }
 
-/**
- * Obtener una carpeta específica
- */
-export async function getFolder(id: string) {
+export async function addFolder(path: string, options?: {
+  thumbnailQuality?: ThumbnailQuality
+  generateThumbnails?: boolean
+}) {
   try {
-    const folder = await prisma.folder.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { images: true }
-        }
-      }
-    });
+    const response = await fetch('/api/folders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        path,
+        ...options
+      })
+    })
 
-    if (!folder) {
-      throw new Error('Carpeta no encontrada');
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Error al agregar carpeta')
     }
 
-    return {
-      ...folder,
-      totalSize: Number(folder.totalSize || 0)
-    };
+    return await response.json()
   } catch (error) {
-    console.error('Error obteniendo carpeta:', error);
-    throw new Error('No se pudo obtener la carpeta');
+    console.error('Error en addFolder:', error)
+    throw error
   }
 }
 
-/**
- * Eliminar una carpeta
- */
-export async function deleteFolder(id: string) {
-  try {
-    await prisma.folder.delete({
-      where: { id }
-    });
-  } catch (error) {
-    console.error('Error eliminando carpeta:', error);
-    throw new Error('No se pudo eliminar la carpeta');
-  }
-}
-
-/**
- * Reindexar una carpeta específica
- */
-export async function reindexFolder({ id, onProgress, onError, onComplete }: ReindexOptions) {
+export async function reindexFolder({ id, onProgress, onError, onComplete }: IndexOptions) {
   try {
     const response = await fetch(`/api/folders/reindex/${id}`, {
       method: 'POST'
-    });
+    })
 
     if (!response.ok) {
-      throw new Error('Error al reindexar la carpeta');
+      throw new Error('Error al reindexar carpeta')
     }
 
-    const reader = response.body?.getReader();
+    const reader = response.body?.getReader()
     if (!reader) {
-      throw new Error('No se pudo leer la respuesta');
+      throw new Error('No se pudo obtener el reader')
     }
 
-    const decoder = new TextDecoder();
-    let isComplete = false;
+    const decoder = new TextDecoder()
 
     try {
-      while (!isComplete) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
 
-        const chunk = decoder.decode(value);
+        const chunk = decoder.decode(value)
         const events = chunk
           .split('\n')
           .filter(Boolean)
           .map(line => {
             try {
-              return JSON.parse(line);
-            } catch (error) {
-              console.error('Error parsing event:', error);
-              return null;
+              return JSON.parse(line)
+            } catch {
+              return null
             }
           })
-          .filter(event => event !== null);
+          .filter(event => event !== null)
 
         for (const event of events) {
-          if (!event?.type || !event?.data) continue;
-
           switch (event.type) {
             case 'progress':
-              onProgress(event.data);
-              break;
+              onProgress?.(event.data)
+              break
             case 'error':
-              onError(new Error(event.data.error));
-              break;
+              onError?.(new Error(event.data.error))
+              break
             case 'complete':
-              isComplete = true;
-              onComplete();
-              break;
+              onComplete?.()
+              break
           }
         }
       }
     } finally {
-      reader.releaseLock();
+      reader.releaseLock()
     }
   } catch (error) {
-    console.error('Error reindexando carpeta:', error);
-    onError(error instanceof Error ? error : new Error('Error desconocido'));
+    console.error('Error en reindexFolder:', error)
+    onError?.(error instanceof Error ? error : new Error('Error desconocido'))
+    throw error
   }
 }
 
-/**
- * Reindexar todas las carpetas
- */
-export async function reindexAll() {
+export async function deleteFolder(id: string) {
   try {
-    const response = await fetch('/api/folders/reindex', {
-      method: 'POST'
-    });
+    const response = await fetch(`/api/folders?id=${id}`, {
+      method: 'DELETE'
+    })
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error al reindexar las carpetas');
-    }
-  } catch (error) {
-    console.error('Error en reindexAll:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtener estadísticas de indexación
- */
-export async function getIndexStats(): Promise<FolderStats> {
-  try {
-    const response = await fetch('/api/folders/stats');
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error al obtener las estadísticas');
+      const error = await response.json()
+      throw new Error(error.message || 'Error al eliminar carpeta')
     }
 
-    const stats = await response.json();
-    return {
-      ...stats,
-      lastIndexed: stats.lastIndexed ? new Date(stats.lastIndexed) : null
-    };
+    return await response.json()
   } catch (error) {
-    console.error('Error en getIndexStats:', error);
-    throw error;
+    console.error('Error en deleteFolder:', error)
+    throw error
   }
 }
-
-// Exportar todas las funciones como un objeto de servicio
-export const folderService = {
-  getFolders,
-  getFolder,
-  deleteFolder,
-  reindexFolder,
-  reindexAll,
-  getIndexStats
-};
