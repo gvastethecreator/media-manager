@@ -206,7 +206,6 @@ export const useFilesStore = create<FilesState>()(
           const files = await getFilesByFolder(id);
           console.log('Archivos cargados:', files);
           set({
-            currentView: 'folder',
             currentItems: files,
             selectedIds: [],
             isLoading: false

@@ -145,12 +145,13 @@ export function FileBrowser() {
   }, [isResizing])
 
   return (
-    <div className="h-full flex">
+    <div className="h-full w-full flex overflow-hidden">
       <ResizablePanelGroup
         direction="horizontal"
+        className="h-full w-full"
       >
-        <ResizablePanel defaultSize={75} minSize={30}>
-          <div className="h-full">
+        <ResizablePanel defaultSize={75} minSize={30} className="h-full">
+          <div className="h-full w-full overflow-auto">
             <VirtualizedView
               items={items}
               viewMode={viewMode}
@@ -163,17 +164,16 @@ export function FileBrowser() {
           </div>
         </ResizablePanel>
         <ResizableHandle onDragStart={handleResizeStart} onDragEnd={handleResizeEnd} />
-        <RightPanel
-          selectedItem={selectedItem}
-          isCollapsed={isRightPanelCollapsed}
-          showSettings={showSettings}
-          onToggleSettings={() => setShowSettings(!showSettings)}
-          onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
-          defaultSize={25}
-          minSize={20}
-          maxSize={40}
-          isResizing={isResizing}
-        />
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="h-full">
+          <RightPanel
+            selectedItem={selectedItem}
+            isCollapsed={isRightPanelCollapsed}
+            showSettings={showSettings}
+            onToggleSettings={() => setShowSettings(!showSettings)}
+            onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+            isResizing={isResizing}
+          />
+        </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   )
@@ -199,7 +199,7 @@ export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect
   const handleItemDoubleClick = React.useCallback((item: FileItem) => {
     if (item.type === 'image' || (item.mimeType?.startsWith('image/'))) {
       // Filtramos solo las imágenes del array de items
-      const imageItems = items.filter(i => 
+      const imageItems = items.filter(i =>
         i.type === 'image' || i.mimeType?.startsWith('image/')
       )
       openViewer(item, imageItems)
@@ -207,14 +207,14 @@ export function FileView({ items, viewMode = "grid", thumbnailSize, onItemSelect
   }, [openViewer, items])
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full w-full overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={viewMode}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="h-full"
+          className="h-full w-full"
         >
           <VirtualizedView
             items={items}

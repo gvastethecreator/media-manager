@@ -1,90 +1,133 @@
 'use client';
 
-import { useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useFilesStore } from '@/store/files'
-import { VirtualizedView } from '@/components/features/file-management/file-browser/components/virtualized-view'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { FileImage } from 'lucide-react'
+import { useColumns } from '@/store/columns'
 import { useImageViewer } from '@/store/image-viewer'
-import { useUIStore } from '@/store/ui'
-import { useNavigationStore } from '@/store/navigation'
+import { VirtualizedView } from '@/components/features/file-management/file-browser/components/virtualized-view'
+import { RightPanel } from '@/components/features/file-management/file-details/right-panel'
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state'
+import { FolderIcon, Loader2 } from 'lucide-react'
+import type { FileItem } from '@/types/file-item'
 
 export function FilesView() {
   const {
-    currentItems,
-    isLoading,
-    currentFolderId,
-    selectItem,
+    currentItems: items,
+    selectedItem,
     selectedIds,
-    handleSelectFolder
+    selectItem,
+    currentFolderId,
+    handleSelectFolder,
+    deselectItem,
+    isLoading: storeLoading
   } = useFilesStore()
+  const { viewMode, thumbnailSize } = useColumns()
   const { openViewer } = useImageViewer()
-  const { zoomLevel } = useUIStore()
-  const { currentView } = useNavigationStore()
+  const [showSettings, setShowSettings] = useState(false)
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
 
-  // Inicializar los archivos cuando se monta el componente o cambia el folderId
   useEffect(() => {
-    console.log('FilesView - currentFolderId:', currentFolderId)
     if (currentFolderId) {
       handleSelectFolder(currentFolderId)
     }
   }, [currentFolderId, handleSelectFolder])
 
-  // Convertir el nivel de zoom a un tamaño de thumbnail
-  const thumbnailSize = zoomLevel <= 50 ? 'small' : zoomLevel <= 100 ? 'medium' : 'large'
+  const handleItemClick = useCallback((item: FileItem) => {
+    if (selectedIds.includes(item.id)) {
+      deselectItem(item.id)
+    } else {
+      selectItem(item)
+    }
+  }, [selectItem, deselectItem, selectedIds])
 
+  const handleItemDoubleClick = useCallback((item: FileItem) => {
+    if (item.type === 'image' || (item.mimeType?.startsWith('image/'))) {
+      const imageItems = (items || []).filter(i =>
+        i.type === 'image' || i.mimeType?.startsWith('image/')
+      )
+      openViewer(item, imageItems)
+    }
+  }, [openViewer, items])
+
+  const handleResizeStart = useCallback(() => {
+    if (!isResizing) {
+      setIsResizing(true)
+    }
+  }, [isResizing])
+
+  const handleResizeEnd = useCallback(() => {
+    if (isResizing) {
+      setIsResizing(false)
+    }
+  }, [isResizing])
+
+  // Si no hay una carpeta seleccionada, mostramos el estado vacío
   if (!currentFolderId) {
     return (
       <EmptyState
-        icon={FileImage}
+        icon={FolderIcon}
         title="No hay carpeta seleccionada"
-        description="Selecciona una carpeta para ver su contenido"
+        description="Selecciona una carpeta del panel izquierdo para ver su contenido"
       />
     )
   }
 
-  if (isLoading) {
+  // Mostramos el estado de carga
+  if (storeLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary" />
+      <div className="h-full w-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
-  if (currentItems.length === 0) {
+  // Si la carpeta está vacía, mostramos el estado vacío
+  if (!items || items.length === 0) {
     return (
       <EmptyState
-        icon={FileImage}
+        icon={FolderIcon}
         title="Carpeta vacía"
-        description="Esta carpeta no contiene imágenes"
+        description="Esta carpeta no contiene archivos"
       />
     )
   }
 
-  const handleItemClick = (item: any) => {
-    selectItem(item.id)
-  }
-
-  const handleItemDoubleClick = (item: any) => {
-    if (item.type === 'image') {
-      openViewer(item, currentItems)
-    }
-  }
-
   return (
-    <ScrollArea className="h-full w-full">
-      <VirtualizedView
-        items={currentItems}
-        viewMode="grid"
-        thumbnailSize={thumbnailSize}
-        selectedItem={null}
-        selectedIds={selectedIds}
-        onItemClick={handleItemClick}
-        onItemDoubleClick={handleItemDoubleClick}
-        loading={isLoading}
-        hasMore={false}
-      />
-    </ScrollArea>
+    <div className="h-full w-full flex overflow-hidden">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="h-full w-full"
+      >
+        <ResizablePanel defaultSize={75} minSize={30} className="h-full">
+          <div className="h-full w-full overflow-auto">
+            <VirtualizedView
+              items={items}
+              viewMode={viewMode}
+              thumbnailSize={thumbnailSize}
+              selectedItem={selectedItem}
+              selectedIds={selectedIds}
+              onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
+              isResizing={isResizing}
+              hasMore={false}
+              isLoading={storeLoading}
+            />
+          </div>
+        </ResizablePanel>
+        <ResizableHandle onDragStart={handleResizeStart} onDragEnd={handleResizeEnd} />
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="h-full">
+          <RightPanel
+            selectedItem={selectedItem}
+            isCollapsed={isRightPanelCollapsed}
+            showSettings={showSettings}
+            onToggleSettings={() => setShowSettings(!showSettings)}
+            onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+            isResizing={isResizing}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   )
 }
