@@ -10,6 +10,29 @@ import { formatBytes } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Animaciones
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
 
 // Función auxiliar para obtener el icono dinámicamente
 const DynamicIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -84,7 +107,11 @@ export function DashboardView({ isResizing }: ViewProps) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center h-full"
+      >
         <Card className="w-[400px]">
           <CardHeader>
             <CardTitle className="text-red-500">Error</CardTitle>
@@ -96,60 +123,116 @@ export function DashboardView({ isResizing }: ViewProps) {
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="h-full overflow-auto">
-      <div className="p-6 space-y-6">
+      <motion.div
+        className="p-6 space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Estadísticas Principales */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {mainStats.map((stat, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <DynamicIcon name={stat.icon} className={cn("h-4 w-4", stat.color)} />
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">{stat.description}</p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <motion.div
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+          variants={containerVariants}
+        >
+          <AnimatePresence mode="wait">
+            {mainStats.map((stat, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <DynamicIcon name={stat.icon} className={cn("h-4 w-4", stat.color)} />
+                  </CardHeader>
+                  <CardContent>
+                    <AnimatePresence mode="wait">
+                      {isLoading ? (
+                        <motion.div
+                          key="skeleton"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Skeleton className="h-8 w-20" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="text-2xl font-bold">{stat.value}</div>
+                          <p className="text-xs text-muted-foreground">{stat.description}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Estadísticas Adicionales */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {additionalStats.map((stat, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <DynamicIcon name={stat.icon} className={cn("h-4 w-4", stat.color)} />
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <motion.div
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+          variants={containerVariants}
+        >
+          <AnimatePresence mode="wait">
+            {additionalStats.map((stat, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <DynamicIcon name={stat.icon} className={cn("h-4 w-4", stat.color)} />
+                  </CardHeader>
+                  <CardContent>
+                    <AnimatePresence mode="wait">
+                      {isLoading ? (
+                        <motion.div
+                          key="skeleton"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Skeleton className="h-8 w-20" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="text-2xl font-bold">{stat.value}</div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Uso de Espacio por Carpeta */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <motion.div
+          className="grid gap-4 md:grid-cols-2"
+          variants={containerVariants}
+        >
           <Card>
             <CardHeader>
               <CardTitle>Uso de Espacio por Carpeta</CardTitle>
@@ -213,50 +296,52 @@ export function DashboardView({ isResizing }: ViewProps) {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Actividad Reciente */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Actividad Reciente</CardTitle>
-            <CardDescription>
-              Últimas acciones realizadas en el sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {isLoading ? (
-                Array(5).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-3 w-[150px]" />
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Actividad Reciente</CardTitle>
+              <CardDescription>
+                Últimas acciones realizadas en el sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {isLoading ? (
+                  Array(5).fill(0).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Skeleton className="h-4 w-[200px]" />
+                        <Skeleton className="h-3 w-[150px]" />
+                      </div>
+                      <Skeleton className="h-4 w-4" />
                     </div>
-                    <Skeleton className="h-4 w-4" />
-                  </div>
-                ))
-              ) : (
-                stats?.recentActivity?.map((activity, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {activity.description}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {activity.timestamp}
-                      </p>
+                  ))
+                ) : (
+                  stats?.recentActivity?.map((activity, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {activity.description}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {activity.timestamp}
+                        </p>
+                      </div>
+                      <DynamicIcon
+                        name={activity.iconName}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
                     </div>
-                    <DynamicIcon
-                      name={activity.iconName}
-                      className="h-4 w-4 text-muted-foreground"
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
