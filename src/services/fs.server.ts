@@ -37,6 +37,8 @@ export const fsService = {
   async listFiles(folderPath: string): Promise<{ name: string; path: string; size: number }[]> {
     try {
       const normalizedPath = this.normalizePath(folderPath)
+      console.log('📂 Listing files in:', normalizedPath)
+
       const files = await fs.readdir(normalizedPath)
       const fileDetails = await Promise.all(
         files.map(async (file) => {
@@ -44,22 +46,32 @@ export const fsService = {
           try {
             const stats = await fs.stat(filePath)
             if (stats.isFile()) {
+              const normalizedFilePath = this.normalizePath(filePath)
+              console.log('📄 Found file:', {
+                name: file,
+                path: normalizedFilePath,
+                size: stats.size
+              })
               return {
                 name: file,
-                path: this.normalizePath(filePath),
+                path: normalizedFilePath,
                 size: stats.size
               }
             }
             return null
           } catch (error) {
-            console.error(`Error procesando archivo ${file}:`, error)
+            console.error(`❌ Error processing file ${file}:`, error)
             return null
           }
         })
       )
-      return fileDetails.filter((file): file is NonNullable<typeof file> => file !== null)
+
+      const validFiles = fileDetails.filter((file): file is NonNullable<typeof file> => file !== null)
+      console.log(`✅ Found ${validFiles.length} valid files`)
+      return validFiles
+
     } catch (error) {
-      console.error('Error listando archivos:', error)
+      console.error('❌ Error listing files:', error)
       throw new Error('No se pudo listar los archivos del directorio')
     }
   },
@@ -100,10 +112,25 @@ export const fsService = {
   },
 
   normalizePath(folderPath: string): string {
-    // Normalizar la ruta para Windows
-    const normalized = path.normalize(folderPath)
-    // Asegurarnos de que use backslashes
-    return normalized.replace(/\//g, '\\')
+    try {
+      // Normalizar la ruta para Windows
+      let normalized = path.normalize(folderPath)
+
+      // Asegurarnos de que use backslashes en Windows
+      if (process.platform === 'win32') {
+        normalized = normalized.replace(/\//g, '\\')
+      }
+
+      console.log('🔄 Normalized path:', {
+        original: folderPath,
+        normalized
+      })
+
+      return normalized
+    } catch (error) {
+      console.error('❌ Error normalizing path:', error)
+      return folderPath
+    }
   }
 }
 
