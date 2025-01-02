@@ -264,11 +264,11 @@ export function FoldersSection() {
         throw new Error(error.message || 'Error reindexing folder')
       }
 
-      const reader = response.body?.getReader()
-      if (!reader) {
+      if (!response.body) {
         throw new Error('No response body')
       }
 
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let isComplete = false
 
@@ -289,38 +289,51 @@ export function FoldersSection() {
                 return null
               }
             })
-            .filter(event => event !== null)
+            .filter((event): event is { type: string; data: any } => {
+              if (!event || typeof event !== 'object') return false
+              if (!event.type || !event.data) return false
+              return true
+            })
 
           for (const event of events) {
-            if (!event || !event.type || !event.data) continue
-
             switch (event.type) {
               case 'progress':
-                if (event.data.progress !== undefined) {
+                if (typeof event.data.progress === 'number') {
                   setProcessProgress(event.data.progress)
+                  setProcessStatus(prevStatus => ({
+                    ...prevStatus,
+                    ...event.data,
+                    folderId,
+                    status: event.data.status || 'Procesando...'
+                  }))
+                  // Añadir un pequeño delay para que el UI se actualice
+                  await new Promise(resolve => setTimeout(resolve, 50))
                 }
-                setProcessStatus({
-                  ...event.data,
-                  folderId
-                })
-                // Añadir un pequeño delay para que el UI se actualice
-                await new Promise(resolve => setTimeout(resolve, 50))
                 break
+
               case 'error':
                 if (event.data.error) {
-                  console.error('Error processing file:', event.data.file, event.data.error)
+                  const errorMessage = event.data.file
+                    ? `Error procesando ${event.data.file}: ${event.data.error}`
+                    : event.data.error
+                  console.error(errorMessage)
                   toast({
                     title: "Error",
-                    description: event.data.error,
+                    description: errorMessage,
                     variant: "destructive"
                   })
                 }
                 break
+
               case 'complete':
                 isComplete = true
+                const errors = event.data.folder?.errors || 0
                 toast({
-                  title: "Reindexación completada",
-                  description: "Se ha completado la reindexación correctamente"
+                  title: errors > 0 ? "Reindexación completada con errores" : "Reindexación completada",
+                  description: errors > 0
+                    ? `Se completó la reindexación con ${errors} errores`
+                    : "Se ha completado la reindexación correctamente",
+                  variant: errors > 0 ? "warning" : "default"
                 })
                 // Esperar un momento antes de actualizar la lista
                 await new Promise(resolve => setTimeout(resolve, 500))

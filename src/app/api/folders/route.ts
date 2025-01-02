@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import path from 'path'
+import { getImageMetadata } from '@/lib/image'
+import { computeHash } from '@/lib/hash'
+import { generateThumbnail } from '@/lib/thumbnail'
+import { fsService } from '@/services/fs.server'
+import { ThumbnailQuality } from '@/services/thumbnail.service'
 import { readdirSync, statSync } from 'node:fs'
 import { join, extname } from 'node:path'
-import { computeHash } from '@/lib/server-utils'
-import { getImageMetadata } from '@/lib/image.server'
-import { THUMBNAIL_QUALITY_CONFIG, type ThumbnailQuality } from '@/services/thumbnail.service'
 import sharp from 'sharp'
 
 export const dynamic = 'force-dynamic'
@@ -12,58 +15,31 @@ export const maxDuration = 300 // 5 minutes
 
 export async function POST(request: NextRequest) {
   try {
-    // Verificar la conexión a la base de datos
-    await prisma.$connect()
+    const { path: folderPath, thumbnailQuality = 'mid', generateThumbnails = true } = await request.json()
 
-    const {
-      path: folderPath,
-      thumbnailQuality = 'mid',
-      generateThumbnails = true
-    } = await request.json() as {
-      path: string,
-      thumbnailQuality?: ThumbnailQuality,
-      generateThumbnails?: boolean
-    };
-
-    console.log('📥 Adding folder:', { folderPath, thumbnailQuality, generateThumbnails });
-
-    // Verificar si la carpeta existe en el sistema de archivos
-    try {
-      const stats = statSync(folderPath)
-      if (!stats.isDirectory()) {
-        return NextResponse.json(
-          { error: 'La ruta no es un directorio válido' },
-          { status: 400 }
-        )
-      }
-    } catch (error) {
-      console.error('Error verificando directorio:', error)
-      return NextResponse.json(
-        { error: 'No se encontró el directorio o no se tiene acceso' },
-        { status: 404 }
-      )
+    if (!folderPath) {
+      return NextResponse.json({ error: 'Se requiere una ruta de carpeta' }, { status: 400 })
     }
 
-    // Verificar si la carpeta ya existe en la base de datos
-    const existingFolder = await prisma.folder.findUnique({
-      where: { path: folderPath }
-    })
-
-    if (existingFolder) {
-      return NextResponse.json(
-        { error: 'La carpeta ya existe en la base de datos' },
-        { status: 400 }
-      )
+    // Validar la ruta de la carpeta
+    const validation = await fsService.validatePath(folderPath)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    // Crear un TransformStream para enviar actualizaciones de progreso
+    // Configurar el stream de respuesta
     const stream = new TransformStream()
     const writer = stream.writable.getWriter()
     const encoder = new TextEncoder()
 
-    const writeEvent = async (event: any) => {
+    const writeEvent = async (payload: { type: string; data: any }) => {
+      if (!payload || typeof payload !== 'object') {
+        console.error('Invalid payload:', payload)
+        return
+      }
+
       try {
-        await writer.write(encoder.encode(JSON.stringify(event) + '\n'))
+        await writer.write(encoder.encode(JSON.stringify(payload) + '\n'))
       } catch (error) {
         console.error('Error writing event:', error)
       }
@@ -76,32 +52,22 @@ export async function POST(request: NextRequest) {
         const folder = await prisma.folder.create({
           data: {
             path: folderPath,
-            name: folderPath.split('\\').pop() || folderPath,
+            name: path.basename(folderPath),
           }
         })
 
         // Leer los archivos de la carpeta
-        const files = readdirSync(folderPath)
-          .map(file => {
-            const filePath = join(folderPath, file)
-            const stats = statSync(filePath)
-            return {
-              path: filePath,
-              name: file,
-              size: stats.size,
-              isDirectory: stats.isDirectory()
-            }
-          })
-          .filter(file => !file.isDirectory && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
+        const files = await fsService.listFiles(folderPath)
+        const imageFiles = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
 
-        console.log('📸 Processing images:', files.length)
+        console.log('📸 Processing images:', imageFiles.length)
 
         // Enviar evento inicial
         await writeEvent({
           type: 'progress',
           data: {
             current: 0,
-            total: files.length,
+            total: imageFiles.length,
             progress: 0,
             currentFile: '',
             status: 'Iniciando procesamiento...'
@@ -112,56 +78,29 @@ export async function POST(request: NextRequest) {
         let processedFiles = 0
 
         // Procesar cada archivo
-        for (const file of files) {
+        for (const file of imageFiles) {
           try {
-            // Enviar evento de inicio de procesamiento del archivo
+            // Enviar evento de progreso
             await writeEvent({
               type: 'progress',
               data: {
                 current: processedFiles + 1,
-                total: files.length,
-                progress: Math.min(Math.round(((processedFiles + 1) / files.length) * 100), 100),
+                total: imageFiles.length,
+                progress: Math.round(((processedFiles + 1) / imageFiles.length) * 100),
                 currentFile: file.name,
-                status: 'Analizando metadata...'
+                status: 'Procesando archivo...'
               }
             })
 
             const metadata = await getImageMetadata(file.path)
             const hash = await computeHash(file.path)
 
-            await writeEvent({
-              type: 'progress',
-              data: {
-                current: processedFiles + 1,
-                total: files.length,
-                progress: Math.min(Math.round(((processedFiles + 1) / files.length) * 100), 100),
-                currentFile: file.name,
-                status: generateThumbnails ? 'Generando thumbnail...' : 'Procesando...'
-              }
-            })
-
-            let thumbnailBuffer: Buffer | null = null
-            let thumbnailWidth: number | null = null
-            let thumbnailHeight: number | null = null
-
+            let thumbnailData = null
             if (generateThumbnails) {
-              const thumbnailConfig = THUMBNAIL_QUALITY_CONFIG[thumbnailQuality]
-              const image = sharp(file.path)
-              const imageMetadata = await image.metadata()
-
-              const resizedImage = image.resize({
-                width: thumbnailConfig.width,
-                height: thumbnailConfig.height,
-                fit: 'inside',
-                withoutEnlargement: true
-              })
-
-              thumbnailBuffer = await resizedImage.toBuffer()
-              const thumbnailMetadata = await sharp(thumbnailBuffer).metadata()
-              thumbnailWidth = thumbnailMetadata.width || 0
-              thumbnailHeight = thumbnailMetadata.height || 0
+              thumbnailData = await generateThumbnail(file.path, thumbnailQuality)
             }
 
+            // Crear entrada en la base de datos
             await prisma.image.create({
               data: {
                 hash,
@@ -170,9 +109,9 @@ export async function POST(request: NextRequest) {
                 size: file.size,
                 width: metadata.width || 0,
                 height: metadata.height || 0,
-                thumbnail: thumbnailBuffer,
-                thumbnailWidth: thumbnailWidth || 0,
-                thumbnailHeight: thumbnailHeight || 0,
+                thumbnail: thumbnailData?.buffer || null,
+                thumbnailWidth: thumbnailData?.width || 0,
+                thumbnailHeight: thumbnailData?.height || 0,
                 folderId: folder.id,
               }
             })
@@ -180,19 +119,7 @@ export async function POST(request: NextRequest) {
             totalSize += file.size
             processedFiles++
 
-            // Enviar evento de archivo completado
-            await writeEvent({
-              type: 'progress',
-              data: {
-                current: processedFiles,
-                total: files.length,
-                progress: Math.min(Math.round((processedFiles / files.length) * 100), 100),
-                currentFile: file.name,
-                status: 'Archivo procesado'
-              }
-            })
-
-            // Pequeña pausa para que el UI pueda actualizarse
+            // Pequeña pausa para evitar sobrecarga
             await new Promise(resolve => setTimeout(resolve, 50))
 
           } catch (error) {
@@ -207,7 +134,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Actualizar el tamaño total de la carpeta
+        // Actualizar estadísticas de la carpeta
         await prisma.folder.update({
           where: { id: folder.id },
           data: {
@@ -221,7 +148,9 @@ export async function POST(request: NextRequest) {
           type: 'complete',
           data: {
             folder: {
-              ...folder,
+              id: folder.id,
+              path: folderPath,
+              name: path.basename(folderPath),
               totalSize,
               _count: { images: processedFiles }
             }
@@ -252,7 +181,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error in POST /api/folders:', error)
+    console.error('Error in POST handler:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Error interno del servidor' },
       { status: 500 }
