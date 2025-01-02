@@ -1,104 +1,98 @@
-// No hay cambios en el archivo src/lib/image.ts, ya que el código proporcionado es el mismo que el original.
-// Si se desea mover el código de imagen a un archivo separado para el servidor, se debería crear un nuevo archivo, por ejemplo, src/server/image.server.ts, y mover el código allí.
-
-// Sin embargo, si se desea mantener el mismo archivo, el contenido sigue siendo el mismo:
-
 import sharp from 'sharp'
+import { existsSync } from 'fs'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
 
 export interface ImageMetadata {
   width: number
   height: number
   format: string | null
-  space: string | null
-  channels: number | null
-  depth: string | null
-  density: number | null
-  hasAlpha: boolean | null
-  orientation: number | null
+  size: number | null
 }
 
-export async function getImageMetadata(filePath: string): Promise<ImageMetadata> {
+export async function getImageMetadata(imagePath: string): Promise<ImageMetadata> {
   try {
-    console.log('📸 Getting metadata for:', filePath)
-    const metadata = await sharp(filePath).metadata()
+    if (!existsSync(imagePath)) {
+      throw new Error('Archivo no encontrado')
+    }
 
-    const result = {
+    const metadata = await sharp(imagePath).metadata()
+
+    return {
       width: metadata.width || 0,
       height: metadata.height || 0,
       format: metadata.format || null,
-      space: metadata.space || null,
-      channels: metadata.channels || null,
-      depth: metadata.depth || null,
-      density: metadata.density || null,
-      hasAlpha: metadata.hasAlpha || null,
-      orientation: metadata.orientation || null
+      size: metadata.size || null
     }
-
-    console.log('✅ Metadata obtained:', result)
-    return result
   } catch (error) {
-    console.error('❌ Error getting image metadata:', {
-      path: filePath,
-      error: error instanceof Error ? error.message : error
-    })
-
-    // Devolver valores por defecto en caso de error
-    return {
-      width: 0,
-      height: 0,
-      format: null,
-      space: null,
-      channels: null,
-      depth: null,
-      density: null,
-      hasAlpha: null,
-      orientation: null
-    }
+    console.error('Error obteniendo metadata:', error)
+    throw new Error('Error al obtener metadata de la imagen')
   }
 }
 
-export async function createThumbnail(path: string, options: {
-  width?: number
-  height?: number
-  quality?: number
-} = {}) {
-  const {
-    width = 200,
-    height = 200,
-    quality = 80
-  } = options
+interface ProcessImageOptions {
+  width: number
+  height: number
+  quality: number
+}
 
+interface ProcessImageResult {
+  data: string
+  size: number
+  width: number
+  height: number
+}
+
+export async function processImage(
+  imagePath: string,
+  options: ProcessImageOptions
+): Promise<ProcessImageResult> {
   try {
-    console.log('🖼️ Creating thumbnail for:', path)
-    console.log('⚙️ Using options:', { width, height, quality })
-
-    const imageBuffer = await sharp(path)
-      .resize(width, height, {
-        fit: 'cover',
-        position: 'centre',
-        withoutEnlargement: true
-      })
-      .webp({ quality })
-      .toBuffer()
-
-    const result = {
-      buffer: imageBuffer,
-      size: imageBuffer.length,
-      format: 'webp'
+    if (!existsSync(imagePath)) {
+      throw new Error('Archivo no encontrado')
     }
 
-    console.log('✅ Thumbnail created:', {
-      size: result.size,
-      format: result.format
-    })
+    const metadata = await getImageMetadata(imagePath)
 
-    return result
+    const imageBuffer = await sharp(imagePath)
+      .resize(options.width, options.height, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .webp({ quality: options.quality })
+      .toBuffer()
+
+    return {
+      data: imageBuffer.toString('base64'),
+      size: imageBuffer.length,
+      width: metadata.width,
+      height: metadata.height
+    }
   } catch (error) {
-    console.error('❌ Error creating thumbnail:', {
-      path,
-      error: error instanceof Error ? error.message : error,
-      options
+    console.error('Error procesando imagen:', error)
+    throw new Error(error instanceof Error ? error.message : 'Error procesando imagen')
+  }
+}
+
+export async function createThumbnail(
+  imagePath: string,
+  options: ProcessImageOptions
+): Promise<ProcessImageResult> {
+  return processImage(imagePath, options)
+}
+
+export async function generateThumbnail(
+  imagePath: string,
+  quality: ThumbnailQuality = 'mid'
+): Promise<ProcessImageResult | null> {
+  try {
+    const config = THUMBNAIL_QUALITY_CONFIG[quality]
+    return await processImage(imagePath, {
+      width: config.width,
+      height: config.height,
+      quality: config.quality
     })
-    throw error
+  } catch (error) {
+    console.error('Error generando thumbnail:', error)
+    return null
   }
 }

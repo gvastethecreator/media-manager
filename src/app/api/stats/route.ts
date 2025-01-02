@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET() {
   try {
+    console.log('Iniciando obtención de estadísticas...')
+
     // Obtener estadísticas principales
     const [
       totalImages,
@@ -23,29 +28,46 @@ export async function GET() {
           downloads: true
         }
       })
-    ])
+    ]).catch(error => {
+      console.error('Error al obtener estadísticas principales:', error)
+      throw new Error('Error al obtener estadísticas principales')
+    })
 
-    // Obtener estadísticas de carpetas
+    console.log('Estadísticas principales obtenidas')
+
+    // Obtener estadísticas de carpetas con conteo de imágenes
     const folders = await prisma.folder.findMany({
       select: {
+        id: true,
         name: true,
-        totalSize: true
+        totalSize: true,
+        _count: {
+          select: { images: true }
+        }
       },
       orderBy: {
         totalSize: 'desc'
       }
+    }).catch(error => {
+      console.error('Error al obtener estadísticas de carpetas:', error)
+      throw new Error('Error al obtener estadísticas de carpetas')
     })
 
-    const totalSize = folders.reduce((sum, folder) => sum + folder.totalSize, 0)
+    console.log('Estadísticas de carpetas obtenidas')
+
+    const totalSize = folders.reduce((sum, folder) => sum + (folder.totalSize || 0), 0)
     const folderStats = folders.map(folder => ({
+      id: folder.id,
       name: folder.name,
-      size: folder.totalSize,
-      percentage: (folder.totalSize / totalSize) * 100
+      size: folder.totalSize || 0,
+      count: folder._count.images,
+      percentage: totalSize > 0 ? ((folder.totalSize || 0) / totalSize) * 100 : 0
     }))
 
-    // Obtener etiquetas más usadas
+    // Obtener etiquetas más usadas con conteo
     const topTags = await prisma.tag.findMany({
       select: {
+        id: true,
         name: true,
         color: true,
         _count: {
@@ -56,59 +78,65 @@ export async function GET() {
         images: {
           _count: 'desc'
         }
-      },
-      take: 5
+      }
+    }).catch(error => {
+      console.error('Error al obtener estadísticas de etiquetas:', error)
+      throw new Error('Error al obtener estadísticas de etiquetas')
     })
 
-    // Obtener actividad reciente
-    const recentActivity = await Promise.all([
-      // Imágenes recientes
-      prisma.image.findMany({
-        select: {
-          name: true,
-          createdAt: true
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5
-      }),
-      // Colecciones recientes
-      prisma.collection.findMany({
-        select: {
-          name: true,
-          createdAt: true
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5
-      }),
-      // Etiquetas recientes
-      prisma.tag.findMany({
-        select: {
-          name: true,
-          createdAt: true
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5
-      })
-    ])
+    console.log('Estadísticas de etiquetas obtenidas')
 
-    const activity = [
-      ...recentActivity[0].map(img => ({
-        description: `Nueva imagen: ${img.name}`,
-        timestamp: img.createdAt.toLocaleString(),
-        iconName: 'image'
-      })),
-      ...recentActivity[1].map(col => ({
-        description: `Nueva colección: ${col.name}`,
-        timestamp: col.createdAt.toLocaleString(),
-        iconName: 'bookmark'
-      })),
-      ...recentActivity[2].map(tag => ({
-        description: `Nueva etiqueta: ${tag.name}`,
-        timestamp: tag.createdAt.toLocaleString(),
-        iconName: 'tag'
-      }))
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 10)
+    // Obtener colecciones con conteo
+    const collections = await prisma.collection.findMany({
+      select: {
+        id: true,
+        name: true,
+        emoji: true,
+        color: true,
+        _count: {
+          select: { images: true }
+        }
+      },
+      orderBy: {
+        images: {
+          _count: 'desc'
+        }
+      }
+    }).catch(error => {
+      console.error('Error al obtener estadísticas de colecciones:', error)
+      throw new Error('Error al obtener estadísticas de colecciones')
+    })
+
+    console.log('Estadísticas de colecciones obtenidas')
+
+    // Obtener actividad reciente
+    const recentActivity = await prisma.imageStats.findMany({
+      where: {
+        OR: [
+          { views: { gt: 0 } },
+          { downloads: { gt: 0 } }
+        ]
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      take: 10,
+      include: {
+        image: true
+      }
+    }).catch(error => {
+      console.error('Error al obtener actividad reciente:', error)
+      throw new Error('Error al obtener actividad reciente')
+    })
+
+    console.log('Actividad reciente obtenida')
+
+    const activity = recentActivity.map(stat => ({
+      description: stat.views > 0 ? 'Vista' : 'Descarga',
+      timestamp: stat.updatedAt.toISOString(),
+      imageId: stat.imageId,
+      imageName: stat.image.name
+    }))
 
     const stats = {
       // Estadísticas principales
@@ -123,6 +151,22 @@ export async function GET() {
       totalDownloads: totalStats._sum.downloads || 0,
       totalSize,
 
+      // Listas con conteos
+      folders: folderStats,
+      tags: topTags.map(tag => ({
+        id: tag.id,
+        name: tag.name,
+        color: tag.color,
+        count: tag._count.images
+      })),
+      collections: collections.map(collection => ({
+        id: collection.id,
+        name: collection.name,
+        emoji: collection.emoji,
+        color: collection.color,
+        count: collection._count.images
+      })),
+
       // Estadísticas detalladas
       folderStats,
       topTags: topTags.map(tag => ({
@@ -133,11 +177,13 @@ export async function GET() {
       recentActivity: activity
     }
 
+    console.log('Estadísticas procesadas correctamente')
+
     return NextResponse.json(stats)
   } catch (error) {
     console.error('Error al obtener estadísticas:', error)
     return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
+      { error: error instanceof Error ? error.message : 'Error desconocido' },
       { status: 500 }
     )
   }

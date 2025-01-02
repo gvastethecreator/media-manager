@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from 'react'
 import { useFilesStore } from '@/store/files'
 import { useImageViewer } from '@/store/image-viewer'
-import { VirtualizedView } from '@/components/features/file-management/file-grid/components/virtualized-view'
+import { FileGrid } from '@/components/features/file-grid/file-grid'
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state'
 import { Star, Loader2 } from 'lucide-react'
 import type { FileItem } from '@/types/file-item'
@@ -37,7 +37,7 @@ export function FavoritesView() {
       const imageItems = (items || []).filter(i =>
         i.type === 'image' || i.mimeType?.startsWith('image/')
       )
-      openViewer(item, imageItems)
+      openViewer(imageItems, imageItems.findIndex(i => i.id === item.id))
     }
   }, [openViewer, items])
 
@@ -62,7 +62,7 @@ export function FavoritesView() {
   return (
     <div className="h-full w-full flex overflow-hidden">
       <div className="h-full w-full overflow-auto">
-        <VirtualizedView
+        <FileGrid
           items={items}
           selectedItem={selectedItem}
           selectedIds={selectedIds}

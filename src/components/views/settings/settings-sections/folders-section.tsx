@@ -424,6 +424,7 @@ export function FoldersSection() {
 
   return (
     <div className="space-y-4">
+
       <Card>
         <CardContent className="space-y-4 pt-6">
           <div className="flex items-center gap-2 p-2 rounded-lg border">
@@ -455,9 +456,9 @@ export function FoldersSection() {
                 </React.Fragment>
               )}
             </Button>
-          </div>
 
-          {isProcessing && (
+          </div>
+ {isProcessing && (
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{processStatus.status || 'Procesando...'}</span>
@@ -467,34 +468,7 @@ export function FoldersSection() {
             </div>
           )}
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <Label>Calidad de miniaturas</Label>
-                <Select value={thumbnailQuality} onValueChange={(value: ThumbnailQuality) => setThumbnailQuality(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona la calidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="compressed">Comprimida (más rápido, menos espacio)</SelectItem>
-                    <SelectItem value="low">Baja (balance entre calidad y espacio)</SelectItem>
-                    <SelectItem value="mid">Media (recomendado)</SelectItem>
-                    <SelectItem value="high">Alta (mejor calidad, más espacio)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="generateThumbnails"
-                  checked={generateThumbnails}
-                  onCheckedChange={(checked) => setGenerateThumbnails(checked as boolean)}
-                />
-                <Label htmlFor="generateThumbnails" className="text-sm">
-                  Generar miniaturas
-                </Label>
-              </div>
-            </div>
-          </div>
+
 
           {isLoading ? (
             <div className="py-4 text-center text-sm text-muted-foreground">

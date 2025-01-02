@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import sharp from 'sharp'
-import { promises as fs } from 'fs'
-import path from 'path'
-import { THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
+import { prisma } from '@/lib/prisma'
+import { generateThumbnail } from '@/lib/thumbnail'
+import { existsSync } from 'fs'
+import { ThumbnailQuality } from '@/services/thumbnail.service'
+
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = params
-    const { quality } = await request.json()
+    const { id } = await Promise.resolve(context.params)
+    const { quality = 'mid' } = await request.json()
 
     // Obtener la imagen
     const image = await prisma.image.findUnique({
@@ -25,49 +27,63 @@ export async function POST(
       )
     }
 
-    // Configuración de calidad
-    const config = THUMBNAIL_QUALITY_CONFIG[quality] || THUMBNAIL_QUALITY_CONFIG.mid
-
-    // Generar miniatura
-    const thumbnailBuffer = await sharp(image.path)
-      .resize(config.width, config.height, {
-        fit: 'inside',
-        withoutEnlargement: true
+    // Verificar que el archivo existe
+    if (!existsSync(image.path)) {
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnailError: 'Original file not found',
+          thumbnailErrorAt: new Date()
+        }
       })
-      .webp({ quality: config.quality })
-      .toBuffer()
+      return NextResponse.json(
+        { error: 'Archivo original no encontrado' },
+        { status: 404 }
+      )
+    }
 
-    // Guardar miniatura
-    const thumbnailDir = path.join(process.cwd(), 'thumbnails')
-    const thumbnailPath = path.join(thumbnailDir, `${id}.webp`)
-    await fs.writeFile(thumbnailPath, thumbnailBuffer)
+    try {
+      // Generar thumbnail
+      const result = await generateThumbnail(image.path, quality as ThumbnailQuality)
 
-    // Actualizar base de datos
-    await prisma.image.update({
-      where: { id },
-      data: {
-        thumbnail: thumbnailBuffer,
-        thumbnailSize: thumbnailBuffer.length,
-        thumbnailWidth: config.width,
-        thumbnailHeight: config.height,
-        thumbnailError: null
+      if (!result) {
+        throw new Error('Error generando miniatura')
       }
-    })
 
-    return NextResponse.json({ success: true })
+      // Actualizar en base de datos
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnail: result.buffer.toString('base64'),
+          thumbnailWidth: result.width,
+          thumbnailHeight: result.height,
+          thumbnailError: null,
+          thumbnailErrorAt: null
+        }
+      })
+
+      return NextResponse.json({ status: 'success' })
+    } catch (error) {
+      console.error('Error generando thumbnail:', error)
+
+      // Actualizar error en base de datos
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+          thumbnailErrorAt: new Date()
+        }
+      })
+
+      return NextResponse.json(
+        { error: 'Error al generar la miniatura' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
-    console.error('Error al generar miniatura:', error)
-
-    // Registrar error en la base de datos
-    await prisma.image.update({
-      where: { id: params.id },
-      data: {
-        thumbnailError: error instanceof Error ? error.message : 'Error desconocido'
-      }
-    })
-
+    console.error('Error en generación de thumbnail:', error)
     return NextResponse.json(
-      { error: 'Error al generar miniatura' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }

@@ -1,5 +1,5 @@
 import { createThumbnail } from './image'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
 
 interface ThumbnailResult {
   buffer: Buffer
@@ -17,8 +17,12 @@ export async function generateThumbnail(
       quality
     })
 
-    const options = getThumbnailOptions(quality)
-    const result = await createThumbnail(imagePath, options)
+    const config = THUMBNAIL_QUALITY_CONFIG[quality]
+    const result = await createThumbnail(imagePath, {
+      width: config.width,
+      height: config.height,
+      quality: config.quality
+    })
 
     if (!result || !result.buffer) {
       console.error('❌ Error: No se pudo generar el thumbnail', {
@@ -36,8 +40,8 @@ export async function generateThumbnail(
 
     return {
       buffer: result.buffer,
-      width: options.width || 0,
-      height: options.height || 0
+      width: config.width,
+      height: config.height
     }
   } catch (error) {
     console.error('❌ Error generando thumbnail:', {
@@ -46,29 +50,5 @@ export async function generateThumbnail(
       error: error instanceof Error ? error.message : error
     })
     return null
-  }
-}
-
-function getThumbnailOptions(quality: ThumbnailQuality) {
-  switch (quality) {
-    case 'low':
-      return {
-        width: 150,
-        height: 150,
-        quality: 60
-      }
-    case 'high':
-      return {
-        width: 400,
-        height: 400,
-        quality: 90
-      }
-    case 'mid':
-    default:
-      return {
-        width: 250,
-        height: 250,
-        quality: 80
-      }
   }
 }
