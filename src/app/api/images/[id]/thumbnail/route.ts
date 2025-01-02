@@ -206,7 +206,7 @@ export async function POST(
       return NextResponse.json({ success: true })
     } catch (error) {
       console.error('❌ Error generating thumbnail:', error)
-      
+
       // Registrar el error en la base de datos
       await prisma.image.update({
         where: { id },

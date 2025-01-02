@@ -131,7 +131,11 @@ model QueueJob {
   finishedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  priority    Int       @default(0) // Para priorizar trabajos
+  metadata    String? // Para datos adicionales flexibles
+  retryAt     DateTime? // Para reintentos programados
 
   @@index([queue, status])
   @@index([status, createdAt])
+  @@index([priority, status, createdAt]) // Optimizar consultas por prioridad
 }

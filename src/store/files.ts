@@ -31,6 +31,10 @@ interface FilesState {
   handleSelectFolder: (id: string) => Promise<void>
   handleSelectTag: (name: string) => void
   selectedItem: FileItem | null
+  currentCollectionId: string | null
+  currentTagId: string | null
+  loadAllImages: () => Promise<void>
+  loadFavorites: () => Promise<void>
 }
 
 export const useFilesStore = create<FilesState>()(
@@ -49,6 +53,8 @@ export const useFilesStore = create<FilesState>()(
       error: null,
       currentFolderId: null,
       selectedItem: null,
+      currentCollectionId: null,
+      currentTagId: null,
 
       initialize: async () => {
         try {
@@ -182,18 +188,17 @@ export const useFilesStore = create<FilesState>()(
 
       handleSelectCollection: async (id) => {
         try {
-          set({ isLoading: true, error: null });
+          set({ isLoading: true, error: null, currentCollectionId: id });
           const files = await getCollectionFiles(id);
           set({
-            currentView: 'collection',
             currentItems: files,
-            selectedIds: [],
+            currentView: 'collections',
             isLoading: false
           });
         } catch (error) {
           console.error('Error loading collection files:', error);
           set({
-            error: 'Error al cargar la colección',
+            error: 'Error al cargar archivos de la colección',
             isLoading: false
           });
         }
@@ -221,22 +226,59 @@ export const useFilesStore = create<FilesState>()(
 
       handleSelectTag: async (name) => {
         try {
-          set({ isLoading: true, error: null });
+          set({ isLoading: true, error: null, currentTagId: name });
           const files = await getTaggedFiles(name);
           set({
-            currentView: 'tag',
             currentItems: files,
-            selectedIds: [],
+            currentView: 'tags',
             isLoading: false
           });
         } catch (error) {
           console.error('Error loading tagged files:', error);
           set({
-            error: 'Error al cargar los archivos etiquetados',
+            error: 'Error al cargar archivos etiquetados',
             isLoading: false
           });
         }
-      }
+      },
+
+      loadAllImages: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          const files = await getFiles();
+          set({
+            currentItems: files,
+            currentView: 'all',
+            isLoading: false
+          });
+        } catch (error) {
+          console.error('Error loading all images:', error);
+          set({
+            error: 'Error al cargar todas las imágenes',
+            isLoading: false
+          });
+        }
+      },
+
+      loadFavorites: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await fetch('/api/favorites');
+          if (!response.ok) throw new Error('Error al cargar favoritos');
+          const files = await response.json();
+          set({
+            currentItems: files,
+            currentView: 'favorites',
+            isLoading: false
+          });
+        } catch (error) {
+          console.error('Error loading favorites:', error);
+          set({
+            error: 'Error al cargar favoritos',
+            isLoading: false
+          });
+        }
+      },
     }),
     {
       name: 'files-storage',

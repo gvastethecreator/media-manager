@@ -4,13 +4,13 @@ import * as React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { FileItem } from '@/store/files'
 import { formatFileSize } from "@/lib/utils"
-import { 
-  ImageOff, 
-  Info, 
-  Maximize2, 
-  Folder, 
-  Download, 
-  Copy, 
+import {
+  ImageOff,
+  Info,
+  Maximize2,
+  Folder,
+  Download,
+  Copy,
   BookmarkPlus,
   Heart,
   Tag as TagIcon,
@@ -42,10 +42,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useImageViewer } from "@/store/image-viewer"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-interface FileInfoProps {
+interface FileDetailsProps {
   selectedItem: FileItem | null
 }
 
@@ -58,7 +57,7 @@ interface InfoItemProps {
 
 const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
   if (!value) return null
-  
+
   const content = (
     <div className="flex items-center justify-between py-1.5">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -89,7 +88,7 @@ const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
   return content
 }
 
-export function FileInfo({ selectedItem }: FileInfoProps) {
+export function FileDetails({ selectedItem }: FileDetailsProps) {
   const [imageError, setImageError] = React.useState(false)
   const { openViewer } = useImageViewer()
 
@@ -139,7 +138,7 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
   }
 
   const metadata = selectedItem.metadata || {}
-  
+
   console.log('Selected Item:', selectedItem)
   console.log('Metadata:', metadata)
 
@@ -187,7 +186,7 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
         {/* Vista previa de imagen */}
         {(selectedItem.type === 'image' || selectedItem.mimeType?.startsWith('image/')) && (
           <div className="relative group">
-            <div 
+            <div
               className="aspect-square w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
               onClick={handleOpenViewer}
             >
@@ -301,23 +300,23 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
         {/* Información básica */}
         <Card>
           <CardContent className="pt-4 space-y-2">
-            <InfoItem 
+            <InfoItem
               icon={<FileText className="h-4 w-4" />}
               label="Nombre"
               value={selectedItem.name}
             />
-            <InfoItem 
+            <InfoItem
               icon={<ImageIcon className="h-4 w-4" />}
               label="Tipo"
               value={selectedItem.mimeType}
             />
-            <InfoItem 
+            <InfoItem
               icon={<HardDrive className="h-4 w-4" />}
               label="Tamaño"
               value={formatFileSize(fileSystem.size)}
             />
             {dimensions.width && dimensions.height && (
-              <InfoItem 
+              <InfoItem
                 icon={<Maximize2 className="h-4 w-4" />}
                 label="Dimensiones"
                 value={`${dimensions.width} × ${dimensions.height}`}
@@ -335,56 +334,56 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
                 <h3 className="font-medium">Información EXIF</h3>
               </div>
               {exif.Make && (
-                <InfoItem 
+                <InfoItem
                   icon={<Box className="h-4 w-4" />}
                   label="Fabricante"
                   value={exif.Make}
                 />
               )}
               {exif.Model && (
-                <InfoItem 
+                <InfoItem
                   icon={<Camera className="h-4 w-4" />}
                   label="Modelo"
                   value={exif.Model}
                 />
               )}
               {exif.Software && (
-                <InfoItem 
+                <InfoItem
                   icon={<Layers className="h-4 w-4" />}
                   label="Software"
                   value={exif.Software}
                 />
               )}
               {exif.DateTime && (
-                <InfoItem 
+                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
                   label="Fecha"
                   value={formatDate(exif.DateTime)}
                 />
               )}
               {exif.ExposureTime && (
-                <InfoItem 
+                <InfoItem
                   icon={<Timer className="h-4 w-4" />}
                   label="Tiempo de exposición"
                   value={`${exif.ExposureTime}s`}
                 />
               )}
               {exif.FNumber && (
-                <InfoItem 
+                <InfoItem
                   icon={<Aperture className="h-4 w-4" />}
                   label="Apertura"
                   value={`f/${exif.FNumber}`}
                 />
               )}
               {exif.ISO && (
-                <InfoItem 
+                <InfoItem
                   icon={<Scale className="h-4 w-4" />}
                   label="ISO"
                   value={exif.ISO}
                 />
               )}
               {exif.FocalLength && (
-                <InfoItem 
+                <InfoItem
                   icon={<Focus className="h-4 w-4" />}
                   label="Distancia focal"
                   value={`${exif.FocalLength}mm`}
@@ -403,49 +402,49 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
                 <h3 className="font-medium">Información de generación</h3>
               </div>
               {generation.prompt && (
-                <InfoItem 
+                <InfoItem
                   icon={<MessageSquare className="h-4 w-4" />}
                   label="Prompt"
                   value={generation.prompt}
                 />
               )}
               {generation.negative_prompt && (
-                <InfoItem 
+                <InfoItem
                   icon={<MessageSquareOff className="h-4 w-4" />}
                   label="Prompt negativo"
                   value={generation.negative_prompt}
                 />
               )}
               {generation.model && (
-                <InfoItem 
+                <InfoItem
                   icon={<Box className="h-4 w-4" />}
                   label="Modelo"
                   value={generation.model}
                 />
               )}
               {generation.steps && (
-                <InfoItem 
+                <InfoItem
                   icon={<GitBranch className="h-4 w-4" />}
                   label="Pasos"
                   value={generation.steps}
                 />
               )}
               {generation.cfg_scale && (
-                <InfoItem 
+                <InfoItem
                   icon={<Scale className="h-4 w-4" />}
                   label="Escala CFG"
                   value={generation.cfg_scale}
                 />
               )}
               {generation.seed && (
-                <InfoItem 
+                <InfoItem
                   icon={<Dice5 className="h-4 w-4" />}
                   label="Semilla"
                   value={generation.seed}
                 />
               )}
               {generation.sampler && (
-                <InfoItem 
+                <InfoItem
                   icon={<Gauge className="h-4 w-4" />}
                   label="Sampler"
                   value={generation.sampler}
@@ -462,17 +461,17 @@ export function FileInfo({ selectedItem }: FileInfoProps) {
               <HardDrive className="h-4 w-4" />
               <h3 className="font-medium">Información del sistema</h3>
             </div>
-            <InfoItem 
+            <InfoItem
               icon={<Calendar className="h-4 w-4" />}
               label="Creado"
               value={formatDate(fileSystem.created)}
             />
-            <InfoItem 
+            <InfoItem
               icon={<Clock className="h-4 w-4" />}
               label="Modificado"
               value={formatDate(fileSystem.modified)}
             />
-            <InfoItem 
+            <InfoItem
               icon={<Clock className="h-4 w-4" />}
               label="Último acceso"
               value={formatDate(fileSystem.accessed)}
