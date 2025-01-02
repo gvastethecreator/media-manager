@@ -69,7 +69,7 @@ export function SettingsView() {
                     <FolderIcon className="h-4 w-4" />
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>Carpetas</TooltipContent>
+                <TooltipContent>Carpetas y Miniaturas</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -78,16 +78,19 @@ export function SettingsView() {
                     <BookmarkIcon className="h-4 w-4" />
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>Colecciones</TooltipContent>
+                <TooltipContent>Colecciones y Tags</TooltipContent>
               </Tooltip>
+
+
+
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="tags">
-                    <TagIcon className="h-4 w-4" />
+                  <TabsTrigger value="system">
+                    <DatabaseIcon className="h-4 w-4" />
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>Etiquetas</TooltipContent>
+                <TooltipContent>Perfiles y Sistema</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -96,63 +99,27 @@ export function SettingsView() {
                     <KeyboardIcon className="h-4 w-4" />
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent>Atajos</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="thumbnails">
-                    <ImageIcon className="h-4 w-4" />
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Miniaturas</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="profiles">
-                    <UserIcon className="h-4 w-4" />
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Perfiles</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="system">
-                    <DatabaseIcon className="h-4 w-4" />
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Sistema</TooltipContent>
+                <TooltipContent>Atajos y Ayuda</TooltipContent>
               </Tooltip>
             </TabsList>
 
             <TabsContent value="folders">
-              <FoldersSection/>
+              <FoldersSection />
+              <ThumbnailsSection />
             </TabsContent>
 
             <TabsContent value="collections">
               <CollectionsSection />
+              <TagsSection />
             </TabsContent>
 
-            <TabsContent value="tags">
-              <TagsSection />
+            <TabsContent value="system">
+              <ProfilesSection />
+              <SystemSection />
             </TabsContent>
 
             <TabsContent value="shortcuts">
               <ShortcutsSection />
-            </TabsContent>
-
-            <TabsContent value="thumbnails">
-              <ThumbnailsSection />
-            </TabsContent>
-
-            <TabsContent value="profiles">
-              <ProfilesSection />
-            </TabsContent>
-
-            <TabsContent value="system">
-              <SystemSection />
             </TabsContent>
           </Tabs>
         </div>
