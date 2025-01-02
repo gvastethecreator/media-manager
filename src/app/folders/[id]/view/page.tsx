@@ -1,6 +1,6 @@
 'use client';
 
-import { FilesView } from '@/components/features/views/files/files-view';
+import { FilesView } from '@/components/views/files/files-view';
 
 interface FolderViewPageProps {
   params: {

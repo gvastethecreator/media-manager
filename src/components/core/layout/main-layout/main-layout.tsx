@@ -2,15 +2,15 @@
 
 import { useNavigationStore } from '@/store/navigation'
 import { useFilesStore } from '@/store/files'
-import { DashboardView } from '@/components/features/views/dashboard/dashboard-view'
-import { AllImagesView } from '@/components/features/views/all-images/all-images-view'
-import { FavoritesView } from '@/components/features/views/favorites/favorites-view'
-import { FilesView } from '@/components/features/views/files/files-view'
-import { CollectionsView } from '@/components/features/views/collections/collections-view'
-import { TagsView } from '@/components/features/views/tags/tags-view'
-import { LeftPanel } from '@/components/features/navigation/left-panel'
+import { DashboardView } from '@/components/views/dashboard/dashboard-view'
+import { AllImagesView } from '@/components/views/all-images/all-images-view'
+import { FavoritesView } from '@/components/views/favorites/favorites-view'
+import { FilesView } from '@/components/views/files/files-view'
+import { CollectionsView } from '@/components/views/collections/collections-view'
+import { TagsView } from '@/components/views/tags/tags-view'
+import { LeftPanel } from '@/components/layout/left-panel/left-panel'
 import { RightPanel } from '@/components/features/file-management/file-details/right-panel'
-import { MainContent } from '@/components/core/layout/main-content/main-content'
+import { MainContent } from '@/components/layout/main-content/main-content'
 import { useUIStore } from '@/store/ui'
 
 export function MainLayout() {

@@ -7,6 +7,10 @@ export async function getFiles(path?: string): Promise<FileItem[]> {
       path: path ? {
         startsWith: path
       } : undefined
+    },
+    include: {
+      tags: true,
+      collections: true
     }
   })
 
@@ -14,15 +18,15 @@ export async function getFiles(path?: string): Promise<FileItem[]> {
 }
 
 export async function getFilesByFolder(folderId: string): Promise<FileItem[]> {
-  console.log('Obteniendo archivos de la carpeta:', folderId)
-
   const files = await prisma.image.findMany({
     where: {
       folderId
+    },
+    include: {
+      tags: true,
+      collections: true
     }
   })
-
-  console.log('✅ Datos recibidos:', { count: files.length, sample: files.slice(0, 2) })
 
   return files.map(mapImageToFileItem)
 }
@@ -35,6 +39,10 @@ export async function getCollectionFiles(collectionId: string): Promise<FileItem
           id: collectionId
         }
       }
+    },
+    include: {
+      tags: true,
+      collections: true
     }
   })
 
@@ -49,6 +57,24 @@ export async function getTaggedFiles(tag: string): Promise<FileItem[]> {
           name: tag
         }
       }
+    },
+    include: {
+      tags: true,
+      collections: true
+    }
+  })
+
+  return files.map(mapImageToFileItem)
+}
+
+export async function getFavorites(): Promise<FileItem[]> {
+  const files = await prisma.image.findMany({
+    where: {
+      isFavorite: true
+    },
+    include: {
+      tags: true,
+      collections: true
     }
   })
 
@@ -64,6 +90,7 @@ function mapImageToFileItem(image: any): FileItem {
     path: image.path,
     url: `/api/images/${image.id}`,
     thumbnailUrl: `/api/thumbnails/${image.id}`,
+    isFavorite: image.isFavorite || false,
     metadata: {
       dimensions: {
         width: image.width,
@@ -72,7 +99,7 @@ function mapImageToFileItem(image: any): FileItem {
       orientation: image.width > image.height ? 'landscape' : 'portrait',
       created: image.createdAt,
       modified: image.updatedAt,
-      tags: image.tags || []
+      tags: image.tags?.map(t => t.name) || []
     },
     gridInfo: {
       rowSpan: image.height > image.width * 1.5 ? 2 : 1,
