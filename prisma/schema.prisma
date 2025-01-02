@@ -27,57 +27,58 @@ model Folder {
 
 model Image {
   id              String       @id @default(cuid())
+  hash            String
   name            String
-  path            String       @unique
+  path            String
   size            Int
-  width           Int         @default(0)
-  height          Int         @default(0)
-  hash            String       @unique
-  metadata        String?      // JSON string for metadata
-  thumbnail       Bytes?      // Binary thumbnail data
-  thumbnailSize   Int?        // size of the thumbnail in bytes
+  width           Int
+  height          Int
+  metadata        String?
+  thumbnail       Bytes?
+  thumbnailSize   Int?
   thumbnailWidth  Int?
   thumbnailHeight Int?
+  thumbnailError  String?
   isPublic        Boolean      @default(false)
   folderId        String
   folder          Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  collections     Collection[] @relation("CollectionToImage")
-  tags            Tag[]        @relation("TagToImage")
-  favorites       Favorite[]
-  stats           ImageStats?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  collections     Collection[] @relation("ImageToCollection")
+  tags            Tag[]        @relation("ImageToTag")
+  favorites       Favorite[]
+  stats           ImageStats?
 
+  @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
   @@index([hash])
-  @@index([name])
 }
 
 model Tag {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  color       String    @default("#3b82f6")
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String   @default("#3b82f6")
   description String?
   shortcut    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  images      Image[]   @relation("TagToImage")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToTag")
 
   @@index([name])
 }
 
 model Collection {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  emoji       String    @default("🌟")
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("🌟")
   description String?
-  color       String    @default("#3b82f6")
+  color       String   @default("#3b82f6")
   shortcut    String?
-  sortBy      String    @default("name")
-  filters     String    @default("[]") // JSON string for filters
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  images      Image[]   @relation("CollectionToImage")
+  sortBy      String   @default("name")
+  filters     String   @default("[]") // JSON string for filters
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToCollection")
 
   @@index([name])
 }
@@ -105,26 +106,26 @@ model ImageStats {
 }
 
 model Profile {
-  id            String   @id @default(cuid())
-  name          String
-  emoji         String   @default("👤")
-  color         String   @default("#3b82f6")
-  theme         String   @default("system")
-  language      String   @default("es")
-  isActive      Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  emoji     String   @default("👤")
+  color     String   @default("#3b82f6")
+  theme     String   @default("system")
+  language  String   @default("es")
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Modelo para el sistema de colas
 model QueueJob {
   id          String    @id @default(cuid())
-  queue       String    // Nombre de la cola (ej: 'thumbnails')
-  data        String    // Datos del trabajo en JSON
+  queue       String // Nombre de la cola (ej: 'thumbnails')
+  data        String // Datos del trabajo en JSON
   status      String    @default("pending") // pending, active, completed, failed
   attempts    Int       @default(0)
   maxAttempts Int       @default(3)
-  error       String?   // Mensaje de error si falla
+  error       String? // Mensaje de error si falla
   progress    Int       @default(0)
   startedAt   DateTime?
   finishedAt  DateTime?

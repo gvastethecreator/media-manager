@@ -1,192 +1,330 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { computeHash } from '@/lib/server-utils'
-import { getImageMetadata } from '@/lib/image.server'
+import { fsService } from '@/services/fs.server'
+import path from 'path'
+import { getImageMetadata } from '@/lib/image'
+import { computeHash } from '@/lib/hash'
+import { generateThumbnail } from '@/lib/thumbnail'
+import { ThumbnailQuality } from '@/services/thumbnail.service'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
-type RouteParams = { params: { id: string } }
+interface ProgressEvent {
+  type: 'progress'
+  data: {
+    current: number
+    total: number
+    progress: number
+    currentFile: string
+    status: string
+  }
+}
 
-export async function POST(request: NextRequest, context: RouteParams) {
+interface ErrorEvent {
+  type: 'error'
+  data: {
+    file?: string
+    error: string
+  }
+}
+
+interface CompleteEvent {
+  type: 'complete'
+  data: {
+    folder: {
+      id: string
+      path: string
+      name: string
+      totalSize: number
+      _count: { images: number }
+      errors: number
+    }
+  }
+}
+
+type Event = ProgressEvent | ErrorEvent | CompleteEvent
+
+export async function POST(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  const stream = new TransformStream()
+  const writer = stream.writable.getWriter()
+  const encoder = new TextEncoder()
+
+  const writeEvent = async (event: Event) => {
+    try {
+      if (!event) {
+        console.error('❌ Error: Evento nulo')
+        return
+      }
+
+      if (typeof event !== 'object') {
+        console.error('❌ Error: Evento no es un objeto:', event)
+        return
+      }
+
+      if (!event.type || !event.data) {
+        console.error('❌ Error: Evento inválido:', event)
+        return
+      }
+
+      // Validar la estructura del evento según su tipo
+      let isValid = true
+      switch (event.type) {
+        case 'progress':
+          isValid = typeof event.data.progress === 'number' &&
+            typeof event.data.current === 'number' &&
+            typeof event.data.total === 'number' &&
+            typeof event.data.currentFile === 'string' &&
+            typeof event.data.status === 'string'
+          break
+
+        case 'error':
+          isValid = typeof event.data.error === 'string'
+          break
+
+        case 'complete':
+          isValid = event.data.folder &&
+            typeof event.data.folder.id === 'string' &&
+            typeof event.data.folder.path === 'string' &&
+            typeof event.data.folder.name === 'string' &&
+            typeof event.data.folder.totalSize === 'number' &&
+            typeof event.data.folder._count?.images === 'number' &&
+            typeof event.data.folder.errors === 'number'
+          break
+
+        default:
+          isValid = false
+      }
+
+      if (!isValid) {
+        console.error('❌ Error: Datos de evento inválidos:', {
+          type: event.type,
+          data: event.data
+        })
+        return
+      }
+
+      const data = encoder.encode(JSON.stringify(event) + '\n')
+      await writer.write(data)
+    } catch (error) {
+      console.error('❌ Error escribiendo evento:', {
+        error: error instanceof Error ? error.message : error,
+        event
+      })
+    }
+  }
+
   try {
-    // Verificar la conexión a la base de datos
-    await prisma.$connect()
+    const id = await Promise.resolve(context.params.id)
 
     // Obtener la carpeta
     const folder = await prisma.folder.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     })
 
     if (!folder) {
-      return NextResponse.json(
-        { error: 'Folder not found' },
-        { status: 404 }
-      )
+      throw new Error('Carpeta no encontrada')
     }
 
-    // Verificar si la carpeta existe en el sistema de archivos
-    try {
-      const stats = statSync(folder.path)
-      if (!stats.isDirectory()) {
-        return NextResponse.json(
-          { error: 'Path is not a directory' },
-          { status: 400 }
-        )
-      }
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Directory not found' },
-        { status: 404 }
-      )
+    // Validar que la carpeta existe en el sistema de archivos
+    const validation = await fsService.validatePath(folder.path)
+    if (!validation.valid) {
+      throw new Error(validation.error || 'La carpeta no es accesible')
     }
 
-    // Crear un TransformStream para enviar actualizaciones de progreso
-    const stream = new TransformStream()
-    const writer = stream.writable.getWriter()
-    const encoder = new TextEncoder()
+    // Obtener la configuración de la solicitud
+    const body = await request.json().catch(() => ({}))
+    const thumbnailQuality = (body?.thumbnailQuality || 'mid') as ThumbnailQuality
+    const generateThumbnails = body?.generateThumbnails !== false
 
-    // Iniciar el procesamiento en segundo plano
+    // Iniciar el proceso de reindexación
     const processPromise = (async () => {
       try {
         // Leer los archivos de la carpeta
-        const files = readdirSync(folder.path)
-          .map(file => {
-            const filePath = join(folder.path, file)
-            const stats = statSync(filePath)
-            return {
-              path: filePath,
-              name: file,
-              size: stats.size,
-              isDirectory: stats.isDirectory()
-            }
-          })
-          .filter(file => !file.isDirectory && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
+        const files = await fsService.listFiles(folder.path)
+        const imageFiles = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
 
-        console.log(' Reindexing images:', files.length)
+        console.log('Reindexing images:', imageFiles.length)
+
+        // Enviar evento inicial
+        const initialEvent: ProgressEvent = {
+          type: 'progress',
+          data: {
+            current: 0,
+            total: imageFiles.length,
+            progress: 0,
+            currentFile: '',
+            status: 'Iniciando reindexación...'
+          }
+        }
+        await writeEvent(initialEvent)
 
         let totalSize = 0
         let processedFiles = 0
+        let errors = 0
 
         // Procesar cada archivo
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
+        for (const file of imageFiles) {
           try {
-            // Enviar actualización de progreso
-            const progress = Math.round(((i + 1) / files.length) * 100)
-            await writer.write(encoder.encode(JSON.stringify({
+            // Enviar evento de progreso
+            const progressEvent: ProgressEvent = {
               type: 'progress',
               data: {
-                current: i + 1,
-                total: files.length,
-                progress,
-                currentFile: file.name
+                current: processedFiles + 1,
+                total: imageFiles.length,
+                progress: Math.round(((processedFiles + 1) / imageFiles.length) * 100),
+                currentFile: file.name,
+                status: 'Procesando archivo...'
               }
-            }) + '\n'))
+            }
+            await writeEvent(progressEvent)
 
-            // Verificar si la imagen ya existe
-            const existingImage = await prisma.image.findFirst({
-              where: {
-                OR: [
-                  { path: file.path },
-                  { name: file.name, folderId: folder.id }
-                ]
-              }
-            })
-
-            // Obtener metadata y generar hash
             const metadata = await getImageMetadata(file.path)
             const hash = await computeHash(file.path)
 
-            if (existingImage) {
-              // Actualizar imagen existente
-              await prisma.image.update({
-                where: { id: existingImage.id },
-                data: {
-                  size: file.size,
-                  hash,
-                  metadata: JSON.stringify(metadata),
-                  path: file.path,
-                  name: file.name
-                }
-              })
-            } else {
-              // Crear nueva imagen
-              await prisma.image.create({
-                data: {
-                  path: file.path,
-                  name: file.name,
-                  size: file.size,
-                  hash,
-                  metadata: JSON.stringify(metadata),
-                  folderId: folder.id,
-                  isPublic: false
-                }
-              })
+            let thumbnailData = null
+            if (generateThumbnails) {
+              thumbnailData = await generateThumbnail(file.path, thumbnailQuality)
             }
+
+            // Actualizar o crear la imagen en la base de datos
+            await prisma.image.upsert({
+              where: {
+                path_folderId: {
+                  path: file.path,
+                  folderId: folder.id
+                }
+              },
+              update: {
+                hash,
+                size: file.size,
+                width: metadata.width,
+                height: metadata.height,
+                thumbnail: thumbnailData?.buffer || null,
+                thumbnailWidth: thumbnailData?.width || null,
+                thumbnailHeight: thumbnailData?.height || null,
+                thumbnailSize: thumbnailData?.buffer?.length || null,
+                updatedAt: new Date()
+              },
+              create: {
+                hash,
+                name: file.name,
+                path: file.path,
+                size: file.size,
+                width: metadata.width,
+                height: metadata.height,
+                thumbnail: thumbnailData?.buffer || null,
+                thumbnailWidth: thumbnailData?.width || null,
+                thumbnailHeight: thumbnailData?.height || null,
+                thumbnailSize: thumbnailData?.buffer?.length || null,
+                folderId: folder.id
+              }
+            })
 
             totalSize += file.size
             processedFiles++
 
-            console.log(' Processed:', file.name)
+            // Pequeña pausa para evitar sobrecarga
+            await new Promise(resolve => setTimeout(resolve, 50))
+
           } catch (error) {
-            console.error(' Error processing file:', file.name, error)
-            // Enviar error pero continuar con el siguiente archivo
-            await writer.write(encoder.encode(JSON.stringify({
+            errors++
+            console.error('Error procesando archivo:', {
+              file: file.path,
+              error: error instanceof Error ? error.message : error
+            })
+
+            const errorEvent: ErrorEvent = {
               type: 'error',
               data: {
                 file: file.name,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error
+                  ? error.message
+                  : typeof error === 'string'
+                    ? error
+                    : 'Error desconocido procesando archivo'
               }
-            }) + '\n'))
+            }
+
+            try {
+              await writeEvent(errorEvent)
+            } catch (writeError) {
+              console.error('Error escribiendo evento:', {
+                originalError: error,
+                writeError
+              })
+            }
+
+            // Continuar con el siguiente archivo
+            continue
           }
         }
 
         // Actualizar estadísticas de la carpeta
-        await prisma.folder.update({
+        const updatedFolder = await prisma.folder.update({
           where: { id: folder.id },
           data: {
-            totalFiles: processedFiles,
             totalSize,
             lastIndexed: new Date()
+          },
+          include: {
+            _count: {
+              select: { images: true }
+            }
           }
         })
 
-        // Enviar mensaje de finalización
-        await writer.write(encoder.encode(JSON.stringify({
+        // Enviar evento de completado
+        const completeEvent: CompleteEvent = {
           type: 'complete',
-          data: { folder }
-        }) + '\n'))
+          data: {
+            folder: {
+              id: updatedFolder.id,
+              path: updatedFolder.path,
+              name: path.basename(updatedFolder.path),
+              totalSize: updatedFolder.totalSize,
+              _count: { images: updatedFolder._count.images },
+              errors
+            }
+          }
+        }
+        await writeEvent(completeEvent)
 
       } catch (error) {
-        console.error('Error reindexing folder:', error)
-        await writer.write(encoder.encode(JSON.stringify({
+        console.error('Error reindexando carpeta:', {
+          folder: folder.path,
+          error: error instanceof Error ? error.message : error
+        })
+
+        const errorEvent: ErrorEvent = {
           type: 'error',
           data: {
-            file: 'folder',
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error
+              ? error.message
+              : 'Error reindexando carpeta'
           }
-        }) + '\n'))
+        }
+        await writeEvent(errorEvent)
       } finally {
         await writer.close()
       }
     })()
 
-    // Iniciar el procesamiento y devolver el stream
-    processPromise.catch(console.error)
     return new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+        'Connection': 'keep-alive'
+      }
     })
 
   } catch (error) {
-    console.error('Error in POST /api/folders/reindex:', error)
+    console.error('Error initializing reindex:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
       { status: 500 }
     )
   }

@@ -8,35 +8,52 @@ import sharp from 'sharp'
 export interface ImageMetadata {
   width: number
   height: number
-  format: string
-  space: string
-  channels: number
-  depth: string
-  density: number
-  isProgressive: boolean
-  hasProfile: boolean
-  hasAlpha: boolean
+  format: string | null
+  space: string | null
+  channels: number | null
+  depth: string | null
+  density: number | null
+  hasAlpha: boolean | null
+  orientation: number | null
 }
 
-export async function getImageMetadata(path: string): Promise<ImageMetadata> {
+export async function getImageMetadata(filePath: string): Promise<ImageMetadata> {
   try {
-    const metadata = await sharp(path).metadata()
-    
-    return {
+    console.log('📸 Getting metadata for:', filePath)
+    const metadata = await sharp(filePath).metadata()
+
+    const result = {
       width: metadata.width || 0,
       height: metadata.height || 0,
-      format: metadata.format || '',
-      space: metadata.space || '',
-      channels: metadata.channels || 0,
-      depth: metadata.depth || '',
-      density: metadata.density || 0,
-      isProgressive: metadata.isProgressive || false,
-      hasProfile: metadata.hasProfile || false,
-      hasAlpha: metadata.hasAlpha || false
+      format: metadata.format || null,
+      space: metadata.space || null,
+      channels: metadata.channels || null,
+      depth: metadata.depth || null,
+      density: metadata.density || null,
+      hasAlpha: metadata.hasAlpha || null,
+      orientation: metadata.orientation || null
     }
+
+    console.log('✅ Metadata obtained:', result)
+    return result
   } catch (error) {
-    console.error('Error getting image metadata:', error)
-    throw error
+    console.error('❌ Error getting image metadata:', {
+      path: filePath,
+      error: error instanceof Error ? error.message : error
+    })
+
+    // Devolver valores por defecto en caso de error
+    return {
+      width: 0,
+      height: 0,
+      format: null,
+      space: null,
+      channels: null,
+      depth: null,
+      density: null,
+      hasAlpha: null,
+      orientation: null
+    }
   }
 }
 
@@ -52,21 +69,36 @@ export async function createThumbnail(path: string, options: {
   } = options
 
   try {
+    console.log('🖼️ Creating thumbnail for:', path)
+    console.log('⚙️ Using options:', { width, height, quality })
+
     const imageBuffer = await sharp(path)
       .resize(width, height, {
         fit: 'cover',
-        position: 'centre'
+        position: 'centre',
+        withoutEnlargement: true
       })
       .webp({ quality })
       .toBuffer()
 
-    return {
+    const result = {
       buffer: imageBuffer,
       size: imageBuffer.length,
       format: 'webp'
     }
+
+    console.log('✅ Thumbnail created:', {
+      size: result.size,
+      format: result.format
+    })
+
+    return result
   } catch (error) {
-    console.error('Error creating thumbnail:', error)
+    console.error('❌ Error creating thumbnail:', {
+      path,
+      error: error instanceof Error ? error.message : error,
+      options
+    })
     throw error
   }
 }
