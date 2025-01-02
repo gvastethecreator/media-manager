@@ -55,7 +55,7 @@ const categories = [
 ];
 
 export function LeftPanel() {
-	const { stats } = useStatsStore();
+	const { stats, initialize: initializeStats } = useStatsStore();
 	const { currentView, setCurrentView } = useNavigationStore();
 	const {
 		collections,
@@ -71,8 +71,13 @@ export function LeftPanel() {
 	const { theme, setTheme } = useTheme();
 
 	useEffect(() => {
-		initialize();
-	}, [initialize]);
+		Promise.all([
+			initialize(),
+			initializeStats()
+		]).catch(error => {
+			console.error('Error initializing:', error);
+		});
+	}, [initialize, initializeStats]);
 
 	const handleThemeToggle = useCallback(() => {
 		setTheme(theme === "light" ? "dark" : "light");
@@ -213,8 +218,8 @@ export function LeftPanel() {
 											<Button
 												key={folder.id}
 												variant="ghost"
-													className="w-full justify-start h-6 text-xs px-2 rounded-none"
-													onClick={() => handleFolderClick(folder.id)}>
+												className="w-full justify-start h-6 text-xs px-2 rounded-none"
+												onClick={() => handleFolderClick(folder.id)}>
 												<FolderIcon
 													className="h-2 w-2"
 												/>
