@@ -1,191 +1,179 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import path from 'path'
-import { getImageMetadata } from '@/lib/image'
+import { getImageMetadata, generateThumbnail } from '@/lib/image'
+import { writeStreamEvent } from '@/lib/stream'
 import { computeHash } from '@/lib/hash'
-import { generateThumbnail } from '@/lib/thumbnail'
-import { fsService } from '@/services/fs.server'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
-import { readdirSync, statSync } from 'node:fs'
-import { join, extname } from 'node:path'
-import sharp from 'sharp'
+import { existsSync } from 'fs'
+import { readdir, stat } from 'fs/promises'
+import { join, extname } from 'path'
 
-export const dynamic = 'force-dynamic'
-export const maxDuration = 300 // 5 minutes
+const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
 
 export async function POST(request: NextRequest) {
+  const stream = new TransformStream()
+  const writer = stream.writable.getWriter()
+
   try {
-    const { path: folderPath, thumbnailQuality = 'mid', generateThumbnails = true } = await request.json()
+    const { path, thumbnailQuality = 'mid', generateThumbnails = true } = await request.json()
 
-    if (!folderPath) {
-      return NextResponse.json({ error: 'Se requiere una ruta de carpeta' }, { status: 400 })
+    if (!path || !existsSync(path)) {
+      throw new Error('La ruta especificada no existe')
     }
 
-    // Validar la ruta de la carpeta
-    const validation = await fsService.validatePath(folderPath)
-    if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 400 })
-    }
-
-    // Configurar el stream de respuesta
-    const stream = new TransformStream()
-    const writer = stream.writable.getWriter()
-    const encoder = new TextEncoder()
-
-    const writeEvent = async (payload: { type: string; data: any }) => {
-      if (!payload || typeof payload !== 'object') {
-        console.error('Invalid payload:', payload)
-        return
+    // Crear carpeta en la base de datos
+    const folder = await prisma.folder.create({
+      data: {
+        path,
+        name: path.split('\\').pop() || path,
+        lastIndexed: new Date()
       }
+    })
 
-      try {
-        await writer.write(encoder.encode(JSON.stringify(payload) + '\n'))
-      } catch (error) {
-        console.error('Error writing event:', error)
-      }
-    }
+    // Función recursiva para procesar archivos
+    async function processDirectory(dirPath: string): Promise<void> {
+      const files = await readdir(dirPath)
+      let processed = 0
+      const total = files.length
 
-    // Iniciar el procesamiento en segundo plano
-    const processPromise = (async () => {
-      try {
-        // Crear la carpeta en la base de datos
-        const folder = await prisma.folder.create({
-          data: {
-            path: folderPath,
-            name: path.basename(folderPath),
+      for (const file of files) {
+        try {
+          const filePath = join(dirPath, file)
+          const stats = await stat(filePath)
+
+          if (stats.isDirectory()) {
+            await processDirectory(filePath)
+            continue
           }
-        })
 
-        // Leer los archivos de la carpeta
-        const files = await fsService.listFiles(folderPath)
-        const imageFiles = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
-
-        console.log('📸 Processing images:', imageFiles.length)
-
-        // Enviar evento inicial
-        await writeEvent({
-          type: 'progress',
-          data: {
-            current: 0,
-            total: imageFiles.length,
-            progress: 0,
-            currentFile: '',
-            status: 'Iniciando procesamiento...'
+          const ext = extname(file).toLowerCase()
+          if (!SUPPORTED_FORMATS.includes(ext)) {
+            continue
           }
-        })
 
-        let totalSize = 0
-        let processedFiles = 0
+          processed++
+          const progress = Math.round((processed / total) * 100)
 
-        // Procesar cada archivo
-        for (const file of imageFiles) {
-          try {
-            // Enviar evento de progreso
-            await writeEvent({
-              type: 'progress',
-              data: {
-                current: processedFiles + 1,
-                total: imageFiles.length,
-                progress: Math.round(((processedFiles + 1) / imageFiles.length) * 100),
-                currentFile: file.name,
-                status: 'Procesando archivo...'
+          await writeStreamEvent(writer, 'progress', {
+            current: processed,
+            total,
+            progress,
+            currentFile: filePath,
+            status: 'Procesando archivo...'
+          })
+
+          // Obtener metadata y hash
+          const metadata = await getImageMetadata(filePath)
+          const hash = await computeHash(filePath)
+
+          // Generar thumbnail si está habilitado
+          let thumbnailData = null
+          if (generateThumbnails) {
+            try {
+              const result = await generateThumbnail(filePath, thumbnailQuality)
+              if (result) {
+                thumbnailData = {
+                  data: result.data,
+                  size: result.size,
+                  width: result.width,
+                  height: result.height
+                }
               }
-            })
-
-            const metadata = await getImageMetadata(file.path)
-            const hash = await computeHash(file.path)
-
-            let thumbnailData = null
-            if (generateThumbnails) {
-              thumbnailData = await generateThumbnail(file.path, thumbnailQuality)
+            } catch (error) {
+              console.error('Error generando thumbnail:', error)
+              await writeStreamEvent(writer, 'error', {
+                file: filePath,
+                error: 'Error generando miniatura'
+              })
             }
-
-            // Crear entrada en la base de datos
-            await prisma.image.create({
-              data: {
-                hash,
-                name: file.name,
-                path: file.path,
-                size: file.size,
-                width: metadata.width || 0,
-                height: metadata.height || 0,
-                thumbnail: thumbnailData?.buffer || null,
-                thumbnailWidth: thumbnailData?.width || 0,
-                thumbnailHeight: thumbnailData?.height || 0,
-                folderId: folder.id,
-              }
-            })
-
-            totalSize += file.size
-            processedFiles++
-
-            // Pequeña pausa para evitar sobrecarga
-            await new Promise(resolve => setTimeout(resolve, 50))
-
-          } catch (error) {
-            console.error('Error processing file:', file.path, error)
-            await writeEvent({
-              type: 'error',
-              data: {
-                file: file.name,
-                error: error instanceof Error ? error.message : 'Error procesando archivo'
-              }
-            })
           }
+
+          // Crear entrada en la base de datos
+          await prisma.image.create({
+            data: {
+              path: filePath,
+              name: file,
+              size: stats.size,
+              hash,
+              width: metadata.width,
+              height: metadata.height,
+              format: metadata.format || undefined,
+              thumbnail: thumbnailData?.data,
+              thumbnailSize: thumbnailData?.size,
+              thumbnailWidth: thumbnailData?.width,
+              thumbnailHeight: thumbnailData?.height,
+              thumbnailQuality,
+              folderId: folder.id,
+              createdAt: stats.birthtime,
+              modifiedAt: stats.mtime
+            }
+          })
+
+        } catch (error) {
+          console.error('Error procesando archivo:', error)
+          await writeStreamEvent(writer, 'error', {
+            file: file,
+            error: error instanceof Error ? error.message : 'Error desconocido'
+          })
         }
-
-        // Actualizar estadísticas de la carpeta
-        await prisma.folder.update({
-          where: { id: folder.id },
-          data: {
-            totalSize,
-            lastIndexed: new Date()
-          }
-        })
-
-        // Enviar evento de completado
-        await writeEvent({
-          type: 'complete',
-          data: {
-            folder: {
-              id: folder.id,
-              path: folderPath,
-              name: path.basename(folderPath),
-              totalSize,
-              _count: { images: processedFiles }
-            }
-          }
-        })
-
-      } catch (error) {
-        console.error('Error processing folder:', error)
-        await writeEvent({
-          type: 'error',
-          data: {
-            error: error instanceof Error ? error.message : 'Error procesando carpeta'
-          }
-        })
-      } finally {
-        await writer.close()
       }
-    })()
+    }
 
-    // Iniciar el procesamiento y devolver el stream
-    processPromise.catch(console.error)
+    // Iniciar procesamiento
+    await processDirectory(path)
+
+    // Actualizar estadísticas de la carpeta
+    const stats = await prisma.image.aggregate({
+      where: { folderId: folder.id },
+      _sum: { size: true },
+      _count: true
+    })
+
+    await prisma.folder.update({
+      where: { id: folder.id },
+      data: {
+        totalSize: stats._sum.size || 0,
+        lastIndexed: new Date()
+      }
+    })
+
+    // Enviar evento de completado
+    await writeStreamEvent(writer, 'complete', {
+      folder: {
+        id: folder.id,
+        path: folder.path,
+        totalFiles: stats._count,
+        totalSize: stats._sum.size || 0
+      }
+    })
+
+    await writer.close()
     return new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+        'Connection': 'keep-alive'
+      }
     })
 
   } catch (error) {
-    console.error('Error in POST handler:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
-      { status: 500 }
-    )
+    console.error('Error procesando carpeta:', error)
+
+    try {
+      await writeStreamEvent(writer, 'error', {
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      })
+    } catch (streamError) {
+      console.error('Error escribiendo en stream:', streamError)
+    }
+
+    await writer.close()
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
   }
 }
 

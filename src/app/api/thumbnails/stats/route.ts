@@ -1,59 +1,77 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Verificar directorio de miniaturas
-    const thumbnailDir = path.join(process.cwd(), 'thumbnails')
-    try {
-      await fs.access(thumbnailDir)
-    } catch {
-      await fs.mkdir(thumbnailDir, { recursive: true })
-    }
-
-    // Obtener estadísticas
-    const [imagesWithThumbnails, imagesWithoutThumbnails] = await Promise.all([
+    // Obtener estadísticas principales
+    const [
+      totalImages,
+      totalWithThumbnail,
+      totalWithError,
+      totalSize,
+      recentlyProcessed,
+      errors
+    ] = await Promise.all([
+      prisma.image.count(),
       prisma.image.count({
         where: { thumbnail: { not: null } }
       }),
       prisma.image.count({
-        where: { thumbnail: null }
+        where: { thumbnailError: { not: null } }
+      }),
+      prisma.image.aggregate({
+        _sum: { thumbnailSize: true }
+      }),
+      prisma.image.findMany({
+        where: {
+          thumbnail: { not: null },
+          thumbnailError: null
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          path: true,
+          updatedAt: true
+        }
+      }),
+      prisma.image.findMany({
+        where: { thumbnailError: { not: null } },
+        orderBy: { thumbnailErrorAt: 'desc' },
+        take: 50,
+        select: {
+          id: true,
+          path: true,
+          thumbnailError: true,
+          thumbnailErrorAt: true
+        }
       })
     ])
 
-    // Obtener errores recientes (últimas 24 horas)
-    const recentErrors = await prisma.image.findMany({
-      where: {
-        thumbnailError: { not: null },
-        updatedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-      },
-      select: {
-        id: true,
-        path: true,
-        thumbnailError: true,
-        updatedAt: true
-      }
-    })
-
-    const stats = {
-      total: imagesWithThumbnails + imagesWithoutThumbnails,
-      totalSize: 0, // TODO: Implementar cálculo de tamaño total
-      pending: imagesWithoutThumbnails,
-      errors: recentErrors.map(error => ({
-        imageId: error.id,
-        imagePath: error.path,
-        error: error.thumbnailError || 'Error desconocido',
-        timestamp: error.updatedAt
+    return NextResponse.json({
+      total: totalImages,
+      withThumbnail: totalWithThumbnail,
+      pending: totalImages - totalWithThumbnail - totalWithError,
+      totalSize: totalSize._sum.thumbnailSize || 0,
+      recentlyProcessed: recentlyProcessed.map(img => ({
+        id: img.id,
+        path: img.path,
+        processedAt: img.updatedAt
+      })),
+      errors: errors.map(err => ({
+        imageId: err.id,
+        imagePath: err.path,
+        error: err.thumbnailError || 'Error desconocido',
+        timestamp: err.thumbnailErrorAt || new Date()
       }))
-    }
-
-    return NextResponse.json(stats)
+    })
   } catch (error) {
-    console.error('Error al obtener estadísticas de miniaturas:', error)
+    console.error('Error obteniendo estadísticas:', error)
     return NextResponse.json(
-      { error: 'Error al obtener estadísticas de miniaturas' },
+      {
+        error: 'Error al obtener estadísticas',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
       { status: 500 }
     )
   }

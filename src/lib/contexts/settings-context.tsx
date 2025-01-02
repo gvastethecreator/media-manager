@@ -15,7 +15,7 @@ const defaultSettings: Settings = {
   theme: 'system',
   language: 'es',
   notifications: true,
-  thumbnailQuality: 'medium',
+  thumbnailQuality: 'mid',
   autoBackup: false,
   compressUploads: true,
   defaultView: 'grid',
