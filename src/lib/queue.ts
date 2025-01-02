@@ -10,6 +10,8 @@ interface JobData {
 interface QueueOptions {
   maxConcurrent?: number
   pollInterval?: number
+  maxRetries?: number
+  retryDelay?: number
 }
 
 class JobQueue extends EventEmitter {
@@ -26,7 +28,7 @@ class JobQueue extends EventEmitter {
     this.maxConcurrent = options.maxConcurrent || 2
     this.pollInterval = options.pollInterval || 1000
     this.isProcessing = false
-    this.processor = async () => {}
+    this.processor = async () => { }
   }
 
   async add(data: JobData) {
@@ -36,7 +38,7 @@ class JobQueue extends EventEmitter {
         data: JSON.stringify(data),
       }
     })
-    
+
     this.emit('added', job)
     return job
   }
@@ -104,7 +106,7 @@ class JobQueue extends EventEmitter {
       this.emit('completed', job)
     } catch (error) {
       console.error(`Error processing job ${job.id}:`, error)
-      
+
       // Marcar como fallido si excede los intentos
       if (job.attempts >= job.maxAttempts - 1) {
         await prisma.queueJob.update({
@@ -153,23 +155,41 @@ class JobQueue extends EventEmitter {
 // Crear la cola de thumbnails
 export const thumbnailQueue = new JobQueue('thumbnails', {
   maxConcurrent: 2,
-  pollInterval: 1000
+  pollInterval: 1000,
+  maxRetries: 3,
+  retryDelay: 5000
 })
 
 // Configurar el procesador
 thumbnailQueue.process(async (data: JobData) => {
   const { imageId, quality, force } = data
 
-  const response = await fetch(`/api/images/${imageId}/thumbnail/generate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ quality, force }),
-  })
+  try {
+    console.log('🔄 Procesando thumbnail:', { imageId, quality, force })
 
-  if (!response.ok) {
-    throw new Error('Error generating thumbnail')
+    const response = await fetch(`/api/images/${imageId}/thumbnail/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ quality, force }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || 'Error generating thumbnail')
+    }
+
+    const result = await response.json()
+    console.log('✅ Thumbnail procesado:', result)
+    return result
+  } catch (error) {
+    console.error('❌ Error en cola de thumbnails:', {
+      imageId,
+      quality,
+      error: error instanceof Error ? error.message : error
+    })
+    throw error // Permitir reintento
   }
 })
 

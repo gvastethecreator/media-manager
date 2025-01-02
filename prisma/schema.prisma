@@ -40,6 +40,7 @@ model Image {
   thumbnailHeight Int?
   thumbnailError  String?
   isPublic        Boolean      @default(false)
+  isFavorite      Boolean      @default(false)
   folderId        String
   folder          Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt       DateTime     @default(now())

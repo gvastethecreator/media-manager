@@ -6,21 +6,21 @@ import { motion, usePresence } from 'framer-motion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { FileItem } from '@/types/file-item'
 import type { ThumbnailSize } from '@/types/ui'
-import { FileCard } from './file-item'
+import { FileCard } from './file-card'
 import { Loader2 } from 'lucide-react'
 import { useWindowSize } from '@/hooks/use-window-size'
 import { cn } from '@/lib/utils'
 import { useInView } from 'react-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
 
-interface VirtualizedViewProps {
+interface FileGridProps {
   items: FileItem[]
-  viewMode: 'grid' | 'list'
-  thumbnailSize: ThumbnailSize
-  selectedItem: FileItem | null
-  selectedIds: string[]
-  onItemClick: (item: FileItem) => void
-  onItemDoubleClick: (item: FileItem) => void
+  viewMode?: 'grid' | 'list'
+  thumbnailSize?: ThumbnailSize
+  selectedItem?: FileItem | null
+  selectedIds?: string[]
+  onItemClick?: (item: FileItem) => void
+  onItemDoubleClick?: (item: FileItem) => void
   isResizing?: boolean
   hasMore?: boolean
   isLoading?: boolean
@@ -32,19 +32,19 @@ const GAP = 15
 const CONTAINER_PADDING = 15
 const MIN_COLUMN_WIDTH = 280
 
-export function VirtualizedView({
-  items,
-  viewMode,
-  thumbnailSize,
-  selectedItem,
-  selectedIds,
+export function FileGrid({
+  items = [],
+  viewMode = 'grid',
+  thumbnailSize = 'medium',
+  selectedItem = null,
+  selectedIds = [],
   onItemClick,
   onItemDoubleClick,
-  isResizing,
-  hasMore,
-  isLoading,
+  isResizing = false,
+  hasMore = false,
+  isLoading = false,
   onLoadMore
-}: VirtualizedViewProps) {
+}: FileGridProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const [isPresent] = usePresence()
   const { width: windowWidth } = useWindowSize()
@@ -217,7 +217,6 @@ export function VirtualizedView({
           >
             {virtualizer.getVirtualItems().map(virtualRow => {
               const rowItems = getItemsForRow(virtualRow.index)
-              const rowStartIndex = virtualRow.index * columnCount
 
               return (
                 <div
@@ -239,15 +238,15 @@ export function VirtualizedView({
                     contain: 'layout style paint'
                   }}
                 >
-                  {rowItems.map((item, index) => (
+                  {rowItems.map((item) => (
                     <FileCard
                       key={item.id}
                       item={item}
                       viewMode={viewMode}
                       thumbnailSize={thumbnailSize}
                       isSelected={selectedIds.includes(item.id)}
-                      onClick={() => onItemClick(item)}
-                      onDoubleClick={() => onItemDoubleClick(item)}
+                      onClick={onItemClick}
+                      onDoubleClick={onItemDoubleClick}
                     />
                   ))}
                 </div>
