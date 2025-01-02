@@ -1,6 +1,6 @@
 "use client"
 
-import { MainLayout } from "@/components/core/layout/main-layout/main-layout"
+import { MainLayout } from "@/components/layout/main-layout/main-layout"
 import { FilesProvider } from "@/context/file-context"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Providers } from "@/components/core/providers/providers"

@@ -10,7 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-  Palette,
   FolderIcon,
   ImageIcon,
   TagIcon,
@@ -21,7 +20,6 @@ import {
 } from "lucide-react"
 
 // Importar las secciones
-import { AppearanceSection } from "./settings-sections/appearance-section"
 import { FoldersSection } from "./settings-sections/folders-section"
 import { CollectionsSection } from "./settings-sections/collections-section"
 import { TagsSection } from "./settings-sections/tags-section"
@@ -32,7 +30,7 @@ import { SystemSection } from "./settings-sections/system-section"
 import { getFolders } from "@/services/folder.service"
 import { useToast } from "@/components/ui/use-toast"
 
-export function SettingsPanel() {
+export function SettingsView() {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = React.useState("appearance")
   const [initialFolders, setInitialFolders] = React.useState([])
@@ -63,14 +61,7 @@ export function SettingsPanel() {
         <div className="p-4 space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-8">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="appearance">
-                    <Palette className="h-4 w-4" />
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Apariencia</TooltipContent>
-              </Tooltip>
+
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -136,12 +127,8 @@ export function SettingsPanel() {
               </Tooltip>
             </TabsList>
 
-            <TabsContent value="appearance">
-              <AppearanceSection />
-            </TabsContent>
-
             <TabsContent value="folders">
-              <FoldersSection initialFolders={initialFolders} />
+              <FoldersSection/>
             </TabsContent>
 
             <TabsContent value="collections">
