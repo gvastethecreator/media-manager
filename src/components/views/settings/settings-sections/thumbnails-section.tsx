@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { RefreshCw, AlertCircle, Settings2, Zap } from "lucide-react"
+import { RefreshCw, AlertCircle, Settings2, Zap, ImageIcon } from "lucide-react"
 import { useSettingsContext } from "@/context/settings-context"
 import { thumbnailService, type ThumbnailStats } from "@/services/thumbnail.service"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -186,13 +186,14 @@ export function ThumbnailsSection() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Configuración de Miniaturas</CardTitle>
+      <Card className="border-none py-6">
+        <CardHeader className="px-4 py-2">
+          <CardTitle className="text-xl font-semibold flex items-center">
+            <ImageIcon className="h-6 w-6 mr-2" /> Miniaturas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="space-y-4 flex flex-col-2 gap-4">
+            <div className="space-y-2 w-1/2">
               <Label>Calidad de Miniaturas</Label>
               <Select
                 value={settings.thumbnailQuality}
@@ -228,9 +229,8 @@ export function ThumbnailsSection() {
               />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 flex flex-col-2 gap-4">
               <div className="flex items-center justify-between">
-                <Label>Acciones</Label>
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"

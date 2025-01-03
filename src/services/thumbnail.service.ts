@@ -82,21 +82,55 @@ class ThumbnailService {
   async getStats(): Promise<ThumbnailStats> {
     try {
       const response = await this.fetchWithTimeout('/api/thumbnails/stats', {
+        method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json'
         }
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || error.error || 'Error obteniendo estadísticas');
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Error parseando respuesta:', text);
+        throw new Error('Error parseando respuesta del servidor');
       }
 
-      return await response.json();
+      if (!response.ok) {
+        throw new Error(data.details || data.error || 'Error obteniendo estadísticas');
+      }
+
+      // Validar la estructura de los datos
+      if (!this.isValidThumbnailStats(data)) {
+        console.error('Datos inválidos recibidos:', data);
+        throw new Error('Datos de estadísticas inválidos');
+      }
+
+      return data;
     } catch (error) {
       console.error('Error en getStats:', error);
-      throw new Error('Error al obtener estadísticas. Por favor, inténtalo de nuevo.');
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : 'Error al obtener estadísticas. Por favor, inténtalo de nuevo.'
+      );
     }
+  }
+
+  private isValidThumbnailStats(data: any): data is ThumbnailStats {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof data.total === 'number' &&
+      typeof data.totalSize === 'number' &&
+      typeof data.pending === 'number' &&
+      typeof data.withThumbnail === 'number' &&
+      Array.isArray(data.recentlyProcessed) &&
+      Array.isArray(data.errors)
+    );
   }
 
   async reprocessAll(onProgress?: (data: any) => void): Promise<void> {
@@ -107,82 +141,71 @@ class ThumbnailService {
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache'
         }
-      })
+      });
 
       if (!response.ok || !response.body) {
-        const errorText = await response.text()
-        console.error('Error en respuesta del servidor:', errorText)
-        throw new Error('Error iniciando el reprocesamiento de miniaturas')
+        const text = await response.text();
+        console.error('Error en respuesta del servidor:', text);
+        throw new Error('Error iniciando el reprocesamiento de miniaturas');
       }
 
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
       try {
         while (true) {
-          const { done, value } = await reader.read()
+          const { done, value } = await reader.read();
 
           if (done) {
-            console.log('Stream completado')
-            break
+            console.log('Stream completado');
+            break;
           }
 
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n\n')
-          buffer = lines.pop() || ''
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               try {
-                const eventData = line.slice(6)
-                console.log('Evento SSE recibido:', eventData)
-                const event = JSON.parse(eventData)
+                const eventData = line.slice(6);
+                const event = JSON.parse(eventData);
+                console.log('Evento SSE recibido:', event);
 
                 if (onProgress) {
-                  onProgress(event)
+                  onProgress(event);
                 }
 
                 // Si es un evento de error, lanzar excepción
                 if (event.type === 'error' && event.data?.error) {
-                  throw new Error(event.data.error)
+                  throw new Error(event.data.error);
+                }
+
+                // Si es un evento de completado, verificar errores
+                if (event.type === 'complete' && event.data?.errors > 0) {
+                  console.warn(`Proceso completado con ${event.data.errors} errores`);
                 }
               } catch (parseError) {
-                console.error('Error parseando evento SSE:', parseError)
-                console.log('Línea con error:', line)
+                console.error('Error parseando evento SSE:', parseError);
+                console.log('Línea con error:', line);
               }
             }
           }
         }
-
-        // Procesar buffer restante
-        if (buffer && buffer.startsWith('data: ')) {
-          try {
-            const eventData = buffer.slice(6)
-            console.log('Evento SSE final recibido:', eventData)
-            const event = JSON.parse(eventData)
-
-            if (onProgress) {
-              onProgress(event)
-            }
-          } catch (parseError) {
-            console.error('Error parseando evento SSE final:', parseError)
-            console.log('Buffer con error:', buffer)
-          }
-        }
       } catch (streamError) {
-        console.error('Error procesando stream:', streamError)
-        throw streamError
+        console.error('Error procesando stream:', streamError);
+        throw streamError;
       } finally {
-        reader.releaseLock()
+        reader.releaseLock();
       }
     } catch (error) {
-      console.error('Error en reprocessAll:', error)
+      console.error('Error en reprocessAll:', error);
       throw new Error(
         error instanceof Error
           ? error.message
           : 'Error al reprocesar las miniaturas. Por favor, inténtalo de nuevo.'
-      )
+      );
     }
   }
 
@@ -228,26 +251,49 @@ class ThumbnailService {
 
   async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
     try {
-      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+      if (!imageId || !quality) {
+        throw new Error('ID de imagen y calidad son requeridos');
+      }
+
+      const config = THUMBNAIL_QUALITY_CONFIG[quality];
+      if (!config) {
+        throw new Error('Calidad de thumbnail inválida');
+      }
+
+      const response = await this.fetchWithTimeout(
+        `/api/thumbnails/${imageId}/generate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
+          body: JSON.stringify({
+            quality,
+            ...config
+          })
         },
-        body: JSON.stringify({ quality })
-      });
+        60000 // Aumentamos el timeout para imágenes grandes
+      );
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || error.error || 'Error generando miniatura');
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Error generando miniatura');
       }
 
       // Invalidar caché para esta imagen
       const cacheKey = `thumbnail:${imageId}:${quality}`;
       await thumbnailCache.delete(cacheKey);
+
+      // Esperar un momento para asegurar que el thumbnail se ha generado
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Error en generateThumbnail:', error);
-      throw new Error('Error al generar la miniatura. Por favor, inténtalo de nuevo.');
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : 'Error al generar la miniatura. Por favor, inténtalo de nuevo.'
+      );
     }
   }
 
