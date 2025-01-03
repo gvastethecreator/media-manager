@@ -1,10 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FileCard } from "./file-card";
 import { useInView } from "react-intersection-observer";
 import type { FileItem } from "@/types/file-item";
+import { AnimationProvider } from "./animation-context";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Buffer de items para mantener en memoria
+const BUFFER_SIZE = 100;
 
 interface FileGridProps {
 	onItemClick?: (item: FileItem) => void;
@@ -17,9 +22,9 @@ interface FileGridProps {
 // Configuración base del grid
 const GRID_CONFIG = {
 	minColumns: 5,
-	gap: 0, // Eliminamos el gap entre items
+	gap: 0,
 	itemBaseWidth: 200,
-	itemAspectRatio: 1.2, // Ajustamos para un aspecto más rectangular (16:9 ≈ 1.77)
+	itemAspectRatio: 1.2,
 } as const;
 
 export function FileGrid({
@@ -34,29 +39,25 @@ export function FileGrid({
 		threshold: 0,
 	});
 
-	useEffect(() => {
-		if (inView && loadMoreItems) {
-			loadMoreItems();
-		}
-	}, [inView, loadMoreItems]);
+	// Mantener un registro de los índices visibles
+	const visibleIndicesRef = useRef<{ start: number; end: number }>({
+		start: 0,
+		end: 0,
+	});
+
+	// Buffer de items renderizados
+	const bufferedItemsRef = useRef<{ [key: number]: boolean }>({});
 
 	// Cálculo dinámico del tamaño de la grilla
-	const calculateGridDimensions = () => {
+	const { itemWidth, itemHeight, columns } = useMemo(() => {
 		const containerWidth = parentRef.current?.offsetWidth || window.innerWidth;
-		// Ya no restamos gap porque lo eliminamos
 		const availableWidth = containerWidth;
-
-		// Calculamos el ancho mínimo por item
 		const minItemWidth = Math.floor(availableWidth / GRID_CONFIG.minColumns);
 		const itemWidth = Math.min(GRID_CONFIG.itemBaseWidth, minItemWidth);
-
-		// Calculamos columnas para ocupar todo el ancho
 		const columns = Math.max(
 			GRID_CONFIG.minColumns,
 			Math.floor(availableWidth / itemWidth)
 		);
-
-		// Ajustamos el itemWidth final para que ocupe exactamente el ancho disponible
 		const finalItemWidth = availableWidth / columns;
 
 		return {
@@ -64,9 +65,8 @@ export function FileGrid({
 			itemHeight: finalItemWidth * GRID_CONFIG.itemAspectRatio,
 			columns,
 		};
-	};
+	}, [parentRef.current?.offsetWidth]);
 
-	const { itemWidth, itemHeight, columns } = calculateGridDimensions();
 	const rowCount = Math.ceil(items.length / columns);
 
 	const virtualizer = useVirtualizer({
@@ -74,6 +74,34 @@ export function FileGrid({
 		getScrollElement: () => parentRef.current,
 		estimateSize: () => itemHeight + GRID_CONFIG.gap,
 		overscan: 3,
+		onChange: (instance) => {
+			if (!instance.range) return;
+
+			const startRow = instance.range.startIndex;
+			const endRow = instance.range.endIndex;
+
+			// Actualizar índices visibles
+			visibleIndicesRef.current = {
+				start: startRow * columns,
+				end: Math.min((endRow + 1) * columns, items.length),
+			};
+
+			// Actualizar buffer
+			const newBuffer: { [key: number]: boolean } = {};
+			const bufferStart = Math.max(
+				0,
+				visibleIndicesRef.current.start - BUFFER_SIZE
+			);
+			const bufferEnd = Math.min(
+				items.length,
+				visibleIndicesRef.current.end + BUFFER_SIZE
+			);
+
+			for (let i = bufferStart; i < bufferEnd; i++) {
+				newBuffer[i] = true;
+			}
+			bufferedItemsRef.current = newBuffer;
+		},
 	});
 
 	const getItemsForRow = useCallback(
@@ -84,53 +112,75 @@ export function FileGrid({
 		[items, columns]
 	);
 
+	useEffect(() => {
+		if (inView && loadMoreItems) {
+			loadMoreItems();
+		}
+	}, [inView, loadMoreItems]);
+
+	const isItemBuffered = useCallback((index: number) => {
+		return !!bufferedItemsRef.current[index];
+	}, []);
+
 	return (
-		<div ref={parentRef} className="h-full w-full overflow-auto">
-			<div
-				style={{
-					height: `${virtualizer.getTotalSize()}px`,
-					width: "100%",
-					position: "relative",
-				}}
-			>
-				{virtualizer.getVirtualItems().map((virtualRow) => (
+		<AnimationProvider>
+			<ScrollArea className="h-full w-full">
+				<div ref={parentRef} className="h-full w-full">
 					<div
-						key={virtualRow.index}
 						style={{
-							position: "absolute",
-							top: 0,
-							left: 0,
+							height: `${virtualizer.getTotalSize()}px`,
 							width: "100%",
-							height: `${itemHeight}px`,
-							transform: `translateY(${virtualRow.start}px)`,
-							display: "grid",
-							gridTemplateColumns: `repeat(${columns}, 1fr)`,
-							gap: 0,
-							padding: 0,
-							borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+							position: "relative",
 						}}
 					>
-						{getItemsForRow(virtualRow.index).map((item, index) => (
+						{virtualizer.getVirtualItems().map((virtualRow) => (
 							<div
-								key={item.id}
-								className="border-r border-1 border-white/10 last:border-r-0"
+								key={virtualRow.index}
+								style={{
+									position: "absolute",
+									top: 0,
+									left: 0,
+									width: "100%",
+									height: `${itemHeight}px`,
+									transform: `translateY(${virtualRow.start}px)`,
+									display: "grid",
+									gridTemplateColumns: `repeat(${columns}, 1fr)`,
+									gap: 0,
+									padding: 0,
+									borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+								}}
 							>
-								<FileCard
-									item={item}
-									onClick={onItemClick}
-									onDoubleClick={onItemDoubleClick}
-									style={{
-										width: "100%",
-										height: "100%",
-									}}
-									index={index}
-								/>
+								{getItemsForRow(virtualRow.index).map((item, colIndex) => {
+									const itemIndex = virtualRow.index * columns + colIndex;
+									const shouldRender = isItemBuffered(itemIndex);
+
+									return (
+										<div
+											key={item.id}
+											className="border-r border-1 border-white/10 last:border-r-0"
+										>
+											{shouldRender && (
+												<FileCard
+													item={item}
+													onClick={onItemClick}
+													onDoubleClick={onItemDoubleClick}
+													style={{
+														width: "100%",
+														height: "100%",
+													}}
+													index={itemIndex}
+													totalColumns={columns}
+												/>
+											)}
+										</div>
+									);
+								})}
 							</div>
 						))}
 					</div>
-				))}
-			</div>
-			<div ref={loadMoreRef} className="h-10 w-full" />
-		</div>
+					<div ref={loadMoreRef} className="h-10 w-full" />
+				</div>
+			</ScrollArea>
+		</AnimationProvider>
 	);
 }
