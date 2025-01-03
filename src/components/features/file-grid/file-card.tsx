@@ -21,7 +21,6 @@ import {
 	CalendarIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useAnimation } from "./animation-context";
 
 interface FileCardProps {
 	item: FileItem;
@@ -49,8 +48,6 @@ export function FileCard({
 	const { openViewer } = useImageViewer();
 	const { toggleSelectedItem, selectedItems } = useFileSelection();
 	const [isHovered, setIsHovered] = useState(false);
-	const [scope, animate] = useAnimate();
-	const { getAnimationDelay } = useAnimation();
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -188,38 +185,16 @@ export function FileCard({
 		[onDoubleClick, toast, openViewer]
 	);
 
-	useEffect(() => {
-		const sequence = async () => {
-			const delay = getAnimationDelay(index, totalColumns);
-
-			await animate(
-				scope.current,
-				{
-					opacity: [0, 1],
-					scale: [0.9, 1],
-					y: [10, 0],
-				},
-				{
-					duration: 0.3,
-					delay,
-					ease: [0.2, 0.65, 0.3, 0.9],
-				}
-			);
-		};
-
-		sequence();
-	}, [animate, index, scope, totalColumns, getAnimationDelay]);
-
 	const cardContent = (
-		<div className="relative w-full h-full">
+		<div className="relative w-full h-full overflow-hidden">
 			<AnimatePresence mode="wait">
 				{isLoading ? (
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 0.4 }}
 						exit={{ opacity: 0 }}
-						transition={{ duration: 0.3 }}
-						className="absolute inset-0 bg-transparent"
+						transition={{ duration: 0.5 }}
+						className="absolute inset-0 bg-gradient-to-b from-primary/50 to-secondary/50"
 					/>
 				) : error ? (
 					<motion.div
@@ -227,7 +202,7 @@ export function FileCard({
 						animate={{ opacity: 1 }}
 						className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
 					>
-						<div className="text-red-500 text-xs text-center p-2">
+						<div className="text-red-500 text-xs text-center">
 							Error al cargar
 						</div>
 					</motion.div>
@@ -240,6 +215,7 @@ export function FileCard({
 					>
 						{/* Fondo blur */}
 						<motion.div
+							initial={{ opacity: 1 }}
 							className="absolute inset-0 overflow-hidden"
 							animate={{
 								filter:
@@ -247,12 +223,13 @@ export function FileCard({
 										? "blur(20px) brightness(0.3)"
 										: "blur(30px) brightness(0.7)",
 							}}
-							transition={{ duration: 0.2 }}
+							transition={{ duration: 0.5 }}
 							style={{
 								backgroundImage: `url(${thumbnail})`,
 								backgroundSize: "cover",
 								backgroundPosition: "center",
-								transform: "scale(1.1)",
+								transform: "scale(1.1) rotate(45deg)",
+								filter: "blur(20px) brightness(0.3)"
 							}}
 						/>
 
@@ -260,7 +237,7 @@ export function FileCard({
 						<motion.div
 							className="absolute inset-0 flex justify-center items-center"
 							animate={{
-								y: isSelected || isHovered ? "-8%" : "0%",
+								y: isSelected || isHovered ? "-10%" : "0%",
 								scale: isSelected || isHovered ? 0.9 : 1,
 							}}
 							transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -270,7 +247,7 @@ export function FileCard({
 								alt={item.name}
 								width={item.metadata?.dimensions?.width || 300}
 								height={item.metadata?.dimensions?.height || 300}
-								className="max-w-[85%] max-h-[85%] object-contain z-10 rounded-none shadow-lg"
+								className="max-w-[90%] max-h-[80%] object-contain z-10 rounded-none shadow-lg"
 								priority={false}
 							/>
 						</motion.div>
@@ -285,8 +262,8 @@ export function FileCard({
 							transition={{ type: "spring", stiffness: 200, damping: 20 }}
 							className="absolute inset-x-0 bottom-0 z-20"
 						>
-							<div className="p-0 m-1 backdrop-blur-sm">
-								<p className="text-[9px] text-white/90 font-medium truncate py-1 text-shadow-sm flex items-center gap-1">
+							<div className="p-1">
+								<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
 									<FileIcon size={10} />
 									<span>{item.name}</span>
 								</p>
@@ -336,8 +313,6 @@ export function FileCard({
 	return (
 		<FileContextMenu file={item} onAction={handleContextMenuAction}>
 			<motion.div
-				ref={scope}
-				layout
 				whileHover={{ scale: 0.95 }}
 				whileTap={{ scale: 0.93 }}
 				transition={{ type: "spring", stiffness: 400, damping: 25 }}
