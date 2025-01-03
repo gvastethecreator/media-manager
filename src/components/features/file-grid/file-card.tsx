@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useAnimate } from "motion/react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+	motion,
+	AnimatePresence,
+	useReducedMotion,
+	LazyMotion,
+	domAnimation,
+	m,
+	useSpring,
+	useMotionValue,
+} from "motion/react";
 import { FileItem } from "@/types/file-item";
 import { ThumbnailSize } from "@/types/ui";
 import { cn, formatBytes } from "@/lib/utils";
@@ -30,7 +39,51 @@ interface FileCardProps {
 	style?: React.CSSProperties;
 	index?: number;
 	totalColumns?: number;
+	shouldLoad?: boolean;
 }
+
+const springConfig = {
+	type: "spring",
+	stiffness: 300,
+	damping: 30,
+	mass: 0.5,
+	restSpeed: 2,
+	restDelta: 0.01,
+};
+
+const transitionConfig = {
+	type: "tween",
+	duration: 0.2,
+	ease: "easeOut",
+};
+
+const fadeInOutVariants = {
+	initial: { opacity: 0 },
+	animate: { opacity: 1 },
+	exit: { opacity: 0 },
+};
+
+const cardVariants = {
+	initial: { scale: 0.95, opacity: 0 },
+	animate: {
+		scale: 1,
+		opacity: 1,
+		transition: springConfig,
+	},
+	exit: {
+		scale: 0.95,
+		opacity: 0,
+		transition: { duration: 0.2 },
+	},
+	hover: {
+		scale: 0.95,
+		transition: springConfig,
+	},
+	tap: {
+		scale: 0.93,
+		transition: springConfig,
+	},
+};
 
 export function FileCard({
 	item,
@@ -40,6 +93,7 @@ export function FileCard({
 	style,
 	index = 0,
 	totalColumns = 3,
+	shouldLoad = false,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -48,11 +102,20 @@ export function FileCard({
 	const { openViewer } = useImageViewer();
 	const { toggleSelectedItem, selectedItems } = useFileSelection();
 	const [isHovered, setIsHovered] = useState(false);
+	const shouldReduceMotion = useReducedMotion();
+	const hasLoaded = useRef(false);
+
+	// Motion values con valores iniciales correctos
+	const scale = useSpring(1, springConfig);
+	const opacity = useSpring(0, springConfig);
+	const y = useSpring(20, springConfig);
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
 
 	const loadThumbnail = useCallback(async () => {
+		if (hasLoaded.current || !shouldLoad) return;
+
 		try {
 			setIsLoading(true);
 			setError(null);
@@ -70,6 +133,7 @@ export function FileCard({
 				quality
 			);
 			setThumbnail(thumbnailData);
+			hasLoaded.current = true;
 			setIsLoading(false);
 		} catch (error) {
 			console.error("Error cargando miniatura:", error);
@@ -89,7 +153,7 @@ export function FileCard({
 				});
 			}
 		}
-	}, [item.id, thumbnailSize, toast]);
+	}, [item.id, thumbnailSize, toast, shouldLoad]);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -99,12 +163,14 @@ export function FileCard({
 			await loadThumbnail();
 		};
 
-		init();
+		if (shouldLoad) {
+			init();
+		}
 
 		return () => {
 			isMounted = false;
 		};
-	}, [loadThumbnail]);
+	}, [loadThumbnail, shouldLoad]);
 
 	const handleClick = (e: React.MouseEvent) => {
 		// Prevenir la selección del DOM cuando se usa shift
@@ -185,157 +251,189 @@ export function FileCard({
 		[onDoubleClick, toast, openViewer]
 	);
 
-	const cardContent = (
-		<div className="relative w-full h-full overflow-hidden">
-			<AnimatePresence mode="wait">
-				{isLoading ? (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 0.4 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.5 }}
-						className="absolute inset-0 bg-gradient-to-b from-black/50 to-secondary/50"
-					/>
-				) : error ? (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
-					>
-						<div className="text-red-500 text-xs text-center">
-							Error al cargar
-						</div>
-					</motion.div>
-				) : (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ duration: 0.4 }}
-						className="relative w-full h-full"
-					>
-						{/* Fondo blur */}
-						<motion.div
-							initial={{ opacity: 1 }}
-							className="absolute inset-0 overflow-hidden"
-							animate={{
-								filter:
-									isSelected || isHovered
-										? "blur(20px) brightness(0.3)"
-										: "blur(30px) brightness(0.7)",
-							}}
-							transition={{ duration: 0.5 }}
-							style={{
-								backgroundImage: `url(${thumbnail})`,
-								backgroundSize: "cover",
-								backgroundPosition: "center",
-								transform: "scale(1.1) rotate(45deg)",
-								filter: "blur(20px) brightness(0.3)",
-							}}
-						/>
+	// Cleanup y reset de animaciones mejorado
+	useEffect(() => {
+		if (!shouldLoad) {
+			setIsHovered(false);
+			scale.set(1, false);
+			opacity.set(0, false);
+			y.set(20, false);
+		}
+		return () => {
+			scale.stop();
+			opacity.stop();
+			y.stop();
+		};
+	}, [shouldLoad, scale, opacity, y]);
 
-						{/* Imagen principal */}
-						<motion.div
-							className="absolute inset-0 flex justify-center items-center"
-							animate={{
-								y: isSelected || isHovered ? "-10%" : "0%",
-								scale: isSelected || isHovered ? 0.9 : 1,
-							}}
-							transition={{ type: "spring", stiffness: 200, damping: 20 }}
-						>
-							<ImageCard
-								src={thumbnail || ""}
-								alt={item.name}
-								width={item.metadata?.dimensions?.width || 300}
-								height={item.metadata?.dimensions?.height || 300}
-								className="max-w-[90%] max-h-[80%] object-contain z-10 rounded-none shadow-lg"
-								priority={false}
-							/>
-						</motion.div>
+	const handleHoverStart = useCallback(() => {
+		if (!shouldLoad) return;
+		setIsHovered(true);
+		y.set(-20);
+		scale.set(0.9);
+		opacity.set(1);
+	}, [shouldLoad, y, scale, opacity]);
 
-						{/* Información */}
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{
-								opacity: isSelected || isHovered ? 1 : 0,
-								y: isSelected || isHovered ? 0 : 20,
-							}}
-							transition={{ type: "spring", stiffness: 200, damping: 20 }}
-							className="absolute inset-x-0 bottom-0 z-20"
-						>
-							<div className="p-1">
-								<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
-									<FileIcon size={10} />
-									<span>{item.name}</span>
-								</p>
-								<div className="grid grid-cols-2 gap-x-2 px-1">
-									<div className="space-y-0.5">
-										<div className="flex items-center gap-1 text-[8px] text-white/70">
-											<ImageIcon size={9} />
-											<span>{item.metadata?.extension?.toUpperCase()}</span>
-											<span>•</span>
-											<span>{formatBytes(item.metadata?.size || 0)}</span>
-										</div>
-										<div className="flex items-center gap-1 text-[9px] text-white/60">
-											<CalendarIcon size={9} />
-											<span>
-												{format(new Date(item.createdAt), "dd MMM yyyy", {
-													locale: es,
-												})}
-											</span>
-										</div>
-									</div>
-									<div className="text-right space-y-0.5">
-										{item.isFavorite && (
-											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-												<StarIcon size={9} className="text-yellow-400" />
-												<span>Favorito</span>
-											</div>
-										)}
-										{item.tags && item.tags[0] && (
-											<Badge
-												variant="secondary"
-												className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-											>
-												<TagIcon size={8} className="mr-1" />
-												{item.tags[0].name}
-											</Badge>
-										)}
-									</div>
-								</div>
-							</div>
-						</motion.div>
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</div>
-	);
+	const handleHoverEnd = useCallback(() => {
+		if (!shouldLoad) return;
+		setIsHovered(false);
+		y.set(20);
+		scale.set(1);
+		opacity.set(0);
+	}, [shouldLoad, y, scale, opacity]);
 
 	return (
-		<FileContextMenu file={item} onAction={handleContextMenuAction}>
-			<motion.div
-				whileHover={{ scale: 0.95 }}
-				whileTap={{ scale: 0.93 }}
-				transition={{ type: "spring", stiffness: 400, damping: 25 }}
-				onHoverStart={() => setIsHovered(true)}
-				onHoverEnd={() => setIsHovered(false)}
-				className={cn(
-					"relative overflow-hidden w-full h-full",
-					isSelected
-						? "ring-1 ring-primary ring-inset shadow-lg"
-						: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
-					"aspect-square"
-				)}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				onMouseDown={handleMouseDown}
-				style={{
-					...style,
-					height: "100%",
-					width: "100%",
-				}}
-			>
-				{cardContent}
-			</motion.div>
-		</FileContextMenu>
+		<motion.div
+			layout
+			initial={false}
+			animate={{
+				scale: isHovered ? 0.95 : 1,
+			}}
+			whileHover={{ scale: shouldReduceMotion ? 1 : 0.95 }}
+			whileTap={{ scale: shouldReduceMotion ? 1 : 0.93 }}
+			transition={springConfig}
+			onHoverStart={handleHoverStart}
+			onHoverEnd={handleHoverEnd}
+			className={cn(
+				"relative overflow-hidden w-full h-full",
+				isSelected
+					? "ring-1 ring-primary ring-inset shadow-lg"
+					: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
+				"aspect-square"
+			)}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
+			onMouseDown={handleMouseDown}
+			style={{
+				...style,
+				height: "100%",
+				width: "100%",
+				willChange: "transform",
+				contain: "size layout",
+			}}
+		>
+			<FileContextMenu file={item} onAction={handleContextMenuAction}>
+				<div className="relative w-full h-full overflow-hidden">
+					<AnimatePresence mode="wait" initial={false}>
+						{isLoading ? (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 0.4 }}
+								exit={{ opacity: 0 }}
+								transition={transitionConfig}
+								className="absolute inset-0 bg-gradient-to-b from-black/50 to-secondary/50"
+							/>
+						) : error ? (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={transitionConfig}
+								className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
+							>
+								<div className="text-red-500 text-xs text-center">
+									Error al cargar
+								</div>
+							</motion.div>
+						) : thumbnail ? (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={transitionConfig}
+								className="relative w-full h-full"
+							>
+								{/* Fondo blur */}
+								<motion.div
+									className="absolute inset-0 overflow-hidden"
+									style={{
+										backgroundImage: `url(${thumbnail})`,
+										backgroundSize: "cover",
+										backgroundPosition: "center",
+										transform: "scale(1.1) rotate(45deg)",
+										filter:
+											isSelected || isHovered
+												? "blur(20px) brightness(0.3)"
+												: "blur(30px) brightness(0.7)",
+									}}
+									transition={springConfig}
+								/>
+
+								{/* Imagen principal */}
+								<motion.div
+									className="absolute inset-0 flex justify-center items-center"
+									style={{
+										y,
+										scale: isSelected || isHovered ? 0.9 : scale,
+									}}
+									transition={springConfig}
+								>
+									<ImageCard
+										src={thumbnail || ""}
+										alt={item.name}
+										width={item.metadata?.dimensions?.width || 300}
+										height={item.metadata?.dimensions?.height || 300}
+										className="max-w-[90%] max-h-[80%] object-contain z-10 rounded-none shadow-lg"
+										priority={false}
+									/>
+								</motion.div>
+
+								{/* Información */}
+								<motion.div
+									style={{
+										opacity,
+										y: isSelected || isHovered ? 0 : 20,
+									}}
+									transition={springConfig}
+									className="absolute inset-x-0 bottom-0 z-20"
+								>
+									<div className="p-1">
+										<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
+											<FileIcon size={10} />
+											<span>{item.name}</span>
+										</p>
+										<div className="grid grid-cols-2 gap-x-2 px-1">
+											<div className="space-y-0.5">
+												<div className="flex items-center gap-1 text-[8px] text-white/70">
+													<ImageIcon size={9} />
+													<span>{item.metadata?.extension?.toUpperCase()}</span>
+													<span>•</span>
+													<span>{formatBytes(item.metadata?.size || 0)}</span>
+												</div>
+												<div className="flex items-center gap-1 text-[9px] text-white/60">
+													<CalendarIcon size={9} />
+													<span>
+														{format(new Date(item.createdAt), "dd MMM yyyy", {
+															locale: es,
+														})}
+													</span>
+												</div>
+											</div>
+											<div className="text-right space-y-0.5">
+												{item.isFavorite && (
+													<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
+														<StarIcon size={9} className="text-yellow-400" />
+														<span>Favorito</span>
+													</div>
+												)}
+												{item.tags && item.tags[0] && (
+													<Badge
+														variant="secondary"
+														className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+													>
+														<TagIcon size={8} className="mr-1" />
+														{item.tags[0].name}
+													</Badge>
+												)}
+											</div>
+										</div>
+									</div>
+								</motion.div>
+							</motion.div>
+						) : null}
+					</AnimatePresence>
+				</div>
+			</FileContextMenu>
+		</motion.div>
 	);
 }
