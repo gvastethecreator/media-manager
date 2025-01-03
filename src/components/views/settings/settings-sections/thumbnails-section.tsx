@@ -41,6 +41,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { formatBytes, cn } from "@/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
 
 interface ProcessStatus {
 	status?: string;
@@ -333,16 +334,16 @@ export function ThumbnailsSection() {
 	}, [loadStats]);
 
 	return (
-		<div className="space-y-4 w-full px-4">
-			<Card className="border-none py-4 w-full">
-				<CardHeader className="px-4 py-2">
+		<div>
+			<Card className="border-none w-full">
+				<CardHeader className="p-0">
 					<CardTitle className="text-base font-semibold flex items-center gap-2">
 						<ImageIcon className="h-5 w-5" /> Configuración de Miniaturas
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="space-y-6">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div className="space-y-4">
+				<CardContent className="p-2 w-full">
+					<div className="grid grid-cols-1 gap-2">
+						<div className="grid grid-cols-2 gap-2">
 							<div className="space-y-1.5">
 								<Label className="text-sm">Calidad de Miniaturas</Label>
 								<Select
@@ -386,87 +387,86 @@ export function ThumbnailsSection() {
 									className="scale-90"
 								/>
 							</div>
-
-							<div className="flex flex-wrap gap-1.5 pt-2">
-								<Button
-									variant="outline"
-									size="sm"
-									className="h-7 text-xs"
-									onClick={handleOptimizeThumbnails}
-									disabled={
-										isLoading || isOptimizing || isProcessing || isCleaning
-									}
-								>
-									{isOptimizing ? (
-										<>
-											<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-											Optimizando...
-										</>
-									) : (
-										<>
-											<Zap className="h-3.5 w-3.5 mr-1.5" />
-											Optimizar
-										</>
-									)}
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									className="h-7 text-xs"
-									onClick={handleReprocessThumbnails}
-									disabled={
-										isLoading || isOptimizing || isProcessing || isCleaning
-									}
-								>
-									{isProcessing ? (
-										<>
-											<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-											Procesando...
-										</>
-									) : (
-										<>
-											<Settings2 className="h-3.5 w-3.5 mr-1.5" />
-											Reprocesar
-										</>
-									)}
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									className="h-7 text-xs"
-									onClick={() => setShowConfirmClean(true)}
-									disabled={
-										isLoading || isOptimizing || isProcessing || isCleaning
-									}
-								>
-									{isCleaning ? (
-										<>
-											<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-											Limpiando...
-										</>
-									) : (
-										<>
-											<Trash2 className="h-3.5 w-3.5 mr-1.5" />
-											Limpiar
-										</>
-									)}
-								</Button>
-
-								{(isProcessing || isOptimizing || isCleaning) && (
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={handleCancel}
-										className="h-7 text-xs text-red-500 hover:text-red-600"
-									>
-										Cancelar
-									</Button>
-								)}
-							</div>
 						</div>
+						<div className="flex flex-wrap gap-1.5 pt-2">
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={handleOptimizeThumbnails}
+								disabled={
+									isLoading || isOptimizing || isProcessing || isCleaning
+								}
+							>
+								{isOptimizing ? (
+									<>
+										<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Optimizando...
+									</>
+								) : (
+									<>
+										<Zap className="h-3.5 w-3.5 mr-1.5" />
+										Optimizar
+									</>
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={handleReprocessThumbnails}
+								disabled={
+									isLoading || isOptimizing || isProcessing || isCleaning
+								}
+							>
+								{isProcessing ? (
+									<>
+										<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Procesando...
+									</>
+								) : (
+									<>
+										<Settings2 className="h-3.5 w-3.5 mr-1.5" />
+										Reprocesar
+									</>
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={() => setShowConfirmClean(true)}
+								disabled={
+									isLoading || isOptimizing || isProcessing || isCleaning
+								}
+							>
+								{isCleaning ? (
+									<>
+										<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Limpiando...
+									</>
+								) : (
+									<>
+										<Trash2 className="h-3.5 w-3.5 mr-1.5" />
+										Limpiar
+									</>
+								)}
+							</Button>
 
+							{(isProcessing || isOptimizing || isCleaning) && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={handleCancel}
+									className="h-7 text-xs text-red-500 hover:text-red-600"
+								>
+									Cancelar
+								</Button>
+							)}
+						</div>
 						{stats && (
-							<div className="space-y-4">
+							<div>
+								<Separator className="my-2" />
 								<div className="grid grid-cols-2 gap-3">
 									<div className="space-y-1.5">
 										<Label className="text-sm">Total de Miniaturas</Label>

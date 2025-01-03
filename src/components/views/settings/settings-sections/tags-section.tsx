@@ -4,7 +4,6 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Palette, PencilIcon, CheckIcon, XIcon } from "lucide-react";
 import { useCollectionTagContext } from "@/context/settings-context";
