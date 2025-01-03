@@ -13,12 +13,13 @@ export async function POST() {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const writeEvent = async (event: string, data: any) => {
+  const writeEvent = async (event: string, data: Record<string, any>) => {
     try {
       const formattedData = JSON.stringify({ type: event, data })
       await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
     } catch (error) {
-      console.error('Error escribiendo evento:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      console.error('Error escribiendo evento:', { error: errorMessage })
     }
   }
 
@@ -100,13 +101,14 @@ export async function POST() {
 
       } catch (error) {
         errors++
-        console.error('Error procesando imagen:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.error('Error procesando imagen:', { error: errorMessage, path: image.path })
 
         // Actualizar error en base de datos
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+            thumbnailError: errorMessage,
             thumbnailErrorAt: new Date(),
             thumbnail: null,
             thumbnailSize: null,
@@ -118,7 +120,7 @@ export async function POST() {
         // Enviar evento de error
         await writeEvent('error', {
           file: image.path,
-          error: error instanceof Error ? error.message : 'Error desconocido'
+          error: errorMessage
         })
       }
     }
@@ -140,14 +142,16 @@ export async function POST() {
     })
 
   } catch (error) {
-    console.error('Error en reprocesamiento:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    console.error('Error en reprocesamiento:', { error: errorMessage })
 
     try {
       await writeEvent('error', {
-        error: error instanceof Error ? error.message : 'Error desconocido'
+        error: errorMessage
       })
     } catch (streamError) {
-      console.error('Error escribiendo en stream:', streamError)
+      const streamErrorMessage = streamError instanceof Error ? streamError.message : 'Error desconocido'
+      console.error('Error escribiendo en stream:', { error: streamErrorMessage })
     }
 
     await writer.close()
