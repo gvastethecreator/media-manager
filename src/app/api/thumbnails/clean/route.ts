@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { generateThumbnail } from '@/lib/thumbnail'
-import { existsSync } from 'fs'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -23,13 +21,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Obtener imágenes que necesitan reprocesar
+    // Obtener imágenes con thumbnail
     const images = await prisma.image.findMany({
       where: {
-        OR: [
-          { thumbnail: null },
-          { thumbnailError: { not: null } }
-        ]
+        thumbnail: { not: null }
       },
       select: {
         id: true,
@@ -38,79 +33,47 @@ export async function GET(request: NextRequest) {
     })
 
     const total = images.length
-    let processed = 0
-    let errors = 0
+    let cleaned = 0
 
     // Enviar evento inicial
     await sendEvent('progress', {
-      current: processed,
+      current: cleaned,
       total,
       progress: 0,
-      status: `Encontradas ${total} imágenes para procesar...`
+      status: `Encontradas ${total} miniaturas para limpiar...`
     })
 
     // Procesar cada imagen
     for (const image of images) {
       try {
-        if (!existsSync(image.path)) {
-          throw new Error('Archivo no encontrado')
-        }
-
-        // Generar thumbnail
-        const result = await generateThumbnail(image.path, 'mid')
-
-        if (!result || !result.buffer) {
-          throw new Error('Error generando thumbnail')
-        }
-
-        // Actualizar en base de datos
+        // Limpiar thumbnail
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnail: result.buffer,
-            thumbnailSize: result.buffer.length,
-            thumbnailWidth: result.width,
-            thumbnailHeight: result.height,
-            thumbnailError: null,
-            thumbnailErrorAt: null,
-            updatedAt: new Date()
-          }
-        })
-
-        processed++
-        const progress = Math.round((processed / total) * 100)
-
-        // Enviar evento de progreso
-        await sendEvent('progress', {
-          current: processed,
-          total,
-          progress,
-          currentFile: image.path,
-          status: `Procesando imagen ${processed} de ${total}...`,
-          lastProcessed: {
-            id: image.id,
-            path: image.path,
-            thumbnailPath: `/api/images/${image.id}/thumbnail`,
-            processedAt: new Date().toISOString()
-          }
-        })
-
-      } catch (error) {
-        errors++
-        console.error('Error procesando imagen:', error)
-
-        // Actualizar error en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date(),
             thumbnail: null,
             thumbnailSize: null,
             thumbnailWidth: null,
-            thumbnailHeight: null
+            thumbnailHeight: null,
+            thumbnailError: null,
+            thumbnailErrorAt: null,
+            thumbnailQuality: null
           }
         })
+
+        cleaned++
+        const progress = Math.round((cleaned / total) * 100)
+
+        // Enviar evento de progreso
+        await sendEvent('progress', {
+          current: cleaned,
+          total,
+          progress,
+          currentFile: image.path,
+          status: `Limpiando miniatura ${cleaned} de ${total}...`
+        })
+
+      } catch (error) {
+        console.error('Error limpiando miniatura:', error)
 
         // Enviar evento de error
         await sendEvent('error', {
@@ -122,13 +85,12 @@ export async function GET(request: NextRequest) {
 
     // Enviar evento de completado
     await sendEvent('complete', {
-      processed,
-      total,
-      errors
+      cleaned,
+      total
     })
 
   } catch (error) {
-    console.error('Error en reprocesamiento:', error)
+    console.error('Error en limpieza:', error)
     await sendEvent('error', {
       error: error instanceof Error ? error.message : 'Error desconocido'
     })

@@ -7,7 +7,7 @@ const imageOptimizer = new ImageOptimizer()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -17,7 +17,7 @@ export async function GET(
     const format = searchParams.get('format') || 'webp'
 
     const image = await prisma.image.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     })
 
     if (!image) {
