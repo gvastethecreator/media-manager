@@ -4,16 +4,30 @@ export interface FileItem {
   path: string
   type: 'image' | 'video' | 'directory'
   size: number
-  created: string
-  modified: string
   width?: number
   height?: number
   mimeType?: string
-  favorite: boolean
-  isFavorite?: boolean
-  tags?: string[]
-  collections?: string[]
-  thumbnailUrl?: string
+  thumbnail?: string
+  src?: string
+  isFavorite: boolean
+  createdAt: Date
+  updatedAt: Date
+  tags: Array<{
+    id: string
+    name: string
+    color: string
+  }>
+  collections: Array<{
+    id: string
+    name: string
+    emoji: string
+    color: string
+  }>
+  stats?: {
+    views: number
+    downloads: number
+    lastViewed: Date
+  }
   metadata?: {
     dimensions?: {
       width: number

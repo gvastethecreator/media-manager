@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/components/ui/use-toast"
 import { ImageFallback } from "@/components/ui/image-fallback"
 
-interface ImageItem {
+interface file {
   id: string
   name: string
   type: 'image'
