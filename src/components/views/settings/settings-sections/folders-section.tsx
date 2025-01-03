@@ -340,15 +340,15 @@ export function FoldersSection() {
 	}
 
 	return (
-		<div className="space-y-4">
-			<Card className="border-none py-2 px-4">
-				<CardHeader className="px-4 py-2">
+		<div>
+			<Card className="border-none">
+				<CardHeader className="px-2 py-0">
 					<CardTitle className="text-base font-semibold flex items-center gap-2">
 						<FolderIcon className="h-5 w-5" /> Carpetas Indexadas
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="p-2">
-					<div className="flex items-center gap-2 p-2 border-none">
+				<CardContent className="p-2 w-full">
+					<div className="flex items-center gap-2 p-0 border-none">
 						<div className="flex-1">
 							<Input
 								type="text"
@@ -397,26 +397,24 @@ export function FoldersSection() {
 							Cargando carpetas...
 						</div>
 					) : folders.length > 0 ? (
-						<div className="space-y-2 mt-2">
+						<div className="space-y-2 mt-2 grid grid-cols-2 gap-2">
 							{folders.map((folder) => (
-								<Card key={folder.id} className="bg-muted/30">
+								<Card key={folder.id} className="bg-muted/30 rounded-none">
 									<CardContent className="p-2">
-										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-2 min-w-0">
-												<div className="p-1.5 rounded-md bg-muted/50">
-													<Folder className="h-3.5 w-3.5 text-muted-foreground" />
-												</div>
-												<div className="min-w-0">
-													<span className="text-xs font-medium block truncate">
+										<div className="flex items-center justify-between relative">
+											<div className="flex items-center justify-between gap-1 w-full">
+												<div className="min-w-full">
+													<span className="text-xs font-xs block truncate inline-flex items-center gap-1">
+														<Folder className="h-3.5 w-3.5 text-muted-foreground" />
 														{folder.name}
 													</span>
 													<p className="text-[10px] text-muted-foreground truncate">
 														{folder.path}
 													</p>
-													<div className="flex items-center gap-2 mt-1">
+													<div className="flex items-center justify-between gap-2 w-full mt-2">
 														<Badge
 															variant="secondary"
-															className="text-[10px] px-1 h-4"
+															className="text-[10px] px-2 h-4"
 														>
 															{folder._count?.images || 0} imágenes
 														</Badge>
@@ -435,7 +433,7 @@ export function FoldersSection() {
 												</div>
 											</div>
 
-											<div className="flex items-center gap-1">
+											<div className="flex items-center gap-1 absolute right-0 top-0">
 												<Button
 													size="icon"
 													variant="ghost"
@@ -524,7 +522,7 @@ export function FoldersSection() {
 						</div>
 					)}
 
-					<div className="pt-2 flex flex-col-4 items-center gap-4">
+					<div className="pt-2 grid grid-cols-2 items-center gap-4">
 						<div className="flex items-center justify-between">
 							<span className="text-xs text-muted-foreground">
 								Carpetas indexadas
