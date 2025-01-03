@@ -67,7 +67,7 @@ export const favoriteService = {
   // Toggle favorite status
   async toggleFavorite(userId: string, imageId: string): Promise<boolean> {
     const isFavorited = await this.isFavorited(userId, imageId)
-    
+
     if (isFavorited) {
       await this.removeFromFavorites(userId, imageId)
       return false
