@@ -2,29 +2,18 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useSettingsContext } from "@/context/settings-context"
-import { addFolder, reindexFolder, getFolders, type IndexStats } from "@/services/folder.service"
+import { addFolder, reindexFolder, getFolders, type IndexStats, deleteFolder } from "@/services/folder.service"
 import { useToast } from "@/components/ui/use-toast"
-import { Folder, FolderPlus, AlertCircle, RefreshCw } from "lucide-react"
+import { Folder, FolderPlus, AlertCircle, RefreshCw, FolderIcon } from "lucide-react"
 import { formatBytes } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { ThumbnailQuality } from "@/services/thumbnail.service"
 import { useState, useEffect } from "react"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Trash2, Plus, Loader2 } from "lucide-react"
+import { Trash2} from "lucide-react"
 
 interface FolderStats {
   totalFolders: number
@@ -50,7 +39,6 @@ const initialStats: FolderStats = {
 }
 
 export function FoldersSection() {
-  const { settings, updateSettings } = useSettingsContext()
   const { toast } = useToast()
 
   const [error, setError] = useState<string | null>(null)
@@ -60,10 +48,8 @@ export function FoldersSection() {
   const [stats, setStats] = useState<FolderStats>(initialStats)
   const [folderPath, setFolderPath] = useState("")
   const [folders, setFolders] = useState<any[]>([])
-  const [thumbnailQuality, setThumbnailQuality] = useState<ThumbnailQuality>('mid')
   const [processStatus, setProcessStatus] = useState<ProcessStatus>({})
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
-  const [generateThumbnails, setGenerateThumbnails] = useState(true)
 
   // Cargar carpetas al montar el componente
   useEffect(() => {
@@ -92,9 +78,9 @@ export function FoldersSection() {
       const folders = await getFolders()
       const indexStats: FolderStats = {
         totalFolders: folders.length,
-        totalFiles: folders.reduce((acc, folder) => acc + (folder._count?.images || 0), 0),
-        totalSize: folders.reduce((acc, folder) => acc + Number(folder.totalSize || 0), 0),
-        lastIndexed: folders.reduce((acc, folder) => {
+        totalFiles: folders.reduce((acc: number, folder: any) => acc + (folder._count?.images || 0), 0),
+        totalSize: folders.reduce((acc: number, folder: any) => acc + Number(folder.totalSize || 0), 0),
+        lastIndexed: folders.reduce((acc: Date | null, folder: any) => {
           if (!acc || !folder.lastIndexed) return acc
           const date = new Date(folder.lastIndexed)
           return acc > date ? acc : date
@@ -134,9 +120,7 @@ export function FoldersSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          path: folderPath,
-          thumbnailQuality: thumbnailQuality,
-          generateThumbnails
+          path: folderPath
         }),
       })
 
@@ -254,8 +238,7 @@ export function FoldersSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          generateThumbnails,
-          thumbnailQuality
+          path: folderPath
         }),
       })
 
@@ -333,7 +316,7 @@ export function FoldersSection() {
                   description: errors > 0
                     ? `Se completó la reindexación con ${errors} errores`
                     : "Se ha completado la reindexación correctamente",
-                  variant: errors > 0 ? "warning" : "default"
+                  variant: errors > 0 ? "destructive" : "default"
                 })
                 // Esperar un momento antes de actualizar la lista
                 await new Promise(resolve => setTimeout(resolve, 500))
@@ -424,10 +407,13 @@ export function FoldersSection() {
 
   return (
     <div className="space-y-4">
-
-      <Card>
-        <CardContent className="space-y-4 pt-6">
-          <div className="flex items-center gap-2 p-2 rounded-lg border">
+      <Card className="border-none py-2">
+        <CardHeader className="px-4 py-2">
+          <CardTitle className="text-xl font-semibold flex items-center">
+            <FolderIcon className="h-6 w-6 mr-2" /> Carpetas</CardTitle>
+        </CardHeader>
+        <CardContent className="p-2">
+          <div className="flex items-center gap-2 p-2 border-none">
             <div className="flex-1">
               <Input
                 type="text"
@@ -479,7 +465,7 @@ export function FoldersSection() {
             <div className="space-y-2">
               {folders.map((folder) => (
                 <Card key={folder.id}>
-                  <CardContent className="p-4">
+                  <CardContent className="p-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 rounded-md bg-muted">

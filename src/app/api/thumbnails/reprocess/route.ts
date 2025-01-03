@@ -1,12 +1,26 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { writeStreamEvent } from '@/lib/stream'
-import { generateThumbnail } from '@/lib/image'
+import { generateThumbnail } from '@/lib/thumbnail'
 import { existsSync } from 'fs'
+import { ThumbnailQuality } from '@/services/thumbnail.service'
+
+export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
 export async function POST() {
+  const encoder = new TextEncoder()
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
+
+  const writeEvent = async (event: string, data: any) => {
+    try {
+      const formattedData = JSON.stringify({ type: event, data })
+      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
+    } catch (error) {
+      console.error('Error escribiendo evento:', error)
+    }
+  }
 
   try {
     // Obtener todas las imágenes que necesitan reprocesar
@@ -26,7 +40,7 @@ export async function POST() {
 
     const total = images.length
     if (total === 0) {
-      await writeStreamEvent(writer, 'complete', { processed: 0, total: 0 })
+      await writeEvent('complete', { processed: 0, total: 0 })
       await writer.close()
       return new NextResponse(stream.readable, {
         headers: {
@@ -49,14 +63,14 @@ export async function POST() {
         // Verificar que el archivo existe
         if (!existsSync(image.path)) {
           errors++
-          await writeStreamEvent(writer, 'error', {
+          await writeEvent('error', {
             file: image.path,
             error: 'Archivo original no encontrado'
           })
           continue
         }
 
-        await writeStreamEvent(writer, 'progress', {
+        await writeEvent('progress', {
           current,
           total,
           progress,
@@ -65,7 +79,7 @@ export async function POST() {
         })
 
         // Generar thumbnail
-        const result = await generateThumbnail(image.path, image.thumbnailQuality || 'mid')
+        const result = await generateThumbnail(image.path, (image.thumbnailQuality as ThumbnailQuality) || 'mid')
         if (!result) {
           throw new Error('Error generando miniatura')
         }
@@ -74,8 +88,8 @@ export async function POST() {
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnail: result.data,
-            thumbnailSize: result.size,
+            thumbnail: result.buffer.toString('base64'),
+            thumbnailSize: result.buffer.length,
             thumbnailWidth: result.width,
             thumbnailHeight: result.height,
             thumbnailError: null,
@@ -93,12 +107,16 @@ export async function POST() {
           where: { id: image.id },
           data: {
             thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date()
+            thumbnailErrorAt: new Date(),
+            thumbnail: null,
+            thumbnailSize: null,
+            thumbnailWidth: null,
+            thumbnailHeight: null
           }
         })
 
         // Enviar evento de error
-        await writeStreamEvent(writer, 'error', {
+        await writeEvent('error', {
           file: image.path,
           error: error instanceof Error ? error.message : 'Error desconocido'
         })
@@ -106,7 +124,7 @@ export async function POST() {
     }
 
     // Enviar evento de completado
-    await writeStreamEvent(writer, 'complete', {
+    await writeEvent('complete', {
       processed: current - errors,
       total,
       errors
@@ -125,7 +143,7 @@ export async function POST() {
     console.error('Error en reprocesamiento:', error)
 
     try {
-      await writeStreamEvent(writer, 'error', {
+      await writeEvent('error', {
         error: error instanceof Error ? error.message : 'Error desconocido'
       })
     } catch (streamError) {

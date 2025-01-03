@@ -5,7 +5,7 @@ import { existsSync } from 'fs'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+export const maxDuration = 300
 
 export async function POST(
   request: NextRequest,
@@ -14,6 +14,14 @@ export async function POST(
   try {
     const { id } = await Promise.resolve(context.params)
     const { quality = 'mid' } = await request.json()
+
+    // Validar ID
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de imagen requerido' },
+        { status: 400 }
+      )
+    }
 
     // Obtener la imagen
     const image = await prisma.image.findUnique({
@@ -32,7 +40,7 @@ export async function POST(
       await prisma.image.update({
         where: { id },
         data: {
-          thumbnailError: 'Original file not found',
+          thumbnailError: 'Archivo original no encontrado',
           thumbnailErrorAt: new Date()
         }
       })
@@ -50,19 +58,34 @@ export async function POST(
         throw new Error('Error generando miniatura')
       }
 
+      // Validar el resultado
+      if (!result.buffer || result.buffer.length === 0) {
+        throw new Error('Buffer de miniatura inválido')
+      }
+
       // Actualizar en base de datos
       await prisma.image.update({
         where: { id },
         data: {
           thumbnail: result.buffer.toString('base64'),
+          thumbnailSize: result.buffer.length,
           thumbnailWidth: result.width,
           thumbnailHeight: result.height,
+          thumbnailQuality: quality,
           thumbnailError: null,
-          thumbnailErrorAt: null
+          thumbnailErrorAt: null,
+          updatedAt: new Date()
         }
       })
 
-      return NextResponse.json({ status: 'success' })
+      return NextResponse.json({
+        status: 'success',
+        data: {
+          width: result.width,
+          height: result.height,
+          size: result.buffer.length
+        }
+      })
     } catch (error) {
       console.error('Error generando thumbnail:', error)
 
@@ -71,19 +94,29 @@ export async function POST(
         where: { id },
         data: {
           thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-          thumbnailErrorAt: new Date()
+          thumbnailErrorAt: new Date(),
+          thumbnail: null, // Limpiar thumbnail si existe
+          thumbnailSize: null,
+          thumbnailWidth: null,
+          thumbnailHeight: null
         }
       })
 
       return NextResponse.json(
-        { error: 'Error al generar la miniatura' },
+        {
+          error: 'Error al generar la miniatura',
+          details: error instanceof Error ? error.message : 'Error desconocido'
+        },
         { status: 500 }
       )
     }
   } catch (error) {
     console.error('Error en generación de thumbnail:', error)
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      {
+        error: 'Error interno del servidor',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
       { status: 500 }
     )
   }
