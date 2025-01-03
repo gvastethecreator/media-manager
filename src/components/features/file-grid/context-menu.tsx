@@ -44,6 +44,53 @@ export function FileContextMenu({
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent className="w-64">
+				<ContextMenuItem onClick={() => onAction("favorite-toggle", file)}>
+					{file.isFavorite ? (
+						<>
+							<HeartOff className="mr-2 h-4 w-4" />
+							Quitar de favoritos
+						</>
+					) : (
+						<>
+							<Heart className="mr-2 h-4 w-4" />
+							Agregar a favoritos
+						</>
+					)}
+					<ContextMenuShortcut>⌘F</ContextMenuShortcut>
+				</ContextMenuItem>
+
+				<ContextMenuSub>
+					<ContextMenuSubTrigger>
+						<BookmarkPlus className="mr-2 h-4 w-4" />
+						Agregar a colección
+					</ContextMenuSubTrigger>
+					<ContextMenuSubContent className="w-48">
+						<ContextMenuItem onClick={() => onAction("collection-new", file)}>
+							<BookmarkPlus className="mr-2 h-4 w-4" />
+							Nueva colección...
+						</ContextMenuItem>
+						<ContextMenuSeparator />
+						{/* Aquí irían las colecciones existentes */}
+					</ContextMenuSubContent>
+				</ContextMenuSub>
+
+				<ContextMenuSub>
+					<ContextMenuSubTrigger>
+						<TagIcon className="mr-2 h-4 w-4" />
+						Etiquetas
+					</ContextMenuSubTrigger>
+					<ContextMenuSubContent className="w-48">
+						<ContextMenuItem onClick={() => onAction("tag-new", file)}>
+							<TagIcon className="mr-2 h-4 w-4" />
+							Nueva etiqueta...
+						</ContextMenuItem>
+						<ContextMenuSeparator />
+						{/* Aquí irían las etiquetas existentes */}
+					</ContextMenuSubContent>
+				</ContextMenuSub>
+
+				<ContextMenuSeparator />
+
 				{isImage && (
 					<ContextMenuItem onClick={() => onAction("preview", file)}>
 						<ImageIcon className="mr-2 h-4 w-4" />
@@ -74,53 +121,6 @@ export function FileContextMenu({
 
 				<ContextMenuSeparator />
 
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>
-						<BookmarkPlus className="mr-2 h-4 w-4" />
-						Agregar a colección
-					</ContextMenuSubTrigger>
-					<ContextMenuSubContent className="w-48">
-						<ContextMenuItem onClick={() => onAction("collection-new", file)}>
-							<BookmarkPlus className="mr-2 h-4 w-4" />
-							Nueva colección...
-						</ContextMenuItem>
-						<ContextMenuSeparator />
-						{/* Aquí irían las colecciones existentes */}
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-
-				<ContextMenuItem onClick={() => onAction("favorite-toggle", file)}>
-					{file.isFavorite ? (
-						<>
-							<HeartOff className="mr-2 h-4 w-4" />
-							Quitar de favoritos
-						</>
-					) : (
-						<>
-							<Heart className="mr-2 h-4 w-4" />
-							Agregar a favoritos
-						</>
-					)}
-					<ContextMenuShortcut>⌘F</ContextMenuShortcut>
-				</ContextMenuItem>
-
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>
-						<TagIcon className="mr-2 h-4 w-4" />
-						Etiquetas
-					</ContextMenuSubTrigger>
-					<ContextMenuSubContent className="w-48">
-						<ContextMenuItem onClick={() => onAction("tag-new", file)}>
-							<TagIcon className="mr-2 h-4 w-4" />
-							Nueva etiqueta...
-						</ContextMenuItem>
-						<ContextMenuSeparator />
-						{/* Aquí irían las etiquetas existentes */}
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-
-				<ContextMenuSeparator />
-
 				<ContextMenuItem
 					onClick={() => onAction("delete", file)}
 					className="text-red-600"
@@ -129,8 +129,6 @@ export function FileContextMenu({
 					Eliminar
 					<ContextMenuShortcut>⌘⌫</ContextMenuShortcut>
 				</ContextMenuItem>
-
-				<ContextMenuSeparator />
 			</ContextMenuContent>
 		</ContextMenu>
 	);

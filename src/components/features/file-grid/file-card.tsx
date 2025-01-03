@@ -16,7 +16,6 @@ import { useFileSelection } from "@/store/file-selection";
 
 interface FileCardProps {
 	item: FileItem;
-	viewMode?: "grid" | "list";
 	thumbnailSize?: ThumbnailSize;
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
@@ -25,7 +24,6 @@ interface FileCardProps {
 
 export function FileCard({
 	item,
-	viewMode = "grid",
 	thumbnailSize = "medium",
 	onClick,
 	onDoubleClick,
@@ -131,6 +129,15 @@ export function FileCard({
 		async (action: string, file: FileItem) => {
 			try {
 				switch (action) {
+					case "favorite-toggle":
+						// TODO: Implementar toggle de favorito
+						break;
+					case "collection-new":
+						// TODO: Implementar creación de colección nueva utilizando el servicio de colecciones y teniendo de referencia @collections-section
+						break;
+					case "tag-new":
+						// TODO: Implementar creación de etiqueta nueva utilizando el servicio de etiquetas y teniendo de referencia @tags-section
+						break;
 					case "preview":
 						if (file.metadata?.mimeType?.startsWith("image/")) {
 							openViewer([file], 0);
@@ -140,42 +147,15 @@ export function FileCard({
 						break;
 					case "open":
 						// Abrir ubicación del archivo
-						window.electron?.openPath(file.path);
 						break;
 					case "download":
 						// Descargar archivo
-						window.electron?.downloadFile(file.path);
-						break;
-					case "share":
-						// Copiar enlace al portapapeles
-						await navigator.clipboard.writeText(file.path);
-						toast({
-							title: "Enlace copiado",
-							description:
-								"La ruta del archivo ha sido copiada al portapapeles",
-						});
 						break;
 					case "copy":
-						// Copiar archivo al portapapeles
-						window.electron?.copyFile(file.path);
-						break;
-					case "collection-new":
-						// TODO: Implementar creación de colección
-						break;
-					case "favorite-toggle":
-						// TODO: Implementar toggle de favorito
-						break;
-					case "tag-new":
-						// TODO: Implementar creación de etiqueta
-						break;
-					case "rename":
-						// TODO: Implementar renombrado
+						// Copiar la imagen  al portapapeles
 						break;
 					case "delete":
 						// TODO: Implementar eliminación
-						break;
-					case "info":
-						// TODO: Implementar vista de propiedades
 						break;
 					default:
 						console.warn("Acción no implementada:", action);
@@ -193,11 +173,11 @@ export function FileCard({
 	);
 
 	const cardContent = (
-		<div className="relative w-full h-full">
+		<div className="relative w-full h-full border-none">
 			{isLoading ? (
 				<Skeleton className="w-full h-full" />
 			) : error ? (
-				<div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2 p-4">
+				<div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2">
 					<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
 					<span className="text-xs text-muted-foreground text-center">
 						{error}
@@ -205,16 +185,14 @@ export function FileCard({
 				</div>
 			) : (
 				<div className="relative w-full h-full">
-					{thumbnail ? (
-						<>
 							<ImageCard
-								src={thumbnail}
+								src={thumbnail || ""}
 								alt={item.name}
 								width={item.metadata?.dimensions?.width || 300}
 								height={item.metadata?.dimensions?.height || 300}
 								className={cn(
-									"w-full h-full",
-									!isSelected && "group-hover:scale-105"
+									"w-full h-full object-cover ",
+									!isSelected && "group-hover:scale-1 border-2 border-primary"
 								)}
 								priority={false}
 							/>
@@ -228,17 +206,7 @@ export function FileCard({
 									<p className="text-xs text-white truncate">{item.name}</p>
 								</div>
 							</div>
-						</>
-					) : (
-						<div className="w-full h-full flex items-center justify-center bg-muted">
-							<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-						</div>
-					)}
-					{viewMode === "list" && (
-						<div className="absolute inset-0 flex items-center px-4">
-							<span className="text-sm truncate">{item.name}</span>
-						</div>
-					)}
+
 				</div>
 			)}
 		</div>
@@ -256,7 +224,7 @@ export function FileCard({
 					isSelected
 						? "border-primary ring-2 ring-primary ring-offset-2"
 						: "border-border",
-					viewMode === "grid" ? "aspect-square" : "h-12",
+					"aspect-square",
 					"group hover:border-primary/50"
 				)}
 				onClick={handleClick}
