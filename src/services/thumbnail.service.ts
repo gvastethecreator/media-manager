@@ -45,8 +45,13 @@ class ThumbnailService {
   private readonly timeout = 300000; // 5 minutos
   private readonly maxRetries = 3;
   private readonly retryDelay = 1000;
+  private preGenerationQueue: Set<string> = new Set();
+  private isProcessingQueue = false;
 
-  private constructor() { }
+  private constructor() {
+    // Inicializar el servicio
+    this.startQueueProcessor();
+  }
 
   public static getInstance(): ThumbnailService {
     if (!ThumbnailService.instance) {
@@ -181,6 +186,26 @@ class ThumbnailService {
     }
   }
 
+  private async startQueueProcessor() {
+    if (this.isProcessingQueue) return
+
+    this.isProcessingQueue = true
+    while (this.preGenerationQueue.size > 0) {
+      const [nextId] = this.preGenerationQueue
+      this.preGenerationQueue.delete(nextId)
+
+      try {
+        await this.generateThumbnail(nextId, 'mid')
+      } catch (error) {
+        console.error('Error pre-generando thumbnail:', error)
+      }
+
+      // Esperar un poco entre cada generación para no sobrecargar
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    this.isProcessingQueue = false
+  }
+
   async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {
     try {
       const cacheKey = `thumbnail:${imageId}:${quality}`
@@ -191,26 +216,50 @@ class ThumbnailService {
         return cached
       }
 
-      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}?quality=${quality}`, {
-        headers: {
-          'Accept': 'image/webp',
-          'Cache-Control': 'no-cache'
-        }
-      })
+      // Si no está en caché, intentar obtener con reintentos
+      let attempts = 0
+      let lastError: Error | null = null
 
-      if (!response.ok) {
-        const error = await response.text()
-        console.error('Error obteniendo miniatura:', error)
-        throw new Error('Miniatura no encontrada')
+      while (attempts < this.maxRetries) {
+        try {
+          const response = await this.fetchWithTimeout(
+            `/api/thumbnails/${imageId}?quality=${quality}`,
+            {
+              headers: {
+                'Accept': 'image/webp',
+                'Cache-Control': 'no-cache'
+              }
+            }
+          )
+
+          if (!response.ok) {
+            const error = await response.text()
+            throw new Error(error || 'Error obteniendo miniatura')
+          }
+
+          const blob = await response.blob()
+          const base64 = await this.blobToBase64(blob)
+
+          // Guardar en caché
+          await thumbnailCache.set(cacheKey, base64)
+
+          return base64
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error('Error desconocido')
+          attempts++
+          if (attempts < this.maxRetries) {
+            await new Promise(resolve =>
+              setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
+            )
+          }
+        }
       }
 
-      const blob = await response.blob()
-      const base64 = await this.blobToBase64(blob)
+      // Si llegamos aquí, agregar a la cola de pre-generación
+      this.preGenerationQueue.add(imageId)
+      this.startQueueProcessor()
 
-      // Guardar en caché
-      await thumbnailCache.set(cacheKey, base64)
-
-      return base64
+      throw lastError || new Error('Error al obtener la miniatura después de reintentos')
     } catch (error) {
       console.error('Error en getThumbnail:', error)
       throw error instanceof Error ? error : new Error('Error al obtener la miniatura')
@@ -218,47 +267,66 @@ class ThumbnailService {
   }
 
   async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
-    try {
-      if (!imageId || !quality) {
-        throw new Error('ID de imagen y calidad son requeridos')
-      }
+    let attempts = 0
+    let lastError: Error | null = null
 
-      const config = THUMBNAIL_QUALITY_CONFIG[quality]
-      if (!config) {
-        throw new Error('Calidad de thumbnail inválida')
-      }
+    while (attempts < this.maxRetries) {
+      try {
+        if (!imageId || !quality) {
+          throw new Error('ID de imagen y calidad son requeridos')
+        }
 
-      const response = await this.fetchWithTimeout(
-        `/api/thumbnails/${imageId}/generate`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
+        const config = THUMBNAIL_QUALITY_CONFIG[quality]
+        if (!config) {
+          throw new Error('Calidad de thumbnail inválida')
+        }
+
+        const response = await this.fetchWithTimeout(
+          `/api/thumbnails/${imageId}/generate`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            body: JSON.stringify({
+              quality,
+              ...config
+            })
           },
-          body: JSON.stringify({
-            quality,
-            ...config
-          })
-        },
-        60000 // 60s timeout para imágenes grandes
-      )
+          60000 // 60s timeout para imágenes grandes
+        )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.details || errorData.error || 'Error generando miniatura')
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.details || errorData.error || 'Error generando miniatura')
+        }
+
+        // Invalidar caché para esta imagen
+        const cacheKey = `thumbnail:${imageId}:${quality}`
+        await thumbnailCache.delete(cacheKey)
+
+        // Esperar un momento para asegurar que el thumbnail se ha generado
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        return
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Error desconocido')
+        attempts++
+        if (attempts < this.maxRetries) {
+          await new Promise(resolve =>
+            setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
+          )
+        }
       }
-
-      // Invalidar caché para esta imagen
-      const cacheKey = `thumbnail:${imageId}:${quality}`
-      await thumbnailCache.delete(cacheKey)
-
-      // Esperar un momento para asegurar que el thumbnail se ha generado
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    } catch (error) {
-      console.error('Error en generateThumbnail:', error)
-      throw error instanceof Error ? error : new Error('Error al generar la miniatura')
     }
+
+    throw lastError || new Error('Error al generar la miniatura después de reintentos')
+  }
+
+  // Método para pre-generar thumbnails
+  async queueThumbnailGeneration(imageIds: string[]): Promise<void> {
+    imageIds.forEach(id => this.preGenerationQueue.add(id))
+    this.startQueueProcessor()
   }
 
   async optimizeThumbnails(onProgress?: ThumbnailEventCallback): Promise<void> {
