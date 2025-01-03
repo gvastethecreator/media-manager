@@ -458,3 +458,73 @@ src/
               └── settings-sections/
                   └── folders-section.tsx
 ```
+
+### 2024-01-10 (Actualización 4)
+
+#### Análisis del Problema de Indexación
+
+##### Hallazgos Iniciales:
+
+1. **Servidor (API Route):**
+   - ✅ Implementación correcta de SSE
+   - ✅ Headers configurados correctamente
+   - ✅ Eventos siendo emitidos (progress, error, complete)
+   - ✅ Manejo de errores implementado
+
+2. **Cliente (folder.service.ts):**
+   - ❌ Posible problema en el procesamiento del buffer de eventos
+   - ❌ Manejo de stream potencialmente defectuoso
+   - ❌ Posible pérdida de eventos o corrupción del buffer
+
+##### Plan de Acción:
+
+1. Revisar y corregir el procesamiento de eventos SSE en el cliente
+2. Mejorar el manejo del buffer de eventos
+3. Implementar mejor logging para debug
+4. Añadir manejo de reconexión automática
+
+### 2024-01-10 (Actualización 5)
+
+#### Correcciones en el Servicio de Carpetas
+
+##### Cambios Realizados:
+
+1. **Mejoras en el Manejo de Timeouts:**
+   - Aumentado timeout por defecto a 5 minutos
+   - Implementado sistema de reintentos automáticos
+   - Añadido delay progresivo entre reintentos
+
+2. **Mejoras en el Manejo de SSE:**
+   - Mejorado procesamiento del buffer de eventos
+   - Añadido logging más detallado
+   - Mejor manejo de errores y eventos vacíos
+
+##### Estado Actual:
+
+- ✅ Implementado sistema de reintentos
+- ✅ Mejorado manejo de eventos SSE
+- ✅ Añadido mejor logging para debug
+- ❌ Pendiente verificar si los cambios resuelven el problema
+
+##### Próximos Pasos:
+
+1. Verificar funcionamiento con carpetas grandes
+2. Monitorear logs para detectar posibles errores
+3. Considerar implementar sistema de caché
+4. Mejorar feedback visual durante el proceso
+
+##### Notas Técnicas:
+
+```typescript
+// Configuración de Timeouts y Reintentos
+timeout = 300000    // 5 minutos
+maxRetries = 3      // Máximo de intentos
+retryDelay = 1000   // Delay base entre reintentos
+```
+
+##### Puntos de Atención:
+
+1. Monitorear si el timeout de 5 minutos es suficiente
+2. Verificar si los reintentos son efectivos
+3. Observar el comportamiento con diferentes tamaños de carpetas
+4. Validar que los eventos SSE se procesen correctamente
