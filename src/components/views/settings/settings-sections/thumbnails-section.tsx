@@ -46,8 +46,9 @@ const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 
 export function ThumbnailsSection() {
 	const { settings, updateSettings } = useSettingsContext();
-	const [stats, setStats] = React.useState<ThumbnailStats>();
+	const [stats, setStats] = React.useState<ThumbnailStats | null>(null);
 	const [isLoading, setIsLoading] = React.useState(false);
+	const [isProcessing, setIsProcessing] = React.useState(false);
 	const [isOptimizing, setIsOptimizing] = React.useState(false);
 	const [progress, setProgress] = React.useState<{
 		current: number;
@@ -59,76 +60,78 @@ export function ThumbnailsSection() {
 	const [showErrors, setShowErrors] = React.useState(false);
 	const { toast } = useToast();
 
+	const loadStats = React.useCallback(async () => {
+		try {
+			const stats = await thumbnailService.getStats();
+			setStats(stats);
+		} catch (error) {
+			console.error("Error cargando estadísticas:", error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al cargar estadísticas de miniaturas",
+				variant: "destructive",
+			});
+		}
+	}, [toast]);
+
+	const handleReprocessThumbnails = React.useCallback(async () => {
+		try {
+			setIsProcessing(true);
+			setProgress(null);
+
+			await thumbnailService.reprocessAll((event) => {
+				if (event.type === "progress") {
+					setProgress({
+						current: event.data.current,
+						total: event.data.total,
+						progress: event.data.progress,
+						currentFile: event.data.currentFile,
+						status: event.data.status,
+					});
+				} else if (event.type === "error") {
+					toast({
+						title: "Error",
+						description: `Error procesando ${event.data.file}: ${event.data.error}`,
+						variant: "destructive",
+					});
+				} else if (event.type === "complete") {
+					toast({
+						title: event.data.errors > 0 ? "Completado con errores" : "Éxito",
+						description: `Se procesaron ${event.data.processed} de ${
+							event.data.total
+						} imágenes${
+							event.data.errors > 0 ? ` (${event.data.errors} errores)` : ""
+						}`,
+						variant: event.data.errors > 0 ? "destructive" : "default",
+					});
+					loadStats();
+				}
+			});
+		} catch (error) {
+			console.error("Error en reprocesamiento:", error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al reprocesar miniaturas",
+				variant: "destructive",
+			});
+		} finally {
+			setIsProcessing(false);
+			setProgress(null);
+		}
+	}, [toast, loadStats]);
+
 	const handleQualityChange = async (quality: ThumbnailQuality) => {
 		await updateSettings({ thumbnailQuality: quality });
 	};
 
 	const handleVideoAnimationToggle = async (enabled: boolean) => {
 		await updateSettings({ videoThumbnailAnimation: enabled });
-	};
-
-	const handleReprocessThumbnails = async () => {
-		try {
-			setIsLoading(true);
-			setProgress(null);
-
-			let errorCount = 0;
-			const maxErrors = 5; // Máximo de errores antes de abortar
-
-			await thumbnailService.reprocessAll((event) => {
-				if (event.type === "progress") {
-					setProgress(event.data);
-				} else if (event.type === "error") {
-					errorCount++;
-					toast({
-						title: "Error",
-						description: (
-							<div className="space-y-2">
-								<p>Error procesando {event.data.file}:</p>
-								<p className="text-sm text-red-500">{event.data.error}</p>
-								{errorCount >= maxErrors && (
-									<p className="text-sm font-medium">
-										Demasiados errores, el proceso se detendrá.
-									</p>
-								)}
-							</div>
-						),
-						variant: "destructive",
-					});
-
-					if (errorCount >= maxErrors) {
-						throw new Error("Demasiados errores consecutivos");
-					}
-				} else if (event.type === "complete") {
-					toast({
-						title: "Completado",
-						description: `Se procesaron ${event.data.processed} de ${event.data.total} imágenes`,
-					});
-					loadStats();
-				}
-			});
-		} catch (error) {
-			console.error("Error reprocesando miniaturas:", error);
-			toast({
-				title: "Error",
-				description: (
-					<div className="space-y-2">
-						<p>
-							{error instanceof Error
-								? error.message
-								: "Error al reprocesar las miniaturas"}
-						</p>
-						<p className="text-sm text-muted-foreground">
-							Revisa los logs para más detalles
-						</p>
-					</div>
-				),
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-			setProgress(null);
-		}
 	};
 
 	const handleOptimizeThumbnails = async () => {
@@ -195,37 +198,20 @@ export function ThumbnailsSection() {
 		}
 	};
 
-	const loadStats = React.useCallback(async () => {
-		try {
-			const stats = await thumbnailService.getStats();
-			setStats(stats);
-		} catch (error) {
-			console.error("Error cargando estadísticas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al cargar estadísticas de miniaturas",
-				variant: "destructive",
-			});
-		}
-	}, [toast]);
-
 	React.useEffect(() => {
 		loadStats();
 	}, [loadStats]);
 
 	return (
-		<div className="space-y-6">
-			<Card className="border-none py-6">
+		<div className="space-y-6 w-full">
+			<Card className="border-none py-6 w-full">
 				<CardHeader className="px-4 py-2">
-					<CardTitle className="text-xl font-semibold flex items-center">
+					<CardTitle className="text-xl font-semibold items-center">
 						<ImageIcon className="h-6 w-6 mr-2" /> Miniaturas
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					<div className="space-y-4 flex flex-col-2 gap-4">
+					<div className="space-y-4 gap-4">
 						<div className="space-y-2 w-1/2">
 							<Label>Calidad de Miniaturas</Label>
 							<Select

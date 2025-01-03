@@ -1,30 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeStreamEvent } from '@/lib/stream'
 import { generateThumbnail } from '@/lib/thumbnail'
-import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { headers } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const encoder = new TextEncoder()
-  const stream = new TransformStream()
-  const writer = stream.writable.getWriter()
-
-  const writeEvent = async (event: string, data: Record<string, any>) => {
-    try {
-      const formattedData = JSON.stringify({ type: event, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      console.error('Error escribiendo evento:', { error: errorMessage })
-    }
-  }
+  const customHeaders = headers()
 
   try {
-    // Obtener todas las imágenes que necesitan reprocesar
+    // Configurar SSE
+    const stream = new TransformStream()
+    const writer = stream.writable.getWriter()
+    const sendEvent = async (event: { type: string, data: any }) => {
+      await writer.write(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
+    }
+
+    // Obtener imágenes para reprocesar
     const images = await prisma.image.findMany({
       where: {
         OR: [
@@ -34,133 +28,88 @@ export async function POST() {
       },
       select: {
         id: true,
-        path: true,
-        thumbnailQuality: true
+        path: true
       }
     })
 
-    const total = images.length
-    if (total === 0) {
-      await writeEvent('complete', { processed: 0, total: 0 })
-      await writer.close()
-      return new NextResponse(stream.readable, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      })
-    }
+    // Iniciar respuesta SSE
+    const response = new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
 
-    let current = 0
-    let errors = 0
-
-    // Procesar cada imagen
-    for (const image of images) {
+    // Procesar imágenes en background
+    const processImages = async () => {
       try {
-        current++
-        const progress = Math.round((current / total) * 100)
+        let processed = 0
+        let errors = 0
+        const total = images.length
 
-        // Verificar que el archivo existe
-        if (!existsSync(image.path)) {
-          errors++
-          await writeEvent('error', {
-            file: image.path,
-            error: 'Archivo original no encontrado'
-          })
-          continue
+        for (const image of images) {
+          try {
+            await generateThumbnail(image.path, 'mid')
+            processed++
+
+            // Actualizar progreso
+            await sendEvent({
+              type: 'progress',
+              data: {
+                current: processed,
+                total,
+                currentFile: image.path,
+                status: 'Procesando...',
+                progress: Math.round((processed / total) * 100)
+              }
+            })
+
+          } catch (error) {
+            errors++
+            console.error('Error procesando imagen:', error)
+            await sendEvent({
+              type: 'error',
+              data: {
+                file: image.path,
+                error: error instanceof Error ? error.message : 'Error desconocido'
+              }
+            })
+          }
         }
 
-        await writeEvent('progress', {
-          current,
-          total,
-          progress,
-          currentFile: image.path,
-          status: 'Procesando...'
-        })
-
-        // Generar thumbnail
-        const result = await generateThumbnail(image.path, (image.thumbnailQuality as ThumbnailQuality) || 'mid')
-        if (!result) {
-          throw new Error('Error generando miniatura')
-        }
-
-        // Actualizar en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
+        // Enviar evento de completado
+        await sendEvent({
+          type: 'complete',
           data: {
-            thumbnail: result.buffer.toString('base64'),
-            thumbnailSize: result.buffer.length,
-            thumbnailWidth: result.width,
-            thumbnailHeight: result.height,
-            thumbnailError: null,
-            thumbnailErrorAt: null,
-            updatedAt: new Date()
+            processed,
+            total,
+            errors
           }
         })
 
       } catch (error) {
-        errors++
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-        console.error('Error procesando imagen:', { error: errorMessage, path: image.path })
-
-        // Actualizar error en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
+        console.error('Error en procesamiento:', error)
+        await sendEvent({
+          type: 'error',
           data: {
-            thumbnailError: errorMessage,
-            thumbnailErrorAt: new Date(),
-            thumbnail: null,
-            thumbnailSize: null,
-            thumbnailWidth: null,
-            thumbnailHeight: null
+            error: error instanceof Error ? error.message : 'Error desconocido'
           }
         })
-
-        // Enviar evento de error
-        await writeEvent('error', {
-          file: image.path,
-          error: errorMessage
-        })
+      } finally {
+        await writer.close()
       }
     }
 
-    // Enviar evento de completado
-    await writeEvent('complete', {
-      processed: current - errors,
-      total,
-      errors
-    })
+    // Iniciar procesamiento
+    processImages()
 
-    await writer.close()
-    return new NextResponse(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    })
-
+    return response
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-    console.error('Error en reprocesamiento:', { error: errorMessage })
-
-    try {
-      await writeEvent('error', {
-        error: errorMessage
-      })
-    } catch (streamError) {
-      const streamErrorMessage = streamError instanceof Error ? streamError.message : 'Error desconocido'
-      console.error('Error escribiendo en stream:', { error: streamErrorMessage })
-    }
-
-    await writer.close()
-    return new NextResponse(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    })
+    console.error('Error en endpoint:', error)
+    return NextResponse.json(
+      { error: 'Error iniciando reprocesamiento' },
+      { status: 500 }
+    )
   }
 }

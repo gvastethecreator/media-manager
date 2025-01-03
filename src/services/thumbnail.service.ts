@@ -133,79 +133,54 @@ class ThumbnailService {
     );
   }
 
-  async reprocessAll(onProgress?: (data: any) => void): Promise<void> {
+  async reprocessAll(onProgress?: (event: any) => void): Promise<void> {
     try {
       const response = await fetch('/api/thumbnails/reprocess', {
         method: 'POST',
         headers: {
           'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
         }
       });
 
       if (!response.ok || !response.body) {
-        const text = await response.text();
-        console.error('Error en respuesta del servidor:', text);
-        throw new Error('Error iniciando el reprocesamiento de miniaturas');
+        throw new Error('Error iniciando el reprocesamiento');
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
+      while (true) {
+        const { done, value } = await reader.read();
 
-          if (done) {
-            console.log('Stream completado');
-            break;
-          }
+        if (done) {
+          console.log('Stream completado');
+          break;
+        }
 
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n\n');
-          buffer = lines.pop() || '';
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const eventData = line.slice(6);
-                const event = JSON.parse(eventData);
-                console.log('Evento SSE recibido:', event);
-
-                if (onProgress) {
-                  onProgress(event);
-                }
-
-                // Si es un evento de error, lanzar excepción
-                if (event.type === 'error' && event.data?.error) {
-                  throw new Error(event.data.error);
-                }
-
-                // Si es un evento de completado, verificar errores
-                if (event.type === 'complete' && event.data?.errors > 0) {
-                  console.warn(`Proceso completado con ${event.data.errors} errores`);
-                }
-              } catch (parseError) {
-                console.error('Error parseando evento SSE:', parseError);
-                console.log('Línea con error:', line);
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
+            try {
+              const event = JSON.parse(line.slice(6));
+              console.log('Evento SSE recibido:', event);
+              if (onProgress) {
+                onProgress(event);
               }
+            } catch (error) {
+              console.error('Error parseando evento SSE:', error);
             }
           }
         }
-      } catch (streamError) {
-        console.error('Error procesando stream:', streamError);
-        throw streamError;
-      } finally {
-        reader.releaseLock();
       }
     } catch (error) {
       console.error('Error en reprocessAll:', error);
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al reprocesar las miniaturas. Por favor, inténtalo de nuevo.'
-      );
+      throw error;
     }
   }
 
@@ -348,6 +323,28 @@ class ThumbnailService {
 
   getQualityConfig(quality: ThumbnailQuality) {
     return THUMBNAIL_QUALITY_CONFIG[quality];
+  }
+
+  async getImagesForReprocess(): Promise<{ id: string; path: string }[]> {
+    try {
+      const images = await prisma.image.findMany({
+        where: {
+          OR: [
+            { thumbnail: null },
+            { thumbnailError: { not: null } }
+          ]
+        },
+        select: {
+          id: true,
+          path: true
+        }
+      });
+
+      return images;
+    } catch (error) {
+      console.error('Error obteniendo imágenes para reprocesar:', error);
+      throw error;
+    }
   }
 }
 

@@ -104,90 +104,61 @@ class FolderService {
     const decoder = new TextDecoder();
     let buffer = '';
 
-    const processEvent = async (eventData: string) => {
-      try {
-        // Validar que el evento tenga datos
-        if (!eventData.trim()) {
-          console.log('Evento vacío recibido, ignorando...');
-          return;
-        }
-
-        console.log('Procesando evento SSE:', eventData);
-        const event = JSON.parse(eventData);
-
-        switch (event.type) {
-          case 'progress':
-            if (event.data) {
-              console.log('Evento de progreso:', event.data);
-              options.onProgress?.({
-                current: event.data.current || 0,
-                total: event.data.total || 0,
-                currentFile: event.data.currentFile || '',
-                status: event.data.status || 'Procesando...',
-                progress: event.data.progress || 0
-              });
-            }
-            break;
-          case 'error':
-            console.log('Evento de error:', event.data);
-            const error = new Error(event.data?.message || 'Error desconocido');
-            error.name = event.data?.type || 'UNKNOWN_ERROR';
-            options.onError?.(error);
-            break;
-          case 'complete':
-            console.log('Evento de completado:', event.data);
-            if (event.data) {
-              options.onComplete?.(event.data);
-            }
-            break;
-          default:
-            console.warn('Tipo de evento desconocido:', event.type);
-        }
-      } catch (parseError) {
-        console.error('Error parseando evento SSE:', parseError);
-        console.log('Datos del evento que causaron error:', eventData);
-        options.onError?.(new Error('Error procesando evento del servidor'));
-      }
-    };
-
     try {
       while (true) {
         const { done, value } = await reader.read();
 
         if (done) {
-          console.log('Stream completado, procesando buffer restante:', buffer);
-          if (buffer.trim()) {
-            const events = buffer
-              .split('\n')
-              .filter(line => line.trim().startsWith('data: '))
-              .map(line => line.slice(6));
-
-            for (const event of events) {
-              await processEvent(event);
-            }
-          }
+          console.log('Stream completado');
           break;
         }
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
 
-        // Procesar líneas completas
-        const completeLines = lines.slice(0, -1);
-        for (const line of completeLines) {
-          if (line.trim() && line.startsWith('data: ')) {
-            await processEvent(line.slice(6));
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
+            try {
+              const eventData = line.slice(6);
+              console.log('Evento SSE recibido:', eventData);
+              const event = JSON.parse(eventData);
+
+              switch (event.type) {
+                case 'progress':
+                  console.log('Evento de progreso:', event.data);
+                  options.onProgress?.({
+                    current: event.data.current || 0,
+                    total: event.data.total || 0,
+                    currentFile: event.data.currentFile || '',
+                    status: event.data.status || 'Procesando...',
+                    progress: event.data.progress || 0
+                  });
+                  break;
+                case 'error':
+                  console.log('Evento de error:', event.data);
+                  const error = new Error(event.data.message || 'Error desconocido');
+                  error.name = event.data.type || 'UNKNOWN_ERROR';
+                  options.onError?.(error);
+                  break;
+                case 'complete':
+                  console.log('Evento de completado:', event.data);
+                  options.onComplete?.(event.data);
+                  break;
+                default:
+                  console.warn('Tipo de evento desconocido:', event.type);
+              }
+            } catch (parseError) {
+              console.error('Error parseando evento SSE:', parseError);
+              console.log('Datos del evento que causaron error:', line);
+            }
           }
         }
-
-        // Mantener el último fragmento incompleto en el buffer
-        buffer = lines[lines.length - 1];
       }
     } catch (streamError) {
       console.error('Error en el stream:', streamError);
       options.onError?.(new Error('Error en la comunicación con el servidor'));
     } finally {
-      console.log('Finalizando stream...');
       try {
         await reader.cancel();
       } catch (cancelError) {
@@ -247,15 +218,8 @@ class FolderService {
       });
 
       if (!response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType?.includes('application/json')) {
-          const error = await response.json();
-          console.log('Error JSON recibido:', error);
-          const errorObj = new Error(error.message || 'Error al agregar carpeta');
-          errorObj.name = error.type || 'UNKNOWN_ERROR';
-          throw errorObj;
-        }
-        throw new Error(`Error al agregar carpeta: ${response.status} ${response.statusText}`);
+        const error = await response.json();
+        throw new Error(error.message || 'Error al agregar carpeta');
       }
 
       if (!response.body) {
@@ -296,7 +260,10 @@ class FolderService {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
           }
         }
       );
@@ -306,36 +273,26 @@ class FolderService {
         throw new Error(error.message || error.error || 'Error al reindexar carpeta');
       }
 
-      const result = await response.json();
-
-      // Simular eventos de progreso
-      if (onProgress) {
-        onProgress({
-          current: result.processed,
-          total: result.totalFiles,
-          currentFile: '',
-          status: 'Procesando...',
-          progress: 100
-        });
+      if (!response.body) {
+        throw new Error('No se recibió respuesta del servidor');
       }
 
-      if (result.errors > 0 && onError) {
-        onError(new Error(`Se encontraron ${result.errors} errores durante la reindexación`));
-      }
-
-      if (onComplete) {
-        onComplete({
-          processed: result.processed,
-          total: result.totalFiles,
-          errors: result.errors,
-          folder: {
-            id: id,
-            name: '',
-            path: '',
-            errors: result.errors
-          }
-        });
-      }
+      console.log('Iniciando lectura del stream');
+      const reader = response.body.getReader();
+      await this.processSSEStream(reader, {
+        onProgress: (stats) => {
+          console.log('Progreso:', stats);
+          onProgress?.(stats);
+        },
+        onError: (error) => {
+          console.log('Error en stream:', error);
+          onError?.(error);
+        },
+        onComplete: (data) => {
+          console.log('Completado:', data);
+          onComplete?.(data);
+        }
+      });
 
       return true;
     } catch (error) {
