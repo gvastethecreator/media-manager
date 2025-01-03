@@ -1,18 +1,17 @@
-'use client'
+"use client";
 
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { FileDetails } from '@/components/features/file-details/file-details'
-import type { RightPanelProps } from '@/types/ui'
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileDetails } from "@/components/features/file-details/file-details";
+import { useFileSelection } from "@/store/file-selection";
 
-export function RightPanel({
-  selectedItem,
-}: RightPanelProps) {
-  return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
-          <FileDetails selectedItem={selectedItem} />
-      </ScrollArea>
-    </div>
-  )
+export function RightPanel() {
+	const { selectedItems } = useFileSelection();
+
+	return (
+		<div className="flex flex-col h-full">
+			<ScrollArea className="flex-1">
+				<FileDetails selectedItems={selectedItems} />
+			</ScrollArea>
+		</div>
+	);
 }
-// Compare this snippet from src/components/features/file-details/file-details.tsx:

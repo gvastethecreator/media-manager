@@ -66,11 +66,6 @@ export function FileContextMenu({
 					<ContextMenuShortcut>⌘D</ContextMenuShortcut>
 				</ContextMenuItem>
 
-				<ContextMenuItem onClick={() => onAction("share", file)}>
-					<Share2 className="mr-2 h-4 w-4" />
-					Compartir
-					<ContextMenuShortcut>⌘S</ContextMenuShortcut>
-				</ContextMenuItem>
 
 				<ContextMenuItem onClick={() => onAction("copy", file)}>
 					<Copy className="mr-2 h-4 w-4" />
@@ -127,11 +122,7 @@ export function FileContextMenu({
 
 				<ContextMenuSeparator />
 
-				<ContextMenuItem onClick={() => onAction("rename", file)}>
-					<Pencil className="mr-2 h-4 w-4" />
-					Renombrar
-					<ContextMenuShortcut>⌘R</ContextMenuShortcut>
-				</ContextMenuItem>
+
 
 				<ContextMenuItem
 					onClick={() => onAction("delete", file)}
@@ -144,11 +135,6 @@ export function FileContextMenu({
 
 				<ContextMenuSeparator />
 
-				<ContextMenuItem onClick={() => onAction("info", file)}>
-					<Info className="mr-2 h-4 w-4" />
-					Propiedades
-					<ContextMenuShortcut>⌘I</ContextMenuShortcut>
-				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
 	);
