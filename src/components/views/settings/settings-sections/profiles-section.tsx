@@ -12,7 +12,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { UserPlus, Trash2, Check, Smile } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
 import type { ThemeMode, Language } from "@/types/settings";
@@ -44,8 +43,6 @@ export function ProfilesSection() {
 			name: "Nuevo Perfil",
 			emoji: "👤",
 			color: "#3b82f6",
-			theme: "system" as ThemeMode,
-			language: "es" as Language,
 		});
 	};
 
@@ -119,54 +116,6 @@ export function ProfilesSection() {
 							</Popover>
 						</div>
 
-						<div className="grid grid-cols-2 gap-2">
-							<div className="space-y-1.5">
-								<Label className="text-xs">Tema</Label>
-								<Select
-									value={activeProfileData?.theme}
-									onValueChange={(value) =>
-										handleUpdateActiveProfile({ theme: value as ThemeMode })
-									}
-								>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Selecciona un tema" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="light" className="text-xs">
-											Claro
-										</SelectItem>
-										<SelectItem value="dark" className="text-xs">
-											Oscuro
-										</SelectItem>
-										<SelectItem value="system" className="text-xs">
-											Sistema
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div className="space-y-1.5">
-								<Label className="text-xs">Idioma</Label>
-								<Select
-									value={activeProfileData?.language}
-									onValueChange={(value) =>
-										handleUpdateActiveProfile({ language: value as Language })
-									}
-								>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Selecciona un idioma" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="es" className="text-xs">
-											Español
-										</SelectItem>
-										<SelectItem value="en" className="text-xs">
-											English
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
