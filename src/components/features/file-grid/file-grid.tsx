@@ -3,12 +3,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FileCard } from "./file-card";
-import { useFilesStore } from "@/store/files";
-import { useSettingsStore } from "@/store/settings";
-import { cn } from "@/lib/utils";
 import { useInView } from "react-intersection-observer";
 import type { FileItem } from "@/types/file-item";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface FileGridProps {
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
@@ -20,9 +17,9 @@ interface FileGridProps {
 // Configuración base del grid
 const GRID_CONFIG = {
 	minColumns: 5,
-	gap: 0, // 1rem = 16px
+	gap: 0, // Eliminamos el gap entre items
 	itemBaseWidth: 200,
-	itemAspectRatio: 1, // altura = ancho * 1.2 para metadata
+	itemAspectRatio: 1.2, // Ajustamos para un aspecto más rectangular (16:9 ≈ 1.77)
 } as const;
 
 export function FileGrid({
@@ -46,22 +43,25 @@ export function FileGrid({
 	// Cálculo dinámico del tamaño de la grilla
 	const calculateGridDimensions = () => {
 		const containerWidth = parentRef.current?.offsetWidth || window.innerWidth;
-		const availableWidth = containerWidth - GRID_CONFIG.gap; // Restamos el gap inicial
-		const minItemWidth = Math.floor(
-			(availableWidth - (GRID_CONFIG.minColumns - 1) * GRID_CONFIG.gap) /
-				GRID_CONFIG.minColumns
-		);
+		// Ya no restamos gap porque lo eliminamos
+		const availableWidth = containerWidth;
+
+		// Calculamos el ancho mínimo por item
+		const minItemWidth = Math.floor(availableWidth / GRID_CONFIG.minColumns);
 		const itemWidth = Math.min(GRID_CONFIG.itemBaseWidth, minItemWidth);
+
+		// Calculamos columnas para ocupar todo el ancho
 		const columns = Math.max(
 			GRID_CONFIG.minColumns,
-			Math.floor(
-				(availableWidth + GRID_CONFIG.gap) / (itemWidth + GRID_CONFIG.gap)
-			)
+			Math.floor(availableWidth / itemWidth)
 		);
 
+		// Ajustamos el itemWidth final para que ocupe exactamente el ancho disponible
+		const finalItemWidth = availableWidth / columns;
+
 		return {
-			itemWidth,
-			itemHeight: Math.floor(itemWidth * GRID_CONFIG.itemAspectRatio),
+			itemWidth: finalItemWidth,
+			itemHeight: finalItemWidth * GRID_CONFIG.itemAspectRatio,
 			columns,
 		};
 	};
@@ -85,9 +85,7 @@ export function FileGrid({
 	);
 
 	return (
-		<div
-			ref={parentRef}
-			className="h-full w-full overflow-auto p-4" >
+		<div ref={parentRef} className="h-full w-full overflow-auto">
 			<div
 				style={{
 					height: `${virtualizer.getTotalSize()}px`,
@@ -103,21 +101,31 @@ export function FileGrid({
 							top: 0,
 							left: 0,
 							width: "100%",
-							height: `${itemHeight + GRID_CONFIG.gap}px`,
+							height: `${itemHeight}px`,
 							transform: `translateY(${virtualRow.start}px)`,
 							display: "grid",
-							gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-							gap: `${GRID_CONFIG.gap}px`,
-							padding: `0 ${GRID_CONFIG.gap}px`,
+							gridTemplateColumns: `repeat(${columns}, 1fr)`,
+							gap: 0,
+							padding: 0,
+							borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
 						}}
 					>
-						{getItemsForRow(virtualRow.index).map((item) => (
-							<FileCard
+						{getItemsForRow(virtualRow.index).map((item, index) => (
+							<div
 								key={item.id}
-								item={item}
-								onClick={onItemClick}
-								onDoubleClick={onItemDoubleClick}
-							/>
+								className="border-r border-1 border-white/10 last:border-r-0"
+							>
+								<FileCard
+									item={item}
+									onClick={onItemClick}
+									onDoubleClick={onItemDoubleClick}
+									style={{
+										width: "100%",
+										height: "100%",
+									}}
+									index={index}
+								/>
+							</div>
 						))}
 					</div>
 				))}

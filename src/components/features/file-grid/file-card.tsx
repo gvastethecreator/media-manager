@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useAnimate } from "motion/react";
 import { FileItem } from "@/types/file-item";
 import { ThumbnailSize } from "@/types/ui";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { thumbnailService } from "@/services/thumbnail.service";
 import { useToast } from "@/components/ui/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ImageIcon } from "lucide-react";
 import { FileContextMenu } from "./context-menu";
 import { useImageViewer } from "@/store/image-viewer";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
 import { useFileSelection } from "@/store/file-selection";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { FileIcon, ImageIcon, StarIcon, TagIcon, CalendarIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface FileCardProps {
 	item: FileItem;
@@ -20,7 +22,9 @@ interface FileCardProps {
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	style?: React.CSSProperties;
+	index?: number;
 }
+
 
 export function FileCard({
 	item,
@@ -28,6 +32,7 @@ export function FileCard({
 	onClick,
 	onDoubleClick,
 	style,
+	index = 0,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +40,8 @@ export function FileCard({
 	const { toast } = useToast();
 	const { openViewer } = useImageViewer();
 	const { toggleSelectedItem, selectedItems } = useFileSelection();
+	const [isHovered, setIsHovered] = useState(false);
+	const [scope, animate] = useAnimate();
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -172,60 +179,147 @@ export function FileCard({
 		[onDoubleClick, toast, openViewer]
 	);
 
+	useEffect(() => {
+		animate(scope.current,
+			{ opacity: [0, 1], y: [20, 0] },
+			{ duration: 0.3, delay: index * 0.05 }
+		);
+	}, []);
+
 	const cardContent = (
-		<div className="relative w-full h-full border-none">
-			{isLoading ? (
-				<Skeleton className="w-full h-full" />
-			) : error ? (
-				<div className="w-full h-full flex flex-col items-center justify-center bg-muted gap-2">
-					<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-					<span className="text-xs text-muted-foreground text-center">
-						{error}
-					</span>
-				</div>
-			) : (
-				<div className="relative w-full h-full">
+		<div className="relative w-full h-full">
+			<AnimatePresence mode="wait">
+				{isLoading ? (
+					<motion.div
+						initial={{ opacity: 0 }}
+							animate={{ opacity: 0.4 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.3 }}
+							className="absolute inset-0 bg-transparent"
+					/>
+				) : error ? (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
+					>
+						<div className="text-red-500 text-xs text-center p-2">
+							Error al cargar
+						</div>
+					</motion.div>
+				) : (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ duration: 0.4 }}
+						className="relative w-full h-full"
+					>
+						{/* Fondo blur */}
+						<motion.div
+							className="absolute inset-0 overflow-hidden"
+							animate={{
+								filter: isSelected || isHovered
+									? 'blur(20px) brightness(0.3)'
+									: 'blur(30px) brightness(0.7)'
+							}}
+							transition={{ duration: 0.2 }}
+							style={{
+								backgroundImage: `url(${thumbnail})`,
+								backgroundSize: 'cover',
+								backgroundPosition: 'center',
+								transform: 'scale(1.1)',
+							}}
+						/>
+
+						{/* Imagen principal */}
+						<motion.div
+							className="absolute inset-0 flex justify-center items-center"
+							animate={{
+								y: isSelected || isHovered ? '-8%' : '0%',
+								scale: isSelected || isHovered ? 0.9 : 1
+							}}
+							transition={{ type: "spring", stiffness: 200, damping: 20 }}
+						>
 							<ImageCard
 								src={thumbnail || ""}
 								alt={item.name}
 								width={item.metadata?.dimensions?.width || 300}
 								height={item.metadata?.dimensions?.height || 300}
-								className={cn(
-									"w-full h-full object-cover ",
-									!isSelected && "group-hover:scale-1 border-2 border-primary"
-								)}
+								className="max-w-[85%] max-h-[85%] object-contain z-10 rounded-none shadow-lg"
 								priority={false}
 							/>
-							<div
-								className={cn(
-									"absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-200",
-									"group-hover:opacity-100"
-								)}
-							>
-								<div className="absolute bottom-0 left-0 right-0 p-2">
-									<p className="text-xs text-white truncate">{item.name}</p>
+						</motion.div>
+
+						{/* Información */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{
+								opacity: isSelected || isHovered ? 1 : 0,
+								y: isSelected || isHovered ? 0 : 20
+							}}
+							transition={{ type: "spring", stiffness: 200, damping: 20 }}
+							className="absolute inset-x-0 bottom-0 z-20"
+						>
+							<div className="p-0 m-1 backdrop-blur-sm">
+								<p className="text-[9px] text-white/90 font-medium truncate py-1 text-shadow-sm flex items-center gap-1">
+									<FileIcon size={10} />
+									<span>{item.name}</span>
+								</p>
+								<div className="grid grid-cols-2 gap-x-2 px-1">
+									<div className="space-y-0.5">
+										<div className="flex items-center gap-1 text-[8px] text-white/70">
+											<ImageIcon size={9} />
+											<span>{item.metadata?.extension?.toUpperCase()}</span>
+											<span>•</span>
+											<span>{formatBytes(item.metadata?.size || 0)}</span>
+										</div>
+										<div className="flex items-center gap-1 text-[9px] text-white/60">
+											<CalendarIcon size={9} />
+											<span>{format(new Date(item.createdAt), 'dd MMM yyyy', { locale: es })}</span>
+										</div>
+									</div>
+									<div className="text-right space-y-0.5">
+										{item.isFavorite && (
+											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
+												<StarIcon size={9} className="text-yellow-400" />
+												<span>Favorito</span>
+											</div>
+										)}
+										{item.tags && item.tags[0] && (
+											<Badge
+												variant="secondary"
+												className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+											>
+												<TagIcon size={8} className="mr-1" />
+												{item.tags[0].name}
+											</Badge>
+										)}
+									</div>
 								</div>
 							</div>
-
-				</div>
-			)}
+						</motion.div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 
 	return (
 		<FileContextMenu file={item} onAction={handleContextMenuAction}>
 			<motion.div
+				ref={scope}
 				layout
-				initial={{ opacity: 0, scale: 0.9 }}
-				animate={{ opacity: 1, scale: 1 }}
-				exit={{ opacity: 0, scale: 0.9 }}
+				whileHover={{ scale: 0.95 }}
+				whileTap={{ scale: 0.93 }}
+				transition={{ type: "spring", stiffness: 400, damping: 25 }}
+				onHoverStart={() => setIsHovered(true)}
+				onHoverEnd={() => setIsHovered(false)}
 				className={cn(
-					"relative rounded-xs overflow-hidden border transition-colors select-none p-4",
+					"relative overflow-hidden",
 					isSelected
-						? "border-primary ring-2 ring-primary ring-offset-2"
-						: "border-border",
-					"aspect-square",
-					"group hover:border-primary/50"
+						? "ring-1 ring-primary ring-inset shadow-lg"
+						: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
+					"aspect-square"
 				)}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
