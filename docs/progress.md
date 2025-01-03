@@ -193,6 +193,90 @@
    - Ofrecer opción de reindexar carpeta existente
    - Mejorar feedback al usuario
 
+### 2024-01-10 (Actualización 3)
+
+#### Análisis del Flujo de Carpetas
+
+##### Estructura Actual:
+
+1. Modelo de Datos (schema.prisma):
+
+   ```prisma
+   model Folder {
+     id          String    @id @default(cuid())
+     name        String
+     path        String    @unique
+     isWatched   Boolean   @default(false)
+     totalFiles  Int       @default(0)
+     totalSize   Int       @default(0)
+     lastIndexed DateTime? @default(now())
+     createdAt   DateTime  @default(now())
+     updatedAt   DateTime  @updatedAt
+     images      Image[]
+   }
+   ```
+
+2. Flujo de Indexación:
+   - Cliente inicia la acción (addFolder/reindexFolder)
+   - Servicio hace petición POST al endpoint correspondiente
+   - API procesa la solicitud y emite eventos SSE
+   - Cliente recibe y procesa eventos de progreso/error/completado
+
+##### Puntos de Fallo Identificados:
+
+1. Manejo de SSE:
+
+   - No se está procesando correctamente el stream de eventos
+   - Posible pérdida de eventos o corrupción del buffer
+   - Headers incorrectos o incompletos
+
+2. Validaciones:
+
+   - Falta validación robusta de parámetros
+   - No hay manejo adecuado de paths duplicados
+   - Verificación incompleta de archivos existentes
+
+3. Estado y Sincronización:
+   - Posible pérdida de estado durante el procesamiento
+   - Falta de sincronización entre cliente y servidor
+   - No hay manejo de timeouts
+
+##### Plan de Corrección:
+
+1. Servicio de Carpetas:
+
+   - Revisar y corregir manejo de SSE
+   - Implementar retry logic
+   - Mejorar validación de respuestas
+   - Añadir timeouts apropiados
+
+2. API Routes:
+
+   - Corregir manejo de params en rutas dinámicas
+   - Mejorar manejo de errores
+   - Implementar validación de paths
+   - Añadir logging detallado
+
+3. Componente UI:
+   - Mejorar manejo de estados
+   - Implementar feedback más detallado
+   - Añadir manejo de errores específicos
+   - Mejorar UX durante procesos largos
+
+##### Dependencias Relacionadas:
+
+- Servicio de Thumbnails
+- Sistema de Caché
+- Validación de Archivos
+- Gestión de Base de Datos
+
+##### Próximos Pasos:
+
+1. Implementar correcciones en orden de dependencia
+2. Añadir logs detallados
+3. Mejorar manejo de errores
+4. Implementar tests
+
 ## Notas Técnicas
 
 ### Sistema de Thumbnails

@@ -203,112 +203,60 @@ export function FoldersSection() {
 	};
 
 	const handleReindexFolder = async (folderId: string) => {
+		if (isProcessing) return;
+
 		try {
 			setError(null);
 			setIsProcessing(true);
 			setProcessProgress(0);
-			setProcessStatus({ folderId });
-
-			const response = await fetch(`/api/folders/reindex/${folderId}`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					path: folderPath,
-				}),
+			setProcessStatus({
+				folderId,
+				status: "Iniciando reindexación...",
+				current: 0,
+				total: 0,
+				progress: 0,
 			});
 
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.message || "Error reindexing folder");
-			}
-
-			if (!response.body) {
-				throw new Error("No response body");
-			}
-
-			const reader = response.body.getReader();
-			const decoder = new TextDecoder();
-			let isComplete = false;
-
-			try {
-				while (!isComplete) {
-					const { done, value } = await reader.read();
-					if (done) break;
-
-					const chunk = decoder.decode(value);
-					const events = chunk
-						.split("\n")
-						.filter(Boolean)
-						.map((line) => {
-							try {
-								return JSON.parse(line);
-							} catch (error) {
-								console.error("Error parsing event:", error);
-								return null;
-							}
-						})
-						.filter((event): event is { type: string; data: any } => {
-							if (!event || typeof event !== "object") return false;
-							if (!event.type || !event.data) return false;
-							return true;
+			await reindexFolder({
+				id: folderId,
+				onProgress: (stats) => {
+					setProcessProgress(stats.progress || 0);
+					setProcessStatus((prevStatus) => ({
+						...prevStatus,
+						...stats,
+						folderId,
+						status: stats.status || "Procesando...",
+					}));
+				},
+				onError: (error) => {
+					console.error("Error en reindexación:", error);
+					if (error.name === "FOLDER_NOT_FOUND") {
+						toast({
+							title: "Carpeta no encontrada",
+							description: "La carpeta ya no existe en el sistema",
+							variant: "destructive",
 						});
-
-					for (const event of events) {
-						switch (event.type) {
-							case "progress":
-								if (typeof event.data.progress === "number") {
-									setProcessProgress(event.data.progress);
-									setProcessStatus((prevStatus) => ({
-										...prevStatus,
-										...event.data,
-										folderId,
-										status: event.data.status || "Procesando...",
-									}));
-									// Añadir un pequeño delay para que el UI se actualice
-									await new Promise((resolve) => setTimeout(resolve, 50));
-								}
-								break;
-
-							case "error":
-								if (event.data.error) {
-									const errorMessage = event.data.file
-										? `Error procesando ${event.data.file}: ${event.data.error}`
-										: event.data.error;
-									console.error(errorMessage);
-									toast({
-										title: "Error",
-										description: errorMessage,
-										variant: "destructive",
-									});
-								}
-								break;
-
-							case "complete":
-								isComplete = true;
-								const errors = event.data.folder?.errors || 0;
-								toast({
-									title:
-										errors > 0
-											? "Reindexación completada con errores"
-											: "Reindexación completada",
-									description:
-										errors > 0
-											? `Se completó la reindexación con ${errors} errores`
-											: "Se ha completado la reindexación correctamente",
-									variant: errors > 0 ? "destructive" : "default",
-								});
-								// Esperar un momento antes de actualizar la lista
-								await new Promise((resolve) => setTimeout(resolve, 500));
-								await loadStats();
-								break;
-						}
+						loadStats(); // Recargar para actualizar la lista
+					} else {
+						toast({
+							title: "Error",
+							description: error.message || "Error al reindexar la carpeta",
+							variant: "destructive",
+						});
 					}
-				}
-			} finally {
-				reader.releaseLock();
-			}
+				},
+				onComplete: async (data) => {
+					toast({
+						title: "Reindexación completada",
+						description:
+							data?.errors > 0
+								? `Se completó la reindexación con ${data.errors} errores`
+								: "Se ha completado la reindexación correctamente",
+						variant: data?.errors > 0 ? "destructive" : "default",
+					});
+					await loadStats();
+				},
+			});
 		} catch (error) {
 			console.error("Error reindexando carpeta:", error);
 			toast({
@@ -320,7 +268,6 @@ export function FoldersSection() {
 				variant: "destructive",
 			});
 		} finally {
-			// Esperar un momento antes de limpiar el estado
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			setIsProcessing(false);
 			setProcessProgress(0);
