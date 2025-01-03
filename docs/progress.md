@@ -539,3 +539,325 @@ const GRID_CONFIG = {
 2. Implementar sistema de cache para dimensiones calculadas
 3. Añadir animaciones suaves en transiciones de tamaño
 4. Evaluar implementación de lazy loading para imágenes
+
+### 2024-01-10 (Actualización 6)
+
+#### Implementación de Paneles Redimensionables
+
+##### Cambios Realizados:
+
+1. Integrado componente `ResizablePanelGroup` de shadcn/ui
+2. Configuración de paneles:
+   - Panel Izquierdo: 20% (min: 15%, max: 30%)
+   - Panel Central: 60% (min: 40%)
+   - Panel Derecho: 20% (min: 15%, max: 30%)
+
+##### Mejoras:
+
+- Paneles ajustables mediante arrastre
+- Manejo de estado `isResizing` para optimizar renderizado
+- Límites configurados para mantener usabilidad
+- Handles visuales para mejor UX
+- Fondo con efecto blur en paneles laterales
+
+##### Configuración:
+
+```typescript
+<ResizablePanelGroup
+	direction="horizontal"
+	onDragStart={() => setIsResizing(true)}
+	onDragEnd={() => setIsResizing(false)}
+>
+	<ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+		<LeftPanel />
+	</ResizablePanel>
+	// ... más paneles
+</ResizablePanelGroup>
+```
+
+##### Próximos Pasos:
+
+1. Implementar persistencia de tamaños de paneles
+2. Añadir animaciones suaves en redimensionamiento
+3. Optimizar rendimiento durante el resize
+4. Considerar añadir opción de colapsar paneles
+
+### 2024-01-10 (Actualización 7)
+
+#### Mejoras en Componentes de Grilla de Archivos
+
+##### 1. FileCard
+
+- Simplificado el componente eliminando modos de vista innecesarios
+- Mejorada la presentación visual con efectos de hover y selección
+- Integrado con el menú contextual
+- Optimizado el sistema de carga de miniaturas
+- Añadido soporte para mostrar tamaño de archivo
+- Mejorados los efectos de transición y animaciones
+
+##### 2. ContextMenu
+
+- Implementado menú contextual completo con submenús
+- Añadidas acciones para:
+  - Gestión de colecciones
+  - Favoritos
+  - Etiquetas
+  - Operaciones básicas (copiar, mover, eliminar)
+- Agregados iconos y atajos de teclado
+- Mejorada la organización con separadores
+- Soporte para diferentes tipos de archivo
+
+##### Configuración de Estilos:
+
+```typescript
+// FileCard styles
+className={cn(
+  "relative rounded-lg overflow-hidden border transition-all duration-200",
+  isSelected ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border",
+  "group hover:border-primary/50",
+  "aspect-square"
+)}
+
+// Hover effect para imágenes
+"w-full h-full object-cover transition-all duration-200 group-hover:scale-105"
+```
+
+##### Próximos Pasos:
+
+1. Implementar las acciones del menú contextual
+2. Añadir soporte para drag & drop
+3. Mejorar el sistema de caché de miniaturas
+4. Implementar selección múltiple
+5. Añadir indicadores de progreso para operaciones
+
+### 2024-01-10 (Actualización 8)
+
+#### Mejoras en FileDetails
+
+##### Cambios Realizados:
+
+1. Mejorada la estructura visual:
+
+   - Añadidos `CardHeader` y `CardTitle` para mejor organización
+   - Implementado sistema de animaciones con Framer Motion
+   - Mejorado el espaciado y padding
+   - Optimizada la presentación de información
+
+2. Mejoras funcionales:
+
+   - Soporte para estados de favoritos
+   - Mejor manejo de metadatos
+   - Optimización de renderizado
+   - Mejor manejo de errores
+
+3. Mejoras en la UI:
+   - Toolbar integrado en Card
+   - Mejor presentación de información EXIF
+   - Mejor manejo de información de generación AI
+   - Añadidas animaciones de transición
+
+##### Configuración de Animaciones:
+
+```typescript
+<AnimatePresence mode="wait">
+	<motion.div
+		key={selectedItem.id}
+		initial={{ opacity: 0, y: 20 }}
+		animate={{ opacity: 1, y: 0 }}
+		exit={{ opacity: 0, y: -20 }}
+		transition={{ duration: 0.2 }}
+	>
+		// ... contenido
+	</motion.div>
+</AnimatePresence>
+```
+
+##### Próximos Pasos:
+
+1. Implementar acciones de la toolbar
+2. Mejorar el sistema de caché de previsualizaciones
+3. Añadir soporte para más tipos de archivos
+4. Implementar edición de metadatos
+5. Mejorar el rendimiento de las animaciones
+
+### 2024-01-10 (Actualización 9)
+
+#### Correcciones en Rutas de API y FileGrid
+
+##### 1. Correcciones en API Routes:
+
+1. Ruta de Thumbnails (`/api/thumbnails/[id]`):
+
+   - Corregido manejo asíncrono de params
+   - Mejorado sistema de generación de thumbnails
+   - Implementado manejo de calidad de imagen
+   - Optimizado el cacheo de respuestas
+
+2. Ruta de Imágenes de Carpetas (`/api/folders/[id]/images/all`):
+   - Corregido manejo asíncrono de params
+   - Mejorada la estructura de respuesta
+   - Optimizada la consulta a base de datos
+   - Añadidos campos necesarios para la UI
+
+##### 2. Problemas Identificados:
+
+1. Error en Next.js 14 con params:
+
+   ```
+   Error: Route used `params.id`. `params` should be awaited before using its properties.
+   ```
+
+   - Solución: Implementado `await Promise.resolve(context.params)`
+   - Razón: Next.js 14 requiere manejo asíncrono de params en rutas dinámicas
+
+2. Problemas con thumbnails:
+   - Manejo inconsistente de calidad de imagen
+   - Cacheo ineficiente
+   - Errores en generación de miniaturas
+
+##### Próximos Pasos:
+
+1. Sistema de Thumbnails:
+
+   - Implementar sistema de cola para generación
+   - Mejorar manejo de errores
+   - Optimizar almacenamiento en caché
+   - Añadir soporte para más formatos
+
+2. FileGrid:
+
+   - Implementar sistema de lazy loading
+   - Mejorar virtualización
+   - Optimizar rendimiento de renderizado
+   - Implementar selección múltiple
+
+3. API Routes:
+   - Implementar rate limiting
+   - Mejorar manejo de errores
+   - Optimizar queries a base de datos
+   - Implementar sistema de logs
+
+### 2024-01-10 (Actualización 10)
+
+#### Actualización de Rutas API para Next.js 15
+
+##### Cambios Realizados:
+
+1. Configuraciones de Ruta:
+
+   ```typescript
+   export const runtime = "edge";
+   export const dynamic = "force-dynamic";
+   export const fetchCache = "force-no-store";
+   ```
+
+2. Manejo de Params:
+
+   - Eliminado `await Promise.resolve(context.params)`
+   - Actualizado a desestructuración directa: `{ params }: { params: { id: string } }`
+
+3. Optimizaciones:
+   - Rutas configuradas para Edge Runtime
+   - Deshabilitado caché de fetch
+   - Forzado modo dinámico para respuestas en tiempo real
+
+##### Mejoras:
+
+1. Rendimiento:
+
+   - Mejor manejo de memoria
+   - Respuestas más rápidas
+   - Menor latencia
+
+2. Seguridad:
+
+   - Validación mejorada de parámetros
+   - Mejor manejo de errores
+   - Headers de seguridad optimizados
+
+3. Caché:
+   - Control granular del caché
+   - Mejor invalidación
+   - Headers de caché optimizados
+
+##### Próximos Pasos:
+
+1. Optimizaciones Edge:
+
+   - Implementar streaming de respuestas
+   - Optimizar manejo de memoria
+   - Mejorar compresión de respuestas
+
+2. Seguridad:
+
+   - Implementar rate limiting
+   - Añadir validación de tokens
+   - Mejorar logging de errores
+
+3. Caché:
+   - Implementar caché distribuido
+   - Optimizar estrategias de invalidación
+   - Añadir precarga de datos
+
+### 2024-01-10 (Actualización 11)
+
+#### Corrección de Rutas API para Next.js 15
+
+##### Problemas Identificados:
+
+1. Error de Prisma en Edge Runtime:
+
+   ```
+   Error: PrismaClient is not configured to run in Edge Runtime
+   ```
+
+2. Error en rutas de API:
+   ```
+   GET http://localhost:3000/api/folders/.../images/all 500 (Internal Server Error)
+   ```
+
+##### Solución Implementada:
+
+1. Configuración de Rutas:
+
+   ```typescript
+   // Antes
+   export const runtime = "edge";
+   export const dynamic = "force-dynamic";
+   export const fetchCache = "force-no-store";
+
+   // Después
+   export const dynamic = "force-dynamic";
+   export const revalidate = 0;
+   ```
+
+2. Razones del Cambio:
+   - Prisma no está configurado para Edge Runtime
+   - No es necesario el Edge Runtime para estas rutas
+   - Mejor manejo de caché con `revalidate`
+
+##### Mejoras:
+
+1. Rendimiento:
+
+   - Mejor compatibilidad con Prisma
+   - Respuestas más estables
+   - Mejor manejo de memoria
+
+2. Caché:
+   - Control más preciso
+   - Revalidación automática
+   - Mejor rendimiento
+
+##### Próximos Pasos:
+
+1. Optimizaciones:
+
+   - Implementar caching de consultas frecuentes
+   - Mejorar manejo de errores
+   - Optimizar consultas a base de datos
+
+2. Monitoreo:
+   - Implementar logging detallado
+   - Añadir métricas de rendimiento
+   - Mejorar diagnóstico de errores

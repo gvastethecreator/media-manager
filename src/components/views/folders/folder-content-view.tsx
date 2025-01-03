@@ -19,6 +19,7 @@ export function FolderContentView() {
 		handleSelectFolder,
 		deselectItem,
 		isLoading: storeLoading,
+		loadMoreItems,
 	} = useFilesStore();
 	const { openViewer } = useImageViewer();
 	const [isProcessingThumbnails, setIsProcessingThumbnails] = useState(false);
@@ -37,6 +38,7 @@ export function FolderContentView() {
 			.filter(
 				(item) => item.type === "image" || item.mimeType?.startsWith("image/")
 			)
+			.filter((item) => !item.thumbnail) // Solo procesar los que no tienen thumbnail
 			.map((item) => item.id);
 
 		if (imageIds.length > 0) {
@@ -100,6 +102,7 @@ export function FolderContentView() {
 					selectedIds={selectedIds}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
+					loadMoreItems={loadMoreItems}
 				/>
 			</div>
 		</div>

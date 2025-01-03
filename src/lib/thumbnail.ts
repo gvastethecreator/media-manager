@@ -1,4 +1,4 @@
-import { createThumbnail } from './image'
+import sharp from 'sharp'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
 import { existsSync } from 'fs'
 import { extname } from 'path'
@@ -12,85 +12,61 @@ interface ThumbnailResult {
 const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
 
 export async function generateThumbnail(
-  imagePath: string,
+  filePath: string,
   quality: ThumbnailQuality = 'mid'
-): Promise<ThumbnailResult | null> {
+): Promise<ThumbnailResult> {
   try {
-    // Validar path
-    if (!imagePath) {
-      throw new Error('Path de imagen requerido')
+    if (!existsSync(filePath)) {
+      throw new Error('Archivo no encontrado')
     }
 
-    // Validar que el archivo existe
-    if (!existsSync(imagePath)) {
-      throw new Error(`Archivo no encontrado: ${imagePath}`)
-    }
-
-    // Validar formato
-    const ext = extname(imagePath).toLowerCase()
+    const ext = extname(filePath).toLowerCase()
     if (!SUPPORTED_FORMATS.includes(ext)) {
-      throw new Error(`Formato no soportado: ${ext}`)
+      throw new Error('Formato de archivo no soportado')
     }
 
-    console.log('🎯 Generando thumbnail:', {
-      path: imagePath,
-      quality
-    })
-
-    // Validar configuración
     const config = THUMBNAIL_QUALITY_CONFIG[quality]
     if (!config) {
-      throw new Error(`Calidad inválida: ${quality}`)
+      throw new Error('Calidad de thumbnail inválida')
     }
 
-    // Intentar generar el thumbnail con reintentos
-    let attempts = 0
-    const maxAttempts = 3
-    let lastError: Error | null = null
+    // Procesar la imagen con sharp
+    const image = sharp(filePath)
+    const metadata = await image.metadata()
 
-    while (attempts < maxAttempts) {
-      try {
-        const result = await createThumbnail(imagePath, {
-          width: config.width,
-          height: config.height,
-          quality: config.quality,
-          format: 'webp' // Forzar formato WebP para mejor compresión
-        })
+    // Calcular dimensiones manteniendo el aspect ratio
+    const aspectRatio = metadata.width! / metadata.height!
+    let width = config.width
+    let height = config.height
 
-        if (!result || !result.buffer) {
-          throw new Error('No se pudo generar el thumbnail')
-        }
-
-        console.log('✅ Thumbnail generado:', {
-          path: imagePath,
-          size: result.buffer.length,
-          quality,
-          attempt: attempts + 1
-        })
-
-        return {
-          buffer: result.buffer,
-          width: config.width,
-          height: config.height
-        }
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Error desconocido')
-        attempts++
-
-        if (attempts < maxAttempts) {
-          console.log(`Reintentando generación (${attempts}/${maxAttempts})...`)
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempts))
-        }
-      }
+    if (aspectRatio > 1) {
+      // Imagen horizontal
+      height = Math.round(width / aspectRatio)
+    } else {
+      // Imagen vertical o cuadrada
+      width = Math.round(height * aspectRatio)
     }
 
-    throw lastError || new Error('No se pudo generar el thumbnail después de varios intentos')
+    // Generar el thumbnail
+    const buffer = await image
+      .resize(width, height, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .webp({
+        quality: config.quality,
+        effort: 4, // Balance entre velocidad y calidad
+        nearLossless: true
+      })
+      .toBuffer()
+
+    return {
+      buffer,
+      width,
+      height
+    }
   } catch (error) {
-    console.error('❌ Error generando thumbnail:', {
-      path: imagePath,
-      quality,
-      error: error instanceof Error ? error.message : error
-    })
+    console.error('Error generando thumbnail:', error)
     throw error
   }
 }
