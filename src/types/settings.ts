@@ -1,249 +1,131 @@
 export type ThemeMode = 'light' | 'dark' | 'system'
-export type Language = 'es' | 'en' | 'pt' | 'fr' | 'de'
-export type SortBy = 'name' | 'date' | 'size' | 'type'
-export type StartPage = 'dashboard' | 'all-images' | 'library' | 'collections' | 'folders' | 'last-view'
-export type LogLevel = 'error' | 'warn' | 'info' | 'debug'
-export type BackupFrequency = 'hourly' | 'daily' | 'weekly' | 'monthly'
-export type ThumbnailSize = 'XS' | 'S' | 'M' | 'L' | 'XL'
-export type FileProperty = 'name' | 'path' | 'size' | 'type' | 'date'
-export type FilterCondition = 'contains' | 'exact' | 'starts' | 'ends' | 'regex' | 'greater' | 'less'
+export type Language = 'es' | 'en'
+export type ThumbnailQuality = 'low' | 'medium' | 'high'
+export type SortMode = 'name' | 'date' | 'size' | 'type'
+export type SortDirection = 'asc' | 'desc'
+export type ViewMode = 'grid' | 'list' | 'details'
+export type ThumbnailSize = 'sm' | 'md' | 'lg'
 
-export interface AppearanceSettings {
-  darkMode: boolean
-  compactMode: boolean
-  potatoMode: boolean
-  thumbnailSize: number
-  sortBy: SortBy
-  collectionPagination: {
-    enabled: boolean
-    itemsPerPage: number
-  }
-  folderPagination: {
-    enabled: boolean
-    itemsPerPage: number
-  }
-  startPage: StartPage
-  autoUpdate: boolean
-}
-
-export interface FolderSettings {
-  path: string
-  fileCount: number
-  size: string
-  autoIndex: boolean
-  excludePatterns: string[]
-  includePatterns: string[]
-}
-
-export interface CollectionSettings {
-  id: string
-  name: string
-  emoji: string
-  description: string
-  shortcut: string
-  color: string
-  count: number
-  size: string
-  sortBy: SortBy
-  filters: FilterRule[]
-}
-
-export interface TagSettings {
-  id: string
-  name: string
-  color: string
-  property: FileProperty
-  condition: FilterCondition
-  value: string
-  count: number
-}
-
-export interface ShortcutSettings {
-  id: string
-  action: string
-  keys: string
-  category: 'navigation' | 'files' | 'collections' | 'view'
-}
-
-export interface ProfileSettings {
+export interface Profile {
   id: string
   name: string
   emoji: string
   color: string
   theme: ThemeMode
   language: Language
-  syncSettings: boolean
-  notifications: boolean
-  customSettings: {
-    appearance: Partial<AppearanceSettings>
-    folders: Partial<FolderSettings>[]
-    collections: Partial<CollectionSettings>[]
-    tags: Partial<TagSettings>[]
-    shortcuts: Partial<ShortcutSettings>[]
-  }
+  isActive: boolean
+}
+
+export interface Collection {
+  id: string
+  name: string
+  emoji: string
+  color: string
+  description?: string
+  shortcut?: string
+  sortBy: SortMode
+  sortDirection: SortDirection
+  filters: string[]
+  count: number
+}
+
+export interface Tag {
+  id: string
+  name: string
+  color: string
+  count: number
+}
+
+export interface Folder {
+  id: string
+  name: string
+  path: string
+  isWatched: boolean
+  isIndexed: boolean
+  lastIndexed: string | null
+  totalFiles: number
+  totalSize: number
+}
+
+export interface ViewSettings {
+  defaultView: ViewMode
+  showHiddenFiles: boolean
+  sortBy: SortMode
+  sortDirection: SortDirection
+  thumbnailSize: ThumbnailSize
+}
+
+export interface ThumbnailSettings {
+  quality: ThumbnailQuality
+  generateOnUpload: boolean
+  maxSize: number
+  cacheSize: number
+  cachePath: string
 }
 
 export interface SystemSettings {
-  info: {
-    os: string
-    version: string
-    lastUpdate: string
-    database: string
-    memory: {
-      used: number
-      total: number
-      percentage: number
-    }
-    storage: {
-      used: number
-      total: number
-      percentage: number
-    }
-  }
-  backup: {
-    autoBackup: boolean
-    frequency: BackupFrequency
-    location: string
-    maxBackups: number
-    compressBackups: boolean
-  }
-  maintenance: {
-    autoClean: boolean
-    cleanupRules: {
-      tempFiles: boolean
-      emptyFolders: boolean
-      unusedThumbnails: boolean
-      oldBackups: boolean
-    }
-    optimizationSchedule: BackupFrequency
-  }
-  logging: {
-    debugMode: boolean
-    logLevel: LogLevel
-    maxLogSize: number
-    rotateLogsAfterDays: number
-    exportFormat: 'json' | 'txt' | 'csv'
-  }
+  theme: ThemeMode
+  language: Language
+  autoStart: boolean
+  minimizeToTray: boolean
+  checkUpdates: boolean
+  telemetry: boolean
 }
 
-export interface FilterRule {
-  id: string
-  property: FileProperty
-  condition: FilterCondition
-  value: string
-  enabled: boolean
+export interface ShortcutSettings {
+  [key: string]: string
 }
 
 export interface AppSettings {
+  profiles: Profile[]
+  activeProfile: string | null
+  collections: Collection[]
+  tags: Tag[]
+  folders: Folder[]
+
+  view: ViewSettings
+  thumbnails: ThumbnailSettings
+  system: SystemSettings
+  shortcuts: ShortcutSettings
+
   version: string
   lastUpdate: string
-  appearance: AppearanceSettings
-  folders: FolderSettings[]
-  collections: CollectionSettings[]
-  tags: TagSettings[]
-  shortcuts: ShortcutSettings[]
-  profiles: ProfileSettings[]
-  system: SystemSettings
-  activeProfile: string
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  version: "1.0.0",
-  lastUpdate: new Date().toISOString(),
-  appearance: {
-    darkMode: false,
-    compactMode: false,
-    potatoMode: false,
-    thumbnailSize: 2,
-    sortBy: "name",
-    collectionPagination: {
-      enabled: false,
-      itemsPerPage: 50
-    },
-    folderPagination: {
-      enabled: false,
-      itemsPerPage: 50
-    },
-    startPage: "dashboard",
-    autoUpdate: true
-  },
-  folders: [],
+  profiles: [],
+  activeProfile: null,
   collections: [],
   tags: [],
-  shortcuts: [
-    {
-      id: "1",
-      action: "Abrir configuración",
-      keys: "Ctrl + ,",
-      category: "navigation"
-    },
-    {
-      id: "2",
-      action: "Alternar panel derecho",
-      keys: "Ctrl + B",
-      category: "navigation"
-    }
-  ],
-  profiles: [
-    {
-      id: "default",
-      name: "Usuario Principal",
-      emoji: "👤",
-      color: "blue",
-      theme: "system",
-      language: "es",
-      syncSettings: true,
-      notifications: false,
-      customSettings: {
-        appearance: {},
-        folders: [],
-        collections: [],
-        tags: [],
-        shortcuts: []
-      }
-    }
-  ],
-  system: {
-    info: {
-      os: "",
-      version: "1.0.0",
-      lastUpdate: new Date().toISOString(),
-      database: "SQLite",
-      memory: {
-        used: 0,
-        total: 0,
-        percentage: 0
-      },
-      storage: {
-        used: 0,
-        total: 0,
-        percentage: 0
-      }
-    },
-    backup: {
-      autoBackup: true,
-      frequency: "daily",
-      location: "./backups",
-      maxBackups: 10,
-      compressBackups: true
-    },
-    maintenance: {
-      autoClean: false,
-      cleanupRules: {
-        tempFiles: true,
-        emptyFolders: true,
-        unusedThumbnails: true,
-        oldBackups: true
-      },
-      optimizationSchedule: "weekly"
-    },
-    logging: {
-      debugMode: false,
-      logLevel: "info",
-      maxLogSize: 10,
-      rotateLogsAfterDays: 7,
-      exportFormat: "json"
-    }
+  folders: [],
+
+  view: {
+    defaultView: 'grid',
+    showHiddenFiles: false,
+    sortBy: 'name',
+    sortDirection: 'asc',
+    thumbnailSize: 'md'
   },
-  activeProfile: "default"
+
+  thumbnails: {
+    quality: 'medium',
+    generateOnUpload: true,
+    maxSize: 500,
+    cacheSize: 1000,
+    cachePath: './cache/thumbnails'
+  },
+
+  system: {
+    theme: 'system',
+    language: 'es',
+    autoStart: false,
+    minimizeToTray: true,
+    checkUpdates: true,
+    telemetry: false
+  },
+
+  shortcuts: {},
+
+  version: '1.0.0',
+  lastUpdate: new Date().toISOString()
 }

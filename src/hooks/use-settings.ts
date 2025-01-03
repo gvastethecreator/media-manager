@@ -1,163 +1,262 @@
-import { useEffect, useState } from 'react'
-import { settingsService } from '@/services/settings'
-import type { AppSettings } from '@/types/settings'
+import { useCallback } from 'react'
+import { useSettingsStore } from '@/store/settings'
+import type {
+  AppSettings,
+  Profile,
+  Collection,
+  Tag,
+  Folder,
+  ThumbnailSettings,
+  SystemSettings,
+  ThemeMode,
+  Language,
+  ViewMode,
+  ThumbnailSize,
+  SortMode,
+  SortDirection
+} from '@/types/settings'
 
-export function useSettings() {
-  const [settings, setSettings] = useState<AppSettings>(settingsService.getSettings())
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+export const useSettings = () => {
+  const store = useSettingsStore()
 
-  useEffect(() => {
-    const initSettings = async () => {
-      try {
-        await settingsService.init()
-        setSettings(settingsService.getSettings())
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Error al inicializar la configuración'))
-      } finally {
-        setLoading(false)
-      }
-    }
+  // Selectores generales
+  const settings = store
+  const version = store.version
+  const lastUpdate = store.lastUpdate
 
-    initSettings()
-  }, [])
+  // Selectores de perfil
+  const profiles = store.profiles
+  const activeProfile = store.activeProfile
+  const currentProfile = profiles.find((p) => p.id === activeProfile)
 
-  const updateSettings = async (newSettings: Partial<AppSettings>) => {
-    try {
-      await settingsService.updateSettings(newSettings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar la configuración'))
-    }
-  }
+  // Selectores de colección
+  const collections = store.collections
+  const getCollection = useCallback(
+    (id: string) => collections.find((c) => c.id === id),
+    [collections]
+  )
 
-  const resetSettings = async () => {
-    try {
-      await settingsService.resetSettings()
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al restablecer la configuración'))
-    }
-  }
+  // Selectores de etiquetas
+  const tags = store.tags
+  const getTag = useCallback(
+    (id: string) => tags.find((t) => t.id === id),
+    [tags]
+  )
 
-  const exportSettings = async (path: string) => {
-    try {
-      await settingsService.exportSettings(path)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al exportar la configuración'))
-    }
-  }
+  // Selectores de carpetas
+  const folders = store.folders
+  const getFolder = useCallback(
+    (id: string) => folders.find((f) => f.id === id),
+    [folders]
+  )
 
-  const importSettings = async (path: string) => {
-    try {
-      await settingsService.importSettings(path)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al importar la configuración'))
-    }
-  }
+  // Selectores de vista
+  const view = store.view
+  const defaultView = view.defaultView
+  const showHiddenFiles = view.showHiddenFiles
+  const sortBy = view.sortBy
+  const sortDirection = view.sortDirection
+  const thumbnailSize = view.thumbnailSize
 
-  // Métodos específicos para cada sección
-  const updateAppearance = async (settings: Partial<AppSettings['appearance']>) => {
-    try {
-      await settingsService.updateAppearanceSettings(settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar la apariencia'))
-    }
-  }
+  // Selectores de miniaturas
+  const thumbnails = store.thumbnails
+  const thumbnailQuality = thumbnails.quality
+  const generateThumbnailsOnUpload = thumbnails.generateOnUpload
+  const maxThumbnailSize = thumbnails.maxSize
+  const thumbnailCacheSize = thumbnails.cacheSize
+  const thumbnailCachePath = thumbnails.cachePath
 
-  const updateFolder = async (folderId: string, settings: Partial<AppSettings['folders'][0]>) => {
-    try {
-      await settingsService.updateFolderSettings(folderId, settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar la carpeta'))
-    }
-  }
+  // Selectores de sistema
+  const system = store.system
+  const theme = system.theme
+  const language = system.language
+  const autoStart = system.autoStart
+  const minimizeToTray = system.minimizeToTray
+  const checkUpdates = system.checkUpdates
+  const telemetry = system.telemetry
 
-  const updateCollection = async (collectionId: string, settings: Partial<AppSettings['collections'][0]>) => {
-    try {
-      await settingsService.updateCollectionSettings(collectionId, settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar la colección'))
-    }
-  }
+  // Selectores de atajos
+  const shortcuts = store.shortcuts
+  const getShortcut = useCallback(
+    (action: string) => shortcuts[action],
+    [shortcuts]
+  )
 
-  const updateTag = async (tagId: string, settings: Partial<AppSettings['tags'][0]>) => {
-    try {
-      await settingsService.updateTagSettings(tagId, settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar la etiqueta'))
-    }
-  }
+  // Acciones generales
+  const updateSettings = store.updateSettings
+  const resetSettings = store.resetSettings
 
-  const updateShortcut = async (shortcutId: string, settings: Partial<AppSettings['shortcuts'][0]>) => {
-    try {
-      await settingsService.updateShortcutSettings(shortcutId, settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar el atajo'))
-    }
-  }
+  // Acciones de perfil
+  const updateProfile = store.updateProfile
+  const setActiveProfile = store.setActiveProfile
+  const deleteProfile = store.deleteProfile
 
-  const updateProfile = async (profileId: string, settings: Partial<AppSettings['profiles'][0]>) => {
-    try {
-      await settingsService.updateProfileSettings(profileId, settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar el perfil'))
-    }
-  }
+  // Acciones de colección
+  const updateCollection = store.updateCollection
+  const deleteCollection = store.deleteCollection
 
-  const updateSystem = async (settings: Partial<AppSettings['system']>) => {
-    try {
-      await settingsService.updateSystemSettings(settings)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al actualizar el sistema'))
-    }
-  }
+  // Acciones de etiquetas
+  const updateTag = store.updateTag
+  const deleteTag = store.deleteTag
 
-  const setActiveProfile = async (profileId: string) => {
-    try {
-      await settingsService.setActiveProfile(profileId)
-      setSettings(settingsService.getSettings())
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error al cambiar el perfil activo'))
-    }
-  }
+  // Acciones de carpetas
+  const updateFolder = store.updateFolder
+  const deleteFolder = store.deleteFolder
+
+  // Acciones de miniaturas
+  const updateThumbnailSettings = store.updateThumbnailSettings
+
+  // Acciones de sistema
+  const updateSystemSettings = store.updateSystemSettings
+
+  // Acciones de atajos
+  const updateShortcut = store.updateShortcut
+  const deleteShortcut = store.deleteShortcut
+
+  // Acciones compuestas
+  const createProfile = useCallback(
+    (profile: Partial<Profile>) => {
+      updateProfile(null, profile)
+    },
+    [updateProfile]
+  )
+
+  const createCollection = useCallback(
+    (collection: Partial<Collection>) => {
+      updateCollection(null, collection)
+    },
+    [updateCollection]
+  )
+
+  const createTag = useCallback(
+    (tag: Partial<Tag>) => {
+      updateTag(null, tag)
+    },
+    [updateTag]
+  )
+
+  const createFolder = useCallback(
+    (folder: Partial<Folder>) => {
+      updateFolder(null, folder)
+    },
+    [updateFolder]
+  )
+
+  const updateView = useCallback(
+    (view: {
+      defaultView?: ViewMode
+      showHiddenFiles?: boolean
+      sortBy?: SortMode
+      sortDirection?: SortDirection
+      thumbnailSize?: ThumbnailSize
+    }) => {
+      updateSettings({ view: { ...settings.view, ...view } })
+    },
+    [settings.view, updateSettings]
+  )
+
+  const updateSystem = useCallback(
+    (system: {
+      theme?: ThemeMode
+      language?: Language
+      autoStart?: boolean
+      minimizeToTray?: boolean
+      checkUpdates?: boolean
+      telemetry?: boolean
+    }) => {
+      updateSystemSettings(system)
+    },
+    [updateSystemSettings]
+  )
 
   return {
+    // Estado general
     settings,
-    loading,
-    error,
+    version,
+    lastUpdate,
+
+    // Perfiles
+    profiles,
+    activeProfile,
+    currentProfile,
+
+    // Colecciones
+    collections,
+    getCollection,
+
+    // Etiquetas
+    tags,
+    getTag,
+
+    // Carpetas
+    folders,
+    getFolder,
+
+    // Vista
+    view,
+    defaultView,
+    showHiddenFiles,
+    sortBy,
+    sortDirection,
+    thumbnailSize,
+
+    // Miniaturas
+    thumbnails,
+    thumbnailQuality,
+    generateThumbnailsOnUpload,
+    maxThumbnailSize,
+    thumbnailCacheSize,
+    thumbnailCachePath,
+
+    // Sistema
+    system,
+    theme,
+    language,
+    autoStart,
+    minimizeToTray,
+    checkUpdates,
+    telemetry,
+
+    // Atajos
+    shortcuts,
+    getShortcut,
+
+    // Acciones generales
     updateSettings,
     resetSettings,
-    exportSettings,
-    importSettings,
-    updateAppearance,
-    updateFolder,
-    updateCollection,
-    updateTag,
-    updateShortcut,
+
+    // Acciones de perfil
+    createProfile,
     updateProfile,
+    setActiveProfile,
+    deleteProfile,
+
+    // Acciones de colección
+    createCollection,
+    updateCollection,
+    deleteCollection,
+
+    // Acciones de etiquetas
+    createTag,
+    updateTag,
+    deleteTag,
+
+    // Acciones de carpetas
+    createFolder,
+    updateFolder,
+    deleteFolder,
+
+    // Acciones de vista
+    updateView,
+
+    // Acciones de miniaturas
+    updateThumbnailSettings,
+
+    // Acciones de sistema
     updateSystem,
-    setActiveProfile
+
+    // Acciones de atajos
+    updateShortcut,
+    deleteShortcut
   }
 }
