@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { generateThumbnail } from '@/lib/image'
+import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
 import { existsSync } from 'fs'
 

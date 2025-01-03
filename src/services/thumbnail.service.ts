@@ -38,15 +38,16 @@ export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: numbe
 }
 
 class ThumbnailService {
-  private static instance: ThumbnailService;
+  private static instance: ThumbnailService
+  private eventSource: EventSource | null = null
 
   private constructor() { }
 
   public static getInstance(): ThumbnailService {
     if (!ThumbnailService.instance) {
-      ThumbnailService.instance = new ThumbnailService();
+      ThumbnailService.instance = new ThumbnailService()
     }
-    return ThumbnailService.instance;
+    return ThumbnailService.instance
   }
 
   private async fetchWithTimeout(
@@ -54,29 +55,29 @@ class ThumbnailService {
     init?: RequestInit,
     timeout = 30000
   ): Promise<Response> {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
 
     try {
       const response = await fetch(input, {
         ...init,
         signal: controller.signal
-      });
-      clearTimeout(id);
-      return response;
+      })
+      clearTimeout(id)
+      return response
     } catch (error) {
-      clearTimeout(id);
-      throw error;
+      clearTimeout(id)
+      throw error
     }
   }
 
   private async blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
   }
 
   async getStats(): Promise<ThumbnailStats> {
@@ -87,36 +88,36 @@ class ThumbnailService {
           'Cache-Control': 'no-cache',
           'Content-Type': 'application/json'
         }
-      });
+      })
 
-      const text = await response.text();
-      let data;
+      const text = await response.text()
+      let data
 
       try {
-        data = JSON.parse(text);
+        data = JSON.parse(text)
       } catch (parseError) {
-        console.error('Error parseando respuesta:', text);
-        throw new Error('Error parseando respuesta del servidor');
+        console.error('Error parseando respuesta:', text)
+        throw new Error('Error parseando respuesta del servidor')
       }
 
       if (!response.ok) {
-        throw new Error(data.details || data.error || 'Error obteniendo estadísticas');
+        throw new Error(data.details || data.error || 'Error obteniendo estadísticas')
       }
 
       // Validar la estructura de los datos
       if (!this.isValidThumbnailStats(data)) {
-        console.error('Datos inválidos recibidos:', data);
-        throw new Error('Datos de estadísticas inválidos');
+        console.error('Datos inválidos recibidos:', data)
+        throw new Error('Datos de estadísticas inválidos')
       }
 
-      return data;
+      return data
     } catch (error) {
-      console.error('Error en getStats:', error);
+      console.error('Error en getStats:', error)
       throw new Error(
         error instanceof Error
           ? error.message
           : 'Error al obtener estadísticas. Por favor, inténtalo de nuevo.'
-      );
+      )
     }
   }
 
@@ -130,11 +131,18 @@ class ThumbnailService {
       typeof data.withThumbnail === 'number' &&
       Array.isArray(data.recentlyProcessed) &&
       Array.isArray(data.errors)
-    );
+    )
   }
 
   async reprocessAll(onProgress?: (event: any) => void): Promise<void> {
     try {
+      // Cerrar conexión previa si existe
+      if (this.eventSource) {
+        this.eventSource.close()
+        this.eventSource = null
+      }
+
+      // Configurar el reader para procesar eventos SSE
       const response = await fetch('/api/thumbnails/reprocess', {
         method: 'POST',
         headers: {
@@ -142,45 +150,45 @@ class ThumbnailService {
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive'
         }
-      });
+      })
 
       if (!response.ok || !response.body) {
-        throw new Error('Error iniciando el reprocesamiento');
+        throw new Error('Error iniciando el reprocesamiento')
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
       while (true) {
-        const { done, value } = await reader.read();
+        const { done, value } = await reader.read()
 
         if (done) {
-          console.log('Stream completado');
-          break;
+          console.log('Stream completado')
+          break
         }
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n\n')
+        buffer = lines.pop() || ''
 
         for (const line of lines) {
           if (line.trim().startsWith('data: ')) {
             try {
-              const event = JSON.parse(line.slice(6));
-              console.log('Evento SSE recibido:', event);
+              const event = JSON.parse(line.slice(6))
+              console.log('Evento SSE recibido:', event)
               if (onProgress) {
-                onProgress(event);
+                onProgress(event)
               }
             } catch (error) {
-              console.error('Error parseando evento SSE:', error);
+              console.error('Error parseando evento SSE:', error)
             }
           }
         }
       }
     } catch (error) {
-      console.error('Error en reprocessAll:', error);
-      throw error;
+      console.error('Error en reprocessAll:', error)
+      throw error
     }
   }
 
@@ -204,7 +212,7 @@ class ThumbnailService {
       if (!response.ok) {
         const error = await response.text()
         console.error('Error obteniendo miniatura:', error)
-        throw new Error('Error al obtener la miniatura')
+        throw new Error('Miniatura no encontrada')
       }
 
       const blob = await response.blob()
@@ -216,23 +224,19 @@ class ThumbnailService {
       return base64
     } catch (error) {
       console.error('Error en getThumbnail:', error)
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al obtener la miniatura. Por favor, inténtalo de nuevo.'
-      )
+      throw error instanceof Error ? error : new Error('Error al obtener la miniatura')
     }
   }
 
   async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
     try {
       if (!imageId || !quality) {
-        throw new Error('ID de imagen y calidad son requeridos');
+        throw new Error('ID de imagen y calidad son requeridos')
       }
 
-      const config = THUMBNAIL_QUALITY_CONFIG[quality];
+      const config = THUMBNAIL_QUALITY_CONFIG[quality]
       if (!config) {
-        throw new Error('Calidad de thumbnail inválida');
+        throw new Error('Calidad de thumbnail inválida')
       }
 
       const response = await this.fetchWithTimeout(
@@ -248,72 +252,85 @@ class ThumbnailService {
             ...config
           })
         },
-        60000 // Aumentamos el timeout para imágenes grandes
-      );
+        60000 // 60s timeout para imágenes grandes
+      )
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || 'Error generando miniatura');
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Error generando miniatura')
       }
 
       // Invalidar caché para esta imagen
-      const cacheKey = `thumbnail:${imageId}:${quality}`;
-      await thumbnailCache.delete(cacheKey);
+      const cacheKey = `thumbnail:${imageId}:${quality}`
+      await thumbnailCache.delete(cacheKey)
 
       // Esperar un momento para asegurar que el thumbnail se ha generado
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000))
     } catch (error) {
-      console.error('Error en generateThumbnail:', error);
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al generar la miniatura. Por favor, inténtalo de nuevo.'
-      );
+      console.error('Error en generateThumbnail:', error)
+      throw error instanceof Error ? error : new Error('Error al generar la miniatura')
     }
   }
 
   async optimizeThumbnails(onProgress?: (data: any) => void): Promise<void> {
     try {
+      // Cerrar conexión previa si existe
+      if (this.eventSource) {
+        this.eventSource.close()
+        this.eventSource = null
+      }
+
+      // Configurar el reader para procesar eventos SSE
       const response = await fetch('/api/thumbnails/optimize', {
         method: 'POST',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
         }
-      });
+      })
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || error.error || 'Error optimizando miniaturas');
+      if (!response.ok || !response.body) {
+        throw new Error('Error iniciando la optimización')
       }
 
-      // Limpiar caché al optimizar
-      await thumbnailCache.clear();
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
-      // Procesar eventos SSE
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read()
 
-      if (reader && onProgress) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        if (done) {
+          console.log('Stream completado')
+          break
+        }
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n').filter(Boolean);
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n\n')
+        buffer = lines.pop() || ''
 
-          for (const line of lines) {
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
             try {
-              const event = JSON.parse(line);
-              onProgress(event);
+              const event = JSON.parse(line.slice(6))
+              console.log('Evento SSE recibido:', event)
+              if (onProgress) {
+                onProgress(event)
+              }
             } catch (error) {
-              console.error('Error parsing event:', error);
+              console.error('Error parseando evento SSE:', error)
             }
           }
         }
       }
+
+      // Limpiar caché al optimizar
+      await thumbnailCache.clear()
+
     } catch (error) {
-      console.error('Error en optimizeThumbnails:', error);
-      throw new Error('Error al optimizar las miniaturas. Por favor, inténtalo de nuevo.');
+      console.error('Error en optimizeThumbnails:', error)
+      throw new Error('Error al optimizar las miniaturas. Por favor, inténtalo de nuevo.')
     }
   }
 
@@ -322,30 +339,15 @@ class ThumbnailService {
   }
 
   getQualityConfig(quality: ThumbnailQuality) {
-    return THUMBNAIL_QUALITY_CONFIG[quality];
+    return THUMBNAIL_QUALITY_CONFIG[quality]
   }
 
-  async getImagesForReprocess(): Promise<{ id: string; path: string }[]> {
-    try {
-      const images = await prisma.image.findMany({
-        where: {
-          OR: [
-            { thumbnail: null },
-            { thumbnailError: { not: null } }
-          ]
-        },
-        select: {
-          id: true,
-          path: true
-        }
-      });
-
-      return images;
-    } catch (error) {
-      console.error('Error obteniendo imágenes para reprocesar:', error);
-      throw error;
+  cancelProcessing() {
+    if (this.eventSource) {
+      this.eventSource.close()
+      this.eventSource = null
     }
   }
 }
 
-export const thumbnailService = ThumbnailService.getInstance();
+export const thumbnailService = ThumbnailService.getInstance()

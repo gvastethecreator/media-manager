@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
-import { existsSync } from 'fs'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
-
-export const dynamic = 'force-dynamic'
-export const maxDuration = 300
+import { existsSync } from 'fs'
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await Promise.resolve(context.params)
-    const { quality = 'mid' } = await request.json()
+    const id = params.id
+    const body = await request.json()
+    const quality = body.quality as ThumbnailQuality
 
-    // Validar ID
-    if (!id) {
+    if (!quality) {
       return NextResponse.json(
-        { error: 'ID de imagen requerido' },
+        { error: 'Calidad no especificada' },
         { status: 400 }
       )
     }
@@ -52,26 +49,19 @@ export async function POST(
 
     try {
       // Generar thumbnail
-      const result = await generateThumbnail(image.path, quality as ThumbnailQuality)
-
-      if (!result) {
-        throw new Error('Error generando miniatura')
-      }
-
-      // Validar el resultado
-      if (!result.buffer || result.buffer.length === 0) {
-        throw new Error('Buffer de miniatura inválido')
+      const result = await generateThumbnail(image.path, quality)
+      if (!result || !result.buffer) {
+        throw new Error('Error generando thumbnail')
       }
 
       // Actualizar en base de datos
       await prisma.image.update({
         where: { id },
         data: {
-          thumbnail: result.buffer.toString('base64'),
+          thumbnail: result.buffer,
           thumbnailSize: result.buffer.length,
           thumbnailWidth: result.width,
           thumbnailHeight: result.height,
-          thumbnailQuality: quality,
           thumbnailError: null,
           thumbnailErrorAt: null,
           updatedAt: new Date()
@@ -79,13 +69,12 @@ export async function POST(
       })
 
       return NextResponse.json({
-        status: 'success',
-        data: {
-          width: result.width,
-          height: result.height,
-          size: result.buffer.length
-        }
+        success: true,
+        width: result.width,
+        height: result.height,
+        size: result.buffer.length
       })
+
     } catch (error) {
       console.error('Error generando thumbnail:', error)
 
@@ -95,7 +84,7 @@ export async function POST(
         data: {
           thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
           thumbnailErrorAt: new Date(),
-          thumbnail: null, // Limpiar thumbnail si existe
+          thumbnail: null,
           thumbnailSize: null,
           thumbnailWidth: null,
           thumbnailHeight: null
@@ -103,20 +92,14 @@ export async function POST(
       })
 
       return NextResponse.json(
-        {
-          error: 'Error al generar la miniatura',
-          details: error instanceof Error ? error.message : 'Error desconocido'
-        },
+        { error: 'Error al generar la miniatura' },
         { status: 500 }
       )
     }
   } catch (error) {
     console.error('Error en generación de thumbnail:', error)
     return NextResponse.json(
-      {
-        error: 'Error interno del servidor',
-        details: error instanceof Error ? error.message : 'Error desconocido'
-      },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }
