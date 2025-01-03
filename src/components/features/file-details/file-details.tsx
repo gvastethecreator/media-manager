@@ -50,9 +50,11 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
+import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FileDetailsProps {
-	selectedItem: FileItem | null;
+	selectedItems: FileItem[];
 }
 
 interface InfoItemProps {
@@ -93,15 +95,17 @@ const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
 	return content;
 };
 
-export function FileDetails({ selectedItem }: FileDetailsProps) {
+export function FileDetails({ selectedItems }: FileDetailsProps) {
 	const [imageError, setImageError] = React.useState(false);
 	const { openViewer } = useImageViewer();
+	const { toast } = useToast();
 
 	React.useEffect(() => {
 		setImageError(false);
-	}, [selectedItem]);
+	}, [selectedItems]);
 
-	if (!selectedItem) {
+	// Si no hay items seleccionados
+	if (!selectedItems.length) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
 				<Card className="w-full">
@@ -118,31 +122,114 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 		);
 	}
 
+	// Si hay múltiples items seleccionados
+	if (selectedItems.length > 1) {
+		return (
+			<div className="flex-1 flex items-center justify-center p-4">
+				<Card className="w-full">
+					<CardContent className="pt-6">
+						<div className="flex flex-col items-center gap-2">
+							<div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
+								<ImageIcon className="h-6 w-6 text-primary" />
+							</div>
+							<p className="text-sm font-medium">
+								{selectedItems.length} archivos seleccionados
+							</p>
+							<p className="text-xs text-muted-foreground text-center">
+								Tamaño total:{" "}
+								{formatFileSize(
+									selectedItems.reduce(
+										(acc, item) => acc + (item.metadata?.fileSystem?.size || 0),
+										0
+									)
+								)}
+							</p>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	// Si hay un solo item seleccionado, mostrar los detalles normales
+	const selectedItem = selectedItems[0];
+
 	const handleOpenViewer = () => {
 		if (
 			selectedItem.type === "image" ||
-			selectedItem.mimeType?.startsWith("image/")
+			selectedItem.metadata?.mimeType?.startsWith("image/")
 		) {
-			openViewer(selectedItem);
+			openViewer([selectedItem], 0);
 		}
 	};
 
-	const renderImage = (src?: string, alt = "") => {
-		if (!src || imageError) {
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(selectedItem.path);
+			toast({
+				title: "Ruta copiada",
+				description: "La ruta del archivo ha sido copiada al portapapeles",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "No se pudo copiar la ruta",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleDownload = () => {
+		try {
+			window.electron?.downloadFile(selectedItem.path);
+			toast({
+				title: "Descarga iniciada",
+				description: "El archivo se está descargando",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "No se pudo descargar el archivo",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleOpenFolder = () => {
+		try {
+			window.electron?.openPath(selectedItem.path);
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "No se pudo abrir la carpeta",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const renderImage = () => {
+		if (imageError || !selectedItem.thumbnail) {
 			return (
 				<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
 					<ImageOff className="h-8 w-8 mb-2" />
-					<span className="text-xs">Error al cargar la imagen</span>
+					<span className="text-xs">
+						{imageError
+							? "Error al cargar la imagen"
+							: "No hay vista previa disponible"}
+					</span>
 				</div>
 			);
 		}
 
 		return (
-			<img
-				src={src}
-				alt={alt}
+			<ImageCard
+				src={selectedItem.thumbnail}
+				alt={selectedItem.name}
+				width={selectedItem.metadata?.dimensions?.width || 300}
+				height={selectedItem.metadata?.dimensions?.height || 300}
 				className="w-full h-full object-cover transition-transform hover:scale-105"
-				onError={() => setImageError(true)}
+				priority={true}
+				onClick={handleOpenViewer}
 			/>
 		);
 	};
@@ -174,15 +261,6 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 		}
 	};
 
-	const formatValue = (value: any): string => {
-		if (value === null || value === undefined) return "";
-		if (typeof value === "number") return value.toString();
-		if (typeof value === "boolean") return value ? "Sí" : "No";
-		if (value instanceof Date) return value.toLocaleString();
-		if (typeof value === "object") return JSON.stringify(value);
-		return value.toString();
-	};
-
 	return (
 		<ScrollArea className="h-full">
 			<AnimatePresence mode="wait">
@@ -196,17 +274,14 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 				>
 					{/* Vista previa de imagen */}
 					{(selectedItem.type === "image" ||
-						selectedItem.mimeType?.startsWith("image/")) && (
+						selectedItem.metadata?.mimeType?.startsWith("image/")) && (
 						<Card>
 							<CardContent className="p-0 relative group">
 								<div
 									className="aspect-square w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
 									onClick={handleOpenViewer}
 								>
-									{renderImage(
-										selectedItem.previewUrl || selectedItem.thumbnailUrl,
-										selectedItem.name
-									)}
+									{renderImage()}
 								</div>
 								<Button
 									variant="secondary"
@@ -226,7 +301,11 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={handleOpenFolder}
+										>
 											<Folder className="h-4 w-4" />
 										</Button>
 									</TooltipTrigger>
@@ -239,7 +318,11 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={handleDownload}
+										>
 											<Download className="h-4 w-4" />
 										</Button>
 									</TooltipTrigger>
@@ -252,12 +335,12 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
+										<Button variant="ghost" size="icon" onClick={handleCopy}>
 											<Copy className="h-4 w-4" />
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent>
-										<p>Copiar imagen</p>
+										<p>Copiar ruta</p>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
@@ -344,7 +427,7 @@ export function FileDetails({ selectedItem }: FileDetailsProps) {
 							<InfoItem
 								icon={<ImageIcon className="h-4 w-4" />}
 								label="Tipo"
-								value={selectedItem.mimeType}
+								value={selectedItem.metadata?.mimeType}
 							/>
 							<InfoItem
 								icon={<HardDrive className="h-4 w-4" />}

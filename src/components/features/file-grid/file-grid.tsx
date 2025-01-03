@@ -11,8 +11,6 @@ import type { FileItem } from "@/types/file-item";
 
 interface FileGridProps {
 	viewMode?: "grid" | "list";
-	selectedItem?: FileItem | null;
-	selectedIds?: string[];
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
 	isResizing?: boolean;
@@ -30,8 +28,6 @@ const GRID_CONFIG = {
 
 export function FileGrid({
 	viewMode = "grid",
-	selectedItem,
-	selectedIds,
 	onItemClick,
 	onItemDoubleClick,
 	isResizing,
@@ -39,10 +35,8 @@ export function FileGrid({
 	loadMoreItems,
 }: FileGridProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
-
 	const { ref: loadMoreRef, inView } = useInView({
-		threshold: 0.1,
-		rootMargin: "100px",
+		threshold: 0,
 	});
 
 	useEffect(() => {
@@ -128,7 +122,6 @@ export function FileGrid({
 							<FileCard
 								key={item.id}
 								item={item}
-								isSelected={selectedIds?.includes(item.id)}
 								onClick={onItemClick}
 								onDoubleClick={onItemDoubleClick}
 								style={{
