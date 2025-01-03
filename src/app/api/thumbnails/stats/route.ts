@@ -46,33 +46,54 @@ export async function GET() {
           thumbnailErrorAt: true
         }
       })
-    ])
+    ]).catch(error => {
+      console.error('Error en consulta:', error);
+      throw new Error('Error al obtener estadísticas de la base de datos');
+    });
 
-    return NextResponse.json({
+    // Validar que tenemos datos válidos
+    if (totalImages === undefined || totalImages === null) {
+      throw new Error('No se pudieron obtener las estadísticas de imágenes');
+    }
+
+    const response = {
       total: totalImages,
-      withThumbnail: totalWithThumbnail,
-      pending: totalImages - totalWithThumbnail - totalWithError,
-      totalSize: totalSize._sum.thumbnailSize || 0,
-      recentlyProcessed: recentlyProcessed.map(img => ({
+      withThumbnail: totalWithThumbnail || 0,
+      pending: totalImages - (totalWithThumbnail || 0) - (totalWithError || 0),
+      totalSize: totalSize?._sum?.thumbnailSize || 0,
+      recentlyProcessed: (recentlyProcessed || []).map(img => ({
         id: img.id,
         path: img.path,
         processedAt: img.updatedAt
       })),
-      errors: errors.map(err => ({
+      errors: (errors || []).map(err => ({
         imageId: err.id,
         imagePath: err.path,
         error: err.thumbnailError || 'Error desconocido',
         timestamp: err.thumbnailErrorAt || new Date()
       }))
-    })
-  } catch (error) {
-    console.error('Error obteniendo estadísticas:', error)
-    return NextResponse.json(
-      {
-        error: 'Error al obtener estadísticas',
-        details: error instanceof Error ? error.message : 'Error desconocido'
+    };
+
+    return new NextResponse(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { status: 500 }
-    )
+    });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas:', error);
+
+    const errorResponse = {
+      error: 'Error al obtener estadísticas',
+      details: error instanceof Error ? error.message : 'Error desconocido',
+      timestamp: new Date().toISOString()
+    };
+
+    return new NextResponse(JSON.stringify(errorResponse), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 }

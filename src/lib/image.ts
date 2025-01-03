@@ -33,11 +33,11 @@ interface ProcessImageOptions {
   width: number
   height: number
   quality: number
+  format?: 'webp' | 'jpeg' | 'png'
 }
 
 interface ProcessImageResult {
-  data: string
-  size: number
+  buffer: Buffer
   width: number
   height: number
 }
@@ -52,24 +52,40 @@ export async function processImage(
     }
 
     const metadata = await getImageMetadata(imagePath)
+    let processor = sharp(imagePath)
 
-    const imageBuffer = await sharp(imagePath)
-      .resize(options.width, options.height, {
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .webp({ quality: options.quality })
-      .toBuffer()
+    // Aplicar redimensionamiento
+    processor = processor.resize(options.width, options.height, {
+      fit: 'inside',
+      withoutEnlargement: true
+    })
+
+    // Aplicar formato y calidad
+    if (options.format === 'webp') {
+      processor = processor.webp({ quality: options.quality })
+    } else if (options.format === 'jpeg') {
+      processor = processor.jpeg({ quality: options.quality })
+    } else if (options.format === 'png') {
+      processor = processor.png({ quality: options.quality })
+    } else {
+      // Por defecto usar WebP
+      processor = processor.webp({ quality: options.quality })
+    }
+
+    const buffer = await processor.toBuffer()
+
+    if (!buffer || buffer.length === 0) {
+      throw new Error('Error generando buffer de imagen')
+    }
 
     return {
-      data: imageBuffer.toString('base64'),
-      size: imageBuffer.length,
+      buffer,
       width: metadata.width,
       height: metadata.height
     }
   } catch (error) {
     console.error('Error procesando imagen:', error)
-    throw new Error(error instanceof Error ? error.message : 'Error procesando imagen')
+    throw error instanceof Error ? error : new Error('Error procesando imagen')
   }
 }
 
@@ -77,22 +93,49 @@ export async function createThumbnail(
   imagePath: string,
   options: ProcessImageOptions
 ): Promise<ProcessImageResult> {
-  return processImage(imagePath, options)
+  try {
+    return await processImage(imagePath, {
+      ...options,
+      format: 'webp' // Forzar WebP para thumbnails
+    })
+  } catch (error) {
+    console.error('Error creando thumbnail:', error)
+    throw error instanceof Error ? error : new Error('Error creando thumbnail')
+  }
 }
 
 export async function generateThumbnail(
   imagePath: string,
   quality: ThumbnailQuality = 'mid'
-): Promise<ProcessImageResult | null> {
+): Promise<ProcessImageResult> {
   try {
+    if (!imagePath) {
+      throw new Error('Path de imagen requerido')
+    }
+
     const config = THUMBNAIL_QUALITY_CONFIG[quality]
-    return await processImage(imagePath, {
+    if (!config) {
+      throw new Error(`Calidad inválida: ${quality}`)
+    }
+
+    const result = await processImage(imagePath, {
       width: config.width,
       height: config.height,
-      quality: config.quality
+      quality: config.quality,
+      format: 'webp'
     })
+
+    if (!result || !result.buffer) {
+      throw new Error('Error generando thumbnail')
+    }
+
+    return result
   } catch (error) {
-    console.error('Error generando thumbnail:', error)
-    return null
+    console.error('Error generando thumbnail:', {
+      path: imagePath,
+      quality,
+      error: error instanceof Error ? error.message : error
+    })
+    throw error instanceof Error ? error : new Error('Error generando thumbnail')
   }
 }
