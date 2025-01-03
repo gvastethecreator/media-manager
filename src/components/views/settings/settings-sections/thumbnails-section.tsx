@@ -198,6 +198,17 @@ export function ThumbnailsSection() {
 		}
 	};
 
+	const handleCancel = () => {
+		thumbnailService.cancelProcessing();
+		setIsProcessing(false);
+		setIsOptimizing(false);
+		setProgress(null);
+		toast({
+			title: "Cancelado",
+			description: "El proceso ha sido cancelado",
+		});
+	};
+
 	React.useEffect(() => {
 		loadStats();
 	}, [loadStats]);
@@ -256,7 +267,7 @@ export function ThumbnailsSection() {
 										variant="outline"
 										size="sm"
 										onClick={handleOptimizeThumbnails}
-										disabled={isLoading || isOptimizing}
+										disabled={isLoading || isOptimizing || isProcessing}
 									>
 										{isOptimizing ? (
 											<>
@@ -274,9 +285,9 @@ export function ThumbnailsSection() {
 										variant="outline"
 										size="sm"
 										onClick={handleReprocessThumbnails}
-										disabled={isLoading || isOptimizing}
+										disabled={isLoading || isOptimizing || isProcessing}
 									>
-										{isLoading ? (
+										{isProcessing ? (
 											<>
 												<Settings2 className="h-4 w-4 mr-2 animate-spin" />
 												Procesando...
@@ -288,6 +299,17 @@ export function ThumbnailsSection() {
 											</>
 										)}
 									</Button>
+
+									{(isProcessing || isOptimizing) && (
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={handleCancel}
+											className="text-red-500 hover:text-red-600"
+										>
+											Cancelar
+										</Button>
+									)}
 								</div>
 							</div>
 
