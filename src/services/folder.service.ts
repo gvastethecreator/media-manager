@@ -90,49 +90,73 @@ class FolderService {
     const decoder = new TextDecoder();
     let buffer = '';
 
+    const processEvent = async (eventData: string) => {
+      try {
+        const event = JSON.parse(eventData);
+        console.log('Evento SSE recibido:', event);
+
+        switch (event.type) {
+          case 'progress':
+            if (event.data) {
+              options.onProgress?.({
+                current: event.data.current || 0,
+                total: event.data.total || 0,
+                currentFile: event.data.currentFile || '',
+                status: event.data.status || 'Procesando...',
+                progress: event.data.progress || 0
+              });
+            }
+            break;
+          case 'error':
+            const error = new Error(event.data?.message || 'Error desconocido');
+            error.name = event.data?.type || 'UNKNOWN_ERROR';
+            console.log('Error en el proceso:', error.message);
+            options.onError?.(error);
+            break;
+          case 'complete':
+            if (event.data) {
+              options.onComplete?.(event.data);
+            }
+            break;
+          default:
+            console.warn('Tipo de evento desconocido:', event.type);
+        }
+      } catch (parseError) {
+        console.log('Error parseando evento SSE:', parseError instanceof Error ? parseError.message : 'Error desconocido');
+        options.onError?.(new Error('Error procesando evento del servidor'));
+      }
+    };
+
     try {
       while (true) {
         const { done, value } = await reader.read();
 
         if (done) {
+          if (buffer.trim()) {
+            const lines = buffer.split('\n');
+            for (const line of lines) {
+              if (line.trim() && line.startsWith('data: ')) {
+                await processEvent(line.slice(6));
+              }
+            }
+          }
           console.log('Stream completado');
           break;
         }
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          if (line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
-
-          try {
-            const eventData = line.slice(6);
-            const event = JSON.parse(eventData);
-            console.log('Evento SSE recibido:', event);
-
-            switch (event.type) {
-              case 'progress':
-                options.onProgress?.(event.data);
-                break;
-              case 'error':
-                const error = new Error(event.data.message || 'Error desconocido');
-                error.name = event.data.type || 'UNKNOWN_ERROR';
-                console.log('Error en el proceso:', error.message);
-                options.onError?.(error);
-                break;
-              case 'complete':
-                options.onComplete?.(event.data);
-                break;
-              default:
-                console.warn('Tipo de evento desconocido:', event.type);
-            }
-          } catch (parseError) {
-            console.log('Error parseando evento SSE:', parseError instanceof Error ? parseError.message : 'Error desconocido');
-            options.onError?.(new Error('Error procesando evento del servidor'));
+        // Procesar líneas completas
+        for (let i = 0; i < lines.length - 1; i++) {
+          const line = lines[i].trim();
+          if (line && line.startsWith('data: ')) {
+            await processEvent(line.slice(6));
           }
         }
+
+        // Mantener el último fragmento incompleto en el buffer
+        buffer = lines[lines.length - 1];
       }
     } catch (streamError) {
       console.log('Error en el stream:', streamError instanceof Error ? streamError.message : 'Error desconocido');
@@ -170,6 +194,7 @@ class FolderService {
     onComplete?: (data: any) => void
   }) {
     try {
+      console.log('Iniciando addFolder con path:', path);
       const response = await this.fetchWithTimeout(
         '/api/folders',
         {
@@ -189,28 +214,58 @@ class FolderService {
         60000 // 60 segundos para agregar carpeta
       );
 
-      if (!response.ok || !response.body) {
+      console.log('Respuesta recibida:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (!response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType?.includes('application/json')) {
           const error = await response.json();
-          throw new Error(error.message || 'Error al agregar carpeta');
+          console.log('Error JSON recibido:', error);
+          const errorObj = new Error(error.message || 'Error al agregar carpeta');
+          errorObj.name = error.type || 'UNKNOWN_ERROR';
+          throw errorObj;
         }
-        throw new Error('Error al agregar carpeta');
+        throw new Error(`Error al agregar carpeta: ${response.status} ${response.statusText}`);
       }
 
+      if (!response.body) {
+        throw new Error('No se recibió respuesta del servidor');
+      }
+
+      console.log('Iniciando lectura del stream');
       const reader = response.body.getReader();
-      await this.processSSEStream(reader, options || {});
+      await this.processSSEStream(reader, {
+        onProgress: (stats) => {
+          console.log('Progreso:', stats);
+          options?.onProgress?.(stats);
+        },
+        onError: (error) => {
+          console.log('Error en stream:', error);
+          options?.onError?.(error);
+        },
+        onComplete: (data) => {
+          console.log('Completado:', data);
+          options?.onComplete?.(data);
+        }
+      });
 
       return true;
     } catch (error) {
       console.error('Error en addFolder:', error);
-      options?.onError?.(error instanceof Error ? error : new Error('Error desconocido'));
-      throw error;
+      const errorObj = error instanceof Error ? error : new Error('Error desconocido');
+      options?.onError?.(errorObj);
+      throw errorObj;
     }
   }
 
   async reindexFolder({ id, onProgress, onError, onComplete }: IndexOptions) {
     try {
+      console.log('Iniciando reindexación de carpeta:', id)
       const response = await this.fetchWithTimeout(
         `/api/folders/reindex/${id}`,
         {
@@ -229,25 +284,47 @@ class FolderService {
         60000 // 60 segundos para reindexar
       );
 
+      console.log('Respuesta recibida:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      })
+
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType?.includes('application/json')) {
           const errorData = await response.json();
+          console.log('Error JSON recibido:', errorData)
           const error = new Error(errorData.message || 'Error al reindexar carpeta');
           error.name = errorData.type || 'UNKNOWN_ERROR';
           throw error;
         }
-        throw new Error('Error al reindexar carpeta');
+        throw new Error(`Error al reindexar carpeta: ${response.status} ${response.statusText}`);
       }
 
       if (!response.body) {
         throw new Error('No se recibió respuesta del servidor');
       }
 
+      console.log('Iniciando lectura del stream')
       const reader = response.body.getReader();
-      await this.processSSEStream(reader, { onProgress, onError, onComplete });
+      await this.processSSEStream(reader, {
+        onProgress: (stats) => {
+          console.log('Progreso:', stats)
+          onProgress?.(stats)
+        },
+        onError: (error) => {
+          console.log('Error en stream:', error)
+          onError?.(error)
+        },
+        onComplete: (data) => {
+          console.log('Completado:', data)
+          onComplete?.(data)
+        }
+      });
     } catch (error) {
-      console.log('Error en reindexFolder:', error instanceof Error ? error.message : 'Error desconocido');
+      console.error('Error en reindexFolder:', error)
       onError?.(error instanceof Error ? error : new Error('Error desconocido'));
       throw error;
     }
