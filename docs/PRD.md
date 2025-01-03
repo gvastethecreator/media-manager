@@ -89,7 +89,7 @@ Con soporte para imágenes y gifs, extracción de metadatos EXIF, y compatibilid
 
 ### Componentes Principales
 1. Panel izquierdo
-   - datos de perfil [ Avatar, nombre de perfil, cantidad de archivos ], botón de configuración, botón de cambiar tema, botón de refrescar aplicación
+   - datos de perfil [ nombre de perfil, cantidad de archivos ], botón de configuración, botón de cambiar tema, botón de refrescar aplicación
    - Dashboard [ botón ]
    - Todas las imagens [ botón ]
    - Favoritos [ botón ]
@@ -99,6 +99,7 @@ Con soporte para imágenes y gifs, extracción de metadatos EXIF, y compatibilid
    - Lista de colecciones
    - Etiquetas [ categoría y botón ]
    - Lista de etiquetas
+   - Busqueda
 
 2. Área principal de contenido
    - Vista principal de contenido, puede tener :
