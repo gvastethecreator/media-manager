@@ -861,3 +861,95 @@ className={cn(
    - Implementar logging detallado
    - Añadir métricas de rendimiento
    - Mejorar diagnóstico de errores
+
+# Progress
+
+## FileCard Component Analysis (Current State)
+
+### Current Implementation
+
+- Manejo de thumbnails con servicio dedicado
+- Sistema de selección múltiple con shift/ctrl
+- Integración con ImageViewer para preview
+- Sistema de contexto menu
+- Manejo de estados de carga y errores
+- Animaciones y transiciones suaves
+- Soporte para diferentes modos de vista (grid/list)
+
+### Pending Tasks
+
+#### 1. Eliminar Referencias a Electron
+
+- [ ] Reemplazar `window.electron?.openPath` con el servicio de sistema de archivos actual
+- [ ] Reemplazar `window.electron?.downloadFile` con el servicio de descargas actual
+- [ ] Reemplazar `window.electron?.copyFile` con el servicio de clipboard actual
+
+#### 2. Implementar TODOs del Context Menu
+
+- [ ] Implementar "collection-new" usando CollectionService
+
+  - Integrar con el modal de nueva colección existente
+  - Usar el store de colecciones actual
+
+- [ ] Implementar "favorite-toggle" usando FileService
+
+  - Usar el método existente para toggle de favoritos
+  - Actualizar el estado en el store
+
+- [ ] Implementar "tag-new" usando TagService
+
+  - Integrar con el modal de tags existente
+  - Usar el store de tags actual
+
+- [ ] Implementar "rename" usando FileService
+
+  - Usar el método de renombrado existente
+  - Manejar validaciones de nombre
+  - Actualizar el estado en el store
+
+- [ ] Implementar "delete" usando FileService
+
+  - Usar el método de eliminación existente
+  - Agregar confirmación de eliminación
+  - Manejar la actualización del store
+
+- [ ] Implementar "info" usando el panel de detalles
+  - Integrar con el panel de detalles existente
+  - Mostrar/ocultar el panel según la acción
+
+#### 3. Mejoras de UX/UI
+
+- [ ] Agregar feedback visual para acciones del context menu
+- [ ] Mejorar las animaciones de selección
+- [ ] Optimizar el rendimiento de selección múltiple
+- [ ] Agregar tooltips para acciones principales
+
+### Dependencies Required
+
+- FileService
+- CollectionService
+- TagService
+- ImageService
+- ClipboardService
+- SystemService (para reemplazar funcionalidades de electron)
+
+### Notes
+
+- Mantener la compatibilidad con el sistema de virtualización actual
+- Respetar el patrón de diseño existente
+- Mantener la consistencia con el resto de la aplicación
+- No romper la funcionalidad existente de selección múltiple
+- Asegurar que los servicios manejen correctamente los errores
+
+### Next Steps
+
+1. Crear/Verificar que existan todos los servicios necesarios
+2. Implementar las funcionalidades en orden de prioridad
+3. Agregar tests para las nuevas funcionalidades
+4. Documentar los cambios en la documentación técnica
+
+### Technical Debt
+
+- Revisar el manejo de memoria en la carga de thumbnails
+- Optimizar la virtualización para grandes cantidades de archivos
+- Mejorar el sistema de caché de thumbnails
