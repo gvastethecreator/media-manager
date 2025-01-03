@@ -332,93 +332,66 @@ export function ThumbnailsSection() {
 		loadStats();
 	}, [loadStats]);
 
-	const RecentThumbnailsGrid = React.memo(() => (
-		<div className="space-y-2">
-			<Label>Últimas Procesadas</Label>
-			<div className="grid grid-cols-3 gap-2">
-				{lastProcessedThumbnails.map((image) => (
-					<div
-						key={image.id}
-						className="relative aspect-square rounded-md overflow-hidden bg-muted group"
-					>
-						<Image
-							src={`/api/images/${image.id}/thumbnail`}
-							alt={image.path}
-							fill
-							className="object-cover transition-transform group-hover:scale-105"
-						/>
-						<div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-2">
-							<p className="text-xs text-white truncate">{image.path}</p>
-							<p className="text-xs text-white/70 absolute bottom-2 left-2">
-								{new Date(image.processedAt).toLocaleTimeString()}
-							</p>
-						</div>
-					</div>
-				))}
-				{Array(9 - lastProcessedThumbnails.length)
-					.fill(0)
-					.map((_, i) => (
-						<div
-							key={`empty-${i}`}
-							className="aspect-square rounded-md bg-muted/50"
-						/>
-					))}
-			</div>
-		</div>
-	));
-
 	return (
-		<div className="space-y-6 w-full">
-			<Card className="border-none py-6 w-full">
+		<div className="space-y-4 w-full px-4">
+			<Card className="border-none py-4 w-full">
 				<CardHeader className="px-4 py-2">
-					<CardTitle className="text-xl font-semibold flex items-center">
-						<ImageIcon className="h-6 w-6 mr-2" /> Miniaturas
+					<CardTitle className="text-base font-semibold flex items-center gap-2">
+						<ImageIcon className="h-5 w-5" /> Configuración de Miniaturas
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					<div className="space-y-4 gap-4">
-						<div className="space-y-2 w-1/2">
-							<Label>Calidad de Miniaturas</Label>
-							<Select
-								value={settings.thumbnailQuality}
-								onValueChange={handleQualityChange}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecciona la calidad" />
-								</SelectTrigger>
-								<SelectContent>
-									{thumbnailQualityOptions.map((option) => (
-										<SelectItem key={option.value} value={option.value}>
-											{option.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<p className="text-sm text-muted-foreground">
-								Una calidad más alta resultará en miniaturas más nítidas pero
-								ocupará más espacio
-							</p>
-						</div>
-
-						<div className="flex items-center justify-between space-x-2">
-							<div className="space-y-0.5">
-								<Label htmlFor="video-animation">Animación en videos</Label>
-								<p className="text-sm text-muted-foreground">
-									Mostrar un preview animado al pasar el cursor sobre videos
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div className="space-y-4">
+							<div className="space-y-1.5">
+								<Label className="text-sm">Calidad de Miniaturas</Label>
+								<Select
+									value={settings.thumbnailQuality}
+									onValueChange={handleQualityChange}
+								>
+									<SelectTrigger className="h-8 text-xs">
+										<SelectValue placeholder="Selecciona la calidad" />
+									</SelectTrigger>
+									<SelectContent>
+										{thumbnailQualityOptions.map((option) => (
+											<SelectItem
+												key={option.value}
+												value={option.value}
+												className="text-xs"
+											>
+												{option.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<p className="text-xs text-muted-foreground">
+									Una calidad más alta resultará en miniaturas más nítidas pero
+									ocupará más espacio
 								</p>
 							</div>
-							<Switch
-								id="video-animation"
-								checked={settings.videoThumbnailAnimation}
-								onCheckedChange={handleVideoAnimationToggle}
-							/>
-						</div>
 
-						<div className="space-y-4 flex flex-col-2 gap-4">
-							<div className="flex items-center space-x-2">
+							<div className="flex items-center justify-between space-x-4 py-1">
+								<div className="space-y-0.5">
+									<Label htmlFor="video-animation" className="text-sm">
+										Animación en videos
+									</Label>
+									<p className="text-xs text-muted-foreground">
+										Mostrar un preview animado al pasar el cursor sobre videos
+									</p>
+								</div>
+								<Switch
+									id="video-animation"
+									checked={settings.videoThumbnailAnimation}
+									onCheckedChange={handleVideoAnimationToggle}
+									className="scale-90"
+								/>
+							</div>
+
+							<div className="flex flex-wrap gap-1.5 pt-2">
 								<Button
 									variant="outline"
 									size="sm"
+									className="h-7 text-xs"
 									onClick={handleOptimizeThumbnails}
 									disabled={
 										isLoading || isOptimizing || isProcessing || isCleaning
@@ -426,12 +399,12 @@ export function ThumbnailsSection() {
 								>
 									{isOptimizing ? (
 										<>
-											<Zap className="h-4 w-4 mr-2 animate-spin" />
+											<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 											Optimizando...
 										</>
 									) : (
 										<>
-											<Zap className="h-4 w-4 mr-2" />
+											<Zap className="h-3.5 w-3.5 mr-1.5" />
 											Optimizar
 										</>
 									)}
@@ -439,6 +412,7 @@ export function ThumbnailsSection() {
 								<Button
 									variant="outline"
 									size="sm"
+									className="h-7 text-xs"
 									onClick={handleReprocessThumbnails}
 									disabled={
 										isLoading || isOptimizing || isProcessing || isCleaning
@@ -446,12 +420,12 @@ export function ThumbnailsSection() {
 								>
 									{isProcessing ? (
 										<>
-											<Settings2 className="h-4 w-4 mr-2 animate-spin" />
+											<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 											Procesando...
 										</>
 									) : (
 										<>
-											<Settings2 className="h-4 w-4 mr-2" />
+											<Settings2 className="h-3.5 w-3.5 mr-1.5" />
 											Reprocesar
 										</>
 									)}
@@ -459,6 +433,7 @@ export function ThumbnailsSection() {
 								<Button
 									variant="outline"
 									size="sm"
+									className="h-7 text-xs"
 									onClick={() => setShowConfirmClean(true)}
 									disabled={
 										isLoading || isOptimizing || isProcessing || isCleaning
@@ -466,12 +441,12 @@ export function ThumbnailsSection() {
 								>
 									{isCleaning ? (
 										<>
-											<Trash2 className="h-4 w-4 mr-2 animate-spin" />
+											<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 											Limpiando...
 										</>
 									) : (
 										<>
-											<Trash2 className="h-4 w-4 mr-2" />
+											<Trash2 className="h-3.5 w-3.5 mr-1.5" />
 											Limpiar
 										</>
 									)}
@@ -482,90 +457,140 @@ export function ThumbnailsSection() {
 										variant="ghost"
 										size="sm"
 										onClick={handleCancel}
-										className="text-red-500 hover:text-red-600"
+										className="h-7 text-xs text-red-500 hover:text-red-600"
 									>
 										Cancelar
 									</Button>
 								)}
 							</div>
-
-							{progress && (
-								<div className="space-y-2">
-									<div className="flex justify-between text-sm text-muted-foreground">
-										<span>
-											{progress.current} de {progress.total} (
-											{Math.round(progress.progress)}%)
-										</span>
-										<span>{progress.status}</span>
-									</div>
-									<Progress value={progress.progress} />
-									<p className="text-sm text-muted-foreground truncate">
-										{progress.currentFile}
-									</p>
-								</div>
-							)}
 						</div>
 
 						{stats && (
-							<div className="space-y-4 pt-4 border-t">
-								<div className="space-y-2">
-									<Label>Total de Miniaturas</Label>
-									<div className="flex items-center justify-between bg-muted p-2 rounded-md">
-										<span className="text-sm font-medium">{stats.total}</span>
-										<Badge variant="secondary">Generadas</Badge>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label>Peso en Base de Datos</Label>
-									<div className="flex items-center justify-between bg-muted p-2 rounded-md">
-										<span className="text-sm font-medium">
-											{formatBytes(stats.totalSize)}
-										</span>
-										<Badge variant="secondary">Optimizado</Badge>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label>Pendientes</Label>
-									<div className="flex items-center justify-between bg-muted p-2 rounded-md">
-										<span className="text-sm font-medium">{stats.pending}</span>
-										<Badge
-											variant="secondary"
-											className={
-												stats.pending === 0 ? "bg-green-500" : undefined
-											}
-										>
-											{stats.pending === 0 ? "Al día" : "Pendiente"}
-										</Badge>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label>Con Error</Label>
-									<div className="flex items-center justify-between bg-muted p-2 rounded-md">
-										<span className="text-sm font-medium">
-											{stats.errors.length}
-										</span>
-										{stats.errors.length > 0 ? (
-											<Button
-												variant="ghost"
-												size="sm"
-												className="h-6 text-red-500 hover:text-red-600"
-												onClick={() => setShowErrors(true)}
-											>
-												<AlertCircle className="h-4 w-4 mr-1" />
-												Ver detalles
-											</Button>
-										) : (
-											<Badge variant="secondary" className="bg-green-500">
-												Sin errores
+							<div className="space-y-4">
+								<div className="grid grid-cols-2 gap-3">
+									<div className="space-y-1.5">
+										<Label className="text-sm">Total de Miniaturas</Label>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">{stats.total}</span>
+											<Badge variant="secondary" className="text-xs">
+												Generadas
 											</Badge>
-										)}
+										</div>
+									</div>
+
+									<div className="space-y-1.5">
+										<Label className="text-sm">Peso en Base de Datos</Label>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">
+												{formatBytes(stats.totalSize)}
+											</span>
+											<Badge variant="secondary" className="text-xs">
+												Optimizado
+											</Badge>
+										</div>
+									</div>
+
+									<div className="space-y-1.5">
+										<Label className="text-sm">Pendientes</Label>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">
+												{stats.pending}
+											</span>
+											<Badge
+												variant="secondary"
+												className={cn(
+													"text-xs",
+													stats.pending === 0 &&
+														"bg-green-500/20 text-green-500"
+												)}
+											>
+												{stats.pending === 0 ? "Al día" : "Pendiente"}
+											</Badge>
+										</div>
+									</div>
+
+									<div className="space-y-1.5">
+										<Label className="text-sm">Con Error</Label>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">
+												{stats.errors.length}
+											</span>
+											{stats.errors.length > 0 ? (
+												<Button
+													variant="ghost"
+													size="sm"
+													className="h-6 text-xs text-red-500 hover:text-red-600"
+													onClick={() => setShowErrors(true)}
+												>
+													<AlertCircle className="h-3.5 w-3.5 mr-1" />
+													Ver detalles
+												</Button>
+											) : (
+												<Badge
+													variant="secondary"
+													className="text-xs bg-green-500/20 text-green-500"
+												>
+													Sin errores
+												</Badge>
+											)}
+										</div>
 									</div>
 								</div>
 
-								{lastProcessedThumbnails.length > 0 && <RecentThumbnailsGrid />}
+								{progress && (
+									<div className="space-y-1.5 bg-muted/30 p-3 rounded-lg">
+										<div className="flex justify-between text-xs">
+											<span>
+												{progress.current} de {progress.total} (
+												{Math.round(progress.progress)}%)
+											</span>
+											<span className="text-muted-foreground">
+												{progress.status}
+											</span>
+										</div>
+										<Progress value={progress.progress} className="h-1.5" />
+										<p className="text-xs text-muted-foreground truncate">
+											{progress.currentFile}
+										</p>
+									</div>
+								)}
+
+								{lastProcessedThumbnails.length > 0 && (
+									<div className="space-y-1.5">
+										<Label className="text-sm">Últimas Procesadas</Label>
+										<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
+											{lastProcessedThumbnails.map((image) => (
+												<div
+													key={image.id}
+													className="relative aspect-square rounded-md overflow-hidden bg-muted group"
+												>
+													<Image
+														src={`/api/images/${image.id}/thumbnail`}
+														alt={image.path}
+														fill
+														className="object-cover transition-transform group-hover:scale-105"
+													/>
+													<div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1.5">
+														<p className="text-[10px] text-white truncate">
+															{image.path}
+														</p>
+														<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
+															{new Date(image.processedAt).toLocaleTimeString()}
+														</p>
+													</div>
+												</div>
+											))}
+											{Array(9 - lastProcessedThumbnails.length)
+												.fill(0)
+												.map((_, i) => (
+													<div
+														key={`empty-${i}`}
+														className="aspect-square rounded-md bg-muted/50"
+													/>
+												))}
+										</div>
+									</div>
+								)}
 							</div>
 						)}
 					</div>
@@ -610,7 +635,7 @@ export function ThumbnailsSection() {
 							{stats?.errors.map((error) => (
 								<div
 									key={error.imageId}
-									className="p-4 rounded-lg border bg-muted"
+									className="p-4 rounded-lg border bg-muted/50"
 								>
 									<div className="flex justify-between items-start mb-2">
 										<span className="font-medium">{error.imagePath}</span>

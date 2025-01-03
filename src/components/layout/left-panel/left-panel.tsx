@@ -122,36 +122,34 @@ export function LeftPanel() {
 	return (
 		<div className="flex flex-col h-full">
 			<div className="flex flex-col">
-				<div className="flex items-center gap-2">
-					<Avatar className="h-8 w-8">
-						<AvatarImage src="/app-logo.png" alt="Logo" />
-						<AvatarFallback>😁</AvatarFallback>
-					</Avatar>
-					<div className="flex flex-col items-start">
+				<div className="flex items-center justify-between gap-2">
+					<div className="flex flex-col items-start px-2">
 						<span className="text-sm font-medium">Image Manager</span>
 						<span className="text-xs text-muted-foreground">
 							{stats?.totalImages || 0} imágenes
 						</span>
 					</div>
-					<div className="flex items-center gap-2">
+					<div className="gap-4 px-2">
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8"
-							onClick={handleOpenSettings}>
-							<Settings2 className="h-4 w-4" />
-						</Button>
-
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8"
-							onClick={handleThemeToggle}>
+							className="h-7 w-7"
+							onClick={handleThemeToggle}
+						>
 							{theme === "light" ? (
 								<Moon className="h-4 w-4" />
 							) : (
 								<Sun className="h-4 w-4" />
 							)}
+						</Button>
+
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={handleOpenSettings}
+						>
+							<Settings2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
@@ -187,13 +185,13 @@ export function LeftPanel() {
 											? stats?.totalTags
 											: undefined
 									}
-									isActive={currentView === id || (
-                    id === "collections" && currentView === "collection-content"
-                  ) || (
-                    id === "folders" && currentView === "folder-content"
-                  ) || (
-                    id === "tags" && currentView === "tag-content"
-                  )}
+									isActive={
+										currentView === id ||
+										(id === "collections" &&
+											currentView === "collection-content") ||
+										(id === "folders" && currentView === "folder-content") ||
+										(id === "tags" && currentView === "tag-content")
+									}
 									onClick={() => handleItemClick(id)}
 								/>
 								<div className="mt-1 space-y-0.5">
@@ -203,7 +201,8 @@ export function LeftPanel() {
 												key={collection.id}
 												variant="ghost"
 												className="w-full justify-start gap-2 h-6 text-xs px-2 rounded-none"
-												onClick={() => handleCollectionClick(collection.id)}>
+												onClick={() => handleCollectionClick(collection.id)}
+											>
 												<span className="text-base">{collection.emoji}</span>
 												<span className="flex-1 text-left truncate">
 													{collection.name}
@@ -219,10 +218,9 @@ export function LeftPanel() {
 												key={folder.id}
 												variant="ghost"
 												className="w-full justify-start h-6 text-xs px-2 rounded-none"
-												onClick={() => handleFolderClick(folder.id)}>
-												<FolderIcon
-													className="h-2 w-2"
-												/>
+												onClick={() => handleFolderClick(folder.id)}
+											>
+												<FolderIcon className="h-2 w-2" />
 												<span className="flex-1 text-left truncate">
 													{folder.name}
 												</span>
@@ -238,7 +236,8 @@ export function LeftPanel() {
 												variant="ghost"
 												className="justify-start h-6 text-xs px-2 rounded-none gap-2"
 												style={{ color: tag.color }}
-												onClick={() => handleTagClick(tag.name)}>
+												onClick={() => handleTagClick(tag.name)}
+											>
 												<span
 													className="w-3 h-3 rounded-full"
 													style={{ backgroundColor: tag.color }}
@@ -246,9 +245,7 @@ export function LeftPanel() {
 												<span className="flex-1 text-left truncate">
 													{tag.name}
 												</span>
-												<Badge variant="outline">
-													{tag.count}
-												</Badge>
+												<Badge variant="outline">{tag.count}</Badge>
 											</Button>
 										))}
 								</div>
