@@ -7,7 +7,7 @@ import type { FileItem } from '@/types/file-item'
 
 // Lazy load del AdvancedImageViewer
 const AdvancedImageViewer = dynamic(
-  () => import('./components/advanced-image-viewer').then(mod => mod.AdvancedImageViewer),
+  () => import('./components/advanced-file-viewer').then(mod => mod.AdvancedImageViewer),
   {
     loading: () => null,
     ssr: false
