@@ -94,48 +94,48 @@ export async function createThumbnail(
   options: ProcessImageOptions
 ): Promise<ProcessImageResult> {
   try {
-    return await processImage(imagePath, {
-      ...options,
-      format: 'webp' // Forzar WebP para thumbnails
-    })
-  } catch (error) {
-    console.error('Error creando thumbnail:', error)
-    throw error instanceof Error ? error : new Error('Error creando thumbnail')
-  }
-}
-
-export async function generateThumbnail(
-  imagePath: string,
-  quality: ThumbnailQuality = 'mid'
-): Promise<ProcessImageResult> {
-  try {
     if (!imagePath) {
       throw new Error('Path de imagen requerido')
     }
 
-    const config = THUMBNAIL_QUALITY_CONFIG[quality]
-    if (!config) {
-      throw new Error(`Calidad inválida: ${quality}`)
+    if (!existsSync(imagePath)) {
+      throw new Error('Archivo no encontrado')
     }
 
     const result = await processImage(imagePath, {
-      width: config.width,
-      height: config.height,
-      quality: config.quality,
-      format: 'webp'
+      ...options,
+      format: 'webp' // Forzar WebP para thumbnails
     })
 
-    if (!result || !result.buffer) {
-      throw new Error('Error generando thumbnail')
+    // Validar tamaño máximo (2MB)
+    const MAX_SIZE = 2 * 1024 * 1024
+    if (result.buffer.length > MAX_SIZE) {
+      console.warn('Thumbnail demasiado grande, reintentando con menor calidad:', {
+        path: imagePath,
+        size: result.buffer.length,
+        maxSize: MAX_SIZE
+      })
+
+      // Reintentar con menor calidad
+      const lowerQualityResult = await processImage(imagePath, {
+        ...options,
+        quality: Math.max(options.quality - 20, 40), // Reducir calidad pero no menos de 40
+        format: 'webp'
+      })
+
+      if (lowerQualityResult.buffer.length > MAX_SIZE) {
+        throw new Error('No se pudo generar un thumbnail de tamaño aceptable')
+      }
+
+      return lowerQualityResult
     }
 
     return result
   } catch (error) {
-    console.error('Error generando thumbnail:', {
+    console.error('Error creando thumbnail:', {
       path: imagePath,
-      quality,
       error: error instanceof Error ? error.message : error
     })
-    throw error instanceof Error ? error : new Error('Error generando thumbnail')
+    throw error instanceof Error ? error : new Error('Error creando thumbnail')
   }
 }
