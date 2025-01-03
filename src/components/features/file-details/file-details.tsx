@@ -270,13 +270,13 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
 					transition={{ duration: 0.2 }}
-					className="space-y-4 p-4"
+					className="p-0"
 				>
 					{/* Vista previa de imagen */}
 					{(selectedItem.type === "image" ||
 						selectedItem.metadata?.mimeType?.startsWith("image/")) && (
 						<Card>
-							<CardContent className="p-0 relative group">
+							<CardContent className="p-0 relative group border-none r">
 								<div
 									className="aspect-square w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
 									onClick={handleOpenViewer}
