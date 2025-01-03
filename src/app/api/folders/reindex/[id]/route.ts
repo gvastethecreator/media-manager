@@ -10,32 +10,32 @@ export const maxDuration = 300
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   const encoder = new TextEncoder()
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const writeEvent = async (event: string, data: any) => {
+  const writeEvent = async (event: string, data: Record<string, any>) => {
     try {
       const formattedData = JSON.stringify({ type: event, data })
       await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
     } catch (error) {
-      console.error('Error escribiendo evento:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      console.error('Error escribiendo evento:', { error: errorMessage })
     }
   }
 
   try {
-    const id = context.params.id
-    if (!id) {
-      throw new Error('ID de carpeta requerido')
+    if (!params?.id) {
+      throw new Error('ID_REQUIRED')
     }
 
     const { generateThumbnails = true, thumbnailQuality = 'mid' } = await request.json().catch(() => ({}))
 
     // Obtener la carpeta
     const folder = await prisma.folder.findUnique({
-      where: { id },
+      where: { id: params.id },
       include: {
         images: {
           select: {
@@ -48,12 +48,20 @@ export async function POST(
     })
 
     if (!folder) {
-      throw new Error('Carpeta no encontrada')
+      throw new Error('FOLDER_NOT_FOUND')
     }
 
     const total = folder.images.length
     let current = 0
     let errors = 0
+
+    // Enviar evento inicial
+    await writeEvent('progress', {
+      current: 0,
+      total,
+      progress: 0,
+      status: 'Iniciando reindexación...'
+    })
 
     // Procesar cada imagen
     for (const image of folder.images) {
@@ -65,6 +73,7 @@ export async function POST(
         if (!existsSync(image.path)) {
           errors++
           await writeEvent('error', {
+            code: 'FILE_NOT_FOUND',
             file: image.path,
             error: 'Archivo original no encontrado'
           })
@@ -136,6 +145,7 @@ export async function POST(
             })
 
             await writeEvent('error', {
+              code: 'THUMBNAIL_ERROR',
               file: image.path,
               error: error instanceof Error ? error.message : 'Error desconocido'
             })
@@ -146,6 +156,7 @@ export async function POST(
         console.error('Error procesando imagen:', error)
 
         await writeEvent('error', {
+          code: 'PROCESS_ERROR',
           file: image.path,
           error: error instanceof Error ? error.message : 'Error desconocido'
         })
@@ -154,7 +165,7 @@ export async function POST(
 
     // Actualizar estadísticas de la carpeta
     await prisma.folder.update({
-      where: { id },
+      where: { id: params.id },
       data: {
         lastIndexed: new Date()
       }
@@ -186,8 +197,18 @@ export async function POST(
     console.error('Error en reindexación:', error)
 
     try {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      const errorCode = errorMessage === 'FOLDER_NOT_FOUND' ? 'FOLDER_NOT_FOUND' :
+        errorMessage === 'ID_REQUIRED' ? 'ID_REQUIRED' : 'UNKNOWN_ERROR'
+      const errorDescription = {
+        'FOLDER_NOT_FOUND': 'Carpeta no encontrada',
+        'ID_REQUIRED': 'ID de carpeta requerido',
+        'UNKNOWN_ERROR': errorMessage
+      }[errorCode]
+
       await writeEvent('error', {
-        error: error instanceof Error ? error.message : 'Error desconocido'
+        code: errorCode,
+        error: errorDescription
       })
     } catch (streamError) {
       console.error('Error escribiendo en stream:', streamError)
