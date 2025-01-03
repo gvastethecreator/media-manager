@@ -2,27 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
-import { existsSync } from 'fs'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const quality = (request.nextUrl.searchParams.get('quality') || 'mid') as ThumbnailQuality
+    const params = await Promise.resolve(context.params)
     const { id } = params
+    const { searchParams } = new URL(request.url)
+    const quality = (searchParams.get('quality') || 'mid') as ThumbnailQuality
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de imagen requerido' },
+        { status: 400 }
+      )
+    }
 
     // Obtener la imagen
     const image = await prisma.image.findUnique({
-      where: { id },
-      select: {
-        thumbnail: true,
-        thumbnailError: true,
-        path: true
-      }
+      where: { id }
     })
 
     if (!image) {
@@ -32,61 +35,56 @@ export async function GET(
       )
     }
 
-    if (image.thumbnailError) {
+    // Si ya tiene thumbnail, devolverlo
+    if (image.thumbnail) {
+      const headers = new Headers()
+      headers.set('Content-Type', 'image/webp')
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+
+      return new NextResponse(image.thumbnail, {
+        headers,
+        status: 200
+      })
+    }
+
+    // Si no tiene thumbnail, generarlo
+    try {
+      const thumbnail = await generateThumbnail(image.path, quality)
+
+      if (!thumbnail || !thumbnail.buffer) {
+        throw new Error('No se pudo generar el thumbnail')
+      }
+
+      // Actualizar la imagen con el nuevo thumbnail
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnail: thumbnail.buffer,
+          thumbnailSize: thumbnail.buffer.length,
+          thumbnailWidth: thumbnail.width,
+          thumbnailHeight: thumbnail.height
+        }
+      })
+
+      const headers = new Headers()
+      headers.set('Content-Type', 'image/webp')
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+
+      return new NextResponse(thumbnail.buffer, {
+        headers,
+        status: 200
+      })
+    } catch (error) {
+      console.error('Error generando thumbnail:', error)
       return NextResponse.json(
-        { error: image.thumbnailError },
+        { error: 'Error generando thumbnail' },
         { status: 500 }
       )
     }
-
-    if (!image.thumbnail) {
-      // Si no existe el thumbnail, intentar generarlo
-      try {
-        const result = await generateThumbnail(image.path, quality)
-        if (!result || !result.buffer) {
-          throw new Error('Error generando thumbnail')
-        }
-
-        // Actualizar en base de datos
-        await prisma.image.update({
-          where: { id },
-          data: {
-            thumbnail: result.buffer,
-            thumbnailSize: result.buffer.length,
-            thumbnailWidth: result.width,
-            thumbnailHeight: result.height,
-            thumbnailError: null,
-            thumbnailErrorAt: null
-          }
-        })
-
-        // Devolver el nuevo thumbnail
-        return new NextResponse(result.buffer, {
-          headers: {
-            'Content-Type': 'image/webp',
-            'Cache-Control': 'public, max-age=31536000'
-          }
-        })
-      } catch (error) {
-        console.error('Error generando thumbnail:', error)
-        return NextResponse.json(
-          { error: 'Error generando thumbnail' },
-          { status: 500 }
-        )
-      }
-    }
-
-    // Devolver la miniatura existente
-    return new NextResponse(image.thumbnail, {
-      headers: {
-        'Content-Type': 'image/webp',
-        'Cache-Control': 'public, max-age=31536000'
-      }
-    })
   } catch (error) {
-    console.error('Error en GET thumbnail:', error)
+    console.error('Error en thumbnail route:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
+      { error: 'Error al procesar la miniatura' },
       { status: 500 }
     )
   }

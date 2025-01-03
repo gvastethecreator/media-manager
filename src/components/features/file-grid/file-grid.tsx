@@ -16,6 +16,8 @@ interface FileGridProps {
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
 	isResizing?: boolean;
+	items: FileItem[];
+	loadMoreItems?: () => void;
 }
 
 // Configuración base del grid
@@ -33,8 +35,9 @@ export function FileGrid({
 	onItemClick,
 	onItemDoubleClick,
 	isResizing,
+	items,
+	loadMoreItems,
 }: FileGridProps) {
-	const { displayedItems, loadMoreItems } = useFilesStore();
 	const parentRef = useRef<HTMLDivElement>(null);
 
 	const { ref: loadMoreRef, inView } = useInView({
@@ -43,7 +46,7 @@ export function FileGrid({
 	});
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && loadMoreItems) {
 			loadMoreItems();
 		}
 	}, [inView, loadMoreItems]);
@@ -72,7 +75,7 @@ export function FileGrid({
 	};
 
 	const { itemWidth, itemHeight, columns } = calculateGridDimensions();
-	const rowCount = Math.ceil(displayedItems.length / columns);
+	const rowCount = Math.ceil(items.length / columns);
 
 	const virtualizer = useVirtualizer({
 		count: rowCount,
@@ -85,9 +88,9 @@ export function FileGrid({
 	const getItemsForRow = useCallback(
 		(rowIndex: number) => {
 			const startIndex = rowIndex * columns;
-			return displayedItems.slice(startIndex, startIndex + columns);
+			return items.slice(startIndex, startIndex + columns);
 		},
-		[displayedItems, columns]
+		[items, columns]
 	);
 
 	return (

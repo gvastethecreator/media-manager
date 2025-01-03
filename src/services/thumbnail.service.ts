@@ -1,5 +1,8 @@
 import { formatBytes } from "@/lib/utils"
 import { thumbnailCache } from "@/lib/cache"
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export interface ThumbnailStats {
   total: number
@@ -281,33 +284,37 @@ class ThumbnailService {
           throw new Error('Calidad de thumbnail inválida')
         }
 
-        const response = await this.fetchWithTimeout(
-          `/api/thumbnails/${imageId}/generate`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache'
-            },
-            body: JSON.stringify({
-              quality,
-              ...config
-            })
-          },
-          60000 // 60s timeout para imágenes grandes
-        )
+        // Obtener la imagen
+        const image = await prisma.image.findUnique({
+          where: { id: imageId }
+        })
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.details || errorData.error || 'Error generando miniatura')
+        if (!image) {
+          throw new Error('Imagen no encontrada')
         }
+
+        // Generar el thumbnail
+        const thumbnail = await generateThumbnail(image.path, quality)
+
+        if (!thumbnail || !thumbnail.buffer) {
+          throw new Error('Error generando thumbnail')
+        }
+
+        // Actualizar la imagen con el nuevo thumbnail
+        await prisma.image.update({
+          where: { id: imageId },
+          data: {
+            thumbnail: thumbnail.buffer,
+            thumbnailSize: thumbnail.buffer.length,
+            thumbnailWidth: thumbnail.width,
+            thumbnailHeight: thumbnail.height
+          }
+        })
 
         // Invalidar caché para esta imagen
         const cacheKey = `thumbnail:${imageId}:${quality}`
         await thumbnailCache.delete(cacheKey)
 
-        // Esperar un momento para asegurar que el thumbnail se ha generado
-        await new Promise(resolve => setTimeout(resolve, 1000))
         return
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Error desconocido')
