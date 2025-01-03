@@ -37,22 +37,23 @@ export async function GET() {
       }),
       prisma.image.findMany({
         where: { thumbnailError: { not: null } },
-        orderBy: { thumbnailErrorAt: 'desc' },
+        orderBy: { updatedAt: 'desc' },
         take: 50,
         select: {
           id: true,
           path: true,
           thumbnailError: true,
-          thumbnailErrorAt: true
+          updatedAt: true
         }
       })
     ]).catch(error => {
-      console.error('Error en consulta:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      console.error('Error en consulta:', { error: errorMessage });
       throw new Error('Error al obtener estadísticas de la base de datos');
     });
 
     // Validar que tenemos datos válidos
-    if (totalImages === undefined || totalImages === null) {
+    if (!totalImages && totalImages !== 0) {
       throw new Error('No se pudieron obtener las estadísticas de imágenes');
     }
 
@@ -70,30 +71,19 @@ export async function GET() {
         imageId: err.id,
         imagePath: err.path,
         error: err.thumbnailError || 'Error desconocido',
-        timestamp: err.thumbnailErrorAt || new Date()
+        timestamp: err.updatedAt
       }))
     };
 
-    return new NextResponse(JSON.stringify(response), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error obteniendo estadísticas:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    console.error('Error obteniendo estadísticas:', { error: errorMessage });
 
-    const errorResponse = {
+    return NextResponse.json({
       error: 'Error al obtener estadísticas',
-      details: error instanceof Error ? error.message : 'Error desconocido',
+      details: errorMessage,
       timestamp: new Date().toISOString()
-    };
-
-    return new NextResponse(JSON.stringify(errorResponse), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    }, { status: 500 });
   }
 }
