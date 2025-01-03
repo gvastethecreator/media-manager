@@ -1,79 +1,88 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect } from 'react'
-import { useFilesStore } from '@/store/files'
-import { useImageViewer } from '@/store/image-viewer'
-import { FileGrid } from '@/components/features/file-grid/file-grid'
-import { EmptyState } from '@/components/core/data-display/empty-state/empty-state'
-import { TagIcon, Loader2 } from 'lucide-react'
-import type { FileItem } from '@/types/file-item'
+import { useCallback, useEffect } from "react";
+import { useFilesStore } from "@/store/files";
+import { useImageViewer } from "@/store/image-viewer";
+import { FileGrid } from "@/components/features/file-grid/file-grid";
+import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
+import { TagIcon, Loader2 } from "lucide-react";
+import type { FileItem } from "@/types/file-item";
 
 export function TagContentView() {
-  const {
-    currentItems: items,
-    selectedItem,
-    selectedIds,
-    selectItem,
-    currentTagId,
-    handleSelectTag,
-    deselectItem,
-    isLoading: storeLoading
-  } = useFilesStore()
-  const { openViewer } = useImageViewer()
+	const {
+		currentItems: items,
+		selectedItem,
+		selectedIds,
+		selectItem,
+		currentTagId,
+		handleSelectTag,
+		deselectItem,
+		isLoading: storeLoading,
+		isProcessingThumbnails,
+	} = useFilesStore();
+	const { openViewer } = useImageViewer();
 
-  useEffect(() => {
-    if (currentTagId) {
-      handleSelectTag(currentTagId)
-    }
-  }, [currentTagId, handleSelectTag])
+	useEffect(() => {
+		if (currentTagId) {
+			handleSelectTag(currentTagId);
+		}
+	}, [currentTagId, handleSelectTag]);
 
-  const handleItemClick = useCallback((item: FileItem) => {
-    if (selectedIds.includes(item.id)) {
-      deselectItem(item.id)
-    } else {
-      selectItem(item)
-    }
-  }, [selectItem, deselectItem, selectedIds])
+	const handleItemClick = useCallback(
+		(item: FileItem) => {
+			if (selectedIds.includes(item.id)) {
+				deselectItem(item.id);
+			} else {
+				selectItem(item);
+			}
+		},
+		[selectItem, deselectItem, selectedIds]
+	);
 
-  const handleItemDoubleClick = useCallback((item: FileItem) => {
-    if (item.type === 'image' || (item.mimeType?.startsWith('image/'))) {
-      const imageItems = (items || []).filter(i =>
-        i.type === 'image' || i.mimeType?.startsWith('image/')
-      )
-      openViewer(imageItems, imageItems.findIndex(i => i.id === item.id))
-    }
-  }, [openViewer, items])
+	const handleItemDoubleClick = useCallback(
+		(item: FileItem) => {
+			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
+				const imageItems = (items || []).filter(
+					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
+				);
+				openViewer(
+					imageItems,
+					imageItems.findIndex((i) => i.id === item.id)
+				);
+			}
+		},
+		[openViewer, items]
+	);
 
-  if (storeLoading) {
-    return (
-      <div className="h-full w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
+	if (storeLoading) {
+		return (
+			<div className="h-full w-full flex items-center justify-center">
+				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+			</div>
+		);
+	}
 
-  if (!items || items.length === 0) {
-    return (
-      <EmptyState
-        icon={TagIcon}
-        title="No hay imágenes con esta etiqueta"
-        description="No se encontraron imágenes con esta etiqueta"
-      />
-    )
-  }
+	if (!items || items.length === 0) {
+		return (
+			<EmptyState
+				icon={TagIcon}
+				title="No hay imágenes con esta etiqueta"
+				description="No se encontraron imágenes con esta etiqueta"
+			/>
+		);
+	}
 
-  return (
-    <div className="h-full w-full flex overflow-hidden">
-      <div className="h-full w-full overflow-auto">
-        <FileGrid
-          items={items}
-          selectedItem={selectedItem}
-          selectedIds={selectedIds}
-          onItemClick={handleItemClick}
-          onItemDoubleClick={handleItemDoubleClick}
-          isLoading={storeLoading}
-        />
-      </div>
-    </div>
-  )
+	return (
+		<div className="h-full w-full flex overflow-hidden">
+			<div className="h-full w-full overflow-auto">
+				<FileGrid
+					items={items}
+					selectedItem={selectedItem}
+					selectedIds={selectedIds}
+					onItemClick={handleItemClick}
+					onItemDoubleClick={handleItemDoubleClick}
+				/>
+			</div>
+		</div>
+	);
 }
