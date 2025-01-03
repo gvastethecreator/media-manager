@@ -8,9 +8,14 @@ import { ThumbnailQuality } from '@/services/thumbnail.service'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
+interface ReindexError extends Error {
+  code?: string;
+  details?: any;
+}
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   const encoder = new TextEncoder()
   const stream = new TransformStream()
@@ -20,35 +25,41 @@ export async function POST(
     try {
       const formattedData = JSON.stringify({ type: event, data })
       await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      console.error('Error escribiendo evento:', { error: errorMessage })
+    } catch (writeError) {
+      // Solo logueamos el mensaje del error para evitar problemas con console.error
+      console.log('Error escribiendo evento:', writeError?.message || 'Error desconocido')
     }
   }
 
   try {
-    if (!params?.id) {
-      throw new Error('ID_REQUIRED')
+    const params = await Promise.resolve(context.params)
+    const { id } = params
+
+    if (!id) {
+      const error: ReindexError = new Error('ID de carpeta requerido')
+      error.code = 'ID_REQUIRED'
+      throw error
     }
 
     const { generateThumbnails = true, thumbnailQuality = 'mid' } = await request.json().catch(() => ({}))
 
     // Obtener la carpeta
     const folder = await prisma.folder.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         images: {
           select: {
             id: true,
-            path: true,
-            thumbnailQuality: true
+            path: true
           }
         }
       }
     })
 
     if (!folder) {
-      throw new Error('FOLDER_NOT_FOUND')
+      const error: ReindexError = new Error('Carpeta no encontrada')
+      error.code = 'FOLDER_NOT_FOUND'
+      throw error
     }
 
     const total = folder.images.length
@@ -73,9 +84,9 @@ export async function POST(
         if (!existsSync(image.path)) {
           errors++
           await writeEvent('error', {
-            code: 'FILE_NOT_FOUND',
-            file: image.path,
-            error: 'Archivo original no encontrado'
+            type: 'FILE_NOT_FOUND',
+            message: 'Archivo original no encontrado',
+            file: image.path
           })
           continue
         }
@@ -115,8 +126,8 @@ export async function POST(
                 })
 
                 break // Si llegamos aquí, el thumbnail se generó correctamente
-              } catch (error) {
-                lastError = error instanceof Error ? error : new Error('Error desconocido')
+              } catch (thumbnailError) {
+                lastError = thumbnailError instanceof Error ? thumbnailError : new Error('Error desconocido')
                 attempts++
 
                 if (attempts < maxAttempts) {
@@ -127,15 +138,15 @@ export async function POST(
                 }
               }
             }
-          } catch (error) {
+          } catch (thumbnailError) {
             errors++
-            console.error('Error generando thumbnail:', error)
+            console.log('Error generando thumbnail:', thumbnailError?.message || 'Error desconocido')
 
             // Actualizar error en base de datos
             await prisma.image.update({
               where: { id: image.id },
               data: {
-                thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+                thumbnailError: thumbnailError instanceof Error ? thumbnailError.message : 'Error desconocido',
                 thumbnailErrorAt: new Date(),
                 thumbnail: null,
                 thumbnailSize: null,
@@ -145,27 +156,27 @@ export async function POST(
             })
 
             await writeEvent('error', {
-              code: 'THUMBNAIL_ERROR',
-              file: image.path,
-              error: error instanceof Error ? error.message : 'Error desconocido'
+              type: 'THUMBNAIL_ERROR',
+              message: thumbnailError instanceof Error ? thumbnailError.message : 'Error desconocido',
+              file: image.path
             })
           }
         }
-      } catch (error) {
+      } catch (processError) {
         errors++
-        console.error('Error procesando imagen:', error)
+        console.log('Error procesando imagen:', processError?.message || 'Error desconocido')
 
         await writeEvent('error', {
-          code: 'PROCESS_ERROR',
-          file: image.path,
-          error: error instanceof Error ? error.message : 'Error desconocido'
+          type: 'PROCESS_ERROR',
+          message: processError instanceof Error ? processError.message : 'Error desconocido',
+          file: image.path
         })
       }
     }
 
     // Actualizar estadísticas de la carpeta
     await prisma.folder.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         lastIndexed: new Date()
       }
@@ -194,24 +205,19 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Error en reindexación:', error)
+    // Evitamos usar console.error directamente con el objeto error
+    console.log('Error en reindexación:', error instanceof Error ? error.message : 'Error desconocido')
 
     try {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      const errorCode = errorMessage === 'FOLDER_NOT_FOUND' ? 'FOLDER_NOT_FOUND' :
-        errorMessage === 'ID_REQUIRED' ? 'ID_REQUIRED' : 'UNKNOWN_ERROR'
-      const errorDescription = {
-        'FOLDER_NOT_FOUND': 'Carpeta no encontrada',
-        'ID_REQUIRED': 'ID de carpeta requerido',
-        'UNKNOWN_ERROR': errorMessage
-      }[errorCode]
+      const errorCode = (error as ReindexError).code || 'UNKNOWN_ERROR'
 
       await writeEvent('error', {
-        code: errorCode,
-        error: errorDescription
+        type: errorCode,
+        message: errorMessage
       })
     } catch (streamError) {
-      console.error('Error escribiendo en stream:', streamError)
+      console.log('Error escribiendo en stream:', streamError instanceof Error ? streamError.message : 'Error desconocido')
     }
 
     await writer.close()
