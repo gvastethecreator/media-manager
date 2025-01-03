@@ -8,6 +8,7 @@ import { readdir, stat } from 'fs/promises'
 import { join, extname } from 'path'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { fsService } from '@/services/fs.server'
 
 const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
 
@@ -16,26 +17,32 @@ export async function POST(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const writeEvent = async (event: string, data: Record<string, any>) => {
+  const sendEvent = async (type: string, data: any) => {
     try {
-      const formattedData = JSON.stringify({ type: event, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
+      await writeStreamEvent(writer, type, data)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      console.error('Error escribiendo evento:', { error: errorMessage })
+      console.error('Error enviando evento:', error)
     }
   }
 
   try {
     const { path, thumbnailQuality = 'mid', generateThumbnails = true } = await request.json()
 
-    if (!path || !existsSync(path)) {
-      throw new Error('La ruta especificada no existe')
+    if (!path) {
+      throw new Error('PATH_REQUIRED')
+    }
+
+    // Validar y normalizar la ruta
+    const normalizedPath = fsService.normalizePath(path)
+    console.log('Path normalizado:', { original: path, normalized: normalizedPath })
+
+    if (!existsSync(normalizedPath)) {
+      throw new Error('PATH_NOT_FOUND')
     }
 
     // Verificar si la carpeta ya existe
     const existingFolder = await prisma.folder.findFirst({
-      where: { path }
+      where: { path: normalizedPath }
     })
 
     if (existingFolder) {
@@ -45,17 +52,26 @@ export async function POST(request: NextRequest) {
     // Crear carpeta en la base de datos
     const folder = await prisma.folder.create({
       data: {
-        path,
-        name: path.split('\\').pop() || path,
+        path: normalizedPath,
+        name: normalizedPath.split('\\').pop() || normalizedPath,
         lastIndexed: new Date()
       }
     })
 
+    console.log('Carpeta creada:', folder)
+    await sendEvent('progress', {
+      status: 'Carpeta creada, iniciando indexación...',
+      current: 0,
+      total: 0,
+      progress: 0
+    })
+
     // Función recursiva para procesar archivos
-    async function processDirectory(dirPath: string): Promise<void> {
+    async function processDirectory(dirPath: string): Promise<{ processed: number; total: number }> {
+      console.log('Procesando directorio:', dirPath)
       const files = await readdir(dirPath)
       let processed = 0
-      const total = files.length
+      let total = 0
 
       for (const file of files) {
         try {
@@ -63,19 +79,31 @@ export async function POST(request: NextRequest) {
           const stats = await stat(filePath)
 
           if (stats.isDirectory()) {
-            await processDirectory(filePath)
+            console.log('Encontrado subdirectorio:', filePath)
+            const subDirStats = await processDirectory(filePath)
+            processed += subDirStats.processed
+            total += subDirStats.total
             continue
           }
 
           const ext = extname(file).toLowerCase()
           if (!SUPPORTED_FORMATS.includes(ext)) {
+            console.log('Archivo no soportado:', filePath)
             continue
           }
 
+          total++
           processed++
-          const progress = Math.round((processed / total) * 100)
+          const progress = Math.round((processed / Math.max(total, 1)) * 100)
 
-          await writeEvent('progress', {
+          console.log('Procesando archivo:', {
+            file: filePath,
+            progress,
+            processed,
+            total
+          })
+
+          await sendEvent('progress', {
             current: processed,
             total,
             progress,
@@ -94,18 +122,18 @@ export async function POST(request: NextRequest) {
               const result = await generateThumbnail(filePath, thumbnailQuality as ThumbnailQuality)
               if (result && result.buffer) {
                 thumbnailData = {
-                  data: Buffer.from(result.buffer).toString('base64'),
+                  data: result.buffer.toString('base64'),
                   size: result.buffer.length,
                   width: result.width,
                   height: result.height
                 }
               }
             } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-              console.error('Error generando thumbnail:', { error: errorMessage, path: filePath })
-              await writeEvent('error', {
-                file: filePath,
-                error: errorMessage
+              console.error('Error generando thumbnail:', error)
+              await sendEvent('error', {
+                type: 'THUMBNAIL_ERROR',
+                message: error instanceof Error ? error.message : 'Error desconocido',
+                file: filePath
               })
             }
           }
@@ -124,26 +152,30 @@ export async function POST(request: NextRequest) {
               thumbnailSize: thumbnailData?.size,
               thumbnailWidth: thumbnailData?.width,
               thumbnailHeight: thumbnailData?.height,
-              thumbnailQuality,
               folderId: folder.id,
               createdAt: stats.birthtime,
               updatedAt: stats.mtime
             }
           })
 
+          console.log('Archivo procesado:', filePath)
+
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-          console.error('Error procesando archivo:', { error: errorMessage, file })
-          await writeEvent('error', {
-            file: file,
-            error: errorMessage
+          console.error('Error procesando archivo:', error)
+          await sendEvent('error', {
+            type: 'PROCESS_ERROR',
+            message: error instanceof Error ? error.message : 'Error desconocido',
+            file: file
           })
         }
       }
+
+      return { processed, total }
     }
 
     // Iniciar procesamiento
-    await processDirectory(path)
+    console.log('Iniciando procesamiento de directorio:', normalizedPath)
+    const { processed, total } = await processDirectory(normalizedPath)
 
     // Actualizar estadísticas de la carpeta
     const stats = await prisma.image.aggregate({
@@ -162,12 +194,15 @@ export async function POST(request: NextRequest) {
     })
 
     // Enviar evento de completado
-    await writeEvent('complete', {
+    console.log('Procesamiento completado:', { processed, total })
+    await sendEvent('complete', {
       folder: {
         id: folder.id,
         path: folder.path,
         totalFiles: stats._count,
-        totalSize: stats._sum.size || 0
+        totalSize: stats._sum.size || 0,
+        processed,
+        total
       }
     })
 
@@ -181,29 +216,22 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-    console.error('Error procesando carpeta:', { error: errorMessage })
+    console.error('Error procesando carpeta:', error)
 
     try {
-      if (errorMessage === 'FOLDER_EXISTS') {
-        await writeEvent('error', {
-          code: 'FOLDER_EXISTS',
-          error: 'La carpeta ya existe en el índice'
-        })
-      } else if (error.code === 'P2002') {
-        await writeEvent('error', {
-          code: 'FOLDER_EXISTS',
-          error: 'La carpeta ya existe en el índice'
-        })
-      } else {
-        await writeEvent('error', {
-          code: 'UNKNOWN_ERROR',
-          error: errorMessage
-        })
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+      const errorType =
+        errorMessage === 'FOLDER_EXISTS' ? 'FOLDER_EXISTS' :
+          errorMessage === 'PATH_REQUIRED' ? 'PATH_REQUIRED' :
+            errorMessage === 'PATH_NOT_FOUND' ? 'PATH_NOT_FOUND' :
+              'UNKNOWN_ERROR'
+
+      await sendEvent('error', {
+        type: errorType,
+        message: errorMessage
+      })
     } catch (streamError) {
-      const streamErrorMessage = streamError instanceof Error ? streamError.message : 'Error desconocido'
-      console.error('Error escribiendo en stream:', { error: streamErrorMessage })
+      console.error('Error escribiendo en stream:', streamError)
     }
 
     await writer.close()

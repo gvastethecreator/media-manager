@@ -308,3 +308,153 @@
 - Migración aplicada: add_thumbnail_error_at
 - Índices optimizados
 - Relaciones validadas
+
+# Progress Report - Análisis de Reindexación
+
+## Estado Actual
+
+- La reindexación de carpetas no está iniciando correctamente
+- El proceso se detiene después de la respuesta inicial
+- No hay errores visibles en la consola
+
+## Flujo de Reindexación
+
+### 1. Componente UI (`@folders-section.tsx`)
+
+```typescript
+handleReindexFolder(folderId: string) {
+  setIsProcessing(true)
+  reindexFolder({
+    id: folderId,
+    onProgress: (stats) => {
+      setProcessProgress(stats.progress || 0)
+      setProcessStatus(...)
+    },
+    onError: (error) => { ... },
+    onComplete: async (data) => { ... }
+  })
+}
+```
+
+### 2. Servicio de Carpetas (`folder.service.ts`)
+
+```typescript
+async reindexFolder({ id, onProgress, onError, onComplete }: IndexOptions) {
+  // 1. Hace la petición POST a /api/folders/reindex/[id]
+  // 2. Configura headers para SSE
+  // 3. Procesa el stream de eventos
+}
+```
+
+### 3. API Route (`/api/folders/reindex/[id]/route.ts`)
+
+```typescript
+export async function POST(request: NextRequest) {
+	// 1. Crea TransformStream para SSE
+	// 2. Obtiene la carpeta por ID
+	// 3. Inicia el proceso de reindexación
+	// 4. Envía eventos de progreso
+}
+```
+
+## Puntos de Verificación y Posibles Problemas
+
+### Verificación de Conexión SSE
+
+1. ✓ Headers correctos en la petición
+
+   - `Accept: text/event-stream`
+   - `Cache-Control: no-cache`
+   - `Connection: keep-alive`
+
+2. ✓ Headers correctos en la respuesta
+   - `Content-Type: text/event-stream`
+   - `Cache-Control: no-cache`
+   - `Connection: keep-alive`
+
+### Manejo de Eventos
+
+1. ❌ No se están recibiendo eventos después de la conexión inicial
+2. ❓ Posible problema en el formato de los eventos SSE
+3. ❓ Posible cierre prematuro del stream
+
+### Procesamiento de Archivos
+
+1. ❓ No hay confirmación de inicio del proceso
+2. ❓ No hay logs de progreso
+3. ❓ No hay eventos de error
+
+## Próximos Pasos para Debugging
+
+1. Agregar logs detallados en puntos clave:
+
+   ```typescript
+   // En route.ts
+   console.log("Iniciando reindexación:", { folderId, path });
+   console.log("Evento enviado:", { type, data });
+
+   // En folder.service.ts
+   console.log("Stream iniciado");
+   console.log("Evento recibido:", event);
+   ```
+
+2. Verificar el manejo del stream:
+
+   - Confirmar que el writer no se cierra prematuramente
+   - Validar el formato de los eventos SSE
+   - Comprobar que el reader procesa correctamente los eventos
+
+3. Revisar la ruta de reindexación:
+   - Validar que el ID se recibe correctamente
+   - Confirmar que la carpeta existe
+   - Verificar que el proceso de archivos inicia
+
+## Issues Identificados
+
+1. **Issue #1: Stream SSE no inicia**
+
+   - Síntoma: No hay eventos después de la conexión inicial
+   - Estado: En investigación
+   - Prioridad: Alta
+
+2. **Issue #2: Manejo de Errores**
+   - Síntoma: No hay retroalimentación clara de errores
+   - Estado: Por verificar
+   - Prioridad: Media
+
+## Stack Tecnológico Relevante
+
+- Next.js 14 (App Router)
+- TypeScript
+- Prisma (ORM)
+- Server-Sent Events (SSE)
+- Sharp (procesamiento de imágenes)
+
+## Dependencias Clave
+
+```json
+{
+	"next": "14.0.4",
+	"sharp": "^0.32.6",
+	"prisma": "^5.7.1"
+}
+```
+
+## Estructura de Archivos Relevantes
+
+```
+src/
+  ├── app/
+  │   └── api/
+  │       └── folders/
+  │           └── reindex/
+  │               └── [id]/
+  │                   └── route.ts
+  ├── services/
+  │   └── folder.service.ts
+  └── components/
+      └── views/
+          └── settings/
+              └── settings-sections/
+                  └── folders-section.tsx
+```
