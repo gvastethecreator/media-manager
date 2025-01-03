@@ -6,7 +6,7 @@ import { existsSync } from 'fs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const encoder = new TextEncoder()
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
     // Obtener imágenes con thumbnail
     const images = await prisma.image.findMany({
       where: {
-        thumbnail: { not: null }
+        thumbnail: { not: null },
+        thumbnailError: null
       },
       select: {
         id: true,
@@ -36,34 +37,32 @@ export async function POST(request: NextRequest) {
     })
 
     const total = images.length
-    let processed = 0
     let optimized = 0
-    let errors = 0
 
     // Enviar evento inicial
     await sendEvent('progress', {
-      current: processed,
+      current: optimized,
       total,
       progress: 0,
-      status: `Encontradas ${total} imágenes para optimizar...`
+      status: `Encontradas ${total} miniaturas para optimizar...`
     })
 
     // Procesar cada imagen
     for (const image of images) {
       try {
         if (!existsSync(image.path)) {
-          throw new Error('Archivo no encontrado')
+          throw new Error('Archivo original no encontrado')
         }
 
-        // Generar thumbnail con calidad comprimida
+        // Generar thumbnail optimizado
         const result = await generateThumbnail(image.path, 'compressed')
 
         if (!result || !result.buffer) {
-          throw new Error('Error generando thumbnail')
+          throw new Error('Error generando thumbnail optimizado')
         }
 
-        // Si el nuevo thumbnail es más pequeño, actualizarlo
-        if (!image.thumbnailSize || result.buffer.length < image.thumbnailSize) {
+        // Solo actualizar si el nuevo tamaño es menor
+        if (result.buffer.length < (image.thumbnailSize || Infinity)) {
           await prisma.image.update({
             where: { id: image.id },
             data: {
@@ -76,24 +75,28 @@ export async function POST(request: NextRequest) {
               updatedAt: new Date()
             }
           })
-          optimized++
         }
 
-        processed++
-        const progress = Math.round((processed / total) * 100)
+        optimized++
+        const progress = Math.round((optimized / total) * 100)
 
         // Enviar evento de progreso
         await sendEvent('progress', {
-          current: processed,
+          current: optimized,
           total,
           progress,
           currentFile: image.path,
-          status: `Procesando imagen ${processed} de ${total}...`
+          status: `Optimizando miniatura ${optimized} de ${total}...`,
+          lastProcessed: {
+            id: image.id,
+            path: image.path,
+            thumbnailPath: `/api/images/${image.id}/thumbnail`,
+            processedAt: new Date().toISOString()
+          }
         })
 
       } catch (error) {
-        errors++
-        console.error('Error procesando imagen:', error)
+        console.error('Error optimizando miniatura:', error)
 
         // Enviar evento de error
         await sendEvent('error', {
@@ -105,26 +108,8 @@ export async function POST(request: NextRequest) {
 
     // Enviar evento de completado
     await sendEvent('complete', {
-      processed,
-      total,
       optimized,
-      errors,
-      recentlyProcessed: await prisma.image.findMany({
-        where: {
-          thumbnail: { not: null },
-          thumbnailError: null
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: 12,
-        select: {
-          id: true,
-          path: true,
-          thumbnail: true,
-          thumbnailWidth: true,
-          thumbnailHeight: true,
-          updatedAt: true
-        }
-      })
+      total
     })
 
   } catch (error) {

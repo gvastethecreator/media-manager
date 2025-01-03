@@ -37,9 +37,14 @@ export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: numbe
   high: { quality: 90, width: 500, height: 500 }
 }
 
+export type ThumbnailEventCallback = (event: { type: string, data: any }) => void;
+
 class ThumbnailService {
   private static instance: ThumbnailService
   private eventSource: EventSource | null = null
+  private readonly timeout = 300000; // 5 minutos
+  private readonly maxRetries = 3;
+  private readonly retryDelay = 1000;
 
   private constructor() { }
 
@@ -53,7 +58,7 @@ class ThumbnailService {
   private async fetchWithTimeout(
     input: RequestInfo | URL,
     init?: RequestInit,
-    timeout = 30000
+    timeout = this.timeout
   ): Promise<Response> {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
@@ -90,105 +95,89 @@ class ThumbnailService {
         }
       })
 
-      const text = await response.text()
-      let data
-
-      try {
-        data = JSON.parse(text)
-      } catch (parseError) {
-        console.error('Error parseando respuesta:', text)
-        throw new Error('Error parseando respuesta del servidor')
-      }
-
       if (!response.ok) {
-        throw new Error(data.details || data.error || 'Error obteniendo estadísticas')
+        const error = await response.json()
+        throw new Error(error.message || error.error || 'Error obteniendo estadísticas')
       }
 
-      // Validar la estructura de los datos
-      if (!this.isValidThumbnailStats(data)) {
-        console.error('Datos inválidos recibidos:', data)
-        throw new Error('Datos de estadísticas inválidos')
-      }
-
-      return data
+      return await response.json()
     } catch (error) {
       console.error('Error en getStats:', error)
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al obtener estadísticas. Por favor, inténtalo de nuevo.'
-      )
+      throw error
     }
   }
 
-  private isValidThumbnailStats(data: any): data is ThumbnailStats {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      typeof data.total === 'number' &&
-      typeof data.totalSize === 'number' &&
-      typeof data.pending === 'number' &&
-      typeof data.withThumbnail === 'number' &&
-      Array.isArray(data.recentlyProcessed) &&
-      Array.isArray(data.errors)
-    )
-  }
-
-  async reprocessAll(onProgress?: (event: any) => void): Promise<void> {
+  async reprocessAll(onProgress?: ThumbnailEventCallback): Promise<void> {
     try {
-      // Cerrar conexión previa si existe
       if (this.eventSource) {
-        this.eventSource.close()
-        this.eventSource = null
+        this.eventSource.close();
+        this.eventSource = null;
       }
 
-      // Configurar el reader para procesar eventos SSE
-      const response = await fetch('/api/thumbnails/reprocess', {
-        method: 'POST',
-        headers: {
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      })
+      return new Promise((resolve, reject) => {
+        this.eventSource = new EventSource('/api/thumbnails/reprocess');
 
-      if (!response.ok || !response.body) {
-        throw new Error('Error iniciando el reprocesamiento')
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          console.log('Stream completado')
-          break
-        }
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.trim().startsWith('data: ')) {
-            try {
-              const event = JSON.parse(line.slice(6))
-              console.log('Evento SSE recibido:', event)
-              if (onProgress) {
-                onProgress(event)
-              }
-            } catch (error) {
-              console.error('Error parseando evento SSE:', error)
+        this.eventSource.addEventListener('message', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Evento SSE recibido:', data);
+            if (onProgress) {
+              onProgress(data);
             }
+          } catch (error) {
+            console.error('Error parseando evento SSE:', error);
           }
-        }
-      }
+        });
+
+        this.eventSource.addEventListener('progress', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Progreso:', data);
+            if (onProgress) {
+              onProgress({ type: 'progress', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de progreso:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('error', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Error:', data);
+            if (onProgress) {
+              onProgress({ type: 'error', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de error:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('complete', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Completado:', data);
+            if (onProgress) {
+              onProgress({ type: 'complete', data });
+            }
+            this.eventSource?.close();
+            this.eventSource = null;
+            resolve();
+          } catch (error) {
+            console.error('Error parseando evento de completado:', error);
+          }
+        });
+
+        this.eventSource.onerror = (error) => {
+          console.error('Error en conexión SSE:', error);
+          this.eventSource?.close();
+          this.eventSource = null;
+          reject(new Error('Error en la conexión SSE'));
+        };
+      });
     } catch (error) {
-      console.error('Error en reprocessAll:', error)
-      throw error
+      console.error('Error en reprocessAll:', error);
+      throw error;
     }
   }
 
@@ -272,65 +261,151 @@ class ThumbnailService {
     }
   }
 
-  async optimizeThumbnails(onProgress?: (data: any) => void): Promise<void> {
+  async optimizeThumbnails(onProgress?: ThumbnailEventCallback): Promise<void> {
     try {
-      // Cerrar conexión previa si existe
       if (this.eventSource) {
-        this.eventSource.close()
-        this.eventSource = null
+        this.eventSource.close();
+        this.eventSource = null;
       }
 
-      // Configurar el reader para procesar eventos SSE
-      const response = await fetch('/api/thumbnails/optimize', {
-        method: 'POST',
-        headers: {
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      })
+      return new Promise((resolve, reject) => {
+        this.eventSource = new EventSource('/api/thumbnails/optimize');
 
-      if (!response.ok || !response.body) {
-        throw new Error('Error iniciando la optimización')
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          console.log('Stream completado')
-          break
-        }
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.trim().startsWith('data: ')) {
-            try {
-              const event = JSON.parse(line.slice(6))
-              console.log('Evento SSE recibido:', event)
-              if (onProgress) {
-                onProgress(event)
-              }
-            } catch (error) {
-              console.error('Error parseando evento SSE:', error)
+        this.eventSource.addEventListener('message', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Evento SSE recibido:', data);
+            if (onProgress) {
+              onProgress(data);
             }
+          } catch (error) {
+            console.error('Error parseando evento SSE:', error);
           }
-        }
+        });
+
+        this.eventSource.addEventListener('progress', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Progreso:', data);
+            if (onProgress) {
+              onProgress({ type: 'progress', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de progreso:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('error', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Error:', data);
+            if (onProgress) {
+              onProgress({ type: 'error', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de error:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('complete', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Completado:', data);
+            if (onProgress) {
+              onProgress({ type: 'complete', data });
+            }
+            this.eventSource?.close();
+            this.eventSource = null;
+            resolve();
+          } catch (error) {
+            console.error('Error parseando evento de completado:', error);
+          }
+        });
+
+        this.eventSource.onerror = (error) => {
+          console.error('Error en conexión SSE:', error);
+          this.eventSource?.close();
+          this.eventSource = null;
+          reject(new Error('Error en la conexión SSE'));
+        };
+      });
+    } catch (error) {
+      console.error('Error en optimizeThumbnails:', error);
+      throw error;
+    }
+  }
+
+  async cleanThumbnails(onProgress?: ThumbnailEventCallback): Promise<void> {
+    try {
+      if (this.eventSource) {
+        this.eventSource.close();
+        this.eventSource = null;
       }
 
-      // Limpiar caché al optimizar
-      await thumbnailCache.clear()
+      return new Promise((resolve, reject) => {
+        this.eventSource = new EventSource('/api/thumbnails/clean');
 
+        this.eventSource.addEventListener('message', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Evento SSE recibido:', data);
+            if (onProgress) {
+              onProgress(data);
+            }
+          } catch (error) {
+            console.error('Error parseando evento SSE:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('progress', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Progreso:', data);
+            if (onProgress) {
+              onProgress({ type: 'progress', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de progreso:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('error', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Error:', data);
+            if (onProgress) {
+              onProgress({ type: 'error', data });
+            }
+          } catch (error) {
+            console.error('Error parseando evento de error:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('complete', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('Completado:', data);
+            if (onProgress) {
+              onProgress({ type: 'complete', data });
+            }
+            this.eventSource?.close();
+            this.eventSource = null;
+            resolve();
+          } catch (error) {
+            console.error('Error parseando evento de completado:', error);
+          }
+        });
+
+        this.eventSource.onerror = (error) => {
+          console.error('Error en conexión SSE:', error);
+          this.eventSource?.close();
+          this.eventSource = null;
+          reject(new Error('Error en la conexión SSE'));
+        };
+      });
     } catch (error) {
-      console.error('Error en optimizeThumbnails:', error)
-      throw new Error('Error al optimizar las miniaturas. Por favor, inténtalo de nuevo.')
+      console.error('Error en cleanThumbnails:', error);
+      throw error;
     }
   }
 

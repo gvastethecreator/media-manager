@@ -6,10 +6,10 @@ import { existsSync } from 'fs'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id
+    const id = context.params.id
     const body = await request.json()
     const quality = body.quality as ThumbnailQuality
 
