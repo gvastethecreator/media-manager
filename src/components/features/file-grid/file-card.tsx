@@ -13,8 +13,15 @@ import { ImageCard } from "@/components/features/file-viewer/components/file-vie
 import { useFileSelection } from "@/store/file-selection";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileIcon, ImageIcon, StarIcon, TagIcon, CalendarIcon } from "lucide-react";
+import {
+	FileIcon,
+	ImageIcon,
+	StarIcon,
+	TagIcon,
+	CalendarIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAnimation } from "./animation-context";
 
 interface FileCardProps {
 	item: FileItem;
@@ -23,8 +30,8 @@ interface FileCardProps {
 	onDoubleClick?: (item: FileItem) => void;
 	style?: React.CSSProperties;
 	index?: number;
+	totalColumns?: number;
 }
-
 
 export function FileCard({
 	item,
@@ -33,6 +40,7 @@ export function FileCard({
 	onDoubleClick,
 	style,
 	index = 0,
+	totalColumns = 3,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +50,7 @@ export function FileCard({
 	const { toggleSelectedItem, selectedItems } = useFileSelection();
 	const [isHovered, setIsHovered] = useState(false);
 	const [scope, animate] = useAnimate();
+	const { getAnimationDelay } = useAnimation();
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -180,11 +189,26 @@ export function FileCard({
 	);
 
 	useEffect(() => {
-		animate(scope.current,
-			{ opacity: [0, 1], y: [20, 0] },
-			{ duration: 0.3, delay: index * 0.05 }
-		);
-	}, []);
+		const sequence = async () => {
+			const delay = getAnimationDelay(index, totalColumns);
+
+			await animate(
+				scope.current,
+				{
+					opacity: [0, 1],
+					scale: [0.9, 1],
+					y: [10, 0],
+				},
+				{
+					duration: 0.3,
+					delay,
+					ease: [0.2, 0.65, 0.3, 0.9],
+				}
+			);
+		};
+
+		sequence();
+	}, [animate, index, scope, totalColumns, getAnimationDelay]);
 
 	const cardContent = (
 		<div className="relative w-full h-full">
@@ -192,10 +216,10 @@ export function FileCard({
 				{isLoading ? (
 					<motion.div
 						initial={{ opacity: 0 }}
-							animate={{ opacity: 0.4 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.3 }}
-							className="absolute inset-0 bg-transparent"
+						animate={{ opacity: 0.4 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.3 }}
+						className="absolute inset-0 bg-transparent"
 					/>
 				) : error ? (
 					<motion.div
@@ -218,16 +242,17 @@ export function FileCard({
 						<motion.div
 							className="absolute inset-0 overflow-hidden"
 							animate={{
-								filter: isSelected || isHovered
-									? 'blur(20px) brightness(0.3)'
-									: 'blur(30px) brightness(0.7)'
+								filter:
+									isSelected || isHovered
+										? "blur(20px) brightness(0.3)"
+										: "blur(30px) brightness(0.7)",
 							}}
 							transition={{ duration: 0.2 }}
 							style={{
 								backgroundImage: `url(${thumbnail})`,
-								backgroundSize: 'cover',
-								backgroundPosition: 'center',
-								transform: 'scale(1.1)',
+								backgroundSize: "cover",
+								backgroundPosition: "center",
+								transform: "scale(1.1)",
 							}}
 						/>
 
@@ -235,8 +260,8 @@ export function FileCard({
 						<motion.div
 							className="absolute inset-0 flex justify-center items-center"
 							animate={{
-								y: isSelected || isHovered ? '-8%' : '0%',
-								scale: isSelected || isHovered ? 0.9 : 1
+								y: isSelected || isHovered ? "-8%" : "0%",
+								scale: isSelected || isHovered ? 0.9 : 1,
 							}}
 							transition={{ type: "spring", stiffness: 200, damping: 20 }}
 						>
@@ -255,7 +280,7 @@ export function FileCard({
 							initial={{ opacity: 0, y: 20 }}
 							animate={{
 								opacity: isSelected || isHovered ? 1 : 0,
-								y: isSelected || isHovered ? 0 : 20
+								y: isSelected || isHovered ? 0 : 20,
 							}}
 							transition={{ type: "spring", stiffness: 200, damping: 20 }}
 							className="absolute inset-x-0 bottom-0 z-20"
@@ -275,7 +300,11 @@ export function FileCard({
 										</div>
 										<div className="flex items-center gap-1 text-[9px] text-white/60">
 											<CalendarIcon size={9} />
-											<span>{format(new Date(item.createdAt), 'dd MMM yyyy', { locale: es })}</span>
+											<span>
+												{format(new Date(item.createdAt), "dd MMM yyyy", {
+													locale: es,
+												})}
+											</span>
 										</div>
 									</div>
 									<div className="text-right space-y-0.5">
