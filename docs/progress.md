@@ -1018,3 +1018,65 @@ className={cn(
 1. Monitorear el rendimiento con grandes cantidades de archivos
 2. Considerar implementar lazy loading para thumbnails
 3. Evaluar la necesidad de ajustes adicionales en breakpoints
+
+## Investigación: Optimización de Animaciones en FileCard
+
+### Contexto
+
+- Componente: `src/components/features/file-grid/file-card.tsx`
+- Problema: Animaciones "choppy" durante la navegación
+- Stack: Motion/Framer-Motion, React 19, NextJS 15
+
+### Análisis Inicial
+
+1. **Problemas Identificados**:
+
+   - Múltiples animaciones ejecutándose simultáneamente
+   - No se está utilizando `useReducedMotion` para accesibilidad
+   - Posible sobrecarga en el renderizado
+   - Falta de optimización en transiciones
+
+2. **Oportunidades de Mejora**:
+   - Implementar `LazyMotion` para reducir el bundle size
+   - Usar `AnimatePresence` para mejorar las transiciones
+   - Implementar `useReducedMotion` para accesibilidad
+   - Optimizar las animaciones con `useSpring`
+   - Mejorar el manejo de layout con `LayoutGroup`
+
+### Plan de Acción
+
+1. Refactorizar las animaciones para mejor rendimiento
+2. Implementar hooks de Motion para optimización
+3. Mejorar la gestión de estados de animación
+4. Reducir la complejidad de las animaciones simultáneas
+
+## Optimización de Carga de Thumbnails
+
+### Contexto
+
+- Componente: `src/components/features/file-grid/file-grid.tsx`
+- Problema: Se están cargando todos los thumbnails simultáneamente
+- Impacto: Alto consumo de recursos y posible degradación del rendimiento
+
+### Análisis
+
+1. **Situación Actual**:
+
+   - No hay control sobre qué thumbnails se cargan
+   - Todos los FileCards intentan cargar su thumbnail al montarse
+   - No se considera la visibilidad del elemento
+   - Posible sobrecarga de la red y memoria
+
+2. **Solución Propuesta**:
+   - Implementar sistema de carga bajo demanda
+   - Usar `useInView` para detectar visibilidad
+   - Mejorar el sistema de buffering
+   - Implementar cola de carga para thumbnails
+   - Priorizar elementos visibles
+
+### Plan de Acción
+
+1. Refactorizar FileGrid para mejor control de renderizado
+2. Implementar sistema de carga progresiva
+3. Optimizar el buffer de items
+4. Mejorar la gestión de memoria
