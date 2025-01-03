@@ -953,3 +953,68 @@ className={cn(
 - Revisar el manejo de memoria en la carga de thumbnails
 - Optimizar la virtualización para grandes cantidades de archivos
 - Mejorar el sistema de caché de thumbnails
+
+## Investigación: Ajuste de tamaño en FileGrid (En progreso)
+
+### Contexto
+
+- Componente: `src/components/features/file-grid/file-grid.tsx`
+- Problema: El cálculo del tamaño de las filas no se ajusta correctamente al ancho de los items (`FileCard`)
+- Stack: NextJS 15, React 19, ShadCN, TypeScript, Motion
+
+### Análisis Inicial
+
+1. **Configuración Actual**:
+
+   - Se usa `useVirtualizer` de @tanstack/react-virtual para virtualización
+   - Configuración base estática:
+     ```typescript
+     const GRID_CONFIG = {
+     	columns: 5,
+     	gap: 0,
+     	itemBaseWidth: 150,
+     	itemAspectRatio: 1,
+     	itemBaseHeight: 150,
+     };
+     ```
+   - El cálculo actual se basa en el ancho del contenedor y un número fijo de columnas
+
+2. **Puntos a Mejorar**:
+   - El cálculo no considera el padding/gap real entre items
+   - No hay ajuste dinámico basado en el viewport
+   - Posible desincronización entre FileCard y FileGrid en dimensiones
+
+### Próximos Pasos
+
+1. Implementar un sistema de medición dinámica para los FileCards
+2. Considerar ResizeObserver para actualizaciones en tiempo real
+3. Mejorar la sincronización entre grid y cards
+4. Evaluar el impacto en el rendimiento de la virtualización
+
+### Cambios Implementados
+
+1. **FileGrid.tsx**:
+
+   - Implementación de ResizeObserver para detección de cambios en tiempo real
+   - Sistema de grid responsivo con breakpoints
+   - Cálculo preciso de dimensiones considerando gaps
+   - Optimización de rendimiento con useMemo
+   - Límites configurables para número de columnas
+
+2. **FileCard.tsx**:
+   - Mejora en la adaptabilidad al contenedor padre
+   - Ajustes en el sistema de dimensionamiento
+   - Correcciones en el manejo de estilos y clases
+
+### Resultados
+
+- Mejor responsividad y adaptación a diferentes tamaños de pantalla
+- Cálculos más precisos de dimensiones
+- Mejor manejo de espaciado entre items
+- Rendimiento optimizado
+
+### Próximos Pasos
+
+1. Monitorear el rendimiento con grandes cantidades de archivos
+2. Considerar implementar lazy loading para thumbnails
+3. Evaluar la necesidad de ajustes adicionales en breakpoints

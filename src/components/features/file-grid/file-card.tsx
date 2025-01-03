@@ -194,7 +194,7 @@ export function FileCard({
 						animate={{ opacity: 0.4 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.5 }}
-						className="absolute inset-0 bg-gradient-to-b from-primary/50 to-secondary/50"
+						className="absolute inset-0 bg-gradient-to-b from-black/50 to-secondary/50"
 					/>
 				) : error ? (
 					<motion.div
@@ -229,7 +229,7 @@ export function FileCard({
 								backgroundSize: "cover",
 								backgroundPosition: "center",
 								transform: "scale(1.1) rotate(45deg)",
-								filter: "blur(20px) brightness(0.3)"
+								filter: "blur(20px) brightness(0.3)",
 							}}
 						/>
 
@@ -319,7 +319,7 @@ export function FileCard({
 				onHoverStart={() => setIsHovered(true)}
 				onHoverEnd={() => setIsHovered(false)}
 				className={cn(
-					"relative overflow-hidden",
+					"relative overflow-hidden w-full h-full",
 					isSelected
 						? "ring-1 ring-primary ring-inset shadow-lg"
 						: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
@@ -328,7 +328,11 @@ export function FileCard({
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 				onMouseDown={handleMouseDown}
-				style={style}
+				style={{
+					...style,
+					height: "100%",
+					width: "100%",
+				}}
 			>
 				{cardContent}
 			</motion.div>
