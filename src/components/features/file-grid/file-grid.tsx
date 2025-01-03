@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useMemo } from "react";
+import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FileCard } from "./file-card";
 import { useInView } from "react-intersection-observer";
@@ -19,13 +19,19 @@ interface FileGridProps {
 	loadMoreItems?: () => void;
 }
 
-// Configuración base del grid
+// Configuración base del grid con valores más flexibles
 const GRID_CONFIG = {
-	columns: 5,
-	gap: 0,
-	itemBaseWidth: 150,
+	minColumns: 2,
+	maxColumns: 8,
+	gap: 1,
+	itemBaseWidth: 180,
 	itemAspectRatio: 1,
-	itemBaseHeight: 150,
+	breakpoints: {
+		sm: 640,
+		md: 768,
+		lg: 1024,
+		xl: 1280,
+	},
 } as const;
 
 export function FileGrid({
@@ -40,6 +46,23 @@ export function FileGrid({
 		threshold: 0,
 	});
 
+	// Usar ResizeObserver para detectar cambios en el contenedor
+	const [containerWidth, setContainerWidth] = useState(0);
+
+	useEffect(() => {
+		if (!parentRef.current) return;
+
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const width = entry.contentRect.width;
+				setContainerWidth(width);
+			}
+		});
+
+		resizeObserver.observe(parentRef.current);
+		return () => resizeObserver.disconnect();
+	}, []);
+
 	// Mantener un registro de los índices visibles
 	const visibleIndicesRef = useRef<{ start: number; end: number }>({
 		start: 0,
@@ -49,21 +72,29 @@ export function FileGrid({
 	// Buffer de items renderizados
 	const bufferedItemsRef = useRef<{ [key: number]: boolean }>({});
 
-	// Cálculo dinámico del tamaño de la grilla
+	// Cálculo dinámico del tamaño de la grilla basado en el ancho del contenedor
 	const { itemWidth, itemHeight, columns } = useMemo(() => {
-		const containerWidth = parentRef.current?.offsetWidth || window.innerWidth;
-		const columns = Math.min(
-			GRID_CONFIG.columns,
-			Math.max(1, Math.floor(containerWidth / GRID_CONFIG.itemBaseWidth)),
+		const availableWidth = containerWidth || window.innerWidth;
+
+		// Calcular columnas basado en breakpoints
+		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
+		targetColumns = Math.max(
+			GRID_CONFIG.minColumns,
+			Math.min(GRID_CONFIG.maxColumns, targetColumns)
 		);
-		const itemWidth = Math.floor(containerWidth / columns);
+
+		// Calcular el ancho real del item considerando gaps
+		const totalGapWidth = (targetColumns - 1) * GRID_CONFIG.gap;
+		const itemWidth = Math.floor(
+			(availableWidth - totalGapWidth) / targetColumns
+		);
 
 		return {
 			itemWidth,
-			itemHeight: itemWidth * GRID_CONFIG.itemAspectRatio,
-			columns,
+			itemHeight: Math.floor(itemWidth * GRID_CONFIG.itemAspectRatio),
+			columns: targetColumns,
 		};
-	}, [parentRef.current?.offsetWidth]);
+	}, [containerWidth]);
 
 	const rowCount = Math.ceil(items.length / columns);
 
@@ -123,56 +154,63 @@ export function FileGrid({
 	return (
 		<AnimationProvider>
 			<ScrollArea className="h-full w-full">
-				<div ref={parentRef} className="h-full w-full overflow-hidden">
-					<div
+				<div
+					ref={parentRef}
+					className="h-full w-full overflow-hidden"
 					style={{
-						height: `${virtualizer.getTotalSize()}px`,
-						width: "100%",
-						position: "relative",
+						padding: `${GRID_CONFIG.gap}px`,
 					}}
 				>
-					{virtualizer.getVirtualItems().map((virtualRow) => (
-						<div
-							key={virtualRow.index}
-							style={{
-								position: "absolute",
-								top: 0,
-								left: 0,
-								width: "100%",
-								height: `${itemHeight}px`,
-								transform: `translateY(${virtualRow.start}px)`,
-								display: "grid",
-								gridTemplateColumns: `repeat(${columns}, 1fr)`,
-								gap: 0,
-								padding: 0,
-								borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-							}}
-						>
-							{getItemsForRow(virtualRow.index).map((item, colIndex) => {
-								const itemIndex = virtualRow.index * columns + colIndex;
-								const shouldRender = isItemBuffered(itemIndex);
+					<div
+						style={{
+							height: `${virtualizer.getTotalSize()}px`,
+							width: "100%",
+							position: "relative",
+						}}
+					>
+						{virtualizer.getVirtualItems().map((virtualRow) => (
+							<div
+								key={virtualRow.index}
+								style={{
+									position: "absolute",
+									top: 0,
+									left: 0,
+									width: "100%",
+									height: `${itemHeight + GRID_CONFIG.gap}px`,
+									transform: `translateY(${virtualRow.start}px)`,
+									display: "grid",
+									gridTemplateColumns: `repeat(${columns}, 1fr)`,
+									gap: `${GRID_CONFIG.gap}px`,
+									padding: `${GRID_CONFIG.gap}px`,
+								}}
+							>
+								{getItemsForRow(virtualRow.index).map((item, colIndex) => {
+									const itemIndex = virtualRow.index * columns + colIndex;
+									const shouldRender = isItemBuffered(itemIndex);
 
-								return (
-									<div
-										key={item.id}
-										className="border-r border-1 border-white/10 last:border-r-0"
-									>
-										{shouldRender && (
-											<FileCard
-												item={item}
-												onClick={onItemClick}
-												onDoubleClick={onItemDoubleClick}
-
-												index={itemIndex}
-												totalColumns={columns}
-											/>
-										)}
-									</div>
-								);
-							})}
-						</div>
-					))}
-				</div>
+									return (
+										<div
+											key={item.id}
+											style={{
+												width: "100%",
+												height: "100%",
+											}}
+										>
+											{shouldRender && (
+												<FileCard
+													item={item}
+													onClick={onItemClick}
+													onDoubleClick={onItemDoubleClick}
+													index={itemIndex}
+													totalColumns={columns}
+												/>
+											)}
+										</div>
+									);
+								})}
+							</div>
+						))}
+					</div>
 					<div ref={loadMoreRef} className="h-5 w-full" />
 				</div>
 			</ScrollArea>
