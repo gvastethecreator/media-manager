@@ -1,266 +1,195 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeStreamEvent } from '@/lib/stream'
 import { generateThumbnail } from '@/lib/thumbnail'
+import { getImageMetadata } from '@/lib/image'
+import { computeHash } from '@/lib/hash'
 import { existsSync } from 'fs'
+import { readdir, stat } from 'fs/promises'
+import { join, extname } from 'path'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
+
+const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
-
-interface ReindexError extends Error {
-  code?: string;
-  details?: any;
-}
 
 export async function POST(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
-  const encoder = new TextEncoder()
-  const stream = new TransformStream()
-  const writer = stream.writable.getWriter()
-
-  const sendEvent = async (type: string, data: Record<string, any>) => {
-    try {
-      const formattedData = JSON.stringify({ type, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-    } catch (writeError) {
-      console.error('Error escribiendo evento:', writeError)
-      throw writeError
-    }
-  }
-
   try {
-    // Esperar a que los parámetros estén disponibles
-    const params = await Promise.resolve(context.params)
-    console.log('Parámetros de ruta:', params)
-
-    const { id } = params
-    console.log('ID de carpeta:', id)
+    const { id } = context.params
+    console.log('Iniciando reindexación de carpeta:', id)
 
     if (!id) {
-      const error: ReindexError = new Error('ID de carpeta requerido')
-      error.code = 'ID_REQUIRED'
-      throw error
+      return NextResponse.json({ error: 'ID de carpeta requerido' }, { status: 400 })
     }
 
-    // Obtener configuración del request
-    const { generateThumbnails = true, thumbnailQuality = 'mid' } = await request.json().catch(() => ({}))
-    console.log('Configuración:', { generateThumbnails, thumbnailQuality })
-
     // Obtener la carpeta
-    console.log('Buscando carpeta:', id)
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
-        images: {
-          select: {
-            id: true,
-            path: true
-          }
+        _count: {
+          select: { images: true }
         }
       }
     })
 
     if (!folder) {
-      console.log('Carpeta no encontrada:', id)
-      const error: ReindexError = new Error('Carpeta no encontrada')
-      error.code = 'FOLDER_NOT_FOUND'
-      throw error
+      return NextResponse.json({ error: 'Carpeta no encontrada' }, { status: 404 })
+    }
+
+    if (!existsSync(folder.path)) {
+      return NextResponse.json({ error: 'Carpeta no encontrada en el sistema' }, { status: 404 })
     }
 
     console.log('Carpeta encontrada:', {
       id: folder.id,
       path: folder.path,
-      imageCount: folder.images.length
+      imageCount: folder._count.images
     })
 
-    const total = folder.images.length
-    let current = 0
-    let errors = 0
-
-    // Enviar evento inicial
-    await sendEvent('progress', {
-      current: 0,
-      total,
-      progress: 0,
-      status: 'Iniciando reindexación...'
+    // Eliminar imágenes existentes
+    await prisma.image.deleteMany({
+      where: { folderId: id }
     })
 
-    // Procesar cada imagen
-    for (const image of folder.images) {
+    // Función recursiva para procesar archivos
+    async function processDirectory(dirPath: string): Promise<{ processed: number; errors: number }> {
+      let processed = 0
+      let errors = 0
+
       try {
-        current++
-        const progress = Math.round((current / total) * 100)
+        const files = await readdir(dirPath)
 
-        console.log('Procesando imagen:', {
-          id: image.id,
-          path: image.path,
-          progress: `${current}/${total} (${progress}%)`
-        })
-
-        // Verificar que el archivo existe
-        if (!existsSync(image.path)) {
-          errors++
-          console.log('Archivo no encontrado:', image.path)
-          await sendEvent('error', {
-            type: 'FILE_NOT_FOUND',
-            message: 'Archivo original no encontrado',
-            file: image.path
-          })
-          continue
-        }
-
-        await sendEvent('progress', {
-          current,
-          total,
-          progress,
-          currentFile: image.path,
-          status: 'Procesando...'
-        })
-
-        if (generateThumbnails) {
+        for (const file of files) {
           try {
-            // Generar thumbnail con reintentos
-            let attempts = 0
-            const maxAttempts = 3
-            let lastError: Error | null = null
+            const filePath = join(dirPath, file)
+            const stats = await stat(filePath)
 
-            while (attempts < maxAttempts) {
-              try {
-                console.log('Generando thumbnail:', { path: image.path, attempt: attempts + 1 })
-                const result = await generateThumbnail(image.path, thumbnailQuality as ThumbnailQuality)
+            if (stats.isDirectory()) {
+              const subDirStats = await processDirectory(filePath)
+              processed += subDirStats.processed
+              errors += subDirStats.errors
+              continue
+            }
 
-                // Actualizar en base de datos
-                await prisma.image.update({
-                  where: { id: image.id },
-                  data: {
-                    thumbnail: result.buffer.toString('base64'),
-                    thumbnailSize: result.buffer.length,
-                    thumbnailWidth: result.width,
-                    thumbnailHeight: result.height,
-                    thumbnailQuality: thumbnailQuality,
-                    thumbnailError: null,
-                    thumbnailErrorAt: null,
-                    updatedAt: new Date()
-                  }
-                })
+            const ext = extname(file).toLowerCase()
+            if (!SUPPORTED_FORMATS.includes(ext)) {
+              continue
+            }
 
-                console.log('Thumbnail generado correctamente:', { id: image.id, size: result.buffer.length })
-                break // Si llegamos aquí, el thumbnail se generó correctamente
-              } catch (thumbnailError) {
-                lastError = thumbnailError instanceof Error ? thumbnailError : new Error('Error desconocido')
-                attempts++
+            // Obtener metadata y hash
+            const metadata = await getImageMetadata(filePath)
+            const hash = await computeHash(filePath)
 
-                if (attempts < maxAttempts) {
-                  console.log(`Reintentando generación (${attempts}/${maxAttempts})...`)
-                  await new Promise(resolve => setTimeout(resolve, 1000 * attempts))
-                } else {
-                  throw lastError
+            // Generar thumbnail
+            let thumbnailData = null
+            try {
+              const result = await generateThumbnail(filePath, 'mid')
+              if (result && result.buffer) {
+                thumbnailData = {
+                  data: result.buffer.toString('base64'),
+                  size: result.buffer.length,
+                  width: result.width,
+                  height: result.height
                 }
               }
+            } catch (thumbnailError) {
+              console.error('Error generando thumbnail:', {
+                file: filePath,
+                error: thumbnailError
+              })
+              errors++
             }
-          } catch (thumbnailError) {
-            errors++
-            console.error('Error generando thumbnail:', thumbnailError)
 
-            // Actualizar error en base de datos
-            await prisma.image.update({
-              where: { id: image.id },
+            // Crear entrada en la base de datos
+            await prisma.image.create({
               data: {
-                thumbnailError: thumbnailError instanceof Error ? thumbnailError.message : 'Error desconocido',
-                thumbnailErrorAt: new Date(),
-                thumbnail: null,
-                thumbnailSize: null,
-                thumbnailWidth: null,
-                thumbnailHeight: null
+                path: filePath,
+                name: file,
+                size: stats.size,
+                hash,
+                width: metadata.width,
+                height: metadata.height,
+                metadata: JSON.stringify(metadata),
+                thumbnail: thumbnailData?.data ? Buffer.from(thumbnailData.data, 'base64') : null,
+                thumbnailSize: thumbnailData?.size,
+                thumbnailWidth: thumbnailData?.width,
+                thumbnailHeight: thumbnailData?.height,
+                folderId: folder.id,
+                createdAt: stats.birthtime,
+                updatedAt: stats.mtime
               }
             })
 
-            await sendEvent('error', {
-              type: 'THUMBNAIL_ERROR',
-              message: thumbnailError instanceof Error ? thumbnailError.message : 'Error desconocido',
-              file: image.path
+            processed++
+            console.log('Archivo procesado:', {
+              file: filePath,
+              processed
             })
+
+          } catch (fileError) {
+            console.error('Error procesando archivo:', {
+              file: file,
+              error: fileError
+            })
+            errors++
           }
         }
-      } catch (processError) {
-        errors++
-        console.error('Error procesando imagen:', processError)
-
-        await sendEvent('error', {
-          type: 'PROCESS_ERROR',
-          message: processError instanceof Error ? processError.message : 'Error desconocido',
-          file: image.path
+      } catch (dirError) {
+        console.error('Error procesando directorio:', {
+          dir: dirPath,
+          error: dirError
         })
+        errors++
       }
+
+      return { processed, errors }
     }
 
+    // Procesar la carpeta
+    const { processed, errors } = await processDirectory(folder.path)
+
     // Actualizar estadísticas de la carpeta
-    console.log('Actualizando estadísticas de carpeta')
+    const stats = await prisma.image.aggregate({
+      where: { folderId: id },
+      _sum: { size: true },
+      _count: true
+    })
+
     await prisma.folder.update({
       where: { id },
       data: {
+        totalFiles: stats._count,
+        totalSize: stats._sum.size || 0,
         lastIndexed: new Date()
       }
     })
 
-    // Enviar evento de completado
-    console.log('Proceso completado:', { processed: current - errors, total, errors })
-    await sendEvent('complete', {
-      processed: current - errors,
-      total,
+    console.log('Reindexación completada:', {
+      processed,
       errors,
-      folder: {
-        id: folder.id,
-        name: folder.name,
-        path: folder.path,
-        errors
-      }
+      totalFiles: stats._count,
+      totalSize: stats._sum.size || 0
     })
 
-    // Preparar respuesta
-    const response = new NextResponse(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
+    return NextResponse.json({
+      success: true,
+      processed,
+      errors,
+      totalFiles: stats._count,
+      totalSize: stats._sum.size || 0
     })
-
-    // Cerrar el writer después de preparar la respuesta
-    writer.close().catch(console.error)
-
-    return response
 
   } catch (error) {
     console.error('Error en reindexación:', error)
-
-    try {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      const errorCode = (error as ReindexError).code || 'UNKNOWN_ERROR'
-
-      await sendEvent('error', {
-        type: errorCode,
-        message: errorMessage
-      })
-    } catch (streamError) {
-      console.error('Error escribiendo en stream:', streamError)
-    }
-
-    // Preparar respuesta de error
-    const response = new NextResponse(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    })
-
-    // Cerrar el writer después de preparar la respuesta
-    writer.close().catch(console.error)
-
-    return response
+    return NextResponse.json(
+      {
+        error: 'Error en reindexación',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
+      { status: 500 }
+    )
   }
 }

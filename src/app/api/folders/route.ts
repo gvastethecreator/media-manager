@@ -19,9 +19,12 @@ export async function POST(request: NextRequest) {
 
   const sendEvent = async (type: string, data: any) => {
     try {
-      await writeStreamEvent(writer, type, data)
+      const formattedData = JSON.stringify({ type, data })
+      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
+      console.log('Evento enviado:', { type, data })
     } catch (error) {
       console.error('Error enviando evento:', error)
+      throw error
     }
   }
 
@@ -73,42 +76,55 @@ export async function POST(request: NextRequest) {
       let processed = 0
       let total = 0
 
+      // Primero contar archivos válidos
+      for (const file of files) {
+        const filePath = join(dirPath, file)
+        const stats = await stat(filePath)
+
+        if (stats.isDirectory()) {
+          const subDirStats = await processDirectory(filePath)
+          total += subDirStats.total
+        } else {
+          const ext = extname(file).toLowerCase()
+          if (SUPPORTED_FORMATS.includes(ext)) {
+            total++
+          }
+        }
+      }
+
+      // Enviar evento con el total inicial
+      await sendEvent('progress', {
+        current: 0,
+        total,
+        progress: 0,
+        status: `Encontrados ${total} archivos para procesar...`
+      })
+
+      // Procesar archivos
       for (const file of files) {
         try {
           const filePath = join(dirPath, file)
           const stats = await stat(filePath)
 
           if (stats.isDirectory()) {
-            console.log('Encontrado subdirectorio:', filePath)
             const subDirStats = await processDirectory(filePath)
             processed += subDirStats.processed
-            total += subDirStats.total
             continue
           }
 
           const ext = extname(file).toLowerCase()
           if (!SUPPORTED_FORMATS.includes(ext)) {
-            console.log('Archivo no soportado:', filePath)
             continue
           }
 
-          total++
           processed++
-          const progress = Math.round((processed / Math.max(total, 1)) * 100)
+          const progress = Math.round((processed / total) * 100)
 
           console.log('Procesando archivo:', {
             file: filePath,
             progress,
             processed,
             total
-          })
-
-          await sendEvent('progress', {
-            current: processed,
-            total,
-            progress,
-            currentFile: filePath,
-            status: 'Procesando archivo...'
           })
 
           // Obtener metadata y hash
@@ -156,6 +172,14 @@ export async function POST(request: NextRequest) {
               createdAt: stats.birthtime,
               updatedAt: stats.mtime
             }
+          })
+
+          await sendEvent('progress', {
+            current: processed,
+            total,
+            progress,
+            currentFile: filePath,
+            status: `Procesando archivo ${processed} de ${total}...`
           })
 
           console.log('Archivo procesado:', filePath)
@@ -206,14 +230,16 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    await writer.close()
-    return new NextResponse(stream.readable, {
+    // Preparar respuesta
+    const response = new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive'
       }
     })
+
+    return response
 
   } catch (error) {
     console.error('Error procesando carpeta:', error)
@@ -230,18 +256,21 @@ export async function POST(request: NextRequest) {
         type: errorType,
         message: errorMessage
       })
+
+      // Preparar respuesta de error
+      const response = new NextResponse(stream.readable, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      })
+
+      return response
     } catch (streamError) {
       console.error('Error escribiendo en stream:', streamError)
+      return new NextResponse(null, { status: 500 })
     }
-
-    await writer.close()
-    return new NextResponse(stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    })
   }
 }
 
