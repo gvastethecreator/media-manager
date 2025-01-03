@@ -9,28 +9,37 @@ import { thumbnailService } from "@/services/thumbnail.service";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageIcon } from "lucide-react";
+import { FileContextMenu } from "./context-menu";
+import { useImageViewer } from "@/store/image-viewer";
+import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
+import { useFileSelection } from "@/store/file-selection";
 
 interface FileCardProps {
 	item: FileItem;
 	viewMode?: "grid" | "list";
 	thumbnailSize?: ThumbnailSize;
-	isSelected?: boolean;
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
+	style?: React.CSSProperties;
 }
 
 export function FileCard({
 	item,
 	viewMode = "grid",
 	thumbnailSize = "medium",
-	isSelected = false,
 	onClick,
 	onDoubleClick,
+	style,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { toast } = useToast();
+	const { openViewer } = useImageViewer();
+	const { toggleSelectedItem, selectedItems } = useFileSelection();
+
+	// Determinar si este item está seleccionado
+	const isSelected = selectedItems.some((i) => i.id === item.id);
 
 	const loadThumbnail = useCallback(async () => {
 		try {
@@ -53,14 +62,11 @@ export function FileCard({
 			setIsLoading(false);
 		} catch (error) {
 			console.error("Error cargando miniatura:", error);
-
-			// El servicio ya maneja los reintentos internamente
 			setError(
 				error instanceof Error ? error.message : "Error cargando miniatura"
 			);
 			setIsLoading(false);
 
-			// Solo mostrar toast para errores críticos (después de reintentos)
 			if (
 				error instanceof Error &&
 				error.message.includes("después de reintentos")
@@ -89,29 +95,105 @@ export function FileCard({
 		};
 	}, [loadThumbnail]);
 
-	const handleClick = () => {
+	const handleClick = (e: React.MouseEvent) => {
+		// Prevenir la selección del DOM cuando se usa shift
+		if (e.shiftKey) {
+			e.preventDefault();
+		}
+
+		// Toggle selección con shift o ctrl/cmd
+		toggleSelectedItem(item, e.shiftKey || e.ctrlKey || e.metaKey);
+
+		// Llamar al onClick proporcionado si existe
 		if (onClick) onClick(item);
 	};
 
-	const handleDoubleClick = () => {
+	const handleDoubleClick = (e: React.MouseEvent) => {
+		// Prevenir la selección del DOM
+		e.preventDefault();
+
+		// Si es una imagen, abrimos el visor
+		if (item.metadata?.mimeType?.startsWith("image/")) {
+			openViewer([item], 0);
+		}
+		// Llamamos al onDoubleClick proporcionado si existe
 		if (onDoubleClick) onDoubleClick(item);
 	};
 
-	return (
-		<motion.div
-			layout
-			initial={{ opacity: 0, scale: 0.9 }}
-			animate={{ opacity: 1, scale: 1 }}
-			exit={{ opacity: 0, scale: 0.9 }}
-			className={cn(
-				"relative rounded-lg overflow-hidden border transition-colors",
-				isSelected ? "border-primary" : "border-border",
-				viewMode === "grid" ? "aspect-square" : "h-12",
-				"group hover:border-primary/50"
-			)}
-			onClick={handleClick}
-			onDoubleClick={handleDoubleClick}
-		>
+	// Prevenir la selección del DOM al arrastrar
+	const handleMouseDown = (e: React.MouseEvent) => {
+		if (e.shiftKey || e.ctrlKey || e.metaKey) {
+			e.preventDefault();
+		}
+	};
+
+	const handleContextMenuAction = useCallback(
+		async (action: string, file: FileItem) => {
+			try {
+				switch (action) {
+					case "preview":
+						if (file.metadata?.mimeType?.startsWith("image/")) {
+							openViewer([file], 0);
+						} else {
+							onDoubleClick?.(file);
+						}
+						break;
+					case "open":
+						// Abrir ubicación del archivo
+						window.electron?.openPath(file.path);
+						break;
+					case "download":
+						// Descargar archivo
+						window.electron?.downloadFile(file.path);
+						break;
+					case "share":
+						// Copiar enlace al portapapeles
+						await navigator.clipboard.writeText(file.path);
+						toast({
+							title: "Enlace copiado",
+							description:
+								"La ruta del archivo ha sido copiada al portapapeles",
+						});
+						break;
+					case "copy":
+						// Copiar archivo al portapapeles
+						window.electron?.copyFile(file.path);
+						break;
+					case "collection-new":
+						// TODO: Implementar creación de colección
+						break;
+					case "favorite-toggle":
+						// TODO: Implementar toggle de favorito
+						break;
+					case "tag-new":
+						// TODO: Implementar creación de etiqueta
+						break;
+					case "rename":
+						// TODO: Implementar renombrado
+						break;
+					case "delete":
+						// TODO: Implementar eliminación
+						break;
+					case "info":
+						// TODO: Implementar vista de propiedades
+						break;
+					default:
+						console.warn("Acción no implementada:", action);
+				}
+			} catch (error) {
+				console.error("Error ejecutando acción:", error);
+				toast({
+					title: "Error",
+					description: "No se pudo completar la acción",
+					variant: "destructive",
+				});
+			}
+		},
+		[onDoubleClick, toast, openViewer]
+	);
+
+	const cardContent = (
+		<div className="relative w-full h-full">
 			{isLoading ? (
 				<Skeleton className="w-full h-full" />
 			) : error ? (
@@ -125,15 +207,16 @@ export function FileCard({
 				<div className="relative w-full h-full">
 					{thumbnail ? (
 						<>
-							<img
+							<ImageCard
 								src={thumbnail}
 								alt={item.name}
+								width={item.metadata?.dimensions?.width || 300}
+								height={item.metadata?.dimensions?.height || 300}
 								className={cn(
-									"w-full h-full object-cover transition-all duration-200",
+									"w-full h-full",
 									!isSelected && "group-hover:scale-105"
 								)}
-								loading="lazy"
-								decoding="async"
+								priority={false}
 							/>
 							<div
 								className={cn(
@@ -158,6 +241,31 @@ export function FileCard({
 					)}
 				</div>
 			)}
-		</motion.div>
+		</div>
+	);
+
+	return (
+		<FileContextMenu file={item} onAction={handleContextMenuAction}>
+			<motion.div
+				layout
+				initial={{ opacity: 0, scale: 0.9 }}
+				animate={{ opacity: 1, scale: 1 }}
+				exit={{ opacity: 0, scale: 0.9 }}
+				className={cn(
+					"relative rounded-lg overflow-hidden border transition-colors select-none",
+					isSelected
+						? "border-primary ring-2 ring-primary ring-offset-2"
+						: "border-border",
+					viewMode === "grid" ? "aspect-square" : "h-12",
+					"group hover:border-primary/50"
+				)}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				onMouseDown={handleMouseDown}
+				style={style}
+			>
+				{cardContent}
+			</motion.div>
+		</FileContextMenu>
 	);
 }
