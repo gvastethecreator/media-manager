@@ -330,10 +330,10 @@ export function FoldersSection() {
 
 	if (error) {
 		return (
-			<Card className="p-6">
+			<Card className="p-4">
 				<div className="flex items-center gap-2 text-destructive">
-					<AlertCircle className="h-4 w-4" />
-					<p className="text-sm">{error}</p>
+					<AlertCircle className="h-3.5 w-3.5" />
+					<p className="text-xs">{error}</p>
 				</div>
 			</Card>
 		);
@@ -341,10 +341,10 @@ export function FoldersSection() {
 
 	return (
 		<div className="space-y-4">
-			<Card className="border-none py-2">
+			<Card className="border-none py-2 px-4">
 				<CardHeader className="px-4 py-2">
-					<CardTitle className="text-xl font-semibold flex items-center">
-						<FolderIcon className="h-6 w-6 mr-2" /> Carpetas
+					<CardTitle className="text-base font-semibold flex items-center gap-2">
+						<FolderIcon className="h-5 w-5" /> Carpetas Indexadas
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="p-2">
@@ -361,49 +361,50 @@ export function FoldersSection() {
 						</div>
 						<Button
 							size="sm"
-							className="h-7"
+							className="h-7 text-xs"
 							onClick={handleAddFolder}
 							disabled={isLoading || isProcessing || !folderPath.trim()}
 						>
 							{isProcessing ? (
-								<React.Fragment>
-									<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-									Agregando...
-								</React.Fragment>
+								<>
+									<RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+									<span>Agregando...</span>
+								</>
 							) : (
-								<React.Fragment>
-									<FolderPlus className="h-3 w-3 mr-1" />
-									Agregar
-								</React.Fragment>
+								<>
+									<FolderPlus className="h-3.5 w-3.5 mr-1.5" />
+									<span>Agregar</span>
+								</>
 							)}
 						</Button>
 					</div>
+
 					{isProcessing && (
-						<div className="space-y-2">
+						<div className="space-y-1.5 px-2">
 							<div className="flex justify-between text-xs text-muted-foreground">
 								<span>{processStatus.status || "Procesando..."}</span>
 								<span>
 									{processStatus.current}/{processStatus.total} archivos
 								</span>
 							</div>
-							<Progress value={processProgress} className="h-2" />
+							<Progress value={processProgress} className="h-1.5" />
 						</div>
 					)}
 
 					{isLoading ? (
-						<div className="py-4 text-center text-sm text-muted-foreground">
-							<RefreshCw className="h-4 w-4 animate-spin mx-auto mb-2" />
+						<div className="py-4 text-center text-xs text-muted-foreground">
+							<RefreshCw className="h-3.5 w-3.5 animate-spin mx-auto mb-2" />
 							Cargando carpetas...
 						</div>
 					) : folders.length > 0 ? (
-						<div className="space-y-2">
+						<div className="space-y-2 mt-2">
 							{folders.map((folder) => (
-								<Card key={folder.id}>
+								<Card key={folder.id} className="bg-muted/30">
 									<CardContent className="p-2">
 										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-2">
-												<div className="p-1.5 rounded-md bg-muted">
-													<Folder className="h-4 w-4 text-muted-foreground" />
+											<div className="flex items-center gap-2 min-w-0">
+												<div className="p-1.5 rounded-md bg-muted/50">
+													<Folder className="h-3.5 w-3.5 text-muted-foreground" />
 												</div>
 												<div className="min-w-0">
 													<span className="text-xs font-medium block truncate">
@@ -413,12 +414,18 @@ export function FoldersSection() {
 														{folder.path}
 													</p>
 													<div className="flex items-center gap-2 mt-1">
-														<span className="text-[10px] text-muted-foreground">
+														<Badge
+															variant="secondary"
+															className="text-[10px] px-1 h-4"
+														>
 															{folder._count?.images || 0} imágenes
-														</span>
-														<span className="text-[10px] text-muted-foreground">
+														</Badge>
+														<Badge
+															variant="secondary"
+															className="text-[10px] px-1 h-4"
+														>
 															{formatBytes(Number(folder.totalSize || 0))}
-														</span>
+														</Badge>
 														<span className="text-[10px] text-muted-foreground">
 															{folder.lastIndexed
 																? new Date(folder.lastIndexed).toLocaleString()
@@ -432,13 +439,13 @@ export function FoldersSection() {
 												<Button
 													size="icon"
 													variant="ghost"
-													className="h-7 w-7"
+													className="h-6 w-6"
 													onClick={() => handleReindexFolder(folder.id)}
 													disabled={isProcessing}
 												>
 													<RefreshCw
 														className={cn(
-															"h-4 w-4",
+															"h-3.5 w-3.5",
 															isProcessing &&
 																processStatus.folderId === folder.id &&
 																"animate-spin"
@@ -452,7 +459,7 @@ export function FoldersSection() {
 																size="icon"
 																variant="ghost"
 																className={cn(
-																	"h-7 w-7",
+																	"h-6 w-6",
 																	selectedFolder === folder.id &&
 																		"bg-destructive hover:bg-destructive/90"
 																)}
@@ -461,14 +468,14 @@ export function FoldersSection() {
 															>
 																<Trash2
 																	className={cn(
-																		"h-4 w-4",
+																		"h-3.5 w-3.5",
 																		selectedFolder === folder.id &&
 																			"text-destructive-foreground"
 																	)}
 																/>
 															</Button>
 														</TooltipTrigger>
-														<TooltipContent>
+														<TooltipContent className="text-xs">
 															{selectedFolder === folder.id
 																? "Haz clic de nuevo para eliminar"
 																: "Haz clic para eliminar"}
@@ -478,23 +485,22 @@ export function FoldersSection() {
 											</div>
 										</div>
 
-										{/* Barra de progreso */}
 										{isProcessing && processStatus.folderId === folder.id && (
-											<div className="mt-4 space-y-2">
-												<div className="flex justify-between text-sm text-muted-foreground">
+											<div className="mt-3 space-y-1.5">
+												<div className="flex justify-between text-xs text-muted-foreground">
 													<span>{processStatus.status || "Procesando..."}</span>
 													<span>{Math.round(processProgress)}%</span>
 												</div>
-												<Progress value={processProgress} className="h-2" />
+												<Progress value={processProgress} className="h-1.5" />
 												<div className="flex flex-col gap-1">
 													{processStatus.currentFile && (
-														<p className="text-xs text-muted-foreground truncate">
+														<p className="text-[10px] text-muted-foreground truncate">
 															Archivo actual: {processStatus.currentFile}
 														</p>
 													)}
 													{processStatus.current !== undefined &&
 														processStatus.total !== undefined && (
-															<p className="text-xs text-muted-foreground">
+															<p className="text-[10px] text-muted-foreground">
 																{processStatus.current} de {processStatus.total}{" "}
 																archivos procesados
 															</p>
@@ -507,37 +513,59 @@ export function FoldersSection() {
 							))}
 						</div>
 					) : (
-						<div className="py-4 text-center text-sm text-muted-foreground">
-							<Folder className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-							No hay carpetas indexadas
-							<p className="text-xs mt-1 text-muted-foreground/75">
+						<div className="py-4 text-center">
+							<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
+							<p className="text-xs text-muted-foreground">
+								No hay carpetas indexadas
+							</p>
+							<p className="text-[10px] mt-1 text-muted-foreground/75">
 								Agrega una carpeta para comenzar a indexar imágenes
 							</p>
 						</div>
 					)}
 
-					<div className="pt-2 space-y-2">
+					<div className="pt-2 flex flex-col-4 items-center gap-4">
 						<div className="flex items-center justify-between">
-							<span className="text-xs">Carpetas indexadas</span>
-							<Badge variant="outline" className="text-[10px] font-mono">
+							<span className="text-xs text-muted-foreground">
+								Carpetas indexadas
+							</span>
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.totalFolders}
 							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-xs">Archivos indexados</span>
-							<Badge variant="outline" className="text-[10px] font-mono">
+							<span className="text-xs text-muted-foreground">
+								Archivos indexados
+							</span>
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.totalFiles}
 							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-xs">Espacio total</span>
-							<Badge variant="outline" className="text-[10px] font-mono">
+							<span className="text-xs text-muted-foreground">
+								Espacio total
+							</span>
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{formatBytes(stats.totalSize)}
 							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-xs">Última indexación</span>
-							<Badge variant="outline" className="text-[10px] font-mono">
+							<span className="text-xs text-muted-foreground">
+								Última indexación
+							</span>
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.lastIndexed
 									? stats.lastIndexed.toLocaleString()
 									: "Nunca"}

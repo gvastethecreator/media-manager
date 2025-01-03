@@ -2,13 +2,13 @@
 
 import { useLoadingStore } from "@/store/loading-store"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const TRANSITION_DURATION = 0.3
+const TRANSITION_DURATION = 0.2
 
 export function LoadingScreen() {
   const { services, progress, isInitializing, isReady } = useLoadingStore()
@@ -22,23 +22,15 @@ export function LoadingScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: TRANSITION_DURATION }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
     >
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader className="space-y-2 text-center pb-4">
-          <CardTitle className="text-3xl font-bold tracking-tight">Image Manager</CardTitle>
-          <CardDescription className="text-base">
-            {isReady
-              ? "¡Todo listo! Iniciando aplicación..."
-              : "Inicializando servicios y preparando la aplicación..."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <Card className="w-full max-w-md border-none">
+        <CardContent>
           <motion.div
             className="space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: TRANSITION_DURATION, delay: 0.1 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(20px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: TRANSITION_DURATION, delay: 0.2 }}
           >
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Progreso general</span>
@@ -47,12 +39,12 @@ export function LoadingScreen() {
             <Progress value={progress} className="h-2" />
           </motion.div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 mt-4">
             {services.map((service, index) => (
               <motion.div
                 key={service.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{
                   duration: TRANSITION_DURATION,
                   delay: 0.2 + index * 0.1,

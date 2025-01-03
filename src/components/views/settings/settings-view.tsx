@@ -4,12 +4,6 @@ import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
 	FolderIcon,
 	BookmarkIcon,
 	KeyboardIcon,
@@ -24,38 +18,10 @@ import { ShortcutsSection } from "./settings-sections/shortcuts-section";
 import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
 import { ProfilesSection } from "./settings-sections/profiles-section";
 import { SystemSection } from "./settings-sections/system-section";
-import { getFolders } from "@/services/folder.service";
-import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 
 export function SettingsView() {
-	const { toast } = useToast();
-	const [activeTab, setActiveTab] = React.useState("appearance");
-	const [initialFolders, setInitialFolders] = React.useState([]);
-
-	React.useEffect(() => {
-		const loadInitialFolders = async () => {
-			try {
-				const folders = await getFolders();
-				setInitialFolders(folders);
-			} catch (error) {
-				console.error("Error cargando carpetas:", error);
-				toast({
-					title: "Error",
-					description:
-						error instanceof Error
-							? error.message
-							: "Error al cargar las carpetas",
-					variant: "destructive",
-				});
-			}
-		};
-
-		if (activeTab === "folders") {
-			loadInitialFolders();
-		}
-	}, [activeTab, toast]);
-
+	const [activeTab, setActiveTab] = React.useState("folders");
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none">
 			<ScrollArea className="h-full">
