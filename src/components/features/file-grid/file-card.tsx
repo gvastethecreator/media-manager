@@ -252,7 +252,7 @@ export function FileCard({
 				animate={{ opacity: 1, scale: 1 }}
 				exit={{ opacity: 0, scale: 0.9 }}
 				className={cn(
-					"relative rounded-lg overflow-hidden border transition-colors select-none",
+					"relative rounded-xs overflow-hidden border transition-colors select-none p-4",
 					isSelected
 						? "border-primary ring-2 ring-primary ring-offset-2"
 						: "border-border",

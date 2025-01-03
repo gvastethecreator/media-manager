@@ -66,7 +66,6 @@ export function FileContextMenu({
 					<ContextMenuShortcut>⌘D</ContextMenuShortcut>
 				</ContextMenuItem>
 
-
 				<ContextMenuItem onClick={() => onAction("copy", file)}>
 					<Copy className="mr-2 h-4 w-4" />
 					Copiar
@@ -122,8 +121,6 @@ export function FileContextMenu({
 
 				<ContextMenuSeparator />
 
-
-
 				<ContextMenuItem
 					onClick={() => onAction("delete", file)}
 					className="text-red-600"
@@ -134,7 +131,6 @@ export function FileContextMenu({
 				</ContextMenuItem>
 
 				<ContextMenuSeparator />
-
 			</ContextMenuContent>
 		</ContextMenu>
 	);
