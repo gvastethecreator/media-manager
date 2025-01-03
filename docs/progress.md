@@ -116,3 +116,62 @@
   2. Movidos providers específicos (`FilesProvider`, `SidebarProvider`) al `AppProvider`
   3. Simplificada la estructura de `page.tsx`
 - **Impacto**: Mejorada la organización de providers y reducida la complejidad del árbol de componentes
+
+## 2024-01-09: Refactorización de la gestión de configuraciones
+
+### Cambios realizados
+
+1. Consolidación del store de configuraciones:
+
+   - Se creó un nuevo store unificado usando Zustand
+   - Se eliminaron stores y contextos redundantes
+   - Se implementó persistencia de datos con migración entre versiones
+
+2. Definición de tipos:
+
+   - Se crearon tipos e interfaces para todas las configuraciones
+   - Se agregaron tipos para modos de vista, ordenamiento y calidad
+   - Se definieron configuraciones por defecto
+
+3. Hook personalizado:
+   - Se creó `useSettings` para facilitar el acceso a las configuraciones
+   - Se implementaron selectores para cada sección
+   - Se agregaron acciones compuestas para operaciones comunes
+
+### Stack tecnológico
+
+- Frontend:
+  - Next.js 15
+  - React 19
+  - TypeScript
+  - Zustand (gestión de estado)
+  - Tailwind CSS
+  - Framer Motion
+  - Lucide React (iconos)
+
+### Estructura del proyecto
+
+```
+src/
+  ├── components/
+  │   ├── core/          # Componentes base
+  │   └── features/      # Componentes de características
+  ├── hooks/             # Hooks personalizados
+  ├── lib/              # Utilidades y configuraciones
+  ├── store/            # Stores de Zustand
+  └── types/            # Definiciones de tipos
+```
+
+### Próximos pasos
+
+1. Migrar componentes existentes para usar el nuevo hook de configuraciones
+2. Implementar persistencia de datos en IndexedDB
+3. Agregar validación de esquemas con Zod
+4. Documentar API del hook de configuraciones
+
+### Issues pendientes
+
+- [ ] Revisar rendimiento de selectores en el hook
+- [ ] Implementar pruebas unitarias para el store
+- [ ] Agregar tipos para migraciones de configuraciones
+- [ ] Documentar proceso de migración entre versiones
