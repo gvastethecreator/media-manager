@@ -6,7 +6,6 @@ import { computeHash } from '@/lib/hash'
 import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
 import { join, extname } from 'path'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
 
 const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
 
@@ -17,51 +16,88 @@ export async function POST(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
-  try {
-    const { id } = context.params
-    console.log('Iniciando reindexación de carpeta:', id)
+  const encoder = new TextEncoder()
+  const stream = new TransformStream()
+  const writer = stream.writable.getWriter()
 
-    if (!id) {
-      return NextResponse.json({ error: 'ID de carpeta requerido' }, { status: 400 })
+  // Preparar respuesta SSE primero
+  const response = new NextResponse(stream.readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
     }
+  })
 
-    // Obtener la carpeta
-    const folder = await prisma.folder.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { images: true }
-        }
+  const sendEvent = async (type: string, data: any) => {
+    try {
+      const formattedData = JSON.stringify({ type, data })
+      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
+      console.log('Evento enviado:', { type, data })
+    } catch (error) {
+      console.error('Error enviando evento:', error)
+      throw error
+    }
+  }
+
+  const processFolder = async () => {
+    try {
+      const { id } = context.params
+      console.log('Iniciando reindexación de carpeta:', id)
+
+      if (!id) {
+        throw new Error('ID de carpeta requerido')
       }
-    })
 
-    if (!folder) {
-      return NextResponse.json({ error: 'Carpeta no encontrada' }, { status: 404 })
-    }
+      // Obtener la carpeta
+      const folder = await prisma.folder.findUnique({
+        where: { id }
+      })
 
-    if (!existsSync(folder.path)) {
-      return NextResponse.json({ error: 'Carpeta no encontrada en el sistema' }, { status: 404 })
-    }
+      if (!folder) {
+        throw new Error('Carpeta no encontrada')
+      }
 
-    console.log('Carpeta encontrada:', {
-      id: folder.id,
-      path: folder.path,
-      imageCount: folder._count.images
-    })
+      if (!existsSync(folder.path)) {
+        throw new Error('Carpeta no encontrada en el sistema')
+      }
 
-    // Eliminar imágenes existentes
-    await prisma.image.deleteMany({
-      where: { folderId: id }
-    })
+      // Eliminar imágenes existentes
+      await prisma.image.deleteMany({
+        where: { folderId: id }
+      })
 
-    // Función recursiva para procesar archivos
-    async function processDirectory(dirPath: string): Promise<{ processed: number; errors: number }> {
-      let processed = 0
-      let errors = 0
-
-      try {
+      // Función recursiva para procesar archivos
+      async function processDirectory(dirPath: string): Promise<{ processed: number; total: number }> {
         const files = await readdir(dirPath)
+        let processed = 0
+        let total = 0
 
+        // Primero contar archivos válidos
+        for (const file of files) {
+          const filePath = join(dirPath, file)
+          const stats = await stat(filePath)
+
+          if (stats.isDirectory()) {
+            const subDirStats = await processDirectory(filePath)
+            total += subDirStats.total
+          } else {
+            const ext = extname(file).toLowerCase()
+            if (SUPPORTED_FORMATS.includes(ext)) {
+              total++
+            }
+          }
+        }
+
+        // Enviar evento con el total inicial
+        await sendEvent('progress', {
+          current: processed,
+          total,
+          progress: 0,
+          status: `Encontrados ${total} archivos para procesar...`
+        })
+
+        // Procesar archivos
         for (const file of files) {
           try {
             const filePath = join(dirPath, file)
@@ -70,7 +106,6 @@ export async function POST(
             if (stats.isDirectory()) {
               const subDirStats = await processDirectory(filePath)
               processed += subDirStats.processed
-              errors += subDirStats.errors
               continue
             }
 
@@ -96,11 +131,7 @@ export async function POST(
                 }
               }
             } catch (thumbnailError) {
-              console.error('Error generando thumbnail:', {
-                file: filePath,
-                error: thumbnailError
-              })
-              errors++
+              console.error('Error generando thumbnail:', thumbnailError)
             }
 
             // Crear entrada en la base de datos
@@ -124,72 +155,74 @@ export async function POST(
             })
 
             processed++
-            console.log('Archivo procesado:', {
-              file: filePath,
-              processed
+            const progress = Math.round((processed / total) * 100)
+
+            await sendEvent('progress', {
+              current: processed,
+              total,
+              progress,
+              currentFile: filePath,
+              status: `Procesando archivo ${processed} de ${total}...`
             })
 
-          } catch (fileError) {
-            console.error('Error procesando archivo:', {
+          } catch (error) {
+            console.error('Error procesando archivo:', error)
+            await sendEvent('error', {
               file: file,
-              error: fileError
+              error: error instanceof Error ? error.message : 'Error desconocido'
             })
-            errors++
           }
         }
-      } catch (dirError) {
-        console.error('Error procesando directorio:', {
-          dir: dirPath,
-          error: dirError
-        })
-        errors++
+
+        return { processed, total }
       }
 
-      return { processed, errors }
+      // Procesar la carpeta
+      const { processed, total } = await processDirectory(folder.path)
+
+      // Actualizar estadísticas de la carpeta
+      const stats = await prisma.image.aggregate({
+        where: { folderId: id },
+        _sum: { size: true },
+        _count: true
+      })
+
+      await prisma.folder.update({
+        where: { id },
+        data: {
+          totalFiles: stats._count,
+          totalSize: stats._sum.size || 0,
+          lastIndexed: new Date()
+        }
+      })
+
+      // Enviar evento de completado
+      await sendEvent('complete', {
+        processed,
+        total,
+        errors: total - processed,
+        folder: {
+          id: folder.id,
+          name: folder.name,
+          path: folder.path,
+          totalFiles: stats._count,
+          totalSize: stats._sum.size || 0
+        }
+      })
+
+    } catch (error) {
+      console.error('Error en reindexación:', error)
+      await sendEvent('error', {
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      })
+    } finally {
+      await writer.close()
     }
-
-    // Procesar la carpeta
-    const { processed, errors } = await processDirectory(folder.path)
-
-    // Actualizar estadísticas de la carpeta
-    const stats = await prisma.image.aggregate({
-      where: { folderId: id },
-      _sum: { size: true },
-      _count: true
-    })
-
-    await prisma.folder.update({
-      where: { id },
-      data: {
-        totalFiles: stats._count,
-        totalSize: stats._sum.size || 0,
-        lastIndexed: new Date()
-      }
-    })
-
-    console.log('Reindexación completada:', {
-      processed,
-      errors,
-      totalFiles: stats._count,
-      totalSize: stats._sum.size || 0
-    })
-
-    return NextResponse.json({
-      success: true,
-      processed,
-      errors,
-      totalFiles: stats._count,
-      totalSize: stats._sum.size || 0
-    })
-
-  } catch (error) {
-    console.error('Error en reindexación:', error)
-    return NextResponse.json(
-      {
-        error: 'Error en reindexación',
-        details: error instanceof Error ? error.message : 'Error desconocido'
-      },
-      { status: 500 }
-    )
   }
+
+  // Iniciar procesamiento en background
+  processFolder()
+
+  return response
 }
+
