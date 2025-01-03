@@ -50,9 +50,10 @@ export function SettingsView() {
 					</TabsList>
 
 					<TabsContent value="folders">
-						<FoldersSection />
-						<Separator />
-						<ThumbnailsSection />
+						<div className="grid grid-cols-2 gap-2 w-full">
+							<FoldersSection  />
+							<ThumbnailsSection />
+						</div>
 					</TabsContent>
 
 					<TabsContent value="collections">
