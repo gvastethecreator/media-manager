@@ -3,6 +3,7 @@ import type { FileItem } from '@/types/file-item'
 
 interface FilesState {
   currentItems: FileItem[]
+  displayedItems: FileItem[]
   selectedItem: FileItem | null
   selectedIds: string[]
   currentFolderId: string | null
@@ -10,26 +11,26 @@ interface FilesState {
   currentTagId: string | null
   isLoading: boolean
   error: string | null
-  page: number
-  totalPages: number
-  hasMore: boolean
   collections: { id: string; name: string; count: number; color?: string; emoji?: string }[]
   folders: { id: string; name: string; count: number }[]
   tags: { id: string; name: string; count: number; color: string }[]
+  isProcessingThumbnails: boolean
   initialize: () => Promise<void>
-  loadAllImages: (page?: number) => Promise<void>
-  loadFavorites: (page?: number) => Promise<void>
+  loadAllImages: () => Promise<void>
+  loadFavorites: () => Promise<void>
   selectItem: (item: FileItem) => void
   deselectItem: (id: string) => void
-  handleSelectFolder: (id: string, page?: number) => Promise<void>
-  handleSelectCollection: (id: string, page?: number) => Promise<void>
-  handleSelectTag: (id: string, page?: number) => Promise<void>
-  loadNextPage: () => Promise<void>
-  loadPreviousPage: () => Promise<void>
+  handleSelectFolder: (id: string) => Promise<void>
+  handleSelectCollection: (id: string) => Promise<void>
+  handleSelectTag: (id: string) => Promise<void>
+  loadMoreItems: () => void
 }
+
+const ITEMS_PER_BATCH = 50
 
 export const useFilesStore = create<FilesState>((set, get) => ({
   currentItems: [],
+  displayedItems: [],
   selectedItem: null,
   selectedIds: [],
   currentFolderId: null,
@@ -37,12 +38,10 @@ export const useFilesStore = create<FilesState>((set, get) => ({
   currentTagId: null,
   isLoading: false,
   error: null,
-  page: 1,
-  totalPages: 1,
-  hasMore: false,
   collections: [],
   folders: [],
   tags: [],
+  isProcessingThumbnails: false,
 
   initialize: async () => {
     try {
@@ -62,41 +61,41 @@ export const useFilesStore = create<FilesState>((set, get) => ({
     }
   },
 
-  loadAllImages: async (page = 1) => {
+  loadAllImages: async () => {
     try {
       set({ isLoading: true })
-      const response = await fetch(`/api/images?page=${page}`)
+      const response = await fetch('/api/images/all')
       if (!response.ok) throw new Error('Error al cargar imágenes')
       const data = await response.json()
+      const items = data.items || []
       set({
-        currentItems: data.items || [],
-        page: data.page || 1,
-        totalPages: data.totalPages || 1,
-        hasMore: data.page < data.totalPages
+        currentItems: items,
+        displayedItems: items.slice(0, ITEMS_PER_BATCH),
+        isProcessingThumbnails: true
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
     } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isProcessingThumbnails: false })
     }
   },
 
-  loadFavorites: async (page = 1) => {
+  loadFavorites: async () => {
     try {
       set({ isLoading: true })
-      const response = await fetch(`/api/images/favorites?page=${page}`)
+      const response = await fetch('/api/images/favorites/all')
       if (!response.ok) throw new Error('Error al cargar favoritos')
       const data = await response.json()
+      const items = data.items || []
       set({
-        currentItems: data.items || [],
-        page: data.page || 1,
-        totalPages: data.totalPages || 1,
-        hasMore: data.page < data.totalPages
+        currentItems: items,
+        displayedItems: items.slice(0, ITEMS_PER_BATCH),
+        isProcessingThumbnails: true
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
     } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isProcessingThumbnails: false })
     }
   },
 
@@ -114,92 +113,73 @@ export const useFilesStore = create<FilesState>((set, get) => ({
     }))
   },
 
-  handleSelectFolder: async (id, page = 1) => {
+  handleSelectFolder: async (id) => {
     try {
       set({ isLoading: true, currentFolderId: id })
-      const response = await fetch(`/api/folders/${id}/images?page=${page}`)
+      const response = await fetch(`/api/folders/${id}/images/all`)
       if (!response.ok) throw new Error('Error al cargar carpeta')
       const data = await response.json()
+      const items = data.items || []
       set({
-        currentItems: data.items || [],
-        page: data.page || 1,
-        totalPages: data.totalPages || 1,
-        hasMore: data.page < data.totalPages
+        currentItems: items,
+        displayedItems: items.slice(0, ITEMS_PER_BATCH),
+        isProcessingThumbnails: true
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
     } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isProcessingThumbnails: false })
     }
   },
 
-  handleSelectCollection: async (id, page = 1) => {
+  handleSelectCollection: async (id) => {
     try {
       set({ isLoading: true, currentCollectionId: id })
-      const response = await fetch(`/api/collections/${id}/images?page=${page}`)
+      const response = await fetch(`/api/collections/${id}/images/all`)
       if (!response.ok) throw new Error('Error al cargar colección')
       const data = await response.json()
+      const items = data.items || []
       set({
-        currentItems: data.items || [],
-        page: data.page || 1,
-        totalPages: data.totalPages || 1,
-        hasMore: data.page < data.totalPages
+        currentItems: items,
+        displayedItems: items.slice(0, ITEMS_PER_BATCH),
+        isProcessingThumbnails: true
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
     } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isProcessingThumbnails: false })
     }
   },
 
-  handleSelectTag: async (id, page = 1) => {
+  handleSelectTag: async (id) => {
     try {
       set({ isLoading: true, currentTagId: id })
-      const response = await fetch(`/api/tags/${id}/images?page=${page}`)
+      const response = await fetch(`/api/tags/${id}/images/all`)
       if (!response.ok) throw new Error('Error al cargar etiqueta')
       const data = await response.json()
+      const items = data.items || []
       set({
-        currentItems: data.items || [],
-        page: data.page || 1,
-        totalPages: data.totalPages || 1,
-        hasMore: data.page < data.totalPages
+        currentItems: items,
+        displayedItems: items.slice(0, ITEMS_PER_BATCH),
+        isProcessingThumbnails: true
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
     } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isProcessingThumbnails: false })
     }
   },
 
-  loadNextPage: async () => {
-    const state = get()
-    if (state.isLoading || !state.hasMore) return
-
-    const nextPage = state.page + 1
-    if (state.currentFolderId) {
-      await get().handleSelectFolder(state.currentFolderId, nextPage)
-    } else if (state.currentCollectionId) {
-      await get().handleSelectCollection(state.currentCollectionId, nextPage)
-    } else if (state.currentTagId) {
-      await get().handleSelectTag(state.currentTagId, nextPage)
-    } else {
-      await get().loadAllImages(nextPage)
-    }
-  },
-
-  loadPreviousPage: async () => {
-    const state = get()
-    if (state.isLoading || state.page <= 1) return
-
-    const prevPage = state.page - 1
-    if (state.currentFolderId) {
-      await get().handleSelectFolder(state.currentFolderId, prevPage)
-    } else if (state.currentCollectionId) {
-      await get().handleSelectCollection(state.currentCollectionId, prevPage)
-    } else if (state.currentTagId) {
-      await get().handleSelectTag(state.currentTagId, prevPage)
-    } else {
-      await get().loadAllImages(prevPage)
-    }
+  loadMoreItems: () => {
+    set((state) => {
+      const currentLength = state.displayedItems.length
+      const nextBatch = state.currentItems.slice(
+        currentLength,
+        currentLength + ITEMS_PER_BATCH
+      )
+      return {
+        displayedItems: [...state.displayedItems, ...nextBatch]
+      }
+    })
   }
 }))
