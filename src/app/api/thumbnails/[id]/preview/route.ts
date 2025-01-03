@@ -12,7 +12,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await Promise.resolve(context.params)
+    const id = context.params.id
     const { searchParams } = new URL(request.url)
     const quality = searchParams.get('quality') || 'mid'
     const qualityConfig = THUMBNAIL_QUALITY_CONFIG[quality]

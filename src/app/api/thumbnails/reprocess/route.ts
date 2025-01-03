@@ -6,7 +6,7 @@ import { existsSync } from 'fs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const encoder = new TextEncoder()
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
@@ -86,7 +86,13 @@ export async function POST(request: NextRequest) {
           total,
           progress,
           currentFile: image.path,
-          status: `Procesando imagen ${processed} de ${total}...`
+          status: `Procesando imagen ${processed} de ${total}...`,
+          lastProcessed: {
+            id: image.id,
+            path: image.path,
+            thumbnailPath: `/api/images/${image.id}/thumbnail`,
+            processedAt: new Date().toISOString()
+          }
         })
 
       } catch (error) {
@@ -118,23 +124,7 @@ export async function POST(request: NextRequest) {
     await sendEvent('complete', {
       processed,
       total,
-      errors,
-      recentlyProcessed: await prisma.image.findMany({
-        where: {
-          thumbnail: { not: null },
-          thumbnailError: null
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: 12,
-        select: {
-          id: true,
-          path: true,
-          thumbnail: true,
-          thumbnailWidth: true,
-          thumbnailHeight: true,
-          updatedAt: true
-        }
-      })
+      errors
     })
 
   } catch (error) {
