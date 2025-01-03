@@ -8,9 +8,8 @@ import { useSettingsStore } from "@/store/settings";
 import { cn } from "@/lib/utils";
 import { useInView } from "react-intersection-observer";
 import type { FileItem } from "@/types/file-item";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 interface FileGridProps {
-	viewMode?: "grid" | "list";
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
 	isResizing?: boolean;
@@ -20,14 +19,13 @@ interface FileGridProps {
 
 // Configuración base del grid
 const GRID_CONFIG = {
-	minColumns: 4,
-	gap: 16, // 1rem = 16px
+	minColumns: 5,
+	gap: 0, // 1rem = 16px
 	itemBaseWidth: 200,
-	itemAspectRatio: 1.2, // altura = ancho * 1.2 para metadata
+	itemAspectRatio: 1, // altura = ancho * 1.2 para metadata
 } as const;
 
 export function FileGrid({
-	viewMode = "grid",
 	onItemClick,
 	onItemDoubleClick,
 	isResizing,
@@ -76,7 +74,6 @@ export function FileGrid({
 		getScrollElement: () => parentRef.current,
 		estimateSize: () => itemHeight + GRID_CONFIG.gap,
 		overscan: 3,
-		scrollingDelay: isResizing ? 1000 : 150,
 	});
 
 	const getItemsForRow = useCallback(
@@ -90,11 +87,7 @@ export function FileGrid({
 	return (
 		<div
 			ref={parentRef}
-			className="h-full w-full overflow-auto"
-			style={{
-				contain: "layout style paint",
-			}}
-		>
+			className="h-full w-full overflow-auto p-4" >
 			<div
 				style={{
 					height: `${virtualizer.getTotalSize()}px`,
@@ -124,16 +117,12 @@ export function FileGrid({
 								item={item}
 								onClick={onItemClick}
 								onDoubleClick={onItemDoubleClick}
-								style={{
-									width: "100%",
-									height: "100%",
-								}}
 							/>
 						))}
 					</div>
 				))}
 			</div>
-			<div ref={loadMoreRef} className="h-4 w-full" />
+			<div ref={loadMoreRef} className="h-10 w-full" />
 		</div>
 	);
 }
