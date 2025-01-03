@@ -21,19 +21,23 @@ export async function POST(
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const writeEvent = async (event: string, data: Record<string, any>) => {
+  const sendEvent = async (type: string, data: Record<string, any>) => {
     try {
-      const formattedData = JSON.stringify({ type: event, data })
+      const formattedData = JSON.stringify({ type, data })
       await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
     } catch (writeError) {
-      // Solo logueamos el mensaje del error para evitar problemas con console.error
-      console.log('Error escribiendo evento:', writeError?.message || 'Error desconocido')
+      console.error('Error escribiendo evento:', writeError)
+      throw writeError
     }
   }
 
   try {
+    // Esperar a que los parámetros estén disponibles
     const params = await Promise.resolve(context.params)
+    console.log('Parámetros de ruta:', params)
+
     const { id } = params
+    console.log('ID de carpeta:', id)
 
     if (!id) {
       const error: ReindexError = new Error('ID de carpeta requerido')
@@ -41,9 +45,12 @@ export async function POST(
       throw error
     }
 
+    // Obtener configuración del request
     const { generateThumbnails = true, thumbnailQuality = 'mid' } = await request.json().catch(() => ({}))
+    console.log('Configuración:', { generateThumbnails, thumbnailQuality })
 
     // Obtener la carpeta
+    console.log('Buscando carpeta:', id)
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
@@ -57,17 +64,24 @@ export async function POST(
     })
 
     if (!folder) {
+      console.log('Carpeta no encontrada:', id)
       const error: ReindexError = new Error('Carpeta no encontrada')
       error.code = 'FOLDER_NOT_FOUND'
       throw error
     }
+
+    console.log('Carpeta encontrada:', {
+      id: folder.id,
+      path: folder.path,
+      imageCount: folder.images.length
+    })
 
     const total = folder.images.length
     let current = 0
     let errors = 0
 
     // Enviar evento inicial
-    await writeEvent('progress', {
+    await sendEvent('progress', {
       current: 0,
       total,
       progress: 0,
@@ -80,10 +94,17 @@ export async function POST(
         current++
         const progress = Math.round((current / total) * 100)
 
+        console.log('Procesando imagen:', {
+          id: image.id,
+          path: image.path,
+          progress: `${current}/${total} (${progress}%)`
+        })
+
         // Verificar que el archivo existe
         if (!existsSync(image.path)) {
           errors++
-          await writeEvent('error', {
+          console.log('Archivo no encontrado:', image.path)
+          await sendEvent('error', {
             type: 'FILE_NOT_FOUND',
             message: 'Archivo original no encontrado',
             file: image.path
@@ -91,7 +112,7 @@ export async function POST(
           continue
         }
 
-        await writeEvent('progress', {
+        await sendEvent('progress', {
           current,
           total,
           progress,
@@ -108,6 +129,7 @@ export async function POST(
 
             while (attempts < maxAttempts) {
               try {
+                console.log('Generando thumbnail:', { path: image.path, attempt: attempts + 1 })
                 const result = await generateThumbnail(image.path, thumbnailQuality as ThumbnailQuality)
 
                 // Actualizar en base de datos
@@ -125,6 +147,7 @@ export async function POST(
                   }
                 })
 
+                console.log('Thumbnail generado correctamente:', { id: image.id, size: result.buffer.length })
                 break // Si llegamos aquí, el thumbnail se generó correctamente
               } catch (thumbnailError) {
                 lastError = thumbnailError instanceof Error ? thumbnailError : new Error('Error desconocido')
@@ -140,7 +163,7 @@ export async function POST(
             }
           } catch (thumbnailError) {
             errors++
-            console.log('Error generando thumbnail:', thumbnailError?.message || 'Error desconocido')
+            console.error('Error generando thumbnail:', thumbnailError)
 
             // Actualizar error en base de datos
             await prisma.image.update({
@@ -155,7 +178,7 @@ export async function POST(
               }
             })
 
-            await writeEvent('error', {
+            await sendEvent('error', {
               type: 'THUMBNAIL_ERROR',
               message: thumbnailError instanceof Error ? thumbnailError.message : 'Error desconocido',
               file: image.path
@@ -164,9 +187,9 @@ export async function POST(
         }
       } catch (processError) {
         errors++
-        console.log('Error procesando imagen:', processError?.message || 'Error desconocido')
+        console.error('Error procesando imagen:', processError)
 
-        await writeEvent('error', {
+        await sendEvent('error', {
           type: 'PROCESS_ERROR',
           message: processError instanceof Error ? processError.message : 'Error desconocido',
           file: image.path
@@ -175,6 +198,7 @@ export async function POST(
     }
 
     // Actualizar estadísticas de la carpeta
+    console.log('Actualizando estadísticas de carpeta')
     await prisma.folder.update({
       where: { id },
       data: {
@@ -183,7 +207,8 @@ export async function POST(
     })
 
     // Enviar evento de completado
-    await writeEvent('complete', {
+    console.log('Proceso completado:', { processed: current - errors, total, errors })
+    await sendEvent('complete', {
       processed: current - errors,
       total,
       errors,
@@ -195,8 +220,8 @@ export async function POST(
       }
     })
 
-    await writer.close()
-    return new NextResponse(stream.readable, {
+    // Preparar respuesta
+    const response = new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -204,29 +229,38 @@ export async function POST(
       }
     })
 
+    // Cerrar el writer después de preparar la respuesta
+    writer.close().catch(console.error)
+
+    return response
+
   } catch (error) {
-    // Evitamos usar console.error directamente con el objeto error
-    console.log('Error en reindexación:', error instanceof Error ? error.message : 'Error desconocido')
+    console.error('Error en reindexación:', error)
 
     try {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       const errorCode = (error as ReindexError).code || 'UNKNOWN_ERROR'
 
-      await writeEvent('error', {
+      await sendEvent('error', {
         type: errorCode,
         message: errorMessage
       })
     } catch (streamError) {
-      console.log('Error escribiendo en stream:', streamError instanceof Error ? streamError.message : 'Error desconocido')
+      console.error('Error escribiendo en stream:', streamError)
     }
 
-    await writer.close()
-    return new NextResponse(stream.readable, {
+    // Preparar respuesta de error
+    const response = new NextResponse(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive'
       }
     })
+
+    // Cerrar el writer después de preparar la respuesta
+    writer.close().catch(console.error)
+
+    return response
   }
 }

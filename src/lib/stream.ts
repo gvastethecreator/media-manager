@@ -1,13 +1,13 @@
-export function writeEvent(type: string, data: any): string {
-  return `data: ${JSON.stringify({ type, data })}\n\n`
-}
-
-export async function writeStreamEvent(writer: WritableStreamDefaultWriter<any>, type: string, data: any) {
+export async function writeStreamEvent(
+  writer: WritableStreamDefaultWriter<Uint8Array>,
+  event: string,
+  data: Record<string, any>
+): Promise<void> {
   try {
-    const encoder = new TextEncoder()
-    const event = writeEvent(type, data)
-    await writer.write(encoder.encode(event))
+    const encoder = new TextEncoder();
+    const formattedData = JSON.stringify({ type: event, data });
+    await writer.write(encoder.encode(`data: ${formattedData}\n\n`));
   } catch (error) {
-    console.error('Error escribiendo en el stream:', error)
+    console.log('Error escribiendo evento:', error instanceof Error ? error.message : 'Error desconocido');
   }
 }
