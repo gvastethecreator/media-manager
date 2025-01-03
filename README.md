@@ -17,34 +17,6 @@ Una aplicación moderna de gestión de imágenes construida con Next.js 15, Reac
 
 ## Estructura del Proyecto
 
-```
-src/
-├── app/                    # Next.js app router y API routes
-├── components/
-│   ├── core/              # Componentes base
-│   │   ├── data-display/  # Cards, empty states
-│   │   ├── feedback/      # Loading states
-│   │   ├── layout/        # Layouts
-│   │   ├── navigation/    # Navigation components
-│   │   ├── providers/     # Context providers
-│   │   └── theme/         # Theme utilities
-│   ├── features/          # Componentes de características
-│   │   ├── collections/   # Gestión de colecciones
-│   │   ├── file-management/
-│   │   │   ├── file-browser/
-│   │   │   ├── file-details/
-│   │   │   └── folders/
-│   │   └── image-viewer/  # Visualizador de imágenes
-│   └── ui/               # Componentes UI (shadcn/ui)
-├── config/               # Configuraciones
-├── context/             # Contextos de React
-├── hooks/               # Hooks personalizados
-├── lib/                 # Utilidades y configuraciones
-├── services/            # Servicios (fs, watcher, etc)
-├── store/              # Estado global (Zustand)
-└── types/              # TypeScript types
-```
-
 ## Estado del Desarrollo
 
 ### Características Completadas ✅
