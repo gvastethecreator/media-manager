@@ -13,7 +13,7 @@ const globalRenderedItems = new Set<string>();
 const GRID_CONFIG = {
 	minColumns: 3,
 	maxColumns: 6,
-	gap: 1,
+	gap: 4,
 	itemBaseWidth: 200,
 	overscanCount: 10,
 	scrollingDelay: 100,

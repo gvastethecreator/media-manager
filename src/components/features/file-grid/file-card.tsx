@@ -43,19 +43,27 @@ interface FileCardProps {
 // Configuración de animaciones simplificada
 const springConfig = {
 	type: "spring",
-	stiffness: 300,
-	damping: 30,
-	mass: 0.5,
+	stiffness: 200,
+	damping: 20,
+	mass: 0.3,
 };
 
 // Solo mantenemos las variantes esenciales y las optimizamos
 const variants = {
 	hover: {
-		scale: 0.95,
+		scale: 1,
 		transition: springConfig,
 	},
+	selected: {
+		scale: 0.96,
+		transition: {
+			...springConfig,
+			stiffness: 400,
+			damping: 10,
+		},
+	},
 	tap: {
-		scale: 0.93,
+		scale: 0.96,
 		transition: {
 			...springConfig,
 			stiffness: 400,
@@ -568,7 +576,7 @@ export function FileCard({
 			whileTap="tap"
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200",
+				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 ring-1 ring-white/10 ring-inset rounded-sm",
 				isSelected || isHovered
 					? "ring-1 ring-primary ring-inset shadow-lg"
 					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
@@ -596,27 +604,12 @@ export function FileCard({
 						</div>
 					) : thumbnail ? (
 						<div className="relative w-full h-full">
-							{/* Fondo blur */}
-							<div
-								className={cn(
-									"absolute inset-0 overflow-hidden brightness-10 transition-[filter] duration-200",
-									isSelected || isHovered
-										? "blur-[20px] brightness-[0.3]"
-										: "blur-[30px] brightness-[0.7]"
-								)}
-								style={{
-									backgroundImage: `url(${thumbnail})`,
-									backgroundSize: "cover",
-									backgroundPosition: "center",
-									transform: "scale(1.1) rotate(45deg)",
-								}}
-							/>
 
 							{/* Imagen principal */}
 							<div
 								className={cn(
 									"absolute inset-0 flex justify-center items-center transition-transform duration-200",
-									isSelected || isHovered ? "scale-90 -translate-y-[10px]" : ""
+									isSelected || isHovered ? "scale-75 -translate-y-[20px]" : ""
 								)}
 							>
 								<ImageCard
@@ -624,7 +617,7 @@ export function FileCard({
 									alt={item.name}
 									width={item.metadata?.dimensions?.width || 300}
 									height={item.metadata?.dimensions?.height || 300}
-									className="max-w-[90%] max-h-[75%] z-10 shadow-lg rounded-sm"
+									className="max-w-[95%] max-h-[95%] rounded-sm border-1 bg-black/50 border-white/10"
 									priority={false}
 								/>
 							</div>
