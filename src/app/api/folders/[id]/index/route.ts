@@ -7,9 +7,6 @@ import { generateThumbnail } from '@/lib/thumbnail'
 import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
 
-export const dynamic = 'force-dynamic'
-export const maxDuration = 300
-
 const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
 
 export async function POST(
@@ -17,7 +14,7 @@ export async function POST(
   context: { params: { id: string } }
 ) {
   const folderId = context.params.id;
-  console.log('Iniciando reindexación para carpeta:', folderId);
+  console.log('Iniciando indexación para carpeta:', folderId);
 
   try {
     // Verificar que la carpeta existe
@@ -41,38 +38,17 @@ export async function POST(
       });
     }
 
-    // Iniciar proceso de reindexación
-    console.log('Iniciando proceso para carpeta:', folder.path);
-
     // Eliminar imágenes existentes
     await prisma.image.deleteMany({
       where: { folderId }
     });
 
     // Procesar archivos
-    const processDirectory = async (dirPath: string) => {
-      console.log('Procesando directorio:', dirPath);
+    const processDirectory = async (dirPath: string): Promise<{ processed: number; total: number }> => {
       const files = await readdir(dirPath);
       let processed = 0;
       let total = 0;
 
-      // Contar archivos válidos
-      for (const file of files) {
-        const filePath = join(dirPath, file);
-        const stats = await stat(filePath);
-
-        if (stats.isDirectory()) {
-          const subDirStats = await processDirectory(filePath);
-          total += subDirStats.total;
-        } else {
-          const ext = extname(file).toLowerCase();
-          if (SUPPORTED_FORMATS.includes(ext)) {
-            total++;
-          }
-        }
-      }
-
-      // Procesar archivos
       for (const file of files) {
         try {
           const filePath = join(dirPath, file);
@@ -81,6 +57,7 @@ export async function POST(
           if (stats.isDirectory()) {
             const subDirStats = await processDirectory(filePath);
             processed += subDirStats.processed;
+            total += subDirStats.total;
             continue;
           }
 
@@ -89,19 +66,17 @@ export async function POST(
             continue;
           }
 
-          console.log('Procesando archivo:', filePath);
+          total++;
 
           // Obtener metadata y hash
-          const [metadata, hash] = await Promise.all([
-            getImageMetadata(filePath),
-            computeHash(filePath)
-          ]);
+          const metadata = await getImageMetadata(filePath);
+          const hash = await computeHash(filePath);
 
           // Generar thumbnail
           let thumbnailData = null;
           try {
             const result = await generateThumbnail(filePath);
-            if (result?.buffer) {
+            if (result && result.buffer) {
               thumbnailData = {
                 data: result.buffer,
                 size: result.buffer.length,
@@ -120,55 +95,52 @@ export async function POST(
               name: file,
               size: stats.size,
               hash,
-              width: metadata.width || 0,
-              height: metadata.height || 0,
+              width: metadata.width,
+              height: metadata.height,
               metadata: JSON.stringify(metadata),
-              thumbnail: thumbnailData?.data || null,
-              thumbnailSize: thumbnailData?.size || null,
-              thumbnailWidth: thumbnailData?.width || null,
-              thumbnailHeight: thumbnailData?.height || null,
-              folderId,
+              thumbnail: thumbnailData?.data,
+              thumbnailSize: thumbnailData?.size,
+              thumbnailWidth: thumbnailData?.width,
+              thumbnailHeight: thumbnailData?.height,
+              folderId: folder.id,
               createdAt: stats.birthtime,
               updatedAt: stats.mtime
             }
           });
 
           processed++;
-
         } catch (error) {
-          console.error('Error procesando archivo:', error);
+          console.error('Error procesando archivo:', file, error);
         }
       }
 
       return { processed, total };
     };
 
-    // Iniciar procesamiento
-    const { processed, total } = await processDirectory(folder.path);
+    // Procesar la carpeta
+    const stats = await processDirectory(folder.path);
 
     // Actualizar estadísticas de la carpeta
-    const stats = await prisma.image.aggregate({
-      where: { folderId },
-      _sum: { size: true },
-      _count: true
-    });
-
     await prisma.folder.update({
-      where: { id: folderId },
+      where: { id: folder.id },
       data: {
-        totalFiles: stats._count,
-        totalSize: stats._sum.size || 0,
+        totalFiles: stats.processed,
         lastIndexed: new Date()
       }
     });
 
-    return new NextResponse(JSON.stringify({ success: true }), {
+    return new NextResponse(JSON.stringify({
+      success: true,
+      stats: {
+        processed: stats.processed,
+        total: stats.total
+      }
+    }), {
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('Error en reindexación:', error);
-
+    console.error('Error en indexación:', error);
     return new NextResponse(JSON.stringify({
       error: error instanceof Error ? error.message : 'Error desconocido'
     }), {
