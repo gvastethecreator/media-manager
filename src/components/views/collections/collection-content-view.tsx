@@ -1,42 +1,37 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { useFilesStore } from "@/store/files";
+import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { FolderIcon, Loader2 } from "lucide-react";
+import { LibraryBig, Loader2 } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 
 export function CollectionContentView() {
 	const {
 		currentItems: items,
 		selectedItem,
-		selectedIds,
-		selectItem,
+		selectedItems,
+		toggleItemSelection,
 		currentCollectionId,
-		handleSelectCollection,
-		deselectItem,
-		isLoading: storeLoading,
+		setCurrentCollection,
+		isLoading,
 		isProcessingThumbnails,
-	} = useFilesStore();
+	} = useFileManager();
 	const { openViewer } = useImageViewer();
 
 	useEffect(() => {
 		if (currentCollectionId) {
-			handleSelectCollection(currentCollectionId);
+			setCurrentCollection(currentCollectionId);
 		}
-	}, [currentCollectionId, handleSelectCollection]);
+	}, [currentCollectionId, setCurrentCollection]);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			if (selectedIds.includes(item.id)) {
-				deselectItem(item.id);
-			} else {
-				selectItem(item);
-			}
+			toggleItemSelection(item, false);
 		},
-		[selectItem, deselectItem, selectedIds]
+		[toggleItemSelection]
 	);
 
 	const handleItemDoubleClick = useCallback(
@@ -54,7 +49,7 @@ export function CollectionContentView() {
 		[openViewer, items]
 	);
 
-	if (storeLoading) {
+	if (isLoading) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
 				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -65,9 +60,9 @@ export function CollectionContentView() {
 	if (!items || items.length === 0) {
 		return (
 			<EmptyState
-				icon={FolderIcon}
+				icon={LibraryBig}
 				title="Colección vacía"
-				description="Esta colección no contiene imágenes"
+				description="No se encontraron imágenes en esta colección"
 			/>
 		);
 	}
@@ -78,7 +73,7 @@ export function CollectionContentView() {
 				<FileGrid
 					items={items}
 					selectedItem={selectedItem}
-					selectedIds={selectedIds}
+					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
 					isProcessingThumbnails={isProcessingThumbnails}
