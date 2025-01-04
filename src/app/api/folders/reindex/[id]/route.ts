@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendSSEEvent } from '@/lib/stream'
 import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
 import { join, extname } from 'path'
@@ -44,12 +43,6 @@ export async function POST(
 
     // Iniciar proceso de reindexación
     console.log('Iniciando proceso para carpeta:', folder.path);
-    await sendSSEEvent(folderId, 'progress', {
-      status: 'Iniciando reindexación...',
-      current: 0,
-      total: 0,
-      progress: 0
-    });
 
     // Eliminar imágenes existentes
     await prisma.image.deleteMany({
@@ -78,14 +71,6 @@ export async function POST(
           }
         }
       }
-
-      // Enviar total inicial
-      await sendSSEEvent(folderId, 'progress', {
-        status: `Encontrados ${total} archivos para procesar...`,
-        current: 0,
-        total,
-        progress: 0
-      });
 
       // Procesar archivos
       for (const file of files) {
@@ -149,23 +134,9 @@ export async function POST(
           });
 
           processed++;
-          const progress = Math.round((processed / total) * 100);
-
-          await sendSSEEvent(folderId, 'progress', {
-            status: `Procesando archivos (${processed}/${total})...`,
-            current: processed,
-            total,
-            progress,
-            currentFile: filePath
-          });
 
         } catch (error) {
           console.error('Error procesando archivo:', error);
-          await sendSSEEvent(folderId, 'error', {
-            type: 'PROCESS_ERROR',
-            message: error instanceof Error ? error.message : 'Error desconocido',
-            file
-          });
         }
       }
 
@@ -191,29 +162,12 @@ export async function POST(
       }
     });
 
-    // Enviar evento de completado
-    await sendSSEEvent(folderId, 'complete', {
-      processed,
-      total,
-      errors: total - processed,
-      folder: {
-        id: folder.id,
-        path: folder.path,
-        totalFiles: stats._count,
-        totalSize: stats._sum.size || 0
-      }
-    });
-
     return new NextResponse(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error('Error en reindexación:', error);
-    await sendSSEEvent(folderId, 'error', {
-      type: 'FATAL_ERROR',
-      message: error instanceof Error ? error.message : 'Error desconocido'
-    });
 
     return new NextResponse(JSON.stringify({
       error: error instanceof Error ? error.message : 'Error desconocido'
@@ -223,4 +177,3 @@ export async function POST(
     });
   }
 }
-
