@@ -803,3 +803,73 @@
 2. Considerar implementar cache para thumbnails
 3. Optimizar el manejo de memoria en operaciones con archivos grandes
 4. Implementar límites de tamaño para prevenir problemas de memoria
+
+## Mejoras en FileDetails (En Progreso)
+
+### Plan de Implementación
+
+#### Fase 1: Toolbar y Acciones
+
+- [ ] Rediseño de la toolbar con nuevo estilo visual
+- [ ] Integración de acciones faltantes:
+  - [ ] Favoritos (reutilizar lógica de FileCard)
+  - [ ] Colecciones (integrar con el sistema existente)
+  - [ ] Tags (mantener consistencia con el grid)
+- [ ] Mejora de feedback visual y animaciones
+- [ ] Tooltips más descriptivos e informativos
+
+#### Fase 2: Vista Previa de Imagen
+
+- [ ] Nuevo diseño del contenedor de imagen
+- [ ] Efectos de hover consistentes con FileCard
+- [ ] Transiciones y animaciones mejoradas
+- [ ] Indicadores de estado (favorito, marcado)
+
+#### Fase 3: Metadata y Estructura
+
+- [ ] Reorganización de información por secciones
+- [ ] Mejora en visualización de tags y colecciones
+- [ ] Nuevo diseño para metadata
+- [ ] Animaciones entre cambios de estado
+
+#### Fase 4: Optimizaciones
+
+- [ ] Mejoras de rendimiento en animaciones
+- [ ] Implementación de lazy loading
+- [ ] Optimización de re-renderizaciones
+- [ ] Consistencia de estado
+
+### Consideraciones Técnicas
+
+- Mantener compatibilidad con el sistema actual de selección
+- Reutilizar lógica existente de FileCard donde sea posible
+- Asegurar que las animaciones no afecten el rendimiento
+- Mantener la consistencia visual con el resto de la aplicación
+
+### Flujos a Mantener
+
+1. Selección de archivos
+2. Gestión de favoritos
+3. Sistema de tags y colecciones
+4. Previsualización de imágenes
+5. Acciones contextuales
+
+### Stack y Dependencias
+
+- Framer Motion para animaciones
+- ShadcnUI para componentes base
+- TanStack Virtual para virtualización
+- Date-fns para formateo de fechas
+
+### Progreso Actual
+
+- Análisis inicial completado
+- Plan de implementación definido
+- Referencia de diseño identificada (FileCard)
+
+### Siguientes Pasos
+
+1. Comenzar con la fase 1: Toolbar y Acciones
+2. Validar cada cambio para evitar regresiones
+3. Mantener la documentación actualizada
+4. Implementar cambios incrementalmente

@@ -38,6 +38,7 @@ import {
 	MessageSquare,
 	MessageSquareOff,
 	HeartOff,
+	StarIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,15 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
 import { useToast } from "@/components/ui/use-toast";
+import { useFileManager } from "@/store/file-manager";
+import { useCollectionTagContext } from "@/context/settings-context";
+import { cn } from "@/lib/utils";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FileDetailsProps {
 	selectedItems: FileItem[];
@@ -73,7 +83,7 @@ const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
 				{icon}
 				<span>{label}</span>
 			</div>
-			<Badge variant="secondary" className="font-mono text-xs">
+			<Badge variant="secondary" className="font-mono text-xs rounded-none">
 				{value}
 			</Badge>
 		</div>
@@ -96,19 +106,296 @@ const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
 };
 
 export function FileDetails({ selectedItems }: FileDetailsProps) {
+	// 1. Todos los estados primero
 	const [imageError, setImageError] = React.useState(false);
+
+	// 2. Todos los hooks de contexto/store
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
+	const { toggleItemSelection } = useFileManager();
+	const { settings } = useCollectionTagContext();
 
+	// 3. Todos los efectos
 	React.useEffect(() => {
 		setImageError(false);
 	}, [selectedItems]);
 
-	// Si no hay items seleccionados
+	// 4. Todos los callbacks
+	const handleContextMenuAction = React.useCallback(
+		async (action: string, file: FileItem, data?: any) => {
+			try {
+				switch (action) {
+					case "favorite-toggle":
+						try {
+							const newFavoriteState = !file.isFavorite;
+							const updatedFile = { ...file, isFavorite: newFavoriteState };
+							toggleItemSelection(updatedFile, false);
+
+							toast({
+								title: newFavoriteState
+									? "Agregado a favoritos"
+									: "Eliminado de favoritos",
+								description: `${file.name} ha sido ${
+									newFavoriteState ? "agregado a" : "eliminado de"
+								} favoritos`,
+							});
+
+							const response = await fetch(`/api/images/${file.id}/favorite`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ isFavorite: newFavoriteState }),
+							});
+
+							if (!response.ok) {
+								toggleItemSelection(
+									{ ...file, isFavorite: !newFavoriteState },
+									false
+								);
+								throw new Error("Error al actualizar favorito");
+							}
+						} catch (error) {
+							console.error("Error toggling favorite:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo actualizar el estado de favorito",
+								variant: "destructive",
+							});
+						}
+						break;
+
+					case "collection-add":
+						try {
+							if (!data?.collectionId)
+								throw new Error("ID de colección no proporcionado");
+
+							toast({
+								title: "Agregando a colección",
+								description: "Procesando...",
+							});
+
+							const response = await fetch(
+								`/api/collections/${data.collectionId}/files`,
+								{
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify({ fileId: file.id }),
+								}
+							);
+
+							const responseData = await response.json().catch(() => null);
+
+							if (!response.ok) {
+								throw new Error(
+									responseData?.error || "Error al agregar a la colección"
+								);
+							}
+
+							const updatedFile = {
+								...file,
+								collections: [
+									...(file.collections || []),
+									{
+										id: responseData.collection.id,
+										name: responseData.collection.name,
+										emoji: responseData.collection.emoji,
+										color: responseData.collection.color || "#000000",
+									},
+								],
+							};
+							toggleItemSelection(updatedFile, false);
+
+							toast({
+								title: "Agregado a la colección",
+								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
+							});
+						} catch (error) {
+							console.error("Error adding to collection:", error);
+							toast({
+								title: "Error",
+								description:
+									error instanceof Error
+										? error.message
+										: "No se pudo agregar a la colección",
+								variant: "destructive",
+							});
+						}
+						break;
+
+					case "tag-add":
+						try {
+							if (!data?.tagId)
+								throw new Error("ID de etiqueta no proporcionado");
+
+							toast({
+								title: "Agregando etiqueta",
+								description: "Procesando...",
+							});
+
+							const response = await fetch(`/api/tags/${data.tagId}/files`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ fileId: file.id }),
+							});
+
+							const responseData = await response.json().catch(() => null);
+
+							if (!response.ok) {
+								throw new Error(
+									responseData?.error || "Error al agregar la etiqueta"
+								);
+							}
+
+							const updatedFile = {
+								...file,
+								tags: [
+									...(file.tags || []),
+									{
+										id: responseData.tag.id,
+										name: responseData.tag.name,
+										color: responseData.tag.color || "#000000",
+									},
+								],
+							};
+							toggleItemSelection(updatedFile, false);
+
+							toast({
+								title: "Etiqueta agregada",
+								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
+							});
+						} catch (error) {
+							console.error("Error adding tag:", error);
+							toast({
+								title: "Error",
+								description:
+									error instanceof Error
+										? error.message
+										: "No se pudo agregar la etiqueta",
+								variant: "destructive",
+							});
+						}
+						break;
+
+					default:
+						console.warn("Acción no implementada:", action);
+				}
+			} catch (error) {
+				console.error("Error ejecutando acción:", error);
+				toast({
+					title: "Error",
+					description: "No se pudo completar la acción",
+					variant: "destructive",
+				});
+			}
+		},
+		[toggleItemSelection, toast]
+	);
+
+	const handleOpenViewer = React.useCallback(
+		(item: FileItem) => {
+			if (
+				item.type === "image" ||
+				item.metadata?.mimeType?.startsWith("image/")
+			) {
+				openViewer([item], 0);
+			}
+		},
+		[openViewer]
+	);
+
+	const handleCopy = React.useCallback(
+		(path: string) => async () => {
+			try {
+				await navigator.clipboard.writeText(path);
+				toast({
+					title: "Ruta copiada",
+					description: "La ruta del archivo ha sido copiada al portapapeles",
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo copiar la ruta",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
+
+	const handleDownload = React.useCallback(
+		(path: string) => () => {
+			try {
+				window.electron?.downloadFile(path);
+				toast({
+					title: "Descarga iniciada",
+					description: "El archivo se está descargando",
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo descargar el archivo",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
+
+	const handleOpenFolder = React.useCallback(
+		(path: string) => () => {
+			try {
+				window.electron?.openPath(path);
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo abrir la carpeta",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
+
+	const renderImage = React.useCallback(
+		(item: FileItem) => {
+			if (imageError || !item.thumbnail) {
+				return (
+					<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
+						<ImageOff className="h-8 w-8 mb-2" />
+						<span className="text-xs">
+							{imageError
+								? "Error al cargar la imagen"
+								: "No hay vista previa disponible"}
+						</span>
+					</div>
+				);
+			}
+
+			return (
+				<ImageCard
+					src={item.thumbnail}
+					alt={item.name}
+					width={item.metadata?.dimensions?.width || 300}
+					height={item.metadata?.dimensions?.height || 300}
+					className="w-full h-full object-cover transition-transform hover:scale-105"
+					priority={true}
+					onClick={() => handleOpenViewer(item)}
+				/>
+			);
+		},
+		[imageError, handleOpenViewer]
+	);
+
+	// Early returns después de todos los hooks
 	if (!selectedItems.length) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
-				<Card className="w-full">
+				<Card className="w-full border-none rounded-none">
 					<CardContent className="pt-6">
 						<div className="flex flex-col items-center gap-2 text-muted-foreground">
 							<Info className="h-8 w-8" />
@@ -122,14 +409,13 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 		);
 	}
 
-	// Si hay múltiples items seleccionados
 	if (selectedItems.length > 1) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
-				<Card className="w-full">
+				<Card className="w-full border-none rounded-none">
 					<CardContent className="pt-6">
 						<div className="flex flex-col items-center gap-2">
-							<div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
+							<div className="flex items-center justify-center w-12 h-12 rounded-none bg-primary/10">
 								<ImageIcon className="h-6 w-6 text-primary" />
 							</div>
 							<p className="text-sm font-medium">
@@ -151,88 +437,7 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 		);
 	}
 
-	// Si hay un solo item seleccionado, mostrar los detalles normales
 	const selectedItem = selectedItems[0];
-
-	const handleOpenViewer = () => {
-		if (
-			selectedItem.type === "image" ||
-			selectedItem.metadata?.mimeType?.startsWith("image/")
-		) {
-			openViewer([selectedItem], 0);
-		}
-	};
-
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(selectedItem.path);
-			toast({
-				title: "Ruta copiada",
-				description: "La ruta del archivo ha sido copiada al portapapeles",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo copiar la ruta",
-				variant: "destructive",
-			});
-		}
-	};
-
-	const handleDownload = () => {
-		try {
-			window.electron?.downloadFile(selectedItem.path);
-			toast({
-				title: "Descarga iniciada",
-				description: "El archivo se está descargando",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo descargar el archivo",
-				variant: "destructive",
-			});
-		}
-	};
-
-	const handleOpenFolder = () => {
-		try {
-			window.electron?.openPath(selectedItem.path);
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo abrir la carpeta",
-				variant: "destructive",
-			});
-		}
-	};
-
-	const renderImage = () => {
-		if (imageError || !selectedItem.thumbnail) {
-			return (
-				<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
-					<ImageOff className="h-8 w-8 mb-2" />
-					<span className="text-xs">
-						{imageError
-							? "Error al cargar la imagen"
-							: "No hay vista previa disponible"}
-					</span>
-				</div>
-			);
-		}
-
-		return (
-			<ImageCard
-				src={selectedItem.thumbnail}
-				alt={selectedItem.name}
-				width={selectedItem.metadata?.dimensions?.width || 300}
-				height={selectedItem.metadata?.dimensions?.height || 300}
-				className="w-full h-full object-cover transition-transform hover:scale-105"
-				priority={true}
-				onClick={handleOpenViewer}
-			/>
-		);
-	};
 
 	const metadata = selectedItem.metadata || {};
 	let parsedMetadata = metadata;
@@ -261,6 +466,199 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 		}
 	};
 
+	// Actualizamos la toolbar con el nuevo diseño
+	const renderToolbar = () => (
+		<Card className="border-none rounded-none">
+			<CardContent className="p-2 flex items-center justify-between gap-1">
+				<div className="flex items-center gap-1">
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => handleOpenFolder(selectedItem.path)}
+									className="h-8 w-8"
+								>
+									<Folder className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Abrir ubicación</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => handleDownload(selectedItem.path)}
+									className="h-8 w-8"
+								>
+									<Download className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Descargar</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => handleCopy(selectedItem.path)}
+									className="h-8 w-8"
+								>
+									<Copy className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Copiar ruta</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				</div>
+
+				<div className="flex items-center gap-1">
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() =>
+										handleContextMenuAction("favorite-toggle", selectedItem)
+									}
+									className={cn(
+										"h-8 w-8",
+										selectedItem.isFavorite && "text-yellow-500"
+									)}
+								>
+									{selectedItem.isFavorite ? (
+										<HeartOff className="h-4 w-4" />
+									) : (
+										<Heart className="h-4 w-4" />
+									)}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>
+									{selectedItem.isFavorite
+										? "Quitar de favoritos"
+										: "Agregar a favoritos"}
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8">
+								<BookmarkPlus className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-48">
+							{settings.collections.length > 0 ? (
+								settings.collections.map((collection) => (
+									<DropdownMenuItem
+										key={collection.id}
+										onClick={() =>
+											handleContextMenuAction("collection-add", selectedItem, {
+												collectionId: collection.id,
+											})
+										}
+									>
+										<div className="flex items-center gap-2 w-full">
+											<span className="mr-2">{collection.emoji}</span>
+											<span className="flex-1">{collection.name}</span>
+											<div
+												className="w-3 h-3 rounded"
+												style={{ backgroundColor: collection.color }}
+											/>
+										</div>
+									</DropdownMenuItem>
+								))
+							) : (
+								<DropdownMenuItem disabled>
+									No hay colecciones disponibles
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8">
+								<TagIcon className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-48">
+							{settings.tags.length > 0 ? (
+								settings.tags.map((tag) => (
+									<DropdownMenuItem
+										key={tag.id}
+										onClick={() =>
+											handleContextMenuAction("tag-add", selectedItem, {
+												tagId: tag.id,
+											})
+										}
+									>
+										<div className="flex items-center gap-2 w-full">
+											<div
+												className="w-3 h-3 rounded"
+												style={{ backgroundColor: tag.color }}
+											/>
+											<span className="flex-1">{tag.name}</span>
+											{tag.shortcut && (
+												<Badge
+													variant="outline"
+													className="text-[10px] h-4 px-1"
+												>
+													{tag.shortcut}
+												</Badge>
+											)}
+										</div>
+									</DropdownMenuItem>
+								))
+							) : (
+								<DropdownMenuItem disabled>
+									No hay etiquetas disponibles
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() =>
+										handleContextMenuAction("delete", selectedItem)
+									}
+									className="h-8 w-8 text-destructive"
+								>
+									<Trash2 className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Eliminar</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				</div>
+			</CardContent>
+		</Card>
+	);
+
 	return (
 		<ScrollArea className="h-full">
 			<AnimatePresence mode="wait">
@@ -270,155 +668,51 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
 					transition={{ duration: 0.2 }}
-					className="p-0"
+					className="space-y-4"
 				>
 					{/* Vista previa de imagen */}
 					{(selectedItem.type === "image" ||
 						selectedItem.metadata?.mimeType?.startsWith("image/")) && (
-						<Card>
-							<CardContent className="p-0 relative group border-none r">
-								<div
-									className="aspect-square w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-									onClick={handleOpenViewer}
-								>
-									{renderImage()}
+						<Card className="border-none rounded-none overflow-hidden">
+							<CardContent className="p-0 relative">
+								<div className="relative aspect-[16/10] w-full overflow-hidden">
+									{/* Fondo blur */}
+									<div
+										className="absolute inset-0 blur-2xl brightness-50 scale-110"
+										style={{
+											backgroundImage: `url(${selectedItem.thumbnail})`,
+											backgroundSize: "cover",
+											backgroundPosition: "center",
+										}}
+									/>
+
+									{/* Imagen principal */}
+									<div className="absolute inset-0 flex items-center justify-center p-4">
+										<div className="relative max-h-full">
+											{renderImage(selectedItem)}
+											{selectedItem.isFavorite && (
+												<div className="absolute top-2 right-2 z-10">
+													<StarIcon className="h-5 w-5 text-yellow-400 drop-shadow-lg" />
+												</div>
+											)}
+										</div>
+									</div>
 								</div>
-								<Button
-									variant="secondary"
-									size="icon"
-									className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-									onClick={handleOpenViewer}
-								>
-									<Maximize2 className="h-4 w-4" />
-								</Button>
 							</CardContent>
 						</Card>
 					)}
 
 					{/* Toolbar */}
-					<Card>
-						<CardContent className="p-2 flex items-center justify-between">
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={handleOpenFolder}
-										>
-											<Folder className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Abrir carpeta</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={handleDownload}
-										>
-											<Download className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Descargar</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon" onClick={handleCopy}>
-											<Copy className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Copiar ruta</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
-											<BookmarkPlus className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Agregar a colección</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
-											{selectedItem.isFavorite ? (
-												<HeartOff className="h-4 w-4" />
-											) : (
-												<Heart className="h-4 w-4" />
-											)}
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>
-											{selectedItem.isFavorite
-												? "Quitar de favoritos"
-												: "Agregar a favoritos"}
-										</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant="ghost" size="icon">
-											<TagIcon className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Marcar</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="text-destructive"
-										>
-											<Trash2 className="h-4 w-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Eliminar</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						</CardContent>
-					</Card>
+					{renderToolbar()}
 
 					{/* Información básica */}
-					<Card>
-						<CardHeader>
+					<Card className="border-none rounded-none">
+						<CardHeader className="p-4 pb-2">
 							<CardTitle className="text-sm font-medium">
 								Información básica
 							</CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-2">
+						<CardContent className="p-4 pt-2 space-y-2">
 							<InfoItem
 								icon={<FileText className="h-4 w-4" />}
 								label="Nombre"
@@ -446,13 +740,13 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 
 					{/* Información EXIF */}
 					{Object.keys(exif).length > 0 && (
-						<Card>
-							<CardHeader>
+						<Card className="border-none rounded-none">
+							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium">
 									Información EXIF
 								</CardTitle>
 							</CardHeader>
-							<CardContent className="space-y-2">
+							<CardContent className="p-4 pt-2 space-y-2">
 								{exif.Make && (
 									<InfoItem
 										icon={<Box className="h-4 w-4" />}
@@ -515,13 +809,13 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 
 					{/* Información de generación AI */}
 					{Object.keys(generation).length > 0 && (
-						<Card>
-							<CardHeader>
+						<Card className="border-none rounded-none">
+							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium">
 									Información de generación
 								</CardTitle>
 							</CardHeader>
-							<CardContent className="space-y-2">
+							<CardContent className="p-4 pt-2 space-y-2">
 								{generation.prompt && (
 									<InfoItem
 										icon={<MessageSquare className="h-4 w-4" />}
@@ -576,13 +870,13 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 					)}
 
 					{/* Información del sistema de archivos */}
-					<Card>
-						<CardHeader>
+					<Card className="border-none rounded-none">
+						<CardHeader className="p-4 pb-2">
 							<CardTitle className="text-sm font-medium">
 								Información del sistema
 							</CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-2">
+						<CardContent className="p-4 pt-2 space-y-2">
 							<InfoItem
 								icon={<Calendar className="h-4 w-4" />}
 								label="Creado"
@@ -603,12 +897,12 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 
 					{/* Debug */}
 					{process.env.NODE_ENV === "development" && (
-						<Card>
-							<CardHeader>
+						<Card className="border-none rounded-none">
+							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium">Debug</CardTitle>
 							</CardHeader>
-							<CardContent>
-								<pre className="text-xs overflow-x-auto p-2 bg-muted rounded-md">
+							<CardContent className="p-4 pt-2">
+								<pre className="text-xs overflow-x-auto p-2 bg-muted rounded-none">
 									{JSON.stringify(parsedMetadata, null, 2)}
 								</pre>
 							</CardContent>
