@@ -23,6 +23,8 @@ model Folder {
   images      Image[]
 
   @@index([path])
+  @@index([lastIndexed])
+  @@index([createdAt])
 }
 
 model Image {
@@ -54,6 +56,10 @@ model Image {
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
   @@index([hash])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([isPublic])
+  @@index([isFavorite])
 }
 
 model Tag {
@@ -67,6 +73,7 @@ model Tag {
   images      Image[]  @relation("ImageToTag")
 
   @@index([name])
+  @@index([createdAt])
 }
 
 model Collection {
@@ -77,12 +84,13 @@ model Collection {
   color       String   @default("#3b82f6")
   shortcut    String?
   sortBy      String   @default("name")
-  filters     String   @default("[]") // JSON string for filters
+  filters     String   @default("[]")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   images      Image[]  @relation("ImageToCollection")
 
   @@index([name])
+  @@index([createdAt])
 }
 
 model Favorite {
@@ -122,22 +130,23 @@ model Profile {
 // Modelo para el sistema de colas
 model QueueJob {
   id          String    @id @default(cuid())
-  queue       String // Nombre de la cola (ej: 'thumbnails')
-  data        String // Datos del trabajo en JSON
-  status      String    @default("pending") // pending, active, completed, failed
+  queue       String
+  data        String
+  status      String    @default("pending")
   attempts    Int       @default(0)
   maxAttempts Int       @default(3)
-  error       String? // Mensaje de error si falla
+  error       String?
   progress    Int       @default(0)
   startedAt   DateTime?
   finishedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  priority    Int       @default(0) // Para priorizar trabajos
-  metadata    String? // Para datos adicionales flexibles
-  retryAt     DateTime? // Para reintentos programados
+  priority    Int       @default(0)
+  metadata    String?
+  retryAt     DateTime?
 
   @@index([queue, status])
   @@index([status, createdAt])
-  @@index([priority, status, createdAt]) // Optimizar consultas por prioridad
+  @@index([priority, status, createdAt])
+  @@index([retryAt])
 }

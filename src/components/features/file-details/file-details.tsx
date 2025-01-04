@@ -40,6 +40,8 @@ import {
 	HeartOff,
 	StarIcon,
 	Flag,
+	Palette,
+	Play,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +65,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { ImageMetadata } from "@/lib/metadata";
 
 interface FileDetailsProps {
 	selectedItems: FileItem[];
@@ -116,6 +119,39 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 	const { toast } = useToast();
 	const { toggleItemSelection } = useFileManager();
 	const { settings } = useCollectionTagContext();
+
+	// Funciones de utilidad
+	const formatFileSize = (size: number | undefined) => {
+		if (!size || isNaN(size)) return "0 B";
+		const units = ["B", "KB", "MB", "GB", "TB"];
+		const i = Math.floor(Math.log(size) / Math.log(1024));
+		return `${(size / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
+	};
+
+	const formatDate = (dateStr: string | undefined | null) => {
+		if (!dateStr) return "";
+		try {
+			return new Date(dateStr).toLocaleString();
+		} catch (e) {
+			return dateStr;
+		}
+	};
+
+	// Parsear metadata de manera segura
+	const parseMetadata = (metadata: any): ImageMetadata => {
+		if (!metadata) return {};
+
+		if (typeof metadata === "string") {
+			try {
+				return JSON.parse(metadata);
+			} catch (e) {
+				console.error("Error parsing metadata:", e);
+				return {};
+			}
+		}
+
+		return metadata;
+	};
 
 	// 3. Efectos
 	React.useEffect(() => {
@@ -519,32 +555,18 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 
 	const selectedItem = selectedItems[0];
 
-	const metadata = selectedItem.metadata || {};
-	let parsedMetadata = metadata;
-
-	if (typeof metadata === "string") {
-		try {
-			parsedMetadata = JSON.parse(metadata);
-		} catch (e) {
-			console.error("Error parsing metadata:", e);
-			parsedMetadata = {};
-		}
-	}
-
+	// Parsear metadata de manera segura
+	const metadata = parseMetadata(selectedItem.metadata);
 	const {
 		dimensions = {},
 		exif = {},
 		fileSystem = {},
 		generation = {},
-	} = parsedMetadata;
-
-	const formatDate = (dateStr: string) => {
-		try {
-			return new Date(dateStr).toLocaleString();
-		} catch (e) {
-			return dateStr;
-		}
-	};
+		format = null,
+		colorSpace = null,
+		hasAlpha = false,
+		isAnimated = false,
+	} = metadata;
 
 	// Actualizamos la toolbar con el nuevo diseño
 	const renderToolbar = () => (
@@ -791,21 +813,43 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 							<InfoItem
 								icon={<ImageIcon className="h-3.5 w-3.5 text-green-400" />}
 								label="Tipo"
-								value={selectedItem.metadata?.mimeType}
+								value={
+									format || selectedItem.metadata?.mimeType || "Desconocido"
+								}
 							/>
 							<InfoItem
 								icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
 								label="Tamaño"
 								value={formatFileSize(fileSystem.size)}
 							/>
-							{selectedItem.metadata?.dimensions?.width &&
-								selectedItem.metadata?.dimensions?.height && (
-									<InfoItem
-										icon={<Maximize2 className="h-3.5 w-3.5 text-yellow-400" />}
-										label="Dimensiones"
-										value={`${selectedItem.metadata?.dimensions?.width || 0} × ${selectedItem.metadata?.dimensions?.height || 0}`}
-									/>
-								)}
+							{dimensions.width && dimensions.height && (
+								<InfoItem
+									icon={<Maximize2 className="h-3.5 w-3.5 text-yellow-400" />}
+									label="Dimensiones"
+									value={`${dimensions.width} × ${dimensions.height}`}
+								/>
+							)}
+							{colorSpace && (
+								<InfoItem
+									icon={<Palette className="h-3.5 w-3.5 text-orange-400" />}
+									label="Espacio de color"
+									value={colorSpace}
+								/>
+							)}
+							{hasAlpha && (
+								<InfoItem
+									icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />}
+									label="Canal alfa"
+									value="Sí"
+								/>
+							)}
+							{isAnimated && (
+								<InfoItem
+									icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
+									label="Animada"
+									value="Sí"
+								/>
+							)}
 						</CardContent>
 					</Card>
 
@@ -985,7 +1029,7 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 							</CardHeader>
 							<CardContent className="p-4 pt-2">
 								<pre className="text-[10px] overflow-x-auto p-2 bg-muted rounded-sm">
-									{JSON.stringify(parsedMetadata, null, 2)}
+									{JSON.stringify(metadata, null, 2)}
 								</pre>
 							</CardContent>
 						</Card>

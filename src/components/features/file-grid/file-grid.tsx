@@ -6,17 +6,15 @@ import type { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-// Cache global persistente para mantener los elementos renderizados
-const globalRenderedItems = new Set<string>();
-
 // Optimizar la configuración del grid
 const GRID_CONFIG = {
 	minColumns: 3,
 	maxColumns: 6,
 	gap: 4,
 	itemBaseWidth: 200,
-	overscanCount: 10,
-	scrollingDelay: 100,
+	overscanCount: 15,
+	scrollingDelay: 150,
+	batchSize: 20,
 	breakpoints: {
 		sm: 640,
 		md: 768,
@@ -24,6 +22,9 @@ const GRID_CONFIG = {
 		xl: 1280,
 	},
 } as const;
+
+// Sistema de cache mejorado usando Map para mejor rendimiento en el cliente
+const renderedItemsCache = new Map<string, boolean>();
 
 interface FileGridProps {
 	onItemClick?: (item: FileItem) => void;
@@ -104,7 +105,7 @@ export function FileGrid({
 		count: rowCount,
 		getScrollElement: () => gridRef.current,
 		estimateSize: useCallback(() => itemSize, [itemSize]),
-		overscan: isScrolling ? 6 : GRID_CONFIG.overscanCount,
+		overscan: isScrolling ? 8 : GRID_CONFIG.overscanCount,
 		onChange: (instance) => {
 			if (instance.isScrolling) {
 				setIsScrolling(true);
@@ -127,22 +128,20 @@ export function FileGrid({
 		};
 	}, []);
 
-	// Función para verificar si un item ya ha sido renderizado
+	// Optimizar la función isItemRendered
 	const isItemRendered = useCallback((itemId: string) => {
-		return globalRenderedItems.has(itemId);
+		return renderedItemsCache.has(itemId);
 	}, []);
 
-	// Función para marcar un item como renderizado
+	// Optimizar la función markItemAsRendered
 	const markItemAsRendered = useCallback((itemId: string) => {
-		globalRenderedItems.add(itemId);
+		renderedItemsCache.set(itemId, true);
 	}, []);
 
 	return (
 		<div
 			ref={gridRef}
-			className={cn(
-				"h-full w-full overflow-auto relative"
-			)}
+			className={cn("h-full w-full overflow-auto relative")}
 			style={{
 				padding: `${GRID_CONFIG.gap}px`,
 				contain: "size layout paint style",
@@ -174,26 +173,34 @@ export function FileGrid({
 								className="grid h-full"
 								style={{
 									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									columnGap:0,
+									columnGap: 0,
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {
 									const index = rowStartIndex + columnIndex;
 									const hasBeenRendered = isItemRendered(item.id);
+									const shouldLoad = !isScrolling || hasBeenRendered;
 
-									if (!hasBeenRendered) {
+									if (!hasBeenRendered && shouldLoad) {
 										markItemAsRendered(item.id);
 									}
 
 									return (
-										<div key={item.id} className="relative w-full py-2 px-1">
+										<div
+											key={item.id}
+											className="relative w-full py-2 px-1"
+											style={{
+												willChange: "transform",
+												contain: "layout style paint",
+											}}
+										>
 											<FileCard
 												item={item}
 												onClick={onItemClick}
 												onDoubleClick={onItemDoubleClick}
 												index={index}
 												totalColumns={columns}
-												shouldLoad={!isScrolling || hasBeenRendered}
+												shouldLoad={shouldLoad}
 												hasBeenRendered={hasBeenRendered}
 											/>
 										</div>
