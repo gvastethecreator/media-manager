@@ -11,15 +11,9 @@ export async function GET(
   console.log('Iniciando ruta de eventos SSE...');
 
   try {
-    // Extraer y validar el ID
-    const { searchParams } = new URL(request.url);
-    const folderId = context.params.id || searchParams.get('id');
-
-    console.log('Parámetros de ruta:', {
-      contextId: context.params.id,
-      queryId: searchParams.get('id'),
-      resolvedId: folderId
-    });
+    // Esperar y extraer los parámetros de manera asíncrona
+    const params = await Promise.resolve(context.params);
+    const folderId = params.id;
 
     if (!folderId) {
       console.error('ID de carpeta no encontrado');
@@ -29,9 +23,22 @@ export async function GET(
       });
     }
 
+    console.log('Parámetros de ruta:', { folderId });
+
     console.log('Creando stream SSE para carpeta:', folderId);
     const streamData = await createStream(folderId, request);
     console.log('Stream creado correctamente');
+
+    // Configurar headers de respuesta
+    const headers = new Headers({
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+
+    // Crear respuesta con stream
+    const response = new NextResponse(streamData.stream.readable, { headers });
 
     // Enviar evento inicial de conexión
     const encoder = new TextEncoder();
@@ -39,13 +46,10 @@ export async function GET(
     await streamData.writer.write(encoder.encode(initialEvent));
     console.log('Evento inicial enviado');
 
-    const response = new NextResponse(streamData.stream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache, no-transform',
-        'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no'
-      }
+    // Manejar desconexión del cliente
+    request.signal.addEventListener('abort', () => {
+      console.log('Cliente desconectado, cerrando stream:', folderId);
+      streamData.writer.close().catch(console.error);
     });
 
     console.log('Respuesta SSE preparada');
