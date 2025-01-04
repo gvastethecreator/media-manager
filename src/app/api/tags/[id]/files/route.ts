@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -29,11 +32,8 @@ export async function POST(
     // Verificar que el tag existe
     const tag = await prisma.tag.findUnique({
       where: { id: tagId },
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        files: {
+      include: {
+        images: {
           select: {
             id: true,
           },
@@ -57,7 +57,7 @@ export async function POST(
     }
 
     // Verificar si el archivo ya tiene el tag
-    const isFileTagged = tag.files.some((file) => file.id === fileId);
+    const isFileTagged = tag.images.some((file) => file.id === fileId);
 
     if (isFileTagged) {
       return new Response(
@@ -99,17 +99,14 @@ export async function POST(
     const updatedTag = await prisma.tag.update({
       where: { id: tagId },
       data: {
-        files: {
+        images: {
           connect: { id: fileId },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        color: true,
+      include: {
         _count: {
           select: {
-            files: true,
+            images: true,
           },
         },
       },
@@ -119,8 +116,10 @@ export async function POST(
       JSON.stringify({
         success: true,
         tag: {
-          ...updatedTag,
-          count: updatedTag._count.files,
+          id: updatedTag.id,
+          name: updatedTag.name,
+          color: updatedTag.color,
+          count: updatedTag._count.images,
         },
       }),
       {
