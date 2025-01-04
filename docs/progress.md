@@ -235,3 +235,44 @@
 3. Mejorar la gestión de errores
 4. Optimizar la carga de thumbnails
 5. Implementar tests automatizados
+
+## Optimización de Animaciones (En Progreso)
+
+### FileCard y FileGrid Optimización
+
+#### Objetivos:
+
+1. Reducir re-renders innecesarios
+2. Implementar animaciones en cascada/secuenciales
+3. Optimizar el rendimiento de las animaciones
+4. Mejorar la experiencia visual
+
+#### Plan de Trabajo:
+
+1. FileGrid.tsx:
+
+   - [ ] Implementar stagger effect para la aparición de cards
+   - [ ] Optimizar virtualización con AnimatePresence
+   - [ ] Reducir re-renders usando memo y callbacks
+   - [ ] Implementar lazy loading de animaciones
+
+2. FileCard.tsx:
+   - [ ] Optimizar estados de animación
+   - [ ] Implementar animaciones secuenciales
+   - [ ] Reducir la cantidad de motion components
+   - [ ] Mejorar el manejo de hover y selección
+
+#### Cambios Técnicos Planificados:
+
+1. Usar `useCallback` y `useMemo` para funciones y valores computados
+2. Implementar `stagger` para animaciones en cascada
+3. Optimizar el uso de `AnimatePresence`
+4. Reducir la cantidad de elementos animados
+5. Mejorar el manejo de estados de animación
+
+#### Consideraciones:
+
+- Mantener la suavidad actual de las animaciones
+- No sacrificar la experiencia de usuario por rendimiento
+- Asegurar que las animaciones sean consistentes en diferentes dispositivos
+- Mantener la accesibilidad con `useReducedMotion`

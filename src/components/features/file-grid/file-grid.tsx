@@ -7,6 +7,7 @@ import { useInView } from "react-intersection-observer";
 import type { FileItem } from "@/types/file-item";
 import { AnimationProvider } from "./animation-context";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 // Configuración del buffer y carga
 const BUFFER_CONFIG = {
@@ -24,12 +25,19 @@ interface FileGridProps {
 	loadMoreItems?: () => void;
 }
 
-// Configuración base del grid con valores más flexibles
+// Configuración de animaciones
+const ANIMATION_CONFIG = {
+	STAGGER_DELAY: 0.02,
+	INITIAL_DELAY: 0.3,
+	BATCH_SIZE: 10, // Número de items a animar por lote
+} as const;
+
+// Optimizar la configuración del grid
 const GRID_CONFIG = {
-	minColumns: 2,
-	maxColumns: 8,
-	gap: 0,
-	itemBaseWidth: 180,
+	minColumns: 3,
+	maxColumns: 6,
+	gap: 0, // Añadido gap para mejor espaciado
+	itemBaseWidth: 200,
 	itemAspectRatio: 1,
 	breakpoints: {
 		sm: 640,
@@ -38,6 +46,13 @@ const GRID_CONFIG = {
 		xl: 1280,
 	},
 } as const;
+
+// Memoizar el cálculo de la posición del item
+const calculateItemPosition = (index: number, columns: number) => {
+	const row = Math.floor(index / columns);
+	const col = index % columns;
+	return { row, col };
+};
 
 export function FileGrid({
 	onItemClick,
@@ -73,7 +88,7 @@ export function FileGrid({
 		return () => resizeObserver.disconnect();
 	}, []);
 
-	// Cálculo dinámico del tamaño de la grilla basado en el ancho del contenedor
+	// Memoizar el cálculo de dimensiones del grid
 	const { itemWidth, itemHeight, columns } = useMemo(() => {
 		const availableWidth = containerWidth || window.innerWidth;
 		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
@@ -94,7 +109,11 @@ export function FileGrid({
 		};
 	}, [containerWidth]);
 
-	const rowCount = Math.ceil(items.length / columns);
+	// Memoizar el cálculo de filas
+	const rowCount = useMemo(
+		() => Math.ceil(items.length / columns),
+		[items.length, columns]
+	);
 
 	// Sistema de carga progresiva por filas
 	const loadItemsBatch = useCallback(() => {
@@ -204,6 +223,7 @@ export function FileGrid({
 		},
 	});
 
+	// Optimizar la función getItemsForRow
 	const getItemsForRow = useCallback(
 		(rowIndex: number) => {
 			const startIndex = rowIndex * columns;
@@ -264,8 +284,8 @@ export function FileGrid({
 			)}
 			style={{
 				padding: `${GRID_CONFIG.gap}px`,
-				willChange: "transform", // Optimización de rendimiento
-				contain: "size layout paint", // Optimización de rendimiento
+				willChange: "transform",
+				contain: "size layout paint",
 			}}
 		>
 			<div
@@ -275,51 +295,70 @@ export function FileGrid({
 					position: "relative",
 				}}
 			>
-				{virtualizer.getVirtualItems().map((virtualRow) => (
-					<div
-						key={virtualRow.index}
-						style={{
-							position: "absolute",
-							top: 0,
-							left: 0,
-							width: "100%",
-							height: `${itemHeight + GRID_CONFIG.gap}px`,
-							transform: `translateY(${virtualRow.start}px)`,
-							display: "grid",
-							gridTemplateColumns: `repeat(${columns}, 1fr)`,
-							gap: `${GRID_CONFIG.gap}px`,
-							willChange: "transform", // Optimización de rendimiento
-						}}
-					>
-						{getItemsForRow(virtualRow.index).map((item, colIndex) => {
-							const itemIndex = virtualRow.index * columns + colIndex;
-							const isBuffered = isItemBuffered(itemIndex);
-							const shouldLoad = shouldLoadItem(itemIndex);
+				<AnimatePresence mode="popLayout">
+					{virtualizer.getVirtualItems().map((virtualRow) => {
+						const rowItems = getItemsForRow(virtualRow.index);
 
-							return (
-								<div
-									key={item.id}
-									style={{
-										width: "100%",
-										height: "100%",
-										contain: "size layout", // Optimización de rendimiento
-									}}
-								>
-									{isBuffered && (
-										<FileCard
-											item={item}
-											onClick={onItemClick}
-											onDoubleClick={onItemDoubleClick}
-											index={itemIndex}
-											totalColumns={columns}
-											shouldLoad={shouldLoad}
-										/>
-									)}
-								</div>
-							);
-						})}
-					</div>
-				))}
+						return (
+							<motion.div
+								key={virtualRow.index}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								style={{
+									position: "absolute",
+									top: 0,
+									left: 0,
+									width: "100%",
+									height: `${itemHeight}px`,
+									transform: `translateY(${virtualRow.start}px)`,
+									display: "grid",
+									gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+									gap: `${GRID_CONFIG.gap}px`,
+									padding: `${GRID_CONFIG.gap / 2}px`,
+									willChange: "transform",
+								}}
+							>
+								{rowItems.map((item, colIndex) => {
+									const itemIndex = virtualRow.index * columns + colIndex;
+									const isBuffered = isItemBuffered(itemIndex);
+									const shouldLoad = shouldLoadItem(itemIndex);
+									const { row, col } = calculateItemPosition(
+										itemIndex,
+										columns
+									);
+
+									return (
+										<motion.div
+											key={item.id}
+											initial={{ opacity: 0, scale: 0.9 }}
+											animate={{ opacity: 1, scale: 1 }}
+											transition={{
+												type: "spring",
+												stiffness: 100,
+												damping: 15,
+												mass: 0.1,
+												delay: (row * 0.1 + col * 0.05) * 0.3,
+											}}
+											className="relative w-full h-full"
+										>
+											{isBuffered && (
+												<FileCard
+													item={item}
+													onClick={onItemClick}
+													onDoubleClick={onItemDoubleClick}
+													index={itemIndex}
+													totalColumns={columns}
+													shouldLoad={shouldLoad}
+												/>
+											)}
+										</motion.div>
+									);
+								})}
+							</motion.div>
+						);
+					})}
+				</AnimatePresence>
 			</div>
 		</div>
 	);
