@@ -14,6 +14,7 @@ import {
 	FolderOpen,
 	ImageIcon,
 	Palette,
+	Flag,
 } from "lucide-react";
 import {
 	ContextMenu,
@@ -152,6 +153,12 @@ export function FileContextMenu({
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent className="w-64">
+				<ContextMenuItem onClick={() => onAction("mark-toggle", file)}>
+					<Flag className="mr-2 h-4 w-4 text-warning" />
+					Marcar/Desmarcar
+					<ContextMenuShortcut>⌘M</ContextMenuShortcut>
+				</ContextMenuItem>
+
 				<ContextMenuItem onClick={() => onAction("favorite-toggle", file)}>
 					{file.isFavorite ? (
 						<>

@@ -25,6 +25,7 @@ import {
 	StarIcon,
 	TagIcon,
 	CalendarIcon,
+	BookmarkIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -48,13 +49,21 @@ const springConfig = {
 	mass: 0.3,
 };
 
-// Solo mantenemos las variantes esenciales y las optimizamos
+// Actualizamos las variantes para incluir todos los estados
 const variants = {
 	hover: {
 		scale: 1,
 		transition: springConfig,
 	},
 	selected: {
+		scale: 0.96,
+		transition: {
+			...springConfig,
+			stiffness: 400,
+			damping: 10,
+		},
+	},
+	marked: {
 		scale: 0.96,
 		transition: {
 			...springConfig,
@@ -88,10 +97,16 @@ export function FileCard({
 	const { openViewer } = useImageViewer();
 	const { toggleItemSelection, selectedItems } = useFileManager();
 	const [isHovered, setIsHovered] = useState(false);
+	const [isMarked, setIsMarked] = useState(false);
 	const hasLoaded = useRef(false);
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
+
+	// Función para manejar el marcado desde el menú contextual
+	const handleMarkToggle = useCallback(() => {
+		setIsMarked((prev) => !prev);
+	}, []);
 
 	const loadThumbnail = useCallback(async () => {
 		if (hasLoaded.current || !shouldLoad) return;
@@ -176,6 +191,9 @@ export function FileCard({
 		async (action: string, file: FileItem, data?: any) => {
 			try {
 				switch (action) {
+					case "mark-toggle":
+						handleMarkToggle();
+						break;
 					case "favorite-toggle":
 						try {
 							// Actualizar el estado local inmediatamente (optimista)
@@ -557,7 +575,7 @@ export function FileCard({
 				});
 			}
 		},
-		[onDoubleClick, toast, openViewer, toggleItemSelection]
+		[handleMarkToggle, toast, openViewer, toggleItemSelection]
 	);
 
 	const handleHoverStart = useCallback(() => {
@@ -574,11 +592,16 @@ export function FileCard({
 		<motion.div
 			whileHover="hover"
 			whileTap="tap"
+			animate={isSelected ? "selected" : isMarked ? "marked" : ""}
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 ring-1 ring-white/10 ring-inset rounded-sm",
-				isSelected || isHovered
+				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 ring-1 ring-white/10 ring-inset rounded-sm  cursor-pointer",
+				isSelected
 					? "ring-1 ring-primary ring-inset shadow-lg"
+					: isMarked
+					? "ring-1 ring-warning ring-inset shadow-lg"
+					: isHovered
+					? "ring-1 ring-white/30 ring-inset"
 					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
 			)}
 			onClick={handleClick}
@@ -604,12 +627,28 @@ export function FileCard({
 						</div>
 					) : thumbnail ? (
 						<div className="relative w-full h-full">
+							{/* Favorito siempre visible */}
+							{item.isFavorite && (
+								<div
+									className={cn(
+										"absolute top-2 right-2 z-30 transition-transform duration-200",
+										isSelected || isMarked || isHovered ? "scale-110" : ""
+									)}
+								>
+									<StarIcon
+										size={14}
+										className="text-yellow-400 drop-shadow-md"
+									/>
+								</div>
+							)}
 
 							{/* Imagen principal */}
 							<div
 								className={cn(
 									"absolute inset-0 flex justify-center items-center transition-transform duration-200",
-									isSelected || isHovered ? "scale-75 -translate-y-[20px]" : ""
+									isSelected || isMarked || isHovered
+										? "scale-75 -translate-y-[20px]"
+										: ""
 								)}
 							>
 								<ImageCard
@@ -626,7 +665,7 @@ export function FileCard({
 							<div
 								className={cn(
 									"absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2 transition-[opacity,transform] duration-200",
-									isSelected || isHovered
+									isSelected || isMarked || isHovered
 										? "opacity-100 translate-y-0"
 										: "opacity-0 translate-y-2"
 								)}
@@ -653,20 +692,42 @@ export function FileCard({
 										</div>
 									</div>
 									<div className="text-right space-y-0.5">
-										{item.isFavorite && (
+										{/* Tags y Colecciones */}
+										{item.collections && item.collections[0] && (
 											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-												<StarIcon size={9} className="text-yellow-400" />
-												<span>Favorito</span>
+												<BookmarkIcon size={9} className="text-blue-400" />
+												<span>{item.collections[0].name}</span>
+												{item.collections.length > 1 && (
+													<span className="text-[8px] text-white/50">
+														+{item.collections.length - 1}
+													</span>
+												)}
 											</div>
 										)}
-										{item.tags && item.tags[0] && (
-											<Badge
-												variant="secondary"
-												className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-											>
-												<TagIcon size={8} className="mr-1" />
-												{item.tags[0].name}
-											</Badge>
+										{item.tags && (
+											<div className="flex flex-wrap justify-end gap-1">
+												{item.tags.slice(0, 2).map((tag) => (
+													<Badge
+														key={tag.id}
+														variant="secondary"
+														className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+														style={{
+															borderColor: tag.color,
+														}}
+													>
+														<div
+															className="w-1.5 h-1.5 rounded-full mr-1"
+															style={{ backgroundColor: tag.color }}
+														/>
+														{tag.name}
+													</Badge>
+												))}
+												{item.tags.length > 2 && (
+													<span className="text-[8px] text-white/50 self-center">
+														+{item.tags.length - 2}
+													</span>
+												)}
+											</div>
 										)}
 									</div>
 								</div>
