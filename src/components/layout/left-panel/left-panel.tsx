@@ -21,13 +21,14 @@ import {
 	Image as ImageIcon,
 	LibraryBig,
 	Search,
+	ChartLine,
+	RefreshCcw,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useNavigationStore } from "@/store/navigation";
 import { ViewType } from "@/types/file-item";
 
 const navigationItems = [
-	{ id: "dashboard" as ViewType, label: "Dashboard", icon: Home },
 	{ id: "all-images" as ViewType, label: "Galería", icon: ImageIcon },
 	{ id: "favorites" as ViewType, label: "Favoritos", icon: Star },
 	{ id: "search" as ViewType, label: "Buscar", icon: Search },
@@ -51,6 +52,11 @@ const categories = [
 		icon: TagIcon,
 		label: "Etiquetas",
 		color: "#f59e0b",
+	},
+	{
+		id: "dashboard" as ViewType,
+		label: "Estadísticas",
+		icon: ChartLine,
 	},
 ];
 
@@ -116,17 +122,34 @@ export function LeftPanel() {
 		[setCurrentView, setCurrentTag]
 	);
 
+	const handleResetApp = useCallback(() => {
+		Promise.all([initialize(), initializeStats()]).catch((error) => {
+			console.error("Error resetting app:", error);
+		});
+	}, [initialize, initializeStats]);
+
 	return (
 		<div className="flex flex-col h-full">
-			<div className="flex flex-col">
+			<div className="flex flex-col bg-primary/10 py-1">
 				<div className="flex items-center justify-between gap-2">
-					<div className="flex flex-col items-start px-2">
-						<span className="text-sm font-medium">Image Manager</span>
-						<span className="text-xs text-muted-foreground">
+					<div className="flex gap-2 items-center px-2">
+						<div className="flex items-center justify-center h-5 w-5 rounded-sm bg-white/10">
+							<span className="text-xs font-medium">🧃</span>
+						</div>
+						<span className="text-[10px] text-muted-foreground">
 							{stats?.totalImages || 0} imágenes
 						</span>
 					</div>
-					<div className="gap-4 px-2">
+					<div className="gap-8 pr-2">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={handleResetApp}
+						>
+							<RefreshCcw className="h-4 w-4" />
+						</Button>
+
 						<Button
 							variant="ghost"
 							size="icon"
@@ -151,11 +174,10 @@ export function LeftPanel() {
 					</div>
 				</div>
 			</div>
-			<Separator className="my-1" />
 			<ScrollArea className="flex-1">
-				<div className="">
+				<div className="px-2">
 					{/* Navegación Principal */}
-					<div className="rounded-none">
+					<div className="rounded-small flex flex-row gap-2">
 						{navigationItems.map(({ id, icon: Icon, label }) => (
 							<SidebarItem
 								key={id}
@@ -167,9 +189,9 @@ export function LeftPanel() {
 						))}
 					</div>
 					{/* Categorías con Listas */}
-					<div className="">
+					<div className="mt-2">
 						{categories.map(({ id, icon: Icon, label, color }) => (
-							<div key={id} className="">
+							<div key={id} className="border-t border-border py-2">
 								<SidebarItem
 									icon={Icon}
 									label={label}
@@ -197,7 +219,7 @@ export function LeftPanel() {
 											<Button
 												key={collection.id}
 												variant="ghost"
-												className="w-full justify-start gap-2 h-6 text-xs px-2 rounded-none"
+												className="gap-2 h-6 text-xs px-2 rounded-small"
 												onClick={() => handleCollectionClick(collection.id)}
 											>
 												<span className="text-base">{collection.emoji}</span>
