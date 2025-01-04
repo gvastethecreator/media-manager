@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -29,12 +32,8 @@ export async function POST(
     // Verificar que la colección existe
     const collection = await prisma.collection.findUnique({
       where: { id: collectionId },
-      select: {
-        id: true,
-        name: true,
-        emoji: true,
-        color: true,
-        files: {
+      include: {
+        images: {
           select: {
             id: true,
           },
@@ -58,7 +57,7 @@ export async function POST(
     }
 
     // Verificar si el archivo ya está en la colección
-    const isFileInCollection = collection.files.some(
+    const isFileInCollection = collection.images.some(
       (file) => file.id === fileId
     );
 
@@ -102,18 +101,14 @@ export async function POST(
     const updatedCollection = await prisma.collection.update({
       where: { id: collectionId },
       data: {
-        files: {
+        images: {
           connect: { id: fileId },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        emoji: true,
-        color: true,
+      include: {
         _count: {
           select: {
-            files: true,
+            images: true,
           },
         },
       },
@@ -123,8 +118,11 @@ export async function POST(
       JSON.stringify({
         success: true,
         collection: {
-          ...updatedCollection,
-          count: updatedCollection._count.files,
+          id: updatedCollection.id,
+          name: updatedCollection.name,
+          emoji: updatedCollection.emoji,
+          color: updatedCollection.color,
+          count: updatedCollection._count.images,
         },
       }),
       {
