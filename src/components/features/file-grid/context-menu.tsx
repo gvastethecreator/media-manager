@@ -41,7 +41,11 @@ import { Button } from "@/components/ui/button";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { GithubPicker } from "react-color";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface FileContextMenuProps {
 	file: FileItem;
@@ -77,13 +81,28 @@ export function FileContextMenu({
 	const handleCreateCollection = async () => {
 		try {
 			const newCollectionData = {
-				...newCollection,
+				name: newCollection.name,
+				emoji: newCollection.emoji,
+				description: newCollection.description,
+				color: newCollection.color,
 				sortBy: "name" as const,
 				filters: [],
-				files: [file.id],
 			};
 
 			await updateCollection(null, newCollectionData);
+
+			// Una vez creada la colección, la actualizamos para agregar el archivo
+			const collections = settings.collections;
+			const createdCollection = collections.find(
+				(c) => c.name === newCollection.name
+			);
+
+			if (createdCollection) {
+				await onAction("collection-add", file, {
+					collectionId: createdCollection.id,
+				});
+			}
+
 			setNewCollection({
 				name: "",
 				emoji: "📁",
@@ -91,7 +110,6 @@ export function FileContextMenu({
 				color: "#3b82f6",
 			});
 			setIsCollectionDialogOpen(false);
-			onAction("collection-refresh", file);
 		} catch (error) {
 			console.error("Error creating collection:", error);
 		}
@@ -99,17 +117,30 @@ export function FileContextMenu({
 
 	const handleCreateTag = async () => {
 		try {
-			await updateTag(null, {
-				...newTag,
-				files: [file.id],
-			});
+			const newTagData = {
+				name: newTag.name,
+				color: newTag.color,
+				description: newTag.description,
+			};
+
+			await updateTag(null, newTagData);
+
+			// Una vez creado el tag, lo actualizamos para agregar el archivo
+			const tags = settings.tags;
+			const createdTag = tags.find((t) => t.name === newTag.name);
+
+			if (createdTag) {
+				await onAction("tag-add", file, {
+					tagId: createdTag.id,
+				});
+			}
+
 			setNewTag({
 				name: "",
 				color: "#3b82f6",
 				description: "",
 			});
 			setIsTagDialogOpen(false);
-			onAction("tag-refresh", file);
 		} catch (error) {
 			console.error("Error creating tag:", error);
 		}
@@ -159,8 +190,7 @@ export function FileContextMenu({
 								<div className="grid gap-4 py-4">
 									<div className="flex items-center gap-4">
 										<EmojiPicker
-											value={newCollection.emoji}
-											onChange={(emoji) =>
+											onEmojiSelect={(emoji: string) =>
 												setNewCollection({ ...newCollection, emoji })
 											}
 										/>

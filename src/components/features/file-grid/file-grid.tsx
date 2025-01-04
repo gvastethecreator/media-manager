@@ -16,9 +16,8 @@ const GRID_CONFIG = {
 	maxColumns: 6,
 	gap: 1,
 	itemBaseWidth: 200,
-	itemAspectRatio: 1,
-	overscanCount: 3,
-	scrollingDelay: 150,
+	overscanCount: 10,
+	scrollingDelay: 100,
 	breakpoints: {
 		sm: 640,
 		md: 768,
@@ -30,7 +29,6 @@ const GRID_CONFIG = {
 interface FileGridProps {
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
-	isResizing?: boolean;
 	items: FileItem[];
 	loadMoreItems?: () => void;
 }
@@ -38,7 +36,6 @@ interface FileGridProps {
 export function FileGrid({
 	onItemClick,
 	onItemDoubleClick,
-	isResizing,
 	items,
 	loadMoreItems,
 }: FileGridProps) {
@@ -88,7 +85,7 @@ export function FileGrid({
 	}, []);
 
 	// Memoizar el cálculo de dimensiones del grid
-	const { columns, itemSize, rowHeight } = useMemo(() => {
+	const { columns, itemSize } = useMemo(() => {
 		const availableWidth = containerWidth || window.innerWidth;
 		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
 		targetColumns = Math.max(
@@ -96,15 +93,12 @@ export function FileGrid({
 			Math.min(GRID_CONFIG.maxColumns, targetColumns)
 		);
 
-		// Calculamos el tamaño del item considerando el gap
+		// Calculamos el tamaño del item considerando solo el gap horizontal
 		const itemSize = Math.floor(
 			(availableWidth - (targetColumns - 1) * GRID_CONFIG.gap) / targetColumns
 		);
 
-		// La altura de la fila es igual al tamaño del item
-		const rowHeight = itemSize;
-
-		return { columns: targetColumns, itemSize, rowHeight };
+		return { columns: targetColumns, itemSize };
 	}, [containerWidth]);
 
 	// Calcular el número de filas
@@ -114,8 +108,8 @@ export function FileGrid({
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		getScrollElement: () => gridRef.current,
-		estimateSize: useCallback(() => rowHeight, [rowHeight]),
-		overscan: isScrolling ? 1 : GRID_CONFIG.overscanCount,
+		estimateSize: useCallback(() => itemSize, [itemSize]),
+		overscan: isScrolling ? 5 : GRID_CONFIG.overscanCount,
 		onChange: (instance) => {
 			if (instance.isScrolling) {
 				setIsScrolling(true);
@@ -182,7 +176,7 @@ export function FileGrid({
 								top: 0,
 								left: 0,
 								width: "100%",
-								height: `${rowHeight}px`,
+								height: `${itemSize}px`,
 								transform: `translateY(${virtualRow.start}px)`,
 								willChange: "transform",
 							}}
@@ -191,7 +185,7 @@ export function FileGrid({
 								className="grid h-full"
 								style={{
 									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									gap: `${GRID_CONFIG.gap}px`,
+									columnGap: `${GRID_CONFIG.gap}px`,
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {
@@ -205,11 +199,7 @@ export function FileGrid({
 									return (
 										<motion.div
 											key={item.id}
-											className="relative w-full aspect-square"
-											initial={{ opacity: 0 }}
-											animate={{ opacity: 1 }}
-											transition={{ duration: 0.2 }}
-											layout
+											className="relative w-full"
 										>
 											<FileCard
 												item={item}
