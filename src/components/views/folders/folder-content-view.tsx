@@ -1,63 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useFilesStore } from "@/store/files";
+import { useCallback, useEffect } from "react";
+import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { FolderIcon, Loader2 } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
-import { thumbnailService } from "@/services/thumbnail.service";
 
 export function FolderContentView() {
 	const {
 		currentItems: items,
 		selectedItem,
-		selectedIds,
-		selectItem,
+		selectedItems,
+		toggleItemSelection,
 		currentFolderId,
-		handleSelectFolder,
-		deselectItem,
-		isLoading: storeLoading,
-		loadMoreItems,
-	} = useFilesStore();
+		setCurrentFolder,
+		isLoading,
+		isProcessingThumbnails,
+	} = useFileManager();
 	const { openViewer } = useImageViewer();
-	const [isProcessingThumbnails, setIsProcessingThumbnails] = useState(false);
 
 	useEffect(() => {
 		if (currentFolderId) {
-			handleSelectFolder(currentFolderId);
+			setCurrentFolder(currentFolderId);
 		}
-	}, [currentFolderId, handleSelectFolder]);
-
-	// Pre-generar thumbnails para los items visibles
-	useEffect(() => {
-		if (!items?.length || isProcessingThumbnails) return;
-
-		const imageIds = items
-			.filter(
-				(item) => item.type === "image" || item.mimeType?.startsWith("image/")
-			)
-			.filter((item) => !item.thumbnail) // Solo procesar los que no tienen thumbnail
-			.map((item) => item.id);
-
-		if (imageIds.length > 0) {
-			setIsProcessingThumbnails(true);
-			thumbnailService
-				.queueThumbnailGeneration(imageIds)
-				.finally(() => setIsProcessingThumbnails(false));
-		}
-	}, [items, isProcessingThumbnails]);
+	}, [currentFolderId, setCurrentFolder]);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			if (selectedIds.includes(item.id)) {
-				deselectItem(item.id);
-			} else {
-				selectItem(item);
-			}
+			toggleItemSelection(item, false);
 		},
-		[selectItem, deselectItem, selectedIds]
+		[toggleItemSelection]
 	);
 
 	const handleItemDoubleClick = useCallback(
@@ -75,7 +49,7 @@ export function FolderContentView() {
 		[openViewer, items]
 	);
 
-	if (storeLoading) {
+	if (isLoading) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
 				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -88,7 +62,7 @@ export function FolderContentView() {
 			<EmptyState
 				icon={FolderIcon}
 				title="Carpeta vacía"
-				description="Esta carpeta no contiene archivos"
+				description="No se encontraron imágenes en esta carpeta"
 			/>
 		);
 	}
@@ -99,10 +73,10 @@ export function FolderContentView() {
 				<FileGrid
 					items={items}
 					selectedItem={selectedItem}
-					selectedIds={selectedIds}
+					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
-					loadMoreItems={loadMoreItems}
+					isProcessingThumbnails={isProcessingThumbnails}
 				/>
 			</div>
 		</div>

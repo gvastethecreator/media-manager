@@ -19,7 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { FileContextMenu } from "./context-menu";
 import { useImageViewer } from "@/store/image-viewer";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
-import { useFileSelection } from "@/store/file-selection";
+import { useFileManager } from "@/store/file-manager";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -100,7 +100,7 @@ export function FileCard({
 	const [error, setError] = useState<string | null>(null);
 	const { toast } = useToast();
 	const { openViewer } = useImageViewer();
-	const { toggleSelectedItem, selectedItems } = useFileSelection();
+	const { toggleItemSelection, selectedItems } = useFileManager();
 	const [isHovered, setIsHovered] = useState(false);
 	const shouldReduceMotion = useReducedMotion();
 	const hasLoaded = useRef(false);
@@ -179,7 +179,7 @@ export function FileCard({
 		}
 
 		// Toggle selección con shift o ctrl/cmd
-		toggleSelectedItem(item, e.shiftKey || e.ctrlKey || e.metaKey);
+		toggleItemSelection(item, e.shiftKey || e.ctrlKey || e.metaKey);
 
 		// Llamar al onClick proporcionado si existe
 		if (onClick) onClick(item);

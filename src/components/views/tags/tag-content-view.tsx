@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { useFilesStore } from "@/store/files";
+import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
@@ -12,31 +12,26 @@ export function TagContentView() {
 	const {
 		currentItems: items,
 		selectedItem,
-		selectedIds,
-		selectItem,
+		selectedItems,
+		toggleItemSelection,
 		currentTagId,
-		handleSelectTag,
-		deselectItem,
-		isLoading: storeLoading,
+		setCurrentTag,
+		isLoading,
 		isProcessingThumbnails,
-	} = useFilesStore();
+	} = useFileManager();
 	const { openViewer } = useImageViewer();
 
 	useEffect(() => {
 		if (currentTagId) {
-			handleSelectTag(currentTagId);
+			setCurrentTag(currentTagId);
 		}
-	}, [currentTagId, handleSelectTag]);
+	}, [currentTagId, setCurrentTag]);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			if (selectedIds.includes(item.id)) {
-				deselectItem(item.id);
-			} else {
-				selectItem(item);
-			}
+			toggleItemSelection(item, false);
 		},
-		[selectItem, deselectItem, selectedIds]
+		[toggleItemSelection]
 	);
 
 	const handleItemDoubleClick = useCallback(
@@ -54,7 +49,7 @@ export function TagContentView() {
 		[openViewer, items]
 	);
 
-	if (storeLoading) {
+	if (isLoading) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
 				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -78,9 +73,10 @@ export function TagContentView() {
 				<FileGrid
 					items={items}
 					selectedItem={selectedItem}
-					selectedIds={selectedIds}
+					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
+					isProcessingThumbnails={isProcessingThumbnails}
 				/>
 			</div>
 		</div>
