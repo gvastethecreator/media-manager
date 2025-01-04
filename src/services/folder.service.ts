@@ -12,81 +12,63 @@ export interface ProcessStatus {
 
 export interface IndexStats extends ProcessStatus {
   error?: string
+  errors?: number
 }
 
-interface IndexCallbacks {
+export interface IndexCallbacks {
   onProgress?: (stats: IndexStats) => void
   onError?: (error: Error) => void
-  onComplete?: (data: any) => void
+  onComplete?: (data: IndexStats) => void
 }
 
-function startIndexing(id: string, callbacks: IndexCallbacks) {
-  let retryCount = 0;
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY = 1000;
+export interface ReindexCallbacks extends IndexCallbacks { }
 
-  function connect() {
-    console.log('Iniciando conexión SSE para:', id);
-    const eventSource = new EventSource(`/api/folders/reindex/${id}/events`, {
-      withCredentials: true
-    });
+export interface FolderResponse {
+  id: string
+  name: string
+  path: string
+  isWatched: boolean
+  totalFiles: number
+  totalSize: number
+  lastIndexed: string | null
+  createdAt: string
+  updatedAt: string
+  _count?: {
+    images: number
+  }
+}
 
-    eventSource.onmessage = (event) => {
-      try {
-        console.log('Evento SSE recibido:', event.data);
-        const data = JSON.parse(event.data);
+const parseSSEData = (data: string) => {
+  try {
+    // Remover el prefijo "data: " si existe
+    const jsonStr = data.replace(/^data: /, '');
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error('Error parseando datos SSE:', error);
+    throw new Error('Error parseando respuesta del servidor');
+  }
+};
 
-        switch (data.type) {
-          case 'progress':
-            if (data.data) {
-              callbacks.onProgress?.(data.data);
-            }
-            break;
-          case 'error':
-            const error = new Error(data.data?.message || 'Error desconocido');
-            if (data.data?.type) error.name = data.data.type;
-            callbacks.onError?.(error);
-            if (data.data?.type === 'FATAL_ERROR') {
-              eventSource.close();
-            }
-            break;
-          case 'complete':
-            callbacks.onComplete?.(data.data);
-            eventSource.close();
-            break;
-          case 'heartbeat':
-            console.log('Heartbeat recibido');
-            break;
-        }
-      } catch (error) {
-        console.error('Error procesando evento SSE:', error);
-        callbacks.onError?.(new Error('Error procesando evento'));
-      }
+const createEventSource = (url: string, options = {}): Promise<EventSource> => {
+  return new Promise((resolve, reject) => {
+    const eventSource = new EventSource(url, { withCredentials: true, ...options });
+    const timeout = setTimeout(() => {
+      eventSource.close();
+      reject(new Error('Timeout esperando conexión SSE'));
+    }, 10000); // 10 segundos de timeout
+
+    eventSource.onopen = () => {
+      clearTimeout(timeout);
+      resolve(eventSource);
     };
 
     eventSource.onerror = (error) => {
-      console.error('Error en EventSource:', error);
+      clearTimeout(timeout);
       eventSource.close();
-
-      if (retryCount < MAX_RETRIES) {
-        retryCount++;
-        console.log(`Reintentando conexión SSE (${retryCount}/${MAX_RETRIES})...`);
-        setTimeout(connect, RETRY_DELAY * retryCount);
-      } else {
-        callbacks.onError?.(new Error('Error en la conexión después de varios intentos'));
-      }
+      reject(error);
     };
-
-    eventSource.addEventListener('open', () => {
-      console.log('Conexión SSE establecida para:', id);
-      retryCount = 0;
-    });
-
-    return eventSource;
-  }
-
-  return connect();
-}
+  });
+};
 
 export async function getFolders() {
   const response = await fetch('/api/folders');
@@ -106,28 +88,98 @@ export async function addFolder(path: string, callbacks: IndexCallbacks) {
       body: JSON.stringify({ path })
     });
 
-    const data = await response.json();
-    console.log('Respuesta al agregar carpeta:', data);
-
     if (!response.ok) {
-      if (data.type === 'FOLDER_EXISTS' && data.folder?.id) {
-        console.log('Carpeta existente, iniciando reindexación:', data.folder.id);
-        return reindexFolder({
-          id: data.folder.id,
-          ...callbacks
-        });
-      }
-
+      const data = await response.json();
       const error = new Error(data.message || 'Error agregando carpeta');
       error.name = data.type || 'ERROR';
       throw error;
     }
 
+    const data = await response.json();
+    console.log('Respuesta al agregar carpeta:', data);
+
     if (!data.id) {
       throw new Error('No se recibió ID de carpeta');
     }
 
-    return startIndexing(data.id, callbacks);
+    // Iniciar monitoreo de eventos SSE
+    const eventSource = await createEventSource(`/api/folders/reindex/${data.id}/events`);
+
+    return new Promise((resolve, reject) => {
+      const initTimeout = setTimeout(() => {
+        eventSource.close();
+        reject(new Error('Timeout esperando inicio de indexación'));
+      }, 15000);
+
+      eventSource.addEventListener('connected', async () => {
+        clearTimeout(initTimeout);
+        console.log('Stream conectado, iniciando indexación');
+
+        try {
+          const response = await fetch(`/api/folders/reindex/${data.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error iniciando indexación');
+          }
+        } catch (error) {
+          eventSource.close();
+          reject(error);
+        }
+      });
+
+      eventSource.addEventListener('progress', (event) => {
+        try {
+          const data = parseSSEData(event.data);
+          callbacks.onProgress?.(data);
+        } catch (error) {
+          console.error('Error procesando evento de progreso:', error);
+        }
+      });
+
+      eventSource.addEventListener('error', (event) => {
+        try {
+          const data = parseSSEData(event.data);
+          callbacks.onError?.(new Error(data.message || 'Error en indexación'));
+          eventSource.close();
+          reject(new Error(data.message));
+        } catch (error) {
+          console.error('Error procesando evento de error:', error);
+          eventSource.close();
+          reject(error);
+        }
+      });
+
+      eventSource.addEventListener('complete', (event) => {
+        try {
+          const data = parseSSEData(event.data);
+          callbacks.onComplete?.(data);
+          eventSource.close();
+          resolve(data);
+        } catch (error) {
+          console.error('Error procesando evento complete:', error);
+          eventSource.close();
+          reject(error);
+        }
+      });
+
+      // Mantener conexión viva
+      const heartbeat = setInterval(() => {
+        if (eventSource.readyState === EventSource.CLOSED) {
+          clearInterval(heartbeat);
+          clearTimeout(initTimeout);
+        }
+      }, 30000);
+
+      // Cleanup
+      eventSource.onerror = () => {
+        clearInterval(heartbeat);
+        clearTimeout(initTimeout);
+      };
+    });
   } catch (error) {
     console.error('Error en addFolder:', error);
     callbacks.onError?.(error instanceof Error ? error : new Error(String(error)));
@@ -136,65 +188,19 @@ export async function addFolder(path: string, callbacks: IndexCallbacks) {
 }
 
 export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
-  const MAX_RETRIES = 3;
-  const INITIAL_RETRY_DELAY = 1000;
-  const MAX_RETRY_DELAY = 10000;
-  let retryCount = 0;
-
-  const connectWithRetry = async (): Promise<EventSource> => {
-    try {
-      const eventSource = new EventSource(`/api/folders/reindex/${id}/events`);
-
-      return new Promise((resolve, reject) => {
-        const connectionTimeout = setTimeout(() => {
-          eventSource.close();
-          reject(new Error('Timeout esperando conexión SSE'));
-        }, 10000);
-
-        eventSource.onopen = () => {
-          console.log('Conexión SSE establecida');
-          clearTimeout(connectionTimeout);
-          resolve(eventSource);
-        };
-
-        eventSource.onerror = async (error) => {
-          console.error('Error en conexión SSE:', error);
-          eventSource.close();
-          clearTimeout(connectionTimeout);
-
-          if (retryCount < MAX_RETRIES) {
-            retryCount++;
-            const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, retryCount - 1), MAX_RETRY_DELAY);
-            console.log(`Reintentando conexión en ${delay}ms (intento ${retryCount}/${MAX_RETRIES})`);
-
-            try {
-              const newEventSource = await new Promise(resolve =>
-                setTimeout(() => resolve(connectWithRetry()), delay)
-              );
-              resolve(newEventSource);
-            } catch (retryError) {
-              reject(retryError);
-            }
-          } else {
-            reject(new Error('Error en conexión SSE después de varios intentos'));
-          }
-        };
-      });
-    } catch (error) {
-      console.error('Error creando EventSource:', error);
-      throw error;
-    }
-  };
-
   try {
     console.log('Iniciando conexión SSE para reindexación...');
-    const eventSource = await connectWithRetry();
-    let isConnected = false;
+    const eventSource = await createEventSource(`/api/folders/reindex/${id}/events`);
 
     return new Promise((resolve, reject) => {
-      eventSource.addEventListener('connected', async (event) => {
+      const initTimeout = setTimeout(() => {
+        eventSource.close();
+        reject(new Error('Timeout esperando inicio de reindexación'));
+      }, 15000);
+
+      eventSource.addEventListener('connected', async () => {
+        clearTimeout(initTimeout);
         console.log('Stream conectado, iniciando reindexación');
-        isConnected = true;
 
         try {
           const response = await fetch(`/api/folders/reindex/${id}`, {
@@ -206,8 +212,6 @@ export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
             const data = await response.json();
             throw new Error(data.error || 'Error iniciando reindexación');
           }
-
-          console.log('Reindexación iniciada correctamente');
         } catch (error) {
           eventSource.close();
           reject(error);
@@ -216,7 +220,7 @@ export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
 
       eventSource.addEventListener('progress', (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data = parseSSEData(event.data);
           callbacks?.onProgress?.(data);
         } catch (error) {
           console.error('Error procesando evento de progreso:', error);
@@ -225,10 +229,10 @@ export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
 
       eventSource.addEventListener('error', (event) => {
         try {
-          const data = JSON.parse(event.data);
-          callbacks?.onError?.(data);
+          const data = parseSSEData(event.data);
+          callbacks?.onError?.(new Error(data.message || 'Error en reindexación'));
           eventSource.close();
-          reject(new Error(data.message || 'Error en reindexación'));
+          reject(new Error(data.message));
         } catch (error) {
           console.error('Error procesando evento de error:', error);
           eventSource.close();
@@ -238,7 +242,7 @@ export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
 
       eventSource.addEventListener('complete', (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data = parseSSEData(event.data);
           callbacks?.onComplete?.(data);
           eventSource.close();
           resolve(data);
@@ -249,9 +253,19 @@ export async function reindexFolder(id: string, callbacks?: ReindexCallbacks) {
         }
       });
 
-      eventSource.addEventListener('heartbeat', () => {
-        console.log('Heartbeat recibido');
-      });
+      // Mantener conexión viva
+      const heartbeat = setInterval(() => {
+        if (eventSource.readyState === EventSource.CLOSED) {
+          clearInterval(heartbeat);
+          clearTimeout(initTimeout);
+        }
+      }, 30000);
+
+      // Cleanup
+      eventSource.onerror = () => {
+        clearInterval(heartbeat);
+        clearTimeout(initTimeout);
+      };
     });
   } catch (error) {
     console.error('Error en reindexFolder:', error);

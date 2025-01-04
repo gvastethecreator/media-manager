@@ -221,9 +221,8 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
-			await reindexFolder({
-				id: folderId,
-				onProgress: (stats) => {
+			await reindexFolder(folderId, {
+				onProgress: (stats: IndexStats) => {
 					setProcessProgress(stats.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
@@ -232,7 +231,7 @@ export function FoldersSection() {
 						status: stats.status || "Procesando...",
 					}));
 				},
-				onError: (error) => {
+				onError: (error: Error) => {
 					console.error("Error en reindexación:", error);
 					if (error.name === "FOLDER_NOT_FOUND") {
 						toast({
@@ -249,14 +248,15 @@ export function FoldersSection() {
 						});
 					}
 				},
-				onComplete: async (data) => {
+				onComplete: async (data: IndexStats) => {
+					const errorCount = data?.errors ?? 0;
 					toast({
 						title: "Reindexación completada",
 						description:
-							data?.errors > 0
-								? `Se completó la reindexación con ${data.errors} errores`
+							errorCount > 0
+								? `Se completó la reindexación con ${errorCount} errores`
 								: "Se ha completado la reindexación correctamente",
-						variant: data?.errors > 0 ? "destructive" : "default",
+						variant: errorCount > 0 ? "destructive" : "default",
 					});
 					await loadStats();
 				},
@@ -282,14 +282,7 @@ export function FoldersSection() {
 	const handleRemoveFolder = async (folderId: string) => {
 		try {
 			setError(null);
-			await reindexFolder({
-				id: folderId,
-				onProgress: () => {},
-				onError: () => {},
-				onComplete: () => {},
-			});
-
-			// Recargar carpetas y estadísticas
+			await deleteFolder(folderId);
 			await loadFolders();
 
 			toast({
