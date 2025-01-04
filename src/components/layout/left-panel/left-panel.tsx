@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useFilesStore } from "@/store/files";
+import { useFileManager } from "@/store/file-manager";
 import { useUIStore } from "@/store/ui";
 import { useStatsStore } from "@/store/stats";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -61,21 +61,18 @@ export function LeftPanel() {
 		collections,
 		folders,
 		tags,
-		handleSelectCollection,
-		handleSelectFolder,
-		handleSelectTag,
+		setCurrentCollection,
+		setCurrentFolder,
+		setCurrentTag,
 		initialize,
-	} = useFilesStore();
+	} = useFileManager();
 
 	const { toggleSettings } = useUIStore();
 	const { theme, setTheme } = useTheme();
 
 	useEffect(() => {
-		Promise.all([
-			initialize(),
-			initializeStats()
-		]).catch(error => {
-			console.error('Error initializing:', error);
+		Promise.all([initialize(), initializeStats()]).catch((error) => {
+			console.error("Error initializing:", error);
 		});
 	}, [initialize, initializeStats]);
 
@@ -84,7 +81,7 @@ export function LeftPanel() {
 	}, [theme, setTheme]);
 
 	const handleOpenSettings = useCallback(() => {
-		setCurrentView('settings');
+		setCurrentView("settings");
 		toggleSettings();
 	}, [toggleSettings, setCurrentView]);
 
@@ -98,25 +95,25 @@ export function LeftPanel() {
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
 			setCurrentView("collection-content");
-			handleSelectCollection(collectionId);
+			setCurrentCollection(collectionId);
 		},
-		[setCurrentView, handleSelectCollection]
+		[setCurrentView, setCurrentCollection]
 	);
 
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
 			setCurrentView("folder-content");
-			handleSelectFolder(folderId);
+			setCurrentFolder(folderId);
 		},
-		[setCurrentView, handleSelectFolder]
+		[setCurrentView, setCurrentFolder]
 	);
 
 	const handleTagClick = useCallback(
 		(tagName: string) => {
 			setCurrentView("tag-content");
-			handleSelectTag(tagName);
+			setCurrentTag(tagName);
 		},
-		[setCurrentView, handleSelectTag]
+		[setCurrentView, setCurrentTag]
 	);
 
 	return (

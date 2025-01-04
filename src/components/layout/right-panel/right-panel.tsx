@@ -2,10 +2,10 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileDetails } from "@/components/features/file-details/file-details";
-import { useFileSelection } from "@/store/file-selection";
+import { useFileManager } from "@/store/file-manager";
 
 export function RightPanel() {
-	const { selectedItems } = useFileSelection();
+	const { selectedItems } = useFileManager();
 
 	return (
 		<div className="flex flex-col h-full">
