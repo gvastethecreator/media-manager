@@ -756,3 +756,50 @@
 2. [ ] Añadir validación de nombres duplicados
 3. [ ] Mejorar manejo de errores con toasts
 4. [ ] Implementar atajos de teclado para operaciones comunes
+
+## 2024-01-09: Correcciones en el Menú Contextual
+
+### Problemas Resueltos
+
+1. Abrir Ubicación:
+
+   - Corregido error con `params.id` en la ruta
+   - Mejorado manejo de rutas en Windows usando PowerShell
+   - Implementada normalización de rutas
+   - Añadido mejor manejo de errores y logging
+
+2. Copiar al Portapapeles:
+   - Implementado sistema de fallback en cascada:
+     1. Intenta copiar thumbnail de alta calidad
+     2. Si falla, intenta con la imagen original
+     3. Si falla, intenta método alternativo con execCommand
+     4. Como último recurso, copia la ruta del archivo
+   - Añadida nueva ruta `/api/files/[id]/raw` para acceso a imágenes originales
+   - Mejorado feedback visual con toasts más descriptivos
+
+### Cambios Técnicos
+
+1. En `api/files/[id]/location/route.ts`:
+
+   - Añadido `dynamic = 'force-dynamic'`
+   - Mejorado manejo de rutas con PowerShell en Windows
+   - Implementada normalización de rutas
+   - Añadido logging de stderr
+
+2. En `file-card.tsx`:
+
+   - Implementado sistema de fallback para copiar imágenes
+   - Mejorado manejo de errores
+   - Añadidos mensajes más descriptivos
+
+3. Nueva ruta `api/files/[id]/raw/route.ts`:
+   - Acceso a imágenes originales
+   - Manejo correcto de tipos MIME
+   - Streaming eficiente de archivos
+
+### Siguientes Pasos
+
+1. Monitorear el rendimiento de la copia de imágenes grandes
+2. Considerar implementar cache para thumbnails
+3. Optimizar el manejo de memoria en operaciones con archivos grandes
+4. Implementar límites de tamaño para prevenir problemas de memoria

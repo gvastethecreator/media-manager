@@ -233,15 +233,15 @@ export function FileCard({
 								}
 							);
 
-							const responseData = await response.json();
+							const responseData = await response.json().catch(() => null);
 
 							if (!response.ok) {
 								throw new Error(
-									responseData.error || "Error al agregar a la colección"
+									responseData?.error || "Error al agregar a la colección"
 								);
 							}
 
-							if (!responseData.success || !responseData.collection) {
+							if (!responseData?.success || !responseData?.collection) {
 								throw new Error("Respuesta inválida del servidor");
 							}
 
@@ -296,15 +296,15 @@ export function FileCard({
 								body: JSON.stringify({ fileId: file.id }),
 							});
 
-							const responseData = await response.json();
+							const responseData = await response.json().catch(() => null);
 
 							if (!response.ok) {
 								throw new Error(
-									responseData.error || "Error al agregar la etiqueta"
+									responseData?.error || "Error al agregar la etiqueta"
 								);
 							}
 
-							if (!responseData.success || !responseData.tag) {
+							if (!responseData?.success || !responseData?.tag) {
 								throw new Error("Respuesta inválida del servidor");
 							}
 
@@ -400,10 +400,109 @@ export function FileCard({
 
 					case "copy":
 						try {
+							// Intentar obtener la imagen original primero
+							let response = await fetch(`/api/files/${file.id}/raw`);
+
+							// Si falla, intentar con el thumbnail
+							if (!response.ok) {
+								const thumbnailUrl = `/api/thumbnails/${file.id}?quality=high`;
+								response = await fetch(thumbnailUrl);
+							}
+
+							if (!response.ok) {
+								throw new Error("No se pudo obtener la imagen");
+							}
+
+							const blob = await response.blob();
+
+							// Función para intentar copiar usando el portapapeles
+							const tryClipboardCopy = async () => {
+								if (navigator.clipboard && navigator.clipboard.write) {
+									try {
+										// Asegurarnos de que el documento tiene el foco
+										window.focus();
+										await navigator.clipboard.write([
+											new ClipboardItem({
+												[blob.type]: blob,
+											}),
+										]);
+										return true;
+									} catch (clipboardError) {
+										console.warn(
+											"Error copying image to clipboard:",
+											clipboardError
+										);
+										return false;
+									}
+								}
+								return false;
+							};
+
+							// Intentar copiar usando el portapapeles
+							const clipboardSuccess = await tryClipboardCopy();
+							if (clipboardSuccess) {
+								toast({
+									title: "Copiado",
+									description: "Imagen copiada al portapapeles",
+								});
+								return;
+							}
+
+							// Si no se pudo usar el portapapeles, intentar con el método fallback
+							try {
+								const url = window.URL.createObjectURL(blob);
+								const img = document.createElement("img");
+								img.src = url;
+
+								// Crear un contenedor temporal
+								const container = document.createElement("div");
+								container.style.position = "fixed";
+								container.style.pointerEvents = "none";
+								container.style.opacity = "0";
+								container.appendChild(img);
+								document.body.appendChild(container);
+
+								// Esperar a que la imagen se cargue
+								await new Promise((resolve) => {
+									img.onload = resolve;
+								});
+
+								// Seleccionar y copiar
+								const range = document.createRange();
+								range.selectNode(img);
+								window.getSelection()?.removeAllRanges();
+								window.getSelection()?.addRange(range);
+
+								// Forzar el foco en el documento
+								window.focus();
+								const success = document.execCommand("copy");
+
+								// Limpiar
+								window.getSelection()?.removeAllRanges();
+								document.body.removeChild(container);
+								window.URL.revokeObjectURL(url);
+
+								if (success) {
+									toast({
+										title: "Copiado",
+										description: "Imagen copiada al portapapeles",
+									});
+									return;
+								}
+							} catch (fallbackError) {
+								console.warn(
+									"Error using fallback copy method:",
+									fallbackError
+								);
+							}
+
+							// Si todo lo anterior falló, copiar el path como último recurso
 							await navigator.clipboard.writeText(file.path);
 							toast({
 								title: "Copiado",
-								description: "Ruta del archivo copiada al portapapeles",
+								description:
+									"Ruta del archivo copiada al portapapeles (no se pudo copiar la imagen)",
+								variant: "destructive",
 							});
 						} catch (error) {
 							console.error("Error copying to clipboard:", error);
