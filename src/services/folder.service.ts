@@ -73,19 +73,28 @@ export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
     console.log('Iniciando indexación de carpeta:', id);
     
     const response = await fetch(`/api/folders/${id}/index`, {
-      method: 'POST'
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Error en indexación');
+      const data = await response.json().catch(() => ({ message: 'Error desconocido' }));
+      throw new Error(data.message || `Error en indexación: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('Indexación completada:', result);
+    
     callbacks?.onComplete?.();
     return result;
   } catch (error) {
-    console.error('Error en indexación:', error);
+    console.error('Error en indexación:', {
+      error: error instanceof Error ? error.message : 'Error desconocido',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
     callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
     throw error;
   }
