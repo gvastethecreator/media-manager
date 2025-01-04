@@ -4,10 +4,10 @@ import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-	FolderIcon,
-	BookmarkIcon,
-	KeyboardIcon,
 	DatabaseIcon,
+	BookmarkIcon,
+	BrainCircuitIcon,
+	CatIcon,
 } from "lucide-react";
 
 // Importar las secciones
@@ -18,7 +18,6 @@ import { ShortcutsSection } from "./settings-sections/shortcuts-section";
 import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
 import { ProfilesSection } from "./settings-sections/profiles-section";
 import { SystemSection } from "./settings-sections/system-section";
-import { Separator } from "@/components/ui/separator";
 
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState("folders");
@@ -31,28 +30,29 @@ export function SettingsView() {
 					className="w-full rounded-none"
 					defaultValue="folders"
 				>
-					<TabsList className="grid w-full grid-cols-4 px-2 m-0 rounded-none">
+					<TabsList className="grid w-full grid-cols-3 h-9 py-0 px-2 m-0 rounded-none">
 						<TabsTrigger value="folders">
-							<FolderIcon className="h-4 w-4 mr-2" /> Carpetas
-						</TabsTrigger>
-
-						<TabsTrigger value="collections">
-							<BookmarkIcon className="h-4 w-4 mr-2" /> Colecciones
-						</TabsTrigger>
-
-						<TabsTrigger value="system">
 							<DatabaseIcon className="h-4 w-4 mr-2" /> Sistema
 						</TabsTrigger>
 
+						<TabsTrigger value="collections">
+							<BookmarkIcon className="h-4 w-4 mr-2" /> Organización
+						</TabsTrigger>
+
 						<TabsTrigger value="shortcuts">
-							<KeyboardIcon className="h-4 w-4 mr-2" /> Ayuda
+							<CatIcon className="h-4 w-4 mr-2" /> Ayuda
 						</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="folders">
+					<TabsContent value="folders" className="gap-2 px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
+							<ProfilesSection />
 							<FoldersSection  />
 							<ThumbnailsSection />
+							<SystemSection />
+						</div>
+						<div className="grid grid-cols-2 gap-2 w-full">
+
 						</div>
 					</TabsContent>
 
@@ -60,13 +60,6 @@ export function SettingsView() {
 						<div className="grid grid-cols-2 gap-2 w-full">
 							<CollectionsSection />
 							<TagsSection />
-						</div>
-					</TabsContent>
-
-					<TabsContent value="system">
-						<div className="grid grid-cols-2 gap-2 w-full">
-							<ProfilesSection />
-							<SystemSection />
 						</div>
 					</TabsContent>
 
