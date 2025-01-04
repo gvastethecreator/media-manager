@@ -298,3 +298,270 @@
 - El sistema de cache mantiene los elementos en memoria
 - La virtualización es más eficiente con el nuevo buffer
 - Las transiciones son más suaves y naturales
+
+## Implementación del Menú Contextual (2024-03-21)
+
+### Análisis de Funcionalidades
+
+#### Estado Actual
+
+1. ✅ Estructura base del menú contextual implementada
+2. ✅ Integración con FileCard y FileGrid
+3. ✅ Diseño visual y animaciones
+4. ❌ Funcionalidades no implementadas
+
+#### Acciones Pendientes
+
+1. Favoritos
+
+   - [x] Implementar toggle de favoritos
+   - [x] Integrar con el servicio de favoritos
+   - [x] Actualizar UI en tiempo real
+
+2. Colecciones
+
+   - [x] Cargar colecciones existentes en el submenú
+   - [x] Implementar creación de nueva colección
+   - [x] Integrar con el servicio de colecciones
+
+3. Etiquetas
+
+   - [ ] Cargar etiquetas existentes en el submenú
+   - [ ] Implementar creación de nueva etiqueta
+   - [ ] Integrar con el servicio de etiquetas
+
+4. Operaciones de Archivo
+   - [x] Implementar vista previa de imagen
+   - [x] Implementar apertura de ubicación
+   - [x] Implementar descarga de archivo
+   - [x] Implementar copiado al portapapeles
+   - [x] Implementar eliminación segura
+
+### Plan de Implementación
+
+1. Fase 1: Acciones Básicas
+
+   - [ ] Implementar toggle de favoritos
+   - [ ] Implementar vista previa
+   - [ ] Implementar apertura de ubicación
+   - [ ] Implementar descarga
+
+2. Fase 2: Gestión de Colecciones
+
+   - [ ] Cargar y mostrar colecciones existentes
+   - [ ] Implementar diálogo de nueva colección
+   - [ ] Integrar con el store de colecciones
+
+3. Fase 3: Gestión de Etiquetas
+
+   - [ ] Cargar y mostrar etiquetas existentes
+   - [ ] Implementar diálogo de nueva etiqueta
+   - [ ] Integrar con el store de etiquetas
+
+4. Fase 4: Operaciones Avanzadas
+   - [ ] Implementar copiado al portapapeles
+   - [ ] Implementar eliminación con confirmación
+   - [ ] Optimizar rendimiento y UX
+
+### Consideraciones Técnicas
+
+1. Integración con Stores
+
+   - Usar FileManager para gestión de estado
+   - Mantener consistencia con selección múltiple
+   - Optimizar actualizaciones de UI
+
+2. Manejo de Errores
+
+   - Implementar manejo de errores robusto
+   - Mostrar feedback visual apropiado
+   - Mantener consistencia del estado
+
+3. UX/UI
+   - Mantener animaciones fluidas
+   - Proporcionar feedback inmediato
+   - Asegurar accesibilidad
+
+### Próximos Pasos Inmediatos
+
+1. ✅ Implementar toggle de favoritos
+2. ✅ Integrar carga de colecciones existentes
+3. ✅ Implementar vista previa de imagen
+4. ✅ Configurar acciones básicas de archivo
+5. 🔄 Implementar gestión de etiquetas
+
+### Cambios Realizados (2024-03-21)
+
+#### Implementación de Toggle de Favoritos
+
+1. ✅ Creado endpoint `/api/images/[id]/favorite`
+2. ✅ Implementada actualización en base de datos
+3. ✅ Integrado con el menú contextual
+4. ✅ Añadido feedback visual con toasts
+5. ✅ Implementada actualización del estado local
+
+#### Implementación de Gestión de Colecciones
+
+1. ✅ Creado endpoint `/api/collections/[id]/files`
+2. ✅ Implementada carga de colecciones existentes
+3. ✅ Implementado diálogo de creación de colecciones
+4. ✅ Integrado con el menú contextual
+5. ✅ Añadido feedback visual con toasts
+6. ✅ Implementada validación de duplicados
+7. ✅ Añadido selector de emoji para colecciones
+
+#### Próxima Tarea
+
+- Implementar vista previa de imagen y acciones básicas de archivo
+
+### Mejoras Pendientes
+
+1. Optimizar la carga de colecciones (implementar caché)
+2. Mejorar la UX del selector de emoji
+3. Añadir opción de color para las colecciones
+4. Implementar eliminación de archivos de colecciones
+5. Añadir diálogo de confirmación para eliminación
+6. Implementar vista previa en hover para miniaturas
+7. Optimizar el streaming de descargas grandes
+8. Añadir soporte para selección múltiple en operaciones
+
+### Próxima Fase
+
+- Implementar gestión completa de etiquetas
+- Mejorar la experiencia de usuario en operaciones de archivo
+- Optimizar el rendimiento de las operaciones masivas
+
+### Optimizaciones Realizadas (2024-03-21)
+
+#### Optimización de Favoritos
+
+1. ✅ Implementada actualización optimista del estado
+2. ✅ Mejorado el feedback visual inmediato
+3. ✅ Optimizada la vista de favoritos con filtrado local
+4. ✅ Implementado manejo de errores con rollback
+5. ✅ Reducida la latencia percibida
+
+#### Optimización de Colecciones
+
+1. ✅ Mejorado el endpoint de agregar a colecciones
+2. ✅ Implementada validación robusta
+3. ✅ Optimizada la respuesta del servidor
+4. ✅ Mejorado el feedback visual
+5. ✅ Implementada actualización local del estado
+6. ✅ Añadido manejo de errores detallado
+
+### Mejoras de Rendimiento
+
+1. Actualización optimista del estado para operaciones comunes
+2. Reducción de la latencia percibida
+3. Mejor manejo de estados de carga
+4. Feedback visual inmediato
+5. Rollback automático en caso de error
+
+### Próximas Optimizaciones
+
+1. Implementar caché de colecciones
+2. Batch updates para operaciones múltiples
+3. Prefetch de datos comunes
+4. Optimizar queries de base de datos
+5. Implementar revalidación de datos
+
+### Issues Resueltos
+
+1. ✅ Lentitud en toggle de favoritos
+2. ✅ Inconsistencia en vista de favoritos
+3. ✅ Errores en agregar a colecciones
+4. ✅ Falta de feedback visual
+5. ✅ Problemas de tipado en colecciones
+
+### Correcciones de Bugs (2024-03-21)
+
+#### Corrección de Endpoint de Colecciones
+
+1. ✅ Corregido manejo de parámetros en la ruta
+2. ✅ Mejorada estructura de respuesta JSON
+3. ✅ Añadida validación adicional de datos
+4. ✅ Corregido manejo de errores
+5. ✅ Añadido campo de color a la respuesta
+
+#### Corrección de Manejo de Respuestas
+
+1. ✅ Mejorado manejo de respuestas JSON
+2. ✅ Implementada validación de respuesta
+3. ✅ Añadido manejo de errores más detallado
+4. ✅ Mejorado feedback visual
+5. ✅ Optimizada actualización del estado local
+
+### Issues Resueltos
+
+1. ✅ Error 500 al agregar a colecciones
+2. ✅ Error de parsing JSON en respuesta
+3. ✅ Inconsistencia en datos de colección
+4. ✅ Falta de validación en endpoint
+5. ✅ Manejo incorrecto de parámetros de ruta
+
+### Próximas Mejoras
+
+1. Implementar caché de respuestas
+2. Añadir retry automático en caso de error
+3. Mejorar validación de datos
+4. Optimizar queries de base de datos
+5. Implementar logging detallado
+
+### Implementación de Etiquetas y Colecciones (2024-03-21)
+
+#### Integración con Menú Contextual
+
+1. ✅ Refactorización del menú contextual para usar `useCollectionTagContext`
+2. ✅ Implementación de diálogo de nueva colección
+3. ✅ Implementación de diálogo de nueva etiqueta
+4. ✅ Integración con servicios existentes
+5. ✅ Optimización de UX/UI
+
+#### Mejoras en la Gestión de Colecciones
+
+1. ✅ Integración con el contexto global
+2. ✅ Selector de emoji mejorado
+3. ✅ Selector de color implementado
+4. ✅ Validación de duplicados
+5. ✅ Feedback visual mejorado
+
+#### Implementación de Etiquetas
+
+1. ✅ Creación de endpoint `/api/tags/[id]/files`
+2. ✅ Integración con el menú contextual
+3. ✅ Selector de color implementado
+4. ✅ Validación de duplicados
+5. ✅ Feedback visual con toasts
+
+### Próximas Mejoras
+
+1. 📋 Implementar eliminación de etiquetas/colecciones desde el menú contextual
+2. 📋 Añadir vista previa de miniaturas en hover
+3. 📋 Optimizar la carga de colecciones y etiquetas
+4. 📋 Implementar caché para mejorar el rendimiento
+5. 📋 Añadir soporte para operaciones masivas
+
+### Notas Técnicas
+
+- Se utiliza el contexto global para mantener la consistencia del estado
+- Las operaciones son optimistas para mejorar la UX
+- Se implementó validación robusta en los endpoints
+- Se añadió manejo de errores detallado
+- Se mejoró el feedback visual en todas las operaciones
+
+### Issues Resueltos
+
+1. ✅ Integración incorrecta con servicios
+2. ✅ Falta de validación en endpoints
+3. ✅ UX inconsistente en operaciones
+4. ✅ Manejo de errores incompleto
+5. ✅ Feedback visual insuficiente
+
+### Próximos Pasos
+
+1. 📋 Implementar eliminación de etiquetas/colecciones
+2. 📋 Mejorar la gestión de estado global
+3. 📋 Optimizar el rendimiento
+4. 📋 Implementar operaciones masivas
+5. 📋 Añadir más opciones de personalización
