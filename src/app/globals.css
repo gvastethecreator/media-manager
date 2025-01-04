@@ -87,12 +87,76 @@
   .sidebar-item-active {
     @apply bg-accent text-accent-foreground;
   }
+
+  /* Efecto de brillo mejorado */
+  .card-glow {
+    --glow-size: 400px;
+    --glow-color: rgba(64, 156, 255, 0.35);
+    position: relative;
+    isolation: isolate;
+  }
+
+  .card-glow::before,
+  .card-glow::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
+        var(--glow-color),
+        transparent 50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .card-glow::before {
+    --glow-color: rgba(64, 156, 255, 0.25);
+    --glow-size: 600px;
+    filter: blur(24px);
+  }
+
+  .card-glow::after {
+    --glow-color: rgba(64, 156, 255, 0.15);
+    --glow-size: 300px;
+    filter: blur(16px);
+  }
+
+  .card-glow:hover::before,
+  .card-glow:hover::after {
+    opacity: 1;
+  }
+
+  /* Variante para tema oscuro */
+  .dark .card-glow::before {
+    --glow-color: rgba(64, 156, 255, 0.35);
+  }
+
+  .dark .card-glow::after {
+    --glow-color: rgba(64, 156, 255, 0.25);
+  }
+
+  /* Estado seleccionado */
+  .card-glow[data-selected="true"]::before,
+  .card-glow[data-selected="true"]::after {
+    --glow-color: rgba(var(--primary), 0.35);
+    opacity: 1;
+  }
+
+  /* Estado marcado */
+  .card-glow[data-marked="true"]::before,
+  .card-glow[data-marked="true"]::after {
+    --glow-color: rgba(var(--warning), 0.35);
+    opacity: 1;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

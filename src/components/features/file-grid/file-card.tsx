@@ -2,11 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
-	motion,
-	AnimatePresence,
-	useReducedMotion,
-	useSpring,
-	useMotionValue,
+	motion
 } from "motion/react";
 import { FileItem } from "@/types/file-item";
 import { ThumbnailSize } from "@/types/ui";
@@ -23,7 +19,6 @@ import {
 	FileIcon,
 	ImageIcon,
 	StarIcon,
-	TagIcon,
 	CalendarIcon,
 	BookmarkIcon,
 } from "lucide-react";
@@ -81,6 +76,39 @@ const variants = {
 	},
 };
 
+/**
+ * Hook optimizado para manejar el efecto de brillo en las tarjetas
+ * @param elementRef Referencia al elemento que tendrá el efecto
+ */
+export function useGlowEffect(elementRef: React.RefObject<HTMLElement>) {
+	const handleMouseMove = useCallback(
+		(e: MouseEvent) => {
+			if (!elementRef.current) return;
+
+			const rect = elementRef.current.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+
+			requestAnimationFrame(() => {
+				elementRef.current?.style.setProperty("--mouse-x", `${x}px`);
+				elementRef.current?.style.setProperty("--mouse-y", `${y}px`);
+			});
+		},
+		[elementRef]
+	);
+
+	useEffect(() => {
+		const element = elementRef.current;
+		if (!element) return;
+
+		element.addEventListener("mousemove", handleMouseMove);
+
+		return () => {
+			element.removeEventListener("mousemove", handleMouseMove);
+		};
+	}, [elementRef, handleMouseMove]);
+}
+
 export function FileCard({
 	item,
 	thumbnailSize = "medium",
@@ -90,6 +118,7 @@ export function FileCard({
 	shouldLoad = false,
 	hasBeenRendered = false,
 }: FileCardProps) {
+	const cardRef = useRef<HTMLDivElement>(null);
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -99,6 +128,9 @@ export function FileCard({
 	const [isHovered, setIsHovered] = useState(false);
 	const [isMarked, setIsMarked] = useState(false);
 	const hasLoaded = useRef(false);
+
+	// Inicializar el efecto de brillo
+	useGlowEffect(cardRef as React.RefObject<HTMLElement>);
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -590,12 +622,16 @@ export function FileCard({
 
 	return (
 		<motion.div
+			ref={cardRef}
 			whileHover="hover"
 			whileTap="tap"
 			animate={isSelected ? "selected" : isMarked ? "marked" : ""}
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 ring-1 ring-white/10 ring-inset rounded-sm  cursor-pointer",
+				"card-glow relative overflow-hidden w-full h-full",
+				"transition-all duration-300 ease-out",
+				"ring-1 ring-white/10 ring-inset rounded-sm cursor-pointer",
+				"transform-gpu backdrop-blur-[1px]",
 				isSelected
 					? "ring-1 ring-primary ring-inset shadow-lg"
 					: isMarked
@@ -604,6 +640,8 @@ export function FileCard({
 					? "ring-1 ring-white/30 ring-inset"
 					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
 			)}
+			data-selected={isSelected}
+			data-marked={isMarked}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onMouseDown={handleMouseDown}
@@ -613,6 +651,7 @@ export function FileCard({
 				...style,
 				height: "100%",
 				width: "100%",
+				willChange: "transform",
 			}}
 		>
 			<FileContextMenu file={item} onAction={handleContextMenuAction}>
