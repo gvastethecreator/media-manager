@@ -187,18 +187,183 @@ export function FileCard({
 	};
 
 	const handleContextMenuAction = useCallback(
-		async (action: string, file: FileItem) => {
+		async (action: string, file: FileItem, data?: any) => {
 			try {
 				switch (action) {
 					case "favorite-toggle":
-						// TODO: Implementar toggle de favorito
+						try {
+							// Actualizar el estado local inmediatamente (optimista)
+							const newFavoriteState = !file.isFavorite;
+							const updatedFile = { ...file, isFavorite: newFavoriteState };
+							toggleItemSelection(updatedFile, false);
+
+							// Mostrar feedback inmediato
+							toast({
+								title: newFavoriteState
+									? "Agregado a favoritos"
+									: "Eliminado de favoritos",
+								description: `${file.name} ha sido ${
+									newFavoriteState ? "agregado a" : "eliminado de"
+								} favoritos`,
+							});
+
+							// Realizar la actualización en el servidor en segundo plano
+							const response = await fetch(`/api/images/${file.id}/favorite`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ isFavorite: newFavoriteState }),
+							});
+
+							if (!response.ok) {
+								// Si falla, revertir el cambio local
+								toggleItemSelection(
+									{ ...file, isFavorite: !newFavoriteState },
+									false
+								);
+								throw new Error("Error al actualizar favorito");
+							}
+						} catch (error) {
+							console.error("Error toggling favorite:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo actualizar el estado de favorito",
+								variant: "destructive",
+							});
+						}
 						break;
-					case "collection-new":
-						// TODO: Implementar creación de colección nueva utilizando el servicio de colecciones y teniendo de referencia @collections-section
+
+					case "collection-add":
+						try {
+							if (!data?.collectionId)
+								throw new Error("ID de colección no proporcionado");
+
+							// Mostrar feedback inmediato
+							toast({
+								title: "Agregando a colección",
+								description: "Procesando...",
+							});
+
+							const response = await fetch(
+								`/api/collections/${data.collectionId}/files`,
+								{
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify({ fileId: file.id }),
+								}
+							);
+
+							if (!response.ok) {
+								const errorData = await response.json();
+								throw new Error(
+									errorData.error || "Error al agregar a la colección"
+								);
+							}
+
+							const { success, collection } = await response.json();
+
+							if (!success || !collection) {
+								throw new Error("Respuesta inválida del servidor");
+							}
+
+							// Actualizar el estado local si es necesario
+							const updatedFile = {
+								...file,
+								collections: [
+									...(file.collections || []),
+									{
+										id: collection.id,
+										name: collection.name,
+										emoji: collection.emoji,
+										color: collection.color || "#000000",
+									},
+								],
+							};
+							toggleItemSelection(updatedFile, false);
+
+							toast({
+								title: "Agregado a la colección",
+								description: `${file.name} ha sido agregado a ${collection.name}`,
+							});
+						} catch (error) {
+							console.error("Error adding to collection:", error);
+							toast({
+								title: "Error",
+								description:
+									error instanceof Error
+										? error.message
+										: "No se pudo agregar a la colección",
+								variant: "destructive",
+							});
+						}
 						break;
-					case "tag-new":
-						// TODO: Implementar creación de etiqueta nueva utilizando el servicio de etiquetas y teniendo de referencia @tags-section
+
+					case "tag-add":
+						try {
+							if (!data?.tagId)
+								throw new Error("ID de etiqueta no proporcionado");
+
+							// Mostrar feedback inmediato
+							toast({
+								title: "Agregando etiqueta",
+								description: "Procesando...",
+							});
+
+							const response = await fetch(`/api/tags/${data.tagId}/files`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ fileId: file.id }),
+							});
+
+							if (!response.ok) {
+								const errorData = await response.json();
+								throw new Error(
+									errorData.error || "Error al agregar la etiqueta"
+								);
+							}
+
+							const { success, tag } = await response.json();
+
+							if (!success || !tag) {
+								throw new Error("Respuesta inválida del servidor");
+							}
+
+							// Actualizar el estado local si es necesario
+							const updatedFile = {
+								...file,
+								tags: [
+									...(file.tags || []),
+									{
+										id: tag.id,
+										name: tag.name,
+										color: tag.color || "#000000",
+									},
+								],
+							};
+							toggleItemSelection(updatedFile, false);
+
+							toast({
+								title: "Etiqueta agregada",
+								description: `${file.name} ha sido etiquetado con ${tag.name}`,
+							});
+						} catch (error) {
+							console.error("Error adding tag:", error);
+							toast({
+								title: "Error",
+								description:
+									error instanceof Error
+										? error.message
+										: "No se pudo agregar la etiqueta",
+								variant: "destructive",
+							});
+						}
 						break;
+
 					case "preview":
 						if (file.metadata?.mimeType?.startsWith("image/")) {
 							openViewer([file], 0);
@@ -206,18 +371,97 @@ export function FileCard({
 							onDoubleClick?.(file);
 						}
 						break;
+
 					case "open":
-						// Abrir ubicación del archivo
+						try {
+							const response = await fetch(`/api/files/${file.id}/location`, {
+								method: "POST",
+							});
+
+							if (!response.ok) throw new Error("Error al abrir ubicación");
+
+							toast({
+								title: "Ubicación abierta",
+								description: "Se ha abierto la ubicación del archivo",
+							});
+						} catch (error) {
+							console.error("Error opening location:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo abrir la ubicación",
+								variant: "destructive",
+							});
+						}
 						break;
+
 					case "download":
-						// Descargar archivo
+						try {
+							const response = await fetch(`/api/files/${file.id}/download`);
+							if (!response.ok) throw new Error("Error al descargar archivo");
+
+							const blob = await response.blob();
+							const url = window.URL.createObjectURL(blob);
+							const a = document.createElement("a");
+							a.href = url;
+							a.download = file.name;
+							document.body.appendChild(a);
+							a.click();
+							window.URL.revokeObjectURL(url);
+							document.body.removeChild(a);
+
+							toast({
+								title: "Descarga iniciada",
+								description: `Se ha iniciado la descarga de ${file.name}`,
+							});
+						} catch (error) {
+							console.error("Error downloading file:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo descargar el archivo",
+								variant: "destructive",
+							});
+						}
 						break;
+
 					case "copy":
-						// Copiar la imagen  al portapapeles
+						try {
+							await navigator.clipboard.writeText(file.path);
+							toast({
+								title: "Copiado",
+								description: "Ruta del archivo copiada al portapapeles",
+							});
+						} catch (error) {
+							console.error("Error copying to clipboard:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo copiar al portapapeles",
+								variant: "destructive",
+							});
+						}
 						break;
+
 					case "delete":
-						// TODO: Implementar eliminación
+						try {
+							const response = await fetch(`/api/files/${file.id}`, {
+								method: "DELETE",
+							});
+
+							if (!response.ok) throw new Error("Error al eliminar archivo");
+
+							toast({
+								title: "Archivo eliminado",
+								description: `${file.name} ha sido eliminado`,
+							});
+						} catch (error) {
+							console.error("Error deleting file:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo eliminar el archivo",
+								variant: "destructive",
+							});
+						}
 						break;
+
 					default:
 						console.warn("Acción no implementada:", action);
 				}
@@ -230,7 +474,7 @@ export function FileCard({
 				});
 			}
 		},
-		[onDoubleClick, toast, openViewer]
+		[onDoubleClick, toast, openViewer, toggleItemSelection]
 	);
 
 	const handleHoverStart = useCallback(() => {

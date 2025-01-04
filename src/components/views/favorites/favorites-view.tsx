@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
@@ -18,11 +18,18 @@ export function FavoritesView() {
 		isLoading,
 		isProcessingThumbnails,
 	} = useFileManager();
+
 	const { openViewer } = useImageViewer();
 
+	// Cargar favoritos al montar el componente
 	useEffect(() => {
 		loadItems("/api/images/favorites/all");
 	}, [loadItems]);
+
+	// Filtrar solo los items favoritos (doble verificación)
+	const favoriteItems = useMemo(() => {
+		return items.filter((item) => item.isFavorite);
+	}, [items]);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
@@ -34,7 +41,7 @@ export function FavoritesView() {
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
 			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
+				const imageItems = favoriteItems.filter(
 					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
 				);
 				openViewer(
@@ -43,7 +50,7 @@ export function FavoritesView() {
 				);
 			}
 		},
-		[openViewer, items]
+		[openViewer, favoriteItems]
 	);
 
 	if (isLoading) {
@@ -54,7 +61,7 @@ export function FavoritesView() {
 		);
 	}
 
-	if (!items || items.length === 0) {
+	if (!favoriteItems || favoriteItems.length === 0) {
 		return (
 			<EmptyState
 				icon={Star}
@@ -68,7 +75,7 @@ export function FavoritesView() {
 		<div className="h-full w-full flex overflow-hidden">
 			<div className="h-full w-full overflow-auto">
 				<FileGrid
-					items={items}
+					items={favoriteItems}
 					selectedItem={selectedItem}
 					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
