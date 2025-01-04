@@ -16,7 +16,7 @@ const GRID_CONFIG = {
 	maxColumns: 6,
 	gap: 0,
 	itemBaseWidth: 200,
-	itemAspectRatio: 1,
+	itemAspectRatio: 1.2,
 	breakpoints: {
 		sm: 640,
 		md: 768,
@@ -46,7 +46,7 @@ export function FileGrid({
 	// Observer para infinite scroll con un margen mayor
 	const { ref: loadMoreRef, inView } = useInView({
 		threshold: 0,
-		rootMargin: "500px", // Aumentado para cargar más anticipadamente
+		rootMargin: "800px", // Aumentado para cargar más anticipadamente
 	});
 
 	// Usar ResizeObserver para detectar cambios en el contenedor
@@ -103,7 +103,6 @@ export function FileGrid({
 			)}
 			style={{
 				padding: `${GRID_CONFIG.gap}px`,
-				willChange: "transform",
 				contain: "size layout paint",
 			}}
 		>
@@ -125,10 +124,9 @@ export function FileGrid({
 					}
 
 					return (
-						<motion.div
+						<div
 							ref={ref}
 							key={item.id}
-							layoutId={`file-${item.id}`}
 							className="relative w-full aspect-square"
 						>
 							<FileCard
@@ -140,7 +138,7 @@ export function FileGrid({
 								shouldLoad={isVisible}
 								hasBeenRendered={hasBeenRendered}
 							/>
-						</motion.div>
+						</div>
 					);
 				})}
 			</div>
