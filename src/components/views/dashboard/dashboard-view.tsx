@@ -100,7 +100,7 @@ const FolderUsage = memo(
 		folder?: { name: string; size: number; percentage: number };
 		isLoading: boolean;
 	}) => (
-		<div className="space-y-2">
+		<div className="space-y-1">
 			{isLoading ? (
 				<>
 					<Skeleton className="h-4 w-full" />
@@ -109,13 +109,21 @@ const FolderUsage = memo(
 			) : (
 				folder && (
 					<>
-						<div className="flex justify-between text-sm">
-							<span className="truncate">{folder.name}</span>
-							<span className="text-muted-foreground">
-								{formatBytes(folder.size)}
-							</span>
+						<div className="flex justify-between text-sm items-center">
+							<div className="flex items-center space-x-2">
+								<Icons.Folder className="h-3 w-3 text-muted-foreground" />
+								<span className="truncate max-w-[150px]">{folder.name}</span>
+							</div>
+							<div className="flex items-center space-x-2">
+								<span className="text-xs text-muted-foreground">
+									{formatBytes(folder.size)}
+								</span>
+								<span className="text-xs font-medium">
+									{folder.percentage}%
+								</span>
+							</div>
 						</div>
-						<Progress value={folder.percentage} />
+						<Progress value={folder.percentage} className="h-1.5" />
 					</>
 				)
 			)}
@@ -299,69 +307,56 @@ export function DashboardView({ isResizing }: ViewProps) {
 	}
 
 	return (
-		<div className="h-full overflow-auto">
+		<ScrollArea className="h-full overflow-auto">
 			<motion.div
 				className="p-6 space-y-6"
 				variants={containerVariants}
 				initial="initial"
 				animate="animate"
 			>
-				{/* Estadísticas Principales */}
-				<motion.div
-					className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-					variants={containerVariants}
-				>
-					{mainStats.map((stat, i) => (
-						<StatCard key={i} {...stat} isLoading={isLoading} />
-					))}
-				</motion.div>
+				<motion.div className="grid gap-4" variants={containerVariants}>
+					{/* Stats Grid */}
+					<div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+						{[...mainStats, ...additionalStats].map((stat, i) => (
+							<StatCard key={i} {...stat} isLoading={isLoading} />
+						))}
+					</div>
 
-				{/* Estadísticas Adicionales */}
-				<motion.div
-					className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-					variants={containerVariants}
-				>
-					{additionalStats.map((stat, i) => (
-						<StatCard key={i} {...stat} isLoading={isLoading} />
-					))}
-				</motion.div>
-
-				{/* Uso de Espacio por Carpeta y Etiquetas Más Usadas */}
-				<motion.div
-					className="grid gap-4 md:grid-cols-2"
-					variants={containerVariants}
-				>
-					<Card>
-						<CardHeader>
-							<CardTitle>Uso de Espacio por Carpeta</CardTitle>
-							<CardDescription>
-								Distribución del espacio utilizado
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{(isLoading ? Array(3).fill(null) : stats?.folderStats || []).map(
-								(folder, i) => (
+					{/* Uso de Espacio y Tags */}
+					<div className="grid gap-3 md:grid-cols-2">
+						<Card>
+							<CardHeader>
+								<CardTitle>Uso de Espacio por Carpeta</CardTitle>
+								<CardDescription>
+									Distribución del espacio utilizado
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								{(isLoading
+									? Array(3).fill(null)
+									: stats?.folderStats || []
+								).map((folder, i) => (
 									<FolderUsage key={i} folder={folder} isLoading={isLoading} />
-								)
-							)}
-						</CardContent>
-					</Card>
+								))}
+							</CardContent>
+						</Card>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Etiquetas Más Usadas</CardTitle>
-							<CardDescription>
-								Top etiquetas por número de imágenes
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
-								(tag, i) => (
-									<TagUsage key={i} tag={tag} isLoading={isLoading} />
-								)
-							)}
-						</CardContent>
-					</Card>
+						<Card>
+							<CardHeader>
+								<CardTitle>Etiquetas Más Usadas</CardTitle>
+								<CardDescription>
+									Top etiquetas por número de imágenes
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
+									(tag, i) => (
+										<TagUsage key={i} tag={tag} isLoading={isLoading} />
+									)
+								)}
+							</CardContent>
+						</Card>
+					</div>
 				</motion.div>
 
 				{/* Actividad Reciente */}
@@ -386,6 +381,6 @@ export function DashboardView({ isResizing }: ViewProps) {
 					</Card>
 				</motion.div>
 			</motion.div>
-		</div>
+		</ScrollArea>
 	);
 }

@@ -48,7 +48,7 @@ const springConfig = {
 	mass: 0.5,
 };
 
-// Solo mantenemos las variantes esenciales
+// Solo mantenemos las variantes esenciales y las optimizamos
 const variants = {
 	hover: {
 		scale: 0.95,
@@ -71,6 +71,7 @@ export function FileCard({
 	onDoubleClick,
 	style,
 	shouldLoad = false,
+	hasBeenRendered = false,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -563,9 +564,6 @@ export function FileCard({
 
 	return (
 		<motion.div
-			initial={false} // Deshabilita la animación inicial
-			layout={false} // Deshabilita las animaciones de layout
-			layoutId={`file-${item.id}`}
 			whileHover="hover"
 			whileTap="tap"
 			variants={variants}
@@ -584,8 +582,6 @@ export function FileCard({
 				...style,
 				height: "100%",
 				width: "100%",
-				willChange: "transform",
-				contain: "size layout",
 			}}
 		>
 			<FileContextMenu file={item} onAction={handleContextMenuAction}>

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { FileCard } from "./file-card";
 import type { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 // Cache global persistente para mantener los elementos renderizados
@@ -41,7 +40,7 @@ export function FileGrid({
 }: FileGridProps) {
 	const gridRef = useRef<HTMLDivElement>(null);
 	const loadMoreRef = useRef<HTMLDivElement>(null);
-	const [containerWidth, setContainerWidth] = useState(0);
+	const [containerWidth, setContainerWidth] = useState(window.innerWidth);
 	const [isScrolling, setIsScrolling] = useState(false);
 	const scrollingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -71,12 +70,9 @@ export function FileGrid({
 		if (!gridRef.current) return;
 
 		const resizeObserver = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const width = entry.contentRect.width;
-				// Debounce del resize para evitar recálculos innecesarios
-				requestAnimationFrame(() => {
-					setContainerWidth(width);
-				});
+			const width = entries[0].contentRect.width;
+			if (width > 0) {
+				setContainerWidth(width);
 			}
 		});
 
@@ -86,14 +82,13 @@ export function FileGrid({
 
 	// Memoizar el cálculo de dimensiones del grid
 	const { columns, itemSize } = useMemo(() => {
-		const availableWidth = containerWidth || window.innerWidth;
+		const availableWidth = containerWidth;
 		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
 		targetColumns = Math.max(
 			GRID_CONFIG.minColumns,
 			Math.min(GRID_CONFIG.maxColumns, targetColumns)
 		);
 
-		// Calculamos el tamaño del item considerando solo el gap horizontal
 		const itemSize = Math.floor(
 			(availableWidth - (targetColumns - 1) * GRID_CONFIG.gap) / targetColumns
 		);
@@ -153,7 +148,6 @@ export function FileGrid({
 			style={{
 				padding: `${GRID_CONFIG.gap}px`,
 				contain: "size layout paint style",
-				willChange: "transform",
 			}}
 		>
 			<div
@@ -161,7 +155,6 @@ export function FileGrid({
 					height: `${rowVirtualizer.getTotalSize()}px`,
 					width: "100%",
 					position: "relative",
-					willChange: "transform",
 				}}
 			>
 				{rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -173,12 +166,10 @@ export function FileGrid({
 							key={virtualRow.key}
 							style={{
 								position: "absolute",
-								top: 0,
+								top: `${virtualRow.start}px`,
 								left: 0,
 								width: "100%",
 								height: `${itemSize}px`,
-								transform: `translateY(${virtualRow.start}px)`,
-								willChange: "transform",
 							}}
 						>
 							<div
@@ -197,10 +188,7 @@ export function FileGrid({
 									}
 
 									return (
-										<motion.div
-											key={item.id}
-											className="relative w-full"
-										>
+										<div key={item.id} className="relative w-full">
 											<FileCard
 												item={item}
 												onClick={onItemClick}
@@ -210,7 +198,7 @@ export function FileGrid({
 												shouldLoad={!isScrolling || hasBeenRendered}
 												hasBeenRendered={hasBeenRendered}
 											/>
-										</motion.div>
+										</div>
 									);
 								})}
 							</div>
