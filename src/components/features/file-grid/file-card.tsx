@@ -45,12 +45,11 @@ interface FileCardProps {
 
 const springConfig = {
 	type: "spring",
-	stiffness: 100,
-	damping: 15,
+	stiffness: 200,
+	damping: 20,
 	mass: 0.2,
 	restSpeed: 0.1,
 	restDelta: 0.001,
-	bounce: 0.1,
 };
 
 const transitionConfig = {
@@ -66,22 +65,9 @@ const fadeInOutVariants = {
 };
 
 const variants = {
-	hidden: {
-		opacity: 0,
-		scale: 0.9,
-	},
-	visible: {
-		opacity: 1,
-		scale: 1,
-		transition: springConfig,
-	},
 	hover: {
 		scale: 0.95,
-		transition: {
-			...springConfig,
-			stiffness: 200,
-			damping: 20,
-		},
+		transition: springConfig,
 	},
 	tap: {
 		scale: 0.93,
@@ -114,12 +100,8 @@ export function FileCard({
 	const shouldReduceMotion = useReducedMotion();
 	const hasLoaded = useRef(false);
 
-	// Motion values optimizados
-	const scale = useSpring(1, {
-		...springConfig,
-		stiffness: 200,
-	});
-	const opacity = useSpring(1, springConfig);
+	// Motion values optimizados solo para hover/selected
+	const scale = useSpring(1, springConfig);
 	const y = useSpring(0, springConfig);
 
 	// Determinar si este item está seleccionado
@@ -256,23 +238,19 @@ export function FileCard({
 		setIsHovered(true);
 		y.set(-10);
 		scale.set(0.95);
-		opacity.set(1);
-	}, [shouldLoad, y, scale, opacity]);
+	}, [shouldLoad, y, scale]);
 
 	const handleHoverEnd = useCallback(() => {
 		if (!shouldLoad) return;
 		setIsHovered(false);
 		y.set(0);
 		scale.set(1);
-		opacity.set(1);
-	}, [shouldLoad, y, scale, opacity]);
+	}, [shouldLoad, y, scale]);
 
 	return (
 		<motion.div
 			layout
 			layoutId={`file-${item.id}`}
-			initial={false}
-			animate="visible"
 			whileHover="hover"
 			whileTap="tap"
 			variants={variants}
@@ -296,13 +274,7 @@ export function FileCard({
 			}}
 		>
 			<FileContextMenu file={item} onAction={handleContextMenuAction}>
-				<motion.div
-					className="relative w-full h-full overflow-hidden"
-					variants={{
-						hidden: { opacity: 0 },
-						visible: { opacity: 1 },
-					}}
-				>
+				<motion.div className="relative w-full h-full overflow-hidden">
 					<AnimatePresence mode="wait" initial={false}>
 						{isLoading ? (
 							<motion.div
@@ -328,7 +300,6 @@ export function FileCard({
 							</motion.div>
 						) : thumbnail ? (
 							<motion.div
-								variants={fadeInOutVariants}
 								initial={false}
 								animate="visible"
 								exit="exit"
@@ -361,11 +332,7 @@ export function FileCard({
 										scale: isSelected || isHovered ? 0.9 : 1,
 										y: isSelected || isHovered ? -10 : 0,
 									}}
-									transition={{
-										type: "spring",
-										stiffness: 200,
-										damping: 20,
-									}}
+									transition={springConfig}
 								>
 									<ImageCard
 										src={thumbnail || ""}
@@ -383,11 +350,7 @@ export function FileCard({
 										opacity: isSelected || isHovered ? 1 : 0,
 										y: isSelected || isHovered ? 0 : 10,
 									}}
-									transition={{
-										type: "spring",
-										stiffness: 200,
-										damping: 20,
-									}}
+									transition={springConfig}
 									className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2"
 								>
 									<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
