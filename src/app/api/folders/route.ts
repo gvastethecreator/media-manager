@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getImageMetadata } from '@/lib/image'
-import { writeStreamEvent } from '@/lib/stream'
+import { generateThumbnail } from '@/lib/thumbnail'
+import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
 import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
 import { join, extname } from 'path'
-import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
 import { fsService } from '@/services/fs.server'
 
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  // Preparar respuesta SSE primero
+  // Preparar respuesta SSE
   const response = new NextResponse(stream.readable, {
     headers: {
       'Content-Type': 'text/event-stream',
@@ -59,26 +58,39 @@ export async function POST(request: NextRequest) {
         where: { path: normalizedPath }
       })
 
+      let folder
       if (existingFolder) {
-        throw new Error('FOLDER_EXISTS')
+        folder = existingFolder
+        console.log('Carpeta existente, iniciando reindexación:', folder)
+        await sendEvent('progress', {
+          status: 'Carpeta existente, iniciando reindexación...',
+          current: 0,
+          total: 0,
+          progress: 0
+        })
+
+        // Eliminar imágenes existentes
+        await prisma.image.deleteMany({
+          where: { folderId: folder.id }
+        })
+      } else {
+        // Crear carpeta en la base de datos
+        folder = await prisma.folder.create({
+          data: {
+            path: normalizedPath,
+            name: normalizedPath.split('\\').pop() || normalizedPath,
+            lastIndexed: new Date()
+          }
+        })
+
+        console.log('Carpeta creada:', folder)
+        await sendEvent('progress', {
+          status: 'Carpeta creada, iniciando indexación...',
+          current: 0,
+          total: 0,
+          progress: 0
+        })
       }
-
-      // Crear carpeta en la base de datos
-      const folder = await prisma.folder.create({
-        data: {
-          path: normalizedPath,
-          name: normalizedPath.split('\\').pop() || normalizedPath,
-          lastIndexed: new Date()
-        }
-      })
-
-      console.log('Carpeta creada:', folder)
-      await sendEvent('progress', {
-        status: 'Carpeta creada, iniciando indexación...',
-        current: 0,
-        total: 0,
-        progress: 0
-      })
 
       // Función recursiva para procesar archivos
       async function processDirectory(dirPath: string): Promise<{ processed: number; total: number }> {
@@ -249,12 +261,18 @@ export async function POST(request: NextRequest) {
         message: errorMessage
       })
     } finally {
-      await writer.close()
+      try {
+        await writer.close()
+      } catch (error) {
+        console.error('Error cerrando writer:', error)
+      }
     }
   }
 
   // Iniciar procesamiento en background
-  processFolder()
+  processFolder().catch(error => {
+    console.error('Error fatal en processFolder:', error)
+  })
 
   return response
 }
