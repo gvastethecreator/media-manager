@@ -17,13 +17,12 @@ export async function POST(
       );
     }
 
-    // Verificar que la colección existe
-    const collection = await prisma.collection.findUnique({
+    // Verificar que la etiqueta existe
+    const tag = await prisma.tag.findUnique({
       where: { id },
       select: {
         id: true,
         name: true,
-        emoji: true,
         color: true,
         files: {
           select: {
@@ -33,21 +32,19 @@ export async function POST(
       },
     });
 
-    if (!collection) {
+    if (!tag) {
       return NextResponse.json(
-        { error: "Colección no encontrada" },
+        { error: "Etiqueta no encontrada" },
         { status: 404 }
       );
     }
 
-    // Verificar si el archivo ya está en la colección
-    const isFileInCollection = collection.files.some(
-      (file) => file.id === fileId
-    );
+    // Verificar si el archivo ya tiene la etiqueta
+    const isFileTagged = tag.files.some((file) => file.id === fileId);
 
-    if (isFileInCollection) {
+    if (isFileTagged) {
       return NextResponse.json(
-        { error: "El archivo ya está en la colección" },
+        { error: "El archivo ya tiene esta etiqueta" },
         { status: 400 }
       );
     }
@@ -65,8 +62,8 @@ export async function POST(
       );
     }
 
-    // Agregar el archivo a la colección
-    await prisma.collection.update({
+    // Agregar la etiqueta al archivo
+    await prisma.tag.update({
       where: { id },
       data: {
         files: {
@@ -75,20 +72,19 @@ export async function POST(
       },
     });
 
-    // Retornar la información de la colección
+    // Retornar la información de la etiqueta
     return NextResponse.json({
       success: true,
-      collection: {
-        id: collection.id,
-        name: collection.name,
-        emoji: collection.emoji,
-        color: collection.color,
+      tag: {
+        id: tag.id,
+        name: tag.name,
+        color: tag.color,
       },
     });
   } catch (error) {
-    console.error("Error adding file to collection:", error);
+    console.error("Error adding tag to file:", error);
     return NextResponse.json(
-      { error: "Error al agregar archivo a la colección" },
+      { error: "Error al agregar etiqueta al archivo" },
       { status: 500 }
     );
   }

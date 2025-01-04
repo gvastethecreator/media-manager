@@ -13,6 +13,7 @@ import {
 	Tag as TagIcon,
 	FolderOpen,
 	ImageIcon,
+	Palette,
 } from "lucide-react";
 import {
 	ContextMenu,
@@ -26,11 +27,26 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import type { FileItem } from "@/types/file-item";
+import { useEffect, useState } from "react";
+import { useCollectionTagContext } from "@/context/settings-context";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { GithubPicker } from "react-color";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
-	onAction: (action: string, file: FileItem) => void;
+	onAction: (action: string, file: FileItem, data?: any) => void;
 }
 
 export function FileContextMenu({
@@ -38,6 +54,67 @@ export function FileContextMenu({
 	children,
 	onAction,
 }: FileContextMenuProps) {
+	const { settings, updateCollection, updateTag } = useCollectionTagContext();
+	const { collections, tags } = settings;
+
+	// Estados para nueva colección
+	const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
+	const [newCollection, setNewCollection] = useState({
+		name: "",
+		emoji: "📁",
+		description: "",
+		color: "#3b82f6",
+	});
+
+	// Estados para nueva etiqueta
+	const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+	const [newTag, setNewTag] = useState({
+		name: "",
+		color: "#3b82f6",
+		description: "",
+	});
+
+	const handleCreateCollection = async () => {
+		try {
+			const newCollectionData = {
+				...newCollection,
+				sortBy: "name" as const,
+				filters: [],
+				files: [file.id],
+			};
+
+			await updateCollection(null, newCollectionData);
+			setNewCollection({
+				name: "",
+				emoji: "📁",
+				description: "",
+				color: "#3b82f6",
+			});
+			setIsCollectionDialogOpen(false);
+			onAction("collection-refresh", file);
+		} catch (error) {
+			console.error("Error creating collection:", error);
+		}
+	};
+
+	const handleCreateTag = async () => {
+		try {
+			await updateTag(null, {
+				...newTag,
+				files: [file.id],
+			});
+			setNewTag({
+				name: "",
+				color: "#3b82f6",
+				description: "",
+			});
+			setIsTagDialogOpen(false);
+			onAction("tag-refresh", file);
+		} catch (error) {
+			console.error("Error creating tag:", error);
+		}
+	};
+
 	const isImage = file.type === "image" || file.mimeType?.startsWith("image/");
 
 	return (
@@ -65,12 +142,100 @@ export function FileContextMenu({
 						Agregar a colección
 					</ContextMenuSubTrigger>
 					<ContextMenuSubContent className="w-48">
-						<ContextMenuItem onClick={() => onAction("collection-new", file)}>
-							<BookmarkPlus className="mr-2 h-4 w-4" />
-							Nueva colección...
-						</ContextMenuItem>
+						<Dialog
+							open={isCollectionDialogOpen}
+							onOpenChange={setIsCollectionDialogOpen}
+						>
+							<DialogTrigger asChild>
+								<ContextMenuItem onSelect={(e) => e.preventDefault()}>
+									<BookmarkPlus className="mr-2 h-4 w-4" />
+									Nueva colección...
+								</ContextMenuItem>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Crear nueva colección</DialogTitle>
+								</DialogHeader>
+								<div className="grid gap-4 py-4">
+									<div className="flex items-center gap-4">
+										<EmojiPicker
+											value={newCollection.emoji}
+											onChange={(emoji) =>
+												setNewCollection({ ...newCollection, emoji })
+											}
+										/>
+										<Input
+											placeholder="Nombre de la colección"
+											value={newCollection.name}
+											onChange={(e) =>
+												setNewCollection({
+													...newCollection,
+													name: e.target.value,
+												})
+											}
+										/>
+									</div>
+									<div>
+										<Popover>
+											<PopoverTrigger asChild>
+												<Button variant="outline" className="w-full">
+													<div
+														className="w-4 h-4 rounded mr-2"
+														style={{
+															backgroundColor: newCollection.color,
+														}}
+													/>
+													Color
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-auto p-0" align="start">
+												<GithubPicker
+													color={newCollection.color}
+													onChange={(color) =>
+														setNewCollection({
+															...newCollection,
+															color: color.hex,
+														})
+													}
+												/>
+											</PopoverContent>
+										</Popover>
+									</div>
+									<Button
+										onClick={handleCreateCollection}
+										disabled={!newCollection.name.trim()}
+									>
+										Crear colección
+									</Button>
+								</div>
+							</DialogContent>
+						</Dialog>
 						<ContextMenuSeparator />
-						{/* Aquí irían las colecciones existentes */}
+						{collections.length > 0 ? (
+							collections.map((collection) => (
+								<ContextMenuItem
+									key={collection.id}
+									onClick={() =>
+										onAction("collection-add", file, {
+											collectionId: collection.id,
+										})
+									}
+								>
+									<div className="flex items-center gap-2 w-full">
+										<span className="mr-2">{collection.emoji}</span>
+										<span className="flex-1">{collection.name}</span>
+										<div
+											className="w-3 h-3 rounded"
+											style={{ backgroundColor: collection.color }}
+										/>
+									</div>
+								</ContextMenuItem>
+							))
+						) : (
+							<ContextMenuItem disabled>
+								No hay colecciones disponibles
+							</ContextMenuItem>
+						)}
 					</ContextMenuSubContent>
 				</ContextMenuSub>
 
@@ -80,12 +245,95 @@ export function FileContextMenu({
 						Etiquetas
 					</ContextMenuSubTrigger>
 					<ContextMenuSubContent className="w-48">
-						<ContextMenuItem onClick={() => onAction("tag-new", file)}>
-							<TagIcon className="mr-2 h-4 w-4" />
-							Nueva etiqueta...
-						</ContextMenuItem>
+						<Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+							<DialogTrigger asChild>
+								<ContextMenuItem onSelect={(e) => e.preventDefault()}>
+									<TagIcon className="mr-2 h-4 w-4" />
+									Nueva etiqueta...
+								</ContextMenuItem>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Crear nueva etiqueta</DialogTitle>
+								</DialogHeader>
+								<div className="grid gap-4 py-4">
+									<div className="flex items-center gap-4">
+										<Input
+											placeholder="Nombre de la etiqueta"
+											value={newTag.name}
+											onChange={(e) =>
+												setNewTag({
+													...newTag,
+													name: e.target.value,
+												})
+											}
+										/>
+									</div>
+									<div>
+										<Popover>
+											<PopoverTrigger asChild>
+												<Button variant="outline" className="w-full">
+													<div
+														className="w-4 h-4 rounded mr-2"
+														style={{
+															backgroundColor: newTag.color,
+														}}
+													/>
+													Color
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent className="w-auto p-0" align="start">
+												<GithubPicker
+													color={newTag.color}
+													onChange={(color) =>
+														setNewTag({
+															...newTag,
+															color: color.hex,
+														})
+													}
+												/>
+											</PopoverContent>
+										</Popover>
+									</div>
+									<Button
+										onClick={handleCreateTag}
+										disabled={!newTag.name.trim()}
+									>
+										Crear etiqueta
+									</Button>
+								</div>
+							</DialogContent>
+						</Dialog>
 						<ContextMenuSeparator />
-						{/* Aquí irían las etiquetas existentes */}
+						{tags.length > 0 ? (
+							tags.map((tag) => (
+								<ContextMenuItem
+									key={tag.id}
+									onClick={() =>
+										onAction("tag-add", file, {
+											tagId: tag.id,
+										})
+									}
+								>
+									<div className="flex items-center gap-2 w-full">
+										<div
+											className="w-3 h-3 rounded"
+											style={{ backgroundColor: tag.color }}
+										/>
+										<span className="flex-1">{tag.name}</span>
+										{tag.shortcut && (
+											<Badge variant="outline" className="text-[10px] h-4 px-1">
+												{tag.shortcut}
+											</Badge>
+										)}
+									</div>
+								</ContextMenuItem>
+							))
+						) : (
+							<ContextMenuItem disabled>
+								No hay etiquetas disponibles
+							</ContextMenuItem>
+						)}
 					</ContextMenuSubContent>
 				</ContextMenuSub>
 
