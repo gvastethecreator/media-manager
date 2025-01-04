@@ -5,9 +5,6 @@ import {
 	motion,
 	AnimatePresence,
 	useReducedMotion,
-	LazyMotion,
-	domAnimation,
-	m,
 	useSpring,
 	useMotionValue,
 } from "motion/react";
@@ -43,27 +40,15 @@ interface FileCardProps {
 	hasBeenRendered?: boolean;
 }
 
+// Configuración de animaciones simplificada
 const springConfig = {
 	type: "spring",
-	stiffness: 200,
-	damping: 20,
-	mass: 0.2,
-	restSpeed: 0.1,
-	restDelta: 0.001,
+	stiffness: 300,
+	damping: 30,
+	mass: 0.5,
 };
 
-const transitionConfig = {
-	type: "tween",
-	duration: 0.3,
-	ease: [0.4, 0, 0.2, 1],
-};
-
-const fadeInOutVariants = {
-	initial: { opacity: 0 },
-	animate: { opacity: 1 },
-	exit: { opacity: 0 },
-};
-
+// Solo mantenemos las variantes esenciales
 const variants = {
 	hover: {
 		scale: 0.95,
@@ -85,10 +70,7 @@ export function FileCard({
 	onClick,
 	onDoubleClick,
 	style,
-	index = 0,
-	totalColumns = 3,
 	shouldLoad = false,
-	hasBeenRendered = false,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -97,12 +79,7 @@ export function FileCard({
 	const { openViewer } = useImageViewer();
 	const { toggleItemSelection, selectedItems } = useFileManager();
 	const [isHovered, setIsHovered] = useState(false);
-	const shouldReduceMotion = useReducedMotion();
 	const hasLoaded = useRef(false);
-
-	// Motion values optimizados solo para hover/selected
-	const scale = useSpring(1, springConfig);
-	const y = useSpring(0, springConfig);
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -480,26 +457,23 @@ export function FileCard({
 	const handleHoverStart = useCallback(() => {
 		if (!shouldLoad) return;
 		setIsHovered(true);
-		y.set(-10);
-		scale.set(0.95);
-	}, [shouldLoad, y, scale]);
+	}, [shouldLoad]);
 
 	const handleHoverEnd = useCallback(() => {
 		if (!shouldLoad) return;
 		setIsHovered(false);
-		y.set(0);
-		scale.set(1);
-	}, [shouldLoad, y, scale]);
+	}, [shouldLoad]);
 
 	return (
 		<motion.div
-			layout
+			initial={false} // Deshabilita la animación inicial
+			layout={false} // Deshabilita las animaciones de layout
 			layoutId={`file-${item.id}`}
 			whileHover="hover"
 			whileTap="tap"
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full",
+				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200",
 				isSelected || isHovered
 					? "ring-1 ring-primary ring-inset shadow-lg"
 					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
@@ -518,129 +492,102 @@ export function FileCard({
 			}}
 		>
 			<FileContextMenu file={item} onAction={handleContextMenuAction}>
-				<motion.div className="relative w-full h-full overflow-hidden">
-					<AnimatePresence mode="wait" initial={false}>
-						{isLoading ? (
-							<motion.div
-								variants={fadeInOutVariants}
-								initial="hidden"
-								animate="visible"
-								exit="exit"
-								transition={transitionConfig}
-								className="absolute inset-0 bg-black/50"
+				<div className="relative w-full h-full overflow-hidden">
+					{isLoading ? (
+						<div className="absolute inset-0 bg-black/50 flex items-center justify-center" />
+					) : error ? (
+						<div className="absolute inset-0 bg-red-50/50 flex items-center justify-center">
+							<div className="text-red-500 text-xs text-center">
+								Error al cargar
+							</div>
+						</div>
+					) : thumbnail ? (
+						<div className="relative w-full h-full">
+							{/* Fondo blur */}
+							<div
+								className={cn(
+									"absolute inset-0 overflow-hidden brightness-10 transition-[filter] duration-200",
+									isSelected || isHovered
+										? "blur-[20px] brightness-[0.3]"
+										: "blur-[30px] brightness-[0.7]"
+								)}
+								style={{
+									backgroundImage: `url(${thumbnail})`,
+									backgroundSize: "cover",
+									backgroundPosition: "center",
+									transform: "scale(1.1) rotate(45deg)",
+								}}
 							/>
-						) : error ? (
-							<motion.div
-								variants={fadeInOutVariants}
-								initial="hidden"
-								animate="visible"
-								exit="exit"
-								transition={transitionConfig}
-								className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
+
+							{/* Imagen principal */}
+							<div
+								className={cn(
+									"absolute inset-0 flex justify-center items-center transition-transform duration-200",
+									isSelected || isHovered ? "scale-90 -translate-y-[10px]" : ""
+								)}
 							>
-								<div className="text-red-500 text-xs text-center">
-									Error al cargar
-								</div>
-							</motion.div>
-						) : thumbnail ? (
-							<motion.div
-								initial={false}
-								animate="visible"
-								exit="exit"
-								transition={transitionConfig}
-								className="relative w-full h-full"
-							>
-								{/* Fondo blur */}
-								<motion.div
-									className="absolute inset-0 overflow-hidden brightness-10"
-									style={{
-										backgroundImage: `url(${thumbnail})`,
-										backgroundSize: "cover",
-										backgroundPosition: "center",
-										transform: "scale(1.1) rotate(45deg)",
-										filter:
-											isSelected || isHovered
-												? "blur(20px) brightness(0.3)"
-												: "blur(30px) brightness(0.7)",
-									}}
-									transition={{
-										duration: 0.4,
-										ease: [0.4, 0, 0.2, 1],
-									}}
+								<ImageCard
+									src={thumbnail || ""}
+									alt={item.name}
+									width={item.metadata?.dimensions?.width || 300}
+									height={item.metadata?.dimensions?.height || 300}
+									className="max-w-[90%] max-h-[75%] z-10 shadow-lg rounded-sm"
+									priority={false}
 								/>
+							</div>
 
-								{/* Imagen principal */}
-								<motion.div
-									className="absolute inset-0 flex justify-center items-center"
-									animate={{
-										scale: isSelected || isHovered ? 0.9 : 1,
-										y: isSelected || isHovered ? -10 : 0,
-									}}
-									transition={springConfig}
-								>
-									<ImageCard
-										src={thumbnail || ""}
-										alt={item.name}
-										width={item.metadata?.dimensions?.width || 300}
-										height={item.metadata?.dimensions?.height || 300}
-										className="max-w-[90%] max-h-[75%] z-10 shadow-lg rounded-sm"
-										priority={false}
-									/>
-								</motion.div>
-
-								{/* Información */}
-								<motion.div
-									animate={{
-										opacity: isSelected || isHovered ? 1 : 0,
-										y: isSelected || isHovered ? 0 : 10,
-									}}
-									transition={springConfig}
-									className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2"
-								>
-									<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
-										<FileIcon size={10} />
-										<span>{item.name}</span>
-									</p>
-									<div className="grid grid-cols-2 gap-x-2 px-1">
-										<div className="space-y-0.5">
-											<div className="flex items-center gap-1 text-[8px] text-white/70">
-												<ImageIcon size={9} />
-												<span>{item.metadata?.extension?.toUpperCase()}</span>
-												<span>•</span>
-												<span>{formatBytes(item.metadata?.size || 0)}</span>
-											</div>
-											<div className="flex items-center gap-1 text-[9px] text-white/60">
-												<CalendarIcon size={9} />
-												<span>
-													{format(new Date(item.createdAt), "dd MMM yyyy", {
-														locale: es,
-													})}
-												</span>
-											</div>
+							{/* Información */}
+							<div
+								className={cn(
+									"absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2 transition-[opacity,transform] duration-200",
+									isSelected || isHovered
+										? "opacity-100 translate-y-0"
+										: "opacity-0 translate-y-2"
+								)}
+							>
+								<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
+									<FileIcon size={10} />
+									<span>{item.name}</span>
+								</p>
+								<div className="grid grid-cols-2 gap-x-2 px-1">
+									<div className="space-y-0.5">
+										<div className="flex items-center gap-1 text-[8px] text-white/70">
+											<ImageIcon size={9} />
+											<span>{item.metadata?.extension?.toUpperCase()}</span>
+											<span>•</span>
+											<span>{formatBytes(item.metadata?.size || 0)}</span>
 										</div>
-										<div className="text-right space-y-0.5">
-											{item.isFavorite && (
-												<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-													<StarIcon size={9} className="text-yellow-400" />
-													<span>Favorito</span>
-												</div>
-											)}
-											{item.tags && item.tags[0] && (
-												<Badge
-													variant="secondary"
-													className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-												>
-													<TagIcon size={8} className="mr-1" />
-													{item.tags[0].name}
-												</Badge>
-											)}
+										<div className="flex items-center gap-1 text-[9px] text-white/60">
+											<CalendarIcon size={9} />
+											<span>
+												{format(new Date(item.createdAt), "dd MMM yyyy", {
+													locale: es,
+												})}
+											</span>
 										</div>
 									</div>
-								</motion.div>
-							</motion.div>
-						) : null}
-					</AnimatePresence>
-				</motion.div>
+									<div className="text-right space-y-0.5">
+										{item.isFavorite && (
+											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
+												<StarIcon size={9} className="text-yellow-400" />
+												<span>Favorito</span>
+											</div>
+										)}
+										{item.tags && item.tags[0] && (
+											<Badge
+												variant="secondary"
+												className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+											>
+												<TagIcon size={8} className="mr-1" />
+												{item.tags[0].name}
+											</Badge>
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					) : null}
+				</div>
 			</FileContextMenu>
 		</motion.div>
 	);
