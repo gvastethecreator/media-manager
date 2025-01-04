@@ -4,17 +4,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { UserPlus, Trash2, Check, Smile } from "lucide-react";
+import { UserPlus, Trash2, Check, Smile, UserCog, Trash, X, UserX, Users, User } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
-import type { ThemeMode, Language } from "@/types/settings";
 import { cn } from "@/lib/utils";
 import { GithubPicker } from "react-color";
 import {
@@ -23,7 +14,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
-
+import { Separator } from "@/components/ui/separator";
 export function ProfilesSection() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } =
 		useSettingsContext();
@@ -54,31 +45,40 @@ export function ProfilesSection() {
 	};
 
 	return (
-		<div className="space-y-3">
+		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
 			{/* Perfil Activo */}
-			<Card className="border-none">
-				<CardHeader className="px-4 py-2">
-					<CardTitle className="text-base font-semibold flex items-center gap-2">
-						<Smile className="h-5 w-5" /> Perfil Activo
+				<CardHeader className="p-2 pb-0 bg-transparent">
+					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
+					<span className="flex items-center gap-2 h-7"><UserCog className="h-5 w-5" /> Perfiles</span>
+					<Button
+							variant="outline"
+							size="sm"
+							onClick={handleAddProfile}
+							className="h-7 text-xs"
+						>
+							<UserPlus className="h-3.5 w-3.5" />
+						</Button>
 					</CardTitle>
-				</CardHeader>
-				<CardContent className="p-3">
-					<div className="space-y-3">
+			</CardHeader>
+			<Separator className="my-0" />
+			<CardContent className="p-2 py-0">
+				<div className="flex items-center gap-2 text-xs text-muted-foreground/75 mb-3"><Smile className="h-4 w-4"/> Perfil Activo</div>
+					<div>
 						<div className="flex items-center gap-2">
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button
-										variant="outline"
+										variant="ghost"
 										size="icon"
-										className="h-8 w-8 rounded-full"
+										className="h-8 w-8 rounded-md items-center justify-center"
 										style={{ backgroundColor: activeProfileData?.color }}
 									>
-										<span className="text-base">
+										<span className="text-lg">
 											{activeProfileData?.emoji}
 										</span>
 									</Button>
 								</PopoverTrigger>
-								<PopoverContent className="w-[320px] p-0" align="start">
+								<PopoverContent className="w-[320px] border-none p-0 bg-transparent" align="start">
 									<EmojiPicker
 										onEmojiSelect={(emoji) =>
 											handleUpdateActiveProfile({ emoji })
@@ -92,13 +92,13 @@ export function ProfilesSection() {
 									onChange={(e) =>
 										handleUpdateActiveProfile({ name: e.target.value })
 									}
-									className="h-8 text-sm"
+									className="h-8 text-base border-none p-3"
 									placeholder="Nombre del perfil"
 								/>
 							</div>
 							<Popover>
 								<PopoverTrigger asChild>
-									<Button variant="outline" size="icon" className="h-8 w-8">
+									<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
 										<div
 											className="h-4 w-4 rounded-full"
 											style={{ backgroundColor: activeProfileData?.color }}
@@ -118,78 +118,49 @@ export function ProfilesSection() {
 
 					</div>
 				</CardContent>
-			</Card>
-
 			{/* Otros Perfiles */}
-			<Card className="border-none">
-				<CardHeader className="px-4 py-2">
-					<div className="flex items-center justify-between">
-						<CardTitle className="text-base font-semibold flex items-center gap-2">
-							<UserPlus className="h-5 w-5" /> Otros Perfiles
-						</CardTitle>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleAddProfile}
-							className="h-7 text-xs gap-1.5"
-						>
-							<UserPlus className="h-3.5 w-3.5" />
-							Nuevo Perfil
-						</Button>
-					</div>
-				</CardHeader>
-				<CardContent className="p-3">
-					<div className="space-y-1.5">
+			<Separator className="my-0" />
+			<CardContent className="px-2">
+				<div className="flex items-center gap-2 text-xs text-muted-foreground/75 mb-3"><Users className="h-4 w-4"/> Otros Perfiles</div>
+					<div className="grid grid-cols-2 gap-2">
 						{profiles
 							.filter((profile) => profile.id !== activeProfile)
 							.map((profile) => (
 								<Card
 									key={profile.id}
 									className={cn(
-										"bg-muted/30 group",
+										"bg-muted/30 group rounded-sm",
 										profile.isActive && "ring-1 ring-primary"
 									)}
 								>
 									<CardContent className="p-2">
-										<div className="flex items-center gap-2">
-											<div className="flex items-center gap-2 flex-1 min-w-0">
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-7 w-7 rounded-full"
+										<div className="flex items-center gap-2 relative">
+											<div className="flex items-center gap-2 min-w-0">
+												<div
+													className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
 													style={{ backgroundColor: profile.color }}
 												>
-													<span className="text-sm">{profile.emoji}</span>
-												</Button>
-												<div className="flex-1 min-w-0">
-													<Input
-														value={profile.name}
-														onChange={(e) =>
-															updateProfile(profile.id, {
-																name: e.target.value,
-															})
-														}
-														className="h-7 text-xs"
-													/>
+													<span className="text-lg">{profile.emoji}</span>
+												</div>
+												<div className="flex">
+													<span className="text-xs font-semibold truncate pl-1">{profile.name}</span>
 												</div>
 											</div>
-											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-8 shadow-lg">
 												<Button
-													variant="ghost"
-													size="sm"
+													variant="outline"
 													onClick={() => setActiveProfile(profile.id)}
-													className="h-7 text-xs gap-1.5"
+													className="h-4 text-xs gap-1 text-[9px] rounded-sm p-2"
 												>
-													<Check className="h-3.5 w-3.5" />
+													<Check className="h-3.5 w-3.5 text-green-500" />
 													Activar
 												</Button>
 												<Button
 													variant="ghost"
-													size="icon"
 													onClick={() => handleDeleteProfile(profile.id)}
-													className="h-7 w-7 text-destructive hover:text-destructive/90"
+													className="h-4 text-red-500 hover:text-red-500/90 text-[9px] rounded-sm p-1 py-2"
 												>
-													<Trash2 className="h-3.5 w-3.5" />
+													<UserX className="h-2 w-2" />
 												</Button>
 											</div>
 										</div>
@@ -208,9 +179,8 @@ export function ProfilesSection() {
 								</p>
 							</div>
 						)}
-					</div>
-				</CardContent>
-			</Card>
-		</div>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }
