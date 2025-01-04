@@ -1,33 +1,7 @@
 import sharp from 'sharp'
 import { existsSync } from 'fs'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
-
-export interface ImageMetadata {
-  width: number
-  height: number
-  format: string | null
-  size: number | null
-}
-
-export async function getImageMetadata(imagePath: string): Promise<ImageMetadata> {
-  try {
-    if (!existsSync(imagePath)) {
-      throw new Error('Archivo no encontrado')
-    }
-
-    const metadata = await sharp(imagePath).metadata()
-
-    return {
-      width: metadata.width || 0,
-      height: metadata.height || 0,
-      format: metadata.format || null,
-      size: metadata.size || null
-    }
-  } catch (error) {
-    console.error('Error obteniendo metadata:', error)
-    throw new Error('Error al obtener metadata de la imagen')
-  }
-}
+import type { ImageMetadata } from './metadata'
 
 interface ProcessImageOptions {
   width: number
@@ -51,8 +25,8 @@ export async function processImage(
       throw new Error('Archivo no encontrado')
     }
 
-    const metadata = await getImageMetadata(imagePath)
-    let processor = sharp(imagePath)
+    const metadata = await sharp(imagePath, { failOn: 'none' }).metadata()
+    let processor = sharp(imagePath, { failOn: 'none' })
 
     // Aplicar redimensionamiento
     processor = processor.resize(options.width, options.height, {
@@ -80,8 +54,8 @@ export async function processImage(
 
     return {
       buffer,
-      width: metadata.width,
-      height: metadata.height
+      width: metadata.width || 0,
+      height: metadata.height || 0
     }
   } catch (error) {
     console.error('Error procesando imagen:', error)
