@@ -1,25 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params;
-    const body = await request.json();
-    const fileId = body.fileId;
+    const data = await request.json();
+    const tagId = params.id;
 
-    if (!fileId) {
-      return NextResponse.json(
-        { error: "ID de archivo no proporcionado" },
-        { status: 400 }
+    if (!data?.fileId || typeof data.fileId !== "string") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "ID de archivo no proporcionado o inválido",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // Verificar que la etiqueta existe
+    const { fileId } = data;
+
+    // Verificar que el tag existe
     const tag = await prisma.tag.findUnique({
-      where: { id },
+      where: { id: tagId },
       select: {
         id: true,
         name: true,
@@ -33,19 +42,35 @@ export async function POST(
     });
 
     if (!tag) {
-      return NextResponse.json(
-        { error: "Etiqueta no encontrada" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Tag no encontrado",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // Verificar si el archivo ya tiene la etiqueta
+    // Verificar si el archivo ya tiene el tag
     const isFileTagged = tag.files.some((file) => file.id === fileId);
 
     if (isFileTagged) {
-      return NextResponse.json(
-        { error: "El archivo ya tiene esta etiqueta" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "El archivo ya tiene este tag",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
@@ -56,36 +81,68 @@ export async function POST(
     });
 
     if (!file) {
-      return NextResponse.json(
-        { error: "Archivo no encontrado" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Archivo no encontrado",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // Agregar la etiqueta al archivo
-    await prisma.tag.update({
-      where: { id },
+    // Agregar el tag al archivo
+    const updatedTag = await prisma.tag.update({
+      where: { id: tagId },
       data: {
         files: {
           connect: { id: fileId },
         },
       },
-    });
-
-    // Retornar la información de la etiqueta
-    return NextResponse.json({
-      success: true,
-      tag: {
-        id: tag.id,
-        name: tag.name,
-        color: tag.color,
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        _count: {
+          select: {
+            files: true,
+          },
+        },
       },
     });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        tag: {
+          ...updatedTag,
+          count: updatedTag._count.files,
+        },
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error adding tag to file:", error);
-    return NextResponse.json(
-      { error: "Error al agregar etiqueta al archivo" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Error al agregar etiqueta al archivo",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }

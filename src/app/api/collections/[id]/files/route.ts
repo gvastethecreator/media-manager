@@ -1,25 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params;
-    const body = await request.json();
-    const fileId = body.fileId;
+    const data = await request.json();
+    const collectionId = params.id;
 
-    if (!fileId) {
-      return NextResponse.json(
-        { error: "ID de archivo no proporcionado" },
-        { status: 400 }
+    if (!data?.fileId || typeof data.fileId !== "string") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "ID de archivo no proporcionado o inválido",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
+    const { fileId } = data;
+
     // Verificar que la colección existe
     const collection = await prisma.collection.findUnique({
-      where: { id },
+      where: { id: collectionId },
       select: {
         id: true,
         name: true,
@@ -34,9 +43,17 @@ export async function POST(
     });
 
     if (!collection) {
-      return NextResponse.json(
-        { error: "Colección no encontrada" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Colección no encontrada",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
@@ -46,9 +63,17 @@ export async function POST(
     );
 
     if (isFileInCollection) {
-      return NextResponse.json(
-        { error: "El archivo ya está en la colección" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "El archivo ya está en la colección",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
@@ -59,37 +84,69 @@ export async function POST(
     });
 
     if (!file) {
-      return NextResponse.json(
-        { error: "Archivo no encontrado" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Archivo no encontrado",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
     // Agregar el archivo a la colección
-    await prisma.collection.update({
-      where: { id },
+    const updatedCollection = await prisma.collection.update({
+      where: { id: collectionId },
       data: {
         files: {
           connect: { id: fileId },
         },
       },
-    });
-
-    // Retornar la información de la colección
-    return NextResponse.json({
-      success: true,
-      collection: {
-        id: collection.id,
-        name: collection.name,
-        emoji: collection.emoji,
-        color: collection.color,
+      select: {
+        id: true,
+        name: true,
+        emoji: true,
+        color: true,
+        _count: {
+          select: {
+            files: true,
+          },
+        },
       },
     });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        collection: {
+          ...updatedCollection,
+          count: updatedCollection._count.files,
+        },
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error adding file to collection:", error);
-    return NextResponse.json(
-      { error: "Error al agregar archivo a la colección" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Error al agregar archivo a la colección",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
