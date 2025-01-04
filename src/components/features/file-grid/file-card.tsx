@@ -40,6 +40,7 @@ interface FileCardProps {
 	index?: number;
 	totalColumns?: number;
 	shouldLoad?: boolean;
+	hasBeenRendered?: boolean;
 }
 
 const springConfig = {
@@ -54,7 +55,7 @@ const springConfig = {
 
 const transitionConfig = {
 	type: "tween",
-	duration: 0.4,
+	duration: 0.3,
 	ease: [0.4, 0, 0.2, 1],
 };
 
@@ -69,17 +70,18 @@ const variants = {
 		opacity: 0,
 		scale: 0.9,
 	},
-	visible: (custom: { delay: number }) => ({
+	visible: {
 		opacity: 1,
 		scale: 1,
-		transition: {
-			...springConfig,
-			delay: custom.delay,
-		},
-	}),
+		transition: springConfig,
+	},
 	hover: {
 		scale: 0.95,
-		transition: springConfig,
+		transition: {
+			...springConfig,
+			stiffness: 200,
+			damping: 20,
+		},
 	},
 	tap: {
 		scale: 0.93,
@@ -100,6 +102,7 @@ export function FileCard({
 	index = 0,
 	totalColumns = 3,
 	shouldLoad = false,
+	hasBeenRendered = false,
 }: FileCardProps) {
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -111,20 +114,16 @@ export function FileCard({
 	const shouldReduceMotion = useReducedMotion();
 	const hasLoaded = useRef(false);
 
-	// Motion values con valores iniciales correctos
-	const scale = useSpring(1, springConfig);
-	const opacity = useSpring(0, springConfig);
-	const y = useSpring(20, springConfig);
+	// Motion values optimizados
+	const scale = useSpring(1, {
+		...springConfig,
+		stiffness: 200,
+	});
+	const opacity = useSpring(1, springConfig);
+	const y = useSpring(0, springConfig);
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
-
-	// Calcular delay basado en el índice para efecto stagger
-	const staggerDelay = useMemo(() => {
-		const row = Math.floor(index / totalColumns);
-		const col = index % totalColumns;
-		return (row * 0.1 + col * 0.05) * 0.5; // Reducido para que sea más rápido
-	}, [index, totalColumns]);
 
 	const loadThumbnail = useCallback(async () => {
 		if (hasLoaded.current || !shouldLoad) return;
@@ -133,7 +132,6 @@ export function FileCard({
 			setIsLoading(true);
 			setError(null);
 
-			// Calidad basada en el tamaño de la miniatura
 			const quality =
 				thumbnailSize === "small"
 					? "compressed"
@@ -169,20 +167,9 @@ export function FileCard({
 	}, [item.id, thumbnailSize, toast, shouldLoad]);
 
 	useEffect(() => {
-		let isMounted = true;
-
-		const init = async () => {
-			if (!isMounted) return;
-			await loadThumbnail();
-		};
-
 		if (shouldLoad) {
-			init();
+			loadThumbnail();
 		}
-
-		return () => {
-			isMounted = false;
-		};
 	}, [loadThumbnail, shouldLoad]);
 
 	const handleClick = (e: React.MouseEvent) => {
@@ -264,49 +251,31 @@ export function FileCard({
 		[onDoubleClick, toast, openViewer]
 	);
 
-	// Cleanup y reset de animaciones mejorado
-	useEffect(() => {
-		if (!shouldLoad) {
-			setIsHovered(false);
-			scale.set(1, false);
-			opacity.set(0, false);
-			y.set(20, false);
-		}
-		return () => {
-			scale.stop();
-			opacity.stop();
-			y.stop();
-		};
-	}, [shouldLoad, scale, opacity, y]);
-
 	const handleHoverStart = useCallback(() => {
 		if (!shouldLoad) return;
 		setIsHovered(true);
-		y.set(-20);
-		scale.set(0.9);
+		y.set(-10);
+		scale.set(0.95);
 		opacity.set(1);
 	}, [shouldLoad, y, scale, opacity]);
 
 	const handleHoverEnd = useCallback(() => {
 		if (!shouldLoad) return;
 		setIsHovered(false);
-		y.set(20);
+		y.set(0);
 		scale.set(1);
-		opacity.set(0);
+		opacity.set(1);
 	}, [shouldLoad, y, scale, opacity]);
 
 	return (
 		<motion.div
 			layout
 			layoutId={`file-${item.id}`}
-			initial="hidden"
+			initial={false}
 			animate="visible"
 			whileHover="hover"
 			whileTap="tap"
 			variants={variants}
-			custom={{ delay: staggerDelay }}
-			onHoverStart={handleHoverStart}
-			onHoverEnd={handleHoverEnd}
 			className={cn(
 				"relative overflow-hidden w-full h-full",
 				isSelected || isHovered
@@ -316,6 +285,8 @@ export function FileCard({
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onMouseDown={handleMouseDown}
+			onHoverStart={handleHoverStart}
+			onHoverEnd={handleHoverEnd}
 			style={{
 				...style,
 				height: "100%",
@@ -358,7 +329,7 @@ export function FileCard({
 						) : thumbnail ? (
 							<motion.div
 								variants={fadeInOutVariants}
-								initial="hidden"
+								initial={false}
 								animate="visible"
 								exit="exit"
 								transition={transitionConfig}
@@ -388,14 +359,12 @@ export function FileCard({
 									className="absolute inset-0 flex justify-center items-center"
 									animate={{
 										scale: isSelected || isHovered ? 0.9 : 1,
-										y: isSelected || isHovered ? -20 : 0,
+										y: isSelected || isHovered ? -10 : 0,
 									}}
 									transition={{
 										type: "spring",
-										stiffness: 100,
-										damping: 15,
-										mass: 0.2,
-										velocity: 2,
+										stiffness: 200,
+										damping: 20,
 									}}
 								>
 									<ImageCard
@@ -412,14 +381,12 @@ export function FileCard({
 								<motion.div
 									animate={{
 										opacity: isSelected || isHovered ? 1 : 0,
-										y: isSelected || isHovered ? 0 : 20,
+										y: isSelected || isHovered ? 0 : 10,
 									}}
 									transition={{
 										type: "spring",
-										stiffness: 100,
-										damping: 15,
-										mass: 0.2,
-										velocity: 2,
+										stiffness: 200,
+										damping: 20,
 									}}
 									className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2"
 								>
