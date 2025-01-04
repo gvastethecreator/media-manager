@@ -1,36 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { FileCard } from "./file-card";
 import { useInView } from "react-intersection-observer";
 import type { FileItem } from "@/types/file-item";
-import { AnimationProvider } from "./animation-context";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
-// Configuración del buffer y carga
-const BUFFER_CONFIG = {
-	OVERSCAN_ROWS: 2, // Aumentado para mejor buffer
-	LOAD_BATCH_ROWS: 2, // Aumentado para cargar más elementos a la vez
-	LOAD_DELAY: 50, // Reducido para mejor respuesta
-	SCROLL_THRESHOLD: 200, // Aumentado para cargar antes
-} as const;
-
-interface FileGridProps {
-	onItemClick?: (item: FileItem) => void;
-	onItemDoubleClick?: (item: FileItem) => void;
-	isResizing?: boolean;
-	items: FileItem[];
-	loadMoreItems?: () => void;
-}
-
-// Configuración de animaciones
-const ANIMATION_CONFIG = {
-	STAGGER_DELAY: 0.02,
-	INITIAL_DELAY: 0.3,
-	BATCH_SIZE: 10, // Número de items a animar por lote
-} as const;
+// Cache global persistente para mantener los elementos renderizados
+const globalRenderedItems = new Set<string>();
 
 // Optimizar la configuración del grid
 const GRID_CONFIG = {
@@ -47,15 +25,13 @@ const GRID_CONFIG = {
 	},
 } as const;
 
-// Memoizar el cálculo de la posición del item
-const calculateItemPosition = (index: number, columns: number) => {
-	const row = Math.floor(index / columns);
-	const col = index % columns;
-	return { row, col };
-};
-
-// Cache global persistente para mantener los elementos renderizados
-const globalRenderedItems = new Set<string>();
+interface FileGridProps {
+	onItemClick?: (item: FileItem) => void;
+	onItemDoubleClick?: (item: FileItem) => void;
+	isResizing?: boolean;
+	items: FileItem[];
+	loadMoreItems?: () => void;
+}
 
 export function FileGrid({
 	onItemClick,
@@ -64,21 +40,18 @@ export function FileGrid({
 	items,
 	loadMoreItems,
 }: FileGridProps) {
-	const parentRef = useRef<HTMLDivElement>(null);
-	const [shouldLoadMore, setShouldLoadMore] = useState(false);
+	const gridRef = useRef<HTMLDivElement>(null);
+	const [containerWidth, setContainerWidth] = useState(0);
+
+	// Observer para infinite scroll con un margen mayor
 	const { ref: loadMoreRef, inView } = useInView({
 		threshold: 0,
+		rootMargin: "500px", // Aumentado para cargar más anticipadamente
 	});
-
-	// Referencia para mantener el estado de animación
-	const animationQueue = useRef<Map<string, number>>(new Map());
-	const lastAnimationTime = useRef<number>(Date.now());
-	const bufferedItemsRef = useRef<Set<number>>(new Set());
-	const [containerWidth, setContainerWidth] = useState(0);
 
 	// Usar ResizeObserver para detectar cambios en el contenedor
 	useEffect(() => {
-		if (!parentRef.current) return;
+		if (!gridRef.current) return;
 
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
@@ -87,9 +60,21 @@ export function FileGrid({
 			}
 		});
 
-		resizeObserver.observe(parentRef.current);
+		resizeObserver.observe(gridRef.current);
 		return () => resizeObserver.disconnect();
 	}, []);
+
+	// Memoizar el cálculo de dimensiones del grid
+	const { columns } = useMemo(() => {
+		const availableWidth = containerWidth || window.innerWidth;
+		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
+		targetColumns = Math.max(
+			GRID_CONFIG.minColumns,
+			Math.min(GRID_CONFIG.maxColumns, targetColumns)
+		);
+
+		return { columns: targetColumns };
+	}, [containerWidth]);
 
 	// Función para verificar si un item ya ha sido renderizado
 	const isItemRendered = useCallback((itemId: string) => {
@@ -101,95 +86,6 @@ export function FileGrid({
 		globalRenderedItems.add(itemId);
 	}, []);
 
-	// Función para calcular el delay de animación
-	const calculateAnimationDelay = useCallback((index: number) => {
-		const now = Date.now();
-		const timeSinceLastAnimation = now - lastAnimationTime.current;
-		const baseDelay = Math.max(0, 50 - timeSinceLastAnimation);
-		const itemDelay = index * 50;
-		return baseDelay + itemDelay;
-	}, []);
-
-	// Memoizar el cálculo de dimensiones del grid
-	const { itemWidth, itemHeight, columns } = useMemo(() => {
-		const availableWidth = containerWidth || window.innerWidth;
-		let targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
-		targetColumns = Math.max(
-			GRID_CONFIG.minColumns,
-			Math.min(GRID_CONFIG.maxColumns, targetColumns)
-		);
-
-		const totalGapWidth = (targetColumns - 1) * GRID_CONFIG.gap;
-		const itemWidth = Math.floor(
-			(availableWidth - totalGapWidth) / targetColumns
-		);
-
-		return {
-			itemWidth,
-			itemHeight: Math.floor(itemWidth * GRID_CONFIG.itemAspectRatio),
-			columns: targetColumns,
-		};
-	}, [containerWidth]);
-
-	// Optimizar la función getItemsForRow
-	const getItemsForRow = useCallback(
-		(rowIndex: number) => {
-			const startIndex = rowIndex * columns;
-			return items.slice(startIndex, startIndex + columns);
-		},
-		[items, columns]
-	);
-
-	// Función para verificar si un item está en el buffer
-	const isItemBuffered = useCallback(
-		(index: number) => bufferedItemsRef.current.has(index),
-		[]
-	);
-
-	const virtualizer = useVirtualizer({
-		count: Math.ceil(items.length / columns),
-		getScrollElement: () => parentRef.current,
-		estimateSize: () => itemHeight,
-		overscan: BUFFER_CONFIG.OVERSCAN_ROWS,
-		onChange: (instance) => {
-			if (!instance.range) return;
-
-			const startRow = instance.range.startIndex;
-			const endRow = instance.range.endIndex;
-			const visibleStartIndex = startRow * columns;
-			const visibleEndIndex = Math.min((endRow + 1) * columns, items.length);
-
-			// Marcar items visibles como renderizados y calcular sus delays
-			for (let i = visibleStartIndex; i < visibleEndIndex; i++) {
-				const item = items[i];
-				if (item && !isItemRendered(item.id)) {
-					const delay = calculateAnimationDelay(i - visibleStartIndex);
-					animationQueue.current.set(item.id, delay);
-					markItemAsRendered(item.id);
-					lastAnimationTime.current = Date.now() + delay;
-				}
-			}
-
-			// Actualizar buffer
-			const overscanStart = Math.max(0, startRow - BUFFER_CONFIG.OVERSCAN_ROWS);
-			const overscanEnd = Math.min(
-				Math.ceil(items.length / columns),
-				endRow + BUFFER_CONFIG.OVERSCAN_ROWS
-			);
-
-			const newBuffer = new Set<number>();
-			for (let row = overscanStart; row <= overscanEnd; row++) {
-				const rowStartIndex = row * columns;
-				const rowEndIndex = Math.min(rowStartIndex + columns, items.length);
-				for (let i = rowStartIndex; i < rowEndIndex; i++) {
-					newBuffer.add(i);
-				}
-			}
-
-			bufferedItemsRef.current = newBuffer;
-		},
-	});
-
 	// Manejo de scroll infinito
 	useEffect(() => {
 		if (inView && loadMoreItems) {
@@ -199,7 +95,7 @@ export function FileGrid({
 
 	return (
 		<div
-			ref={parentRef}
+			ref={gridRef}
 			className={cn(
 				"h-full w-full overflow-auto relative",
 				"scrollbar-thin scrollbar-thumb-secondary scrollbar-track-transparent",
@@ -212,78 +108,43 @@ export function FileGrid({
 			}}
 		>
 			<div
-				style={{
-					height: `${virtualizer.getTotalSize()}px`,
-					width: "100%",
-					position: "relative",
-				}}
+				className="grid auto-rows-fr gap-0"
+				style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
 			>
-				<AnimatePresence mode="popLayout" initial={false}>
-					{virtualizer.getVirtualItems().map((virtualRow) => {
-						const rowItems = getItemsForRow(virtualRow.index);
+				{items.map((item: FileItem, index: number) => {
+					const { ref, inView: isVisible } = useInView({
+						threshold: 0,
+						triggerOnce: true,
+						rootMargin: "100px", // Aumentado para cargar antes de entrar al viewport
+					});
 
-						return (
-							<motion.div
-								key={virtualRow.index}
-								initial={false}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								style={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: `${itemHeight}px`,
-									transform: `translateY(${virtualRow.start}px)`,
-									display: "grid",
-									gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-									gap: `${GRID_CONFIG.gap}px`,
-									padding: `${GRID_CONFIG.gap / 2}px`,
-									willChange: "transform",
-								}}
-							>
-								{rowItems.map((item: FileItem, colIndex: number) => {
-									const itemIndex = virtualRow.index * columns + colIndex;
-									const isBuffered = isItemBuffered(itemIndex);
-									const hasBeenRendered = isItemRendered(item.id);
-									const animationDelay =
-										animationQueue.current.get(item.id) || 0;
+					const hasBeenRendered = isItemRendered(item.id);
 
-									return (
-										<motion.div
-											key={item.id}
-											initial={
-												hasBeenRendered ? false : { opacity: 0, scale: 0.8 }
-											}
-											animate={{ opacity: 1, scale: 1 }}
-											transition={{
-												type: "spring",
-												stiffness: 100,
-												damping: 15,
-												mass: 0.1,
-												delay: hasBeenRendered ? 0 : animationDelay / 1000,
-											}}
-											className="relative w-full h-full"
-										>
-											{isBuffered && (
-												<FileCard
-													item={item}
-													onClick={onItemClick}
-													onDoubleClick={onItemDoubleClick}
-													index={itemIndex}
-													totalColumns={columns}
-													shouldLoad={true}
-													hasBeenRendered={hasBeenRendered}
-												/>
-											)}
-										</motion.div>
-									);
-								})}
-							</motion.div>
-						);
-					})}
-				</AnimatePresence>
+					if (!hasBeenRendered && isVisible) {
+						markItemAsRendered(item.id);
+					}
+
+					return (
+						<motion.div
+							ref={ref}
+							key={item.id}
+							layoutId={`file-${item.id}`}
+							className="relative w-full aspect-square"
+						>
+							<FileCard
+								item={item}
+								onClick={onItemClick}
+								onDoubleClick={onItemDoubleClick}
+								index={index}
+								totalColumns={columns}
+								shouldLoad={isVisible}
+								hasBeenRendered={hasBeenRendered}
+							/>
+						</motion.div>
+					);
+				})}
 			</div>
+			<div ref={loadMoreRef} className="h-px w-full" />
 		</div>
 	);
 }
