@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
-import { getImageMetadata } from '@/lib/image'
+import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
 import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
@@ -20,7 +20,7 @@ export async function POST(
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  // Preparar respuesta SSE primero
+  // Preparar respuesta SSE
   const response = new NextResponse(stream.readable, {
     headers: {
       'Content-Type': 'text/event-stream',
@@ -29,14 +29,13 @@ export async function POST(
     }
   })
 
-  const sendEvent = async (type: string, data: any) => {
+  const sendEvent = async (type: string, data: Record<string, any>) => {
     try {
-      const formattedData = JSON.stringify({ type, data })
+      const formattedData = JSON.stringify({ type, data: data || {} })
       await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
       console.log('Evento enviado:', { type, data })
     } catch (error) {
       console.error('Error enviando evento:', error)
-      throw error
     }
   }
 
@@ -124,7 +123,7 @@ export async function POST(
               const result = await generateThumbnail(filePath, 'mid')
               if (result && result.buffer) {
                 thumbnailData = {
-                  data: result.buffer.toString('base64'),
+                  data: result.buffer,
                   size: result.buffer.length,
                   width: result.width,
                   height: result.height
@@ -141,13 +140,13 @@ export async function POST(
                 name: file,
                 size: stats.size,
                 hash,
-                width: metadata.width,
-                height: metadata.height,
+                width: metadata.dimensions?.width || 0,
+                height: metadata.dimensions?.height || 0,
                 metadata: JSON.stringify(metadata),
-                thumbnail: thumbnailData?.data ? Buffer.from(thumbnailData.data, 'base64') : null,
-                thumbnailSize: thumbnailData?.size,
-                thumbnailWidth: thumbnailData?.width,
-                thumbnailHeight: thumbnailData?.height,
+                thumbnail: thumbnailData?.data || null,
+                thumbnailSize: thumbnailData?.size || null,
+                thumbnailWidth: thumbnailData?.width || null,
+                thumbnailHeight: thumbnailData?.height || null,
                 folderId: folder.id,
                 createdAt: stats.birthtime,
                 updatedAt: stats.mtime
@@ -168,7 +167,7 @@ export async function POST(
           } catch (error) {
             console.error('Error procesando archivo:', error)
             await sendEvent('error', {
-              file: file,
+              file,
               error: error instanceof Error ? error.message : 'Error desconocido'
             })
           }
@@ -213,15 +212,22 @@ export async function POST(
     } catch (error) {
       console.error('Error en reindexación:', error)
       await sendEvent('error', {
-        error: error instanceof Error ? error.message : 'Error desconocido'
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        details: error instanceof Error ? error.stack : null
       })
     } finally {
-      await writer.close()
+      try {
+        await writer.close()
+      } catch (error) {
+        console.error('Error cerrando writer:', error)
+      }
     }
   }
 
   // Iniciar procesamiento en background
-  processFolder()
+  processFolder().catch(error => {
+    console.error('Error fatal en processFolder:', error)
+  })
 
   return response
 }
