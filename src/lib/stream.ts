@@ -5,131 +5,85 @@ interface StreamData {
   writer: WritableStreamDefaultWriter;
   isActive: boolean;
   lastActivity: number;
-  encoder: TextEncoder;
 }
 
-const activeStreams = new Map<string, StreamData>();
-const STREAM_TIMEOUT = 30000; // 30 segundos
+const streams = new Map<string, StreamData>();
 
-export async function createStream(id: string, request: NextRequest) {
+export async function createStream(id: string, request: NextRequest): Promise<StreamData> {
   // Limpiar stream existente si hay uno
-  await cleanupStream(id);
+  if (streams.has(id)) {
+    const existingStream = streams.get(id)!;
+    existingStream.writer.close();
+    streams.delete(id);
+  }
 
   // Crear nuevo stream
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
-  const encoder = new TextEncoder();
 
-  // Guardar el stream con estado activo
   const streamData: StreamData = {
     stream,
     writer,
     isActive: true,
-    lastActivity: Date.now(),
-    encoder
+    lastActivity: Date.now()
   };
-  activeStreams.set(id, streamData);
 
-  // Configurar limpieza cuando el cliente se desconecte
+  streams.set(id, streamData);
+
+  // Cleanup cuando el cliente se desconecta
   request.signal.addEventListener('abort', () => {
-    console.log('Cliente desconectado, limpiando recursos:', id);
-    cleanupStream(id).catch(console.error);
+    console.log('Cliente desconectado, limpiando stream:', id);
+    cleanupStream(id);
   });
-
-  // Iniciar heartbeat para mantener la conexión viva
-  startHeartbeat(id);
 
   return streamData;
 }
 
-function startHeartbeat(id: string) {
-  const interval = setInterval(async () => {
-    const streamData = activeStreams.get(id);
-    if (!streamData || !streamData.isActive) {
-      clearInterval(interval);
-      return;
-    }
-
-    // Si no hay actividad reciente, enviar heartbeat
-    if (Date.now() - streamData.lastActivity > STREAM_TIMEOUT / 2) {
-      try {
-        await sendEvent(id, 'heartbeat', { timestamp: Date.now() });
-      } catch (error) {
-        console.error('Error en heartbeat:', error);
-        clearInterval(interval);
-        cleanupStream(id).catch(console.error);
-      }
-    }
-  }, 5000);
-
-  // Asegurarse de que el intervalo se limpie cuando el stream se cierre
-  const streamData = activeStreams.get(id);
-  if (streamData) {
-    const originalClose = streamData.writer.close.bind(streamData.writer);
-    streamData.writer.close = async () => {
-      clearInterval(interval);
-      return originalClose();
-    };
-  }
+export function getStream(id: string): StreamData | undefined {
+  return streams.get(id);
 }
 
 export async function cleanupStream(id: string) {
-  const streamData = activeStreams.get(id);
+  const streamData = streams.get(id);
   if (streamData) {
     try {
       streamData.isActive = false;
       await streamData.writer.close();
     } catch (error) {
-      console.error('Error cerrando writer:', error);
+      console.error('Error cerrando stream:', error);
     } finally {
-      activeStreams.delete(id);
+      streams.delete(id);
     }
   }
 }
 
-export async function sendEvent(id: string, type: string, data: any) {
-  const streamData = activeStreams.get(id);
-  if (!streamData) {
-    console.warn('No hay stream activo para el folderId:', id);
-    return;
+// Función para enviar eventos SSE
+export async function sendSSEEvent(id: string, type: string, data: any) {
+  const streamData = streams.get(id);
+  if (!streamData || !streamData.isActive) {
+    throw new Error('Stream no encontrado o inactivo');
   }
 
   try {
-    if (!streamData.isActive) {
-      console.warn('Stream marcado como inactivo:', id);
-      return;
-    }
-
-    const event = JSON.stringify({ type, data });
-    await streamData.writer.write(streamData.encoder.encode(`data: ${event}\n\n`));
+    const event = `data: ${JSON.stringify({ type, data })}\n\n`;
+    await streamData.writer.write(new TextEncoder().encode(event));
     streamData.lastActivity = Date.now();
-    console.log('Evento enviado:', { type, data });
   } catch (error) {
-    console.error('Error enviando evento:', error);
-    streamData.isActive = false;
+    console.error('Error enviando evento SSE:', error);
     throw error;
   }
 }
 
-export function getActiveStream(id: string) {
-  const streamData = activeStreams.get(id);
-  return streamData?.isActive ? streamData : undefined;
-}
+// Limpieza periódica de streams inactivos
+const CLEANUP_INTERVAL = 60000; // 1 minuto
+const INACTIVE_TIMEOUT = 300000; // 5 minutos
 
-export function hasActiveStream(id: string) {
-  const streamData = activeStreams.get(id);
-  return streamData?.isActive === true;
-}
-
-export function checkStreamStatus(id: string) {
-  const streamData = activeStreams.get(id);
-  if (!streamData) {
-    return { exists: false, isActive: false, lastActivity: null };
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, streamData] of streams.entries()) {
+    if (now - streamData.lastActivity > INACTIVE_TIMEOUT) {
+      console.log('Limpiando stream inactivo:', id);
+      cleanupStream(id);
+    }
   }
-
-  return {
-    exists: true,
-    isActive: streamData.isActive,
-    lastActivity: new Date(streamData.lastActivity)
-  };
-}
+}, CLEANUP_INTERVAL);
