@@ -21,157 +21,217 @@
 
 ### Áreas de Mejora Identificadas
 
-#### 1. Duplicación de Código
+#### 1. Duplicación de Código y Componentes
 
 - Componentes de loading duplicados entre `core/loading-screen.tsx` y `core/feedback/loading/loading-screen.tsx`
 - Múltiples implementaciones similares de context en diferentes ubicaciones
 - Servicios con métodos duplicados
+- Componentes de vista con lógica similar que podría abstraerse
 
 #### 2. Gestión de Estado
 
 - Múltiples stores con posible solapamiento de responsabilidades
 - Posible consolidación de stores relacionados (files, file-selection, image-viewer)
 - Mejorar la separación entre estado global y local
+- Optimizar la actualización de estado para evitar re-renders innecesarios
 
-#### 3. Estructura de Archivos
+#### 3. Estructura de Archivos y Componentes
 
 - Duplicación de directorios (stores/store)
 - Servicios y hooks con nombres similares pero en diferentes ubicaciones
 - Posible consolidación de tipos dispersos
+- Mejorar la organización de componentes compartidos
 
-#### 4. API Routes
+#### 4. Rendimiento y Optimización
 
-- Algunas rutas API podrían consolidarse
-- Posible optimización en el manejo de rutas dinámicas
-- Mejorar la consistencia en el manejo de errores
+- Oportunidades de mejora en la virtualización de listas largas
+- Optimización de carga de imágenes y thumbnails
+- Posible mejora en el manejo de caché
+- Reducción de re-renders innecesarios
 
 ### Plan de Acción Propuesto
 
-#### Fase 1: Consolidación y Limpieza
+#### Fase 1: Consolidación de Stores (En Progreso)
 
-1. ✅ Unificar componentes duplicados
+1. ✅ Crear nuevo store unificado `FileManager`
 
-   - Movido `loading-screen.tsx` a `feedback/loading/initialization-screen.tsx`
-   - Creado índice para componentes de loading
-   - Eliminada duplicación en providers
+   - Implementado en `src/store/file-manager.ts`
+   - Combina funcionalidad de `files.ts` y `file-selection.ts`
+   - Mejora el manejo de selección múltiple
+   - Simplifica la carga de datos
 
-2. Consolidar stores relacionados
-3. Reorganizar estructura de archivos
-4. Documentar patrones y convenciones
+2. 🔄 Migración de componentes al nuevo store
 
-#### Fase 2: Optimización
+   - ✅ Migrado `RightPanel` a usar `useFileManager`
+   - ✅ Migrado `AllImagesView` a usar `useFileManager`
+   - [ ] Pendiente migrar `FavoritesView`
+   - [ ] Pendiente migrar `FolderContentView`
+   - [ ] Pendiente migrar `CollectionContentView`
+   - [ ] Pendiente migrar `TagContentView`
 
-1. Revisar y optimizar rutas API
-2. Mejorar manejo de caché
-3. Optimizar carga de imágenes
-4. Implementar lazy loading donde sea beneficioso
+3. 📋 Próximos componentes a migrar
 
-#### Fase 3: Mejoras de Arquitectura
+   - [ ] Migrar componentes de navegación
+   - [ ] Migrar componentes de selección
+   - [ ] Migrar componentes de acciones
+   - [ ] Actualizar tipos y interfaces
 
-1. Implementar mejor manejo de errores
-2. Mejorar tipado global
-3. Optimizar rendimiento de consultas
-4. Revisar y actualizar dependencias
+4. 📋 Limpieza final
+   - [ ] Eliminar stores antiguos
+   - [ ] Actualizar tests
+   - [ ] Actualizar documentación
+   - [ ] Verificar funcionamiento completo
 
-### Precauciones
+#### Fase 2: Optimización de Rendimiento
 
-- Mantener funcionalidad existente
-- Realizar cambios incrementales
-- Pruebas exhaustivas antes de cada cambio
+1. 📋 Mejorar virtualización
+
+   - [ ] Implementar virtualización en todas las listas largas
+   - [ ] Optimizar renderizado de grillas de imágenes
+   - [ ] Mejorar scroll infinito
+
+2. 📋 Optimizar carga de imágenes
+
+   - [ ] Implementar lazy loading mejorado
+   - [ ] Optimizar generación de thumbnails
+   - [ ] Mejorar estrategia de caché
+
+3. 📋 Reducir re-renders
+   - [ ] Implementar React.memo donde sea beneficioso
+   - [ ] Optimizar uso de callbacks
+   - [ ] Mejorar manejo de estado
+
+### Precauciones y Consideraciones
+
+- Mantener funcionalidad existente durante la migración
+- Realizar cambios incrementales y probar cada cambio
 - Documentar todos los cambios realizados
+- Mantener compatibilidad con componentes existentes
+
+### Próximos Pasos Inmediatos
+
+1. 🔄 Continuar migración de componentes al nuevo store
+2. 🔄 Probar exhaustivamente los componentes migrados
+3. 🔄 Documentar cambios y actualizaciones
+4. 🔄 Planear siguiente fase de optimizaciones
+
+### Issues Actuales
+
+1. 🐛 Asegurar que la migración no afecte el rendimiento actual
+2. 🐛 Verificar que la selección múltiple funcione correctamente
+3. 🐛 Mantener la consistencia en el estado durante la navegación
+
+### Stack Tecnológico Detallado
+
+#### Frontend
+
+- Next.js 15 (App Router)
+- React 19 (Server Components)
+- TypeScript 5.3+
+- TailwindCSS 3.4+
+- Shadcn/ui (Componentes base)
+- Framer Motion (Animaciones)
+- Zustand 4+ (Estado global)
+- TanStack Query v5 (Estado del servidor)
+
+#### Backend
+
+- SQLite 3 (Base de datos)
+- Prisma ORM
+- Next.js API Routes
+- Node.js fs/promises (Sistema de archivos)
+
+# Progress Log
+
+## Migración a FileManager Store Unificado
+
+### Componentes Migrados ✅
+
+1. `file-card.tsx`: Actualizado para usar useFileManager
+
+   - Reemplazado useFileSelection por useFileManager
+   - Implementada nueva lógica de selección con toggleItemSelection
+
+2. `left-panel.tsx`: Migrado completamente
+
+   - Actualizado para usar las nuevas funciones del FileManager
+   - Implementada navegación con el nuevo sistema
+
+3. `favorites-view.tsx`: Migrado completamente
+
+   - Actualizado para usar el nuevo store
+   - Implementada nueva lógica de carga y selección
+
+4. `folder-content-view.tsx`: Migrado completamente
+
+   - Actualizado para usar el nuevo store
+   - Implementada nueva lógica de navegación y selección
+
+5. `collection-content-view.tsx`: Migrado completamente
+
+   - Actualizado para usar el nuevo store
+   - Implementada nueva lógica de navegación y selección
+   - Cambiado icono a LibraryBig para mejor consistencia visual
+
+6. `tag-content-view.tsx`: Migrado completamente
+
+   - Actualizado para usar el nuevo store
+   - Implementada nueva lógica de navegación y selección
+   - Añadido isProcessingThumbnails para mejor feedback visual
+
+7. `search-view.tsx`: Migrado completamente
+
+   - Reemplazado useInfiniteQuery por el nuevo sistema de carga
+   - Implementada integración con FileManager para selección
+   - Mejorado el manejo de estados vacíos y carga
+   - Añadido soporte para búsqueda con Enter
+   - Implementado EmptyState personalizado
+
+8. `dashboard-view.tsx`: Revisado ✅
+
+   - No requiere migración ya que usa useStatsStore
+   - Mantiene su propia lógica de estado para estadísticas
+   - Funciona correctamente con la arquitectura actual
+
+### Cambios Principales Realizados
+
+- Reemplazo de toggleSelectedItem por toggleItemSelection
+- Migración de selectedIds a selectedItems
+- Unificación de la lógica de selección
+- Eliminación de lógica duplicada de thumbnails
+- Implementación de carga de datos centralizada
+- Mejora en la consistencia visual de iconos
+- Mejor manejo del estado de procesamiento de thumbnails
+- Simplificación de la lógica de búsqueda
 
 ### Próximos Pasos
 
-1. Revisión detallada de cada área identificada
-2. Creación de issues específicos
-3. Priorización de cambios
-4. Implementación gradual de mejoras
+1. Pruebas de integración
+2. Limpieza de código obsoleto
+3. Documentación de la nueva arquitectura
+4. Revisión de rendimiento
 
-## 📝 Changelog
+### Issues Conocidos
 
-### 2024-03-21
+- Verificar que la selección múltiple funcione correctamente en todas las vistas
+- Asegurar que la navegación entre vistas mantenga el estado de selección cuando sea apropiado
+- Validar que los thumbnails se procesen correctamente en todas las vistas
+- Revisar el rendimiento de la búsqueda con el nuevo sistema
 
-- ✨ Reorganización de componentes de loading
+### Mejoras Implementadas
 
-  - Movido `loading-screen.tsx` a `feedback/loading/initialization-screen.tsx`
-  - Creado índice para componentes de loading
-  - Mejorada la organización de componentes de feedback
+1. Mejor consistencia en mensajes de estado vacío
+2. Unificación del manejo de selección de archivos
+3. Mejor feedback visual durante la carga de thumbnails
+4. Simplificación del código mediante el uso de funciones unificadas
+5. Mejora en la experiencia de búsqueda con soporte para tecla Enter
+6. Estados vacíos más informativos y consistentes
+7. Mejor organización de la lógica de estado
 
-- 🔄 Consolidación de providers
-  - Creado nuevo `AppProvider` que combina todos los providers
-  - Eliminados providers duplicados
-  - Mejorada la estructura de providers
-  - Actualizado layout principal para usar el nuevo provider
-  - Corregido error de compilación por referencias a providers eliminados
-  - Movidos providers específicos de página al AppProvider
-  - Simplificada la estructura de page.tsx
+### Siguientes Mejoras Propuestas
 
-### Issues Resueltos
-
-#### 🐛 Error de Compilación en Providers
-
-- **Problema**: Error al compilar por referencia a providers eliminados
-- **Solución**:
-  1. Identificadas referencias en `page.tsx`
-  2. Movidos providers específicos (`FilesProvider`, `SidebarProvider`) al `AppProvider`
-  3. Simplificada la estructura de `page.tsx`
-- **Impacto**: Mejorada la organización de providers y reducida la complejidad del árbol de componentes
-
-## 2024-01-09: Refactorización de la gestión de configuraciones
-
-### Cambios realizados
-
-1. Consolidación del store de configuraciones:
-
-   - Se creó un nuevo store unificado usando Zustand
-   - Se eliminaron stores y contextos redundantes
-   - Se implementó persistencia de datos con migración entre versiones
-
-2. Definición de tipos:
-
-   - Se crearon tipos e interfaces para todas las configuraciones
-   - Se agregaron tipos para modos de vista, ordenamiento y calidad
-   - Se definieron configuraciones por defecto
-
-3. Hook personalizado:
-   - Se creó `useSettings` para facilitar el acceso a las configuraciones
-   - Se implementaron selectores para cada sección
-   - Se agregaron acciones compuestas para operaciones comunes
-
-### Stack tecnológico
-
-- Frontend:
-  - Next.js 15
-  - React 19
-  - TypeScript
-  - Zustand (gestión de estado)
-  - Tailwind CSS
-  - Framer Motion
-  - Lucide React (iconos)
-
-### Estructura del proyecto
-
-```
-src/
-  ├── components/
-  │   ├── core/          # Componentes base
-  │   └── features/      # Componentes de características
-  ├── hooks/             # Hooks personalizados
-  ├── lib/              # Utilidades y configuraciones
-  ├── store/            # Stores de Zustand
-  └── types/            # Definiciones de tipos
-```
-
-### Próximos pasos
-
-1. Migrar componentes existentes para usar el nuevo hook de configuraciones
-2. Implementar persistencia de datos en IndexedDB
-3. Agregar validación de esquemas con Zod
-4. Documentar API del hook de configuraciones
-
-### Issues pendientes
-
-- [ ] Revisar rendimiento de selectores en el hook
-- [ ] Implementar pruebas unitarias para el store
-- [ ] Agregar tipos para migraciones de configuraciones
-- [ ] Documentar proceso de migración entre versiones
+1. Implementar sistema de caché para mejorar el rendimiento
+2. Añadir más feedback visual durante las operaciones
+3. Mejorar la gestión de errores
+4. Optimizar la carga de thumbnails
+5. Implementar tests automatizados
