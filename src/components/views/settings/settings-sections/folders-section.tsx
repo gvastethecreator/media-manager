@@ -137,12 +137,14 @@ export function FoldersSection() {
 
 			await addFolder(folderPath, {
 				onProgress: (stats) => {
-					setProcessProgress(stats.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...stats,
-						status: stats.status || "Procesando...",
-					}));
+					if (stats && typeof stats.progress === "number") {
+						setProcessProgress(stats.progress);
+						setProcessStatus((prevStatus) => ({
+							...prevStatus,
+							...stats,
+							status: stats.status || "Procesando...",
+						}));
+					}
 				},
 				onError: (error) => {
 					console.error("Error en el proceso:", error);
@@ -176,12 +178,14 @@ export function FoldersSection() {
 					}
 				},
 				onComplete: async (data) => {
-					toast({
-						title: "Carpeta agregada",
-						description: `Se agregó la carpeta correctamente`,
-					});
-					setFolderPath("");
-					await loadStats();
+					if (data) {
+						toast({
+							title: "Carpeta agregada",
+							description: `Se agregó la carpeta correctamente`,
+						});
+						setFolderPath("");
+						await loadStats();
+					}
 				},
 			});
 		} catch (error) {
