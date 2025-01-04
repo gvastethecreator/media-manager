@@ -724,3 +724,35 @@
   1. Investigar la versión específica de TypeScript y sus tipos
   2. Considerar actualizar o degradar la versión de react-intersection-observer
   3. Explorar alternativas como usar un observer manual o una solución personalizada
+
+### Mejoras en el Menú Contextual (2024-03-21)
+
+#### Implementación de Acciones para Colecciones y Tags
+
+1. ✅ Corregido flujo de creación de colecciones
+
+   - Eliminada la asignación directa de archivos en la creación
+   - Implementado proceso en dos pasos:
+     1. Crear la colección con datos básicos
+     2. Agregar el archivo usando el ID de la colección creada
+   - Mejorado manejo de errores y feedback
+
+2. ✅ Corregido flujo de creación de tags
+
+   - Eliminada la asignación directa de archivos en la creación
+   - Implementado proceso en dos pasos:
+     1. Crear el tag con datos básicos
+     2. Agregar el archivo usando el ID del tag creado
+   - Mejorado manejo de errores y feedback
+
+3. 🔄 Mejoras en la UX
+   - Corregida implementación del EmojiPicker
+   - Mejorado feedback visual durante las operaciones
+   - Mantenida consistencia con la sección de configuración
+
+#### Próximos Pasos
+
+1. [ ] Implementar feedback visual durante las operaciones
+2. [ ] Añadir validación de nombres duplicados
+3. [ ] Mejorar manejo de errores con toasts
+4. [ ] Implementar atajos de teclado para operaciones comunes

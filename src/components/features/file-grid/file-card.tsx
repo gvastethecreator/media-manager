@@ -233,16 +233,15 @@ export function FileCard({
 								}
 							);
 
+							const responseData = await response.json();
+
 							if (!response.ok) {
-								const errorData = await response.json();
 								throw new Error(
-									errorData.error || "Error al agregar a la colección"
+									responseData.error || "Error al agregar a la colección"
 								);
 							}
 
-							const { success, collection } = await response.json();
-
-							if (!success || !collection) {
+							if (!responseData.success || !responseData.collection) {
 								throw new Error("Respuesta inválida del servidor");
 							}
 
@@ -252,10 +251,10 @@ export function FileCard({
 								collections: [
 									...(file.collections || []),
 									{
-										id: collection.id,
-										name: collection.name,
-										emoji: collection.emoji,
-										color: collection.color || "#000000",
+										id: responseData.collection.id,
+										name: responseData.collection.name,
+										emoji: responseData.collection.emoji,
+										color: responseData.collection.color || "#000000",
 									},
 								],
 							};
@@ -263,7 +262,7 @@ export function FileCard({
 
 							toast({
 								title: "Agregado a la colección",
-								description: `${file.name} ha sido agregado a ${collection.name}`,
+								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
 							});
 						} catch (error) {
 							console.error("Error adding to collection:", error);
@@ -297,16 +296,15 @@ export function FileCard({
 								body: JSON.stringify({ fileId: file.id }),
 							});
 
+							const responseData = await response.json();
+
 							if (!response.ok) {
-								const errorData = await response.json();
 								throw new Error(
-									errorData.error || "Error al agregar la etiqueta"
+									responseData.error || "Error al agregar la etiqueta"
 								);
 							}
 
-							const { success, tag } = await response.json();
-
-							if (!success || !tag) {
+							if (!responseData.success || !responseData.tag) {
 								throw new Error("Respuesta inválida del servidor");
 							}
 
@@ -316,9 +314,9 @@ export function FileCard({
 								tags: [
 									...(file.tags || []),
 									{
-										id: tag.id,
-										name: tag.name,
-										color: tag.color || "#000000",
+										id: responseData.tag.id,
+										name: responseData.tag.name,
+										color: responseData.tag.color || "#000000",
 									},
 								],
 							};
@@ -326,7 +324,7 @@ export function FileCard({
 
 							toast({
 								title: "Etiqueta agregada",
-								description: `${file.name} ha sido etiquetado con ${tag.name}`,
+								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
 							});
 						} catch (error) {
 							console.error("Error adding tag:", error);
