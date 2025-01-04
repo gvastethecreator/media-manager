@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
 	motion,
 	AnimatePresence,
@@ -44,17 +44,18 @@ interface FileCardProps {
 
 const springConfig = {
 	type: "spring",
-	stiffness: 300,
-	damping: 30,
-	mass: 0.5,
-	restSpeed: 2,
-	restDelta: 0.01,
+	stiffness: 100,
+	damping: 15,
+	mass: 0.2,
+	restSpeed: 0.1,
+	restDelta: 0.001,
+	bounce: 0.1,
 };
 
 const transitionConfig = {
 	type: "tween",
-	duration: 0.2,
-	ease: "easeOut",
+	duration: 0.4,
+	ease: [0.4, 0, 0.2, 1],
 };
 
 const fadeInOutVariants = {
@@ -63,25 +64,30 @@ const fadeInOutVariants = {
 	exit: { opacity: 0 },
 };
 
-const cardVariants = {
-	initial: { scale: 0.95, opacity: 0 },
-	animate: {
-		scale: 1,
-		opacity: 1,
-		transition: springConfig,
-	},
-	exit: {
-		scale: 0.95,
+const variants = {
+	hidden: {
 		opacity: 0,
-		transition: { duration: 0.2 },
+		scale: 0.9,
 	},
+	visible: (custom: { delay: number }) => ({
+		opacity: 1,
+		scale: 1,
+		transition: {
+			...springConfig,
+			delay: custom.delay,
+		},
+	}),
 	hover: {
 		scale: 0.95,
 		transition: springConfig,
 	},
 	tap: {
 		scale: 0.93,
-		transition: springConfig,
+		transition: {
+			...springConfig,
+			stiffness: 400,
+			damping: 10,
+		},
 	},
 };
 
@@ -112,6 +118,13 @@ export function FileCard({
 
 	// Determinar si este item está seleccionado
 	const isSelected = selectedItems.some((i) => i.id === item.id);
+
+	// Calcular delay basado en el índice para efecto stagger
+	const staggerDelay = useMemo(() => {
+		const row = Math.floor(index / totalColumns);
+		const col = index % totalColumns;
+		return (row * 0.1 + col * 0.05) * 0.5; // Reducido para que sea más rápido
+	}, [index, totalColumns]);
 
 	const loadThumbnail = useCallback(async () => {
 		if (hasLoaded.current || !shouldLoad) return;
@@ -285,21 +298,20 @@ export function FileCard({
 	return (
 		<motion.div
 			layout
-			initial={false}
-			animate={{
-				scale: isHovered ? 0.95 : 1,
-			}}
-			whileHover={{ scale: shouldReduceMotion ? 1 : 0.95 }}
-			whileTap={{ scale: shouldReduceMotion ? 1 : 0.93 }}
-			transition={springConfig}
+			layoutId={`file-${item.id}`}
+			initial="hidden"
+			animate="visible"
+			whileHover="hover"
+			whileTap="tap"
+			variants={variants}
+			custom={{ delay: staggerDelay }}
 			onHoverStart={handleHoverStart}
 			onHoverEnd={handleHoverEnd}
 			className={cn(
 				"relative overflow-hidden w-full h-full",
-				isSelected
+				isSelected || isHovered
 					? "ring-1 ring-primary ring-inset shadow-lg"
-					: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
-				"aspect-square"
+					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
 			)}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
@@ -313,21 +325,29 @@ export function FileCard({
 			}}
 		>
 			<FileContextMenu file={item} onAction={handleContextMenuAction}>
-				<div className="relative w-full h-full overflow-hidden">
+				<motion.div
+					className="relative w-full h-full overflow-hidden"
+					variants={{
+						hidden: { opacity: 0 },
+						visible: { opacity: 1 },
+					}}
+				>
 					<AnimatePresence mode="wait" initial={false}>
 						{isLoading ? (
 							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 0.4 }}
-								exit={{ opacity: 0 }}
+								variants={fadeInOutVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
 								transition={transitionConfig}
-								className="absolute inset-0 bg-gradient-to-b from-black/50 to-secondary/50"
+								className="absolute inset-0 bg-black/50"
 							/>
 						) : error ? (
 							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
+								variants={fadeInOutVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
 								transition={transitionConfig}
 								className="absolute inset-0 bg-red-50/50 flex items-center justify-center"
 							>
@@ -337,15 +357,16 @@ export function FileCard({
 							</motion.div>
 						) : thumbnail ? (
 							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
+								variants={fadeInOutVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
 								transition={transitionConfig}
 								className="relative w-full h-full"
 							>
 								{/* Fondo blur */}
 								<motion.div
-									className="absolute inset-0 overflow-hidden"
+									className="absolute inset-0 overflow-hidden brightness-10"
 									style={{
 										backgroundImage: `url(${thumbnail})`,
 										backgroundSize: "cover",
@@ -356,83 +377,96 @@ export function FileCard({
 												? "blur(20px) brightness(0.3)"
 												: "blur(30px) brightness(0.7)",
 									}}
-									transition={springConfig}
+									transition={{
+										duration: 0.4,
+										ease: [0.4, 0, 0.2, 1],
+									}}
 								/>
 
 								{/* Imagen principal */}
 								<motion.div
 									className="absolute inset-0 flex justify-center items-center"
-									style={{
-										y,
-										scale: isSelected || isHovered ? 0.9 : scale,
+									animate={{
+										scale: isSelected || isHovered ? 0.9 : 1,
+										y: isSelected || isHovered ? -20 : 0,
 									}}
-									transition={springConfig}
+									transition={{
+										type: "spring",
+										stiffness: 100,
+										damping: 15,
+										mass: 0.2,
+										velocity: 2,
+									}}
 								>
 									<ImageCard
 										src={thumbnail || ""}
 										alt={item.name}
 										width={item.metadata?.dimensions?.width || 300}
 										height={item.metadata?.dimensions?.height || 300}
-										className="max-w-[90%] max-h-[80%] object-contain z-10 rounded-none shadow-lg"
+										className="max-w-[90%] max-h-[75%] z-10 shadow-lg rounded-sm"
 										priority={false}
 									/>
 								</motion.div>
 
 								{/* Información */}
 								<motion.div
-									style={{
-										opacity,
+									animate={{
+										opacity: isSelected || isHovered ? 1 : 0,
 										y: isSelected || isHovered ? 0 : 20,
 									}}
-									transition={springConfig}
-									className="absolute inset-x-0 bottom-0 z-20"
+									transition={{
+										type: "spring",
+										stiffness: 100,
+										damping: 15,
+										mass: 0.2,
+										velocity: 2,
+									}}
+									className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2"
 								>
-									<div className="p-1">
-										<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
-											<FileIcon size={10} />
-											<span>{item.name}</span>
-										</p>
-										<div className="grid grid-cols-2 gap-x-2 px-1">
-											<div className="space-y-0.5">
-												<div className="flex items-center gap-1 text-[8px] text-white/70">
-													<ImageIcon size={9} />
-													<span>{item.metadata?.extension?.toUpperCase()}</span>
-													<span>•</span>
-													<span>{formatBytes(item.metadata?.size || 0)}</span>
-												</div>
-												<div className="flex items-center gap-1 text-[9px] text-white/60">
-													<CalendarIcon size={9} />
-													<span>
-														{format(new Date(item.createdAt), "dd MMM yyyy", {
-															locale: es,
-														})}
-													</span>
-												</div>
+									<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
+										<FileIcon size={10} />
+										<span>{item.name}</span>
+									</p>
+									<div className="grid grid-cols-2 gap-x-2 px-1">
+										<div className="space-y-0.5">
+											<div className="flex items-center gap-1 text-[8px] text-white/70">
+												<ImageIcon size={9} />
+												<span>{item.metadata?.extension?.toUpperCase()}</span>
+												<span>•</span>
+												<span>{formatBytes(item.metadata?.size || 0)}</span>
 											</div>
-											<div className="text-right space-y-0.5">
-												{item.isFavorite && (
-													<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-														<StarIcon size={9} className="text-yellow-400" />
-														<span>Favorito</span>
-													</div>
-												)}
-												{item.tags && item.tags[0] && (
-													<Badge
-														variant="secondary"
-														className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-													>
-														<TagIcon size={8} className="mr-1" />
-														{item.tags[0].name}
-													</Badge>
-												)}
+											<div className="flex items-center gap-1 text-[9px] text-white/60">
+												<CalendarIcon size={9} />
+												<span>
+													{format(new Date(item.createdAt), "dd MMM yyyy", {
+														locale: es,
+													})}
+												</span>
 											</div>
+										</div>
+										<div className="text-right space-y-0.5">
+											{item.isFavorite && (
+												<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
+													<StarIcon size={9} className="text-yellow-400" />
+													<span>Favorito</span>
+												</div>
+											)}
+											{item.tags && item.tags[0] && (
+												<Badge
+													variant="secondary"
+													className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+												>
+													<TagIcon size={8} className="mr-1" />
+													{item.tags[0].name}
+												</Badge>
+											)}
 										</div>
 									</div>
 								</motion.div>
 							</motion.div>
 						) : null}
 					</AnimatePresence>
-				</div>
+				</motion.div>
 			</FileContextMenu>
 		</motion.div>
 	);
