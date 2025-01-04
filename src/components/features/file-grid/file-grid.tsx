@@ -104,7 +104,7 @@ export function FileGrid({
 		count: rowCount,
 		getScrollElement: () => gridRef.current,
 		estimateSize: useCallback(() => itemSize, [itemSize]),
-		overscan: isScrolling ? 5 : GRID_CONFIG.overscanCount,
+		overscan: isScrolling ? 6 : GRID_CONFIG.overscanCount,
 		onChange: (instance) => {
 			if (instance.isScrolling) {
 				setIsScrolling(true);
@@ -141,9 +141,7 @@ export function FileGrid({
 		<div
 			ref={gridRef}
 			className={cn(
-				"h-full w-full overflow-auto relative",
-				"scrollbar-thin scrollbar-thumb-secondary scrollbar-track-transparent",
-				"hover:scrollbar-thumb-secondary/80"
+				"h-full w-full overflow-auto relative"
 			)}
 			style={{
 				padding: `${GRID_CONFIG.gap}px`,
@@ -176,7 +174,7 @@ export function FileGrid({
 								className="grid h-full"
 								style={{
 									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									columnGap: `${GRID_CONFIG.gap}px`,
+									columnGap:0,
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {
@@ -188,7 +186,7 @@ export function FileGrid({
 									}
 
 									return (
-										<div key={item.id} className="relative w-full">
+										<div key={item.id} className="relative w-full py-2 px-1">
 											<FileCard
 												item={item}
 												onClick={onItemClick}
