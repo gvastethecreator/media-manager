@@ -3,11 +3,17 @@ import path from 'path'
 import { prisma } from '@/lib/prisma'
 import { folderService } from './folder.service'
 
+/**
+ * @deprecated Use watcherClient from @/services/watcher instead
+ */
 export const watcherService = {
   activeWatchers: new Map<string, { close: () => void }>(),
 
-  // Iniciar el monitoreo de una carpeta
+  /**
+   * @deprecated Use watcherClient.watchFolder instead
+   */
   async watchFolder(folderId: string): Promise<void> {
+    console.warn('⚠️ [Deprecated] Use watcherClient.watchFolder instead');
     try {
       const response = await fetch('/api/folders/watch', {
         method: 'POST',
@@ -27,8 +33,11 @@ export const watcherService = {
     }
   },
 
-  // Detener el monitoreo de una carpeta
+  /**
+   * @deprecated Use watcherClient.unwatchFolder instead
+   */
   async stopWatching(folderId: string): Promise<void> {
+    console.warn('⚠️ [Deprecated] Use watcherClient.unwatchFolder instead');
     try {
       const response = await fetch('/api/folders/watch', {
         method: 'POST',
@@ -48,8 +57,11 @@ export const watcherService = {
     }
   },
 
-  // Iniciar el monitoreo de todas las carpetas observadas
+  /**
+   * @deprecated Use watcherClient.syncWatchedFolders instead
+   */
   async startWatchingAll(): Promise<void> {
+    console.warn('⚠️ [Deprecated] Use watcherClient.syncWatchedFolders instead');
     const folders = await prisma.folder.findMany({
       where: { isWatched: true }
     })
@@ -59,8 +71,11 @@ export const watcherService = {
     }
   },
 
-  // Detener todo el monitoreo
+  /**
+   * @deprecated Use watcherClient.stopAll instead
+   */
   stopWatchingAll(): void {
+    console.warn('⚠️ [Deprecated] Use watcherClient.stopAll instead');
     for (const [folderId, watcher] of this.activeWatchers) {
       watcher.close()
       this.activeWatchers.delete(folderId)
