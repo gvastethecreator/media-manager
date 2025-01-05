@@ -97,3 +97,22 @@
 - Los tests de API requieren una configuración especial para manejar las respuestas JSON
 - La implementación de `MockNextRequest` debe seguir la misma interfaz que `NextRequest` de Next.js
 - Los mocks deben ser cargados antes de que se importen los archivos que los utilizan
+
+### Integración de Perfil Activo en Panel Izquierdo
+
+#### Cambios Realizados
+
+- Se integró la información del perfil activo en el panel izquierdo
+- Se agregaron los siguientes elementos:
+  - Emoji del perfil con el color de fondo correspondiente
+  - Nombre del perfil
+  - Se mantuvo el contador de imágenes pero se reorganizó el diseño
+- Se mejoró el diseño para mostrar la información de manera más compacta y atractiva
+
+#### Detalles Técnicos
+
+- Se utiliza el `useSettingsContext` para acceder a la información del perfil
+- Se mantiene la consistencia visual con la sección de perfiles
+- Se aplican los colores y emojis del perfil activo
+- Se agregó truncamiento para nombres largos
+- Se ajustó el tamaño de fuente y espaciado para mejor legibilidad
