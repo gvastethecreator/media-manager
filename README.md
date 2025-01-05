@@ -39,7 +39,7 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ## Estado actual del proyecto
 
-### Características
+### Características Implementadas
 
 - 🔄 Indexado completo de carpetas
 - 🖼️ Generación de thumbnails
@@ -53,15 +53,58 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 📈 Panel de estadisticas
 - 📊 Panel de detalles basicos
 
-### Vistas
+### Vistas Disponibles
 
-- 🖼️ Vista de galería ( todas las imagenes )
+- 🖼️ Vista de galería (todas las imágenes)
 - ⭐ Vista de favoritos
 - 📂 Vista de carpetas
 - 📕 Vista de colecciones
 - 🔖 Vista de etiquetas
-- 🔍 Vista de busqueda
+- 🔍 Vista de búsqueda
 - 🛠️ Vista de debug
+
+## Documentación Detallada a desarrollar
+
+### Core Features
+
+Consulta `/docs/features/` para documentación detallada de cada característica:
+
+#### 1. Optimización y Rendimiento
+
+- [Grid Performance](/docs/features/optimization/grid-performance.md)
+- [Paginación y Scroll Infinito](/docs/features/optimization/pagination-infinite-scroll.md)
+
+#### 2. Gestión de Archivos
+
+- [Operaciones Batch](/docs/features/file-management/batch-operations.md)
+
+#### 3. Interfaz de Usuario
+
+- [Paneles Informativos](/docs/features/ui/info-panels.md)
+- [Mejoras del Visualizador](/docs/features/viewer/image-viewer-improvements.md)
+
+#### 4. Personalización
+
+- [Temas y Performance](/docs/features/customization/themes-and-performance.md)
+
+#### 5. Metadata y Edición
+
+- [Gestión de Metadatos](/docs/features/metadata/metadata-management.md)
+
+#### 6. Integración IA
+
+- [Características IA](/docs/features/ai/ai-integration.md)
+
+## Roadmap y Planificación
+
+Consulta `/docs/ROADMAP.md` para ver la planificación detallada y prioridades del proyecto.
+
+## Contribución
+
+1. Revisa la documentación en `/docs`
+2. Sigue las guías de desarrollo
+3. Asegúrate de añadir tests
+4. Mantén la documentación actualizada
 
 ## Configuración
 
@@ -71,7 +114,7 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 🔖 Gestion de etiquetas
 - 🖼️ Gestion de miniaturas
 
-### Servicios actuales
+## Servicios Actuales
 
 - 📂 Servicio de indexado de carpetas
 - 📂 Servicio de monitoreo de carpetas
@@ -82,177 +125,3 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 🔖 Servicio de gestión de etiquetas
 - 👨🏻‍🦱 Servicio de gestión de usuarios
 - 🧑🏻‍🦰 Servicio de gestión de perfiles
-
-## Estructura del Proyecto
-
-```
-├───app
-│   ├───actions
-│   ├───api
-│   │   ├───collections
-│   │   │   └───[id]
-│   │   │       ├───files
-│   │   │       └───images
-│   │   │           ├───all
-│   │   │           └───id2
-│   │   ├───favorites
-│   │   ├───files
-│   │   │   ├───folder
-│   │   │   └───[id]
-│   │   │       ├───download
-│   │   │       ├───location
-│   │   │       └───raw
-│   │   ├───folders
-│   │   │   ├───reindex
-│   │   │   │   └───[id]
-│   │   │   │       └───events
-│   │   │   ├───stats
-│   │   │   ├───test
-│   │   │   ├───watch
-│   │   │   ├───watched
-│   │   │   └───[id]
-│   │   │       ├───files
-│   │   │       ├───images
-│   │   │       │   └───all
-│   │   │       ├───index
-│   │   │       └───watch
-│   │   ├───images
-│   │   │   ├───all
-│   │   │   ├───favorites
-│   │   │   │   └───all
-│   │   │   ├───reprocess-thumbnails
-│   │   │   ├───thumbnail-stats
-│   │   │   └───[id]
-│   │   │       ├───favorite
-│   │   │       ├───preview
-│   │   │       └───thumbnail
-│   │   │           └───generate
-│   │   ├───profiles
-│   │   │   └───[id]
-│   │   │       └───activate
-│   │   ├───seed
-│   │   ├───settings
-│   │   ├───stats
-│   │   ├───system
-│   │   │   ├───copy
-│   │   │   ├───download
-│   │   │   ├───open
-│   │   │   └───status
-│   │   ├───tags
-│   │   │   └───[id]
-│   │   │       ├───files
-│   │   │       └───images
-│   │   │           ├───all
-│   │   │           ├───[id2]
-│   │   │           └───[id]
-│   │   └───thumbnails
-│   │       ├───clean
-│   │       ├───cleanup
-│   │       ├───maintenance
-│   │       ├───migrate
-│   │       ├───optimize
-│   │       ├───process
-│   │       │   └───[folderId]
-│   │       ├───reprocess
-│   │       ├───stats
-│   │       ├───validate
-│   │       └───[id]
-│   │           ├───delete
-│   │           ├───download
-│   │           ├───generate
-│   │           └───preview
-│   └───folders
-│       └───[id]
-│           └───view
-├───components
-│   ├───core
-│   │   ├───data-display
-│   │   │   └───empty-state
-│   │   ├───feedback
-│   │   │   └───loading
-│   │   └───theme
-│   ├───features
-│   │   ├───file-grid
-│   │   └───file-viewer
-│   │       └───components
-│   ├───layout
-│   ├───panels
-│   │   ├───details
-│   │   ├───nav
-│   │   └───stats
-│   ├───ui
-│   └───views
-│       ├───all-images
-│       ├───collections
-│       ├───debug
-│       ├───favorites
-│       ├───folders
-│       ├───search
-│       ├───settings
-│       │   └───settings-sections
-│       └───tags
-├───config
-├───context
-├───hooks
-├───lib
-│   ├───constants
-│   ├───contexts
-│   ├───hooks
-│   ├───sse
-│   └───thumbnail
-├───providers
-├───services
-│   └───watcher
-├───store
-├───tests
-│   ├───api
-│   ├───components
-│   ├───integration
-│   ├───mocks
-│   └───unit
-│       └───services
-├───types
-└───__tests__
-    └───api
-        └───folders
-```
-
-## Estado del Desarrollo
-
-# Por desarrollar y planificar
-
-- [ ] Funcionalidad de búsqueda detallada y funcional
-- [ ] Sección de perfiles funcional e integrada
-- [ ] Extracción completa de metadata y datos de generación ( AI )
-- [ ] Optimización de rendimiento de la vista de grilla
-- [ ] Panel de carpeta con información de la carpeta
-- [ ] Panel de coleccion con información de la colección
-- [ ] Panel de etiqueta con información de la etiqueta
-- [ ] Panel de busqueda con información de la busqueda
-- [ ] Vista de debug con información de la aplicación, documentación y otros
-- [ ] Mejoras en los servicios de indexado, monitoreo y procesamiento de imágenes
-- [ ] Tests para los servicios
-- [ ] Tests para los componentes
-- [ ] Paginado disponible para las vistas de grilla
-- [ ] Scroll infinito para las vistas de grilla
-- [ ] Toolbars para las vistas
-- [ ] Mejoras en el visualizador de imágenes
-- [ ] Nuevos temas de diferentes colores
-- [ ] Modo performance sin animaciones
-- [ ] Personalización de interfaz
-- [ ] Gestión de favoritos
-- [ ] Funcionalidad de marcar archivos
-- [ ] Funcionalidad para empaquetar y descargar archivos marcados
-- [ ] Funcionalidad para organizar archivos marcados y asignar colección, favoritos, etiquetas
-- [ ] Funcionalidad para eliminar archivos marcados
-- [ ] Navegación por teclado
-- [ ] Funcionalidad para arrastrar y soltar archivos
-- [ ] Funcionalidad de subcarpetas y tarjeta de carpeta para file-grid
-- [ ] Edición de metadatos de archivos
-- [ ] Edición básica de imagenes ( crop, rotación, zoom, etc )
-- [ ] Renombrado avanzado de archivos
-- [ ] Integración de procesado en batch para archivos seleccionados
-- [ ] Interrogado de imagenes para usar con algún llm y generar prompts
-- [ ] Generado de mind-maps a travez de metadata para hacer busqueda espacial
-- [ ] Ordenado segun paleta de colores
-- [ ] Organización de carpetas en el sistema de archivos de windows
