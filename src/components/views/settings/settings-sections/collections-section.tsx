@@ -4,10 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
-	KeyboardIcon,
 	Trash2,
 	Smile,
 	PencilIcon,
@@ -15,7 +12,6 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useCollectionTagContext } from "@/context/settings-context";
-import { GithubPicker } from "react-color";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -23,14 +19,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { CompactPicker } from "react-color";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
-import { Check, UserX } from "lucide-react";
-
-const MotionCard = motion(Card);
 
 export function CollectionsSection() {
 	const { settings, updateCollection, deleteCollection } =

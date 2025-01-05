@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	DatabaseIcon,
 	BookmarkIcon,
-	BrainCircuitIcon,
 	CatIcon,
 } from "lucide-react";
 
