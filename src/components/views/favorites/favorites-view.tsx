@@ -76,11 +76,8 @@ export function FavoritesView() {
 			<div className="h-full w-full overflow-auto">
 				<FileGrid
 					items={favoriteItems}
-					selectedItem={selectedItem}
-					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
-					isProcessingThumbnails={isProcessingThumbnails}
 				/>
 			</div>
 		</div>
