@@ -145,7 +145,7 @@ const Activity = memo(
 	)
 );
 
-export function DashboardPanel() {
+export function StatsPanel() {
 	const { stats, isLoading, error, initialize } = useStatsStore();
 
 	useEffect(() => {
