@@ -5,6 +5,7 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 # Stack Tecnológico
 
 ## Front End
+
 - **Next.js 15** - con App Router
 - **React 19** - con Server Components
 - **Tailwind CSS** - para estilos
@@ -16,12 +17,14 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - **Typescript** - para tipado estático
 
 ## Back End
+
 - **SQLite 3** - para base de datos local
 - **Prisma ORM** - para ORM
 - **Next.js API Routes** - para endpoints
 - **Node.js fs/promises** - para manipulación de archivos
 
 ### Otras dependencias
+
 - **Event Source Polyfill** - para soporte de eventos en navegadores antiguos
 - **Event Source Stream** - para soporte de eventos en navegadores antiguos
 - **Tanstack Query** - para gestión de datos
@@ -59,7 +62,6 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 🔖 Vista de etiquetas
 - 🔍 Vista de busqueda
 - 🛠️ Vista de debug
-
 
 ## Configuración
 
@@ -176,17 +178,14 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 │   │   │   └───toolbar
 │   │   └───theme
 │   ├───features
-│   │   ├───collections
-│   │   ├───dashboard
-│   │   ├───file-details
 │   │   ├───file-grid
-│   │   ├───file-viewer
-│   │   │   └───components
-│   │   └───modals
+│   │   └───file-viewer
+│   │       └───components
 │   ├───layout
-│   │   ├───left-panel
-│   │   ├───main-layout
-│   │   └───right-panel
+│   ├───panels
+│   │   ├───details
+│   │   ├───nav
+│   │   └───stats
 │   ├───ui
 │   └───views
 │       ├───all-images
@@ -225,8 +224,8 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
         └───folders
 ```
 
-
 ## Estado del Desarrollo
+
 # Por desarrollar y planificar
 
 - [ ] Funcionalidad de búsqueda detallada y funcional
