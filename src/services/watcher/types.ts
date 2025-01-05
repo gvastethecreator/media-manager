@@ -7,22 +7,17 @@
  * Eventos emitidos por el sistema de observación
  */
 export interface WatcherEvents {
-  onFileAdd: (path: string) => void;
-  onFileRemove: (path: string) => void;
-  onFileChange: (path: string) => void;
-  onError: (error: Error) => void;
+  onFileAdded?: (path: string) => void;
+  onFileDeleted?: (path: string) => void;
+  onFileChanged?: (path: string) => void;
+  onError?: (error: Error) => void;
 }
 
 /**
  * Configuración para el sistema de observación
  */
 export interface WatcherConfig {
-  /** Tiempo en ms para considerar un archivo como estable después de escritura */
-  stabilityThreshold?: number;
-  /** Intervalo en ms para verificar la estabilidad del archivo */
-  pollInterval?: number;
-  /** Si se deben ignorar los archivos existentes al iniciar */
-  ignoreInitial?: boolean;
+  isTestEnvironment?: boolean;
 }
 
 /**
@@ -31,7 +26,7 @@ export interface WatcherConfig {
 export interface WatchedFolder {
   id: string;
   path: string;
-  isActive: boolean;
+  isWatched: boolean;
 }
 
 /**
@@ -39,6 +34,7 @@ export interface WatchedFolder {
  */
 export interface WatcherApiResponse {
   success: boolean;
+  message?: string;
   error?: string;
   data?: {
     folderId: string;
