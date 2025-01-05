@@ -54,7 +54,7 @@ const initialStats: FolderStats = {
 	lastIndexed: null,
 };
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 export function FoldersSection() {
 	const { toast } = useToast();
