@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UserPlus, Trash2, Check, Smile, UserCog, Trash, X, UserX, Users, User } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
 import { cn } from "@/lib/utils";
-import { GithubPicker } from "react-color";
+import { CompactPicker } from "react-color";
 import {
 	Popover,
 	PopoverContent,
@@ -105,9 +105,10 @@ export function ProfilesSection() {
 										/>
 									</Button>
 								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="end">
-									<GithubPicker
-										color={activeProfileData?.color}
+								<PopoverContent className="w-auto p-0 bg-transparent" align="end">
+									<CompactPicker
+									color={activeProfileData?.color}
+									className="shadow-lg bg-black/90 text-white"
 										onChange={(color) =>
 											handleUpdateActiveProfile({ color: color.hex })
 										}
