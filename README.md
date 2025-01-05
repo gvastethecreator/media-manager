@@ -63,6 +63,35 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 🔍 Vista de búsqueda
 - 🛠️ Vista de debug
 
+
+
+## Contribución
+
+1. Revisa la documentación en `/docs`
+2. Sigue las guías de desarrollo
+3. Asegúrate de añadir tests
+4. Mantén la documentación actualizada
+
+## Configuración
+
+- 👥 Gestion de usuarios
+- 📂 Gestion de carpetas indexadas
+- 📕 Gestion de colecciones
+- 🔖 Gestion de etiquetas
+- 🖼️ Gestion de miniaturas
+
+## Servicios Actuales
+
+- 📂 Servicio de indexado de carpetas
+- 📂 Servicio de monitoreo de carpetas
+- 📂 Servicio de procesamiento de imágenes
+- 🖼️ Servicio de generación de thumbnails
+- 🗒️ Servicio de extracción de metadatos
+- 📕 Servicio de gestión de colecciones
+- 🔖 Servicio de gestión de etiquetas
+- 👨🏻‍🦱 Servicio de gestión de usuarios
+- 🧑🏻‍🦰 Servicio de gestión de perfiles
+
 ## Documentación Detallada a desarrollar
 
 ### Core Features
@@ -98,30 +127,3 @@ Consulta `/docs/features/` para documentación detallada de cada característica
 ## Roadmap y Planificación
 
 Consulta `/docs/ROADMAP.md` para ver la planificación detallada y prioridades del proyecto.
-
-## Contribución
-
-1. Revisa la documentación en `/docs`
-2. Sigue las guías de desarrollo
-3. Asegúrate de añadir tests
-4. Mantén la documentación actualizada
-
-## Configuración
-
-- 👥 Gestion de usuarios
-- 📂 Gestion de carpetas indexadas
-- 📕 Gestion de colecciones
-- 🔖 Gestion de etiquetas
-- 🖼️ Gestion de miniaturas
-
-## Servicios Actuales
-
-- 📂 Servicio de indexado de carpetas
-- 📂 Servicio de monitoreo de carpetas
-- 📂 Servicio de procesamiento de imágenes
-- 🖼️ Servicio de generación de thumbnails
-- 🗒️ Servicio de extracción de metadatos
-- 📕 Servicio de gestión de colecciones
-- 🔖 Servicio de gestión de etiquetas
-- 👨🏻‍🦱 Servicio de gestión de usuarios
-- 🧑🏻‍🦰 Servicio de gestión de perfiles
