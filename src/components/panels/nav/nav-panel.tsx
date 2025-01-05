@@ -7,7 +7,6 @@ import { useUIStore } from "@/store/ui";
 import { useStatsStore } from "@/store/stats";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "next-themes";
-import { Badge } from "@/components/ui/badge";
 import { useSettingsContext } from "@/context/settings-context";
 import {
 	FolderIcon,
@@ -23,7 +22,6 @@ import {
 	BookImage,
 	CornerDownRight,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { useNavigationStore } from "@/store/navigation";
 import { ViewType } from "@/types/file-item";
 import { cn } from "@/lib/utils";
@@ -61,7 +59,7 @@ const categories = [
 	},
 ];
 
-export function LeftPanel() {
+export function NavPanel() {
 	const { stats, initialize: initializeStats } = useStatsStore();
 	const { settings } = useSettingsContext();
 	const { profiles, activeProfile } = settings;

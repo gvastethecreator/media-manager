@@ -1,7 +1,7 @@
 "use client";
 
-import { LeftPanel } from "@/components/layout/left-panel/left-panel";
-import { RightPanel } from "@/components/layout/right-panel/right-panel";
+import { NavPanel } from "@/components/panels/nav/nav-panel";
+import { RightPanel } from "@/components/layout/right-panel";
 import { ViewContainer } from "@/components/views/view-container";
 import {
 	ResizableHandle,
@@ -27,7 +27,7 @@ export function MainLayout() {
 				maxSize={30}
 				className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 			>
-				<LeftPanel />
+				<NavPanel />
 			</ResizablePanel>
 
 			<ResizableHandle withHandle />
