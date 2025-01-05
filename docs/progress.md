@@ -39,12 +39,11 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ## 📝 Documentación del Proyecto
 
-### 🎯 Estado Actual del Proyecto
-
 Se ha realizado una documentación detallada de las características principales del proyecto. La documentación actualizada se encuentra en:
 
 #### Documentación Core
 
+- `/docs/PRD.md` - Documento de Requerimientos del Producto
 - `/docs/ROADMAP.md` - Vista general del proyecto y planificación
 - `/docs/features/` - Documentación detallada de características
 
@@ -111,22 +110,3 @@ Se ha realizado una documentación detallada de las características principales
 - Se prioriza la estabilidad y rendimiento
 - Se documenta cada nueva implementación
 - Se mantienen tests actualizados
-
-### 📋 Próximas Documentaciones
-
-1. **Testing y QA**
-
-   - Estrategias de testing
-   - Automatización de pruebas
-   - Métricas de calidad
-
-2. **Deployment y CI/CD**
-
-   - Proceso de build
-   - Estrategias de deployment
-   - Monitoreo y logging
-
-3. **Guías de Desarrollo**
-   - Estándares de código
-   - Flujo de trabajo
-   - Best practices
