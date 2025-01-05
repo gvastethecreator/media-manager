@@ -1,17 +1,45 @@
 # Image Manager
 
-Una aplicación moderna de gestión de imágenes construida con Next.js 15, React 19, Prisma y SQLite.
+Este proyecto es una aplicación moderna de gestión y visualización de archivos multimedia diseñada para proporcionar una experiencia fluida y eficiente en la organización y visualización de grandes colecciones de medios locales.
 
-## Características
+# Stack Tecnológico
 
-- 🖼️ Visualización avanzada de imágenes con zoom, pan y gestos
-- 📂 Organización jerárquica de carpetas con monitoreo automático
-- 🔄 Indexación automática de imágenes
-- 🏷️ Organización basada en etiquetas
-- 📱 Diseño responsive
-- 🎨 Tema claro/oscuro
+## Front End
+- Next.js 15
+- React 19
+- Tailwind CSS
+- shadcn/ui
+- Zustand
+- Jest
+- Motion
+
+## Back End
+- SQLite
+- Prisma ORM
+- Next.js API Routes
+- Node.js fs/promises
+
+# Otras dependencias
+- Event Source Polyfill
+- Event Source Stream
+- Lucide React
+- Framer Motion
+- Tanstack Query
+- Bull
+- Chokidar
+- Exifr
+- Sharp
+- React Scan
+- React Color
+
+
+## Características actuales
+
 - ⚡ Navegación rápida y eficiente
-- 🔍 Capacidades avanzadas de búsqueda
+- 🔄 Indexación de carpetas para organización
+- 📚 Organización basada en carpetas, colecciones, etiquetas, favoritos.
+- 🖼️ Visualización avanzada de imágenes
+- 🎨 Tema claro/oscuro
 - 💾 Base de datos local SQLite
 - 📊 Estadísticas de carpetas y archivos
 
@@ -30,14 +58,13 @@ Una aplicación moderna de gestión de imágenes construida con Next.js 15, Reac
 - Monitoreo de cambios en carpetas
 - Base de datos local con SQLite
 - Estadísticas de carpetas
-
-### En Progreso 🚧
 - Gestión de colecciones
 - Sistema de etiquetas
+
+# Por desarrollar
 - Funcionalidad de búsqueda
-- Panel de configuración
-- Manejo de metadatos de archivos
-- Caché de miniaturas
+- Sección de perfiles funcional
+- Extracción completa de metadata y datos de generación ( AI )
 - Optimización de rendimiento
 
 ### Características Planeadas 🎯
@@ -48,38 +75,6 @@ Una aplicación moderna de gestión de imágenes construida con Next.js 15, Reac
 - Características basadas en IA
 - Capacidades de procesamiento de imágenes
 - Exportación/Importación de datos
-
-## Comenzando
-
-1. Clonar el repositorio
-```bash
-git clone https://github.com/yourusername/image-manager.git
-cd image-manager
-```
-
-2. Instalar dependencias
-```bash
-pnpm install
-```
-
-3. Configurar la base de datos
-```bash
-pnpm prisma generate
-pnpm prisma db push
-```
-
-4. Iniciar el servidor de desarrollo
-```bash
-pnpm dev
-```
-
-5. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
-
-## Requisitos del Sistema
-
-- Node.js 18 o superior
-- Windows 11 (recomendado para mejor compatibilidad)
-- SQLite 3
 
 ## Características Técnicas
 
@@ -101,11 +96,3 @@ pnpm dev
 - Monitoreo de carpetas en tiempo real
 - Caché de metadatos
 - Procesamiento de imágenes optimizado
-
-## Contribuir
-
-Las contribuciones son bienvenidas. Por favor, lee nuestra [Guía de Contribución](CONTRIBUTING.md) para más detalles.
-
-## Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
