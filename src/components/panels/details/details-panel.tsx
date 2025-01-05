@@ -63,10 +63,8 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ImageMetadata } from "@/lib/metadata";
-import { Meteors } from "@/components/ui/meteors";
-import { DashboardView } from "@/components/views/dashboard/dashboard-view";
-import { DashboardPanel } from "../dashboard/dashboard-panel";
-interface FileDetailsProps {
+import { DashboardPanel, StatsPanel } from "../stats/stats-panel";
+interface DetailsPanelProps {
 	selectedItems: FileItem[];
 }
 
@@ -108,7 +106,7 @@ const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
 	return content;
 };
 
-export function FileDetails({ selectedItems }: FileDetailsProps) {
+export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// 1. Estados
 	const [imageError, setImageError] = React.useState(false);
 	const [isMarked, setIsMarked] = React.useState(false);
@@ -510,7 +508,7 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 	if (!selectedItems.length) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
-				<DashboardPanel />
+				<StatsPanel />
 			</div>
 		);
 	}

@@ -1,7 +1,7 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileDetails } from "@/components/features/file-details/file-details";
+import { DetailsPanel } from "@/components/panels/details/details-panel";
 import { useFileManager } from "@/store/file-manager";
 
 export function RightPanel() {
@@ -10,7 +10,7 @@ export function RightPanel() {
 	return (
 		<div className="flex flex-col h-full">
 			<ScrollArea className="flex-1">
-				<FileDetails selectedItems={selectedItems} />
+				<DetailsPanel selectedItems={selectedItems} />
 			</ScrollArea>
 		</div>
 	);
