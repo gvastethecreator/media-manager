@@ -757,6 +757,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 					opacity: [0, 1],
 					y: [20, 0],
 				}}
+				transition={{ delay: 0.5 }}
 				className="space-y-4"
 			>
 				{/* Vista previa de imagen */}
@@ -796,7 +797,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						opacity: [0, 1],
 						y: [20, 0],
 					}}
-					style={{ delay: 0.1 }}
+					transition={{ delay: 0.1 }}
 				>
 					<Card className="border-none rounded-none mt-2">
 						<CardHeader className="p-4 pb-2">
@@ -862,7 +863,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: 0.2 }}
+						transition={{ delay: 0.2 }}
 					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
@@ -940,7 +941,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: 0.3 }}
+						transition={{ delay: 0.3 }}
 					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
@@ -1016,7 +1017,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						opacity: [0, 1],
 						y: [20, 0],
 					}}
-					style={{ delay: 0.4 }}
+					transition={{ delay: 0.4 }}
 				>
 					<Card className="border-none rounded-none mt-2">
 						<CardHeader className="p-4 pb-2">
@@ -1052,7 +1053,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: 0.5 }}
+						transition={{ delay: 0.5 }}
 					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
