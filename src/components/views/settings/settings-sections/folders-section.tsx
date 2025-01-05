@@ -32,7 +32,7 @@ import {
 	TooltipTrigger,
 	TooltipContent,
 } from "@/components/ui/tooltip";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 
 interface FolderStats {
@@ -345,7 +345,9 @@ export function FoldersSection() {
 							className="h-7 text-xs"
 							disabled={isLoading || isProcessing}
 						>
-							<RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
+							<RefreshCw
+								className={cn("h-3.5 w-3.5", isLoading && "animate-spin")}
+							/>
 						</Button>
 					</div>
 				</CardTitle>
@@ -410,158 +412,156 @@ export function FoldersSection() {
 						</motion.div>
 					)}
 
-					<AnimatePresence>
-						{folders.length > 0 ? (
+					<div className="grid grid-cols-2 gap-2">
+						{folders.map((folder, index) => (
 							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								className="space-y-2 grid grid-cols-2 gap-2"
+								key={folder.id}
+								animate={{
+									opacity: [0, 1],
+									y: [20, 0],
+								}}
+								style={{ delay: index * 0.1 }}
+								className={cn(
+									"bg-muted/30 group rounded-sm",
+									selectedFolder === folder.id && "ring-1 ring-primary"
+								)}
 							>
-								{folders.map((folder, index) => (
-									<MotionCard
-										key={folder.id}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -20 }}
-										transition={{ delay: index * 0.1 }}
-										className="bg-muted/30 rounded-sm group"
-									>
-										<CardContent className="p-2">
-											<div className="flex items-center justify-between relative">
-												<div className="flex items-center justify-between gap-1 w-full">
-													<div className="min-w-full">
-														<span className="text-xs font-xs block truncate inline-flex items-center gap-1">
-															<Folder className="h-3.5 w-3.5 text-muted-foreground" />
-															{folder.name}
-														</span>
-														<p className="text-[10px] text-muted-foreground truncate">
-															{folder.path}
-														</p>
-														<div className="flex items-center justify-between gap-2 w-full mt-2">
-															<Badge
-																variant="secondary"
-																className="text-[10px] px-2 h-4"
-															>
-																{folder._count?.images || 0} imágenes
-															</Badge>
-															<Badge
-																variant="secondary"
-																className="text-[10px] px-1 h-4"
-															>
-																{formatBytes(Number(folder.totalSize || 0))}
-															</Badge>
-															<span className="text-[10px] text-muted-foreground">
-																{folder.lastIndexed
-																	? new Date(folder.lastIndexed).toLocaleString()
-																	: "No indexado"}
-															</span>
-														</div>
-													</div>
+								<CardContent className="p-2">
+									<div className="flex items-center justify-between relative">
+										<div className="flex items-center justify-between gap-1 w-full">
+											<div className="min-w-full">
+												<span className="text-xs font-xs block truncate inline-flex items-center gap-1">
+													<Folder className="h-3.5 w-3.5 text-muted-foreground" />
+													{folder.name}
+												</span>
+												<p className="text-[10px] text-muted-foreground truncate">
+													{folder.path}
+												</p>
+												<div className="flex items-center justify-between gap-2 w-full mt-2">
+													<Badge
+														variant="secondary"
+														className="text-[10px] px-2 h-4"
+													>
+														{folder._count?.images || 0} imágenes
+													</Badge>
+													<Badge
+														variant="secondary"
+														className="text-[10px] px-1 h-4"
+													>
+														{formatBytes(Number(folder.totalSize || 0))}
+													</Badge>
+													<span className="text-[10px] text-muted-foreground">
+														{folder.lastIndexed
+															? new Date(folder.lastIndexed).toLocaleString()
+															: "No indexado"}
+													</span>
 												</div>
-
-												<motion.div
-													initial={{ opacity: 0, x: 20 }}
-													whileHover={{ opacity: 1, x: 0 }}
-													className="flex items-center gap-1 absolute right-0 top-0"
-												>
-													<TooltipProvider>
-														<Tooltip>
-															<TooltipTrigger asChild>
-																<Button
-																	size="icon"
-																	variant="ghost"
-																	className="h-6 w-6"
-																	onClick={() => handleReindexFolder(folder.id)}
-																	disabled={isProcessing}
-																>
-																	<RefreshCw
-																		className={cn(
-																			"h-3.5 w-3.5",
-																			isProcessing &&
-																				processStatus.folderId === folder.id &&
-																				"animate-spin"
-																		)}
-																	/>
-																</Button>
-															</TooltipTrigger>
-															<TooltipContent className="text-xs">
-																Reindexar carpeta
-															</TooltipContent>
-														</Tooltip>
-													</TooltipProvider>
-
-													<TooltipProvider>
-														<Tooltip>
-															<TooltipTrigger asChild>
-																<Button
-																	size="icon"
-																	variant="ghost"
-																	className={cn(
-																		"h-6 w-6",
-																		selectedFolder === folder.id &&
-																			"bg-destructive hover:bg-destructive/90"
-																	)}
-																	onClick={() => handleFolderClick(folder.id)}
-																	disabled={isProcessing}
-																>
-																	<Trash2
-																		className={cn(
-																			"h-3.5 w-3.5",
-																			selectedFolder === folder.id &&
-																				"text-destructive-foreground"
-																		)}
-																	/>
-																</Button>
-															</TooltipTrigger>
-															<TooltipContent className="text-xs">
-																{selectedFolder === folder.id
-																	? "Haz clic de nuevo para eliminar"
-																	: "Haz clic para eliminar"}
-															</TooltipContent>
-														</Tooltip>
-													</TooltipProvider>
-												</motion.div>
 											</div>
+										</div>
 
-											{isProcessing && processStatus.folderId === folder.id && (
-												<motion.div
-													initial={{ opacity: 0, height: 0 }}
-													animate={{ opacity: 1, height: "auto" }}
-													exit={{ opacity: 0, height: 0 }}
-													className="mt-3 space-y-1.5"
-												>
-													<div className="flex justify-between text-xs text-muted-foreground">
-														<span>{processStatus.status || "Procesando..."}</span>
-														<span>{Math.round(processProgress)}%</span>
-													</div>
-													<Progress value={processProgress} className="h-1.5" />
-													<div className="flex flex-col gap-1">
-														{processStatus.currentFile && (
-															<p className="text-[10px] text-muted-foreground truncate">
-																Archivo actual: {processStatus.currentFile}
-															</p>
-														)}
-														{processStatus.current !== undefined &&
-															processStatus.total !== undefined && (
-																<p className="text-[10px] text-muted-foreground">
-																	{processStatus.current} de{" "}
-																	{processStatus.total} archivos procesados
-																</p>
+										<motion.div
+											initial={{ opacity: 0, x: 20 }}
+											whileHover={{ opacity: 1, x: 0 }}
+											className="flex items-center gap-1 absolute right-0 top-0"
+										>
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Button
+															size="icon"
+															variant="ghost"
+															className="h-6 w-6"
+															onClick={() => handleReindexFolder(folder.id)}
+															disabled={isProcessing}
+														>
+															<RefreshCw
+																className={cn(
+																	"h-3.5 w-3.5",
+																	isProcessing &&
+																		processStatus.folderId === folder.id &&
+																		"animate-spin"
+																)}
+															/>
+														</Button>
+													</TooltipTrigger>
+													<TooltipContent className="text-xs">
+														Reindexar carpeta
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Button
+															size="icon"
+															variant="ghost"
+															className={cn(
+																"h-6 w-6",
+																selectedFolder === folder.id &&
+																	"bg-destructive hover:bg-destructive/90"
 															)}
-													</div>
-												</motion.div>
-											)}
-										</CardContent>
-									</MotionCard>
-								))}
+															onClick={() => handleFolderClick(folder.id)}
+															disabled={isProcessing}
+														>
+															<Trash2
+																className={cn(
+																	"h-3.5 w-3.5",
+																	selectedFolder === folder.id &&
+																		"text-destructive-foreground"
+																)}
+															/>
+														</Button>
+													</TooltipTrigger>
+													<TooltipContent className="text-xs">
+														{selectedFolder === folder.id
+															? "Haz clic de nuevo para eliminar"
+															: "Haz clic para eliminar"}
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</motion.div>
+									</div>
+
+									{isProcessing && processStatus.folderId === folder.id && (
+										<motion.div
+											initial={{ opacity: 0, height: 0 }}
+											animate={{ opacity: 1, height: "auto" }}
+											exit={{ opacity: 0, height: 0 }}
+											className="mt-3 space-y-1.5"
+										>
+											<div className="flex justify-between text-xs text-muted-foreground">
+												<span>{processStatus.status || "Procesando..."}</span>
+												<span>{Math.round(processProgress)}%</span>
+											</div>
+											<Progress value={processProgress} className="h-1.5" />
+											<div className="flex flex-col gap-1">
+												{processStatus.currentFile && (
+													<p className="text-[10px] text-muted-foreground truncate">
+														Archivo actual: {processStatus.currentFile}
+													</p>
+												)}
+												{processStatus.current !== undefined &&
+													processStatus.total !== undefined && (
+														<p className="text-[10px] text-muted-foreground">
+															{processStatus.current} de {processStatus.total}{" "}
+															archivos procesados
+														</p>
+													)}
+											</div>
+										</motion.div>
+									)}
+								</CardContent>
 							</motion.div>
-						) : (
+						))}
+
+						{folders.length === 0 && (
 							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: -20 }}
-								className="py-4 text-center"
+								animate={{
+									opacity: [0, 1],
+									y: [20, 0],
+								}}
+								className="py-4 text-center col-span-2"
 							>
 								<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
 								<p className="text-xs text-muted-foreground">
@@ -572,7 +572,7 @@ export function FoldersSection() {
 								</p>
 							</motion.div>
 						)}
-					</AnimatePresence>
+					</div>
 
 					<Separator className="my-2" />
 
@@ -585,7 +585,10 @@ export function FoldersSection() {
 							<span className="text-xs text-muted-foreground">
 								Carpetas indexadas
 							</span>
-							<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.totalFolders}
 							</Badge>
 						</motion.div>
@@ -597,7 +600,10 @@ export function FoldersSection() {
 							<span className="text-xs text-muted-foreground">
 								Archivos indexados
 							</span>
-							<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.totalFiles}
 							</Badge>
 						</motion.div>
@@ -610,7 +616,10 @@ export function FoldersSection() {
 							<span className="text-xs text-muted-foreground">
 								Espacio total
 							</span>
-							<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{formatBytes(stats.totalSize)}
 							</Badge>
 						</motion.div>
@@ -623,7 +632,10 @@ export function FoldersSection() {
 							<span className="text-xs text-muted-foreground">
 								Última indexación
 							</span>
-							<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+							<Badge
+								variant="outline"
+								className="text-[10px] font-mono h-4 px-1"
+							>
 								{stats.lastIndexed
 									? stats.lastIndexed.toLocaleString()
 									: "Nunca"}

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { FileItem } from '@/types'
+import { FileItem } from '@/types/file-item'
 
 interface ImageViewerStore {
   isOpen: boolean

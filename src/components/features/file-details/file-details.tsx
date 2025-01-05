@@ -50,7 +50,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "motion/react";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
 import { useToast } from "@/components/ui/use-toast";
 import { useFileManager } from "@/store/file-manager";
@@ -753,40 +753,53 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 
 	return (
 		<ScrollArea className="h-full pr-2">
-			<AnimatePresence mode="wait">
-				<motion.div
-					key={selectedItem.id}
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -20 }}
-					transition={{ duration: 0.2 }}
-				>
-					{/* Vista previa de imagen */}
-					{(selectedItem.type === "image" ||
-						selectedItem.metadata?.mimeType?.startsWith("image/")) && (
-						<Card className="border-none rounded-none overflow-hidden">
-							<CardContent className="p-0 relative">
-								<div className="relative max-h-[500px] w-full overflow-hidden flex items-center justify-center">
-									{/* Imagen principal */}
-									<div className="inset-0 flex items-center justify-center">
-										<div className="relative max-h-full">
-											{renderImage(selectedItem)}
-											{selectedItem.isFavorite && (
-												<div className="absolute top-2 right-2 z-10">
-													<StarIcon className="h-5 w-5 text-yellow-400 drop-shadow-lg" />
-												</div>
-											)}
-										</div>
+			<motion.div
+				key={selectedItem.id}
+				animate={{
+					opacity: [0, 1],
+					y: [20, 0],
+				}}
+				className="space-y-4"
+			>
+				{/* Vista previa de imagen */}
+				{(selectedItem.type === "image" ||
+					selectedItem.metadata?.mimeType?.startsWith("image/")) && (
+					<Card className="border-none rounded-none overflow-hidden">
+						<CardContent className="p-0 relative">
+							<motion.div
+								className="relative max-h-[500px] w-full overflow-hidden flex items-center justify-center"
+								animate={{ opacity: [0, 1], scale: [0.95, 1] }}
+							>
+								{/* Imagen principal */}
+								<div className="inset-0 flex items-center justify-center">
+									<div className="relative max-h-full">
+										{renderImage(selectedItem)}
+										{selectedItem.isFavorite && (
+											<motion.div
+												className="absolute top-2 right-2 z-10"
+												animate={{ scale: [0, 1] }}
+											>
+												<StarIcon className="h-5 w-5 text-yellow-400 drop-shadow-lg" />
+											</motion.div>
+										)}
 									</div>
 								</div>
-							</CardContent>
-						</Card>
-					)}
+							</motion.div>
+						</CardContent>
+					</Card>
+				)}
 
-					{/* Toolbar */}
-					{renderToolbar()}
+				{/* Toolbar */}
+				{renderToolbar()}
 
-					{/* Información básica */}
+				{/* Información básica */}
+				<motion.div
+					animate={{
+						opacity: [0, 1],
+						y: [20, 0],
+					}}
+					style={{ delay: 0.1 }}
+				>
 					<Card className="border-none rounded-none mt-2">
 						<CardHeader className="p-4 pb-2">
 							<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -842,9 +855,17 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 							)}
 						</CardContent>
 					</Card>
+				</motion.div>
 
-					{/* Información EXIF */}
-					{Object.keys(exif).length > 0 && (
+				{/* Información EXIF */}
+				{Object.keys(exif).length > 0 && (
+					<motion.div
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+						}}
+						style={{ delay: 0.2 }}
+					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -911,10 +932,18 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 								)}
 							</CardContent>
 						</Card>
-					)}
+					</motion.div>
+				)}
 
-					{/* Información de generación AI */}
-					{Object.keys(generation).length > 0 && (
+				{/* Información de generación AI */}
+				{Object.keys(generation).length > 0 && (
+					<motion.div
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+						}}
+						style={{ delay: 0.3 }}
+					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -980,8 +1009,17 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 								</>
 							</CardContent>
 						</Card>
-					)}
-					{/* Información del sistema de archivos */}
+					</motion.div>
+				)}
+
+				{/* Información del sistema de archivos */}
+				<motion.div
+					animate={{
+						opacity: [0, 1],
+						y: [20, 0],
+					}}
+					style={{ delay: 0.4 }}
+				>
 					<Card className="border-none rounded-none mt-2">
 						<CardHeader className="p-4 pb-2">
 							<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -1007,9 +1045,17 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 							/>
 						</CardContent>
 					</Card>
+				</motion.div>
 
-					{/* Debug en desarrollo */}
-					{process.env.NODE_ENV === "development" && (
+				{/* Debug en desarrollo */}
+				{process.env.NODE_ENV === "development" && (
+					<motion.div
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+						}}
+						style={{ delay: 0.5 }}
+					>
 						<Card className="border-none rounded-none mt-2">
 							<CardHeader className="p-4 pb-2">
 								<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -1023,9 +1069,9 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 								</pre>
 							</CardContent>
 						</Card>
-					)}
-				</motion.div>
-			</AnimatePresence>
+					</motion.div>
+				)}
+			</motion.div>
 		</ScrollArea>
 	);
 }

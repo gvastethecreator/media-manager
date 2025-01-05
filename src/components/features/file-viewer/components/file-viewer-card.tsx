@@ -3,7 +3,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInView } from "react-intersection-observer";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "motion/react";
 
 interface ImageCardProps {
 	src: string;
@@ -48,17 +48,14 @@ export function ImageCard({
 				</div>
 			) : (
 				<>
-					<AnimatePresence>
-						{isLoading && (
-							<motion.div
-								initial={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								className="absolute inset-0"
-							>
-								<Skeleton className="h-full w-full" />
-							</motion.div>
-						)}
-					</AnimatePresence>
+					{isLoading && (
+						<motion.div
+							animate={{ opacity: [1, 0] }}
+							className="absolute inset-0"
+						>
+							<Skeleton className="h-full w-full" />
+						</motion.div>
+					)}
 
 					{(inView || priority) && (
 						<Image

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { motion } from "motion/react";
 import { X, RotateCcw, ZoomIn, ZoomOut, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,7 +44,6 @@ export function AdvancedImageViewer({
 	const [error, setError] = useState<string | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
-	const dragControls = useDragControls();
 
 	// Reset state when opening viewer
 	useEffect(() => {
@@ -105,49 +104,6 @@ export function AdvancedImageViewer({
 	const resetView = () => {
 		setScale(1);
 		setPosition({ x: 0, y: 0 });
-	};
-
-	const renderThumbnails = () => {
-		const start = Math.max(0, index - 3);
-		const end = Math.min(images.length, index + 4);
-		return images.slice(start, end).map((image, i) => {
-			const gradientColors = [
-				`hsl(${
-					(parseInt(image.id.split("-")[1] || "0") * 40) % 360
-				}, 95%, 75%)`,
-				`hsl(${
-					(parseInt(image.id.split("-")[1] || "0") * 40 + 60) % 360
-				}, 95%, 75%)`,
-			];
-
-			return (
-				<motion.div
-					key={image.id}
-					initial={false}
-					animate={{
-						opacity: i + start === index ? 1 : 0.7,
-						scale: i + start === index ? 1 : 0.95,
-					}}
-					whileHover={{ opacity: 1, scale: 1.05 }}
-					className={cn(
-						"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
-						i + start === index &&
-							"ring-2 ring-primary ring-offset-2 ring-offset-background"
-					)}
-					style={{ zIndex: i + start === index ? 10 : 1 }}
-					onClick={() => setIndex(i + start)}
-					transition={{ duration: 0.2 }}
-				>
-					<ImageFallback
-						src={image.thumbnail}
-						alt={image.name}
-						className="w-full h-full object-cover"
-						gradientColors={gradientColors}
-						showPlaceholder={!image.thumbnail}
-					/>
-				</motion.div>
-			);
-		});
 	};
 
 	const getImageSource = (image?: ImageItem) => {
@@ -239,167 +195,172 @@ export function AdvancedImageViewer({
 		return null;
 	}
 
-	return (
-		<AnimatePresence>
-			{isOpen && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 0.2 }}
-					className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
-					onClick={onClose}
-				>
-					<div
-						ref={containerRef}
-						className="relative w-full h-full flex flex-col items-center justify-center"
-						onClick={(e) => e.stopPropagation()}
-						onWheel={handleWheel}
-						onDoubleClick={resetView}
-					>
-						{/* Toolbar */}
-						<div className="fixed top-4 inset-x-4 flex items-center justify-between z-20">
-							<div className="flex space-x-2">
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={() => handleZoom(1.2)}
-									title="Acercar"
-								>
-									<ZoomIn className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={() => handleZoom(0.8)}
-									title="Alejar"
-								>
-									<ZoomOut className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={resetView}
-									title="Restablecer vista"
-								>
-									<RotateCcw className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={handleCopy}
-									title="Copiar"
-								>
-									<Copy className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={handleDownload}
-									title="Descargar"
-								>
-									<Download className="h-4 w-4" />
-								</Button>
-							</div>
-
-							<Button
-								variant="outline"
-								size="icon"
-								onClick={onClose}
-								title="Cerrar"
-							>
-								<X className="h-4 w-4" />
-							</Button>
-						</div>
-
-						{/* Main Image */}
-						<AnimatePresence mode="wait" initial={false}>
-							<motion.div
-								key={getImageSource(currentImage)}
-								className="absolute inset-0 flex items-center justify-center"
-							>
-								{isLoading && (
-									<Skeleton className="w-[80vw] h-[80vh] absolute" />
-								)}
-								{error ? (
-									<div className="text-center text-muted-foreground">
-										<p>{error}</p>
-									</div>
-								) : (
-									<motion.img
-										ref={imageRef}
-										src={getImageSource(currentImage)}
-										alt={getImageAlt(currentImage)}
-										onError={handleImageError}
-										className={cn(
-											"object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none",
-											isLoading ? "opacity-0" : "opacity-100"
-										)}
-										style={{
-											cursor: "grab",
-											touchAction: "none",
-										}}
-										initial={{ opacity: 0 }}
-										animate={{
-											opacity: 1,
-											scale,
-											x: position.x,
-											y: position.y,
-										}}
-										exit={{ opacity: 0 }}
-										transition={{
-											opacity: { duration: 0.2 },
-											layout: { duration: 0.2 },
-											scale: { type: "spring", stiffness: 300, damping: 30 },
-											x: { type: "spring", stiffness: 300, damping: 30 },
-											y: { type: "spring", stiffness: 300, damping: 30 },
-										}}
-										drag
-										dragControls={dragControls}
-										dragConstraints={containerRef}
-										dragElastic={0.1}
-										dragMomentum={false}
-										dragTransition={{
-											power: 0.2,
-											timeConstant: 200,
-										}}
-										whileDrag={{
-											cursor: "grabbing",
-										}}
-										onDragStart={() => {
-											if (imageRef.current) {
-												imageRef.current.style.cursor = "grabbing";
-											}
-										}}
-										onDragEnd={() => {
-											if (imageRef.current) {
-												imageRef.current.style.cursor = "grab";
-											}
-										}}
-										onLoad={() => {
-											setIsLoading(false);
-											setError(null);
-										}}
-									/>
-								)}
-							</motion.div>
-						</AnimatePresence>
-
-						{/* Thumbnails */}
-						<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
-							<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
-								{renderThumbnails()}
-							</div>
-						</div>
-
-						{/* Navigation hints */}
-						<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none max-w-[300px]">
-							<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
-							<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
-						</div>
+	return isOpen ? (
+		<motion.div
+			animate={{ opacity: [0, 1] }}
+			className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
+			onClick={onClose}
+		>
+			<div
+				ref={containerRef}
+				className="relative w-full h-full flex flex-col items-center justify-center"
+				onClick={(e) => e.stopPropagation()}
+				onWheel={handleWheel}
+				onDoubleClick={resetView}
+			>
+				{/* Toolbar */}
+				<div className="fixed top-4 inset-x-4 flex items-center justify-between z-20">
+					<div className="flex space-x-2">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={() => handleZoom(1.2)}
+							title="Acercar"
+						>
+							<ZoomIn className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={() => handleZoom(0.8)}
+							title="Alejar"
+						>
+							<ZoomOut className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={resetView}
+							title="Restablecer vista"
+						>
+							<RotateCcw className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleCopy}
+							title="Copiar"
+						>
+							<Copy className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleDownload}
+							title="Descargar"
+						>
+							<Download className="h-4 w-4" />
+						</Button>
 					</div>
+
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={onClose}
+						title="Cerrar"
+					>
+						<X className="h-4 w-4" />
+					</Button>
+				</div>
+
+				{/* Main Image */}
+				<motion.div
+					key={getImageSource(currentImage)}
+					className="absolute inset-0 flex items-center justify-center"
+				>
+					{isLoading && <Skeleton className="w-[80vw] h-[80vh] absolute" />}
+					{error ? (
+						<div className="text-center text-muted-foreground">
+							<p>{error}</p>
+						</div>
+					) : (
+						<motion.img
+							ref={imageRef}
+							src={getImageSource(currentImage)}
+							alt={getImageAlt(currentImage)}
+							onError={handleImageError}
+							className={cn(
+								"object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none",
+								isLoading ? "opacity-0" : "opacity-100"
+							)}
+							style={{
+								cursor: "grab",
+								touchAction: "none",
+							}}
+							animate={{
+								opacity: [0, 1],
+								scale,
+								x: position.x,
+								y: position.y,
+							}}
+							drag
+							dragConstraints={containerRef}
+							onDragStart={() => {
+								if (imageRef.current) {
+									imageRef.current.style.cursor = "grabbing";
+								}
+							}}
+							onDragEnd={() => {
+								if (imageRef.current) {
+									imageRef.current.style.cursor = "grab";
+								}
+							}}
+							onLoad={() => {
+								setIsLoading(false);
+								setError(null);
+							}}
+						/>
+					)}
 				</motion.div>
-			)}
-		</AnimatePresence>
-	);
+
+				{/* Thumbnails */}
+				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
+					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
+						{images
+							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
+							.map((image, i) => (
+								<motion.div
+									key={image.id}
+									animate={{
+										opacity: i + Math.max(0, index - 3) === index ? 1 : 0.7,
+										scale: i + Math.max(0, index - 3) === index ? 1 : 0.95,
+									}}
+									className={cn(
+										"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
+										i + Math.max(0, index - 3) === index &&
+											"ring-2 ring-primary ring-offset-2 ring-offset-background"
+									)}
+									style={{
+										zIndex: i + Math.max(0, index - 3) === index ? 10 : 1,
+									}}
+									onClick={() => setIndex(i + Math.max(0, index - 3))}
+								>
+									<ImageFallback
+										src={image.thumbnail}
+										alt={image.name}
+										className="w-full h-full object-cover"
+										gradientColors={[
+											`hsl(${
+												(parseInt(image.id.split("-")[1] || "0") * 40) % 360
+											}, 95%, 75%)`,
+											`hsl(${
+												(parseInt(image.id.split("-")[1] || "0") * 40 + 60) %
+												360
+											}, 95%, 75%)`,
+										]}
+										showPlaceholder={!image.thumbnail}
+									/>
+								</motion.div>
+							))}
+					</div>
+				</div>
+
+				{/* Navigation hints */}
+				<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none max-w-[300px]">
+					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
+					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
+				</div>
+			</div>
+		</motion.div>
+	) : null;
 }
