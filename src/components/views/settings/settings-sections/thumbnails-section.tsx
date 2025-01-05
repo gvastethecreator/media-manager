@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-	RefreshCw,
 	AlertCircle,
 	Settings2,
 	Zap,
@@ -42,9 +41,7 @@ import { formatBytes, cn } from "@/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { motion, AnimatePresence } from "framer-motion";
-
-const MotionCard = motion(Card);
+import { AnimateSharedLayout, motion } from "motion/react";
 
 interface ProcessStatus {
 	status?: string;
@@ -601,7 +598,7 @@ export function ThumbnailsSection() {
 								>
 									<Label className="text-sm">Últimas Procesadas</Label>
 									<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
-										<AnimatePresence>
+										<AnimateSharedLayout>
 											{lastProcessedThumbnails.map((image, index) => (
 												<motion.div
 													key={image.id}
@@ -649,7 +646,7 @@ export function ThumbnailsSection() {
 														className="aspect-square rounded-md bg-muted/50"
 													/>
 												))}
-										</AnimatePresence>
+										</AnimateSharedLayout>
 									</div>
 								</motion.div>
 							)}

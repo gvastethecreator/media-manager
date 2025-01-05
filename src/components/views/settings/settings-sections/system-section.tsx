@@ -27,7 +27,6 @@ import {
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 
-const MotionCard = motion(Card);
 
 export function SystemSection() {
 	const { settings } = useSettingsContext();
