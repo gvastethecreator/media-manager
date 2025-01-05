@@ -180,7 +180,7 @@ export function CollectionsSection() {
 									opacity: [0, 1],
 									y: [20, 0],
 								}}
-								style={{ delay: index * 0.1 }}
+								transition={{ delay: index * 0.1 }}
 								className={cn(
 									"bg-muted/30 group rounded-sm",
 									editingId === collection.id && "ring-1 ring-primary"
