@@ -8,20 +8,20 @@ import { useStatsStore } from "@/store/stats";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
+import { useSettingsContext } from "@/context/settings-context";
 import {
 	FolderIcon,
 	TagIcon,
 	Settings2,
 	Sun,
 	Moon,
-	Home,
 	Star,
 	Image as ImageIcon,
-	LibraryBig,
 	Search,
-	ChartLine,
 	RefreshCcw,
 	Bug,
+	BookImage,
+	CornerDownRight,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useNavigationStore } from "@/store/navigation";
@@ -37,7 +37,7 @@ const navigationItems = [
 const categories = [
 	{
 		id: "collections" as ViewType,
-		icon: LibraryBig,
+		icon: BookImage,
 		label: "Colecciones",
 		color: "#ef4444",
 	},
@@ -63,6 +63,9 @@ const categories = [
 
 export function LeftPanel() {
 	const { stats, initialize: initializeStats } = useStatsStore();
+	const { settings } = useSettingsContext();
+	const { profiles, activeProfile } = settings;
+	const activeProfileData = profiles.find((p) => p.id === activeProfile);
 	const { currentView, setCurrentView } = useNavigationStore();
 	const {
 		collections,
@@ -134,21 +137,31 @@ export function LeftPanel() {
 
 	return (
 		<div className="flex flex-col h-full">
-			<div className="flex flex-col bg-primary/10 py-1">
+			<div className="flex flex-col bg-primary/10 py-2">
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex gap-2 items-center px-2">
-						<div className="flex items-center justify-center h-5 w-5 rounded-sm bg-white/10">
-							<span className="text-xs font-medium">🧃</span>
+						<div
+							className="flex items-center justify-center h-8 w-8 rounded-sm"
+							style={{ backgroundColor: activeProfileData?.color }}
+						>
+							<span className="text-xs font-medium">
+								{activeProfileData?.emoji}
+							</span>
 						</div>
-						<span className="text-[10px] text-muted-foreground">
-							{stats?.totalImages || 0} imágenes
-						</span>
+						<div className="flex flex-col">
+							<span className="text-xs font-medium truncate">
+								{activeProfileData?.name}
+							</span>
+							<span className="text-[9px] text-muted-foreground">
+								{stats?.totalImages || 0} imágenes
+							</span>
+						</div>
 					</div>
 					<div className="gap-8 pr-2">
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-8 w-8"
 							onClick={handleResetApp}
 						>
 							<RefreshCcw className="h-4 w-4" />
@@ -157,7 +170,7 @@ export function LeftPanel() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-8 w-8"
 							onClick={handleThemeToggle}
 						>
 							{theme === "light" ? (
@@ -170,7 +183,7 @@ export function LeftPanel() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-8 w-8"
 							onClick={handleOpenSettings}
 						>
 							<Settings2 className="h-4 w-4" />
@@ -181,119 +194,129 @@ export function LeftPanel() {
 			<ScrollArea className="flex-1">
 				<div className="p-2">
 					{/* Navegación Principal */}
-					<div className="flex flex-col gap-1">
+					<div className="flex justify-between gap-1">
 						{navigationItems.map(({ id, icon: Icon, label }) => (
 							<Button
 								key={id}
-								variant={currentView === id ? "secondary" : "ghost"}
-								className="w-full justify-start gap-2 h-9 px-2 transition-colors"
+								variant="outline"
+								className={cn(
+									"gap-2 h-7 px-3 transition-colors rounded-sm flex-1 text-center",
+									currentView === id &&
+										"bg-gradient-to-r from-white/10 to-white/15"
+								)}
 								onClick={() => handleItemClick(id)}
 							>
-								<Icon className="h-4 w-4" />
-								<span className="flex-1 text-left truncate">{label}</span>
+								<span className="truncate flex items-center justify-center">
+									<Icon className="h-4 w-4 mr-1 mb-0.5" /> {label}
+								</span>
 							</Button>
 						))}
 					</div>
 
 					{/* Categorías con Listas */}
-					<div className="mt-2">
+					<div className="mt-1">
 						{categories.map(({ id, icon: Icon, label, color }) => (
-							<div key={id} className="mb-1">
+							<div key={id} className="mt-1">
 								<Button
-									variant={currentView === id ? "secondary" : "ghost"}
+									variant="ghost"
 									className={cn(
-										"w-full justify-start gap-2 h-9 px-2 font-medium transition-colors",
-										currentView === id && "bg-accent"
+										"w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm bg-white/5 mt-2",
+										currentView === id &&
+											"bg-gradient-to-r from-white/10 to-white/15"
 									)}
 									onClick={() => handleItemClick(id)}
 								>
 									<Icon className="h-4 w-4" style={{ color }} />
 									<span className="flex-1 text-left truncate">{label}</span>
 									{id === "collections" && stats?.totalCollections ? (
-										<Badge variant="secondary" className="ml-2">
+										<span className="ml-2 text-white border-none">
 											{stats.totalCollections}
-										</Badge>
+										</span>
 									) : null}
 									{id === "folders" && stats?.totalFolders ? (
-										<Badge variant="secondary" className="ml-2">
+										<span className="ml-2 text-white border-none	">
 											{stats.totalFolders}
-										</Badge>
+										</span>
 									) : null}
 									{id === "tags" && stats?.totalTags ? (
-										<Badge variant="secondary" className="ml-2">
+										<span className="ml-2 text-white border-none">
 											{stats.totalTags}
-										</Badge>
+										</span>
 									) : null}
 								</Button>
 
-								<div className="mt-1 pl-1 flex flex-col gap-1">
+								<div className="mt-1 flex flex-col gap-1">
 									{id === "collections" &&
 										collections?.map((collection) => (
 											<Button
 												key={collection.id}
-												variant={
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "collection-content" &&
-													currentCollectionId === collection.id
-														? "secondary"
-														: "ghost"
-												}
-												className="w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs"
+														currentCollectionId === collection.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
 												onClick={() => handleCollectionClick(collection.id)}
 											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
 												<span className="text-base">{collection.emoji}</span>
 												<span className="flex-1 text-left truncate">
 													{collection.name}
 												</span>
-												<Badge variant="secondary" className="ml-2">
+												<span className="ml-2 text-white border-none">
 													{collection.count}
-												</Badge>
+												</span>
 											</Button>
 										))}
 									{id === "folders" &&
 										folders?.map((folder) => (
 											<Button
 												key={folder.id}
-												variant={
+												variant="ghost"
+												className={cn(
+													"w-full justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs",
 													currentView === "folder-content" &&
-													currentFolderId === folder.id
-														? "secondary"
-														: "ghost"
-												}
-												className="w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs"
+														currentFolderId === folder.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
 												onClick={() => handleFolderClick(folder.id)}
 											>
-												<FolderIcon className="h-4 w-4" style={{ color }} />
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<FolderIcon className="h-4 w-4" />
 												<span className="flex-1 text-left truncate">
 													{folder.name}
 												</span>
-												<Badge variant="secondary" className="ml-2">
+												<span className="ml-2 text-white border-none">
 													{folder.count}
-												</Badge>
-											</Button>
-										))}
-									{id === "tags" &&
-										tags?.map((tag) => (
-											<Button
-												key={tag.id}
-												variant={
-													currentView === "tag-content" &&
-													currentTagId === tag.name
-														? "secondary"
-														: "ghost"
-												}
-												className="w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs"
-												onClick={() => handleTagClick(tag.name)}
-											>
-												<span
-													className="w-3 h-3 rounded-full"
-													style={{ backgroundColor: tag.color }}
-												/>
-												<span className="flex-1 text-left truncate">
-													{tag.name}
 												</span>
-												<Badge variant="outline">{tag.count}</Badge>
 											</Button>
 										))}
+									{id === "tags" && (
+										<div className="flex flex-col-4 gap-2 mt-1">
+											{tags?.map((tag) => (
+												<Button
+													variant="ghost"
+													key={tag.id}
+													style={{ backgroundColor: tag.color }}
+													className={cn(
+														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl",
+														currentView === "tag-content" &&
+															currentTagId === tag.name &&
+															"bg-gradient-to-r from-black/30 to-black/35"
+													)}
+													onClick={() => handleTagClick(tag.name)}
+												>
+													<span className="flex-1 text-left  text-[10px] truncate shadow-sm">
+														{tag.name}
+													</span>
+													<span className="text-[10px] h-4 text-white border-none">
+														{tag.count}
+													</span>
+												</Button>
+											))}
+										</div>
+									)}
 								</div>
 							</div>
 						))}
