@@ -8,12 +8,7 @@ import {
 	AlertCircle,
 	Database,
 } from "lucide-react";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -29,7 +24,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 
 const MotionCard = motion(Card);
@@ -50,8 +45,10 @@ export function SystemSection() {
 			<CardContent className="p-2">
 				<div className="space-y-3">
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+						}}
 						className="space-y-2"
 					>
 						<div className="space-y-1.5">
@@ -99,16 +96,21 @@ export function SystemSection() {
 									{settings.cacheSize || "0"}MB
 								</Badge>
 							</div>
-							<Progress value={(settings.cacheSize || 0) / 10} className="h-1" />
+							<Progress
+								value={(settings.cacheSize || 0) / 10}
+								className="h-1"
+							/>
 						</div>
 					</motion.div>
 
 					<Separator className="my-2" />
 
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.1 }}
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+						}}
+						style={{ delay: 0.1 }}
 						className="space-y-1.5"
 					>
 						<div className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent transition-colors group">
@@ -129,8 +131,7 @@ export function SystemSection() {
 						<AlertDialog>
 							<AlertDialogTrigger asChild>
 								<motion.div
-									whileHover={{ scale: 1.01 }}
-									whileTap={{ scale: 0.99 }}
+									animate={{ scale: 1 }}
 									className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer group"
 								>
 									<div className="flex items-center gap-2">

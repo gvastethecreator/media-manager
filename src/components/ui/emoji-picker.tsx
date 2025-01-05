@@ -2,7 +2,7 @@ import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 interface EmojiPickerProps {
 	onEmojiSelect: (emoji: string) => void;
@@ -99,7 +99,7 @@ const emojiCategories = [
 			"🤔",
 			"🫢",
 			"🤭",
-			"🤫"
+			"🤫",
 		],
 	},
 	{
@@ -168,7 +168,7 @@ const emojiCategories = [
 			"🌪️",
 			"🌫️",
 			"🌊",
-			"💧"
+			"💧",
 		],
 	},
 	{
@@ -226,7 +226,10 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
 	const handleEmojiSelect = React.useCallback(
 		(emoji: string) => {
 			setRecentEmojis((prev) => {
-				const newRecent = [emoji, ...prev.filter((e) => e !== emoji)].slice(0, 16);
+				const newRecent = [emoji, ...prev.filter((e) => e !== emoji)].slice(
+					0,
+					16
+				);
 				localStorage.setItem("recent-emojis", JSON.stringify(newRecent));
 				return newRecent;
 			});
@@ -274,20 +277,25 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
 							>
 								<ScrollArea className="h-[200px] p-2">
 									<div className="grid grid-cols-8 gap-1">
-										{(category.id === "recent" ? recentEmojis : category.emojis).map(
-											(emoji, index) => (
-												<motion.button
-													key={`${category.id}-${index}`}
-													className="inline-flex items-center justify-center w-7 h-7 text-base hover:bg-muted rounded-sm"
-													whileHover={{ scale: 1.2 }}
-													whileTap={{ scale: 0.95 }}
-													transition={{ type: "spring", stiffness: 600, damping: 17 }}
-													onClick={() => handleEmojiSelect(emoji)}
-												>
-													{emoji}
-												</motion.button>
-											)
-										)}
+										{(category.id === "recent"
+											? recentEmojis
+											: category.emojis
+										).map((emoji, index) => (
+											<motion.button
+												key={`${category.id}-${index}`}
+												className="inline-flex items-center justify-center w-7 h-7 text-base hover:bg-muted rounded-sm"
+												whileHover={{ scale: 1.2 }}
+												whileTap={{ scale: 0.95 }}
+												transition={{
+													type: "spring",
+													stiffness: 600,
+													damping: 17,
+												}}
+												onClick={() => handleEmojiSelect(emoji)}
+											>
+												{emoji}
+											</motion.button>
+										))}
 									</div>
 								</ScrollArea>
 							</motion.div>

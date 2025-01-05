@@ -4,7 +4,7 @@ import { useLoadingStore } from "@/store/loading-store";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "motion/react";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -13,24 +13,22 @@ const TRANSITION_DURATION = 0.2;
 export function InitializationScreen() {
 	const { services, progress, isInitializing, isReady } = useLoadingStore();
 
-	// No renderizar nada si no estamos inicializando
 	if (!isInitializing) return null;
 
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: TRANSITION_DURATION }}
+			animate={{ opacity: [0, 1] }}
 			className="fixed inset-0 z-[9999] flex items-center justify-center"
 		>
 			<Card className="w-full max-w-md border-none">
 				<CardContent>
 					<motion.div
 						className="space-y-2"
-						initial={{ opacity: 0, y: 20, filter: "blur(20px)" }}
-						animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-						transition={{ duration: TRANSITION_DURATION, delay: 0.2 }}
+						animate={{
+							opacity: [0, 1],
+							y: [20, 0],
+							filter: ["blur(20px)", "blur(0px)"],
+						}}
 					>
 						<div className="flex justify-between text-sm text-muted-foreground">
 							<span>Progreso general</span>
@@ -43,12 +41,12 @@ export function InitializationScreen() {
 						{services.map((service, index) => (
 							<motion.div
 								key={service.name}
-								initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
-								animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-								transition={{
-									duration: TRANSITION_DURATION,
-									delay: 0.2 + index * 0.1,
+								animate={{
+									opacity: [0, 1],
+									y: [20, 0],
+									filter: ["blur(5px)", "blur(0px)"],
 								}}
+								style={{ delay: index * 0.1 }}
 								className={cn(
 									"flex items-center justify-between space-x-4 rounded-lg border p-3",
 									service.status === "error" &&
@@ -89,18 +87,16 @@ function StatusIcon({ status }: { status: string }) {
 		<div className="flex h-6 w-6 items-center justify-center">
 			{status === "success" && (
 				<motion.div
-					initial={{ scale: 0 }}
-					animate={{ scale: 1 }}
-					transition={{ type: "spring", stiffness: 200, damping: 10 }}
+					animate={{ scale: [0, 1] }}
+					style={{ transformOrigin: "center" }}
 				>
 					<CheckCircle2 className="h-5 w-5 text-green-500" />
 				</motion.div>
 			)}
 			{status === "error" && (
 				<motion.div
-					initial={{ scale: 0 }}
-					animate={{ scale: 1 }}
-					transition={{ type: "spring", stiffness: 200, damping: 10 }}
+					animate={{ scale: [0, 1] }}
+					style={{ transformOrigin: "center" }}
 				>
 					<XCircle className="h-5 w-5 text-red-500" />
 				</motion.div>
