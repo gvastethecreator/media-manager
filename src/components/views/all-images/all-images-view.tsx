@@ -69,11 +69,8 @@ export function AllImagesView() {
 			<div className="h-full w-full overflow-auto">
 				<FileGrid
 					items={items}
-					selectedItem={selectedItem}
-					selectedIds={selectedItems.map((item) => item.id)}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
-					isProcessingThumbnails={isProcessingThumbnails}
 				/>
 			</div>
 		</div>
