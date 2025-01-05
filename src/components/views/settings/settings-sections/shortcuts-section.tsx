@@ -24,7 +24,6 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import type { Settings } from "@/context/settings-context";
 
-const MotionCard = motion(Card);
 
 const shortcutCategories = [
 	{
@@ -117,7 +116,7 @@ export function ShortcutsSection() {
 								opacity: [0, 1],
 								y: [20, 0],
 							}}
-							style={{ delay: categoryIndex * 0.1 }}
+							transition={{ delay: categoryIndex * 0.1 }}
 						>
 							<Card className="overflow-hidden bg-muted/30">
 								<CardHeader className="p-4 pb-3">
@@ -136,7 +135,7 @@ export function ShortcutsSection() {
 												opacity: [0, 1],
 												x: [-20, 0],
 											}}
-											style={{ delay: categoryIndex * 0.1 + index * 0.05 }}
+											transition={{ delay: categoryIndex * 0.1 + index * 0.05 }}
 											className="flex items-center justify-between p-2 rounded-lg hover:bg-accent group"
 										>
 											<div className="flex items-center gap-2">
