@@ -1,15 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, memo } from "react";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStatsStore } from "@/store/stats";
 import * as Icons from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { formatBytes } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -17,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import Meteors from "@/components/ui/meteors";
-
 
 const itemVariants = {
 	initial: { opacity: 0, y: 10 },
@@ -72,7 +65,9 @@ const StatCard = memo(
 						)}
 					</div>
 					{description && (
-						<p className="text-[10px] text-muted-foreground/70">{description}</p>
+						<p className="text-[10px] text-muted-foreground/70">
+							{description}
+						</p>
 					)}
 				</div>
 			</div>
@@ -90,9 +85,7 @@ const TagUsage = memo(
 	}) => (
 		<div className="flex items-center justify-start py-0.5">
 			{isLoading ? (
-				<>
-
-				</>
+				<></>
 			) : (
 				tag && (
 					<>
@@ -100,7 +93,7 @@ const TagUsage = memo(
 							<Badge
 								className="rounded-full flex-shrink-0"
 								style={{ backgroundColor: tag.color }}
-								>
+							>
 								{tag.name} - {tag.count}
 							</Badge>
 						</div>
@@ -121,8 +114,7 @@ const Activity = memo(
 	}) => (
 		<div className="flex items-start justify-between py-0.5">
 			{isLoading ? (
-				<div className="w-full">
-				</div>
+				<div className="w-full"></div>
 			) : (
 				activity && (
 					<>
@@ -246,22 +238,22 @@ export function StatsPanel() {
 	return (
 		<ScrollArea className="h-full w-full p-0">
 			<div className="p-0 w-full h-full">
-				<Meteors/>
+				<Meteors />
 				<Card className="border-none rounded-none">
-						<CardHeader className="p-0 py-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-								<Icons.BarChart className="h-4 w-4 text-primary" />
-								Estadísticas generales
-							</CardTitle>
+					<CardHeader className="p-0 py-2">
+						<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+							<Icons.BarChart className="h-4 w-4 text-primary" />
+							Estadísticas generales
+						</CardTitle>
 					</CardHeader>
-						<CardContent className="grid grid-cols-2 p-0 gap-2">
-							{mainStats.map((stat, i) => (
-								<StatCard key={i} {...stat} isLoading={isLoading} />
-							))}
-							{additionalStats.map((stat, i) => (
-								<StatCard key={i} {...stat} isLoading={isLoading} />
-							))}
-						</CardContent>
+					<CardContent className="grid grid-cols-2 p-0 gap-2">
+						{mainStats.map((stat, i) => (
+							<StatCard key={i} {...stat} isLoading={isLoading} />
+						))}
+						{additionalStats.map((stat, i) => (
+							<StatCard key={i} {...stat} isLoading={isLoading} />
+						))}
+					</CardContent>
 
 					<CardHeader className="px-0 py-2 mt-2">
 						<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
@@ -284,11 +276,12 @@ export function StatsPanel() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-2 space-y-1">
-						{(isLoading ? Array(5).fill(null) : stats?.recentActivity || []).map(
-							(activity, i) => (
-								<Activity key={i} activity={activity} isLoading={isLoading} />
-							)
-						)}
+						{(isLoading
+							? Array(5).fill(null)
+							: stats?.recentActivity || []
+						).map((activity, i) => (
+							<Activity key={i} activity={activity} isLoading={isLoading} />
+						))}
 					</CardContent>
 				</Card>
 			</div>
