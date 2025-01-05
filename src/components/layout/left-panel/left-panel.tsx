@@ -21,6 +21,7 @@ import {
 	Search,
 	ChartLine,
 	RefreshCcw,
+	Bug,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useNavigationStore } from "@/store/navigation";
@@ -53,10 +54,10 @@ const categories = [
 		color: "#f59e0b",
 	},
 	{
-		id: "dashboard" as ViewType,
-		label: "Estadísticas",
-		icon: ChartLine,
-		color: "#3b82f6",
+		id: "debug" as ViewType,
+		label: "Desarrollo",
+		icon: Bug,
+		color: "#4ade80",
 	},
 ];
 

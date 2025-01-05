@@ -3,7 +3,6 @@
 import { useNavigationStore } from '@/store/navigation';
 import { ViewContainerProps } from './types';
 import { SettingsView } from './settings/settings-view';
-import { DashboardView } from './dashboard/dashboard-view';
 import { AllImagesView } from './all-images/all-images-view';
 import { FavoritesView } from './favorites/favorites-view';
 import { SearchView } from './search/search-view';
@@ -14,6 +13,7 @@ import { CollectionContentView } from './collections/collection-content-view';
 import { TagsView } from './tags/tags-view';
 import { TagContentView } from './tags/tag-content-view';
 import { AnimatePresence, motion } from 'framer-motion';
+import { DebugView } from './debug/debug-view';
 
 const variants = {
   enter: (direction: number) => ({
@@ -38,28 +38,28 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
   const renderView = () => {
     switch (currentView) {
       case 'settings':
-        return <SettingsView isResizing={isResizing} />;
+        return <SettingsView />;
+      default:
       case 'all-images':
         return <AllImagesView />;
       case 'favorites':
         return <FavoritesView />;
       case 'search':
-        return <SearchView isResizing={isResizing} />;
+        return <SearchView />;
       case 'collections':
-        return <CollectionsView isResizing={isResizing} />;
+        return <CollectionsView  />;
       case 'collection-content':
         return <CollectionContentView />;
       case 'folders':
-        return <FoldersView isResizing={isResizing} />;
+        return <FoldersView  />;
       case 'folder-content':
         return <FolderContentView />;
       case 'tags':
-        return <TagsView isResizing={isResizing} />;
+        return <TagsView/>;
       case 'tag-content':
         return <TagContentView />;
-      case 'dashboard':
-      default:
-        return <DashboardView isResizing={isResizing} />;
+      case 'debug':
+        return <DebugView />;
     }
   };
 
