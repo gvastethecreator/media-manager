@@ -1,7 +1,5 @@
 # 🔧 Backend Stack & Guidelines
-
 ## 📚 Stack Tecnológico
-
 ### Database
 
 - **SQLite 3**
