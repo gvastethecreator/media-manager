@@ -56,14 +56,14 @@ export function SettingsView() {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="collections">
+					<TabsContent value="collections" className="px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
 							<CollectionsSection />
 							<TagsSection />
 						</div>
 					</TabsContent>
 
-					<TabsContent value="shortcuts">
+					<TabsContent value="shortcuts" className="px-2">
 						<ShortcutsSection />
 					</TabsContent>
 				</Tabs>

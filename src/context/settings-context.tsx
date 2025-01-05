@@ -24,13 +24,14 @@ interface TagWithStats extends Tag {
 	size: string;
 }
 
-interface Settings {
+export interface Settings {
 	collections: CollectionWithStats[];
 	tags: TagWithStats[];
 	profiles: Profile[];
 	activeProfile: string | null;
 	thumbnailQuality: ThumbnailQuality;
 	videoThumbnailAnimation: boolean;
+	shortcuts: { [key: string]: string };
 }
 
 interface SettingsContextType {
@@ -58,6 +59,7 @@ const defaultSettings: Settings = {
 	activeProfile: null,
 	thumbnailQuality: "mid",
 	videoThumbnailAnimation: true,
+	shortcuts: {},
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -86,6 +88,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 					...prev,
 					thumbnailQuality: parsed.thumbnailQuality || "mid",
 					videoThumbnailAnimation: parsed.videoThumbnailAnimation ?? true,
+					shortcuts: parsed.shortcuts || {},
 				}));
 			}
 		} catch (error) {
@@ -103,6 +106,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 					JSON.stringify({
 						thumbnailQuality: updated.thumbnailQuality,
 						videoThumbnailAnimation: updated.videoThumbnailAnimation,
+						shortcuts: updated.shortcuts,
 					})
 				);
 				return updated;

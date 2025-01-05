@@ -105,10 +105,10 @@ export function ProfilesSection() {
 										/>
 									</Button>
 								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0 bg-transparent" align="end">
+								<PopoverContent className="w-auto p-0 bg-transparent border-none" align="end">
 									<CompactPicker
 									color={activeProfileData?.color}
-									className="shadow-lg bg-black/90 text-white"
+									className="bg-black/90 text-white overflow-hidden"
 										onChange={(color) =>
 											handleUpdateActiveProfile({ color: color.hex })
 										}
