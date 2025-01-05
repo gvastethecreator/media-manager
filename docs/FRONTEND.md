@@ -1,7 +1,5 @@
 # 🎨 Frontend Stack & Guidelines
-
 ## 📚 Stack Tecnológico
-
 ### Core
 
 - **Next.js 15**
@@ -68,80 +66,51 @@ components/
 └── views/        # Vistas principales
 ```
 
-### Mejoras Propuestas
+### Guidelines generales
 
-1. Consolidar componentes duplicados
-2. Implementar lazy loading en componentes pesados
-3. Mejorar la documentación de componentes
-4. Establecer patrones claros para props y tipos
-
-## 💡 Patrones de Implementación
-
-### 1. Componentes
-
+- Si se encuentran componentes duplicados, consolidarlos en un solo componente
+- Implementar lazy loading en componentes pesados
+- Mejorar la documentación de componentes durante el desarrollo
+- Establecer patrones claros para props y tipos
 - Usar Server Components por defecto
 - Marcar explícitamente "use client"
 - Props tipadas con TypeScript
 - Documentar con JSDoc
 - Mantener componentes pequeños
 - Usar composition pattern
-
-### 2. Estado
-
-#### Global (Zustand)
-
-- Separar por dominio
-- Usar slices para mejor organización
-- Implementar persist donde sea necesario
-- Evitar duplicación de estado
-
-#### Local
-
+- En Estado global (Zustand):
+  - Separar por dominio
+  - Usar slices para mejor organización
+  - Implementar persist donde sea necesario
+  - Evitar duplicación de estado
+- Local
 - useState para estado simple
 - useReducer para estado complejo
 - Context para estado compartido
-
-### 3. Hooks
-
-- Mantener hooks pequeños y enfocados
-- Documentar efectos secundarios
-- Implementar cleanup functions
-- Evitar dependencias circulares
-
-### 4. Estilos
-
-- Usar Tailwind para estilos base
-- Componentes Shadcn para UI consistente
-- CSS Modules para estilos específicos
-- Variables CSS para temas
+- Hooks
+  - Mantener hooks pequeños y enfocados
+  - Documentar efectos secundarios
+  - Implementar cleanup functions
+  - Evitar dependencias circulares
+- Estilos
+  - Usar Tailwind para estilos base
+  - Componentes Shadcn para UI consistente
+  - CSS Modules para estilos específicos
+  - Variables CSS para temas
 
 ## 🔄 Áreas de Mejora
-
-### 1. Rendimiento
 
 - Implementar React.memo donde sea beneficioso
 - Optimizar re-renders innecesarios
 - Mejorar lazy loading de imágenes
 - Reducir bundle size
-
-### 2. Accesibilidad
-
-- Implementar ARIA labels
 - Mejorar navegación por teclado
 - Asegurar contraste adecuado
 - Testear con lectores de pantalla
-
-### 3. Testing
-
 - Implementar tests unitarios
 - Añadir tests de integración
 - Configurar CI/CD
-- Documentar casos de prueba
-
-### 4. Documentación
-
 - Mejorar documentación de componentes
-- Crear guía de estilos
 - Documentar patrones comunes
 - Mantener changelog actualizado
 
@@ -149,10 +118,10 @@ components/
 
 ### Fase 1: Limpieza
 
-1. Consolidar componentes duplicados
-2. Reorganizar estructura de archivos
-3. Actualizar tipos y documentación
-4. Optimizar imports
+1. Consolidar componentes duplicados cuando se encuentran
+2. Reorganizar estructura de archivos si es necesario
+3. Actualizar tipos y documentación constantemente
+4. Optimizar imports y organizarlos correctamente
 
 ### Fase 2: Optimización
 
@@ -160,10 +129,3 @@ components/
 2. Mejorar manejo de caché
 3. Optimizar bundles
 4. Reducir re-renders
-
-### Fase 3: Calidad
-
-1. Implementar tests
-2. Mejorar accesibilidad
-3. Optimizar SEO
-4. Documentar componentes
