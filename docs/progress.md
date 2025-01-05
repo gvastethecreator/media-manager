@@ -258,3 +258,201 @@ docs/
 - Se documentan áreas de mejora y optimizaciones
 
 # EDITAR A PARTIR DE ACA
+
+### 📝 Plan de Documentación de Componentes (05/01/2024)
+
+#### Estructura de Documentación de Componentes
+
+```
+docs/components/
+├── core/           # Componentes base y utilidades
+├── features/       # Características específicas
+├── layout/         # Componentes de estructura
+├── panels/         # Paneles de la aplicación
+├── ui/            # Componentes de interfaz reutilizables
+└── views/         # Vistas principales
+```
+
+#### Plan de Trabajo para Componentes
+
+1. **Core Components**
+
+   - [x] Data Display Components
+     - [x] Empty State
+   - [x] Feedback Components
+     - [x] Loading State
+     - [x] Loading Screen
+   - [x] Motion Component
+   - [x] Theme Components
+     - [x] Theme Toggle
+
+2. **Feature Components** (En Progreso)
+
+   - [ ] File Grid
+   - [ ] File Viewer
+   - [ ] File Actions
+   - [ ] Search Components
+
+3. **Layout Components** (Pendiente)
+
+   - [ ] Main Layout
+   - [ ] Navigation Layout
+   - [ ] Panel Layout
+   - [ ] Grid Layout
+
+4. **Panel Components** (Pendiente)
+
+   - [ ] Details Panel
+   - [ ] Navigation Panel
+   - [ ] Stats Panel
+   - [ ] Right Panel
+
+5. **UI Components** (Pendiente)
+
+   - [ ] Buttons
+   - [ ] Forms
+   - [ ] Modals
+   - [ ] Cards
+   - [ ] Navigation
+   - [ ] Data Display
+
+6. **View Components** (Pendiente)
+   - [ ] All Images View
+   - [ ] Collections View
+   - [ ] Debug View
+   - [ ] Favorites View
+   - [ ] Folders View
+   - [ ] Search View
+   - [ ] Settings View
+   - [ ] Tags View
+
+#### Estado Actual de Documentación de Componentes (05/01/2024)
+
+1. **Core Components** ✅
+
+   - [x] Data Display Components
+     - [x] Empty State
+   - [x] Feedback Components
+     - [x] Loading State
+     - [x] Loading Screen
+   - [x] Motion Component
+   - [x] Theme Components
+     - [x] Theme Toggle
+
+2. **Feature Components** ✅
+
+   - [x] File Grid
+     - [x] FileGrid Component
+     - [x] FileCard Component
+     - [x] FileContextMenu Component
+     - [x] AnimationContext
+   - [x] File Viewer
+     - [x] ImageViewer Component
+     - [x] AdvancedImageViewer Component
+     - [x] ImageCard Component
+   - [x] File Actions
+     - [x] File Management Actions
+     - [x] Collection Actions
+     - [x] Tag Actions
+   - [x] Search Components
+     - [x] SearchView Component
+     - [x] SearchStore Integration
+     - [x] Search Filters Interface
+
+3. **Layout Components** ✅
+
+   - [x] Main Layout
+     - [x] Panel Structure
+     - [x] Resizable Panels
+     - [x] Layout Management
+   - [x] Navigation Layout
+     - [x] NavPanel Component
+     - [x] Navigation Structure
+   - [x] Panel Layout
+     - [x] RightPanel Component
+     - [x] Panel Management
+   - [x] Grid Layout
+     - [x] Grid Structure
+     - [x] Responsive Design
+
+4. **Panel Components** ✅
+
+   - [x] Details Panel
+     - [x] File Information
+     - [x] Metadata Display
+     - [x] Actions Integration
+   - [x] Navigation Panel
+     - [x] Menu Structure
+     - [x] Navigation Logic
+   - [x] Stats Panel
+     - [x] Statistics Display
+     - [x] Activity Tracking
+   - [x] Right Panel
+     - [x] Context Management
+     - [x] Panel Integration
+
+5. **UI Components** (Pendiente)
+
+   - [ ] Buttons
+   - [ ] Forms
+   - [ ] Modals
+   - [ ] Cards
+   - [ ] Navigation
+   - [ ] Data Display
+
+6. **View Components** (Pendiente)
+   - [ ] All Images View
+   - [ ] Collections View
+   - [ ] Debug View
+   - [ ] Favorites View
+   - [ ] Folders View
+   - [ ] Search View
+   - [ ] Settings View
+   - [ ] Tags View
+
+#### Documentación Completada
+
+- [x] Empty State Component (`docs/components/core/empty-state.md`)
+- [x] Loading Components (`docs/components/core/loading-components.md`)
+- [x] Motion Component (`docs/components/core/motion.md`)
+- [x] Theme Toggle Component (`docs/components/core/theme-toggle.md`)
+- [x] File Grid Component (`docs/components/features/file-grid.md`)
+- [x] File Viewer Component (`docs/components/features/file-viewer.md`)
+- [x] File Actions (`docs/components/features/file-actions.md`)
+- [x] Search Components (`docs/components/features/search.md`)
+- [x] Main Layout (`docs/components/layout/main-layout.md`)
+- [x] Nav Panel (`docs/components/layout/nav-panel.md`)
+- [x] Right Panel (`docs/components/layout/right-panel.md`)
+- [x] Details Panel (`docs/components/panels/details-panel.md`)
+- [x] Stats Panel (`docs/components/panels/stats-panel.md`)
+
+#### Próximos Pasos
+
+1. Documentar Theme Components
+2. Comenzar con Feature Components
+   - Documentar File Viewer
+   - Revisar File Actions
+   - Explorar Search Components
+3. Seguir con Layout Components
+4. Continuar con Panel Components
+5. Documentar UI Components
+6. Finalizar con View Components
+
+#### Notas de Progreso
+
+- Se ha completado la documentación de todos los componentes core
+- Se han documentado todos los componentes de características
+- Se ha completado la documentación de los componentes de layout
+- Se ha completado la documentación de los componentes de panel
+- Se mantiene una estructura consistente en la documentación
+- Se incluyen diagramas de flujo para visualizar la lógica
+- Se documentan consideraciones de performance y accesibilidad
+- Se mantienen ejemplos de uso claros y prácticos
+- Cada componente tiene su propia documentación detallada
+- Se han identificado patrones comunes y mejores prácticas
+- Se documentan mejoras futuras y optimizaciones pendientes
+- Se mantiene un seguimiento claro del progreso
+- Se ha mejorado la documentación de interacciones entre componentes
+- Se han documentado las integraciones con los stores
+- Se ha mejorado la documentación de la estructura de la aplicación
+- Se han documentado los flujos de datos entre componentes

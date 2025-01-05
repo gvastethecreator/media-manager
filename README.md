@@ -167,15 +167,9 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 ├───components
 │   ├───core
 │   │   ├───data-display
-│   │   │   ├───card-view
 │   │   │   └───empty-state
 │   │   ├───feedback
 │   │   │   └───loading
-│   │   ├───layout
-│   │   │   └───main-layout
-│   │   ├───navigation
-│   │   │   ├───breadcrumbs
-│   │   │   └───toolbar
 │   │   └───theme
 │   ├───features
 │   │   ├───file-grid
@@ -196,7 +190,6 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 │       ├───search
 │       ├───settings
 │       │   └───settings-sections
-│       ├───shared
 │       └───tags
 ├───config
 ├───context
