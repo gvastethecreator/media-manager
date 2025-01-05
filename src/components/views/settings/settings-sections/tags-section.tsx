@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Palette, PencilIcon, CheckIcon, XIcon } from "lucide-react";
 import { useCollectionTagContext } from "@/context/settings-context";
-import { GithubPicker } from "react-color";
+import { CompactPicker } from "react-color";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -15,6 +15,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Separator } from "@/components/ui/separator";
+
+const MotionCard = motion(Card);
 
 export function TagsSection() {
 	const { settings, updateTag, deleteTag } = useCollectionTagContext();
@@ -83,136 +87,105 @@ export function TagsSection() {
 		}
 	};
 
-	const handleRemoveTag = async (id: string) => {
-		try {
-			await deleteTag(id);
-		} catch (error) {
-			console.error("Error al eliminar el tag:", error);
-		}
-	};
-
 	return (
-		<div className="space-y-3">
-			<Card className="border-none">
-				<CardHeader className="px-4 py-2">
-					<CardTitle className="text-base font-semibold flex items-center gap-2">
+		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
+			<CardHeader className="p-2 pb-0 bg-transparent">
+				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
+					<span className="flex items-center gap-2 h-7">
 						<Palette className="h-5 w-5" /> Etiquetas
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="p-3">
-					<div className="space-y-3">
-						<div className="flex gap-1.5">
-							<div className="flex-1 min-w-0">
-								<Input
-									placeholder="Nueva etiqueta..."
-									value={newTag.name}
-									onChange={(e) =>
-										setNewTag({ ...newTag, name: e.target.value })
-									}
-									className="h-7 text-xs"
-								/>
-							</div>
-							<div className="flex gap-1.5">
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button variant="outline" className="h-7 px-2 text-xs">
-											<div className="flex items-center gap-1.5">
-												<div
-													className="w-3.5 h-3.5 rounded"
-													style={{ backgroundColor: newTag.color }}
-												/>
-												<Palette className="h-3.5 w-3.5" />
-											</div>
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent className="w-auto p-0" align="start">
-										<GithubPicker
-											color={newTag.color}
-											onChangeComplete={handleColorChange}
-										/>
-									</PopoverContent>
-								</Popover>
-								<Button
-									size="sm"
-									className="h-7 text-xs px-2"
-									onClick={handleAddTag}
-									disabled={!newTag.name.trim()}
-								>
-									Crear
-								</Button>
-							</div>
+					</span>
+				</CardTitle>
+			</CardHeader>
+			<Separator className="my-0" />
+			<CardContent className="p-2">
+				<div className="space-y-3">
+					<div className="flex items-center gap-2">
+						<div className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: newTag.color }}>
+							<Palette className="h-4 w-4 text-white/90" />
 						</div>
+						<div className="flex-1 min-w-0">
+							<Input
+								value={newTag.name}
+								onChange={(e) => setNewTag({ ...newTag, name: e.target.value })}
+								className="h-8 text-base border-none p-3"
+								placeholder="Nombre de la etiqueta"
+							/>
+						</div>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+									<div
+										className="h-4 w-4 rounded-full"
+										style={{ backgroundColor: newTag.color }}
+									/>
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-auto p-0 bg-transparent border-none" align="end">
+								<CompactPicker
+									color={newTag.color}
+									className="bg-black/90 text-white overflow-hidden"
+									onChange={(color) => handleColorChange(color)}
+								/>
+							</PopoverContent>
+						</Popover>
+						<Button
+							size="sm"
+							className="h-8 text-xs px-3"
+							onClick={handleAddTag}
+							disabled={!newTag.name.trim()}
+						>
+							Crear
+						</Button>
+					</div>
 
-						<div className="space-y-1.5">
+					<Separator className="my-0" />
+
+					<div className="grid grid-cols-2 gap-2">
+						<AnimatePresence>
 							{tags.map((tag) => (
-								<Card
+								<MotionCard
 									key={tag.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -20 }}
 									className={cn(
-										"bg-muted/30 group",
+										"bg-muted/30 group rounded-sm",
 										editingId === tag.id && "ring-1 ring-primary"
 									)}
 								>
 									<CardContent className="p-2">
 										{editingId === tag.id ? (
-											<div className="flex gap-2">
-												<div className="flex-1 min-w-0 space-y-1.5">
-													<div className="flex gap-1.5">
+											<div className="space-y-2">
+												<div className="flex items-center gap-2">
+													<div className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: editForm?.color }}>
+														<Palette className="h-4 w-4 text-white/90" />
+													</div>
+													<div className="flex-1 min-w-0">
 														<Input
 															value={editForm?.name}
 															onChange={(e) =>
 																setEditForm((prev) =>
-																	prev
-																		? { ...prev, name: e.target.value }
-																		: null
+																	prev ? { ...prev, name: e.target.value } : null
 																)
 															}
-															className="h-7 text-xs"
+															className="h-8 text-base border-none p-3"
 															placeholder="Nombre de la etiqueta"
 														/>
-														<Input
-															value={editForm?.shortcut}
-															onChange={(e) =>
-																setEditForm((prev) =>
-																	prev
-																		? { ...prev, shortcut: e.target.value }
-																		: null
-																)
-															}
-															className="h-7 text-xs w-24"
-															placeholder="Atajo"
-														/>
 													</div>
-													<Input
-														value={editForm?.description}
-														onChange={(e) =>
-															setEditForm((prev) =>
-																prev
-																	? { ...prev, description: e.target.value }
-																	: null
-															)
-														}
-														className="h-7 text-xs"
-														placeholder="Descripción (opcional)"
-													/>
-												</div>
-												<div className="flex flex-col gap-1.5">
 													<Popover>
 														<PopoverTrigger asChild>
-															<Button
-																variant="ghost"
-																size="icon"
-																className="h-7 w-7"
-															>
+															<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
 																<div
-																	className="h-3.5 w-3.5 rounded"
+																	className="h-4 w-4 rounded-full"
 																	style={{ backgroundColor: editForm?.color }}
 																/>
 															</Button>
 														</PopoverTrigger>
-														<PopoverContent className="w-auto p-0" align="end">
-															<GithubPicker
+														<PopoverContent className="w-auto p-0 bg-transparent border-none" align="end">
+															<CompactPicker
 																color={editForm?.color}
-																onChange={(color: { hex: string }) =>
+																className="bg-black/90 text-white overflow-hidden"
+																onChange={(color) =>
 																	setEditForm((prev) =>
 																		prev ? { ...prev, color: color.hex } : null
 																	)
@@ -220,99 +193,91 @@ export function TagsSection() {
 															/>
 														</PopoverContent>
 													</Popover>
-													<div className="flex gap-1">
-														<Button
-															size="icon"
-															variant="ghost"
-															className="h-7 w-7 text-destructive hover:text-destructive/90"
-															onClick={handleCancelEdit}
-														>
-															<XIcon className="h-3.5 w-3.5" />
-														</Button>
-														<Button
-															size="icon"
-															variant="ghost"
-															className="h-7 w-7 text-green-500 hover:text-green-600"
-															onClick={() => handleSaveEdit(tag.id)}
-														>
-															<CheckIcon className="h-3.5 w-3.5" />
-														</Button>
-													</div>
+												</div>
+												<div className="flex justify-end gap-1">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={handleCancelEdit}
+														className="h-7 text-xs text-destructive hover:text-destructive/90"
+													>
+														<XIcon className="h-3.5 w-3.5 mr-1" />
+														Cancelar
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => handleSaveEdit(tag.id)}
+														className="h-7 text-xs text-green-500 hover:text-green-600"
+													>
+														<CheckIcon className="h-3.5 w-3.5 mr-1" />
+														Guardar
+													</Button>
 												</div>
 											</div>
 										) : (
-											<div className="flex items-center gap-2">
-												<div className="flex items-center gap-2 flex-1 min-w-0">
+											<div className="flex items-center gap-2 relative">
+												<div className="flex items-center gap-2 min-w-0">
 													<div
-														className="w-3.5 h-3.5 rounded"
+														className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
 														style={{ backgroundColor: tag.color }}
-													/>
+													>
+														<Palette className="h-4 w-4 text-white/90" />
+													</div>
 													<div className="flex-1 min-w-0">
-														<div className="flex items-center gap-1.5">
-															<span className="text-xs font-medium truncate">
-																{tag.name}
-															</span>
-															{tag.shortcut && (
-																<Badge
-																	variant="outline"
-																	className="text-[10px] h-4 px-1"
-																>
-																	{tag.shortcut}
-																</Badge>
-															)}
-														</div>
+														<span className="text-xs font-semibold truncate pl-1">
+															{tag.name}
+														</span>
 														{tag.description && (
-															<p className="text-[10px] text-muted-foreground truncate mt-0.5">
+															<p className="text-[10px] text-muted-foreground truncate pl-1">
 																{tag.description}
 															</p>
 														)}
 													</div>
 												</div>
-												<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-													<Badge
-														variant="secondary"
-														className="text-[10px] h-4 px-1"
-													>
-														{tag.count} imágenes
-													</Badge>
+												<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-8 shadow-lg">
 													<Button
-														variant="ghost"
-														size="icon"
-														className="h-6 w-6"
+														variant="outline"
 														onClick={() => handleStartEdit(tag)}
+														className="h-4 text-xs gap-1 text-[9px] rounded-sm p-2"
 													>
 														<PencilIcon className="h-3 w-3" />
+														Editar
 													</Button>
 													<Button
 														variant="ghost"
-														size="icon"
-														className="h-6 w-6 text-destructive hover:text-destructive/90"
-														onClick={() => handleRemoveTag(tag.id)}
+														onClick={() => deleteTag(tag.id)}
+														className="h-4 text-red-500 hover:text-red-500/90 text-[9px] rounded-sm p-1 py-2"
 													>
-														<Trash2 className="h-3 w-3" />
+														<Trash2 className="h-2 w-2" />
 													</Button>
 												</div>
 											</div>
 										)}
 									</CardContent>
-								</Card>
+								</MotionCard>
 							))}
+						</AnimatePresence>
 
-							{tags.length === 0 && (
-								<div className="py-6 text-center">
-									<Palette className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-									<p className="text-xs text-muted-foreground">
-										No hay etiquetas creadas
-									</p>
-									<p className="text-[10px] mt-1 text-muted-foreground/75">
-										Crea una etiqueta para clasificar tus imágenes
-									</p>
-								</div>
-							)}
-						</div>
+						{tags.length === 0 && (
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: -20 }}
+								className="py-4 text-center col-span-2"
+							>
+								<Palette className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
+								<p className="text-xs text-muted-foreground">
+									No hay etiquetas creadas
+								</p>
+								<p className="text-[10px] mt-1 text-muted-foreground/75">
+									Crea una etiqueta para clasificar tus imágenes
+								</p>
+							</motion.div>
+						)}
 					</div>
-				</CardContent>
-			</Card>
-		</div>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }
