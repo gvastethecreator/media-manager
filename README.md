@@ -83,9 +83,152 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ## Estructura del Proyecto
 
-## Estado del Desarrollo
+```
+├───app
+│   ├───actions
+│   ├───api
+│   │   ├───collections
+│   │   │   └───[id]
+│   │   │       ├───files
+│   │   │       └───images
+│   │   │           ├───all
+│   │   │           └───id2
+│   │   ├───favorites
+│   │   ├───files
+│   │   │   ├───folder
+│   │   │   └───[id]
+│   │   │       ├───download
+│   │   │       ├───location
+│   │   │       └───raw
+│   │   ├───folders
+│   │   │   ├───reindex
+│   │   │   │   └───[id]
+│   │   │   │       └───events
+│   │   │   ├───stats
+│   │   │   ├───test
+│   │   │   ├───watch
+│   │   │   ├───watched
+│   │   │   └───[id]
+│   │   │       ├───files
+│   │   │       ├───images
+│   │   │       │   └───all
+│   │   │       ├───index
+│   │   │       └───watch
+│   │   ├───images
+│   │   │   ├───all
+│   │   │   ├───favorites
+│   │   │   │   └───all
+│   │   │   ├───reprocess-thumbnails
+│   │   │   ├───thumbnail-stats
+│   │   │   └───[id]
+│   │   │       ├───favorite
+│   │   │       ├───preview
+│   │   │       └───thumbnail
+│   │   │           └───generate
+│   │   ├───profiles
+│   │   │   └───[id]
+│   │   │       └───activate
+│   │   ├───seed
+│   │   ├───settings
+│   │   ├───stats
+│   │   ├───system
+│   │   │   ├───copy
+│   │   │   ├───download
+│   │   │   ├───open
+│   │   │   └───status
+│   │   ├───tags
+│   │   │   └───[id]
+│   │   │       ├───files
+│   │   │       └───images
+│   │   │           ├───all
+│   │   │           ├───[id2]
+│   │   │           └───[id]
+│   │   └───thumbnails
+│   │       ├───clean
+│   │       ├───cleanup
+│   │       ├───maintenance
+│   │       ├───migrate
+│   │       ├───optimize
+│   │       ├───process
+│   │       │   └───[folderId]
+│   │       ├───reprocess
+│   │       ├───stats
+│   │       ├───validate
+│   │       └───[id]
+│   │           ├───delete
+│   │           ├───download
+│   │           ├───generate
+│   │           └───preview
+│   └───folders
+│       └───[id]
+│           └───view
+├───components
+│   ├───core
+│   │   ├───data-display
+│   │   │   ├───card-view
+│   │   │   └───empty-state
+│   │   ├───feedback
+│   │   │   └───loading
+│   │   ├───layout
+│   │   │   └───main-layout
+│   │   ├───navigation
+│   │   │   ├───breadcrumbs
+│   │   │   └───toolbar
+│   │   └───theme
+│   ├───features
+│   │   ├───collections
+│   │   ├───dashboard
+│   │   ├───file-details
+│   │   ├───file-grid
+│   │   ├───file-viewer
+│   │   │   └───components
+│   │   └───modals
+│   ├───layout
+│   │   ├───left-panel
+│   │   ├───main-layout
+│   │   └───right-panel
+│   ├───ui
+│   └───views
+│       ├───all-images
+│       ├───collections
+│       ├───debug
+│       ├───favorites
+│       ├───folders
+│       ├───search
+│       ├───settings
+│       │   └───settings-sections
+│       ├───shared
+│       └───tags
+├───config
+├───context
+├───hooks
+├───lib
+│   ├───constants
+│   ├───contexts
+│   ├───hooks
+│   ├───sse
+│   └───thumbnail
+├───providers
+├───services
+│   └───watcher
+├───store
+├───tests
+│   ├───api
+│   ├───components
+│   ├───integration
+│   ├───mocks
+│   └───unit
+│       └───services
+├───types
+└───__tests__
+    └───api
+        └───folders
+```
 
+
+## Estado del Desarrollo
 # Por desarrollar y planificar
+
 - [ ] Funcionalidad de búsqueda detallada y funcional
 - [ ] Sección de perfiles funcional e integrada
 - [ ] Extracción completa de metadata y datos de generación ( AI )
