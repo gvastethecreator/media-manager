@@ -1,125 +1,94 @@
-import { WatcherApiResponse, WatchedFolder } from './types';
+import { WatcherConfig, WatcherEvents, WatchedFolder, WatcherApiResponse } from './types';
 
-/**
- * Cliente para el servicio de observación de archivos
- * Maneja la comunicación con la API del servidor
- */
 export class WatcherClient {
-  private activeWatchers: Map<string, WatchedFolder> = new Map();
+  private activeWatchers: Map<string, boolean>;
+  private config: WatcherConfig;
 
-  /**
-   * Inicia la observación de una carpeta
-   */
+  constructor(config: WatcherConfig = {}) {
+    this.activeWatchers = new Map();
+    this.config = config;
+  }
+
+  private logError(method: string, error: Error): void {
+    if (!this.config.isTestEnvironment) {
+      console.error(`[WatcherClient] Error en ${method}:`, error);
+    }
+  }
+
   async watchFolder(folderId: string): Promise<void> {
     try {
-      const response = await fetch('/api/folders/watch', {
+      const response = await fetch(`/api/folders/${folderId}/watch`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId, watch: true }),
       });
 
-      const data: WatcherApiResponse = await response.json();
-
       if (!response.ok) {
+        const data: WatcherApiResponse = await response.json();
         throw new Error(data.error || 'Error al iniciar el monitoreo');
       }
 
-      if (data.data) {
-        this.activeWatchers.set(folderId, {
-          id: folderId,
-          path: data.data.folderId,
-          isActive: true
-        });
-      }
+      this.activeWatchers.set(folderId, true);
     } catch (error) {
-      console.error('Error en watchFolder:', error);
+      this.logError('watchFolder', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
 
-  /**
-   * Detiene la observación de una carpeta
-   */
   async unwatchFolder(folderId: string): Promise<void> {
     try {
-      const response = await fetch('/api/folders/watch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId, watch: false }),
+      const response = await fetch(`/api/folders/${folderId}/watch`, {
+        method: 'DELETE',
       });
 
-      const data: WatcherApiResponse = await response.json();
-
       if (!response.ok) {
+        const data: WatcherApiResponse = await response.json();
         throw new Error(data.error || 'Error al detener el monitoreo');
       }
 
       this.activeWatchers.delete(folderId);
     } catch (error) {
-      console.error('Error en unwatchFolder:', error);
+      this.logError('unwatchFolder', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
 
-  /**
-   * Sincroniza el estado de las carpetas observadas
-   */
   async syncWatchedFolders(): Promise<void> {
     try {
       const response = await fetch('/api/folders/watched');
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Error al sincronizar carpetas');
+        throw new Error('Error al sincronizar carpetas monitoreadas');
       }
 
-      // Limpiar watchers actuales
+      const folders: WatchedFolder[] = await response.json();
       this.activeWatchers.clear();
 
-      // Actualizar con los datos del servidor
-      for (const folder of data.folders) {
+      folders.forEach(folder => {
         if (folder.isWatched) {
-          this.activeWatchers.set(folder.id, {
-            id: folder.id,
-            path: folder.path,
-            isActive: true
-          });
+          this.activeWatchers.set(folder.id, true);
         }
-      }
+      });
     } catch (error) {
-      console.error('Error en syncWatchedFolders:', error);
+      this.logError('syncWatchedFolders', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
 
-  /**
-   * Obtiene todas las carpetas actualmente observadas
-   */
-  getActiveWatchers(): WatchedFolder[] {
-    return Array.from(this.activeWatchers.values());
+  async stopAll(): Promise<void> {
+    try {
+      const watchers = Array.from(this.activeWatchers.keys());
+      await Promise.all(watchers.map(folderId => this.unwatchFolder(folderId)));
+      this.activeWatchers.clear();
+    } catch (error) {
+      this.logError('stopAll', error instanceof Error ? error : new Error(String(error)));
+      // No lanzamos el error aquí para permitir una limpieza parcial
+      this.activeWatchers.clear(); // Limpiamos el estado interno de todas formas
+    }
   }
 
-  /**
-   * Verifica si una carpeta está siendo observada
-   */
+  getActiveWatchers(): string[] {
+    return Array.from(this.activeWatchers.keys());
+  }
+
   isWatched(folderId: string): boolean {
     return this.activeWatchers.has(folderId);
   }
-
-  /**
-   * Detiene la observación de todas las carpetas
-   */
-  async stopAll(): Promise<void> {
-    const folders = Array.from(this.activeWatchers.keys());
-    for (const folderId of folders) {
-      await this.unwatchFolder(folderId);
-    }
-  }
 }
-
-// Exportar una instancia singleton
-export const watcherClient = new WatcherClient();
