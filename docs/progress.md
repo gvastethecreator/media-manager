@@ -275,122 +275,8 @@ docs/components/
 
 #### Plan de Trabajo para Componentes
 
-1. **Core Components**
-
-   - [x] Data Display Components
-     - [x] Empty State
-   - [x] Feedback Components
-     - [x] Loading State
-     - [x] Loading Screen
-   - [x] Motion Component
-   - [x] Theme Components
-     - [x] Theme Toggle
-
-2. **Feature Components** (En Progreso)
-
-   - [ ] File Grid
-   - [ ] File Viewer
-   - [ ] File Actions
-   - [ ] Search Components
-
-3. **Layout Components** (Pendiente)
-
-   - [ ] Main Layout
-   - [ ] Navigation Layout
-   - [ ] Panel Layout
-   - [ ] Grid Layout
-
-4. **Panel Components** (Pendiente)
-
-   - [ ] Details Panel
-   - [ ] Navigation Panel
-   - [ ] Stats Panel
-   - [ ] Right Panel
-
-5. **UI Components** (Pendiente)
-
-   - [ ] Buttons
-   - [ ] Forms
-   - [ ] Modals
-   - [ ] Cards
-   - [ ] Navigation
-   - [ ] Data Display
-
-6. **View Components** (Pendiente)
-   - [ ] All Images View
-   - [ ] Collections View
-   - [ ] Debug View
-   - [ ] Favorites View
-   - [ ] Folders View
-   - [ ] Search View
-   - [ ] Settings View
-   - [ ] Tags View
-
 #### Estado Actual de Documentación de Componentes (05/01/2024)
 
-1. **Core Components** ✅
-
-   - [x] Data Display Components
-     - [x] Empty State
-   - [x] Feedback Components
-     - [x] Loading State
-     - [x] Loading Screen
-   - [x] Motion Component
-   - [x] Theme Components
-     - [x] Theme Toggle
-
-2. **Feature Components** ✅
-
-   - [x] File Grid
-     - [x] FileGrid Component
-     - [x] FileCard Component
-     - [x] FileContextMenu Component
-     - [x] AnimationContext
-   - [x] File Viewer
-     - [x] ImageViewer Component
-     - [x] AdvancedImageViewer Component
-     - [x] ImageCard Component
-   - [x] File Actions
-     - [x] File Management Actions
-     - [x] Collection Actions
-     - [x] Tag Actions
-   - [x] Search Components
-     - [x] SearchView Component
-     - [x] SearchStore Integration
-     - [x] Search Filters Interface
-
-3. **Layout Components** ✅
-
-   - [x] Main Layout
-     - [x] Panel Structure
-     - [x] Resizable Panels
-     - [x] Layout Management
-   - [x] Navigation Layout
-     - [x] NavPanel Component
-     - [x] Navigation Structure
-   - [x] Panel Layout
-     - [x] RightPanel Component
-     - [x] Panel Management
-   - [x] Grid Layout
-     - [x] Grid Structure
-     - [x] Responsive Design
-
-4. **Panel Components** ✅
-
-   - [x] Details Panel
-     - [x] File Information
-     - [x] Metadata Display
-     - [x] Actions Integration
-   - [x] Navigation Panel
-     - [x] Menu Structure
-     - [x] Navigation Logic
-   - [x] Stats Panel
-     - [x] Statistics Display
-     - [x] Activity Tracking
-   - [x] Right Panel
-     - [x] Context Management
-     - [x] Panel Integration
-
 5. **UI Components** (Pendiente)
 
    - [ ] Buttons
@@ -400,15 +286,39 @@ docs/components/
    - [ ] Navigation
    - [ ] Data Display
 
-6. **View Components** (Pendiente)
-   - [ ] All Images View
-   - [ ] Collections View
-   - [ ] Debug View
-   - [ ] Favorites View
-   - [ ] Folders View
-   - [ ] Search View
-   - [ ] Settings View
-   - [ ] Tags View
+6. **View Components** ✅
+   - [x] All Images View
+     - [x] Grid Layout
+     - [x] File Management
+     - [x] Sorting & Filtering
+   - [x] Collections View
+     - [x] Collection Grid
+     - [x] Collection Management
+     - [x] Item Organization
+   - [x] Debug View
+     - [x] System Monitoring
+     - [x] Performance Tools
+     - [x] Debug Features
+   - [x] Favorites View
+     - [x] Favorites Grid
+     - [x] Quick Actions
+     - [x] State Management
+   - [x] Folders View
+     - [x] Folder Structure
+     - [x] Navigation
+     - [x] File Operations
+   - [x] Search View
+     - [x] Search Interface
+     - [x] Filter System
+     - [x] Results Display
+   - [x] Settings View
+     - [x] Preferences
+     - [x] System Settings
+     - [x] Advanced Options
+   - [x] Tags View
+     - [x] Tag Management
+     - [x] Tag Assignment
+     - [x] Tag Organization
 
 #### Documentación Completada
 
@@ -425,18 +335,35 @@ docs/components/
 - [x] Right Panel (`docs/components/layout/right-panel.md`)
 - [x] Details Panel (`docs/components/panels/details-panel.md`)
 - [x] Stats Panel (`docs/components/panels/stats-panel.md`)
+- [x] View Container (`docs/components/views/view-container.md`)
+- [x] All Images View (`docs/components/views/all-images.md`)
+- [x] Collections View (`docs/components/views/collections.md`)
+- [x] Debug View (`docs/components/views/debug.md`)
+- [x] Favorites View (`docs/components/views/favorites.md`)
+- [x] Folders View (`docs/components/views/folders.md`)
+- [x] Search View (`docs/components/views/search.md`)
+- [x] Settings View (`docs/components/views/settings.md`)
+- [x] Tags View (`docs/components/views/tags.md`)
 
 #### Próximos Pasos
 
-1. Documentar Theme Components
-2. Comenzar con Feature Components
-   - Documentar File Viewer
-   - Revisar File Actions
-   - Explorar Search Components
-3. Seguir con Layout Components
-4. Continuar con Panel Components
-5. Documentar UI Components
-6. Finalizar con View Components
+1. ~~Documentar Theme Components~~ ✅
+2. ~~Comenzar con Feature Components~~ ✅
+   - ~~Analizar File Grid~~ ✅
+   - ~~Documentar File Viewer~~ ✅
+   - ~~Revisar File Actions~~ ✅
+   - ~~Explorar Search Components~~ ✅
+3. ~~Seguir con Layout Components~~ ✅
+   - ~~Documentar Main Layout~~ ✅
+   - ~~Analizar Nav Panel~~ ✅
+   - ~~Revisar Right Panel~~ ✅
+4. ~~Continuar con Panel Components~~ ✅
+   - ~~Documentar Details Panel~~ ✅
+   - ~~Analizar Stats Panel~~ ✅
+5. ~~Documentar View Components~~ ✅
+   - ~~Documentar ViewContainer~~ ✅
+   - ~~Analizar vistas principales~~ ✅
+   - ~~Revisar integración~~ ✅
 
 #### Notas de Progreso
 
@@ -444,6 +371,7 @@ docs/components/
 - Se han documentado todos los componentes de características
 - Se ha completado la documentación de los componentes de layout
 - Se ha completado la documentación de los componentes de panel
+- Se ha completado la documentación de los componentes de vista
 - Se mantiene una estructura consistente en la documentación
 - Se incluyen diagramas de flujo para visualizar la lógica
 - Se documentan consideraciones de performance y accesibilidad
@@ -456,3 +384,6 @@ docs/components/
 - Se han documentado las integraciones con los stores
 - Se ha mejorado la documentación de la estructura de la aplicación
 - Se han documentado los flujos de datos entre componentes
+- Se ha completado la documentación de todas las vistas principales
+- Se han documentado las integraciones entre vistas y stores
+- Se han identificado áreas de mejora en cada vista
