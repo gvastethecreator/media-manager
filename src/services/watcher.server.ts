@@ -2,9 +2,16 @@ import { prisma } from '@/lib/db'
 import chokidar from 'chokidar'
 import path from 'path'
 
+/**
+ * @deprecated Use watcherServer from @/services/watcher instead
+ */
 let watcher: chokidar.FSWatcher | null = null
 
+/**
+ * @deprecated Use watcherServer.initialize instead
+ */
 export async function initializeWatcher() {
+  console.warn('⚠️ [Deprecated] Use watcherServer.initialize instead');
   try {
     // Obtener carpetas monitoreadas
     const watchedFolders = await prisma.folder.findMany({
@@ -40,7 +47,11 @@ export async function initializeWatcher() {
   }
 }
 
+/**
+ * @deprecated Use watcherServer.stop instead
+ */
 export function stopWatcher() {
+  console.warn('⚠️ [Deprecated] Use watcherServer.stop instead');
   if (watcher) {
     watcher.close()
     watcher = null
