@@ -1,7 +1,7 @@
 "use client";
 
 import { NavPanel } from "@/components/panels/nav/nav-panel";
-import { RightPanel } from "@/components/layout/right-panel";
+import { RightPanel } from "@/components/panels/right-panel";
 import { ViewContainer } from "@/components/views/view-container";
 import {
 	ResizableHandle,
