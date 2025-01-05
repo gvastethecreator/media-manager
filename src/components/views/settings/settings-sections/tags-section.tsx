@@ -4,7 +4,6 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Trash2, Palette, PencilIcon, CheckIcon, XIcon } from "lucide-react";
 import { useCollectionTagContext } from "@/context/settings-context";
 import { CompactPicker } from "react-color";
@@ -14,12 +13,9 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
-
-const MotionCard = motion(Card);
 
 export function TagsSection() {
 	const { settings, updateTag, deleteTag } = useCollectionTagContext();

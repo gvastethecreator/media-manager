@@ -20,7 +20,6 @@ import {
 	RefreshCw,
 	FolderIcon,
 	Trash2,
-	X,
 } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -54,7 +53,6 @@ const initialStats: FolderStats = {
 	lastIndexed: null,
 };
 
-const MotionCard = motion.create(Card);
 
 export function FoldersSection() {
 	const { toast } = useToast();
@@ -420,7 +418,7 @@ export function FoldersSection() {
 									opacity: [0, 1],
 									y: [20, 0],
 								}}
-								style={{ delay: index * 0.1 }}
+								transition={{ delay: index * 0.1 }}
 								className={cn(
 									"bg-muted/30 group rounded-sm",
 									selectedFolder === folder.id && "ring-1 ring-primary"

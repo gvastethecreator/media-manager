@@ -4,7 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { UserPlus, Trash2, Check, Smile, UserCog, Trash, X, UserX, Users, User } from "lucide-react";
+import { UserPlus, Check, Smile, UserCog, UserX, Users } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
 import { cn } from "@/lib/utils";
 import { CompactPicker } from "react-color";
@@ -25,7 +25,7 @@ export function ProfilesSection() {
 		updates: Partial<typeof activeProfileData>
 	) => {
 		if (activeProfileData) {
-			await updateProfile(activeProfileData.id, updates);
+			await updateProfile(activeProfileData.id, updates as ProfileUpdate);
 		}
 	};
 
