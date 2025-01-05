@@ -9,7 +9,8 @@ export type ViewType =
   | 'tag-content'
   | 'search'
   | 'files'
-  | 'settings';
+  | 'settings'
+  | 'debug';
 
 export interface ViewProps {
   isResizing?: boolean;

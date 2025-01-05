@@ -3,7 +3,6 @@
 import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { FileItem } from "@/types/file-item";
-import { formatFileSize } from "@/lib/utils";
 import {
 	ImageOff,
 	Info,
@@ -18,8 +17,6 @@ import {
 	FileText,
 	Calendar,
 	Image as ImageIcon,
-	Hash,
-	Cpu,
 	Clock,
 	Info as InfoIcon,
 	Wand2,
@@ -66,7 +63,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ImageMetadata } from "@/lib/metadata";
-
+import { Meteors } from "@/components/ui/meteors";
+import { DashboardView } from "@/components/views/dashboard/dashboard-view";
+import { DashboardPanel } from "../dashboard/dashboard-panel";
 interface FileDetailsProps {
 	selectedItems: FileItem[];
 }
@@ -511,16 +510,7 @@ export function FileDetails({ selectedItems }: FileDetailsProps) {
 	if (!selectedItems.length) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
-				<Card className="w-full border-none rounded-none">
-					<CardContent className="pt-6">
-						<div className="flex flex-col items-center gap-2 text-muted-foreground">
-							<Info className="h-8 w-8" />
-							<p className="text-sm">
-								Selecciona un archivo para ver su información
-							</p>
-						</div>
-					</CardContent>
-				</Card>
+				<DashboardPanel />
 			</div>
 		);
 	}
