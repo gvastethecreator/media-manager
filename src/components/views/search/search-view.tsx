@@ -13,6 +13,7 @@ import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { Search } from "lucide-react";
+import { LoadingScreen } from "@/components/core/feedback";
 
 interface SearchFilters {
 	query: string;
@@ -114,17 +115,12 @@ export function SearchView({ isResizing }: ViewProps) {
 
 			<div className="flex-1 overflow-auto p-6">
 				{isLoading ? (
-					<div className="h-full flex items-center justify-center">
-						<LoadingSpinner />
-					</div>
+					<LoadingScreen />
 				) : items && items.length > 0 ? (
 					<FileGrid
 						items={items}
-						selectedItem={selectedItem}
-						selectedIds={selectedItems.map((item) => item.id)}
 						onItemClick={handleItemClick}
 						onItemDoubleClick={handleItemDoubleClick}
-						isProcessingThumbnails={isProcessingThumbnails}
 					/>
 				) : filters.query ? (
 					<EmptyState

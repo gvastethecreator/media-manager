@@ -5,18 +5,16 @@ import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { Star, Loader2 } from "lucide-react";
+import { Star } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
+import { LoadingScreen } from "@/components/core/feedback";
 
 export function FavoritesView() {
 	const {
 		currentItems: items,
-		selectedItem,
-		selectedItems,
 		toggleItemSelection,
 		loadItems,
 		isLoading,
-		isProcessingThumbnails,
 	} = useFileManager();
 
 	const { openViewer } = useImageViewer();
@@ -54,11 +52,7 @@ export function FavoritesView() {
 	);
 
 	if (isLoading) {
-		return (
-			<div className="h-full w-full flex items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-			</div>
-		);
+		return <LoadingScreen />;
 	}
 
 	if (!favoriteItems || favoriteItems.length === 0) {

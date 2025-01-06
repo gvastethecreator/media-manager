@@ -135,115 +135,179 @@ class ThumbnailService {
     }
   }
 
-  async reprocessAll(callbacks?: ThumbnailCallbacks): Promise<void> {
-    try {
-      if (this.eventSource) {
-        this.eventSource.close();
-      }
+  private handleSSEConnection(
+    endpoint: string,
+    callbacks?: ThumbnailCallbacks
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let retryCount = 0;
+      const maxRetries = 3;
+      let lastEventTime = Date.now();
+      let timeoutId: NodeJS.Timeout;
 
-      return new Promise((resolve, reject) => {
-        let lastEventTime = Date.now();
-        let timeoutId: NodeJS.Timeout;
-
-        const resetTimeout = () => {
-          if (timeoutId) clearTimeout(timeoutId);
-          lastEventTime = Date.now();
-          timeoutId = setTimeout(() => {
-            if (Date.now() - lastEventTime > this.timeout) {
+      const resetTimeout = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        lastEventTime = Date.now();
+        timeoutId = setTimeout(() => {
+          if (Date.now() - lastEventTime > this.timeout) {
+            if (retryCount < maxRetries) {
+              console.log(`Reintentando conexión (${retryCount + 1}/${maxRetries})...`);
+              retryCount++;
               this.eventSource?.close();
-              reject(new Error('No activity within 45000 milliseconds. No response received.'));
+              setupEventSource();
+            } else {
+              this.eventSource?.close();
+              reject(new Error('No se pudo establecer conexión después de varios intentos'));
             }
-          }, this.timeout);
-        };
+          }
+        }, this.timeout);
+      };
 
-        const handleEvent = (event: EventSourceEvent) => {
+      const handleEvent = (event: EventSourceEvent) => {
+        try {
           const messageEvent = event as MessageEvent;
+          if (!messageEvent.data) return null;
           resetTimeout();
           return messageEvent;
-        };
+        } catch (error) {
+          console.error('Error procesando evento:', error);
+          return null;
+        }
+      };
 
-        this.eventSource = new EventSource(`/api/thumbnails/reprocess?_=${Date.now()}`, {
+      const setupEventSource = () => {
+        if (this.eventSource) {
+          this.eventSource.close();
+        }
+
+        this.eventSource = new EventSource(`${endpoint}?_=${Date.now()}`, {
           withCredentials: true
         });
 
         this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida para reprocesamiento');
+          console.log(`Conexión SSE establecida para ${endpoint}`);
           resetTimeout();
         };
 
         this.eventSource.onerror = (error) => {
           console.error('Error en conexión SSE:', error);
-          this.eventSource?.close();
-          clearTimeout(timeoutId);
-          reject(new Error('Error en la conexión SSE'));
+          if (retryCount < maxRetries) {
+            console.log(`Reintentando conexión (${retryCount + 1}/${maxRetries})...`);
+            retryCount++;
+            setTimeout(setupEventSource, 1000 * retryCount);
+          } else {
+            this.eventSource?.close();
+            clearTimeout(timeoutId);
+            reject(new Error('Error en la conexión SSE después de varios intentos'));
+          }
         };
 
         this.eventSource.addEventListener('ping', (event) => {
           const messageEvent = handleEvent(event);
-          console.log('Ping recibido:', messageEvent.data);
+          if (messageEvent) {
+            console.log('Ping recibido:', messageEvent.data);
+          }
         });
 
         this.eventSource.addEventListener('start', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Iniciando...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile
-            });
-          } catch (error) {
-            console.error('Error procesando evento start:', error);
+          const messageEvent = handleEvent(event);
+          if (messageEvent) {
+            try {
+              const data = JSON.parse(messageEvent.data);
+              callbacks?.onProgress?.({
+                status: data.status || "Iniciando...",
+                current: data.current,
+                total: data.total,
+                progress: data.progress || 0,
+                currentFile: data.currentFile
+              });
+            } catch (error) {
+              console.error('Error procesando evento start:', error);
+            }
           }
         });
 
         this.eventSource.addEventListener('progress', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Procesando...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile,
-              lastProcessed: data.lastProcessed
-            });
-          } catch (error) {
-            console.error('Error procesando evento progress:', error);
+          const messageEvent = handleEvent(event);
+          if (messageEvent) {
+            try {
+              const data = JSON.parse(messageEvent.data);
+              callbacks?.onProgress?.({
+                status: data.status || "Procesando...",
+                current: data.current,
+                total: data.total,
+                progress: data.progress || 0,
+                currentFile: data.currentFile,
+                lastProcessed: data.lastProcessed
+              });
+            } catch (error) {
+              console.error('Error procesando evento progress:', error);
+            }
           }
         });
 
         this.eventSource.addEventListener('error', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            const error = new Error(data.message || data.error);
-            error.name = data.type;
-            callbacks?.onError?.(error);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            reject(error);
-          } catch (error) {
-            console.error('Error procesando evento error:', error);
+          const messageEvent = handleEvent(event);
+          if (messageEvent) {
+            try {
+              const data = JSON.parse(messageEvent.data);
+              const error = new Error(data.message || data.error);
+              error.name = data.type;
+              callbacks?.onError?.(error);
+              this.eventSource?.close();
+              clearTimeout(timeoutId);
+              reject(error);
+            } catch (error) {
+              // Si no podemos parsear el error, probablemente sea un error de conexión
+              console.error('Error procesando evento error:', error);
+            }
           }
         });
 
         this.eventSource.addEventListener('complete', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onComplete?.(data);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            resolve();
-          } catch (error) {
-            console.error('Error procesando evento complete:', error);
+          const messageEvent = handleEvent(event);
+          if (messageEvent) {
+            try {
+              const data = JSON.parse(messageEvent.data);
+              callbacks?.onComplete?.(data);
+              this.eventSource?.close();
+              clearTimeout(timeoutId);
+              resolve(data);
+            } catch (error) {
+              console.error('Error procesando evento complete:', error);
+              reject(error);
+            }
           }
         });
-      });
+      };
+
+      setupEventSource();
+    });
+  }
+
+  async optimizeThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+    try {
+      await this.handleSSEConnection('/api/thumbnails/optimize', callbacks);
+    } catch (error) {
+      console.error('Error en optimizeThumbnails:', error);
+      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+
+  async cleanThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+    try {
+      await this.handleSSEConnection('/api/thumbnails/clean', callbacks);
+    } catch (error) {
+      console.error('Error en cleanThumbnails:', error);
+      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+
+  async reprocessAll(callbacks?: ThumbnailCallbacks): Promise<void> {
+    try {
+      await this.handleSSEConnection('/api/thumbnails/reprocess', callbacks);
     } catch (error) {
       console.error('Error en reprocessAll:', error);
       callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
@@ -392,238 +456,6 @@ class ThumbnailService {
   async queueThumbnailGeneration(imageIds: string[]): Promise<void> {
     imageIds.forEach(id => this.preGenerationQueue.add(id))
     this.startQueueProcessor()
-  }
-
-  async optimizeThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
-    try {
-      if (this.eventSource) {
-        this.eventSource.close();
-      }
-
-      return new Promise((resolve, reject) => {
-        let lastEventTime = Date.now();
-        let timeoutId: NodeJS.Timeout;
-
-        const resetTimeout = () => {
-          if (timeoutId) clearTimeout(timeoutId);
-          lastEventTime = Date.now();
-          timeoutId = setTimeout(() => {
-            if (Date.now() - lastEventTime > this.timeout) {
-              this.eventSource?.close();
-              reject(new Error('No activity within 45000 milliseconds. No response received.'));
-            }
-          }, this.timeout);
-        };
-
-        const handleEvent = (event: EventSourceEvent) => {
-          const messageEvent = event as MessageEvent;
-          resetTimeout();
-          return messageEvent;
-        };
-
-        this.eventSource = new EventSource(`/api/thumbnails/optimize?_=${Date.now()}`, {
-          withCredentials: true
-        });
-
-        this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida para optimización');
-          resetTimeout();
-        };
-
-        this.eventSource.onerror = (error) => {
-          console.error('Error en conexión SSE:', error);
-          this.eventSource?.close();
-          clearTimeout(timeoutId);
-          reject(new Error('Error en la conexión SSE'));
-        };
-
-        this.eventSource.addEventListener('ping', (event) => {
-          const messageEvent = handleEvent(event);
-          console.log('Ping recibido:', messageEvent.data);
-        });
-
-        this.eventSource.addEventListener('start', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Iniciando optimización...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile
-            });
-          } catch (error) {
-            console.error('Error procesando evento start:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('progress', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Optimizando...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile,
-              lastProcessed: data.lastProcessed
-            });
-          } catch (error) {
-            console.error('Error procesando evento progress:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('error', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            const error = new Error(data.message || data.error);
-            error.name = data.type;
-            callbacks?.onError?.(error);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            reject(error);
-          } catch (error) {
-            console.error('Error procesando evento error:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('complete', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onComplete?.(data);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            resolve();
-          } catch (error) {
-            console.error('Error procesando evento complete:', error);
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Error en optimizeThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
-  }
-
-  async cleanThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
-    try {
-      if (this.eventSource) {
-        this.eventSource.close();
-      }
-
-      return new Promise((resolve, reject) => {
-        let lastEventTime = Date.now();
-        let timeoutId: NodeJS.Timeout;
-
-        const resetTimeout = () => {
-          if (timeoutId) clearTimeout(timeoutId);
-          lastEventTime = Date.now();
-          timeoutId = setTimeout(() => {
-            if (Date.now() - lastEventTime > this.timeout) {
-              this.eventSource?.close();
-              reject(new Error('No activity within 45000 milliseconds. No response received.'));
-            }
-          }, this.timeout);
-        };
-
-        const handleEvent = (event: EventSourceEvent) => {
-          const messageEvent = event as MessageEvent;
-          resetTimeout();
-          return messageEvent;
-        };
-
-        this.eventSource = new EventSource(`/api/thumbnails/clean?_=${Date.now()}`, {
-          withCredentials: true
-        });
-
-        this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida para limpieza');
-          resetTimeout();
-        };
-
-        this.eventSource.onerror = (error) => {
-          console.error('Error en conexión SSE:', error);
-          this.eventSource?.close();
-          clearTimeout(timeoutId);
-          reject(new Error('Error en la conexión SSE'));
-        };
-
-        this.eventSource.addEventListener('ping', (event) => {
-          const messageEvent = handleEvent(event);
-          console.log('Ping recibido:', messageEvent.data);
-        });
-
-        this.eventSource.addEventListener('start', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Iniciando limpieza...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile
-            });
-          } catch (error) {
-            console.error('Error procesando evento start:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('progress', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onProgress?.({
-              status: data.status || "Limpiando...",
-              current: data.current,
-              total: data.total,
-              progress: data.progress || 0,
-              currentFile: data.currentFile,
-              lastProcessed: data.lastProcessed
-            });
-          } catch (error) {
-            console.error('Error procesando evento progress:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('error', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            const error = new Error(data.message || data.error);
-            error.name = data.type;
-            callbacks?.onError?.(error);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            reject(error);
-          } catch (error) {
-            console.error('Error procesando evento error:', error);
-          }
-        });
-
-        this.eventSource.addEventListener('complete', (event) => {
-          try {
-            const messageEvent = handleEvent(event);
-            const data = JSON.parse(messageEvent.data);
-            callbacks?.onComplete?.(data);
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            resolve();
-          } catch (error) {
-            console.error('Error procesando evento complete:', error);
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Error en cleanThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
   }
 
   formatSize(bytes: number): string {

@@ -215,6 +215,7 @@ export function ThumbnailsSection() {
 		try {
 			setError(null);
 			setIsProcessing(true);
+			setIsCleaning(true);
 			setProcessProgress(0);
 			setProcessStatus({
 				status: "Iniciando limpieza...",
@@ -283,6 +284,7 @@ export function ThumbnailsSection() {
 		} finally {
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			setIsProcessing(false);
+			setIsCleaning(false);
 			setProcessProgress(0);
 			setProcessStatus({});
 			setProgress(null);
@@ -494,7 +496,7 @@ export function ThumbnailsSection() {
 							variant="outline"
 							size="sm"
 							className="h-7 text-xs"
-							onClick={() => setShowConfirmClean(true)}
+							onClick={handleCleanThumbnails}
 							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
 						>
 							{isCleaning ? (
@@ -704,34 +706,6 @@ export function ThumbnailsSection() {
 					)}
 				</div>
 			</CardContent>
-
-			<Dialog open={showConfirmClean} onOpenChange={setShowConfirmClean}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Confirmar Limpieza</DialogTitle>
-						<DialogDescription>
-							¿Estás seguro de que quieres eliminar todas las miniaturas? Esta
-							acción no se puede deshacer.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setShowConfirmClean(false)}
-							disabled={isCleaning}
-						>
-							Cancelar
-						</Button>
-						<Button
-							variant="destructive"
-							onClick={handleCleanThumbnails}
-							disabled={isCleaning}
-						>
-							{isCleaning ? "Limpiando..." : "Limpiar"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 
 			<Dialog open={showErrors} onOpenChange={setShowErrors}>
 				<DialogContent className="max-w-2xl">
