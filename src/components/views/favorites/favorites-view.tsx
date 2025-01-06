@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/core/data-display/empty-state/empty-sta
 import { Star } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 import { LoadingScreen } from "@/components/core/feedback";
+import BlurFade from "@/components/ui/blur-fade";
 
 export function FavoritesView() {
 	const {
@@ -19,12 +20,10 @@ export function FavoritesView() {
 
 	const { openViewer } = useImageViewer();
 
-	// Cargar favoritos al montar el componente
 	useEffect(() => {
 		loadItems("/api/images/favorites/all");
 	}, [loadItems]);
 
-	// Filtrar solo los items favoritos (doble verificación)
 	const favoriteItems = useMemo(() => {
 		return items.filter((item) => item.isFavorite);
 	}, [items]);
@@ -68,11 +67,17 @@ export function FavoritesView() {
 	return (
 		<div className="h-full w-full flex overflow-hidden">
 			<div className="h-full w-full overflow-auto">
-				<FileGrid
-					items={favoriteItems}
-					onItemClick={handleItemClick}
-					onItemDoubleClick={handleItemDoubleClick}
-				/>
+				<BlurFade
+					className="h-full w-full overflow-auto"
+					delay={0.5}
+					inView={true}
+				>
+					<FileGrid
+						items={favoriteItems}
+						onItemClick={handleItemClick}
+						onItemDoubleClick={handleItemDoubleClick}
+					/>
+				</BlurFade>
 			</div>
 		</div>
 	);

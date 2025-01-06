@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -14,12 +14,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import { cn, formatBytes } from "@/lib/utils";
-import { Folder, FolderIcon, ImageIcon, RefreshCw, Settings2, Trash2 } from "lucide-react";
+import {
+	Folder,
+	FolderIcon,
+	ImageIcon,
+	RefreshCw,
+	Settings2,
+	Trash2,
+	ArrowUpRight,
+	Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFolders } from "@/services/folder.service";
 import { toast } from "sonner";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { useRouter } from "next/navigation";
+import { useNavigationStore } from "@/store/navigation";
+import { useFileManager } from "@/store/file-manager";
 
 interface FolderCardProps {
 	folder: any;
@@ -27,8 +44,23 @@ interface FolderCardProps {
 	onDelete: (id: string) => void;
 	isProcessing: boolean;
 	processStatus: any;
+	onClick: () => void;
 }
 
+function getRandomGradient() {
+	const gradients = [
+		"from-blue-500/20 to-cyan-500/20",
+		"from-purple-500/20 to-pink-500/20",
+		"from-yellow-500/20 to-red-500/20",
+		"from-green-500/20 to-emerald-500/20",
+		"from-indigo-500/20 to-purple-500/20",
+		"from-orange-500/20 to-amber-500/20",
+		"from-teal-500/20 to-green-500/20",
+		"from-red-500/20 to-orange-500/20",
+		"from-cyan-500/20 to-blue-500/20",
+	];
+	return gradients[Math.floor(Math.random() * gradients.length)];
+}
 
 function FolderCard({
 	folder,
@@ -36,10 +68,14 @@ function FolderCard({
 	onDelete,
 	isProcessing,
 	processStatus,
+	onClick,
 }: FolderCardProps) {
 	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+	const router = useRouter();
+	const gradient = getRandomGradient();
 
-	const handleDelete = () => {
+	const handleDelete = (e: React.MouseEvent) => {
+		e.stopPropagation();
 		if (isConfirmingDelete) {
 			onDelete(folder.id);
 			setIsConfirmingDelete(false);
@@ -49,16 +85,42 @@ function FolderCard({
 		}
 	};
 
+	const handleReindex = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		onReindex(folder.id);
+	};
+
+	const handleSettings = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		router.push("/settings/folders");
+	};
+
 	const isProcessingThis = isProcessing && processStatus.folderId === folder.id;
 
 	return (
 		<motion.div animate={{ scale: 1 }} className="h-full">
-			<Card className="w-full h-full overflow-hidden group transition-all duration-200 hover:shadow-lg">
-				<CardHeader className="p-4 pb-2">
+			<Card
+				className={cn(
+					"w-full h-full cursor-pointer overflow-hidden group",
+					"transition-all duration-200 hover:shadow-lg",
+					"border-2 flex flex-col"
+				)}
+				style={{
+					borderColor: "transparent",
+					background: `linear-gradient(160deg, ${gradient} 0%, transparent 100%)`,
+				}}
+				onClick={onClick}
+			>
+				<CardHeader className="p-4 pb-2 flex-none">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
-							<div className="p-2 rounded-md bg-muted">
-								<Folder className="h-5 w-5 text-muted-foreground" />
+							<div
+								className={cn(
+									"p-2 rounded-md bg-gradient-to-br",
+									"from-blue-500 to-cyan-500"
+								)}
+							>
+								<FolderIcon className="h-5 w-5 text-white" />
 							</div>
 							<div>
 								<CardTitle className="text-xl">{folder.name}</CardTitle>
@@ -71,13 +133,21 @@ function FolderCard({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8"
-								onClick={() => onReindex(folder.id)}
+								className={cn("h-8 w-8", isProcessingThis && "text-primary")}
+								onClick={handleReindex}
 								disabled={isProcessing}
 							>
 								<RefreshCw
 									className={cn("h-4 w-4", isProcessingThis && "animate-spin")}
 								/>
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8"
+								onClick={handleSettings}
+							>
+								<Settings2 className="h-4 w-4" />
 							</Button>
 							<Button
 								variant="ghost"
@@ -92,52 +162,130 @@ function FolderCard({
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>
+							<Button variant="ghost" size="icon" className="h-8 w-8">
+								<ArrowUpRight className="h-4 w-4" />
+							</Button>
 						</div>
 					</div>
 				</CardHeader>
 
-				<CardContent className="p-4 pt-2">
-					{/* Stats */}
-					<div className="grid grid-cols-3 gap-2 mb-4">
-						<div className="p-2 rounded-lg bg-muted/50">
-							<p className="text-xs text-muted-foreground">Archivos</p>
-							<p className="text-sm font-medium">
-								{folder._count?.images || 0}
-							</p>
+				<CardContent className="p-4 pt-2 flex-1 flex flex-col">
+					{/* Grid de imágenes recientes */}
+					<div className="relative group/grid flex-1">
+						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
+							{folder.recentImages && folder.recentImages.length > 0
+								? folder.recentImages.map((src: string, i: number) => (
+										<div
+											key={i}
+											className="relative rounded-md overflow-hidden aspect-square"
+										>
+											{src ? (
+												<img
+													src={src}
+													alt={`Imagen ${i + 1}`}
+													className="object-cover w-full h-full transition-transform group-hover/grid:scale-105"
+												/>
+											) : (
+												<div
+													className={cn(
+														"w-full h-full flex items-center justify-center bg-gradient-to-br",
+														getRandomGradient()
+													)}
+												>
+													<ImageIcon className="w-5 h-5 text-white/80" />
+												</div>
+											)}
+										</div>
+								  ))
+								: Array.from({ length: 9 }).map((_, i) => (
+										<div
+											key={i}
+											className={cn(
+												"relative rounded-md overflow-hidden aspect-square",
+												"flex items-center justify-center",
+												"bg-gradient-to-br transition-transform hover:scale-105",
+												getRandomGradient()
+											)}
+										>
+											<ImageIcon className="w-5 h-5 text-white/80" />
+										</div>
+								  ))}
 						</div>
-						<div className="p-2 rounded-lg bg-muted/50">
-							<p className="text-xs text-muted-foreground">Tamaño</p>
-							<p className="text-sm font-medium">
-								{formatBytes(Number(folder.totalSize || 0))}
-							</p>
-						</div>
-						<div className="p-2 rounded-lg bg-muted/50">
-							<p className="text-xs text-muted-foreground">Última indexación</p>
-							<p className="text-sm font-medium">
-								{folder.lastIndexed
-									? new Date(folder.lastIndexed).toLocaleDateString()
-									: "Nunca"}
-							</p>
+
+						{/* Overlay con hover */}
+						<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4">
+							<Button variant="secondary" size="sm" className="gap-2">
+								<ImageIcon className="w-4 h-4" />
+								{folder._count?.images > 0
+									? `Ver ${folder._count.images} imágenes`
+									: "Carpeta vacía"}
+							</Button>
 						</div>
 					</div>
 
-					{/* Progress bar if processing */}
-					{isProcessingThis && (
-						<div className="space-y-2">
-							<div className="h-2 bg-muted rounded-full overflow-hidden">
-								<div
-									className="h-full bg-primary transition-all duration-200"
-									style={{ width: `${processStatus.progress || 0}%` }}
-								/>
+					{/* Footer con stats */}
+					<div className="mt-4 space-y-3">
+						<div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
+							<div className="flex items-center gap-4">
+								<HoverCard openDelay={200}>
+									<HoverCardTrigger asChild>
+										<div className="flex items-center gap-1.5 cursor-help">
+											<ImageIcon className="w-4 h-4" />
+											<span>{folder._count?.images || 0}</span>
+										</div>
+									</HoverCardTrigger>
+									<HoverCardContent side="top" className="text-sm">
+										Esta carpeta contiene {folder._count?.images || 0} imágenes
+									</HoverCardContent>
+								</HoverCard>
+
+								<HoverCard openDelay={200}>
+									<HoverCardTrigger asChild>
+										<div className="flex items-center gap-1.5 cursor-help">
+											<Clock className="w-4 h-4" />
+											<span>
+												{folder.lastIndexed
+													? new Date(folder.lastIndexed).toLocaleDateString()
+													: "Nunca"}
+											</span>
+										</div>
+									</HoverCardTrigger>
+									<HoverCardContent side="top" className="text-sm">
+										Última indexación de la carpeta
+									</HoverCardContent>
+								</HoverCard>
 							</div>
-							<div className="flex justify-between text-xs text-muted-foreground">
-								<span>{processStatus.status || "Procesando..."}</span>
-								<span>
-									{processStatus.current}/{processStatus.total}
-								</span>
-							</div>
+
+							<HoverCard openDelay={200}>
+								<HoverCardTrigger asChild>
+									<div className="flex items-center gap-1.5 cursor-help">
+										<span>{formatBytes(Number(folder.totalSize || 0))}</span>
+									</div>
+								</HoverCardTrigger>
+								<HoverCardContent side="top" className="text-sm">
+									Espacio total usado por las imágenes
+								</HoverCardContent>
+							</HoverCard>
 						</div>
-					)}
+
+						{/* Progress bar if processing */}
+						{isProcessingThis && (
+							<div className="space-y-2">
+								<div className="h-2 bg-muted rounded-full overflow-hidden">
+									<div
+										className="h-full bg-primary transition-all duration-200"
+										style={{ width: `${processStatus.progress || 0}%` }}
+									/>
+								</div>
+								<div className="flex justify-between text-xs text-muted-foreground">
+									<span>{processStatus.status || "Procesando..."}</span>
+									<span>
+										{processStatus.current}/{processStatus.total}
+									</span>
+								</div>
+							</div>
+						)}
+					</div>
 				</CardContent>
 			</Card>
 		</motion.div>
@@ -145,39 +293,13 @@ function FolderCard({
 }
 
 export function FoldersView({ isResizing }: ViewProps) {
+	const { setCurrentView } = useNavigationStore();
+	const { setCurrentFolder } = useFileManager();
 	const [folders, setFolders] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [processStatus, setProcessStatus] = useState({});
-
-	// ... resto de la implementación similar a folders-section ...
-
-	const handleReindex = async (folderId: string) => {
-		// Implementar lógica de reindexación
-		toast.promise(
-			// Aquí iría la llamada real
-			Promise.resolve(),
-			{
-				loading: "Reindexando carpeta...",
-				success: "Carpeta reindexada correctamente",
-				error: "Error al reindexar la carpeta",
-			}
-		);
-	};
-
-	const handleDelete = async (folderId: string) => {
-		// Implementar lógica de eliminación
-		toast.promise(
-			// Aquí iría la llamada real
-			Promise.resolve(),
-			{
-				loading: "Eliminando carpeta...",
-				success: "Carpeta eliminada correctamente",
-				error: "Error al eliminar la carpeta",
-			}
-		);
-	};
 
 	useEffect(() => {
 		const loadFolders = async () => {
@@ -195,6 +317,48 @@ export function FoldersView({ isResizing }: ViewProps) {
 		loadFolders();
 	}, []);
 
+	const handleReindex = async (folderId: string) => {
+		setIsProcessing(true);
+		setProcessStatus({ folderId, progress: 0 });
+
+		toast.promise(
+			fetch(`/api/folders/${folderId}/reindex`, {
+				method: "POST",
+			}).finally(() => {
+				setIsProcessing(false);
+				setProcessStatus({});
+			}),
+			{
+				loading: "Reindexando carpeta...",
+				success: "Carpeta reindexada correctamente",
+				error: "Error al reindexar la carpeta",
+			}
+		);
+	};
+
+	const handleDelete = async (folderId: string) => {
+		toast.promise(
+			fetch(`/api/folders/${folderId}`, {
+				method: "DELETE",
+			}).then(() => {
+				setFolders((prev) => prev.filter((f) => f.id !== folderId));
+			}),
+			{
+				loading: "Eliminando carpeta...",
+				success: "Carpeta eliminada correctamente",
+				error: "Error al eliminar la carpeta",
+			}
+		);
+	};
+
+	const handleFolderClick = useCallback(
+		(folder: any) => {
+			setCurrentView("folder-content");
+			setCurrentFolder(folder.id);
+		},
+		[setCurrentView, setCurrentFolder]
+	);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -207,7 +371,7 @@ export function FoldersView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (folders.length === 0) {
+	if (!folders || folders.length === 0) {
 		return (
 			<EmptyState
 				icon={FolderIcon}
@@ -235,6 +399,7 @@ export function FoldersView({ isResizing }: ViewProps) {
 							onDelete={handleDelete}
 							isProcessing={isProcessing}
 							processStatus={processStatus}
+							onClick={() => handleFolderClick(folder)}
 						/>
 					</motion.div>
 				))}
