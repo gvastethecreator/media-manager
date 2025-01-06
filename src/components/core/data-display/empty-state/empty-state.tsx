@@ -3,6 +3,7 @@
 import { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import BlurFade from "@/components/ui/blur-fade";
 
 interface EmptyStateProps {
 	icon: LucideIcon;
@@ -21,13 +22,19 @@ export function EmptyState({
 		<motion.div
 			animate={{ opacity: [0, 1], y: [20, 0] }}
 			className={cn(
-				"flex flex-col items-center justify-center h-[50vh] text-muted-foreground",
+				"flex flex-col items-center justify-center h-full w-full text-muted-foreground",
 				className
 			)}
 		>
-			<Icon className="w-12 h-12 mb-4 opacity-50" />
-			<h3 className="text-lg font-medium mb-2">{title}</h3>
-			<p className="text-sm text-muted-foreground">{description}</p>
+			<BlurFade
+				className="text-center flex flex-col items-center justify-center"
+				delay={0.5}
+				inView={true}
+			>
+				<Icon className="w-12 h-12 mb-4 opacity-50" />
+				<h3 className="text-lg font-medium mb-2">{title}</h3>
+				<p className="text-sm text-muted-foreground">{description}</p>
+			</BlurFade>
 		</motion.div>
 	);
 }

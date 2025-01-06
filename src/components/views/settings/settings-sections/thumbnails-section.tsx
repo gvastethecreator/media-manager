@@ -135,12 +135,22 @@ export function ThumbnailsSection() {
 
 			await thumbnailService.reprocessAll({
 				onProgress: (status) => {
+					console.log("Progreso recibido:", status);
 					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
 						...status,
 						status: status.status || "Procesando...",
 					}));
+
+					// Actualizar también el progreso suave
+					updateProgressSmooth({
+						current: status.current || 0,
+						total: status.total || 0,
+						progress: status.progress || 0,
+						currentFile: status.currentFile || "",
+						status: status.status || "Procesando...",
+					});
 
 					if (status.lastProcessed) {
 						setLastProcessedThumbnails((prev) => {
@@ -151,6 +161,7 @@ export function ThumbnailsSection() {
 					}
 				},
 				onError: (error) => {
+					console.error("Error en proceso:", error);
 					toast({
 						title: "Error",
 						description: error.message || "Error al procesar miniaturas",
@@ -158,6 +169,7 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
+					console.log("Proceso completado:", data);
 					toast({
 						title: "Proceso completado",
 						description: `Se procesaron ${data.processed} de ${
@@ -185,6 +197,7 @@ export function ThumbnailsSection() {
 			setIsProcessing(false);
 			setProcessProgress(0);
 			setProcessStatus({});
+			setProgress(null);
 		}
 	};
 
@@ -584,11 +597,11 @@ export function ThumbnailsSection() {
 								>
 									<div className="flex justify-between text-xs">
 										<span>
-											{processStatus.current} de {processStatus.total} (
-											{Math.round(processProgress)}%)
+											{processStatus.current || 0} de {processStatus.total || 0}{" "}
+											({Math.round(processProgress)}%)
 										</span>
 										<span className="text-muted-foreground">
-											{processStatus.status}
+											{processStatus.status || "Procesando..."}
 										</span>
 									</div>
 									<Progress value={processProgress} className="h-1.5" />
