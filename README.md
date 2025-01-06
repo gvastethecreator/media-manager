@@ -61,9 +61,7 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 📕 Vista de colecciones
 - 🔖 Vista de etiquetas
 - 🔍 Vista de búsqueda
-- 🛠️ Vista de debug
-
-
+- 🛠️ Vista de desarrollo
 
 ## Contribución
 
@@ -91,39 +89,3 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 - 🔖 Servicio de gestión de etiquetas
 - 👨🏻‍🦱 Servicio de gestión de usuarios
 - 🧑🏻‍🦰 Servicio de gestión de perfiles
-
-## Documentación Detallada a desarrollar
-
-### Core Features
-
-Consulta `/docs/features/` para documentación detallada de cada característica:
-
-#### 1. Optimización y Rendimiento
-
-- [Grid Performance](/docs/features/optimization/grid-performance.md)
-- [Paginación y Scroll Infinito](/docs/features/optimization/pagination-infinite-scroll.md)
-
-#### 2. Gestión de Archivos
-
-- [Operaciones Batch](/docs/features/file-management/batch-operations.md)
-
-#### 3. Interfaz de Usuario
-
-- [Paneles Informativos](/docs/features/ui/info-panels.md)
-- [Mejoras del Visualizador](/docs/features/viewer/image-viewer-improvements.md)
-
-#### 4. Personalización
-
-- [Temas y Performance](/docs/features/customization/themes-and-performance.md)
-
-#### 5. Metadata y Edición
-
-- [Gestión de Metadatos](/docs/features/metadata/metadata-management.md)
-
-#### 6. Integración IA
-
-- [Características IA](/docs/features/ai/ai-integration.md)
-
-## Roadmap y Planificación
-
-Consulta `/docs/ROADMAP.md` para ver la planificación detallada y prioridades del proyecto.
