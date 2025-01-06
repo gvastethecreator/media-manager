@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { existsSync } from 'fs'
+import { ThumbnailQuality } from '@/services/thumbnail.service'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -11,14 +12,13 @@ export async function GET(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const sendEvent = async (type: string, data: any) => {
+  const writeEvent = async (event: string, data: any) => {
     try {
-      const formattedData = JSON.stringify({ type, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-      console.log('Evento enviado:', { type, data })
+      await writer.write(
+        encoder.encode(`data: ${JSON.stringify({ type: event, data })}\n\n`)
+      )
     } catch (error) {
-      console.error('Error enviando evento:', error)
-      throw error
+      console.error('Error writing event:', error)
     }
   }
 
@@ -32,100 +32,134 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         path: true,
+        name: true,
         thumbnailSize: true
       }
     })
 
     const total = images.length
+    let current = 0
     let optimized = 0
+    let errors = 0
+    let totalSaved = 0
 
-    // Enviar evento inicial
-    await sendEvent('progress', {
-      current: optimized,
+    // Enviar estado inicial
+    await writeEvent('start', {
       total,
-      progress: 0,
-      status: `Encontradas ${total} miniaturas para optimizar...`
+      status: 'Iniciando optimización...'
     })
 
     // Procesar cada imagen
     for (const image of images) {
+      current++
+      const progress = Math.round((current / total) * 100)
+
       try {
+        // Verificar que el archivo existe
         if (!existsSync(image.path)) {
-          throw new Error('Archivo original no encontrado')
+          await writeEvent('error', {
+            imageId: image.id,
+            path: image.path,
+            error: 'Archivo no encontrado'
+          })
+          errors++
+          continue
         }
 
-        // Generar thumbnail optimizado
-        const result = await generateThumbnail(image.path, 'compressed')
+        const originalSize = image.thumbnailSize || 0
 
-        if (!result || !result.buffer) {
+        // Generar thumbnail optimizado
+        const thumbnail = await generateThumbnail(image.path, 'compressed' as ThumbnailQuality)
+
+        if (!thumbnail || !thumbnail.buffer) {
           throw new Error('Error generando thumbnail optimizado')
         }
 
-        // Solo actualizar si el nuevo tamaño es menor
-        if (result.buffer.length < (image.thumbnailSize || Infinity)) {
+        // Si el nuevo thumbnail es más pequeño, actualizarlo
+        if (thumbnail.buffer.length < originalSize) {
           await prisma.image.update({
             where: { id: image.id },
             data: {
-              thumbnail: result.buffer,
-              thumbnailSize: result.buffer.length,
-              thumbnailWidth: result.width,
-              thumbnailHeight: result.height,
+              thumbnail: thumbnail.buffer,
+              thumbnailSize: thumbnail.buffer.length,
+              thumbnailWidth: thumbnail.width,
+              thumbnailHeight: thumbnail.height,
               thumbnailError: null,
-              thumbnailErrorAt: null,
-              updatedAt: new Date()
+              thumbnailErrorAt: null
             }
           })
+
+          totalSaved += originalSize - thumbnail.buffer.length
+          optimized++
         }
 
-        optimized++
-        const progress = Math.round((optimized / total) * 100)
-
-        // Enviar evento de progreso
-        await sendEvent('progress', {
-          current: optimized,
+        // Enviar progreso
+        await writeEvent('progress', {
+          current,
           total,
           progress,
           currentFile: image.path,
-          status: `Optimizando miniatura ${optimized} de ${total}...`,
+          status: `Optimizando ${current} de ${total}`,
           lastProcessed: {
             id: image.id,
             path: image.path,
-            thumbnailPath: `/api/images/${image.id}/thumbnail`,
-            processedAt: new Date().toISOString()
+            processedAt: new Date().toISOString(),
+            saved: originalSize - thumbnail.buffer.length
+          }
+        })
+      } catch (error) {
+        console.error('Error optimizando imagen:', error)
+        errors++
+
+        // Actualizar error en base de datos
+        await prisma.image.update({
+          where: { id: image.id },
+          data: {
+            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+            thumbnailErrorAt: new Date()
           }
         })
 
-      } catch (error) {
-        console.error('Error optimizando miniatura:', error)
-
-        // Enviar evento de error
-        await sendEvent('error', {
-          file: image.path,
+        // Enviar error
+        await writeEvent('error', {
+          imageId: image.id,
+          path: image.path,
           error: error instanceof Error ? error.message : 'Error desconocido'
         })
       }
+
+      // Pequeña pausa para no sobrecargar
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
 
-    // Enviar evento de completado
-    await sendEvent('complete', {
+    // Enviar evento de finalización
+    await writeEvent('complete', {
       optimized,
-      total
+      errors,
+      total,
+      totalSaved
     })
 
+    await writer.close()
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
   } catch (error) {
     console.error('Error en optimización:', error)
-    await sendEvent('error', {
+    await writeEvent('error', {
       error: error instanceof Error ? error.message : 'Error desconocido'
     })
-  } finally {
     await writer.close()
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
   }
-
-  return new NextResponse(stream.readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    }
-  })
 }
