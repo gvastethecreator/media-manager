@@ -5,6 +5,7 @@ export interface ProcessStatus {
   current?: number
   total?: number
   progress?: number
+  currentFile?: string
 }
 
 export interface IndexCallbacks {
@@ -39,9 +40,9 @@ export async function getFolders() {
 export async function addFolder(path: string, callbacks?: IndexCallbacks) {
   try {
     console.log('Iniciando proceso de agregar carpeta:', path);
-    
-    // Crear la carpeta
-    const response = await fetch('/api/folders', {
+
+    // Primero crear la carpeta
+    const createResponse = await fetch('/api/folders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -49,18 +50,87 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
       body: JSON.stringify({ path })
     });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Error agregando carpeta');
+    if (!createResponse.ok) {
+      const error = await createResponse.json();
+      throw new Error(error.message || 'Error creando carpeta');
     }
 
-    const folder = await response.json();
+    const folder = await createResponse.json();
     console.log('Carpeta creada:', folder);
 
-    // Iniciar indexación
-    await indexFolder(folder.id, callbacks);
-    
-    return folder;
+    // Luego iniciar el proceso de indexación con SSE
+    const eventSource = new EventSource(`/api/folders/${folder.id}/index?_=${Date.now()}`, {
+      withCredentials: true,
+      heartbeatTimeout: 300000, // 5 minutos
+    });
+
+    eventSource.onmessage = (event) => {
+      try {
+        if (!event.data) return;
+        const data = JSON.parse(event.data);
+        console.log('Evento recibido:', data);
+
+        switch (data.type) {
+          case 'progress':
+            callbacks?.onProgress?.(data.data);
+            break;
+          case 'error':
+            const error = new Error(data.data.message);
+            error.name = data.data.type;
+            callbacks?.onError?.(error);
+            eventSource.close();
+            break;
+          case 'complete':
+            callbacks?.onComplete?.();
+            eventSource.close();
+            break;
+        }
+      } catch (error) {
+        console.error('Error procesando evento:', error);
+        callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('Error en EventSource:', error);
+      eventSource.close();
+      callbacks?.onError?.(new Error('Error en la conexión'));
+    };
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        eventSource.close();
+        reject(new Error('Timeout esperando respuesta'));
+      }, 300000); // 5 minutos
+
+      eventSource.addEventListener('complete', (event) => {
+        try {
+          clearTimeout(timeout);
+          const data = JSON.parse(event.data);
+          resolve(data.folder);
+        } catch (error) {
+          reject(error);
+        } finally {
+          eventSource.close();
+        }
+      });
+
+      eventSource.addEventListener('error', (event: any) => {
+        try {
+          clearTimeout(timeout);
+          if (event.data) {
+            const data = JSON.parse(event.data);
+            reject(new Error(data.message));
+          } else {
+            reject(new Error('Error en la conexión'));
+          }
+        } catch (error) {
+          reject(error);
+        } finally {
+          eventSource.close();
+        }
+      });
+    });
   } catch (error) {
     console.error('Error en addFolder:', error);
     callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
@@ -71,30 +141,81 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
 export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
   try {
     console.log('Iniciando indexación de carpeta:', id);
-    
-    const response = await fetch(`/api/folders/${id}/index`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+
+    const eventSource = new EventSource(`/api/folders/${id}/index?_=${Date.now()}`, {
+      withCredentials: true,
+      heartbeatTimeout: 300000, // 5 minutos
+    });
+
+    eventSource.onmessage = (event) => {
+      try {
+        if (!event.data) return;
+        const data = JSON.parse(event.data);
+        console.log('Evento de indexación recibido:', data);
+
+        switch (data.type) {
+          case 'progress':
+            callbacks?.onProgress?.(data.data);
+            break;
+          case 'error':
+            const error = new Error(data.data.message);
+            error.name = data.data.type;
+            callbacks?.onError?.(error);
+            eventSource.close();
+            break;
+          case 'complete':
+            callbacks?.onComplete?.();
+            eventSource.close();
+            break;
+        }
+      } catch (error) {
+        console.error('Error procesando evento de indexación:', error);
+        callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('Error en EventSource de indexación:', error);
+      eventSource.close();
+      callbacks?.onError?.(new Error('Error en la conexión'));
+    };
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        eventSource.close();
+        reject(new Error('Timeout esperando respuesta'));
+      }, 300000); // 5 minutos
+
+      eventSource.addEventListener('complete', (event) => {
+        try {
+          clearTimeout(timeout);
+          const data = JSON.parse(event.data);
+          resolve(data);
+        } catch (error) {
+          reject(error);
+        } finally {
+          eventSource.close();
+        }
+      });
+
+      eventSource.addEventListener('error', (event: any) => {
+        try {
+          clearTimeout(timeout);
+          if (event.data) {
+            const data = JSON.parse(event.data);
+            reject(new Error(data.message));
+          } else {
+            reject(new Error('Error en la conexión'));
+          }
+        } catch (error) {
+          reject(error);
+        } finally {
+          eventSource.close();
+        }
+      });
     });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({ message: 'Error desconocido' }));
-      throw new Error(data.message || `Error en indexación: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('Indexación completada:', result);
-    
-    callbacks?.onComplete?.();
-    return result;
   } catch (error) {
-    console.error('Error en indexación:', {
-      error: error instanceof Error ? error.message : 'Error desconocido',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    
+    console.error('Error en indexación:', error);
     callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
     throw error;
   }
@@ -108,11 +229,11 @@ export async function deleteFolder(id: string) {
   const response = await fetch(`/api/folders/${id}`, {
     method: 'DELETE'
   });
-  
+
   if (!response.ok) {
     const data = await response.json();
     throw new Error(data.message || 'Error eliminando carpeta');
   }
-  
+
   return response.json();
 }
