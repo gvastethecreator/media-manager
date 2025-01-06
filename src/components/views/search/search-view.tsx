@@ -10,7 +10,6 @@ import { FileItem } from "@/types/file-item";
 import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { LoadingSpinner } from "@/components/ui/spinner";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { Search } from "lucide-react";
 import { LoadingScreen } from "@/components/core/feedback";
