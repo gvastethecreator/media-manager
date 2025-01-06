@@ -154,18 +154,32 @@ class CacheManager<T = unknown> {
     try {
       const now = Date.now()
       let pruned = 0
-      for (const [key, entry] of this.cache.entries()) {
-        if (now - entry.timestamp > entry.ttl) {
-          this.cache.delete(key)
-          pruned++
+
+      // Obtener una copia segura de las entradas
+      const entries = Array.from(this.cache.entries())
+
+      for (const [key, entry] of entries) {
+        try {
+          if (now - entry.timestamp > entry.ttl) {
+            await this.delete(key)
+            pruned++
+          }
+        } catch (error) {
+          logger.error(`[Cache:${this.name}] Error al procesar entrada en prune:`, {
+            error: error instanceof Error ? error.message : String(error),
+            key
+          })
         }
       }
+
       if (pruned > 0) {
         logger.info(`[Cache:${this.name}] Eliminadas ${pruned} entradas expiradas`)
-        this.updateStats()
+        await this.updateStats()
       }
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en prune:`, error)
+      logger.error(`[Cache:${this.name}] Error en prune:`, {
+        error: error instanceof Error ? error.message : String(error)
+      })
     }
   }
 
@@ -182,38 +196,78 @@ class CacheManager<T = unknown> {
     }
   }
 
-  private updateStats(): void {
-    const entries = Array.from(this.cache.entries())
-    const now = Date.now()
+  private async updateStats(): Promise<void> {
+    try {
+      const entries = Array.from(this.cache.entries())
+      const now = Date.now()
 
-    this.stats.keys = this.cache.size
-    this.stats.size = entries.reduce((acc, [_, entry]) => acc + JSON.stringify(entry.value).length, 0)
-    this.stats.hitRatio = this.stats.hits / (this.stats.hits + this.stats.misses) || 0
-    this.stats.avgTTL = entries.reduce((acc, [_, entry]) => acc + entry.ttl, 0) / entries.length || 0
+      // Calcular estadísticas en chunks para evitar bloquear el event loop
+      const chunkSize = 100
+      let totalSize = 0
+      let totalTTL = 0
+      let minTimestamp = Infinity
+      let maxTimestamp = -Infinity
 
-    if (entries.length > 0) {
-      const timestamps = entries.map(([_, entry]) => entry.timestamp)
-      this.stats.oldestEntry = now - Math.min(...timestamps)
-      this.stats.newestEntry = now - Math.max(...timestamps)
+      for (let i = 0; i < entries.length; i += chunkSize) {
+        const chunk = entries.slice(i, i + chunkSize)
+
+        for (const [_, entry] of chunk) {
+          try {
+            totalSize += JSON.stringify(entry.value).length
+            totalTTL += entry.ttl
+            minTimestamp = Math.min(minTimestamp, entry.timestamp)
+            maxTimestamp = Math.max(maxTimestamp, entry.timestamp)
+          } catch (error) {
+            logger.warn(`[Cache:${this.name}] Error al procesar entrada en stats:`, {
+              error: error instanceof Error ? error.message : String(error)
+            })
+          }
+        }
+
+        // Dar tiempo al event loop
+        await new Promise(resolve => setTimeout(resolve, 0))
+      }
+
+      this.stats.keys = this.cache.size
+      this.stats.size = totalSize
+      this.stats.hitRatio = this.stats.hits / (this.stats.hits + this.stats.misses) || 0
+      this.stats.avgTTL = entries.length > 0 ? totalTTL / entries.length : 0
+
+      if (entries.length > 0) {
+        this.stats.oldestEntry = now - minTimestamp
+        this.stats.newestEntry = now - maxTimestamp
+      }
+    } catch (error) {
+      logger.error(`[Cache:${this.name}] Error al actualizar estadísticas:`, {
+        error: error instanceof Error ? error.message : String(error)
+      })
     }
   }
 
   private logStats(): void {
-    const stats = {
-      ...this.stats,
-      hitRatio: `${(this.stats.hitRatio * 100).toFixed(2)}%`,
-      oldestEntry: `${(this.stats.oldestEntry / 1000 / 60).toFixed(2)}m`,
-      newestEntry: `${(this.stats.newestEntry / 1000 / 60).toFixed(2)}m`,
-      avgTTL: `${(this.stats.avgTTL / 1000 / 60).toFixed(2)}m`,
-      size: `${(this.stats.size / 1024).toFixed(2)}KB`
+    try {
+      const stats = {
+        ...this.stats,
+        hitRatio: `${(this.stats.hitRatio * 100).toFixed(2)}%`,
+        oldestEntry: `${(this.stats.oldestEntry / 1000 / 60).toFixed(2)}m`,
+        newestEntry: `${(this.stats.newestEntry / 1000 / 60).toFixed(2)}m`,
+        avgTTL: `${(this.stats.avgTTL / 1000 / 60).toFixed(2)}m`,
+        size: `${(this.stats.size / 1024).toFixed(2)}KB`
+      }
+      logger.info(`[Cache:${this.name}] Stats:`, stats)
+    } catch (error) {
+      logger.error(`[Cache:${this.name}] Error al generar log de estadísticas:`, {
+        error: error instanceof Error ? error.message : String(error)
+      })
     }
-    logger.info(`[Cache:${this.name}] Stats:`, stats)
   }
 
   private startCleanupTimer(interval: number): void {
     this.cleanupTimer = setInterval(() => {
       this.prune().catch(error =>
-        logger.error(`[Cache:${this.name}] Error en cleanup timer:`, error)
+        logger.error(`[Cache:${this.name}] Error en cleanup timer:`, {
+          error: error instanceof Error ? error.message : String(error)
+        })
       )
     }, interval)
   }
@@ -227,17 +281,33 @@ class CacheManager<T = unknown> {
   }
 
   async stop(): Promise<void> {
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer)
-    }
-    if (this.statsTimer) {
-      clearInterval(this.statsTimer)
+    try {
+      if (this.cleanupTimer) {
+        clearInterval(this.cleanupTimer)
+        this.cleanupTimer = undefined
+      }
+      if (this.statsTimer) {
+        clearInterval(this.statsTimer)
+        this.statsTimer = undefined
+      }
+      await this.clear()
+    } catch (error) {
+      logger.error(`[Cache:${this.name}] Error al detener caché:`, {
+        error: error instanceof Error ? error.message : String(error)
+      })
     }
   }
 
   getStats(): CacheStats {
-    this.updateStats()
-    return { ...this.stats }
+    try {
+      this.updateStats()
+      return { ...this.stats }
+    } catch (error) {
+      logger.error(`[Cache:${this.name}] Error al obtener estadísticas:`, {
+        error: error instanceof Error ? error.message : String(error)
+      })
+      return { ...this.stats }
+    }
   }
 }
 
