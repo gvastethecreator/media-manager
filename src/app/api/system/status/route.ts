@@ -1,18 +1,88 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getDatabaseStatus, getPrismaClient } from '@/lib/db'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { logger } from '@/lib/utils'
+
+// Función auxiliar para transformar BigInts en la respuesta
+function serializeResponse(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj
+  }
+
+  if (typeof obj === 'bigint') {
+    return Number(obj)
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(serializeResponse)
+  }
+
+  if (typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [key, serializeResponse(value)])
+    )
+  }
+
+  return obj
+}
 
 export async function GET() {
   try {
     // Verificar conexión a la base de datos
-    await prisma.$connect()
+    const dbStatus = await getDatabaseStatus()
+
+    // Si la base de datos está inicializándose, retornar estado de inicialización
+    if (dbStatus.status === 'initializing') {
+      return NextResponse.json(serializeResponse({
+        status: 'initializing',
+        message: 'Sistema inicializándose',
+        database: dbStatus,
+        fileSystem: {
+          status: 'pending',
+          message: 'Esperando inicialización de la base de datos'
+        },
+        thumbnails: {
+          status: 'pending',
+          message: 'Esperando inicialización del sistema'
+        },
+        settings: {
+          status: 'pending',
+          message: 'Esperando inicialización del sistema'
+        }
+      }))
+    }
+
+    // Si hay un error en la base de datos, retornar error
+    if (dbStatus.status === 'error') {
+      return NextResponse.json(serializeResponse({
+        status: 'error',
+        error: dbStatus.message,
+        database: dbStatus,
+        fileSystem: {
+          status: 'error',
+          message: 'Error en el sistema de archivos'
+        },
+        thumbnails: {
+          status: 'error',
+          message: 'Error en el servicio de miniaturas'
+        },
+        settings: {
+          status: 'error',
+          message: 'Error al cargar configuraciones'
+        }
+      }), { status: 500 })
+    }
+
+    // Si la base de datos está conectada, continuar con las verificaciones
+    const prisma = await getPrismaClient()
 
     // Verificar sistema de archivos
     const thumbnailsDir = path.join(process.cwd(), 'thumbnails')
     try {
       await fs.access(thumbnailsDir)
     } catch {
+      logger.info('Creando directorio de miniaturas...')
       await fs.mkdir(thumbnailsDir, { recursive: true })
     }
 
@@ -22,6 +92,7 @@ export async function GET() {
       await fs.writeFile(testFile, '')
       await fs.unlink(testFile)
     } catch (error) {
+      logger.error('Error de permisos en thumbnails:', error)
       throw new Error('No hay permisos de escritura en el directorio de miniaturas')
     }
 
@@ -30,27 +101,27 @@ export async function GET() {
     try {
       await fs.access(settingsPath)
     } catch {
+      logger.error('No se encontró settings.json')
       throw new Error('No se encontró el archivo de configuración')
     }
 
     // Obtener estadísticas de miniaturas
-    const imagesWithoutThumbnails = await prisma.image.count({
+    const imagesWithoutThumbnails = Number(await prisma.image.count({
       where: { thumbnail: null }
-    })
+    }))
 
     // Verificar estado del sistema
     const systemChecks = {
-      database: await prisma.$queryRaw`SELECT 1+1 as test`,
+      database: Number((await prisma.$queryRaw`SELECT 1+1 as test`)[0].test),
       fileSystem: await fs.readdir(process.cwd()),
       settings: await fs.readFile(settingsPath, 'utf-8')
     }
 
+    logger.info('Sistema verificado correctamente', systemChecks)
+
     const stats = {
       status: 'active',
-      database: {
-        status: 'connected',
-        message: 'Base de datos conectada y funcionando'
-      },
+      database: dbStatus,
       fileSystem: {
         status: 'active',
         message: 'Sistema de archivos operativo'
@@ -68,16 +139,15 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json(stats)
+    return NextResponse.json(serializeResponse(stats))
   } catch (error) {
-    console.error('Error al obtener estado del sistema:', error)
-    return NextResponse.json({
+    logger.error('Error al obtener estado del sistema:', error)
+    const dbStatus = await getDatabaseStatus()
+
+    return NextResponse.json(serializeResponse({
       status: 'error',
       error: error instanceof Error ? error.message : 'Error desconocido',
-      database: {
-        status: 'error',
-        message: 'Error al conectar con la base de datos'
-      },
+      database: dbStatus,
       fileSystem: {
         status: 'error',
         message: 'Error en el sistema de archivos'
@@ -90,6 +160,6 @@ export async function GET() {
         status: 'error',
         message: 'Error al cargar configuraciones'
       }
-    }, { status: 500 })
+    }), { status: 500 })
   }
 }

@@ -18,11 +18,19 @@ export function useInitializeApp() {
         name: 'System',
         init: async () => {
           updateService('System', 'loading', 'Verificando estado del sistema...')
-          const response = await fetch('/api/system/status')
-          if (!response.ok) throw new Error('Error al obtener estado del sistema')
-          const stats = await response.json()
-          if (stats.status !== 'active') throw new Error('Sistema no activo')
-          updateService('System', 'success', 'Sistema inicializado')
+          try {
+            const response = await fetch('/api/system/status')
+            if (!response.ok) {
+              const error = await response.json()
+              throw new Error(error.error || 'Error al obtener estado del sistema')
+            }
+            const stats = await response.json()
+            if (stats.status !== 'active') throw new Error('Sistema no activo')
+            updateService('System', 'success', 'Sistema inicializado')
+          } catch (error) {
+            console.error('Error en System:', error)
+            throw error
+          }
         }
       },
       {
@@ -30,13 +38,18 @@ export function useInitializeApp() {
         dependencies: ['System'],
         init: async () => {
           updateService('Database', 'loading', 'Conectando a la base de datos...')
-          const response = await fetch('/api/system/status')
-          if (!response.ok) throw new Error('Error al verificar base de datos')
-          const { database } = await response.json()
-          if (database.status !== 'connected') {
-            throw new Error('Base de datos no conectada')
+          try {
+            const response = await fetch('/api/system/status')
+            if (!response.ok) throw new Error('Error al verificar base de datos')
+            const { database } = await response.json()
+            if (!database || database.status !== 'connected') {
+              throw new Error(database?.message || 'Base de datos no conectada')
+            }
+            updateService('Database', 'success', database.message)
+          } catch (error) {
+            console.error('Error en Database:', error)
+            throw error
           }
-          updateService('Database', 'success', database.message)
         }
       },
       {
@@ -44,13 +57,18 @@ export function useInitializeApp() {
         dependencies: ['System'],
         init: async () => {
           updateService('File System', 'loading', 'Verificando sistema de archivos...')
-          const response = await fetch('/api/system/status')
-          if (!response.ok) throw new Error('Error al verificar sistema de archivos')
-          const { fileSystem } = await response.json()
-          if (fileSystem.status !== 'active') {
-            throw new Error('Sistema de archivos no disponible')
+          try {
+            const response = await fetch('/api/system/status')
+            if (!response.ok) throw new Error('Error al verificar sistema de archivos')
+            const { fileSystem } = await response.json()
+            if (!fileSystem || fileSystem.status !== 'active') {
+              throw new Error(fileSystem?.message || 'Sistema de archivos no disponible')
+            }
+            updateService('File System', 'success', 'Sistema de archivos inicializado')
+          } catch (error) {
+            console.error('Error en File System:', error)
+            throw error
           }
-          updateService('File System', 'success', 'Sistema de archivos inicializado')
         }
       },
       {
@@ -58,13 +76,18 @@ export function useInitializeApp() {
         dependencies: ['Database'],
         init: async () => {
           updateService('Settings', 'loading', 'Cargando configuraciones...')
-          const response = await fetch('/api/system/status')
-          if (!response.ok) throw new Error('Error al cargar configuraciones')
-          const { settings } = await response.json()
-          if (settings.status !== 'active') {
-            throw new Error('Error en configuraciones')
+          try {
+            const response = await fetch('/api/system/status')
+            if (!response.ok) throw new Error('Error al cargar configuraciones')
+            const { settings } = await response.json()
+            if (!settings || settings.status !== 'active') {
+              throw new Error(settings?.message || 'Error en configuraciones')
+            }
+            updateService('Settings', 'success', settings.message)
+          } catch (error) {
+            console.error('Error en Settings:', error)
+            throw error
           }
-          updateService('Settings', 'success', settings.message)
         }
       },
       {
@@ -72,13 +95,18 @@ export function useInitializeApp() {
         dependencies: ['File System', 'Settings'],
         init: async () => {
           updateService('Thumbnails', 'loading', 'Verificando servicio de miniaturas...')
-          const response = await fetch('/api/system/status')
-          if (!response.ok) throw new Error('Error al verificar miniaturas')
-          const { thumbnails } = await response.json()
-          if (thumbnails.status !== 'active') {
-            throw new Error('Servicio de miniaturas no disponible')
+          try {
+            const response = await fetch('/api/system/status')
+            if (!response.ok) throw new Error('Error al verificar miniaturas')
+            const { thumbnails } = await response.json()
+            if (!thumbnails || thumbnails.status !== 'active') {
+              throw new Error(thumbnails?.message || 'Servicio de miniaturas no disponible')
+            }
+            updateService('Thumbnails', 'success', thumbnails.message)
+          } catch (error) {
+            console.error('Error en Thumbnails:', error)
+            throw error
           }
-          updateService('Thumbnails', 'success', thumbnails.message)
         }
       }
     ]
@@ -96,8 +124,9 @@ export function useInitializeApp() {
         try {
           await service.init()
           initialized.add(service.name)
+          console.log(`✅ Servicio ${service.name} inicializado correctamente`)
         } catch (error) {
-          console.error(`Error initializing ${service.name}:`, error)
+          console.error(`❌ Error inicializando ${service.name}:`, error)
           failed.add(service.name)
           updateService(
             service.name,
@@ -107,31 +136,55 @@ export function useInitializeApp() {
         }
       }
 
-      // Inicializar servicios en paralelo respetando dependencias
+      // Inicializar servicios secuencialmente respetando dependencias
+      let lastSize = -1
       while (initialized.size + failed.size < services.length) {
         const pending = services.filter(
           service => !initialized.has(service.name) && !failed.has(service.name)
         )
 
         const ready = pending.filter(canInitialize)
-        if (ready.length === 0) break // Evitar bucle infinito si hay dependencias circulares
+        if (ready.length === 0) {
+          if (lastSize === initialized.size + failed.size) {
+            console.error('❌ Dependencias circulares detectadas')
+            break
+          }
+        }
 
-        await Promise.all(ready.map(initializeService))
+        lastSize = initialized.size + failed.size
+
+        // Inicializar servicios uno por uno para mejor control
+        for (const service of ready) {
+          await initializeService(service)
+        }
       }
 
       // Si todos los servicios se inicializaron correctamente
       if (initialized.size === services.length) {
         setReady(true)
+        console.log('✅ Todos los servicios inicializados correctamente')
         // Pequeño delay para asegurar una transición suave
         await new Promise(resolve => setTimeout(resolve, 300))
         setInitializing(false)
       } else {
         // Si algún servicio falló
         setReady(false)
-        console.error('Initialization failed for services:', Array.from(failed))
+        const failedServices = Array.from(failed)
+        console.error('❌ Falló la inicialización de los servicios:', failedServices)
+        throw new Error(`Falló la inicialización de: ${failedServices.join(', ')}`)
       }
     }
 
-    initialize()
+    initialize().catch(error => {
+      console.error('❌ Error en la inicialización:', error)
+      setReady(false)
+      setInitializing(false)
+    })
+
+    // Cleanup
+    return () => {
+      setReady(false)
+      setInitializing(false)
+    }
   }, [updateService, setProgress, setInitializing, setReady])
 }

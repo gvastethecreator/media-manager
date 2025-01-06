@@ -28,7 +28,9 @@ class Database {
   private client: PrismaClient
   private config: Required<DatabaseConfig>
   private isInitialized: boolean = false
+  private isInitializing: boolean = false
   private connectionPromise?: Promise<void>
+  private lastError?: Error
 
   private constructor(config: DatabaseConfig = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config }
@@ -51,6 +53,7 @@ class Database {
 
     // Configurar eventos de logging
     this.client.$on('error', (e) => {
+      this.lastError = e instanceof Error ? e : new Error(String(e))
       logger.error('Error de base de datos:', e)
     })
 
@@ -91,15 +94,24 @@ class Database {
    */
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
-      logger.warn('La base de datos ya está inicializada')
+      logger.debug('La base de datos ya está inicializada')
       return
     }
 
-    if (this.connectionPromise) {
+    if (this.isInitializing) {
+      logger.debug('La base de datos está en proceso de inicialización')
       return this.connectionPromise
     }
 
+    this.isInitializing = true
     this.connectionPromise = this.connect()
+
+    try {
+      await this.connectionPromise
+    } finally {
+      this.isInitializing = false
+    }
+
     return this.connectionPromise
   }
 
@@ -120,12 +132,14 @@ class Database {
         await this.client.folder.count()
 
         this.isInitialized = true
+        this.lastError = undefined
         logger.info('Conexión establecida correctamente')
         return
       } catch (error) {
         attempts++
+        this.lastError = error instanceof Error ? error : new Error(String(error))
         logger.error(`Error al conectar (intento ${attempts}/${this.config.retryAttempts}):`, {
-          error: error instanceof Error ? error.message : error
+          error: this.lastError.message
         })
 
         if (attempts === this.config.retryAttempts) {
@@ -172,11 +186,32 @@ class Database {
   public isConnected(): boolean {
     return this.isInitialized
   }
+
+  /**
+   * Verifica si la base de datos está en proceso de inicialización
+   */
+  public isConnecting(): boolean {
+    return this.isInitializing
+  }
+
+  /**
+   * Obtiene el último error registrado
+   */
+  public getLastError(): Error | undefined {
+    return this.lastError
+  }
 }
 
 // Exportar instancia única
 export const db = Database.getInstance()
-export const prisma = db.getClient()
+
+// Exportar función para obtener el cliente de forma segura
+export async function getPrismaClient(): Promise<PrismaClient> {
+  if (!db.isConnected()) {
+    await db.initialize()
+  }
+  return db.getClient()
+}
 
 /**
  * Inicializa la base de datos con la configuración proporcionada
@@ -187,5 +222,52 @@ export async function initializeDatabase(config?: DatabaseConfig): Promise<void>
   } catch (error) {
     logger.error('Error al inicializar la base de datos:', error)
     throw error
+  }
+}
+
+/**
+ * Obtiene el estado actual de la conexión a la base de datos
+ */
+export async function getDatabaseStatus() {
+  try {
+    // Si la base de datos está en proceso de inicialización
+    if (db.isConnecting()) {
+      return {
+        status: 'initializing',
+        message: 'Base de datos inicializándose'
+      }
+    }
+
+    // Si la base de datos no está conectada, intentar inicializar
+    if (!db.isConnected()) {
+      try {
+        await db.initialize()
+      } catch (error) {
+        return {
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Error al inicializar la base de datos'
+        }
+      }
+    }
+
+    // Verificar conexión
+    const client = db.getClient()
+    const result = await client.$queryRaw`SELECT 1+1 as test`
+    const testValue = Number((result as any)[0].test)
+
+    if (isNaN(testValue)) {
+      throw new Error('Error en la verificación de la base de datos')
+    }
+
+    return {
+      status: 'connected',
+      message: 'Base de datos conectada y funcionando'
+    }
+  } catch (error) {
+    const lastError = db.getLastError()
+    return {
+      status: 'error',
+      message: lastError?.message || (error instanceof Error ? error.message : 'Error desconocido')
+    }
   }
 }
