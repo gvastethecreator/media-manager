@@ -1115,3 +1115,135 @@ src/
 - Objetivo de cobertura: >90% en servicios core
 - Tests pendientes: ~20% del total planificado
 - Tiempo estimado: 1-2 semanas para completar
+
+# Estado Actual y Seguimiento de Problemas (2024-01-06)
+
+## 🚨 Problemas Identificados
+
+### 1. Errores de Caché
+
+```log
+[Cache:thumbnails] Error en prune: {}
+[Cache:metadata] Error en prune: {}
+[Cache:search] Error en prune: {}
+```
+
+- [ ] Investigar por qué los servicios de caché están fallando en la limpieza
+- [ ] Revisar la implementación del sistema de caché
+- [ ] Implementar mejor manejo de errores en el sistema de caché
+
+### 2. Errores de Serialización
+
+```log
+Error: Do not know how to serialize a BigInt
+```
+
+- [x] Implementada función `serializeResponse` para manejar BigInts
+- [x] Modificado endpoint de status para usar serialización
+- [ ] Revisar otros endpoints que puedan tener el mismo problema
+- [ ] Implementar solución global para manejo de BigInts
+
+### 3. Inicialización del Sistema
+
+- [ ] Mejorar el manejo de estados durante la inicialización
+- [ ] Implementar mejor logging para debugging
+- [ ] Revisar dependencias circulares en la inicialización de servicios
+
+### 4. Errores de API
+
+```log
+Error: Route "/api/images/[id]/thumbnail" used `params.id`
+```
+
+- [ ] Corregir manejo de parámetros en rutas dinámicas
+- [ ] Implementar validación de parámetros
+- [ ] Mejorar manejo de errores en endpoints
+
+## 📝 Plan de Acción
+
+### Fase 1: Sistema de Caché
+
+1. Revisar implementación actual en `src/lib/cache.ts`
+2. Implementar mejor manejo de errores
+3. Añadir logging detallado
+4. Implementar mecanismo de recuperación
+
+### Fase 2: Serialización y Tipos
+
+1. Crear utilidad global para serialización
+2. Revisar todos los endpoints
+3. Implementar tipos estrictos
+4. Añadir validación de datos
+
+### Fase 3: Inicialización
+
+1. Refactorizar sistema de inicialización
+2. Resolver dependencias circulares
+3. Mejorar manejo de estados
+4. Implementar retry con backoff
+
+### Fase 4: API y Rutas
+
+1. Actualizar manejo de rutas dinámicas
+2. Implementar middleware de validación
+3. Mejorar manejo de errores
+4. Añadir documentación de API
+
+## 🔍 Próximos Pasos Inmediatos
+
+1. **Alta Prioridad**
+
+   - Resolver errores de caché que están afectando el funcionamiento básico
+   - Implementar solución global para serialización de BigInts
+   - Corregir manejo de rutas dinámicas en la API
+
+2. **Media Prioridad**
+
+   - Mejorar sistema de logging
+   - Implementar mejor manejo de errores
+   - Refactorizar sistema de inicialización
+
+3. **Baja Prioridad**
+   - Actualizar documentación
+   - Optimizar rendimiento
+   - Implementar tests adicionales
+
+## 📊 Métricas de Seguimiento
+
+- Número de errores en logs
+- Tiempo de inicialización
+- Uso de caché (hits/misses)
+- Errores de API
+
+## 🔄 Estado de Servicios
+
+### Cache
+
+- Estado: ❌ Con errores
+- Problemas: Errores en prune
+- Prioridad: Alta
+
+### Base de Datos
+
+- Estado: ✅ Funcional con warnings
+- Problemas: Serialización de BigInts
+- Prioridad: Media
+
+### API
+
+- Estado: ⚠️ Parcialmente funcional
+- Problemas: Manejo de parámetros
+- Prioridad: Alta
+
+### Sistema de Archivos
+
+- Estado: ✅ Funcional
+- Problemas: Ninguno crítico
+- Prioridad: Baja
+
+## 📝 Notas Adicionales
+
+- Se requiere revisión completa del sistema de caché
+- Necesario implementar mejor sistema de monitoreo
+- Considerar implementar health checks
+- Revisar manejo de memoria en caché

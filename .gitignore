@@ -42,7 +42,3 @@ next-env.d.ts
 
 # project
 .image-cache
-
-# ... otros patrones ...
-prisma/dev.db
-prisma/*.db
