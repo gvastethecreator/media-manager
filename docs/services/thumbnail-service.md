@@ -102,20 +102,111 @@ interface ThumbnailError {
 - Reporte de limpieza
 - Manejo seguro de eliminación
 
-## 🔄 Sistema de Eventos
+## 🔄 Sistema de Eventos SSE
 
 ### Tipos de Eventos
 
-- `progress`: Actualización de progreso
-- `error`: Notificación de errores
-- `complete`: Finalización de proceso
-- `message`: Eventos generales
-
-### Callbacks
-
 ```typescript
-type ThumbnailEventCallback = (event: { type: string; data: any }) => void;
+type ThumbnailEventType = "start" | "progress" | "error" | "complete";
+
+interface ThumbnailEvent {
+	type: ThumbnailEventType;
+	data: {
+		// Datos comunes
+		status?: string;
+		current?: number;
+		total?: number;
+		progress?: number;
+
+		// Datos específicos por tipo
+		currentFile?: string;
+		lastProcessed?: {
+			id: string;
+			path: string;
+			processedAt: string;
+			saved?: number;
+			freed?: number;
+		};
+		error?: string;
+		imageId?: string;
+
+		// Datos de completado
+		processed?: number;
+		optimized?: number;
+		cleaned?: number;
+		errors?: number;
+		totalSaved?: number;
+		totalFreed?: number;
+	};
+}
+
+type ThumbnailEventCallback = (event: ThumbnailEvent) => void;
 ```
+
+### Flujo de Eventos
+
+1. **Inicio (`start`)**
+
+   ```typescript
+   {
+   	type: 'start',
+   	data: {
+   		total: number;
+   		status: string;
+   	}
+   }
+   ```
+
+2. **Progreso (`progress`)**
+
+   ```typescript
+   {
+   	type: 'progress',
+   	data: {
+   		current: number;
+   		total: number;
+   		progress: number;
+   		currentFile: string;
+   		status: string;
+   		lastProcessed: {
+   			id: string;
+   			path: string;
+   			processedAt: string;
+   			saved?: number;
+   			freed?: number;
+   		}
+   	}
+   }
+   ```
+
+3. **Error (`error`)**
+
+   ```typescript
+   {
+   	type: 'error',
+   	data: {
+   		imageId?: string;
+   		path?: string;
+   		error: string;
+   	}
+   }
+   ```
+
+4. **Completado (`complete`)**
+   ```typescript
+   {
+   	type: 'complete',
+   	data: {
+   		processed?: number;
+   		optimized?: number;
+   		cleaned?: number;
+   		errors: number;
+   		total: number;
+   		totalSaved?: number;
+   		totalFreed?: number;
+   	}
+   }
+   ```
 
 ## 🔐 Seguridad y Optimización
 
@@ -124,12 +215,14 @@ type ThumbnailEventCallback = (event: { type: string; data: any }) => void;
 - Timeout por defecto: 5 minutos
 - Máximo de reintentos: 3
 - Delay entre reintentos: 1 segundo
+- Pausa entre procesamiento: 100ms
 
 ### Caché
 
 - Sistema de caché en memoria
 - Claves únicas por imagen y calidad
 - Invalidación automática
+- Limpieza periódica
 
 ## 📈 Monitoreo
 
@@ -140,6 +233,8 @@ type ThumbnailEventCallback = (event: { type: string; data: any }) => void;
 - Pendientes de procesamiento
 - Errores de generación
 - Últimos procesados
+- Espacio ahorrado
+- Espacio liberado
 
 ### Mantenimiento
 
@@ -154,63 +249,65 @@ type ThumbnailEventCallback = (event: { type: string; data: any }) => void;
 
 ```mermaid
 flowchart TD
-    A[Solicitud] --> B{Cola Disponible}
-    B -->|Sí| C[Agregar a Cola]
-    B -->|No| D[Cola Llena]
-    C --> E[Procesar]
-    E --> F{Error}
-    F -->|Sí| G[Reintentar]
-    F -->|No| H[Guardar]
-    G -->|Max Intentos| I[Error Final]
-    H --> J[Actualizar Stats]
-    J --> K[Notificar]
+	A[Solicitud] --> B{Cola Disponible}
+	B -->|Sí| C[Agregar a Cola]
+	B -->|No| D[Cola Llena]
+	C --> E[Procesar]
+	E --> F{Error}
+	F -->|Sí| G[Reintentar]
+	F -->|No| H[Guardar]
+	G -->|Max Intentos| I[Error Final]
+	H --> J[Actualizar Stats]
+	J --> K[Notificar]
 ```
 
 ### Sistema de Cola
 
 ```mermaid
 flowchart TD
-    A[Nueva Tarea] --> B[Pre-Generación]
-    B --> C{Cola Activa}
-    C -->|Sí| D[Encolar]
-    C -->|No| E[Iniciar Cola]
-    D --> F[Esperar Turno]
-    E --> F
-    F --> G[Procesar]
-    G --> H[Siguiente]
+	A[Nueva Tarea] --> B[Pre-Generación]
+	B --> C{Cola Activa}
+	C -->|Sí| D[Encolar]
+	C -->|No| E[Iniciar Cola]
+	D --> F[Esperar Turno]
+	E --> F
+	F --> G[Procesar]
+	G --> H[Siguiente]
 ```
 
-### Monitoreo y Eventos
+### Monitoreo y Eventos SSE
 
 ```mermaid
 flowchart TD
-    A[Inicio] --> B[Conectar SSE]
-    B --> C{Tipo Evento}
-    C -->|Progress| D[Actualizar UI]
-    C -->|Error| E[Manejar Error]
-    C -->|Complete| F[Finalizar]
-    D --> G[Siguiente Evento]
-    E --> H[Reintentar/Parar]
-    F --> I[Cerrar Conexión]
+	A[Inicio] --> B[Conectar SSE]
+	B --> C{Tipo Evento}
+	C -->|Start| D[Inicializar UI]
+	C -->|Progress| E[Actualizar Progreso]
+	C -->|Error| F[Manejar Error]
+	C -->|Complete| G[Finalizar]
+	D --> H[Siguiente Evento]
+	E --> H
+	F --> I[Reintentar/Parar]
+	G --> J[Cerrar Conexión]
 ```
 
 ### Mantenimiento
 
 ```mermaid
 flowchart TD
-    A[Inicio] --> B[Verificar Stats]
-    B --> C{Problemas}
-    C -->|Sí| D[Limpiar Cache]
-    C -->|No| E[OK]
-    D --> F[Reindexar]
-    F --> G[Actualizar]
-    G --> H[Verificar]
+	A[Inicio] --> B[Verificar Stats]
+	B --> C{Problemas}
+	C -->|Sí| D[Limpiar Cache]
+	C -->|No| E[OK]
+	D --> F[Reindexar]
+	F --> G[Actualizar]
+	G --> H[Verificar]
 ```
 
 ## 🔗 Dependencias
 
 - Sharp: Procesamiento de imágenes
-- EventSource: Sistema de eventos
+- EventSource: Sistema de eventos SSE
 - Cache: Sistema de caché
 - Prisma: Persistencia
 
@@ -220,6 +317,8 @@ flowchart TD
 - Mejorar sistema de prioridades
 - Añadir compresión adaptativa
 - Optimizar uso de memoria
+- Mejorar manejo de reconexión SSE
+- Implementar retry con backoff exponencial
 
 ## 📝 Notas Técnicas
 
@@ -227,3 +326,5 @@ flowchart TD
 - Procesamiento asíncrono
 - Sistema de eventos SSE
 - Gestión de memoria optimizada
+- Manejo de errores robusto
+- Feedback en tiempo real
