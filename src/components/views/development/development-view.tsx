@@ -20,27 +20,14 @@ import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 
 
-export function DebugView() {
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function DevelopmentView() {
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
 
 
 	return (
 		<ScrollArea className="h-full w-full">
 			<div className="p-6">
-				Debug view
+				Development view
 			</div>
 		</ScrollArea>
 	);
