@@ -187,14 +187,14 @@ Se ha realizado una documentación detallada de las características principales
 1. Issue #1: Indexación de Carpetas
 
    - ✅ Carpeta se crea correctamente en la base de datos
-   - ✅ Corregido error 405 en el endpoint de indexación
-   - ✅ Conexión SSE funciona correctamente
-   - ✅ Proceso de indexación inicia y completa
+   - ❌ Error 405 en el endpoint de indexación
+   - ❌ Conexión SSE falla por método no permitido
+   - ❌ Proceso de indexación no inicia
 
 2. Issue #2: Reindexación
-   - ✅ Corregido error 405 en reindexación
-   - ✅ Conexión SSE funciona
-   - ✅ Proceso completa correctamente
+   - ❌ Mismo error 405 en reindexación
+   - ❌ Conexión SSE falla
+   - ❌ No se completa el proceso
 
 ### Nuevos Problemas Identificados
 
@@ -213,20 +213,20 @@ Se ha realizado una documentación detallada de las características principales
 
 1. **Fase Inmediata**
 
-   - ✅ Corregir endpoint para aceptar GET
-   - ✅ Implementar manejo correcto de SSE
-   - ✅ Ajustar headers de respuesta
+   - [ ] Corregir endpoint para aceptar GET
+   - [ ] Implementar manejo correcto de SSE
+   - [ ] Ajustar headers de respuesta
 
 2. **Fase de Verificación**
 
-   - ✅ Probar flujo completo de indexación
-   - ✅ Verificar reindexación
-   - ✅ Validar eventos de progreso
+   - [ ] Probar flujo completo de indexación
+   - [ ] Verificar reindexación
+   - [ ] Validar eventos de progreso
 
 3. **Documentación**
-   - ✅ Actualizar documentación de endpoints
-   - ✅ Documentar cambios en el servicio
-   - ✅ Actualizar guías de implementación
+   - [ ] Actualizar documentación de endpoints
+   - [ ] Documentar cambios en el servicio
+   - [ ] Actualizar guías de implementación
 
 ### Implementación de SSE en Servicio de Carpetas
 

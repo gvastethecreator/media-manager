@@ -55,13 +55,10 @@ interface IndexCallbacks {
 ### `addFolder`
 
 - Agrega nueva carpeta al sistema
-- Proceso en dos fases:
-  1. Creación de carpeta (POST /api/folders)
-  2. Indexación con SSE (GET /api/folders/:id/index)
+- Implementa SSE para progreso en tiempo real
 - Sistema de callbacks para estados
 - Manejo de errores robusto
 - Eventos de progreso detallados
-- Timeout configurable (5 minutos por defecto)
 
 ### `indexFolder`
 
@@ -70,8 +67,6 @@ interface IndexCallbacks {
 - Callbacks para estados del proceso
 - Logging detallado
 - Progreso por archivo
-- Manejo de reconexión automática
-- Timeout configurable
 
 ### `reindexFolder`
 
@@ -80,7 +75,6 @@ interface IndexCallbacks {
 - Actualiza estadísticas
 - Preserva configuración
 - SSE para progreso
-- Hereda funcionalidad de indexFolder
 
 ### `deleteFolder`
 
@@ -93,8 +87,8 @@ interface IndexCallbacks {
 
 ### Indexación
 
-1. Creación de carpeta (POST)
-2. Inicio de indexación con SSE (GET)
+1. Creación/Selección de carpeta
+2. Inicio de indexación con SSE
 3. Monitoreo de progreso en tiempo real
 4. Actualización de estadísticas
 5. Finalización y callbacks
@@ -145,7 +139,7 @@ interface IndexCallbacks {
 }
 ```
 
-## 🔐 Seguridad y Manejo de Errores
+## 🔐 Seguridad
 
 ### Validaciones
 
@@ -154,16 +148,6 @@ interface IndexCallbacks {
 - Existencia de carpeta
 - Integridad de datos
 - Manejo de conexiones SSE
-- Timeouts configurables
-
-### Tipos de Errores
-
-- `PATH_REQUIRED`: Ruta no proporcionada
-- `PATH_NOT_FOUND`: Carpeta no existe
-- `FOLDER_EXISTS`: Carpeta ya indexada
-- `FOLDER_NOT_FOUND`: Carpeta no encontrada en BD
-- `UNKNOWN_ERROR`: Errores no categorizados
-- `TIMEOUT`: Excedido tiempo de espera
 
 ## 📈 Optimizaciones
 
@@ -174,7 +158,6 @@ interface IndexCallbacks {
 - Caché de resultados
 - Reintento automático
 - Progreso en tiempo real
-- Timeout configurable (5 minutos)
 
 ### Monitoreo
 
@@ -183,7 +166,6 @@ interface IndexCallbacks {
 - Gestión de memoria
 - Control de concurrencia
 - Estado detallado por archivo
-- Reconexión automática
 
 ## 🔗 Dependencias
 
@@ -200,35 +182,30 @@ interface IndexCallbacks {
 - Añadir filtros avanzados
 - Implementar búsqueda
 - Caché de thumbnails
-- Configuración de timeouts por usuario
 
 ## 📝 Notas Técnicas
 
-- Uso de EventSource con polyfill
+- Uso de EventSource
 - Manejo asíncrono
 - Logging detallado
 - Tipado estricto
 - SSE para tiempo real
-- Headers CORS configurados
 
 ## 🔄 Integración
 
 ### API Endpoints
 
-- `/api/folders`: CRUD básico (POST, GET, DELETE)
-- `/api/folders/:id/index`: Indexación SSE (GET)
+- `/api/folders`: CRUD básico con SSE
+- `/api/folders/:id/index`: Indexación con SSE
 - `/api/folders/:id`: Operaciones específicas
 
-### Headers SSE
+### Eventos SSE
 
-```typescript
-{
-	'Content-Type': 'text/event-stream',
-	'Cache-Control': 'no-cache',
-	'Connection': 'keep-alive',
-	'Access-Control-Allow-Origin': '*'
-}
-```
+- Progreso de indexación
+- Errores del proceso
+- Completado de operaciones
+- Estado del sistema
+- Progreso por archivo
 
 ## 🔄 Diagramas de Flujo
 
@@ -236,10 +213,10 @@ interface IndexCallbacks {
 
 ```mermaid
 flowchart TD
-	A[Nueva Carpeta] --> B[POST /api/folders]
+	A[Nueva Carpeta] --> B[Iniciar SSE]
 	B --> C[Validar Path]
 	C --> D[Crear Registro]
-	D --> E[GET /api/folders/:id/index]
+	D --> E[Iniciar Indexado]
 	E --> F{Archivos}
 	F -->|Imagen| G[Procesar]
 	F -->|Otro| H[Ignorar]
@@ -283,9 +260,7 @@ flowchart TD
 	B -->|SSE| C[Reconectar]
 	B -->|Path| D[Validar]
 	B -->|IO| E[Reintentar]
-	B -->|Timeout| F[Cancelar]
-	C --> G[Notificar]
-	D --> G
-	E -->|Max| G
-	F --> G
+	C --> F[Notificar]
+	D --> F
+	E -->|Max| F
 ```
