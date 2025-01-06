@@ -25,7 +25,7 @@ export function MainLayout() {
 				defaultSize={20}
 				minSize={15}
 				maxSize={30}
-				className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+				className="bg-background/95"
 			>
 				<NavPanel />
 			</ResizablePanel>
@@ -36,7 +36,6 @@ export function MainLayout() {
 			<ResizablePanel defaultSize={60} minSize={40} className="h-full">
 				<ViewContainer isResizing={isResizing} />
 			</ResizablePanel>
-
 			<ResizableHandle withHandle />
 
 			{/* Panel Derecho - Default 20% */}
@@ -44,7 +43,7 @@ export function MainLayout() {
 				defaultSize={20}
 				minSize={15}
 				maxSize={30}
-				className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+				className="bg-background/95"
 			>
 				<RightPanel />
 			</ResizablePanel>
