@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ViewProps } from "../types";
-import { useRouter } from "next/navigation";
 import {
 	Card,
 	CardContent,
@@ -11,12 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	collectionService,
-	CollectionWithStats,
-} from "@/services/collection.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -40,6 +34,15 @@ import {
 import { toast } from "sonner";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
+import { useNavigationStore } from "@/store/navigation";
+import { useFileManager } from "@/store/file-manager";
+import { useRouter } from "next/navigation";
+import {
+	collectionService,
+	CollectionWithStats,
+} from "@/services/collection.service";
+import Image from "next/image";
+
 interface CollectionCardProps {
 	collection: CollectionWithStats & {
 		recentImages?: string[];
@@ -47,7 +50,6 @@ interface CollectionCardProps {
 	};
 	onClick: () => void;
 }
-
 
 function getRandomGradient() {
 	const gradients = [
@@ -107,6 +109,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 					borderColor: `${bgColor}50`,
 					background: `linear-gradient(160deg, ${bgColor}10 0%, ${bgColor}05 100%)`,
 				}}
+				onClick={onClick}
 			>
 				<CardHeader className="relative p-4 pb-2 flex-none">
 					<div className="flex items-center justify-between">
@@ -146,12 +149,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 							>
 								<Settings2 className="w-4 h-4" />
 							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={onClick}
-							>
+							<Button variant="ghost" size="icon" className="h-8 w-8">
 								<ArrowUpRight className="w-4 h-4" />
 							</Button>
 						</div>
@@ -169,12 +167,14 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 											className="relative rounded-md overflow-hidden aspect-square"
 										>
 											{src ? (
-												<Image
-													src={src}
-													alt={`Imagen ${i + 1}`}
-													fill
-													className="object-cover transition-transform group-hover/grid:scale-105"
-												/>
+												<div className="relative w-full h-full">
+													<Image
+														src={src}
+														alt={`Imagen ${i + 1}`}
+														fill
+														className="object-cover transition-transform group-hover/grid:scale-105"
+													/>
+												</div>
 											) : (
 												<div
 													className={cn(
@@ -187,8 +187,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 											)}
 										</div>
 								  ))
-								: // Mostrar 9 placeholders cuando no hay imágenes
-								  Array.from({ length: 9 }).map((_, i) => (
+								: Array.from({ length: 9 }).map((_, i) => (
 										<div
 											key={i}
 											className={cn(
@@ -295,7 +294,8 @@ function LoadingSkeleton() {
 }
 
 export function CollectionsView({ isResizing }: ViewProps) {
-	const router = useRouter();
+	const { setCurrentView } = useNavigationStore();
+	const { setCurrentCollection } = useFileManager();
 	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -316,9 +316,13 @@ export function CollectionsView({ isResizing }: ViewProps) {
 		fetchCollections();
 	}, []);
 
-	const handleCollectionClick = (collection: CollectionWithStats) => {
-		router.push(`/collections/${collection.id}`);
-	};
+	const handleCollectionClick = useCallback(
+		(collection: CollectionWithStats) => {
+			setCurrentView("collection-content");
+			setCurrentCollection(collection.id);
+		},
+		[setCurrentView, setCurrentCollection]
+	);
 
 	if (error) {
 		return (
