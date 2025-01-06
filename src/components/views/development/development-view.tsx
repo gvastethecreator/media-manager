@@ -15,18 +15,13 @@ import { cn, formatBytes } from "@/lib/utils";
 import {
 	Bug,
 	Folder,
-	LoaderPinwheel,
 	RefreshCw,
-	Trash2,
 	Code2,
 	Database,
 	FileJson,
-	GitBranch,
 	HardDrive,
 	ImageIcon,
-	LayoutDashboard,
 	Library,
-	Loader2,
 	Settings,
 	Zap,
 	AlertTriangle,
@@ -39,18 +34,12 @@ import {
 	Clock,
 	Activity,
 	BarChart,
-	PieChart,
-	LineChart,
 	Cpu,
 	Boxes,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	HoverCard,
