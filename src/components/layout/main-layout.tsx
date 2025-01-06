@@ -33,7 +33,7 @@ export function MainLayout() {
 			<ResizableHandle withHandle />
 
 			{/* Contenido Principal - Default 60% */}
-			<ResizablePanel defaultSize={60} minSize={40} className="h-full">
+			<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
 				<ViewContainer isResizing={isResizing} />
 			</ResizablePanel>
 			<ResizableHandle withHandle />
