@@ -225,12 +225,22 @@ export function ThumbnailsSection() {
 
 			await thumbnailService.cleanThumbnails({
 				onProgress: (status) => {
+					console.log("Progreso de limpieza recibido:", status);
 					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
 						...status,
 						status: status.status || "Limpiando...",
 					}));
+
+					// Actualizar también el progreso suave
+					updateProgressSmooth({
+						current: status.current || 0,
+						total: status.total || 0,
+						progress: status.progress || 0,
+						currentFile: status.currentFile || "",
+						status: status.status || "Limpiando...",
+					});
 
 					if (status.lastProcessed) {
 						setLastProcessedThumbnails((prev) => {
@@ -241,6 +251,7 @@ export function ThumbnailsSection() {
 					}
 				},
 				onError: (error) => {
+					console.error("Error en limpieza:", error);
 					toast({
 						title: "Error",
 						description: error.message || "Error al limpiar miniaturas",
@@ -248,6 +259,7 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
+					console.log("Limpieza completada:", data);
 					toast({
 						title: "Limpieza completada",
 						description: `Se limpiaron ${data.cleaned} de ${
@@ -273,6 +285,7 @@ export function ThumbnailsSection() {
 			setIsProcessing(false);
 			setProcessProgress(0);
 			setProcessStatus({});
+			setProgress(null);
 		}
 	};
 
@@ -292,12 +305,22 @@ export function ThumbnailsSection() {
 
 			await thumbnailService.optimizeThumbnails({
 				onProgress: (status) => {
+					console.log("Progreso de optimización recibido:", status);
 					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
 						...status,
 						status: status.status || "Optimizando...",
 					}));
+
+					// Actualizar también el progreso suave
+					updateProgressSmooth({
+						current: status.current || 0,
+						total: status.total || 0,
+						progress: status.progress || 0,
+						currentFile: status.currentFile || "",
+						status: status.status || "Optimizando...",
+					});
 
 					if (status.lastProcessed) {
 						setLastProcessedThumbnails((prev) => {
@@ -308,6 +331,7 @@ export function ThumbnailsSection() {
 					}
 				},
 				onError: (error) => {
+					console.error("Error en optimización:", error);
 					toast({
 						title: "Error",
 						description: error.message || "Error al optimizar miniaturas",
@@ -315,6 +339,7 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
+					console.log("Optimización completada:", data);
 					toast({
 						title: "Optimización completada",
 						description: `Se optimizaron ${data.optimized} de ${
@@ -340,6 +365,7 @@ export function ThumbnailsSection() {
 			setIsProcessing(false);
 			setProcessProgress(0);
 			setProcessStatus({});
+			setProgress(null);
 		}
 	};
 
