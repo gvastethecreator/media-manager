@@ -785,54 +785,333 @@ src/
 - ✅ Implementada limpieza automática
 - ✅ Mejor manejo de errores y logging
 
+## Plan de Testing
+
+### Fase 1: Tests Unitarios (En Progreso)
+
+#### Core Utilities (/lib)
+
+- [ ] utils.ts
+  - [ ] Sistema de logging
+  - [ ] Funciones de formato
+  - [ ] Utilidades de zoom
+- [ ] cache.ts
+  - [ ] Gestión de caché
+  - [ ] TTL y limpieza
+  - [ ] Estadísticas
+- [ ] metadata.ts
+  - [ ] Extracción de metadatos
+  - [ ] Parseo de información AI
+  - [ ] Caché de metadatos
+- [ ] image.ts
+  - [ ] Procesamiento de imágenes
+  - [ ] Optimizaciones
+  - [ ] Manejo de errores
+- [ ] thumbnail.ts
+  - [ ] Generación de thumbnails
+  - [ ] Validaciones
+  - [ ] Optimizaciones
+- [ ] queue.ts
+  - [ ] Sistema de cola
+  - [ ] Prioridades
+  - [ ] Reintentos
+- [ ] db.ts
+  - [ ] Conexión y reconexión
+  - [ ] Manejo de errores
+  - [ ] Eventos y logging
+
+### Fase 2: Tests de Integración (Pendiente)
+
+#### API Endpoints
+
+- [ ] /api/folders
+  - [ ] Listado y búsqueda
+  - [ ] Indexación
+  - [ ] Monitoreo
+- [ ] /api/images
+  - [ ] Procesamiento
+  - [ ] Thumbnails
+  - [ ] Metadatos
+- [ ] /api/thumbnails
+  - [ ] Generación
+  - [ ] Caché
+  - [ ] Cola
+
+#### Servicios Integrados
+
+- [ ] Queue + Thumbnails
+- [ ] Watcher + Folders
+- [ ] Database + Cache
+
+### Fase 3: Tests E2E (Pendiente)
+
+#### Flujos Principales
+
+- [ ] Indexación de carpetas
+- [ ] Generación de thumbnails
+- [ ] Visualización de imágenes
+- [ ] Búsqueda y filtrado
+
+## Objetivos de Cobertura
+
+- Líneas: >80%
+- Funciones: >90%
+- Ramas: >75%
+- Statements: >80%
+
+## Estado Actual
+
+- ✅ Guías de testing documentadas
+- ✅ Setup de Jest configurado
+- ✅ Mocks básicos implementados
+- 🔄 Tests unitarios en progreso
+- ⏳ Tests de integración pendientes
+- ⏳ Tests E2E pendientes
+
 ## Próximos Pasos
 
-1. ✅ Revisar y optimizar archivos en `/lib`
-   - [x] image.ts
-   - [x] thumbnail.ts
-   - [x] db.ts
-2. Implementar pruebas unitarias
-3. Mejorar la documentación de la API
-4. Optimizar el rendimiento general
-5. Implementar métricas y monitoreo
+1. Implementar tests unitarios para /lib
+2. Configurar CI/CD para tests
+3. Implementar tests de integración
+4. Configurar reportes de cobertura
+5. Implementar tests E2E
 
-## Notas Técnicas
+# Progress Log
 
-- Se mantiene la compatibilidad con las interfaces existentes
-- Se ha mejorado la robustez general del sistema
-- Se han añadido mejores prácticas de logging y manejo de errores
-- Se ha optimizado el uso de recursos
-- Se ha mejorado la documentación y tipado
-- Se han implementado patrones de diseño (Singleton, Factory)
-- Se han optimizado los procesos de imagen y thumbnails
-- Se han implementado validaciones y límites de seguridad
-- Se ha mejorado la gestión de conexiones y recursos
+## Tests Implementation - Services (2024-01-09)
 
-## Mejoras de Código
+### Collection Service Tests ✅
 
-- ✅ Mejor organización y estructura
-- ✅ Tipos estrictos y validaciones
-- ✅ Documentación JSDoc
-- ✅ Manejo de errores robusto
-- ✅ Opciones configurables
-- ✅ Patrones de diseño modernos
-- ✅ Optimizaciones de rendimiento
-- ✅ Seguridad mejorada
-- ✅ Gestión de recursos mejorada
+- Implementados tests para todas las funciones del servicio de colecciones
+- Cobertura de casos exitosos y manejo de errores
+- Mock de fetch para llamadas API
+- Tests para:
+  - getCollections
+  - getCollection
+  - createCollection
+  - updateCollection
+  - deleteCollection
+  - addImageToCollection
+  - removeImageFromCollection
 
-## Cambios Pendientes
+### Favorite Service Tests ✅
 
-- [x] Revisar y optimizar image.ts
-- [x] Revisar y optimizar thumbnail.ts
-- [x] Revisar y optimizar db.ts
-- [ ] Implementar tests
-- [ ] Completar documentación API
-- [ ] Añadir ejemplos de uso
+- Implementados tests para todas las funciones del servicio de favoritos
+- Mock de Prisma para operaciones de base de datos
+- Tests para:
+  - addToFavorites
+  - removeFromFavorites
+  - getUserFavorites
+  - isFavorited
+  - toggleFavorite
+  - getRecentFavorites
 
-## Siguientes Tareas
+### Files Service Tests ✅
 
-1. Implementar suite de pruebas
-2. Documentar API y ejemplos
-3. Revisar y optimizar endpoints
-4. Implementar monitoreo
-5. Optimizar rendimiento general
+- Implementados tests para todas las funciones del servicio de archivos
+- Mock de Prisma para operaciones de base de datos
+- Tests para:
+  - getFiles (con y sin path)
+  - getFilesByFolder
+  - getCollectionFiles
+  - getTaggedFiles
+  - getFavorites
+
+### Watcher Service Tests ✅
+
+- Implementados tests para el servicio deprecado de watcher
+- Mock de fetch y Prisma
+- Tests para:
+  - watchFolder
+  - stopWatching
+  - startWatchingAll
+  - stopWatchingAll
+- Verificación de mensajes de deprecación
+
+### User Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de usuarios
+- Mock de Prisma para operaciones de base de datos
+- Tests para:
+  - createUser
+  - getUser
+  - getUserByEmail
+  - updateUser
+  - deleteUser
+
+### Tag Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de tags
+- Mock de fetch para llamadas API
+- Tests para:
+  - getTags
+  - getTag
+  - createTag
+  - updateTag
+  - deleteTag
+  - addImageToTag
+  - removeImageFromTag
+
+### Stats Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de estadísticas
+- Mock de Prisma para operaciones de base de datos
+- Tests para:
+  - getOrCreateImageStats
+  - incrementViewCount
+  - incrementDownloadCount
+  - updateRating
+  - getPopularImages
+  - getMostDownloadedImages
+  - getHighestRatedImages
+  - getRecentlyViewedImages
+
+### Profile Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de perfiles
+- Mock de fetch para llamadas API
+- Tests para:
+  - getProfiles
+  - getProfile
+  - createProfile
+  - updateProfile
+  - deleteProfile
+  - setActiveProfile
+
+### Settings Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de configuraciones
+- Mock de localStorage y fetch para operaciones de almacenamiento
+- Tests para:
+  - Singleton getInstance
+  - Inicialización y carga de configuraciones
+  - Actualización y guardado de configuraciones
+  - Reseteo de configuraciones
+  - Exportación e importación de configuraciones
+  - Manejo de perfiles por defecto
+  - Métodos específicos para cada sección (apariencia, carpetas, colecciones, etc.)
+  - Manejo de errores y casos edge
+
+### File System Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de sistema de archivos
+- Mock de fs, path y prisma para operaciones de archivos
+- Tests para:
+  - Validación de rutas
+  - Listado de archivos
+  - Cálculo de hashes
+  - Obtención de metadatos
+  - Identificación de imágenes
+  - Normalización de rutas
+  - Inicialización del sistema de archivos
+  - Manejo de errores y casos edge
+
+### Watcher Service Tests ✅
+
+- Implementados tests para el servicio completo de watcher (cliente y servidor)
+- Mock de fetch, chokidar y prisma
+- Tests para Cliente:
+  - watchFolder y unwatchFolder
+  - syncWatchedFolders
+  - stopAll y getActiveWatchers
+  - isWatched
+  - Manejo de errores y logging
+- Tests para Servidor:
+  - initialize con y sin rutas proporcionadas
+  - addPath y removePath
+  - stop y limpieza de recursos
+  - Manejo de eventos y callbacks
+  - Configuración y opciones
+  - Manejo de errores y casos edge
+
+### Thumbnail Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de thumbnails
+- Mock de prisma, fs y sharp para operaciones de archivos
+- Tests para:
+  - getStats (estadísticas de thumbnails)
+  - optimize (optimización de thumbnails)
+  - clean (limpieza de thumbnails huérfanos)
+  - reprocess (reprocesamiento de thumbnails)
+  - generateThumbnail (generación individual)
+  - getThumbnailPath (rutas de thumbnails)
+  - ensureThumbnailsDir (gestión de directorios)
+  - Manejo de errores y callbacks
+
+### Image Service Tests ✅
+
+- Implementados tests para todas las funciones del servicio de imágenes
+- Mock de prisma, fs, sharp y thumbnailService
+- Tests para:
+  - createImage (creación con thumbnail)
+  - getThumbnail (obtención y generación bajo demanda)
+  - processImage (procesamiento y transformación)
+  - deleteImage (eliminación con thumbnails)
+  - updateImage (actualización de metadatos)
+  - getImageMetadata (extracción de metadatos)
+  - Manejo de errores y casos edge
+
+### Pendientes
+
+- [ ] Folder Service Tests
+- [ ] Tests de integración entre servicios
+- [ ] Tests E2E de flujos completos
+
+### Análisis de Pendientes
+
+#### 1. Tests Unitarios
+
+- **Folder Service**: Último servicio por testear
+  - Funciones CRUD básicas
+  - Indexación de carpetas
+  - Monitoreo y sincronización
+  - Manejo de rutas y permisos
+
+#### 2. Tests de Integración
+
+- Interacciones entre servicios:
+  - Image + Thumbnail
+  - Folder + Watcher
+  - Collection + Image
+  - Tag + Image
+  - Stats + Image
+  - Profile + Settings
+
+#### 3. Tests E2E
+
+- Flujos completos de usuario:
+  - Indexación de carpetas
+  - Procesamiento de imágenes
+  - Gestión de colecciones
+  - Búsqueda y filtrado
+  - Configuración de perfiles
+
+#### 4. Mejoras Generales
+
+- Optimizar mocks y fixtures
+- Mejorar cobertura de casos edge
+- Documentar patrones de testing
+- Configurar CI/CD para tests
+- Implementar reportes de cobertura
+
+#### 5. Documentación
+
+- Actualizar guías de testing
+- Documentar patrones y mejores prácticas
+- Crear ejemplos de uso
+- Mantener changelog actualizado
+
+### Próximos Pasos Inmediatos
+
+1. Implementar tests para Folder Service
+2. Configurar tests de integración básicos
+3. Documentar patrones establecidos
+4. Configurar reportes de cobertura
+5. Planificar tests E2E
+
+### Métricas y Objetivos
+
+- Cobertura actual: ~80% de servicios testeados
+- Objetivo de cobertura: >90% en servicios core
+- Tests pendientes: ~20% del total planificado
+- Tiempo estimado: 1-2 semanas para completar
