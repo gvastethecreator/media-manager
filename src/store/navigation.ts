@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ViewType } from '@/types/file-item'
+import { ViewType } from '@/components/views/types'
 
 interface NavigationState {
   currentView: ViewType
@@ -10,7 +10,7 @@ interface NavigationState {
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({
-  currentView: 'dashboard',
+  currentView: 'development',
   navigationDirection: 0,
   previousView: null,
   setCurrentView: (view) =>
@@ -21,7 +21,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
     })),
   goBack: () =>
     set((state) => ({
-      currentView: state.previousView || 'dashboard',
+      currentView: state.previousView || 'all-images',
       previousView: state.currentView,
       navigationDirection: -1,
     })),
@@ -30,18 +30,17 @@ export const useNavigationStore = create<NavigationState>((set) => ({
 // Helper para determinar la dirección de la navegación
 function getNavigationDirection(currentView: ViewType, nextView: ViewType): number {
   const viewOrder: ViewType[] = [
-    'dashboard',
+    'settings',
     'all-images',
+    'favorites',
+    'search',
     'collections',
     'collection-content',
     'folders',
     'folder-content',
     'tags',
     'tag-content',
-    'search',
-    'files',
-    'settings',
-    'favorites'
+    'development'
   ]
 
   const currentIndex = viewOrder.indexOf(currentView)

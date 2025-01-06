@@ -41,6 +41,8 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 		switch (currentView) {
 			case "settings":
 				return <SettingsView />;
+			case "all-images":
+				return <AllImagesView />;
 			case "favorites":
 				return <FavoritesView />;
 			case "search":
@@ -57,15 +59,14 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				return <TagsView />;
 			case "tag-content":
 				return <TagContentView />;
-			case "all-images":
-				return <AllImagesView />;
 			default:
+				case "development":
 				return <DevelopmentView />;
 		}
 	};
 
 	return (
-		<div className="relative w-full h-ful	l overflow-hidden">
+		<div className="relative w-full h-full overflow-hidden">
 			<GridPattern
 				width={30}
 				height={30}
