@@ -16,18 +16,19 @@ export async function GET(request: NextRequest) {
   const response = new NextResponse(stream.readable, {
     headers: {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'X-Accel-Buffering': 'no'
     }
   })
 
   const writeEvent = async (event: string, data: any) => {
     try {
-      // Formato correcto para SSE
-      const formattedData = `data: ${JSON.stringify({ type: event, data })}\n\n`
+      // Formato correcto para SSE con retry
+      const formattedData = `retry: 1000\nid: ${Date.now()}\nevent: ${event}\ndata: ${JSON.stringify(data)}\n\n`
       await writer.write(encoder.encode(formattedData))
       console.log('Evento enviado:', { type: event, data })
     } catch (error) {
@@ -36,6 +37,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Enviar un ping inicial para mantener la conexión
+    await writeEvent('ping', { timestamp: Date.now() })
+
     // Obtener todas las imágenes que necesitan reprocesamiento
     const images = await prisma.image.findMany({
       where: {
@@ -116,6 +120,11 @@ export async function GET(request: NextRequest) {
             processedAt: new Date().toISOString()
           }
         })
+
+        // Enviar ping cada 10 segundos para mantener la conexión viva
+        if (current % 10 === 0) {
+          await writeEvent('ping', { timestamp: Date.now() })
+        }
       } catch (error) {
         console.error('Error procesando imagen:', error)
         errors++
