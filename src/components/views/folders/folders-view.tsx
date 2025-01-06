@@ -10,12 +10,9 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import { cn, formatBytes } from "@/lib/utils";
 import {
-	Folder,
 	FolderIcon,
 	ImageIcon,
 	RefreshCw,
