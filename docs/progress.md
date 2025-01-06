@@ -182,108 +182,180 @@ Se ha realizado una documentación detallada de las características principales
 
 ## 🔄 Actualizaciones (2024-01-06)
 
-### Estado Actual de Issues
+### Correcciones en SSE para Thumbnails
 
-1. Issue #1: Indexación de Carpetas
+#### Problemas Identificados
 
-   - ✅ Carpeta se crea correctamente en la base de datos
-   - ❌ Error 405 en el endpoint de indexación
-   - ❌ Conexión SSE falla por método no permitido
-   - ❌ Proceso de indexación no inicia
+1. **Manejo de Eventos SSE**
 
-2. Issue #2: Reindexación
-   - ❌ Mismo error 405 en reindexación
-   - ❌ Conexión SSE falla
-   - ❌ No se completa el proceso
+   - ✅ Eventos no se recibían en tiempo real
+   - ✅ Formato de eventos SSE incorrecto
+   - ✅ Headers CORS faltantes
+   - ✅ Caché de eventos no controlada
 
-### Nuevos Problemas Identificados
-
-1. **Error de Método HTTP**
-
-   - El endpoint `/api/folders/[id]/index` solo acepta POST
-   - EventSource intenta hacer GET
-   - Conexión se aborta por status 405
-
-2. **Manejo de SSE**
-   - Necesario ajustar configuración de endpoints
-   - Revisar manejo de conexiones SSE
-   - Mejorar manejo de errores
-
-### Plan de Corrección
-
-1. **Fase Inmediata**
-
-   - [ ] Corregir endpoint para aceptar GET
-   - [ ] Implementar manejo correcto de SSE
-   - [ ] Ajustar headers de respuesta
-
-2. **Fase de Verificación**
-
-   - [ ] Probar flujo completo de indexación
-   - [ ] Verificar reindexación
-   - [ ] Validar eventos de progreso
-
-3. **Documentación**
-   - [ ] Actualizar documentación de endpoints
-   - [ ] Documentar cambios en el servicio
-   - [ ] Actualizar guías de implementación
-
-### Implementación de SSE en Servicio de Carpetas
+2. **UI/UX**
+   - ✅ Barra de progreso no se actualizaba
+   - ✅ Estado no se mostraba correctamente
+   - ✅ Feedback visual limitado
 
 #### Cambios Realizados
 
-1. ✅ Implementado SSE en `folder.service.ts`
+1. **Servicio de Thumbnails**
 
-   - Manejo de eventos en tiempo real
-   - Sistema de callbacks mejorado
-   - Progreso detallado por archivo
+   - ✅ Refactorizado manejo de eventos SSE
+   - ✅ Implementado sistema de callbacks
+   - ✅ Añadido control de caché con timestamp
+   - ✅ Mejorado manejo de errores y reconexión
+   - ✅ Implementado timeout de seguridad
+   - ✅ Añadida limpieza de recursos
 
-2. ✅ Actualizado endpoint de indexación
+2. **Componente UI**
+   - ✅ Actualización en tiempo real de progreso
+   - ✅ Mejor feedback visual
+   - ✅ Manejo de estados mejorado
+   - ✅ Animaciones y transiciones
+   - ✅ Integración con sistema de callbacks
 
-   - Soporte completo para SSE
-   - Mejor manejo de errores
-   - Estadísticas en tiempo real
+### Estado Actual
 
-3. ✅ Documentación actualizada
-   - Nuevos diagramas de flujo
-   - Documentación de eventos SSE
-   - Guías de implementación
+1. **Funcionalidades**
 
-#### Estado de Issues
+   - ✅ Reprocesamiento de thumbnails
+   - ✅ Optimización de thumbnails
+   - ✅ Limpieza de thumbnails
+   - ✅ Progreso en tiempo real
+   - ✅ Manejo de errores
+   - ✅ Cancelación de procesos
+   - ✅ Timeout de seguridad
 
-1. Issue #1: Indexación de Carpetas
+2. **Pendientes**
+   - [ ] Implementar sistema de cola
+   - [ ] Optimizar uso de memoria
+   - [ ] Mejorar caché de thumbnails
+   - [ ] Documentar nuevos endpoints
 
-   - ✅ Corregido error de payload
-   - ✅ Implementado progreso en tiempo real
-   - ✅ Añadido sistema de eventos SSE
-   - ✅ Mejorado manejo de errores
+### Notas Técnicas
 
-2. Issue #2: Reindexación
+1. **Formato de Eventos SSE**
 
-   - ✅ Implementado progreso en tiempo real
-   - ✅ Añadida notificación de finalización
-   - ✅ Corregido problema de espera indefinida
+   ```typescript
+   // Evento de Progreso
+   {
+     type: 'progress',
+     data: {
+       status: string,
+       current: number,
+       total: number,
+       progress: number,
+       currentFile?: string,
+       lastProcessed?: {
+         id: string,
+         path: string,
+         processedAt: string
+       }
+     }
+   }
 
-3. Issue #3: Estadísticas
-   - ✅ Implementada actualización de tamaños
-   - ✅ Corregida actualización de contadores
-   - ✅ Mejorada información en UI
+   // Evento de Error
+   {
+     type: 'error',
+     data: {
+       message: string,
+       type: string
+     }
+   }
+
+   // Evento de Completado
+   {
+     type: 'complete',
+     data: {
+       processed: number,
+       total: number,
+       errors: number
+     }
+   }
+   ```
+
+2. **Sistema de Callbacks**
+
+   ```typescript
+   interface ThumbnailCallbacks {
+   	onProgress?: (status: ProcessStatus) => void;
+   	onError?: (error: Error) => void;
+   	onComplete?: (data: any) => void;
+   }
+
+   interface ProcessStatus {
+   	status?: string;
+   	current?: number;
+   	total?: number;
+   	progress?: number;
+   	currentFile?: string;
+   	lastProcessed?: {
+   		id: string;
+   		path: string;
+   		processedAt: string;
+   	};
+   }
+   ```
+
+3. **Manejo de Errores**
+
+   ```typescript
+   try {
+   	// Proceso principal
+   } catch (error) {
+   	callbacks?.onError?.(
+   		error instanceof Error ? error : new Error(String(error))
+   	);
+   	throw error;
+   } finally {
+   	// Limpieza de recursos
+   	eventSource?.close();
+   }
+   ```
 
 ### Próximos Pasos
 
 1. **Optimizaciones**
 
-   - [ ] Mejorar manejo de reconexión SSE
-   - [ ] Implementar caché de thumbnails
-   - [ ] Optimizar procesamiento de archivos grandes
+   - Implementar sistema de cola con Bull
+   - Mejorar manejo de memoria
+   - Optimizar procesamiento de imágenes
+   - Implementar caché eficiente
 
-2. **UI/UX**
+2. **Documentación**
+   - Actualizar diagramas de flujo
+   - Documentar tipos de eventos
+   - Añadir ejemplos de uso
+   - Documentar manejo de errores
 
-   - [ ] Mejorar feedback visual de progreso
-   - [ ] Añadir animaciones de transición
-   - [ ] Implementar tooltips informativos
+### Diagramas de Flujo
 
-3. **Documentación**
-   - [ ] Actualizar guías de desarrollo
-   - [ ] Documentar casos de error
-   - [ ] Añadir ejemplos de uso
+#### Procesamiento de Thumbnails
+
+```mermaid
+flowchart TD
+  A[Inicio Proceso] --> B[Crear EventSource]
+  B --> C{Tipo Evento}
+  C -->|Progress| D[Actualizar UI]
+  C -->|Error| E[Manejar Error]
+  C -->|Complete| F[Finalizar]
+  D --> G[Siguiente]
+  G --> C
+  E --> H[Notificar]
+  F --> I[Limpiar]
+```
+
+#### Sistema de Callbacks
+
+```mermaid
+flowchart TD
+  A[Evento SSE] --> B{Tipo}
+  B -->|Progress| C[onProgress]
+  B -->|Error| D[onError]
+  B -->|Complete| E[onComplete]
+  C --> F[Actualizar UI]
+  D --> G[Toast Error]
+  E --> H[Toast Success]
+```
