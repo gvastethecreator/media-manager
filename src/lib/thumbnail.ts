@@ -2,40 +2,110 @@ import sharp from 'sharp'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
 import { existsSync } from 'fs'
 import { extname } from 'path'
+import { thumbnailLogger as logger } from './utils'
+import { formatBytes } from './utils'
+import type { ImageFormat } from './image'
 
-interface ThumbnailResult {
+export interface ThumbnailOptions {
+  quality: ThumbnailQuality
+  format?: ImageFormat
+  preserveMetadata?: boolean
+  background?: string
+  progressive?: boolean
+}
+
+export interface ThumbnailResult {
   buffer: Buffer
   width: number
   height: number
+  format: ImageFormat
+  size: number
+  originalSize?: number
 }
 
-const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 
+const DEFAULT_OPTIONS: Partial<ThumbnailOptions> = {
+  quality: 'mid',
+  format: 'webp',
+  preserveMetadata: false,
+  progressive: true
+}
+
+const MAX_DIMENSION = 2048 // Máxima dimensión permitida
+const MIN_DIMENSION = 16 // Mínima dimensión permitida
+
+/**
+ * Valida y ajusta las dimensiones para el thumbnail
+ */
+function validateDimensions(width: number, height: number): { width: number; height: number } {
+  const aspectRatio = width / height
+
+  if (width > MAX_DIMENSION) {
+    width = MAX_DIMENSION
+    height = Math.round(width / aspectRatio)
+  }
+
+  if (height > MAX_DIMENSION) {
+    height = MAX_DIMENSION
+    width = Math.round(height * aspectRatio)
+  }
+
+  if (width < MIN_DIMENSION) width = MIN_DIMENSION
+  if (height < MIN_DIMENSION) height = MIN_DIMENSION
+
+  return { width, height }
+}
+
+/**
+ * Genera un thumbnail optimizado de una imagen
+ * @param filePath Ruta del archivo de imagen
+ * @param options Opciones de generación
+ * @returns Resultado con el buffer y dimensiones
+ */
 export async function generateThumbnail(
   filePath: string,
-  quality: ThumbnailQuality = 'mid'
+  options: Partial<ThumbnailOptions> = {}
 ): Promise<ThumbnailResult> {
   try {
+    // Validar archivo
     if (!existsSync(filePath)) {
-      throw new Error('Archivo no encontrado')
+      throw new Error(`Archivo no encontrado: ${filePath}`)
     }
 
     const ext = extname(filePath).toLowerCase()
-    if (!SUPPORTED_FORMATS.includes(ext)) {
-      throw new Error('Formato de archivo no soportado')
+    if (!SUPPORTED_FORMATS.has(ext)) {
+      throw new Error(`Formato no soportado: ${ext}`)
     }
 
-    const config = THUMBNAIL_QUALITY_CONFIG[quality]
+    // Combinar opciones
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options }
+    const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality]
     if (!config) {
-      throw new Error('Calidad de thumbnail inválida')
+      throw new Error(`Calidad inválida: ${finalOptions.quality}`)
     }
 
-    // Procesar la imagen con sharp
-    const image = sharp(filePath)
-    const metadata = await image.metadata()
+    logger.debug('Generando thumbnail:', {
+      path: filePath,
+      options: finalOptions,
+      config
+    })
 
-    // Calcular dimensiones manteniendo el aspect ratio
-    const aspectRatio = metadata.width! / metadata.height!
+    // Inicializar sharp
+    const image = sharp(filePath, {
+      failOn: 'none',
+      animated: true, // Preservar animaciones
+      limitInputPixels: Math.pow(MAX_DIMENSION, 2) // Limitar tamaño máximo
+    })
+
+    // Obtener metadata
+    const metadata = await image.metadata()
+    if (!metadata.width || !metadata.height) {
+      throw new Error('No se pudieron obtener las dimensiones de la imagen')
+    }
+
+    // Calcular dimensiones
+    const aspectRatio = metadata.width / metadata.height
     let width = config.width
     let height = config.height
 
@@ -47,26 +117,83 @@ export async function generateThumbnail(
       width = Math.round(height * aspectRatio)
     }
 
-    // Generar el thumbnail
-    const buffer = await image
-      .resize(width, height, {
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .webp({
-        quality: config.quality,
-        effort: 4, // Balance entre velocidad y calidad
-        nearLossless: true
-      })
-      .toBuffer()
+    // Validar dimensiones finales
+    const validDimensions = validateDimensions(width, height)
 
-    return {
-      buffer,
-      width,
-      height
+    // Configurar el pipeline de procesamiento
+    let processor = image.resize(validDimensions.width, validDimensions.height, {
+      fit: 'inside',
+      withoutEnlargement: true,
+      background: finalOptions.background
+    })
+
+    if (finalOptions.preserveMetadata) {
+      processor = processor.withMetadata()
     }
+
+    // Aplicar formato y optimizaciones
+    const format = finalOptions.format || 'webp'
+    switch (format) {
+      case 'webp':
+        processor = processor.webp({
+          quality: config.quality,
+          effort: 4,
+          nearLossless: config.quality >= 90,
+          smartSubsample: true
+        })
+        break
+      case 'jpeg':
+        processor = processor.jpeg({
+          quality: config.quality,
+          progressive: finalOptions.progressive,
+          optimizeCoding: true,
+          trellisQuantisation: true
+        })
+        break
+      case 'png':
+        processor = processor.png({
+          quality: config.quality,
+          progressive: finalOptions.progressive,
+          compressionLevel: 9,
+          adaptiveFiltering: true
+        })
+        break
+      default:
+        processor = processor.webp({
+          quality: config.quality,
+          effort: 4
+        })
+    }
+
+    // Generar buffer
+    const buffer = await processor.toBuffer()
+    if (!buffer || buffer.length === 0) {
+      throw new Error('Error generando buffer del thumbnail')
+    }
+
+    const result: ThumbnailResult = {
+      buffer,
+      width: validDimensions.width,
+      height: validDimensions.height,
+      format,
+      size: buffer.length,
+      originalSize: metadata.size
+    }
+
+    logger.debug('Thumbnail generado:', {
+      path: filePath,
+      dimensions: `${result.width}x${result.height}`,
+      originalSize: formatBytes(metadata.size || 0),
+      newSize: formatBytes(result.size),
+      reduction: metadata.size ? `${((1 - result.size / metadata.size) * 100).toFixed(1)}%` : 'N/A'
+    })
+
+    return result
   } catch (error) {
-    console.error('Error generando thumbnail:', error)
-    throw error
+    logger.error('Error generando thumbnail:', {
+      path: filePath,
+      error: error instanceof Error ? error.message : error
+    })
+    throw error instanceof Error ? error : new Error('Error generando thumbnail')
   }
 }
