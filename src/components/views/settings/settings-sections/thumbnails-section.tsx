@@ -14,13 +14,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-	AlertCircle,
-	Settings2,
-	Zap,
-	ImageIcon,
-	Trash2,
-} from "lucide-react";
+import { AlertCircle, Settings2, Zap, ImageIcon, Trash2 } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
 import {
 	thumbnailService,
@@ -43,19 +37,18 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { AnimateSharedLayout, motion } from "motion/react";
 
+interface LastProcessedThumbnail {
+	id: string;
+	path: string;
+	processedAt: string;
+}
+
 interface ProcessStatus {
 	status?: string;
 	currentFile?: string;
 	current?: number;
 	total?: number;
 	progress?: number;
-}
-
-interface LastProcessedThumbnail {
-	id: string;
-	path: string;
-	thumbnailPath: string;
-	processedAt: string;
 }
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
@@ -140,40 +133,42 @@ export function ThumbnailsSection() {
 				progress: 0,
 			});
 
-			await thumbnailService.reprocessAll((event) => {
-				if (event.type === "progress") {
-					setProcessProgress(event.data.progress || 0);
+			await thumbnailService.reprocessAll({
+				onProgress: (status) => {
+					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
-						...event.data,
-						status: event.data.status || "Procesando...",
+						...status,
+						status: status.status || "Procesando...",
 					}));
 
-					if (event.data.lastProcessed) {
+					if (status.lastProcessed) {
 						setLastProcessedThumbnails((prev) => {
 							const newThumbnails = [...prev];
-							newThumbnails.unshift(event.data.lastProcessed);
-							return newThumbnails.slice(0, 9); // Mantener solo los últimos 9
+							newThumbnails.unshift(status.lastProcessed!);
+							return newThumbnails.slice(0, 9);
 						});
 					}
-				} else if (event.type === "error") {
+				},
+				onError: (error) => {
 					toast({
 						title: "Error",
-						description: event.data.error || "Error al procesar miniaturas",
+						description: error.message || "Error al procesar miniaturas",
 						variant: "destructive",
 					});
-				} else if (event.type === "complete") {
+				},
+				onComplete: (data) => {
 					toast({
 						title: "Proceso completado",
-						description: `Se procesaron ${event.data.processed} de ${
-							event.data.total
+						description: `Se procesaron ${data.processed} de ${
+							data.total
 						} miniaturas${
-							event.data.errors > 0 ? ` con ${event.data.errors} errores` : ""
+							data.errors > 0 ? ` con ${data.errors} errores` : ""
 						}`,
-						variant: event.data.errors > 0 ? "destructive" : "default",
+						variant: data.errors > 0 ? "destructive" : "default",
 					});
 					loadStats();
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Error reprocesando miniaturas:", error);
@@ -215,28 +210,40 @@ export function ThumbnailsSection() {
 				progress: 0,
 			});
 
-			await thumbnailService.cleanThumbnails((event) => {
-				if (event.type === "progress") {
-					setProcessProgress(event.data.progress || 0);
+			await thumbnailService.cleanThumbnails({
+				onProgress: (status) => {
+					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
-						...event.data,
-						status: event.data.status || "Limpiando...",
+						...status,
+						status: status.status || "Limpiando...",
 					}));
-				} else if (event.type === "error") {
+
+					if (status.lastProcessed) {
+						setLastProcessedThumbnails((prev) => {
+							const newThumbnails = [...prev];
+							newThumbnails.unshift(status.lastProcessed!);
+							return newThumbnails.slice(0, 9);
+						});
+					}
+				},
+				onError: (error) => {
 					toast({
 						title: "Error",
-						description: event.data.error || "Error al limpiar miniaturas",
+						description: error.message || "Error al limpiar miniaturas",
 						variant: "destructive",
 					});
-				} else if (event.type === "complete") {
+				},
+				onComplete: (data) => {
 					toast({
 						title: "Limpieza completada",
-						description: `Se limpiaron ${event.data.cleaned} de ${event.data.total} miniaturas`,
+						description: `Se limpiaron ${data.cleaned} de ${
+							data.total
+						} miniaturas. Espacio liberado: ${formatBytes(data.totalFreed)}`,
+						variant: data.errors > 0 ? "destructive" : "default",
 					});
-					setLastProcessedThumbnails([]); // Limpiar grid de miniaturas
 					loadStats();
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Error limpiando miniaturas:", error);
@@ -270,35 +277,40 @@ export function ThumbnailsSection() {
 				progress: 0,
 			});
 
-			await thumbnailService.optimizeThumbnails((event) => {
-				if (event.type === "progress") {
-					setProcessProgress(event.data.progress || 0);
+			await thumbnailService.optimizeThumbnails({
+				onProgress: (status) => {
+					setProcessProgress(status.progress || 0);
 					setProcessStatus((prevStatus) => ({
 						...prevStatus,
-						...event.data,
-						status: event.data.status || "Optimizando...",
+						...status,
+						status: status.status || "Optimizando...",
 					}));
 
-					if (event.data.lastProcessed) {
+					if (status.lastProcessed) {
 						setLastProcessedThumbnails((prev) => {
 							const newThumbnails = [...prev];
-							newThumbnails.unshift(event.data.lastProcessed);
+							newThumbnails.unshift(status.lastProcessed!);
 							return newThumbnails.slice(0, 9);
 						});
 					}
-				} else if (event.type === "error") {
+				},
+				onError: (error) => {
 					toast({
 						title: "Error",
-						description: event.data.error || "Error al optimizar miniaturas",
+						description: error.message || "Error al optimizar miniaturas",
 						variant: "destructive",
 					});
-				} else if (event.type === "complete") {
+				},
+				onComplete: (data) => {
 					toast({
 						title: "Optimización completada",
-						description: `Se optimizaron ${event.data.optimized} de ${event.data.total} miniaturas`,
+						description: `Se optimizaron ${data.optimized} de ${
+							data.total
+						} miniaturas. Espacio ahorrado: ${formatBytes(data.totalSaved)}`,
+						variant: data.errors > 0 ? "destructive" : "default",
 					});
 					loadStats();
-				}
+				},
 			});
 		} catch (error) {
 			console.error("Error optimizando miniaturas:", error);
@@ -517,15 +529,12 @@ export function ThumbnailsSection() {
 								>
 									<Label className="text-sm">Pendientes</Label>
 									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">
-											{stats.pending}
-										</span>
+										<span className="text-sm font-medium">{stats.pending}</span>
 										<Badge
 											variant="secondary"
 											className={cn(
 												"text-xs",
-												stats.pending === 0 &&
-													"bg-green-500/20 text-green-500"
+												stats.pending === 0 && "bg-green-500/20 text-green-500"
 											)}
 										>
 											{stats.pending === 0 ? "Al día" : "Pendiente"}
@@ -566,7 +575,7 @@ export function ThumbnailsSection() {
 								</motion.div>
 							</div>
 
-							{progress && (
+							{isProcessing && (
 								<motion.div
 									initial={{ opacity: 0, height: 0 }}
 									animate={{ opacity: 1, height: "auto" }}
@@ -575,17 +584,19 @@ export function ThumbnailsSection() {
 								>
 									<div className="flex justify-between text-xs">
 										<span>
-											{progress.current} de {progress.total} (
-											{Math.round(progress.progress)}%)
+											{processStatus.current} de {processStatus.total} (
+											{Math.round(processProgress)}%)
 										</span>
 										<span className="text-muted-foreground">
-											{progress.status}
+											{processStatus.status}
 										</span>
 									</div>
-									<Progress value={progress.progress} className="h-1.5" />
-									<p className="text-xs text-muted-foreground truncate">
-										{progress.currentFile}
-									</p>
+									<Progress value={processProgress} className="h-1.5" />
+									{processStatus.currentFile && (
+										<p className="text-xs text-muted-foreground truncate">
+											{processStatus.currentFile}
+										</p>
+									)}
 								</motion.div>
 							)}
 
@@ -609,7 +620,7 @@ export function ThumbnailsSection() {
 													className="relative aspect-square rounded-md overflow-hidden bg-muted group"
 													style={{
 														transform: `scale(${
-															image.processedAt === progress?.currentFile
+															image.processedAt === processStatus.currentFile
 																? 1.05
 																: 1
 														})`,

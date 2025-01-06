@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { existsSync } from 'fs'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -9,100 +10,124 @@ export async function GET(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  const sendEvent = async (type: string, data: any) => {
+  const writeEvent = async (event: string, data: any) => {
     try {
-      const formattedData = JSON.stringify({ type, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-      console.log('Evento enviado:', { type, data })
+      await writer.write(
+        encoder.encode(`data: ${JSON.stringify({ type: event, data })}\n\n`)
+      )
     } catch (error) {
-      console.error('Error enviando evento:', error)
-      throw error
+      console.error('Error writing event:', error)
     }
   }
 
   try {
-    // Obtener imágenes con thumbnail
+    // Obtener todas las imágenes con thumbnail
     const images = await prisma.image.findMany({
       where: {
         thumbnail: { not: null }
       },
       select: {
         id: true,
-        path: true
+        path: true,
+        name: true,
+        thumbnailSize: true
       }
     })
 
     const total = images.length
+    let current = 0
     let cleaned = 0
+    let errors = 0
+    let totalFreed = 0
 
-    // Enviar evento inicial
-    await sendEvent('progress', {
-      current: cleaned,
+    // Enviar estado inicial
+    await writeEvent('start', {
       total,
-      progress: 0,
-      status: `Encontradas ${total} miniaturas para limpiar...`
+      status: 'Iniciando limpieza...'
     })
 
     // Procesar cada imagen
     for (const image of images) {
+      current++
+      const progress = Math.round((current / total) * 100)
+
       try {
-        // Limpiar thumbnail
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnail: null,
-            thumbnailSize: null,
-            thumbnailWidth: null,
-            thumbnailHeight: null,
-            thumbnailError: null,
-            thumbnailErrorAt: null,
-            thumbnailQuality: null
-          }
-        })
+        // Verificar si el archivo original existe
+        if (!existsSync(image.path)) {
+          // Si el archivo original no existe, limpiar el thumbnail
+          await prisma.image.update({
+            where: { id: image.id },
+            data: {
+              thumbnail: null,
+              thumbnailSize: null,
+              thumbnailWidth: null,
+              thumbnailHeight: null,
+              thumbnailError: 'Archivo original no encontrado',
+              thumbnailErrorAt: new Date()
+            }
+          })
 
-        cleaned++
-        const progress = Math.round((cleaned / total) * 100)
+          totalFreed += image.thumbnailSize || 0
+          cleaned++
 
-        // Enviar evento de progreso
-        await sendEvent('progress', {
-          current: cleaned,
-          total,
-          progress,
-          currentFile: image.path,
-          status: `Limpiando miniatura ${cleaned} de ${total}...`
-        })
-
+          await writeEvent('progress', {
+            current,
+            total,
+            progress,
+            currentFile: image.path,
+            status: `Limpiando ${current} de ${total}`,
+            lastProcessed: {
+              id: image.id,
+              path: image.path,
+              processedAt: new Date().toISOString(),
+              freed: image.thumbnailSize || 0
+            }
+          })
+        }
       } catch (error) {
-        console.error('Error limpiando miniatura:', error)
+        console.error('Error limpiando imagen:', error)
+        errors++
 
-        // Enviar evento de error
-        await sendEvent('error', {
-          file: image.path,
+        // Enviar error
+        await writeEvent('error', {
+          imageId: image.id,
+          path: image.path,
           error: error instanceof Error ? error.message : 'Error desconocido'
         })
       }
+
+      // Pequeña pausa para no sobrecargar
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
 
-    // Enviar evento de completado
-    await sendEvent('complete', {
+    // Enviar evento de finalización
+    await writeEvent('complete', {
       cleaned,
-      total
+      errors,
+      total,
+      totalFreed
     })
 
+    await writer.close()
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
   } catch (error) {
     console.error('Error en limpieza:', error)
-    await sendEvent('error', {
+    await writeEvent('error', {
       error: error instanceof Error ? error.message : 'Error desconocido'
     })
-  } finally {
     await writer.close()
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
   }
-
-  return new NextResponse(stream.readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    }
-  })
 }
