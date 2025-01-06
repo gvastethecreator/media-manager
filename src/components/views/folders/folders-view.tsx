@@ -14,10 +14,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import { cn, formatBytes } from "@/lib/utils";
-import { Folder, ImageIcon, RefreshCw, Settings2, Trash2 } from "lucide-react";
+import { Folder, FolderIcon, ImageIcon, RefreshCw, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFolders } from "@/services/folder.service";
 import { toast } from "sonner";
+import { LoadingScreen } from "@/components/core/feedback";
+import { EmptyState } from "@/components/core/data-display";
 
 interface FolderCardProps {
 	folder: any;
@@ -27,20 +29,6 @@ interface FolderCardProps {
 	processStatus: any;
 }
 
-function EmptyState() {
-	return (
-		<div className="flex flex-col items-center justify-center h-full text-center p-8">
-			<div className="w-[300px] h-[300px] relative mb-8">
-				<Folder className="w-full h-full text-muted-foreground/20" />
-			</div>
-			<h3 className="text-2xl font-bold mb-2">No hay carpetas indexadas</h3>
-			<p className="text-muted-foreground max-w-[500px]">
-				Agrega carpetas desde el panel de configuración para comenzar a indexar
-				tus imágenes.
-			</p>
-		</div>
-	);
-}
 
 function FolderCard({
 	folder,
@@ -156,18 +144,6 @@ function FolderCard({
 	);
 }
 
-function LoadingSkeleton() {
-	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-			{Array(4)
-				.fill(0)
-				.map((_, i) => (
-					<Skeleton key={i} className="w-full h-[200px]" />
-				))}
-		</div>
-	);
-}
-
 export function FoldersView({ isResizing }: ViewProps) {
 	const [folders, setFolders] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -228,11 +204,17 @@ export function FoldersView({ isResizing }: ViewProps) {
 	}
 
 	if (isLoading) {
-		return <LoadingSkeleton />;
+		return <LoadingScreen />;
 	}
 
 	if (folders.length === 0) {
-		return <EmptyState />;
+		return (
+			<EmptyState
+				icon={FolderIcon}
+				title="No hay carpetas indexadas"
+				description="Agrega carpetas desde el panel de configuración para comenzar a indexar tus imágenes."
+			/>
+		);
 	}
 
 	return (
@@ -245,7 +227,7 @@ export function FoldersView({ isResizing }: ViewProps) {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: index * 0.1 }}
+						transition={{ delay: index * 0.1 }}
 					>
 						<FolderCard
 							folder={folder}

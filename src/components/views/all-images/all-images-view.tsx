@@ -7,6 +7,7 @@ import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { ImageIcon, Loader2 } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
+import { LoadingScreen } from "@/components/core/feedback";
 
 export function AllImagesView() {
 	const {
@@ -47,11 +48,7 @@ export function AllImagesView() {
 	);
 
 	if (isLoading) {
-		return (
-			<div className="h-full w-full flex items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-			</div>
-		);
+		return <LoadingScreen />;
 	}
 
 	if (!items || items.length === 0) {

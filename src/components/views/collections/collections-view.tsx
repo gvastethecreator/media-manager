@@ -28,6 +28,7 @@ import {
 	Download,
 	Heart,
 	Settings2,
+	LibraryBig,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,8 @@ import {
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { toast } from "sonner";
-
+import { LoadingScreen } from "@/components/core/feedback";
+import { EmptyState } from "@/components/core/data-display";
 interface CollectionCardProps {
 	collection: CollectionWithStats & {
 		recentImages?: string[];
@@ -46,25 +48,6 @@ interface CollectionCardProps {
 	onClick: () => void;
 }
 
-function EmptyState() {
-	return (
-		<div className="flex flex-col items-center justify-center h-full text-center p-8">
-			<div className="w-[300px] h-[300px] relative mb-8">
-				<Image
-					src="/empty-collections.svg"
-					alt="No hay colecciones"
-					fill
-					className="object-contain"
-				/>
-			</div>
-			<h3 className="text-2xl font-bold mb-2">No hay colecciones</h3>
-			<p className="text-muted-foreground max-w-[500px]">
-				Las colecciones te ayudan a organizar tus imágenes. Crea una nueva
-				colección desde el panel de configuración.
-			</p>
-		</div>
-	);
-}
 
 function getRandomGradient() {
 	const gradients = [
@@ -346,11 +329,17 @@ export function CollectionsView({ isResizing }: ViewProps) {
 	}
 
 	if (isLoading) {
-		return <LoadingSkeleton />;
+		return <LoadingScreen />;
 	}
 
 	if (collections.length === 0) {
-		return <EmptyState />;
+		return (
+			<EmptyState
+				icon={LibraryBig}
+				title="No hay colecciones"
+				description="Las colecciones te ayudan a organizar tus imágenes. Crea una nueva colección desde el panel de configuración."
+			/>
+		);
 	}
 
 	return (
@@ -363,7 +352,7 @@ export function CollectionsView({ isResizing }: ViewProps) {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: index * 0.1 }}
+						transition={{ delay: index * 0.1 }}
 					>
 						<CollectionCard
 							collection={collection}

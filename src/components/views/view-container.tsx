@@ -41,9 +41,6 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 		switch (currentView) {
 			case "settings":
 				return <SettingsView />;
-			default:
-			case "all-images":
-				return <AllImagesView />;
 			case "favorites":
 				return <FavoritesView />;
 			case "search":
@@ -62,6 +59,8 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				return <TagContentView />;
 			case "debug":
 				return <DebugView />;
+			default:
+				return <AllImagesView />;
 		}
 	};
 
