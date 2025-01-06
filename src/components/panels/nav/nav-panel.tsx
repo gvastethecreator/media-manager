@@ -34,28 +34,22 @@ const navigationItems = [
 
 const categories = [
 	{
-		id: "collections" as ViewType,
-		icon: BookImage,
-		label: "Colecciones",
-		color: "#ef4444",
-	},
-	{
 		id: "folders" as ViewType,
 		icon: FolderIcon,
 		label: "Carpetas",
 		color: "#22c55e",
 	},
 	{
+		id: "collections" as ViewType,
+		icon: BookImage,
+		label: "Colecciones",
+		color: "#ef4444",
+	},
+	{
 		id: "tags" as ViewType,
 		icon: TagIcon,
 		label: "Etiquetas",
 		color: "#f59e0b",
-	},
-	{
-		id: "debug" as ViewType,
-		label: "Desarrollo",
-		icon: Bug,
-		color: "#4ade80",
 	},
 ];
 
@@ -95,6 +89,10 @@ export function NavPanel() {
 		setCurrentView("settings");
 		toggleSettings();
 	}, [toggleSettings, setCurrentView]);
+
+	const handleOpenDevelopment = useCallback(() => {
+		setCurrentView("development");
+	}, [setCurrentView]);
 
 	const handleItemClick = useCallback(
 		(id: ViewType) => {
@@ -156,6 +154,15 @@ export function NavPanel() {
 						</div>
 					</div>
 					<div className="gap-8 pr-2">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleOpenDevelopment}
+						>
+							<Bug className="h-4 w-4" />
+						</Button>
+
 						<Button
 							variant="ghost"
 							size="icon"

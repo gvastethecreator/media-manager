@@ -30,17 +30,17 @@ export const useNavigationStore = create<NavigationState>((set) => ({
 // Helper para determinar la dirección de la navegación
 function getNavigationDirection(currentView: ViewType, nextView: ViewType): number {
   const viewOrder: ViewType[] = [
+    'development',
     'settings',
     'all-images',
     'favorites',
     'search',
-    'collections',
-    'collection-content',
     'folders',
     'folder-content',
+    'collections',
+    'collection-content',
     'tags',
     'tag-content',
-    'development'
   ]
 
   const currentIndex = viewOrder.indexOf(currentView)
