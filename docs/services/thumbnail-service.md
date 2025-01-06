@@ -2,7 +2,7 @@
 
 ## 📝 Descripción
 
-El servicio de thumbnails es un componente especializado que maneja la generación, gestión y optimización de miniaturas para las imágenes en la aplicación.
+El servicio de thumbnails es un componente especializado que maneja la generación, gestión y optimización de miniaturas para las imágenes en la aplicación. Implementa un sistema robusto de cola, caché y optimización para garantizar un rendimiento óptimo.
 
 ## 🔧 Características Principales
 
@@ -13,14 +13,18 @@ compressed: { quality: 60, width: 200, height: 200 }
 low: { quality: 70, width: 300, height: 300 }
 mid: { quality: 80, width: 400, height: 400 }
 high: { quality: 90, width: 500, height: 500 }
+ultra: { quality: 100, width: 800, height: 800 }
 ```
 
-### Sistema de Cola
+### Sistema de Cola Mejorado
 
 - Cola de pre-generación para procesamiento asíncrono
-- Procesamiento en segundo plano
-- Control de concurrencia
-- Reintentos automáticos
+- Procesamiento en segundo plano con prioridades
+- Control de concurrencia configurable
+- Reintentos automáticos con backoff exponencial
+- Límites de memoria configurables
+- Cancelación de tareas
+- Pausado/Reanudación de cola
 
 ### Monitoreo y Estadísticas
 
@@ -34,8 +38,16 @@ interface ThumbnailStats {
 		id: string;
 		path: string;
 		processedAt: Date;
+		quality: ThumbnailQuality;
+		size: number;
+		processingTime: number;
 	}[];
 	errors: ThumbnailError[];
+	performance: {
+		averageProcessingTime: number;
+		peakMemoryUsage: number;
+		successRate: number;
+	};
 }
 ```
 
@@ -48,10 +60,26 @@ interface ThumbnailConfig {
 	quality: ThumbnailQuality;
 	width: number;
 	height: number;
-	format: "webp";
+	format: "webp" | "jpeg" | "png";
+	compression: {
+		enabled: boolean;
+		level: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+	};
+	cache: {
+		enabled: boolean;
+		maxAge: number;
+		maxSize: number;
+	};
+	queue: {
+		concurrency: number;
+		maxRetries: number;
+		backoffDelay: number;
+		timeout: number;
+		maxMemory: number;
+	};
 }
 
-type ThumbnailQuality = "compressed" | "low" | "mid" | "high";
+type ThumbnailQuality = "compressed" | "low" | "mid" | "high" | "ultra";
 ```
 
 ### Gestión de Errores
@@ -62,6 +90,12 @@ interface ThumbnailError {
 	imagePath: string;
 	error: string;
 	timestamp: Date;
+	attempts: number;
+	lastAttempt: {
+		quality: ThumbnailQuality;
+		error: string;
+		memoryUsage: number;
+	};
 }
 ```
 
@@ -69,45 +103,111 @@ interface ThumbnailError {
 
 ### `getThumbnail`
 
-- Recupera thumbnails con sistema de caché
-- Reintentos automáticos (3 intentos)
-- Timeout de 5 minutos
-- Conversión a base64
+```typescript
+async function getThumbnail(
+	imageId: string,
+	options: {
+		quality: ThumbnailQuality;
+		priority?: "high" | "normal" | "low";
+		force?: boolean;
+		timeout?: number;
+	}
+): Promise<ThumbnailResult>;
+```
+
+- Recupera thumbnails con sistema de caché multinivel
+- Soporte para prioridades
+- Reintentos automáticos con backoff exponencial
+- Timeout configurable
+- Conversión a base64/blob/buffer
+- Soporte para streaming
 
 ### `generateThumbnail`
 
-- Genera thumbnails en diferentes calidades
+```typescript
+async function generateThumbnail(
+	imagePath: string,
+	options: {
+		quality: ThumbnailQuality;
+		format?: "webp" | "jpeg" | "png";
+		compression?: {
+			enabled: boolean;
+			level: number;
+		};
+	}
+): Promise<ThumbnailResult>;
+```
+
+- Generación en múltiples calidades
 - Optimización automática
-- Manejo de errores robusto
-- Actualización de estadísticas
+- Compresión configurable
+- Manejo de memoria optimizado
+- Soporte para cancelación
+- Eventos de progreso
 
 ### `reprocessAll`
 
-- Reprocesa todos los thumbnails
-- Sistema de eventos SSE para progreso
-- Manejo de errores por evento
-- Callbacks de progreso
+```typescript
+async function reprocessAll(options: {
+	filter?: (image: ImageMetadata) => boolean;
+	batchSize?: number;
+	onProgress?: (progress: ReprocessProgress) => void;
+	onError?: (error: ThumbnailError) => void;
+}): Promise<ReprocessResult>;
+```
+
+- Reprocesamiento selectivo
+- Procesamiento por lotes
+- Sistema de eventos SSE
+- Pausado/Reanudación
+- Estadísticas detalladas
 
 ### `optimizeThumbnails`
 
-- Optimiza thumbnails existentes
-- Reduce tamaño manteniendo calidad
-- Monitoreo de progreso
-- Gestión de errores
+```typescript
+async function optimizeThumbnails(options: {
+	minSavings?: number;
+	aggressive?: boolean;
+	onProgress?: (progress: OptimizationProgress) => void;
+}): Promise<OptimizationResult>;
+```
+
+- Optimización inteligente
+- Modo agresivo opcional
+- Preservación de calidad
+- Análisis de ahorro
+- Reporte detallado
 
 ### `cleanThumbnails`
 
-- Limpieza de thumbnails huérfanos
+```typescript
+async function cleanThumbnails(options: {
+	dryRun?: boolean;
+	older?: Date;
+	unused?: boolean;
+	onProgress?: (progress: CleanupProgress) => void;
+}): Promise<CleanupResult>;
+```
+
+- Modo simulación
+- Limpieza selectiva
 - Validación de integridad
-- Reporte de limpieza
-- Manejo seguro de eliminación
+- Backup automático
+- Reporte detallado
 
 ## 🔄 Sistema de Eventos SSE
 
 ### Tipos de Eventos
 
 ```typescript
-type ThumbnailEventType = "start" | "progress" | "error" | "complete";
+type ThumbnailEventType =
+	| "start"
+	| "progress"
+	| "error"
+	| "warning"
+	| "complete"
+	| "pause"
+	| "resume";
 
 interface ThumbnailEvent {
 	type: ThumbnailEventType;
@@ -118,95 +218,43 @@ interface ThumbnailEvent {
 		total?: number;
 		progress?: number;
 
-		// Datos específicos por tipo
+		// Datos específicos
 		currentFile?: string;
 		lastProcessed?: {
 			id: string;
 			path: string;
 			processedAt: string;
+			quality: ThumbnailQuality;
 			saved?: number;
 			freed?: number;
+			processingTime?: number;
+			memoryUsage?: number;
 		};
 		error?: string;
+		warning?: string;
 		imageId?: string;
 
-		// Datos de completado
+		// Métricas
+		performance?: {
+			cpu: number;
+			memory: number;
+			diskIO: number;
+		};
+
+		// Resultados
 		processed?: number;
 		optimized?: number;
 		cleaned?: number;
 		errors?: number;
+		warnings?: number;
 		totalSaved?: number;
 		totalFreed?: number;
+		averageProcessingTime?: number;
 	};
 }
 
 type ThumbnailEventCallback = (event: ThumbnailEvent) => void;
 ```
-
-### Flujo de Eventos
-
-1. **Inicio (`start`)**
-
-   ```typescript
-   {
-   	type: 'start',
-   	data: {
-   		total: number;
-   		status: string;
-   	}
-   }
-   ```
-
-2. **Progreso (`progress`)**
-
-   ```typescript
-   {
-   	type: 'progress',
-   	data: {
-   		current: number;
-   		total: number;
-   		progress: number;
-   		currentFile: string;
-   		status: string;
-   		lastProcessed: {
-   			id: string;
-   			path: string;
-   			processedAt: string;
-   			saved?: number;
-   			freed?: number;
-   		}
-   	}
-   }
-   ```
-
-3. **Error (`error`)**
-
-   ```typescript
-   {
-   	type: 'error',
-   	data: {
-   		imageId?: string;
-   		path?: string;
-   		error: string;
-   	}
-   }
-   ```
-
-4. **Completado (`complete`)**
-   ```typescript
-   {
-   	type: 'complete',
-   	data: {
-   		processed?: number;
-   		optimized?: number;
-   		cleaned?: number;
-   		errors: number;
-   		total: number;
-   		totalSaved?: number;
-   		totalFreed?: number;
-   	}
-   }
-   ```
 
 ## 🔐 Seguridad y Optimización
 
@@ -214,117 +262,86 @@ type ThumbnailEventCallback = (event: ThumbnailEvent) => void;
 
 - Timeout por defecto: 5 minutos
 - Máximo de reintentos: 3
-- Delay entre reintentos: 1 segundo
-- Pausa entre procesamiento: 100ms
+- Delay entre reintentos: Exponencial (1s, 2s, 4s)
+- Pausa entre procesamiento: Adaptativa
 
-### Caché
+### Caché Multinivel
 
-- Sistema de caché en memoria
-- Claves únicas por imagen y calidad
-- Invalidación automática
-- Limpieza periódica
+- Memoria (LRU)
+- Disco (persistente)
+- CDN (opcional)
+- Invalidación inteligente
+- Precarga predictiva
+
+### Optimización de Recursos
+
+- Gestión de memoria dinámica
+- Liberación proactiva
+- Compresión adaptativa
+- Procesamiento por lotes
+- Priorización inteligente
 
 ## 📈 Monitoreo
 
-### Métricas Disponibles
+### Métricas en Tiempo Real
 
-- Total de thumbnails
-- Tamaño total
-- Pendientes de procesamiento
-- Errores de generación
-- Últimos procesados
-- Espacio ahorrado
-- Espacio liberado
+- Rendimiento del procesamiento
+- Uso de recursos
+- Tasa de éxito/error
+- Tiempo de respuesta
+- Uso de caché
+- Ahorro de espacio
 
-### Mantenimiento
+### Alertas y Notificaciones
 
-- Limpieza periódica
-- Optimización bajo demanda
-- Regeneración masiva
-- Validación de integridad
+- Errores críticos
+- Uso excesivo de recursos
+- Degradación de rendimiento
+- Problemas de caché
+- Espacio insuficiente
 
-## 🔗 Diagramas de Flujo
+## 🔗 Integración
 
-### Generación de Thumbnail
+### API REST
 
-```mermaid
-flowchart TD
-	A[Solicitud] --> B{Cola Disponible}
-	B -->|Sí| C[Agregar a Cola]
-	B -->|No| D[Cola Llena]
-	C --> E[Procesar]
-	E --> F{Error}
-	F -->|Sí| G[Reintentar]
-	F -->|No| H[Guardar]
-	G -->|Max Intentos| I[Error Final]
-	H --> J[Actualizar Stats]
-	J --> K[Notificar]
+```typescript
+// Endpoints principales
+GET /api/thumbnails/:imageId
+POST /api/thumbnails/generate
+POST /api/thumbnails/reprocess
+POST /api/thumbnails/optimize
+DELETE /api/thumbnails/clean
+
+// Endpoints de monitoreo
+GET /api/thumbnails/stats
+GET /api/thumbnails/health
+GET /api/thumbnails/metrics
 ```
 
-### Sistema de Cola
+### WebSocket/SSE
 
-```mermaid
-flowchart TD
-	A[Nueva Tarea] --> B[Pre-Generación]
-	B --> C{Cola Activa}
-	C -->|Sí| D[Encolar]
-	C -->|No| E[Iniciar Cola]
-	D --> F[Esperar Turno]
-	E --> F
-	F --> G[Procesar]
-	G --> H[Siguiente]
+```typescript
+// Eventos en tiempo real
+//api/thumbnails/events
+ws: GET / api / thumbnails / sse;
 ```
-
-### Monitoreo y Eventos SSE
-
-```mermaid
-flowchart TD
-	A[Inicio] --> B[Conectar SSE]
-	B --> C{Tipo Evento}
-	C -->|Start| D[Inicializar UI]
-	C -->|Progress| E[Actualizar Progreso]
-	C -->|Error| F[Manejar Error]
-	C -->|Complete| G[Finalizar]
-	D --> H[Siguiente Evento]
-	E --> H
-	F --> I[Reintentar/Parar]
-	G --> J[Cerrar Conexión]
-```
-
-### Mantenimiento
-
-```mermaid
-flowchart TD
-	A[Inicio] --> B[Verificar Stats]
-	B --> C{Problemas}
-	C -->|Sí| D[Limpiar Cache]
-	C -->|No| E[OK]
-	D --> F[Reindexar]
-	F --> G[Actualizar]
-	G --> H[Verificar]
-```
-
-## 🔗 Dependencias
-
-- Sharp: Procesamiento de imágenes
-- EventSource: Sistema de eventos SSE
-- Cache: Sistema de caché
-- Prisma: Persistencia
-
-## 🚧 Áreas de Mejora
-
-- Implementar procesamiento en lote más eficiente
-- Mejorar sistema de prioridades
-- Añadir compresión adaptativa
-- Optimizar uso de memoria
-- Mejorar manejo de reconexión SSE
-- Implementar retry con backoff exponencial
 
 ## 📝 Notas Técnicas
 
-- Patrón Singleton
+### Mejores Prácticas
+
+- Uso de workers para procesamiento pesado
+- Implementación de circuit breaker
+- Manejo de memoria optimizado
+- Logging estructurado
+- Métricas detalladas
+- Testing exhaustivo
+
+### Consideraciones de Rendimiento
+
 - Procesamiento asíncrono
-- Sistema de eventos SSE
-- Gestión de memoria optimizada
-- Manejo de errores robusto
-- Feedback en tiempo real
+- Caché multinivel
+- Compresión adaptativa
+- Priorización inteligente
+- Gestión de recursos
+- Monitoreo proactivo
