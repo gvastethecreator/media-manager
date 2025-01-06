@@ -1,5 +1,4 @@
 export type ViewType =
-	| "dashboard"
 	| "all-images"
 	| "collections"
 	| "collection-content"
@@ -11,16 +10,12 @@ export type ViewType =
 	| "files"
 	| "settings"
 	| "development"
-	| "loading"
-	| "debug";
+	| "loading";
 
 export interface ViewProps {
-  isResizing?: boolean;
+	isResizing?: boolean;
 }
 export interface ViewContainerProps {
-  isResizing?: boolean;
+	isResizing?: boolean;
 }
 
-export interface DebugViewProps {
-  isResizing?: boolean;
-}

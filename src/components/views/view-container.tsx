@@ -13,7 +13,7 @@ import { CollectionContentView } from "./collections/collection-content-view";
 import { TagsView } from "./tags/tags-view";
 import { TagContentView } from "./tags/tag-content-view";
 import { AnimatePresence, motion } from "motion/react";
-import { DebugView } from "./debug/debug-view";
+import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/ui/grid-pattern";
 
@@ -57,15 +57,15 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				return <TagsView />;
 			case "tag-content":
 				return <TagContentView />;
-			case "debug":
-				return <DebugView />;
-			default:
+			case "all-images":
 				return <AllImagesView />;
+			default:
+				return <DevelopmentView />;
 		}
 	};
 
 	return (
-		<div className="relative w-full h-full overflow-hidden">
+		<div className="relative w-full h-ful	l overflow-hidden">
 			<GridPattern
 				width={30}
 				height={30}
