@@ -1,7 +1,7 @@
 import { formatBytes } from "@/lib/utils"
 import { thumbnailCache } from "@/lib/cache"
 import { PrismaClient } from '@prisma/client'
-import { EventSourcePolyfill as EventSource } from 'event-source-polyfill'
+import { EventSourcePolyfill as EventSource, Event as EventSourceEvent } from 'event-source-polyfill'
 
 const prisma = new PrismaClient()
 
@@ -65,7 +65,7 @@ export type ThumbnailEventCallback = (event: { type: string, data: any }) => voi
 class ThumbnailService {
   private static instance: ThumbnailService
   private eventSource: EventSource | null = null
-  private readonly timeout = 300000; // 5 minutos
+  private timeout = 45000; // 45 segundos
   private readonly maxRetries = 3;
   private readonly retryDelay = 1000;
   private preGenerationQueue: Set<string> = new Set();
@@ -139,75 +139,110 @@ class ThumbnailService {
     try {
       if (this.eventSource) {
         this.eventSource.close();
-        this.eventSource = null;
       }
 
       return new Promise((resolve, reject) => {
+        let lastEventTime = Date.now();
+        let timeoutId: NodeJS.Timeout;
+
+        const resetTimeout = () => {
+          if (timeoutId) clearTimeout(timeoutId);
+          lastEventTime = Date.now();
+          timeoutId = setTimeout(() => {
+            if (Date.now() - lastEventTime > this.timeout) {
+              this.eventSource?.close();
+              reject(new Error('No activity within 45000 milliseconds. No response received.'));
+            }
+          }, this.timeout);
+        };
+
+        const handleEvent = (event: EventSourceEvent) => {
+          const messageEvent = event as MessageEvent;
+          resetTimeout();
+          return messageEvent;
+        };
+
         this.eventSource = new EventSource(`/api/thumbnails/reprocess?_=${Date.now()}`, {
           withCredentials: true
         });
 
-        // Timeout de seguridad
-        const timeout = setTimeout(() => {
-          this.eventSource?.close();
-          reject(new Error('Timeout esperando respuesta'));
-        }, this.timeout);
-
         this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida');
-        };
-
-        this.eventSource.onmessage = (event) => {
-          try {
-            if (!event.data) return;
-            const data = JSON.parse(event.data);
-            console.log('Evento SSE recibido:', data);
-
-            switch (data.type) {
-              case 'start':
-                callbacks?.onProgress?.({
-                  ...data.data,
-                  status: data.data.status || "Iniciando...",
-                });
-                break;
-              case 'progress':
-                callbacks?.onProgress?.({
-                  ...data.data,
-                  status: data.data.status || "Procesando...",
-                });
-                break;
-              case 'error':
-                const error = new Error(data.data.message || data.data.error);
-                error.name = data.data.type;
-                callbacks?.onError?.(error);
-                this.eventSource?.close();
-                clearTimeout(timeout);
-                reject(error);
-                break;
-              case 'complete':
-                callbacks?.onComplete?.(data.data);
-                this.eventSource?.close();
-                clearTimeout(timeout);
-                resolve();
-                break;
-            }
-          } catch (error) {
-            console.error('Error parseando evento SSE:', error);
-            callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-            this.eventSource?.close();
-            clearTimeout(timeout);
-            reject(error);
-          }
+          console.log('Conexión SSE establecida para reprocesamiento');
+          resetTimeout();
         };
 
         this.eventSource.onerror = (error) => {
           console.error('Error en conexión SSE:', error);
           this.eventSource?.close();
-          this.eventSource = null;
-          callbacks?.onError?.(new Error('Error en la conexión SSE'));
-          clearTimeout(timeout);
+          clearTimeout(timeoutId);
           reject(new Error('Error en la conexión SSE'));
         };
+
+        this.eventSource.addEventListener('ping', (event) => {
+          const messageEvent = handleEvent(event);
+          console.log('Ping recibido:', messageEvent.data);
+        });
+
+        this.eventSource.addEventListener('start', (event) => {
+          try {
+            const messageEvent = handleEvent(event);
+            const data = JSON.parse(messageEvent.data);
+            callbacks?.onProgress?.({
+              status: data.status || "Iniciando...",
+              current: data.current,
+              total: data.total,
+              progress: data.progress || 0,
+              currentFile: data.currentFile
+            });
+          } catch (error) {
+            console.error('Error procesando evento start:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('progress', (event) => {
+          try {
+            const messageEvent = handleEvent(event);
+            const data = JSON.parse(messageEvent.data);
+            callbacks?.onProgress?.({
+              status: data.status || "Procesando...",
+              current: data.current,
+              total: data.total,
+              progress: data.progress || 0,
+              currentFile: data.currentFile,
+              lastProcessed: data.lastProcessed
+            });
+          } catch (error) {
+            console.error('Error procesando evento progress:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('error', (event) => {
+          try {
+            const messageEvent = handleEvent(event);
+            const data = JSON.parse(messageEvent.data);
+            const error = new Error(data.message || data.error);
+            error.name = data.type;
+            callbacks?.onError?.(error);
+            this.eventSource?.close();
+            clearTimeout(timeoutId);
+            reject(error);
+          } catch (error) {
+            console.error('Error procesando evento error:', error);
+          }
+        });
+
+        this.eventSource.addEventListener('complete', (event) => {
+          try {
+            const messageEvent = handleEvent(event);
+            const data = JSON.parse(messageEvent.data);
+            callbacks?.onComplete?.(data);
+            this.eventSource?.close();
+            clearTimeout(timeoutId);
+            resolve();
+          } catch (error) {
+            console.error('Error procesando evento complete:', error);
+          }
+        });
       });
     } catch (error) {
       console.error('Error en reprocessAll:', error);
@@ -378,7 +413,7 @@ class ThumbnailService {
         }, this.timeout);
 
         this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida');
+          console.log('Conexión SSE establecida para optimización');
         };
 
         this.eventSource.onmessage = (event) => {
@@ -390,14 +425,21 @@ class ThumbnailService {
             switch (data.type) {
               case 'start':
                 callbacks?.onProgress?.({
-                  ...data.data,
-                  status: data.data.status || "Iniciando...",
+                  status: data.data.status || "Iniciando optimización...",
+                  current: data.data.current,
+                  total: data.data.total,
+                  progress: data.data.progress || 0,
+                  currentFile: data.data.currentFile
                 });
                 break;
               case 'progress':
                 callbacks?.onProgress?.({
-                  ...data.data,
                   status: data.data.status || "Optimizando...",
+                  current: data.data.current,
+                  total: data.data.total,
+                  progress: data.data.progress || 0,
+                  currentFile: data.data.currentFile,
+                  lastProcessed: data.data.lastProcessed
                 });
                 break;
               case 'error':
@@ -459,7 +501,7 @@ class ThumbnailService {
         }, this.timeout);
 
         this.eventSource.onopen = () => {
-          console.log('Conexión SSE establecida');
+          console.log('Conexión SSE establecida para limpieza');
         };
 
         this.eventSource.onmessage = (event) => {
@@ -471,14 +513,21 @@ class ThumbnailService {
             switch (data.type) {
               case 'start':
                 callbacks?.onProgress?.({
-                  ...data.data,
-                  status: data.data.status || "Iniciando...",
+                  status: data.data.status || "Iniciando limpieza...",
+                  current: data.data.current,
+                  total: data.data.total,
+                  progress: data.data.progress || 0,
+                  currentFile: data.data.currentFile
                 });
                 break;
               case 'progress':
                 callbacks?.onProgress?.({
-                  ...data.data,
                   status: data.data.status || "Limpiando...",
+                  current: data.data.current,
+                  total: data.data.total,
+                  progress: data.data.progress || 0,
+                  currentFile: data.data.currentFile,
+                  lastProcessed: data.data.lastProcessed
                 });
                 break;
               case 'error':

@@ -180,182 +180,127 @@ Se ha realizado una documentación detallada de las características principales
 3. Actualización de estadísticas
 4. Manejo de errores
 
-## 🔄 Actualizaciones (2024-01-06)
+## 🔄 Actualizaciones (2024-01-07)
 
-### Correcciones en SSE para Thumbnails
+### Correcciones en Progreso de Thumbnails
 
-#### Problemas Identificados
+#### Problemas Identificados y Resueltos
 
-1. **Manejo de Eventos SSE**
+1. **Manejo de Estado de Progreso**
 
-   - ✅ Eventos no se recibían en tiempo real
-   - ✅ Formato de eventos SSE incorrecto
-   - ✅ Headers CORS faltantes
-   - ✅ Caché de eventos no controlada
+   - ✅ Estados duplicados causando inconsistencias
+   - ✅ Falta de sincronización entre estados
+   - ✅ Valores iniciales no manejados
+   - ✅ Limpieza incompleta de estados
 
-2. **UI/UX**
-   - ✅ Barra de progreso no se actualizaba
-   - ✅ Estado no se mostraba correctamente
-   - ✅ Feedback visual limitado
+2. **Actualización de UI**
+   - ✅ Progreso no se mostraba en tiempo real
+   - ✅ Valores undefined en la interfaz
+   - ✅ Transiciones abruptas
+   - ✅ Feedback visual incompleto
 
-#### Cambios Realizados
+#### Cambios Implementados
 
-1. **Servicio de Thumbnails**
+1. **Gestión de Estado**
 
-   - ✅ Refactorizado manejo de eventos SSE
-   - ✅ Implementado sistema de callbacks
-   - ✅ Añadido control de caché con timestamp
-   - ✅ Mejorado manejo de errores y reconexión
-   - ✅ Implementado timeout de seguridad
-   - ✅ Añadida limpieza de recursos
+   ```typescript
+   // Estado unificado
+   const [processProgress, setProcessProgress] = useState(0);
+   const [processStatus, setProcessStatus] = useState<ProcessStatus>({});
+   const [progress, setProgress] = useState<ProgressState | null>(null);
+   ```
 
-2. **Componente UI**
-   - ✅ Actualización en tiempo real de progreso
-   - ✅ Mejor feedback visual
-   - ✅ Manejo de estados mejorado
-   - ✅ Animaciones y transiciones
-   - ✅ Integración con sistema de callbacks
+2. **Manejo de Progreso**
+
+   ```typescript
+   // Actualización suave del progreso
+   updateProgressSmooth({
+   	current: status.current || 0,
+   	total: status.total || 0,
+   	progress: status.progress || 0,
+   	currentFile: status.currentFile || "",
+   	status: status.status || "Procesando...",
+   });
+   ```
+
+3. **Mejoras en UI**
+   ```typescript
+   // Valores seguros con fallbacks
+   <span>
+     {processStatus.current || 0} de {processStatus.total || 0} (
+     {Math.round(processProgress)}%)
+   </span>
+   <span className="text-muted-foreground">
+     {processStatus.status || "Procesando..."}
+   </span>
+   ```
 
 ### Estado Actual
 
 1. **Funcionalidades**
 
-   - ✅ Reprocesamiento de thumbnails
-   - ✅ Optimización de thumbnails
-   - ✅ Limpieza de thumbnails
-   - ✅ Progreso en tiempo real
-   - ✅ Manejo de errores
-   - ✅ Cancelación de procesos
-   - ✅ Timeout de seguridad
+   - ✅ Progreso en tiempo real funcionando
+   - ✅ Transiciones suaves
+   - ✅ Manejo de errores robusto
+   - ✅ Feedback visual completo
+   - ✅ Estados sincronizados
 
-2. **Pendientes**
-   - [ ] Implementar sistema de cola
-   - [ ] Optimizar uso de memoria
-   - [ ] Mejorar caché de thumbnails
-   - [ ] Documentar nuevos endpoints
+2. **Mejoras**
+   - ✅ Logging detallado para debugging
+   - ✅ Valores por defecto seguros
+   - ✅ Limpieza de estados
+   - ✅ Manejo de casos edge
+
+### Diagrama de Flujo Actualizado
+
+```mermaid
+flowchart TD
+    A[Inicio Operación] --> B[Inicializar Estados]
+    B --> C[Crear EventSource]
+    C --> D{Evento Recibido}
+    D -->|Progress| E[Actualizar Estados]
+    E --> F[Actualizar UI]
+    F --> G[Transición Suave]
+    G --> D
+    D -->|Error| H[Manejar Error]
+    D -->|Complete| I[Finalizar]
+    H --> J[Limpiar Estados]
+    I --> J
+```
 
 ### Notas Técnicas
 
-1. **Formato de Eventos SSE**
+1. **Estados**
 
-   ```typescript
-   // Evento de Progreso
-   {
-     type: 'progress',
-     data: {
-       status: string,
-       current: number,
-       total: number,
-       progress: number,
-       currentFile?: string,
-       lastProcessed?: {
-         id: string,
-         path: string,
-         processedAt: string
-       }
-     }
-   }
+   - Múltiples estados sincronizados
+   - Transiciones suaves
+   - Valores por defecto
+   - Limpieza completa
 
-   // Evento de Error
-   {
-     type: 'error',
-     data: {
-       message: string,
-       type: string
-     }
-   }
+2. **UI/UX**
 
-   // Evento de Completado
-   {
-     type: 'complete',
-     data: {
-       processed: number,
-       total: number,
-       errors: number
-     }
-   }
-   ```
+   - Feedback visual inmediato
+   - Transiciones animadas
+   - Manejo de casos nulos
+   - Información detallada
 
-2. **Sistema de Callbacks**
-
-   ```typescript
-   interface ThumbnailCallbacks {
-   	onProgress?: (status: ProcessStatus) => void;
-   	onError?: (error: Error) => void;
-   	onComplete?: (data: any) => void;
-   }
-
-   interface ProcessStatus {
-   	status?: string;
-   	current?: number;
-   	total?: number;
-   	progress?: number;
-   	currentFile?: string;
-   	lastProcessed?: {
-   		id: string;
-   		path: string;
-   		processedAt: string;
-   	};
-   }
-   ```
-
-3. **Manejo de Errores**
-
-   ```typescript
-   try {
-   	// Proceso principal
-   } catch (error) {
-   	callbacks?.onError?.(
-   		error instanceof Error ? error : new Error(String(error))
-   	);
-   	throw error;
-   } finally {
-   	// Limpieza de recursos
-   	eventSource?.close();
-   }
-   ```
+3. **Debugging**
+   - Logging detallado
+   - Trazabilidad de eventos
+   - Manejo de errores
+   - Estados verificables
 
 ### Próximos Pasos
 
 1. **Optimizaciones**
 
-   - Implementar sistema de cola con Bull
-   - Mejorar manejo de memoria
-   - Optimizar procesamiento de imágenes
-   - Implementar caché eficiente
+   - [ ] Reducir re-renders
+   - [ ] Mejorar transiciones
+   - [ ] Optimizar estados
+   - [ ] Implementar memoización
 
-2. **Documentación**
-   - Actualizar diagramas de flujo
-   - Documentar tipos de eventos
-   - Añadir ejemplos de uso
-   - Documentar manejo de errores
-
-### Diagramas de Flujo
-
-#### Procesamiento de Thumbnails
-
-```mermaid
-flowchart TD
-  A[Inicio Proceso] --> B[Crear EventSource]
-  B --> C{Tipo Evento}
-  C -->|Progress| D[Actualizar UI]
-  C -->|Error| E[Manejar Error]
-  C -->|Complete| F[Finalizar]
-  D --> G[Siguiente]
-  G --> C
-  E --> H[Notificar]
-  F --> I[Limpiar]
-```
-
-#### Sistema de Callbacks
-
-```mermaid
-flowchart TD
-  A[Evento SSE] --> B{Tipo}
-  B -->|Progress| C[onProgress]
-  B -->|Error| D[onError]
-  B -->|Complete| E[onComplete]
-  C --> F[Actualizar UI]
-  D --> G[Toast Error]
-  E --> H[Toast Success]
-```
+2. **Mejoras**
+   - [ ] Añadir más feedback visual
+   - [ ] Mejorar animaciones
+   - [ ] Expandir logging
+   - [ ] Refinar manejo de errores
