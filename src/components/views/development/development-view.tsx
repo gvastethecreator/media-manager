@@ -145,7 +145,10 @@ function StatusBadge({ status }: { status: string }) {
 	return (
 		<Badge
 			variant="secondary"
-			className={cn("transition-colors font-medium", getStatusColor())}
+			className={cn(
+				"transition-colors text-[10px] absolute top-2 right-2 p-2 h-4 rounded-lg border-2 border-primary/10",
+				getStatusColor()
+			)}
 		>
 			{status}
 		</Badge>
@@ -156,13 +159,13 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
 	const Icon = service.icon;
 
 	return (
-		<Card className="relative overflow-hidden">
-			<CardHeader className="p-4 pb-2">
+		<Card className="relative overflow-hidden h-full border-2 border-primary/10">
+			<CardHeader className="p-2">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								"p-2 rounded-md",
+								"p-2 rounded-md border-2 border-primary/10",
 								service.status === "online" && "bg-green-500/20",
 								service.status === "warning" && "bg-yellow-500/20",
 								service.status === "offline" && "bg-red-500/20"
@@ -172,7 +175,7 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
 						</div>
 						<div>
 							<CardTitle className="text-sm">{service.name}</CardTitle>
-							<CardDescription className="text-xs">
+							<CardDescription className="text-[10px] truncate">
 								{service.description}
 							</CardDescription>
 						</div>
@@ -188,11 +191,11 @@ function MetricCard({ metric }: { metric: SystemMetric }) {
 	const Icon = metric.icon;
 
 	return (
-		<Card>
-			<CardContent className="p-4">
+		<Card className="h-full border-2 border-primary/10">
+			<CardContent className="p-3">
 				<div className="flex items-center gap-4">
-					<div className="p-2 rounded-md bg-primary/10">
-						<Icon className="h-4 w-4" />
+					<div className="p-2 rounded-md bg-primary/10 border-2 border-primary/10">
+						<Icon className="h-8 w-8" />
 					</div>
 					<div className="flex-1">
 						<p className="text-sm text-muted-foreground">{metric.name}</p>
@@ -242,11 +245,11 @@ function ProcessingMetricCard({ metric }: { metric: ProcessingMetric }) {
 	const percentage = (metric.value / metric.max) * 100;
 
 	return (
-		<Card>
-			<CardContent className="p-4">
+		<Card className="h-full border-2 border-primary/10">
+			<CardContent className="p-3 py-2">
 				<div className="flex items-center gap-4 mb-2">
-					<div className="p-2 rounded-md bg-primary/10">
-						<Icon className="h-4 w-4" />
+					<div className="p-2 rounded-md bg-primary/10 border-2 border-primary/10">
+						<Icon className="h-6 w-6" />
 					</div>
 					<div className="flex-1">
 						<p className="text-sm text-muted-foreground">{metric.name}</p>
@@ -263,9 +266,9 @@ function ProcessingMetricCard({ metric }: { metric: ProcessingMetric }) {
 
 function FeatureCard({ feature }: { feature: Feature }) {
 	return (
-		<Card>
-			<CardContent className="p-4">
-				<div className="flex items-center justify-between mb-2">
+		<Card className="h-full border-2 border-primary/10">
+			<CardContent className="py-1 px-4">
+				<div className="flex items-center justify-between mb-2 relative">
 					<div>
 						<h3 className="font-medium">{feature.name}</h3>
 						<p className="text-sm text-muted-foreground">
@@ -302,7 +305,7 @@ function IssueCard({ issue }: { issue: Issue }) {
 	};
 
 	return (
-		<Card>
+		<Card className="h-full border-2 border-primary/10 relative">
 			<CardContent className="p-4">
 				<div className="flex items-start gap-4">
 					<div className="mt-1">{getSeverityIcon()}</div>
@@ -612,8 +615,8 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 					</TabsContent>
 
 					<TabsContent value="docs" className="mt-4 space-y-4">
-						<Card>
-							<CardContent className="p-4">
+						<Card className="h-full border-2 border-primary/10">
+							<CardContent className="p-2">
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 									{[
 										{
@@ -672,10 +675,10 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 					</TabsContent>
 
 					<TabsContent value="stats" className="mt-4">
-						<Card>
+						<Card className="h-full border-2 border-primary/10">
 							<CardContent className="p-4">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<Card>
+									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
 											<CardTitle className="text-sm font-medium">
 												Distribución de Archivos
@@ -710,7 +713,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 										</CardContent>
 									</Card>
 
-									<Card>
+									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
 											<CardTitle className="text-sm font-medium">
 												Actividad de Indexación
@@ -768,7 +771,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 										</CardContent>
 									</Card>
 
-									<Card>
+									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
 											<CardTitle className="text-sm font-medium">
 												Uso de Recursos
@@ -797,7 +800,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 										</CardContent>
 									</Card>
 
-									<Card>
+									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
 											<CardTitle className="text-sm font-medium">
 												Rendimiento del Sistema
