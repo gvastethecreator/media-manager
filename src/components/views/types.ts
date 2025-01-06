@@ -1,5 +1,6 @@
 export type ViewType =
 	| "all-images"
+	| "favorites"
 	| "collections"
 	| "collection-content"
 	| "folders"
