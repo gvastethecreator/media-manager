@@ -1,4 +1,8 @@
 import { EventSourcePolyfill as EventSource } from 'event-source-polyfill'
+import { logger } from '@/lib/logger';
+
+// Crear una instancia específica para el servicio de carpetas
+const folderLogger = logger.withContext('FolderService');
 
 export interface ProcessStatus {
   status?: string
@@ -39,7 +43,7 @@ export async function getFolders() {
 
 export async function addFolder(path: string, callbacks?: IndexCallbacks) {
   try {
-    console.log('Iniciando proceso de agregar carpeta:', path);
+    folderLogger.info('Adding new folder:', path);
 
     // Primero crear la carpeta
     const createResponse = await fetch('/api/folders', {
@@ -132,8 +136,7 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
       });
     });
   } catch (error) {
-    console.error('Error en addFolder:', error);
-    callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+    folderLogger.error('Error adding folder:', error);
     throw error;
   }
 }
@@ -222,18 +225,31 @@ export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
 }
 
 export async function reindexFolder(id: string, callbacks?: IndexCallbacks) {
-  return indexFolder(id, callbacks);
+  try {
+    folderLogger.info('Reindexing folder:', id);
+    return indexFolder(id, callbacks);
+  } catch (error) {
+    folderLogger.error('Error reindexing folder:', error);
+    throw error;
+  }
 }
 
 export async function deleteFolder(id: string) {
-  const response = await fetch(`/api/folders/${id}`, {
-    method: 'DELETE'
-  });
+  try {
+    folderLogger.info('Deleting folder:', id);
+    const response = await fetch(`/api/folders/${id}`, {
+      method: 'DELETE'
+    });
 
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || 'Error eliminando carpeta');
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Error eliminando carpeta');
+    }
+
+    folderLogger.info('Folder deleted successfully', { folderId: id });
+    return response.json();
+  } catch (error) {
+    folderLogger.error('Error deleting folder:', error);
+    throw error;
   }
-
-  return response.json();
 }
