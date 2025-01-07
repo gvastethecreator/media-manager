@@ -16,39 +16,27 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Settings2, Zap, ImageIcon, Trash2 } from "lucide-react";
 import { useSettingsContext } from "@/context/settings-context";
-import {
-	thumbnailService,
-	type ThumbnailStats,
-	type ThumbnailQuality,
-} from "@/services/thumbnail.service";
+import { type ThumbnailQuality } from "@/services/thumbnail.service";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogDescription,
-	DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { formatBytes, cn } from "@/lib/utils";
 import Image from "next/image";
-import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { AnimateSharedLayout, motion } from "motion/react";
+import { useThumbnailStore } from "@/store/thumbnails";
+import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
+import * as thumbnailActions from "@/actions/thumbnails";
 
 interface LastProcessedThumbnail {
 	id: string;
 	path: string;
 	processedAt: string;
-}
-
-interface ProcessStatus {
-	status?: string;
-	currentFile?: string;
-	current?: number;
-	total?: number;
-	progress?: number;
 }
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
@@ -60,128 +48,43 @@ const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 
 export function ThumbnailsSection() {
 	const { settings, updateSettings } = useSettingsContext();
-	const [stats, setStats] = useState<ThumbnailStats | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isProcessing, setIsProcessing] = useState(false);
-	const [isOptimizing, setIsOptimizing] = useState(false);
-	const [isCleaning, setIsCleaning] = useState(false);
-	const [showConfirmClean, setShowConfirmClean] = useState(false);
-	const [progress, setProgress] = useState<{
-		current: number;
-		total: number;
-		progress: number;
-		currentFile: string;
-		status: string;
-	} | null>(null);
-	const [showErrors, setShowErrors] = useState(false);
+	const {
+		stats,
+		isLoading,
+		isProcessing,
+		processStatus,
+		error,
+		initialize,
+		setProcessing,
+	} = useThumbnailStore();
+	const [showErrors, setShowErrors] = React.useState(false);
 	const { toast } = useToast();
-	const [error, setError] = useState<string | null>(null);
-	const [processProgress, setProcessProgress] = useState(0);
-	const [processStatus, setProcessStatus] = useState<ProcessStatus>({});
-	const [lastProcessedThumbnails, setLastProcessedThumbnails] = useState<
+	const [lastProcessedThumbnails, setLastProcessedThumbnails] = React.useState<
 		LastProcessedThumbnail[]
 	>([]);
-	const [selectedQuality, setSelectedQuality] =
-		useState<ThumbnailQuality>("mid");
 
-	const loadStats = React.useCallback(async () => {
-		try {
-			const stats = await thumbnailService.getStats();
-			setStats(stats);
-		} catch (error) {
-			console.error("Error cargando estadísticas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al cargar estadísticas de miniaturas",
-				variant: "destructive",
-			});
-		}
-	}, [toast]);
+	// Inicializar eventos SSE
+	useThumbnailEvents();
 
-	const updateProgressSmooth = React.useCallback(
-		(newProgress: typeof progress) => {
-			if (!newProgress) return;
+	// Cargar estadísticas iniciales
+	React.useEffect(() => {
+		initialize();
+	}, [initialize]);
 
-			setProgress((prev) => {
-				if (!prev) return newProgress;
+	const handleQualityChange = async (quality: ThumbnailQuality) => {
+		await updateSettings({ thumbnailQuality: quality });
+	};
 
-				// Suavizar la transición del progreso
-				return {
-					...newProgress,
-					progress:
-						prev.progress + (newProgress.progress - prev.progress) * 0.3,
-				};
-			});
-		},
-		[]
-	);
+	const handleVideoAnimationToggle = async (enabled: boolean) => {
+		await updateSettings({ videoThumbnailAnimation: enabled });
+	};
 
 	const handleReprocessThumbnails = async () => {
 		if (isProcessing) return;
 
 		try {
-			setError(null);
-			setIsProcessing(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando reprocesamiento...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
-
-			await thumbnailService.reprocessAll({
-				onProgress: (status) => {
-					console.log("Progreso recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Procesando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Procesando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
-					}
-				},
-				onError: (error) => {
-					console.error("Error en proceso:", error);
-					toast({
-						title: "Error",
-						description: error.message || "Error al procesar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					console.log("Proceso completado:", data);
-					toast({
-						title: "Proceso completado",
-						description: `Se procesaron ${data.processed} de ${
-							data.total
-						} miniaturas${
-							data.errors > 0 ? ` con ${data.errors} errores` : ""
-						}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
-				},
-			});
+			setProcessing(true);
+			await thumbnailActions.reprocessThumbnails();
 		} catch (error) {
 			console.error("Error reprocesando miniaturas:", error);
 			toast({
@@ -192,102 +95,7 @@ export function ThumbnailsSection() {
 						: "Error al reprocesar miniaturas",
 				variant: "destructive",
 			});
-		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
-		}
-	};
-
-	const handleQualityChange = async (quality: ThumbnailQuality) => {
-		await updateSettings({ thumbnailQuality: quality });
-	};
-
-	const handleVideoAnimationToggle = async (enabled: boolean) => {
-		await updateSettings({ videoThumbnailAnimation: enabled });
-	};
-
-	const handleCleanThumbnails = async () => {
-		if (isProcessing) return;
-
-		try {
-			setError(null);
-			setIsProcessing(true);
-			setIsCleaning(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando limpieza...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
-
-			await thumbnailService.cleanThumbnails({
-				onProgress: (status) => {
-					console.log("Progreso de limpieza recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Limpiando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Limpiando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
-					}
-				},
-				onError: (error) => {
-					console.error("Error en limpieza:", error);
-					toast({
-						title: "Error",
-						description: error.message || "Error al limpiar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					console.log("Limpieza completada:", data);
-					toast({
-						title: "Limpieza completada",
-						description: `Se limpiaron ${data.cleaned} de ${
-							data.total
-						} miniaturas. Espacio liberado: ${formatBytes(data.totalFreed)}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
-				},
-			});
-		} catch (error) {
-			console.error("Error limpiando miniaturas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al limpiar miniaturas",
-				variant: "destructive",
-			});
-		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setIsCleaning(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
+			setProcessing(false);
 		}
 	};
 
@@ -295,63 +103,8 @@ export function ThumbnailsSection() {
 		if (isProcessing) return;
 
 		try {
-			setError(null);
-			setIsProcessing(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando optimización...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
-
-			await thumbnailService.optimizeThumbnails({
-				onProgress: (status) => {
-					console.log("Progreso de optimización recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Optimizando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Optimizando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
-					}
-				},
-				onError: (error) => {
-					console.error("Error en optimización:", error);
-					toast({
-						title: "Error",
-						description: error.message || "Error al optimizar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					console.log("Optimización completada:", data);
-					toast({
-						title: "Optimización completada",
-						description: `Se optimizaron ${data.optimized} de ${
-							data.total
-						} miniaturas. Espacio ahorrado: ${formatBytes(data.totalSaved)}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
-				},
-			});
+			setProcessing(true);
+			await thumbnailActions.optimizeThumbnails();
 		} catch (error) {
 			console.error("Error optimizando miniaturas:", error);
 			toast({
@@ -362,29 +115,46 @@ export function ThumbnailsSection() {
 						: "Error al optimizar miniaturas",
 				variant: "destructive",
 			});
-		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
+			setProcessing(false);
 		}
 	};
 
-	const handleCancel = () => {
-		thumbnailService.cancelProcessing();
-		setIsProcessing(false);
-		setIsOptimizing(false);
-		setProgress(null);
-		toast({
-			title: "Cancelado",
-			description: "El proceso ha sido cancelado",
-		});
+	const handleCleanThumbnails = async () => {
+		if (isProcessing) return;
+
+		try {
+			setProcessing(true);
+			await thumbnailActions.cleanThumbnails();
+		} catch (error) {
+			console.error("Error limpiando miniaturas:", error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al limpiar miniaturas",
+				variant: "destructive",
+			});
+			setProcessing(false);
+		}
 	};
 
+	// Actualizar últimas miniaturas procesadas cuando cambia el estado
 	React.useEffect(() => {
-		loadStats();
-	}, [loadStats]);
+		if (processStatus.currentFile && processStatus.status) {
+			setLastProcessedThumbnails((prev) => {
+				const newThumbnails = [...prev];
+				if (processStatus.currentFile) {
+					newThumbnails.unshift({
+						id: processStatus.currentFile,
+						path: processStatus.currentFile,
+						processedAt: new Date().toISOString(),
+					});
+				}
+				return newThumbnails.slice(0, 9);
+			});
+		}
+	}, [processStatus]);
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
@@ -459,9 +229,9 @@ export function ThumbnailsSection() {
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleOptimizeThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isLoading || isProcessing}
 						>
-							{isOptimizing ? (
+							{isProcessing ? (
 								<>
 									<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 									Optimizando...
@@ -478,7 +248,7 @@ export function ThumbnailsSection() {
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleReprocessThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isLoading || isProcessing}
 						>
 							{isProcessing ? (
 								<>
@@ -497,9 +267,9 @@ export function ThumbnailsSection() {
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleCleanThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isLoading || isProcessing}
 						>
-							{isCleaning ? (
+							{isProcessing ? (
 								<>
 									<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 									Limpiando...
@@ -512,11 +282,11 @@ export function ThumbnailsSection() {
 							)}
 						</Button>
 
-						{(isProcessing || isOptimizing || isCleaning) && (
+						{isProcessing && (
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={handleCancel}
+								onClick={() => setProcessing(false)}
 								className="h-7 text-xs text-red-500 hover:text-red-600"
 							>
 								Cancelar
@@ -626,13 +396,16 @@ export function ThumbnailsSection() {
 									<div className="flex justify-between text-xs">
 										<span>
 											{processStatus.current || 0} de {processStatus.total || 0}{" "}
-											({Math.round(processProgress)}%)
+											({Math.round(processStatus.progress || 0)}%)
 										</span>
 										<span className="text-muted-foreground">
 											{processStatus.status || "Procesando..."}
 										</span>
 									</div>
-									<Progress value={processProgress} className="h-1.5" />
+									<Progress
+										value={processStatus.progress || 0}
+										className="h-1.5"
+									/>
 									{processStatus.currentFile && (
 										<p className="text-xs text-muted-foreground truncate">
 											{processStatus.currentFile}
