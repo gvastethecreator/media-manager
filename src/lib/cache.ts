@@ -1,5 +1,5 @@
-import LRUCache from 'lru-cache'
-import { cacheLogger as logger } from './utils'
+import { LRUCache } from 'lru-cache'
+import { logger } from '@/lib/logger'
 
 export interface CacheOptions {
   /** Número máximo de elementos en caché */
@@ -46,6 +46,9 @@ const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = {
   statsInterval: 1000 * 60 * 5 // 5 minutos
 }
 
+// Crear una instancia específica para el servicio de caché
+const cacheLogger = logger.withContext('CacheManager')
+
 class CacheManager<T = unknown> {
   private cache: LRUCache<string, CacheEntry<T>>
   private defaultTTL: number
@@ -67,19 +70,21 @@ class CacheManager<T = unknown> {
 
   constructor(options: CacheOptions = {}) {
     const opts = { ...DEFAULT_OPTIONS, ...options }
+    this.name = options.name || 'default'
     this.defaultTTL = opts.ttl
     this.updateAgeOnGet = opts.updateAgeOnGet
     this.allowStale = opts.allowStale
-    this.name = options.name || 'default'
 
-    this.cache = new LRUCache<string, CacheEntry<T>>({
+    cacheLogger.info(`Initializing cache manager: ${this.name}`)
+
+    // Crear instancia de LRUCache con la nueva configuración
+    this.cache = new LRUCache({
       max: opts.max,
-      ttlAutopurge: true,
-      allowStale: this.allowStale,
-      updateAgeOnGet: this.updateAgeOnGet,
-      ttl: this.defaultTTL,
-      dispose: (key, entry) => {
-        logger.debug(`[Cache:${this.name}] Eliminada entrada:`, { key })
+      ttl: opts.ttl,
+      updateAgeOnGet: opts.updateAgeOnGet,
+      allowStale: opts.allowStale,
+      dispose: (value: CacheEntry<T>, key: string) => {
+        cacheLogger.debug(`[${this.name}] Entry disposed:`, { key })
       }
     })
 
@@ -90,9 +95,10 @@ class CacheManager<T = unknown> {
 
   async get(key: string): Promise<T | undefined> {
     try {
-      const entry = this.cache.get(key)
+      const entry = this.cache.get(key) as CacheEntry<T> | undefined
       if (!entry) {
         this.stats.misses++
+        cacheLogger.debug(`[${this.name}] Cache miss:`, { key })
         return undefined
       }
 
@@ -110,10 +116,10 @@ class CacheManager<T = unknown> {
       }
 
       this.stats.hits++
-      this.updateStats()
+      cacheLogger.debug(`[${this.name}] Cache hit:`, { key })
       return entry.value
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en get:`, { error, key })
+      cacheLogger.error(`[${this.name}] Error getting cache entry:`, { error, key })
       return undefined
     }
   }
@@ -129,18 +135,18 @@ class CacheManager<T = unknown> {
       }
 
       this.cache.set(key, entry)
-      this.updateStats()
+      cacheLogger.debug(`[${this.name}] Cache entry set:`, { key, ttl })
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en set:`, { error, key })
+      cacheLogger.error(`[${this.name}] Error setting cache entry:`, { error, key })
     }
   }
 
   async delete(key: string): Promise<void> {
     try {
       this.cache.delete(key)
-      this.updateStats()
+      cacheLogger.debug(`[${this.name}] Cache entry deleted:`, { key })
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en delete:`, { error, key })
+      cacheLogger.error(`[${this.name}] Error deleting cache entry:`, { error, key })
     }
   }
 
@@ -148,8 +154,9 @@ class CacheManager<T = unknown> {
     try {
       this.cache.clear()
       this.resetStats()
+      cacheLogger.info(`[${this.name}] Cache cleared`)
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en clear:`, error)
+      cacheLogger.error(`[${this.name}] Error clearing cache:`, error)
     }
   }
 
@@ -157,32 +164,20 @@ class CacheManager<T = unknown> {
     try {
       const now = Date.now()
       let pruned = 0
-
-      // Usar dump() en lugar de entries()
       const entries = this.cache.dump()
 
       for (const [key, entry] of Object.entries(entries)) {
-        try {
-          if (now - entry.value.timestamp > entry.value.ttl) {
-            await this.delete(key)
-            pruned++
-          }
-        } catch (error) {
-          logger.error(`[Cache:${this.name}] Error al procesar entrada en prune:`, {
-            error: error instanceof Error ? error.message : String(error),
-            key
-          })
+        if (now - entry.value.timestamp > entry.value.ttl) {
+          await this.delete(key)
+          pruned++
         }
       }
 
       if (pruned > 0) {
-        logger.info(`[Cache:${this.name}] Eliminadas ${pruned} entradas expiradas`)
-        await this.updateStats()
+        cacheLogger.info(`[${this.name}] Pruned ${pruned} expired entries`)
       }
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error en prune:`, {
-        error: error instanceof Error ? error.message : String(error)
-      })
+      cacheLogger.error(`[${this.name}] Error pruning cache:`, error)
     }
   }
 
@@ -227,7 +222,7 @@ class CacheManager<T = unknown> {
             minTimestamp = Math.min(minTimestamp, entry.timestamp)
             maxTimestamp = Math.max(maxTimestamp, entry.timestamp)
           } catch (error) {
-            logger.warn(`[Cache:${this.name}] Error al procesar entrada en stats:`, {
+            cacheLogger.warn(`[Cache:${this.name}] Error al procesar entrada en stats:`, {
               error: error instanceof Error ? error.message : String(error)
             })
           }
@@ -247,7 +242,7 @@ class CacheManager<T = unknown> {
         this.stats.newestEntry = now - maxTimestamp
       }
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error al actualizar estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] Error al actualizar estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -263,9 +258,9 @@ class CacheManager<T = unknown> {
         avgTTL: `${(this.stats.avgTTL / 1000 / 60).toFixed(2)}m`,
         size: `${(this.stats.size / 1024).toFixed(2)}KB`
       }
-      logger.info(`[Cache:${this.name}] Stats:`, stats)
+      cacheLogger.info(`[Cache:${this.name}] Stats:`, stats)
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error al generar log de estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] Error al generar log de estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -274,7 +269,7 @@ class CacheManager<T = unknown> {
   private startCleanupTimer(interval: number): void {
     this.cleanupTimer = setInterval(() => {
       this.prune().catch(error =>
-        logger.error(`[Cache:${this.name}] Error en cleanup timer:`, {
+        cacheLogger.error(`[Cache:${this.name}] Error en cleanup timer:`, {
           error: error instanceof Error ? error.message : String(error)
         })
       )
@@ -301,7 +296,7 @@ class CacheManager<T = unknown> {
       }
       await this.clear()
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error al detener caché:`, {
+      cacheLogger.error(`[Cache:${this.name}] Error al detener caché:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -312,7 +307,7 @@ class CacheManager<T = unknown> {
       this.updateStats()
       return { ...this.stats }
     } catch (error) {
-      logger.error(`[Cache:${this.name}] Error al obtener estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] Error al obtener estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
       return { ...this.stats }
@@ -351,7 +346,7 @@ if (typeof window !== 'undefined') {
       metadataCache.stop(),
       searchCache.stop()
     ]).catch(error =>
-      logger.error('[Cache] Error deteniendo caches:', error)
+      cacheLogger.error('[Cache] Error deteniendo caches:', error)
     )
   })
 }

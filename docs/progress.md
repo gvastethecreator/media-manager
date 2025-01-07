@@ -182,6 +182,35 @@ Se ha realizado una documentación detallada de las características principales
 
 ## 🔄 Actualizaciones (2024-01-07)
 
+### Sistema Centralizado de Eventos
+
+#### Implementación Completada
+
+1. **Nuevo Servicio de Eventos**
+
+   - ✅ Creado `EventService` como singleton
+   - ✅ Implementado manejo robusto de errores
+   - ✅ Añadido sistema de reconexión automática
+   - ✅ Integrado con sistema de logging
+
+2. **Mejoras en Hooks**
+
+   - ✅ Actualizado `useThumbnailEvents` para usar el nuevo servicio
+   - ✅ Mejorado manejo de ciclo de vida
+   - ✅ Optimizada gestión de recursos
+
+3. **Documentación**
+   - ✅ Creada documentación completa del servicio
+   - ✅ Añadidos ejemplos de uso
+   - ✅ Documentadas mejores prácticas
+
+#### Beneficios
+
+- Mejor manejo de errores y reconexiones
+- Código más mantenible y centralizado
+- Logging mejorado para debugging
+- Mejor gestión de recursos
+
 ### Correcciones en Progreso de Thumbnails
 
 #### Problemas Identificados y Resueltos
@@ -878,372 +907,44 @@ src/
 
 # Progress Log
 
-## Tests Implementation - Services (2024-01-09)
+## Current Tasks
 
-### Collection Service Tests ✅
+### 1. Mejora del Sistema de Logging y Sincronización de Componentes
 
-- Implementados tests para todas las funciones del servicio de colecciones
-- Cobertura de casos exitosos y manejo de errores
-- Mock de fetch para llamadas API
-- Tests para:
-  - getCollections
-  - getCollection
-  - createCollection
-  - updateCollection
-  - deleteCollection
-  - addImageToCollection
-  - removeImageFromCollection
+- ✅ Implementado nuevo sistema de logging con contextos y niveles
+- ✅ Integrado logger en servicios principales (thumbnails, folders, cache)
+- ✅ Mejorada sincronización entre componentes usando Server-Sent Events
+- ✅ Implementado store centralizado para thumbnails
+- ✅ Actualizado manejo de eventos y estados en componentes
 
-### Favorite Service Tests ✅
+### 2. Optimización de Thumbnails y Carpetas
 
-- Implementados tests para todas las funciones del servicio de favoritos
-- Mock de Prisma para operaciones de base de datos
-- Tests para:
-  - addToFavorites
-  - removeFromFavorites
-  - getUserFavorites
-  - isFavorited
-  - toggleFavorite
-  - getRecentFavorites
+- ✅ Mejorado manejo de errores en procesamiento de thumbnails
+- ✅ Implementada sincronización en tiempo real de estadísticas
+- ✅ Agregado sistema de eventos para actualizaciones en vivo
+- ✅ Optimizado rendimiento de caché
 
-### Files Service Tests ✅
+### 3. Mejoras en la Interfaz de Usuario
 
-- Implementados tests para todas las funciones del servicio de archivos
-- Mock de Prisma para operaciones de base de datos
-- Tests para:
-  - getFiles (con y sin path)
-  - getFilesByFolder
-  - getCollectionFiles
-  - getTaggedFiles
-  - getFavorites
+- ✅ Implementada retroalimentación visual en tiempo real
+- ✅ Mejorada visualización de progreso de operaciones
+- ✅ Agregadas animaciones suaves en transiciones
+- ✅ Optimizado rendimiento de renderizado
 
-### Watcher Service Tests ✅
+### 4. Próximas Tareas
 
-- Implementados tests para el servicio deprecado de watcher
-- Mock de fetch y Prisma
-- Tests para:
-  - watchFolder
-  - stopWatching
-  - startWatchingAll
-  - stopWatchingAll
-- Verificación de mensajes de deprecación
+- [ ] Implementar pruebas unitarias para nuevos componentes
+- [ ] Optimizar manejo de memoria en caché
+- [ ] Mejorar documentación de API
+- [ ] Implementar sistema de recuperación ante fallos
 
-### User Service Tests ✅
+## Changelog
 
-- Implementados tests para todas las funciones del servicio de usuarios
-- Mock de Prisma para operaciones de base de datos
-- Tests para:
-  - createUser
-  - getUser
-  - getUserByEmail
-  - updateUser
-  - deleteUser
+### [2024-01-XX]
 
-### Tag Service Tests ✅
+- Implementado nuevo sistema de logging
+- Mejorada sincronización entre componentes
+- Optimizado manejo de caché
+- Actualizada documentación
 
-- Implementados tests para todas las funciones del servicio de tags
-- Mock de fetch para llamadas API
-- Tests para:
-  - getTags
-  - getTag
-  - createTag
-  - updateTag
-  - deleteTag
-  - addImageToTag
-  - removeImageFromTag
-
-### Stats Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de estadísticas
-- Mock de Prisma para operaciones de base de datos
-- Tests para:
-  - getOrCreateImageStats
-  - incrementViewCount
-  - incrementDownloadCount
-  - updateRating
-  - getPopularImages
-  - getMostDownloadedImages
-  - getHighestRatedImages
-  - getRecentlyViewedImages
-
-### Profile Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de perfiles
-- Mock de fetch para llamadas API
-- Tests para:
-  - getProfiles
-  - getProfile
-  - createProfile
-  - updateProfile
-  - deleteProfile
-  - setActiveProfile
-
-### Settings Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de configuraciones
-- Mock de localStorage y fetch para operaciones de almacenamiento
-- Tests para:
-  - Singleton getInstance
-  - Inicialización y carga de configuraciones
-  - Actualización y guardado de configuraciones
-  - Reseteo de configuraciones
-  - Exportación e importación de configuraciones
-  - Manejo de perfiles por defecto
-  - Métodos específicos para cada sección (apariencia, carpetas, colecciones, etc.)
-  - Manejo de errores y casos edge
-
-### File System Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de sistema de archivos
-- Mock de fs, path y prisma para operaciones de archivos
-- Tests para:
-  - Validación de rutas
-  - Listado de archivos
-  - Cálculo de hashes
-  - Obtención de metadatos
-  - Identificación de imágenes
-  - Normalización de rutas
-  - Inicialización del sistema de archivos
-  - Manejo de errores y casos edge
-
-### Watcher Service Tests ✅
-
-- Implementados tests para el servicio completo de watcher (cliente y servidor)
-- Mock de fetch, chokidar y prisma
-- Tests para Cliente:
-  - watchFolder y unwatchFolder
-  - syncWatchedFolders
-  - stopAll y getActiveWatchers
-  - isWatched
-  - Manejo de errores y logging
-- Tests para Servidor:
-  - initialize con y sin rutas proporcionadas
-  - addPath y removePath
-  - stop y limpieza de recursos
-  - Manejo de eventos y callbacks
-  - Configuración y opciones
-  - Manejo de errores y casos edge
-
-### Thumbnail Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de thumbnails
-- Mock de prisma, fs y sharp para operaciones de archivos
-- Tests para:
-  - getStats (estadísticas de thumbnails)
-  - optimize (optimización de thumbnails)
-  - clean (limpieza de thumbnails huérfanos)
-  - reprocess (reprocesamiento de thumbnails)
-  - generateThumbnail (generación individual)
-  - getThumbnailPath (rutas de thumbnails)
-  - ensureThumbnailsDir (gestión de directorios)
-  - Manejo de errores y callbacks
-
-### Image Service Tests ✅
-
-- Implementados tests para todas las funciones del servicio de imágenes
-- Mock de prisma, fs, sharp y thumbnailService
-- Tests para:
-  - createImage (creación con thumbnail)
-  - getThumbnail (obtención y generación bajo demanda)
-  - processImage (procesamiento y transformación)
-  - deleteImage (eliminación con thumbnails)
-  - updateImage (actualización de metadatos)
-  - getImageMetadata (extracción de metadatos)
-  - Manejo de errores y casos edge
-
-### Pendientes
-
-- [ ] Folder Service Tests
-- [ ] Tests de integración entre servicios
-- [ ] Tests E2E de flujos completos
-
-### Análisis de Pendientes
-
-#### 1. Tests Unitarios
-
-- **Folder Service**: Último servicio por testear
-  - Funciones CRUD básicas
-  - Indexación de carpetas
-  - Monitoreo y sincronización
-  - Manejo de rutas y permisos
-
-#### 2. Tests de Integración
-
-- Interacciones entre servicios:
-  - Image + Thumbnail
-  - Folder + Watcher
-  - Collection + Image
-  - Tag + Image
-  - Stats + Image
-  - Profile + Settings
-
-#### 3. Tests E2E
-
-- Flujos completos de usuario:
-  - Indexación de carpetas
-  - Procesamiento de imágenes
-  - Gestión de colecciones
-  - Búsqueda y filtrado
-  - Configuración de perfiles
-
-#### 4. Mejoras Generales
-
-- Optimizar mocks y fixtures
-- Mejorar cobertura de casos edge
-- Documentar patrones de testing
-- Configurar CI/CD para tests
-- Implementar reportes de cobertura
-
-#### 5. Documentación
-
-- Actualizar guías de testing
-- Documentar patrones y mejores prácticas
-- Crear ejemplos de uso
-- Mantener changelog actualizado
-
-### Próximos Pasos Inmediatos
-
-1. Implementar tests para Folder Service
-2. Configurar tests de integración básicos
-3. Documentar patrones establecidos
-4. Configurar reportes de cobertura
-5. Planificar tests E2E
-
-### Métricas y Objetivos
-
-- Cobertura actual: ~80% de servicios testeados
-- Objetivo de cobertura: >90% en servicios core
-- Tests pendientes: ~20% del total planificado
-- Tiempo estimado: 1-2 semanas para completar
-
-# Estado Actual y Seguimiento de Problemas (2024-01-06)
-
-## 🚨 Problemas Identificados
-
-### 1. Errores de Caché
-
-```log
-[Cache:thumbnails] Error en prune: {}
-[Cache:metadata] Error en prune: {}
-[Cache:search] Error en prune: {}
-```
-
-- [ ] Investigar por qué los servicios de caché están fallando en la limpieza
-- [ ] Revisar la implementación del sistema de caché
-- [ ] Implementar mejor manejo de errores en el sistema de caché
-
-### 2. Errores de Serialización
-
-```log
-Error: Do not know how to serialize a BigInt
-```
-
-- [x] Implementada función `serializeResponse` para manejar BigInts
-- [x] Modificado endpoint de status para usar serialización
-- [ ] Revisar otros endpoints que puedan tener el mismo problema
-- [ ] Implementar solución global para manejo de BigInts
-
-### 3. Inicialización del Sistema
-
-- [ ] Mejorar el manejo de estados durante la inicialización
-- [ ] Implementar mejor logging para debugging
-- [ ] Revisar dependencias circulares en la inicialización de servicios
-
-### 4. Errores de API
-
-```log
-Error: Route "/api/images/[id]/thumbnail" used `params.id`
-```
-
-- [ ] Corregir manejo de parámetros en rutas dinámicas
-- [ ] Implementar validación de parámetros
-- [ ] Mejorar manejo de errores en endpoints
-
-## 📝 Plan de Acción
-
-### Fase 1: Sistema de Caché
-
-1. Revisar implementación actual en `src/lib/cache.ts`
-2. Implementar mejor manejo de errores
-3. Añadir logging detallado
-4. Implementar mecanismo de recuperación
-
-### Fase 2: Serialización y Tipos
-
-1. Crear utilidad global para serialización
-2. Revisar todos los endpoints
-3. Implementar tipos estrictos
-4. Añadir validación de datos
-
-### Fase 3: Inicialización
-
-1. Refactorizar sistema de inicialización
-2. Resolver dependencias circulares
-3. Mejorar manejo de estados
-4. Implementar retry con backoff
-
-### Fase 4: API y Rutas
-
-1. Actualizar manejo de rutas dinámicas
-2. Implementar middleware de validación
-3. Mejorar manejo de errores
-4. Añadir documentación de API
-
-## 🔍 Próximos Pasos Inmediatos
-
-1. **Alta Prioridad**
-
-   - Resolver errores de caché que están afectando el funcionamiento básico
-   - Implementar solución global para serialización de BigInts
-   - Corregir manejo de rutas dinámicas en la API
-
-2. **Media Prioridad**
-
-   - Mejorar sistema de logging
-   - Implementar mejor manejo de errores
-   - Refactorizar sistema de inicialización
-
-3. **Baja Prioridad**
-   - Actualizar documentación
-   - Optimizar rendimiento
-   - Implementar tests adicionales
-
-## 📊 Métricas de Seguimiento
-
-- Número de errores en logs
-- Tiempo de inicialización
-- Uso de caché (hits/misses)
-- Errores de API
-
-## 🔄 Estado de Servicios
-
-### Cache
-
-- Estado: ❌ Con errores
-- Problemas: Errores en prune
-- Prioridad: Alta
-
-### Base de Datos
-
-- Estado: ✅ Funcional con warnings
-- Problemas: Serialización de BigInts
-- Prioridad: Media
-
-### API
-
-- Estado: ⚠️ Parcialmente funcional
-- Problemas: Manejo de parámetros
-- Prioridad: Alta
-
-### Sistema de Archivos
-
-- Estado: ✅ Funcional
-- Problemas: Ninguno crítico
-- Prioridad: Baja
-
-## 📝 Notas Adicionales
-
-- Se requiere revisión completa del sistema de caché
-- Necesario implementar mejor sistema de monitoreo
-- Considerar implementar health checks
-- Revisar manejo de memoria en caché
+// ... mantener solo las últimas 4 entradas en el changelog ...
