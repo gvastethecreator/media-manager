@@ -2,8 +2,12 @@ import { formatBytes } from "@/lib/utils"
 import { thumbnailCache } from "@/lib/cache"
 import { PrismaClient } from '@prisma/client'
 import { EventSourcePolyfill as EventSource, Event as EventSourceEvent } from 'event-source-polyfill'
+import { logger } from '@/lib/logger'
 
 const prisma = new PrismaClient()
+
+// Crear una instancia específica para el servicio de thumbnails
+const thumbLogger = logger.withContext('ThumbnailService')
 
 export interface ThumbnailStats {
   total: number
@@ -62,7 +66,7 @@ export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: numbe
 
 export type ThumbnailEventCallback = (event: { type: string, data: any }) => void;
 
-class ThumbnailService {
+export class ThumbnailService {
   private static instance: ThumbnailService
   private eventSource: EventSource | null = null
   private timeout = 45000; // 45 segundos
@@ -71,7 +75,8 @@ class ThumbnailService {
   private preGenerationQueue: Set<string> = new Set();
   private isProcessingQueue = false;
 
-  private constructor() {
+  constructor() {
+    thumbLogger.info('Initializing ThumbnailService');
     // Inicializar el servicio
     this.startQueueProcessor();
   }
@@ -285,32 +290,35 @@ class ThumbnailService {
     });
   }
 
-  async optimizeThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+  async optimizeThumbnails(options: ProcessOptions = {}): Promise<void> {
     try {
-      await this.handleSSEConnection('/api/thumbnails/optimize', callbacks);
+      thumbLogger.info('Starting thumbnail optimization');
+      await this.handleSSEConnection('/api/thumbnails/optimize', options);
+      thumbLogger.info('Thumbnail optimization completed', { optimized: options.total, total: options.total });
     } catch (error) {
-      console.error('Error en optimizeThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      thumbLogger.error('Error optimizing thumbnails:', error);
       throw error;
     }
   }
 
-  async cleanThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+  async cleanThumbnails(options: ProcessOptions = {}): Promise<void> {
     try {
-      await this.handleSSEConnection('/api/thumbnails/clean', callbacks);
+      thumbLogger.info('Starting thumbnail cleanup');
+      await this.handleSSEConnection('/api/thumbnails/clean', options);
+      thumbLogger.info('Thumbnail cleanup completed', { cleaned: options.total, total: options.total });
     } catch (error) {
-      console.error('Error en cleanThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      thumbLogger.error('Error cleaning thumbnails:', error);
       throw error;
     }
   }
 
-  async reprocessAll(callbacks?: ThumbnailCallbacks): Promise<void> {
+  async reprocessAll(options: ProcessOptions = {}): Promise<void> {
     try {
-      await this.handleSSEConnection('/api/thumbnails/reprocess', callbacks);
+      thumbLogger.info('Starting thumbnail reprocessing');
+      await this.handleSSEConnection('/api/thumbnails/reprocess', options);
+      thumbLogger.info('Thumbnail reprocessing completed', { processed: options.total, total: options.total });
     } catch (error) {
-      console.error('Error en reprocessAll:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
+      thumbLogger.error('Error reprocessing thumbnails:', error);
       throw error;
     }
   }

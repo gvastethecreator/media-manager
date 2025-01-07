@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import Meteors from "@/components/ui/meteors";
+import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
 
 const itemVariants = {
 	initial: { opacity: 0, y: 10 },
@@ -139,6 +140,9 @@ const Activity = memo(
 
 export function StatsPanel() {
 	const { stats, isLoading, error, initialize } = useStatsStore();
+
+	// Inicializar eventos SSE
+	useThumbnailEvents();
 
 	useEffect(() => {
 		initialize();
