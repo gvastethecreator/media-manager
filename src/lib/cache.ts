@@ -78,6 +78,9 @@ class CacheManager<T = unknown> {
       allowStale: this.allowStale,
       updateAgeOnGet: this.updateAgeOnGet,
       ttl: this.defaultTTL,
+      dispose: (key, entry) => {
+        logger.debug(`[Cache:${this.name}] Eliminada entrada:`, { key })
+      }
     })
 
     // Iniciar timers
@@ -155,12 +158,12 @@ class CacheManager<T = unknown> {
       const now = Date.now()
       let pruned = 0
 
-      // Obtener una copia segura de las entradas
-      const entries = Array.from(this.cache.entries())
+      // Usar dump() en lugar de entries()
+      const entries = this.cache.dump()
 
-      for (const [key, entry] of entries) {
+      for (const [key, entry] of Object.entries(entries)) {
         try {
-          if (now - entry.timestamp > entry.ttl) {
+          if (now - entry.value.timestamp > entry.value.ttl) {
             await this.delete(key)
             pruned++
           }
@@ -198,7 +201,8 @@ class CacheManager<T = unknown> {
 
   private async updateStats(): Promise<void> {
     try {
-      const entries = Array.from(this.cache.entries())
+      // LRUCache no tiene método entries(), usamos dump() para obtener las entradas
+      const entries = this.cache.dump()
       const now = Date.now()
 
       // Calcular estadísticas en chunks para evitar bloquear el event loop
@@ -208,10 +212,15 @@ class CacheManager<T = unknown> {
       let minTimestamp = Infinity
       let maxTimestamp = -Infinity
 
-      for (let i = 0; i < entries.length; i += chunkSize) {
-        const chunk = entries.slice(i, i + chunkSize)
+      // Convertir el dump en array de entradas
+      const entriesArray = Object.entries(entries).map(([key, value]) => [key, value.value])
+
+      for (let i = 0; i < entriesArray.length; i += chunkSize) {
+        const chunk = entriesArray.slice(i, i + chunkSize)
 
         for (const [_, entry] of chunk) {
+          if (!entry) continue
+
           try {
             totalSize += JSON.stringify(entry.value).length
             totalTTL += entry.ttl
@@ -231,9 +240,9 @@ class CacheManager<T = unknown> {
       this.stats.keys = this.cache.size
       this.stats.size = totalSize
       this.stats.hitRatio = this.stats.hits / (this.stats.hits + this.stats.misses) || 0
-      this.stats.avgTTL = entries.length > 0 ? totalTTL / entries.length : 0
+      this.stats.avgTTL = entriesArray.length > 0 ? totalTTL / entriesArray.length : 0
 
-      if (entries.length > 0) {
+      if (entriesArray.length > 0 && minTimestamp !== Infinity && maxTimestamp !== -Infinity) {
         this.stats.oldestEntry = now - minTimestamp
         this.stats.newestEntry = now - maxTimestamp
       }

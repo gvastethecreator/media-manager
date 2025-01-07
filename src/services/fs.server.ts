@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { prisma } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 
 // Esta función debe ser llamada solo en el servidor
 export const fsService = {

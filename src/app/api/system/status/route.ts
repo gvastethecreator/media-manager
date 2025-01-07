@@ -110,9 +110,13 @@ export async function GET() {
       where: { thumbnail: null }
     }))
 
+    interface TestResult {
+      test: number
+    }
+
     // Verificar estado del sistema
     const systemChecks = {
-      database: Number((await prisma.$queryRaw`SELECT 1+1 as test`)[0].test),
+      database: Number((await prisma.$queryRaw<TestResult[]>`SELECT 1+1 as test`)[0].test),
       fileSystem: await fs.readdir(process.cwd()),
       settings: await fs.readFile(settingsPath, 'utf-8')
     }
