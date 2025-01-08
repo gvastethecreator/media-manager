@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/image.service'
 import { existsSync } from 'fs'
 import { extname } from 'path'
 import { thumbnailLogger as logger } from './utils'
@@ -80,7 +80,7 @@ export async function generateThumbnail(
 
     // Combinar opciones
     const finalOptions = { ...DEFAULT_OPTIONS, ...options }
-    const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality]
+    const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality as ThumbnailQuality]
     if (!config) {
       throw new Error(`Calidad inválida: ${finalOptions.quality}`)
     }

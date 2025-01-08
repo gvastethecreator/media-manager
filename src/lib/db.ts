@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { logger } from './utils'
 
 // Tipos para la configuración de la base de datos
@@ -17,10 +17,6 @@ const DEFAULT_CONFIG: Required<DatabaseConfig> = {
   maxConnections: 10,
   retryAttempts: 3,
   retryDelay: 1000
-}
-
-declare global {
-  var prisma: PrismaClient | undefined
 }
 
 class Database {
@@ -52,20 +48,20 @@ class Database {
     })
 
     // Configurar eventos de logging
-    this.client.$on('error', (e) => {
+    this.client.$on('error' as never, (e: Prisma.LogEvent) => {
       this.lastError = e instanceof Error ? e : new Error(String(e))
       logger.error('Error de base de datos:', e)
     })
 
-    this.client.$on('warn', (e) => {
+    this.client.$on('warn' as never, (e: Prisma.LogEvent) => {
       logger.warn('Advertencia de base de datos:', e)
     })
 
-    this.client.$on('info', (e) => {
+    this.client.$on('info' as never, (e: Prisma.LogEvent) => {
       logger.info('Info de base de datos:', e)
     })
 
-    this.client.$on('query', (e) => {
+    this.client.$on('query' as never, (e: Prisma.QueryEvent) => {
       logger.debug('Query ejecutada:', {
         query: e.query,
         params: e.params,
@@ -73,10 +69,7 @@ class Database {
       })
     })
 
-    // Guardar instancia en desarrollo
-    if (process.env.NODE_ENV !== 'production') {
-      global.prisma = this.client
-    }
+ 
   }
 
   /**

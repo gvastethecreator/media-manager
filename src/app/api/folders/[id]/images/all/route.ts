@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import type { FileItem } from '@/types/file-item'
+import { logger } from '@/lib/logger'
+
+const imagesLogger = logger.withContext('ImagesAPI')
+
+interface ImageMetadata {
+  mimeType?: string
+  dimensions?: {
+    width: number
+    height: number
+  }
+  fileSystem?: {
+    created?: string
+    modified?: string
+    size?: number
+  }
+  [key: string]: any
+}
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -14,6 +31,7 @@ export async function GET(
     const { id } = params
 
     if (!id) {
+      imagesLogger.error('ID de carpeta no proporcionado')
       return NextResponse.json(
         { error: 'ID de carpeta no proporcionado' },
         { status: 400 }
@@ -57,6 +75,7 @@ export async function GET(
     })
 
     if (!folder) {
+      imagesLogger.error('Carpeta no encontrada:', id)
       return NextResponse.json(
         { error: 'Carpeta no encontrada', items: [] },
         { status: 404 }
@@ -65,11 +84,14 @@ export async function GET(
 
     // Transformar los datos para mantener compatibilidad con la interfaz FileItem
     const items: FileItem[] = folder.images.map(image => {
-      let metadata = {};
+      let metadata: ImageMetadata = {}
       try {
-        metadata = image.metadata ? JSON.parse(image.metadata) : {};
+        metadata = image.metadata ? JSON.parse(image.metadata) : {}
       } catch (e) {
-        console.warn('Error parsing metadata:', e);
+        imagesLogger.warn('Error parsing metadata:', {
+          imageId: image.id,
+          error: e instanceof Error ? e.message : 'Error desconocido'
+        })
       }
 
       return {
@@ -120,14 +142,12 @@ export async function GET(
       items
     })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-    console.error('Error obteniendo imágenes:', errorMessage)
-
+    imagesLogger.error('Error obteniendo imágenes:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Error al obtener las imágenes',
-        message: errorMessage,
+        message: error instanceof Error ? error.message : 'Error desconocido',
         items: []
       },
       { status: 500 }

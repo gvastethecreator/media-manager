@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +57,7 @@ import { type ThumbnailQuality } from "@/services/thumbnail.service";
 import { useThumbnailStore } from "@/store/thumbnails";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
 import * as thumbnailActions from "@/actions/thumbnails";
+import { ThumbnailService } from "@/services/thumbnail.service";
 
 interface FolderStats {
 	totalFolders: number;
@@ -128,7 +129,7 @@ const initialStats: FolderStats = {
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{ value: "compressed", label: "Comprimida (más rápido, menos espacio)" },
 	{ value: "low", label: "Baja (balance entre calidad y espacio)" },
-	{ value: "mid", label: "Media (recomendado)" },
+	{ value: "medium", label: "Media (recomendado)" },
 	{ value: "high", label: "Alta (mejor calidad, más espacio)" },
 ];
 
@@ -158,6 +159,9 @@ export function FoldersSection() {
 	const [lastProcessedThumbnails, setLastProcessedThumbnails] = React.useState<
 		LastProcessedThumbnail[]
 	>([]);
+
+	// Usar el singleton en lugar de crear una nueva instancia
+	const thumbnailService = useMemo(() => ThumbnailService.getInstance(), []);
 
 	// Inicializar eventos SSE
 	useThumbnailEvents();

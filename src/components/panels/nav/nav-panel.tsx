@@ -298,14 +298,14 @@ export function NavPanel() {
 											</Button>
 										))}
 									{id === "tags" && (
-										<div className="flex flex-col-4 gap-2 mt-1">
+										<div className="flex w-full flex-wrap gap-2 mt-1">
 											{tags?.map((tag) => (
 												<Button
 													variant="ghost"
 													key={tag.id}
 													style={{ backgroundColor: tag.color }}
 													className={cn(
-														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl",
+														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold" ,
 														currentView === "tag-content" &&
 															currentTagId === tag.name &&
 															"bg-gradient-to-r from-black/30 to-black/35"
