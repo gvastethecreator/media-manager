@@ -15,9 +15,8 @@ export async function GET(request: NextRequest) {
 
   const writeEvent = async (event: string, data: any) => {
     try {
-      await writer.write(
-        encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-      )
+      const eventString = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+      await writer.write(encoder.encode(eventString))
     } catch (error) {
       thumbLogger.error('Error writing event:', error)
     }
