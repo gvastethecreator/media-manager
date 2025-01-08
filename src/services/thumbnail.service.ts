@@ -5,6 +5,7 @@ import { EventSourcePolyfill as EventSource } from 'event-source-polyfill'
 import { logger } from '@/lib/logger'
 import { eventService } from './events.service'
 import { thumbnailEventService } from './thumbnail-events.service'
+import sharp from 'sharp'
 
 const prisma = new PrismaClient()
 
@@ -13,6 +14,13 @@ const thumbLogger = logger.withContext('ThumbnailService')
 
 // Configuración base para las URLs
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+
+// Configuración de límites
+const LIMITS = {
+  MAX_PIXELS: 40000000, // 40 megapíxeles
+  MAX_FILE_SIZE: 100 * 1024 * 1024, // 100MB
+  MAX_DIMENSION: 8000 // 8000px
+} as const;
 
 export interface ThumbnailStats {
   total: number
@@ -84,6 +92,9 @@ export class ThumbnailService {
   private isProcessing = false
   private preGenerationQueue: Set<string> = new Set()
   private isProcessingQueue = false
+  private readonly MAX_RETRIES = 3;
+  private readonly RETRY_DELAY = 1000;
+  private readonly PROCESS_TIMEOUT = 60000; // 1 minuto
 
   constructor() {
     thumbLogger.info('Initializing ThumbnailService')
@@ -98,7 +109,9 @@ export class ThumbnailService {
   }
 
   private getFullUrl(path: string): string {
-    return `${BASE_URL}${path}`
+    const baseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`
+    return `${baseUrl}${normalizedPath}`
   }
 
   private async fetchWithTimeout(
@@ -173,9 +186,10 @@ export class ThumbnailService {
 
     this.isProcessing = true;
     const handlers = this.setupEventHandlers(callbacks);
+    const url = this.getFullUrl(endpoint);
 
     try {
-      await eventService.connect(endpoint, {
+      await eventService.connect(url, {
         withCredentials: true,
         heartbeatTimeout: 45000,
         reconnectInterval: 1000,
@@ -212,11 +226,15 @@ export class ThumbnailService {
         }, 0);
       });
     } catch (error) {
-      thumbLogger.error('Error en el proceso:', error);
-      throw error;
+      const formattedError = {
+        message: 'Error en la conexión',
+        details: error instanceof Error ? error.message : 'Error desconocido',
+        originalError: error
+      };
+      thumbLogger.error('Error en el proceso:', formattedError);
+      throw formattedError;
     } finally {
       this.isProcessing = false;
-      // Limpiar todos los handlers
       Object.entries(handlers).forEach(([event, handler]) => {
         eventService.off(event, handler);
       });
@@ -337,62 +355,71 @@ export class ThumbnailService {
     }
   }
 
-  async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
-    let attempts = 0
-    let lastError: Error | null = null
+  async generateThumbnail(
+    imagePath: string,
+    options: ThumbnailOptions = {},
+    retryCount = 0
+  ): Promise<string> {
+    try {
+      // Validar imagen antes de procesar
+      await this.validateImage(imagePath);
 
-    while (attempts < this.maxRetries) {
-      try {
-        if (!imageId || !quality) {
-          throw new Error('ID de imagen y calidad son requeridos')
-        }
-
-        const config = THUMBNAIL_QUALITY_CONFIG[quality]
-        if (!config) {
-          throw new Error('Calidad de thumbnail inválida')
-        }
-
-        // Obtener la imagen
-        const image = await prisma.image.findUnique({
-          where: { id: imageId }
-        })
-
-        if (!image) {
-          throw new Error('Imagen no encontrada')
-        }
-
-        // Generar el thumbnail
-        const response = await fetch(`/api/thumbnails/generate/${imageId}?quality=${quality}`, {
-          method: 'POST'
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error generando thumbnail');
-        }
-
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.error || 'Error generando thumbnail');
-        }
-
-        // Invalidar caché para esta imagen
-        const cacheKey = `thumbnail:${imageId}:${quality}`
-        await thumbnailCache.delete(cacheKey)
-
-        return
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Error desconocido')
-        attempts++
-        if (attempts < this.maxRetries) {
-          await new Promise(resolve =>
-            setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
-          )
-        }
+      const thumbnailPath = await this.generateThumbnailInternal(imagePath, options);
+      return thumbnailPath;
+    } catch (error) {
+      if (retryCount < this.MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY * Math.pow(2, retryCount)));
+        return this.generateThumbnail(imagePath, options, retryCount + 1);
       }
+      throw new Error(`Error al generar la miniatura después de ${this.MAX_RETRIES} reintentos: ${error.message}`);
+    }
+  }
+
+  private async generateThumbnailInternal(
+    imagePath: string,
+    options: ThumbnailOptions
+  ): Promise<string> {
+    const { quality = 'mid', width, height } = options;
+
+    // Validar que el archivo existe
+    if (!await this.fileExists(imagePath)) {
+      throw new Error(`El archivo no existe: ${imagePath}`);
     }
 
-    throw lastError || new Error('Error al generar la miniatura después de reintentos')
+    // Obtener el hash del archivo
+    const fileHash = await this.getFileHash(imagePath);
+
+    // Generar path de la miniatura
+    const thumbnailPath = this.getThumbnailPath(fileHash, quality);
+
+    // Si ya existe y no está corrupto, retornar
+    if (await this.isValidThumbnail(thumbnailPath)) {
+      return thumbnailPath;
+    }
+
+    // Procesar la imagen
+    await this.processImage(imagePath, thumbnailPath, { quality, width, height });
+
+    // Verificar que se generó correctamente
+    if (!await this.isValidThumbnail(thumbnailPath)) {
+      throw new Error('La miniatura generada no es válida');
+    }
+
+    return thumbnailPath;
+  }
+
+  private async isValidThumbnail(thumbnailPath: string): Promise<boolean> {
+    try {
+      if (!await this.fileExists(thumbnailPath)) {
+        return false;
+      }
+
+      // Intentar abrir la imagen para verificar que no está corrupta
+      const metadata = await sharp(thumbnailPath).metadata();
+      return Boolean(metadata.width && metadata.height);
+    } catch {
+      return false;
+    }
   }
 
   async queueThumbnailGeneration(imageIds: string[]): Promise<void> {
@@ -444,6 +471,96 @@ export class ThumbnailService {
     } catch (error) {
       thumbLogger.error('Error en getStats:', error)
       throw error
+    }
+  }
+
+  async reprocessThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+    if (this.isProcessing) {
+      throw new Error('Ya hay un proceso en ejecución');
+    }
+
+    this.isProcessing = true;
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), this.PROCESS_TIMEOUT);
+
+    try {
+      const response = await fetch('/api/thumbnails/reprocess', {
+        method: 'POST',
+        signal: abortController.signal,
+        headers: {
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error iniciando el reprocesamiento');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No se pudo iniciar la lectura del stream');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const text = new TextDecoder().decode(value);
+        const events = text.split('\n\n').filter(Boolean);
+
+        for (const event of events) {
+          const [type, ...dataLines] = event.split('\n');
+          const data = dataLines.join('\n').replace('data: ', '');
+
+          try {
+            const parsedData = JSON.parse(data);
+            switch (type.replace('event: ', '')) {
+              case 'progress':
+                callbacks?.onProgress?.(parsedData);
+                break;
+              case 'error':
+                callbacks?.onError?.(new Error(parsedData.message));
+                break;
+              case 'complete':
+                callbacks?.onComplete?.(parsedData);
+                break;
+            }
+          } catch (error) {
+            logger.error('Error procesando evento:', error);
+          }
+        }
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('El proceso excedió el tiempo límite');
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      this.isProcessing = false;
+    }
+  }
+
+  private async validateImage(imagePath: string): Promise<void> {
+    try {
+      const metadata = await sharp(imagePath).metadata();
+
+      if (!metadata.width || !metadata.height) {
+        throw new Error('No se pudieron obtener las dimensiones de la imagen');
+      }
+
+      const pixels = metadata.width * metadata.height;
+
+      if (pixels > LIMITS.MAX_PIXELS) {
+        throw new Error(`La imagen excede el límite de píxeles (${LIMITS.MAX_PIXELS})`);
+      }
+
+      if (metadata.width > LIMITS.MAX_DIMENSION || metadata.height > LIMITS.MAX_DIMENSION) {
+        throw new Error(`La imagen excede la dimensión máxima permitida (${LIMITS.MAX_DIMENSION}px)`);
+      }
+    } catch (error) {
+      throw new Error(`Error validando imagen: ${error.message}`);
     }
   }
 }

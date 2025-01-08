@@ -1,5 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 // Tipos para el sistema de logging
 interface LoggerOptions {
@@ -168,6 +170,11 @@ export function zoomLevelToThumbnailSize(
   // Convertir el nivel de zoom (50-200) a un tamaño de thumbnail (min-max)
   const size = Math.floor((zoomLevel / 100) * defaultSize)
   return Math.max(min, Math.min(max, size))
+}
+
+export function formatDate(date: string | Date) {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return format(dateObj, "dd MMM yyyy", { locale: es });
 }
 
 // Exportar tipos útiles

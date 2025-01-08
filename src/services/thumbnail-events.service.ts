@@ -1,5 +1,22 @@
 import { EventEmitter } from 'events';
 import { logger } from '@/lib/logger';
+import { ProcessStatus, ThumbnailStats } from './thumbnail.service';
+
+type ThumbnailEventType = 'thumbnail:progress' | 'thumbnail:error' | 'thumbnail:complete' | 'thumbnail:stats';
+
+interface ThumbnailEventData {
+  'thumbnail:progress': ProcessStatus;
+  'thumbnail:error': Error | unknown;
+  'thumbnail:complete': {
+    processed?: number;
+    optimized?: number;
+    cleaned?: number;
+    totalSaved?: number;
+    totalFreed?: number;
+    errors?: number;
+  };
+  'thumbnail:stats': ThumbnailStats;
+}
 
 class ThumbnailEventService {
   private static instance: ThumbnailEventService;
@@ -8,7 +25,7 @@ class ThumbnailEventService {
 
   private constructor() {
     this.emitter = new EventEmitter();
-    this.emitter.setMaxListeners(50); // Aumentamos el límite de listeners
+    this.emitter.setMaxListeners(50);
   }
 
   static getInstance(): ThumbnailEventService {
@@ -18,58 +35,62 @@ class ThumbnailEventService {
     return ThumbnailEventService.instance;
   }
 
+  private emit<T extends ThumbnailEventType>(event: T, data: ThumbnailEventData[T]) {
+    this.emitter.emit(event, data);
+  }
+
   // Métodos para emitir eventos
-  emitProgress(status: any) {
+  emitProgress(status: ProcessStatus) {
     this.logger.debug('📊 Emitiendo progreso:', status);
-    this.emitter.emit('thumbnail:progress', status);
+    this.emit('thumbnail:progress', status);
   }
 
-  emitError(error: any) {
+  emitError(error: Error | unknown) {
     this.logger.error('❌ Emitiendo error:', error);
-    this.emitter.emit('thumbnail:error', error);
+    this.emit('thumbnail:error', error);
   }
 
-  emitComplete(data: any) {
+  emitComplete(data: ThumbnailEventData['thumbnail:complete']) {
     this.logger.info('✅ Proceso completado:', data);
-    this.emitter.emit('thumbnail:complete', data);
+    this.emit('thumbnail:complete', data);
   }
 
-  emitStats(stats: any) {
+  emitStats(stats: ThumbnailStats) {
     this.logger.debug('📈 Actualizando estadísticas:', stats);
-    this.emitter.emit('thumbnail:stats', stats);
+    this.emit('thumbnail:stats', stats);
   }
 
   // Métodos para suscribirse a eventos
-  onProgress(handler: (status: any) => void) {
+  onProgress(handler: (status: ProcessStatus) => void) {
     this.emitter.on('thumbnail:progress', handler);
   }
 
-  onError(handler: (error: any) => void) {
+  onError(handler: (error: Error | unknown) => void) {
     this.emitter.on('thumbnail:error', handler);
   }
 
-  onComplete(handler: (data: any) => void) {
+  onComplete(handler: (data: ThumbnailEventData['thumbnail:complete']) => void) {
     this.emitter.on('thumbnail:complete', handler);
   }
 
-  onStats(handler: (stats: any) => void) {
+  onStats(handler: (stats: ThumbnailStats) => void) {
     this.emitter.on('thumbnail:stats', handler);
   }
 
   // Métodos para desuscribirse de eventos
-  offProgress(handler: (status: any) => void) {
+  offProgress(handler: (status: ProcessStatus) => void) {
     this.emitter.off('thumbnail:progress', handler);
   }
 
-  offError(handler: (error: any) => void) {
+  offError(handler: (error: Error | unknown) => void) {
     this.emitter.off('thumbnail:error', handler);
   }
 
-  offComplete(handler: (data: any) => void) {
+  offComplete(handler: (data: ThumbnailEventData['thumbnail:complete']) => void) {
     this.emitter.off('thumbnail:complete', handler);
   }
 
-  offStats(handler: (stats: any) => void) {
+  offStats(handler: (stats: ThumbnailStats) => void) {
     this.emitter.off('thumbnail:stats', handler);
   }
 

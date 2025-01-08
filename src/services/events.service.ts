@@ -1,250 +1,258 @@
 import { EventSourcePolyfill as EventSource } from 'event-source-polyfill';
 import { logger } from '@/lib/logger';
 
-export type EventCallback = (data: any) => void;
-export type ErrorCallback = (error: any) => void;
+const eventLogger = logger.withContext('EventService');
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-interface EventSourceConfig {
+type EventType = 'connected' | 'message' | 'error' | 'heartbeat' | 'progress' | 'complete' | 'stats';
+type EventCallback<T = any> = (data: T) => void;
+type EventHandlers = Map<string, Set<EventCallback>>;
+
+interface EventSourceOptions {
   withCredentials?: boolean;
   headers?: Record<string, string>;
   heartbeatTimeout?: number;
   reconnectInterval?: number;
 }
 
-interface EventHandlers {
-  [key: string]: EventCallback[];
+interface EventError {
+  message: string;
+  details?: string;
+  code?: string;
+  timestamp?: number;
 }
 
 export class EventService {
-  private static instance: EventService;
+  private handlers: EventHandlers = new Map();
   private eventSource: EventSource | null = null;
-  private eventHandlers: EventHandlers = {};
-  private reconnectAttempts = 0;
   private heartbeatInterval: NodeJS.Timeout | null = null;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
   private lastHeartbeat: number = Date.now();
-  private baseUrl: string = '';
+  private currentEndpoint: string | null = null;
 
-  private readonly MAX_RECONNECT_ATTEMPTS = 3;
-  private readonly RECONNECT_DELAY = 2000;
-  private readonly DEFAULT_HEARTBEAT_TIMEOUT = 30000;
-  private readonly DEFAULT_RECONNECT_INTERVAL = 1000;
-  private readonly logger = logger.withContext('EventService');
+  private readonly HEARTBEAT_INTERVAL = 15000;
+  private readonly HEARTBEAT_TIMEOUT = 45000;
+  private readonly RECONNECT_DELAY = 5000;
+  private readonly MAX_RECONNECT_ATTEMPTS = 5;
+  private reconnectAttempts = 0;
 
-  private constructor() {
-    // Intentar obtener la URL base del entorno
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  constructor() {
+    this.setupHeartbeat();
   }
 
-  static getInstance(): EventService {
-    if (!EventService.instance) {
-      EventService.instance = new EventService();
-    }
-    return EventService.instance;
-  }
-
-  private getFullUrl(endpoint: string): string {
-    if (endpoint.startsWith('http')) {
-      return endpoint;
-    }
-    return `${this.baseUrl}${endpoint}`;
-  }
-
-  connect(endpoint: string, config: EventSourceConfig = {}): void {
-    if (this.eventSource) {
-      this.disconnect();
-    }
-
-    const heartbeatTimeout = config.heartbeatTimeout || this.DEFAULT_HEARTBEAT_TIMEOUT;
-    const reconnectInterval = config.reconnectInterval || this.DEFAULT_RECONNECT_INTERVAL;
-
-    try {
-      const fullUrl = this.getFullUrl(endpoint);
-
-      this.eventSource = new EventSource(fullUrl, {
-        withCredentials: config.withCredentials ?? true,
-        headers: {
-          ...config.headers,
-          'Cache-Control': 'no-cache',
-          'Client-Id': `client-${Date.now()}`,
-          'Accept': 'text/event-stream'
-        },
-        heartbeatTimeout: heartbeatTimeout
-      });
-
-      this.setupHeartbeat(heartbeatTimeout);
-
-      this.eventSource.onopen = () => {
-        this.logger.info('🔌 Conexión establecida con', endpoint);
-        this.reconnectAttempts = 0;
-        this.lastHeartbeat = Date.now();
-      };
-
-      this.eventSource.onmessage = (event) => {
-        try {
-          if (event.data === 'heartbeat') {
-            this.handleHeartbeat();
-            return;
-          }
-
-          const data = JSON.parse(event.data);
-          this.logger.debug('📨 Evento recibido:', data);
-          this.handleEvent(data);
-          this.lastHeartbeat = Date.now();
-        } catch (error) {
-          this.logger.error('❌ Error procesando evento:', error);
-        }
-      };
-
-      this.eventSource.onerror = (error) => {
-        this.handleError(error, endpoint, config);
-      };
-
-      // Configurar reconexión automática
-      this.eventSource.addEventListener('error', () => {
-        if (this.shouldReconnect()) {
-          setTimeout(() => {
-            this.logger.info('🔄 Intentando reconexión...');
-            this.connect(endpoint, config);
-          }, reconnectInterval * Math.pow(2, this.reconnectAttempts));
-        }
-      });
-
-    } catch (error) {
-      this.logger.error('❌ Error al establecer conexión:', error);
-      this.handleError(error, endpoint, config);
-    }
-  }
-
-  private setupHeartbeat(timeout: number): void {
+  private setupHeartbeat() {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
 
     this.heartbeatInterval = setInterval(() => {
-      const timeSinceLastHeartbeat = Date.now() - this.lastHeartbeat;
-      if (timeSinceLastHeartbeat > timeout) {
-        this.logger.warn(`⚠️ No se ha recibido heartbeat en ${timeSinceLastHeartbeat}ms`);
-        if (this.eventSource) {
-          this.eventSource.close();
-          this.eventSource = null;
-          this.emit('error', {
-            message: 'Conexión perdida - No se han recibido heartbeats',
-            timeSinceLastHeartbeat
-          });
-        }
+      const now = Date.now();
+      const timeSinceLastHeartbeat = now - this.lastHeartbeat;
+
+      if (timeSinceLastHeartbeat > this.HEARTBEAT_TIMEOUT) {
+        eventLogger.warn('⚠️ No se ha recibido heartbeat en', timeSinceLastHeartbeat, 'ms');
+        this.emit('error', {
+          message: 'Conexión perdida - No se han recibido heartbeats',
+          details: `Último heartbeat hace ${Math.round(timeSinceLastHeartbeat / 1000)}s`,
+          code: 'HEARTBEAT_TIMEOUT',
+          timestamp: now
+        } as EventError);
+        this.reconnect();
       }
-    }, Math.floor(timeout / 2));
+    }, this.HEARTBEAT_INTERVAL);
   }
 
-  private handleHeartbeat(): void {
-    this.lastHeartbeat = Date.now();
-    this.logger.debug('💓 Heartbeat recibido');
-  }
+  async connect(endpoint: string, options: EventSourceOptions = {}) {
+    if (!endpoint) {
+      throw new Error('Endpoint no proporcionado');
+    }
 
-  private shouldReconnect(): boolean {
-    return this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS;
-  }
+    try {
+      this.currentEndpoint = endpoint;
 
-  private handleError(error: any, endpoint: string, config: EventSourceConfig): void {
-    this.logger.error('❌ Error en la conexión:', error);
-    this.disconnect();
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
 
-    if (this.shouldReconnect()) {
-      this.reconnectAttempts++;
-      const delay = this.RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts - 1);
-      this.logger.info(`🔄 Reintentando conexión (${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS}) en ${delay}ms...`);
+      const url = new URL(endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`);
 
-      setTimeout(() => {
-        if (this.eventSource?.readyState !== 1) {
-          this.connect(endpoint, {
-            ...config,
-            heartbeatTimeout: Math.min(config.heartbeatTimeout || this.DEFAULT_HEARTBEAT_TIMEOUT, 15000)
-          });
+      this.eventSource = new EventSource(url.toString(), {
+        withCredentials: options.withCredentials ?? true,
+        heartbeatTimeout: options.heartbeatTimeout ?? this.HEARTBEAT_TIMEOUT,
+        reconnectInterval: options.reconnectInterval ?? this.RECONNECT_DELAY,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Accept': 'text/event-stream',
+          ...(options.headers || {})
         }
-      }, delay);
-    } else {
-      this.logger.error('❌ Máximo número de intentos de reconexión alcanzado');
-      this.emit('error', {
-        message: 'Error de conexión después de varios intentos',
-        originalError: error
       });
+
+      this.eventSource.onopen = () => {
+        eventLogger.info('✅ Conexión establecida con:', url.toString());
+        this.emit('connected', { timestamp: Date.now() });
+        this.lastHeartbeat = Date.now();
+        this.reconnectAttempts = 0;
+      };
+
+      this.eventSource.onerror = (error) => {
+        const errorData: EventError = {
+          message: 'Error en la conexión',
+          details: error instanceof Error ? error.message : 'Error de conexión SSE',
+          code: 'CONNECTION_ERROR',
+          timestamp: Date.now()
+        };
+        eventLogger.error('❌ Error en conexión:', errorData);
+        this.emit('error', errorData);
+        this.reconnect();
+      };
+
+      this.eventSource.onmessage = (event) => {
+        try {
+          if (!event.data) {
+            eventLogger.warn('⚠️ Mensaje recibido sin datos');
+            return;
+          }
+
+          const data = JSON.parse(event.data);
+          this.lastHeartbeat = Date.now();
+          this.emit('message', data);
+        } catch (error) {
+          eventLogger.error('❌ Error procesando mensaje:', error, 'Datos recibidos:', event.data);
+          this.emit('error', {
+            message: 'Error procesando mensaje',
+            details: error instanceof Error ? error.message : 'Error al procesar JSON',
+            code: 'MESSAGE_PARSE_ERROR',
+            timestamp: Date.now()
+          } as EventError);
+        }
+      };
+
+      // Manejador específico para eventos de progreso
+      this.eventSource.addEventListener('progress', (event: MessageEvent) => {
+        try {
+          if (!event.data) return;
+          const data = JSON.parse(event.data);
+          this.emit('progress', data);
+        } catch (error) {
+          eventLogger.error('❌ Error procesando evento de progreso:', error);
+        }
+      });
+
+      // Manejador específico para eventos de completado
+      this.eventSource.addEventListener('complete', (event: MessageEvent) => {
+        try {
+          if (!event.data) return;
+          const data = JSON.parse(event.data);
+          this.emit('complete', data);
+        } catch (error) {
+          eventLogger.error('❌ Error procesando evento de completado:', error);
+        }
+      });
+
+      this.eventSource.addEventListener('heartbeat', () => {
+        this.lastHeartbeat = Date.now();
+      });
+
+    } catch (error) {
+      const errorData: EventError = {
+        message: 'Error al crear conexión',
+        details: error instanceof Error ? error.message : 'Error al inicializar EventSource',
+        code: 'CONNECTION_CREATE_ERROR',
+        timestamp: Date.now()
+      };
+      eventLogger.error('❌ Error al crear conexión:', errorData);
+      this.emit('error', errorData);
+      throw error;
     }
   }
 
-  private handleEvent(data: any): void {
-    const { type, payload } = data;
-    if (!type) {
-      this.logger.warn('⚠️ Evento recibido sin tipo:', data);
+  private reconnect() {
+    if (this.reconnectAttempts >= this.MAX_RECONNECT_ATTEMPTS) {
+      const errorData: EventError = {
+        message: 'No se pudo restablecer la conexión',
+        details: `Máximo número de intentos (${this.MAX_RECONNECT_ATTEMPTS}) alcanzado`,
+        code: 'MAX_RECONNECT_ATTEMPTS',
+        timestamp: Date.now()
+      };
+      eventLogger.error('❌ Máximo número de intentos de reconexión alcanzado');
+      this.emit('error', errorData);
       return;
     }
 
-    this.logger.debug(`📨 Procesando evento ${type}:`, payload);
-
-    if (this.eventHandlers[type]) {
-      this.eventHandlers[type].forEach(callback => {
-        try {
-          callback(payload);
-        } catch (error) {
-          this.logger.error(`❌ Error en callback para evento ${type}:`, error);
-        }
-      });
-    } else {
-      this.logger.warn(`⚠️ No hay handlers registrados para el evento: ${type}`);
-    }
-  }
-
-  on(eventType: string, callback: EventCallback): void {
-    if (!this.eventHandlers[eventType]) {
-      this.eventHandlers[eventType] = [];
-      this.logger.debug(`📝 Creando nuevo array de handlers para evento: ${eventType}`);
-    }
-    this.eventHandlers[eventType].push(callback);
-    this.logger.debug(`📝 Handler registrado para evento: ${eventType}`);
-  }
-
-  off(eventType: string, callback: EventCallback): void {
-    if (this.eventHandlers[eventType]) {
-      const initialLength = this.eventHandlers[eventType].length;
-      this.eventHandlers[eventType] = this.eventHandlers[eventType].filter(
-        cb => cb !== callback
-      );
-      const removedCount = initialLength - this.eventHandlers[eventType].length;
-      this.logger.debug(`🗑️ Eliminados ${removedCount} handlers para evento: ${eventType}`);
-    }
-  }
-
-  private emit(eventType: string, data: any): void {
-    if (this.eventHandlers[eventType]) {
-      this.logger.debug(`📤 Emitiendo evento ${eventType}:`, data);
-      this.eventHandlers[eventType].forEach(callback => {
-        try {
-          callback(data);
-        } catch (error) {
-          this.logger.error(`❌ Error en callback al emitir ${eventType}:`, error);
-        }
-      });
-    } else {
-      this.logger.warn(`⚠️ Intento de emitir evento ${eventType} sin handlers registrados`);
-    }
-  }
-
-  disconnect(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
 
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
-      this.logger.info('🔌 Conexión cerrada');
+    }
+
+    this.reconnectAttempts++;
+    const delay = this.RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts - 1);
+
+    this.reconnectTimeout = setTimeout(() => {
+      if (this.currentEndpoint) {
+        eventLogger.info(`🔄 Intento de reconexión ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS}...`);
+        this.connect(this.currentEndpoint).catch(error => {
+          eventLogger.error('❌ Error en reconexión:', error);
+        });
+      }
+    }, delay);
+  }
+
+  on<T = any>(event: EventType, callback: EventCallback<T>) {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, new Set());
+      eventLogger.debug('📝 Creando nuevo array de handlers para evento:', event);
+    }
+
+    this.handlers.get(event)?.add(callback as EventCallback);
+    eventLogger.debug('📝 Handler registrado para evento:', event);
+  }
+
+  off<T = any>(event: EventType, callback: EventCallback<T>) {
+    const handlers = this.handlers.get(event);
+    if (handlers) {
+      handlers.delete(callback as EventCallback);
+      eventLogger.debug('🗑️ Eliminados', handlers.size, 'handlers para evento:', event);
     }
   }
 
-  clearHandlers(): void {
-    this.eventHandlers = {};
-    this.logger.debug('🧹 Handlers limpiados');
+  emit(event: EventType, data?: any) {
+    const handlers = this.handlers.get(event);
+    if (handlers) {
+      handlers.forEach((callback) => {
+        try {
+          callback(data);
+        } catch (error) {
+          eventLogger.error('❌ Error en handler de evento:', event, error);
+        }
+      });
+    }
+  }
+
+  disconnect() {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
+    this.currentEndpoint = null;
+    this.reconnectAttempts = 0;
+    this.handlers.clear();
+    eventLogger.info('🔌 Conexión cerrada');
   }
 }
 
-export const eventService = EventService.getInstance();
+export const eventService = new EventService();

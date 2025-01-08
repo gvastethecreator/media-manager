@@ -76,6 +76,48 @@ interface LastProcessedThumbnail {
 	processedAt: string;
 }
 
+interface ThumbnailProcessStatus extends ProcessStatus {
+	lastProcessed?: LastProcessedThumbnail;
+}
+
+interface OptimizeResult {
+	optimized: number;
+	totalSaved: number;
+}
+
+interface CleanResult {
+	cleaned: number;
+	totalFreed: number;
+}
+
+interface ReprocessResult {
+	processed: number;
+}
+
+interface ThumbnailCallbacks {
+	onProgress?: (status: ThumbnailProcessStatus) => void;
+	onError?: (error: unknown) => void;
+	onComplete?: (data: OptimizeResult | CleanResult | ReprocessResult) => void;
+}
+
+interface ErrorResponse {
+	message?: string;
+	details?: string;
+	code?: string;
+}
+
+interface FolderResponse {
+	folder: {
+		id: string;
+		name: string;
+		path: string;
+	};
+	stats?: {
+		processed: number;
+		total: number;
+	};
+}
+
 const initialStats: FolderStats = {
 	totalFolders: 0,
 	totalFiles: 0,
@@ -199,9 +241,18 @@ export function FoldersSection() {
 						}));
 					}
 				},
-				onError: (error: Error) => {
+				onError: (error: Error | ErrorResponse) => {
 					console.error("Error en el proceso:", error);
-					if (error.name === "FOLDER_EXISTS") {
+					let errorMessage = "Error desconocido al procesar la carpeta";
+
+					if (error instanceof Error) {
+						errorMessage = error.message;
+					} else if (typeof error === "object" && error !== null) {
+						errorMessage =
+							error.message || error.details || JSON.stringify(error);
+					}
+
+					if (errorMessage.includes("FOLDER_EXISTS")) {
 						toast({
 							title: "Carpeta existente",
 							description:
@@ -225,28 +276,50 @@ export function FoldersSection() {
 					} else {
 						toast({
 							title: "Error",
-							description: error.message || "Error al procesar la carpeta",
+							description: errorMessage,
 							variant: "destructive",
 						});
 					}
 				},
-				onComplete: () => {
-					toast({
-						title: "Carpeta agregada",
-						description: `Se agregó la carpeta correctamente`,
-					});
-					setFolderPath("");
-					loadStats();
+				onComplete: (data: FolderResponse) => {
+					if (data?.folder) {
+						toast({
+							title: "Carpeta agregada",
+							description: `Se agregó la carpeta "${data.folder.name}" correctamente`,
+						});
+						setFolderPath("");
+						loadStats();
+					} else {
+						toast({
+							title: "Advertencia",
+							description:
+								"La carpeta se agregó pero no se recibieron datos completos",
+							variant: "default",
+						});
+					}
 				},
 			});
 		} catch (error) {
 			console.error("Error agregando carpeta:", error);
+			let errorMessage = "No se pudo agregar la carpeta";
+
+			if (error instanceof Error) {
+				errorMessage = error.message;
+			} else if (
+				typeof error === "object" &&
+				error !== null &&
+				(error as ErrorResponse)
+			) {
+				const errorResponse = error as ErrorResponse;
+				errorMessage =
+					errorResponse.message ||
+					errorResponse.details ||
+					JSON.stringify(error);
+			}
+
 			toast({
 				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "No se pudo agregar la carpeta",
+				description: errorMessage,
 				variant: "destructive",
 			});
 		} finally {
@@ -380,62 +453,156 @@ export function FoldersSection() {
 		await updateSettings({ videoThumbnailAnimation: enabled });
 	};
 
-	const handleReprocessThumbnails = async () => {
-		if (isThumbnailProcessing) return;
-
-		try {
-			setThumbnailProcessing(true);
-			await thumbnailActions.reprocessThumbnails();
-		} catch (error) {
-			console.error("Error reprocesando miniaturas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al reprocesar miniaturas",
-				variant: "destructive",
-			});
-			setThumbnailProcessing(false);
-		}
-	};
-
 	const handleOptimizeThumbnails = async () => {
-		if (isThumbnailProcessing) return;
-
 		try {
 			setThumbnailProcessing(true);
-			await thumbnailActions.optimizeThumbnails();
-		} catch (error) {
+			await thumbnailActions.optimizeThumbnails({
+				onProgress: (status: ThumbnailProcessStatus) => {
+					if (status?.lastProcessed) {
+						setLastProcessedThumbnails((prev) => [
+							status.lastProcessed as LastProcessedThumbnail,
+							...prev.slice(0, 4),
+						]);
+					}
+				},
+				onError: (error: unknown) => {
+					console.error("Error optimizando miniaturas:", error);
+					toast({
+						title: "Error",
+						description:
+							error instanceof Error
+								? `Error: ${error.message}`
+								: typeof error === "object" && error && "message" in error
+								? String(error.message)
+								: "Error desconocido al optimizar miniaturas",
+						variant: "destructive",
+					});
+				},
+				onComplete: (data: OptimizeResult) => {
+					toast({
+						title: "Optimización completada",
+						description: `Se optimizaron ${
+							data.optimized
+						} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`,
+					});
+					initializeThumbnails();
+				},
+			} as ThumbnailCallbacks);
+		} catch (error: unknown) {
 			console.error("Error optimizando miniaturas:", error);
 			toast({
 				title: "Error",
 				description:
 					error instanceof Error
-						? error.message
-						: "Error al optimizar miniaturas",
+						? `Error: ${error.message}`
+						: typeof error === "object" && error && "message" in error
+						? String(error.message)
+						: "Error desconocido al optimizar miniaturas",
 				variant: "destructive",
 			});
+		} finally {
+			setThumbnailProcessing(false);
+		}
+	};
+
+	const handleReprocessThumbnails = async () => {
+		try {
+			setThumbnailProcessing(true);
+			await thumbnailActions.reprocessThumbnails({
+				onProgress: (status: ThumbnailProcessStatus) => {
+					if (status?.lastProcessed) {
+						setLastProcessedThumbnails((prev) => [
+							status.lastProcessed as LastProcessedThumbnail,
+							...prev.slice(0, 4),
+						]);
+					}
+				},
+				onError: (error: unknown) => {
+					console.error("Error reprocesando miniaturas:", error);
+					toast({
+						title: "Error",
+						description:
+							error instanceof Error
+								? `Error: ${error.message}`
+								: typeof error === "object" && error && "message" in error
+								? String(error.message)
+								: "Error desconocido al reprocesar miniaturas",
+						variant: "destructive",
+					});
+				},
+				onComplete: (data: ReprocessResult) => {
+					toast({
+						title: "Reprocesamiento completado",
+						description: `Se reprocesaron ${data.processed} miniaturas`,
+					});
+					initializeThumbnails();
+				},
+			} as ThumbnailCallbacks);
+		} catch (error: unknown) {
+			console.error("Error reprocesando miniaturas:", error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error
+						? `Error: ${error.message}`
+						: typeof error === "object" && error && "message" in error
+						? String(error.message)
+						: "Error desconocido al reprocesar miniaturas",
+				variant: "destructive",
+			});
+		} finally {
 			setThumbnailProcessing(false);
 		}
 	};
 
 	const handleCleanThumbnails = async () => {
-		if (isThumbnailProcessing) return;
-
 		try {
 			setThumbnailProcessing(true);
-			await thumbnailActions.cleanThumbnails();
-		} catch (error) {
+			await thumbnailActions.cleanThumbnails({
+				onProgress: (status: ThumbnailProcessStatus) => {
+					if (status?.lastProcessed) {
+						setLastProcessedThumbnails((prev) => [
+							status.lastProcessed as LastProcessedThumbnail,
+							...prev.slice(0, 4),
+						]);
+					}
+				},
+				onError: (error: unknown) => {
+					console.error("Error limpiando miniaturas:", error);
+					toast({
+						title: "Error",
+						description:
+							error instanceof Error
+								? `Error: ${error.message}`
+								: typeof error === "object" && error && "message" in error
+								? String(error.message)
+								: "Error desconocido al limpiar miniaturas",
+						variant: "destructive",
+					});
+				},
+				onComplete: (data: CleanResult) => {
+					toast({
+						title: "Limpieza completada",
+						description: `Se limpiaron ${
+							data.cleaned
+						} miniaturas, liberando ${formatBytes(data.totalFreed)}`,
+					});
+					initializeThumbnails();
+				},
+			} as ThumbnailCallbacks);
+		} catch (error: unknown) {
 			console.error("Error limpiando miniaturas:", error);
 			toast({
 				title: "Error",
 				description:
 					error instanceof Error
-						? error.message
-						: "Error al limpiar miniaturas",
+						? `Error: ${error.message}`
+						: typeof error === "object" && error && "message" in error
+						? String(error.message)
+						: "Error desconocido al limpiar miniaturas",
 				variant: "destructive",
 			});
+		} finally {
 			setThumbnailProcessing(false);
 		}
 	};
