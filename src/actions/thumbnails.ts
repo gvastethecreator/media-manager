@@ -6,17 +6,24 @@ import { thumbnailEventService } from "@/services/thumbnail-events.service";
 
 const actionLogger = logger.withContext('ThumbnailActions');
 
-export async function reprocessThumbnails() {
+export async function reprocessThumbnails(options?: {
+  onProgress?: (status: ProcessStatus) => void;
+  onError?: (error: unknown) => void;
+  onComplete?: (data: any) => void;
+}) {
   try {
     return await thumbnailService.reprocessAll({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        options?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        options?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        options?.onComplete?.(data);
       }
     });
   } catch (error) {
@@ -26,17 +33,24 @@ export async function reprocessThumbnails() {
   }
 }
 
-export async function optimizeThumbnails() {
+export async function optimizeThumbnails(options?: {
+  onProgress?: (status: ProcessStatus) => void;
+  onError?: (error: unknown) => void;
+  onComplete?: (data: any) => void;
+}) {
   try {
     return await thumbnailService.optimizeThumbnails({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        options?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        options?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        options?.onComplete?.(data);
       }
     });
   } catch (error) {
@@ -46,17 +60,24 @@ export async function optimizeThumbnails() {
   }
 }
 
-export async function cleanThumbnails() {
+export async function cleanThumbnails(options?: {
+  onProgress?: (status: ProcessStatus) => void;
+  onError?: (error: unknown) => void;
+  onComplete?: (data: any) => void;
+}) {
   try {
     return await thumbnailService.cleanThumbnails({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        options?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        options?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        options?.onComplete?.(data);
       }
     });
   } catch (error) {

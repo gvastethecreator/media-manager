@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ImageOptimizer } from '@/lib/image-optimizer'
 import path from 'path'
+import type { ThumbnailResult } from '@/lib/thumbnail'
 
 const imageOptimizer = new ImageOptimizer()
 
@@ -33,7 +34,7 @@ export async function GET(
     if (isThumbnail) {
       // Si ya tenemos un thumbnail guardado y no está corrupto, usarlo
       if (image.thumbnail && !image.thumbnailError) {
-        return new NextResponse(Buffer.from(image.thumbnail, 'base64'), {
+        return new NextResponse(image.thumbnail, {
           headers: {
             'Content-Type': 'image/webp',
             'Cache-Control': 'public, max-age=31536000, immutable'
@@ -43,7 +44,7 @@ export async function GET(
 
       try {
         // Generar nuevo thumbnail
-        const thumbnail = await imageOptimizer.generateThumbnail(image.path, {
+        const thumbnailResult = await imageOptimizer.generateThumbnail(image.path, {
           width: 300,
           height: 300,
           quality: 60
@@ -53,24 +54,27 @@ export async function GET(
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnail,
+            thumbnail: thumbnailResult.buffer,
+            thumbnailWidth: thumbnailResult.width,
+            thumbnailHeight: thumbnailResult.height,
+            thumbnailSize: thumbnailResult.size,
             thumbnailError: null,
             thumbnailErrorAt: null
           }
         })
 
-        return new NextResponse(Buffer.from(thumbnail, 'base64'), {
+        return new NextResponse(thumbnailResult.buffer, {
           headers: {
             'Content-Type': 'image/webp',
             'Cache-Control': 'public, max-age=31536000, immutable'
           }
         })
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error generando thumbnail:', error)
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnailError: error.message,
+            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
             thumbnailErrorAt: new Date()
           }
         })

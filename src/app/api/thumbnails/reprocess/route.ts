@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const thumbnail = await generateThumbnail(image.path, 'mid' as ThumbnailQuality)
+        const thumbnail = await generateThumbnail(image.path, { quality: 'mid' })
 
         if (!thumbnail || !thumbnail.buffer) {
           throw new Error('Error generando thumbnail')

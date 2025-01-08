@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import type { Image, Thumbnail } from '@prisma/client'
+import type { Image } from '@prisma/client'
 import { statsService } from './stats.service'
 import sharp from 'sharp'
 import { thumbnailCache, metadataCache } from '@/lib/cache'

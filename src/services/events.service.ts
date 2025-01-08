@@ -1,11 +1,20 @@
 import { EventEmitter } from 'events'
 import { logger } from '@/lib/logger'
+import { EventSourcePolyfill } from 'event-source-polyfill'
 
 const eventsLogger = logger.withContext('EventService')
 
+type EventSourceType = EventSourcePolyfill | EventSource;
+type EventHandler = (event: MessageEvent<any>) => void;
+
+interface EventSourceWithPolyfill extends EventSource {
+  addEventListener(type: string, listener: EventHandler): void;
+  removeEventListener(type: string, listener: EventHandler): void;
+}
+
 export class EventsService {
   private emitter = new EventEmitter()
-  private source: EventSource | null = null
+  private source: EventSourceWithPolyfill | null = null
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private reconnectDelay = 5000
@@ -15,9 +24,11 @@ export class EventsService {
   private heartbeatTimer: NodeJS.Timeout | null = null
   private reconnectTimer: NodeJS.Timeout | null = null
   private endpoint: string
+  private EventSourceImpl: typeof EventSourcePolyfill | typeof EventSource
 
-  constructor(endpoint?: string) {
+  constructor(endpoint?: string, EventSourceImpl?: typeof EventSourcePolyfill | typeof EventSource) {
     this.endpoint = endpoint || '/api/events'
+    this.EventSourceImpl = EventSourceImpl || EventSourcePolyfill
   }
 
   private clearTimers() {
@@ -78,14 +89,14 @@ export class EventsService {
     }
 
     try {
-      this.source = new EventSource(this.endpoint)
+      this.source = new this.EventSourceImpl(this.endpoint) as EventSourceWithPolyfill
 
       this.source.onopen = () => {
         eventsLogger.info('✅ Conexión SSE establecida')
         this.setupHeartbeat()
       }
 
-      this.source.onerror = (error) => {
+      this.source.onerror = (error: Event) => {
         eventsLogger.error('❌ Error en conexión:', error)
         this.emit('error', {
           type: 'CONNECTION_ERROR',
@@ -96,39 +107,7 @@ export class EventsService {
         this.reconnect()
       }
 
-      this.source.addEventListener('heartbeat', (e: Event) => {
-        if (e instanceof MessageEvent) {
-          this.handleHeartbeat()
-        }
-      })
-
-      this.source.addEventListener('error', (e: Event) => {
-        if (e instanceof MessageEvent) {
-          const error = this.parseEventData(e)
-          this.emit('error', error)
-        }
-      })
-
-      this.source.addEventListener('progress', (e: Event) => {
-        if (e instanceof MessageEvent) {
-          const data = this.parseEventData(e)
-          this.emit('progress', data)
-        }
-      })
-
-      this.source.addEventListener('complete', (e: Event) => {
-        if (e instanceof MessageEvent) {
-          const data = this.parseEventData(e)
-          this.emit('complete', data)
-        }
-      })
-
-      this.source.addEventListener('stats', (e: Event) => {
-        if (e instanceof MessageEvent) {
-          const data = this.parseEventData(e)
-          this.emit('stats', data)
-        }
-      })
+      this.setupEventListeners()
 
     } catch (error) {
       eventsLogger.error('❌ Error estableciendo conexión:', error)
@@ -138,6 +117,38 @@ export class EventsService {
         details: error instanceof Error ? error.message : 'Error desconocido'
       })
     }
+  }
+
+  private setupEventListeners() {
+    if (!this.source) return;
+
+    const addListener = (event: string, handler: EventHandler) => {
+      this.source?.addEventListener(event, handler)
+    }
+
+    addListener('heartbeat', () => {
+      this.handleHeartbeat()
+    })
+
+    addListener('error', (e) => {
+      const error = this.parseEventData(e)
+      this.emit('error', error)
+    })
+
+    addListener('progress', (e) => {
+      const data = this.parseEventData(e)
+      this.emit('progress', data)
+    })
+
+    addListener('complete', (e) => {
+      const data = this.parseEventData(e)
+      this.emit('complete', data)
+    })
+
+    addListener('stats', (e) => {
+      const data = this.parseEventData(e)
+      this.emit('stats', data)
+    })
   }
 
   private parseEventData(event: MessageEvent) {
