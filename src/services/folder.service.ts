@@ -1,8 +1,9 @@
 import { logger } from '@/lib/logger';
-import { eventService } from './events.service';
+import { EventsService } from './events.service';
 
 const folderLogger = logger.withContext('FolderService');
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+let eventsService: EventsService;
 
 export interface ProcessStatus {
   status?: string
@@ -80,19 +81,12 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
   const handlers = setupEventHandlers(callbacks);
 
   try {
-    await eventService.connect(endpoint, {
-      withCredentials: true,
-      heartbeatTimeout: 300000, // 5 minutos
-      reconnectInterval: 1000,
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Accept': 'text/event-stream'
-      }
-    });
+    eventsService = new EventsService(endpoint);
+    eventsService.connect();
 
     // Registrar handlers
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventService.on(event as any, handler);
+      eventsService.on(event as any, handler);
     });
 
     // Esperar a que se complete el proceso
@@ -111,14 +105,14 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
         reject(error);
       };
 
-      eventService.on('complete', completeHandler);
-      eventService.on('error', errorHandler);
+      eventsService.on('complete', completeHandler);
+      eventsService.on('error', errorHandler);
 
       // Limpiar handlers específicos
       return () => {
         clearTimeout(timeoutId);
-        eventService.off('complete', completeHandler);
-        eventService.off('error', errorHandler);
+        eventsService.off('complete', completeHandler);
+        eventsService.off('error', errorHandler);
       };
     });
 
@@ -129,9 +123,9 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
   } finally {
     // Limpiar handlers
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventService.off(event as any, handler);
+      eventsService.off(event as any, handler);
     });
-    eventService.disconnect();
+    eventsService.disconnect();
   }
 }
 
