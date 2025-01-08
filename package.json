@@ -2,6 +2,9 @@
   "name": "image-manager",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +12,9 @@
     "lint": "next lint",
     "seed": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
-    "db:clean": "del prisma\\dev.db && prisma migrate deploy",
+    "db:clean": "del prisma\\dev.db && prisma migrate && prisma db push",
+    "db:setup": "prisma generate && prisma migrate dev --name init",
+    "db:full-reset": "del prisma\\dev.db && prisma generate && prisma migrate dev --name init && prisma db push",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
