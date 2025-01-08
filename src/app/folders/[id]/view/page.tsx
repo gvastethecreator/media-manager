@@ -1,6 +1,6 @@
 'use client';
 
-import { FilesView } from '@/components/views/files/files-view';
+import { FolderContentView } from '@/components/views/folders/folder-content-view';
 
 interface FolderViewPageProps {
   params: {
@@ -11,7 +11,7 @@ interface FolderViewPageProps {
 export default function FolderViewPage({ params }: FolderViewPageProps) {
   return (
     <div className="h-full">
-      <FilesView />
+      <FolderContentView />
     </div>
   )
 }
