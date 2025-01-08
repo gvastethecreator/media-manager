@@ -12,16 +12,7 @@ async function main() {
   await prisma.folder.deleteMany()
   await prisma.collection.deleteMany()
   await prisma.tag.deleteMany()
-
-  try {
-    // Desactivar todos los perfiles existentes
-    await prisma.profile.updateMany({
-      where: { isActive: true },
-      data: { isActive: false }
-    })
-  } catch (error) {
-    console.log('No hay perfiles que desactivar')
-  }
+  await prisma.profile.deleteMany()
 
   // Crear perfil por defecto
   const defaultProfile = await prisma.profile.create({
@@ -37,43 +28,74 @@ async function main() {
 
   console.log('👤 Perfil por defecto creado:', defaultProfile)
 
-  // Crear carpeta Home
-  const homeFolder = await prisma.folder.create({
-    data: {
-      name: 'Home',
-      path: 'Home',
-      isWatched: true
-    }
+  // Crear carpetas iniciales
+  const folders = await prisma.folder.createMany({
+    data: [
+      {
+        name: 'Cartoons',
+        path: 'D:\\Pictures\\Cartoons',
+        isWatched: true
+      },
+      {
+        name: 'Retro',
+        path: 'D:\\Pictures\\retro',
+        isWatched: true
+      },
+      {
+        name: 'Comfy 2024-12-15',
+        path: 'G:\\#OUTPUTS\\COMFY\\2024-12-15',
+        isWatched: true
+      },
+      {
+        name: 'Comfy 2025-01-01',
+        path: 'G:\\#OUTPUTS\\COMFY\\2025-01-01',
+        isWatched: true
+      }
+    ]
   })
 
-  console.log('📁 Carpeta Home creada:', homeFolder)
+  console.log('📁 Carpetas creadas:', folders)
 
-  // Crear algunas colecciones de prueba
+  // Crear colecciones
   const collections = await prisma.collection.createMany({
     data: [
       {
-        name: 'Favoritos',
-        emoji: '⭐',
-        color: '#fbbf24',
-        description: 'Mis imágenes favoritas',
-        shortcut: 'Ctrl+F',
+        name: 'personajes',
+        emoji: '👥',
+        color: '#FF6B6B',
+        description: 'Colección de personajes y diseños de personajes',
         sortBy: 'name',
         filters: '[]'
       },
       {
-        name: 'Archivados',
-        emoji: '📦',
-        color: '#94a3b8',
-        description: 'Imágenes archivadas',
+        name: 'paisajes',
+        emoji: '🌄',
+        color: '#4ECDC4',
+        description: 'Paisajes y escenarios',
         sortBy: 'name',
         filters: '[]'
       },
       {
-        name: 'Importantes',
-        emoji: '🎯',
-        color: '#ef4444',
-        description: 'Imágenes importantes',
-        shortcut: 'Ctrl+I',
+        name: 'criaturas',
+        emoji: '🐉',
+        color: '#45B7D1',
+        description: 'Criaturas fantásticas y diseños de criaturas',
+        sortBy: 'name',
+        filters: '[]'
+      },
+      {
+        name: 'moklos',
+        emoji: '🎭',
+        color: '#96CEB4',
+        description: 'Colección Moklos',
+        sortBy: 'name',
+        filters: '[]'
+      },
+      {
+        name: 'hot',
+        emoji: '🔥',
+        color: '#FF4858',
+        description: 'Contenido hot',
         sortBy: 'name',
         filters: '[]'
       }
@@ -82,26 +104,43 @@ async function main() {
 
   console.log('📚 Colecciones creadas:', collections)
 
-  // Crear algunas etiquetas de prueba
+  // Crear etiquetas
   const tags = await prisma.tag.createMany({
     data: [
       {
-        name: 'Familia',
-        color: '#22c55e',
-        description: 'Fotos familiares',
-        shortcut: 'Ctrl+1'
+        name: 'character design',
+        color: '#FF9F1C',
+        description: 'Diseños de personajes',
       },
       {
-        name: 'Trabajo',
-        color: '#3b82f6',
-        description: 'Imágenes relacionadas con el trabajo',
-        shortcut: 'Ctrl+2'
+        name: 'concept art',
+        color: '#2EC4B6',
+        description: 'Arte conceptual',
       },
       {
-        name: 'Vacaciones',
-        color: '#f59e0b',
-        description: 'Fotos de vacaciones',
-        shortcut: 'Ctrl+3'
+        name: 'memes',
+        color: '#E71D36',
+        description: 'Memes y contenido humorístico',
+      },
+      {
+        name: 'fuego',
+        color: '#FF6B6B',
+        description: 'Elementos y temas relacionados con fuego',
+      },
+      {
+        name: 'agua',
+        color: '#4ECDC4',
+        description: 'Elementos y temas relacionados con agua',
+      },
+      {
+        name: 'hielo',
+        color: '#A8E6CF',
+        description: 'Elementos y temas relacionados con hielo',
+      },
+      {
+        name: 'oscuro',
+        color: '#2D3436',
+        description: 'Temas oscuros y sombríos',
       }
     ]
   })
