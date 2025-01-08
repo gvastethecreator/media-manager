@@ -12,25 +12,35 @@ export interface ProcessStatus {
   currentFile?: string
 }
 
-export interface IndexCallbacks {
-  onProgress?: (status: ProcessStatus) => void
-  onError?: (error: Error) => void
-  onComplete?: () => void
+export interface ErrorResponse {
+  message?: string
+  details?: string
+  code?: string
 }
 
 export interface FolderResponse {
-  id: string
-  name: string
-  path: string
-  isWatched: boolean
-  totalFiles: number
-  totalSize: number
-  lastIndexed: string | null
-  createdAt: string
-  updatedAt: string
-  _count?: {
-    images: number
+  folder: {
+    id: string
+    name: string
+    path: string
+    isWatched?: boolean
+    totalFiles?: number
+    totalSize?: number
+    lastIndexed?: string | null
+    createdAt?: string
+    updatedAt?: string
   }
+  stats?: {
+    processed: number
+    total: number
+    totalSize?: number
+  }
+}
+
+export interface IndexCallbacks {
+  onProgress?: (status: ProcessStatus) => void
+  onError?: (error: Error | ErrorResponse) => void
+  onComplete?: (data: FolderResponse) => void
 }
 
 function getFullUrl(path: string): string {
@@ -55,8 +65,8 @@ function setupEventHandlers(callbacks?: IndexCallbacks) {
     callbacks?.onError?.(formattedError);
   };
 
-  const handleComplete = () => {
-    callbacks?.onComplete?.();
+  const handleComplete = (data: FolderResponse) => {
+    callbacks?.onComplete?.(data);
   };
 
   return {
@@ -82,13 +92,34 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
 
     // Registrar handlers
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventService.on(event, handler);
+      eventService.on(event as any, handler);
     });
 
     // Esperar a que se complete el proceso
     const result = await new Promise((resolve, reject) => {
-      eventService.on('complete', () => resolve(context));
-      eventService.on('error', reject);
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout - El proceso excedió el tiempo límite'));
+      }, 300000); // 5 minutos
+
+      const completeHandler = (data: any) => {
+        clearTimeout(timeoutId);
+        resolve(data);
+      };
+
+      const errorHandler = (error: any) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      };
+
+      eventService.on('complete', completeHandler);
+      eventService.on('error', errorHandler);
+
+      // Limpiar handlers específicos
+      return () => {
+        clearTimeout(timeoutId);
+        eventService.off('complete', completeHandler);
+        eventService.off('error', errorHandler);
+      };
     });
 
     return result;
@@ -98,7 +129,7 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
   } finally {
     // Limpiar handlers
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventService.off(event, handler);
+      eventService.off(event as any, handler);
     });
     eventService.disconnect();
   }
@@ -112,7 +143,8 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
     const createResponse = await fetch(getFullUrl('/api/folders'), {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ path })
     });
@@ -124,6 +156,10 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
 
     const folder = await createResponse.json();
     folderLogger.info('Folder created:', folder);
+
+    if (!folder || !folder.id) {
+      throw new Error('Respuesta inválida al crear carpeta');
+    }
 
     // Luego iniciar el proceso de indexación con SSE
     return handleFolderProcess(`/api/folders/${folder.id}/index`, callbacks, folder);
