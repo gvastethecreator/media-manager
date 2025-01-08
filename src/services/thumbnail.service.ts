@@ -3,7 +3,7 @@ import { thumbnailCache } from "@/lib/cache"
 import { PrismaClient } from '@prisma/client'
 import { EventSourcePolyfill as EventSource } from 'event-source-polyfill'
 import { logger } from '@/lib/logger'
-import { eventService } from './events.service'
+import { EventsService } from './events.service'
 import { thumbnailEventService } from './thumbnail-events.service'
 import sharp from 'sharp'
 
@@ -70,6 +70,12 @@ export interface ThumbnailCallbacks {
   onComplete?: (data: any) => void
 }
 
+export interface ProcessOptions extends ThumbnailCallbacks {
+  timeout?: number
+  retryAttempts?: number
+  retryDelay?: number
+}
+
 // Constantes para los nombres de eventos
 const EVENTS = {
   PROGRESS: 'progress',
@@ -95,6 +101,7 @@ export class ThumbnailService {
   private readonly MAX_RETRIES = 3;
   private readonly RETRY_DELAY = 1000;
   private readonly PROCESS_TIMEOUT = 60000; // 1 minuto
+  private eventsService: EventsService | null = null
 
   constructor() {
     thumbLogger.info('Initializing ThumbnailService')
@@ -139,36 +146,100 @@ export class ThumbnailService {
   private setupEventHandlers(callbacks?: ThumbnailCallbacks) {
     const handleProgress = (data: ProcessStatus) => {
       if (!data) return;
-      const status = {
-        status: data.status || "Procesando...",
-        current: data.current || 0,
-        total: data.total || 0,
-        progress: data.progress || 0,
-        currentFile: data.currentFile,
-        lastProcessed: data.lastProcessed
+
+      // Validar y normalizar los datos
+      const status: ProcessStatus = {
+        status: typeof data.status === 'string' ? data.status : "Procesando...",
+        current: typeof data.current === 'number' ? data.current : 0,
+        total: typeof data.total === 'number' ? data.total : 0,
+        progress: typeof data.progress === 'number' ? data.progress : 0,
+        currentFile: typeof data.currentFile === 'string' ? data.currentFile : undefined
       };
+
+      if (data.lastProcessed && typeof data.lastProcessed === 'object') {
+        status.lastProcessed = {
+          id: String(data.lastProcessed.id),
+          path: String(data.lastProcessed.path),
+          processedAt: String(data.lastProcessed.processedAt)
+        };
+      }
 
       callbacks?.onProgress?.(status);
       thumbnailEventService.emitProgress(status);
       thumbLogger.debug('📊 Progreso:', status);
     };
 
-    const handleError = (error: any) => {
-      const formattedError = error instanceof Error ? error : new Error(String(error));
+    const handleError = (error: unknown) => {
+      let formattedError: Error;
+
+      if (error instanceof Error) {
+        formattedError = error;
+      } else if (typeof error === 'object' && error !== null) {
+        const errorObj = error as Record<string, unknown>;
+        formattedError = new Error(
+          typeof errorObj.message === 'string'
+            ? errorObj.message
+            : 'Error desconocido'
+        );
+
+        if ('code' in errorObj) {
+          (formattedError as any).code = errorObj.code;
+        }
+        if ('details' in errorObj) {
+          (formattedError as any).details = errorObj.details;
+        }
+      } else {
+        formattedError = new Error(String(error));
+      }
+
       callbacks?.onError?.(formattedError);
       thumbnailEventService.emitError(formattedError);
       thumbLogger.error('❌ Error:', formattedError);
     };
 
     const handleComplete = (data: any) => {
-      callbacks?.onComplete?.(data);
-      thumbnailEventService.emitComplete(data);
-      thumbLogger.info('✅ Proceso completado:', data);
+      try {
+        // Validar y normalizar los datos
+        const normalizedData = {
+          processed: typeof data?.processed === 'number' ? data.processed : 0,
+          optimized: typeof data?.optimized === 'number' ? data.optimized : 0,
+          cleaned: typeof data?.cleaned === 'number' ? data.cleaned : 0,
+          totalSaved: typeof data?.totalSaved === 'number' ? data.totalSaved : 0,
+          totalFreed: typeof data?.totalFreed === 'number' ? data.totalFreed : 0,
+          errors: Array.isArray(data?.errors) ? data.errors : []
+        };
+
+        callbacks?.onComplete?.(normalizedData);
+        thumbnailEventService.emitComplete(normalizedData);
+        thumbLogger.info('✅ Proceso completado:', normalizedData);
+      } catch (error) {
+        thumbLogger.error('❌ Error procesando datos de completado:', error);
+        handleError(error);
+      }
     };
 
     const handleStats = (data: any) => {
-      thumbnailEventService.emitStats(data);
-      thumbLogger.debug('📈 Estadísticas actualizadas:', data);
+      try {
+        // Validar y normalizar los datos
+        if (!data || typeof data !== 'object') {
+          throw new Error('Datos de estadísticas inválidos');
+        }
+
+        const normalizedStats = {
+          total: typeof data.total === 'number' ? data.total : 0,
+          totalSize: typeof data.totalSize === 'number' ? data.totalSize : 0,
+          pending: typeof data.pending === 'number' ? data.pending : 0,
+          withThumbnail: typeof data.withThumbnail === 'number' ? data.withThumbnail : 0,
+          errors: Array.isArray(data.errors) ? data.errors : [],
+          recentlyProcessed: Array.isArray(data.recentlyProcessed) ? data.recentlyProcessed : []
+        };
+
+        thumbnailEventService.emitStats(normalizedStats);
+        thumbLogger.debug('📈 Estadísticas actualizadas:', normalizedStats);
+      } catch (error) {
+        thumbLogger.error('❌ Error procesando estadísticas:', error);
+        handleError(error);
+      }
     };
 
     return {
@@ -181,64 +252,63 @@ export class ThumbnailService {
 
   private async handleProcess(endpoint: string, callbacks?: ThumbnailCallbacks): Promise<void> {
     if (this.isProcessing) {
-      throw new Error('Ya hay un proceso en ejecución');
+      throw new Error('Ya hay un proceso en ejecución')
     }
 
-    this.isProcessing = true;
-    const handlers = this.setupEventHandlers(callbacks);
-    const url = this.getFullUrl(endpoint);
+    this.isProcessing = true
+    const handlers = this.setupEventHandlers(callbacks)
 
     try {
-      await eventService.connect(url, {
-        withCredentials: true,
-        heartbeatTimeout: 45000,
-        reconnectInterval: 1000,
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Accept': 'text/event-stream'
-        }
-      });
+      this.eventsService = new EventsService(endpoint)
+      this.eventsService.connect()
+
+      if (!this.eventsService) {
+        throw new Error('No se pudo inicializar el servicio de eventos')
+      }
 
       // Registrar handlers
       Object.entries(handlers).forEach(([event, handler]) => {
-        eventService.on(event, handler);
-      });
+        this.eventsService!.on(event, handler)
+      })
 
       // Esperar a que se complete el proceso
       await new Promise<void>((resolve, reject) => {
         const completeHandler = (data: any) => {
-          thumbLogger.info('✅ Proceso completado con éxito');
-          resolve();
-        };
+          thumbLogger.info('✅ Proceso completado con éxito')
+          resolve()
+        }
 
         const errorHandler = (error: any) => {
-          thumbLogger.error('❌ Proceso fallido:', error);
-          reject(error);
-        };
+          thumbLogger.error('❌ Proceso fallido:', error)
+          reject(error)
+        }
 
-        eventService.on(EVENTS.COMPLETE, completeHandler);
-        eventService.on(EVENTS.ERROR, errorHandler);
+        this.eventsService!.on(EVENTS.COMPLETE, completeHandler)
+        this.eventsService!.on(EVENTS.ERROR, errorHandler)
 
         // Limpiar handlers específicos de la promesa
         setTimeout(() => {
-          eventService.off(EVENTS.COMPLETE, completeHandler);
-          eventService.off(EVENTS.ERROR, errorHandler);
-        }, 0);
-      });
+          this.eventsService?.off(EVENTS.COMPLETE, completeHandler)
+          this.eventsService?.off(EVENTS.ERROR, errorHandler)
+        }, 0)
+      })
     } catch (error) {
       const formattedError = {
         message: 'Error en la conexión',
         details: error instanceof Error ? error.message : 'Error desconocido',
         originalError: error
-      };
-      thumbLogger.error('Error en el proceso:', formattedError);
-      throw formattedError;
+      }
+      thumbLogger.error('Error en el proceso:', formattedError)
+      throw formattedError
     } finally {
-      this.isProcessing = false;
-      Object.entries(handlers).forEach(([event, handler]) => {
-        eventService.off(event, handler);
-      });
-      eventService.disconnect();
+      this.isProcessing = false
+      if (this.eventsService) {
+        Object.entries(handlers).forEach(([event, handler]) => {
+          this.eventsService!.off(event, handler)
+        })
+        this.eventsService.disconnect()
+        this.eventsService = null
+      }
     }
   }
 
@@ -437,7 +507,8 @@ export class ThumbnailService {
 
   cancelProcessing() {
     if (this.isProcessing) {
-      eventService.disconnect()
+      this.eventsService?.disconnect()
+      this.eventsService = null
       this.isProcessing = false
       thumbLogger.info('Processing cancelled')
     }
