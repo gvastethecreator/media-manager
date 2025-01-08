@@ -23,17 +23,17 @@ export async function optimizeThumbnail(buffer: Buffer): Promise<OptimizeResult>
 
     // Optimizar manteniendo calidad pero reduciendo tamaño
     const optimized = await image
-      .jpeg({
+      .webp({
         quality: 80,
-        progressive: true,
-        optimizeScans: true,
-        mozjpeg: true
+        effort: 4,
+        nearLossless: true,
+        smartSubsample: true
       })
-      .toBuffer({ resolveWithObject: true })
+      .toBuffer()
 
     return {
-      data: optimized.data,
-      size: optimized.info.size,
+      data: Buffer.from(optimized),
+      size: optimized.length,
       width: metadata.width || 0,
       height: metadata.height || 0
     }
