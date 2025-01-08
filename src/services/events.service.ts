@@ -7,9 +7,17 @@ const eventsLogger = logger.withContext('EventService')
 type EventSourceType = EventSourcePolyfill | EventSource;
 type EventHandler = (event: MessageEvent<any>) => void;
 
-interface EventSourceWithPolyfill extends EventSource {
-  addEventListener(type: string, listener: EventHandler): void;
-  removeEventListener(type: string, listener: EventHandler): void;
+interface EventSourceWithPolyfill {
+  addEventListener(type: string, listener: EventHandler, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener(type: string, listener: EventHandler, options?: boolean | EventListenerOptions): void;
+  close(): void;
+  onopen: ((this: EventSource, ev: Event) => any) | null;
+  onerror: ((this: EventSource, ev: Event) => any) | null;
+  readonly CLOSED: number;
+  readonly CONNECTING: number;
+  readonly OPEN: number;
+  readonly readyState: number;
+  readonly url: string;
 }
 
 export class EventsService {
