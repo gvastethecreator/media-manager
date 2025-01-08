@@ -1,20 +1,23 @@
 'use server'
 
-import { thumbnailService } from "@/services/thumbnail.service";
+import { thumbnailService, type ProcessStatus, type ThumbnailCallbacks } from "@/services/thumbnail.service";
 import { logger } from "@/lib/logger";
 import { thumbnailEventService } from "@/services/thumbnail-events.service";
 
-export async function reprocessThumbnails() {
+export async function reprocessThumbnails(callbacks?: ThumbnailCallbacks) {
   try {
     return await thumbnailService.reprocessAll({
-      onProgress: (status) => {
+      onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        callbacks?.onProgress?.(status);
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        callbacks?.onError?.(error);
       },
-      onComplete: (data) => {
+      onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
@@ -23,17 +26,20 @@ export async function reprocessThumbnails() {
   }
 }
 
-export async function optimizeThumbnails() {
+export async function optimizeThumbnails(callbacks?: ThumbnailCallbacks) {
   try {
     return await thumbnailService.optimizeThumbnails({
-      onProgress: (status) => {
+      onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        callbacks?.onProgress?.(status);
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        callbacks?.onError?.(error);
       },
-      onComplete: (data) => {
+      onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
@@ -42,17 +48,20 @@ export async function optimizeThumbnails() {
   }
 }
 
-export async function cleanThumbnails() {
+export async function cleanThumbnails(callbacks?: ThumbnailCallbacks) {
   try {
     return await thumbnailService.cleanThumbnails({
-      onProgress: (status) => {
+      onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
+        callbacks?.onProgress?.(status);
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
+        callbacks?.onError?.(error);
       },
-      onComplete: (data) => {
+      onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
+        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
