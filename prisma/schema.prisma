@@ -28,30 +28,31 @@ model Folder {
 }
 
 model Image {
-  id               String       @id @default(cuid())
-  hash             String
-  name             String
-  path             String
-  size             Int
-  width            Int
-  height           Int
-  metadata         String?
-  thumbnail        Bytes?
-  thumbnailSize    Int?
-  thumbnailWidth   Int?
-  thumbnailHeight  Int?
-  thumbnailError   String?
-  thumbnailErrorAt DateTime?
-  isPublic         Boolean      @default(false)
-  isFavorite       Boolean      @default(false)
-  folderId         String
-  folder           Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  collections      Collection[] @relation("ImageToCollection")
-  tags             Tag[]        @relation("ImageToTag")
-  favorites        Favorite[]
-  stats            ImageStats?
+  id                   String       @id @default(cuid())
+  hash                 String
+  name                 String
+  path                 String
+  size                 Int
+  width                Int
+  height               Int
+  metadata             String?
+  thumbnail            Bytes?
+  thumbnailSize        Int?
+  thumbnailWidth       Int?
+  thumbnailHeight      Int?
+  thumbnailError       String?
+  thumbnailErrorAt     DateTime?
+  thumbnailOptimizedAt DateTime?
+  isPublic             Boolean      @default(false)
+  isFavorite           Boolean      @default(false)
+  folderId             String
+  folder               Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  collections          Collection[] @relation("ImageToCollection")
+  tags                 Tag[]        @relation("ImageToTag")
+  favorites            Favorite[]
+  stats                ImageStats?
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])

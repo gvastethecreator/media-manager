@@ -26,7 +26,7 @@ const EXIFR_OPTIONS = {
   // Opciones de depuración
   silentErrors: true,
   sanitize: true,
-} as const
+}
 
 export interface FileSystemMetadata {
   size: number
@@ -208,6 +208,7 @@ async function getImageInfo(filePath: string): Promise<Pick<ImageMetadata, 'dime
  * @param filePath Ruta del archivo de imagen
  * @returns Objeto con los metadatos EXIF y de generación
  */
+// Start of Selection
 async function getExifMetadata(filePath: string): Promise<Pick<ImageMetadata, 'exif' | 'generation'>> {
   try {
     const exifData = await exifr.parse(filePath, EXIFR_OPTIONS)
@@ -260,7 +261,7 @@ export async function getImageMetadata(filePath: string): Promise<ImageMetadata>
     }
 
     // Guardar en caché
-    await metadataCache.set(filePath, metadata)
+    await metadataCache.set(filePath, metadata as Record<string, unknown>)
 
     return metadata
   } catch (error) {

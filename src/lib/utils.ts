@@ -177,5 +177,34 @@ export function formatDate(date: string | Date) {
   return format(dateObj, "dd MMM yyyy", { locale: es });
 }
 
+/**
+ * Realiza una fusión profunda de objetos
+ * @param target Objeto destino
+ * @param source Objeto fuente
+ * @returns Objeto combinado
+ */
+export function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+  const output = { ...target }
+
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          Object.assign(output, { [key]: source[key] })
+        } else {
+          output[key as keyof T] = deepMerge(target[key as keyof T], source[key]) as T[keyof T]
+        }
+      } else {
+        Object.assign(output, { [key]: source[key] })
+      }
+    })
+  }
+  return output
+}
+
+function isObject(item: unknown): item is Record<string, unknown> {
+  return Boolean(item && typeof item === 'object' && !Array.isArray(item))
+}
+
 // Exportar tipos útiles
 export type { LoggerOptions, LogLevel, FileSizeUnit }

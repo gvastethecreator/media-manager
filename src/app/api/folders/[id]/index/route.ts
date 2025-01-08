@@ -32,14 +32,13 @@ export async function GET(
     }
   }
 
-  const processFolder = async () => {
+  const processFolder = async (folderId: string) => {
     try {
-      const { id } = context.params
-      folderLogger.info('Iniciando indexación para carpeta:', id)
+      folderLogger.info('Iniciando indexación para carpeta:', folderId)
 
       // Verificar que la carpeta existe
       const folder = await prisma.folder.findUnique({
-        where: { id },
+        where: { id: folderId },
         select: {
           id: true,
           path: true,
@@ -235,32 +234,50 @@ export async function GET(
     }
   }
 
-  // Configuración del stream SSE
-  const stream = new ReadableStream({
-    start(ctrl) {
-      controller = ctrl
+  try {
+    // Obtener y validar el ID de manera asíncrona
+    const params = await Promise.resolve(context.params)
+    const { id } = params
 
-      // Enviar heartbeat periódicamente
-      const heartbeatInterval = setInterval(() => {
-        sendEvent('heartbeat', { timestamp: Date.now() })
-      }, 30000) // Aumentado a 30 segundos
-
-      // Procesar la carpeta
-      processFolder().finally(() => {
-        clearInterval(heartbeatInterval)
-        controller?.close()
-      })
-    },
-    cancel() {
-      controller = null
+    if (!id) {
+      throw new Error('ID de carpeta no proporcionado')
     }
-  })
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  })
+    // Configuración del stream SSE
+    const stream = new ReadableStream({
+      start(ctrl) {
+        controller = ctrl
+
+        // Enviar heartbeat periódicamente
+        const heartbeatInterval = setInterval(() => {
+          sendEvent('heartbeat', { timestamp: Date.now() })
+        }, 30000)
+
+        // Procesar la carpeta
+        processFolder(id).finally(() => {
+          clearInterval(heartbeatInterval)
+          controller?.close()
+        })
+      },
+      cancel() {
+        controller = null
+      }
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
+  } catch (error) {
+    folderLogger.error('Error configurando SSE:', error)
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 }
