@@ -1,7 +1,7 @@
-import { LRUCache } from 'lru-cache'
+import { LRUCache, Entry } from 'lru-cache'
 import { logger } from '@/lib/logger'
 
-export interface CacheOptions {
+interface CacheOptions {
   /** Número máximo de elementos en caché */
   max?: number
   /** Tiempo de vida en milisegundos */
@@ -26,6 +26,12 @@ interface CacheEntry<T> {
   hits?: number
 }
 
+interface DumpEntry<T> {
+  value: CacheEntry<T>
+  ttl?: number
+  start?: number
+}
+
 interface CacheStats {
   hits: number
   misses: number
@@ -48,6 +54,10 @@ const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = {
 
 // Crear una instancia específica para el servicio de caché
 const cacheLogger = logger.withContext('CacheManager')
+
+type LRUEntry<T> = { value: CacheEntry<T> }
+
+type DumpedEntry<T> = { value: T; ttl?: number; start?: number }
 
 class CacheManager<T = unknown> {
   private cache: LRUCache<string, CacheEntry<T>>
@@ -164,10 +174,11 @@ class CacheManager<T = unknown> {
     try {
       const now = Date.now()
       let pruned = 0
-      const entries = this.cache.dump()
+      const dump = this.cache.dump()
 
-      for (const [key, entry] of Object.entries(entries)) {
-        if (now - entry.value.timestamp > entry.value.ttl) {
+      for (const key of Object.keys(dump)) {
+        const entry = dump[key]
+        if (entry && now - (entry.value as CacheEntry<T>).timestamp > (entry.value as CacheEntry<T>).ttl) {
           await this.delete(key)
           pruned++
         }
@@ -196,31 +207,35 @@ class CacheManager<T = unknown> {
 
   private async updateStats(): Promise<void> {
     try {
-      // LRUCache no tiene método entries(), usamos dump() para obtener las entradas
-      const entries = this.cache.dump()
-      const now = Date.now()
+      const dump = this.cache.dump()
+      const entries = Object.fromEntries(
+        Object.entries(dump).map(([key, value]) => [
+          key,
+          { value: value.value as CacheEntry<T> }
+        ])
+      )
 
-      // Calcular estadísticas en chunks para evitar bloquear el event loop
+      const now = Date.now()
       const chunkSize = 100
       let totalSize = 0
       let totalTTL = 0
       let minTimestamp = Infinity
       let maxTimestamp = -Infinity
 
-      // Convertir el dump en array de entradas
-      const entriesArray = Object.entries(entries).map(([key, value]) => [key, value.value])
+      // Procesar entradas en chunks
+      const keys = Object.keys(entries)
+      for (let i = 0; i < keys.length; i += chunkSize) {
+        const chunk = keys.slice(i, i + chunkSize)
 
-      for (let i = 0; i < entriesArray.length; i += chunkSize) {
-        const chunk = entriesArray.slice(i, i + chunkSize)
-
-        for (const [_, entry] of chunk) {
-          if (!entry) continue
+        for (const key of chunk) {
+          const entry = entries[key]
+          if (!entry?.value) continue
 
           try {
             totalSize += JSON.stringify(entry.value).length
-            totalTTL += entry.ttl
-            minTimestamp = Math.min(minTimestamp, entry.timestamp)
-            maxTimestamp = Math.max(maxTimestamp, entry.timestamp)
+            totalTTL += entry.value.ttl
+            minTimestamp = Math.min(minTimestamp, entry.value.timestamp)
+            maxTimestamp = Math.max(maxTimestamp, entry.value.timestamp)
           } catch (error) {
             cacheLogger.warn(`[Cache:${this.name}] Error al procesar entrada en stats:`, {
               error: error instanceof Error ? error.message : String(error)
@@ -235,9 +250,9 @@ class CacheManager<T = unknown> {
       this.stats.keys = this.cache.size
       this.stats.size = totalSize
       this.stats.hitRatio = this.stats.hits / (this.stats.hits + this.stats.misses) || 0
-      this.stats.avgTTL = entriesArray.length > 0 ? totalTTL / entriesArray.length : 0
+      this.stats.avgTTL = keys.length > 0 ? totalTTL / keys.length : 0
 
-      if (entriesArray.length > 0 && minTimestamp !== Infinity && maxTimestamp !== -Infinity) {
+      if (keys.length > 0 && minTimestamp !== Infinity && maxTimestamp !== -Infinity) {
         this.stats.oldestEntry = now - minTimestamp
         this.stats.newestEntry = now - maxTimestamp
       }

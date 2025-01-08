@@ -1,5 +1,5 @@
-import { FileItem } from "@/types/files";
 import { prisma } from '@/lib/prisma'
+import { FileItem } from '@/types/files';
 
 function mapImageToFileItem(image: any): FileItem {
   let metadata = {};
@@ -17,7 +17,7 @@ function mapImageToFileItem(image: any): FileItem {
     size: image.size,
     width: image.width,
     height: image.height,
-    mimeType: metadata.mimeType,
+    mimeType: (metadata as any).mimeType || undefined,
     thumbnail: image.thumbnail ? `/api/images/${image.id}/thumbnail` : undefined,
     src: `/api/images/${image.id}`,
     tags: image.tags?.map((tag: any) => ({
