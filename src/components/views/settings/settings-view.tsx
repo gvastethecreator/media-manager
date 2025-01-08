@@ -14,7 +14,6 @@ import { FoldersSection } from "./settings-sections/folders-section";
 import { CollectionsSection } from "./settings-sections/collections-section";
 import { TagsSection } from "./settings-sections/tags-section";
 import { ShortcutsSection } from "./settings-sections/shortcuts-section";
-import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
 import { ProfilesSection } from "./settings-sections/profiles-section";
 import { SystemSection } from "./settings-sections/system-section";
 
@@ -47,7 +46,6 @@ export function SettingsView() {
 						<div className="grid grid-cols-2 gap-2 w-full">
 							<ProfilesSection />
 							<FoldersSection  />
-							<ThumbnailsSection />
 							<SystemSection />
 						</div>
 						<div className="grid grid-cols-2 gap-2 w-full">
