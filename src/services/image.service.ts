@@ -17,17 +17,14 @@ export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: numbe
 }
 
 export type CreateImageInput = {
-  title: string
   name: string
-  description?: string
-  filePath: string
-  fileSize: number
-  mimeType: string
+  path: string
+  size: number
   width: number
   height: number
-  userId: string
+  hash: string
+  folderId: string
   metadata?: Record<string, any>
-  hash?: string
   isPublic?: boolean
 }
 
@@ -72,7 +69,7 @@ class ImageService {
   private async processImage(
     inputPath: string,
     options: ImageProcessingOptions = {}
-  ): Promise<{ buffer: Buffer; metadata: sharp.Metadata }> {
+  ): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
     let pipeline = sharp(inputPath)
     const metadata = await pipeline.metadata()
 
@@ -118,13 +115,19 @@ class ImageService {
   async createImage(data: CreateImageInput): Promise<Image> {
     const image = await prisma.image.create({
       data: {
-        ...data,
+        name: data.name,
+        path: data.path,
+        size: data.size,
+        width: data.width,
+        height: data.height,
+        hash: data.hash,
         metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        isPublic: data.isPublic ?? false,
+        folder: {
+          connect: { id: data.folderId }
+        }
       },
       include: {
-        thumbnails: true,
         tags: true,
       },
     })
@@ -199,7 +202,7 @@ class ImageService {
       throw new Error('Error obteniendo thumbnail')
     }
 
-    const base64 = image.thumbnail.toString('base64')
+    const base64 = (image.thumbnail as Buffer).toString('base64')
     await thumbnailCache.set(cacheKey, base64)
 
     return base64

@@ -3,17 +3,15 @@ import type { Favorite } from '@prisma/client'
 
 export const favoriteService = {
   // Add image to favorites
-  async addToFavorites(userId: string, imageId: string): Promise<Favorite> {
+  async addToFavorites(imageId: string): Promise<Favorite> {
     return prisma.favorite.create({
       data: {
-        userId,
         imageId,
         createdAt: new Date(),
       },
       include: {
         image: {
           include: {
-            thumbnails: true,
             tags: true,
           },
         },
@@ -22,25 +20,20 @@ export const favoriteService = {
   },
 
   // Remove image from favorites
-  async removeFromFavorites(userId: string, imageId: string): Promise<void> {
+  async removeFromFavorites(imageId: string): Promise<void> {
     await prisma.favorite.delete({
       where: {
-        userId_imageId: {
-          userId,
-          imageId,
-        },
+        id: imageId,
       },
     })
   },
 
-  // Get user's favorite images
-  async getUserFavorites(userId: string) {
+  // Get all favorite images
+  async getFavorites() {
     return prisma.favorite.findMany({
-      where: { userId },
       include: {
         image: {
           include: {
-            thumbnails: true,
             tags: true,
           },
         },
@@ -52,35 +45,31 @@ export const favoriteService = {
   },
 
   // Check if image is favorited
-  async isFavorited(userId: string, imageId: string): Promise<boolean> {
-    const favorite = await prisma.favorite.findUnique({
+  async isFavorited(imageId: string): Promise<boolean> {
+    const favorite = await prisma.favorite.findFirst({
       where: {
-        userId_imageId: {
-          userId,
-          imageId,
-        },
+        imageId,
       },
     })
     return !!favorite
   },
 
   // Toggle favorite status
-  async toggleFavorite(userId: string, imageId: string): Promise<boolean> {
-    const isFavorited = await this.isFavorited(userId, imageId)
+  async toggleFavorite(imageId: string): Promise<boolean> {
+    const isFavorited = await this.isFavorited(imageId)
 
     if (isFavorited) {
-      await this.removeFromFavorites(userId, imageId)
+      await this.removeFromFavorites(imageId)
       return false
     } else {
-      await this.addToFavorites(userId, imageId)
+      await this.addToFavorites(imageId)
       return true
     }
   },
 
-  // Get recently favorited images
-  async getRecentFavorites(userId: string, limit: number = 10) {
+  // Get recent favorites
+  async getRecentFavorites(limit: number = 10) {
     return prisma.favorite.findMany({
-      where: { userId },
       take: limit,
       orderBy: {
         createdAt: 'desc',
@@ -88,7 +77,6 @@ export const favoriteService = {
       include: {
         image: {
           include: {
-            thumbnails: true,
             tags: true,
           },
         },
