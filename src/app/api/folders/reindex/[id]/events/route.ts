@@ -38,7 +38,7 @@ export async function GET(
     });
 
     // Crear respuesta con stream
-    const response = new NextResponse(streamData.stream.readable, { headers });
+    const response = new NextResponse(streamData.stream, { headers });
 
     // Enviar evento inicial de conexión
     const encoder = new TextEncoder();

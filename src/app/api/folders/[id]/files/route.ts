@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import path from 'path'
 
 export async function GET(
   request: Request,
@@ -27,8 +28,8 @@ export async function GET(
       name: image.name,
       path: image.path,
       size: image.size,
-      type: image.mimeType?.startsWith('image/') ? 'image' : 'file',
-      mimeType: image.mimeType,
+      type: 'image',
+      mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : `image/${path.extname(image.path).slice(1)}`,
       lastModified: image.updatedAt,
       isDirectory: false,
       metadata: image.metadata ? JSON.parse(image.metadata) : null,

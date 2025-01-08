@@ -49,7 +49,7 @@ export async function GET(
 
     // Si no tiene thumbnail, generarlo
     try {
-      const thumbnail = await generateThumbnail(image.path, { quality: quality as ThumbnailQuality })
+      const thumbnail = await generateThumbnail(image.path, { quality: quality as 'compressed' | 'low' | 'mid' | 'high' })
 
       if (!thumbnail || !thumbnail.buffer) {
         throw new Error('No se pudo generar el thumbnail')

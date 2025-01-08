@@ -1,4 +1,4 @@
-import { LRUCache, Entry } from 'lru-cache'
+import { LRUCache } from 'lru-cache'
 import { logger } from '@/lib/logger'
 
 interface CacheOptions {
@@ -58,6 +58,10 @@ const cacheLogger = logger.withContext('CacheManager')
 type LRUEntry<T> = { value: CacheEntry<T> }
 
 type DumpedEntry<T> = { value: T; ttl?: number; start?: number }
+
+type CacheDump<T> = {
+  [key: string]: { value: CacheEntry<T> }
+}
 
 class CacheManager<T = unknown> {
   private cache: LRUCache<string, CacheEntry<T>>
@@ -174,7 +178,7 @@ class CacheManager<T = unknown> {
     try {
       const now = Date.now()
       let pruned = 0
-      const dump = this.cache.dump()
+      const dump = this.cache.dump() as unknown as CacheDump<T>
 
       for (const key of Object.keys(dump)) {
         const entry = dump[key]
@@ -207,14 +211,8 @@ class CacheManager<T = unknown> {
 
   private async updateStats(): Promise<void> {
     try {
-      const dump = this.cache.dump()
-      const entries = Object.fromEntries(
-        Object.entries(dump).map(([key, value]) => [
-          key,
-          { value: value.value as CacheEntry<T> }
-        ])
-      )
-
+      const dump = this.cache.dump() as unknown as { [key: string]: { value: CacheEntry<T> } }
+      const entries = dump
       const now = Date.now()
       const chunkSize = 100
       let totalSize = 0

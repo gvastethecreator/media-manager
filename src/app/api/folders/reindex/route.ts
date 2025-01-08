@@ -66,8 +66,12 @@ export async function POST() {
                     path: file.path,
                     hash,
                     size: file.size,
-                    mimeType: `image/${path.extname(file.path).slice(1)}`,
-                    metadata: JSON.stringify(metadata),
+                    width: 0,
+                    height: 0,
+                    metadata: JSON.stringify({
+                      ...metadata,
+                      mimeType: `image/${path.extname(file.path).slice(1)}`
+                    }),
                     folderId: folder.id,
                     isPublic: false
                   }

@@ -49,7 +49,7 @@ export async function POST(
 
     try {
       // Generar thumbnail
-      const result = await generateThumbnail(image.path, { quality })
+      const result = await generateThumbnail(image.path, { quality: quality as 'compressed' | 'low' | 'mid' | 'high' })
       if (!result || !result.buffer) {
         throw new Error('Error generando thumbnail')
       }
