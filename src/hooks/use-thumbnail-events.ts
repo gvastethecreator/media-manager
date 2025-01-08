@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useThumbnailStore } from '@/store/thumbnails';
 import { logger } from '@/lib/logger';
-import { ProcessStatus, ThumbnailStats, ThumbnailError } from '@/services/thumbnail.service';
+import { ProcessStatus, ThumbnailError } from '@/services/thumbnail.service';
 
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30000;
@@ -86,7 +86,7 @@ export function useThumbnailEvents() {
               ...data,
               errors: data.errors?.map((error: ThumbnailError) => ({
                 ...error,
-                timestamp: error.timestamp.toISOString()
+                timestamp: error.timestamp.toString()
               }))
             };
             setStats(stats);

@@ -12,7 +12,7 @@ import {
 	ProfileUpdate,
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
-import { ThumbnailQuality } from "@/services/thumbnail.service";
+import { ThumbnailQuality } from "@/services/image.service";
 
 interface CollectionWithStats extends Collection {
 	count: number;

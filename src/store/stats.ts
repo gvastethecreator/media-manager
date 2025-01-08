@@ -61,7 +61,7 @@ interface StatsState {
   isLoading: boolean
   error: string | null
   fetchStats: () => Promise<void>
-  initialize: () => Promise<void>
+  initialize: () => Promise<(() => void) | void>
 }
 
 export const useStatsStore = create<StatsState>((set, get) => ({

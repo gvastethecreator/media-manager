@@ -12,6 +12,13 @@ export enum EVENTS {
 
 export type ThumbnailQuality = 'high' | 'medium' | 'low' | 'compressed'
 
+export interface ThumbnailError {
+  imageId: string
+  imagePath: string
+  error: string
+  timestamp: Date | string
+}
+
 export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
   compressed: { quality: 60, width: 200, height: 200 },
   low: { quality: 70, width: 300, height: 300 },
