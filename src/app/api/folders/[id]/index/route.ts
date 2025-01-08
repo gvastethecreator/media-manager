@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
@@ -6,6 +6,9 @@ import { join, extname } from 'path'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
+import { logger } from '@/lib/logger'
+
+const folderLogger = logger.withContext('FolderIndexAPI')
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -17,53 +20,40 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   const encoder = new TextEncoder()
-  const stream = new TransformStream()
-  const writer = stream.writable.getWriter()
+  let controller: ReadableStreamDefaultController | null = null
 
-  // Preparar respuesta SSE
-  const response = new NextResponse(stream.readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*'
-    }
-  })
-
-  const sendEvent = async (type: string, data: any) => {
+  const sendEvent = (event: string, data: any) => {
     try {
-      const formattedData = JSON.stringify({ type, data })
-      await writer.write(encoder.encode(`data: ${formattedData}\n\n`))
-      console.log('Evento enviado:', { type, data })
+      if (!controller) return
+      const formattedData = typeof data === 'string' ? data : JSON.stringify(data)
+      controller.enqueue(encoder.encode(`event: ${event}\ndata: ${formattedData}\n\n`))
     } catch (error) {
-      console.error('Error enviando evento:', error)
-      throw error
+      folderLogger.error('Error enviando evento:', error)
     }
   }
 
-  // Procesar en background
   const processFolder = async () => {
     try {
-      const folderId = context.params.id
-      console.log('Iniciando indexación para carpeta:', folderId)
+      const { id } = context.params
+      folderLogger.info('Iniciando indexación para carpeta:', id)
 
       // Verificar que la carpeta existe
       const folder = await prisma.folder.findUnique({
-        where: { id: folderId }
+        where: { id },
+        select: {
+          id: true,
+          path: true,
+          name: true,
+        },
       })
 
       if (!folder) {
-        console.error('Carpeta no encontrada:', folderId)
-        await sendEvent('error', {
-          type: 'FOLDER_NOT_FOUND',
-          message: 'Carpeta no encontrada'
-        })
-        return
+        throw new Error('FOLDER_NOT_FOUND')
       }
 
       if (!existsSync(folder.path)) {
-        console.error('Carpeta no encontrada en el sistema:', folder.path)
-        await sendEvent('error', {
+        folderLogger.error('Carpeta no encontrada en el sistema:', folder.path)
+        sendEvent('error', {
           type: 'PATH_NOT_FOUND',
           message: 'Carpeta no encontrada en el sistema'
         })
@@ -72,7 +62,7 @@ export async function GET(
 
       // Eliminar imágenes existentes
       await prisma.image.deleteMany({
-        where: { folderId }
+        where: { folderId: folder.id }
       })
 
       // Procesar archivos
@@ -100,7 +90,7 @@ export async function GET(
           }
 
           // Enviar total inicial
-          await sendEvent('progress', {
+          sendEvent('progress', {
             status: `Encontrados ${total} archivos para procesar...`,
             current: 0,
             total,
@@ -125,7 +115,7 @@ export async function GET(
               }
 
               // Enviar progreso
-              await sendEvent('progress', {
+              sendEvent('progress', {
                 status: 'Procesando archivos...',
                 current: processed + 1,
                 total,
@@ -139,7 +129,7 @@ export async function GET(
 
               // Asegurarnos de que tenemos las dimensiones
               if (!metadata.dimensions?.width || !metadata.dimensions?.height) {
-                console.warn('No se pudieron obtener las dimensiones de la imagen:', {
+                folderLogger.warn('No se pudieron obtener las dimensiones de la imagen:', {
                   file: filePath,
                   metadata
                 })
@@ -159,7 +149,7 @@ export async function GET(
                   }
                 }
               } catch (thumbnailError) {
-                console.error('Error generando thumbnail:', {
+                folderLogger.error('Error generando thumbnail:', {
                   file: filePath,
                   error: thumbnailError
                 })
@@ -187,7 +177,7 @@ export async function GET(
 
               processed++
             } catch (fileError) {
-              console.error('Error procesando archivo:', {
+              folderLogger.error('Error procesando archivo:', {
                 file,
                 path: dirPath,
                 error: fileError instanceof Error ? fileError.message : 'Error desconocido'
@@ -197,7 +187,7 @@ export async function GET(
 
           return { processed, total }
         } catch (dirError) {
-          console.error('Error procesando directorio:', {
+          folderLogger.error('Error procesando directorio:', {
             path: dirPath,
             error: dirError instanceof Error ? dirError.message : 'Error desconocido'
           })
@@ -206,7 +196,7 @@ export async function GET(
       }
 
       // Procesar la carpeta
-      console.log('Iniciando procesamiento de directorio:', folder.path)
+      folderLogger.info('Iniciando procesamiento de directorio:', folder.path)
       const { processed, total } = await processDirectory(folder.path)
 
       // Actualizar estadísticas de la carpeta
@@ -226,8 +216,8 @@ export async function GET(
       })
 
       // Enviar evento de completado
-      console.log('Procesamiento completado:', { processed, total })
-      await sendEvent('complete', {
+      folderLogger.info('Procesamiento completado:', { processed, total })
+      sendEvent('complete', {
         folder: updatedFolder,
         stats: {
           processed,
@@ -237,24 +227,40 @@ export async function GET(
       })
 
     } catch (error) {
-      console.error('Error en indexación:', error)
-      await sendEvent('error', {
-        type: 'UNKNOWN_ERROR',
+      folderLogger.error('Error en indexación:', error)
+      sendEvent('error', {
+        type: error instanceof Error && error.message === 'FOLDER_NOT_FOUND' ? 'FOLDER_NOT_FOUND' : 'UNKNOWN_ERROR',
         message: error instanceof Error ? error.message : 'Error desconocido'
       })
-    } finally {
-      try {
-        await writer.close()
-      } catch (error) {
-        console.error('Error cerrando writer:', error)
-      }
     }
   }
 
-  // Iniciar procesamiento en background
-  processFolder().catch(error => {
-    console.error('Error fatal en processFolder:', error)
+  // Configuración del stream SSE
+  const stream = new ReadableStream({
+    start(ctrl) {
+      controller = ctrl
+
+      // Enviar heartbeat periódicamente
+      const heartbeatInterval = setInterval(() => {
+        sendEvent('heartbeat', { timestamp: Date.now() })
+      }, 30000) // Aumentado a 30 segundos
+
+      // Procesar la carpeta
+      processFolder().finally(() => {
+        clearInterval(heartbeatInterval)
+        controller?.close()
+      })
+    },
+    cancel() {
+      controller = null
+    }
   })
 
-  return response
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  })
 }

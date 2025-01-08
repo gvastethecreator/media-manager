@@ -1,71 +1,67 @@
 'use server'
 
-import { thumbnailService, type ProcessStatus, type ThumbnailCallbacks } from "@/services/thumbnail.service";
+import { thumbnailService, type ProcessStatus } from "@/services/thumbnail.service";
 import { logger } from "@/lib/logger";
 import { thumbnailEventService } from "@/services/thumbnail-events.service";
 
-export async function reprocessThumbnails(callbacks?: ThumbnailCallbacks) {
+const actionLogger = logger.withContext('ThumbnailActions');
+
+export async function reprocessThumbnails() {
   try {
     return await thumbnailService.reprocessAll({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
-        callbacks?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
-        callbacks?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
-        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
-    logger.error('Error reprocessing thumbnails:', error);
+    actionLogger.error('Error reprocessing thumbnails:', error);
+    thumbnailEventService.emitError(error);
     throw error;
   }
 }
 
-export async function optimizeThumbnails(callbacks?: ThumbnailCallbacks) {
+export async function optimizeThumbnails() {
   try {
     return await thumbnailService.optimizeThumbnails({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
-        callbacks?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
-        callbacks?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
-        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
-    logger.error('Error optimizing thumbnails:', error);
+    actionLogger.error('Error optimizing thumbnails:', error);
+    thumbnailEventService.emitError(error);
     throw error;
   }
 }
 
-export async function cleanThumbnails(callbacks?: ThumbnailCallbacks) {
+export async function cleanThumbnails() {
   try {
     return await thumbnailService.cleanThumbnails({
       onProgress: (status: ProcessStatus) => {
         thumbnailEventService.emitProgress(status);
-        callbacks?.onProgress?.(status);
       },
       onError: (error: unknown) => {
         thumbnailEventService.emitError(error);
-        callbacks?.onError?.(error);
       },
       onComplete: (data: any) => {
         thumbnailEventService.emitComplete(data);
-        callbacks?.onComplete?.(data);
       }
     });
   } catch (error) {
-    logger.error('Error cleaning thumbnails:', error);
+    actionLogger.error('Error cleaning thumbnails:', error);
+    thumbnailEventService.emitError(error);
     throw error;
   }
 }
@@ -76,7 +72,8 @@ export async function getStats() {
     thumbnailEventService.emitStats(stats);
     return stats;
   } catch (error) {
-    logger.error('Error getting thumbnail stats:', error);
+    actionLogger.error('Error getting thumbnail stats:', error);
+    thumbnailEventService.emitError(error);
     throw error;
   }
 }

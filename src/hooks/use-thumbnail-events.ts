@@ -93,14 +93,24 @@ export function useThumbnailEvents() {
 
         eventSource.addEventListener('progress', (e: MessageEvent) => {
           try {
+            if (!e.data) {
+              logger.warn('⚠️ Evento de progreso recibido sin datos');
+              return;
+            }
+
             const data = JSON.parse(e.data) as ProgressEvent;
+            if (!data || typeof data !== 'object') {
+              logger.warn('⚠️ Datos de progreso inválidos:', data);
+              return;
+            }
+
             setProcessStatus({
               status: data.status || 'Procesando...',
-              progress: data.progress || 0,
-              current: data.current,
-              total: data.total,
-              currentFile: data.currentFile,
-              lastProcessed: data.lastProcessed
+              progress: typeof data.progress === 'number' ? data.progress : 0,
+              current: typeof data.current === 'number' ? data.current : undefined,
+              total: typeof data.total === 'number' ? data.total : undefined,
+              currentFile: typeof data.currentFile === 'string' ? data.currentFile : undefined,
+              lastProcessed: data.lastProcessed && typeof data.lastProcessed === 'object' ? data.lastProcessed : undefined
             });
             resetHeartbeatTimeout();
           } catch (error) {
@@ -110,7 +120,17 @@ export function useThumbnailEvents() {
 
         eventSource.addEventListener('stats', (e: MessageEvent) => {
           try {
+            if (!e.data) {
+              logger.warn('⚠️ Evento de estadísticas recibido sin datos');
+              return;
+            }
+
             const data = JSON.parse(e.data) as ThumbnailStats;
+            if (!data || typeof data !== 'object') {
+              logger.warn('⚠️ Datos de estadísticas inválidos:', data);
+              return;
+            }
+
             setStats(data);
             resetHeartbeatTimeout();
           } catch (error) {
@@ -120,7 +140,17 @@ export function useThumbnailEvents() {
 
         eventSource.addEventListener('complete', (e: MessageEvent) => {
           try {
+            if (!e.data) {
+              logger.warn('⚠️ Evento de completado recibido sin datos');
+              return;
+            }
+
             const data = JSON.parse(e.data) as CompleteEvent;
+            if (!data || typeof data !== 'object') {
+              logger.warn('⚠️ Datos de completado inválidos:', data);
+              return;
+            }
+
             setProcessing(false);
             setProcessStatus({
               status: 'Completado',
@@ -135,9 +165,22 @@ export function useThumbnailEvents() {
 
         eventSource.addEventListener('error', (e: MessageEvent) => {
           try {
+            if (!e.data) {
+              logger.warn('⚠️ Evento de error recibido sin datos');
+              setError('Error desconocido en el proceso');
+              return;
+            }
+
             const data = JSON.parse(e.data) as ErrorEvent;
-            setError(data.message || 'Error desconocido');
-            logger.error('❌ Error recibido:', data);
+            if (!data || typeof data !== 'object') {
+              logger.warn('⚠️ Datos de error inválidos:', data);
+              setError('Error desconocido en el proceso');
+              return;
+            }
+
+            const errorMessage = data.message || data.details || 'Error desconocido';
+            setError(errorMessage);
+            logger.error('❌ Error recibido:', { message: errorMessage, code: data.code, details: data.details });
             resetHeartbeatTimeout();
           } catch (error) {
             logger.error('❌ Error procesando evento de error:', error);

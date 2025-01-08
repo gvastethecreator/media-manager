@@ -355,9 +355,19 @@ export function FoldersSection() {
 						status: stats.status || "Procesando...",
 					}));
 				},
-				onError: (error: Error) => {
+				onError: (error: Error | ErrorResponse) => {
 					console.error("Error en reindexación:", error);
-					if (error.name === "FOLDER_NOT_FOUND") {
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: error.message ||
+							  error.details ||
+							  "Error al reindexar la carpeta";
+
+					if (
+						(error instanceof Error && error.name === "FOLDER_NOT_FOUND") ||
+						("code" in error && error.code === "FOLDER_NOT_FOUND")
+					) {
 						toast({
 							title: "Carpeta no encontrada",
 							description: "La carpeta ya no existe en el sistema",
@@ -367,7 +377,7 @@ export function FoldersSection() {
 					} else {
 						toast({
 							title: "Error",
-							description: error.message || "Error al reindexar la carpeta",
+							description: errorMessage,
 							variant: "destructive",
 						});
 					}
