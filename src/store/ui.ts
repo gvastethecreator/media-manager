@@ -69,7 +69,7 @@ export const useUIStore = create<UIState>()(
       toggleRightPanel: () => set((state) => ({ isRightPanelCollapsed: !state.isRightPanelCollapsed })),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
       setTheme: (theme) => set({ theme }),
-      toggleSettings: () => set((state) => ({ showSettings: !state.showSettings })),
+
     }),
     {
       name: 'ui-storage',
