@@ -1,6 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import type { ImageStats } from '@prisma/client'
 
+export interface ThumbnailStats {
+  processed: number
+  optimized: number
+  cleaned: number
+  totalSaved: number
+  totalFreed: number
+  errors: number
+}
+
 export const statsService = {
   // Initialize or get stats for an image
   async getOrCreateImageStats(imageId: string): Promise<ImageStats> {
