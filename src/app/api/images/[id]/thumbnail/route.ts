@@ -1,24 +1,34 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
-import sharp from 'sharp'
-import { existsSync } from 'fs'
+import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
 
 const thumbLogger = logger.withContext('ThumbnailAPI')
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+export const revalidate = 0
 
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params
+    // Obtener y validar el ID
+    const params = await Promise.resolve(context.params)
+    const { id } = params
+
+    if (!id) {
+      thumbLogger.error('❌ ID no proporcionado')
+      return NextResponse.json(
+        { error: 'ID de imagen requerido' },
+        { status: 400 }
+      )
+    }
+
     thumbLogger.info('🔍 Thumbnail request for ID:', id)
 
+    // Obtener la imagen
     const file = await prisma.image.findUnique({
       where: { id },
       select: {
@@ -26,129 +36,100 @@ export async function GET(
         path: true,
         thumbnail: true,
         thumbnailError: true,
-      },
+        thumbnailErrorAt: true
+      }
     })
 
     if (!file) {
-      thumbLogger.warn('❌ Image not found:', id)
-      return new Response('Image not found', { status: 404 })
+      thumbLogger.error('❌ Imagen no encontrada:', id)
+      return NextResponse.json(
+        { error: 'Imagen no encontrada' },
+        { status: 404 }
+      )
     }
 
+    // Log para debugging
     thumbLogger.debug('📄 Image found:', {
       id: file.id,
       path: file.path,
       hasThumbnail: !!file.thumbnail,
-      hasError: !!file.thumbnailError,
+      hasError: !!file.thumbnailError
     })
 
-    if (!file.thumbnail) {
-      if (file.thumbnailError) {
-        thumbLogger.error('❌ Thumbnail error:', file.thumbnailError)
-        return new Response('Thumbnail generation failed', { status: 500 })
-      }
-      thumbLogger.warn('⚠️ No thumbnail available')
-      return new Response('Thumbnail not generated yet', { status: 404 })
+    // Si ya tiene thumbnail, devolverlo
+    if (file.thumbnail) {
+      thumbLogger.info('✅ Returning existing thumbnail')
+      const headers = new Headers()
+      headers.set('Content-Type', 'image/webp')
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      headers.set('ETag', `"${id}"`)
+
+      return new NextResponse(file.thumbnail, {
+        headers,
+        status: 200
+      })
     }
 
-    thumbLogger.info('✅ Returning existing thumbnail')
-    return new Response(file.thumbnail, {
-      headers: {
-        'Content-Type': 'image/webp',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    })
-  } catch (error) {
-    thumbLogger.error('❌ Error serving thumbnail:', error)
-    return new Response(
-      JSON.stringify({
-        error: 'Error serving thumbnail',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
-  }
-}
+    // Obtener calidad de la URL
+    const { searchParams } = new URL(request.url)
+    const quality = (searchParams.get('quality') || 'mid') as ThumbnailQuality
 
-export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  try {
-    const id = context.params.id
-    const { quality = 'mid' } = await request.json() as { quality?: ThumbnailQuality }
-    console.log('🔍 Thumbnail generation request:', { id, quality })
-
-    const file = await prisma.image.findUnique({
-      where: { id }
-    })
-
-    if (!file) {
-      console.log('❌ Image not found in database:', id)
-      return NextResponse.json(
-        { error: 'Image not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verificar que el archivo existe
-    if (!existsSync(file.path)) {
-      console.log('❌ Original file not found at path:', file.path)
-      return NextResponse.json(
-        { error: 'Original file not found' },
-        { status: 404 }
-      )
-    }
-
-    const qualityConfig = THUMBNAIL_QUALITY_CONFIG[quality]
-    console.log('⚙️ Using quality config:', qualityConfig)
-
+    // Si no tiene thumbnail, generarlo
     try {
-      // Generar thumbnail
-      const imageBuffer = await sharp(file.path)
-        .resize(qualityConfig.width, qualityConfig.height, {
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .webp({ quality: qualityConfig.quality })
-        .toBuffer()
+      const thumbnail = await generateThumbnail(file.path, { quality })
 
-      // Guardar en base de datos
+      if (!thumbnail || !thumbnail.buffer) {
+        throw new Error('No se pudo generar el thumbnail')
+      }
+
+      // Actualizar la imagen con el nuevo thumbnail
       await prisma.image.update({
         where: { id },
         data: {
-          thumbnail: new Uint8Array(imageBuffer),
-          thumbnailSize: imageBuffer.length,
+          thumbnail: thumbnail.buffer,
+          thumbnailSize: thumbnail.buffer.length,
+          thumbnailWidth: thumbnail.width,
+          thumbnailHeight: thumbnail.height,
           thumbnailError: null,
-          thumbnailErrorAt: null
+          thumbnailErrorAt: null,
+          updatedAt: new Date()
         }
       })
 
-      console.log('✅ Thumbnail generated successfully')
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.error('❌ Error generating thumbnail:', error)
+      thumbLogger.info('✅ New thumbnail generated and stored')
+      const headers = new Headers()
+      headers.set('Content-Type', 'image/webp')
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      headers.set('ETag', `"${id}-${Date.now()}"`)
 
+      return new NextResponse(thumbnail.buffer, {
+        headers,
+        status: 200
+      })
+    } catch (error) {
       // Registrar el error en la base de datos
       await prisma.image.update({
         where: { id },
         data: {
-          thumbnailError: error instanceof Error ? error.message : String(error),
-          thumbnailErrorAt: new Date()
+          thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+          thumbnailErrorAt: new Date(),
+          thumbnail: null,
+          thumbnailSize: null,
+          thumbnailWidth: null,
+          thumbnailHeight: null
         }
       })
 
+      thumbLogger.error('❌ Error generating thumbnail:', error)
       return NextResponse.json(
-        { error: 'Error generating thumbnail' },
+        { error: 'Error generando thumbnail' },
         { status: 500 }
       )
     }
   } catch (error) {
-    console.error('❌ Unexpected error:', error)
+    thumbLogger.error('❌ Error in thumbnail route:', error)
     return NextResponse.json(
-      { error: 'Unexpected error' },
+      { error: 'Error al procesar la miniatura' },
       { status: 500 }
     )
   }
