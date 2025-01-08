@@ -6,6 +6,13 @@ import { logger } from '@/lib/logger'
 import { EventsService } from './events.service'
 import { thumbnailEventService } from './thumbnail-events.service'
 import sharp from 'sharp'
+import { stat } from 'fs/promises'
+import { createHash } from 'crypto'
+import { readFile } from 'fs/promises'
+
+// Verificar si estamos en el cliente o servidor
+const isClient = typeof window !== 'undefined'
+const EventSourceImpl = isClient ? window.EventSource : EventSource
 
 const prisma = new PrismaClient()
 
@@ -74,6 +81,13 @@ export interface ProcessOptions extends ThumbnailCallbacks {
   timeout?: number
   retryAttempts?: number
   retryDelay?: number
+}
+
+export interface ThumbnailOptions {
+  quality?: ThumbnailQuality
+  width?: number
+  height?: number
+  format?: 'webp'
 }
 
 // Constantes para los nombres de eventos
@@ -259,56 +273,72 @@ export class ThumbnailService {
     const handlers = this.setupEventHandlers(callbacks)
 
     try {
-      this.eventsService = new EventsService(endpoint)
-      this.eventsService.connect()
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache'
+        }
+      });
 
-      if (!this.eventsService) {
-        throw new Error('No se pudo inicializar el servicio de eventos')
+      if (!response.ok) {
+        throw new Error('Error iniciando el proceso');
       }
 
-      // Registrar handlers
-      Object.entries(handlers).forEach(([event, handler]) => {
-        this.eventsService!.on(event, handler)
-      })
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No se pudo iniciar la lectura del stream');
+      }
 
-      // Esperar a que se complete el proceso
-      await new Promise<void>((resolve, reject) => {
-        const completeHandler = (data: any) => {
-          thumbLogger.info('✅ Proceso completado con éxito')
-          resolve()
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const [eventType, ...dataLines] = line.split('\n');
+            const event = eventType.replace('event: ', '');
+            const data = dataLines.join('\n').replace('data: ', '');
+            const parsedData = JSON.parse(data);
+
+            switch (event) {
+              case 'progress':
+                handlers[EVENTS.PROGRESS](parsedData);
+                break;
+              case 'error':
+                handlers[EVENTS.ERROR](parsedData);
+                break;
+              case 'complete':
+                handlers[EVENTS.COMPLETE](parsedData);
+                break;
+              case 'stats':
+                handlers[EVENTS.STATS](parsedData);
+                break;
+            }
+          } catch (error) {
+            thumbLogger.error('Error procesando evento:', error);
+          }
         }
-
-        const errorHandler = (error: any) => {
-          thumbLogger.error('❌ Proceso fallido:', error)
-          reject(error)
-        }
-
-        this.eventsService!.on(EVENTS.COMPLETE, completeHandler)
-        this.eventsService!.on(EVENTS.ERROR, errorHandler)
-
-        // Limpiar handlers específicos de la promesa
-        setTimeout(() => {
-          this.eventsService?.off(EVENTS.COMPLETE, completeHandler)
-          this.eventsService?.off(EVENTS.ERROR, errorHandler)
-        }, 0)
-      })
+      }
     } catch (error) {
       const formattedError = {
         message: 'Error en la conexión',
         details: error instanceof Error ? error.message : 'Error desconocido',
         originalError: error
-      }
-      thumbLogger.error('Error en el proceso:', formattedError)
-      throw formattedError
+      };
+      thumbLogger.error('Error en el proceso:', formattedError);
+      throw formattedError;
     } finally {
-      this.isProcessing = false
-      if (this.eventsService) {
-        Object.entries(handlers).forEach(([event, handler]) => {
-          this.eventsService!.off(event, handler)
-        })
-        this.eventsService.disconnect()
-        this.eventsService = null
-      }
+      this.isProcessing = false;
     }
   }
 
@@ -354,7 +384,7 @@ export class ThumbnailService {
       this.preGenerationQueue.delete(nextId)
 
       try {
-        await this.generateThumbnail(nextId, 'mid')
+        await this.generateThumbnail(nextId, { quality: 'mid' })
       } catch (error) {
         console.error('Error pre-generando thumbnail:', error)
       }
@@ -379,7 +409,7 @@ export class ThumbnailService {
       let attempts = 0
       let lastError: Error | null = null
 
-      while (attempts < this.maxRetries) {
+      while (attempts < this.MAX_RETRIES) {
         try {
           const response = await this.fetchWithTimeout(
             `/api/thumbnails/${imageId}?quality=${quality}`,
@@ -406,9 +436,9 @@ export class ThumbnailService {
         } catch (error) {
           lastError = error instanceof Error ? error : new Error('Error desconocido')
           attempts++
-          if (attempts < this.maxRetries) {
+          if (attempts < this.MAX_RETRIES) {
             await new Promise(resolve =>
-              setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
+              setTimeout(resolve, this.RETRY_DELAY * Math.pow(2, attempts - 1))
             )
           }
         }
@@ -441,7 +471,7 @@ export class ThumbnailService {
         await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY * Math.pow(2, retryCount)));
         return this.generateThumbnail(imagePath, options, retryCount + 1);
       }
-      throw new Error(`Error al generar la miniatura después de ${this.MAX_RETRIES} reintentos: ${error.message}`);
+      throw new Error(`Error al generar la miniatura después de ${this.MAX_RETRIES} reintentos: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -603,7 +633,7 @@ export class ThumbnailService {
         }
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('El proceso excedió el tiempo límite');
       }
       throw error;
@@ -631,8 +661,42 @@ export class ThumbnailService {
         throw new Error(`La imagen excede la dimensión máxima permitida (${LIMITS.MAX_DIMENSION}px)`);
       }
     } catch (error) {
-      throw new Error(`Error validando imagen: ${error.message}`);
+      throw new Error(`Error validando imagen: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  private async fileExists(path: string): Promise<boolean> {
+    try {
+      await stat(path)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  private async processImage(
+    inputPath: string,
+    outputPath: string,
+    options: { quality: ThumbnailQuality; width?: number; height?: number }
+  ): Promise<void> {
+    const config = THUMBNAIL_QUALITY_CONFIG[options.quality]
+    await sharp(inputPath)
+      .resize(options.width || config.width, options.height || config.height, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .webp({ quality: config.quality })
+      .toFile(outputPath)
+  }
+
+  private async getFileHash(filePath: string): Promise<string> {
+    const buffer = await readFile(filePath)
+    return createHash('sha256').update(buffer).digest('hex')
+  }
+
+  private getThumbnailPath(fileHash: string, quality: ThumbnailQuality): string {
+    const thumbnailDir = process.env.THUMBNAIL_DIR || './thumbnails'
+    return `${thumbnailDir}/${fileHash}_${quality}.webp`
   }
 }
 

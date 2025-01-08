@@ -8,8 +8,8 @@ export async function GET() {
   try {
     const images = await prisma.image.findMany({
       where: {
-        favorite: {
-          isNot: null
+        favorites: {
+          some: {}
         }
       },
       orderBy: {

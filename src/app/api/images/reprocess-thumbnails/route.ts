@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnail: Buffer.from(imageBuffer).toString('base64'),
+            thumbnail: imageBuffer,
             thumbnailSize: imageBuffer.length,
             thumbnailError: null,
             thumbnailErrorAt: null
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnailError: error.message,
+            thumbnailError: error instanceof Error ? error.message : 'Unknown error',
             thumbnailErrorAt: new Date()
           }
         })

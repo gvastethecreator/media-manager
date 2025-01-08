@@ -123,7 +123,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en DELETE /api/folders:', error)
 
     // Verificar si es un error de Prisma

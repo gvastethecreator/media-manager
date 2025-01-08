@@ -2,6 +2,7 @@ import sharp from 'sharp'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { createHash } from 'crypto'
+import type { ThumbnailResult } from './thumbnail'
 
 interface OptimizeImageOptions {
   quality?: number
@@ -45,7 +46,7 @@ export class ImageOptimizer {
   async optimizeImage(
     inputPath: string,
     options: OptimizeImageOptions = {}
-  ): Promise<{ buffer: Buffer; metadata: sharp.Metadata }> {
+  ): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
     const cacheKey = this.getCacheKey(inputPath, options)
     const cachePath = this.getCachePath(cacheKey)
 
@@ -54,8 +55,8 @@ export class ImageOptimizer {
       const stats = await fs.stat(cachePath)
       if (stats.isFile()) {
         const buffer = await fs.readFile(cachePath)
-        const metadata = await sharp(buffer).metadata()
-        return { buffer, metadata }
+        const { info } = await sharp(buffer).toBuffer({ resolveWithObject: true })
+        return { buffer, metadata: info }
       }
     } catch (error) {
       // Cache miss, continuar con la optimización
@@ -86,7 +87,7 @@ export class ImageOptimizer {
   async generateThumbnail(
     inputPath: string,
     options: GenerateThumbnailOptions
-  ): Promise<string> {
+  ): Promise<ThumbnailResult> {
     const cacheKey = this.getCacheKey(inputPath, { ...options, type: 'thumbnail' })
     const cachePath = this.getCachePath(cacheKey)
 
@@ -95,13 +96,20 @@ export class ImageOptimizer {
       const stats = await fs.stat(cachePath)
       if (stats.isFile()) {
         const buffer = await fs.readFile(cachePath)
-        return buffer.toString('base64')
+        const { info } = await sharp(buffer).toBuffer({ resolveWithObject: true })
+        return {
+          buffer,
+          width: info.width || options.width,
+          height: info.height || options.height,
+          format: 'webp',
+          size: buffer.length
+        }
       }
     } catch (error) {
       // Cache miss, continuar con la generación
     }
 
-    const { buffer } = await this.optimizeImage(inputPath, {
+    const { buffer: data, metadata: info } = await this.optimizeImage(inputPath, {
       width: options.width,
       height: options.height,
       quality: options.quality || 60,
@@ -109,9 +117,15 @@ export class ImageOptimizer {
     })
 
     // Guardar en caché
-    await fs.writeFile(cachePath, buffer)
+    await fs.writeFile(cachePath, data)
 
-    return buffer.toString('base64')
+    return {
+      buffer: data,
+      width: info.width || options.width,
+      height: info.height || options.height,
+      format: 'webp',
+      size: data.length
+    }
   }
 
   async getImageMetadata(inputPath: string): Promise<sharp.Metadata> {

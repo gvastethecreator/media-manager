@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const result = await generateThumbnail(image.path, 'mid' as ThumbnailQuality)
+        const result = await generateThumbnail(image.path, { quality: 'mid' })
 
         if (!result) {
           throw new Error('Error generando miniatura')
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         await prisma.image.update({
           where: { id: image.id },
           data: {
-            thumbnail: result.buffer.toString('base64'),
+            thumbnail: result.buffer,
             thumbnailWidth: result.width,
             thumbnailHeight: result.height,
             thumbnailError: null,
