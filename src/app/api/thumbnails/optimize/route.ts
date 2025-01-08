@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
       try {
         // Optimizar miniatura
-        const result = await optimizeThumbnail(image.thumbnail!)
+        const result = await optimizeThumbnail(Buffer.from(image.thumbnail!))
 
         if (result && result.size < (image.thumbnailSize || 0)) {
           // Actualizar miniatura si es más pequeña

@@ -72,11 +72,11 @@ export async function GET(
 
     // Obtener calidad de la URL
     const { searchParams } = new URL(request.url)
-    const quality = (searchParams.get('quality') || 'mid') as ThumbnailQuality
+    const quality = (searchParams.get( 'quality') || 'mid') as 'compressed' | 'low' | 'mid' | 'high'
 
     // Si no tiene thumbnail, generarlo
     try {
-      const thumbnail = await generateThumbnail(file.path, { quality })
+      const thumbnail = await generateThumbnail(file.path, { quality: quality as 'compressed' | 'low' | 'mid' | 'high' })
 
       if (!thumbnail || !thumbnail.buffer) {
         throw new Error('No se pudo generar el thumbnail')
