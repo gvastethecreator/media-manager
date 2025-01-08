@@ -78,9 +78,8 @@ export async function POST(
       await prisma.image.update({
         where: { id: params.id },
         data: {
-          thumbnail: thumbnailBuffer.toString('base64'),
+          thumbnail: thumbnailBuffer,
           thumbnailSize: thumbnailBuffer.length,
-          thumbnailQuality: quality,
           thumbnailError: null,
           thumbnailErrorAt: null,
           updatedAt: new Date()

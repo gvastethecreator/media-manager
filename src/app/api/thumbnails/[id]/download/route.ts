@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import sharp from 'sharp'
 import { existsSync } from 'fs'
-import { THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/services/thumbnail.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -15,7 +15,7 @@ export async function GET(
     const { id } = await Promise.resolve(context.params)
     const { searchParams } = new URL(request.url)
     const quality = searchParams.get('quality') || 'high'
-    const qualityConfig = THUMBNAIL_QUALITY_CONFIG[quality]
+    const qualityConfig = THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality]
 
     // Obtener la imagen
     const image = await prisma.image.findUnique({

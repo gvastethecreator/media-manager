@@ -2,45 +2,17 @@ import { useEffect } from 'react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useThumbnailStore } from '@/store/thumbnails';
 import { logger } from '@/lib/logger';
-import { ProcessStatus, ThumbnailStats } from '@/services/thumbnail.service';
+import { ProcessStatus, ThumbnailStats, ThumbnailError } from '@/services/thumbnail.service';
 
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-interface EventData {
+type EventSourceMessage = {
   data: string;
-  type: string;
-}
-
-interface ProgressEvent extends ProcessStatus {
-  status: string;
-  progress: number;
-  current?: number;
-  total?: number;
-  currentFile?: string;
-  lastProcessed?: {
-    id: string;
-    path: string;
-    processedAt: string;
-  };
-}
-
-interface ErrorEvent {
-  message: string;
-  details?: string;
-  code?: string;
-}
-
-interface CompleteEvent {
-  processed?: number;
-  optimized?: number;
-  cleaned?: number;
-  totalSaved?: number;
-  totalFreed?: number;
-  errors?: number;
-}
+  type?: string;
+};
 
 export function useThumbnailEvents() {
   const { setProcessing, setStats, setError, setProcessStatus } = useThumbnailStore();
@@ -91,102 +63,45 @@ export function useThumbnailEvents() {
           resetHeartbeatTimeout();
         });
 
-        eventSource.addEventListener('progress', (e: MessageEvent) => {
+        const handleEvent = (e: EventSourceMessage) => {
           try {
-            if (!e.data) {
-              logger.warn('⚠️ Evento de progreso recibido sin datos');
-              return;
-            }
-
-            const data = JSON.parse(e.data) as ProgressEvent;
-            if (!data || typeof data !== 'object') {
-              logger.warn('⚠️ Datos de progreso inválidos:', data);
-              return;
-            }
-
-            setProcessStatus({
-              status: data.status || 'Procesando...',
-              progress: typeof data.progress === 'number' ? data.progress : 0,
-              current: typeof data.current === 'number' ? data.current : undefined,
-              total: typeof data.total === 'number' ? data.total : undefined,
-              currentFile: typeof data.currentFile === 'string' ? data.currentFile : undefined,
-              lastProcessed: data.lastProcessed && typeof data.lastProcessed === 'object' ? data.lastProcessed : undefined
-            });
-            resetHeartbeatTimeout();
-          } catch (error) {
-            logger.error('❌ Error procesando evento de progreso:', error);
+            if (!e.data) return;
+            const data = JSON.parse(e.data);
+            if (!data || typeof data !== 'object') return;
+            return data;
+          } catch (error: unknown) {
+            logger.error('❌ Error procesando evento:', error);
+            return null;
           }
-        });
+        };
 
-        eventSource.addEventListener('stats', (e: MessageEvent) => {
-          try {
-            if (!e.data) {
-              logger.warn('⚠️ Evento de estadísticas recibido sin datos');
-              return;
-            }
+        eventSource.onmessage = (e: EventSourceMessage) => {
+          const data = handleEvent(e);
+          if (!data) return;
 
-            const data = JSON.parse(e.data) as ThumbnailStats;
-            if (!data || typeof data !== 'object') {
-              logger.warn('⚠️ Datos de estadísticas inválidos:', data);
-              return;
-            }
-
-            setStats(data);
-            resetHeartbeatTimeout();
-          } catch (error) {
-            logger.error('❌ Error procesando evento de estadísticas:', error);
-          }
-        });
-
-        eventSource.addEventListener('complete', (e: MessageEvent) => {
-          try {
-            if (!e.data) {
-              logger.warn('⚠️ Evento de completado recibido sin datos');
-              return;
-            }
-
-            const data = JSON.parse(e.data) as CompleteEvent;
-            if (!data || typeof data !== 'object') {
-              logger.warn('⚠️ Datos de completado inválidos:', data);
-              return;
-            }
-
+          if (data.type === 'progress') {
+            setProcessStatus(data as ProcessStatus);
+          } else if (data.type === 'stats') {
+            const stats = {
+              ...data,
+              errors: data.errors?.map((error: ThumbnailError) => ({
+                ...error,
+                timestamp: error.timestamp.toISOString()
+              }))
+            };
+            setStats(stats);
+          } else if (data.type === 'complete') {
             setProcessing(false);
             setProcessStatus({
               status: 'Completado',
               progress: 100,
               ...data
             });
-            resetHeartbeatTimeout();
-          } catch (error) {
-            logger.error('❌ Error procesando evento de completado:', error);
-          }
-        });
-
-        eventSource.addEventListener('error', (e: MessageEvent) => {
-          try {
-            if (!e.data) {
-              logger.warn('⚠️ Evento de error recibido sin datos');
-              setError('Error desconocido en el proceso');
-              return;
-            }
-
-            const data = JSON.parse(e.data) as ErrorEvent;
-            if (!data || typeof data !== 'object') {
-              logger.warn('⚠️ Datos de error inválidos:', data);
-              setError('Error desconocido en el proceso');
-              return;
-            }
-
+          } else if (data.type === 'error') {
             const errorMessage = data.message || data.details || 'Error desconocido';
             setError(errorMessage);
-            logger.error('❌ Error recibido:', { message: errorMessage, code: data.code, details: data.details });
-            resetHeartbeatTimeout();
-          } catch (error) {
-            logger.error('❌ Error procesando evento de error:', error);
-            setError('Error desconocido en el proceso');
           }
-        });
+        };
       } catch (error) {
         logger.error('❌ Error creando conexión SSE:', error);
         setError(error instanceof Error ? error.message : 'Error al establecer la conexión');

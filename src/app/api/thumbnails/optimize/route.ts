@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         const originalSize = image.thumbnailSize || 0
 
         // Generar thumbnail optimizado
-        const thumbnail = await generateThumbnail(image.path, 'compressed' as ThumbnailQuality)
+        const thumbnail = await generateThumbnail(image.path, { quality: 'compressed' })
 
         if (!thumbnail || !thumbnail.buffer) {
           throw new Error('Error generando thumbnail optimizado')

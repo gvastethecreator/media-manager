@@ -15,54 +15,39 @@ export const statsService = {
     return prisma.imageStats.create({
       data: {
         imageId,
-        viewCount: 0,
-        downloadCount: 0,
+        views: 0,
+        downloads: 0,
+        lastViewed: new Date(),
         createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     })
   },
 
   // Increment view count
   async incrementViewCount(imageId: string): Promise<ImageStats> {
     const stats = await this.getOrCreateImageStats(imageId)
-    
+
     return prisma.imageStats.update({
       where: { id: stats.id },
       data: {
-        viewCount: { increment: 1 },
+        views: { increment: 1 },
         lastViewed: new Date(),
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     })
   },
 
   // Increment download count
   async incrementDownloadCount(imageId: string): Promise<ImageStats> {
     const stats = await this.getOrCreateImageStats(imageId)
-    
-    return prisma.imageStats.update({
-      where: { id: stats.id },
-      data: {
-        downloadCount: { increment: 1 },
-        lastDownloaded: new Date(),
-        updatedAt: new Date(),
-      },
-    })
-  },
-
-  // Update rating
-  async updateRating(imageId: string, rating: number): Promise<ImageStats> {
-    const stats = await this.getOrCreateImageStats(imageId)
-    const currentRating = stats.averageRating || 0
-    const newRating = currentRating === 0 ? rating : (currentRating + rating) / 2
 
     return prisma.imageStats.update({
       where: { id: stats.id },
       data: {
-        averageRating: newRating,
-        updatedAt: new Date(),
-      },
+        downloads: { increment: 1 },
+        updatedAt: new Date()
+      }
     })
   },
 
@@ -71,16 +56,15 @@ export const statsService = {
     return prisma.imageStats.findMany({
       take: limit,
       orderBy: {
-        viewCount: 'desc',
+        views: 'desc'
       },
       include: {
         image: {
           include: {
-            thumbnails: true,
-            tags: true,
-          },
-        },
-      },
+            tags: true
+          }
+        }
+      }
     })
   },
 
@@ -89,39 +73,15 @@ export const statsService = {
     return prisma.imageStats.findMany({
       take: limit,
       orderBy: {
-        downloadCount: 'desc',
+        downloads: 'desc'
       },
       include: {
         image: {
           include: {
-            thumbnails: true,
-            tags: true,
-          },
-        },
-      },
-    })
-  },
-
-  // Get highest rated images
-  async getHighestRatedImages(limit: number = 10) {
-    return prisma.imageStats.findMany({
-      take: limit,
-      where: {
-        averageRating: {
-          not: null,
-        },
-      },
-      orderBy: {
-        averageRating: 'desc',
-      },
-      include: {
-        image: {
-          include: {
-            thumbnails: true,
-            tags: true,
-          },
-        },
-      },
+            tags: true
+          }
+        }
+      }
     })
   },
 
@@ -129,22 +89,16 @@ export const statsService = {
   async getRecentlyViewedImages(limit: number = 10) {
     return prisma.imageStats.findMany({
       take: limit,
-      where: {
-        lastViewed: {
-          not: null,
-        },
-      },
       orderBy: {
-        lastViewed: 'desc',
+        lastViewed: 'desc'
       },
       include: {
         image: {
           include: {
-            thumbnails: true,
-            tags: true,
-          },
-        },
-      },
+            tags: true
+          }
+        }
+      }
     })
-  },
+  }
 }

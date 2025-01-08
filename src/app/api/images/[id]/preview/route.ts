@@ -37,12 +37,15 @@ export async function GET(
     try {
       // Verificar que el archivo existe
       const stats = await stat(filePath)
-      
+
       // Crear un stream de lectura del archivo
       const stream = createReadStream(filePath)
 
-      // Determinar el tipo MIME
-      const mimeType = image.mimeType || 'application/octet-stream'
+      // Parsear metadata y determinar el tipo MIME
+      const metadata = typeof image.metadata === 'string'
+        ? JSON.parse(image.metadata)
+        : image.metadata
+      const mimeType = metadata?.mimeType || 'application/octet-stream'
 
       // Crear y retornar la respuesta con el stream
       return new NextResponse(stream as any, {
