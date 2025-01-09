@@ -1,4 +1,9 @@
-import type { Tag } from '.prisma/client'
+import type { Tag as PrismaTag } from '.prisma/client'
+import type { FileItem } from '@/types/file-item'
+
+export interface Tag extends PrismaTag {
+  count: number
+}
 
 export interface TagCreate {
   name: string
@@ -15,6 +20,10 @@ export interface TagUpdate extends Partial<Omit<TagCreate, 'name'>> {
 export interface TagWithStats extends Tag {
   count: number
   size: string
+}
+
+export interface TagWithImages extends Tag {
+  images: FileItem[]
 }
 
 export const tagService = {
@@ -133,6 +142,19 @@ export const tagService = {
       }
     } catch (error) {
       console.error('Error removing image from tag:', error)
+      throw error
+    }
+  },
+
+  async getTagImages(tagId: string): Promise<FileItem[]> {
+    try {
+      const response = await fetch(`/api/tags/${tagId}/images`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch tag images')
+      }
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching tag images:', error)
       throw error
     }
   }

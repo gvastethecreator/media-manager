@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger'
-import { thumbnailCache, metadataCache, searchCache } from '@/lib/cache'
+import { thumbnailCache, metadataCache, searchCache, statsCache } from '@/lib/cache'
 
 const eventsLogger = logger.withContext('EventsService')
 
@@ -80,39 +80,76 @@ class EventsService {
 
   private async invalidateCache(event: CacheInvalidationEvent): Promise<void> {
     try {
+      // Agrupar eventos por tipo de caché
+      const cacheInvalidations: { [key: string]: string[] } = {
+        search: [],
+        metadata: [],
+        thumbnails: [],
+        stats: []
+      }
+
+      // Determinar qué cachés necesitan ser invalidados
       switch (event) {
         case 'files:added':
         case 'files:deleted':
         case 'files:modified':
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.metadata.push(event)
+          cacheInvalidations.stats.push(event)
+          break
+
         case 'folders:added':
         case 'folders:deleted':
         case 'folders:modified':
-          await Promise.all([
-            searchCache.clear(),
-            metadataCache.clear()
-          ])
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.stats.push(event)
           break
 
         case 'collections:modified':
         case 'favorites:modified':
         case 'tags:modified':
-          await searchCache.clear()
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.stats.push(event)
           break
 
         case 'thumbnails:modified':
-          await thumbnailCache.clear()
+          cacheInvalidations.thumbnails.push(event)
           break
 
         case 'metadata:modified':
-          await metadataCache.clear()
+          cacheInvalidations.metadata.push(event)
           break
 
         case 'search:modified':
-          await searchCache.clear()
+          cacheInvalidations.search.push(event)
           break
       }
 
-      eventsLogger.info(`🧹 Caché invalidado para evento: ${event}`)
+      // Invalidar cachés de forma selectiva
+      const invalidationPromises: Promise<void>[] = []
+
+      if (cacheInvalidations.search.length > 0) {
+        invalidationPromises.push(searchCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de búsqueda:', cacheInvalidations.search)
+      }
+
+      if (cacheInvalidations.metadata.length > 0) {
+        invalidationPromises.push(metadataCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de metadata:', cacheInvalidations.metadata)
+      }
+
+      if (cacheInvalidations.thumbnails.length > 0) {
+        invalidationPromises.push(thumbnailCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de thumbnails:', cacheInvalidations.thumbnails)
+      }
+
+      if (cacheInvalidations.stats.length > 0) {
+        invalidationPromises.push(statsCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de estadísticas:', cacheInvalidations.stats)
+      }
+
+      await Promise.all(invalidationPromises)
+      eventsLogger.info(`🧹 Cachés invalidados para evento: ${event}`)
     } catch (error) {
       eventsLogger.error(`❌ Error invalidando caché para ${event}:`, error)
     }

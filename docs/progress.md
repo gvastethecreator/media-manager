@@ -43,28 +43,35 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ### Últimas 4 tareas, si hay mas deben ir a changelog.md al final del archivo
 
-1. **[2024-01-11] Optimización del Flujo de Inicialización**
+1. **[2024-01-11] Integración de Servicios de Gestión de Contenido**
+
+   - Integración de FavoriteService, CollectionService y TagService
+   - Optimización del ContextMenu y sus interacciones
+   - Implementación de caché y gestión de estado
+   - Mejora en el manejo de eventos y actualizaciones UI
+
+2. **[2024-01-11] Optimización del Flujo de Inicialización**
 
    - Revisión y mejora del flujo de inicialización de la aplicación
    - Reorganización del orden de carga de servicios
    - Optimización de la pantalla de carga y estados visuales
    - Implementación de mejor manejo de errores y dependencias
 
-2. **[2024-01-10] Separación de Componentes de Configuración**
+3. **[2024-01-10] Separación de Componentes de Configuración**
 
    - Separación de FoldersSection y ThumbnailsSection en componentes independientes
    - Implementación de comunicación entre componentes
    - Optimización de la gestión de estado compartido
    - Mejora en la organización del código y responsabilidades
 
-3. **[2024-01-10] Corrección del Sistema de Reindexado**
+4. **[2024-01-10] Corrección del Sistema de Reindexado**
 
    - Análisis del flujo de eventos SSE en el proceso de reindexado
    - Corrección de la sincronización de estado en FoldersSection
    - Mejora en el manejo de tipos de eventos en EventsService
    - Optimización del manejo de progreso y estado
 
-4. **[2024-01-09] Optimización para Server Components**
+5. **[2024-01-09] Optimización para Server Components**
 
    - Refactorización del FileContext para Server Components
    - Migración de operaciones de base de datos al servidor
@@ -75,52 +82,53 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ### Cambios realizados:
 
-1. ✅ Creado nuevo servicio `SystemService` para centralizar llamadas al estado del sistema
-2. ✅ Implementado caché específico para el estado del sistema
-3. ✅ Optimizado el hook `useInitializeApp` para reducir llamadas redundantes
-4. ✅ Mejorado el store de stats con caché y optimización de llamadas
-5. ✅ Implementado logger para mejor seguimiento y debugging
-6. ✅ Corregido error de exportación en CacheManager
-7. ✅ Creado CacheProvider para manejo del ciclo de vida del caché
-8. ✅ Integrado CacheProvider en AppProvider
-9. ✅ Mejorado el sistema de logging con emojis para mejor visibilidad
-10. ✅ Implementado sistema de eventos para invalidación de caché
-11. ✅ Optimizado actualización de stats basado en eventos relevantes
-12. ✅ Ajustado TTL del caché de stats a 5 minutos
-13. ✅ Actualizado FolderService para usar el nuevo sistema de eventos
-14. ✅ Eliminado código redundante de eventos en FolderService
-15. ✅ Mejorado el manejo de errores y logging en FolderService
-16. ✅ Actualizado FoldersView para usar el nuevo sistema de eventos
-17. ✅ Implementada suscripción a eventos en FoldersView
-18. ✅ Mejorado manejo de estados y errores en FoldersView
+1. ✅ Creado store para gestión de favoritos (FavoritesStore)
+2. ✅ Creado store para gestión de colecciones (CollectionsStore)
+3. ✅ Creado store para gestión de tags (TagsStore)
+4. ✅ Integrado ContextMenu con los nuevos stores
+5. ✅ Implementado sistema de logging para mejor seguimiento
+6. ✅ Agregado servicio de Content al proceso de inicialización
+7. ✅ Optimizado manejo de estado y caché
+8. ✅ Mejorado el manejo de errores y feedback
+9. ✅ Corregidos tipos en FavoriteService para incluir imagen
+10. ✅ Mejorada exportación de tipos en CollectionService
+11. ✅ Mejorada exportación de tipos en TagService
+12. ✅ Agregados métodos para obtener imágenes en servicios
+13. ✅ Implementada interfaz común para tipos de servicios
+14. ✅ Movidas operaciones de base de datos al servidor
+15. ✅ Creados endpoints para favoritos
+16. ✅ Creados endpoints para colecciones
+17. ✅ Mejorado manejo de errores en endpoints
+18. ✅ Implementado logging en endpoints
 
 ### Próximos pasos:
 
-1. 🔄 Revisar y optimizar ViewContainer
-2. 🔄 Verificar y ajustar tiempos de caché según necesidad
-3. 🔄 Implementar manejo de errores más robusto
-4. 🔄 Añadir métricas de rendimiento
-5. 🔄 Documentar API del sistema
-6. 🔄 Implementar sistema de invalidación de caché selectiva
-7. 🔄 Añadir tests para el sistema de caché
-8. 🔄 Monitorear uso de memoria del caché
-9. 🔄 Implementar sistema de precarga de caché
-10. 🔄 Implementar sistema de retry para operaciones fallidas
+1. 🔄 Implementar sistema de caché selectiva para favoritos
+2. 🔄 Optimizar carga inicial de colecciones
+3. 🔄 Mejorar sistema de eventos para tags
+4. 🔄 Implementar sistema de retry para operaciones fallidas
+5. 🔄 Agregar tests para los nuevos stores
+6. 🔄 Implementar sistema de precarga de contenido
+7. 🔄 Optimizar rendimiento de operaciones masivas
+8. 🔄 Mejorar UX con feedback visual
 
 ### Beneficios:
 
-- Reducción de llamadas redundantes al API
-- Mejor manejo de estado y caché
-- Logging mejorado para debugging
-- Mayor eficiencia en la inicialización
-- Sistema de caché más robusto y mantenible
-- Mejor gestión del ciclo de vida de los cachés
-- Actualización de stats basada en eventos
-- Menor consumo de recursos del servidor
-- Sistema de eventos más limpio y eficiente
-- Mejor manejo de errores y feedback
-- Actualización automática de UI basada en eventos
-- Mayor robustez en operaciones de carpetas
+- Mejor organización del código y responsabilidades
+- Sistema de caché más eficiente
+- Mejor manejo de errores y logging
+- Mayor eficiencia en operaciones
+- Sistema de eventos más robusto
+- Mejor feedback al usuario
+- Mayor estabilidad en operaciones
+- Mejor mantenibilidad del código
+- Tipado más seguro y consistente
+- Mejor integración entre servicios
+- Mejor manejo de relaciones entre entidades
+- Código más mantenible y escalable
+- Operaciones de base de datos seguras en el servidor
+- Mejor manejo de errores y respuestas HTTP
+- Logging centralizado y consistente
 
 ## Corrección de problemas de inicialización y reindexado [Completado]
 
