@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { ImageViewer } from "@/components/features/file-viewer/file-viewer";
 import { SettingsProvider } from "@/context/settings-context";
 import { FilesProvider } from "@/context/file-context";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface AppProviderProps {
 	children: React.ReactNode;
@@ -25,11 +24,9 @@ export function AppProvider({ children }: AppProviderProps) {
 				<SettingsProvider>
 					<InitializeProvider>
 						<FilesProvider>
-							<SidebarProvider>
 								{children}
 								<ImageViewer />
 								<Toaster />
-							</SidebarProvider>
 						</FilesProvider>
 					</InitializeProvider>
 				</SettingsProvider>

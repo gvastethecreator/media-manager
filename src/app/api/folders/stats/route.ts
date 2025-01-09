@@ -20,14 +20,14 @@ export async function GET() {
     // Calcular estadísticas totales
     const stats = {
       totalFolders: folders.length,
-      totalFiles: folders.reduce((sum, folder) => sum + folder._count.images, 0),
-      totalSize: folders.reduce((sum, folder) => {
-        const folderSize = folder.images.reduce((total, img) => total + (img.size || 0), 0)
+      totalFiles: folders.reduce((sum: any, folder: any) => sum + folder._count.images, 0),
+      totalSize: folders.reduce((sum: any, folder: any) => {
+        const folderSize = folder.images.reduce((total: any, img: any) => total + (img.size || 0), 0)
         return sum + folderSize
       }, 0),
       lastIndexed: folders
-        .filter(f => f.lastIndexed)
-        .reduce((latest, folder) => {
+        .filter((f: any) => f.lastIndexed)
+        .reduce((latest: any, folder: any) => {
           if (!latest || (folder.lastIndexed && folder.lastIndexed > latest)) {
             return folder.lastIndexed
           }

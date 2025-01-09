@@ -1,85 +1,216 @@
-'use server'
+'use server';
 
-import { prisma } from '@/lib/prisma'
-import { FileItem } from '@/types/files'
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import type { FileItem } from "@/types/files";
+import type { Collection, Tag, Folder, SortMode } from "@/types/settings";
 
-export async function getFiles(path?: string): Promise<FileItem[]> {
-  const files = await prisma.image.findMany({
-    where: {
-      path: path ? {
-        startsWith: path
-      } : undefined
+/**
+ * Transforma los datos de la imagen de Prisma al formato FileItem
+ */
+const transformImageToFileItem = (img: any): FileItem => ({
+  id: img.id,
+  name: img.name,
+  path: img.path,
+  type: "image" as const,
+  size: img.size,
+  width: img.width,
+  height: img.height,
+  src: `file://${img.path}`,
+  metadata: img.metadata ? JSON.parse(img.metadata) : null,
+  thumbnail: img.thumbnail
+    ? `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString("base64")}`
+    : undefined,
+  thumbnailSize: img.thumbnailSize || 0,
+  thumbnailWidth: img.thumbnailWidth || 0,
+  thumbnailHeight: img.thumbnailHeight || 0,
+  isPublic: img.isPublic,
+  isFavorite: img.isFavorite,
+  tags: img.tags.map((tag: any) => ({
+    id: tag.id,
+    name: tag.name,
+    color: tag.color,
+  })),
+  collections: img.collections.map((collection: any) => ({
+    id: collection.id,
+    name: collection.name,
+    emoji: collection.emoji,
+    color: collection.color,
+  })),
+  stats: img.stats
+    ? {
+      views: img.stats.views,
+      downloads: img.stats.downloads,
+      lastViewed: img.stats.lastViewed,
     }
-  })
+    : undefined,
+  createdAt: img.createdAt,
+  updatedAt: img.updatedAt,
+});
 
-  return files.map(mapImageToFileItem)
-}
-
-export async function getFilesByFolder(folderId: string): Promise<FileItem[]> {
-  console.log('Obteniendo archivos de la carpeta:', folderId)
-
-  const files = await prisma.image.findMany({
-    where: {
-      folderId
-    }
-  })
-
-  console.log('✅ Datos recibidos:', { count: files.length, sample: files.slice(0, 2) })
-
-  return files.map(mapImageToFileItem)
-}
-
-export async function getCollectionFiles(collectionId: string): Promise<FileItem[]> {
-  const files = await prisma.image.findMany({
-    where: {
-      collections: {
-        some: {
-          id: collectionId
-        }
-      }
-    }
-  })
-
-  return files.map(mapImageToFileItem)
-}
-
-export async function getTaggedFiles(tag: string): Promise<FileItem[]> {
-  const files = await prisma.image.findMany({
-    where: {
-      tags: {
-        some: {
-          name: tag
-        }
-      }
-    }
-  })
-
-  return files.map(mapImageToFileItem)
-}
-
-function mapImageToFileItem(image: any): FileItem {
-  return {
-    id: image.id,
-    name: image.name,
-    type: 'image',
-    size: image.size,
-    path: image.path,
-    url: `/api/images/${image.id}`,
-    thumbnailUrl: `/api/thumbnails/${image.id}`,
-    metadata: {
-      dimensions: {
-        width: image.width,
-        height: image.height
-      },
-      orientation: image.width > image.height ? 'landscape' : 'portrait',
-      created: image.createdAt,
-      modified: image.updatedAt,
-      tags: image.tags || []
+/**
+ * Obtiene todas las imágenes con sus relaciones
+ */
+export async function getAllImages() {
+  const images = await prisma.image.findMany({
+    include: {
+      folder: true,
+      collections: true,
+      tags: true,
+      favorites: true,
+      stats: true,
     },
-    gridInfo: {
-      rowSpan: image.height > image.width * 1.5 ? 2 : 1,
-      colSpan: image.width > image.height * 1.5 ? 2 : 1,
-      priority: (image.width * image.height) / 1000000
-    }
+    orderBy: { createdAt: "desc" },
+  });
+
+  return images.map(transformImageToFileItem);
+}
+
+/**
+ * Obtiene las imágenes de una colección específica
+ */
+export async function getCollectionImages(id: string) {
+  const collection = await prisma.collection.findUnique({
+    where: { id },
+    include: {
+      images: {
+        include: {
+          folder: true,
+          collections: true,
+          tags: true,
+          favorites: true,
+          stats: true,
+        },
+      },
+    },
+  });
+
+  if (!collection) {
+    throw new Error("Colección no encontrada");
   }
+
+  return collection.images.map(transformImageToFileItem);
+}
+
+/**
+ * Obtiene las imágenes de una carpeta específica
+ */
+export async function getFolderImages(id: string) {
+  const folder = await prisma.folder.findUnique({
+    where: { id },
+    include: {
+      images: {
+        include: {
+          folder: true,
+          collections: true,
+          tags: true,
+          favorites: true,
+          stats: true,
+        },
+      },
+    },
+  });
+
+  if (!folder) {
+    throw new Error("Carpeta no encontrada");
+  }
+
+  return folder.images.map(transformImageToFileItem);
+}
+
+/**
+ * Obtiene las imágenes de una etiqueta específica
+ */
+export async function getTagImages(name: string) {
+  const tag = await prisma.tag.findUnique({
+    where: { name },
+    include: {
+      images: {
+        include: {
+          folder: true,
+          collections: true,
+          tags: true,
+          favorites: true,
+          stats: true,
+        },
+      },
+    },
+  });
+
+  if (!tag) {
+    throw new Error("Etiqueta no encontrada");
+  }
+
+  return tag.images.map(transformImageToFileItem);
+}
+
+/**
+ * Alterna el estado de favorito de una imagen
+ */
+export async function toggleFavorite(id: string) {
+  const image = await prisma.image.findUnique({
+    where: { id },
+    include: { favorites: true },
+  });
+
+  if (!image) {
+    throw new Error("Imagen no encontrada");
+  }
+
+  const isFavorite = image.favorites.length > 0;
+
+  if (isFavorite) {
+    await prisma.favorite.deleteMany({
+      where: { imageId: id },
+    });
+  } else {
+    await prisma.favorite.create({
+      data: { imageId: id },
+    });
+  }
+
+  revalidatePath("/");
+  return !isFavorite;
+}
+
+/**
+ * Obtiene los datos del sistema (carpetas, colecciones, etiquetas)
+ */
+export async function getSystemData(): Promise<{
+  folders: Folder[];
+  collections: Collection[];
+  tags: Tag[];
+}> {
+  const [folders, collections, tags] = await Promise.all([
+    prisma.folder.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.collection.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.tag.findMany({
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  return {
+    folders: folders.map(folder => ({
+      ...folder,
+      isIndexed: true,
+      lastIndexed: folder.lastIndexed?.toISOString() || null,
+    })),
+    collections: collections.map(collection => ({
+      ...collection,
+      sortDirection: "asc" as const,
+      filters: JSON.parse(collection.filters),
+      count: 0,
+      description: collection.description || undefined,
+      shortcut: collection.shortcut || undefined,
+      sortBy: collection.sortBy as SortMode,
+    })),
+    tags: tags.map(tag => ({
+      ...tag,
+      count: 0,
+    })),
+  };
 }

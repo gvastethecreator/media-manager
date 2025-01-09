@@ -20,6 +20,7 @@ function mapImageToFileItem(image: any): FileItem {
     mimeType: (metadata as any).mimeType || undefined,
     thumbnail: image.thumbnail ? `/api/images/${image.id}/thumbnail` : undefined,
     src: `/api/images/${image.id}`,
+    isPublic: image.isPublic || false,
     tags: image.tags?.map((tag: any) => ({
       id: tag.id,
       name: tag.name,

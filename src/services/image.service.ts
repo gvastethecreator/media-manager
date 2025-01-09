@@ -1,18 +1,17 @@
 import { prisma } from '@/lib/prisma'
-import type { Image } from '@prisma/client'
+import type { Image } from '.prisma/client'
 import { statsService } from './stats.service'
 import sharp from 'sharp'
-import { thumbnailCache, metadataCache } from '@/lib/cache'
+import { thumbnailCache } from '@/lib/cache'
 import { createHash } from 'crypto'
-import path from 'path'
 import { promises as fs } from 'fs'
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'mid' | 'high'
+export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high'
 
 export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
   compressed: { quality: 60, width: 200, height: 200 },
   low: { quality: 70, width: 300, height: 300 },
-  mid: { quality: 80, width: 400, height: 400 },
+  medium: { quality: 80, width: 400, height: 400 },
   high: { quality: 90, width: 500, height: 500 }
 }
 
@@ -133,7 +132,7 @@ class ImageService {
     })
 
     // Generar thumbnail automáticamente
-    await this.generateThumbnail(image.id, 'mid')
+    await this.generateThumbnail(image.id, 'medium')
 
     // Inicializar estadísticas
     await statsService.getOrCreateImageStats(image.id)
@@ -182,7 +181,7 @@ class ImageService {
     }
   }
 
-  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'mid'): Promise<string> {
+  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'medium'): Promise<string> {
     const cacheKey = `thumbnail:${imageId}:${quality}`
 
     // Intentar obtener del caché

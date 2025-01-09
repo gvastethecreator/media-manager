@@ -3,14 +3,11 @@
 import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	DatabaseIcon,
-	BookmarkIcon,
-	CatIcon,
-} from "lucide-react";
+import { DatabaseIcon, BookmarkIcon, CatIcon } from "lucide-react";
 
 // Importar las secciones
 import { FoldersSection } from "./settings-sections/folders-section";
+import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
 import { CollectionsSection } from "./settings-sections/collections-section";
 import { TagsSection } from "./settings-sections/tags-section";
 import { ShortcutsSection } from "./settings-sections/shortcuts-section";
@@ -45,11 +42,11 @@ export function SettingsView() {
 					<TabsContent value="folders" className="gap-2 px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
 							<ProfilesSection />
-							<FoldersSection  />
+							<div className="grid grid-cols-1 gap-2">
+								<FoldersSection />
+								<ThumbnailsSection />
+							</div>
 							<SystemSection />
-						</div>
-						<div className="grid grid-cols-2 gap-2 w-full">
-
 						</div>
 					</TabsContent>
 

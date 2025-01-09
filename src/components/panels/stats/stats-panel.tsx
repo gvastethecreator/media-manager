@@ -12,6 +12,7 @@ import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import Meteors from "@/components/ui/meteors";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
+import { Button } from "@/components/ui/button";
 
 const itemVariants = {
 	initial: { opacity: 0, y: 10 },
@@ -84,20 +85,27 @@ const TagUsage = memo(
 		tag?: { name: string; color: string; count: number };
 		isLoading: boolean;
 	}) => (
-		<div className="flex items-center justify-start py-0.5">
+		<div className="flex flex-wrap justify-start py-0.5 w-full">
 			{isLoading ? (
 				<></>
 			) : (
 				tag && (
 					<>
-						<div className="flex items-center space-x-2">
-							<Badge
-								className="rounded-full flex-shrink-0"
-								style={{ backgroundColor: tag.color }}
-							>
-								{tag.name} - {tag.count}
-							</Badge>
-						</div>
+						<span
+							key={tag.name}
+							style={{ backgroundColor: tag.color }}
+							className={cn(
+								"px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold",
+								"bg-gradient-to-r from-black/30 to-black/35"
+							)}
+						>
+							<span className="flex-1 text-left  text-[10px] truncate shadow-sm">
+								{tag.name}
+							</span>
+							<span className="text-[10px] ml-2 h-4 text-white border-none">
+								{tag.count}
+							</span>
+						</span>
 					</>
 				)
 			)}
@@ -265,12 +273,12 @@ export function StatsPanel() {
 							Etiquetas Más Usadas
 						</CardTitle>
 					</CardHeader>
-					<CardContent className="p-2 space-y-1 flex flex-col-4 gap-2">
-						{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
-							(tag, i) => (
-								<TagUsage key={i} tag={tag} isLoading={isLoading} />
-							)
-						)}
+					<CardContent className="p-0 space-y-1 w-full gap-2">
+							{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
+								(tag, i) => (
+									<TagUsage key={i} tag={tag} isLoading={isLoading} />
+								)
+							)}
 					</CardContent>
 
 					<CardHeader className="p-0 pb-2">

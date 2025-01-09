@@ -4,6 +4,17 @@ import { EventSourcePolyfill } from 'event-source-polyfill'
 
 const eventsLogger = logger.withContext('EventService')
 
+export enum EVENT_TYPES {
+  HEARTBEAT = 'heartbeat',
+  ERROR = 'error',
+  PROGRESS = 'progress',
+  COMPLETE = 'complete',
+  STATS = 'stats',
+  FOLDER_PROGRESS = 'folder:progress',
+  FOLDER_ERROR = 'folder:error',
+  FOLDER_COMPLETE = 'folder:complete'
+}
+
 type EventSourceType = EventSourcePolyfill | EventSource;
 type EventHandler = (event: MessageEvent<any>) => void;
 
@@ -20,6 +31,12 @@ interface EventSourceWithPolyfill {
   readonly url: string;
 }
 
+export interface EventData<T = any> {
+  type: EVENT_TYPES;
+  data: T;
+  timestamp: number;
+}
+
 export class EventsService {
   private emitter = new EventEmitter()
   private source: EventSourceWithPolyfill | null = null
@@ -33,10 +50,12 @@ export class EventsService {
   private reconnectTimer: NodeJS.Timeout | null = null
   private endpoint: string
   private EventSourceImpl: typeof EventSourcePolyfill | typeof EventSource
+  private isConnected: boolean = false
 
   constructor(endpoint?: string, EventSourceImpl?: typeof EventSourcePolyfill | typeof EventSource) {
     this.endpoint = endpoint || '/api/events'
     this.EventSourceImpl = EventSourceImpl || EventSourcePolyfill
+    eventsLogger.info('🔌 Inicializando EventsService con endpoint:', this.endpoint)
   }
 
   private clearTimers() {
@@ -69,10 +88,13 @@ export class EventsService {
   private async reconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       eventsLogger.error('❌ Máximo número de intentos de reconexión alcanzado')
-      this.emit('error', {
-        type: 'MAX_RECONNECT_ATTEMPTS',
-        message: 'No se pudo restablecer la conexión',
-        details: `Máximo número de intentos (${this.maxReconnectAttempts}) alcanzado`
+      this.emit(EVENT_TYPES.ERROR, {
+        type: EVENT_TYPES.ERROR,
+        data: {
+          message: 'No se pudo restablecer la conexión',
+          details: `Máximo número de intentos (${this.maxReconnectAttempts}) alcanzado`
+        },
+        timestamp: Date.now()
       })
       this.disconnect()
       return
@@ -92,24 +114,34 @@ export class EventsService {
   }
 
   connect() {
-    if (this.source) {
-      this.disconnect()
+    if (this.isConnected) {
+      eventsLogger.warn('⚠️ Intento de conexión mientras ya está conectado')
+      return
     }
 
     try {
+      eventsLogger.info('🔄 Iniciando conexión SSE...')
       this.source = new this.EventSourceImpl(this.endpoint) as EventSourceWithPolyfill
 
       this.source.onopen = () => {
+        this.isConnected = true
         eventsLogger.info('✅ Conexión SSE establecida')
         this.setupHeartbeat()
+        this.emit(EVENT_TYPES.COMPLETE, {
+          type: EVENT_TYPES.COMPLETE,
+          data: { status: 'connected' },
+          timestamp: Date.now()
+        })
       }
 
       this.source.onerror = (error: Event) => {
-        eventsLogger.error('❌ Error en conexión:', error)
-        this.emit('error', {
-          type: 'CONNECTION_ERROR',
-          message: 'Error en la conexión',
-          details: 'Error de conexión SSE',
+        eventsLogger.error('❌ Error en conexión SSE:', error)
+        this.emit(EVENT_TYPES.ERROR, {
+          type: EVENT_TYPES.ERROR,
+          data: {
+            message: 'Error en la conexión SSE',
+            error
+          },
           timestamp: Date.now()
         })
         this.reconnect()
@@ -119,10 +151,13 @@ export class EventsService {
 
     } catch (error) {
       eventsLogger.error('❌ Error estableciendo conexión:', error)
-      this.emit('error', {
-        type: 'SETUP_ERROR',
-        message: 'Error estableciendo conexión',
-        details: error instanceof Error ? error.message : 'Error desconocido'
+      this.emit(EVENT_TYPES.ERROR, {
+        type: EVENT_TYPES.ERROR,
+        data: {
+          message: 'Error estableciendo conexión',
+          error
+        },
+        timestamp: Date.now()
       })
     }
   }
@@ -132,35 +167,33 @@ export class EventsService {
 
     const addListener = (event: string, handler: EventHandler) => {
       this.source?.addEventListener(event, handler)
+      eventsLogger.debug(`📡 Listener agregado para evento: ${event}`)
     }
 
-    addListener('heartbeat', () => {
+    // Eventos base
+    Object.values(EVENT_TYPES).forEach(eventType => {
+      addListener(eventType, (e) => {
+        const data = this.parseEventData(e)
+        if (data) {
+          eventsLogger.debug(`📨 Evento recibido: ${eventType}`, data)
+          this.emit(eventType, {
+            type: eventType,
+            data,
+            timestamp: Date.now()
+          })
+        }
+      })
+    })
+
+    // Manejo especial para heartbeat
+    addListener(EVENT_TYPES.HEARTBEAT, () => {
       this.handleHeartbeat()
-    })
-
-    addListener('error', (e) => {
-      const error = this.parseEventData(e)
-      this.emit('error', error)
-    })
-
-    addListener('progress', (e) => {
-      const data = this.parseEventData(e)
-      this.emit('progress', data)
-    })
-
-    addListener('complete', (e) => {
-      const data = this.parseEventData(e)
-      this.emit('complete', data)
-    })
-
-    addListener('stats', (e) => {
-      const data = this.parseEventData(e)
-      this.emit('stats', data)
     })
   }
 
-  private parseEventData(event: MessageEvent) {
+  private parseEventData(event: MessageEvent): any {
     try {
+      if (!event.data) return null
       return typeof event.data === 'string' ? JSON.parse(event.data) : event.data
     } catch (error) {
       eventsLogger.error('❌ Error parseando datos del evento:', error)
@@ -169,22 +202,32 @@ export class EventsService {
   }
 
   disconnect() {
+    if (!this.isConnected) {
+      eventsLogger.warn('⚠️ Intento de desconexión mientras no está conectado')
+      return
+    }
+
     this.clearTimers()
     if (this.source) {
       this.source.close()
       this.source = null
     }
+    this.isConnected = false
+    eventsLogger.info('🔌 Desconectado del servidor de eventos')
   }
 
-  on(event: string, callback: (data: any) => void) {
+  on(event: EVENT_TYPES, callback: (data: EventData) => void) {
     this.emitter.on(event, callback)
+    eventsLogger.debug(`➕ Listener agregado para ${event}`)
   }
 
-  off(event: string, callback: (data: any) => void) {
+  off(event: EVENT_TYPES, callback: (data: EventData) => void) {
     this.emitter.off(event, callback)
+    eventsLogger.debug(`➖ Listener removido para ${event}`)
   }
 
-  private emit(event: string, data: any) {
+  private emit(event: EVENT_TYPES, data: EventData) {
     this.emitter.emit(event, data)
+    eventsLogger.debug(`📢 Emitiendo evento ${event}:`, data)
   }
 }

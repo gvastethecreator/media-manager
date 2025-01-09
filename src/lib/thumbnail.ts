@@ -26,7 +26,7 @@ export interface ThumbnailResult {
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 
 const DEFAULT_OPTIONS: Partial<ThumbnailOptions> = {
-  quality: 'mid',
+  quality: 'medium',
   format: 'webp',
   preserveMetadata: false,
   progressive: true

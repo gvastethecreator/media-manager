@@ -23,7 +23,7 @@ export async function GET(
     })
 
     // Convertir las imágenes al formato esperado por VirtualizedView
-    const files = images.map(image => ({
+    const files = images.map((image: any) => ({
       id: image.id,
       name: image.name,
       path: image.path,

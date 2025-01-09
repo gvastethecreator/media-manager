@@ -57,7 +57,7 @@ export async function POST(
     }
 
     // Verificar si el archivo ya tiene el tag
-    const isFileTagged = tag.images.some((file) => file.id === fileId);
+    const isFileTagged = tag.images.some((file: any) => file.id === fileId);
 
     if (isFileTagged) {
       return new Response(

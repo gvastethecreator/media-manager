@@ -70,6 +70,10 @@ export interface SystemSettings {
   minimizeToTray: boolean
   checkUpdates: boolean
   telemetry: boolean
+  // Métricas del sistema
+  cpuUsage: number
+  memoryUsage: number
+  cacheSize: number
 }
 
 export interface ShortcutSettings {
@@ -121,7 +125,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
     autoStart: false,
     minimizeToTray: true,
     checkUpdates: true,
-    telemetry: false
+    telemetry: false,
+    cpuUsage: 0,
+    memoryUsage: 0,
+    cacheSize: 0
   },
 
   shortcuts: {},

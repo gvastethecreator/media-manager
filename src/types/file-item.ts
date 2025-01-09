@@ -59,7 +59,7 @@ export interface FileItem {
 }
 
 export type ViewType =
-  | 'dashboard'
+  | 'development'
   | 'all-images'
   | 'collections'
   | 'collection-content'

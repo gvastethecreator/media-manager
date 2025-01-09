@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import type { ImageStats } from '@prisma/client'
+import type { ImageStats } from '.prisma/client'
 
 export interface ThumbnailStats {
   processed: number

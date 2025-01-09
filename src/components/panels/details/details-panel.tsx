@@ -62,8 +62,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { ImageMetadata } from "@/lib/metadata";
-import { DashboardPanel, StatsPanel } from "../stats/stats-panel";
+import { StatsPanel } from "../stats/stats-panel";
+
+// Interfaces primero
 interface DetailsPanelProps {
 	selectedItems: FileItem[];
 }
@@ -71,10 +72,68 @@ interface DetailsPanelProps {
 interface InfoItemProps {
 	icon: React.ReactNode;
 	label: string;
-	value: string | number | null | undefined;
+	value: string;
 	tooltip?: string;
 }
 
+interface ImageDimensions {
+	width: number;
+	height: number;
+	aspectRatio: number;
+}
+
+interface FileSystemMetadata {
+	size: number;
+	created: string;
+	modified: string;
+	accessed: string;
+}
+
+interface LocalImageMetadata {
+	dimensions: Partial<ImageDimensions>;
+	exif: Record<string, string | number>;
+	fileSystem: Partial<FileSystemMetadata>;
+	generation: Record<string, string | number>;
+	format?: string | null;
+	colorSpace?: string | null;
+	hasAlpha?: boolean;
+	isAnimated?: boolean;
+}
+
+// Funciones auxiliares
+const safeString = (value: unknown): string => {
+	if (value === null || value === undefined) return "";
+	return String(value);
+};
+
+const getIconForExif = (key: string): React.ReactNode => {
+	const icons: Record<string, React.ReactNode> = {
+		Make: <Box className="h-3.5 w-3.5 text-indigo-400" />,
+		Model: <Camera className="h-3.5 w-3.5 text-pink-400" />,
+		Software: <Layers className="h-3.5 w-3.5 text-cyan-400" />,
+		DateTime: <Calendar className="h-3.5 w-3.5 text-orange-400" />,
+		ExposureTime: <Timer className="h-3.5 w-3.5 text-red-400" />,
+		FNumber: <Aperture className="h-3.5 w-3.5 text-emerald-400" />,
+		ISO: <Scale className="h-3.5 w-3.5 text-violet-400" />,
+		FocalLength: <Focus className="h-3.5 w-3.5 text-amber-400" />,
+	};
+	return icons[key] || <Info className="h-3.5 w-3.5 text-muted-foreground" />;
+};
+
+const getIconForGeneration = (key: string): React.ReactNode => {
+	const icons: Record<string, React.ReactNode> = {
+		prompt: <MessageSquare className="h-3.5 w-3.5 text-teal-400" />,
+		negative_prompt: <MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />,
+		model: <Box className="h-3.5 w-3.5 text-sky-400" />,
+		steps: <GitBranch className="h-3.5 w-3.5 text-lime-400" />,
+		cfg_scale: <Scale className="h-3.5 w-3.5 text-fuchsia-400" />,
+		seed: <Dice5 className="h-3.5 w-3.5 text-amber-400" />,
+		sampler: <Gauge className="h-3.5 w-3.5 text-indigo-400" />,
+	};
+	return icons[key] || <Wand2 className="h-3.5 w-3.5 text-muted-foreground" />;
+};
+
+// Componente InfoItem
 const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
 	if (!value) return null;
 
@@ -135,19 +194,35 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	};
 
 	// Parsear metadata de manera segura
-	const parseMetadata = (metadata: any): ImageMetadata => {
-		if (!metadata) return {};
+	const parseMetadata = (metadata: any): LocalImageMetadata => {
+		const emptyMetadata: LocalImageMetadata = {
+			dimensions: {},
+			exif: {},
+			fileSystem: {},
+			generation: {},
+		};
+
+		if (!metadata) return emptyMetadata;
 
 		if (typeof metadata === "string") {
 			try {
 				return JSON.parse(metadata);
 			} catch (e) {
 				console.error("Error parsing metadata:", e);
-				return {};
+				return emptyMetadata;
 			}
 		}
 
-		return metadata;
+		return {
+			dimensions: metadata.dimensions || {},
+			exif: metadata.exif || {},
+			fileSystem: metadata.fileSystem || {},
+			generation: metadata.generation || {},
+			format: metadata.format || null,
+			colorSpace: metadata.colorSpace || null,
+			hasAlpha: !!metadata.hasAlpha,
+			isAnimated: !!metadata.isAnimated,
+		};
 	};
 
 	// 3. Efectos
@@ -857,7 +932,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				</motion.div>
 
 				{/* Información EXIF */}
-				{Object.keys(exif).length > 0 && (
+				{Object.entries(exif).length > 0 && (
 					<motion.div
 						animate={{
 							opacity: [0, 1],
@@ -873,69 +948,21 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-4 pt-2 space-y-1.5">
-								{exif.Make && (
+								{Object.entries(exif).map(([key, value]) => (
 									<InfoItem
-										icon={<Box className="h-3.5 w-3.5 text-indigo-400" />}
-										label="Fabricante"
-										value={exif.Make}
+										key={key}
+										icon={getIconForExif(key)}
+										label={key}
+										value={safeString(value)}
 									/>
-								)}
-								{exif.Model && (
-									<InfoItem
-										icon={<Camera className="h-3.5 w-3.5 text-pink-400" />}
-										label="Modelo"
-										value={exif.Model}
-									/>
-								)}
-								{exif.Software && (
-									<InfoItem
-										icon={<Layers className="h-3.5 w-3.5 text-cyan-400" />}
-										label="Software"
-										value={exif.Software}
-									/>
-								)}
-								{exif.DateTime && (
-									<InfoItem
-										icon={<Calendar className="h-3.5 w-3.5 text-orange-400" />}
-										label="Fecha"
-										value={formatDate(exif.DateTime)}
-									/>
-								)}
-								{exif.ExposureTime && (
-									<InfoItem
-										icon={<Timer className="h-3.5 w-3.5 text-red-400" />}
-										label="Tiempo de exposición"
-										value={`${exif.ExposureTime}s`}
-									/>
-								)}
-								{exif.FNumber && (
-									<InfoItem
-										icon={<Aperture className="h-3.5 w-3.5 text-emerald-400" />}
-										label="Apertura"
-										value={`f/${exif.FNumber}`}
-									/>
-								)}
-								{exif.ISO && (
-									<InfoItem
-										icon={<Scale className="h-3.5 w-3.5 text-violet-400" />}
-										label="ISO"
-										value={exif.ISO}
-									/>
-								)}
-								{exif.FocalLength && (
-									<InfoItem
-										icon={<Focus className="h-3.5 w-3.5 text-amber-400" />}
-										label="Distancia focal"
-										value={`${exif.FocalLength}mm`}
-									/>
-								)}
+								))}
 							</CardContent>
 						</Card>
 					</motion.div>
 				)}
 
 				{/* Información de generación AI */}
-				{Object.keys(generation).length > 0 && (
+				{Object.entries(generation).length > 0 && (
 					<motion.div
 						animate={{
 							opacity: [0, 1],
@@ -951,61 +978,14 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-4 pt-2 space-y-1.5">
-								<>
-									{generation.prompt && (
-										<InfoItem
-											icon={
-												<MessageSquare className="h-3.5 w-3.5 text-teal-400" />
-											}
-											label="Prompt"
-											value={generation.prompt}
-										/>
-									)}
-									{generation.negative_prompt && (
-										<InfoItem
-											icon={
-												<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />
-											}
-											label="Prompt negativo"
-											value={generation.negative_prompt}
-										/>
-									)}
-									{generation.model && (
-										<InfoItem
-											icon={<Box className="h-3.5 w-3.5 text-sky-400" />}
-											label="Modelo"
-											value={generation.model}
-										/>
-									)}
-									{generation.steps && (
-										<InfoItem
-											icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
-											label="Pasos"
-											value={generation.steps}
-										/>
-									)}
-									{generation.cfg_scale && (
-										<InfoItem
-											icon={<Scale className="h-3.5 w-3.5 text-fuchsia-400" />}
-											label="Escala CFG"
-											value={generation.cfg_scale}
-										/>
-									)}
-									{generation.seed && (
-										<InfoItem
-											icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
-											label="Semilla"
-											value={generation.seed}
-										/>
-									)}
-									{generation.sampler && (
-										<InfoItem
-											icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
-											label="Sampler"
-											value={generation.sampler}
-										/>
-									)}
-								</>
+								{Object.entries(generation).map(([key, value]) => (
+									<InfoItem
+										key={key}
+										icon={getIconForGeneration(key)}
+										label={key}
+										value={safeString(value)}
+									/>
+								))}
 							</CardContent>
 						</Card>
 					</motion.div>
