@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const apiLogger = logger.withContext('FavoritesAPI')
 
@@ -49,6 +50,9 @@ export async function POST(request: Request) {
         },
       },
     })
+
+    // Emitir evento de cambio
+    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
 
     apiLogger.info('⭐ Favorito creado:', { imageId })
     return NextResponse.json(favorite)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const apiLogger = logger.withContext('FavoritesAPI')
 
@@ -16,6 +17,9 @@ export async function DELETE(
         id,
       },
     })
+
+    // Emitir evento de cambio
+    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
 
     apiLogger.info('🗑️ Favorito eliminado:', { id })
     return NextResponse.json({ success: true })
