@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, memo } from "react";
+import { useEffect, useMemo, memo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStatsStore } from "@/store/stats";
 import * as Icons from "lucide-react";
@@ -13,6 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import Meteors from "@/components/ui/meteors";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
 import { statsEventEmitter } from "@/services/stats.service";
+import { statsService } from "@/services/stats.service";
+import { logger } from "@/lib/logger";
+
+const statsLogger = logger.withContext("StatsPanel");
 
 const itemVariants = {
 	initial: { opacity: 0, y: 10 },
@@ -152,22 +156,67 @@ export function StatsPanel() {
 	// Inicializar eventos SSE
 	useThumbnailEvents();
 
-	useEffect(() => {
-		// Inicialización inicial
-		initialize();
+	const handleStatsUpdate = useCallback(
+		async (events: string[]) => {
+			// Solo actualizar si los eventos son relevantes
+			const relevantEvents = [
+				"files:added",
+				"files:deleted",
+				"folders:modified",
+				"tags:modified",
+				"collections:modified",
+			];
 
-		// Suscribirse a eventos de actualización
-		const handleStatsUpdate = () => {
-			console.log("🔄 Actualizando estadísticas por cambios en el sistema...");
-			initialize();
+			const hasRelevantEvents = events.some((event) =>
+				relevantEvents.includes(event)
+			);
+
+			if (hasRelevantEvents) {
+				try {
+					const newStats = await statsService.getGeneralStats();
+					initialize(newStats);
+					statsLogger.debug(
+						"📊 Estadísticas actualizadas por eventos:",
+						events
+					);
+				} catch (error) {
+					statsLogger.error("❌ Error al actualizar estadísticas:", error);
+				}
+			} else {
+				statsLogger.debug("🔄 Ignorando eventos no relevantes:", events);
+			}
+		},
+		[initialize]
+	);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		// Inicialización inicial con caché
+		const initializeStats = async () => {
+			try {
+				const stats = await statsService.getGeneralStats();
+				if (isMounted && stats) {
+					initialize(stats);
+					statsLogger.debug("📊 Estadísticas iniciales cargadas");
+				}
+			} catch (error) {
+				if (isMounted) {
+					statsLogger.error("❌ Error al inicializar estadísticas:", error);
+				}
+			}
 		};
 
+		initializeStats();
+
+		// Suscribirse a eventos de actualización
 		statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
 
 		return () => {
+			isMounted = false;
 			statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
 		};
-	}, [initialize]);
+	}, [handleStatsUpdate, initialize]);
 
 	// Memoizar las estadísticas principales
 	const mainStats = useMemo(

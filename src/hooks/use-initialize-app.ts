@@ -4,6 +4,9 @@ import { useEffect } from 'react'
 import { useLoadingStore } from '@/store/loading-store'
 import { systemService } from '@/services/system.service'
 import { logger } from '@/lib/logger'
+import { useFavoritesStore } from '@/store/favorites'
+import { useCollectionsStore } from '@/store/collections'
+import { useTagsStore } from '@/store/tags'
 
 const initLogger = logger.withContext('Initialization')
 
@@ -19,6 +22,9 @@ const COMPLETION_DELAY = 500
 
 export function useInitializeApp() {
   const { updateService, setProgress, setInitializing, setReady } = useLoadingStore()
+  const { loadFavorites } = useFavoritesStore()
+  const { loadCollections } = useCollectionsStore()
+  const { loadTags } = useTagsStore()
 
   useEffect(() => {
     const services: ServiceInitializer[] = [
@@ -113,6 +119,33 @@ export function useInitializeApp() {
           } catch (error) {
             initLogger.error('🔴 Error en Thumbnails:', error)
             throw new Error(`Error del servicio de miniaturas: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+          }
+        }
+      },
+      {
+        name: 'Content',
+        weight: 25,
+        dependencies: ['Database', 'Settings'],
+        init: async () => {
+          updateService('Content', 'loading', 'Cargando contenido...')
+          try {
+            // Cargar favoritos
+            await loadFavorites()
+            initLogger.info('✅ Favoritos cargados')
+
+            // Cargar colecciones
+            await loadCollections()
+            initLogger.info('✅ Colecciones cargadas')
+
+            // Cargar tags
+            await loadTags()
+            initLogger.info('✅ Tags cargados')
+
+            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
+            updateService('Content', 'success', '✅ Contenido cargado')
+          } catch (error) {
+            initLogger.error('🔴 Error cargando contenido:', error)
+            throw new Error(`Error cargando contenido: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
       }
