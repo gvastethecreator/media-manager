@@ -37,22 +37,22 @@ export async function GET() {
       }
     })
 
-    const processedCollections = await Promise.all(collections.map(async (collection) => {
-      const totalSize = collection.images.reduce((sum, img) => sum + img.size, 0)
+    const processedCollections = await Promise.all(collections.map(async (collection: any) => {
+      const totalSize = collection.images.reduce((sum: any, img: any) => sum + img.size, 0)
 
-      const tagCounts = collection.images.reduce((acc, img) => {
-        img.tags.forEach(tag => {
+      const tagCounts = collection.images.reduce((acc: any, img: any) => {
+        img.tags.forEach((tag: any) => {
           acc[tag.name] = (acc[tag.name] || 0) + 1
         })
         return acc
       }, {} as Record<string, number>)
 
       const topTags = Object.entries(tagCounts)
-        .sort(([, a], [, b]) => b - a)
+        .sort(([, a]: any, [, b]: any) => b - a)
         .slice(0, 3)
         .map(([name, count]) => ({ name, count }))
 
-      const recentImages = collection.images.map(img => `/api/thumbnails/${img.id}`)
+      const recentImages = collection.images.map((img: any) => `/api/thumbnails/${img.id}`)
 
       return {
         id: collection.id,

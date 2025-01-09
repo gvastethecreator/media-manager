@@ -41,28 +41,32 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ## 🚀 Progreso
 
-### Últimas 4 tareas
+### Últimas 4 tareas, si hay mas deben ir a changelog.md al final del archivo
 
-1. **[2024-01-08] Optimización del servicio de miniaturas**
+1. **[2024-01-10] Separación de Componentes de Configuración**
 
-   - Refactorización del servicio de miniaturas para mejorar el manejo de errores y eventos
-   - Implementación de optimización de miniaturas con Sharp
-   - Actualización del componente ThumbnailsSection para usar el nuevo servicio
-   - Corrección de errores en las rutas de API de miniaturas
+   - Separación de FoldersSection y ThumbnailsSection en componentes independientes
+   - Implementación de comunicación entre componentes
+   - Optimización de la gestión de estado compartido
+   - Mejora en la organización del código y responsabilidades
 
-2. **[2024-01-07] Mejoras en el sistema de caché**
+2. **[2024-01-10] Corrección del Sistema de Reindexado**
 
-   - Implementación de caché para metadatos de imágenes
-   - Optimización del rendimiento en la carga de miniaturas
-   - Corrección de errores en el manejo de caché
+   - Análisis del flujo de eventos SSE en el proceso de reindexado
+   - Corrección de la sincronización de estado en FoldersSection
+   - Mejora en el manejo de tipos de eventos en EventsService
+   - Optimización del manejo de progreso y estado
 
-3. **[2024-01-06] Actualización del sistema de indexación**
+3. **[2024-01-09] Optimización para Server Components**
 
-   - Mejoras en el procesamiento de carpetas
-   - Implementación de eventos SSE para seguimiento en tiempo real
-   - Corrección de errores en el manejo de rutas
+   - Refactorización del FileContext para Server Components
+   - Migración de operaciones de base de datos al servidor
+   - Implementación de Server Actions para operaciones de datos
+   - Optimización del manejo de estado cliente/servidor
 
-4. **[2024-01-05] Implementación de observador de carpetas**
-   - Sistema de monitoreo de cambios en carpetas
-   - Integración con el servicio de indexación
-   - Manejo de eventos de sistema de archivos
+4. **[2024-01-09] Actualización del FileContext**
+
+   - Integración completa con Prisma y base de datos local
+   - Eliminación de datos mockup
+   - Optimización de consultas y manejo de estado
+   - Mejora en el manejo de errores y logging

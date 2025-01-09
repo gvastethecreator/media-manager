@@ -44,7 +44,7 @@ export async function GET() {
       }
     })
 
-    const errors = errorsResult.map(img => ({
+    const errors = errorsResult.map((img: any) => ({
       imageId: img.id,
       imagePath: img.path,
       error: img.thumbnailError!,
