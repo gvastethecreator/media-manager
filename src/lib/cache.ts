@@ -1,24 +1,17 @@
 import { LRUCache } from 'lru-cache'
 import { logger } from '@/lib/logger'
 
-interface CacheOptions {
-  /** Número máximo de elementos en caché */
+export interface CacheOptions {
   max?: number
-  /** Tiempo de vida en milisegundos */
   ttl?: number
-  /** Actualizar edad al obtener */
   updateAgeOnGet?: boolean
-  /** Permitir valores expirados */
   allowStale?: boolean
-  /** Nombre para identificación */
   name?: string
-  /** Intervalo de limpieza en ms */
   cleanupInterval?: number
-  /** Intervalo de log de stats en ms */
   statsInterval?: number
 }
 
-interface CacheEntry<T> {
+export interface CacheEntry<T> {
   value: T
   timestamp: number
   ttl: number
@@ -26,13 +19,7 @@ interface CacheEntry<T> {
   hits?: number
 }
 
-interface DumpEntry<T> {
-  value: CacheEntry<T>
-  ttl?: number
-  start?: number
-}
-
-interface CacheStats {
+export interface CacheStats {
   hits: number
   misses: number
   keys: number
@@ -45,25 +32,16 @@ interface CacheStats {
 
 const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = {
   max: 500,
-  ttl: 1000 * 60 * 60, // 1 hora
+  ttl: 1000 * 60 * 60,
   updateAgeOnGet: true,
   allowStale: false,
-  cleanupInterval: 1000 * 60 * 15, // 15 minutos
-  statsInterval: 1000 * 60 * 5 // 5 minutos
+  cleanupInterval: 1000 * 60 * 15,
+  statsInterval: 1000 * 60 * 5
 }
 
-// Crear una instancia específica para el servicio de caché
 const cacheLogger = logger.withContext('CacheManager')
 
-type LRUEntry<T> = { value: CacheEntry<T> }
-
-type DumpedEntry<T> = { value: T; ttl?: number; start?: number }
-
-type CacheDump<T> = {
-  [key: string]: { value: CacheEntry<T> }
-}
-
-class CacheManager<T = unknown> {
+export class CacheManager<T = unknown> {
   private cache: LRUCache<string, CacheEntry<T>>
   private defaultTTL: number
   private updateAgeOnGet: boolean
@@ -89,20 +67,18 @@ class CacheManager<T = unknown> {
     this.updateAgeOnGet = opts.updateAgeOnGet
     this.allowStale = opts.allowStale
 
-    cacheLogger.info(`Initializing cache manager: ${this.name}`)
+    cacheLogger.info(`🚀 Inicializando cache manager: ${this.name}`)
 
-    // Crear instancia de LRUCache con la nueva configuración
     this.cache = new LRUCache({
       max: opts.max,
       ttl: opts.ttl,
       updateAgeOnGet: opts.updateAgeOnGet,
       allowStale: opts.allowStale,
       dispose: (value: CacheEntry<T>, key: string) => {
-        cacheLogger.debug(`[${this.name}] Entry disposed:`, { key })
+        cacheLogger.debug(`[${this.name}] 🗑️ Entry disposed:`, { key })
       }
     })
 
-    // Iniciar timers
     this.startCleanupTimer(opts.cleanupInterval)
     this.startStatsTimer(opts.statsInterval)
   }
@@ -112,7 +88,7 @@ class CacheManager<T = unknown> {
       const entry = this.cache.get(key) as CacheEntry<T> | undefined
       if (!entry) {
         this.stats.misses++
-        cacheLogger.debug(`[${this.name}] Cache miss:`, { key })
+        cacheLogger.debug(`[${this.name}] ❌ Cache miss:`, { key })
         return undefined
       }
 
@@ -130,10 +106,10 @@ class CacheManager<T = unknown> {
       }
 
       this.stats.hits++
-      cacheLogger.debug(`[${this.name}] Cache hit:`, { key })
+      cacheLogger.debug(`[${this.name}] ✅ Cache hit:`, { key })
       return entry.value
     } catch (error) {
-      cacheLogger.error(`[${this.name}] Error getting cache entry:`, { error, key })
+      cacheLogger.error(`[${this.name}] ❌ Error getting cache entry:`, { error, key })
       return undefined
     }
   }
@@ -149,18 +125,18 @@ class CacheManager<T = unknown> {
       }
 
       this.cache.set(key, entry)
-      cacheLogger.debug(`[${this.name}] Cache entry set:`, { key, ttl })
+      cacheLogger.debug(`[${this.name}] 💾 Cache entry set:`, { key, ttl })
     } catch (error) {
-      cacheLogger.error(`[${this.name}] Error setting cache entry:`, { error, key })
+      cacheLogger.error(`[${this.name}] ❌ Error setting cache entry:`, { error, key })
     }
   }
 
   async delete(key: string): Promise<void> {
     try {
       this.cache.delete(key)
-      cacheLogger.debug(`[${this.name}] Cache entry deleted:`, { key })
+      cacheLogger.debug(`[${this.name}] 🗑️ Cache entry deleted:`, { key })
     } catch (error) {
-      cacheLogger.error(`[${this.name}] Error deleting cache entry:`, { error, key })
+      cacheLogger.error(`[${this.name}] ❌ Error deleting cache entry:`, { error, key })
     }
   }
 
@@ -168,9 +144,9 @@ class CacheManager<T = unknown> {
     try {
       this.cache.clear()
       this.resetStats()
-      cacheLogger.info(`[${this.name}] Cache cleared`)
+      cacheLogger.info(`[${this.name}] 🧹 Cache cleared`)
     } catch (error) {
-      cacheLogger.error(`[${this.name}] Error clearing cache:`, error)
+      cacheLogger.error(`[${this.name}] ❌ Error clearing cache:`, error)
     }
   }
 
@@ -178,21 +154,21 @@ class CacheManager<T = unknown> {
     try {
       const now = Date.now()
       let pruned = 0
-      const dump = this.cache.dump() as unknown as CacheDump<T>
+      const dump = this.cache.dump() as unknown as { [key: string]: { value: CacheEntry<T> } }
 
       for (const key of Object.keys(dump)) {
         const entry = dump[key]
-        if (entry && now - (entry.value as CacheEntry<T>).timestamp > (entry.value as CacheEntry<T>).ttl) {
+        if (entry && now - entry.value.timestamp > entry.value.ttl) {
           await this.delete(key)
           pruned++
         }
       }
 
       if (pruned > 0) {
-        cacheLogger.info(`[${this.name}] Pruned ${pruned} expired entries`)
+        cacheLogger.info(`[${this.name}] 🧹 Pruned ${pruned} expired entries`)
       }
     } catch (error) {
-      cacheLogger.error(`[${this.name}] Error pruning cache:`, error)
+      cacheLogger.error(`[${this.name}] ❌ Error pruning cache:`, error)
     }
   }
 
@@ -220,7 +196,6 @@ class CacheManager<T = unknown> {
       let minTimestamp = Infinity
       let maxTimestamp = -Infinity
 
-      // Procesar entradas en chunks
       const keys = Object.keys(entries)
       for (let i = 0; i < keys.length; i += chunkSize) {
         const chunk = keys.slice(i, i + chunkSize)
@@ -235,13 +210,12 @@ class CacheManager<T = unknown> {
             minTimestamp = Math.min(minTimestamp, entry.value.timestamp)
             maxTimestamp = Math.max(maxTimestamp, entry.value.timestamp)
           } catch (error) {
-            cacheLogger.warn(`[Cache:${this.name}] Error al procesar entrada en stats:`, {
+            cacheLogger.warn(`[Cache:${this.name}] ⚠️ Error al procesar entrada en stats:`, {
               error: error instanceof Error ? error.message : String(error)
             })
           }
         }
 
-        // Dar tiempo al event loop
         await new Promise(resolve => setTimeout(resolve, 0))
       }
 
@@ -255,7 +229,7 @@ class CacheManager<T = unknown> {
         this.stats.newestEntry = now - maxTimestamp
       }
     } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] Error al actualizar estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] ❌ Error al actualizar estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -271,9 +245,9 @@ class CacheManager<T = unknown> {
         avgTTL: `${(this.stats.avgTTL / 1000 / 60).toFixed(2)}m`,
         size: `${(this.stats.size / 1024).toFixed(2)}KB`
       }
-      cacheLogger.info(`[Cache:${this.name}] Stats:`, stats)
+      cacheLogger.info(`[Cache:${this.name}] 📊 Stats:`, stats)
     } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] Error al generar log de estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] ❌ Error al generar log de estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -282,7 +256,7 @@ class CacheManager<T = unknown> {
   private startCleanupTimer(interval: number): void {
     this.cleanupTimer = setInterval(() => {
       this.prune().catch(error =>
-        cacheLogger.error(`[Cache:${this.name}] Error en cleanup timer:`, {
+        cacheLogger.error(`[Cache:${this.name}] ❌ Error en cleanup timer:`, {
           error: error instanceof Error ? error.message : String(error)
         })
       )
@@ -309,7 +283,7 @@ class CacheManager<T = unknown> {
       }
       await this.clear()
     } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] Error al detener caché:`, {
+      cacheLogger.error(`[Cache:${this.name}] ❌ Error al detener caché:`, {
         error: error instanceof Error ? error.message : String(error)
       })
     }
@@ -320,7 +294,7 @@ class CacheManager<T = unknown> {
       this.updateStats()
       return { ...this.stats }
     } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] Error al obtener estadísticas:`, {
+      cacheLogger.error(`[Cache:${this.name}] ❌ Error al obtener estadísticas:`, {
         error: error instanceof Error ? error.message : String(error)
       })
       return { ...this.stats }
@@ -328,30 +302,29 @@ class CacheManager<T = unknown> {
   }
 }
 
-// Crear instancias específicas para diferentes tipos de caché
+// Instancias específicas de caché
 export const thumbnailCache = new CacheManager<string>({
   name: 'thumbnails',
   max: 1000,
-  ttl: 1000 * 60 * 60 * 24, // 24 horas
+  ttl: 1000 * 60 * 60 * 24,
   updateAgeOnGet: true,
-  allowStale: true // Permitir usar thumbnails expirados mientras se regeneran
+  allowStale: true
 })
 
 export const metadataCache = new CacheManager<Record<string, unknown>>({
   name: 'metadata',
   max: 5000,
-  ttl: 1000 * 60 * 60, // 1 hora
+  ttl: 1000 * 60 * 60,
   updateAgeOnGet: true
 })
 
 export const searchCache = new CacheManager<unknown[]>({
   name: 'search',
   max: 100,
-  ttl: 1000 * 60 * 5, // 5 minutos
-  updateAgeOnGet: false // No actualizar edad en búsquedas
+  ttl: 1000 * 60 * 5,
+  updateAgeOnGet: false
 })
 
-// Limpiar caches al cerrar la aplicación
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
     Promise.all([
@@ -359,7 +332,7 @@ if (typeof window !== 'undefined') {
       metadataCache.stop(),
       searchCache.stop()
     ]).catch(error =>
-      cacheLogger.error('[Cache] Error deteniendo caches:', error)
+      cacheLogger.error('[Cache] ❌ Error deteniendo caches:', error)
     )
   })
 }
