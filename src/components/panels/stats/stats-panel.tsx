@@ -12,7 +12,7 @@ import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import Meteors from "@/components/ui/meteors";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
-import { Button } from "@/components/ui/button";
+import { statsEventEmitter } from "@/services/stats.service";
 
 const itemVariants = {
 	initial: { opacity: 0, y: 10 },
@@ -153,7 +153,20 @@ export function StatsPanel() {
 	useThumbnailEvents();
 
 	useEffect(() => {
+		// Inicialización inicial
 		initialize();
+
+		// Suscribirse a eventos de actualización
+		const handleStatsUpdate = () => {
+			console.log("🔄 Actualizando estadísticas por cambios en el sistema...");
+			initialize();
+		};
+
+		statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
+
+		return () => {
+			statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
+		};
 	}, [initialize]);
 
 	// Memoizar las estadísticas principales
@@ -274,11 +287,11 @@ export function StatsPanel() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-0 space-y-1 w-full gap-2">
-							{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
-								(tag, i) => (
-									<TagUsage key={i} tag={tag} isLoading={isLoading} />
-								)
-							)}
+						{(isLoading ? Array(5).fill(null) : stats?.topTags || []).map(
+							(tag, i) => (
+								<TagUsage key={i} tag={tag} isLoading={isLoading} />
+							)
+						)}
 					</CardContent>
 
 					<CardHeader className="p-0 pb-2">
