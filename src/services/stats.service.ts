@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import type { ImageStats } from '.prisma/client'
+import { EventEmitter } from 'events'
 
 export interface ThumbnailStats {
   processed: number
@@ -9,6 +10,57 @@ export interface ThumbnailStats {
   totalFreed: number
   errors: number
 }
+
+// Eventos que pueden causar actualización de estadísticas
+export const STATS_EVENTS = {
+  IMAGE_VIEW: 'image_view',
+  IMAGE_DOWNLOAD: 'image_download',
+  IMAGE_ADD: 'image_add',
+  IMAGE_DELETE: 'image_delete',
+  TAG_CHANGE: 'tag_change',
+  COLLECTION_CHANGE: 'collection_change',
+  FOLDER_CHANGE: 'folder_change',
+  FAVORITE_CHANGE: 'favorite_change',
+} as const
+
+class StatsEventEmitter extends EventEmitter {
+  private static instance: StatsEventEmitter
+  private lastUpdate: number = 0
+  private updateInterval: number = 5000 // 5 segundos mínimo entre actualizaciones
+  private shouldUpdate: boolean = false
+
+  private constructor() {
+    super()
+    this.setupEventHandlers()
+  }
+
+  public static getInstance(): StatsEventEmitter {
+    if (!StatsEventEmitter.instance) {
+      StatsEventEmitter.instance = new StatsEventEmitter()
+    }
+    return StatsEventEmitter.instance
+  }
+
+  private setupEventHandlers() {
+    Object.values(STATS_EVENTS).forEach(event => {
+      this.on(event, () => {
+        this.shouldUpdate = true
+        this.checkUpdate()
+      })
+    })
+  }
+
+  private checkUpdate() {
+    const now = Date.now()
+    if (this.shouldUpdate && now - this.lastUpdate >= this.updateInterval) {
+      this.shouldUpdate = false
+      this.lastUpdate = now
+      this.emit('stats_update_needed')
+    }
+  }
+}
+
+export const statsEventEmitter = StatsEventEmitter.getInstance()
 
 export const statsService = {
   // Initialize or get stats for an image
@@ -36,6 +88,7 @@ export const statsService = {
   // Increment view count
   async incrementViewCount(imageId: string): Promise<ImageStats> {
     const stats = await this.getOrCreateImageStats(imageId)
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_VIEW)
 
     return prisma.imageStats.update({
       where: { id: stats.id },
@@ -50,6 +103,7 @@ export const statsService = {
   // Increment download count
   async incrementDownloadCount(imageId: string): Promise<ImageStats> {
     const stats = await this.getOrCreateImageStats(imageId)
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_DOWNLOAD)
 
     return prisma.imageStats.update({
       where: { id: stats.id },
