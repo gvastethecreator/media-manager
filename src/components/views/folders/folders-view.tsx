@@ -22,7 +22,13 @@ import {
 	Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getFolders } from "@/services/folder.service";
+import {
+	getFolders,
+	reindexFolder,
+	deleteFolder,
+	ProcessStatus,
+	ErrorResponse,
+} from "@/services/folder.service";
 import { toast } from "sonner";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
@@ -34,6 +40,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
+import { eventsService } from "@/services/events.service";
 
 interface FolderCardProps {
 	folder: any;
@@ -311,41 +318,73 @@ export function FoldersView({ isResizing }: ViewProps) {
 			}
 		};
 
+		// Cargar carpetas inicialmente
 		loadFolders();
+
+		// Suscribirse a eventos relevantes
+		const unsubscribe = eventsService.subscribe((event) => {
+			if (
+				event === "folders:added" ||
+				event === "folders:deleted" ||
+				event === "folders:modified"
+			) {
+				loadFolders();
+			}
+		});
+
+		return () => {
+			unsubscribe();
+		};
 	}, []);
 
 	const handleReindex = async (folderId: string) => {
+		if (isProcessing) return;
+
 		setIsProcessing(true);
 		setProcessStatus({ folderId, progress: 0 });
 
-		toast.promise(
-			fetch(`/api/folders/${folderId}/reindex`, {
-				method: "POST",
-			}).finally(() => {
-				setIsProcessing(false);
-				setProcessStatus({});
-			}),
-			{
-				loading: "Reindexando carpeta...",
-				success: "Carpeta reindexada correctamente",
-				error: "Error al reindexar la carpeta",
-			}
-		);
+		try {
+			await reindexFolder(folderId, {
+				onProgress: (status) => {
+					setProcessStatus((prev) => ({
+						...prev,
+						...status,
+						folderId,
+					}));
+				},
+				onError: (error) => {
+					toast.error(`Error: ${error.message}`);
+					setIsProcessing(false);
+					setProcessStatus({});
+				},
+				onComplete: () => {
+					toast.success("Carpeta reindexada correctamente");
+					setIsProcessing(false);
+					setProcessStatus({});
+					// El evento folders:modified ya disparará la recarga
+				},
+			});
+		} catch (error) {
+			toast.error(
+				`Error: ${error instanceof Error ? error.message : "Error desconocido"}`
+			);
+			setIsProcessing(false);
+			setProcessStatus({});
+		}
 	};
 
 	const handleDelete = async (folderId: string) => {
-		toast.promise(
-			fetch(`/api/folders/${folderId}`, {
-				method: "DELETE",
-			}).then(() => {
-				setFolders((prev) => prev.filter((f) => f.id !== folderId));
-			}),
-			{
-				loading: "Eliminando carpeta...",
-				success: "Carpeta eliminada correctamente",
-				error: "Error al eliminar la carpeta",
-			}
-		);
+		if (isProcessing) return;
+
+		try {
+			await deleteFolder(folderId);
+			toast.success("Carpeta eliminada correctamente");
+			// El evento folders:deleted ya disparará la recarga
+		} catch (error) {
+			toast.error(
+				`Error: ${error instanceof Error ? error.message : "Error desconocido"}`
+			);
+		}
 	};
 
 	const handleFolderClick = useCallback(

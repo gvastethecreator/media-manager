@@ -62,7 +62,7 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 			case "tag-content":
 				return <TagContentView />;
 			default:
-				case "development":
+			case "development":
 				return <DevelopmentView />;
 		}
 	};
@@ -70,9 +70,10 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 	return (
 		<div className="relative w-full h-full overflow-hidden">
 			<DotPattern
-		
 				className={cn(
-					"[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
+					"opacity-40",
+					"[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
+					isResizing && "opacity-60 transition-opacity duration-150"
 				)}
 			/>
 			<AnimatePresence initial={false} custom={navigationDirection}>
@@ -86,6 +87,12 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 					transition={{
 						x: { type: "spring", stiffness: 300, damping: 30 },
 						opacity: { duration: 0.2 },
+					}}
+					style={{
+						opacity: isResizing ? 0.3 : 1,
+						filter: isResizing ? "blur(2px)" : "none",
+						transition: "all 0.15s ease-in-out",
+						transform: isResizing ? "scale(0.99)" : "scale(1)",
 					}}
 					className="absolute w-full h-full"
 				>
