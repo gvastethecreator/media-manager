@@ -25,144 +25,25 @@ export interface ThumbnailStats {
 
 // Eventos que pueden causar actualización de estadísticas
 export const STATS_EVENTS = {
-  IMAGE_VIEW: 'image_view',
-  IMAGE_DOWNLOAD: 'image_download',
-  IMAGE_ADD: 'image_add',
-  IMAGE_DELETE: 'image_delete',
-  TAG_CHANGE: 'tag_change',
-  COLLECTION_CHANGE: 'collection_change',
-  FOLDER_CHANGE: 'folder_change',
-  FAVORITE_CHANGE: 'favorite_change',
+  IMAGE_VIEW: 'IMAGE_VIEW',
+  IMAGE_DOWNLOAD: 'IMAGE_DOWNLOAD',
+  IMAGE_ADD: 'IMAGE_ADD',
+  IMAGE_DELETE: 'IMAGE_DELETE',
+  TAG_CHANGE: 'TAG_CHANGE',
+  COLLECTION_CHANGE: 'COLLECTION_CHANGE',
+  FOLDER_CHANGE: 'FOLDER_CHANGE',
+  FAVORITE_CHANGE: 'FAVORITE_CHANGE',
 } as const
 
-type EventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS]
-
-type EventGroups = {
-  COUNTS: readonly EventType[]
-  METADATA: readonly EventType[]
-  ACTIVITY: readonly EventType[]
-}
-
-const EVENT_IMPACTS: EventGroups = {
-  COUNTS: [
-    STATS_EVENTS.IMAGE_ADD,
-    STATS_EVENTS.IMAGE_DELETE,
-    STATS_EVENTS.FOLDER_CHANGE
-  ],
-  METADATA: [
-    STATS_EVENTS.TAG_CHANGE,
-    STATS_EVENTS.COLLECTION_CHANGE
-  ],
-  ACTIVITY: [
-    STATS_EVENTS.IMAGE_VIEW,
-    STATS_EVENTS.IMAGE_DOWNLOAD,
-    STATS_EVENTS.FAVORITE_CHANGE
-  ]
-} as const
+export type StatsEventType = keyof typeof STATS_EVENTS;
 
 class StatsEventEmitter extends EventEmitter {
-  private static instance: StatsEventEmitter
-  private lastUpdate: number = 0
-  private updateInterval: number = 5000
-  private shouldUpdate: boolean = false
-  private pendingEvents: Map<EventType, number> = new Map()
-  private updateTimeout: NodeJS.Timeout | null = null
-  private isUpdating: boolean = false
-
-  private constructor() {
-    super()
-    this.setupEventHandlers()
-  }
-
-  public static getInstance(): StatsEventEmitter {
-    if (!StatsEventEmitter.instance) {
-      StatsEventEmitter.instance = new StatsEventEmitter()
-    }
-    return StatsEventEmitter.instance
-  }
-
-  private setupEventHandlers() {
-    Object.values(STATS_EVENTS).forEach(event => {
-      this.on(event, () => {
-        const now = Date.now()
-        const lastEventTime = this.pendingEvents.get(event) || 0
-
-        // Evitar eventos duplicados en un intervalo corto (1 segundo)
-        if (now - lastEventTime < 1000) {
-          return
-        }
-
-        this.pendingEvents.set(event, now)
-        this.shouldUpdate = true
-        this.debouncedUpdate()
-      })
-    })
-  }
-
-  private shouldTriggerUpdate(events: EventType[]): boolean {
-    // Si hay eventos que afectan conteos, siempre actualizar
-    if (events.some(event => EVENT_IMPACTS.COUNTS.includes(event))) {
-      return true
-    }
-
-    // Para eventos de metadata, acumular hasta tener varios
-    const metadataEvents = events.filter(event =>
-      EVENT_IMPACTS.METADATA.includes(event)
-    )
-    if (metadataEvents.length > 2) {
-      return true
-    }
-
-    // Para eventos de actividad, no trigger inmediato
-    const activityEvents = events.filter(event =>
-      EVENT_IMPACTS.ACTIVITY.includes(event)
-    )
-    if (activityEvents.length > 0) {
-      return false
-    }
-
-    return false
-  }
-
-  private debouncedUpdate() {
-    if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout)
-    }
-
-    const events = Array.from(this.pendingEvents.keys())
-    const shouldTrigger = this.shouldTriggerUpdate(events)
-
-    // Ajustar el delay según el tipo de eventos
-    const delay = shouldTrigger ? this.updateInterval : this.updateInterval * 2
-
-    this.updateTimeout = setTimeout(() => {
-      this.checkUpdate()
-    }, delay)
-  }
-
-  private checkUpdate() {
-    const now = Date.now()
-    if (this.shouldUpdate && now - this.lastUpdate >= this.updateInterval && !this.isUpdating) {
-      this.shouldUpdate = false
-      this.lastUpdate = now
-      this.isUpdating = true
-
-      const events = Array.from(this.pendingEvents.keys()) as EventType[]
-      if (this.shouldTriggerUpdate(events)) {
-        this.emit('stats_update_needed', events)
-        statsLogger.debug('🔄 Actualizando estadísticas:', { events })
-      }
-
-      this.pendingEvents.clear()
-
-      setTimeout(() => {
-        this.isUpdating = false
-      }, this.updateInterval)
-    }
+  emit(event: string | symbol, ...args: any[]): boolean {
+    return super.emit('stats_update_needed', [event], ...args);
   }
 }
 
-export const statsEventEmitter = StatsEventEmitter.getInstance()
+export const statsEventEmitter = new StatsEventEmitter();
 
 export const statsService = {
   async getOrCreateImageStats(imageId: string): Promise<ImageStats> {
