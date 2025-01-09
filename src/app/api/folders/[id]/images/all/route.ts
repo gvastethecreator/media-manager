@@ -83,7 +83,7 @@ export async function GET(
     }
 
     // Transformar los datos para mantener compatibilidad con la interfaz FileItem
-    const items: FileItem[] = folder.images.map(image => {
+    const items: FileItem[] = folder.images.map((image: any) => {
       let metadata: ImageMetadata = {}
       try {
         metadata = image.metadata ? JSON.parse(image.metadata) : {}
@@ -108,12 +108,12 @@ export async function GET(
         isFavorite: image.isFavorite || false,
         createdAt: image.createdAt,
         updatedAt: image.updatedAt,
-        tags: image.tags?.map(tag => ({
+        tags: image.tags?.map((tag: any) => ({
           id: tag.id,
           name: tag.name,
           color: tag.color
         })) || [],
-        collections: image.collections?.map(collection => ({
+        collections: image.collections?.map((collection: any) => ({
           id: collection.id,
           name: collection.name,
           emoji: collection.emoji,

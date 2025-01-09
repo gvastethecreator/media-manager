@@ -58,7 +58,7 @@ export async function POST(
 
     // Verificar si el archivo ya está en la colección
     const isFileInCollection = collection.images.some(
-      (file) => file.id === fileId
+      (file: any) => file.id === fileId
     );
 
     if (isFileInCollection) {

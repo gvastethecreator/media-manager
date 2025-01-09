@@ -96,7 +96,7 @@ export function NavPanel() {
 
 	const handleItemClick = useCallback(
 		(id: ViewType) => {
-			setCurrentView(id);
+			setCurrentView(id as ViewType);
 		},
 		[setCurrentView]
 	);

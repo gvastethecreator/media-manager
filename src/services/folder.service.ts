@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import { EventsService } from './events.service';
+import { EventsService, EVENT_TYPES, EventData } from './events.service';
 
 const folderLogger = logger.withContext('FolderService');
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -11,12 +11,14 @@ export interface ProcessStatus {
   total?: number
   progress?: number
   currentFile?: string
+  timestamp?: number
 }
 
 export interface ErrorResponse {
   message: string
   details?: string
   code?: string
+  timestamp?: number
 }
 
 export interface FolderResponse {
@@ -36,6 +38,7 @@ export interface FolderResponse {
     total: number
     totalSize?: number
   }
+  timestamp?: number
 }
 
 export interface IndexCallbacks {
@@ -50,82 +53,102 @@ function getFullUrl(path: string): string {
 
 export async function getFolders() {
   try {
+    folderLogger.info('📂 Obteniendo lista de carpetas...');
     const response = await fetch(getFullUrl('/api/folders'));
     if (!response.ok) {
       const data = await response.json();
       throw { message: data.error || 'Error obteniendo carpetas', details: data.details };
     }
-    return response.json();
+    const folders = await response.json();
+    folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
+    return folders;
   } catch (error) {
     const errorResponse: ErrorResponse = {
       message: error instanceof Error ? error.message : 'Error obteniendo carpetas',
-      details: error instanceof Error ? error.stack : String(error)
+      details: error instanceof Error ? error.stack : String(error),
+      timestamp: Date.now()
     };
-    folderLogger.error('Error getting folders:', errorResponse);
+    folderLogger.error('❌ Error getting folders:', errorResponse);
     throw errorResponse;
   }
 }
 
 function setupEventHandlers(callbacks?: IndexCallbacks) {
-  const handleProgress = (data: ProcessStatus) => {
-    callbacks?.onProgress?.(data);
+  const handleProgress = (event: EventData<ProcessStatus>) => {
+    folderLogger.debug('📊 Progreso recibido:', event.data);
+    callbacks?.onProgress?.({
+      ...event.data,
+      timestamp: event.timestamp
+    });
   };
 
-  const handleError = (error: unknown) => {
-    const errorResponse: ErrorResponse = {
-      message: error instanceof Error ? error.message : 'Error desconocido',
-      details: error instanceof Error ? error.stack : String(error)
-    };
-    callbacks?.onError?.(errorResponse);
+  const handleError = (event: EventData<ErrorResponse>) => {
+    folderLogger.error('❌ Error recibido:', event.data);
+    callbacks?.onError?.({
+      ...event.data,
+      timestamp: event.timestamp
+    });
   };
 
-  const handleComplete = (data: FolderResponse) => {
-    callbacks?.onComplete?.(data);
+  const handleComplete = (event: EventData<FolderResponse>) => {
+    folderLogger.info('✅ Proceso completado:', event.data);
+    callbacks?.onComplete?.({
+      ...event.data,
+      timestamp: event.timestamp
+    });
   };
 
   return {
-    'folder:progress': handleProgress,
-    'folder:error': handleError,
-    'folder:complete': handleComplete
+    [EVENT_TYPES.FOLDER_PROGRESS]: handleProgress,
+    [EVENT_TYPES.FOLDER_ERROR]: handleError,
+    [EVENT_TYPES.FOLDER_COMPLETE]: handleComplete,
+    [EVENT_TYPES.PROGRESS]: handleProgress,
+    [EVENT_TYPES.ERROR]: handleError,
+    [EVENT_TYPES.COMPLETE]: handleComplete
   };
 }
 
-async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks, context?: any): Promise<any> {
+async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks): Promise<any> {
   const handlers = setupEventHandlers(callbacks);
 
   try {
+    folderLogger.info('🔄 Iniciando proceso de carpeta:', endpoint);
     eventsService = new EventsService(endpoint);
     eventsService.connect();
 
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventsService.on(event as any, handler);
+      eventsService.on(event as EVENT_TYPES, handler);
     });
 
     const result = await new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        reject({ message: 'Timeout - El proceso excedió el tiempo límite' });
+        reject({
+          message: 'Timeout - El proceso excedió el tiempo límite',
+          timestamp: Date.now()
+        });
       }, 300000);
 
-      const completeHandler = (data: any) => {
+      const completeHandler = (event: EventData<FolderResponse>) => {
         clearTimeout(timeoutId);
-        resolve(data);
+        resolve(event.data);
       };
 
-      const errorHandler = (error: unknown) => {
+      const errorHandler = (event: EventData<ErrorResponse>) => {
         clearTimeout(timeoutId);
         reject({
-          message: error instanceof Error ? error.message : 'Error desconocido',
-          details: error instanceof Error ? error.stack : String(error)
+          message: event.data.message || 'Error desconocido',
+          details: event.data.details,
+          timestamp: event.timestamp
         });
       };
 
-      eventsService.on('complete', completeHandler);
-      eventsService.on('error', errorHandler);
+      eventsService.on(EVENT_TYPES.COMPLETE, completeHandler);
+      eventsService.on(EVENT_TYPES.ERROR, errorHandler);
 
       return () => {
         clearTimeout(timeoutId);
-        eventsService.off('complete', completeHandler);
-        eventsService.off('error', errorHandler);
+        eventsService.off(EVENT_TYPES.COMPLETE, completeHandler);
+        eventsService.off(EVENT_TYPES.ERROR, errorHandler);
       };
     });
 
@@ -133,13 +156,14 @@ async function handleFolderProcess(endpoint: string, callbacks?: IndexCallbacks,
   } catch (error) {
     const errorResponse: ErrorResponse = {
       message: error instanceof Error ? error.message : 'Error en el proceso',
-      details: error instanceof Error ? error.stack : String(error)
+      details: error instanceof Error ? error.stack : String(error),
+      timestamp: Date.now()
     };
-    folderLogger.error('Error en el proceso:', errorResponse);
+    folderLogger.error('❌ Error en el proceso:', errorResponse);
     throw errorResponse;
   } finally {
     Object.entries(handlers).forEach(([event, handler]) => {
-      eventsService.off(event as any, handler);
+      eventsService.off(event as EVENT_TYPES, handler);
     });
     eventsService.disconnect();
   }
@@ -197,14 +221,15 @@ export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
 
 export async function reindexFolder(id: string, callbacks?: IndexCallbacks) {
   try {
-    folderLogger.info('Reindexing folder:', id);
+    folderLogger.info('�� Reindexando carpeta:', id);
     return handleFolderProcess(`/api/folders/${id}/index`, callbacks);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       message: error instanceof Error ? error.message : 'Error reindexando carpeta',
-      details: error instanceof Error ? error.stack : String(error)
+      details: error instanceof Error ? error.stack : String(error),
+      timestamp: Date.now()
     };
-    folderLogger.error('Error reindexing folder:', errorResponse);
+    folderLogger.error('❌ Error reindexing folder:', errorResponse);
     throw errorResponse;
   }
 }

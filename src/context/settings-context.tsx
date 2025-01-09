@@ -1,5 +1,5 @@
+import type { Collection, Tag, Profile } from ".prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Collection, Tag, Profile } from "@prisma/client";
 import {
 	collectionService,
 	CollectionCreate,
@@ -32,6 +32,11 @@ export interface Settings {
 	thumbnailQuality: ThumbnailQuality;
 	videoThumbnailAnimation: boolean;
 	shortcuts: { [key: string]: string };
+	system: {
+		cpuUsage: number;
+		memoryUsage: number;
+		cacheSize: number;
+	};
 }
 
 interface SettingsContextType {
@@ -57,9 +62,14 @@ const defaultSettings: Settings = {
 	tags: [],
 	profiles: [],
 	activeProfile: null,
-	thumbnailQuality: "mid",
+	thumbnailQuality: "medium",
 	videoThumbnailAnimation: true,
 	shortcuts: {},
+	system: {
+		cpuUsage: 0,
+		memoryUsage: 0,
+		cacheSize: 0,
+	},
 };
 
 const SettingsContext = createContext<SettingsContextType>({

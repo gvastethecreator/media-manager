@@ -34,15 +34,15 @@ export async function POST() {
           select: { id: true, path: true }
         })
 
-        const currentPaths = files.map(f => f.path)
-        const deletedImages = existingImages.filter(img => !currentPaths.includes(img.path))
+        const currentPaths = files.map((f: any) => f.path)
+        const deletedImages = existingImages.filter((img: any) => !currentPaths.includes(img.path))
 
         if (deletedImages.length > 0) {
           console.log('Eliminando imágenes que ya no existen:', deletedImages.length)
           await prisma.image.deleteMany({
             where: {
               id: {
-                in: deletedImages.map(img => img.id)
+                in: deletedImages.map((img: any) => img.id)
               }
             }
           })

@@ -62,12 +62,12 @@ export async function GET() {
       withThumbnail: totalWithThumbnail || 0,
       pending: totalImages - (totalWithThumbnail || 0) - (totalWithError || 0),
       totalSize: totalSize?._sum?.thumbnailSize || 0,
-      recentlyProcessed: (recentlyProcessed || []).map(img => ({
+      recentlyProcessed: (recentlyProcessed || []).map((img: any) => ({
         id: img.id,
         path: img.path,
         processedAt: img.updatedAt
       })),
-      errors: (errors || []).map(err => ({
+      errors: (errors || []).map((err: any) => ({
         imageId: err.id,
         imagePath: err.path,
         error: err.thumbnailError || 'Error desconocido',

@@ -28,7 +28,7 @@ export async function GET() {
           downloads: true
         }
       })
-    ]).catch(error => {
+    ]).catch((error: any) => {
       console.error('Error al obtener estadísticas principales:', error)
       throw new Error('Error al obtener estadísticas principales')
     })
@@ -48,15 +48,15 @@ export async function GET() {
       orderBy: {
         totalSize: 'desc'
       }
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('Error al obtener estadísticas de carpetas:', error)
       throw new Error('Error al obtener estadísticas de carpetas')
     })
 
     console.log('Estadísticas de carpetas obtenidas')
 
-    const totalSize = folders.reduce((sum, folder) => sum + (folder.totalSize || 0), 0)
-    const folderStats = folders.map(folder => ({
+    const totalSize = folders.reduce((sum: any, folder: any) => sum + (folder.totalSize || 0), 0)
+    const folderStats = folders.map((folder: any) => ({
       id: folder.id,
       name: folder.name,
       size: folder.totalSize || 0,
@@ -79,7 +79,7 @@ export async function GET() {
           _count: 'desc'
         }
       }
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('Error al obtener estadísticas de etiquetas:', error)
       throw new Error('Error al obtener estadísticas de etiquetas')
     })
@@ -102,7 +102,7 @@ export async function GET() {
           _count: 'desc'
         }
       }
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('Error al obtener estadísticas de colecciones:', error)
       throw new Error('Error al obtener estadísticas de colecciones')
     })
@@ -124,14 +124,14 @@ export async function GET() {
       include: {
         image: true
       }
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('Error al obtener actividad reciente:', error)
       throw new Error('Error al obtener actividad reciente')
     })
 
     console.log('Actividad reciente obtenida')
 
-    const activity = recentActivity.map(stat => ({
+    const activity = recentActivity.map((stat: any) => ({
       description: stat.views > 0 ? 'Vista' : 'Descarga',
       timestamp: stat.updatedAt.toISOString(),
       imageId: stat.imageId,
@@ -153,13 +153,13 @@ export async function GET() {
 
       // Listas con conteos
       folders: folderStats,
-      tags: topTags.map(tag => ({
+      tags: topTags.map((tag: any) => ({
         id: tag.id,
         name: tag.name,
         color: tag.color,
         count: tag._count.images
       })),
-      collections: collections.map(collection => ({
+      collections: collections.map((collection: any) => ({
         id: collection.id,
         name: collection.name,
         emoji: collection.emoji,
@@ -169,7 +169,7 @@ export async function GET() {
 
       // Estadísticas detalladas
       folderStats,
-      topTags: topTags.map(tag => ({
+      topTags: topTags.map((tag: any) => ({
         name: tag.name,
         color: tag.color,
         count: tag._count.images
