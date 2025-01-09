@@ -43,30 +43,30 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ### Últimas 4 tareas, si hay mas deben ir a changelog.md al final del archivo
 
-1. **[2024-01-10] Separación de Componentes de Configuración**
+1. **[2024-01-11] Optimización del Flujo de Inicialización**
+
+   - Revisión y mejora del flujo de inicialización de la aplicación
+   - Reorganización del orden de carga de servicios
+   - Optimización de la pantalla de carga y estados visuales
+   - Implementación de mejor manejo de errores y dependencias
+
+2. **[2024-01-10] Separación de Componentes de Configuración**
 
    - Separación de FoldersSection y ThumbnailsSection en componentes independientes
    - Implementación de comunicación entre componentes
    - Optimización de la gestión de estado compartido
    - Mejora en la organización del código y responsabilidades
 
-2. **[2024-01-10] Corrección del Sistema de Reindexado**
+3. **[2024-01-10] Corrección del Sistema de Reindexado**
 
    - Análisis del flujo de eventos SSE en el proceso de reindexado
    - Corrección de la sincronización de estado en FoldersSection
    - Mejora en el manejo de tipos de eventos en EventsService
    - Optimización del manejo de progreso y estado
 
-3. **[2024-01-09] Optimización para Server Components**
+4. **[2024-01-09] Optimización para Server Components**
 
    - Refactorización del FileContext para Server Components
    - Migración de operaciones de base de datos al servidor
    - Implementación de Server Actions para operaciones de datos
    - Optimización del manejo de estado cliente/servidor
-
-4. **[2024-01-09] Actualización del FileContext**
-
-   - Integración completa con Prisma y base de datos local
-   - Eliminación de datos mockup
-   - Optimización de consultas y manejo de estado
-   - Mejora en el manejo de errores y logging
