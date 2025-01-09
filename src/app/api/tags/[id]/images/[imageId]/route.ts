@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { Logger } from '@/lib/logger'
-import { EventEmitter } from 'events'
-import { toastService } from '@/lib/toast'
+import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
+import { toastService } from '@/services/toast.service'
 
-const prisma = new PrismaClient()
-const logger = new Logger()
 const apiLogger = logger.withContext('TagsAPI')
-
-const statsEventEmitter = new EventEmitter()
-const STATS_EVENTS = {
-  TAG_CHANGE: 'tag_change' as const
-}
 
 export async function POST(
   request: Request,
