@@ -49,6 +49,8 @@ import {
 	BookmarkIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
+import { toastService } from "@/services/toast.service";
 
 interface FileCardProps {
 	item: FileItem;
@@ -121,8 +123,64 @@ export function FileCard({
 	const [isMarked, setIsMarked] = useState(false);
 	const hasLoaded = useRef(false);
 
-	// Determinar si este item está seleccionado
-	const isSelected = selectedItems.some((i) => i.id === item.id);
+	// Escuchar eventos de cambios con debounce
+	useEffect(() => {
+		let timeoutId: NodeJS.Timeout;
+
+		const handleStatsUpdate = async (
+			events: Array<keyof typeof STATS_EVENTS>
+		) => {
+			const relevantEvents = [
+				"COLLECTION_CHANGE",
+				"TAG_CHANGE",
+				"FAVORITE_CHANGE",
+			] as const;
+
+			const shouldUpdate = events.some(
+				(event) =>
+					relevantEvents.includes(event as any) &&
+					((event === "COLLECTION_CHANGE" && item.collections?.length > 0) ||
+						(event === "TAG_CHANGE" && item.tags?.length > 0) ||
+						(event === "FAVORITE_CHANGE" && item.isFavorite))
+			);
+
+			if (shouldUpdate) {
+				// Debounce la actualización
+				clearTimeout(timeoutId);
+				timeoutId = setTimeout(async () => {
+					try {
+						// Forzar re-render del componente solo si es necesario
+						toggleItemSelection(item, false);
+
+						// Actualizar datos locales si es necesario
+						if (event === "FAVORITE_CHANGE" && item.isFavorite) {
+							toastService.favorite.updated();
+						}
+					} catch (error) {
+						console.error("Error actualizando FileCard:", error);
+						toastService.system.error("Error actualizando la tarjeta");
+					}
+				}, 300);
+			}
+		};
+
+		if (shouldLoad) {
+			statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
+		}
+
+		return () => {
+			if (shouldLoad) {
+				statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
+				clearTimeout(timeoutId);
+			}
+		};
+	}, [item, toggleItemSelection, shouldLoad]);
+
+	// Memoizar el estado de selección para evitar re-renders innecesarios
+	const isSelected = useMemo(
+		() => selectedItems.some((i) => i.id === item.id),
+		[selectedItems, item.id]
+	);
 
 	// Función para manejar el marcado desde el menú contextual
 	const handleMarkToggle = useCallback(() => {

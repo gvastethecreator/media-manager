@@ -1,11 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+	useCallback,
+} from "react";
 import type { FileItem } from "@/types/files";
 import type { ViewType } from "@/components/views/types";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
 import type { Collection, Tag, Folder } from "@/types/settings";
+import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
 import {
 	getAllImages,
 	getCollectionImages,
@@ -14,6 +21,7 @@ import {
 	toggleFavorite,
 	getSystemData,
 } from "@/app/actions/files";
+import { toastService } from "@/lib/toast";
 
 const fileLogger = logger.withContext("FileContext");
 
@@ -63,6 +71,176 @@ export function FilesProvider({ children }: { children: React.ReactNode }) {
 	const [collections, setCollections] = useState<Collection[]>([]);
 	const [folders, setFolders] = useState<Folder[]>([]);
 	const [tags, setTags] = useState<Tag[]>([]);
+
+	// Función mejorada para refrescar la vista actual
+	const refreshCurrentView = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			let newItems: FileItem[] = [];
+
+			switch (currentView) {
+				case "collection-content":
+					if (selectedItem?.collections?.[0]?.id) {
+						newItems = await getCollectionImages(
+							selectedItem.collections[0].id
+						);
+						toastService.collection.updated(selectedItem.collections[0].name);
+					}
+					break;
+				case "tag-content":
+					if (selectedItem?.tags?.[0]?.name) {
+						newItems = await getTagImages(selectedItem.tags[0].name);
+						toastService.tag.updated(selectedItem.tags[0].name);
+					}
+					break;
+				case "folder-content":
+					if (selectedItem?.path) {
+						newItems = await getFolderImages(selectedItem.path);
+						toastService.folder.updated(selectedItem.name);
+					}
+					break;
+				default:
+					newItems = await getAllImages();
+			}
+
+			setCurrentItems(newItems);
+			fileLogger.info("✅ Vista actual actualizada", {
+				view: currentView,
+				items: newItems.length,
+			});
+		} catch (error) {
+			fileLogger.error("❌ Error actualizando vista actual:", error);
+			toastService.system.error("Error actualizando la vista actual");
+		} finally {
+			setIsLoading(false);
+		}
+	}, [currentView, selectedItem]);
+
+	// Función mejorada para actualizar los datos del sistema
+	const updateSystemData = useCallback(
+		async (eventType?: keyof typeof STATS_EVENTS) => {
+			try {
+				setIsLoading(true);
+				const [systemData, images] = await Promise.all([
+					getSystemData(),
+					getAllImages(),
+				]);
+
+				// Actualizar datos básicos
+				setFolders(systemData.folders);
+				setCollections(systemData.collections);
+				setTags(systemData.tags);
+
+				// Actualizar contadores y estado
+				const collectionCounts = new Map<string, number>();
+				const tagCounts = new Map<string, number>();
+				const favoriteCount = images.filter((img) => img.isFavorite).length;
+
+				images.forEach((img) => {
+					img.collections?.forEach((col) => {
+						collectionCounts.set(
+							col.id,
+							(collectionCounts.get(col.id) || 0) + 1
+						);
+					});
+					img.tags?.forEach((tag) => {
+						tagCounts.set(tag.id, (tagCounts.get(tag.id) || 0) + 1);
+					});
+				});
+
+				// Actualizar colecciones con contadores
+				setCollections((prev) =>
+					prev.map((col) => ({
+						...col,
+						count: collectionCounts.get(col.id) || 0,
+					}))
+				);
+
+				// Actualizar tags con contadores
+				setTags((prev) =>
+					prev.map((tag) => ({
+						...tag,
+						count: tagCounts.get(tag.id) || 0,
+					}))
+				);
+
+				// Actualizar vista actual si es necesario
+				if (
+					currentView === "collection-content" ||
+					currentView === "tag-content"
+				) {
+					await refreshCurrentView();
+				}
+
+				// Mostrar feedback según el tipo de evento
+				if (eventType) {
+					switch (eventType) {
+						case "COLLECTION_CHANGE":
+							toastService.collection.updated();
+							break;
+						case "TAG_CHANGE":
+							toastService.tag.updated();
+							break;
+						case "FAVORITE_CHANGE":
+							toastService.favorite.updated();
+							break;
+						case "FOLDER_CHANGE":
+							toastService.folder.updated();
+							break;
+					}
+				}
+
+				fileLogger.info("✅ Datos del sistema actualizados", {
+					collections: systemData.collections.length,
+					tags: systemData.tags.length,
+					folders: systemData.folders.length,
+					images: images.length,
+					favorites: favoriteCount,
+				});
+			} catch (error) {
+				fileLogger.error("❌ Error actualizando datos del sistema:", error);
+				toastService.system.error("Error actualizando datos del sistema");
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[currentView, refreshCurrentView]
+	);
+
+	// Escuchar eventos de cambios con debounce
+	useEffect(() => {
+		let timeoutId: NodeJS.Timeout;
+
+		const handleStatsUpdate = async (
+			events: Array<keyof typeof STATS_EVENTS>
+		) => {
+			const relevantEvents = [
+				"COLLECTION_CHANGE",
+				"TAG_CHANGE",
+				"FAVORITE_CHANGE",
+				"FOLDER_CHANGE",
+			] as const;
+
+			const relevantEvent = events.find((event) =>
+				relevantEvents.includes(event as any)
+			);
+
+			if (relevantEvent) {
+				// Debounce la actualización
+				clearTimeout(timeoutId);
+				timeoutId = setTimeout(() => {
+					updateSystemData(relevantEvent);
+				}, 300);
+			}
+		};
+
+		statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
+
+		return () => {
+			statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
+			clearTimeout(timeoutId);
+		};
+	}, [updateSystemData]);
 
 	// Cargar datos iniciales
 	useEffect(() => {
