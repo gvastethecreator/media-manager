@@ -221,7 +221,7 @@ export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
 
 export async function reindexFolder(id: string, callbacks?: IndexCallbacks) {
   try {
-    folderLogger.info('�� Reindexando carpeta:', id);
+    folderLogger.info('Reindexando carpeta:', id);
     return handleFolderProcess(`/api/folders/${id}/index`, callbacks);
   } catch (error) {
     const errorResponse: ErrorResponse = {
