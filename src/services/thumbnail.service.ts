@@ -217,6 +217,65 @@ export class ThumbnailService {
       throw error
     }
   }
+
+  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'medium'): Promise<string> {
+    try {
+      thumbLogger.info(`🖼️ Obteniendo miniatura para imagen ${imageId} con calidad ${quality}`);
+
+      // Construir la URL correctamente
+      const url = `api/thumbnails/${encodeURIComponent(imageId)}`;
+      const params = new URLSearchParams({ quality });
+
+      const response = await this.fetchWithTimeout(`${url}?${params}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'image/*',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Error desconocido');
+        throw new Error(`Error obteniendo miniatura (${response.status}): ${errorText}`);
+      }
+
+      // Obtener el blob de la imagen
+      const blob = await response.blob();
+
+      // Verificar que el blob es una imagen
+      if (!blob.type.startsWith('image/')) {
+        throw new Error(`Tipo de respuesta inválido: ${blob.type}`);
+      }
+
+      // Convertir el blob a base64 de manera segura
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          try {
+            if (typeof reader.result === 'string') {
+              // Extraer solo la parte base64 del data URL
+              const base64Data = reader.result.split(',')[1];
+              if (!base64Data) {
+                reject(new Error('Error al procesar la imagen'));
+                return;
+              }
+              resolve(base64Data);
+            } else {
+              reject(new Error('Resultado inválido al leer la imagen'));
+            }
+          } catch (error) {
+            reject(new Error(`Error procesando la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`));
+          }
+        };
+        reader.onerror = () => reject(new Error('Error leyendo la imagen'));
+        reader.readAsDataURL(blob);
+      });
+
+    } catch (error) {
+      thumbLogger.error(`❌ Error obteniendo miniatura para imagen ${imageId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export const thumbnailService = ThumbnailService.getInstance();

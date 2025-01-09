@@ -194,7 +194,7 @@ export async function addFolder(path: string, callbacks?: IndexCallbacks) {
       throw { message: 'Respuesta inválida al crear carpeta' };
     }
 
-    return handleFolderProcess(`/api/folders/${folder.id}/index`, callbacks, folder);
+    return handleFolderProcess(`/api/folders/${folder.id}/index`, callbacks);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       message: error instanceof Error ? error.message : 'Error agregando carpeta',
