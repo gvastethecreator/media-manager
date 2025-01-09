@@ -1,8 +1,6 @@
 import sharp from 'sharp'
 import { getImageMetadata as getMetadata } from './metadata'
 
-export type { ImageMetadata } from './metadata'
-
 export async function getImageMetadata(path: string) {
   try {
     return await getMetadata(path)

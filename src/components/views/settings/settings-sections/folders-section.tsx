@@ -211,23 +211,39 @@ export function FoldersSection() {
 			await reindexFolder(folderId, {
 				onProgress: (stats: ProcessStatus) => {
 					if (stats) {
-						const progress = stats.progress || 0;
+						const total = stats.total || 0;
+						const current = stats.current || 0;
+						const progress = total > 0 ? (current / total) * 100 : 0;
+
 						setProcessProgress(progress);
 						setProcessStatus((prevStatus) => ({
 							...prevStatus,
 							...stats,
 							folderId,
 							status: stats.status || "Procesando...",
+							progress,
 						}));
 
-						// Actualizar las estadísticas en tiempo real
-						if (stats.current && stats.total) {
-							setStats((prevStats) => ({
-								...prevStats,
-								totalFiles: stats.total || prevStats.totalFiles,
-								lastIndexed: new Date(),
-							}));
-						}
+						setFolders((prevFolders) =>
+							prevFolders.map((folder) =>
+								folder.id === folderId
+									? {
+											...folder,
+											_count: {
+												...folder._count,
+												images: stats.current || folder._count?.images || 0,
+											},
+											lastIndexed: new Date().toISOString(),
+									  }
+									: folder
+							)
+						);
+
+						setStats((prevStats) => ({
+							...prevStats,
+							totalFiles: stats.total || prevStats.totalFiles,
+							lastIndexed: new Date(),
+						}));
 					}
 				},
 				onError: (error: ErrorResponse) => {
@@ -239,23 +255,11 @@ export function FoldersSection() {
 							  error.details ||
 							  "Error al reindexar la carpeta";
 
-					if (
-						(error instanceof Error && error.name === "FOLDER_NOT_FOUND") ||
-						("code" in error && error.code === "FOLDER_NOT_FOUND")
-					) {
-						toast({
-							title: "Carpeta no encontrada",
-							description: "La carpeta ya no existe en el sistema",
-							variant: "destructive",
-						});
-						loadStats();
-					} else {
-						toast({
-							title: "Error",
-							description: errorMessage,
-							variant: "destructive",
-						});
-					}
+					toast({
+						title: "Error",
+						description: errorMessage,
+						variant: "destructive",
+					});
 				},
 				onComplete: async (data: FolderResponse) => {
 					if (data?.folder) {
@@ -268,17 +272,18 @@ export function FoldersSection() {
 											_count: {
 												images: data.stats?.total || folder._count?.images || 0,
 											},
-											totalSize: folder.totalSize,
+											totalSize: data.stats?.totalSize || folder.totalSize,
 											lastIndexed: new Date().toISOString(),
 									  }
 									: folder
 							)
 						);
 
-						if (data.stats?.processed) {
+						if (data.stats) {
 							setStats((prevStats) => ({
 								...prevStats,
-								totalFiles: prevStats.totalFiles + data.stats!.processed,
+								totalFiles: prevStats.totalFiles + (data.stats?.processed || 0),
+								totalSize: prevStats.totalSize + (data.stats?.totalSize || 0),
 								lastIndexed: new Date(),
 							}));
 						}
@@ -288,7 +293,6 @@ export function FoldersSection() {
 							description: `Se han procesado ${
 								data.stats?.processed || 0
 							} archivos correctamente`,
-							variant: "default",
 						});
 					}
 				},

@@ -2,16 +2,20 @@
 
 import { useEffect } from 'react'
 import { useLoadingStore } from '@/store/loading-store'
+import { systemService } from '@/services/system.service'
+import { logger } from '@/lib/logger'
+
+const initLogger = logger.withContext('Initialization')
 
 interface ServiceInitializer {
   name: string
   init: () => Promise<void>
   dependencies?: string[]
-  weight?: number // Peso para el cálculo del progreso
+  weight?: number
 }
 
-const INITIALIZATION_DELAY = 300 // ms entre servicios para mejor UX
-const COMPLETION_DELAY = 500 // ms antes de completar
+const INITIALIZATION_DELAY = 300
+const COMPLETION_DELAY = 500
 
 export function useInitializeApp() {
   const { updateService, setProgress, setInitializing, setReady } = useLoadingStore()
@@ -24,15 +28,14 @@ export function useInitializeApp() {
         init: async () => {
           updateService('System', 'loading', 'Verificando estado del sistema...')
           try {
-            const response = await fetch('/api/system/status')
-            if (!response.ok) {
-              const error = await response.json()
-              throw new Error(error.error || 'Error al obtener estado del sistema')
+            const status = await systemService.getStatus(true)
+            if (status.status !== 'active') {
+              throw new Error(status.message || 'Sistema no disponible')
             }
             await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
             updateService('System', 'success', 'Sistema inicializado correctamente')
           } catch (error) {
-            console.error('🔴 Error en System:', error)
+            initLogger.error('🔴 Error en System:', error)
             throw new Error(`Error del sistema: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
@@ -44,18 +47,14 @@ export function useInitializeApp() {
         init: async () => {
           updateService('Database', 'loading', 'Inicializando base de datos...')
           try {
-            const response = await fetch('/api/system/status')
-            if (!response.ok) throw new Error('Error al verificar base de datos')
-            const { database } = await response.json()
-            if (!database?.status) throw new Error('Estado de base de datos no disponible')
-
-            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
-            if (database.status !== 'connected') {
-              throw new Error(database?.message || 'Base de datos no conectada')
+            const status = await systemService.getStatus()
+            if (!status.database?.status || status.database.status !== 'connected') {
+              throw new Error(status.database?.message || 'Base de datos no conectada')
             }
+            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
             updateService('Database', 'success', '✅ Base de datos conectada')
           } catch (error) {
-            console.error('🔴 Error en Database:', error)
+            initLogger.error('🔴 Error en Database:', error)
             throw new Error(`Error de base de datos: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
@@ -67,17 +66,14 @@ export function useInitializeApp() {
         init: async () => {
           updateService('Settings', 'loading', 'Cargando configuraciones...')
           try {
-            const response = await fetch('/api/system/status')
-            if (!response.ok) throw new Error('Error al cargar configuraciones')
-            const { settings } = await response.json()
-
-            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
-            if (!settings?.status || settings.status !== 'active') {
-              throw new Error(settings?.message || 'Error en configuraciones')
+            const status = await systemService.getStatus()
+            if (!status.settings?.status || status.settings.status !== 'active') {
+              throw new Error(status.settings?.message || 'Error en configuraciones')
             }
+            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
             updateService('Settings', 'success', '✅ Configuraciones cargadas')
           } catch (error) {
-            console.error('🔴 Error en Settings:', error)
+            initLogger.error('🔴 Error en Settings:', error)
             throw new Error(`Error de configuraciones: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
@@ -89,17 +85,14 @@ export function useInitializeApp() {
         init: async () => {
           updateService('File System', 'loading', 'Inicializando sistema de archivos...')
           try {
-            const response = await fetch('/api/system/status')
-            if (!response.ok) throw new Error('Error al verificar sistema de archivos')
-            const { fileSystem } = await response.json()
-
-            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
-            if (!fileSystem?.status || fileSystem.status !== 'active') {
-              throw new Error(fileSystem?.message || 'Sistema de archivos no disponible')
+            const status = await systemService.getStatus()
+            if (!status.fileSystem?.status || status.fileSystem.status !== 'active') {
+              throw new Error(status.fileSystem?.message || 'Sistema de archivos no disponible')
             }
+            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
             updateService('File System', 'success', '✅ Sistema de archivos listo')
           } catch (error) {
-            console.error('🔴 Error en File System:', error)
+            initLogger.error('🔴 Error en File System:', error)
             throw new Error(`Error del sistema de archivos: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
@@ -111,17 +104,14 @@ export function useInitializeApp() {
         init: async () => {
           updateService('Thumbnails', 'loading', 'Inicializando servicio de miniaturas...')
           try {
-            const response = await fetch('/api/system/status')
-            if (!response.ok) throw new Error('Error al verificar miniaturas')
-            const { thumbnails } = await response.json()
-
-            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
-            if (!thumbnails?.status || thumbnails.status !== 'active') {
-              throw new Error(thumbnails?.message || 'Servicio de miniaturas no disponible')
+            const status = await systemService.getStatus()
+            if (!status.thumbnails?.status || status.thumbnails.status !== 'active') {
+              throw new Error(status.thumbnails?.message || 'Servicio de miniaturas no disponible')
             }
+            await new Promise(resolve => setTimeout(resolve, INITIALIZATION_DELAY))
             updateService('Thumbnails', 'success', '✅ Servicio de miniaturas listo')
           } catch (error) {
-            console.error('🔴 Error en Thumbnails:', error)
+            initLogger.error('🔴 Error en Thumbnails:', error)
             throw new Error(`Error del servicio de miniaturas: ${error instanceof Error ? error.message : 'Error desconocido'}`)
           }
         }
@@ -156,9 +146,9 @@ export function useInitializeApp() {
           await service.init()
           initialized.add(service.name)
           calculateProgress(service.name, 'complete')
-          console.log(`✅ Servicio ${service.name} inicializado correctamente`)
+          initLogger.info(`✅ Servicio ${service.name} inicializado correctamente`)
         } catch (error) {
-          console.error(`❌ Error inicializando ${service.name}:`, error)
+          initLogger.error(`❌ Error inicializando ${service.name}:`, error)
           failed.add(service.name)
           updateService(
             service.name,
@@ -178,7 +168,7 @@ export function useInitializeApp() {
         const ready = pending.filter(canInitialize)
         if (ready.length === 0) {
           if (lastSize === initialized.size + failed.size) {
-            console.error('❌ Dependencias circulares detectadas')
+            initLogger.error('❌ Dependencias circulares detectadas')
             throw new Error('Error crítico: Dependencias circulares detectadas')
           }
         }
@@ -193,7 +183,7 @@ export function useInitializeApp() {
       if (initialized.size === services.length) {
         setProgress(100)
         setReady(true)
-        console.log('✅ Todos los servicios inicializados correctamente')
+        initLogger.info('✅ Todos los servicios inicializados correctamente')
         await new Promise(resolve => setTimeout(resolve, COMPLETION_DELAY))
         setInitializing(false)
       } else {
@@ -204,7 +194,7 @@ export function useInitializeApp() {
     }
 
     initialize().catch(error => {
-      console.error('❌ Error en la inicialización:', error)
+      initLogger.error('❌ Error en la inicialización:', error)
       setReady(false)
       setInitializing(false)
     })

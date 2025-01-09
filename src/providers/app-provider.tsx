@@ -1,36 +1,24 @@
 "use client";
 
-import { ThemeProvider } from "./theme-provider";
-import { QueryProvider } from "./query-provider";
-import { InitializeProvider } from "./initialize-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { ImageViewer } from "@/components/features/file-viewer/file-viewer";
-import { SettingsProvider } from "@/context/settings-context";
-import { FilesProvider } from "@/context/file-context";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
+import { InitializeProvider } from "@/providers/initialize-provider";
+import { CacheProvider } from "@/providers/cache-provider";
 
-interface AppProviderProps {
-	children: React.ReactNode;
-}
-
-export function AppProvider({ children }: AppProviderProps) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<ThemeProvider
 			attribute="class"
-			defaultTheme="system"
-			enableSystem
+			defaultTheme="dark"
+			enableSystem={false}
 			disableTransitionOnChange
 		>
-			<QueryProvider>
-				<SettingsProvider>
-					<InitializeProvider>
-						<FilesProvider>
-								{children}
-								<ImageViewer />
-								<Toaster />
-						</FilesProvider>
-					</InitializeProvider>
-				</SettingsProvider>
-			</QueryProvider>
+			<CacheProvider>
+				<InitializeProvider>
+					<Toaster position="bottom-right" richColors closeButton />
+					{children}
+				</InitializeProvider>
+			</CacheProvider>
 		</ThemeProvider>
 	);
 }
