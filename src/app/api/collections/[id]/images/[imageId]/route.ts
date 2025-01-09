@@ -1,37 +1,61 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { logger } from '@/lib/logger'
+import { PrismaClient } from '@prisma/client'
+import { Logger } from '@/lib/logger'
+import { EventEmitter } from 'events'
+import { toastService } from '@/lib/toast'
 
+const prisma = new PrismaClient()
+const logger = new Logger()
 const apiLogger = logger.withContext('CollectionsAPI')
+
+const statsEventEmitter = new EventEmitter()
+const STATS_EVENTS = {
+  COLLECTION_CHANGE: 'collection_change' as const
+}
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string; imageId: string } }
 ) {
-  try {
-    const { id, imageId } = params
+  if (!params?.id || !params?.imageId) {
+    return NextResponse.json(
+      { error: 'Parámetros inválidos' },
+      { status: 400 }
+    )
+  }
 
+  const collectionId = params.id
+  const imageId = params.imageId
+
+  try {
     // Verificar si la imagen ya está en la colección
     const existingImage = await prisma.collection.findFirst({
       where: {
-        id,
+        id: collectionId,
         images: {
           some: {
             id: imageId,
           },
         },
       },
+      include: {
+        images: true,
+        _count: {
+          select: { images: true }
+        }
+      }
     })
 
     if (existingImage) {
-      apiLogger.info('ℹ️ Imagen ya existe en la colección:', { id, imageId })
+      apiLogger.info('ℹ️ Imagen ya existe en la colección:', { collectionId, imageId })
+      toastService.collection.imageAdded(existingImage.name)
       return NextResponse.json({ success: true })
     }
 
     // Agregar la imagen a la colección
-    await prisma.collection.update({
+    const collection = await prisma.collection.update({
       where: {
-        id,
+        id: collectionId,
       },
       data: {
         images: {
@@ -40,12 +64,23 @@ export async function POST(
           },
         },
       },
+      include: {
+        images: true,
+        _count: {
+          select: { images: true }
+        }
+      },
     })
 
-    apiLogger.info('📸 Imagen agregada a la colección:', { id, imageId })
-    return NextResponse.json({ success: true })
+    // Emitir evento de cambio
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
+    toastService.collection.imageAdded(collection.name)
+
+    apiLogger.info('📸 Imagen agregada a la colección:', { collectionId, imageId })
+    return NextResponse.json({ success: true, collection })
   } catch (error) {
     apiLogger.error('❌ Error agregando imagen a la colección:', error)
+    toastService.system.error('Error agregando imagen a la colección')
     return NextResponse.json(
       { error: 'Error agregando imagen a la colección' },
       { status: 500 }
@@ -57,12 +92,20 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string; imageId: string } }
 ) {
-  try {
-    const { id, imageId } = params
+  if (!params?.id || !params?.imageId) {
+    return NextResponse.json(
+      { error: 'Parámetros inválidos' },
+      { status: 400 }
+    )
+  }
 
-    await prisma.collection.update({
+  const collectionId = params.id
+  const imageId = params.imageId
+
+  try {
+    const collection = await prisma.collection.update({
       where: {
-        id,
+        id: collectionId,
       },
       data: {
         images: {
@@ -71,12 +114,23 @@ export async function DELETE(
           },
         },
       },
+      include: {
+        images: true,
+        _count: {
+          select: { images: true }
+        }
+      },
     })
 
-    apiLogger.info('🗑️ Imagen eliminada de la colección:', { id, imageId })
-    return NextResponse.json({ success: true })
+    // Emitir evento de cambio
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
+    toastService.collection.imageRemoved(collection.name)
+
+    apiLogger.info('🗑️ Imagen eliminada de la colección:', { collectionId, imageId })
+    return NextResponse.json({ success: true, collection })
   } catch (error) {
     apiLogger.error('❌ Error eliminando imagen de la colección:', error)
+    toastService.system.error('Error eliminando imagen de la colección')
     return NextResponse.json(
       { error: 'Error eliminando imagen de la colección' },
       { status: 500 }

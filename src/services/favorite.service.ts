@@ -1,5 +1,6 @@
 import type { Favorite } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
+import { statsEventEmitter, STATS_EVENTS } from './stats.service'
 
 export interface FavoriteWithImage extends Favorite {
   image: FileItem
@@ -20,6 +21,8 @@ export const favoriteService = {
       throw new Error('Failed to add to favorites')
     }
 
+    // Emitir evento de cambio en favoritos
+    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
     return response.json()
   },
 
@@ -32,6 +35,9 @@ export const favoriteService = {
     if (!response.ok) {
       throw new Error('Failed to remove from favorites')
     }
+
+    // Emitir evento de cambio en favoritos
+    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
   },
 
   // Get all favorite images
@@ -57,9 +63,11 @@ export const favoriteService = {
 
     if (isFavorited) {
       await this.removeFromFavorites(imageId)
+      statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
       return false
     } else {
       await this.addToFavorites(imageId)
+      statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
       return true
     }
   },
