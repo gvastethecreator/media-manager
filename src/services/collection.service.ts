@@ -1,5 +1,6 @@
 import type { Collection as PrismaCollection } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
+import { statsEventEmitter, STATS_EVENTS } from './stats.service'
 
 export interface Collection extends PrismaCollection {
   count: number
@@ -128,6 +129,8 @@ export const collectionService = {
         const error = await response.json()
         throw new Error(error.message || 'Failed to add image to collection')
       }
+
+      statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
     } catch (error) {
       console.error('Error adding image to collection:', error)
       throw error
@@ -143,6 +146,8 @@ export const collectionService = {
       if (!response.ok) {
         throw new Error('Failed to remove image from collection')
       }
+
+      statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
     } catch (error) {
       console.error('Error removing image from collection:', error)
       throw error

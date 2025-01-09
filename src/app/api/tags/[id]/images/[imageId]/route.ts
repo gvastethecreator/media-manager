@@ -6,11 +6,11 @@ import { toastService } from '@/lib/toast'
 
 const prisma = new PrismaClient()
 const logger = new Logger()
-const apiLogger = logger.withContext('CollectionsAPI')
+const apiLogger = logger.withContext('TagsAPI')
 
 const statsEventEmitter = new EventEmitter()
 const STATS_EVENTS = {
-  COLLECTION_CHANGE: 'collection_change' as const
+  TAG_CHANGE: 'tag_change' as const
 }
 
 export async function POST(
@@ -24,14 +24,14 @@ export async function POST(
     )
   }
 
-  const collectionId = params.id
+  const tagId = params.id
   const imageId = params.imageId
 
   try {
-    // Verificar si la imagen ya está en la colección
-    const existingImage = await prisma.collection.findFirst({
+    // Verificar si la imagen ya tiene el tag
+    const existingTag = await prisma.tag.findFirst({
       where: {
-        id: collectionId,
+        id: tagId,
         images: {
           some: {
             id: imageId,
@@ -46,16 +46,16 @@ export async function POST(
       }
     })
 
-    if (existingImage) {
-      apiLogger.info('ℹ️ Imagen ya existe en la colección:', { collectionId, imageId })
-      toastService.collection.imageAdded(existingImage.name)
+    if (existingTag) {
+      apiLogger.info('ℹ️ Imagen ya tiene el tag:', { tagId, imageId })
+      toastService.tag.imageAdded(existingTag.name)
       return NextResponse.json({ success: true })
     }
 
-    // Agregar la imagen a la colección
-    const collection = await prisma.collection.update({
+    // Agregar el tag a la imagen
+    const tag = await prisma.tag.update({
       where: {
-        id: collectionId,
+        id: tagId,
       },
       data: {
         images: {
@@ -73,16 +73,16 @@ export async function POST(
     })
 
     // Emitir evento de cambio
-    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
-    toastService.collection.imageAdded(collection.name)
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE)
+    toastService.tag.imageAdded(tag.name)
 
-    apiLogger.info('📸 Imagen agregada a la colección:', { collectionId, imageId })
-    return NextResponse.json({ success: true, collection })
+    apiLogger.info('🏷️ Tag agregado a la imagen:', { tagId, imageId })
+    return NextResponse.json({ success: true, tag })
   } catch (error) {
-    apiLogger.error('❌ Error agregando imagen a la colección:', error)
-    toastService.system.error('Error agregando imagen a la colección')
+    apiLogger.error('❌ Error agregando tag a la imagen:', error)
+    toastService.system.error('Error agregando tag a la imagen')
     return NextResponse.json(
-      { error: 'Error agregando imagen a la colección' },
+      { error: 'Error agregando tag a la imagen' },
       { status: 500 }
     )
   }
@@ -99,13 +99,13 @@ export async function DELETE(
     )
   }
 
-  const collectionId = params.id
+  const tagId = params.id
   const imageId = params.imageId
 
   try {
-    const collection = await prisma.collection.update({
+    const tag = await prisma.tag.update({
       where: {
-        id: collectionId,
+        id: tagId,
       },
       data: {
         images: {
@@ -123,16 +123,16 @@ export async function DELETE(
     })
 
     // Emitir evento de cambio
-    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
-    toastService.collection.imageRemoved(collection.name)
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE)
+    toastService.tag.imageRemoved(tag.name)
 
-    apiLogger.info('🗑️ Imagen eliminada de la colección:', { collectionId, imageId })
-    return NextResponse.json({ success: true, collection })
+    apiLogger.info('🗑️ Tag eliminado de la imagen:', { tagId, imageId })
+    return NextResponse.json({ success: true, tag })
   } catch (error) {
-    apiLogger.error('❌ Error eliminando imagen de la colección:', error)
-    toastService.system.error('Error eliminando imagen de la colección')
+    apiLogger.error('❌ Error eliminando tag de la imagen:', error)
+    toastService.system.error('Error eliminando tag de la imagen')
     return NextResponse.json(
-      { error: 'Error eliminando imagen de la colección' },
+      { error: 'Error eliminando tag de la imagen' },
       { status: 500 }
     )
   }
