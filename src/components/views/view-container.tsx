@@ -16,6 +16,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/ui/grid-pattern";
+import { DotPattern } from "../ui/dot-pattern";
 
 const variants = {
 	enter: (direction: number) => ({
@@ -68,12 +69,8 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 
 	return (
 		<div className="relative w-full h-full overflow-hidden">
-			<GridPattern
-				width={30}
-				height={30}
-				x={-1}
-				y={-1}
-				strokeDasharray={"4 2"}
+			<DotPattern
+		
 				className={cn(
 					"[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
 				)}
