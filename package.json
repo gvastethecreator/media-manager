@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "db:clean": "del prisma\\dev.db && prisma migrate && prisma db push",
     "db:setup": "prisma generate && prisma migrate dev --name init",
-    "db:full-reset": "del prisma\\dev.db && prisma generate && prisma migrate dev --name init && prisma db push",
+    "db:seed": "prisma db seed",
+    "db:full-reset": "del prisma\\dev.db && prisma generate && prisma migrate dev --name init && prisma db push && prisma db seed",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

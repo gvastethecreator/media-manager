@@ -7,7 +7,11 @@ export interface FileItem {
   width: number
   height: number
   mimeType?: string
+  metadata?: any
   thumbnail?: string
+  thumbnailSize?: number
+  thumbnailWidth?: number
+  thumbnailHeight?: number
   src: string
   tags: Array<{
     id: string
@@ -20,6 +24,7 @@ export interface FileItem {
     emoji: string
     color: string
   }>
+  isPublic: boolean
   isFavorite: boolean
   createdAt: Date
   updatedAt: Date

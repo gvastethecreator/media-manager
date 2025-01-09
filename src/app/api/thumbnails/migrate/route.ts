@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const result = await generateThumbnail(image.path, { quality: 'mid' })
+        const result = await generateThumbnail(image.path, { quality: 'medium' })
 
         if (!result) {
           throw new Error('Error generando miniatura')

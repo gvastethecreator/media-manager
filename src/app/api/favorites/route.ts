@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transformar los datos para que coincidan con el formato esperado
-    const images = favorites.map(favorite => ({
+    const images = favorites.map((favorite: any) => ({
       ...favorite.image,
       isFavorite: true,
       favoriteId: favorite.id,

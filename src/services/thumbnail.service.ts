@@ -10,7 +10,7 @@ export enum EVENTS {
   STATS = 'stats'
 }
 
-export type ThumbnailQuality = 'high' | 'medium' | 'low' | 'compressed'
+export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high';
 
 export interface ThumbnailError {
   imageId: string

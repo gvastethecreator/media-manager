@@ -22,10 +22,10 @@ export async function GET() {
       }
     })
 
-    const tagsWithStats = tags.map(tag => ({
-      ...tag,
+    const tagsWithStats = tags.map((tag: any) => ({
+      ...tag, 
       count: tag._count.images,
-      size: formatBytes(tag.images.reduce((acc, img) => acc + img.size, 0))
+      size: formatBytes(tag.images.reduce((acc: any, img: any) => acc + img.size, 0))
     }))
 
     return NextResponse.json(tagsWithStats)
@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest) {
   try {
     const data = await request.json()
     const { id, ...updateData } = data
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Tag ID is required' },
@@ -91,7 +91,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Tag ID is required' },

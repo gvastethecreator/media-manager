@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import type { Favorite } from '@prisma/client'
+import type { Favorite } from '.prisma/client'
 
 export const favoriteService = {
   // Add image to favorites

@@ -461,7 +461,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 	useEffect(() => {
 		const loadMarkdownFiles = async () => {
 			try {
-				const files = [];
+				const files: string[] = [];
 				const contents: { [key: string]: string } = {};
 
 				for (const file of files) {

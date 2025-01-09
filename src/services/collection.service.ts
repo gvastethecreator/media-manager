@@ -1,4 +1,4 @@
-import { Collection } from '@prisma/client'
+import type { Collection } from '.prisma/client'
 
 export interface CollectionCreate {
   name: string

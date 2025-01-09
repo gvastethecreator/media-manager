@@ -27,7 +27,6 @@ import {
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 
-
 export function SystemSection() {
 	const { settings } = useSettingsContext();
 
@@ -60,10 +59,10 @@ export function SystemSection() {
 									variant="outline"
 									className="text-[10px] font-mono h-4 px-1"
 								>
-									{settings.cpuUsage || "0"}%
+									{settings.system.cpuUsage || "0"}%
 								</Badge>
 							</div>
-							<Progress value={settings.cpuUsage || 0} className="h-1" />
+							<Progress value={settings.system.cpuUsage || 0} className="h-1" />
 						</div>
 
 						<div className="space-y-1.5">
@@ -76,10 +75,13 @@ export function SystemSection() {
 									variant="outline"
 									className="text-[10px] font-mono h-4 px-1"
 								>
-									{settings.memoryUsage || "0"}%
+									{settings.system.memoryUsage || "0"}%
 								</Badge>
 							</div>
-							<Progress value={settings.memoryUsage || 0} className="h-1" />
+							<Progress
+								value={settings.system.memoryUsage || 0}
+								className="h-1"
+							/>
 						</div>
 
 						<div className="space-y-1.5">
@@ -92,11 +94,11 @@ export function SystemSection() {
 									variant="outline"
 									className="text-[10px] font-mono h-4 px-1"
 								>
-									{settings.cacheSize || "0"}MB
+									{settings.system.cacheSize || "0"}MB
 								</Badge>
 							</div>
 							<Progress
-								value={(settings.cacheSize || 0) / 10}
+								value={(settings.system.cacheSize || 0) / 10}
 								className="h-1"
 							/>
 						</div>
@@ -109,7 +111,6 @@ export function SystemSection() {
 							opacity: [0, 1],
 							y: [20, 0],
 						}}
-						style={{ delay: 0.1 }}
 						className="space-y-1.5"
 					>
 						<div className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent transition-colors group">
