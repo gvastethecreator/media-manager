@@ -1,4 +1,10 @@
-import type { Collection } from '.prisma/client'
+import type { Collection as PrismaCollection } from '.prisma/client'
+import type { FileItem } from '@/types/file-item'
+
+export interface Collection extends PrismaCollection {
+  count: number
+  size: string
+}
 
 export interface CollectionCreate {
   name: string
@@ -18,6 +24,10 @@ export interface CollectionUpdate extends Partial<Omit<CollectionCreate, 'name'>
 export interface CollectionWithStats extends Collection {
   count: number
   size: string
+}
+
+export interface CollectionWithImages extends Collection {
+  images: FileItem[]
 }
 
 export const collectionService = {
@@ -109,10 +119,14 @@ export const collectionService = {
     try {
       const response = await fetch(`/api/collections/${collectionId}/images/${imageId}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
 
       if (!response.ok) {
-        throw new Error('Failed to add image to collection')
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to add image to collection')
       }
     } catch (error) {
       console.error('Error adding image to collection:', error)
@@ -131,6 +145,19 @@ export const collectionService = {
       }
     } catch (error) {
       console.error('Error removing image from collection:', error)
+      throw error
+    }
+  },
+
+  async getCollectionImages(collectionId: string): Promise<FileItem[]> {
+    try {
+      const response = await fetch(`/api/collections/${collectionId}/images`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch collection images')
+      }
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching collection images:', error)
       throw error
     }
   }

@@ -1,51 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
-export async function GET(request: NextRequest) {
+const apiLogger = logger.withContext('FavoritesAPI')
+
+export async function GET() {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '0')
-    const pageSize = parseInt(searchParams.get('pageSize') || '100')
-
-    const skip = page * pageSize
-    const take = pageSize
-
     const favorites = await prisma.favorite.findMany({
-      skip,
-      take,
       include: {
         image: {
           include: {
-            folder: true,
             tags: true,
             collections: true,
-            _count: {
-              select: {
-                tags: true,
-                collections: true
-              }
-            }
-          }
-        }
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
-    // Transformar los datos para que coincidan con el formato esperado
-    const images = favorites.map((favorite: any) => ({
-      ...favorite.image,
-      isFavorite: true,
-      favoriteId: favorite.id,
-      favoriteDate: favorite.createdAt
-    }))
-
-    return NextResponse.json(images)
+    apiLogger.info('📥 Favoritos obtenidos:', { count: favorites.length })
+    return NextResponse.json(favorites)
   } catch (error) {
-    console.error('Error fetching favorites:', error)
+    apiLogger.error('❌ Error obteniendo favoritos:', error)
     return NextResponse.json(
-      { error: 'Error fetching favorites' },
+      { error: 'Error obteniendo favoritos' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const { imageId } = await request.json()
+
+    const favorite = await prisma.favorite.create({
+      data: {
+        imageId,
+        createdAt: new Date(),
+      },
+      include: {
+        image: {
+          include: {
+            tags: true,
+            collections: true,
+          },
+        },
+      },
+    })
+
+    apiLogger.info('⭐ Favorito creado:', { imageId })
+    return NextResponse.json(favorite)
+  } catch (error) {
+    apiLogger.error('❌ Error creando favorito:', error)
+    return NextResponse.json(
+      { error: 'Error creando favorito' },
       { status: 500 }
     )
   }

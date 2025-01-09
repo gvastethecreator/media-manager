@@ -32,7 +32,6 @@ const variants = {
 		zIndex: 0,
 		x: direction < 0 ? 1000 : -1000,
 		opacity: 0,
-		delay: 0.2,
 	}),
 };
 

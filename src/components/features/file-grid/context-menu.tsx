@@ -47,6 +47,12 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { useFavoritesStore } from "@/store/favorites";
+import { useCollectionsStore } from "@/store/collections";
+import { useTagsStore } from "@/store/tags";
+import { logger } from "@/lib/logger";
+
+const contextMenuLogger = logger.withContext("ContextMenu");
 
 interface FileContextMenuProps {
 	file: FileItem;
@@ -59,8 +65,11 @@ export function FileContextMenu({
 	children,
 	onAction,
 }: FileContextMenuProps) {
-	const { settings, updateCollection, updateTag } = useCollectionTagContext();
-	const { collections, tags } = settings;
+	// Stores
+	const { toggleFavorite, isFavorited } = useFavoritesStore();
+	const { collections, createCollection, addImageToCollection } =
+		useCollectionsStore();
+	const { tags, createTag, addImageToTag } = useTagsStore();
 
 	// Estados para nueva colección
 	const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
@@ -81,26 +90,23 @@ export function FileContextMenu({
 
 	const handleCreateCollection = async () => {
 		try {
-			const newCollectionData = {
+			await createCollection({
 				name: newCollection.name,
 				emoji: newCollection.emoji,
 				description: newCollection.description,
 				color: newCollection.color,
-				sortBy: "name" as const,
-				filters: [],
-			};
+			});
 
-			await updateCollection(null, newCollectionData);
-
-			// Una vez creada la colección, la actualizamos para agregar el archivo
-			const collections = settings.collections;
+			// Una vez creada la colección, agregamos el archivo
 			const createdCollection = collections.find(
 				(c) => c.name === newCollection.name
 			);
 
 			if (createdCollection) {
-				await onAction("collection-add", file, {
-					collectionId: createdCollection.id,
+				await addImageToCollection(createdCollection.id, file.id);
+				contextMenuLogger.info("✨ Colección creada y archivo agregado:", {
+					collection: createdCollection.name,
+					fileId: file.id,
 				});
 			}
 
@@ -112,27 +118,26 @@ export function FileContextMenu({
 			});
 			setIsCollectionDialogOpen(false);
 		} catch (error) {
-			console.error("Error creating collection:", error);
+			contextMenuLogger.error("❌ Error al crear colección:", { error });
 		}
 	};
 
 	const handleCreateTag = async () => {
 		try {
-			const newTagData = {
+			await createTag({
 				name: newTag.name,
 				color: newTag.color,
 				description: newTag.description,
-			};
+			});
 
-			await updateTag(null, newTagData);
-
-			// Una vez creado el tag, lo actualizamos para agregar el archivo
-			const tags = settings.tags;
+			// Una vez creado el tag, agregamos el archivo
 			const createdTag = tags.find((t) => t.name === newTag.name);
 
 			if (createdTag) {
-				await onAction("tag-add", file, {
-					tagId: createdTag.id,
+				await addImageToTag(createdTag.id, file.id);
+				contextMenuLogger.info("✨ Tag creado y archivo agregado:", {
+					tag: createdTag.name,
+					fileId: file.id,
 				});
 			}
 
@@ -143,7 +148,20 @@ export function FileContextMenu({
 			});
 			setIsTagDialogOpen(false);
 		} catch (error) {
-			console.error("Error creating tag:", error);
+			contextMenuLogger.error("❌ Error al crear tag:", { error });
+		}
+	};
+
+	const handleToggleFavorite = async () => {
+		try {
+			await toggleFavorite(file.id);
+			contextMenuLogger.info("💫 Estado de favorito cambiado:", {
+				fileId: file.id,
+			});
+		} catch (error) {
+			contextMenuLogger.error("❌ Error al cambiar estado de favorito:", {
+				error,
+			});
 		}
 	};
 
@@ -159,8 +177,8 @@ export function FileContextMenu({
 					<ContextMenuShortcut>⌘M</ContextMenuShortcut>
 				</ContextMenuItem>
 
-				<ContextMenuItem onClick={() => onAction("favorite-toggle", file)}>
-					{file.isFavorite ? (
+				<ContextMenuItem onClick={handleToggleFavorite}>
+					{isFavorited(file.id) ? (
 						<>
 							<HeartOff className="mr-2 h-4 w-4" />
 							Quitar de favoritos
@@ -252,11 +270,7 @@ export function FileContextMenu({
 							collections.map((collection) => (
 								<ContextMenuItem
 									key={collection.id}
-									onClick={() =>
-										onAction("collection-add", file, {
-											collectionId: collection.id,
-										})
-									}
+									onClick={() => addImageToCollection(collection.id, file.id)}
 								>
 									<div className="flex items-center gap-2 w-full">
 										<span className="mr-2">{collection.emoji}</span>
@@ -346,11 +360,7 @@ export function FileContextMenu({
 							tags.map((tag) => (
 								<ContextMenuItem
 									key={tag.id}
-									onClick={() =>
-										onAction("tag-add", file, {
-											tagId: tag.id,
-										})
-									}
+									onClick={() => addImageToTag(tag.id, file.id)}
 								>
 									<div className="flex items-center gap-2 w-full">
 										<div
