@@ -1,57 +1,54 @@
-import { prisma } from '@/lib/prisma'
 import type { Favorite } from '.prisma/client'
+import type { FileItem } from '@/types/file-item'
+
+export interface FavoriteWithImage extends Favorite {
+  image: FileItem
+}
 
 export const favoriteService = {
   // Add image to favorites
-  async addToFavorites(imageId: string): Promise<Favorite> {
-    return prisma.favorite.create({
-      data: {
-        imageId,
-        createdAt: new Date(),
+  async addToFavorites(imageId: string): Promise<FavoriteWithImage> {
+    const response = await fetch('/api/favorites', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      include: {
-        image: {
-          include: {
-            tags: true,
-          },
-        },
-      },
+      body: JSON.stringify({ imageId }),
     })
+
+    if (!response.ok) {
+      throw new Error('Failed to add to favorites')
+    }
+
+    return response.json()
   },
 
   // Remove image from favorites
   async removeFromFavorites(imageId: string): Promise<void> {
-    await prisma.favorite.delete({
-      where: {
-        id: imageId,
-      },
+    const response = await fetch(`/api/favorites/${imageId}`, {
+      method: 'DELETE',
     })
+
+    if (!response.ok) {
+      throw new Error('Failed to remove from favorites')
+    }
   },
 
   // Get all favorite images
-  async getFavorites() {
-    return prisma.favorite.findMany({
-      include: {
-        image: {
-          include: {
-            tags: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+  async getFavorites(): Promise<FavoriteWithImage[]> {
+    const response = await fetch('/api/favorites')
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch favorites')
+    }
+
+    return response.json()
   },
 
   // Check if image is favorited
   async isFavorited(imageId: string): Promise<boolean> {
-    const favorite = await prisma.favorite.findFirst({
-      where: {
-        imageId,
-      },
-    })
-    return !!favorite
+    const response = await fetch(`/api/favorites/${imageId}`)
+    return response.ok
   },
 
   // Toggle favorite status
@@ -68,19 +65,13 @@ export const favoriteService = {
   },
 
   // Get recent favorites
-  async getRecentFavorites(limit: number = 10) {
-    return prisma.favorite.findMany({
-      take: limit,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        image: {
-          include: {
-            tags: true,
-          },
-        },
-      },
-    })
+  async getRecentFavorites(limit: number = 10): Promise<FavoriteWithImage[]> {
+    const response = await fetch(`/api/favorites?limit=${limit}`)
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recent favorites')
+    }
+
+    return response.json()
   },
 }

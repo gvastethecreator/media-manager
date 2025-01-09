@@ -315,22 +315,58 @@ export const metadataCache = new CacheManager<Record<string, unknown>>({
   name: 'metadata',
   max: 5000,
   ttl: 1000 * 60 * 60,
-  updateAgeOnGet: true
+  updateAgeOnGet: true,
+  allowStale: true,
+  cleanupInterval: 1000 * 60 * 30
 })
 
 export const searchCache = new CacheManager<unknown[]>({
   name: 'search',
   max: 100,
   ttl: 1000 * 60 * 5,
-  updateAgeOnGet: false
+  updateAgeOnGet: false,
+  allowStale: true
 })
+
+export const statsCache = new CacheManager<Record<string, unknown>>({
+  name: 'stats',
+  max: 100,
+  ttl: 1000 * 60 * 5,
+  updateAgeOnGet: true,
+  allowStale: true,
+  cleanupInterval: 1000 * 60 * 10
+})
+
+export async function clearAllCaches(): Promise<void> {
+  try {
+    await Promise.all([
+      thumbnailCache.clear(),
+      metadataCache.clear(),
+      searchCache.clear(),
+      statsCache.clear()
+    ])
+    cacheLogger.info('🧹 Todos los cachés han sido limpiados')
+  } catch (error) {
+    cacheLogger.error('❌ Error al limpiar cachés:', error)
+  }
+}
+
+export async function getAllCacheStats(): Promise<Record<string, unknown>> {
+  return {
+    thumbnails: thumbnailCache.getStats(),
+    metadata: metadataCache.getStats(),
+    search: searchCache.getStats(),
+    stats: statsCache.getStats()
+  }
+}
 
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
     Promise.all([
       thumbnailCache.stop(),
       metadataCache.stop(),
-      searchCache.stop()
+      searchCache.stop(),
+      statsCache.stop()
     ]).catch(error =>
       cacheLogger.error('[Cache] ❌ Error deteniendo caches:', error)
     )
