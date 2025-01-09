@@ -1,3 +1,23 @@
+/**
+ * @component FileGrid
+ * @description Componente principal para mostrar una cuadrícula de archivos con virtualización y optimización de rendimiento.
+ *
+ * Flujo de integración:
+ * 1. Recibe items (FileItem[]) desde el componente padre
+ * 2. Utiliza virtualización para renderizar solo los elementos visibles
+ * 3. Maneja la selección de archivos y la interacción del usuario
+ * 4. Se integra con FileCard para renderizar cada elemento
+ * 5. Soporta infinite scroll para cargar más elementos
+ *
+ * Optimizaciones:
+ * - Virtualización con @tanstack/react-virtual
+ * - Cache de elementos renderizados
+ * - Lazy loading de imágenes
+ * - Gestión eficiente de eventos de scroll
+ *
+ * @param {FileGridProps} props - Propiedades del componente
+ */
+
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
