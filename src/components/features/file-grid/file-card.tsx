@@ -1,3 +1,24 @@
+/**
+ * @component FileCard
+ * @description Componente que representa una tarjeta individual de archivo con soporte para miniaturas, interacciones y menú contextual.
+ *
+ * Flujo de integración:
+ * 1. Recibe un FileItem y callbacks desde FileGrid
+ * 2. Se integra con ThumbnailService para cargar miniaturas
+ * 3. Maneja estados de carga, error y visualización
+ * 4. Integra FileContextMenu para acciones contextuales
+ * 5. Soporta selección, marcado y favoritos
+ *
+ * Características:
+ * - Lazy loading de miniaturas
+ * - Animaciones con Framer Motion
+ * - Integración con sistema de eventos
+ * - Gestión de caché de miniaturas
+ * - Soporte para diferentes calidades de miniatura
+ *
+ * @param {FileCardProps} props - Propiedades del componente
+ */
+
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -120,34 +141,62 @@ export function FileCard({
 					? "compressed"
 					: thumbnailSize === "large"
 					? "high"
-					: "mid";
+					: "medium";
 
 			const thumbnailData = await thumbnailService.getThumbnail(
 				item.id,
 				quality
 			);
-			setThumbnail(thumbnailData);
+
+			// Validar que el thumbnail es una cadena base64 válida
+			if (typeof thumbnailData !== "string" || !thumbnailData.length) {
+				throw new Error("Formato de miniatura inválido");
+			}
+
+			// Construir la URL de datos completa
+			const mimeType = item.metadata?.mimeType || "image/jpeg";
+			const dataUrl = `data:${mimeType};base64,${thumbnailData}`;
+
+			// Precargar la imagen para asegurar que es válida
+			await new Promise((resolve, reject) => {
+				const img = new Image();
+				img.onload = resolve;
+				img.onerror = () => reject(new Error("Error cargando la imagen"));
+				img.src = dataUrl;
+			});
+
+			setThumbnail(dataUrl);
 			hasLoaded.current = true;
 			setIsLoading(false);
 		} catch (error) {
 			console.error("Error cargando miniatura:", error);
-			setError(
-				error instanceof Error ? error.message : "Error cargando miniatura"
-			);
+			const errorMessage =
+				error instanceof Error ? error.message : "Error desconocido";
+			setError(errorMessage);
 			setIsLoading(false);
 
+			// Mostrar toast solo para errores críticos o después de reintentos
 			if (
-				error instanceof Error &&
-				error.message.includes("después de reintentos")
+				errorMessage.includes("después de reintentos") ||
+				errorMessage.includes("Formato de miniatura inválido") ||
+				errorMessage.includes("Error cargando la imagen")
 			) {
 				toast({
-					title: "Error",
-					description: "No se pudo cargar la miniatura",
+					title: "Error de miniatura",
+					description: "No se pudo cargar la vista previa de la imagen",
 					variant: "destructive",
 				});
 			}
+
+			// Intentar recargar después de un error, pero solo una vez
+			if (!hasLoaded.current && shouldLoad) {
+				setTimeout(() => {
+					hasLoaded.current = false;
+					loadThumbnail();
+				}, 2000);
+			}
 		}
-	}, [item.id, thumbnailSize, toast, shouldLoad]);
+	}, [item.id, thumbnailSize, toast, shouldLoad, item.metadata?.mimeType]);
 
 	useEffect(() => {
 		if (shouldLoad) {
