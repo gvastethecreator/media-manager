@@ -1,6 +1,10 @@
 import { create } from 'zustand'
-import { formatBytes } from '@/lib/utils'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
+import { CacheManager } from '@/lib/cache'
+import { eventsService, CacheInvalidationEvent } from '@/services/events.service'
+
+const statsLogger = logger.withContext('StatsStore')
 
 interface FolderStat {
   id: string
@@ -33,24 +37,17 @@ interface Activity {
 }
 
 interface Stats {
-  // Estadísticas principales
   totalImages: number
   totalFolders: number
   totalTags: number
   totalCollections: number
-
-  // Estadísticas adicionales
   totalFavorites: number
   totalViews: number
   totalDownloads: number
   totalSize: number
-
-  // Listas con conteos
   folders: FolderStat[]
   tags: TagStat[]
   collections: CollectionStat[]
-
-  // Estadísticas detalladas
   folderStats: FolderStat[]
   topTags: TagStat[]
   recentActivity: Activity[]
@@ -64,6 +61,15 @@ interface StatsState {
   initialize: () => Promise<(() => void) | void>
 }
 
+// Cache específico para estadísticas
+const statsCache = new CacheManager<Stats>({
+  name: 'stats',
+  max: 1,
+  ttl: 1000 * 60 * 5, // 5 minutos
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
 export const useStatsStore = create<StatsState>((set, get) => ({
   stats: null,
   isLoading: false,
@@ -74,29 +80,48 @@ export const useStatsStore = create<StatsState>((set, get) => ({
     try {
       await fetchStats()
 
-      // Configurar actualización periódica cada 30 segundos
-      const interval = setInterval(async () => {
-        try {
-          await fetchStats()
-        } catch (error) {
-          console.error('Error en actualización automática:', error)
-          clearInterval(interval)
-          toast.error('Error en actualización automática de estadísticas')
-        }
-      }, 30000)
+      // Suscribirse a eventos que requieren actualización de stats
+      const unsubscribe = eventsService.subscribe((event: CacheInvalidationEvent) => {
+        // Solo actualizar stats para eventos relevantes
+        const relevantEvents: CacheInvalidationEvent[] = [
+          'files:added',
+          'files:deleted',
+          'files:modified',
+          'folders:added',
+          'folders:deleted',
+          'folders:modified',
+          'collections:modified',
+          'favorites:modified',
+          'tags:modified'
+        ]
 
-      // Limpiar intervalo cuando se desmonte
-      return () => clearInterval(interval)
+        if (relevantEvents.includes(event)) {
+          statsLogger.info(`🔄 Actualizando stats por evento: ${event}`)
+          fetchStats().catch(error => {
+            statsLogger.error('❌ Error actualizando stats:', error)
+          })
+        }
+      })
+
+      return unsubscribe
     } catch (error) {
-      console.error('Error en inicialización:', error)
+      statsLogger.error('❌ Error en inicialización:', error)
       toast.error('Error al inicializar estadísticas')
-      throw error // Re-throw para que el componente pueda manejarlo
+      throw error
     }
   },
 
   fetchStats: async () => {
     try {
       set({ isLoading: true, error: null })
+
+      // Intentar obtener del caché primero
+      const cached = await statsCache.get('stats')
+      if (cached) {
+        statsLogger.debug('✅ Usando stats en caché')
+        set({ stats: cached, isLoading: false })
+        return
+      }
 
       const response = await fetch('/api/stats', {
         method: 'GET',
@@ -116,7 +141,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
         throw new Error('Formato de respuesta inválido')
       }
 
-      // Validar que los campos requeridos estén presentes
+      // Validar campos requeridos
       const requiredFields = [
         'totalImages',
         'totalFolders',
@@ -133,16 +158,19 @@ export const useStatsStore = create<StatsState>((set, get) => ({
         }
       }
 
+      // Actualizar caché y estado
+      await statsCache.set('stats', data)
+      statsLogger.debug('💾 Stats actualizados y guardados en caché')
       set({ stats: data, isLoading: false })
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      statsLogger.error('❌ Error fetching stats:', error)
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({
         error: errorMessage,
         isLoading: false
       })
       toast.error(`Error al obtener estadísticas: ${errorMessage}`)
-      throw error // Re-throw para que el caller pueda manejarlo
+      throw error
     }
   }
 }))
