@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { ThumbnailQuality } from '@/types/thumbnails'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const result = await generateThumbnail(image.path, { quality: 'medium' })
+        const result = await generateThumbnail(image.path, { quality: ThumbnailQuality.MEDIUM })
 
         if (!result) {
           throw new Error('Error generando miniatura')
