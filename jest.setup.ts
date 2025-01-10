@@ -8,8 +8,6 @@ global.fetch = jest.fn(() =>
   })
 ) as jest.Mock;
 
-// Establecer NODE_ENV para pruebas
-process.env.NODE_ENV = 'test';
 
 // Limpiar mocks después de cada prueba
 afterEach(() => {

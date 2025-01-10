@@ -21,6 +21,19 @@ export const favoriteService = {
       throw new Error('Failed to add to favorites')
     }
 
+    // Actualizar el campo isFavorite
+    const updateResponse = await fetch(`/api/images/${imageId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isFavorite: true }),
+    })
+
+    if (!updateResponse.ok) {
+      throw new Error('Failed to update image favorite status')
+    }
+
     // Emitir evento de cambio en favoritos
     statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
     return response.json()
@@ -34,6 +47,19 @@ export const favoriteService = {
 
     if (!response.ok) {
       throw new Error('Failed to remove from favorites')
+    }
+
+    // Actualizar el campo isFavorite
+    const updateResponse = await fetch(`/api/images/${imageId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isFavorite: false }),
+    })
+
+    if (!updateResponse.ok) {
+      throw new Error('Failed to update image favorite status')
     }
 
     // Emitir evento de cambio en favoritos
@@ -63,11 +89,9 @@ export const favoriteService = {
 
     if (isFavorited) {
       await this.removeFromFavorites(imageId)
-      statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
       return false
     } else {
       await this.addToFavorites(imageId)
-      statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
       return true
     }
   },
