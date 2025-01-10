@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -108,12 +107,14 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
-					toast({
-						title: "Optimización completada",
-						description: `Se optimizaron ${
-							data.optimized
-						} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`,
-					});
+					if ("optimized" in data && "totalSaved" in data) {
+						toast({
+							title: "Optimización completada",
+							description: `Se optimizaron ${
+								data.optimized
+							} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`,
+						});
+					}
 					initializeThumbnails();
 				},
 			});
@@ -160,10 +161,12 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
-					toast({
-						title: "Reprocesamiento completado",
-						description: `Se reprocesaron ${data.processed} miniaturas`,
-					});
+					if ("processed" in data) {
+						toast({
+							title: "Reprocesamiento completado",
+							description: `Se reprocesaron ${data.processed} miniaturas`,
+						});
+					}
 					initializeThumbnails();
 				},
 			});
@@ -210,12 +213,14 @@ export function ThumbnailsSection() {
 					});
 				},
 				onComplete: (data) => {
-					toast({
-						title: "Limpieza completada",
-						description: `Se limpiaron ${
-							data.cleaned
-						} miniaturas, liberando ${formatBytes(data.totalFreed)}`,
-					});
+					if ("cleaned" in data) {
+						toast({
+							title: "Limpieza completada",
+							description: `Se limpiaron ${
+								data.cleaned
+							} miniaturas, liberando ${formatBytes(data.totalFreed)}`,
+						});
+					}
 					initializeThumbnails();
 				},
 			});

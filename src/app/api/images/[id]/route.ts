@@ -118,3 +118,56 @@ export async function GET(
     )
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    const data = await request.json();
+
+    const updatedImage = await prisma.image.update({
+      where: { id },
+      data,
+      include: {
+        folder: {
+          select: {
+            id: true,
+            name: true,
+            path: true
+          }
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            color: true
+          }
+        },
+        collections: {
+          select: {
+            id: true,
+            name: true,
+            color: true
+          }
+        },
+        stats: {
+          select: {
+            views: true,
+            downloads: true,
+            lastViewed: true
+          }
+        }
+      }
+    });
+
+    return NextResponse.json(updatedImage);
+  } catch (error) {
+    console.error("Error updating image:", error);
+    return NextResponse.json(
+      { error: "Error al actualizar la imagen" },
+      { status: 500 }
+    );
+  }
+}
