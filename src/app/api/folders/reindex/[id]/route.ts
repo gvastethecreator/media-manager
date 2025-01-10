@@ -21,7 +21,10 @@ export async function POST(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params
+    // Esperar y extraer los parámetros de manera asíncrona
+    const params = await Promise.resolve(context.params);
+    const { id } = params;
+
     reindexLogger.info('🔄 Iniciando reindexado para carpeta:', id)
 
     // Verificar que la carpeta existe

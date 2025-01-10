@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
@@ -7,77 +7,65 @@ import { toastService } from '@/services/toast.service'
 const apiLogger = logger.withContext('TagsAPI')
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string; imageId: string } }
 ) {
-  if (!params?.id || !params?.imageId) {
-    return NextResponse.json(
-      { error: 'Parámetros inválidos' },
-      { status: 400 }
-    )
-  }
-
-  const tagId = params.id
-  const imageId = params.imageId
-
   try {
-    // Verificar si la imagen ya tiene el tag
-    const existingTag = await prisma.tag.findFirst({
-      where: {
-        id: tagId,
-        images: {
-          some: {
-            id: imageId,
-          },
-        },
-      },
-      include: {
-        images: true,
-        _count: {
-          select: { images: true }
-        }
-      }
-    })
+    // Esperar y extraer los parámetros de manera asíncrona
+    const resolvedParams = await Promise.resolve(params);
+    const { id: tagId, imageId } = resolvedParams;
 
-    if (existingTag) {
-      apiLogger.info('ℹ️ Imagen ya tiene el tag:', { tagId, imageId })
-      toastService.tag.imageAdded(existingTag.name)
-      return NextResponse.json({ success: true })
+    if (!tagId || !imageId) {
+      return NextResponse.json(
+        { error: 'Parámetros inválidos' },
+        { status: 400 }
+      );
     }
 
-    // Agregar el tag a la imagen
-    const tag = await prisma.tag.update({
-      where: {
-        id: tagId,
-      },
-      data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
-      include: {
-        images: true,
-        _count: {
-          select: { images: true }
+    try {
+      // Verificar si la imagen ya tiene el tag
+      const existingTag = await prisma.tag.findFirst({
+        where: {
+          id: tagId,
+          images: {
+            some: {
+              id: imageId
+            }
+          }
         }
-      },
-    })
+      });
 
-    // Emitir evento de cambio
-    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE)
-    toastService.tag.imageAdded(tag.name)
+      if (existingTag) {
+        return NextResponse.json(
+          { message: 'La imagen ya tiene este tag' },
+          { status: 200 }
+        );
+      }
 
-    apiLogger.info('🏷️ Tag agregado a la imagen:', { tagId, imageId })
-    return NextResponse.json({ success: true, tag })
+      // Agregar tag a la imagen
+      await prisma.tag.update({
+        where: { id: tagId },
+        data: {
+          images: {
+            connect: { id: imageId }
+          }
+        }
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error('Error adding tag to image:', error);
+      return NextResponse.json(
+        { error: 'Error al agregar tag a la imagen' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    apiLogger.error('❌ Error agregando tag a la imagen:', error)
-    toastService.system.error('Error agregando tag a la imagen')
+    console.error('Error in tag image route:', error);
     return NextResponse.json(
-      { error: 'Error agregando tag a la imagen' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
-    )
+    );
   }
 }
 

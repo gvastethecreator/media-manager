@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
@@ -7,77 +7,65 @@ import { toastService } from '@/services/toast.service'
 const apiLogger = logger.withContext('CollectionsAPI')
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string; imageId: string } }
 ) {
-  if (!params?.id || !params?.imageId) {
-    return NextResponse.json(
-      { error: 'Parámetros inválidos' },
-      { status: 400 }
-    )
-  }
-
-  const collectionId = params.id
-  const imageId = params.imageId
-
   try {
-    // Verificar si la imagen ya está en la colección
-    const existingImage = await prisma.collection.findFirst({
-      where: {
-        id: collectionId,
-        images: {
-          some: {
-            id: imageId,
-          },
-        },
-      },
-      include: {
-        images: true,
-        _count: {
-          select: { images: true }
-        }
-      }
-    })
+    // Esperar y extraer los parámetros de manera asíncrona
+    const resolvedParams = await Promise.resolve(params);
+    const { id: collectionId, imageId } = resolvedParams;
 
-    if (existingImage) {
-      apiLogger.info('ℹ️ Imagen ya existe en la colección:', { collectionId, imageId })
-      toastService.collection.imageAdded(existingImage.name)
-      return NextResponse.json({ success: true })
+    if (!collectionId || !imageId) {
+      return NextResponse.json(
+        { error: 'Parámetros inválidos' },
+        { status: 400 }
+      );
     }
 
-    // Agregar la imagen a la colección
-    const collection = await prisma.collection.update({
-      where: {
-        id: collectionId,
-      },
-      data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
-      include: {
-        images: true,
-        _count: {
-          select: { images: true }
+    try {
+      // Verificar si la imagen ya está en la colección
+      const existingImage = await prisma.collection.findFirst({
+        where: {
+          id: collectionId,
+          images: {
+            some: {
+              id: imageId
+            }
+          }
         }
-      },
-    })
+      });
 
-    // Emitir evento de cambio
-    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
-    toastService.collection.imageAdded(collection.name)
+      if (existingImage) {
+        return NextResponse.json(
+          { message: 'La imagen ya está en la colección' },
+          { status: 200 }
+        );
+      }
 
-    apiLogger.info('📸 Imagen agregada a la colección:', { collectionId, imageId })
-    return NextResponse.json({ success: true, collection })
+      // Agregar imagen a la colección
+      await prisma.collection.update({
+        where: { id: collectionId },
+        data: {
+          images: {
+            connect: { id: imageId }
+          }
+        }
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error('Error adding image to collection:', error);
+      return NextResponse.json(
+        { error: 'Error al agregar imagen a la colección' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    apiLogger.error('❌ Error agregando imagen a la colección:', error)
-    toastService.system.error('Error agregando imagen a la colección')
+    console.error('Error in collection image route:', error);
     return NextResponse.json(
-      { error: 'Error agregando imagen a la colección' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
-    )
+    );
   }
 }
 
