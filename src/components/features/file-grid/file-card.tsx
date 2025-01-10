@@ -125,11 +125,16 @@ export function FileCard({
 
 	// Escuchar eventos de cambios con debounce
 	useEffect(() => {
+		if (!shouldLoad) return;
+
+		let isSubscribed = true;
 		let timeoutId: NodeJS.Timeout;
 
 		const handleStatsUpdate = async (
 			events: Array<keyof typeof STATS_EVENTS>
 		) => {
+			if (!isSubscribed) return;
+
 			const relevantEvents = [
 				"COLLECTION_CHANGE",
 				"TAG_CHANGE",
@@ -145,15 +150,12 @@ export function FileCard({
 			);
 
 			if (shouldUpdate) {
-				// Debounce la actualización
 				clearTimeout(timeoutId);
 				timeoutId = setTimeout(async () => {
+					if (!isSubscribed) return;
 					try {
-						// Forzar re-render del componente solo si es necesario
 						toggleItemSelection(item, false);
-
-						// Actualizar datos locales si es necesario
-						if (event === "FAVORITE_CHANGE" && item.isFavorite) {
+						if (events.includes("FAVORITE_CHANGE") && item.isFavorite) {
 							toastService.favorite.updated();
 						}
 					} catch (error) {
@@ -164,17 +166,16 @@ export function FileCard({
 			}
 		};
 
-		if (shouldLoad) {
-			statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
-		}
+		// Configurar el listener una sola vez
+		statsEventEmitter.setMaxListeners(20); // Aumentar el límite si es necesario
+		statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
 
 		return () => {
-			if (shouldLoad) {
-				statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
-				clearTimeout(timeoutId);
-			}
+			isSubscribed = false;
+			clearTimeout(timeoutId);
+			statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
 		};
-	}, [item, toggleItemSelection, shouldLoad]);
+	}, [item.id]); // Solo depender del ID del item, no del objeto completo
 
 	// Memoizar el estado de selección para evitar re-renders innecesarios
 	const isSelected = useMemo(
@@ -738,13 +739,15 @@ export function FileCard({
 							{item.isFavorite && (
 								<div
 									className={cn(
-										"absolute top-2 right-2 z-30 transition-transform duration-200",
-										isSelected || isMarked || isHovered ? "scale-110" : ""
+										"absolute top-2 right-2 z-30 transition-transform duration-200 bg-black/30 p-1 rounded-full",
+										isSelected || isMarked || isHovered
+											? "scale-110"
+											: "scale-100"
 									)}
 								>
 									<StarIcon
 										size={14}
-										className="text-yellow-400 drop-shadow-md"
+										className="text-yellow-400 drop-shadow-lg"
 									/>
 								</div>
 							)}
