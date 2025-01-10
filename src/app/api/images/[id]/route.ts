@@ -124,7 +124,9 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    // Esperar y extraer los parámetros de manera asíncrona
+    const resolvedParams = await Promise.resolve(params);
+    const { id } = resolvedParams;
     const data = await request.json();
 
     const updatedImage = await prisma.image.update({
