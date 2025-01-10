@@ -12,6 +12,10 @@ export interface FileItem {
   isFavorite: boolean
   createdAt: Date
   updatedAt: Date
+  favorites?: Array<{
+    id: string
+    createdAt: Date
+  }>
   tags: Array<{
     id: string
     name: string

@@ -41,6 +41,7 @@ import { useRouter } from "next/navigation";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
 import { eventsService } from "@/services/events.service";
+import type { CacheInvalidationEvent } from "@/services/events.service";
 
 interface FolderCardProps {
 	folder: any;
@@ -322,15 +323,17 @@ export function FoldersView({ isResizing }: ViewProps) {
 		loadFolders();
 
 		// Suscribirse a eventos relevantes
-		const unsubscribe = eventsService.subscribe((event) => {
-			if (
-				event === "folders:added" ||
-				event === "folders:deleted" ||
-				event === "folders:modified"
-			) {
-				loadFolders();
+		const unsubscribe = eventsService.subscribe(
+			(event: CacheInvalidationEvent) => {
+				if (
+					event === "folders:added" ||
+					event === "folders:deleted" ||
+					event === "folders:modified"
+				) {
+					loadFolders();
+				}
 			}
-		});
+		);
 
 		return () => {
 			unsubscribe();

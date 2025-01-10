@@ -1,10 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
-import { thumbnailCache, metadataCache, searchCache } from "@/lib/cache";
+import {
+	thumbnailCache,
+	metadataCache,
+	searchCache,
+	CacheManager,
+} from "@/lib/cache";
 import { logger } from "@/lib/logger";
 
 const cacheProviderLogger = logger.withContext("CacheProvider");
+
+// Asegurar que TypeScript reconozca las instancias como CacheManager
+const typedThumbnailCache = thumbnailCache as CacheManager<string>;
+const typedMetadataCache = metadataCache as CacheManager<
+	Record<string, unknown>
+>;
+const typedSearchCache = searchCache as CacheManager<unknown[]>;
 
 export function CacheProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
@@ -13,9 +25,9 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
 		return () => {
 			// Limpiar caches al desmontar
 			Promise.all([
-				thumbnailCache.stop(),
-				metadataCache.stop(),
-				searchCache.stop(),
+				typedThumbnailCache.stop(),
+				typedMetadataCache.stop(),
+				typedSearchCache.stop(),
 			]).catch((error) => {
 				cacheProviderLogger.error("❌ Error al detener caches:", error);
 			});

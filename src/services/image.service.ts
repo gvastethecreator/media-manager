@@ -9,7 +9,7 @@ import { promises as fs } from 'fs'
 export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high'
 
 export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
-  compressed: { quality: 60, width: 200, height: 200 },
+  compressed: { quality: 40, width: 200, height: 200 },
   low: { quality: 70, width: 300, height: 300 },
   medium: { quality: 80, width: 400, height: 400 },
   high: { quality: 90, width: 500, height: 500 }

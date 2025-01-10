@@ -9,6 +9,7 @@ import { Star } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 import { LoadingScreen } from "@/components/core/feedback";
 import BlurFade from "@/components/ui/blur-fade";
+import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
 
 export function FavoritesView() {
 	const {
@@ -22,6 +23,17 @@ export function FavoritesView() {
 
 	useEffect(() => {
 		loadItems("/api/images/favorites/all");
+
+		// Suscribirse a cambios en favoritos
+		const handleFavoriteChange = () => {
+			loadItems("/api/images/favorites/all");
+		};
+
+		statsEventEmitter.on(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
+
+		return () => {
+			statsEventEmitter.off(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
+		};
 	}, [loadItems]);
 
 	const favoriteItems = useMemo(() => {
