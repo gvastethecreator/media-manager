@@ -211,13 +211,8 @@ export function FileCard({
 			setIsLoading(true);
 			setError(null);
 
-			const quality: ThumbnailQuality =
-				thumbnailSize === "small"
-					? "low"
-					: thumbnailSize === "large"
-					? "high"
-					: "medium";
-
+			const quality: ThumbnailQuality = ThumbnailQuality.MEDIUM;
+			
 			const thumbnailData = await thumbnailService.getThumbnail(
 				item.id,
 				quality
@@ -719,7 +714,7 @@ export function FileCard({
 			animate={isSelected ? "selected" : isMarked ? "marked" : ""}
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 ring-1 ring-white/10 ring-inset rounded-sm  cursor-pointer",
+				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 rounded-sm  cursor-pointer",
 				isSelected
 					? "ring-1 ring-primary ring-inset shadow-lg"
 					: isMarked
@@ -782,7 +777,7 @@ export function FileCard({
 									alt={item.name}
 									width={item.metadata?.dimensions?.width || 300}
 									height={item.metadata?.dimensions?.height || 300}
-									className="max-w-[95%] max-h-[95%] rounded-sm border-1 bg-black/50 border-white/10"
+									className="h-full w-full rounded-sm border-1 bg-black/50 border-white/10"
 									priority={false}
 								/>
 							</div>
