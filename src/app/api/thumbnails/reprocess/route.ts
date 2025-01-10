@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { ThumbnailQuality } from '@/types/thumbnails'
 import { logger } from '@/lib/logger'
 
 const thumbLogger = logger.withContext('ThumbnailReprocessAPI')
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const thumbnail = await generateThumbnail(image.path, { quality: 'medium' })
+        const thumbnail = await generateThumbnail(image.path, { quality: ThumbnailQuality.MEDIUM })
 
         if (!thumbnail || !thumbnail.buffer) {
           throw new Error('Error generando thumbnail')
