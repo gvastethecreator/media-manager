@@ -1,24 +1,20 @@
 import { logger } from '@/lib/logger';
 import { eventsService } from '@/services/events.service';
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
+import { EventEmitter } from 'events';
 
 const folderLogger = logger.withContext('FolderService');
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-// Debounce function para promesas
-const debounce = <T>(fn: (...args: any[]) => Promise<T>, ms = 300) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: any[]): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        fn(...args).then(resolve).catch(reject);
-      }, ms);
-    });
-  };
-};
-
-// Cache para operaciones en curso
-const operationsInProgress = new Map<string, boolean>();
+export enum FOLDER_EVENTS {
+  PROGRESS = 'folder:progress',
+  ERROR = 'folder:error',
+  COMPLETE = 'folder:complete',
+  STATS = 'folder:stats',
+  FOLDER_ADDED = 'folder:added',
+  FOLDER_DELETED = 'folder:deleted',
+  FOLDER_MODIFIED = 'folder:modified'
+}
 
 export interface ProcessStatus {
   status?: string
@@ -63,220 +59,311 @@ export interface IndexCallbacks {
   onComplete?: (data: FolderResponse) => void
 }
 
-function getFullUrl(path: string): string {
-  return `${BASE_URL}${path}`;
-}
+// Debounce function para promesas
+const debounce = <T>(fn: (...args: any[]) => Promise<T>, ms = 300) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return (...args: any[]): Promise<T> => {
+    return new Promise((resolve, reject) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        fn(...args).then(resolve).catch(reject);
+      }, ms);
+    });
+  };
+};
 
-// Función para manejar operaciones concurrentes
-function withConcurrencyControl<T>(operation: string, fn: () => Promise<T>): Promise<T> {
-  if (operationsInProgress.get(operation)) {
-    throw new Error(`Operación ${operation} en progreso`);
+class FolderServiceClass extends EventEmitter {
+  private static instance: FolderServiceClass;
+  private operationsInProgress = new Map<string, boolean>();
+
+  private constructor() {
+    super();
+    folderLogger.info('🚀 Inicializando FolderService');
+    this.setMaxListeners(50);
   }
 
-  operationsInProgress.set(operation, true);
-  return fn().finally(() => {
-    operationsInProgress.delete(operation);
-  });
-}
-
-// Función getFolders sin debounce
-async function getFoldersBase() {
-  return withConcurrencyControl('getFolders', async () => {
-    try {
-      folderLogger.info('📂 Obteniendo lista de carpetas...');
-      const response = await fetch(getFullUrl('/api/folders'));
-      if (!response.ok) {
-        const data = await response.json();
-        throw { message: data.error || 'Error obteniendo carpetas', details: data.details };
-      }
-      const folders = await response.json();
-      folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
-      return folders;
-    } catch (error) {
-      const errorResponse: ErrorResponse = {
-        message: error instanceof Error ? error.message : 'Error obteniendo carpetas',
-        details: error instanceof Error ? error.stack : String(error),
-        timestamp: Date.now()
-      };
-      folderLogger.error('❌ Error getting folders:', errorResponse);
-      throw errorResponse;
+  static getInstance(): FolderServiceClass {
+    if (!FolderServiceClass.instance) {
+      FolderServiceClass.instance = new FolderServiceClass();
     }
-  });
-}
+    return FolderServiceClass.instance;
+  }
 
-// Versión con debounce
-export const getFolders = debounce(() => getFoldersBase(), 300);
+  // Métodos de eventos
+  onProgress(callback: (status: ProcessStatus) => void): void {
+    this.on(FOLDER_EVENTS.PROGRESS, callback);
+  }
 
-export async function addFolder(path: string, callbacks?: IndexCallbacks) {
-  return withConcurrencyControl('addFolder', async () => {
-    try {
-      folderLogger.info('📁 Agregando nueva carpeta:', path);
+  offProgress(callback: (status: ProcessStatus) => void): void {
+    this.off(FOLDER_EVENTS.PROGRESS, callback);
+  }
 
-      const response = await fetch(getFullUrl('/api/folders'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ path })
-      });
+  onError(callback: (error: ErrorResponse) => void): void {
+    this.on(FOLDER_EVENTS.ERROR, callback);
+  }
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw { message: data.error || 'Error creando carpeta', details: data.details };
-      }
+  offError(callback: (error: ErrorResponse) => void): void {
+    this.off(FOLDER_EVENTS.ERROR, callback);
+  }
 
-      const folder = await response.json();
-      folderLogger.info('✅ Carpeta creada:', folder);
+  onComplete(callback: (data: FolderResponse) => void): void {
+    this.on(FOLDER_EVENTS.COMPLETE, callback);
+  }
 
-      if (!folder || !folder.id) {
-        throw { message: 'Respuesta inválida al crear carpeta' };
-      }
+  offComplete(callback: (data: FolderResponse) => void): void {
+    this.off(FOLDER_EVENTS.COMPLETE, callback);
+  }
 
-      // Emitir evento de carpeta agregada
-      eventsService.emit('folders:added');
+  onStats(callback: (stats: any) => void): void {
+    this.on(FOLDER_EVENTS.STATS, callback);
+  }
 
-      // Iniciar indexación
-      return indexFolder(folder.id, callbacks);
-    } catch (error) {
-      const errorResponse: ErrorResponse = {
-        message: error instanceof Error ? error.message : 'Error agregando carpeta',
-        details: error instanceof Error ? error.stack : String(error),
-        timestamp: Date.now()
-      };
-      folderLogger.error('❌ Error adding folder:', errorResponse);
-      throw errorResponse;
+  offStats(callback: (stats: any) => void): void {
+    this.off(FOLDER_EVENTS.STATS, callback);
+  }
+
+  private getFullUrl(path: string): string {
+    return `${BASE_URL}${path}`;
+  }
+
+  // Control de concurrencia mejorado
+  private async withConcurrencyControl<T>(operation: string, fn: () => Promise<T>): Promise<T> {
+    if (this.operationsInProgress.get(operation)) {
+      throw new Error(`Operación ${operation} en progreso`);
     }
-  });
-}
 
-export async function indexFolder(id: string, callbacks?: IndexCallbacks) {
-  return withConcurrencyControl(`indexFolder:${id}`, async () => {
+    this.operationsInProgress.set(operation, true);
     try {
-      folderLogger.info('🔄 Iniciando indexación de carpeta:', id);
+      return await fn();
+    } finally {
+      this.operationsInProgress.delete(operation);
+    }
+  }
 
-      // Notificar inicio del proceso
-      callbacks?.onProgress?.({
-        status: 'Iniciando indexación...',
-        progress: 0,
-        current: 0,
-        total: 0,
-        folderId: id
-      });
+  // Métodos públicos
+  async getFolders() {
+    return this.withConcurrencyControl('getFolders', async () => {
+      try {
+        folderLogger.info('📂 Obteniendo lista de carpetas...');
+        const response = await fetch(this.getFullUrl('/api/folders'));
 
-      const response = await fetch(getFullUrl(`/api/folders/${id}/index`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+        if (!response.ok) {
+          const data = await response.json();
+          throw { message: data.error || 'Error obteniendo carpetas', details: data.details };
         }
-      });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error en la indexación');
+        const folders = await response.json();
+        folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
+        this.emit(FOLDER_EVENTS.STATS, { totalFolders: folders.length });
+        return folders;
+      } catch (error) {
+        const errorResponse: ErrorResponse = {
+          message: error instanceof Error ? error.message : 'Error obteniendo carpetas',
+          details: error instanceof Error ? error.stack : String(error),
+          timestamp: Date.now()
+        };
+        folderLogger.error('❌ Error getting folders:', errorResponse);
+        this.emit(FOLDER_EVENTS.ERROR, errorResponse);
+        throw errorResponse;
       }
+    });
+  }
 
-      const result = await response.json();
+  async addFolder(path: string, callbacks?: IndexCallbacks) {
+    return this.withConcurrencyControl('addFolder', async () => {
+      try {
+        folderLogger.info('📁 Agregando nueva carpeta:', path);
 
-      // Emitir eventos relevantes
-      eventsService.emit('files:modified');
-      eventsService.emit('folders:modified');
+        const response = await fetch(this.getFullUrl('/api/folders'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ path })
+        });
 
-      callbacks?.onComplete?.(result);
-      return result;
-    } catch (error) {
-      const errorResponse: ErrorResponse = {
-        message: error instanceof Error ? error.message : 'Error indexando carpeta',
-        details: error instanceof Error ? error.stack : String(error),
-        timestamp: Date.now()
-      };
-      folderLogger.error('❌ Error indexing folder:', errorResponse);
-      callbacks?.onError?.(errorResponse);
-      throw errorResponse;
-    }
-  });
-}
-
-export async function reindexFolder(id: string, callbacks?: IndexCallbacks) {
-  return withConcurrencyControl(`reindexFolder:${id}`, async () => {
-    try {
-      folderLogger.info('🔄 Reindexando carpeta:', id);
-
-      // Notificar inicio del proceso
-      callbacks?.onProgress?.({
-        status: 'Iniciando reindexación...',
-        progress: 0,
-        current: 0,
-        total: 0,
-        folderId: id
-      });
-
-      const response = await fetch(getFullUrl(`/api/folders/reindex/${id}`), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+        if (!response.ok) {
+          const data = await response.json();
+          throw { message: data.error || 'Error creando carpeta', details: data.details };
         }
-      });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error en la reindexación');
-      }
+        const folder = await response.json();
+        folderLogger.info('✅ Carpeta creada:', folder);
 
-      const result = await response.json();
-
-      // Emitir eventos relevantes
-      eventsService.emit('files:modified');
-      eventsService.emit('folders:modified');
-
-      callbacks?.onComplete?.(result);
-      return result;
-    } catch (error) {
-      const errorResponse: ErrorResponse = {
-        message: error instanceof Error ? error.message : 'Error reindexando carpeta',
-        details: error instanceof Error ? error.stack : String(error),
-        timestamp: Date.now()
-      };
-      folderLogger.error('❌ Error reindexing folder:', errorResponse);
-      callbacks?.onError?.(errorResponse);
-      throw errorResponse;
-    }
-  });
-}
-
-export async function deleteFolder(id: string) {
-  return withConcurrencyControl(`deleteFolder:${id}`, async () => {
-    try {
-      folderLogger.info('🗑️ Eliminando carpeta:', id);
-      const response = await fetch(getFullUrl(`/api/folders/${id}`), {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+        if (!folder || !folder.id) {
+          throw { message: 'Respuesta inválida al crear carpeta' };
         }
-      });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw { message: data.error || 'Error eliminando carpeta', details: data.details };
+        // Emitir eventos
+        this.emit(FOLDER_EVENTS.FOLDER_ADDED, folder);
+        eventsService.emit('folders:added');
+        statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
+        statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+
+        // Iniciar indexación
+        return this.indexFolder(folder.id, callbacks);
+      } catch (error) {
+        const errorResponse: ErrorResponse = {
+          message: error instanceof Error ? error.message : 'Error agregando carpeta',
+          details: error instanceof Error ? error.stack : String(error),
+          timestamp: Date.now()
+        };
+        folderLogger.error('❌ Error adding folder:', errorResponse);
+        this.emit(FOLDER_EVENTS.ERROR, errorResponse);
+        throw errorResponse;
       }
+    });
+  }
 
-      // Emitir evento de carpeta eliminada
-      eventsService.emit('folders:deleted');
-      eventsService.emit('files:deleted');
+  async indexFolder(id: string, callbacks?: IndexCallbacks) {
+    return this.withConcurrencyControl(`indexFolder:${id}`, async () => {
+      try {
+        folderLogger.info('🔄 Iniciando indexación de carpeta:', id);
 
-      folderLogger.info('✅ Carpeta eliminada correctamente', { folderId: id });
-      return response.json();
-    } catch (error) {
-      const errorResponse: ErrorResponse = {
-        message: error instanceof Error ? error.message : 'Error eliminando carpeta',
-        details: error instanceof Error ? error.stack : String(error),
-        timestamp: Date.now()
-      };
-      folderLogger.error('❌ Error deleting folder:', errorResponse);
-      throw errorResponse;
-    }
-  });
+        // Notificar inicio del proceso
+        const initialStatus: ProcessStatus = {
+          status: 'Iniciando indexación...',
+          progress: 0,
+          current: 0,
+          total: 0,
+          folderId: id
+        };
+
+        this.emit(FOLDER_EVENTS.PROGRESS, initialStatus);
+        callbacks?.onProgress?.(initialStatus);
+
+        const response = await fetch(this.getFullUrl(`/api/folders/${id}/index`), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Error en la indexación');
+        }
+
+        const result = await response.json();
+
+        // Emitir eventos relevantes
+        this.emit(FOLDER_EVENTS.COMPLETE, result);
+        eventsService.emit('files:modified');
+        eventsService.emit('folders:modified');
+
+        callbacks?.onComplete?.(result);
+        return result;
+      } catch (error) {
+        const errorResponse: ErrorResponse = {
+          message: error instanceof Error ? error.message : 'Error indexando carpeta',
+          details: error instanceof Error ? error.stack : String(error),
+          timestamp: Date.now()
+        };
+        folderLogger.error('❌ Error indexing folder:', errorResponse);
+        this.emit(FOLDER_EVENTS.ERROR, errorResponse);
+        callbacks?.onError?.(errorResponse);
+        throw errorResponse;
+      }
+    });
+  }
+
+  async reindexFolder(id: string, callbacks?: IndexCallbacks) {
+    return this.withConcurrencyControl(`reindexFolder:${id}`, async () => {
+      try {
+        folderLogger.info('🔄 Reindexando carpeta:', id);
+
+        // Notificar inicio del proceso
+        const initialStatus: ProcessStatus = {
+          status: 'Iniciando reindexación...',
+          progress: 0,
+          current: 0,
+          total: 0,
+          folderId: id
+        };
+
+        this.emit(FOLDER_EVENTS.PROGRESS, initialStatus);
+        callbacks?.onProgress?.(initialStatus);
+
+        const response = await fetch(this.getFullUrl(`/api/folders/reindex/${id}`), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Error en la reindexación');
+        }
+
+        const result = await response.json();
+
+        // Emitir eventos relevantes
+        this.emit(FOLDER_EVENTS.COMPLETE, result);
+        eventsService.emit('files:modified');
+        eventsService.emit('folders:modified');
+
+        callbacks?.onComplete?.(result);
+        return result;
+      } catch (error) {
+        const errorResponse: ErrorResponse = {
+          message: error instanceof Error ? error.message : 'Error reindexando carpeta',
+          details: error instanceof Error ? error.stack : String(error),
+          timestamp: Date.now()
+        };
+        folderLogger.error('❌ Error reindexing folder:', errorResponse);
+        this.emit(FOLDER_EVENTS.ERROR, errorResponse);
+        callbacks?.onError?.(errorResponse);
+        throw errorResponse;
+      }
+    });
+  }
+
+  async deleteFolder(id: string) {
+    return this.withConcurrencyControl(`deleteFolder:${id}`, async () => {
+      try {
+        folderLogger.info('🗑️ Eliminando carpeta:', id);
+        const response = await fetch(this.getFullUrl(`/api/folders/${id}`), {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw { message: data.error || 'Error eliminando carpeta', details: data.details };
+        }
+
+        // Emitir eventos
+        this.emit(FOLDER_EVENTS.FOLDER_DELETED, { id });
+        eventsService.emit('folders:deleted');
+        eventsService.emit('files:deleted');
+        statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
+        statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+
+        folderLogger.info('✅ Carpeta eliminada correctamente', { folderId: id });
+        return response.json();
+      } catch (error) {
+        const errorResponse: ErrorResponse = {
+          message: error instanceof Error ? error.message : 'Error eliminando carpeta',
+          details: error instanceof Error ? error.stack : String(error),
+          timestamp: Date.now()
+        };
+        folderLogger.error('❌ Error deleting folder:', errorResponse);
+        this.emit(FOLDER_EVENTS.ERROR, errorResponse);
+        throw errorResponse;
+      }
+    });
+  }
 }
+
+// Instancia singleton
+export const folderService = FolderServiceClass.getInstance();
+
+// Versión con debounce de getFolders
+export const getFolders = debounce(() => folderService.getFolders(), 300);

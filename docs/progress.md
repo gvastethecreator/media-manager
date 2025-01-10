@@ -43,40 +43,120 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ### Últimas 4 tareas, si hay mas deben ir a changelog.md al final del archivo
 
-1. **[2024-01-11] Integración de Servicios de Gestión de Contenido**
+1. **[2024-01-12] Consolidación y Optimización de Servicios Core**
+
+   - Análisis y optimización de servicios principales (ThumbnailService, ImageService, StatsService)
+   - Mejora en la integración de servicios de caché y logging
+   - Eliminación de duplicidad en llamadas y responsabilidades
+   - Adaptación para Next.js 15 y Server Components
+
+2. **[2024-01-11] Integración de Servicios de Gestión de Contenido**
 
    - Integración de FavoriteService, CollectionService y TagService
    - Optimización del ContextMenu y sus interacciones
    - Implementación de caché y gestión de estado
    - Mejora en el manejo de eventos y actualizaciones UI
 
-2. **[2024-01-11] Optimización del Flujo de Inicialización**
+3. **[2024-01-11] Optimización del Flujo de Inicialización**
 
    - Revisión y mejora del flujo de inicialización de la aplicación
    - Reorganización del orden de carga de servicios
    - Optimización de la pantalla de carga y estados visuales
    - Implementación de mejor manejo de errores y dependencias
 
-3. **[2024-01-10] Separación de Componentes de Configuración**
+4. **[2024-01-10] Separación de Componentes de Configuración**
 
    - Separación de FoldersSection y ThumbnailsSection en componentes independientes
    - Implementación de comunicación entre componentes
    - Optimización de la gestión de estado compartido
    - Mejora en la organización del código y responsabilidades
 
-4. **[2024-01-10] Corrección del Sistema de Reindexado**
+5. **[2024-01-10] Corrección del Sistema de Reindexado**
 
    - Análisis del flujo de eventos SSE en el proceso de reindexado
    - Corrección de la sincronización de estado en FoldersSection
    - Mejora en el manejo de tipos de eventos en EventsService
    - Optimización del manejo de progreso y estado
 
-5. **[2024-01-09] Optimización para Server Components**
+6. **[2024-01-09] Optimización para Server Components**
 
    - Refactorización del FileContext para Server Components
    - Migración de operaciones de base de datos al servidor
    - Implementación de Server Actions para operaciones de datos
    - Optimización del manejo de estado cliente/servidor
+
+## Análisis y Mejoras de Servicios (2025-01-10)
+
+## Problemas Identificados
+
+### 1. Duplicación de Configuraciones
+- Configuración de calidad de miniaturas duplicada en `thumbnail.service.ts` y `image.service.ts`
+- Necesidad de unificar las configuraciones en un solo lugar
+
+### 2. Inconsistencias en el Manejo de Caché
+- `thumbnailCache` se usa en múltiples servicios sin una estrategia clara
+- No hay una política de expiración consistente
+- Falta manejo de errores unificado
+
+### 3. Separación Cliente/Servidor
+- Algunos servicios mezclan lógica de cliente y servidor
+- `toast.service.ts` debe ser exclusivamente del lado del cliente
+- Necesidad de separar endpoints y lógica de servidor
+
+### 4. Gestión de Estados
+- `stats.service.ts` utiliza eventos que podrían causar problemas en Next.js 15
+- Necesidad de migrar a un sistema de estado más apropiado para Next.js
+
+## Plan de Mejoras
+
+### Fase 1: Refactorización de Servicios Base
+
+1. Crear un servicio de configuración centralizado
+   - Mover todas las configuraciones a `src/config/`
+   - Implementar validación de configuración
+   - Separar configuraciones de desarrollo y producción
+
+2. Optimizar el sistema de caché
+   - Implementar políticas de caché consistentes
+   - Mejorar el manejo de errores
+   - Añadir métricas de rendimiento
+
+3. Separar lógica cliente/servidor
+   - Mover `toast.service.ts` a `src/client/services/`
+   - Crear endpoints API REST claros
+   - Implementar validación de datos en endpoints
+
+### Fase 2: Mejora de Servicios Específicos
+
+1. Servicio de Imágenes
+   - Unificar lógica de procesamiento de imágenes
+   - Implementar mejor manejo de errores
+   - Optimizar el procesamiento de miniaturas
+
+2. Servicio de Estadísticas
+   - Migrar a un sistema basado en Server Actions
+   - Implementar cache invalidation apropiado
+   - Mejorar el rendimiento de consultas
+
+3. Sistema de Logging
+   - Implementar niveles de log configurables
+   - Añadir rotación de logs
+   - Mejorar formato de logs para debugging
+
+## Próximos Pasos
+
+1. Implementar servicio de configuración centralizado
+2. Refactorizar sistema de caché
+3. Migrar toast service al lado del cliente
+4. Actualizar endpoints para Next.js 15
+5. Implementar nuevas políticas de logging
+
+## Estado Actual
+
+- [x] Análisis inicial completado
+- [ ] Implementación de mejoras
+- [ ] Pruebas de integración
+- [ ] Documentación actualizada
 
 ## Optimización del flujo de inicialización y caché del sistema [En progreso]
 
@@ -178,3 +258,95 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 3. 🔄 Implementar cola de operaciones para mejor control
 4. 🔄 Agregar métricas de rendimiento
 5. 🔄 Implementar sistema de precarga de caché
+
+## Actualización del Sistema (2025-01-10)
+
+### 1. Sistema de Logging Mejorado
+
+Se ha implementado un nuevo sistema de logging con las siguientes características:
+- Configuración centralizada en `src/config/logger.config.ts`
+- Niveles de log configurables por servicio
+- Formato personalizable con colores y timestamps
+- Mejor manejo de contextos y datos estructurados
+
+### 2. Migración a Server Actions
+
+Se ha migrado el servicio de estadísticas a Server Actions:
+- Creado nuevo archivo `src/app/actions/stats.actions.ts`
+- Eliminado sistema basado en eventos
+- Implementada revalidación automática de rutas
+- Mejorado el sistema de caché con TTL configurable
+
+### Cambios en Archivos
+
+1. Nuevos Archivos:
+   - `src/config/logger.config.ts`: Configuración del sistema de logging
+   - `src/app/actions/stats.actions.ts`: Server Actions para estadísticas
+
+2. Archivos Modificados:
+   - `src/lib/logger.ts`: Implementación del nuevo sistema de logging
+   - `src/services/stats.service.ts`: Migración a Server Actions
+   - `src/config/cache.config.ts`: Mejoras en la configuración de caché
+
+### Mejoras de Rendimiento
+
+1. Sistema de Caché:
+   - Configuración específica por tipo de caché
+   - TTL optimizado según el uso
+   - Mejor manejo de errores y fallbacks
+
+2. Estadísticas:
+   - Revalidación automática de datos
+   - Reducción de llamadas a la base de datos
+   - Mejor manejo de concurrencia
+
+### Próximos Pasos
+
+1. [x] Implementar sistema de logging mejorado
+2. [x] Migrar estadísticas a Server Actions
+3. [ ] Mover toast service al lado del cliente
+4. [ ] Implementar validación de datos en endpoints
+5. [ ] Actualizar tests
+
+## Cambios Realizados (2025-01-10)
+
+### 1. Implementación de Configuración Centralizada
+
+Se ha creado un nuevo sistema de configuración centralizado en `src/config/` con los siguientes componentes:
+
+1. `image.config.ts`
+   - Configuración de calidades de miniaturas
+   - Parámetros de procesamiento de imágenes
+   - Validación de esquema con Zod
+
+2. `cache.config.ts`
+   - Configuraciones de caché por tipo
+   - TTL y tamaños máximos
+   - Intervalos de limpieza
+
+3. `index.ts`
+   - Exportación centralizada de configuraciones
+   - Validación automática al inicio
+
+### Servicios Actualizados
+
+1. Cache Service (`src/lib/cache.ts`)
+   - Migrado a usar configuración centralizada
+   - Implementada configuración específica por tipo de caché
+   - Mejorado el manejo de errores
+
+2. Image Service (`src/services/image.service.ts`)
+   - Eliminada configuración duplicada
+   - Migrado a usar configuración centralizada
+   - Actualizado para usar tipos compartidos
+
+3. Thumbnail Service (`src/services/thumbnail.service.ts`)
+   - Eliminada configuración duplicada
+   - Migrado a usar configuración centralizada
+   - Mejorada la integración con el sistema de caché
+
+### Próximos Pasos
+
+1. Migrar el servicio de estadísticas a Server Actions
+2. Implementar nueva estructura de logging
+3. Mover toast service al lado del cliente

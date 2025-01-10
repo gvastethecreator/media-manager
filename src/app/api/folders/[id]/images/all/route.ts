@@ -24,11 +24,10 @@ export const revalidate = 0
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await Promise.resolve(context.params)
-    const { id } = params
+    const { id } = await params;
 
     if (!id) {
       imagesLogger.error('ID de carpeta no proporcionado')

@@ -53,6 +53,7 @@ model Image {
   tags                 Tag[]        @relation("ImageToTag")
   favorites            Favorite[]
   stats                ImageStats?
+  activities           Activity[]
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -150,4 +151,16 @@ model QueueJob {
   @@index([status, createdAt])
   @@index([priority, status, createdAt])
   @@index([retryAt])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  description String
+  imageId     String?
+  image       Image?   @relation(fields: [imageId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([imageId])
 }
