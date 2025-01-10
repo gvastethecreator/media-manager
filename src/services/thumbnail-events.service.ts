@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { logger } from '@/lib/logger';
 import { ProcessStatus } from './thumbnail.service';
-import { ThumbnailStats } from './stats.service';
+import { ThumbnailStats } from '@/types/thumbnails';
 
 type ThumbnailEventType = 'thumbnail:progress' | 'thumbnail:error' | 'thumbnail:complete' | 'thumbnail:stats';
 

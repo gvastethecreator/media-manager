@@ -1,5 +1,6 @@
 import { LRUCache } from 'lru-cache'
 import { logger } from '@/lib/logger'
+import { cacheConfig } from '@/config'
 
 export interface CacheOptions {
   max?: number
@@ -30,14 +31,7 @@ export interface CacheStats {
   newestEntry: number
 }
 
-const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = {
-  max: 500,
-  ttl: 1000 * 60 * 60,
-  updateAgeOnGet: true,
-  allowStale: false,
-  cleanupInterval: 1000 * 60 * 15,
-  statsInterval: 1000 * 60 * 5
-}
+const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = cacheConfig.default
 
 const cacheLogger = logger.withContext('CacheManager')
 
@@ -305,36 +299,22 @@ export class CacheManager<T = unknown> {
 // Instancias específicas de caché
 export const thumbnailCache = new CacheManager<string>({
   name: 'thumbnails',
-  max: 1000,
-  ttl: 1000 * 60 * 60 * 24,
-  updateAgeOnGet: true,
-  allowStale: true
+  ...cacheConfig.thumbnails
 })
 
 export const metadataCache = new CacheManager<Record<string, unknown>>({
   name: 'metadata',
-  max: 5000,
-  ttl: 1000 * 60 * 60,
-  updateAgeOnGet: true,
-  allowStale: true,
-  cleanupInterval: 1000 * 60 * 30
+  ...cacheConfig.metadata
 })
 
 export const searchCache = new CacheManager<unknown[]>({
   name: 'search',
-  max: 100,
-  ttl: 1000 * 60 * 5,
-  updateAgeOnGet: false,
-  allowStale: true
+  ...cacheConfig.search
 })
 
 export const statsCache = new CacheManager<Record<string, unknown>>({
   name: 'stats',
-  max: 100,
-  ttl: 1000 * 60 * 5,
-  updateAgeOnGet: true,
-  allowStale: true,
-  cleanupInterval: 1000 * 60 * 10
+  ...cacheConfig.stats
 })
 
 export async function clearAllCaches(): Promise<void> {

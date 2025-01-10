@@ -12,7 +12,7 @@ import {
 	ProfileUpdate,
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
-import { ThumbnailQuality } from "@/services/image.service";
+import { ThumbnailQuality } from "@/types/thumbnails";
 
 interface CollectionWithStats extends Collection {
 	count: number;
@@ -62,7 +62,7 @@ const defaultSettings: Settings = {
 	tags: [],
 	profiles: [],
 	activeProfile: null,
-	thumbnailQuality: "medium",
+	thumbnailQuality: ThumbnailQuality.MEDIUM,
 	videoThumbnailAnimation: true,
 	shortcuts: {},
 	system: {

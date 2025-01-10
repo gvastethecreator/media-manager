@@ -1,19 +1,18 @@
 import { prisma } from '@/lib/prisma'
-import type { Image } from '.prisma/client'
+import type { Image } from '@prisma/client'
 import { statsService } from './stats.service'
 import sharp from 'sharp'
 import { thumbnailCache } from '@/lib/cache'
 import { createHash } from 'crypto'
 import { promises as fs } from 'fs'
+import { imageConfig } from '@/config'
+import { logger } from '@/lib/logger'
+import { ThumbnailQuality } from '@/types/thumbnails'
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high'
+const imageLogger = logger.withContext('ImageService')
 
-export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
-  compressed: { quality: 40, width: 200, height: 200 },
-  low: { quality: 70, width: 300, height: 300 },
-  medium: { quality: 80, width: 400, height: 400 },
-  high: { quality: 90, width: 500, height: 500 }
-}
+export type { ThumbnailQuality }
+export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities
 
 export type CreateImageInput = {
   name: string
@@ -37,7 +36,7 @@ export type ImageProcessingOptions = {
 
 class ImageService {
   private static instance: ImageService
-  private readonly SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+  private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats
   private readonly CACHE_DIR = '.image-cache'
 
   private constructor() {
@@ -132,7 +131,7 @@ class ImageService {
     })
 
     // Generar thumbnail automáticamente
-    await this.generateThumbnail(image.id, 'medium')
+    await this.generateThumbnail(image.id, ThumbnailQuality.MEDIUM)
 
     // Inicializar estadísticas
     await statsService.getOrCreateImageStats(image.id)
@@ -181,7 +180,7 @@ class ImageService {
     }
   }
 
-  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'medium'): Promise<string> {
+  async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
     const cacheKey = `thumbnail:${imageId}:${quality}`
 
     // Intentar obtener del caché
@@ -211,4 +210,3 @@ class ImageService {
 }
 
 export const imageService = ImageService.getInstance()
-

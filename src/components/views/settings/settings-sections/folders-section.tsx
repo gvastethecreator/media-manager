@@ -16,10 +16,11 @@ import {
 	TooltipContent,
 } from "@/components/ui/tooltip";
 import {
-	addFolder,
-	reindexFolder,
+	folderService,
 	getFolders,
-	deleteFolder,
+	type ProcessStatus,
+	type ErrorResponse,
+	type FolderResponse,
 } from "@/services/folder.service";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -34,9 +35,6 @@ import { formatBytes, cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import type {
 	FolderStats,
-	ProcessStatus,
-	FolderResponse,
-	ErrorResponse,
 	ExtendedProcessStatus,
 	Folder as FolderType,
 } from "@/types/folders";
@@ -59,6 +57,88 @@ export function FoldersSection() {
 	const [folders, setFolders] = useState<FolderType[]>([]);
 	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+
+	// Suscribirse a eventos del FolderService
+	useEffect(() => {
+		const handleProgress = (status: ProcessStatus) => {
+			if (status) {
+				const progress = status.progress || 0;
+				setProcessProgress(progress);
+				setProcessStatus((prevStatus) => ({
+					...prevStatus,
+					...status,
+					status: status.status || "Procesando...",
+				}));
+			}
+		};
+
+		const handleError = (error: ErrorResponse) => {
+			console.error("Error en el proceso:", error);
+			let errorMessage = "Error desconocido al procesar la carpeta";
+
+			if (error instanceof Error) {
+				errorMessage = error.message;
+			} else if (typeof error === "object" && error !== null) {
+				errorMessage = error.message || error.details || JSON.stringify(error);
+			}
+
+			toast({
+				title: "Error",
+				description: errorMessage,
+				variant: "destructive",
+			});
+		};
+
+		const handleComplete = (data: FolderResponse) => {
+			if (data?.folder) {
+				setFolders((prevFolders) =>
+					prevFolders.map((folder) =>
+						folder.id === data.folder.id
+							? {
+									...folder,
+									...data.folder,
+									_count: {
+										images: data.stats?.total || folder._count?.images || 0,
+									},
+									totalSize: data.stats?.totalSize || folder.totalSize,
+									lastIndexed: new Date().toISOString(),
+							  }
+							: folder
+					)
+				);
+
+				if (data.stats) {
+					setStats((prevStats) => ({
+						...prevStats,
+						totalFiles: prevStats.totalFiles + (data.stats?.processed || 0),
+						totalSize: prevStats.totalSize + (data.stats?.totalSize || 0),
+						lastIndexed: new Date(),
+					}));
+				}
+			}
+		};
+
+		const handleStats = (stats: any) => {
+			setStats((prevStats) => ({
+				...prevStats,
+				...stats,
+			}));
+		};
+
+		// Suscribirse a eventos
+		folderService.onProgress(handleProgress);
+		folderService.onError(handleError);
+		folderService.onComplete(handleComplete);
+		folderService.onStats(handleStats);
+
+		// Cleanup
+		return () => {
+			folderService.offProgress(handleProgress);
+			folderService.offError(handleError);
+			folderService.offComplete(handleComplete);
+			folderService.offStats(handleStats);
+		};
+	}, [toast]);
 
 	useEffect(() => {
 		loadStats();
@@ -126,55 +206,8 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
-			await addFolder(folderPath, {
-				onProgress: (stats: ProcessStatus) => {
-					if (stats) {
-						const progress = stats.progress || 0;
-						setProcessProgress(progress);
-						setProcessStatus((prevStatus) => ({
-							...prevStatus,
-							...stats,
-							status: stats.status || "Procesando...",
-						}));
-					}
-				},
-				onError: (error: ErrorResponse) => {
-					console.error("Error en el proceso:", error);
-					let errorMessage = "Error desconocido al procesar la carpeta";
-
-					if (error instanceof Error) {
-						errorMessage = error.message;
-					} else if (typeof error === "object" && error !== null) {
-						errorMessage =
-							error.message || error.details || JSON.stringify(error);
-					}
-
-					if (errorMessage.includes("FOLDER_EXISTS")) {
-						toast({
-							title: "Carpeta existente",
-							description:
-								"Esta carpeta ya está indexada. Puedes reindexarla usando el botón de actualización.",
-							variant: "default",
-						});
-					} else {
-						toast({
-							title: "Error",
-							description: errorMessage,
-							variant: "destructive",
-						});
-					}
-				},
-				onComplete: (data: FolderResponse) => {
-					if (data?.folder) {
-						toast({
-							title: "Carpeta agregada",
-							description: `Se agregó la carpeta "${data.folder.name}" correctamente`,
-						});
-						setFolderPath("");
-						loadStats();
-					}
-				},
-			});
+			await folderService.addFolder(folderPath);
+			setFolderPath("");
 		} catch (error) {
 			console.error("Error agregando carpeta:", error);
 			toast({
@@ -208,95 +241,7 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
-			await reindexFolder(folderId, {
-				onProgress: (stats: ProcessStatus) => {
-					if (stats) {
-						const total = stats.total || 0;
-						const current = stats.current || 0;
-						const progress = total > 0 ? (current / total) * 100 : 0;
-
-						setProcessProgress(progress);
-						setProcessStatus((prevStatus) => ({
-							...prevStatus,
-							...stats,
-							folderId,
-							status: stats.status || "Procesando...",
-							progress,
-						}));
-
-						setFolders((prevFolders) =>
-							prevFolders.map((folder) =>
-								folder.id === folderId
-									? {
-											...folder,
-											_count: {
-												...folder._count,
-												images: stats.current || folder._count?.images || 0,
-											},
-											lastIndexed: new Date().toISOString(),
-									  }
-									: folder
-							)
-						);
-
-						setStats((prevStats) => ({
-							...prevStats,
-							totalFiles: stats.total || prevStats.totalFiles,
-							lastIndexed: new Date(),
-						}));
-					}
-				},
-				onError: (error: ErrorResponse) => {
-					console.error("Error en reindexación:", error);
-					const errorMessage =
-						error instanceof Error
-							? error.message
-							: error.message ||
-							  error.details ||
-							  "Error al reindexar la carpeta";
-
-					toast({
-						title: "Error",
-						description: errorMessage,
-						variant: "destructive",
-					});
-				},
-				onComplete: async (data: FolderResponse) => {
-					if (data?.folder) {
-						setFolders((prevFolders) =>
-							prevFolders.map((folder) =>
-								folder.id === data.folder.id
-									? {
-											...folder,
-											...data.folder,
-											_count: {
-												images: data.stats?.total || folder._count?.images || 0,
-											},
-											totalSize: data.stats?.totalSize || folder.totalSize,
-											lastIndexed: new Date().toISOString(),
-									  }
-									: folder
-							)
-						);
-
-						if (data.stats) {
-							setStats((prevStats) => ({
-								...prevStats,
-								totalFiles: prevStats.totalFiles + (data.stats?.processed || 0),
-								totalSize: prevStats.totalSize + (data.stats?.totalSize || 0),
-								lastIndexed: new Date(),
-							}));
-						}
-
-						toast({
-							title: "Reindexación completada",
-							description: `Se han procesado ${
-								data.stats?.processed || 0
-							} archivos correctamente`,
-						});
-					}
-				},
-			});
+			await folderService.reindexFolder(folderId);
 		} catch (error) {
 			console.error("Error reindexando carpeta:", error);
 			toast({
@@ -319,7 +264,7 @@ export function FoldersSection() {
 	const handleRemoveFolder = async (folderId: string) => {
 		try {
 			setError(null);
-			await deleteFolder(folderId);
+			await folderService.deleteFolder(folderId);
 			await loadFolders();
 
 			toast({
@@ -342,7 +287,7 @@ export function FoldersSection() {
 	const handleFolderClick = async (folderId: string) => {
 		if (selectedFolder === folderId) {
 			try {
-				await deleteFolder(folderId);
+				await folderService.deleteFolder(folderId);
 				toast({
 					title: "Carpeta eliminada",
 					description: "La carpeta se eliminó correctamente",

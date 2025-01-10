@@ -9,7 +9,7 @@ import { Star } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 import { LoadingScreen } from "@/components/core/feedback";
 import BlurFade from "@/components/ui/blur-fade";
-import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 
 export function FavoritesView() {
 	const {
