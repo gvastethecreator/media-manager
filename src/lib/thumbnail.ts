@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/image.service'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { existsSync } from 'fs'
 import { extname } from 'path'
 import { thumbnailLogger as logger } from './utils'
@@ -26,7 +26,7 @@ export interface ThumbnailResult {
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 
 const DEFAULT_OPTIONS: Partial<ThumbnailOptions> = {
-  quality: 'medium',
+  quality: ThumbnailQuality.MEDIUM,
   format: 'webp',
   preserveMetadata: false,
   progressive: true

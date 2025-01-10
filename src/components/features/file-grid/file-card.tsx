@@ -49,8 +49,14 @@ import {
 	BookmarkIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
+import {
+	statsEventEmitter,
+	STATS_EVENTS,
+	type StatsEventType,
+	type StatsUpdateEvent,
+} from "@/services/stats.service";
 import { toastService } from "@/services/toast.service";
+import { ThumbnailQuality } from "@/types/thumbnails";
 
 interface FileCardProps {
 	item: FileItem;
@@ -130,23 +136,21 @@ export function FileCard({
 		let isSubscribed = true;
 		let timeoutId: NodeJS.Timeout;
 
-		const handleStatsUpdate = async (
-			events: Array<keyof typeof STATS_EVENTS>
-		) => {
+		const handleStatsUpdate = async (events: StatsUpdateEvent[]) => {
 			if (!isSubscribed) return;
 
-			const relevantEvents = [
-				"COLLECTION_CHANGE",
-				"TAG_CHANGE",
-				"FAVORITE_CHANGE",
-			] as const;
+			const relevantEvents: StatsUpdateEvent[] = [
+				"collection_change",
+				"tag_change",
+				"favorite_change",
+			];
 
 			const shouldUpdate = events.some(
 				(event) =>
-					relevantEvents.includes(event as any) &&
-					((event === "COLLECTION_CHANGE" && item.collections?.length > 0) ||
-						(event === "TAG_CHANGE" && item.tags?.length > 0) ||
-						(event === "FAVORITE_CHANGE" && item.isFavorite))
+					relevantEvents.includes(event) &&
+					((event === "collection_change" && item.collections?.length > 0) ||
+						(event === "tag_change" && item.tags?.length > 0) ||
+						(event === "favorite_change" && item.isFavorite))
 			);
 
 			if (shouldUpdate) {
@@ -155,7 +159,10 @@ export function FileCard({
 					if (!isSubscribed) return;
 					try {
 						toggleItemSelection(item, false);
-						if (events.includes("FAVORITE_CHANGE") && item.isFavorite) {
+						if (
+							events.includes("favorite_change" as StatsUpdateEvent) &&
+							item.isFavorite
+						) {
 							toastService.favorite.updated();
 						}
 					} catch (error) {
@@ -168,14 +175,23 @@ export function FileCard({
 
 		// Configurar el listener una sola vez
 		statsEventEmitter.setMaxListeners(20); // Aumentar el límite si es necesario
-		statsEventEmitter.on("stats_update_needed", handleStatsUpdate);
+		statsEventEmitter.on(STATS_EVENTS.STATS_UPDATE_NEEDED, handleStatsUpdate);
 
 		return () => {
 			isSubscribed = false;
 			clearTimeout(timeoutId);
-			statsEventEmitter.off("stats_update_needed", handleStatsUpdate);
+			statsEventEmitter.off(
+				STATS_EVENTS.STATS_UPDATE_NEEDED,
+				handleStatsUpdate
+			);
 		};
-	}, [item.id]); // Solo depender del ID del item, no del objeto completo
+	}, [
+		item.id,
+		item.collections?.length,
+		item.tags?.length,
+		item.isFavorite,
+		toggleItemSelection,
+	]);
 
 	// Memoizar el estado de selección para evitar re-renders innecesarios
 	const isSelected = useMemo(
@@ -195,9 +211,9 @@ export function FileCard({
 			setIsLoading(true);
 			setError(null);
 
-			const quality =
+			const quality: ThumbnailQuality =
 				thumbnailSize === "small"
-					? "compressed"
+					? "low"
 					: thumbnailSize === "large"
 					? "high"
 					: "medium";

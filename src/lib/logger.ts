@@ -1,34 +1,89 @@
+import { loggerConfig, LogLevel } from '@/config/logger.config'
+
+const LOG_COLORS = {
+  debug: '\x1b[34m', // blue
+  info: '\x1b[32m',  // green
+  warn: '\x1b[33m',  // yellow
+  error: '\x1b[31m', // red
+  reset: '\x1b[0m',  // reset
+}
+
 export class Logger {
-  private context: string = '';
+  private context: string = ''
+  private config = loggerConfig
 
   withContext(context: string): Logger {
-    const logger = new Logger();
-    logger.context = context;
-    return logger;
+    const logger = new Logger()
+    logger.context = context
+    return logger
   }
 
-  private formatMessage(level: string, message: string, data?: any): string {
-    const timestamp = new Date().toISOString();
-    const contextStr = this.context ? `[${this.context}] ` : '';
-    const dataStr = data ? ` ${JSON.stringify(data)}` : '';
-    return `${timestamp} ${level} ${contextStr}${message}${dataStr}`;
+  private shouldLog(level: LogLevel): boolean {
+    if (!this.config.enableConsole) return false
+    
+    const serviceConfig = this.context ? this.config.services[this.context] : null
+    if (serviceConfig && !serviceConfig.enabled) return false
+
+    const logLevel = serviceConfig?.level || this.config.level
+    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error']
+    return levels.indexOf(level) >= levels.indexOf(logLevel)
   }
 
-  info(message: string, data?: any): void {
-    console.log(this.formatMessage('INFO', message, data));
-  }
+  private formatMessage(level: LogLevel, message: string, data?: any): string {
+    const parts: string[] = []
 
-  error(message: string, data?: any): void {
-    console.error(this.formatMessage('ERROR', message, data));
-  }
+    if (this.config.format.timestamp) {
+      parts.push(new Date().toISOString())
+    }
 
-  warn(message: string, data?: any): void {
-    console.warn(this.formatMessage('WARN', message, data));
+    const levelStr = level.toUpperCase()
+    if (this.config.format.colors) {
+      parts.push(`${LOG_COLORS[level]}${levelStr}${LOG_COLORS.reset}`)
+    } else {
+      parts.push(levelStr)
+    }
+
+    if (this.config.format.context && this.context) {
+      parts.push(`[${this.context}]`)
+    }
+
+    parts.push(message)
+
+    if (data) {
+      try {
+        const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+        parts.push(dataStr)
+      } catch (error) {
+        parts.push('[Error serializing data]')
+      }
+    }
+
+    return parts.join(' ')
   }
 
   debug(message: string, data?: any): void {
-    console.debug(this.formatMessage('DEBUG', message, data));
+    if (this.shouldLog('debug')) {
+      console.debug(this.formatMessage('debug', message, data))
+    }
+  }
+
+  info(message: string, data?: any): void {
+    if (this.shouldLog('info')) {
+      console.info(this.formatMessage('info', message, data))
+    }
+  }
+
+  warn(message: string, data?: any): void {
+    if (this.shouldLog('warn')) {
+      console.warn(this.formatMessage('warn', message, data))
+    }
+  }
+
+  error(message: string, data?: any): void {
+    if (this.shouldLog('error')) {
+      console.error(this.formatMessage('error', message, data))
+    }
   }
 }
 
-export const logger = new Logger();
+export const logger = new Logger()

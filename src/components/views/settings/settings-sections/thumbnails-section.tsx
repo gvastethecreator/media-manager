@@ -31,7 +31,7 @@ import { useThumbnailStore } from "@/store/thumbnails";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
 import * as thumbnailActions from "@/actions/thumbnails";
 import { formatBytes, cn } from "@/lib/utils";
-import type {
+import {
 	ThumbnailQuality,
 	LastProcessedThumbnail,
 	ThumbnailCallbacks,
@@ -41,10 +41,12 @@ import type {
 } from "@/types/thumbnails";
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
-	{ value: "compressed", label: "Comprimida (más rápido, menos espacio)" },
-	{ value: "low", label: "Baja (balance entre calidad y espacio)" },
-	{ value: "medium", label: "Media (recomendado)" },
-	{ value: "high", label: "Alta (mejor calidad, más espacio)" },
+	{
+		value: ThumbnailQuality.LOW,
+		label: "Baja (balance entre calidad y espacio)",
+	},
+	{ value: ThumbnailQuality.MEDIUM, label: "Media (recomendado)" },
+	{ value: ThumbnailQuality.HIGH, label: "Alta (mejor calidad, más espacio)" },
 ];
 
 export function ThumbnailsSection() {
@@ -65,181 +67,138 @@ export function ThumbnailsSection() {
 		LastProcessedThumbnail[]
 	>([]);
 
-	// Inicializar eventos SSE
-	useThumbnailEvents();
-
-	// Cargar estadísticas iniciales
+	// Inicializar eventos SSE y cargar estadísticas iniciales
 	React.useEffect(() => {
 		initializeThumbnails();
 	}, [initializeThumbnails]);
 
+	// Manejador común para procesos de miniaturas
+	const handleThumbnailProcess = async (
+		processFunction: (options: ThumbnailCallbacks) => Promise<void>,
+		processName: string
+	) => {
+		if (isThumbnailProcessing) {
+			toast({
+				title: "Proceso en curso",
+				description: "Ya hay un proceso de miniaturas en ejecución",
+				variant: "default",
+			});
+			return;
+		}
+
+		try {
+			setThumbnailProcessing(true);
+			await processFunction({
+				onProgress: (status) => {
+					if (status?.lastProcessed) {
+						setLastProcessedThumbnails((prev) => [
+							status.lastProcessed as LastProcessedThumbnail,
+							...prev.slice(0, 4),
+						]);
+					}
+				},
+				onError: (error: unknown) => {
+					console.error(`Error en ${processName}:`, error);
+					toast({
+						title: "Error",
+						description:
+							error instanceof Error
+								? `Error: ${error.message}`
+								: typeof error === "object" && error && "message" in error
+								? String(error.message)
+								: `Error desconocido en ${processName}`,
+						variant: "destructive",
+					});
+				},
+				onComplete: (data) => {
+					let message = "";
+					if ("optimized" in data && "totalSaved" in data) {
+						message = `Se optimizaron ${
+							data.optimized
+						} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`;
+					} else if ("cleaned" in data && "totalFreed" in data) {
+						message = `Se limpiaron ${
+							data.cleaned
+						} miniaturas, liberando ${formatBytes(data.totalFreed)}`;
+					} else if ("processed" in data) {
+						message = `Se reprocesaron ${data.processed} miniaturas`;
+					}
+
+					if (message) {
+						toast({
+							title: `${processName} completado`,
+							description: message,
+						});
+					}
+
+					initializeThumbnails();
+				},
+			});
+		} catch (error: unknown) {
+			console.error(`Error en ${processName}:`, error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error
+						? `Error: ${error.message}`
+						: typeof error === "object" && error && "message" in error
+						? String(error.message)
+						: `Error desconocido en ${processName}`,
+				variant: "destructive",
+			});
+		} finally {
+			setThumbnailProcessing(false);
+		}
+	};
+
 	const handleQualityChange = async (quality: ThumbnailQuality) => {
-		await updateSettings({ thumbnailQuality: quality });
+		try {
+			await updateSettings({ thumbnailQuality: quality });
+			toast({
+				title: "Calidad actualizada",
+				description:
+					"La calidad de las miniaturas se ha actualizado correctamente",
+			});
+		} catch (error) {
+			console.error("Error actualizando calidad:", error);
+			toast({
+				title: "Error",
+				description: "No se pudo actualizar la calidad de las miniaturas",
+				variant: "destructive",
+			});
+		}
 	};
 
 	const handleVideoAnimationToggle = async (enabled: boolean) => {
-		await updateSettings({ videoThumbnailAnimation: enabled });
-	};
-
-	const handleOptimizeThumbnails = async () => {
 		try {
-			setThumbnailProcessing(true);
-			await thumbnailActions.optimizeThumbnails({
-				onProgress: (status) => {
-					if (status?.lastProcessed) {
-						setLastProcessedThumbnails((prev) => [
-							status.lastProcessed as LastProcessedThumbnail,
-							...prev.slice(0, 4),
-						]);
-					}
-				},
-				onError: (error: unknown) => {
-					console.error("Error optimizando miniaturas:", error);
-					toast({
-						title: "Error",
-						description:
-							error instanceof Error
-								? `Error: ${error.message}`
-								: typeof error === "object" && error && "message" in error
-								? String(error.message)
-								: "Error desconocido al optimizar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					if ("optimized" in data && "totalSaved" in data) {
-						toast({
-							title: "Optimización completada",
-							description: `Se optimizaron ${
-								data.optimized
-							} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`,
-						});
-					}
-					initializeThumbnails();
-				},
+			await updateSettings({ videoThumbnailAnimation: enabled });
+			toast({
+				title: "Animación actualizada",
+				description: `La animación de videos se ha ${
+					enabled ? "activado" : "desactivado"
+				} correctamente`,
 			});
-		} catch (error: unknown) {
-			console.error("Error optimizando miniaturas:", error);
+		} catch (error) {
+			console.error("Error actualizando animación:", error);
 			toast({
 				title: "Error",
-				description:
-					error instanceof Error
-						? `Error: ${error.message}`
-						: typeof error === "object" && error && "message" in error
-						? String(error.message)
-						: "Error desconocido al optimizar miniaturas",
+				description: "No se pudo actualizar la configuración de animación",
 				variant: "destructive",
 			});
-		} finally {
-			setThumbnailProcessing(false);
 		}
 	};
 
-	const handleReprocessThumbnails = async () => {
-		try {
-			setThumbnailProcessing(true);
-			await thumbnailActions.reprocessThumbnails({
-				onProgress: (status) => {
-					if (status?.lastProcessed) {
-						setLastProcessedThumbnails((prev) => [
-							status.lastProcessed as LastProcessedThumbnail,
-							...prev.slice(0, 4),
-						]);
-					}
-				},
-				onError: (error: unknown) => {
-					console.error("Error reprocesando miniaturas:", error);
-					toast({
-						title: "Error",
-						description:
-							error instanceof Error
-								? `Error: ${error.message}`
-								: typeof error === "object" && error && "message" in error
-								? String(error.message)
-								: "Error desconocido al reprocesar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					if ("processed" in data) {
-						toast({
-							title: "Reprocesamiento completado",
-							description: `Se reprocesaron ${data.processed} miniaturas`,
-						});
-					}
-					initializeThumbnails();
-				},
-			});
-		} catch (error: unknown) {
-			console.error("Error reprocesando miniaturas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? `Error: ${error.message}`
-						: typeof error === "object" && error && "message" in error
-						? String(error.message)
-						: "Error desconocido al reprocesar miniaturas",
-				variant: "destructive",
-			});
-		} finally {
-			setThumbnailProcessing(false);
-		}
-	};
+	const handleOptimizeThumbnails = () =>
+		handleThumbnailProcess(thumbnailActions.optimizeThumbnails, "Optimización");
 
-	const handleCleanThumbnails = async () => {
-		try {
-			setThumbnailProcessing(true);
-			await thumbnailActions.cleanThumbnails({
-				onProgress: (status) => {
-					if (status?.lastProcessed) {
-						setLastProcessedThumbnails((prev) => [
-							status.lastProcessed as LastProcessedThumbnail,
-							...prev.slice(0, 4),
-						]);
-					}
-				},
-				onError: (error: unknown) => {
-					console.error("Error limpiando miniaturas:", error);
-					toast({
-						title: "Error",
-						description:
-							error instanceof Error
-								? `Error: ${error.message}`
-								: typeof error === "object" && error && "message" in error
-								? String(error.message)
-								: "Error desconocido al limpiar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					if ("cleaned" in data) {
-						toast({
-							title: "Limpieza completada",
-							description: `Se limpiaron ${
-								data.cleaned
-							} miniaturas, liberando ${formatBytes(data.totalFreed)}`,
-						});
-					}
-					initializeThumbnails();
-				},
-			});
-		} catch (error: unknown) {
-			console.error("Error limpiando miniaturas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? `Error: ${error.message}`
-						: typeof error === "object" && error && "message" in error
-						? String(error.message)
-						: "Error desconocido al limpiar miniaturas",
-				variant: "destructive",
-			});
-		} finally {
-			setThumbnailProcessing(false);
-		}
-	};
+	const handleReprocessThumbnails = () =>
+		handleThumbnailProcess(
+			thumbnailActions.reprocessThumbnails,
+			"Reprocesamiento"
+		);
+
+	const handleCleanThumbnails = () =>
+		handleThumbnailProcess(thumbnailActions.cleanThumbnails, "Limpieza");
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">

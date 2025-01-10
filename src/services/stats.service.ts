@@ -1,157 +1,103 @@
-import { EventEmitter } from 'events'
-import { statsCache } from '@/lib/cache'
 import { logger } from '@/lib/logger'
+import {
+  getGeneralStats,
+  getImageStats,
+  incrementImageView,
+  incrementImageDownload,
+  type GeneralStats,
+} from '@/app/actions/stats.actions'
+import { EventEmitter } from 'events'
 
 const statsLogger = logger.withContext('StatsService')
 
-export interface ImageStats {
-  id: string
-  imageId: string
-  views: number
-  downloads: number
-  lastViewed: Date
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface ThumbnailStats {
-  processed: number
-  optimized: number
-  cleaned: number
-  totalSaved: number
-  totalFreed: number
-  errors: number
-}
-
-// Eventos que pueden causar actualización de estadísticas
+// Eventos de estadísticas
 export const STATS_EVENTS = {
-  IMAGE_VIEW: 'IMAGE_VIEW',
-  IMAGE_DOWNLOAD: 'IMAGE_DOWNLOAD',
-  IMAGE_ADD: 'IMAGE_ADD',
-  IMAGE_DELETE: 'IMAGE_DELETE',
-  TAG_CHANGE: 'TAG_CHANGE',
-  COLLECTION_CHANGE: 'COLLECTION_CHANGE',
-  FOLDER_CHANGE: 'FOLDER_CHANGE',
-  FAVORITE_CHANGE: 'FAVORITE_CHANGE',
+  VIEW_INCREMENTED: 'view_incremented',
+  DOWNLOAD_INCREMENTED: 'download_incremented',
+  STATS_UPDATED: 'stats_updated',
+  COLLECTION_CHANGE: 'collection_change',
+  TAG_CHANGE: 'tag_change',
+  FAVORITE_CHANGE: 'favorite_change',
+  STATS_UPDATE_NEEDED: 'stats_update_needed',
+  FOLDER_CHANGE: 'folder_change'
 } as const
 
-export type StatsEventType = keyof typeof STATS_EVENTS;
+export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS]
+export type StatsUpdateEvent = 'collection_change' | 'tag_change' | 'favorite_change' | 'folder_change'
+export type StatsEvents = typeof STATS_EVENTS
 
-class StatsEventEmitter extends EventEmitter {
-  emit(event: string | symbol, ...args: any[]): boolean {
-    return super.emit('stats_update_needed', [event], ...args);
-  }
-}
+export const statsEventEmitter = new EventEmitter()
+statsEventEmitter.setMaxListeners(50)
 
-export const statsEventEmitter = new StatsEventEmitter();
-
-export const statsService = {
-  async getOrCreateImageStats(imageId: string): Promise<ImageStats> {
+class StatsService {
+  async getGeneralStats(): Promise<GeneralStats> {
     try {
-      const response = await fetch(`/api/stats/image?imageId=${imageId}`)
-      if (!response.ok) {
-        throw new Error('Error al obtener estadísticas de imagen')
-      }
-      return response.json()
-    } catch (error) {
-      statsLogger.error('❌ Error al obtener estadísticas de imagen:', error)
-      throw error
-    }
-  },
-
-  async incrementViewCount(imageId: string): Promise<ImageStats> {
-    try {
-      const response = await fetch(`/api/stats/image?imageId=${imageId}&action=view`, {
-        method: 'POST'
-      })
-      if (!response.ok) {
-        throw new Error('Error al incrementar vistas')
-      }
-      statsEventEmitter.emit(STATS_EVENTS.IMAGE_VIEW)
-      return response.json()
-    } catch (error) {
-      statsLogger.error('❌ Error al incrementar vistas:', error)
-      throw error
-    }
-  },
-
-  async incrementDownloadCount(imageId: string): Promise<ImageStats> {
-    try {
-      const response = await fetch(`/api/stats/image?imageId=${imageId}&action=download`, {
-        method: 'POST'
-      })
-      if (!response.ok) {
-        throw new Error('Error al incrementar descargas')
-      }
-      statsEventEmitter.emit(STATS_EVENTS.IMAGE_DOWNLOAD)
-      return response.json()
-    } catch (error) {
-      statsLogger.error('❌ Error al incrementar descargas:', error)
-      throw error
-    }
-  },
-
-  async getCachedStats(key: string) {
-    try {
-      const cached = await statsCache.get(key)
-      if (cached) {
-        return cached
-      }
-      return null
-    } catch (error) {
-      statsLogger.error('❌ Error al obtener estadísticas cacheadas:', error)
-      return null
-    }
-  },
-
-  async setCachedStats(key: string, data: Record<string, unknown>) {
-    try {
-      await statsCache.set(key, data)
-    } catch (error) {
-      statsLogger.error('❌ Error al cachear estadísticas:', error)
-    }
-  },
-
-  async getGeneralStats() {
-    const cacheKey = 'general_stats'
-
-    try {
-      // Intentar obtener del caché primero
-      const cached = await this.getCachedStats(cacheKey)
-      if (cached) {
-        const cacheAge = Date.now() - (cached as any).timestamp
-        // Usar caché si tiene menos de 1 minuto
-        if (cacheAge < 60000) {
-          statsLogger.debug('✅ Usando estadísticas cacheadas (edad: ${Math.round(cacheAge/1000)}s)')
-          return cached
-        }
-      }
-
-      const response = await fetch('/api/stats', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al obtener estadísticas')
-      }
-
-      const stats = await response.json()
-      await this.setCachedStats(cacheKey, stats)
-      statsLogger.debug('📊 Estadísticas actualizadas desde API')
+      const stats = await getGeneralStats()
+      statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED, stats)
       return stats
     } catch (error) {
-      // Si hay un error, intentar usar el caché aunque sea antiguo
-      const cached = await this.getCachedStats(cacheKey)
-      if (cached) {
-        statsLogger.warn('⚠️ Usando caché antiguo debido a error:', error)
-        return cached
-      }
-
-      statsLogger.error('❌ Error al obtener estadísticas:', error)
+      statsLogger.error('Error al obtener estadísticas generales', { error })
       throw error
     }
   }
+
+  async getOrCreateImageStats(imageId: string) {
+    try {
+      return await getImageStats(imageId)
+    } catch (error) {
+      statsLogger.error('Error al obtener estadísticas de imagen', {
+        error,
+        imageId,
+      })
+      throw error
+    }
+  }
+
+  async incrementViewCount(imageId: string) {
+    try {
+      const stats = await incrementImageView(imageId)
+      statsEventEmitter.emit(STATS_EVENTS.VIEW_INCREMENTED, { imageId, stats })
+      return stats
+    } catch (error) {
+      statsLogger.error('Error al incrementar vistas', { error, imageId })
+      throw error
+    }
+  }
+
+  async incrementDownloadCount(imageId: string) {
+    try {
+      const stats = await incrementImageDownload(imageId)
+      statsEventEmitter.emit(STATS_EVENTS.DOWNLOAD_INCREMENTED, {
+        imageId,
+        stats,
+      })
+      return stats
+    } catch (error) {
+      statsLogger.error('Error al incrementar descargas', { error, imageId })
+      throw error
+    }
+  }
+
+  // Métodos para emitir eventos de cambios
+  emitCollectionChange(imageId: string) {
+    statsEventEmitter.emit('collection_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['collection_change'])
+  }
+
+  emitTagChange(imageId: string) {
+    statsEventEmitter.emit('tag_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['tag_change'])
+  }
+
+  emitFavoriteChange(imageId: string) {
+    statsEventEmitter.emit('favorite_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['favorite_change'])
+  }
+
+  emitFolderChange(folderId: string) {
+    statsEventEmitter.emit('folder_change', { folderId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['folder_change'])
+  }
 }
+
+export const statsService = new StatsService()

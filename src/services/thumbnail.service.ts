@@ -1,7 +1,11 @@
 import { logger } from '@/lib/logger'
 import { optimizeThumbnail } from '@/lib/thumbnails'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
+import { EventEmitter } from 'events'
 
 const thumbLogger = logger.withContext('ThumbnailService')
+
+export { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG }
 
 export enum EVENTS {
   PROGRESS = 'progress',
@@ -10,8 +14,6 @@ export enum EVENTS {
   STATS = 'stats'
 }
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high';
-
 export interface ThumbnailError {
   imageId: string
   imagePath: string
@@ -19,11 +21,11 @@ export interface ThumbnailError {
   timestamp: Date | string
 }
 
-export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
-  compressed: { quality: 60, width: 200, height: 200 },
-  low: { quality: 70, width: 300, height: 300 },
-  medium: { quality: 80, width: 400, height: 400 },
-  high: { quality: 90, width: 500, height: 500 }
+export type ThumbnailErrorType = {
+  imageId: string
+  imagePath: string
+  error: string
+  timestamp: Date | string
 }
 
 export interface ProcessOptions {
@@ -47,33 +49,72 @@ export interface ProcessStatus {
   }
 }
 
-export class ThumbnailService {
+class ThumbnailService extends EventEmitter {
   private static instance: ThumbnailService;
   private isProcessing: boolean = false;
 
   private constructor() {
-    thumbLogger.info('Initializing ThumbnailService')
+    super()
+    thumbLogger.info('🚀 Inicializando ThumbnailService')
+    this.setMaxListeners(50)
   }
 
-  public static getInstance(): ThumbnailService {
+  static getInstance(): ThumbnailService {
     if (!ThumbnailService.instance) {
       ThumbnailService.instance = new ThumbnailService()
     }
     return ThumbnailService.instance
   }
 
+  // Métodos de eventos
+  onProgress(callback: (status: ProcessStatus) => void): void {
+    this.on(EVENTS.PROGRESS, callback)
+  }
+
+  offProgress(callback: (status: ProcessStatus) => void): void {
+    this.off(EVENTS.PROGRESS, callback)
+  }
+
+  onError(callback: (error: any) => void): void {
+    this.on(EVENTS.ERROR, callback)
+  }
+
+  offError(callback: (error: any) => void): void {
+    this.off(EVENTS.ERROR, callback)
+  }
+
+  onComplete(callback: (data: any) => void): void {
+    this.on(EVENTS.COMPLETE, callback)
+  }
+
+  offComplete(callback: (data: any) => void): void {
+    this.off(EVENTS.COMPLETE, callback)
+  }
+
+  onStats(callback: (stats: any) => void): void {
+    this.on(EVENTS.STATS, callback)
+  }
+
+  offStats(callback: (stats: any) => void): void {
+    this.off(EVENTS.STATS, callback)
+  }
+
   private setupEventHandlers(callbacks?: ProcessOptions) {
     return {
       [EVENTS.PROGRESS]: (data: any) => {
+        this.emit(EVENTS.PROGRESS, data)
         callbacks?.onProgress?.(data)
       },
       [EVENTS.ERROR]: (error: any) => {
+        this.emit(EVENTS.ERROR, error)
         callbacks?.onError?.(error)
       },
       [EVENTS.COMPLETE]: (data: any) => {
+        this.emit(EVENTS.COMPLETE, data)
         callbacks?.onComplete?.(data)
       },
       [EVENTS.STATS]: (stats: any) => {
+        this.emit(EVENTS.STATS, stats)
         callbacks?.onStats?.(stats)
       }
     }
@@ -218,7 +259,7 @@ export class ThumbnailService {
     }
   }
 
-  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'medium'): Promise<string> {
+  async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {
     try {
       thumbLogger.info(`🖼️ Obteniendo miniatura para imagen ${imageId} con calidad ${quality}`);
 

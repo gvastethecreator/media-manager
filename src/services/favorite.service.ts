@@ -1,6 +1,10 @@
 import type { Favorite } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
-import { statsEventEmitter, STATS_EVENTS } from './stats.service'
+import { logger } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
+
+const favoriteLogger = logger.withContext('FavoriteService')
 
 export interface FavoriteWithImage extends Favorite {
   image: FileItem

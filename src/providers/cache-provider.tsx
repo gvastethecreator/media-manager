@@ -8,6 +8,8 @@ import {
 	CacheManager,
 } from "@/lib/cache";
 import { logger } from "@/lib/logger";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/react-query";
 
 const cacheProviderLogger = logger.withContext("CacheProvider");
 
@@ -20,7 +22,7 @@ const typedSearchCache = searchCache as CacheManager<unknown[]>;
 
 export function CacheProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
-		cacheProviderLogger.info("🚀 Inicializando sistema de caché");
+		cacheProviderLogger.info(" Inicializando sistema de cach");
 
 		return () => {
 			// Limpiar caches al desmontar
@@ -29,10 +31,12 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
 				typedMetadataCache.stop(),
 				typedSearchCache.stop(),
 			]).catch((error) => {
-				cacheProviderLogger.error("❌ Error al detener caches:", error);
+				cacheProviderLogger.error(" Error al detener caches:", error);
 			});
 		};
 	}, []);
 
-	return <>{children}</>;
+	return (
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+	);
 }
