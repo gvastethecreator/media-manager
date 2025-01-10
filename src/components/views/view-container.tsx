@@ -15,23 +15,25 @@ import { TagContentView } from "./tags/tag-content-view";
 import { AnimatePresence, motion } from "motion/react";
 import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
-import { GridPattern } from "@/components/ui/grid-pattern";
 import { DotPattern } from "../ui/dot-pattern";
 
 const variants = {
 	enter: (direction: number) => ({
-		x: direction > 0 ? 1000 : -1000,
+		x: direction > 0 ? 800 : -800,
 		opacity: 0,
+		scale: 0.98,
 	}),
 	center: {
 		zIndex: 1,
 		x: 0,
 		opacity: 1,
+		scale: 1,
 	},
 	exit: (direction: number) => ({
 		zIndex: 0,
-		x: direction < 0 ? 1000 : -1000,
+		x: direction < 0 ? 800 : -800,
 		opacity: 0,
+		scale: 0.98,
 	}),
 };
 
@@ -84,14 +86,14 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 					animate="center"
 					exit="exit"
 					transition={{
-						x: { type: "spring", stiffness: 300, damping: 30 },
-						opacity: { duration: 0.2 },
+						x: { type: "spring", stiffness: 400, damping: 35 },
+						opacity: { duration: 0.15 },
+						scale: { duration: 0.2 },
 					}}
 					style={{
-						opacity: isResizing ? 0.3 : 1,
-						filter: isResizing ? "blur(2px)" : "none",
-						transition: "all 0.15s ease-in-out",
-						transform: isResizing ? "scale(0.99)" : "scale(1)",
+						opacity: isResizing ? 0 : 1,
+						filter: isResizing ? "blur(1px)" : "none",
+						transition: "all 0.12s ease-out",
 					}}
 					className="absolute w-full h-full"
 				>
