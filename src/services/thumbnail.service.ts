@@ -153,8 +153,9 @@ class ThumbnailService extends EventEmitter {
       throw new Error('Ya hay un proceso en ejecución')
     }
 
-    this.isProcessing = true
-    const handlers = this.setupEventHandlers(callbacks)
+    this.isProcessing = true;
+    const handlers = this.setupEventHandlers(callbacks);
+    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
     try {
       const response = await this.fetchWithTimeout(endpoint, {
@@ -163,66 +164,80 @@ class ThumbnailService extends EventEmitter {
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache'
         }
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Error iniciando el proceso: ${response.statusText}`)
+        throw new Error(`Error iniciando el proceso: ${response.statusText}`);
       }
 
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('No se pudo iniciar la lectura del stream')
+      const bodyReader = response.body?.getReader();
+      if (!bodyReader) {
+        throw new Error('No se pudo iniciar la lectura del stream');
       }
+      reader = bodyReader;
 
-      const decoder = new TextDecoder()
-      let buffer = ''
+      const decoder = new TextDecoder();
+      let buffer = '';
 
       while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        const { done, value } = await reader.read();
+        if (done) break;
 
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() || ''
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (!line.trim()) continue
+          if (!line.trim()) continue;
 
           try {
-            const [eventType, ...dataLines] = line.split('\n')
-            const event = eventType.replace('event: ', '')
-            const data = dataLines.join('\n').replace('data: ', '')
-            const parsedData = JSON.parse(data)
+            const [eventType, ...dataLines] = line.split('\n');
+            const event = eventType.replace('event: ', '');
+            const data = dataLines.join('\n').replace('data: ', '');
+            const parsedData = JSON.parse(data);
 
             switch (event) {
               case EVENTS.PROGRESS:
-                handlers[EVENTS.PROGRESS](parsedData)
-                break
+                handlers[EVENTS.PROGRESS](parsedData);
+                break;
               case EVENTS.ERROR:
-                handlers[EVENTS.ERROR](parsedData)
-                break
+                handlers[EVENTS.ERROR](parsedData);
+                break;
               case EVENTS.COMPLETE:
-                handlers[EVENTS.COMPLETE](parsedData)
-                break
+                handlers[EVENTS.COMPLETE](parsedData);
+                break;
               case EVENTS.STATS:
-                handlers[EVENTS.STATS](parsedData)
-                break
+                handlers[EVENTS.STATS](parsedData);
+                break;
             }
           } catch (error) {
-            thumbLogger.error('Error procesando evento:', error)
+            thumbLogger.error('Error procesando evento:', error);
           }
         }
       }
     } catch (error) {
+      // Verificar si el error es por cancelación
+      if (error instanceof Error && error.name === 'AbortError') {
+        thumbLogger.warn('Conexión cancelada por el cliente');
+        return;
+      }
+
       const formattedError = {
         message: 'Error en la conexión',
         details: error instanceof Error ? error.message : 'Error desconocido',
         originalError: error
-      }
-      thumbLogger.error('Error en el proceso:', formattedError)
-      throw formattedError
+      };
+      thumbLogger.error('Error en el proceso:', formattedError);
+      throw formattedError;
     } finally {
-      this.isProcessing = false
+      if (reader) {
+        try {
+          await reader.cancel();
+        } catch (error) {
+          thumbLogger.warn('Error al cerrar el reader:', error);
+        }
+      }
+      this.isProcessing = false;
     }
   }
 
