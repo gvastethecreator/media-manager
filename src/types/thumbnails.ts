@@ -48,7 +48,11 @@ export interface ThumbnailCallbacks {
   onComplete?: (data: OptimizeResult | CleanResult | ReprocessResult) => void;
 }
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'medium' | 'high';
+export enum ThumbnailQuality {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high'
+}
 
 export interface ThumbnailQualityConfig {
   quality: number;
@@ -57,8 +61,7 @@ export interface ThumbnailQualityConfig {
 }
 
 export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, ThumbnailQualityConfig> = {
-  compressed: { quality: 60, width: 200, height: 200 },
-  low: { quality: 70, width: 300, height: 300 },
-  medium: { quality: 80, width: 400, height: 400 },
-  high: { quality: 90, width: 500, height: 500 }
+  [ThumbnailQuality.LOW]: { quality: 70, width: 300, height: 300 },
+  [ThumbnailQuality.MEDIUM]: { quality: 80, width: 400, height: 400 },
+  [ThumbnailQuality.HIGH]: { quality: 90, width: 500, height: 500 }
 };

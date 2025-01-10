@@ -15,21 +15,12 @@ import { cn, formatBytes } from "@/lib/utils";
 import {
 	FolderIcon,
 	ImageIcon,
-	RefreshCw,
-	Settings2,
-	Trash2,
-	ArrowUpRight,
 	Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	getFolders,
-	reindexFolder,
-	deleteFolder,
-	ProcessStatus,
-	ErrorResponse,
 } from "@/services/folder.service";
-import { toast } from "sonner";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import {
@@ -37,7 +28,6 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useRouter } from "next/navigation";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
 import { eventsService } from "@/services/events.service";
@@ -45,8 +35,6 @@ import type { CacheInvalidationEvent } from "@/services/events.service";
 
 interface FolderCardProps {
 	folder: any;
-	onReindex: (id: string) => void;
-	onDelete: (id: string) => void;
 	isProcessing: boolean;
 	processStatus: any;
 	onClick: () => void;
@@ -69,36 +57,12 @@ function getRandomGradient() {
 
 function FolderCard({
 	folder,
-	onReindex,
-	onDelete,
 	isProcessing,
 	processStatus,
 	onClick,
 }: FolderCardProps) {
-	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-	const router = useRouter();
 	const gradient = getRandomGradient();
 
-	const handleDelete = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (isConfirmingDelete) {
-			onDelete(folder.id);
-			setIsConfirmingDelete(false);
-		} else {
-			setIsConfirmingDelete(true);
-			setTimeout(() => setIsConfirmingDelete(false), 3000);
-		}
-	};
-
-	const handleReindex = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		onReindex(folder.id);
-	};
-
-	const handleSettings = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		router.push("/settings/folders");
-	};
 
 	const isProcessingThis = isProcessing && processStatus.folderId === folder.id;
 
@@ -134,43 +98,7 @@ function FolderCard({
 								</CardDescription>
 							</div>
 						</div>
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-							<Button
-								variant="ghost"
-								size="icon"
-								className={cn("h-8 w-8", isProcessingThis && "text-primary")}
-								onClick={handleReindex}
-								disabled={isProcessing}
-							>
-								<RefreshCw
-									className={cn("h-4 w-4", isProcessingThis && "animate-spin")}
-								/>
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleSettings}
-							>
-								<Settings2 className="h-4 w-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className={cn(
-									"h-8 w-8",
-									isConfirmingDelete &&
-										"bg-destructive text-destructive-foreground hover:bg-destructive/90"
-								)}
-								onClick={handleDelete}
-								disabled={isProcessing}
-							>
-								<Trash2 className="h-4 w-4" />
-							</Button>
-							<Button variant="ghost" size="icon" className="h-8 w-8">
-								<ArrowUpRight className="h-4 w-4" />
-							</Button>
-						</div>
+
 					</div>
 				</CardHeader>
 
@@ -340,55 +268,7 @@ export function FoldersView({ isResizing }: ViewProps) {
 		};
 	}, []);
 
-	const handleReindex = async (folderId: string) => {
-		if (isProcessing) return;
 
-		setIsProcessing(true);
-		setProcessStatus({ folderId, progress: 0 });
-
-		try {
-			await reindexFolder(folderId, {
-				onProgress: (status) => {
-					setProcessStatus((prev) => ({
-						...prev,
-						...status,
-						folderId,
-					}));
-				},
-				onError: (error) => {
-					toast.error(`Error: ${error.message}`);
-					setIsProcessing(false);
-					setProcessStatus({});
-				},
-				onComplete: () => {
-					toast.success("Carpeta reindexada correctamente");
-					setIsProcessing(false);
-					setProcessStatus({});
-					// El evento folders:modified ya disparará la recarga
-				},
-			});
-		} catch (error) {
-			toast.error(
-				`Error: ${error instanceof Error ? error.message : "Error desconocido"}`
-			);
-			setIsProcessing(false);
-			setProcessStatus({});
-		}
-	};
-
-	const handleDelete = async (folderId: string) => {
-		if (isProcessing) return;
-
-		try {
-			await deleteFolder(folderId);
-			toast.success("Carpeta eliminada correctamente");
-			// El evento folders:deleted ya disparará la recarga
-		} catch (error) {
-			toast.error(
-				`Error: ${error instanceof Error ? error.message : "Error desconocido"}`
-			);
-		}
-	};
 
 	const handleFolderClick = useCallback(
 		(folder: any) => {
@@ -434,8 +314,6 @@ export function FoldersView({ isResizing }: ViewProps) {
 					>
 						<FolderCard
 							folder={folder}
-							onReindex={handleReindex}
-							onDelete={handleDelete}
 							isProcessing={isProcessing}
 							processStatus={processStatus}
 							onClick={() => handleFolderClick(folder)}

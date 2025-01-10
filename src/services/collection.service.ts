@@ -1,6 +1,10 @@
 import type { Collection as PrismaCollection } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
-import { statsEventEmitter, STATS_EVENTS } from './stats.service'
+import { logger } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
+
+const collectionLogger = logger.withContext('CollectionService')
 
 export interface Collection extends PrismaCollection {
   count: number
@@ -40,7 +44,7 @@ export const collectionService = {
       }
       return response.json()
     } catch (error) {
-      console.error('Error fetching collections:', error)
+      collectionLogger.error('Error fetching collections:', error)
       throw error
     }
   },
@@ -54,7 +58,7 @@ export const collectionService = {
       }
       return response.json()
     } catch (error) {
-      console.error('Error fetching collection:', error)
+      collectionLogger.error('Error fetching collection:', error)
       throw error
     }
   },
@@ -75,7 +79,7 @@ export const collectionService = {
 
       return response.json()
     } catch (error) {
-      console.error('Error creating collection:', error)
+      collectionLogger.error('Error creating collection:', error)
       throw error
     }
   },
@@ -96,7 +100,7 @@ export const collectionService = {
 
       return response.json()
     } catch (error) {
-      console.error('Error updating collection:', error)
+      collectionLogger.error('Error updating collection:', error)
       throw error
     }
   },
@@ -111,7 +115,7 @@ export const collectionService = {
         throw new Error('Failed to delete collection')
       }
     } catch (error) {
-      console.error('Error deleting collection:', error)
+      collectionLogger.error('Error deleting collection:', error)
       throw error
     }
   },
@@ -132,7 +136,7 @@ export const collectionService = {
 
       statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
     } catch (error) {
-      console.error('Error adding image to collection:', error)
+      collectionLogger.error('Error adding image to collection:', error)
       throw error
     }
   },
@@ -149,7 +153,7 @@ export const collectionService = {
 
       statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
     } catch (error) {
-      console.error('Error removing image from collection:', error)
+      collectionLogger.error('Error removing image from collection:', error)
       throw error
     }
   },
@@ -162,7 +166,7 @@ export const collectionService = {
       }
       return response.json()
     } catch (error) {
-      console.error('Error fetching collection images:', error)
+      collectionLogger.error('Error fetching collection images:', error)
       throw error
     }
   }

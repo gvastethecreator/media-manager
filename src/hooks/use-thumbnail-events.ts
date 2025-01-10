@@ -26,7 +26,7 @@ export function useThumbnailEvents() {
     const resetHeartbeatTimeout = () => {
       if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
       heartbeatTimeout = setTimeout(() => {
-        logger.warn('⚠️ No se ha recibido heartbeat en', HEARTBEAT_TIMEOUT, 'ms');
+        logger.warn('⚠️ No se ha recibido heartbeat en', HEARTBEAT_TIMEOUT);
         reconnect();
       }, HEARTBEAT_TIMEOUT);
     };
