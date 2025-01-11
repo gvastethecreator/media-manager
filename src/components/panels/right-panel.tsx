@@ -2,6 +2,7 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DetailsPanel } from "@/components/panels/details/details-panel";
+import { InfoPanel } from "@/components/panels/info/info-panel";
 import { useFileManager } from "@/store/file-manager";
 
 export function RightPanel() {
@@ -9,9 +10,13 @@ export function RightPanel() {
 
 	return (
 		<div className="flex flex-col h-full">
-			<ScrollArea className="flex-1">
-				<DetailsPanel selectedItems={selectedItems} />
-			</ScrollArea>
+			{selectedItems.length > 0 ? (
+				<ScrollArea className="flex-1">
+					<DetailsPanel selectedItems={selectedItems} />
+				</ScrollArea>
+			) : (
+				<InfoPanel />
+			)}
 		</div>
 	);
 }

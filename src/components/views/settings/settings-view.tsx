@@ -41,12 +41,10 @@ export function SettingsView() {
 
 					<TabsContent value="folders" className="gap-2 px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
-							<ProfilesSection />
-							<div className="grid grid-cols-1 gap-2">
 								<FoldersSection />
 								<ThumbnailsSection />
-							</div>
-							<SystemSection />
+
+
 						</div>
 					</TabsContent>
 
@@ -58,7 +56,7 @@ export function SettingsView() {
 					</TabsContent>
 
 					<TabsContent value="shortcuts" className="px-2">
-						<ShortcutsSection />
+						<ProfilesSection />
 					</TabsContent>
 				</Tabs>
 			</ScrollArea>
