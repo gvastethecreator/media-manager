@@ -6,6 +6,8 @@ export interface ProfileCreate {
   color?: string
   theme?: string
   language?: string
+  description?: string
+  shortcut?: string
   syncSettings?: boolean
   notifications?: boolean
   settings?: Record<string, any>

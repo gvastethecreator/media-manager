@@ -52,7 +52,6 @@ import { Badge } from "@/components/ui/badge";
 import {
 	statsEventEmitter,
 	STATS_EVENTS,
-	type StatsEventType,
 	type StatsUpdateEvent,
 } from "@/services/stats.service";
 import { toastService } from "@/services/toast.service";
@@ -148,8 +147,9 @@ export function FileCard({
 			const shouldUpdate = events.some(
 				(event) =>
 					relevantEvents.includes(event) &&
-					((event === "collection_change" && item.collections?.length > 0) ||
-						(event === "tag_change" && item.tags?.length > 0) ||
+					((event === "collection_change" &&
+						(item.collections?.length ?? 0) > 0) ||
+						(event === "tag_change" && (item.tags?.length ?? 0) > 0) ||
 						(event === "favorite_change" && item.isFavorite))
 			);
 
@@ -212,7 +212,7 @@ export function FileCard({
 			setError(null);
 
 			const quality: ThumbnailQuality = ThumbnailQuality.MEDIUM;
-			
+
 			const thumbnailData = await thumbnailService.getThumbnail(
 				item.id,
 				quality

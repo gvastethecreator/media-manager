@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { getDatabaseStatus, getPrismaClient } from '@/lib/db'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { logger } from '@/lib/utils'
+import { logger } from '@/lib/logger'
+
+const statusLogger = logger.withContext("SystemStatus");
 
 // Función auxiliar para transformar BigInts en la respuesta
 function serializeResponse(obj: any): any {
@@ -82,7 +84,7 @@ export async function GET() {
     try {
       await fs.access(thumbnailsDir)
     } catch {
-      logger.info('Creando directorio de miniaturas...')
+      statusLogger.info('Creando directorio de miniaturas...')
       await fs.mkdir(thumbnailsDir, { recursive: true })
     }
 
@@ -92,7 +94,7 @@ export async function GET() {
       await fs.writeFile(testFile, '')
       await fs.unlink(testFile)
     } catch (error) {
-      logger.error('Error de permisos en thumbnails:', error)
+      statusLogger.error('Error de permisos en thumbnails:', error)
       throw new Error('No hay permisos de escritura en el directorio de miniaturas')
     }
 
@@ -101,7 +103,7 @@ export async function GET() {
     try {
       await fs.access(settingsPath)
     } catch {
-      logger.error('No se encontró settings.json')
+      statusLogger.error('No se encontró settings.json')
       throw new Error('No se encontró el archivo de configuración')
     }
 
@@ -121,7 +123,7 @@ export async function GET() {
       settings: await fs.readFile(settingsPath, 'utf-8')
     }
 
-    logger.info('Sistema verificado correctamente', systemChecks)
+    statusLogger.info('Sistema verificado correctamente', systemChecks)
 
     const stats = {
       status: 'active',
@@ -145,7 +147,7 @@ export async function GET() {
 
     return NextResponse.json(serializeResponse(stats))
   } catch (error) {
-    logger.error('Error al obtener estado del sistema:', error)
+    statusLogger.error('Error al obtener estado del sistema:', error)
     const dbStatus = await getDatabaseStatus()
 
     return NextResponse.json(serializeResponse({

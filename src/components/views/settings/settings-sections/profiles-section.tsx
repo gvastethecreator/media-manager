@@ -92,7 +92,7 @@ export function ProfilesSection() {
 								/>
 							</PopoverContent>
 						</Popover>
-						<div className="flex-1 min-w-0">
+						<div className="flex-1 min-w-0 space-y-1">
 							<Input
 								value={activeProfileData?.name}
 								onChange={(e) =>
@@ -101,6 +101,30 @@ export function ProfilesSection() {
 								className="h-8 text-base border-none p-3"
 								placeholder="Nombre del perfil"
 							/>
+						
+							<div className="flex gap-2">
+								<select
+									value={activeProfileData?.theme || "system"}
+									onChange={(e) =>
+										handleUpdateActiveProfile({ theme: e.target.value })
+									}
+									className="h-6 text-xs border-none rounded-sm bg-muted/30 px-2"
+								>
+									<option value="system">Sistema</option>
+									<option value="light">Claro</option>
+									<option value="dark">Oscuro</option>
+								</select>
+								<select
+									value={activeProfileData?.language || "es"}
+									onChange={(e) =>
+										handleUpdateActiveProfile({ language: e.target.value })
+									}
+									className="h-6 text-xs border-none rounded-sm bg-muted/30 px-2"
+								>
+									<option value="es">Español</option>
+									<option value="en">English</option>
+								</select>
+							</div>
 						</div>
 						<Popover>
 							<PopoverTrigger asChild>
@@ -157,10 +181,23 @@ export function ProfilesSection() {
 											>
 												<span className="text-lg">{profile.emoji}</span>
 											</div>
-											<div className="flex">
+											<div className="flex-1 min-w-0">
 												<span className="text-xs font-semibold truncate pl-1">
 													{profile.name}
 												</span>
+												<div className="flex gap-1 text-[10px] text-muted-foreground/75">
+													<span>
+														{profile.theme === "system"
+															? "Sistema"
+															: profile.theme === "light"
+															? "Claro"
+															: "Oscuro"}
+													</span>
+													<span>•</span>
+													<span>
+														{profile.language === "es" ? "Español" : "English"}
+													</span>
+												</div>
 											</div>
 										</div>
 										<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-8 shadow-lg">

@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger'
-import { thumbnailCache, metadataCache, searchCache, statsCache } from '@/lib/cache'
+import { thumbnailCache, metadataCache, searchCache, statsCache, charactersCache, placesCache, objectsCache } from '@/lib/cache'
 
 const eventsLogger = logger.withContext('EventsService')
 
@@ -16,8 +16,25 @@ export type CacheInvalidationEvent =
   | 'thumbnails:modified'
   | 'metadata:modified'
   | 'search:modified'
+  | 'characters:modified'
+  | 'places:modified'
+  | 'objects:modified'
 
-type EventCallback = (event: CacheInvalidationEvent) => void
+export type EventType =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'addImage'
+  | 'removeImage'
+
+export interface EventData {
+  type: EventType
+  id?: string
+  objectId?: string
+  imageId?: string
+}
+
+type EventCallback = (event: CacheInvalidationEvent, data?: EventData) => void
 
 class EventsService {
   private static instance: EventsService
@@ -34,7 +51,10 @@ class EventsService {
     'tags:modified': 0,
     'thumbnails:modified': 0,
     'metadata:modified': 0,
-    'search:modified': 0
+    'search:modified': 0,
+    'characters:modified': 0,
+    'places:modified': 0,
+    'objects:modified': 0
   }
 
   private constructor() { }
@@ -53,17 +73,17 @@ class EventsService {
     }
   }
 
-  emit(event: CacheInvalidationEvent): void {
+  emit(event: CacheInvalidationEvent, data?: EventData): EventsService {
     const now = Date.now()
     const lastEvent = this.lastEventTimestamp[event]
 
     // Evitar eventos duplicados en un intervalo corto (500ms)
     if (now - lastEvent < 500) {
-      return
+      return this
     }
 
     this.lastEventTimestamp[event] = now
-    eventsLogger.debug(`🔄 Evento emitido: ${event}`)
+    eventsLogger.debug(`🔄 Evento emitido: ${event}`, data)
 
     // Invalidar cachés según el tipo de evento
     this.invalidateCache(event)
@@ -71,11 +91,13 @@ class EventsService {
     // Notificar a los listeners
     this.listeners.forEach(listener => {
       try {
-        listener(event)
+        listener(event, data)
       } catch (error) {
         eventsLogger.error(`❌ Error en listener para ${event}:`, error)
       }
     })
+
+    return this
   }
 
   private async invalidateCache(event: CacheInvalidationEvent): Promise<void> {
@@ -85,7 +107,10 @@ class EventsService {
         search: [],
         metadata: [],
         thumbnails: [],
-        stats: []
+        stats: [],
+        characters: [],
+        places: [],
+        objects: []
       }
 
       // Determinar qué cachés necesitan ser invalidados
@@ -96,6 +121,9 @@ class EventsService {
           cacheInvalidations.search.push(event)
           cacheInvalidations.metadata.push(event)
           cacheInvalidations.stats.push(event)
+          cacheInvalidations.characters.push(event)
+          cacheInvalidations.places.push(event)
+          cacheInvalidations.objects.push(event)
           break
 
         case 'folders:added':
@@ -123,6 +151,24 @@ class EventsService {
         case 'search:modified':
           cacheInvalidations.search.push(event)
           break
+
+        case 'characters:modified':
+          cacheInvalidations.characters.push(event)
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.stats.push(event)
+          break
+
+        case 'places:modified':
+          cacheInvalidations.places.push(event)
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.stats.push(event)
+          break
+
+        case 'objects:modified':
+          cacheInvalidations.objects.push(event)
+          cacheInvalidations.search.push(event)
+          cacheInvalidations.stats.push(event)
+          break
       }
 
       // Invalidar cachés de forma selectiva
@@ -146,6 +192,21 @@ class EventsService {
       if (cacheInvalidations.stats.length > 0) {
         invalidationPromises.push(statsCache.clear())
         eventsLogger.debug('🔄 Invalidando caché de estadísticas:', cacheInvalidations.stats)
+      }
+
+      if (cacheInvalidations.characters.length > 0) {
+        invalidationPromises.push(charactersCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de personajes:', cacheInvalidations.characters)
+      }
+
+      if (cacheInvalidations.places.length > 0) {
+        invalidationPromises.push(placesCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de lugares:', cacheInvalidations.places)
+      }
+
+      if (cacheInvalidations.objects.length > 0) {
+        invalidationPromises.push(objectsCache.clear())
+        eventsLogger.debug('🔄 Invalidando caché de objetos:', cacheInvalidations.objects)
       }
 
       await Promise.all(invalidationPromises)

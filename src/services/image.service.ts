@@ -172,7 +172,7 @@ class ImageService {
       })
 
       // Actualizar caché
-      await thumbnailCache.set(cacheKey, buffer.toString('base64'))
+      await thumbnailCache.set(cacheKey, buffer)
 
     } catch (error) {
       console.error('Error generating thumbnail:', error)
@@ -200,10 +200,9 @@ class ImageService {
       throw new Error('Error obteniendo thumbnail')
     }
 
-    const base64 = (image.thumbnail as Buffer).toString('base64')
-    await thumbnailCache.set(cacheKey, base64)
-
-    return base64
+    const base64 = (image.thumbnail as Buffer).toString('base64');
+    await thumbnailCache.set(cacheKey, base64);
+    return base64;
   }
 
   // Resto de métodos del servicio original...

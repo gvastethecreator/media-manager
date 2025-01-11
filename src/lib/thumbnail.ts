@@ -2,9 +2,11 @@ import sharp from 'sharp'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { existsSync } from 'fs'
 import { extname } from 'path'
-import { thumbnailLogger as logger } from './utils'
+import { logger } from '@/lib/logger'
 import { formatBytes } from './utils'
 import type { ImageFormat } from './image'
+
+const thumbLogger = logger.withContext('Thumbnail')
 
 export interface ThumbnailOptions {
   quality: ThumbnailQuality
@@ -85,7 +87,7 @@ export async function generateThumbnail(
       throw new Error(`Calidad inválida: ${finalOptions.quality}`)
     }
 
-    logger.debug('Generando thumbnail:', {
+    thumbLogger.debug('Generando thumbnail:', {
       path: filePath,
       options: finalOptions,
       config
@@ -180,7 +182,7 @@ export async function generateThumbnail(
       originalSize: metadata.size
     }
 
-    logger.debug('Thumbnail generado:', {
+    thumbLogger.debug('Thumbnail generado:', {
       path: filePath,
       dimensions: `${result.width}x${result.height}`,
       originalSize: formatBytes(metadata.size || 0),
@@ -190,7 +192,7 @@ export async function generateThumbnail(
 
     return result
   } catch (error) {
-    logger.error('Error generando thumbnail:', {
+    thumbLogger.error('Error generando thumbnail:', {
       path: filePath,
       error: error instanceof Error ? error.message : error
     })

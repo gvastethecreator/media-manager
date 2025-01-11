@@ -1,4 +1,4 @@
-import { loggerConfig, LogLevel } from '@/config/logger.config'
+import { loggerConfig, LogLevel } from './logger.config'
 
 const LOG_COLORS = {
   debug: '\x1b[34m', // blue
@@ -8,81 +8,64 @@ const LOG_COLORS = {
   reset: '\x1b[0m',  // reset
 }
 
+interface LoggerOptions {
+  context?: string
+  timestamp?: boolean
+  level?: LogLevel
+}
+
 export class Logger {
-  private context: string = ''
-  private config = loggerConfig
+  private context: string
+  private timestamp: boolean
+  private level: LogLevel
+
+  constructor(options: LoggerOptions = {}) {
+    this.context = options.context || 'App'
+    this.timestamp = options.timestamp ?? true
+    this.level = options.level || 'info'
+  }
+
+  private getTimestamp(): string {
+    return new Date().toISOString()
+  }
+
+  private formatMessage(level: string, message: string, ...args: any[]): string {
+    const timestamp = this.timestamp ? `[${this.getTimestamp()}] ` : ''
+    const context = `[${this.context}] `
+    return `${timestamp}${level} ${context}${message} ${args.length ? JSON.stringify(args) : ''}`
+  }
 
   withContext(context: string): Logger {
-    const logger = new Logger()
-    logger.context = context
-    return logger
+    return new Logger({ ...this, context })
+  }
+
+  debug(message: string, ...args: any[]): void {
+    if (this.shouldLog('debug')) {
+      console.debug(this.formatMessage('🔍 DEBUG', message, ...args))
+    }
+  }
+
+  info(message: string, ...args: any[]): void {
+    if (this.shouldLog('info')) {
+      console.info(this.formatMessage('ℹ️ INFO', message, ...args))
+    }
+  }
+
+  warn(message: string, ...args: any[]): void {
+    if (this.shouldLog('warn')) {
+      console.warn(this.formatMessage('⚠️ WARN', message, ...args))
+    }
+  }
+
+  error(message: string, ...args: any[]): void {
+    if (this.shouldLog('error')) {
+      console.error(this.formatMessage('❌ ERROR', message, ...args))
+    }
   }
 
   private shouldLog(level: LogLevel): boolean {
-    if (!this.config.enableConsole) return false
-    
-    const serviceConfig = this.context ? this.config.services[this.context] : null
-    if (serviceConfig && !serviceConfig.enabled) return false
-
-    const logLevel = serviceConfig?.level || this.config.level
     const levels: LogLevel[] = ['debug', 'info', 'warn', 'error']
-    return levels.indexOf(level) >= levels.indexOf(logLevel)
-  }
-
-  private formatMessage(level: LogLevel, message: string, data?: any): string {
-    const parts: string[] = []
-
-    if (this.config.format.timestamp) {
-      parts.push(new Date().toISOString())
-    }
-
-    const levelStr = level.toUpperCase()
-    if (this.config.format.colors) {
-      parts.push(`${LOG_COLORS[level]}${levelStr}${LOG_COLORS.reset}`)
-    } else {
-      parts.push(levelStr)
-    }
-
-    if (this.config.format.context && this.context) {
-      parts.push(`[${this.context}]`)
-    }
-
-    parts.push(message)
-
-    if (data) {
-      try {
-        const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
-        parts.push(dataStr)
-      } catch (error) {
-        parts.push('[Error serializing data]')
-      }
-    }
-
-    return parts.join(' ')
-  }
-
-  debug(message: string, data?: any): void {
-    if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('debug', message, data))
-    }
-  }
-
-  info(message: string, data?: any): void {
-    if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message, data))
-    }
-  }
-
-  warn(message: string, data?: any): void {
-    if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message, data))
-    }
-  }
-
-  error(message: string, data?: any): void {
-    if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message, data))
-    }
+    return levels.indexOf(level) >= levels.indexOf(this.level)
   }
 }
 

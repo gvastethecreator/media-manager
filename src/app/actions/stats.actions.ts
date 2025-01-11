@@ -4,138 +4,153 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import { handlePrismaError } from '@/lib/errors'
+import { FileItem } from "@/types/file-item";
 
 const statsLogger = logger.withContext('StatsActions')
 
-export type GeneralStats = {
-  totalImages: number
-  totalViews: number
-  totalDownloads: number
-  totalFolders: number
-  totalTags: number
-  totalCollections: number
-  totalFavorites: number
-  totalSize: number
-  popularImages: Array<{
-    id: string
-    image: {
-      id: string
-      name: string
-    }
-    views: number
-  }>
-  topTags: Array<{
-    name: string
-    color: string
-    count: number
-  }>
-  recentActivity: Array<{
-    description: string
-    timestamp: string
-    iconName: string
-  }>
+export interface GeneralStats {
+  totalImages: number;
+  totalViews: number;
+  totalDownloads: number;
+  totalFolders: number;
+  totalTags: number;
+  totalCollections: number;
+  totalFavorites: number;
+  totalAlbums: number;
+  totalCharacters: number;
+  totalPlaces: number;
+  totalObjects: number;
+  totalActivities: number;
+  totalSize: number;
+  popularImages: FileItem[];
+  topTags: { id: string; name: string; color: string; count: number }[];
+  recentActivity: { id: string; type: string; description: string; timestamp: Date }[];
 }
 
 export async function getGeneralStats(): Promise<GeneralStats> {
   try {
     const [
       totalImages,
-      totalViews,
-      totalDownloads,
       totalFolders,
       totalTags,
       totalCollections,
       totalFavorites,
+      totalAlbums,
+      totalCharacters,
+      totalPlaces,
+      totalObjects,
+      totalActivities,
+      totalSize,
+      viewsAndDownloads,
+      rawPopularImages,
+      topTags,
+      rawRecentActivity,
+    ] = await Promise.all([
+      prisma.image.count(),
+      prisma.folder.count(),
+      prisma.tag.count(),
+      prisma.collection.count(),
+      prisma.favorite.count(),
+      prisma.album.count(),
+      prisma.character.count(),
+      prisma.place.count(),
+      prisma.object.count(),
+      prisma.activity.count(),
+      prisma.image.aggregate({ _sum: { size: true } }).then((r) => r._sum.size || 0),
+      prisma.imageStats.aggregate({
+        _sum: {
+          views: true,
+          downloads: true,
+        },
+      }),
+      prisma.image.findMany({
+        take: 5,
+        orderBy: [{ stats: { views: 'desc' } }],
+        include: {
+          tags: true,
+          collections: true,
+          albums: true,
+          characters: true,
+          places: true,
+          objects: true,
+          stats: true,
+        },
+      }),
+      prisma.tag.findMany({
+        take: 10,
+        orderBy: [{ images: { _count: 'desc' } }],
+        include: {
+          _count: {
+            select: {
+              images: true
+            }
+          }
+        },
+      }).then((tags) =>
+        tags.map((tag) => ({
+          id: tag.id,
+          name: tag.name,
+          color: tag.color,
+          count: tag._count.images,
+        }))
+      ),
+      prisma.activity.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    // Transformar imágenes populares al formato FileItem
+    const popularImages: FileItem[] = rawPopularImages.map(img => ({
+      id: img.id,
+      name: img.name,
+      path: img.path,
+      size: img.size,
+      type: 'image',
+      createdAt: img.createdAt,
+      updatedAt: img.updatedAt,
+      metadata: img.metadata ? JSON.parse(img.metadata) : {},
+      tags: img.tags.map(t => t.id),
+      collections: img.collections.map(c => c.id),
+      albums: img.albums.map(a => a.id),
+      characters: img.characters.map(c => c.id),
+      places: img.places.map(p => p.id),
+      objects: img.objects.map(o => o.id),
+      favorite: false,
+      views: img.stats?.views || 0,
+      downloads: img.stats?.downloads || 0,
+      count: 0,
+    }));
+
+    // Transformar actividades recientes
+    const recentActivity = rawRecentActivity.map(activity => ({
+      id: activity.id,
+      type: activity.type,
+      description: activity.description,
+      timestamp: activity.createdAt,
+    }));
+
+    return {
+      totalImages,
+      totalViews: viewsAndDownloads._sum.views || 0,
+      totalDownloads: viewsAndDownloads._sum.downloads || 0,
+      totalFolders,
+      totalTags,
+      totalCollections,
+      totalFavorites,
+      totalAlbums,
+      totalCharacters,
+      totalPlaces,
+      totalObjects,
+      totalActivities,
       totalSize,
       popularImages,
       topTags,
       recentActivity,
-    ] = await Promise.all([
-      prisma.image.count(),
-      prisma.imageStats.aggregate({
-        _sum: {
-          views: true,
-        },
-      }),
-      prisma.imageStats.aggregate({
-        _sum: {
-          downloads: true,
-        },
-      }),
-      prisma.folder.count(),
-      prisma.tag.count(),
-      prisma.collection.count(),
-      prisma.image.count({
-        where: {
-          isFavorite: true,
-        },
-      }),
-      prisma.image.aggregate({
-        _sum: {
-          size: true,
-        },
-      }),
-      prisma.imageStats.findMany({
-        take: 5,
-        orderBy: {
-          views: 'desc',
-        },
-        include: {
-          image: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      }),
-      prisma.tag.findMany({
-        take: 5,
-        orderBy: {
-          images: {
-            _count: 'desc',
-          },
-        },
-        include: {
-          _count: {
-            select: {
-              images: true,
-            },
-          },
-        },
-      }),
-      prisma.activity.findMany({
-        take: 5,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
-    ])
-
-    return {
-      totalImages,
-      totalViews: totalViews._sum.views || 0,
-      totalDownloads: totalDownloads._sum.downloads || 0,
-      totalFolders,
-      totalTags,
-      totalCollections,
-      totalFavorites,
-      totalSize: totalSize._sum.size || 0,
-      popularImages,
-      topTags: topTags.map((tag) => ({
-        name: tag.name,
-        color: tag.color,
-        count: tag._count.images,
-      })),
-      recentActivity: recentActivity.map((activity) => ({
-        description: activity.description,
-        timestamp: activity.createdAt.toLocaleString(),
-        iconName: activity.type,
-      })),
-    }
+    };
   } catch (error) {
-    statsLogger.error('Error al obtener estadísticas generales', { error })
-    handlePrismaError(error)
+    statsLogger.error('Error al obtener estadísticas generales:', { error });
+    throw error;
   }
 }
 

@@ -28,7 +28,7 @@ export interface SystemStatus {
 // Cache específico para el estado del sistema
 const systemCache = new CacheManager<SystemStatus>({
   name: 'system',
-  max: 1,
+  maxSize: 1,
   ttl: 1000 * 30, // 30 segundos
   updateAgeOnGet: true,
   allowStale: true

@@ -5,7 +5,10 @@ import {
 	thumbnailCache,
 	metadataCache,
 	searchCache,
-	CacheManager,
+	statsCache,
+	charactersCache,
+	placesCache,
+	objectsCache,
 } from "@/lib/cache";
 import { logger } from "@/lib/logger";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -13,25 +16,22 @@ import { queryClient } from "@/lib/react-query";
 
 const cacheProviderLogger = logger.withContext("CacheProvider");
 
-// Asegurar que TypeScript reconozca las instancias como CacheManager
-const typedThumbnailCache = thumbnailCache as CacheManager<string>;
-const typedMetadataCache = metadataCache as CacheManager<
-	Record<string, unknown>
->;
-const typedSearchCache = searchCache as CacheManager<unknown[]>;
-
 export function CacheProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
-		cacheProviderLogger.info(" Inicializando sistema de cach");
+		cacheProviderLogger.info("🚀 Inicializando sistema de caché");
 
 		return () => {
-			// Limpiar caches al desmontar
+			// Limpiar todos los caches al desmontar
 			Promise.all([
-				typedThumbnailCache.stop(),
-				typedMetadataCache.stop(),
-				typedSearchCache.stop(),
+				thumbnailCache.stop(),
+				metadataCache.stop(),
+				searchCache.stop(),
+				statsCache.stop(),
+				charactersCache.stop(),
+				placesCache.stop(),
+				objectsCache.stop(),
 			]).catch((error) => {
-				cacheProviderLogger.error(" Error al detener caches:", error);
+				cacheProviderLogger.error("❌ Error al detener caches:", error);
 			});
 		};
 	}, []);

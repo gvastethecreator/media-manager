@@ -26,9 +26,16 @@ export interface CollectionUpdate extends Partial<Omit<CollectionCreate, 'name'>
   name?: string
 }
 
+export interface CollectionStats {
+  count: number;
+  size: number;
+  lastUpdated?: Date;
+}
+
 export interface CollectionWithStats extends Collection {
-  count: number
-  size: string
+  count: number;
+  size: string;
+  stats?: CollectionStats;
 }
 
 export interface CollectionWithImages extends Collection {
@@ -38,28 +45,48 @@ export interface CollectionWithImages extends Collection {
 export const collectionService = {
   async getCollections(): Promise<CollectionWithStats[]> {
     try {
-      const response = await fetch('/api/collections')
+      collectionLogger.info('📚 Obteniendo lista de colecciones');
+      const response = await fetch('/api/collections', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
       if (!response.ok) {
-        throw new Error('Failed to fetch collections')
+        throw new Error('Failed to fetch collections');
       }
-      return response.json()
+
+      const collections = await response.json();
+      collectionLogger.info(`✅ ${collections.length} colecciones obtenidas`);
+      return collections;
     } catch (error) {
-      collectionLogger.error('Error fetching collections:', error)
-      throw error
+      collectionLogger.error('❌ Error al obtener colecciones:', error);
+      throw error;
     }
   },
 
   async getCollection(id: string): Promise<CollectionWithStats | null> {
     try {
-      const response = await fetch(`/api/collections/${id}`)
+      collectionLogger.info('🔍 Obteniendo colección:', id);
+      const response = await fetch(`/api/collections/${id}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
       if (!response.ok) {
-        if (response.status === 404) return null
-        throw new Error('Failed to fetch collection')
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch collection');
       }
-      return response.json()
+
+      const collection = await response.json();
+      collectionLogger.info('✅ Colección obtenida:', collection.name);
+      return collection;
     } catch (error) {
-      collectionLogger.error('Error fetching collection:', error)
-      throw error
+      collectionLogger.error('❌ Error al obtener colección:', error);
+      throw error;
     }
   },
 
@@ -169,6 +196,50 @@ export const collectionService = {
       collectionLogger.error('Error fetching collection images:', error)
       throw error
     }
+  },
+
+  async getCollectionStats(id: string): Promise<CollectionStats> {
+    try {
+      collectionLogger.info('📊 Obteniendo estadísticas de colección:', id);
+      const response = await fetch(`/api/collections/${id}/stats`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch collection stats');
+      }
+      const stats = await response.json();
+      collectionLogger.info('✅ Estadísticas obtenidas:', stats);
+      return stats;
+    } catch (error) {
+      collectionLogger.error('❌ Error al obtener estadísticas:', error);
+      throw error;
+    }
+  },
+
+  async updateCollectionStats(id: string, stats: Partial<CollectionStats>): Promise<CollectionStats> {
+    try {
+      collectionLogger.info('📝 Actualizando estadísticas de colección:', { id, stats });
+      const response = await fetch(`/api/collections/${id}/stats`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(stats),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update collection stats');
+      }
+
+      const updatedStats = await response.json();
+      collectionLogger.info('✅ Estadísticas actualizadas:', updatedStats);
+      return updatedStats;
+    } catch (error) {
+      collectionLogger.error('❌ Error al actualizar estadísticas:', error);
+      throw error;
+    }
+  },
+
+  formatBytes(bytes: number): string {
+    return formatBytes(bytes);
   }
 }
 
