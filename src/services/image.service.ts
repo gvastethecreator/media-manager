@@ -181,27 +181,27 @@ class ImageService {
   }
 
   async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
-    const cacheKey = `thumbnail:${imageId}:${quality}`
+    const cacheKey = `thumbnail:${imageId}:${quality}`;
 
     // Intentar obtener del caché
-    const cached = await thumbnailCache.get(cacheKey)
-    if (cached) return cached
+    const cached = await thumbnailCache.get(cacheKey);
+    if (cached) return cached.toString('base64');
 
     // Si no está en caché, generarlo
-    await this.generateThumbnail(imageId, quality)
+    await this.generateThumbnail(imageId, quality);
 
     // Intentar obtener el nuevo thumbnail
     const image = await prisma.image.findUnique({
       where: { id: imageId },
       select: { thumbnail: true }
-    })
+    });
 
     if (!image?.thumbnail) {
-      throw new Error('Error obteniendo thumbnail')
+      throw new Error('Error obteniendo thumbnail');
     }
 
     const base64 = (image.thumbnail as Buffer).toString('base64');
-    await thumbnailCache.set(cacheKey, base64);
+    await thumbnailCache.set(cacheKey, Buffer.from(base64, 'base64'));
     return base64;
   }
 

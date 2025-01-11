@@ -1,146 +1,95 @@
 import { create } from "zustand";
-import { objectService, type ObjectCreate, type ObjectUpdate, type ObjectWithStats } from "@/services/object.service";
+import type { ObjectCreate, ObjectUpdate, ObjectWithStats } from "@/services/object.service";
 import { logger } from "@/lib/logger";
-import type { FileItem } from "@/types/file-item";
 
-const objectsLogger = logger.withContext("ObjectsStore");
+const objectLogger = logger.withContext("ObjectsStore");
 
 interface ObjectsState {
   objects: ObjectWithStats[];
-  currentObject: ObjectWithStats | null;
-  currentItems: FileItem[];
   isLoading: boolean;
-  error: string | null;
-  // Acciones
+  error: Error | null;
   loadObjects: () => Promise<void>;
   createObject: (data: ObjectCreate) => Promise<void>;
   updateObject: (id: string, data: ObjectUpdate) => Promise<void>;
   deleteObject: (id: string) => Promise<void>;
-  addImageToObject: (objectId: string, imageId: string) => Promise<void>;
-  removeImageFromObject: (objectId: string, imageId: string) => Promise<void>;
-  loadObjectContent: (id: string) => Promise<void>;
 }
 
 export const useObjectsStore = create<ObjectsState>((set, get) => ({
   objects: [],
-  currentObject: null,
-  currentItems: [],
   isLoading: false,
   error: null,
 
   loadObjects: async () => {
     try {
       set({ isLoading: true, error: null });
-      const objects = await objectService.getObjects();
+      objectLogger.info("🔄 Cargando objetos...");
+      const response = await fetch("/api/objects");
+      if (!response.ok) throw new Error("Error al cargar objetos");
+      const objects = await response.json();
       set({ objects, isLoading: false });
-      objectsLogger.info("📥 Objetos cargados:", { count: objects.length });
+      objectLogger.info("✅ Objetos cargados:", { count: objects.length });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      objectsLogger.error("❌ Error al cargar objetos:", { error });
+      objectLogger.error("❌ Error al cargar objetos:", error);
+      set({ error: error as Error, isLoading: false });
     }
   },
 
   createObject: async (data: ObjectCreate) => {
     try {
-      set({ isLoading: true, error: null });
-      const object = await objectService.createObject(data);
-      const objectWithStats = await objectService.getObject(object.id);
-      if (!objectWithStats) throw new Error("Error al obtener estadísticas del objeto");
-      set((state) => ({
-        objects: [...state.objects, objectWithStats],
-        isLoading: false,
+      objectLogger.info("✨ Creando objeto...", data);
+      const response = await fetch("/api/objects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error("Error al crear objeto");
+      const object = await response.json();
+      set(state => ({
+        objects: [object, ...state.objects]
       }));
-      objectsLogger.info("✨ Objeto creado:", { object });
+      objectLogger.info("✅ Objeto creado:", object);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      objectsLogger.error("❌ Error al crear objeto:", { error });
+      objectLogger.error("❌ Error al crear objeto:", error);
+      throw error;
     }
   },
 
   updateObject: async (id: string, data: ObjectUpdate) => {
     try {
-      set({ isLoading: true, error: null });
-      await objectService.updateObject(id, data);
-      const updatedObject = await objectService.getObject(id);
-      if (!updatedObject) throw new Error("Error al obtener objeto actualizado");
-      set((state) => ({
-        objects: state.objects.map((o) =>
-          o.id === id ? updatedObject : o
-        ),
-        currentObject: state.currentObject?.id === id ? updatedObject : state.currentObject,
-        isLoading: false,
+      objectLogger.info("📝 Actualizando objeto...", { id, data });
+      const response = await fetch(`/api/objects/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error("Error al actualizar objeto");
+      const updatedObject = await response.json();
+      set(state => ({
+        objects: state.objects.map(obj =>
+          obj.id === id ? updatedObject : obj
+        )
       }));
-      objectsLogger.info("📝 Objeto actualizado:", { id, data });
+      objectLogger.info("✅ Objeto actualizado:", updatedObject);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      objectsLogger.error("❌ Error al actualizar objeto:", { id, error });
+      objectLogger.error("❌ Error al actualizar objeto:", error);
+      throw error;
     }
   },
 
   deleteObject: async (id: string) => {
     try {
-      set({ isLoading: true, error: null });
-      await objectService.deleteObject(id);
-      set((state) => ({
-        objects: state.objects.filter((o) => o.id !== id),
-        currentObject: state.currentObject?.id === id ? null : state.currentObject,
-        currentItems: state.currentObject?.id === id ? [] : state.currentItems,
-        isLoading: false,
-      }));
-      objectsLogger.info("🗑️ Objeto eliminado:", { id });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      objectsLogger.error("❌ Error al eliminar objeto:", { id, error });
-    }
-  },
-
-  addImageToObject: async (objectId: string, imageId: string) => {
-    try {
-      await objectService.addImageToObject(objectId, imageId);
-      objectsLogger.info("📸 Imagen agregada a objeto:", { objectId, imageId });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      objectsLogger.error("❌ Error al agregar imagen a objeto:", { objectId, imageId, error });
-    }
-  },
-
-  removeImageFromObject: async (objectId: string, imageId: string) => {
-    try {
-      await objectService.removeImageFromObject(objectId, imageId);
-      set((state) => ({
-        currentItems: state.currentItems.filter((item) => item.id !== imageId),
-      }));
-      objectsLogger.info("🗑️ Imagen eliminada de objeto:", { objectId, imageId });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      objectsLogger.error("❌ Error al eliminar imagen de objeto:", { objectId, imageId, error });
-    }
-  },
-
-  loadObjectContent: async (id: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      const object = await objectService.getObject(id);
-      if (!object) {
-        throw new Error("Objeto no encontrado");
-      }
-      const images = await objectService.getObjectImages(id);
-      set({
-        currentObject: object,
-        currentItems: images,
-        isLoading: false,
+      objectLogger.info("🗑️ Eliminando objeto...", id);
+      const response = await fetch(`/api/objects/${id}`, {
+        method: "DELETE"
       });
-      objectsLogger.info("📂 Contenido de objeto cargado:", { id });
+      if (!response.ok) throw new Error("Error al eliminar objeto");
+      set(state => ({
+        objects: state.objects.filter(obj => obj.id !== id)
+      }));
+      objectLogger.info("✅ Objeto eliminado:", id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      objectsLogger.error("❌ Error al cargar contenido de objeto:", { id, error });
+      objectLogger.error("❌ Error al eliminar objeto:", error);
+      throw error;
     }
-  },
+  }
 }));

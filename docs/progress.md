@@ -43,4 +43,132 @@ Este proyecto es una aplicación moderna de gestión y visualización de archivo
 
 ### Últimas 4 tareas, si hay mas deben ir a changelog.md al final del archivo
 
+#### 11/01/2024 - Integración de Nuevas Entidades en el Panel de Navegación
 
+Se han integrado las siguientes entidades en el panel de navegación:
+
+- Álbumes (Albums)
+- Personajes (Characters)
+- Lugares (Places)
+- Objetos (Objects)
+
+Cambios realizados:
+
+1. Actualización del store de gestión de archivos (FileManager)
+
+   - Nuevos estados para las entidades
+   - Nuevas acciones de navegación
+   - Actualización de la inicialización
+
+2. Actualización del panel de navegación
+
+   - Nuevas categorías con iconos y colores
+   - Contadores de elementos
+   - Navegación entre vistas
+
+3. Preparación de componentes de vista
+   - Estructura base para las nuevas vistas
+   - Integración en el contenedor de vistas
+   - Animaciones de transición
+
+Próximos pasos:
+
+- Implementar la lógica de las nuevas vistas
+- Crear los servicios de API correspondientes
+- Agregar funcionalidad de gestión para cada entidad
+
+#### 12/01/2024 - Implementación de Secciones de Personajes, Lugares y Objetos
+
+Estado actual:
+
+1. Sección de Personajes (Characters)
+
+   - ✅ Implementación completa del componente
+   - ✅ Servicio y store funcionales
+   - ✅ CRUD completo de personajes
+   - ✅ Gestión de imágenes asociadas
+   - ✅ Error de tipado resuelto con tipo local EmojiClickData
+
+2. Sección de Lugares (Places)
+
+   - ✅ Actualización del modelo en schema.prisma
+   - ✅ Implementación del servicio y store
+   - ✅ Implementación del componente
+   - ✅ CRUD completo de lugares
+   - ✅ Gestión de imágenes asociadas
+   - ✅ Migración de base de datos aplicada
+
+3. Sección de Objetos (Objects)
+   - ✅ Actualización del modelo en schema.prisma
+   - ✅ Implementación del servicio y store
+   - ✅ Implementación del componente
+   - ✅ CRUD completo de objetos
+   - ✅ Gestión de imágenes asociadas
+   - ✅ Migración de base de datos aplicada
+
+Próximos pasos:
+
+1. Realizar pruebas de integración
+2. Documentar el uso de cada sección
+3. Optimizar el rendimiento si es necesario
+4. Considerar mejoras en la interfaz de usuario
+
+# Registro de Progreso
+
+## Última Actualización
+
+### Base de Datos
+
+- ✅ Actualización del modelo Place con nuevos campos
+  - Agregado campo `region` para ubicación geográfica
+  - Agregado campo `dangers` para lista de peligros
+  - Agregado campo `resources` para lista de recursos
+  - Agregado campo `lore` para historia y mitología
+  - Agregado índice para búsqueda por región
+
+### Documentación
+
+- ✅ Creada documentación detallada del schema
+- ✅ Actualizado README principal
+- ✅ Documentados nuevos modelos y relaciones
+
+### Próximos Pasos
+
+- [ ] Implementar validaciones para campos JSON
+- [ ] Agregar enums para climate y type
+- [ ] Mejorar la documentación de la API
+- [ ] Crear guías de usuario
+
+## Historial de Cambios
+
+### [2024-01-20]
+
+- Actualización del modelo Place
+- Mejora en la documentación
+- Corrección de errores en el seed
+
+### [2024-01-19]
+
+- Implementación inicial de modelos base
+- Configuración del proyecto
+- Creación de estructura inicial
+
+## Tareas Pendientes
+
+### Alta Prioridad
+
+- [ ] Implementar sistema de búsqueda por región
+- [ ] Agregar validaciones de datos
+- [ ] Mejorar el rendimiento de consultas
+
+### Media Prioridad
+
+- [ ] Crear vistas para nuevos campos
+- [ ] Implementar filtros avanzados
+- [ ] Mejorar la UI de gestión de lugares
+
+### Baja Prioridad
+
+- [ ] Agregar más ejemplos en la documentación
+- [ ] Optimizar consultas de base de datos
+- [ ] Mejorar la cobertura de pruebas
