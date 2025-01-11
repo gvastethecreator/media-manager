@@ -88,8 +88,8 @@ export function ProfilesSection() {
 								align="start"
 							>
 								<EmojiPicker
-									onEmojiSelect={(emojiData: EmojiClickData) =>
-										handleUpdateActiveProfile({ emoji: emojiData.emoji })
+									onEmojiSelect={(emoji: string) =>
+										handleUpdateActiveProfile({ emoji: emoji })
 									}
 								/>
 							</PopoverContent>

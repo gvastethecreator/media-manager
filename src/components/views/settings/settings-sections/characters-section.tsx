@@ -208,7 +208,9 @@ export function CharactersSection() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-full p-0" align="start">
-                    <EmojiPicker onEmojiClick={handleEmojiSelect} />
+                    <EmojiPicker onEmojiSelect={(emoji: string) =>
+                      setNewCharacter({ ...newCharacter, emoji: emoji })
+                    } />
                   </PopoverContent>
                 </Popover>
                 <Popover>
@@ -367,7 +369,9 @@ export function CharactersSection() {
                                   align="start"
                                 >
                                   <EmojiPicker
-                                    onEmojiClick={handleEditEmojiSelect}
+                                    onEmojiSelect={(emoji: string) =>
+                                      setEditForm({ ...editForm!, emoji: emoji })
+                                    }
                                   />
                                 </PopoverContent>
                               </Popover>
