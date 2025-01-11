@@ -48,6 +48,7 @@ export interface FileItem {
   isPublic?: boolean;
   createdAt: string;
   updatedAt: string;
+  folderId: string;
   collections?: Array<{
     id: string;
     name: string;

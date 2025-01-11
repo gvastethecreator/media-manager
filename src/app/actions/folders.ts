@@ -1,125 +1,125 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import type { FolderCreate, FolderUpdate } from "@/services/folder.service";
+import { logger } from "@/lib/logger";
 import { revalidatePath } from "next/cache";
+
+const folderLogger = logger.withContext('FolderActions');
+
+export interface FolderCreate {
+  name: string;
+  path: string;
+  totalFiles?: number;
+  totalSize?: number;
+  lastIndexed?: Date;
+}
+
+export interface FolderUpdate extends Partial<Omit<FolderCreate, 'path'>> {
+  id: string;
+  path?: string;
+}
 
 export async function getFolders() {
   try {
+    folderLogger.info('📁 Obteniendo lista de carpetas');
     const folders = await prisma.folder.findMany({
       include: {
         _count: {
           select: {
             images: true,
-            subfolders: true,
           },
         },
-        parent: true,
       },
     });
 
-    const foldersWithStats = await Promise.all(
-      folders.map(async (folder) => {
-        const totalSize = await prisma.image.aggregate({
-          where: {
-            folderId: folder.id,
-          },
-          _sum: {
-            size: true,
-          },
-        });
-
-        return {
-          ...folder,
-          totalSize: totalSize._sum.size || 0,
-        };
-      })
-    );
-
-    return foldersWithStats;
+    folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
+    return folders;
   } catch (error) {
-    console.error("Error al obtener carpetas:", error);
+    folderLogger.error("❌ Error al obtener carpetas:", error);
     throw new Error("No se pudieron obtener las carpetas");
   }
 }
 
 export async function getFolder(id: string) {
   try {
+    folderLogger.info('🔍 Obteniendo carpeta:', id);
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
             images: true,
-            subfolders: true,
           },
         },
-        parent: true,
       },
     });
 
     if (!folder) {
+      folderLogger.warn('❌ Carpeta no encontrada:', id);
       throw new Error("Carpeta no encontrada");
     }
 
-    const totalSize = await prisma.image.aggregate({
-      where: {
-        folderId: folder.id,
-      },
-      _sum: {
-        size: true,
-      },
-    });
-
-    return {
-      ...folder,
-      totalSize: totalSize._sum.size || 0,
-    };
+    folderLogger.info('✅ Carpeta obtenida:', folder.name);
+    return folder;
   } catch (error) {
-    console.error("Error al obtener carpeta:", error);
+    folderLogger.error("❌ Error al obtener carpeta:", error);
     throw new Error("No se pudo obtener la carpeta");
   }
 }
 
 export async function createFolder(data: FolderCreate) {
   try {
-    await prisma.folder.create({
-      data,
+    folderLogger.info('📝 Creando nueva carpeta:', data.name);
+    const folder = await prisma.folder.create({
+      data: {
+        ...data,
+        totalFiles: data.totalFiles || 0,
+        totalSize: data.totalSize || 0,
+        lastIndexed: data.lastIndexed || new Date(),
+      },
     });
+    folderLogger.info('✅ Carpeta creada:', folder.name);
     revalidatePath("/settings");
+    return folder;
   } catch (error) {
-    console.error("Error al crear carpeta:", error);
+    folderLogger.error("❌ Error al crear carpeta:", error);
     throw new Error("No se pudo crear la carpeta");
   }
 }
 
 export async function updateFolder(id: string, data: FolderUpdate) {
   try {
-    await prisma.folder.update({
+    folderLogger.info('📝 Actualizando carpeta:', id);
+    const folder = await prisma.folder.update({
       where: { id },
       data,
     });
+    folderLogger.info('✅ Carpeta actualizada:', folder.name);
     revalidatePath("/settings");
+    return folder;
   } catch (error) {
-    console.error("Error al actualizar carpeta:", error);
+    folderLogger.error("❌ Error al actualizar carpeta:", error);
     throw new Error("No se pudo actualizar la carpeta");
   }
 }
 
 export async function deleteFolder(id: string) {
   try {
+    folderLogger.info('🗑️ Eliminando carpeta:', id);
     await prisma.folder.delete({
       where: { id },
     });
+    folderLogger.info('✅ Carpeta eliminada');
     revalidatePath("/settings");
   } catch (error) {
-    console.error("Error al eliminar carpeta:", error);
+    folderLogger.error("❌ Error al eliminar carpeta:", error);
     throw new Error("No se pudo eliminar la carpeta");
   }
 }
 
 export async function getFolderImages(id: string) {
   try {
+    folderLogger.info('🖼️ Obteniendo imágenes de la carpeta:', id);
     const images = await prisma.image.findMany({
       where: {
         folderId: id,
@@ -136,87 +136,64 @@ export async function getFolderImages(id: string) {
         height: true,
         metadata: true,
         thumbnail: true,
-        type: true,
         folderId: true,
       },
     });
+
+    folderLogger.info(`✅ ${images.length} imágenes obtenidas`);
     return images.map(image => ({
       ...image,
-      type: "image" as const
+      type: 'image',
     }));
   } catch (error) {
-    console.error("Error al obtener imágenes de la carpeta:", error);
+    folderLogger.error("❌ Error al obtener imágenes de la carpeta:", error);
     throw new Error("No se pudieron obtener las imágenes de la carpeta");
   }
 }
 
-export async function getFolderSubfolders(id: string) {
+export async function updateFolderStats(id: string, stats: { totalFiles: number; totalSize: number }) {
   try {
-    const subfolders = await prisma.folder.findMany({
-      where: {
-        parentId: id,
+    folderLogger.info('📊 Actualizando estadísticas de carpeta:', { id, stats });
+    const folder = await prisma.folder.update({
+      where: { id },
+      data: {
+        totalFiles: stats.totalFiles,
+        totalSize: stats.totalSize,
+        lastIndexed: new Date(),
       },
+    });
+    folderLogger.info('✅ Estadísticas de carpeta actualizadas:', folder.name);
+    revalidatePath("/settings");
+    return folder;
+  } catch (error) {
+    folderLogger.error("❌ Error al actualizar estadísticas de carpeta:", error);
+    throw new Error("No se pudieron actualizar las estadísticas de la carpeta");
+  }
+}
+
+export async function getFolderByPath(path: string) {
+  try {
+    folderLogger.info('🔍 Buscando carpeta por ruta:', path);
+    const folder = await prisma.folder.findUnique({
+      where: { path },
       include: {
         _count: {
           select: {
             images: true,
-            subfolders: true,
           },
         },
       },
     });
 
-    const subfoldersWithStats = await Promise.all(
-      subfolders.map(async (folder) => {
-        const totalSize = await prisma.image.aggregate({
-          where: {
-            folderId: folder.id,
-          },
-          _sum: {
-            size: true,
-          },
-        });
+    if (!folder) {
+      folderLogger.warn('❌ Carpeta no encontrada:', path);
+      return null;
+    }
 
-        return {
-          ...folder,
-          totalSize: totalSize._sum.size || 0,
-        };
-      })
-    );
-
-    return subfoldersWithStats;
+    folderLogger.info('✅ Carpeta encontrada:', folder.name);
+    return folder;
   } catch (error) {
-    console.error("Error al obtener subcarpetas:", error);
-    throw new Error("No se pudieron obtener las subcarpetas");
-  }
-}
-
-export async function moveFolder(id: string, parentId: string | null) {
-  try {
-    await prisma.folder.update({
-      where: { id },
-      data: {
-        parentId,
-      },
-    });
-    revalidatePath("/settings");
-  } catch (error) {
-    console.error("Error al mover carpeta:", error);
-    throw new Error("No se pudo mover la carpeta");
-  }
-}
-
-export async function moveImageToFolder(imageId: string, folderId: string) {
-  try {
-    await prisma.image.update({
-      where: { id: imageId },
-      data: {
-        folderId,
-      },
-    });
-    revalidatePath("/settings");
-  } catch (error) {
-    console.error("Error al mover imagen:", error);
-    throw new Error("No se pudo mover la imagen");
+    folderLogger.error("❌ Error al buscar carpeta por ruta:", error);
+    throw new Error("No se pudo buscar la carpeta por ruta");
   }
 }

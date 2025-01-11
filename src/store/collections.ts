@@ -1,13 +1,40 @@
 import { create } from 'zustand'
 import { logger } from '@/lib/logger'
 import type { FileItem } from '@/types/file-item'
-import { collectionService } from '@/services/collection.service'
-import type { Collection, CollectionCreate, CollectionUpdate } from '@/services/collection.service'
+import {
+  getCollections,
+  getCollection,
+  createCollection as createCollectionAction,
+  updateCollection as updateCollectionAction,
+  deleteCollection as deleteCollectionAction,
+  addImageToCollection as addImageToCollectionAction,
+  removeImageFromCollection as removeImageFromCollectionAction,
+  getCollectionImages
+} from '@/app/actions/collections'
 
 const collectionsLogger = logger.withContext('CollectionsStore')
 
+export interface CollectionCreate {
+  name: string
+  emoji?: string
+  color?: string
+  description?: string
+  shortcut?: string
+  sortBy?: string
+  filters?: string
+}
+
+export interface CollectionUpdate extends Partial<Omit<CollectionCreate, 'name'>> {
+  id: string
+  name?: string
+}
+
+export type Collection = Awaited<ReturnType<typeof getCollection>>
+export type CollectionWithStats = Awaited<ReturnType<typeof getCollections>>[0]
+export type ImageFromServer = Awaited<ReturnType<typeof getCollectionImages>>[0]
+
 interface CollectionsState {
-  collections: Collection[]
+  collections: CollectionWithStats[]
   currentCollection: Collection | null
   currentItems: FileItem[]
   isLoading: boolean
@@ -22,6 +49,49 @@ interface CollectionsState {
   loadCollectionContent: (id: string) => Promise<void>
 }
 
+const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
+  if (!metadata) return undefined
+  try {
+    const parsed = JSON.parse(metadata)
+    return typeof parsed === 'object' ? parsed : undefined
+  } catch {
+    collectionsLogger.warn('⚠️ Error al parsear metadata de imagen')
+    return undefined
+  }
+}
+
+const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+  try {
+    const metadata = validateMetadata(image.metadata)
+    const thumbnail = image.thumbnail
+      ? Buffer.from(image.thumbnail).toString('base64')
+      : undefined
+
+    return {
+      id: image.id,
+      name: image.name,
+      path: image.path,
+      type: 'image',
+      size: image.size,
+      width: image.width ?? undefined,
+      height: image.height ?? undefined,
+      metadata,
+      thumbnail,
+      thumbnailSize: image.thumbnailSize ?? undefined,
+      thumbnailWidth: image.thumbnailWidth ?? undefined,
+      thumbnailHeight: image.thumbnailHeight ?? undefined,
+      createdAt: image.createdAt.toISOString(),
+      updatedAt: image.updatedAt.toISOString(),
+      isPublic: image.isPublic ?? false,
+      isFavorite: image.isFavorite ?? false,
+      folderId: image.folderId,
+    }
+  } catch (error) {
+    collectionsLogger.error('❌ Error al convertir imagen del servidor:', { error, image })
+    throw new Error('Error al procesar imagen del servidor')
+  }
+}
+
 export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   collections: [],
   currentCollection: null,
@@ -32,7 +102,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   loadCollections: async () => {
     try {
       set({ isLoading: true, error: null })
-      const collections = await collectionService.getCollections()
+      const collections = await getCollections()
       set({ collections, isLoading: false })
       collectionsLogger.info('📥 Colecciones cargadas:', { count: collections.length })
     } catch (error) {
@@ -45,9 +115,14 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   createCollection: async (data: CollectionCreate) => {
     try {
       set({ isLoading: true, error: null })
-      const collection = await collectionService.createCollection(data)
+      const collection = await createCollectionAction(data)
+      const collectionWithStats = {
+        ...collection,
+        _count: { images: 0 },
+        totalSize: 0,
+      } as CollectionWithStats
       set(state => ({
-        collections: [...state.collections, collection],
+        collections: [...state.collections, collectionWithStats],
         isLoading: false
       }))
       collectionsLogger.info('✨ Colección creada:', { collection })
@@ -61,12 +136,18 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   updateCollection: async (id: string, data: CollectionUpdate) => {
     try {
       set({ isLoading: true, error: null })
-      const updatedCollection = await collectionService.updateCollection(id, data)
+      const updatedCollection = await updateCollectionAction(id, data)
+      const currentStats = get().collections.find(c => c.id === id)
+      const updatedCollectionWithStats = {
+        ...updatedCollection,
+        _count: currentStats?._count || { images: 0 },
+        totalSize: currentStats?.totalSize || 0,
+      } as CollectionWithStats
       set(state => ({
         collections: state.collections.map(c =>
-          c.id === id ? updatedCollection : c
+          c.id === id ? updatedCollectionWithStats : c
         ),
-        currentCollection: state.currentCollection?.id === id ? updatedCollection : state.currentCollection,
+        currentCollection: state.currentCollection?.id === id ? updatedCollectionWithStats : state.currentCollection,
         isLoading: false
       }))
       collectionsLogger.info('📝 Colección actualizada:', { id, data })
@@ -80,7 +161,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   deleteCollection: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      await collectionService.deleteCollection(id)
+      await deleteCollectionAction(id)
       set(state => ({
         collections: state.collections.filter(c => c.id !== id),
         currentCollection: state.currentCollection?.id === id ? null : state.currentCollection,
@@ -97,7 +178,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
 
   addImageToCollection: async (collectionId: string, imageId: string) => {
     try {
-      await collectionService.addImageToCollection(collectionId, imageId)
+      await addImageToCollectionAction(collectionId, imageId)
       collectionsLogger.info('📸 Imagen agregada a colección:', { collectionId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
@@ -108,7 +189,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
 
   removeImageFromCollection: async (collectionId: string, imageId: string) => {
     try {
-      await collectionService.removeImageFromCollection(collectionId, imageId)
+      await removeImageFromCollectionAction(collectionId, imageId)
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }))
@@ -123,13 +204,19 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   loadCollectionContent: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      const collection = await collectionService.getCollection(id)
+      const [collection, images] = await Promise.all([
+        getCollection(id),
+        getCollectionImages(id)
+      ])
       if (!collection) {
         throw new Error('Colección no encontrada')
       }
-      // TODO: Implementar endpoint para obtener imágenes de una colección
+
+      const fileItems = images.map(convertServerImageToFileItem)
+
       set({
         currentCollection: collection,
+        currentItems: fileItems,
         isLoading: false
       })
       collectionsLogger.info('📂 Contenido de colección cargado:', { id })

@@ -3,9 +3,31 @@
 import { prisma } from "@/lib/prisma";
 import type { AlbumCreate, AlbumUpdate } from "@/services/album.service";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
+
+const albumLogger = logger.withContext('AlbumActions');
+
+const REVALIDATE_PATHS = [
+  '/settings',
+  '/albums',
+  '/albums/[id]'
+] as const;
+
+const revalidateAllPaths = () => {
+  REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+  albumLogger.info('🔄 Rutas revalidadas');
+};
+
+class AlbumError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message);
+    this.name = 'AlbumError';
+  }
+}
 
 export async function getAlbums() {
   try {
+    albumLogger.info('📚 Obteniendo lista de álbumes');
     const albums = await prisma.album.findMany({
       include: {
         _count: {
@@ -38,15 +60,17 @@ export async function getAlbums() {
       })
     );
 
+    albumLogger.info(`✅ ${albums.length} álbumes obtenidos`);
     return albumsWithStats;
   } catch (error) {
-    console.error("Error al obtener álbumes:", error);
-    throw new Error("No se pudieron obtener los álbumes");
+    albumLogger.error("❌ Error al obtener álbumes:", error);
+    throw new AlbumError("No se pudieron obtener los álbumes", error);
   }
 }
 
 export async function getAlbum(id: string) {
   try {
+    albumLogger.info('🔍 Obteniendo álbum:', id);
     const album = await prisma.album.findUnique({
       where: { id },
       include: {
@@ -59,7 +83,7 @@ export async function getAlbum(id: string) {
     });
 
     if (!album) {
-      throw new Error("Álbum no encontrado");
+      throw new AlbumError("Álbum no encontrado");
     }
 
     const totalSize = await prisma.image.aggregate({
@@ -75,55 +99,74 @@ export async function getAlbum(id: string) {
       },
     });
 
-    return {
+    const result = {
       ...album,
       totalSize: totalSize._sum.size || 0,
     };
+
+    albumLogger.info('✅ Álbum obtenido:', album.name);
+    return result;
   } catch (error) {
-    console.error("Error al obtener álbum:", error);
-    throw new Error("No se pudo obtener el álbum");
+    albumLogger.error("❌ Error al obtener álbum:", error);
+    if (error instanceof AlbumError) throw error;
+    throw new AlbumError("No se pudo obtener el álbum", error);
   }
 }
 
 export async function createAlbum(data: AlbumCreate) {
   try {
-    await prisma.album.create({
-      data,
+    albumLogger.info('📝 Creando nuevo álbum:', data.name);
+    const album = await prisma.album.create({
+      data: {
+        ...data,
+        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+      },
     });
-    revalidatePath("/settings");
+    albumLogger.info('✅ Álbum creado:', album.name);
+    revalidateAllPaths();
+    return album;
   } catch (error) {
-    console.error("Error al crear álbum:", error);
-    throw new Error("No se pudo crear el álbum");
+    albumLogger.error("❌ Error al crear álbum:", error);
+    throw new AlbumError("No se pudo crear el álbum", error);
   }
 }
 
 export async function updateAlbum(id: string, data: AlbumUpdate) {
   try {
-    await prisma.album.update({
+    albumLogger.info('📝 Actualizando álbum:', id);
+    const album = await prisma.album.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+      },
     });
-    revalidatePath("/settings");
+    albumLogger.info('✅ Álbum actualizado:', album.name);
+    revalidateAllPaths();
+    return album;
   } catch (error) {
-    console.error("Error al actualizar álbum:", error);
-    throw new Error("No se pudo actualizar el álbum");
+    albumLogger.error("❌ Error al actualizar álbum:", error);
+    throw new AlbumError("No se pudo actualizar el álbum", error);
   }
 }
 
 export async function deleteAlbum(id: string) {
   try {
+    albumLogger.info('🗑️ Eliminando álbum:', id);
     await prisma.album.delete({
       where: { id },
     });
-    revalidatePath("/settings");
+    albumLogger.info('✅ Álbum eliminado');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar álbum:", error);
-    throw new Error("No se pudo eliminar el álbum");
+    albumLogger.error("❌ Error al eliminar álbum:", error);
+    throw new AlbumError("No se pudo eliminar el álbum", error);
   }
 }
 
 export async function getAlbumImages(id: string) {
   try {
+    albumLogger.info('🖼️ Obteniendo imágenes del álbum:', id);
     const images = await prisma.image.findMany({
       where: {
         albums: {
@@ -144,22 +187,29 @@ export async function getAlbumImages(id: string) {
         height: true,
         metadata: true,
         thumbnail: true,
-        type: true,
+        thumbnailSize: true,
+        thumbnailWidth: true,
+        thumbnailHeight: true,
         folderId: true,
+        isPublic: true,
+        isFavorite: true,
       },
     });
+
+    albumLogger.info(`✅ ${images.length} imágenes obtenidas`);
     return images.map(image => ({
       ...image,
-      type: "image" as const
+      type: 'image',
     }));
   } catch (error) {
-    console.error("Error al obtener imágenes del álbum:", error);
-    throw new Error("No se pudieron obtener las imágenes del álbum");
+    albumLogger.error("❌ Error al obtener imágenes del álbum:", error);
+    throw new AlbumError("No se pudieron obtener las imágenes del álbum", error);
   }
 }
 
 export async function addImageToAlbum(albumId: string, imageId: string) {
   try {
+    albumLogger.info('➕ Agregando imagen a álbum:', { albumId, imageId });
     await prisma.album.update({
       where: { id: albumId },
       data: {
@@ -170,15 +220,17 @@ export async function addImageToAlbum(albumId: string, imageId: string) {
         },
       },
     });
-    revalidatePath("/settings");
+    albumLogger.info('✅ Imagen agregada al álbum');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al agregar imagen al álbum:", error);
-    throw new Error("No se pudo agregar la imagen al álbum");
+    albumLogger.error("❌ Error al agregar imagen al álbum:", error);
+    throw new AlbumError("No se pudo agregar la imagen al álbum", error);
   }
 }
 
 export async function removeImageFromAlbum(albumId: string, imageId: string) {
   try {
+    albumLogger.info('➖ Removiendo imagen de álbum:', { albumId, imageId });
     await prisma.album.update({
       where: { id: albumId },
       data: {
@@ -189,9 +241,10 @@ export async function removeImageFromAlbum(albumId: string, imageId: string) {
         },
       },
     });
-    revalidatePath("/settings");
+    albumLogger.info('✅ Imagen removida del álbum');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar imagen del álbum:", error);
-    throw new Error("No se pudo eliminar la imagen del álbum");
+    albumLogger.error("❌ Error al eliminar imagen del álbum:", error);
+    throw new AlbumError("No se pudo eliminar la imagen del álbum", error);
   }
 }

@@ -3,195 +3,153 @@
 import { prisma } from "@/lib/prisma";
 import type { ProfileCreate, ProfileUpdate } from "@/services/profile.service";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
+
+const profileLogger = logger.withContext('ProfileActions');
+
+const REVALIDATE_PATHS = [
+  '/settings',
+  '/profiles',
+  '/profiles/[id]'
+] as const;
+
+const revalidateAllPaths = () => {
+  REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+  profileLogger.info('🔄 Rutas revalidadas');
+};
+
+class ProfileError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message);
+    this.name = 'ProfileError';
+  }
+}
 
 export async function getProfiles() {
   try {
-    const profiles = await prisma.profile.findMany({
-      include: {
-        _count: {
-          select: {
-            images: true,
-          },
-        },
-      },
-    });
-
-    const profilesWithStats = await Promise.all(
-      profiles.map(async (profile) => {
-        const totalSize = await prisma.image.aggregate({
-          where: {
-            profiles: {
-              some: {
-                id: profile.id,
-              },
-            },
-          },
-          _sum: {
-            size: true,
-          },
-        });
-
-        return {
-          ...profile,
-          totalSize: totalSize._sum.size || 0,
-        };
-      })
-    );
-
-    return profilesWithStats;
+    profileLogger.info('👥 Obteniendo lista de perfiles');
+    const profiles = await prisma.profile.findMany();
+    profileLogger.info(`✅ ${profiles.length} perfiles obtenidos`);
+    return profiles;
   } catch (error) {
-    console.error("Error al obtener perfiles:", error);
-    throw new Error("No se pudieron obtener los perfiles");
+    profileLogger.error("❌ Error al obtener perfiles:", error);
+    throw new ProfileError("No se pudieron obtener los perfiles", error);
   }
 }
 
 export async function getProfile(id: string) {
   try {
+    profileLogger.info('🔍 Obteniendo perfil:', id);
     const profile = await prisma.profile.findUnique({
       where: { id },
-      include: {
-        _count: {
-          select: {
-            images: true,
-          },
-        },
-      },
     });
 
     if (!profile) {
-      throw new Error("Perfil no encontrado");
+      throw new ProfileError("Perfil no encontrado");
     }
 
-    const totalSize = await prisma.image.aggregate({
-      where: {
-        profiles: {
-          some: {
-            id: profile.id,
-          },
-        },
-      },
-      _sum: {
-        size: true,
-      },
-    });
-
-    return {
-      ...profile,
-      totalSize: totalSize._sum.size || 0,
-    };
+    profileLogger.info('✅ Perfil obtenido:', profile.name);
+    return profile;
   } catch (error) {
-    console.error("Error al obtener perfil:", error);
-    throw new Error("No se pudo obtener el perfil");
+    profileLogger.error("❌ Error al obtener perfil:", error);
+    if (error instanceof ProfileError) throw error;
+    throw new ProfileError("No se pudo obtener el perfil", error);
   }
 }
 
 export async function createProfile(data: ProfileCreate) {
   try {
-    await prisma.profile.create({
+    profileLogger.info('📝 Creando nuevo perfil:', data.name);
+    const profile = await prisma.profile.create({
       data,
     });
-    revalidatePath("/settings");
+    profileLogger.info('✅ Perfil creado:', profile.name);
+    revalidateAllPaths();
+    return profile;
   } catch (error) {
-    console.error("Error al crear perfil:", error);
-    throw new Error("No se pudo crear el perfil");
+    profileLogger.error("❌ Error al crear perfil:", error);
+    throw new ProfileError("No se pudo crear el perfil", error);
   }
 }
 
 export async function updateProfile(id: string, data: ProfileUpdate) {
   try {
-    await prisma.profile.update({
+    profileLogger.info('📝 Actualizando perfil:', id);
+    const profile = await prisma.profile.update({
       where: { id },
       data,
     });
-    revalidatePath("/settings");
+    profileLogger.info('✅ Perfil actualizado:', profile.name);
+    revalidateAllPaths();
+    return profile;
   } catch (error) {
-    console.error("Error al actualizar perfil:", error);
-    throw new Error("No se pudo actualizar el perfil");
+    profileLogger.error("❌ Error al actualizar perfil:", error);
+    throw new ProfileError("No se pudo actualizar el perfil", error);
   }
 }
 
 export async function deleteProfile(id: string) {
   try {
+    profileLogger.info('🗑️ Eliminando perfil:', id);
     await prisma.profile.delete({
       where: { id },
     });
-    revalidatePath("/settings");
+    profileLogger.info('✅ Perfil eliminado');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar perfil:", error);
-    throw new Error("No se pudo eliminar el perfil");
+    profileLogger.error("❌ Error al eliminar perfil:", error);
+    throw new ProfileError("No se pudo eliminar el perfil", error);
   }
 }
 
-export async function getProfileImages(id: string) {
+export async function activateProfile(id: string) {
   try {
-    const images = await prisma.image.findMany({
+    profileLogger.info('🔔 Activando perfil:', id);
+    // Primero desactivamos todos los perfiles
+    await prisma.profile.updateMany({
       where: {
-        profiles: {
-          some: {
-            id,
-          },
-        },
+        isActive: true,
       },
-      select: {
-        id: true,
-        name: true,
-        path: true,
-        size: true,
-        createdAt: true,
-        updatedAt: true,
-        hash: true,
-        width: true,
-        height: true,
-        metadata: true,
-        thumbnail: true,
-        type: true,
-        folderId: true,
+      data: {
+        isActive: false,
       },
     });
-    return images.map(image => ({
-      ...image,
-      type: "image" as const
-    }));
+
+    // Luego activamos el perfil seleccionado
+    const profile = await prisma.profile.update({
+      where: { id },
+      data: {
+        isActive: true,
+      },
+    });
+
+    profileLogger.info('✅ Perfil activado:', profile.name);
+    revalidateAllPaths();
+    return profile;
   } catch (error) {
-    console.error("Error al obtener imágenes del perfil:", error);
-    throw new Error("No se pudieron obtener las imágenes del perfil");
+    profileLogger.error("❌ Error al activar perfil:", error);
+    throw new ProfileError("No se pudo activar el perfil", error);
   }
 }
 
-export async function addImageToProfile(profileId: string, imageId: string) {
+export async function getActiveProfile() {
   try {
-    await prisma.profile.update({
-      where: { id: profileId },
-      data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
+    profileLogger.info('🔍 Obteniendo perfil activo');
+    const profile = await prisma.profile.findFirst({
+      where: {
+        isActive: true,
       },
     });
-    revalidatePath("/settings");
-  } catch (error) {
-    console.error("Error al agregar imagen al perfil:", error);
-    throw new Error("No se pudo agregar la imagen al perfil");
-  }
-}
 
-export async function removeImageFromProfile(profileId: string, imageId: string) {
-  try {
-    await prisma.profile.update({
-      where: { id: profileId },
-      data: {
-        images: {
-          disconnect: {
-            id: imageId,
-          },
-        },
-      },
-    });
-    revalidatePath("/settings");
+    if (!profile) {
+      throw new ProfileError("No hay perfil activo");
+    }
+
+    profileLogger.info('✅ Perfil activo obtenido:', profile.name);
+    return profile;
   } catch (error) {
-    console.error("Error al eliminar imagen del perfil:", error);
-    throw new Error("No se pudo eliminar la imagen del perfil");
+    profileLogger.error("❌ Error al obtener perfil activo:", error);
+    if (error instanceof ProfileError) throw error;
+    throw new ProfileError("No se pudo obtener el perfil activo", error);
   }
 }
