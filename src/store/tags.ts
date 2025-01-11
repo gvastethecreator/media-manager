@@ -1,13 +1,37 @@
 import { create } from 'zustand'
 import { logger } from '@/lib/logger'
 import type { FileItem } from '@/types/file-item'
-import { tagService } from '@/services/tag.service'
-import type { Tag, TagCreate, TagUpdate } from '@/services/tag.service'
+import {
+  getTags,
+  getTag,
+  createTag as createTagAction,
+  updateTag as updateTagAction,
+  deleteTag as deleteTagAction,
+  addImageToTag as addImageToTagAction,
+  removeImageFromTag as removeImageFromTagAction,
+  getTagImages
+} from '@/app/actions/tags'
 
-const tagsLogger = logger.withContext('TagsStore')
+const tagLogger = logger.withContext('TagStore')
+
+export interface TagCreate {
+  name: string
+  color?: string
+  description?: string
+  shortcut?: string
+}
+
+export interface TagUpdate extends Partial<Omit<TagCreate, 'name'>> {
+  id: string
+  name?: string
+}
+
+export type Tag = Awaited<ReturnType<typeof getTag>>
+export type TagWithStats = Awaited<ReturnType<typeof getTags>>[0]
+export type ImageFromServer = Awaited<ReturnType<typeof getTagImages>>[0]
 
 interface TagsState {
-  tags: Tag[]
+  tags: TagWithStats[]
   currentTag: Tag | null
   currentItems: FileItem[]
   isLoading: boolean
@@ -22,6 +46,49 @@ interface TagsState {
   loadTagContent: (id: string) => Promise<void>
 }
 
+const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
+  if (!metadata) return undefined
+  try {
+    const parsed = JSON.parse(metadata)
+    return typeof parsed === 'object' ? parsed : undefined
+  } catch {
+    tagLogger.warn('⚠️ Error al parsear metadata de imagen')
+    return undefined
+  }
+}
+
+const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+  try {
+    const metadata = validateMetadata(image.metadata)
+    const thumbnail = image.thumbnail
+      ? Buffer.from(image.thumbnail).toString('base64')
+      : undefined
+
+    return {
+      id: image.id,
+      name: image.name,
+      path: image.path,
+      type: 'image',
+      size: image.size,
+      width: image.width ?? undefined,
+      height: image.height ?? undefined,
+      metadata,
+      thumbnail,
+      thumbnailSize: image.thumbnailSize ?? undefined,
+      thumbnailWidth: image.thumbnailWidth ?? undefined,
+      thumbnailHeight: image.thumbnailHeight ?? undefined,
+      createdAt: image.createdAt.toISOString(),
+      updatedAt: image.updatedAt.toISOString(),
+      isPublic: image.isPublic ?? false,
+      isFavorite: image.isFavorite ?? false,
+      folderId: image.folderId,
+    }
+  } catch (error) {
+    tagLogger.error('❌ Error al convertir imagen del servidor:', { error, image })
+    throw new Error('Error al procesar imagen del servidor')
+  }
+}
+
 export const useTagsStore = create<TagsState>((set, get) => ({
   tags: [],
   currentTag: null,
@@ -32,111 +99,128 @@ export const useTagsStore = create<TagsState>((set, get) => ({
   loadTags: async () => {
     try {
       set({ isLoading: true, error: null })
-      const tags = await tagService.getTags()
+      const tags = await getTags()
       set({ tags, isLoading: false })
-      tagsLogger.info('📥 Tags cargados:', { count: tags.length })
+      tagLogger.info('📥 Etiquetas cargadas:', { count: tags.length })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage, isLoading: false })
-      tagsLogger.error('❌ Error al cargar tags:', { error })
+      tagLogger.error('❌ Error al cargar etiquetas:', { error })
     }
   },
 
   createTag: async (data: TagCreate) => {
     try {
       set({ isLoading: true, error: null })
-      const tag = await tagService.createTag(data)
+      const tag = await createTagAction(data)
+      const tagWithStats = {
+        ...tag,
+        _count: { images: 0 },
+        totalSize: 0,
+      } as TagWithStats
       set(state => ({
-        tags: [...state.tags, tag],
+        tags: [...state.tags, tagWithStats],
         isLoading: false
       }))
-      tagsLogger.info('✨ Tag creado:', { tag })
+      tagLogger.info('✨ Etiqueta creada:', { tag })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage, isLoading: false })
-      tagsLogger.error('❌ Error al crear tag:', { error })
+      tagLogger.error('❌ Error al crear etiqueta:', { error })
     }
   },
 
   updateTag: async (id: string, data: TagUpdate) => {
     try {
       set({ isLoading: true, error: null })
-      const updatedTag = await tagService.updateTag(id, data)
+      const updatedTag = await updateTagAction(id, data)
+      const currentStats = get().tags.find(t => t.id === id)
+      const updatedTagWithStats = {
+        ...updatedTag,
+        _count: currentStats?._count || { images: 0 },
+        totalSize: currentStats?.totalSize || 0,
+      } as TagWithStats
       set(state => ({
         tags: state.tags.map(t =>
-          t.id === id ? updatedTag : t
+          t.id === id ? updatedTagWithStats : t
         ),
-        currentTag: state.currentTag?.id === id ? updatedTag : state.currentTag,
+        currentTag: state.currentTag?.id === id ? updatedTagWithStats : state.currentTag,
         isLoading: false
       }))
-      tagsLogger.info('📝 Tag actualizado:', { id, data })
+      tagLogger.info('📝 Etiqueta actualizada:', { id, data })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage, isLoading: false })
-      tagsLogger.error('❌ Error al actualizar tag:', { id, error })
+      tagLogger.error('❌ Error al actualizar etiqueta:', { id, error })
     }
   },
 
   deleteTag: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      await tagService.deleteTag(id)
+      await deleteTagAction(id)
       set(state => ({
         tags: state.tags.filter(t => t.id !== id),
         currentTag: state.currentTag?.id === id ? null : state.currentTag,
         currentItems: state.currentTag?.id === id ? [] : state.currentItems,
         isLoading: false
       }))
-      tagsLogger.info('🗑️ Tag eliminado:', { id })
+      tagLogger.info('🗑️ Etiqueta eliminada:', { id })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage, isLoading: false })
-      tagsLogger.error('❌ Error al eliminar tag:', { id, error })
+      tagLogger.error('❌ Error al eliminar etiqueta:', { id, error })
     }
   },
 
   addImageToTag: async (tagId: string, imageId: string) => {
     try {
-      await tagService.addImageToTag(tagId, imageId)
-      tagsLogger.info('📸 Imagen agregada a tag:', { tagId, imageId })
+      await addImageToTagAction(tagId, imageId)
+      tagLogger.info('📸 Imagen agregada a etiqueta:', { tagId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage })
-      tagsLogger.error('❌ Error al agregar imagen a tag:', { tagId, imageId, error })
+      tagLogger.error('❌ Error al agregar imagen a etiqueta:', { tagId, imageId, error })
     }
   },
 
   removeImageFromTag: async (tagId: string, imageId: string) => {
     try {
-      await tagService.removeImageFromTag(tagId, imageId)
+      await removeImageFromTagAction(tagId, imageId)
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }))
-      tagsLogger.info('🗑️ Imagen eliminada de tag:', { tagId, imageId })
+      tagLogger.info('🗑️ Imagen eliminada de etiqueta:', { tagId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage })
-      tagsLogger.error('❌ Error al eliminar imagen de tag:', { tagId, imageId, error })
+      tagLogger.error('❌ Error al eliminar imagen de etiqueta:', { tagId, imageId, error })
     }
   },
 
   loadTagContent: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      const tag = await tagService.getTag(id)
+      const [tag, images] = await Promise.all([
+        getTag(id),
+        getTagImages(id)
+      ])
       if (!tag) {
-        throw new Error('Tag no encontrado')
+        throw new Error('Etiqueta no encontrada')
       }
-      // TODO: Implementar endpoint para obtener imágenes de un tag
+
+      const fileItems = images.map(convertServerImageToFileItem)
+
       set({
         currentTag: tag,
+        currentItems: fileItems,
         isLoading: false
       })
-      tagsLogger.info('📂 Contenido de tag cargado:', { id })
+      tagLogger.info('📂 Contenido de etiqueta cargado:', { id })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       set({ error: errorMessage, isLoading: false })
-      tagsLogger.error('❌ Error al cargar contenido de tag:', { id, error })
+      tagLogger.error('❌ Error al cargar contenido de etiqueta:', { id, error })
     }
   }
 }))

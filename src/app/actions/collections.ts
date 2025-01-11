@@ -3,9 +3,31 @@
 import { prisma } from "@/lib/prisma";
 import type { CollectionCreate, CollectionUpdate } from "@/services/collection.service";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
+
+const collectionLogger = logger.withContext('CollectionActions');
+
+const REVALIDATE_PATHS = [
+  '/settings',
+  '/collections',
+  '/collections/[id]'
+] as const;
+
+const revalidateAllPaths = () => {
+  REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+  collectionLogger.info('🔄 Rutas revalidadas');
+};
+
+class CollectionError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message);
+    this.name = 'CollectionError';
+  }
+}
 
 export async function getCollections() {
   try {
+    collectionLogger.info('📚 Obteniendo lista de colecciones');
     const collections = await prisma.collection.findMany({
       include: {
         _count: {
@@ -38,15 +60,17 @@ export async function getCollections() {
       })
     );
 
+    collectionLogger.info(`✅ ${collections.length} colecciones obtenidas`);
     return collectionsWithStats;
   } catch (error) {
-    console.error("Error al obtener colecciones:", error);
-    throw new Error("No se pudieron obtener las colecciones");
+    collectionLogger.error("❌ Error al obtener colecciones:", error);
+    throw new CollectionError("No se pudieron obtener las colecciones", error);
   }
 }
 
 export async function getCollection(id: string) {
   try {
+    collectionLogger.info('🔍 Obteniendo colección:', id);
     const collection = await prisma.collection.findUnique({
       where: { id },
       include: {
@@ -59,7 +83,7 @@ export async function getCollection(id: string) {
     });
 
     if (!collection) {
-      throw new Error("Colección no encontrada");
+      throw new CollectionError("Colección no encontrada");
     }
 
     const totalSize = await prisma.image.aggregate({
@@ -75,55 +99,74 @@ export async function getCollection(id: string) {
       },
     });
 
-    return {
+    const result = {
       ...collection,
       totalSize: totalSize._sum.size || 0,
     };
+
+    collectionLogger.info('✅ Colección obtenida:', collection.name);
+    return result;
   } catch (error) {
-    console.error("Error al obtener colección:", error);
-    throw new Error("No se pudo obtener la colección");
+    collectionLogger.error("❌ Error al obtener colección:", error);
+    if (error instanceof CollectionError) throw error;
+    throw new CollectionError("No se pudo obtener la colección", error);
   }
 }
 
 export async function createCollection(data: CollectionCreate) {
   try {
-    await prisma.collection.create({
-      data,
+    collectionLogger.info('📝 Creando nueva colección:', data.name);
+    const collection = await prisma.collection.create({
+      data: {
+        ...data,
+        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+      },
     });
-    revalidatePath("/settings");
+    collectionLogger.info('✅ Colección creada:', collection.name);
+    revalidateAllPaths();
+    return collection;
   } catch (error) {
-    console.error("Error al crear colección:", error);
-    throw new Error("No se pudo crear la colección");
+    collectionLogger.error("❌ Error al crear colección:", error);
+    throw new CollectionError("No se pudo crear la colección", error);
   }
 }
 
 export async function updateCollection(id: string, data: CollectionUpdate) {
   try {
-    await prisma.collection.update({
+    collectionLogger.info('📝 Actualizando colección:', id);
+    const collection = await prisma.collection.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+      },
     });
-    revalidatePath("/settings");
+    collectionLogger.info('✅ Colección actualizada:', collection.name);
+    revalidateAllPaths();
+    return collection;
   } catch (error) {
-    console.error("Error al actualizar colección:", error);
-    throw new Error("No se pudo actualizar la colección");
+    collectionLogger.error("❌ Error al actualizar colección:", error);
+    throw new CollectionError("No se pudo actualizar la colección", error);
   }
 }
 
 export async function deleteCollection(id: string) {
   try {
+    collectionLogger.info('🗑️ Eliminando colección:', id);
     await prisma.collection.delete({
       where: { id },
     });
-    revalidatePath("/settings");
+    collectionLogger.info('✅ Colección eliminada');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar colección:", error);
-    throw new Error("No se pudo eliminar la colección");
+    collectionLogger.error("❌ Error al eliminar colección:", error);
+    throw new CollectionError("No se pudo eliminar la colección", error);
   }
 }
 
 export async function getCollectionImages(id: string) {
   try {
+    collectionLogger.info('🖼️ Obteniendo imágenes de la colección:', id);
     const images = await prisma.image.findMany({
       where: {
         collections: {
@@ -144,22 +187,29 @@ export async function getCollectionImages(id: string) {
         height: true,
         metadata: true,
         thumbnail: true,
-        type: true,
+        thumbnailSize: true,
+        thumbnailWidth: true,
+        thumbnailHeight: true,
         folderId: true,
+        isPublic: true,
+        isFavorite: true,
       },
     });
+
+    collectionLogger.info(`✅ ${images.length} imágenes obtenidas`);
     return images.map(image => ({
       ...image,
-      type: "image" as const
+      type: 'image',
     }));
   } catch (error) {
-    console.error("Error al obtener imágenes de la colección:", error);
-    throw new Error("No se pudieron obtener las imágenes de la colección");
+    collectionLogger.error("❌ Error al obtener imágenes de la colección:", error);
+    throw new CollectionError("No se pudieron obtener las imágenes de la colección", error);
   }
 }
 
 export async function addImageToCollection(collectionId: string, imageId: string) {
   try {
+    collectionLogger.info('➕ Agregando imagen a colección:', { collectionId, imageId });
     await prisma.collection.update({
       where: { id: collectionId },
       data: {
@@ -170,15 +220,17 @@ export async function addImageToCollection(collectionId: string, imageId: string
         },
       },
     });
-    revalidatePath("/settings");
+    collectionLogger.info('✅ Imagen agregada a la colección');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al agregar imagen a la colección:", error);
-    throw new Error("No se pudo agregar la imagen a la colección");
+    collectionLogger.error("❌ Error al agregar imagen a la colección:", error);
+    throw new CollectionError("No se pudo agregar la imagen a la colección", error);
   }
 }
 
 export async function removeImageFromCollection(collectionId: string, imageId: string) {
   try {
+    collectionLogger.info('➖ Removiendo imagen de colección:', { collectionId, imageId });
     await prisma.collection.update({
       where: { id: collectionId },
       data: {
@@ -189,9 +241,10 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
         },
       },
     });
-    revalidatePath("/settings");
+    collectionLogger.info('✅ Imagen removida de la colección');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar imagen de la colección:", error);
-    throw new Error("No se pudo eliminar la imagen de la colección");
+    collectionLogger.error("❌ Error al eliminar imagen de la colección:", error);
+    throw new CollectionError("No se pudo eliminar la imagen de la colección", error);
   }
 }

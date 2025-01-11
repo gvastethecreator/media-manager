@@ -18,7 +18,7 @@ export interface CollectionCreate {
   description?: string
   shortcut?: string
   sortBy?: string
-  filters?: any[]
+  filters?: string
 }
 
 export interface CollectionUpdate extends Partial<Omit<CollectionCreate, 'name'>> {
