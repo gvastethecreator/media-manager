@@ -63,6 +63,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StatsPanel } from "../stats/stats-panel";
+import { useFiles } from "@/context/file-context";
+import { statsService } from "@/services/stats.service";
+import type { CacheInvalidationEvent } from "@/services/events.service";
 
 // Interfaces primero
 interface DetailsPanelProps {
@@ -77,22 +80,22 @@ interface InfoItemProps {
 }
 
 interface ImageDimensions {
-	width: number;
-	height: number;
-	aspectRatio: number;
+	width?: number;
+	height?: number;
+	aspectRatio?: number;
 }
 
 interface FileSystemMetadata {
-	size: number;
-	created: string;
-	modified: string;
-	accessed: string;
+	size?: number;
+	created?: string;
+	modified?: string;
+	accessed?: string;
 }
 
 interface LocalImageMetadata {
-	dimensions: Partial<ImageDimensions>;
+	dimensions?: ImageDimensions;
 	exif: Record<string, string | number>;
-	fileSystem: Partial<FileSystemMetadata>;
+	fileSystem?: FileSystemMetadata;
 	generation: Record<string, string | number>;
 	format?: string | null;
 	colorSpace?: string | null;
@@ -173,7 +176,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// 2. Hooks
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
-	const { toggleItemSelection } = useFileManager();
+	const { handleSelectItem, toggleItemSelection } = useFiles();
 	const { settings } = useCollectionTagContext();
 
 	// Funciones de utilidad
@@ -250,26 +253,8 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 								title: newFavoriteState
 									? "Agregado a favoritos"
 									: "Eliminado de favoritos",
-								description: `${file.name} ha sido ${
-									newFavoriteState ? "agregado a" : "eliminado de"
-								} favoritos`,
+								description: file.name,
 							});
-
-							const response = await fetch(`/api/images/${file.id}/favorite`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ isFavorite: newFavoriteState }),
-							});
-
-							if (!response.ok) {
-								toggleItemSelection(
-									{ ...file, isFavorite: !newFavoriteState },
-									false
-								);
-								throw new Error("Error al actualizar favorito");
-							}
 						} catch (error) {
 							console.error("Error toggling favorite:", error);
 							toast({
@@ -280,135 +265,89 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						}
 						break;
 
-					case "collection-add":
+					case "copy-path":
 						try {
-							if (!data?.collectionId)
-								throw new Error("ID de colección no proporcionado");
-
+							await navigator.clipboard.writeText(file.path);
 							toast({
-								title: "Agregando a colección",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(
-								`/api/collections/${data.collectionId}/files`,
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify({ fileId: file.id }),
-								}
-							);
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar a la colección"
-								);
-							}
-
-							const updatedFile = {
-								...file,
-								collections: [
-									...(file.collections || []),
-									{
-										id: responseData.collection.id,
-										name: responseData.collection.name,
-										emoji: responseData.collection.emoji,
-										color: responseData.collection.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Agregado a la colección",
-								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
+								title: "Ruta copiada",
+								description:
+									"La ruta del archivo ha sido copiada al portapapeles",
 							});
 						} catch (error) {
-							console.error("Error adding to collection:", error);
+							console.error("Error copying path:", error);
 							toast({
 								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar a la colección",
+								description: "No se pudo copiar la ruta al portapapeles",
 								variant: "destructive",
 							});
 						}
 						break;
 
-					case "tag-add":
+					case "copy-name":
 						try {
-							if (!data?.tagId)
-								throw new Error("ID de etiqueta no proporcionado");
-
+							await navigator.clipboard.writeText(file.name);
 							toast({
-								title: "Agregando etiqueta",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(`/api/tags/${data.tagId}/files`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ fileId: file.id }),
-							});
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar la etiqueta"
-								);
-							}
-
-							const updatedFile = {
-								...file,
-								tags: [
-									...(file.tags || []),
-									{
-										id: responseData.tag.id,
-										name: responseData.tag.name,
-										color: responseData.tag.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Etiqueta agregada",
-								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
+								title: "Nombre copiado",
+								description:
+									"El nombre del archivo ha sido copiado al portapapeles",
 							});
 						} catch (error) {
-							console.error("Error adding tag:", error);
+							console.error("Error copying name:", error);
 							toast({
 								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar la etiqueta",
+								description: "No se pudo copiar el nombre al portapapeles",
+								variant: "destructive",
+							});
+						}
+						break;
+
+					case "download":
+						try {
+							// TODO: Implementar descarga
+							toast({
+								title: "Descarga iniciada",
+								description: file.name,
+							});
+						} catch (error) {
+							console.error("Error downloading file:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo descargar el archivo",
+								variant: "destructive",
+							});
+						}
+						break;
+
+					case "delete":
+						try {
+							// TODO: Implementar eliminación
+							toast({
+								title: "Archivo eliminado",
+								description: file.name,
+							});
+						} catch (error) {
+							console.error("Error deleting file:", error);
+							toast({
+								title: "Error",
+								description: "No se pudo eliminar el archivo",
 								variant: "destructive",
 							});
 						}
 						break;
 
 					default:
-						console.warn("Acción no implementada:", action);
+						console.warn("Unknown action:", action);
 				}
 			} catch (error) {
-				console.error("Error ejecutando acción:", error);
+				console.error("Error handling context menu action:", error);
 				toast({
 					title: "Error",
-					description: "No se pudo completar la acción",
+					description: "Ocurrió un error al procesar la acción",
 					variant: "destructive",
 				});
 			}
 		},
-		[toggleItemSelection, toast]
+		[toast, toggleItemSelection]
 	);
 
 	const handleOpenViewer = React.useCallback(
@@ -617,338 +556,277 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	}
 
 	const selectedItem = selectedItems[0];
-
-	// Parsear metadata de manera segura
 	const metadata = parseMetadata(selectedItem.metadata);
-	const {
-		dimensions = {},
-		exif = {},
-		fileSystem = {},
-		generation = {},
-		format = null,
-		colorSpace = null,
-		hasAlpha = false,
-		isAnimated = false,
-	} = metadata;
 
-	// Actualizamos la toolbar con el nuevo diseño
-	const renderToolbar = () => (
-		<div className="flex flex-col bg-primary/10 py-1">
-			<div className="flex items-center justify-between gap-2 px-2">
-				<div className="flex gap-2 items-center">
-					<div className="flex items-center justify-center h-5 w-5 rounded-sm bg-white/10">
-						<ImageIcon className="h-3 w-3" />
-					</div>
-					<span className="text-[10px] text-muted-foreground">
-						{selectedItem.metadata?.dimensions?.width || 0} ×{" "}
-						{selectedItem.metadata?.dimensions?.height || 0}
-					</span>
-				</div>
-				<div className="flex items-center gap-1">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleContextMenuAction("mark-toggle", selectedItem)}
-					>
-						<Flag className={cn("h-4 w-4", isMarked && "text-warning")} />
-					</Button>
+	const hasCollections =
+		selectedItem.collections && selectedItem.collections.length > 0;
+	const hasTags = selectedItem.tags && selectedItem.tags.length > 0;
+	const hasCharacters =
+		selectedItem.characters && selectedItem.characters.length > 0;
+	const hasPlaces = selectedItem.places && selectedItem.places.length > 0;
+	const hasObjects = selectedItem.objects && selectedItem.objects.length > 0;
 
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() =>
-							handleContextMenuAction("favorite-toggle", selectedItem)
-						}
-					>
-						{selectedItem.isFavorite ? (
-							<HeartOff className="h-4 w-4" />
-						) : (
-							<Heart
-								className={cn(
-									"h-4 w-4",
-									selectedItem.isFavorite && "text-yellow-500"
-								)}
-							/>
-						)}
-					</Button>
+	// Emitir eventos de actualización si es necesario
+	React.useEffect(() => {
+		const events: CacheInvalidationEvent[] = [];
+		if (hasCollections) events.push("collections:modified");
+		if (hasTags) events.push("tags:modified");
+		if (hasCharacters) events.push("characters:modified");
+		if (hasPlaces) events.push("places:modified");
+		if (hasObjects) events.push("objects:modified");
+		if (selectedItem.isFavorite) events.push("favorites:modified");
 
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-7 w-7">
-								<BookmarkPlus className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-48">
-							{settings?.collections?.length > 0 ? (
-								settings.collections.map((collection) => (
-									<DropdownMenuItem
-										key={collection.id}
-										onClick={() =>
-											handleContextMenuAction("collection-add", selectedItem, {
-												collectionId: collection.id,
-											})
-										}
-									>
-										<div className="flex items-center gap-2 w-full">
-											<span className="mr-2">{collection.emoji}</span>
-											<span className="flex-1">{collection.name}</span>
-											<div
-												className="w-3 h-3 rounded"
-												style={{ backgroundColor: collection.color }}
-											/>
-										</div>
-									</DropdownMenuItem>
-								))
-							) : (
-								<DropdownMenuItem disabled>
-									No hay colecciones disponibles
-								</DropdownMenuItem>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-7 w-7">
-								<TagIcon className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-48">
-							{settings?.tags?.length > 0 ? (
-								settings.tags.map((tag) => (
-									<DropdownMenuItem
-										key={tag.id}
-										onClick={() =>
-											handleContextMenuAction("tag-add", selectedItem, {
-												tagId: tag.id,
-											})
-										}
-									>
-										<div className="flex items-center gap-2 w-full">
-											<div
-												className="w-3 h-3 rounded"
-												style={{ backgroundColor: tag.color }}
-											/>
-											<span className="flex-1">{tag.name}</span>
-											{tag.shortcut && (
-												<Badge
-													variant="outline"
-													className="text-[10px] h-4 px-1"
-												>
-													{tag.shortcut}
-												</Badge>
-											)}
-										</div>
-									</DropdownMenuItem>
-								))
-							) : (
-								<DropdownMenuItem disabled>
-									No hay etiquetas disponibles
-								</DropdownMenuItem>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleOpenFolder(selectedItem.path)}
-					>
-						<Folder className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleDownload(selectedItem.path)}
-					>
-						<Download className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleCopy(selectedItem.path)}
-					>
-						<Copy className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 text-destructive"
-						onClick={() => handleContextMenuAction("delete", selectedItem)}
-					>
-						<Trash2 className="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
-
-			{/* Sección de colecciones y tags actuales */}
-			{(selectedItem.collections?.length > 0 ||
-				selectedItem.tags?.length > 0) && (
-				<div className="flex items-center gap-2 px-2 py-1 mt-1 border-t border-border/50">
-					<div className="flex flex-wrap gap-1">
-						{selectedItem.collections?.map((collection) => (
-							<Badge
-								key={collection.id}
-								variant="secondary"
-								className="h-5 text-[10px] bg-white/10 hover:bg-white/20 gap-1"
-							>
-								<span>{collection.emoji}</span>
-								{collection.name}
-							</Badge>
-						))}
-						{selectedItem.tags?.map((tag) => (
-							<Badge
-								key={tag.id}
-								variant="outline"
-								className="h-5 text-[10px] hover:bg-white/10"
-								style={{ borderColor: tag.color }}
-							>
-								<div
-									className="w-1.5 h-1.5 rounded-full mr-1"
-									style={{ backgroundColor: tag.color }}
-								/>
-								{tag.name}
-							</Badge>
-						))}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+		if (events.length > 0) {
+			statsService.emitUpdateNeeded(events);
+		}
+	}, [
+		hasCollections,
+		hasTags,
+		hasCharacters,
+		hasPlaces,
+		hasObjects,
+		selectedItem.isFavorite,
+	]);
 
 	return (
-		<ScrollArea className="h-full pr-2">
-			<motion.div
-				key={selectedItem.id}
-				animate={{
-					opacity: [0, 1],
-					y: [20, 0],
-				}}
-				transition={{ delay: 0.5 }}
-				className="space-y-4"
-			>
-				{/* Vista previa de imagen */}
-				{(selectedItem.type === "image" ||
-					selectedItem.metadata?.mimeType?.startsWith("image/")) && (
-					<Card className="border-none rounded-none overflow-hidden">
-						<CardContent className="p-0 relative">
-							<motion.div
-								className="relative max-h-[500px] w-full overflow-hidden flex items-center justify-center"
-								animate={{ opacity: [0, 1], scale: [0.95, 1] }}
-							>
-								{/* Imagen principal */}
-								<div className="inset-0 flex items-center justify-center">
-									<div className="relative max-h-full">
-										{renderImage(selectedItem)}
-										{selectedItem.isFavorite && (
-											<motion.div
-												className="absolute top-2 right-2 z-10"
-												animate={{ scale: [0, 1] }}
-											>
-												<StarIcon className="h-5 w-5 text-yellow-400 drop-shadow-lg" />
-											</motion.div>
-										)}
-									</div>
+		<ScrollArea className="h-full">
+			<div className="flex flex-col gap-4 p-4">
+				{/* Imagen */}
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center gap-2 text-sm font-medium">
+							<ImageIcon className="h-4 w-4" />
+							Vista previa
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
+							{!imageError ? (
+								<ImageCard
+									file={selectedItem}
+									onError={() => setImageError(true)}
+									onClick={() => openViewer(selectedItem)}
+									className="cursor-pointer transition-transform hover:scale-105"
+								/>
+							) : (
+								<div className="flex h-full items-center justify-center">
+									<ImageOff className="h-12 w-12 text-muted-foreground" />
 								</div>
-							</motion.div>
-						</CardContent>
-					</Card>
-				)}
+							)}
+						</div>
+					</CardContent>
+				</Card>
 
-				{/* Toolbar */}
-				{renderToolbar()}
+				{/* Acciones */}
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center gap-2 text-sm font-medium">
+							<Play className="h-4 w-4" />
+							Acciones
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => openViewer(selectedItem)}
+							>
+								<Maximize2 className="mr-2 h-4 w-4" />
+								Ver
+							</Button>
 
-				{/* Información básica */}
-				<motion.div
-					animate={{
-						opacity: [0, 1],
-						y: [20, 0],
-					}}
-					transition={{ delay: 0.1 }}
-				>
-					<Card className="border-none rounded-none mt-2">
-						<CardHeader className="p-4 pb-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<FileText className="h-4 w-4 text-primary" />
-								Información básica
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-4 pt-2 space-y-1.5">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									handleContextMenuAction("download", selectedItem)
+								}
+							>
+								<Download className="mr-2 h-4 w-4" />
+								Descargar
+							</Button>
+
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button variant="outline" size="sm">
+										<Copy className="mr-2 h-4 w-4" />
+										Copiar
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent>
+									<DropdownMenuItem
+										onClick={() =>
+											handleContextMenuAction("copy-path", selectedItem)
+										}
+									>
+										<Folder className="mr-2 h-4 w-4" />
+										Ruta
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={() =>
+											handleContextMenuAction("copy-name", selectedItem)
+										}
+									>
+										<FileText className="mr-2 h-4 w-4" />
+										Nombre
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+
+							<Button
+								variant={selectedItem.isFavorite ? "default" : "outline"}
+								size="sm"
+								onClick={() =>
+									handleContextMenuAction("favorite-toggle", selectedItem)
+								}
+							>
+								{selectedItem.isFavorite ? (
+									<>
+										<HeartOff className="mr-2 h-4 w-4" />
+										Quitar favorito
+									</>
+								) : (
+									<>
+										<Heart className="mr-2 h-4 w-4" />
+										Favorito
+									</>
+								)}
+							</Button>
+
+							<Button
+								variant={isMarked ? "default" : "outline"}
+								size="sm"
+								onClick={() =>
+									handleContextMenuAction("mark-toggle", selectedItem)
+								}
+							>
+								{isMarked ? (
+									<>
+										<Flag className="mr-2 h-4 w-4" />
+										Desmarcar
+									</>
+								) : (
+									<>
+										<Flag className="mr-2 h-4 w-4" />
+										Marcar
+									</>
+								)}
+							</Button>
+
+							<Button
+								variant="destructive"
+								size="sm"
+								onClick={() => handleContextMenuAction("delete", selectedItem)}
+							>
+								<Trash2 className="mr-2 h-4 w-4" />
+								Eliminar
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Información */}
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center gap-2 text-sm font-medium">
+							<Info className="h-4 w-4" />
+							Información
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{/* Información básica */}
+						<div className="space-y-1">
 							<InfoItem
 								icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
 								label="Nombre"
 								value={selectedItem.name}
 							/>
 							<InfoItem
-								icon={<ImageIcon className="h-3.5 w-3.5 text-green-400" />}
-								label="Tipo"
-								value={
-									format || selectedItem.metadata?.mimeType || "Desconocido"
-								}
+								icon={<Folder className="h-3.5 w-3.5 text-amber-400" />}
+								label="Ruta"
+								value={selectedItem.path}
 							/>
 							<InfoItem
-								icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
+								icon={<Scale className="h-3.5 w-3.5 text-emerald-400" />}
 								label="Tamaño"
-								value={formatFileSize(fileSystem.size)}
+								value={formatFileSize(selectedItem.size)}
 							/>
-							{dimensions.width && dimensions.height && (
-								<InfoItem
-									icon={<Maximize2 className="h-3.5 w-3.5 text-yellow-400" />}
-									label="Dimensiones"
-									value={`${dimensions.width} × ${dimensions.height}`}
-								/>
-							)}
-							{colorSpace && (
-								<InfoItem
-									icon={<Palette className="h-3.5 w-3.5 text-orange-400" />}
-									label="Espacio de color"
-									value={colorSpace}
-								/>
-							)}
-							{hasAlpha && (
-								<InfoItem
-									icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />}
-									label="Canal alfa"
-									value="Sí"
-								/>
-							)}
-							{isAnimated && (
-								<InfoItem
-									icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
-									label="Animada"
-									value="Sí"
-								/>
-							)}
-						</CardContent>
-					</Card>
-				</motion.div>
+							<InfoItem
+								icon={<Calendar className="h-3.5 w-3.5 text-violet-400" />}
+								label="Creado"
+								value={formatDate(selectedItem.createdAt)}
+							/>
+							<InfoItem
+								icon={<Clock className="h-3.5 w-3.5 text-rose-400" />}
+								label="Modificado"
+								value={formatDate(selectedItem.updatedAt)}
+							/>
+						</div>
 
-				{/* Información EXIF */}
-				{Object.entries(exif).length > 0 && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.2 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Camera className="h-4 w-4 text-primary" />
-									Información EXIF
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2 space-y-1.5">
-								{Object.entries(exif).map(([key, value]) => (
+						{/* Dimensiones */}
+						{metadata.dimensions && (
+							<div className="space-y-1">
+								<h4 className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+									<ImageIcon className="h-3.5 w-3.5" />
+									Dimensiones
+								</h4>
+								<InfoItem
+									icon={<Scale className="h-3.5 w-3.5 text-cyan-400" />}
+									label="Ancho"
+									value={`${metadata.dimensions.width || 0}px`}
+								/>
+								<InfoItem
+									icon={<Scale className="h-3.5 w-3.5 text-pink-400" />}
+									label="Alto"
+									value={`${metadata.dimensions.height || 0}px`}
+								/>
+								<InfoItem
+									icon={<Scale className="h-3.5 w-3.5 text-indigo-400" />}
+									label="Relación"
+									value={`${metadata.dimensions.aspectRatio || 0}`}
+								/>
+							</div>
+						)}
+
+						{/* Sistema de archivos */}
+						{metadata.fileSystem && (
+							<div className="space-y-1">
+								<h4 className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+									<HardDrive className="h-3.5 w-3.5" />
+									Sistema de archivos
+								</h4>
+								<InfoItem
+									icon={<Scale className="h-3.5 w-3.5 text-teal-400" />}
+									label="Tamaño"
+									value={formatFileSize(metadata.fileSystem.size)}
+								/>
+								<InfoItem
+									icon={<Calendar className="h-3.5 w-3.5 text-orange-400" />}
+									label="Creado"
+									value={formatDate(metadata.fileSystem.created)}
+								/>
+								<InfoItem
+									icon={<Clock className="h-3.5 w-3.5 text-lime-400" />}
+									label="Modificado"
+									value={formatDate(metadata.fileSystem.modified)}
+								/>
+								<InfoItem
+									icon={<Timer className="h-3.5 w-3.5 text-fuchsia-400" />}
+									label="Accedido"
+									value={formatDate(metadata.fileSystem.accessed)}
+								/>
+							</div>
+						)}
+
+						{/* EXIF */}
+						{Object.keys(metadata.exif).length > 0 && (
+							<div className="space-y-1">
+								<h4 className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+									<Camera className="h-3.5 w-3.5" />
+									EXIF
+								</h4>
+								{Object.entries(metadata.exif).map(([key, value]) => (
 									<InfoItem
 										key={key}
 										icon={getIconForExif(key)}
@@ -956,29 +834,17 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 										value={safeString(value)}
 									/>
 								))}
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
+							</div>
+						)}
 
-				{/* Información de generación AI */}
-				{Object.entries(generation).length > 0 && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.3 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Wand2 className="h-4 w-4 text-primary" />
-									Información de generación
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2 space-y-1.5">
-								{Object.entries(generation).map(([key, value]) => (
+						{/* Generación */}
+						{Object.keys(metadata.generation).length > 0 && (
+							<div className="space-y-1">
+								<h4 className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+									<Wand2 className="h-3.5 w-3.5" />
+									Generación
+								</h4>
+								{Object.entries(metadata.generation).map(([key, value]) => (
 									<InfoItem
 										key={key}
 										icon={getIconForGeneration(key)}
@@ -986,71 +852,43 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 										value={safeString(value)}
 									/>
 								))}
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
+							</div>
+						)}
 
-				{/* Información del sistema de archivos */}
-				<motion.div
-					animate={{
-						opacity: [0, 1],
-						y: [20, 0],
-					}}
-					transition={{ delay: 0.4 }}
-				>
-					<Card className="border-none rounded-none mt-2">
-						<CardHeader className="p-4 pb-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<HardDrive className="h-4 w-4 text-primary" />
-								Información del sistema
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-4 pt-2 space-y-1.5">
-							<InfoItem
-								icon={<Calendar className="h-3.5 w-3.5 text-blue-400" />}
-								label="Creado"
-								value={formatDate(fileSystem.created)}
-							/>
-							<InfoItem
-								icon={<Clock className="h-3.5 w-3.5 text-green-400" />}
-								label="Modificado"
-								value={formatDate(fileSystem.modified)}
-							/>
-							<InfoItem
-								icon={<Clock className="h-3.5 w-3.5 text-yellow-400" />}
-								label="Último acceso"
-								value={formatDate(fileSystem.accessed)}
-							/>
-						</CardContent>
-					</Card>
-				</motion.div>
-
-				{/* Debug en desarrollo */}
-				{process.env.NODE_ENV === "development" && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.5 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Bug className="h-4 w-4 text-primary" />
-									Debug
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2">
-								<pre className="text-[10px] overflow-x-auto p-2 bg-muted rounded-sm">
-									{JSON.stringify(metadata, null, 2)}
-								</pre>
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
-			</motion.div>
+						{/* Formato */}
+						{metadata.format && (
+							<div className="space-y-1">
+								<h4 className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+									<Palette className="h-3.5 w-3.5" />
+									Formato
+								</h4>
+								<InfoItem
+									icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
+									label="Formato"
+									value={metadata.format}
+								/>
+								{metadata.colorSpace && (
+									<InfoItem
+										icon={<Palette className="h-3.5 w-3.5 text-purple-400" />}
+										label="Espacio de color"
+										value={metadata.colorSpace}
+									/>
+								)}
+								<InfoItem
+									icon={<Layers className="h-3.5 w-3.5 text-yellow-400" />}
+									label="Canal alfa"
+									value={metadata.hasAlpha ? "Sí" : "No"}
+								/>
+								<InfoItem
+									icon={<Play className="h-3.5 w-3.5 text-green-400" />}
+									label="Animado"
+									value={metadata.isAnimated ? "Sí" : "No"}
+								/>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			</div>
 		</ScrollArea>
 	);
 }

@@ -23,6 +23,34 @@ interface TagStat {
   count: number
 }
 
+interface AlbumStat {
+  id: string
+  name: string
+  emoji: string
+  count: number
+}
+
+interface CharacterStat {
+  id: string
+  name: string
+  emoji: string
+  count: number
+}
+
+interface PlaceStat {
+  id: string
+  name: string
+  emoji: string
+  count: number
+}
+
+interface ObjectStat {
+  id: string
+  name: string
+  emoji: string
+  count: number
+}
+
 interface Activity {
   description: string
   timestamp: string
@@ -40,11 +68,20 @@ interface Stats {
   totalViews: number
   totalDownloads: number
   totalSize: number
+  totalAlbums: number
+  totalCharacters: number
+  totalPlaces: number
+  totalObjects: number
+  totalActivities: number
 
   // Listas detalladas
   folders: FolderStat[]
   collections: CollectionStat[]
   tags: TagStat[]
+  albums: AlbumStat[]
+  characters: CharacterStat[]
+  places: PlaceStat[]
+  objects: ObjectStat[]
   topTags: TagStat[]
   recentActivity: Activity[]
 

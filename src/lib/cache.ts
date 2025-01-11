@@ -1,354 +1,147 @@
-import { LRUCache } from 'lru-cache'
-import { logger } from '@/lib/logger'
-import { cacheConfig } from '@/config'
+import { logger } from './logger'
 
-export interface CacheOptions {
-  max?: number
-  ttl?: number
-  updateAgeOnGet?: boolean
-  allowStale?: boolean
-  name?: string
-  cleanupInterval?: number
-  statsInterval?: number
+const cacheLogger = logger.withContext('Cache')
+
+interface CacheOptions {
+  ttl?: number // Time to live in milliseconds
+  maxSize?: number // Maximum number of items in cache
+  name?: string // Cache name for logging
+  updateAgeOnGet?: boolean // Update item age on get
+  allowStale?: boolean // Allow returning stale items
 }
 
-export interface CacheEntry<T> {
-  value: T
-  timestamp: number
-  ttl: number
-  key: string
-  hits?: number
-}
-
-export interface CacheStats {
-  hits: number
-  misses: number
-  keys: number
-  size: number
-  hitRatio: number
-  avgTTL: number
-  oldestEntry: number
-  newestEntry: number
-}
-
-const DEFAULT_OPTIONS: Required<Omit<CacheOptions, 'name'>> = cacheConfig.default
-
-const cacheLogger = logger.withContext('CacheManager')
-
-export class CacheManager<T = unknown> {
-  private cache: LRUCache<string, CacheEntry<T>>
-  private defaultTTL: number
+export class CacheManager<T> {
+  private cache: Map<string, { value: T; timestamp: number }>
+  private ttl: number
+  private maxSize: number
+  private name: string
   private updateAgeOnGet: boolean
   private allowStale: boolean
-  private name: string
-  private cleanupTimer?: NodeJS.Timeout
-  private statsTimer?: NodeJS.Timeout
-  private stats: CacheStats = {
-    hits: 0,
-    misses: 0,
-    keys: 0,
-    size: 0,
-    hitRatio: 0,
-    avgTTL: 0,
-    oldestEntry: 0,
-    newestEntry: 0
-  }
 
   constructor(options: CacheOptions = {}) {
-    const opts = { ...DEFAULT_OPTIONS, ...options }
+    this.cache = new Map()
+    this.ttl = options.ttl || 5 * 60 * 1000 // 5 minutes by default
+    this.maxSize = options.maxSize || 1000
     this.name = options.name || 'default'
-    this.defaultTTL = opts.ttl
-    this.updateAgeOnGet = opts.updateAgeOnGet
-    this.allowStale = opts.allowStale
+    this.updateAgeOnGet = options.updateAgeOnGet || false
+    this.allowStale = options.allowStale || false
+  }
 
-    cacheLogger.info(`🚀 Inicializando cache manager: ${this.name}`)
+  async set(key: string, value: T, customTtl?: number): Promise<void> {
+    if (this.cache.size >= this.maxSize) {
+      this.evictOldest()
+    }
 
-    this.cache = new LRUCache({
-      max: opts.max,
-      ttl: opts.ttl,
-      updateAgeOnGet: opts.updateAgeOnGet,
-      allowStale: opts.allowStale,
-      dispose: (value: CacheEntry<T>, key: string) => {
-        cacheLogger.debug(`[${this.name}] 🗑️ Entry disposed:`, { key })
-      }
+    this.cache.set(key, {
+      value,
+      timestamp: Date.now(),
     })
 
-    this.startCleanupTimer(opts.cleanupInterval)
-    this.startStatsTimer(opts.statsInterval)
+    cacheLogger.debug(`✨ Cache ${this.name}: Elemento agregado`, { key })
   }
 
   async get(key: string): Promise<T | undefined> {
-    try {
-      const entry = this.cache.get(key) as CacheEntry<T> | undefined
-      if (!entry) {
-        this.stats.misses++
-        cacheLogger.debug(`[${this.name}] ❌ Cache miss:`, { key })
-        return undefined
-      }
+    const item = this.cache.get(key)
 
-      const now = Date.now()
-      if (now - entry.timestamp > entry.ttl && !this.allowStale) {
-        this.cache.delete(key)
-        this.stats.misses++
-        return undefined
-      }
-
-      if (this.updateAgeOnGet) {
-        entry.timestamp = now
-        entry.hits = (entry.hits || 0) + 1
-        this.cache.set(key, entry)
-      }
-
-      this.stats.hits++
-      cacheLogger.debug(`[${this.name}] ✅ Cache hit:`, { key })
-      return entry.value
-    } catch (error) {
-      cacheLogger.error(`[${this.name}] ❌ Error getting cache entry:`, { error, key })
+    if (!item) {
       return undefined
     }
-  }
 
-  async set(key: string, value: T, ttl?: number): Promise<void> {
-    try {
-      const entry: CacheEntry<T> = {
-        value,
-        timestamp: Date.now(),
-        ttl: ttl || this.defaultTTL,
-        key,
-        hits: 0
-      }
+    const now = Date.now()
+    const isExpired = now - item.timestamp > this.ttl
 
-      this.cache.set(key, entry)
-      cacheLogger.debug(`[${this.name}] 💾 Cache entry set:`, { key, ttl })
-    } catch (error) {
-      cacheLogger.error(`[${this.name}] ❌ Error setting cache entry:`, { error, key })
+    if (isExpired && !this.allowStale) {
+      this.cache.delete(key)
+      cacheLogger.debug(`🕒 Cache ${this.name}: Elemento expirado`, { key })
+      return undefined
     }
+
+    if (this.updateAgeOnGet) {
+      item.timestamp = now
+    }
+
+    return item.value
   }
 
   async delete(key: string): Promise<void> {
-    try {
-      this.cache.delete(key)
-      cacheLogger.debug(`[${this.name}] 🗑️ Cache entry deleted:`, { key })
-    } catch (error) {
-      cacheLogger.error(`[${this.name}] ❌ Error deleting cache entry:`, { error, key })
-    }
+    this.cache.delete(key)
+    cacheLogger.debug(`🗑️ Cache ${this.name}: Elemento eliminado`, { key })
   }
 
   async clear(): Promise<void> {
-    try {
-      this.cache.clear()
-      this.resetStats()
-      cacheLogger.info(`[${this.name}] 🧹 Cache cleared`)
-    } catch (error) {
-      cacheLogger.error(`[${this.name}] ❌ Error clearing cache:`, error)
-    }
-  }
-
-  async prune(): Promise<void> {
-    try {
-      const now = Date.now()
-      let pruned = 0
-      const dump = this.cache.dump() as unknown as { [key: string]: { value: CacheEntry<T> } }
-
-      for (const key of Object.keys(dump)) {
-        const entry = dump[key]
-        if (entry && now - entry.value.timestamp > entry.value.ttl) {
-          await this.delete(key)
-          pruned++
-        }
-      }
-
-      if (pruned > 0) {
-        cacheLogger.info(`[${this.name}] 🧹 Pruned ${pruned} expired entries`)
-      }
-    } catch (error) {
-      cacheLogger.error(`[${this.name}] ❌ Error pruning cache:`, error)
-    }
-  }
-
-  private resetStats(): void {
-    this.stats = {
-      hits: 0,
-      misses: 0,
-      keys: 0,
-      size: 0,
-      hitRatio: 0,
-      avgTTL: 0,
-      oldestEntry: 0,
-      newestEntry: 0
-    }
-  }
-
-  private async updateStats(): Promise<void> {
-    try {
-      const dump = this.cache.dump() as unknown as { [key: string]: { value: CacheEntry<T> } }
-      const entries = dump
-      const now = Date.now()
-      const chunkSize = 100
-      let totalSize = 0
-      let totalTTL = 0
-      let minTimestamp = Infinity
-      let maxTimestamp = -Infinity
-
-      const keys = Object.keys(entries)
-      for (let i = 0; i < keys.length; i += chunkSize) {
-        const chunk = keys.slice(i, i + chunkSize)
-
-        for (const key of chunk) {
-          const entry = entries[key]
-          if (!entry?.value) continue
-
-          try {
-            totalSize += JSON.stringify(entry.value).length
-            totalTTL += entry.value.ttl
-            minTimestamp = Math.min(minTimestamp, entry.value.timestamp)
-            maxTimestamp = Math.max(maxTimestamp, entry.value.timestamp)
-          } catch (error) {
-            cacheLogger.warn(`[Cache:${this.name}] ⚠️ Error al procesar entrada en stats:`, {
-              error: error instanceof Error ? error.message : String(error)
-            })
-          }
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 0))
-      }
-
-      this.stats.keys = this.cache.size
-      this.stats.size = totalSize
-      this.stats.hitRatio = this.stats.hits / (this.stats.hits + this.stats.misses) || 0
-      this.stats.avgTTL = keys.length > 0 ? totalTTL / keys.length : 0
-
-      if (keys.length > 0 && minTimestamp !== Infinity && maxTimestamp !== -Infinity) {
-        this.stats.oldestEntry = now - minTimestamp
-        this.stats.newestEntry = now - maxTimestamp
-      }
-    } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] ❌ Error al actualizar estadísticas:`, {
-        error: error instanceof Error ? error.message : String(error)
-      })
-    }
-  }
-
-  private logStats(): void {
-    try {
-      const stats = {
-        ...this.stats,
-        hitRatio: `${(this.stats.hitRatio * 100).toFixed(2)}%`,
-        oldestEntry: `${(this.stats.oldestEntry / 1000 / 60).toFixed(2)}m`,
-        newestEntry: `${(this.stats.newestEntry / 1000 / 60).toFixed(2)}m`,
-        avgTTL: `${(this.stats.avgTTL / 1000 / 60).toFixed(2)}m`,
-        size: `${(this.stats.size / 1024).toFixed(2)}KB`
-      }
-      cacheLogger.info(`[Cache:${this.name}] 📊 Stats:`, stats)
-    } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] ❌ Error al generar log de estadísticas:`, {
-        error: error instanceof Error ? error.message : String(error)
-      })
-    }
-  }
-
-  private startCleanupTimer(interval: number): void {
-    this.cleanupTimer = setInterval(() => {
-      this.prune().catch(error =>
-        cacheLogger.error(`[Cache:${this.name}] ❌ Error en cleanup timer:`, {
-          error: error instanceof Error ? error.message : String(error)
-        })
-      )
-    }, interval)
-  }
-
-  private startStatsTimer(interval: number): void {
-    if (process.env.NODE_ENV === 'development') {
-      this.statsTimer = setInterval(() => {
-        this.logStats()
-      }, interval)
-    }
+    this.cache.clear()
+    cacheLogger.info(`🧹 Cache ${this.name}: Limpiado completo`)
   }
 
   async stop(): Promise<void> {
-    try {
-      if (this.cleanupTimer) {
-        clearInterval(this.cleanupTimer)
-        this.cleanupTimer = undefined
-      }
-      if (this.statsTimer) {
-        clearInterval(this.statsTimer)
-        this.statsTimer = undefined
-      }
-      await this.clear()
-    } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] ❌ Error al detener caché:`, {
-        error: error instanceof Error ? error.message : String(error)
-      })
-    }
+    await this.clear()
+    cacheLogger.info(`⏹️ Cache ${this.name}: Detenido`)
   }
 
-  getStats(): CacheStats {
-    try {
-      this.updateStats()
-      return { ...this.stats }
-    } catch (error) {
-      cacheLogger.error(`[Cache:${this.name}] ❌ Error al obtener estadísticas:`, {
-        error: error instanceof Error ? error.message : String(error)
-      })
-      return { ...this.stats }
-    }
-  }
-}
-
-// Instancias específicas de caché
-export const thumbnailCache = new CacheManager<string>({
-  name: 'thumbnails',
-  ...cacheConfig.thumbnails
-})
-
-export const metadataCache = new CacheManager<Record<string, unknown>>({
-  name: 'metadata',
-  ...cacheConfig.metadata
-})
-
-export const searchCache = new CacheManager<unknown[]>({
-  name: 'search',
-  ...cacheConfig.search
-})
-
-export const statsCache = new CacheManager<Record<string, unknown>>({
-  name: 'stats',
-  ...cacheConfig.stats
-})
-
-export async function clearAllCaches(): Promise<void> {
-  try {
-    await Promise.all([
-      thumbnailCache.clear(),
-      metadataCache.clear(),
-      searchCache.clear(),
-      statsCache.clear()
-    ])
-    cacheLogger.info('🧹 Todos los cachés han sido limpiados')
-  } catch (error) {
-    cacheLogger.error('❌ Error al limpiar cachés:', error)
-  }
-}
-
-export async function getAllCacheStats(): Promise<Record<string, unknown>> {
-  return {
-    thumbnails: thumbnailCache.getStats(),
-    metadata: metadataCache.getStats(),
-    search: searchCache.getStats(),
-    stats: statsCache.getStats()
-  }
-}
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', () => {
-    Promise.all([
-      thumbnailCache.stop(),
-      metadataCache.stop(),
-      searchCache.stop(),
-      statsCache.stop()
-    ]).catch(error =>
-      cacheLogger.error('[Cache] ❌ Error deteniendo caches:', error)
+  private evictOldest(): void {
+    const oldest = Array.from(this.cache.entries()).reduce((a, b) =>
+      a[1].timestamp < b[1].timestamp ? a : b
     )
-  })
+    this.cache.delete(oldest[0])
+    cacheLogger.debug(`♻️ Cache ${this.name}: Elemento más antiguo eliminado`, {
+      key: oldest[0],
+    })
+  }
 }
+
+// Instancias de caché predefinidas
+export const thumbnailCache = new CacheManager<Buffer>({
+  name: 'thumbnails',
+  ttl: 30 * 60 * 1000, // 30 minutos
+  maxSize: 500,
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
+export const metadataCache = new CacheManager<any>({
+  name: 'metadata',
+  ttl: 15 * 60 * 1000, // 15 minutos
+  maxSize: 1000,
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
+export const searchCache = new CacheManager<any>({
+  name: 'search',
+  ttl: 5 * 60 * 1000, // 5 minutos
+  maxSize: 100,
+  updateAgeOnGet: false,
+  allowStale: true
+})
+
+export const statsCache = new CacheManager<any>({
+  name: 'stats',
+  ttl: 10 * 60 * 1000, // 10 minutos
+  maxSize: 100,
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
+export const charactersCache = new CacheManager<any>({
+  name: 'characters',
+  ttl: 15 * 60 * 1000, // 15 minutos
+  maxSize: 200,
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
+export const placesCache = new CacheManager<any>({
+  name: 'places',
+  ttl: 15 * 60 * 1000, // 15 minutos
+  maxSize: 200,
+  updateAgeOnGet: true,
+  allowStale: true
+})
+
+export const objectsCache = new CacheManager<any>({
+  name: 'objects',
+  ttl: 15 * 60 * 1000, // 15 minutos
+  maxSize: 200,
+  updateAgeOnGet: true,
+  allowStale: true
+})

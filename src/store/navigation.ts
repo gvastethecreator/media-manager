@@ -1,51 +1,38 @@
 import { create } from 'zustand'
-import { ViewType } from '@/components/views/types'
+
+export type ViewType =
+  | "all-images"
+  | "favorites"
+  | "collections"
+  | "collection-content"
+  | "folders"
+  | "folder-content"
+  | "tags"
+  | "tag-content"
+  | "search"
+  | "files"
+  | "settings"
+  | "development"
+  | "loading"
+  | "albums"
+  | "album-content"
+  | "characters"
+  | "character-content"
+  | "places"
+  | "place-content"
+  | "objects"
+  | "object-content";
 
 interface NavigationState {
-  currentView: ViewType
-  navigationDirection: number
-  previousView: ViewType | null
-  setCurrentView: (view: ViewType) => void
-  goBack: () => void
+  currentView: ViewType;
+  navigationDirection: number;
+  setCurrentView: (view: ViewType) => void;
+  setNavigationDirection: (direction: number) => void;
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({
-  currentView: 'development',
+  currentView: 'folders',
   navigationDirection: 0,
-  previousView: null,
-  setCurrentView: (view) =>
-    set((state) => ({
-      previousView: state.currentView,
-      currentView: view,
-      navigationDirection: getNavigationDirection(state.currentView, view),
-    })),
-  goBack: () =>
-    set((state) => ({
-      currentView: state.previousView || 'all-images',
-      previousView: state.currentView,
-      navigationDirection: -1,
-    })),
+  setCurrentView: (view) => set({ currentView: view }),
+  setNavigationDirection: (direction) => set({ navigationDirection: direction }),
 }))
-
-// Helper para determinar la dirección de la navegación
-function getNavigationDirection(currentView: ViewType, nextView: ViewType): number {
-  const viewOrder: ViewType[] = [
-    'development',
-    'settings',
-    'all-images',
-    'favorites',
-    'search',
-    'folders',
-    'folder-content',
-    'collections',
-    'collection-content',
-    'tags',
-    'tag-content',
-  ]
-
-  const currentIndex = viewOrder.indexOf(currentView)
-  const nextIndex = viewOrder.indexOf(nextView)
-
-  if (currentIndex === -1 || nextIndex === -1) return 0
-  return nextIndex > currentIndex ? 1 : -1
-}

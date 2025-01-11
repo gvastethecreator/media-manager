@@ -378,4 +378,17 @@ export function useSettingsContext() {
 }
 
 // Alias para mantener compatibilidad
-export const useCollectionTagContext = useSettingsContext;
+export function useCollectionTagContext() {
+	const context = useContext(SettingsContext);
+	if (!context) {
+		throw new Error(
+			"useCollectionTagContext must be used within a SettingsProvider"
+		);
+	}
+	return {
+		collections: context.settings.collections,
+		updateCollection: context.updateCollection,
+		deleteCollection: context.deleteCollection,
+		settings: context.settings,
+	};
+}

@@ -1,6 +1,5 @@
 import { AppSettings, DEFAULT_SETTINGS } from '@/types/settings'
 import defaultSettings from '@/config/settings.json'
-import { deepMerge } from '@/lib/utils'
 import { merge } from 'lodash'
 
 const SETTINGS_KEY = 'image-manager-settings'
@@ -35,7 +34,7 @@ export function resetSettings(): AppSettings {
 
 export function updateSettings(settings: Partial<AppSettings>): AppSettings {
   const currentSettings = loadSettings()
-  const newSettings = deepMerge(currentSettings, settings)
+  const newSettings = merge(currentSettings, settings)
   saveSettings(newSettings)
   return newSettings
 }
@@ -64,7 +63,7 @@ export function exportSettings(): string {
 export function importSettings(jsonString: string): AppSettings {
   try {
     const importedSettings = JSON.parse(jsonString)
-    const mergedSettings = deepMerge(DEFAULT_SETTINGS, importedSettings)
+    const mergedSettings = merge(DEFAULT_SETTINGS, importedSettings)
     saveSettings(mergedSettings)
     return mergedSettings
   } catch (error) {
