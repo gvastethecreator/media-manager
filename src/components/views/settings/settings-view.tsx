@@ -13,6 +13,10 @@ import { TagsSection } from "./settings-sections/tags-section";
 import { ShortcutsSection } from "./settings-sections/shortcuts-section";
 import { ProfilesSection } from "./settings-sections/profiles-section";
 import { SystemSection } from "./settings-sections/system-section";
+import { AlbumsSection } from "./settings-sections/albums-section";
+import { ObjectsSection } from "./settings-sections/objects-section";
+import { PlacesSection } from "./settings-sections/places-section";
+import { CharactersSection } from "./settings-sections/characters-section";
 
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState("folders");
@@ -52,6 +56,10 @@ export function SettingsView() {
 						<div className="grid grid-cols-2 gap-2 w-full">
 							<CollectionsSection />
 							<TagsSection />
+							<AlbumsSection />
+							<CharactersSection />
+							<ObjectsSection />
+							<PlacesSection />
 						</div>
 					</TabsContent>
 

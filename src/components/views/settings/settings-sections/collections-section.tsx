@@ -185,7 +185,9 @@ export function CollectionsSection() {
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-[320px] p-0" align="start">
-									<EmojiPicker onEmojiSelect={handleEmojiSelect} />
+									<EmojiPicker onEmojiSelect={(emoji: string) =>
+										setNewCollection({ ...newCollection, emoji: emoji })
+									} />
 								</PopoverContent>
 							</Popover>
 						</div>
@@ -304,10 +306,10 @@ export function CollectionsSection() {
 																align="start"
 															>
 																<EmojiPicker
-																	onEmojiSelect={(emojiData: EmojiClickData) =>
+																	onEmojiSelect={(emoji: string) =>
 																		setEditForm((prev) =>
 																			prev
-																				? { ...prev, emoji: emojiData.emoji }
+																				? { ...prev, emoji: emoji }
 																				: null
 																		)
 																	}

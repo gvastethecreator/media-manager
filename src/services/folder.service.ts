@@ -197,7 +197,7 @@ class FolderServiceClass extends EventEmitter {
 
         // Emitir eventos
         this.emit(FOLDER_EVENTS.FOLDER_ADDED, folder);
-        eventsService.emit('folders:added');
+        eventsService.emit('folders:modified');
         statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
         statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
 
@@ -341,8 +341,8 @@ class FolderServiceClass extends EventEmitter {
 
         // Emitir eventos
         this.emit(FOLDER_EVENTS.FOLDER_DELETED, { id });
-        eventsService.emit('folders:deleted');
-        eventsService.emit('files:deleted');
+        eventsService.emit('folders:modified');
+        eventsService.emit('files:modified');
         statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
         statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
 

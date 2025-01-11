@@ -250,3 +250,33 @@ function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
+
+export async function addImageToCollection(collectionId: string, fileId: string) {
+  try {
+    const response = await fetch(`/api/collections/${collectionId}/files`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fileId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al agregar imagen a la colección");
+    }
+
+    const data = await response.json();
+    collectionLogger.info("✨ Imagen agregada a la colección:", {
+      collectionId,
+      fileId,
+    });
+    return data;
+  } catch (error) {
+    collectionLogger.error("❌ Error al agregar imagen a la colección:", {
+      error,
+      collectionId,
+      fileId,
+    });
+    throw error;
+  }
+}
