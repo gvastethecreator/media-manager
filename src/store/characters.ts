@@ -1,144 +1,95 @@
 import { create } from "zustand";
-import { characterService } from "@/services/character.service";
-import type { CharacterCreate, CharacterUpdate } from "@/services/character.service";
+import type { CharacterCreate, CharacterUpdate, CharacterWithStats } from "@/services/character.service";
 import { logger } from "@/lib/logger";
-import type { FileItem } from "@/types/file-item";
-import { Character } from "@prisma/client";
 
-const charactersLogger = logger.withContext("CharactersStore");
+const characterLogger = logger.withContext("CharactersStore");
 
 interface CharactersState {
-  characters: Character[];
-  currentCharacter: Character | null;
-  currentItems: FileItem[];
+  characters: CharacterWithStats[];
   isLoading: boolean;
-  error: string | null;
-  // Acciones
+  error: Error | null;
   loadCharacters: () => Promise<void>;
   createCharacter: (data: CharacterCreate) => Promise<void>;
   updateCharacter: (id: string, data: CharacterUpdate) => Promise<void>;
   deleteCharacter: (id: string) => Promise<void>;
-  addImageToCharacter: (characterId: string, imageId: string) => Promise<void>;
-  removeImageFromCharacter: (characterId: string, imageId: string) => Promise<void>;
-  loadCharacterContent: (id: string) => Promise<void>;
 }
 
 export const useCharactersStore = create<CharactersState>((set, get) => ({
   characters: [],
-  currentCharacter: null,
-  currentItems: [],
   isLoading: false,
   error: null,
 
   loadCharacters: async () => {
     try {
       set({ isLoading: true, error: null });
-      const characters = await characterService.getCharacters();
+      characterLogger.info("🔄 Cargando personajes...");
+      const response = await fetch("/api/characters");
+      if (!response.ok) throw new Error("Error al cargar personajes");
+      const characters = await response.json();
       set({ characters, isLoading: false });
-      charactersLogger.info("📥 Personajes cargados:", { count: characters.length });
+      characterLogger.info("✅ Personajes cargados:", { count: characters.length });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      charactersLogger.error("❌ Error al cargar personajes:", { error });
+      characterLogger.error("❌ Error al cargar personajes:", error);
+      set({ error: error as Error, isLoading: false });
     }
   },
 
   createCharacter: async (data: CharacterCreate) => {
     try {
-      set({ isLoading: true, error: null });
-      const character = await characterService.createCharacter(data);
-      set((state) => ({
-        characters: [...state.characters, character],
-        isLoading: false,
+      characterLogger.info("✨ Creando personaje...", data);
+      const response = await fetch("/api/characters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error("Error al crear personaje");
+      const character = await response.json();
+      set(state => ({
+        characters: [character, ...state.characters]
       }));
-      charactersLogger.info("✨ Personaje creado:", { character });
+      characterLogger.info("✅ Personaje creado:", character);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      charactersLogger.error("❌ Error al crear personaje:", { error });
+      characterLogger.error("❌ Error al crear personaje:", error);
+      throw error;
     }
   },
 
   updateCharacter: async (id: string, data: CharacterUpdate) => {
     try {
-      set({ isLoading: true, error: null });
-      const updatedCharacter = await characterService.updateCharacter(id, data);
-      set((state) => ({
-        characters: state.characters.map((c) =>
-          c.id === id ? updatedCharacter : c
-        ),
-        currentCharacter: state.currentCharacter?.id === id ? updatedCharacter : state.currentCharacter,
-        isLoading: false,
+      characterLogger.info("📝 Actualizando personaje...", { id, data });
+      const response = await fetch(`/api/characters/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error("Error al actualizar personaje");
+      const updatedCharacter = await response.json();
+      set(state => ({
+        characters: state.characters.map(char =>
+          char.id === id ? updatedCharacter : char
+        )
       }));
-      charactersLogger.info("📝 Personaje actualizado:", { id, data });
+      characterLogger.info("✅ Personaje actualizado:", updatedCharacter);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      charactersLogger.error("❌ Error al actualizar personaje:", { id, error });
+      characterLogger.error("❌ Error al actualizar personaje:", error);
+      throw error;
     }
   },
 
   deleteCharacter: async (id: string) => {
     try {
-      set({ isLoading: true, error: null });
-      await characterService.deleteCharacter(id);
-      set((state) => ({
-        characters: state.characters.filter((c) => c.id !== id),
-        currentCharacter: state.currentCharacter?.id === id ? null : state.currentCharacter,
-        currentItems: state.currentCharacter?.id === id ? [] : state.currentItems,
-        isLoading: false,
-      }));
-      charactersLogger.info("🗑️ Personaje eliminado:", { id });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      charactersLogger.error("❌ Error al eliminar personaje:", { id, error });
-    }
-  },
-
-  addImageToCharacter: async (characterId: string, imageId: string) => {
-    try {
-      await characterService.addImageToCharacter(characterId, imageId);
-      charactersLogger.info("📸 Imagen agregada a personaje:", { characterId, imageId });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      charactersLogger.error("❌ Error al agregar imagen a personaje:", { characterId, imageId, error });
-    }
-  },
-
-  removeImageFromCharacter: async (characterId: string, imageId: string) => {
-    try {
-      await characterService.removeImageFromCharacter(characterId, imageId);
-      set((state) => ({
-        currentItems: state.currentItems.filter((item) => item.id !== imageId),
-      }));
-      charactersLogger.info("🗑️ Imagen eliminada de personaje:", { characterId, imageId });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      charactersLogger.error("❌ Error al eliminar imagen de personaje:", { characterId, imageId, error });
-    }
-  },
-
-  loadCharacterContent: async (id: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      const character = await characterService.getCharacter(id);
-      if (!character) {
-        throw new Error("Personaje no encontrado");
-      }
-      const images = await characterService.getCharacterImages(id);
-      set({
-        currentCharacter: character,
-        currentItems: images,
-        isLoading: false,
+      characterLogger.info("🗑️ Eliminando personaje...", id);
+      const response = await fetch(`/api/characters/${id}`, {
+        method: "DELETE"
       });
-      charactersLogger.info("📂 Contenido de personaje cargado:", { id });
+      if (!response.ok) throw new Error("Error al eliminar personaje");
+      set(state => ({
+        characters: state.characters.filter(char => char.id !== id)
+      }));
+      characterLogger.info("✅ Personaje eliminado:", id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage, isLoading: false });
-      charactersLogger.error("❌ Error al cargar contenido de personaje:", { id, error });
+      characterLogger.error("❌ Error al eliminar personaje:", error);
+      throw error;
     }
-  },
+  }
 }));

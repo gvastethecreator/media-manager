@@ -1,91 +1,107 @@
 # Image Manager
 
-Este proyecto es una aplicación moderna de gestión y visualización de archivos multimedia diseñada para proporcionar una experiencia fluida y eficiente en la organización y visualización de grandes colecciones de medios locales.
+Sistema de gestión de imágenes con capacidades avanzadas de organización y categorización.
 
-# Stack Tecnológico
+## Características
 
-## Front End
+- 📁 Gestión de carpetas y archivos
+- 🏷️ Sistema de etiquetas
+- 📚 Colecciones y álbumes
+- 👥 Personajes y lugares
+- 🎭 Objetos y propiedades
+- 📊 Estadísticas y seguimiento
+- 🔄 Cola de procesamiento
+- 🖼️ Generación de miniaturas
+- 📱 Interfaz responsive
 
-- **Next.js 15** - con App Router
-- **React 19** - con Server Components
-- **Tailwind CSS** - para estilos
-- **shadcn/ui** - para componentes de UI
-- **Zustand** - para gestión de estado
-- **Jest** - para testing
-- **Motion** - para animaciones
-- **Lucide React** - para iconos
-- **Typescript** - para tipado estático
+## Estructura del Proyecto
 
-## Back End
+```
+image-manager/
+├── docs/               # Documentación
+│   ├── database/      # Documentación de la base de datos
+│   ├── api/           # Documentación de la API
+│   └── guides/        # Guías de usuario
+├── prisma/            # Schema y migraciones
+├── public/            # Archivos estáticos
+└── src/
+    ├── components/    # Componentes React
+    ├── hooks/         # Hooks personalizados
+    ├── lib/           # Utilidades
+    ├── services/      # Servicios
+    └── store/         # Estado global
+```
 
-- **SQLite 3** - para base de datos local
-- **Prisma ORM** - para ORM
-- **Next.js API Routes** - para endpoints
-- **Node.js fs/promises** - para manipulación de archivos
+## Modelos de Datos
 
-### Otras dependencias
+El sistema utiliza varios modelos para organizar la información:
 
-- **Event Source Polyfill** - para soporte de eventos en navegadores antiguos
-- **Event Source Stream** - para soporte de eventos en navegadores antiguos
-- **Tanstack Query** - para gestión de datos
-- **Bull** - para procesamiento de imágenes
-- **Chokidar** - para monitoreo de cambios en carpetas
-- **Exifr** - para extraer metadatos de imágenes
-- **Sharp** - para procesamiento de imágenes
-- **React Scan** - para debug de renderizado
-- **React Color** - para color picker
-- **Next Themes** - para gestión de temas
-- **Eslint** - para linting
+- **Images**: Gestión de imágenes y metadatos
+- **Collections**: Agrupación temática de imágenes
+- **Tags**: Etiquetado flexible
+- **Albums**: Organización por álbumes
+- **Characters**: Personajes y sus atributos
+- **Places**: Lugares y ubicaciones
+- **Objects**: Objetos y propiedades
 
-## Estado actual del proyecto
+Para más detalles, consulta la [documentación del schema](docs/database/schema.md).
 
-### Características Implementadas
+## Instalación
 
-- 🔄 Indexado completo de carpetas
-- 🖼️ Generación de thumbnails
-- 🗒️ Procesado de metadatos de imágenes
-- 🖼️ Vista de grilla para las imágenes
-- 🖼️ Visor avanzado de imagenes funcional
-- 🎨 Tema claro/oscuro
-- 💾 Base de datos local SQLite
-- 📊 Estadísticas de carpetas y archivos
-- ⚡ Navegación rápida y funcional
-- 📈 Panel de estadisticas
-- 📊 Panel de detalles basicos
+1. Clona el repositorio:
 
-### Vistas Disponibles
+```bash
+git clone https://github.com/tu-usuario/image-manager.git
+cd image-manager
+```
 
-- 🖼️ Vista de galería (todas las imágenes)
-- ⭐ Vista de favoritos
-- 📂 Vista de carpetas
-- 📕 Vista de colecciones
-- 🔖 Vista de etiquetas
-- 🔍 Vista de búsqueda
-- 🛠️ Vista de desarrollo
+2. Instala las dependencias:
 
-## Contribución
+```bash
+pnpm install
+```
 
-1. Revisa la documentación en `/docs`
-2. Sigue las guías de desarrollo
-3. Asegúrate de añadir tests
-4. Mantén la documentación actualizada
+3. Configura la base de datos:
+
+```bash
+pnpm prisma generate
+pnpm prisma db push
+```
+
+4. Ejecuta el seed:
+
+```bash
+pnpm prisma db seed
+```
+
+5. Inicia el servidor de desarrollo:
+
+```bash
+pnpm dev
+```
 
 ## Configuración
 
-- 👥 Gestion de usuarios
-- 📂 Gestion de carpetas indexadas
-- 📕 Gestion de colecciones
-- 🔖 Gestion de etiquetas
-- 🖼️ Gestion de miniaturas
+El sistema utiliza variables de entorno para su configuración. Copia el archivo `.env.example` a `.env` y ajusta los valores según tu entorno.
 
-## Servicios Actuales
+## Desarrollo
 
-- 📂 Servicio de indexado de carpetas
-- 📂 Servicio de monitoreo de carpetas
-- 📂 Servicio de procesamiento de imágenes
-- 🖼️ Servicio de generación de thumbnails
-- 🗒️ Servicio de extracción de metadatos
-- 📕 Servicio de gestión de colecciones
-- 🔖 Servicio de gestión de etiquetas
-- 👨🏻‍🦱 Servicio de gestión de usuarios
-- 🧑🏻‍🦰 Servicio de gestión de perfiles
+### Comandos Útiles
+
+- `pnpm dev`: Inicia el servidor de desarrollo
+- `pnpm build`: Construye la aplicación
+- `pnpm start`: Inicia la aplicación en producción
+- `pnpm lint`: Ejecuta el linter
+- `pnpm test`: Ejecuta las pruebas
+- `pnpm prisma studio`: Abre el explorador de base de datos
+
+### Convenciones
+
+- Utiliza TypeScript para todo el código
+- Sigue las guías de estilo de ESLint
+- Documenta los componentes y funciones principales
+- Usa commits semánticos
+
+## Licencia
+
+MIT - Ver [LICENSE](LICENSE) para más detalles.

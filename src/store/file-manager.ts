@@ -17,11 +17,19 @@ interface FileManagerState {
   currentFolderId: string | null
   currentCollectionId: string | null
   currentTagId: string | null
+  currentAlbumId: string | null
+  currentCharacterId: string | null
+  currentPlaceId: string | null
+  currentObjectId: string | null
 
   // Metadatos
   collections: { id: string; name: string; count: number; color?: string; emoji?: string }[]
   folders: { id: string; name: string; count: number }[]
   tags: { id: string; name: string; count: number; color: string }[]
+  albums: { id: string; name: string; count: number; emoji: string }[]
+  characters: { id: string; name: string; count: number; emoji: string }[]
+  places: { id: string; name: string; count: number; emoji: string }[]
+  objects: { id: string; name: string; count: number; emoji: string }[]
 
   // Estado de procesamiento
   isProcessingThumbnails: boolean
@@ -43,6 +51,10 @@ interface FileManagerState {
   setCurrentFolder: (id: string) => Promise<void>
   setCurrentCollection: (id: string) => Promise<void>
   setCurrentTag: (id: string) => Promise<void>
+  setCurrentAlbum: (id: string) => Promise<void>
+  setCurrentCharacter: (id: string) => Promise<void>
+  setCurrentPlace: (id: string) => Promise<void>
+  setCurrentObject: (id: string) => Promise<void>
 }
 
 const ITEMS_PER_BATCH = 50
@@ -64,11 +76,19 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
   currentFolderId: null,
   currentCollectionId: null,
   currentTagId: null,
+  currentAlbumId: null,
+  currentCharacterId: null,
+  currentPlaceId: null,
+  currentObjectId: null,
   isLoading: false,
   error: null,
   collections: [],
   folders: [],
   tags: [],
+  albums: [],
+  characters: [],
+  places: [],
+  objects: [],
   isProcessingThumbnails: false,
 
   // Inicialización
@@ -81,7 +101,11 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       set({
         collections: stats.collections || [],
         folders: stats.folders || [],
-        tags: stats.tags || []
+        tags: stats.tags || [],
+        albums: stats.albums || [],
+        characters: stats.characters || [],
+        places: stats.places || [],
+        objects: stats.objects || []
       })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Error desconocido' })
@@ -185,5 +209,65 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
     state.clearSelection()
     set({ currentFolderId: null, currentCollectionId: null, currentTagId: id })
     await state.loadItems(`/api/tags/${id}/images/all`)
-  }
+  },
+
+  setCurrentAlbum: async (id: string) => {
+    const state = get()
+    state.clearSelection()
+    set({
+      currentFolderId: null,
+      currentCollectionId: null,
+      currentTagId: null,
+      currentAlbumId: id,
+      currentCharacterId: null,
+      currentPlaceId: null,
+      currentObjectId: null
+    })
+    await state.loadItems(`/api/albums/${id}/images/all`)
+  },
+
+  setCurrentCharacter: async (id: string) => {
+    const state = get()
+    state.clearSelection()
+    set({
+      currentFolderId: null,
+      currentCollectionId: null,
+      currentTagId: null,
+      currentAlbumId: null,
+      currentCharacterId: id,
+      currentPlaceId: null,
+      currentObjectId: null
+    })
+    await state.loadItems(`/api/characters/${id}/images/all`)
+  },
+
+  setCurrentPlace: async (id: string) => {
+    const state = get()
+    state.clearSelection()
+    set({
+      currentFolderId: null,
+      currentCollectionId: null,
+      currentTagId: null,
+      currentAlbumId: null,
+      currentCharacterId: null,
+      currentPlaceId: id,
+      currentObjectId: null
+    })
+    await state.loadItems(`/api/places/${id}/images/all`)
+  },
+
+  setCurrentObject: async (id: string) => {
+    const state = get()
+    state.clearSelection()
+    set({
+      currentFolderId: null,
+      currentCollectionId: null,
+      currentTagId: null,
+      currentAlbumId: null,
+      currentCharacterId: null,
+      currentPlaceId: null,
+      currentObjectId: id
+    })
+    await state.loadItems(`/api/objects/${id}/images/all`)
+  },
 }))

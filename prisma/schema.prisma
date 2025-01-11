@@ -14,7 +14,6 @@ model Folder {
   id          String    @id @default(cuid())
   name        String
   path        String    @unique
-  isWatched   Boolean   @default(false)
   totalFiles  Int       @default(0)
   totalSize   Int       @default(0)
   lastIndexed DateTime? @default(now())
@@ -158,6 +157,12 @@ model Character {
   color       String   @default("#3b82f6")
   description String?
   shortcut    String?
+  level       Int      @default(1)
+  class       String   @default("unknown")
+  race        String   @default("unknown")
+  alignment   String   @default("neutral")
+  backstory   String   @default("")
+  stats       String   @default("{}")
   sortBy      String   @default("name")
   filters     String   @default("[]")
   createdAt   DateTime @default(now())
@@ -166,6 +171,8 @@ model Character {
 
   @@index([name])
   @@index([createdAt])
+  @@index([class])
+  @@index([race])
 }
 
 model Place {
@@ -175,6 +182,16 @@ model Place {
   color       String   @default("#3b82f6")
   description String?
   shortcut    String?
+  region      String   @default("unknown")
+  type        String   @default("unknown")
+  climate     String   @default("temperate")
+  population  Int      @default(0)
+  government  String   @default("unknown")
+  dangers     String   @default("[]")
+  resources   String   @default("[]")
+  lore        String   @default("")
+  history     String   @default("")
+  stats       String   @default("{}")
   sortBy      String   @default("name")
   filters     String   @default("[]")
   createdAt   DateTime @default(now())
@@ -183,23 +200,34 @@ model Place {
 
   @@index([name])
   @@index([createdAt])
+  @@index([type])
+  @@index([climate])
+  @@index([region])
 }
 
 model Object {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  emoji       String   @default("🎯")
-  color       String   @default("#3b82f6")
-  description String?
-  shortcut    String?
-  sortBy      String   @default("name")
-  filters     String   @default("[]")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      Image[]  @relation("ImageToObject")
+  id           String   @id @default(cuid())
+  name         String   @unique
+  emoji        String   @default("🎯")
+  color        String   @default("#3b82f6")
+  description  String?
+  shortcut     String?
+  type         String   @default("misc")
+  rarity       String   @default("common")
+  properties   String   @default("[]")
+  requirements String   @default("{}")
+  origin       String   @default("")
+  stats        String   @default("{}")
+  sortBy       String   @default("name")
+  filters      String   @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  images       Image[]  @relation("ImageToObject")
 
   @@index([name])
   @@index([createdAt])
+  @@index([type])
+  @@index([rarity])
 }
 
 // Modelo para el sistema de colas

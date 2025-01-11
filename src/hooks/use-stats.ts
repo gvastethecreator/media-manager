@@ -1,10 +1,40 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { statsService } from '@/services/stats.service'
 import { logger } from '@/lib/logger'
-import type { GeneralStats } from '@/services/stats.service'
 import type { ImageStats } from '@prisma/client'
 
 const statsLogger = logger.withContext('StatsHook')
+
+export interface GeneralStats {
+  totalImages: number
+  totalFolders: number
+  totalTags: number
+  totalCollections: number
+  totalAlbums: number
+  totalCharacters: number
+  totalPlaces: number
+  totalObjects: number
+  totalFavorites: number
+  totalViews: number
+  totalDownloads: number
+  totalSize: number
+  totalActivities: number
+  popularImages: Array<{
+    id: string
+    name: string
+    views: number
+  }>
+  topTags: Array<{
+    name: string
+    color: string
+    count: number
+  }>
+  recentActivity: Array<{
+    description: string
+    timestamp: string
+    iconName: string
+  }>
+}
 
 export const STATS_QUERY_KEYS = {
   all: ['stats'] as const,
@@ -78,7 +108,7 @@ export function useImageStats(imageId: string) {
 
   const incrementView = async () => {
     try {
-      const updatedStats = await statsService.incrementView(imageId)
+      const updatedStats = await statsService.incrementViewCount(imageId)
       queryClient.setQueryData(STATS_QUERY_KEYS.image(imageId), updatedStats)
       queryClient.invalidateQueries({ queryKey: STATS_QUERY_KEYS.general() })
     } catch (error) {
@@ -89,7 +119,7 @@ export function useImageStats(imageId: string) {
 
   const incrementDownload = async () => {
     try {
-      const updatedStats = await statsService.incrementDownload(imageId)
+      const updatedStats = await statsService.incrementDownloadCount(imageId)
       queryClient.setQueryData(STATS_QUERY_KEYS.image(imageId), updatedStats)
       queryClient.invalidateQueries({ queryKey: STATS_QUERY_KEYS.general() })
     } catch (error) {

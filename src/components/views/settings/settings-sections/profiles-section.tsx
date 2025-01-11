@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { Separator } from "@/components/ui/separator";
+import type { EmojiClickData } from "emoji-picker-react";
+
 export function ProfilesSection() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } =
 		useSettingsContext();
@@ -86,8 +88,8 @@ export function ProfilesSection() {
 								align="start"
 							>
 								<EmojiPicker
-									onEmojiSelect={(emoji) =>
-										handleUpdateActiveProfile({ emoji })
+									onEmojiSelect={(emojiData: EmojiClickData) =>
+										handleUpdateActiveProfile({ emoji: emojiData.emoji })
 									}
 								/>
 							</PopoverContent>
@@ -101,7 +103,7 @@ export function ProfilesSection() {
 								className="h-8 text-base border-none p-3"
 								placeholder="Nombre del perfil"
 							/>
-						
+
 							<div className="flex gap-2">
 								<select
 									value={activeProfileData?.theme || "system"}
