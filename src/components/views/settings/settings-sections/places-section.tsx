@@ -49,7 +49,7 @@ interface EditForm extends PlaceUpdate {
 export function PlacesSection() {
 	const {
 		places,
-		loading,
+		isLoading,
 		error,
 		createPlace,
 		updatePlace,
@@ -175,9 +175,9 @@ export function PlacesSection() {
 					variant="outline"
 					size="sm"
 					onClick={() => loadPlaces()}
-					disabled={loading}
+					disabled={isLoading}
 				>
-					{loading ? (
+					{isLoading ? (
 						<Loader2 className="h-4 w-4 animate-spin" />
 					) : (
 						<span>Recargar</span>
@@ -209,10 +209,10 @@ export function PlacesSection() {
 										align="start"
 									>
 										<EmojiPicker
-											onEmojiSelect={(emojiData: EmojiClickData) =>
+											onEmojiSelect={(emoji: string) =>
 												setNewPlace((prev) => ({
 													...prev,
-													emoji: emojiData.emoji,
+													emoji: emoji,
 												}))
 											}
 										/>
@@ -315,8 +315,8 @@ export function PlacesSection() {
 							/>
 						</div>
 						<div className="flex items-center justify-end">
-							<Button type="submit" size="sm" disabled={loading}>
-								{loading ? (
+							<Button type="submit" size="sm" disabled={isLoading}>
+								{isLoading ? (
 									<Loader2 className="h-4 w-4 animate-spin mr-2" />
 								) : null}
 								Crear lugar
@@ -329,10 +329,10 @@ export function PlacesSection() {
 			<div className="grid gap-4">
 				{error && (
 					<div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">
-						{error.message}
+						{error}
 					</div>
 				)}
-				{places.length === 0 && !loading ? (
+				{places.length === 0 && !isLoading ? (
 					<div className="text-sm text-muted-foreground text-center py-4">
 						No hay lugares creados
 					</div>
@@ -438,10 +438,10 @@ export function PlacesSection() {
 															align="start"
 														>
 															<EmojiPicker
-																onEmojiSelect={(emojiData: EmojiClickData) =>
+																onEmojiSelect={(emoji: string) =>
 																	setEditForm((prev) => ({
 																		...prev!,
-																		emoji: emojiData.emoji,
+																		emoji: emoji,
 																	}))
 																}
 															/>
@@ -555,8 +555,8 @@ export function PlacesSection() {
 												>
 													<XIcon className="h-4 w-4" />
 												</Button>
-												<Button type="submit" size="sm" disabled={loading}>
-													{loading ? (
+												<Button type="submit" size="sm" disabled={isLoading}>
+													{isLoading ? (
 														<Loader2 className="h-4 w-4 animate-spin mr-2" />
 													) : (
 														<CheckIcon className="h-4 w-4" />

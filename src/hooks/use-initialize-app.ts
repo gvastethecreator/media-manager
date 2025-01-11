@@ -22,9 +22,9 @@ const COMPLETION_DELAY = 500
 
 export function useInitializeApp() {
   const { updateService, setProgress, setInitializing, setReady } = useLoadingStore()
-  const { loadFavorites } = useFavoritesStore()
   const { loadCollections } = useCollectionsStore()
   const { loadTags } = useTagsStore()
+  const { loadFavorites } = useFavoritesStore()
 
   useEffect(() => {
     const services: ServiceInitializer[] = [

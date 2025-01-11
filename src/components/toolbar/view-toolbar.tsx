@@ -51,7 +51,9 @@ export function ViewToolbar() {
 		const basePath = (
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink href="/">Inicio</BreadcrumbLink>
+					<BreadcrumbLink href="/" className="text-sm font-medium hover:text-foreground">
+						Inicio
+					</BreadcrumbLink>
 				</BreadcrumbItem>
 				<BreadcrumbSeparator />
 			</BreadcrumbList>
@@ -63,7 +65,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Galería</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Galería</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -72,7 +74,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Favoritos</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Favoritos</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -81,7 +83,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Búsqueda</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Búsqueda</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -90,7 +92,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Colecciones</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Colecciones</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -99,11 +101,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/collections">Colecciones</BreadcrumbLink>
+							<BreadcrumbLink href="/collections" className="text-sm font-medium hover:text-foreground">Colecciones</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentCollection?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentCollection?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -112,7 +114,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Carpetas</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Carpetas</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -121,11 +123,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/folders">Carpetas</BreadcrumbLink>
+							<BreadcrumbLink href="/folders" className="text-sm font-medium hover:text-foreground">Carpetas</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentFolder?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentFolder?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -134,7 +136,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Etiquetas</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Etiquetas</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -143,11 +145,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/tags">Etiquetas</BreadcrumbLink>
+							<BreadcrumbLink href="/tags" className="text-sm font-medium hover:text-foreground">Etiquetas</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentTag}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentTag}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -156,7 +158,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Álbumes</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Álbumes</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -165,11 +167,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/albums">Álbumes</BreadcrumbLink>
+							<BreadcrumbLink href="/albums" className="text-sm font-medium hover:text-foreground">Álbumes</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentAlbum?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentAlbum?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -178,7 +180,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Personajes</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Personajes</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -187,11 +189,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/characters">Personajes</BreadcrumbLink>
+							<BreadcrumbLink href="/characters" className="text-sm font-medium hover:text-foreground">Personajes</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentCharacter?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentCharacter?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -200,7 +202,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Lugares</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Lugares</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -209,11 +211,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/places">Lugares</BreadcrumbLink>
+							<BreadcrumbLink href="/places" className="text-sm font-medium hover:text-foreground">Lugares</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentPlace?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentPlace?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -222,7 +224,7 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage>Objetos</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Objetos</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -231,11 +233,11 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/objects">Objetos</BreadcrumbLink>
+							<BreadcrumbLink href="/objects" className="text-sm font-medium hover:text-foreground">Objetos</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{currentObject?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentObject?.name}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -247,14 +249,14 @@ export function ViewToolbar() {
 	const renderActions = () => {
 		const commonActions = (
 			<>
-				<Button variant="ghost" size="icon" className="h-8 w-8">
-					<Filter className="h-4 w-4" />
+				<Button variant="ghost" size="icon" className="h-7 w-7">
+					<Filter className="h-3.5 w-3.5" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-8 w-8">
-					<SlidersHorizontal className="h-4 w-4" />
+				<Button variant="ghost" size="icon" className="h-7 w-7">
+					<SlidersHorizontal className="h-3.5 w-3.5" />
 				</Button>
-				<Button variant="ghost" size="icon" className="h-8 w-8">
-					<Grid className="h-4 w-4" />
+				<Button variant="ghost" size="icon" className="h-7 w-7">
+					<Grid className="h-3.5 w-3.5" />
 				</Button>
 			</>
 		);
@@ -264,13 +266,13 @@ export function ViewToolbar() {
 			case "favorites":
 			case "search":
 				return (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-1">
 						{commonActions}
-						<Button variant="ghost" size="icon" className="h-8 w-8">
-							<Download className="h-4 w-4" />
+						<Button variant="ghost" size="icon" className="h-7 w-7">
+							<Download className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-8 w-8">
-							<Share2 className="h-4 w-4" />
+						<Button variant="ghost" size="icon" className="h-7 w-7">
+							<Share2 className="h-3.5 w-3.5" />
 						</Button>
 					</div>
 				);
@@ -282,9 +284,9 @@ export function ViewToolbar() {
 			case "places":
 			case "objects":
 				return (
-					<div className="flex items-center gap-2">
-						<Button variant="ghost" size="sm" className="h-8">
-							<Plus className="h-4 w-4 mr-2" />
+					<div className="flex items-center gap-1">
+						<Button variant="ghost" size="sm" className="h-7 text-xs">
+							<Plus className="h-3.5 w-3.5 mr-1" />
 							Nuevo
 						</Button>
 						{commonActions}
@@ -298,13 +300,13 @@ export function ViewToolbar() {
 			case "place-content":
 			case "object-content":
 				return (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-1">
 						{commonActions}
-						<Button variant="ghost" size="icon" className="h-8 w-8">
-							<Edit className="h-4 w-4" />
+						<Button variant="ghost" size="icon" className="h-7 w-7">
+							<Edit className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-8 w-8">
-							<Trash2 className="h-4 w-4" />
+						<Button variant="ghost" size="icon" className="h-7 w-7">
+							<Trash2 className="h-3.5 w-3.5" />
 						</Button>
 					</div>
 				);
@@ -316,32 +318,32 @@ export function ViewToolbar() {
 	const renderIcon = () => {
 		switch (currentView) {
 			case "all-images":
-				return <ImageIcon className="h-4 w-4 text-muted-foreground" />;
+				return <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "favorites":
-				return <Star className="h-4 w-4 text-muted-foreground" />;
+				return <Star className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "search":
-				return <Search className="h-4 w-4 text-muted-foreground" />;
+				return <Search className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "collections":
 			case "collection-content":
-				return <BookImage className="h-4 w-4 text-muted-foreground" />;
+				return <BookImage className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "folders":
 			case "folder-content":
-				return <FolderIcon className="h-4 w-4 text-muted-foreground" />;
+				return <FolderIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "tags":
 			case "tag-content":
-				return <TagIcon className="h-4 w-4 text-muted-foreground" />;
+				return <TagIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "albums":
 			case "album-content":
-				return <Camera className="h-4 w-4 text-muted-foreground" />;
+				return <Camera className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "characters":
 			case "character-content":
-				return <User2 className="h-4 w-4 text-muted-foreground" />;
+				return <User2 className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "places":
 			case "place-content":
-				return <MapPin className="h-4 w-4 text-muted-foreground" />;
+				return <MapPin className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "objects":
 			case "object-content":
-				return <Box className="h-4 w-4 text-muted-foreground" />;
+				return <Box className="h-3.5 w-3.5 text-muted-foreground" />;
 			default:
 				return null;
 		}
@@ -351,17 +353,17 @@ export function ViewToolbar() {
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
-			className={cn(
-				"w-full h-12 px-4",
-				"border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-				"flex items-center justify-between"
-			)}
+			className={cn("flex flex-col bg-primary/10 py-2 h-12", "border-b")}
 		>
-			<div className="flex items-center gap-4">
-				{renderIcon()}
-				{renderBreadcrumb()}
+			<div className="flex w-full items-center justify-between gap-2 px-2">
+				<div className="flex items-center gap-4 w-full">
+					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">
+						{renderIcon()}
+					</div>
+					{renderBreadcrumb()}
+				</div>
+				<div className="flex items-center gap-2">{renderActions()}</div>
 			</div>
-			{renderActions()}
 		</motion.div>
 	);
 }

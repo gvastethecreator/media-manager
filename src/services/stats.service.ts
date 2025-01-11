@@ -19,11 +19,23 @@ export const STATS_EVENTS = {
   TAG_CHANGE: 'tag_change',
   FAVORITE_CHANGE: 'favorite_change',
   STATS_UPDATE_NEEDED: 'stats_update_needed',
-  FOLDER_CHANGE: 'folder_change'
+  FOLDER_CHANGE: 'folder_change',
+  ALBUM_CHANGE: 'album_change',
+  CHARACTER_CHANGE: 'character_change',
+  PLACE_CHANGE: 'place_change',
+  OBJECT_CHANGE: 'object_change'
 } as const
 
 export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS]
-export type StatsUpdateEvent = 'collection_change' | 'tag_change' | 'favorite_change' | 'folder_change'
+export type StatsUpdateEvent =
+  | 'collection_change'
+  | 'tag_change'
+  | 'favorite_change'
+  | 'folder_change'
+  | 'album_change'
+  | 'character_change'
+  | 'place_change'
+  | 'object_change'
 export type StatsEvents = typeof STATS_EVENTS
 
 export const statsEventEmitter = new EventEmitter()
@@ -97,6 +109,26 @@ class StatsService {
   emitFolderChange(folderId: string) {
     statsEventEmitter.emit('folder_change', { folderId })
     statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['folder_change'])
+  }
+
+  emitAlbumChange(imageId: string) {
+    statsEventEmitter.emit('album_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['album_change'])
+  }
+
+  emitCharacterChange(imageId: string) {
+    statsEventEmitter.emit('character_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['character_change'])
+  }
+
+  emitPlaceChange(imageId: string) {
+    statsEventEmitter.emit('place_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['place_change'])
+  }
+
+  emitObjectChange(imageId: string) {
+    statsEventEmitter.emit('object_change', { imageId })
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['object_change'])
   }
 }
 

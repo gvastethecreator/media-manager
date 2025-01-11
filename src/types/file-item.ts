@@ -59,23 +59,37 @@ export interface FileItem {
     name: string;
     color: string;
   }>;
+  albums?: Array<{
+    id: string;
+    name: string;
+    emoji: string;
+    color: string;
+  }>;
   characters?: Array<{
     id: string;
     name: string;
     emoji: string;
     color: string;
+    level?: number;
+    class?: string;
+    race?: string;
   }>;
   places?: Array<{
     id: string;
     name: string;
     emoji: string;
     color: string;
+    region?: string;
+    type?: string;
+    climate?: string;
   }>;
   objects?: Array<{
     id: string;
     name: string;
     emoji: string;
     color: string;
+    type?: string;
+    rarity?: string;
   }>;
   activities?: Array<{
     id: string;

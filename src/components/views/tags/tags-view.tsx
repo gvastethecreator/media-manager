@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -31,9 +31,28 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+
+const viewLogger = logger.withContext("TagsView");
+
+interface Tag {
+	id: string;
+	name: string;
+	description?: string;
+	color?: string;
+	count?: number;
+	totalSize?: number;
+	recentImages?: string[];
+	relatedTags?: Array<{
+		id: string;
+		name: string;
+		count: number;
+	}>;
+}
 
 interface TagCardProps {
-	tag: any;
+	tag: Tag;
 	onClick: () => void;
 }
 
@@ -52,14 +71,18 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-function TagCard({ tag, onClick }: TagCardProps) {
+const TagCard = memo(function TagCard({ tag, onClick }: TagCardProps) {
 	const router = useRouter();
 	const gradient = getRandomGradient();
 
-	const handleEdit = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		router.push("/settings/tags");
-	};
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando etiqueta:", tag.name);
+			router.push("/settings/tags");
+		},
+		[router, tag.name]
+	);
 
 	return (
 		<motion.div animate={{ scale: 1 }} className="h-full">
@@ -109,7 +132,7 @@ function TagCard({ tag, onClick }: TagCardProps) {
 					<div className="relative group/grid flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
 							{tag.recentImages && tag.recentImages.length > 0
-								? tag.recentImages.map((src: string, i: number) => (
+								? tag.recentImages.map((src, i) => (
 										<div
 											key={i}
 											className="relative rounded-md overflow-hidden aspect-square"
@@ -151,7 +174,9 @@ function TagCard({ tag, onClick }: TagCardProps) {
 						<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4">
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{tag.count > 0 ? `Ver ${tag.count} imágenes` : "Sin imágenes"}
+								{(tag.count ?? 0) > 0
+									? `Ver ${tag.count} imágenes`
+									: "Sin imágenes"}
 							</Button>
 						</div>
 					</div>
@@ -186,9 +211,9 @@ function TagCard({ tag, onClick }: TagCardProps) {
 						{tag.relatedTags && tag.relatedTags.length > 0 && (
 							<>
 								<div className="flex flex-wrap gap-1">
-									{tag.relatedTags.map((relatedTag: any, i: number) => (
+									{tag.relatedTags.map((relatedTag) => (
 										<Badge
-											key={i}
+											key={relatedTag.id}
 											variant="secondary"
 											className="text-xs hover:bg-accent transition-colors"
 										>
@@ -203,35 +228,53 @@ function TagCard({ tag, onClick }: TagCardProps) {
 			</Card>
 		</motion.div>
 	);
-}
+});
 
 export function TagsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentTag } = useFileManager();
-	const [tags, setTags] = useState<any[]>([]);
+	const [tags, setTags] = useState<Tag[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchTags = async () => {
-			try {
-				setIsLoading(true);
-				// TODO: Implementar servicio de tags
-				const response = await fetch("/api/tags");
-				const data = await response.json();
-				setTags(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchTags();
+	const fetchTags = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando etiquetas...");
+			const response = await fetch("/api/tags");
+			const data = await response.json();
+			setTags(data);
+			viewLogger.info(`✅ ${data.length} etiquetas cargadas`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando etiquetas:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar etiquetas inicialmente
+		fetchTags();
+
+		// Suscribirse a eventos relevantes
+		const handleTagModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de etiquetas recibido:", data);
+			fetchTags();
+		};
+
+		eventsService.on("tags:modified", handleTagModified);
+
+		return () => {
+			eventsService.off("tags:modified", handleTagModified);
+		};
+	}, [fetchTags]);
+
 	const handleTagClick = useCallback(
-		(tag: any) => {
+		(tag: Tag) => {
+			viewLogger.info("🖱️ Click en etiqueta:", tag.name);
 			setCurrentView("tag-content");
 			setCurrentTag(tag.id);
 		},
@@ -255,26 +298,23 @@ export function TagsView({ isResizing }: ViewProps) {
 			<EmptyState
 				icon={TagIcon}
 				title="No hay etiquetas"
-				description="Las etiquetas te ayudan a organizar tus imágenes. Crea una nueva etiqueta desde el panel de configuración."
+				description="Las etiquetas te ayudan a organizar y encontrar tus imágenes. Crea una nueva etiqueta desde el panel de configuración."
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full w-full">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-				{tags.map((tag, index) => (
-					<motion.div
-						key={tag.id}
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: index * 0.1 }}
-					>
-						<TagCard tag={tag} onClick={() => handleTagClick(tag)} />
-					</motion.div>
-				))}
+		<ScrollArea className="h-full">
+			<div className="container mx-auto p-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{tags.map((tag) => (
+						<TagCard
+							key={tag.id}
+							tag={tag}
+							onClick={() => handleTagClick(tag)}
+						/>
+					))}
+				</div>
 			</div>
 		</ScrollArea>
 	);

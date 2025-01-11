@@ -22,20 +22,8 @@ export interface CharacterCreate {
   filters?: string
 }
 
-export interface CharacterUpdate {
-  name?: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  level?: number
-  class?: string
-  race?: string
-  alignment?: string
-  backstory?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
+export interface CharacterUpdate extends Partial<CharacterCreate> {
+  id: string
 }
 
 export interface CharacterWithStats extends PrismaCharacter {
@@ -58,30 +46,18 @@ class CharacterService {
         orderBy: {
           createdAt: 'desc'
         }
-      }).catch((error) => {
-        characterLogger.error('❌ Error en prisma.character.findMany:', error)
-        throw error
       })
 
-      characterLogger.info('📊 Calculando estadísticas para', characters.length, 'personajes')
       const charactersWithStats = await Promise.all(
         characters.map(async (character) => {
-          try {
-            const totalSize = await prisma.image.aggregate({
-              where: { characters: { some: { id: character.id } } },
-              _sum: { size: true }
-            })
+          const totalSize = await prisma.image.aggregate({
+            where: { characters: { some: { id: character.id } } },
+            _sum: { size: true }
+          })
 
-            return {
-              ...character,
-              totalSize: totalSize._sum?.size || 0
-            }
-          } catch (error) {
-            characterLogger.error('❌ Error al calcular estadísticas del personaje:', { characterId: character.id, error: error instanceof Error ? error.message : 'Error desconocido' })
-            return {
-              ...character,
-              totalSize: 0
-            }
+          return {
+            ...character,
+            totalSize: totalSize._sum?.size || 0
           }
         })
       )
@@ -89,8 +65,8 @@ class CharacterService {
       characterLogger.info('✅ Personajes obtenidos correctamente:', { count: characters.length })
       return charactersWithStats
     } catch (error) {
-      characterLogger.error('❌ Error al obtener personajes:', error instanceof Error ? { message: error.message, stack: error.stack } : error)
-      throw new Error('Error al obtener los personajes: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al obtener personajes:', error)
+      throw error
     }
   }
 
@@ -117,8 +93,8 @@ class CharacterService {
         totalSize: totalSize._sum?.size || 0
       }
     } catch (error) {
-      characterLogger.error('❌ Error al obtener personaje:', { id, error })
-      throw new Error('Error al obtener el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al obtener personaje:', error)
+      throw error
     }
   }
 
@@ -147,17 +123,18 @@ class CharacterService {
         }
       })
 
-      characterLogger.info('✨ Personaje creado:', { character })
-      const eventData: EventData = { type: 'create', id: character.id }
-      eventsService.emit('characters:modified', eventData)
-
-      return {
+      const characterWithStats = {
         ...character,
         totalSize: 0
       }
+
+      characterLogger.info('✨ Personaje creado:', character)
+      const eventData: EventData = { type: 'create', id: character.id }
+      eventsService.emit('characters:modified', eventData)
+      return characterWithStats
     } catch (error) {
-      characterLogger.error('❌ Error al crear personaje:', { data, error })
-      throw new Error('Error al crear el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al crear personaje:', error)
+      throw error
     }
   }
 
@@ -188,8 +165,8 @@ class CharacterService {
       eventsService.emit('characters:modified', eventData)
       return characterWithStats
     } catch (error) {
-      characterLogger.error('❌ Error al actualizar personaje:', { id, data, error })
-      throw new Error('Error al actualizar el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al actualizar personaje:', error)
+      throw error
     }
   }
 
@@ -198,50 +175,59 @@ class CharacterService {
       await prisma.character.delete({
         where: { id }
       })
-      characterLogger.info('🗑️ Personaje eliminado:', { id })
+      characterLogger.info('🗑️ Personaje eliminado:', id)
       const eventData: EventData = { type: 'delete', id }
       eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('❌ Error al eliminar personaje:', { id, error })
-      throw new Error('Error al eliminar el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al eliminar personaje:', error)
+      throw error
     }
   }
 
-  async addImageToCharacter(characterId: string, imageId: string): Promise<void> {
+  async addImageToCharacter(characterId: string, fileId: string) {
     try {
       await prisma.character.update({
         where: { id: characterId },
         data: {
           images: {
-            connect: { id: imageId }
+            connect: { id: fileId }
           }
         }
       })
-      characterLogger.info('📸 Imagen agregada a personaje:', { characterId, imageId })
-      const eventData: EventData = { type: 'addImage', objectId: characterId, imageId }
+
+      characterLogger.info('✨ Imagen agregada al personaje:', {
+        characterId,
+        fileId,
+      })
+
+      const eventData: EventData = { type: 'addImage', objectId: characterId, imageId: fileId }
       eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('❌ Error al agregar imagen a personaje:', { characterId, imageId, error })
-      throw new Error('Error al agregar imagen al personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al agregar imagen al personaje:', {
+        error,
+        characterId,
+        fileId,
+      })
+      throw error
     }
   }
 
-  async removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
+  async removeImageFromCharacter(characterId: string, fileId: string): Promise<void> {
     try {
       await prisma.character.update({
         where: { id: characterId },
         data: {
           images: {
-            disconnect: { id: imageId }
+            disconnect: { id: fileId }
           }
         }
       })
-      characterLogger.info('🖼️ Imagen removida de personaje:', { characterId, imageId })
-      const eventData: EventData = { type: 'removeImage', objectId: characterId, imageId }
+      characterLogger.info('🗑️ Imagen eliminada del personaje:', { characterId, fileId })
+      const eventData: EventData = { type: 'removeImage', objectId: characterId, imageId: fileId }
       eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('❌ Error al remover imagen de personaje:', { characterId, imageId, error })
-      throw new Error('Error al remover imagen del personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al eliminar imagen del personaje:', error)
+      throw error
     }
   }
 
@@ -266,6 +252,14 @@ class CharacterService {
             select: {
               id: true,
               name: true,
+              color: true
+            }
+          },
+          albums: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
               color: true
             }
           },
@@ -294,10 +288,10 @@ class CharacterService {
             }
           }
         }
-      });
+      })
 
       return images.map(image => {
-        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined;
+        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined
         return {
           id: image.id,
           name: image.name,
@@ -318,16 +312,18 @@ class CharacterService {
           updatedAt: image.updatedAt.toISOString(),
           collections: image.collections,
           tags: image.tags,
+          albums: image.albums,
           characters: image.characters,
           places: image.places,
           objects: image.objects
-        };
-      });
+        }
+      })
     } catch (error) {
-      characterLogger.error("❌ Error al obtener imágenes del personaje:", { error });
-      throw new Error('Error al obtener imágenes del personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      characterLogger.error('❌ Error al obtener imágenes del personaje:', error)
+      throw error
     }
   }
 }
 
-export const characterService = new CharacterService();
+export const characterService = new CharacterService()
+export const { addImageToCharacter } = characterService

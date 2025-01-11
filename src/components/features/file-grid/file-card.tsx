@@ -13,8 +13,9 @@
  * - Lazy loading de miniaturas
  * - Animaciones con Framer Motion
  * - Integración con sistema de eventos
- * - Gestión de caché de miniaturas
+ * - Gestión de caché de thumbnails
  * - Soporte para diferentes calidades de miniatura
+ * - Integración con nuevas entidades (Albums, Characters, Places, Objects)
  *
  * @param {FileCardProps} props - Propiedades del componente
  */
@@ -47,6 +48,10 @@ import {
 	TagIcon,
 	CalendarIcon,
 	BookmarkIcon,
+	Camera,
+	User2,
+	MapPin,
+	Box,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -56,6 +61,51 @@ import {
 } from "@/services/stats.service";
 import { toastService } from "@/services/toast.service";
 import { ThumbnailQuality } from "@/types/thumbnails";
+import { statsService } from "@/services/stats.service";
+import { addImageToCollection } from "@/services/collection.service";
+import { addImageToTag } from "@/services/tag.service";
+import { addImageToAlbum } from "@/services/album.service";
+import { addImageToCharacter } from "@/services/character.service";
+import { addImageToPlace } from "@/services/place.service";
+import { addImageToObject } from "@/services/object.service";
+import { ElectronAPI } from "@/types/electron";
+import { useFavorites } from "@/store/favorites";
+import { logger } from "@/lib/logger";
+
+declare global {
+	interface Window {
+		electron?: ElectronAPI;
+	}
+}
+
+const fileCardLogger = logger.withContext("FileCard");
+
+// Configuración de la caché de thumbnails
+const THUMBNAIL_CACHE_CONFIG = {
+	maxSize: 200,
+	quality: ThumbnailQuality.MEDIUM as const,
+	retryDelay: 2000,
+	retryAttempts: 2,
+};
+
+// Caché de thumbnails usando WeakMap para mejor gestión de memoria
+const thumbnailCache = new WeakMap<FileItem, string>();
+
+// Tipos de acciones del menú contextual
+type ContextMenuAction =
+	| "mark-toggle"
+	| "favorite-toggle"
+	| "collection-add"
+	| "tag-add"
+	| "album-add"
+	| "character-add"
+	| "place-add"
+	| "object-add"
+	| "preview"
+	| "open"
+	| "download"
+	| "copy"
+	| "delete";
 
 interface FileCardProps {
 	item: FileItem;
@@ -69,15 +119,15 @@ interface FileCardProps {
 	hasBeenRendered?: boolean;
 }
 
-// Configuración de animaciones simplificada
+// Configuración de animaciones optimizada
 const springConfig = {
-	type: "spring",
+	type: "spring" as const,
 	stiffness: 200,
 	damping: 20,
 	mass: 0.3,
 };
 
-// Actualizamos las variantes para incluir todos los estados
+// Variantes de animación actualizadas
 const variants = {
 	hover: {
 		scale: 1,
@@ -118,17 +168,41 @@ export function FileCard({
 	shouldLoad = false,
 	hasBeenRendered = false,
 }: FileCardProps) {
-	const [thumbnail, setThumbnail] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [thumbnail, setThumbnail] = useState<string | null>(
+		thumbnailCache.get(item) || null
+	);
+	const [isLoading, setIsLoading] = useState(!thumbnailCache.has(item));
 	const [error, setError] = useState<string | null>(null);
+	const [retryCount, setRetryCount] = useState(0);
 	const { toast } = useToast();
 	const { openViewer } = useImageViewer();
 	const { toggleItemSelection, selectedItems } = useFileManager();
+	const { toggleFavorite } = useFavorites();
 	const [isHovered, setIsHovered] = useState(false);
 	const [isMarked, setIsMarked] = useState(false);
 	const hasLoaded = useRef(false);
+	const shouldReduceMotion = useReducedMotion();
 
-	// Escuchar eventos de cambios con debounce
+	// Memoizar los datos de las entidades relacionadas
+	const entityData = useMemo(() => {
+		return {
+			collections: item.collections || [],
+			tags: item.tags || [],
+			albums: item.albums || [],
+			characters: item.characters || [],
+			places: item.places || [],
+			objects: item.objects || [],
+		};
+	}, [
+		item.collections,
+		item.tags,
+		item.albums,
+		item.characters,
+		item.places,
+		item.objects,
+	]);
+
+	// Escuchar eventos de cambios con debounce optimizado
 	useEffect(() => {
 		if (!shouldLoad) return;
 
@@ -138,19 +212,28 @@ export function FileCard({
 		const handleStatsUpdate = async (events: StatsUpdateEvent[]) => {
 			if (!isSubscribed) return;
 
-			const relevantEvents: StatsUpdateEvent[] = [
+			const relevantEvents = new Set<StatsUpdateEvent>([
 				"collection_change",
 				"tag_change",
 				"favorite_change",
-			];
+				"album_change",
+				"character_change",
+				"place_change",
+				"object_change",
+			]);
 
 			const shouldUpdate = events.some(
 				(event) =>
-					relevantEvents.includes(event) &&
+					relevantEvents.has(event) &&
 					((event === "collection_change" &&
-						(item.collections?.length ?? 0) > 0) ||
-						(event === "tag_change" && (item.tags?.length ?? 0) > 0) ||
-						(event === "favorite_change" && item.isFavorite))
+						entityData.collections.length > 0) ||
+						(event === "tag_change" && entityData.tags.length > 0) ||
+						(event === "favorite_change" && item.isFavorite) ||
+						(event === "album_change" && entityData.albums.length > 0) ||
+						(event === "character_change" &&
+							entityData.characters.length > 0) ||
+						(event === "place_change" && entityData.places.length > 0) ||
+						(event === "object_change" && entityData.objects.length > 0))
 			);
 
 			if (shouldUpdate) {
@@ -173,8 +256,7 @@ export function FileCard({
 			}
 		};
 
-		// Configurar el listener una sola vez
-		statsEventEmitter.setMaxListeners(20); // Aumentar el límite si es necesario
+		statsEventEmitter.setMaxListeners(20);
 		statsEventEmitter.on(STATS_EVENTS.STATS_UPDATE_NEEDED, handleStatsUpdate);
 
 		return () => {
@@ -185,25 +267,15 @@ export function FileCard({
 				handleStatsUpdate
 			);
 		};
-	}, [
-		item.id,
-		item.collections?.length,
-		item.tags?.length,
-		item.isFavorite,
-		toggleItemSelection,
-	]);
+	}, [item, entityData, shouldLoad, toggleItemSelection]);
 
-	// Memoizar el estado de selección para evitar re-renders innecesarios
+	// Memoizar el estado de selección
 	const isSelected = useMemo(
 		() => selectedItems.some((i) => i.id === item.id),
 		[selectedItems, item.id]
 	);
 
-	// Función para manejar el marcado desde el menú contextual
-	const handleMarkToggle = useCallback(() => {
-		setIsMarked((prev) => !prev);
-	}, []);
-
+	// Función optimizada para cargar thumbnails
 	const loadThumbnail = useCallback(async () => {
 		if (hasLoaded.current || !shouldLoad) return;
 
@@ -211,23 +283,28 @@ export function FileCard({
 			setIsLoading(true);
 			setError(null);
 
-			const quality: ThumbnailQuality = ThumbnailQuality.MEDIUM;
+			// Intentar obtener de la caché primero
+			const cachedThumbnail = thumbnailCache.get(item);
+			if (cachedThumbnail) {
+				setThumbnail(cachedThumbnail);
+				setIsLoading(false);
+				hasLoaded.current = true;
+				return;
+			}
 
 			const thumbnailData = await thumbnailService.getThumbnail(
 				item.id,
-				quality
+				THUMBNAIL_CACHE_CONFIG.quality
 			);
 
-			// Validar que el thumbnail es una cadena base64 válida
 			if (typeof thumbnailData !== "string" || !thumbnailData.length) {
 				throw new Error("Formato de miniatura inválido");
 			}
 
-			// Construir la URL de datos completa
 			const mimeType = item.metadata?.mimeType || "image/jpeg";
 			const dataUrl = `data:${mimeType};base64,${thumbnailData}`;
 
-			// Precargar la imagen para asegurar que es válida
+			// Precargar la imagen
 			await new Promise((resolve, reject) => {
 				const img = new Image();
 				img.onload = resolve;
@@ -235,6 +312,8 @@ export function FileCard({
 				img.src = dataUrl;
 			});
 
+			// Guardar en caché y actualizar estado
+			thumbnailCache.set(item, dataUrl);
 			setThumbnail(dataUrl);
 			hasLoaded.current = true;
 			setIsLoading(false);
@@ -245,28 +324,28 @@ export function FileCard({
 			setError(errorMessage);
 			setIsLoading(false);
 
-			// Mostrar toast solo para errores críticos o después de reintentos
+			// Reintentar con backoff exponencial
 			if (
-				errorMessage.includes("después de reintentos") ||
-				errorMessage.includes("Formato de miniatura inválido") ||
-				errorMessage.includes("Error cargando la imagen")
+				retryCount < THUMBNAIL_CACHE_CONFIG.retryAttempts &&
+				!hasLoaded.current &&
+				shouldLoad
 			) {
+				const delay =
+					THUMBNAIL_CACHE_CONFIG.retryDelay * Math.pow(2, retryCount);
+				setTimeout(() => {
+					setRetryCount((prev) => prev + 1);
+					hasLoaded.current = false;
+					loadThumbnail();
+				}, delay);
+			} else if (errorMessage.includes("después de reintentos")) {
 				toast({
 					title: "Error de miniatura",
 					description: "No se pudo cargar la vista previa de la imagen",
 					variant: "destructive",
 				});
 			}
-
-			// Intentar recargar después de un error, pero solo una vez
-			if (!hasLoaded.current && shouldLoad) {
-				setTimeout(() => {
-					hasLoaded.current = false;
-					loadThumbnail();
-				}, 2000);
-			}
 		}
-	}, [item.id, thumbnailSize, toast, shouldLoad, item.metadata?.mimeType]);
+	}, [item, thumbnailSize, toast, shouldLoad, retryCount]);
 
 	useEffect(() => {
 		if (shouldLoad) {
@@ -274,217 +353,226 @@ export function FileCard({
 		}
 	}, [loadThumbnail, shouldLoad]);
 
-	const handleClick = (e: React.MouseEvent) => {
-		// Prevenir la selección del DOM cuando se usa shift
-		if (e.shiftKey) {
-			e.preventDefault();
+	// Renderizar el icono de la entidad principal
+	const renderEntityIcon = useCallback(() => {
+		if (entityData.albums?.length > 0)
+			return <Camera size={9} className="text-blue-400" />;
+		if (entityData.characters?.length > 0)
+			return <User2 size={9} className="text-green-400" />;
+		if (entityData.places?.length > 0)
+			return <MapPin size={9} className="text-yellow-400" />;
+		if (entityData.objects?.length > 0)
+			return <Box size={9} className="text-purple-400" />;
+		if (entityData.collections?.length > 0)
+			return <BookmarkIcon size={9} className="text-blue-400" />;
+		return null;
+	}, [entityData]);
+
+	// Renderizar badges de entidades
+	const renderEntityBadges = useCallback(() => {
+		const allEntities = [
+			...(entityData.tags || []).slice(0, 2).map((tag) => ({
+				id: tag.id,
+				name: tag.name,
+				color: tag.color,
+				type: "tag" as const,
+			})),
+			...(entityData.collections || []).slice(0, 1).map((collection) => ({
+				id: collection.id,
+				name: collection.name,
+				color: collection.color,
+				type: "collection" as const,
+			})),
+			...(entityData.albums || []).slice(0, 1).map((album) => ({
+				id: album.id,
+				name: album.name,
+				color: album.color,
+				type: "album" as const,
+			})),
+			...(entityData.characters || []).slice(0, 1).map((character) => ({
+				id: character.id,
+				name: character.name,
+				color: character.color,
+				type: "character" as const,
+			})),
+			...(entityData.places || []).slice(0, 1).map((place) => ({
+				id: place.id,
+				name: place.name,
+				color: place.color,
+				type: "place" as const,
+			})),
+			...(entityData.objects || []).slice(0, 1).map((object) => ({
+				id: object.id,
+				name: object.name,
+				color: object.color,
+				type: "object" as const,
+			})),
+		].slice(0, 3);
+
+		const totalRemaining =
+			(entityData.tags?.length || 0) +
+			(entityData.collections?.length || 0) +
+			(entityData.albums?.length || 0) +
+			(entityData.characters?.length || 0) +
+			(entityData.places?.length || 0) +
+			(entityData.objects?.length || 0) -
+			allEntities.length;
+
+		return (
+			<div className="flex flex-wrap justify-end gap-1">
+				{allEntities.map((entity) => (
+					<Badge
+						key={`${entity.type}-${entity.id}`}
+						variant="secondary"
+						className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
+						style={{ borderColor: entity.color }}
+					>
+						<div
+							className="w-1.5 h-1.5 rounded-full mr-1"
+							style={{ backgroundColor: entity.color }}
+						/>
+						{entity.name}
+					</Badge>
+				))}
+				{totalRemaining > 0 && (
+					<span className="text-[8px] text-white/50 self-center">
+						+{totalRemaining}
+					</span>
+				)}
+			</div>
+		);
+	}, [entityData]);
+
+	const handleToggleFavorite = useCallback(async () => {
+		try {
+			await toggleFavorite(item.id);
+			fileCardLogger.info("💫 Estado de favorito cambiado:", {
+				fileId: item.id,
+			});
+			statsService.emitFavoriteChange(item.id);
+		} catch (error) {
+			fileCardLogger.error("❌ Error al cambiar estado de favorito:", {
+				error,
+			});
 		}
+	}, [item.id, toggleFavorite]);
 
-		// Toggle selección con shift o ctrl/cmd
-		toggleItemSelection(item, e.shiftKey || e.ctrlKey || e.metaKey);
+	const handleAddToAlbum = useCallback(
+		async (albumId: string, file: FileItem) => {
+			try {
+				await addImageToAlbum(albumId, file.id);
+				toast({
+					title: "Agregado al álbum",
+					description: `${file.name} ha sido agregado al álbum`,
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo agregar al álbum",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
 
-		// Llamar al onClick proporcionado si existe
-		if (onClick) onClick(item);
-	};
+	const handleAddToCharacter = useCallback(
+		async (characterId: string, file: FileItem) => {
+			try {
+				await addImageToCharacter(characterId, file.id);
+				toast({
+					title: "Agregado al personaje",
+					description: `${file.name} ha sido agregado al personaje`,
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo agregar al personaje",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
 
-	const handleDoubleClick = (e: React.MouseEvent) => {
-		// Prevenir la selección del DOM
-		e.preventDefault();
+	const handleAddToPlace = useCallback(
+		async (placeId: string, file: FileItem) => {
+			try {
+				await addImageToPlace(placeId, file.id);
+				toast({
+					title: "Agregado al lugar",
+					description: `${file.name} ha sido agregado al lugar`,
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo agregar al lugar",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
 
-		// Si es una imagen, abrimos el visor
-		if (item.metadata?.mimeType?.startsWith("image/")) {
-			openViewer([item], 0);
-		}
-		// Llamamos al onDoubleClick proporcionado si existe
-		if (onDoubleClick) onDoubleClick(item);
-	};
-
-	// Prevenir la selección del DOM al arrastrar
-	const handleMouseDown = (e: React.MouseEvent) => {
-		if (e.shiftKey || e.ctrlKey || e.metaKey) {
-			e.preventDefault();
-		}
-	};
+	const handleAddToObject = useCallback(
+		async (objectId: string, file: FileItem) => {
+			try {
+				await addImageToObject(objectId, file.id);
+				toast({
+					title: "Agregado al objeto",
+					description: `${file.name} ha sido agregado al objeto`,
+				});
+			} catch (error) {
+				toast({
+					title: "Error",
+					description: "No se pudo agregar al objeto",
+					variant: "destructive",
+				});
+			}
+		},
+		[toast]
+	);
 
 	const handleContextMenuAction = useCallback(
-		async (action: string, file: FileItem, data?: any) => {
+		async (action: ContextMenuAction, file: FileItem, data?: any) => {
 			try {
 				switch (action) {
 					case "mark-toggle":
-						handleMarkToggle();
+						setIsMarked((prev) => !prev);
 						break;
 					case "favorite-toggle":
-						try {
-							// Actualizar el estado local inmediatamente (optimista)
-							const newFavoriteState = !file.isFavorite;
-							const updatedFile = { ...file, isFavorite: newFavoriteState };
-							toggleItemSelection(updatedFile, false);
-
-							// Mostrar feedback inmediato
-							toast({
-								title: newFavoriteState
-									? "Agregado a favoritos"
-									: "Eliminado de favoritos",
-								description: `${file.name} ha sido ${
-									newFavoriteState ? "agregado a" : "eliminado de"
-								} favoritos`,
-							});
-
-							// Realizar la actualización en el servidor en segundo plano
-							const response = await fetch(`/api/images/${file.id}/favorite`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ isFavorite: newFavoriteState }),
-							});
-
-							if (!response.ok) {
-								// Si falla, revertir el cambio local
-								toggleItemSelection(
-									{ ...file, isFavorite: !newFavoriteState },
-									false
-								);
-								throw new Error("Error al actualizar favorito");
-							}
-						} catch (error) {
-							console.error("Error toggling favorite:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo actualizar el estado de favorito",
-								variant: "destructive",
-							});
-						}
+						await handleToggleFavorite();
 						break;
-
 					case "collection-add":
-						try {
-							if (!data?.collectionId)
-								throw new Error("ID de colección no proporcionado");
-
-							// Mostrar feedback inmediato
-							toast({
-								title: "Agregando a colección",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(
-								`/api/collections/${data.collectionId}/files`,
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify({ fileId: file.id }),
-								}
-							);
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar a la colección"
-								);
-							}
-
-							if (!responseData?.success || !responseData?.collection) {
-								throw new Error("Respuesta inválida del servidor");
-							}
-
-							// Actualizar el estado local si es necesario
-							const updatedFile = {
-								...file,
-								collections: [
-									...(file.collections || []),
-									{
-										id: responseData.collection.id,
-										name: responseData.collection.name,
-										emoji: responseData.collection.emoji,
-										color: responseData.collection.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Agregado a la colección",
-								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding to collection:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar a la colección",
-								variant: "destructive",
-							});
-						}
+						if (!data?.collectionId) break;
+						await addImageToCollection(data.collectionId, file.id);
+						statsService.emitCollectionChange(file.id);
 						break;
-
 					case "tag-add":
-						try {
-							if (!data?.tagId)
-								throw new Error("ID de etiqueta no proporcionado");
-
-							// Mostrar feedback inmediato
-							toast({
-								title: "Agregando etiqueta",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(`/api/tags/${data.tagId}/files`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ fileId: file.id }),
-							});
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar la etiqueta"
-								);
-							}
-
-							if (!responseData?.success || !responseData?.tag) {
-								throw new Error("Respuesta inválida del servidor");
-							}
-
-							// Actualizar el estado local si es necesario
-							const updatedFile = {
-								...file,
-								tags: [
-									...(file.tags || []),
-									{
-										id: responseData.tag.id,
-										name: responseData.tag.name,
-										color: responseData.tag.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Etiqueta agregada",
-								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding tag:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar la etiqueta",
-								variant: "destructive",
-							});
-						}
+						if (!data?.tagId) break;
+						await addImageToTag(data.tagId, file.id);
+						statsService.emitTagChange(file.id);
 						break;
-
+					case "album-add":
+						if (!data?.albumId) break;
+						await handleAddToAlbum(data.albumId, file);
+						statsService.emitAlbumChange(file.id);
+						break;
+					case "character-add":
+						if (!data?.characterId) break;
+						await handleAddToCharacter(data.characterId, file);
+						statsService.emitCharacterChange(file.id);
+						break;
+					case "place-add":
+						if (!data?.placeId) break;
+						await handleAddToPlace(data.placeId, file);
+						statsService.emitPlaceChange(file.id);
+						break;
+					case "object-add":
+						if (!data?.objectId) break;
+						await handleAddToObject(data.objectId, file);
+						statsService.emitObjectChange(file.id);
+						break;
 					case "preview":
 						if (file.metadata?.mimeType?.startsWith("image/")) {
 							openViewer([file], 0);
@@ -492,196 +580,20 @@ export function FileCard({
 							onDoubleClick?.(file);
 						}
 						break;
-
 					case "open":
-						try {
-							const response = await fetch(`/api/files/${file.id}/location`, {
-								method: "POST",
-							});
-
-							if (!response.ok) throw new Error("Error al abrir ubicación");
-
-							toast({
-								title: "Ubicación abierta",
-								description: "Se ha abierto la ubicación del archivo",
-							});
-						} catch (error) {
-							console.error("Error opening location:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo abrir la ubicación",
-								variant: "destructive",
-							});
-						}
+						window.electron?.openPath(file.path);
 						break;
-
 					case "download":
-						try {
-							const response = await fetch(`/api/files/${file.id}/download`);
-							if (!response.ok) throw new Error("Error al descargar archivo");
-
-							const blob = await response.blob();
-							const url = window.URL.createObjectURL(blob);
-							const a = document.createElement("a");
-							a.href = url;
-							a.download = file.name;
-							document.body.appendChild(a);
-							a.click();
-							window.URL.revokeObjectURL(url);
-							document.body.removeChild(a);
-
-							toast({
-								title: "Descarga iniciada",
-								description: `Se ha iniciado la descarga de ${file.name}`,
-							});
-						} catch (error) {
-							console.error("Error downloading file:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo descargar el archivo",
-								variant: "destructive",
-							});
-						}
+						window.electron?.downloadFile(file.path);
 						break;
-
 					case "copy":
-						try {
-							// Intentar obtener la imagen original primero
-							let response = await fetch(`/api/files/${file.id}/raw`);
-
-							// Si falla, intentar con el thumbnail
-							if (!response.ok) {
-								const thumbnailUrl = `/api/thumbnails/${file.id}?quality=high`;
-								response = await fetch(thumbnailUrl);
-							}
-
-							if (!response.ok) {
-								throw new Error("No se pudo obtener la imagen");
-							}
-
-							const blob = await response.blob();
-
-							// Función para intentar copiar usando el portapapeles
-							const tryClipboardCopy = async () => {
-								if (navigator.clipboard && navigator.clipboard.write) {
-									try {
-										// Asegurarnos de que el documento tiene el foco
-										window.focus();
-										await navigator.clipboard.write([
-											new ClipboardItem({
-												[blob.type]: blob,
-											}),
-										]);
-										return true;
-									} catch (clipboardError) {
-										console.warn(
-											"Error copying image to clipboard:",
-											clipboardError
-										);
-										return false;
-									}
-								}
-								return false;
-							};
-
-							// Intentar copiar usando el portapapeles
-							const clipboardSuccess = await tryClipboardCopy();
-							if (clipboardSuccess) {
-								toast({
-									title: "Copiado",
-									description: "Imagen copiada al portapapeles",
-								});
-								return;
-							}
-
-							// Si no se pudo usar el portapapeles, intentar con el método fallback
-							try {
-								const url = window.URL.createObjectURL(blob);
-								const img = document.createElement("img");
-								img.src = url;
-
-								// Crear un contenedor temporal
-								const container = document.createElement("div");
-								container.style.position = "fixed";
-								container.style.pointerEvents = "none";
-								container.style.opacity = "0";
-								container.appendChild(img);
-								document.body.appendChild(container);
-
-								// Esperar a que la imagen se cargue
-								await new Promise((resolve) => {
-									img.onload = resolve;
-								});
-
-								// Seleccionar y copiar
-								const range = document.createRange();
-								range.selectNode(img);
-								window.getSelection()?.removeAllRanges();
-								window.getSelection()?.addRange(range);
-
-								// Forzar el foco en el documento
-								window.focus();
-								const success = document.execCommand("copy");
-
-								// Limpiar
-								window.getSelection()?.removeAllRanges();
-								document.body.removeChild(container);
-								window.URL.revokeObjectURL(url);
-
-								if (success) {
-									toast({
-										title: "Copiado",
-										description: "Imagen copiada al portapapeles",
-									});
-									return;
-								}
-							} catch (fallbackError) {
-								console.warn(
-									"Error using fallback copy method:",
-									fallbackError
-								);
-							}
-
-							// Si todo lo anterior falló, copiar el path como último recurso
-							await navigator.clipboard.writeText(file.path);
-							toast({
-								title: "Copiado",
-								description:
-									"Ruta del archivo copiada al portapapeles (no se pudo copiar la imagen)",
-								variant: "destructive",
-							});
-						} catch (error) {
-							console.error("Error copying to clipboard:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo copiar al portapapeles",
-								variant: "destructive",
-							});
-						}
+						window.electron?.copyFile(file.path);
 						break;
-
 					case "delete":
-						try {
-							const response = await fetch(`/api/files/${file.id}`, {
-								method: "DELETE",
-							});
-
-							if (!response.ok) throw new Error("Error al eliminar archivo");
-
-							toast({
-								title: "Archivo eliminado",
-								description: `${file.name} ha sido eliminado`,
-							});
-						} catch (error) {
-							console.error("Error deleting file:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo eliminar el archivo",
-								variant: "destructive",
-							});
+						if (window.confirm("¿Estás seguro de eliminar este archivo?")) {
+							window.electron?.deleteFile(file.path);
 						}
 						break;
-
 					default:
 						console.warn("Acción no implementada:", action);
 				}
@@ -694,27 +606,27 @@ export function FileCard({
 				});
 			}
 		},
-		[handleMarkToggle, toast, openViewer, toggleItemSelection]
+		[
+			toast,
+			openViewer,
+			toggleItemSelection,
+			onDoubleClick,
+			handleToggleFavorite,
+			handleAddToAlbum,
+			handleAddToCharacter,
+			handleAddToPlace,
+			handleAddToObject,
+		]
 	);
-
-	const handleHoverStart = useCallback(() => {
-		if (!shouldLoad) return;
-		setIsHovered(true);
-	}, [shouldLoad]);
-
-	const handleHoverEnd = useCallback(() => {
-		if (!shouldLoad) return;
-		setIsHovered(false);
-	}, [shouldLoad]);
 
 	return (
 		<motion.div
-			whileHover="hover"
-			whileTap="tap"
+			whileHover={shouldReduceMotion ? undefined : "hover"}
+			whileTap={shouldReduceMotion ? undefined : "tap"}
 			animate={isSelected ? "selected" : isMarked ? "marked" : ""}
 			variants={variants}
 			className={cn(
-				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 rounded-sm  cursor-pointer",
+				"relative overflow-hidden w-full h-full transition-[shadow,ring] duration-200 rounded-sm cursor-pointer",
 				isSelected
 					? "ring-1 ring-primary ring-inset shadow-lg"
 					: isMarked
@@ -723,11 +635,25 @@ export function FileCard({
 					? "ring-1 ring-white/30 ring-inset"
 					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
 			)}
-			onClick={handleClick}
-			onDoubleClick={handleDoubleClick}
-			onMouseDown={handleMouseDown}
-			onHoverStart={handleHoverStart}
-			onHoverEnd={handleHoverEnd}
+			onClick={(e) => {
+				if (e.shiftKey) e.preventDefault();
+				toggleItemSelection(item, e.shiftKey || e.ctrlKey || e.metaKey);
+				onClick?.(item);
+			}}
+			onDoubleClick={(e) => {
+				e.preventDefault();
+				if (item.metadata?.mimeType?.startsWith("image/")) {
+					openViewer([item], 0);
+				}
+				onDoubleClick?.(item);
+			}}
+			onMouseDown={(e) => {
+				if (e.shiftKey || e.ctrlKey || e.metaKey) {
+					e.preventDefault();
+				}
+			}}
+			onHoverStart={() => shouldLoad && setIsHovered(true)}
+			onHoverEnd={() => shouldLoad && setIsHovered(false)}
 			style={{
 				...style,
 				height: "100%",
@@ -746,7 +672,7 @@ export function FileCard({
 						</div>
 					) : thumbnail ? (
 						<div className="relative w-full h-full">
-							{/* Favorito siempre visible */}
+							{/* Favorito */}
 							{item.isFavorite && (
 								<div
 									className={cn(
@@ -763,7 +689,7 @@ export function FileCard({
 								</div>
 							)}
 
-							{/* Imagen principal */}
+							{/* Imagen */}
 							<div
 								className={cn(
 									"absolute inset-0 flex justify-center items-center transition-transform duration-200",
@@ -773,7 +699,7 @@ export function FileCard({
 								)}
 							>
 								<ImageCard
-									src={thumbnail || ""}
+									src={thumbnail}
 									alt={item.name}
 									width={item.metadata?.dimensions?.width || 300}
 									height={item.metadata?.dimensions?.height || 300}
@@ -813,43 +739,21 @@ export function FileCard({
 										</div>
 									</div>
 									<div className="text-right space-y-0.5">
-										{/* Tags y Colecciones */}
-										{item.collections && item.collections[0] && (
+										{/* Entidad Principal */}
+										{renderEntityIcon() && (
 											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-												<BookmarkIcon size={9} className="text-blue-400" />
-												<span>{item.collections[0].name}</span>
-												{item.collections.length > 1 && (
-													<span className="text-[8px] text-white/50">
-														+{item.collections.length - 1}
-													</span>
-												)}
+												{renderEntityIcon()}
+												<span>
+													{entityData.collections[0]?.name ||
+														entityData.albums[0]?.name ||
+														entityData.characters[0]?.name ||
+														entityData.places[0]?.name ||
+														entityData.objects[0]?.name}
+												</span>
 											</div>
 										)}
-										{item.tags && (
-											<div className="flex flex-wrap justify-end gap-1">
-												{item.tags.slice(0, 2).map((tag) => (
-													<Badge
-														key={tag.id}
-														variant="secondary"
-														className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-														style={{
-															borderColor: tag.color,
-														}}
-													>
-														<div
-															className="w-1.5 h-1.5 rounded-full mr-1"
-															style={{ backgroundColor: tag.color }}
-														/>
-														{tag.name}
-													</Badge>
-												))}
-												{item.tags.length > 2 && (
-													<span className="text-[8px] text-white/50 self-center">
-														+{item.tags.length - 2}
-													</span>
-												)}
-											</div>
-										)}
+										{/* Badges */}
+										{renderEntityBadges()}
 									</div>
 								</div>
 							</div>

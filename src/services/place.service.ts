@@ -26,24 +26,8 @@ export interface PlaceCreate {
   filters?: string
 }
 
-export interface PlaceUpdate {
-  name?: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  region?: string
-  type?: string
-  climate?: string
-  population?: number
-  government?: string
-  dangers?: string
-  resources?: string
-  lore?: string
-  history?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
+export interface PlaceUpdate extends Partial<PlaceCreate> {
+  id: string
 }
 
 export interface PlaceWithStats extends PrismaPlace {
@@ -66,30 +50,18 @@ class PlaceService {
         orderBy: {
           createdAt: 'desc'
         }
-      }).catch((error) => {
-        placeLogger.error('❌ Error en prisma.place.findMany:', error)
-        throw error
       })
 
-      placeLogger.info('📊 Calculando estadísticas para', places.length, 'lugares')
       const placesWithStats = await Promise.all(
         places.map(async (place) => {
-          try {
-            const totalSize = await prisma.image.aggregate({
-              where: { places: { some: { id: place.id } } },
-              _sum: { size: true }
-            })
+          const totalSize = await prisma.image.aggregate({
+            where: { places: { some: { id: place.id } } },
+            _sum: { size: true }
+          })
 
-            return {
-              ...place,
-              totalSize: totalSize._sum?.size || 0
-            }
-          } catch (error) {
-            placeLogger.error('❌ Error al calcular estadísticas del lugar:', { placeId: place.id, error: error instanceof Error ? error.message : 'Error desconocido' })
-            return {
-              ...place,
-              totalSize: 0
-            }
+          return {
+            ...place,
+            totalSize: totalSize._sum?.size || 0
           }
         })
       )
@@ -97,8 +69,8 @@ class PlaceService {
       placeLogger.info('✅ Lugares obtenidos correctamente:', { count: places.length })
       return placesWithStats
     } catch (error) {
-      placeLogger.error('❌ Error al obtener lugares:', error instanceof Error ? { message: error.message, stack: error.stack } : error)
-      throw new Error('Error al obtener los lugares: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al obtener lugares:', error)
+      throw error
     }
   }
 
@@ -125,8 +97,8 @@ class PlaceService {
         totalSize: totalSize._sum?.size || 0
       }
     } catch (error) {
-      placeLogger.error('❌ Error al obtener lugar:', { id, error })
-      throw new Error('Error al obtener el lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al obtener lugar:', error)
+      throw error
     }
   }
 
@@ -159,17 +131,18 @@ class PlaceService {
         }
       })
 
-      placeLogger.info('✨ Lugar creado:', { place })
-      const eventData: EventData = { type: 'create', id: place.id }
-      eventsService.emit('places:modified', eventData)
-
-      return {
+      const placeWithStats = {
         ...place,
         totalSize: 0
       }
+
+      placeLogger.info('✨ Lugar creado:', place)
+      const eventData: EventData = { type: 'create', id: place.id }
+      eventsService.emit('places:modified', eventData)
+      return placeWithStats
     } catch (error) {
-      placeLogger.error('❌ Error al crear lugar:', { data, error })
-      throw new Error('Error al crear el lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al crear lugar:', error)
+      throw error
     }
   }
 
@@ -200,8 +173,8 @@ class PlaceService {
       eventsService.emit('places:modified', eventData)
       return placeWithStats
     } catch (error) {
-      placeLogger.error('❌ Error al actualizar lugar:', { id, data, error })
-      throw new Error('Error al actualizar el lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al actualizar lugar:', error)
+      throw error
     }
   }
 
@@ -210,50 +183,59 @@ class PlaceService {
       await prisma.place.delete({
         where: { id }
       })
-      placeLogger.info('🗑️ Lugar eliminado:', { id })
+      placeLogger.info('🗑️ Lugar eliminado:', id)
       const eventData: EventData = { type: 'delete', id }
       eventsService.emit('places:modified', eventData)
     } catch (error) {
-      placeLogger.error('❌ Error al eliminar lugar:', { id, error })
-      throw new Error('Error al eliminar el lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al eliminar lugar:', error)
+      throw error
     }
   }
 
-  async addImageToPlace(placeId: string, imageId: string): Promise<void> {
+  async addImageToPlace(placeId: string, fileId: string) {
     try {
       await prisma.place.update({
         where: { id: placeId },
         data: {
           images: {
-            connect: { id: imageId }
+            connect: { id: fileId }
           }
         }
       })
-      placeLogger.info('📸 Imagen agregada a lugar:', { placeId, imageId })
-      const eventData: EventData = { type: 'addImage', objectId: placeId, imageId }
+
+      placeLogger.info('✨ Imagen agregada al lugar:', {
+        placeId,
+        fileId,
+      })
+
+      const eventData: EventData = { type: 'addImage', objectId: placeId, imageId: fileId }
       eventsService.emit('places:modified', eventData)
     } catch (error) {
-      placeLogger.error('❌ Error al agregar imagen a lugar:', { placeId, imageId, error })
-      throw new Error('Error al agregar imagen al lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al agregar imagen al lugar:', {
+        error,
+        placeId,
+        fileId,
+      })
+      throw error
     }
   }
 
-  async removeImageFromPlace(placeId: string, imageId: string): Promise<void> {
+  async removeImageFromPlace(placeId: string, fileId: string): Promise<void> {
     try {
       await prisma.place.update({
         where: { id: placeId },
         data: {
           images: {
-            disconnect: { id: imageId }
+            disconnect: { id: fileId }
           }
         }
       })
-      placeLogger.info('🗑️ Imagen eliminada de lugar:', { placeId, imageId })
-      const eventData: EventData = { type: 'removeImage', objectId: placeId, imageId }
+      placeLogger.info('🗑️ Imagen eliminada del lugar:', { placeId, fileId })
+      const eventData: EventData = { type: 'removeImage', objectId: placeId, imageId: fileId }
       eventsService.emit('places:modified', eventData)
     } catch (error) {
-      placeLogger.error('❌ Error al eliminar imagen de lugar:', { placeId, imageId, error })
-      throw new Error('Error al eliminar imagen del lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al eliminar imagen del lugar:', error)
+      throw error
     }
   }
 
@@ -278,6 +260,14 @@ class PlaceService {
             select: {
               id: true,
               name: true,
+              color: true
+            }
+          },
+          albums: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
               color: true
             }
           },
@@ -306,10 +296,10 @@ class PlaceService {
             }
           }
         }
-      });
+      })
 
       return images.map(image => {
-        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined;
+        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined
         return {
           id: image.id,
           name: image.name,
@@ -330,16 +320,18 @@ class PlaceService {
           updatedAt: image.updatedAt.toISOString(),
           collections: image.collections,
           tags: image.tags,
+          albums: image.albums,
           characters: image.characters,
           places: image.places,
           objects: image.objects
-        };
-      });
+        }
+      })
     } catch (error) {
-      placeLogger.error("❌ Error al obtener imágenes del lugar:", { error });
-      throw new Error('Error al obtener imágenes del lugar: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      placeLogger.error('❌ Error al obtener imágenes del lugar:', error)
+      throw error
     }
   }
 }
 
-export const placeService = new PlaceService();
+export const placeService = new PlaceService()
+export const { addImageToPlace } = placeService

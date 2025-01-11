@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { Album, ImageIcon, Settings2 } from "lucide-react";
+import { Album as AlbumIcon, ImageIcon, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
@@ -24,9 +24,28 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+
+const viewLogger = logger.withContext("AlbumsView");
+
+interface Album {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string;
+	shortcut?: string;
+	sortBy?: string;
+	filters?: string;
+	_count?: {
+		images: number;
+	};
+	totalSize?: number;
+}
 
 interface AlbumCardProps {
-	album: any;
+	album: Album;
 	onClick: () => void;
 }
 
@@ -45,7 +64,7 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-function AlbumCard({ album, onClick }: AlbumCardProps) {
+const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 	const gradient = getRandomGradient();
 
 	return (
@@ -70,7 +89,7 @@ function AlbumCard({ album, onClick }: AlbumCardProps) {
 							</CardTitle>
 							<CardDescription className="flex items-center gap-2 text-xs">
 								<ImageIcon className="h-3 w-3" />
-								<span>{album.count} imágenes</span>
+								<span>{album._count?.images ?? 0} imágenes</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="p-4 pt-0">
@@ -95,7 +114,7 @@ function AlbumCard({ album, onClick }: AlbumCardProps) {
 							</h4>
 							<div className="flex items-center gap-4">
 								<Badge variant="secondary" className="font-normal">
-									{album.count} imágenes
+									{album._count?.images ?? 0} imágenes
 								</Badge>
 							</div>
 						</div>
@@ -111,34 +130,53 @@ function AlbumCard({ album, onClick }: AlbumCardProps) {
 			</HoverCard>
 		</motion.div>
 	);
-}
+});
 
 export function AlbumsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentAlbum } = useFileManager();
-	const [albums, setAlbums] = useState<any[]>([]);
+	const [albums, setAlbums] = useState<Album[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchAlbums = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch("/api/albums");
-				const data = await response.json();
-				setAlbums(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchAlbums();
+	const fetchAlbums = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando álbumes...");
+			const response = await fetch("/api/albums");
+			const data = await response.json();
+			setAlbums(data);
+			viewLogger.info(`✅ ${data.length} álbumes cargados`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando álbumes:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar álbumes inicialmente
+		fetchAlbums();
+
+		// Suscribirse a eventos relevantes
+		const handleAlbumModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de álbumes recibido:", data);
+			fetchAlbums();
+		};
+
+		eventsService.on("albums:modified", handleAlbumModified);
+
+		return () => {
+			eventsService.off("albums:modified", handleAlbumModified);
+		};
+	}, [fetchAlbums]);
+
 	const handleAlbumClick = useCallback(
-		(album: any) => {
+		(album: Album) => {
+			viewLogger.info("🖱️ Click en álbum:", album.name);
 			setCurrentView("album-content");
 			setCurrentAlbum(album.id);
 		},
@@ -160,7 +198,7 @@ export function AlbumsView({ isResizing }: ViewProps) {
 	if (!albums || albums.length === 0) {
 		return (
 			<EmptyState
-				icon={Album}
+				icon={AlbumIcon}
 				title="No hay álbumes"
 				description="Los álbumes te ayudan a organizar tus imágenes. Crea un nuevo álbum desde el panel de configuración."
 			/>
