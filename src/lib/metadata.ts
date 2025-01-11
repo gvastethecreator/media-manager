@@ -4,11 +4,15 @@ import type { ImageMetadata } from '@/types/metadata';
 import { statSync } from 'fs';
 import sharp from 'sharp';
 
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 const metadataLogger = logger.withContext('MetadataService');
+
+// Crear una instancia de CacheManager para metadatos
 const metadataCache = new CacheManager<ImageMetadata>({
   name: 'metadata',
-  ttl: CACHE_TTL
+  ttl: 5 * 60 * 1000, // 5 minutos
+  maxSize: 1000,
+  updateAgeOnGet: true,
+  allowStale: true
 });
 
 async function getFileMetadata(path: string) {
@@ -36,8 +40,11 @@ export async function getImageMetadata(path: string): Promise<ImageMetadata> {
     // Intentar obtener del caché primero
     const cached = await metadataCache.get(path);
     if (cached) {
+      metadataLogger.debug('🎯 Cache hit para metadatos:', { path });
       return cached;
     }
+
+    metadataLogger.debug('🔍 Cache miss para metadatos:', { path });
 
     // Obtener metadatos
     const [fileSystem, imageInfo] = await Promise.all([
@@ -51,12 +58,13 @@ export async function getImageMetadata(path: string): Promise<ImageMetadata> {
       mimeType: imageInfo.mimeType
     };
 
-    // Guardar en caché con TTL específico
-    await metadataCache.set(path, metadata, CACHE_TTL);
+    // Guardar en caché
+    await metadataCache.set(path, metadata);
+    metadataLogger.debug('💾 Metadatos guardados en caché:', { path });
 
     return metadata;
   } catch (error) {
-    metadataLogger.error('Error obteniendo metadatos:', { path, error });
+    metadataLogger.error('❌ Error obteniendo metadatos:', { path, error });
     throw error;
   }
 }

@@ -54,6 +54,10 @@ model Image {
   favorites            Favorite[]
   stats                ImageStats?
   activities           Activity[]
+  albums               Album[]      @relation("ImageToAlbum")
+  characters           Character[]  @relation("ImageToCharacter")
+  places               Place[]      @relation("ImageToPlace")
+  objects              Object[]     @relation("ImageToObject")
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -118,15 +122,84 @@ model ImageStats {
 }
 
 model Profile {
-  id        String   @id @default(cuid())
-  name      String
-  emoji     String   @default("👤")
-  color     String   @default("#3b82f6")
-  theme     String   @default("system")
-  language  String   @default("es")
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  emoji       String   @default("👤")
+  color       String   @default("#3b82f6")
+  theme       String   @default("system")
+  language    String   @default("es")
+  description String?
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Album {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("📸")
+  description String?
+  color       String   @default("#3b82f6")
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToAlbum")
+
+  @@index([name])
+  @@index([createdAt])
+}
+
+model Character {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("👤")
+  color       String   @default("#3b82f6")
+  description String?
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToCharacter")
+
+  @@index([name])
+  @@index([createdAt])
+}
+
+model Place {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("📍")
+  color       String   @default("#3b82f6")
+  description String?
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToPlace")
+
+  @@index([name])
+  @@index([createdAt])
+}
+
+model Object {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("🎯")
+  color       String   @default("#3b82f6")
+  description String?
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToObject")
+
+  @@index([name])
+  @@index([createdAt])
 }
 
 // Modelo para el sistema de colas
