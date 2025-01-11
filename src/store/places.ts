@@ -1,15 +1,14 @@
 import { create } from "zustand";
 import { placeService } from "@/services/place.service";
-import type { PlaceCreate, PlaceUpdate } from "@/services/place.service";
+import type { PlaceCreate, PlaceUpdate, PlaceWithStats } from "@/services/place.service";
 import { logger } from "@/lib/logger";
 import type { FileItem } from "@/types/file-item";
-import { Place } from "@prisma/client";
 
 const placesLogger = logger.withContext("PlacesStore");
 
 interface PlacesState {
-  places: Place[];
-  currentPlace: Place | null;
+  places: PlaceWithStats[];
+  currentPlace: PlaceWithStats | null;
   currentItems: FileItem[];
   isLoading: boolean;
   error: string | null;
@@ -64,17 +63,20 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
       set({ isLoading: true, error: null });
       const updatedPlace = await placeService.updatePlace(id, data);
       set((state) => ({
-        places: state.places.map((p) =>
-          p.id === id ? updatedPlace : p
+        places: state.places.map((place) =>
+          place.id === id ? updatedPlace : place
         ),
-        currentPlace: state.currentPlace?.id === id ? updatedPlace : state.currentPlace,
+        currentPlace:
+          state.currentPlace?.id === id
+            ? updatedPlace
+            : state.currentPlace,
         isLoading: false,
       }));
       placesLogger.info("📝 Lugar actualizado:", { id, data });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       set({ error: errorMessage, isLoading: false });
-      placesLogger.error("❌ Error al actualizar lugar:", { id, error });
+      placesLogger.error("❌ Error al actualizar lugar:", { error });
     }
   },
 
@@ -83,41 +85,44 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
       set({ isLoading: true, error: null });
       await placeService.deletePlace(id);
       set((state) => ({
-        places: state.places.filter((p) => p.id !== id),
-        currentPlace: state.currentPlace?.id === id ? null : state.currentPlace,
-        currentItems: state.currentPlace?.id === id ? [] : state.currentItems,
+        places: state.places.filter((place) => place.id !== id),
+        currentPlace:
+          state.currentPlace?.id === id ? null : state.currentPlace,
         isLoading: false,
       }));
       placesLogger.info("🗑️ Lugar eliminado:", { id });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       set({ error: errorMessage, isLoading: false });
-      placesLogger.error("❌ Error al eliminar lugar:", { id, error });
+      placesLogger.error("❌ Error al eliminar lugar:", { error });
     }
   },
 
   addImageToPlace: async (placeId: string, imageId: string) => {
     try {
+      set({ isLoading: true, error: null });
       await placeService.addImageToPlace(placeId, imageId);
+      const places = await placeService.getPlaces();
+      set({ places, isLoading: false });
       placesLogger.info("📸 Imagen agregada a lugar:", { placeId, imageId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      placesLogger.error("❌ Error al agregar imagen a lugar:", { placeId, imageId, error });
+      set({ error: errorMessage, isLoading: false });
+      placesLogger.error("❌ Error al agregar imagen a lugar:", { error });
     }
   },
 
   removeImageFromPlace: async (placeId: string, imageId: string) => {
     try {
+      set({ isLoading: true, error: null });
       await placeService.removeImageFromPlace(placeId, imageId);
-      set((state) => ({
-        currentItems: state.currentItems.filter((item) => item.id !== imageId),
-      }));
+      const places = await placeService.getPlaces();
+      set({ places, isLoading: false });
       placesLogger.info("🗑️ Imagen eliminada de lugar:", { placeId, imageId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-      set({ error: errorMessage });
-      placesLogger.error("❌ Error al eliminar imagen de lugar:", { placeId, imageId, error });
+      set({ error: errorMessage, isLoading: false });
+      placesLogger.error("❌ Error al eliminar imagen de lugar:", { error });
     }
   },
 
@@ -128,17 +133,17 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
       if (!place) {
         throw new Error("Lugar no encontrado");
       }
-      const images = await placeService.getPlaceImages(id);
+      const items = await placeService.getPlaceImages(id);
       set({
         currentPlace: place,
-        currentItems: images,
+        currentItems: items,
         isLoading: false,
       });
-      placesLogger.info("📂 Contenido de lugar cargado:", { id });
+      placesLogger.info("📥 Contenido de lugar cargado:", { id });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       set({ error: errorMessage, isLoading: false });
-      placesLogger.error("❌ Error al cargar contenido de lugar:", { id, error });
+      placesLogger.error("❌ Error al cargar contenido de lugar:", { error });
     }
   },
 }));

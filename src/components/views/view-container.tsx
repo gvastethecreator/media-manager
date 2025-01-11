@@ -12,6 +12,14 @@ import { CollectionsView } from "./collections/collections-view";
 import { CollectionContentView } from "./collections/collection-content-view";
 import { TagsView } from "./tags/tags-view";
 import { TagContentView } from "./tags/tag-content-view";
+import { AlbumsView } from "./albums/albums-view";
+import { AlbumContentView } from "./albums/album-content-view";
+import { CharactersView } from "./characters/characters-view";
+import { CharacterContentView } from "./characters/character-content-view";
+import { PlacesView } from "./places/places-view";
+import { PlaceContentView } from "./places/place-content-view";
+import { ObjectsView } from "./objects/objects-view";
+import { ObjectContentView } from "./objects/object-content-view";
 import { AnimatePresence, motion } from "motion/react";
 import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
@@ -62,6 +70,22 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				return <TagsView />;
 			case "tag-content":
 				return <TagContentView />;
+			case "albums":
+				return <AlbumsView />;
+			case "album-content":
+				return <AlbumContentView />;
+			case "characters":
+				return <CharactersView />;
+			case "character-content":
+				return <CharacterContentView />;
+			case "places":
+				return <PlacesView />;
+			case "place-content":
+				return <PlaceContentView />;
+			case "objects":
+				return <ObjectsView />;
+			case "object-content":
+				return <ObjectContentView />;
 			default:
 			case "development":
 				return <DevelopmentView />;

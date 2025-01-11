@@ -29,7 +29,7 @@ export function ImageViewer() {
 			name: img.name,
 			type: "image" as const,
 			thumbnail: img.thumbnail || "",
-			src: img.src || img.thumbnail || "",
+			src: img.thumbnail || "",
 			alt: img.name,
 			width: img.metadata?.dimensions?.width,
 			height: img.metadata?.dimensions?.height,

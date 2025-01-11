@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
 import type { AlbumCreate, AlbumUpdate } from "@/services/album.service";
+import type { EmojiClickData } from "emoji-picker-react";
 
 const albumsLogger = logger.withContext("AlbumsSection");
 
@@ -93,8 +94,8 @@ export function AlbumsSection() {
 		}
 	};
 
-	const handleEmojiSelect = (emoji: string) => {
-		setNewAlbum({ ...newAlbum, emoji });
+	const handleEmojiSelect = (emojiData: EmojiClickData) => {
+		setNewAlbum({ ...newAlbum, emoji: emojiData.emoji });
 	};
 
 	const handleColorChange = (color: { hex: string }) => {
@@ -109,7 +110,7 @@ export function AlbumsSection() {
 			const newAlbumData = {
 				...newAlbum,
 				sortBy: "name" as const,
-				filters: [],
+				filters: "",
 			};
 
 			await createAlbum(newAlbumData);
@@ -299,9 +300,11 @@ export function AlbumsSection() {
 																align="start"
 															>
 																<EmojiPicker
-																	onEmojiSelect={(emoji) =>
+																	onEmojiSelect={(emojiData: EmojiClickData) =>
 																		setEditForm((prev) =>
-																			prev ? { ...prev, emoji } : null
+																			prev
+																				? { ...prev, emoji: emojiData.emoji }
+																				: null
 																		)
 																	}
 																/>

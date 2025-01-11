@@ -1,87 +1,58 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { placeService } from '@/services/place.service'
 import { logger } from '@/lib/logger'
 
-const placeLogger = logger.withContext('PlaceAPI')
+const placeLogger = logger.withContext('PlacesAPI')
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const place = await prisma.place.findUnique({
-      where: { id: params.id },
-      include: {
-        images: {
-          select: {
-            id: true,
-            name: true,
-            path: true,
-            size: true,
-            width: true,
-            height: true,
-            isFavorite: true,
-            createdAt: true,
-            updatedAt: true,
-            tags: {
-              select: {
-                id: true,
-                name: true,
-                color: true
-              }
-            },
-            collections: {
-              select: {
-                id: true,
-                name: true,
-                emoji: true,
-                color: true
-              }
-            }
-          },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }
-      }
-    })
-
-    if (!place) {
-      return NextResponse.json({ error: 'Lugar no encontrado' }, { status: 404 })
-    }
-
-    return NextResponse.json(place.images)
+    placeLogger.info(`📥 GET /api/places/${params.id}/images`)
+    const images = await placeService.getPlaceImages(params.id)
+    return NextResponse.json(images)
   } catch (error) {
-    placeLogger.error('Error al obtener imágenes del lugar:', error)
-    return NextResponse.json({ error: 'Error al obtener imágenes del lugar' }, { status: 500 })
+    placeLogger.error(`❌ Error en GET /api/places/${params.id}/images:`, error)
+    return NextResponse.json(
+      { error: 'Error al obtener imágenes del lugar' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const data = await request.json()
-    const { imageId } = data
-
-    const place = await prisma.place.update({
-      where: { id: params.id },
-      data: {
-        images: {
-          connect: { id: imageId }
-        }
-      },
-      include: {
-        images: {
-          where: { id: imageId },
-          select: {
-            id: true,
-            name: true,
-            path: true
-          }
-        }
-      }
-    })
-
-    placeLogger.info('Imagen agregada al lugar:', { placeId: params.id, imageId })
-    return NextResponse.json(place.images[0])
+    const { imageId } = await request.json()
+    placeLogger.info(`📤 POST /api/places/${params.id}/images`, { imageId })
+    const image = await placeService.addImageToPlace(params.id, imageId)
+    return NextResponse.json(image)
   } catch (error) {
-    placeLogger.error('Error al agregar imagen al lugar:', error)
-    return NextResponse.json({ error: 'Error al agregar imagen al lugar' }, { status: 500 })
+    placeLogger.error(`❌ Error en POST /api/places/${params.id}/images:`, error)
+    return NextResponse.json(
+      { error: 'Error al agregar imagen al lugar' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { imageId } = await request.json()
+    placeLogger.info(`🗑️ DELETE /api/places/${params.id}/images`, { imageId })
+    const image = await placeService.removeImageFromPlace(params.id, imageId)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    placeLogger.error(`❌ Error en DELETE /api/places/${params.id}/images:`, error)
+    return NextResponse.json(
+      { error: 'Error al eliminar imagen del lugar' },
+      { status: 500 }
+    )
   }
 }

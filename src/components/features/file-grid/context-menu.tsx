@@ -28,7 +28,7 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import type { FileItem } from "@/types/file-item";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useCollectionTagContext } from "@/context/settings-context";
 import {
 	Dialog,
@@ -51,13 +51,20 @@ import { useFavoritesStore } from "@/store/favorites";
 import { useCollectionsStore } from "@/store/collections";
 import { useTagsStore } from "@/store/tags";
 import { logger } from "@/lib/logger";
+import type { EmojiClickData } from "@/types/emoji";
 
 const contextMenuLogger = logger.withContext("ContextMenu");
 
 interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
-	onAction: (action: string, file: FileItem, data?: any) => void;
+	onAction: (action: string, file: FileItem) => void;
+}
+
+interface NewCollectionData {
+	name: string;
+	emoji: string;
+	color: string;
 }
 
 export function FileContextMenu({
@@ -73,10 +80,9 @@ export function FileContextMenu({
 
 	// Estados para nueva colección
 	const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
-	const [newCollection, setNewCollection] = useState({
+	const [newCollection, setNewCollection] = useState<NewCollectionData>({
 		name: "",
 		emoji: "📁",
-		description: "",
 		color: "#3b82f6",
 	});
 
@@ -88,39 +94,20 @@ export function FileContextMenu({
 		description: "",
 	});
 
-	const handleCreateCollection = async () => {
+	const handleCreateCollection = useCallback(async () => {
 		try {
 			await createCollection({
 				name: newCollection.name,
 				emoji: newCollection.emoji,
-				description: newCollection.description,
 				color: newCollection.color,
 			});
-
-			// Una vez creada la colección, agregamos el archivo
-			const createdCollection = collections.find(
-				(c) => c.name === newCollection.name
-			);
-
-			if (createdCollection) {
-				await addImageToCollection(createdCollection.id, file.id);
-				contextMenuLogger.info("✨ Colección creada y archivo agregado:", {
-					collection: createdCollection.name,
-					fileId: file.id,
-				});
-			}
-
-			setNewCollection({
-				name: "",
-				emoji: "📁",
-				description: "",
-				color: "#3b82f6",
-			});
 			setIsCollectionDialogOpen(false);
+			setNewCollection({ name: "", emoji: "📁", color: "#3b82f6" });
+			contextMenuLogger.info("✨ Nueva colección creada:", newCollection);
 		} catch (error) {
 			contextMenuLogger.error("❌ Error al crear colección:", { error });
 		}
-	};
+	}, [newCollection, createCollection]);
 
 	const handleCreateTag = async () => {
 		try {
@@ -215,8 +202,11 @@ export function FileContextMenu({
 								<div className="grid gap-4 py-4">
 									<div className="flex items-center gap-4">
 										<EmojiPicker
-											onEmojiSelect={(emoji: string) =>
-												setNewCollection({ ...newCollection, emoji })
+											onEmojiSelect={(emojiData: EmojiClickData) =>
+												setNewCollection({
+													...newCollection,
+													emoji: emojiData.emoji,
+												})
 											}
 										/>
 										<Input

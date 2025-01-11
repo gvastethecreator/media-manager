@@ -1,97 +1,35 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { formatBytes } from "@/lib/format";
+import { placeService } from "@/services/place.service";
 import { logger } from "@/lib/logger";
 
-const placeLogger = logger.withContext("PlaceAPI");
+const placeLogger = logger.withContext("PlacesAPI");
 
 export async function GET() {
   try {
-    const places = await prisma.place.findMany({
-      include: {
-        images: {
-          select: {
-            id: true,
-            path: true,
-            size: true,
-            tags: {
-              select: {
-                name: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 9,
-        },
-        _count: {
-          select: {
-            images: true,
-          },
-        },
-      },
-    });
-
-    const processedPlaces = await Promise.all(places.map(async (place: any) => {
-      const totalSize = place.images.reduce((sum: any, img: any) => sum + img.size, 0);
-
-      const tagCounts = place.images.reduce((acc: any, img: any) => {
-        img.tags.forEach((tag: any) => {
-          acc[tag.name] = (acc[tag.name] || 0) + 1;
-        });
-        return acc;
-      }, {} as Record<string, number>);
-
-      const topTags = Object.entries(tagCounts)
-        .sort(([, a]: any, [, b]: any) => b - a)
-        .slice(0, 3)
-        .map(([name, count]) => ({ name, count }));
-
-      const recentImages = place.images.map((img: any) => `/api/thumbnails/${img.id}`);
-
-      return {
-        id: place.id,
-        name: place.name,
-        emoji: place.emoji || "📍",
-        color: place.color || "#3b82f6",
-        description: place.description || "",
-        shortcut: place.shortcut,
-        count: place._count.images,
-        size: formatBytes(totalSize),
-        recentImages,
-        topTags,
-      };
-    }));
-
-    return NextResponse.json(processedPlaces);
+    placeLogger.info("📥 GET /api/places");
+    const places = await placeService.getPlaces();
+    return NextResponse.json(places);
   } catch (error) {
-    placeLogger.error("Error al obtener lugares:", error);
-    return NextResponse.json({ error: "Error al obtener lugares" }, { status: 500 });
+    placeLogger.error("❌ Error en GET /api/places:", error);
+    return NextResponse.json(
+      { error: "Error al obtener lugares" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-
-    const place = await prisma.place.create({
-      data: {
-        name: data.name,
-        emoji: data.emoji,
-        color: data.color,
-        description: data.description,
-        shortcut: data.shortcut,
-        sortBy: data.sortBy || "name",
-        filters: data.filters || "[]",
-      },
-    });
-
-    placeLogger.info("Lugar creado:", place);
+    placeLogger.info("📤 POST /api/places", data);
+    const place = await placeService.createPlace(data);
     return NextResponse.json(place);
   } catch (error) {
-    placeLogger.error("Error al crear lugar:", error);
-    return NextResponse.json({ error: "Error al crear lugar" }, { status: 500 });
+    placeLogger.error("❌ Error en POST /api/places:", error);
+    return NextResponse.json(
+      { error: "Error al crear lugar" },
+      { status: 500 }
+    );
   }
 }
 

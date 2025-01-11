@@ -9,15 +9,16 @@ import { LibraryBig } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 import { LoadingScreen } from "@/components/core/feedback";
 import BlurFade from "@/components/ui/blur-fade";
+import { useFiles } from "@/context/file-context";
 
 export function CollectionContentView() {
 	const {
 		currentItems: items,
-		handleSelectItem,
 		currentCollectionId,
 		setCurrentCollection,
 		isLoading,
 	} = useFileManager();
+	const { handleSelectItem } = useFiles();
 	const { openViewer } = useImageViewer();
 
 	useEffect(() => {

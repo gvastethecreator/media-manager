@@ -1,76 +1,16 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { characterService } from "@/services/character.service";
 import { logger } from "@/lib/logger";
-import { formatBytes } from "@/lib/utils";
 
-const charactersLogger = logger.withContext("CharactersAPI");
+const characterLogger = logger.withContext("CharactersAPI");
 
 export async function GET() {
   try {
-    charactersLogger.info("🔄 Obteniendo personajes...");
-
-    const characters = await prisma.character.findMany({
-      include: {
-        images: {
-          select: {
-            id: true,
-            path: true,
-            size: true,
-            tags: {
-              select: {
-                name: true
-              }
-            }
-          },
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 9
-        },
-        _count: {
-          select: {
-            images: true
-          }
-        }
-      }
-    });
-
-    const processedCharacters = await Promise.all(characters.map(async (character: any) => {
-      const totalSize = character.images.reduce((sum: any, img: any) => sum + img.size, 0);
-
-      const tagCounts = character.images.reduce((acc: any, img: any) => {
-        img.tags.forEach((tag: any) => {
-          acc[tag.name] = (acc[tag.name] || 0) + 1;
-        });
-        return acc;
-      }, {} as Record<string, number>);
-
-      const topTags = Object.entries(tagCounts)
-        .sort(([, a]: any, [, b]: any) => b - a)
-        .slice(0, 3)
-        .map(([name, count]) => ({ name, count }));
-
-      const recentImages = character.images.map((img: any) => `/api/thumbnails/${img.id}`);
-
-      return {
-        id: character.id,
-        name: character.name,
-        emoji: character.emoji || '👤',
-        color: character.color || '#3b82f6',
-        description: character.description || '',
-        shortcut: character.shortcut,
-        count: character._count.images,
-        size: formatBytes(totalSize),
-        recentImages,
-        topTags
-      };
-    }));
-
-    charactersLogger.info(`✅ ${characters.length} personajes obtenidos`);
-
-    return NextResponse.json(processedCharacters);
+    characterLogger.info("📥 GET /api/characters");
+    const characters = await characterService.getCharacters();
+    return NextResponse.json(characters);
   } catch (error) {
-    charactersLogger.error("❌ Error al obtener personajes:", error);
+    characterLogger.error("❌ Error en GET /api/characters:", error);
     return NextResponse.json(
       { error: "Error al obtener personajes" },
       { status: 500 }
@@ -81,25 +21,11 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    charactersLogger.info("➕ Creando nuevo personaje:", data);
-
-    const character = await prisma.character.create({
-      data: {
-        name: data.name,
-        emoji: data.emoji,
-        color: data.color,
-        description: data.description,
-        shortcut: data.shortcut,
-        sortBy: data.sortBy || 'name',
-        filters: data.filters || '[]'
-      }
-    });
-
-    charactersLogger.info("✅ Personaje creado:", character);
-
+    characterLogger.info("📤 POST /api/characters", data);
+    const character = await characterService.createCharacter(data);
     return NextResponse.json(character);
   } catch (error) {
-    charactersLogger.error("❌ Error al crear personaje:", error);
+    characterLogger.error("❌ Error en POST /api/characters:", error);
     return NextResponse.json(
       { error: "Error al crear personaje" },
       { status: 500 }
@@ -119,7 +45,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    charactersLogger.info("📝 Actualizando personaje:", { id, body });
+    characterLogger.info("📝 Actualizando personaje:", { id, body });
 
     const character = await prisma.character.update({
       where: { id },
@@ -142,11 +68,11 @@ export async function PUT(request: Request) {
       _count: undefined,
     };
 
-    charactersLogger.info("✅ Personaje actualizado:", formattedCharacter);
+    characterLogger.info("✅ Personaje actualizado:", formattedCharacter);
 
     return NextResponse.json(formattedCharacter);
   } catch (error) {
-    charactersLogger.error("❌ Error al actualizar personaje:", error);
+    characterLogger.error("❌ Error al actualizar personaje:", error);
     return NextResponse.json(
       { error: "Error al actualizar personaje" },
       { status: 500 }
@@ -165,17 +91,17 @@ export async function DELETE(request: Request) {
       );
     }
 
-    charactersLogger.info("🗑️ Eliminando personaje:", id);
+    characterLogger.info("🗑️ Eliminando personaje:", id);
 
     await prisma.character.delete({
       where: { id },
     });
 
-    charactersLogger.info("✅ Personaje eliminado:", id);
+    characterLogger.info("✅ Personaje eliminado:", id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    charactersLogger.error("❌ Error al eliminar personaje:", error);
+    characterLogger.error("❌ Error al eliminar personaje:", error);
     return NextResponse.json(
       { error: "Error al eliminar personaje" },
       { status: 500 }

@@ -21,6 +21,10 @@ import {
 	Bug,
 	BookImage,
 	CornerDownRight,
+	Camera,
+	MapPin,
+	User2,
+	Box,
 } from "lucide-react";
 import { useNavigationStore } from "@/store/navigation";
 import { ViewType } from "@/types/file-item";
@@ -46,6 +50,30 @@ const categories = [
 		color: "#ef4444",
 	},
 	{
+		id: "albums" as ViewType,
+		icon: Camera,
+		label: "Álbumes",
+		color: "#8b5cf6",
+	},
+	{
+		id: "characters" as ViewType,
+		icon: User2,
+		label: "Personajes",
+		color: "#ec4899",
+	},
+	{
+		id: "places" as ViewType,
+		icon: MapPin,
+		label: "Lugares",
+		color: "#14b8a6",
+	},
+	{
+		id: "objects" as ViewType,
+		icon: Box,
+		label: "Objetos",
+		color: "#f59e0b",
+	},
+	{
 		id: "tags" as ViewType,
 		icon: TagIcon,
 		label: "Etiquetas",
@@ -63,12 +91,24 @@ export function NavPanel() {
 		collections,
 		folders,
 		tags,
+		albums,
+		characters,
+		places,
+		objects,
 		setCurrentCollection,
 		setCurrentFolder,
 		setCurrentTag,
+		setCurrentAlbum,
+		setCurrentCharacter,
+		setCurrentPlace,
+		setCurrentObject,
 		currentCollectionId,
 		currentFolderId,
 		currentTagId,
+		currentAlbumId,
+		currentCharacterId,
+		currentPlaceId,
+		currentObjectId,
 		initialize,
 	} = useFileManager();
 
@@ -130,6 +170,38 @@ export function NavPanel() {
 			console.error("Error resetting app:", error);
 		});
 	}, [initialize, initializeStats]);
+
+	const handleAlbumClick = useCallback(
+		(albumId: string) => {
+			setCurrentView("album-content");
+			setCurrentAlbum(albumId);
+		},
+		[setCurrentView, setCurrentAlbum]
+	);
+
+	const handleCharacterClick = useCallback(
+		(characterId: string) => {
+			setCurrentView("character-content");
+			setCurrentCharacter(characterId);
+		},
+		[setCurrentView, setCurrentCharacter]
+	);
+
+	const handlePlaceClick = useCallback(
+		(placeId: string) => {
+			setCurrentView("place-content");
+			setCurrentPlace(placeId);
+		},
+		[setCurrentView, setCurrentPlace]
+	);
+
+	const handleObjectClick = useCallback(
+		(objectId: string) => {
+			setCurrentView("object-content");
+			setCurrentObject(objectId);
+		},
+		[setCurrentView, setCurrentObject]
+	);
 
 	return (
 		<div className="flex flex-col h-full">
@@ -243,6 +315,26 @@ export function NavPanel() {
 											{stats.totalFolders}
 										</span>
 									) : null}
+									{id === "albums" && stats?.totalAlbums ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalAlbums}
+										</span>
+									) : null}
+									{id === "characters" && stats?.totalCharacters ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalCharacters}
+										</span>
+									) : null}
+									{id === "places" && stats?.totalPlaces ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalPlaces}
+										</span>
+									) : null}
+									{id === "objects" && stats?.totalObjects ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalObjects}
+										</span>
+									) : null}
 									{id === "tags" && stats?.totalTags ? (
 										<span className="ml-2 text-white border-none">
 											{stats.totalTags}
@@ -297,6 +389,98 @@ export function NavPanel() {
 												</span>
 											</Button>
 										))}
+									{id === "albums" &&
+										albums?.map((album) => (
+											<Button
+												key={album.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "album-content" &&
+														currentAlbumId === album.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleAlbumClick(album.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{album.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{album.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{album.count}
+												</span>
+											</Button>
+										))}
+									{id === "characters" &&
+										characters?.map((character) => (
+											<Button
+												key={character.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "character-content" &&
+														currentCharacterId === character.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleCharacterClick(character.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{character.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{character.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{character.count}
+												</span>
+											</Button>
+										))}
+									{id === "places" &&
+										places?.map((place) => (
+											<Button
+												key={place.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "place-content" &&
+														currentPlaceId === place.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handlePlaceClick(place.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{place.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{place.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{place.count}
+												</span>
+											</Button>
+										))}
+									{id === "objects" &&
+										objects?.map((object) => (
+											<Button
+												key={object.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "object-content" &&
+														currentObjectId === object.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleObjectClick(object.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{object.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{object.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{object.count}
+												</span>
+											</Button>
+										))}
 									{id === "tags" && (
 										<div className="flex w-full flex-wrap gap-2 mt-1">
 											{tags?.map((tag) => (
@@ -305,7 +489,7 @@ export function NavPanel() {
 													key={tag.id}
 													style={{ backgroundColor: tag.color }}
 													className={cn(
-														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold" ,
+														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold",
 														currentView === "tag-content" &&
 															currentTagId === tag.name &&
 															"bg-gradient-to-r from-black/30 to-black/35"

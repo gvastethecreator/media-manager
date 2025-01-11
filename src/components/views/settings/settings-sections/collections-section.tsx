@@ -30,6 +30,7 @@ import type {
 	CollectionCreate,
 	CollectionUpdate,
 } from "@/services/collection.service";
+import type { EmojiClickData } from "emoji-picker-react";
 
 const collectionLogger = logger.withContext("CollectionsSection");
 
@@ -96,8 +97,8 @@ export function CollectionsSection() {
 		}
 	};
 
-	const handleEmojiSelect = (emoji: string) => {
-		setNewCollection({ ...newCollection, emoji });
+	const handleEmojiSelect = (emojiData: EmojiClickData) => {
+		setNewCollection({ ...newCollection, emoji: emojiData.emoji });
 	};
 
 	const handleColorChange = (color: { hex: string }) => {
@@ -112,7 +113,7 @@ export function CollectionsSection() {
 			const newCollectionData = {
 				...newCollection,
 				sortBy: "name" as const,
-				filters: [],
+				filters: [] as any[],
 			};
 
 			await createCollection(newCollectionData);
@@ -303,9 +304,11 @@ export function CollectionsSection() {
 																align="start"
 															>
 																<EmojiPicker
-																	onEmojiSelect={(emoji) =>
+																	onEmojiSelect={(emojiData: EmojiClickData) =>
 																		setEditForm((prev) =>
-																			prev ? { ...prev, emoji } : null
+																			prev
+																				? { ...prev, emoji: emojiData.emoji }
+																				: null
 																		)
 																	}
 																/>

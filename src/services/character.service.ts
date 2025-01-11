@@ -1,6 +1,8 @@
+import { prisma } from '@/lib/prisma'
 import type { Character as PrismaCharacter } from '@prisma/client'
 import type { FileItem } from '@/types/file-item'
 import { logger } from '@/lib/logger'
+import { eventsService, type EventData } from './events.service'
 
 const characterLogger = logger.withContext('CharacterService')
 
@@ -10,194 +12,322 @@ export interface CharacterCreate {
   color?: string
   description?: string
   shortcut?: string
+  level?: number
+  class?: string
+  race?: string
+  alignment?: string
+  backstory?: string
+  stats?: string
   sortBy?: string
   filters?: string
 }
 
-export interface CharacterUpdate extends Partial<CharacterCreate> {
-  id: string
+export interface CharacterUpdate {
+  name?: string
+  emoji?: string
+  color?: string
+  description?: string
+  shortcut?: string
+  level?: number
+  class?: string
+  race?: string
+  alignment?: string
+  backstory?: string
+  stats?: string
+  sortBy?: string
+  filters?: string
 }
 
-export interface CharacterWithStats {
-  id: string
-  name: string
-  emoji: string
-  description: string | null
-  color: string
-  shortcut: string | null
-  sortBy: string
-  filters: string
-  createdAt: Date
-  updatedAt: Date
-  count: number
+export interface CharacterWithStats extends PrismaCharacter {
+  _count: {
+    images: number
+  }
+  totalSize: number
 }
 
-export interface CharacterWithImages extends CharacterWithStats {
-  images: FileItem[]
-}
-
-export const characterService = {
+class CharacterService {
   async getCharacters(): Promise<CharacterWithStats[]> {
     try {
-      characterLogger.info('👥 Obteniendo lista de personajes')
-      const response = await fetch('/api/characters')
-      if (!response.ok) {
-        throw new Error('Failed to fetch characters')
-      }
-      const characters = await response.json()
-      characterLogger.info(`✅ ${characters.length} personajes obtenidos`)
-      return characters
+      characterLogger.info('🔍 Buscando personajes...')
+      const characters = await prisma.character.findMany({
+        include: {
+          _count: {
+            select: { images: true }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }).catch((error) => {
+        characterLogger.error('❌ Error en prisma.character.findMany:', error)
+        throw error
+      })
+
+      characterLogger.info('📊 Calculando estadísticas para', characters.length, 'personajes')
+      const charactersWithStats = await Promise.all(
+        characters.map(async (character) => {
+          try {
+            const totalSize = await prisma.image.aggregate({
+              where: { characters: { some: { id: character.id } } },
+              _sum: { size: true }
+            })
+
+            return {
+              ...character,
+              totalSize: totalSize._sum?.size || 0
+            }
+          } catch (error) {
+            characterLogger.error('❌ Error al calcular estadísticas del personaje:', { characterId: character.id, error: error instanceof Error ? error.message : 'Error desconocido' })
+            return {
+              ...character,
+              totalSize: 0
+            }
+          }
+        })
+      )
+
+      characterLogger.info('✅ Personajes obtenidos correctamente:', { count: characters.length })
+      return charactersWithStats
     } catch (error) {
-      characterLogger.error('❌ Error al obtener personajes:', error)
-      throw error
+      characterLogger.error('❌ Error al obtener personajes:', error instanceof Error ? { message: error.message, stack: error.stack } : error)
+      throw new Error('Error al obtener los personajes: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async getCharacter(id: string): Promise<CharacterWithStats | null> {
     try {
-      characterLogger.info('👤 Obteniendo personaje:', id)
-      const response = await fetch(`/api/characters/${id}`)
-      if (!response.ok) {
-        if (response.status === 404) return null
-        throw new Error('Failed to fetch character')
+      const character = await prisma.character.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: { images: true }
+          }
+        }
+      })
+
+      if (!character) return null
+
+      const totalSize = await prisma.image.aggregate({
+        where: { characters: { some: { id } } },
+        _sum: { size: true }
+      })
+
+      return {
+        ...character,
+        totalSize: totalSize._sum?.size || 0
       }
-      const character = await response.json()
-      characterLogger.info('✅ Personaje obtenido:', character.name)
-      return character
     } catch (error) {
-      characterLogger.error('❌ Error al obtener personaje:', error)
-      throw error
+      characterLogger.error('❌ Error al obtener personaje:', { id, error })
+      throw new Error('Error al obtener el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async createCharacter(data: CharacterCreate): Promise<CharacterWithStats> {
     try {
-      characterLogger.info('➕ Creando personaje:', data)
-      const response = await fetch('/api/characters', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create character')
+      const characterData = {
+        ...data,
+        emoji: data.emoji || '👤',
+        color: data.color || '#3b82f6',
+        level: data.level || 1,
+        class: data.class || 'unknown',
+        race: data.race || 'unknown',
+        alignment: data.alignment || 'neutral',
+        backstory: data.backstory || '',
+        stats: data.stats || '{}',
+        sortBy: data.sortBy || 'name',
+        filters: data.filters || '[]'
       }
 
-      const character = await response.json()
-      characterLogger.info('✅ Personaje creado:', character.name)
-      return character
+      const character = await prisma.character.create({
+        data: characterData,
+        include: {
+          _count: {
+            select: { images: true }
+          }
+        }
+      })
+
+      characterLogger.info('✨ Personaje creado:', { character })
+      const eventData: EventData = { type: 'create', id: character.id }
+      eventsService.emit('characters:modified', eventData)
+
+      return {
+        ...character,
+        totalSize: 0
+      }
     } catch (error) {
-      characterLogger.error('❌ Error al crear personaje:', error)
-      throw error
+      characterLogger.error('❌ Error al crear personaje:', { data, error })
+      throw new Error('Error al crear el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async updateCharacter(id: string, data: CharacterUpdate): Promise<CharacterWithStats> {
     try {
-      characterLogger.info('📝 Actualizando personaje:', { id, data })
-      const response = await fetch(`/api/characters/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const character = await prisma.character.update({
+        where: { id },
+        data,
+        include: {
+          _count: {
+            select: { images: true }
+          }
+        }
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to update character')
+      const totalSize = await prisma.image.aggregate({
+        where: { characters: { some: { id } } },
+        _sum: { size: true }
+      })
+
+      const characterWithStats = {
+        ...character,
+        totalSize: totalSize._sum?.size || 0
       }
 
-      const character = await response.json()
-      characterLogger.info('✅ Personaje actualizado:', character.name)
-      return character
+      characterLogger.info('📝 Personaje actualizado:', { id, data })
+      const eventData: EventData = { type: 'update', id }
+      eventsService.emit('characters:modified', eventData)
+      return characterWithStats
     } catch (error) {
-      characterLogger.error('❌ Error al actualizar personaje:', error)
-      throw error
+      characterLogger.error('❌ Error al actualizar personaje:', { id, data, error })
+      throw new Error('Error al actualizar el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async deleteCharacter(id: string): Promise<void> {
     try {
-      characterLogger.info('🗑️ Eliminando personaje:', id)
-      const response = await fetch(`/api/characters/${id}`, {
-        method: 'DELETE',
+      await prisma.character.delete({
+        where: { id }
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to delete character')
-      }
-      characterLogger.info('✅ Personaje eliminado:', id)
+      characterLogger.info('🗑️ Personaje eliminado:', { id })
+      const eventData: EventData = { type: 'delete', id }
+      eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('❌ Error al eliminar personaje:', error)
-      throw error
+      characterLogger.error('❌ Error al eliminar personaje:', { id, error })
+      throw new Error('Error al eliminar el personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async addImageToCharacter(characterId: string, imageId: string): Promise<void> {
     try {
-      const response = await fetch(`/api/characters/${characterId}/images/${imageId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await prisma.character.update({
+        where: { id: characterId },
+        data: {
+          images: {
+            connect: { id: imageId }
+          }
+        }
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to add image to character')
-      }
+      characterLogger.info('📸 Imagen agregada a personaje:', { characterId, imageId })
+      const eventData: EventData = { type: 'addImage', objectId: characterId, imageId }
+      eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('Error adding image to character:', error)
-      throw error
+      characterLogger.error('❌ Error al agregar imagen a personaje:', { characterId, imageId, error })
+      throw new Error('Error al agregar imagen al personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
   async removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
     try {
-      const response = await fetch(`/api/characters/${characterId}/images/${imageId}`, {
-        method: 'DELETE',
+      await prisma.character.update({
+        where: { id: characterId },
+        data: {
+          images: {
+            disconnect: { id: imageId }
+          }
+        }
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to remove image from character')
-      }
+      characterLogger.info('🖼️ Imagen removida de personaje:', { characterId, imageId })
+      const eventData: EventData = { type: 'removeImage', objectId: characterId, imageId }
+      eventsService.emit('characters:modified', eventData)
     } catch (error) {
-      characterLogger.error('Error removing image from character:', error)
-      throw error
+      characterLogger.error('❌ Error al remover imagen de personaje:', { characterId, imageId, error })
+      throw new Error('Error al remover imagen del personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
-  },
+  }
 
-  async getCharacterImages(characterId: string): Promise<FileItem[]> {
+  async getCharacterImages(id: string): Promise<FileItem[]> {
     try {
-      const response = await fetch(`/api/characters/${characterId}/images`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch character images')
-      }
-      return response.json()
-    } catch (error) {
-      characterLogger.error('Error fetching character images:', error)
-      throw error
-    }
-  },
+      const images = await prisma.image.findMany({
+        where: {
+          characters: {
+            some: { id }
+          }
+        },
+        include: {
+          collections: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
+              color: true
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              color: true
+            }
+          },
+          characters: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
+              color: true
+            }
+          },
+          places: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
+              color: true
+            }
+          },
+          objects: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
+              color: true
+            }
+          }
+        }
+      });
 
-  async getCharacterStats(id: string): Promise<{ count: number; size: string }> {
-    try {
-      characterLogger.info('📊 Obteniendo estadísticas de personaje:', id)
-      const response = await fetch(`/api/characters/${id}/stats`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch character stats')
-      }
-      const stats = await response.json()
-      characterLogger.info('✅ Estadísticas obtenidas:', stats)
-      return stats
+      return images.map(image => {
+        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined;
+        return {
+          id: image.id,
+          name: image.name,
+          path: image.path,
+          type: 'image',
+          mimeType: metadata?.mimeType,
+          size: image.size,
+          width: image.width || undefined,
+          height: image.height || undefined,
+          metadata,
+          thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : undefined,
+          thumbnailSize: image.thumbnailSize || undefined,
+          thumbnailWidth: image.thumbnailWidth || undefined,
+          thumbnailHeight: image.thumbnailHeight || undefined,
+          isFavorite: image.isFavorite || false,
+          isPublic: image.isPublic || false,
+          createdAt: image.createdAt.toISOString(),
+          updatedAt: image.updatedAt.toISOString(),
+          collections: image.collections,
+          tags: image.tags,
+          characters: image.characters,
+          places: image.places,
+          objects: image.objects
+        };
+      });
     } catch (error) {
-      characterLogger.error('❌ Error al obtener estadísticas:', error)
-      throw error
+      characterLogger.error("❌ Error al obtener imágenes del personaje:", { error });
+      throw new Error('Error al obtener imágenes del personaje: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
   }
 }
+
+export const characterService = new CharacterService();
