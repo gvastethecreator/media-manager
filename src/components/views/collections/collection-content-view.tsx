@@ -13,7 +13,7 @@ import BlurFade from "@/components/ui/blur-fade";
 export function CollectionContentView() {
 	const {
 		currentItems: items,
-		toggleItemSelection,
+		handleSelectItem,
 		currentCollectionId,
 		setCurrentCollection,
 		isLoading,
@@ -28,9 +28,9 @@ export function CollectionContentView() {
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			toggleItemSelection(item, false);
+			handleSelectItem(item);
 		},
-		[toggleItemSelection]
+		[handleSelectItem]
 	);
 
 	const handleItemDoubleClick = useCallback(

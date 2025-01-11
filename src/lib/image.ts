@@ -1,6 +1,6 @@
 import sharp from 'sharp'
 import { existsSync } from 'fs'
-import { thumbnailLogger as logger } from './utils'
+import { logger } from './logger'
 import { formatBytes } from './utils'
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png'

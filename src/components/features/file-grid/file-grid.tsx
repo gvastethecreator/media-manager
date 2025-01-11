@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { FileCard } from "./file-card";
-import type { FileItem } from "@/types/file-item";
+import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -46,17 +46,19 @@ const GRID_CONFIG = {
 // Sistema de cache mejorado usando Map para mejor rendimiento en el cliente
 const renderedItemsCache = new Map<string, boolean>();
 
-interface FileGridProps {
+export interface FileGridProps {
+	items: FileItem[];
+	isResizing?: boolean;
 	onItemClick?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
-	items: FileItem[];
 	loadMoreItems?: () => void;
 }
 
 export function FileGrid({
+	items,
+	isResizing,
 	onItemClick,
 	onItemDoubleClick,
-	items,
 	loadMoreItems,
 }: FileGridProps) {
 	const gridRef = useRef<HTMLDivElement>(null);
