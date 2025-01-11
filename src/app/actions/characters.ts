@@ -3,9 +3,31 @@
 import { prisma } from "@/lib/prisma";
 import type { CharacterCreate, CharacterUpdate } from "@/services/character.service";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
+
+const characterLogger = logger.withContext('CharacterActions');
+
+const REVALIDATE_PATHS = [
+  '/settings',
+  '/characters',
+  '/characters/[id]'
+] as const;
+
+const revalidateAllPaths = () => {
+  REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+  characterLogger.info('🔄 Rutas revalidadas');
+};
+
+class CharacterError extends Error {
+  constructor(message: string, public cause?: unknown) {
+    super(message);
+    this.name = 'CharacterError';
+  }
+}
 
 export async function getCharacters() {
   try {
+    characterLogger.info('👥 Obteniendo lista de personajes');
     const characters = await prisma.character.findMany({
       include: {
         _count: {
@@ -38,15 +60,17 @@ export async function getCharacters() {
       })
     );
 
+    characterLogger.info(`✅ ${characters.length} personajes obtenidos`);
     return charactersWithStats;
   } catch (error) {
-    console.error("Error al obtener personajes:", error);
-    throw new Error("No se pudieron obtener los personajes");
+    characterLogger.error("❌ Error al obtener personajes:", error);
+    throw new CharacterError("No se pudieron obtener los personajes", error);
   }
 }
 
 export async function getCharacter(id: string) {
   try {
+    characterLogger.info('🔍 Obteniendo personaje:', id);
     const character = await prisma.character.findUnique({
       where: { id },
       include: {
@@ -59,7 +83,7 @@ export async function getCharacter(id: string) {
     });
 
     if (!character) {
-      throw new Error("Personaje no encontrado");
+      throw new CharacterError("Personaje no encontrado");
     }
 
     const totalSize = await prisma.image.aggregate({
@@ -75,55 +99,76 @@ export async function getCharacter(id: string) {
       },
     });
 
-    return {
+    const result = {
       ...character,
       totalSize: totalSize._sum.size || 0,
     };
+
+    characterLogger.info('✅ Personaje obtenido:', character.name);
+    return result;
   } catch (error) {
-    console.error("Error al obtener personaje:", error);
-    throw new Error("No se pudo obtener el personaje");
+    characterLogger.error("❌ Error al obtener personaje:", error);
+    if (error instanceof CharacterError) throw error;
+    throw new CharacterError("No se pudo obtener el personaje", error);
   }
 }
 
 export async function createCharacter(data: CharacterCreate) {
   try {
-    await prisma.character.create({
-      data,
+    characterLogger.info('📝 Creando nuevo personaje:', data.name);
+    const character = await prisma.character.create({
+      data: {
+        ...data,
+        stats: data.stats ? JSON.stringify(data.stats) : '{}',
+        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+      },
     });
-    revalidatePath("/settings");
+    characterLogger.info('✅ Personaje creado:', character.name);
+    revalidateAllPaths();
+    return character;
   } catch (error) {
-    console.error("Error al crear personaje:", error);
-    throw new Error("No se pudo crear el personaje");
+    characterLogger.error("❌ Error al crear personaje:", error);
+    throw new CharacterError("No se pudo crear el personaje", error);
   }
 }
 
 export async function updateCharacter(id: string, data: CharacterUpdate) {
   try {
-    await prisma.character.update({
+    characterLogger.info('📝 Actualizando personaje:', id);
+    const character = await prisma.character.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        stats: data.stats ? JSON.stringify(data.stats) : undefined,
+        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+      },
     });
-    revalidatePath("/settings");
+    characterLogger.info('✅ Personaje actualizado:', character.name);
+    revalidateAllPaths();
+    return character;
   } catch (error) {
-    console.error("Error al actualizar personaje:", error);
-    throw new Error("No se pudo actualizar el personaje");
+    characterLogger.error("❌ Error al actualizar personaje:", error);
+    throw new CharacterError("No se pudo actualizar el personaje", error);
   }
 }
 
 export async function deleteCharacter(id: string) {
   try {
+    characterLogger.info('🗑️ Eliminando personaje:', id);
     await prisma.character.delete({
       where: { id },
     });
-    revalidatePath("/settings");
+    characterLogger.info('✅ Personaje eliminado');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar personaje:", error);
-    throw new Error("No se pudo eliminar el personaje");
+    characterLogger.error("❌ Error al eliminar personaje:", error);
+    throw new CharacterError("No se pudo eliminar el personaje", error);
   }
 }
 
 export async function getCharacterImages(id: string) {
   try {
+    characterLogger.info('🖼️ Obteniendo imágenes del personaje:', id);
     const images = await prisma.image.findMany({
       where: {
         characters: {
@@ -132,16 +177,41 @@ export async function getCharacterImages(id: string) {
           },
         },
       },
+      select: {
+        id: true,
+        name: true,
+        path: true,
+        size: true,
+        createdAt: true,
+        updatedAt: true,
+        hash: true,
+        width: true,
+        height: true,
+        metadata: true,
+        thumbnail: true,
+        thumbnailSize: true,
+        thumbnailWidth: true,
+        thumbnailHeight: true,
+        folderId: true,
+        isPublic: true,
+        isFavorite: true,
+      },
     });
-    return images;
+
+    characterLogger.info(`✅ ${images.length} imágenes obtenidas`);
+    return images.map(image => ({
+      ...image,
+      type: 'image',
+    }));
   } catch (error) {
-    console.error("Error al obtener imágenes del personaje:", error);
-    throw new Error("No se pudieron obtener las imágenes del personaje");
+    characterLogger.error("❌ Error al obtener imágenes del personaje:", error);
+    throw new CharacterError("No se pudieron obtener las imágenes del personaje", error);
   }
 }
 
 export async function addImageToCharacter(characterId: string, imageId: string) {
   try {
+    characterLogger.info('➕ Agregando imagen a personaje:', { characterId, imageId });
     await prisma.character.update({
       where: { id: characterId },
       data: {
@@ -152,15 +222,17 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
         },
       },
     });
-    revalidatePath("/settings");
+    characterLogger.info('✅ Imagen agregada al personaje');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al agregar imagen al personaje:", error);
-    throw new Error("No se pudo agregar la imagen al personaje");
+    characterLogger.error("❌ Error al agregar imagen al personaje:", error);
+    throw new CharacterError("No se pudo agregar la imagen al personaje", error);
   }
 }
 
 export async function removeImageFromCharacter(characterId: string, imageId: string) {
   try {
+    characterLogger.info('➖ Removiendo imagen de personaje:', { characterId, imageId });
     await prisma.character.update({
       where: { id: characterId },
       data: {
@@ -171,9 +243,10 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
         },
       },
     });
-    revalidatePath("/settings");
+    characterLogger.info('✅ Imagen removida del personaje');
+    revalidateAllPaths();
   } catch (error) {
-    console.error("Error al eliminar imagen del personaje:", error);
-    throw new Error("No se pudo eliminar la imagen del personaje");
+    characterLogger.error("❌ Error al eliminar imagen del personaje:", error);
+    throw new CharacterError("No se pudo eliminar la imagen del personaje", error);
   }
 }
