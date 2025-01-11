@@ -4,20 +4,27 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import {
-	Trash2,
-	Smile,
-	PencilIcon,
-	CheckIcon,
-	XIcon,
-	Loader2,
+  Trash2,
+  Smile,
+  PencilIcon,
+  CheckIcon,
+  XIcon,
+  Loader2,
+  Swords,
+  Crown,
+  Users,
+  Heart,
+  ScrollText,
+  AlertCircle,
 } from "lucide-react";
 import { useCharactersStore } from "@/store/characters";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { cn } from "@/lib/utils";
@@ -27,428 +34,532 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
 import type {
-	CharacterCreate,
-	CharacterUpdate,
-	CharacterWithStats,
+  CharacterCreate,
+  CharacterUpdate,
 } from "@/services/character.service";
+import type { EmojiClickData } from "emoji-picker-react";
 
 const characterLogger = logger.withContext("CharactersSection");
 
 export function CharactersSection() {
-	const { toast } = useToast();
-	const [isCreating, setIsCreating] = React.useState(false);
-	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const [name, setName] = React.useState("");
-	const [description, setDescription] = React.useState("");
-	const [emoji, setEmoji] = React.useState("👤");
-	const [color, setColor] = React.useState("#3b82f6");
-	const [shortcut, setShortcut] = React.useState("");
-	const [isLoading, setIsLoading] = React.useState(false);
+  const {
+    characters,
+    isLoading,
+    error,
+    createCharacter,
+    updateCharacter,
+    deleteCharacter,
+    loadCharacters,
+  } = useCharactersStore();
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editForm, setEditForm] = React.useState<CharacterUpdate | null>(null);
+  const [newCharacter, setNewCharacter] = React.useState<CharacterCreate>({
+    name: "",
+    emoji: "👤",
+    description: "",
+    color: "#3b82f6",
+    level: 1,
+    class: "",
+    race: "",
+    alignment: "",
+    backstory: "",
+  });
+  const { toast } = useToast();
 
-	const {
-		characters,
-		loadCharacters,
-		createCharacter,
-		updateCharacter,
-		deleteCharacter,
-	} = useCharactersStore();
+  React.useEffect(() => {
+    loadCharacters();
+  }, [loadCharacters]);
 
-	React.useEffect(() => {
-		loadCharacters();
-	}, [loadCharacters]);
+  const handleStartEdit = (character: (typeof characters)[0]) => {
+    setEditingId(character.id);
+    setEditForm({
+      id: character.id,
+      name: character.name,
+      emoji: character.emoji,
+      description: character.description || "",
+      color: character.color,
+      level: character.level,
+      class: character.class || "",
+      race: character.race || "",
+      alignment: character.alignment || "",
+      backstory: character.backstory || "",
+    });
+  };
 
-	const handleStartCreate = () => {
-		setIsCreating(true);
-		setName("");
-		setDescription("");
-		setEmoji("👤");
-		setColor("#3b82f6");
-		setShortcut("");
-	};
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm(null);
+  };
 
-	const handleCancelCreate = () => {
-		setIsCreating(false);
-		setName("");
-		setDescription("");
-		setEmoji("👤");
-		setColor("#3b82f6");
-		setShortcut("");
-	};
+  const handleSaveEdit = async (id: string) => {
+    if (!editForm) return;
+    try {
+      characterLogger.info("💾 Guardando cambios en personaje:", {
+        id,
+        data: editForm,
+      });
+      await updateCharacter(id, editForm);
+      handleCancelEdit();
+      toast({
+        title: "Éxito",
+        description: "Personaje actualizado correctamente",
+      });
+    } catch (error) {
+      characterLogger.error("❌ Error al actualizar personaje:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el personaje",
+        variant: "destructive",
+      });
+    }
+  };
 
-	const handleCreate = async () => {
-		if (!name) {
-			toast({
-				title: "Error",
-				description: "El nombre es requerido",
-				variant: "destructive",
-			});
-			return;
-		}
+  const handleEmojiSelect = (emojiData: EmojiClickData) => {
+    setNewCharacter({ ...newCharacter, emoji: emojiData.emoji });
+  };
 
-		try {
-			setIsLoading(true);
-			await createCharacter({
-				name,
-				description,
-				emoji,
-				color,
-				shortcut,
-			});
-			setIsCreating(false);
-			setName("");
-			setDescription("");
-			setEmoji("👤");
-			setColor("#3b82f6");
-			setShortcut("");
-			toast({
-				title: "Éxito",
-				description: "Personaje creado correctamente",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo crear el personaje",
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	};
+  const handleEditEmojiSelect = (emojiData: EmojiClickData) => {
+    if (editForm) {
+      setEditForm({ ...editForm, emoji: emojiData.emoji });
+    }
+  };
 
-	const handleStartEdit = (character: CharacterWithStats) => {
-		setEditingId(character.id);
-		setName(character.name);
-		setDescription(character.description || "");
-		setEmoji(character.emoji || "👤");
-		setColor(character.color || "#3b82f6");
-		setShortcut(character.shortcut || "");
-	};
+  const handleCreate = async () => {
+    if (!newCharacter.name.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre es requerido",
+        variant: "destructive",
+      });
+      return;
+    }
 
-	const handleCancelEdit = () => {
-		setEditingId(null);
-		setName("");
-		setDescription("");
-		setEmoji("👤");
-		setColor("#3b82f6");
-		setShortcut("");
-	};
+    try {
+      characterLogger.info("✨ Creando nuevo personaje:", newCharacter);
+      await createCharacter(newCharacter);
+      setNewCharacter({
+        name: "",
+        emoji: "👤",
+        description: "",
+        color: "#3b82f6",
+        level: 1,
+        class: "",
+        race: "",
+        alignment: "",
+        backstory: "",
+      });
+      toast({
+        title: "Éxito",
+        description: "Personaje creado correctamente",
+      });
+    } catch (error) {
+      characterLogger.error("❌ Error al crear personaje:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear el personaje",
+        variant: "destructive",
+      });
+    }
+  };
 
-	const handleUpdate = async (id: string) => {
-		if (!name) {
-			toast({
-				title: "Error",
-				description: "El nombre es requerido",
-				variant: "destructive",
-			});
-			return;
-		}
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar este personaje?")) return;
+    try {
+      characterLogger.info("🗑️ Eliminando personaje:", { id });
+      await deleteCharacter(id);
+      toast({
+        title: "Éxito",
+        description: "Personaje eliminado correctamente",
+      });
+    } catch (error) {
+      characterLogger.error("❌ Error al eliminar personaje:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el personaje",
+        variant: "destructive",
+      });
+    }
+  };
 
-		try {
-			setIsLoading(true);
-			await updateCharacter(id, {
-				id,
-				name,
-				description,
-				emoji,
-				color,
-				shortcut,
-			});
-			setEditingId(null);
-			setName("");
-			setDescription("");
-			setEmoji("👤");
-			setColor("#3b82f6");
-			setShortcut("");
-			toast({
-				title: "Éxito",
-				description: "Personaje actualizado correctamente",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo actualizar el personaje",
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	};
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Swords className="h-5 w-5" />
+              Crear nuevo personaje
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <Input
+                  placeholder="Nombre del personaje"
+                  value={newCharacter.name}
+                  onChange={(e) =>
+                    setNewCharacter({ ...newCharacter, name: e.target.value })
+                  }
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-[60px]">
+                      {newCharacter.emoji || <Smile className="h-4 w-4" />}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <EmojiPicker onEmojiClick={handleEmojiSelect} />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-[60px]"
+                      style={{
+                        backgroundColor: newCharacter.color,
+                      }}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <CompactPicker
+                      color={newCharacter.color}
+                      onChange={(color) =>
+                        setNewCharacter({ ...newCharacter, color: color.hex })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Nivel"
+                    type="number"
+                    value={newCharacter.level}
+                    onChange={(e) =>
+                      setNewCharacter({
+                        ...newCharacter,
+                        level: parseInt(e.target.value) || 1,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Swords className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Clase"
+                    value={newCharacter.class}
+                    onChange={(e) =>
+                      setNewCharacter({ ...newCharacter, class: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Raza"
+                    value={newCharacter.race}
+                    onChange={(e) =>
+                      setNewCharacter({ ...newCharacter, race: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Alineamiento"
+                    value={newCharacter.alignment}
+                    onChange={(e) =>
+                      setNewCharacter({ ...newCharacter, alignment: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <ScrollText className="h-4 w-4 text-muted-foreground" />
+                <Textarea
+                  placeholder="Descripción"
+                  value={newCharacter.description}
+                  onChange={(e) =>
+                    setNewCharacter({ ...newCharacter, description: e.target.value })
+                  }
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <ScrollText className="h-4 w-4 text-muted-foreground" />
+                <Textarea
+                  placeholder="Historia del personaje"
+                  value={newCharacter.backstory}
+                  onChange={(e) =>
+                    setNewCharacter({ ...newCharacter, backstory: e.target.value })
+                  }
+                />
+              </div>
+              <Button onClick={handleCreate} className="w-full">
+                Crear personaje
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-	const handleDeleteCharacter = async (id: string) => {
-		try {
-			await deleteCharacter(id);
-			toast({
-				title: "Éxito",
-				description: "Personaje eliminado correctamente",
-			});
-		} catch (error) {
-			toast({
-				title: "Error",
-				description: "No se pudo eliminar el personaje",
-				variant: "destructive",
-			});
-		}
-	};
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center justify-between">
-					<span>Personajes</span>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleStartCreate}
-						disabled={isCreating}
-					>
-						Agregar personaje
-					</Button>
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="grid gap-4">
-				{isCreating && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -10 }}
-						className="grid gap-4"
-					>
-						<div className="flex items-center gap-2">
-							<div className="flex items-center gap-2 flex-1 min-w-0">
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button
-											variant="outline"
-											size="icon"
-											className="h-8 w-8"
-											disabled={isLoading}
-										>
-											<span className="text-lg">{emoji}</span>
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent className="w-full p-0" align="start">
-										<EmojiPicker onSelect={setEmoji} />
-									</PopoverContent>
-								</Popover>
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button
-											variant="outline"
-											size="icon"
-											className="h-8 w-8"
-											style={{ backgroundColor: color }}
-											disabled={isLoading}
-										>
-											<Smile className="h-4 w-4 text-white" />
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent className="w-full p-0" align="start">
-										<CompactPicker
-											color={color}
-											onChange={(color) => setColor(color.hex)}
-										/>
-									</PopoverContent>
-								</Popover>
-								<div className="grid gap-1 flex-1 min-w-0">
-									<Input
-										placeholder="Nombre del personaje"
-										value={name}
-										onChange={(e) => setName(e.target.value)}
-										className="h-8"
-										disabled={isLoading}
-									/>
-									<Input
-										placeholder="Descripción (opcional)"
-										value={description}
-										onChange={(e) => setDescription(e.target.value)}
-										className="h-8"
-										disabled={isLoading}
-									/>
-									<Input
-										placeholder="Atajo de teclado (opcional)"
-										value={shortcut}
-										onChange={(e) => setShortcut(e.target.value)}
-										className="h-8"
-										disabled={isLoading}
-									/>
-								</div>
-							</div>
-							<div className="flex items-center gap-1">
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={handleCreate}
-									disabled={isLoading}
-									className="h-8 w-8"
-								>
-									{isLoading ? (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									) : (
-										<CheckIcon className="h-4 w-4" />
-									)}
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={handleCancelCreate}
-									disabled={isLoading}
-									className="h-8 w-8"
-								>
-									<XIcon className="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-						<Separator />
-					</motion.div>
-				)}
-				<div className="grid gap-4">
-					{characters.map((character) => (
-						<motion.div
-							key={character.id}
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							className={cn("group relative", {
-								"opacity-50": isLoading && editingId === character.id,
-							})}
-						>
-							{editingId === character.id ? (
-								<div className="flex items-center gap-2">
-									<div className="flex items-center gap-2 flex-1 min-w-0">
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													size="icon"
-													className="h-8 w-8"
-													disabled={isLoading}
-												>
-													<span className="text-lg">{emoji}</span>
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-full p-0" align="start">
-												<EmojiPicker onSelect={setEmoji} />
-											</PopoverContent>
-										</Popover>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													size="icon"
-													className="h-8 w-8"
-													style={{ backgroundColor: color }}
-													disabled={isLoading}
-												>
-													<Smile className="h-4 w-4 text-white" />
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-full p-0" align="start">
-												<CompactPicker
-													color={color}
-													onChange={(color) => setColor(color.hex)}
-												/>
-											</PopoverContent>
-										</Popover>
-										<div className="grid gap-1 flex-1 min-w-0">
-											<Input
-												placeholder="Nombre del personaje"
-												value={name}
-												onChange={(e) => setName(e.target.value)}
-												className="h-8"
-												disabled={isLoading}
-											/>
-											<Input
-												placeholder="Descripción (opcional)"
-												value={description}
-												onChange={(e) => setDescription(e.target.value)}
-												className="h-8"
-												disabled={isLoading}
-											/>
-											<Input
-												placeholder="Atajo de teclado (opcional)"
-												value={shortcut}
-												onChange={(e) => setShortcut(e.target.value)}
-												className="h-8"
-												disabled={isLoading}
-											/>
-										</div>
-									</div>
-									<div className="flex items-center gap-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => handleUpdate(character.id)}
-											disabled={isLoading}
-											className="h-8 w-8"
-										>
-											{isLoading ? (
-												<Loader2 className="h-4 w-4 animate-spin" />
-											) : (
-												<CheckIcon className="h-4 w-4" />
-											)}
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={handleCancelEdit}
-											disabled={isLoading}
-											className="h-8 w-8"
-										>
-											<XIcon className="h-4 w-4" />
-										</Button>
-									</div>
-								</div>
-							) : (
-								<div className="flex items-center gap-2 relative">
-									<div className="flex items-center gap-2 min-w-0">
-										<div
-											className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-											style={{ backgroundColor: character.color }}
-										>
-											<span className="text-lg">{character.emoji}</span>
-										</div>
-										<div className="flex-1 min-w-0">
-											<span className="text-xs font-semibold truncate pl-1">
-												{character.name}
-											</span>
-											{character.description && (
-												<p className="text-[10px] text-muted-foreground truncate pl-1">
-													{character.description}
-												</p>
-											)}
-											{character.count > 0 && (
-												<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-													{character.count}{" "}
-													{character.count === 1 ? "imagen" : "imágenes"} •{" "}
-													{character.size}
-												</p>
-											)}
-										</div>
-									</div>
-									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => handleStartEdit(character)}
-											className="h-6 w-6"
-										>
-											<PencilIcon className="h-3 w-3" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => handleDeleteCharacter(character.id)}
-											className="h-6 w-6 text-red-500 hover:text-red-500/90"
-										>
-											<Trash2 className="h-3 w-3" />
-										</Button>
-									</div>
-								</div>
-							)}
-						</motion.div>
-					))}
-				</div>
-			</CardContent>
-		</Card>
-	);
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Personajes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center gap-2 p-4 text-muted-foreground">
+                <AlertCircle className="h-6 w-6" />
+                <p>Error al cargar los personajes</p>
+                <Button variant="outline" onClick={() => loadCharacters()}>
+                  Reintentar
+                </Button>
+              </div>
+            ) : characters.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 p-4 text-muted-foreground">
+                <Users className="h-6 w-6" />
+                <p>No hay personajes creados</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {characters.map((character) => (
+                  <motion.div
+                    key={character.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {editingId === character.id ? (
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="space-y-4">
+                            <div className="flex gap-4">
+                              <Input
+                                placeholder="Nombre del personaje"
+                                value={editForm?.name}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm!,
+                                    name: e.target.value,
+                                  })
+                                }
+                              />
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" className="w-[60px]">
+                                    {editForm?.emoji || (
+                                      <Smile className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-full p-0"
+                                  align="start"
+                                >
+                                  <EmojiPicker
+                                    onEmojiClick={handleEditEmojiSelect}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-[60px]"
+                                    style={{
+                                      backgroundColor: editForm?.color,
+                                    }}
+                                  />
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-full p-0"
+                                  align="start"
+                                >
+                                  <CompactPicker
+                                    color={editForm?.color}
+                                    onChange={(color) =>
+                                      setEditForm({
+                                        ...editForm!,
+                                        color: color.hex,
+                                      })
+                                    }
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center gap-2">
+                                <Crown className="h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Nivel"
+                                  type="number"
+                                  value={editForm?.level}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm!,
+                                      level: parseInt(e.target.value) || 1,
+                                    })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Swords className="h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Clase"
+                                  value={editForm?.class}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm!,
+                                      class: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Raza"
+                                  value={editForm?.race}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm!,
+                                      race: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Heart className="h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Alineamiento"
+                                  value={editForm?.alignment}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm!,
+                                      alignment: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ScrollText className="h-4 w-4 text-muted-foreground" />
+                              <Textarea
+                                placeholder="Descripción"
+                                value={editForm?.description}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm!,
+                                    description: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ScrollText className="h-4 w-4 text-muted-foreground" />
+                              <Textarea
+                                placeholder="Historia del personaje"
+                                value={editForm?.backstory}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm!,
+                                    backstory: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => handleSaveEdit(character.id)}
+                                size="icon"
+                              >
+                                <CheckIcon className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={handleCancelEdit}
+                                variant="outline"
+                                size="icon"
+                              >
+                                <XIcon className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <span
+                                className="flex h-8 w-8 items-center justify-center rounded"
+                                style={{ backgroundColor: character.color }}
+                              >
+                                {character.emoji}
+                              </span>
+                              <div>
+                                <h3 className="font-medium">{character.name}</h3>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Users className="h-3 w-3" />
+                                  <span>{character.race}</span>
+                                  <Crown className="h-3 w-3 ml-2" />
+                                  <span>Nivel {character.level}</span>
+                                  <Swords className="h-3 w-3 ml-2" />
+                                  <span>{character.class}</span>
+                                  {character.alignment && (
+                                    <>
+                                      <Heart className="h-3 w-3 ml-2" />
+                                      <span>{character.alignment}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => handleStartEdit(character)}
+                                variant="ghost"
+                                size="icon"
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDelete(character.id)}
+                                variant="ghost"
+                                size="icon"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          {character.description && (
+                            <>
+                              <Separator className="my-4" />
+                              <p className="text-sm text-muted-foreground">
+                                {character.description}
+                              </p>
+                            </>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }

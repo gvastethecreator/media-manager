@@ -6,101 +6,144 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
 	Trash2,
-	Box,
 	PencilIcon,
 	CheckIcon,
 	XIcon,
 	Loader2,
+	Target,
+	Sparkles,
+	Gem,
+	ScrollText,
+	Swords,
+	Shield,
+	Crown,
+	Scroll,
 } from "lucide-react";
 import { useObjectsStore } from "@/store/objects";
-import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { CardContent } from "@/components/ui/card";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { cn, formatBytes } from "@/lib/utils";
+import { CompactPicker } from "react-color";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import type { ObjectCreate, ObjectUpdate } from "@/services/object.service";
+import type {
+	ObjectCreate,
+	ObjectUpdate,
+	ObjectWithStats,
+} from "@/services/object.service";
+import type { EmojiClickData } from "@/types/emoji";
 
-const objectsLogger = logger.withContext("ObjectsSection");
+const objectLogger = logger.withContext("ObjectsSection");
+
+interface EditForm extends ObjectUpdate {
+	id: string;
+}
 
 export function ObjectsSection() {
 	const {
 		objects,
 		isLoading,
+		error,
 		createObject,
 		updateObject,
 		deleteObject,
 		loadObjects,
 	} = useObjectsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const [editForm, setEditForm] = React.useState<ObjectUpdate | null>(null);
+	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
 	const [newObject, setNewObject] = React.useState<ObjectCreate>({
 		name: "",
+		emoji: "🎯",
 		description: "",
+		color: "#3b82f6",
+		type: "",
+		rarity: "",
+		properties: "[]",
+		requirements: "{}",
+		origin: "",
+		stats: "{}",
 	});
 	const { toast } = useToast();
 
-	// Cargar objetos al montar el componente
 	React.useEffect(() => {
 		loadObjects();
 	}, [loadObjects]);
 
-	const handleStartEdit = (object: (typeof objects)[0]) => {
+	const handleStartEdit = (object: ObjectWithStats) => {
 		setEditingId(object.id);
 		setEditForm({
 			id: object.id,
 			name: object.name,
+			emoji: object.emoji,
 			description: object.description || "",
+			color: object.color,
+			type: object.type,
+			rarity: object.rarity,
+			properties: object.properties,
+			requirements: object.requirements,
+			origin: object.origin,
+			stats: object.stats,
 		});
 	};
 
-	const handleCancelEdit = () => {
-		setEditingId(null);
-		setEditForm(null);
-	};
-
-	const handleSaveEdit = async (id: string) => {
+	const handleSubmitEdit = async (e: React.FormEvent) => {
+		e.preventDefault();
 		if (!editForm) return;
+
 		try {
-			objectsLogger.info("💾 Guardando cambios en objeto:", {
-				id,
-				data: editForm,
-			});
-			await updateObject(id, editForm);
-			handleCancelEdit();
+			objectLogger.info("📝 Actualizando objeto...", editForm);
+			const { id, ...data } = editForm;
+			await updateObject(id, data);
+			setEditingId(null);
+			setEditForm(null);
 			toast({
-				title: "Éxito",
-				description: "Objeto actualizado correctamente",
+				title: "✅ Objeto actualizado",
+				description: "El objeto se ha actualizado correctamente.",
 			});
 		} catch (error) {
-			objectsLogger.error("❌ Error al actualizar objeto:", error);
+			objectLogger.error("❌ Error al actualizar objeto:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo actualizar el objeto",
+				title: "❌ Error al actualizar objeto",
+				description: "No se pudo actualizar el objeto.",
 				variant: "destructive",
 			});
 		}
 	};
 
-	const handleAddObject = async () => {
-		if (!newObject.name) return;
+	const handleSubmitCreate = async (e: React.FormEvent) => {
+		e.preventDefault();
 
 		try {
-			objectsLogger.info("➕ Creando nuevo objeto:", newObject);
+			objectLogger.info("✨ Creando objeto...", newObject);
 			await createObject(newObject);
 			setNewObject({
 				name: "",
+				emoji: "🎯",
 				description: "",
+				color: "#3b82f6",
+				type: "",
+				rarity: "",
+				properties: "[]",
+				requirements: "{}",
+				origin: "",
+				stats: "{}",
 			});
 			toast({
-				title: "Éxito",
-				description: "Objeto creado correctamente",
+				title: "✅ Objeto creado",
+				description: "El objeto se ha creado correctamente.",
 			});
 		} catch (error) {
-			objectsLogger.error("❌ Error al crear objeto:", error);
+			objectLogger.error("❌ Error al crear objeto:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo crear el objeto",
+				title: "❌ Error al crear objeto",
+				description: "No se pudo crear el objeto.",
 				variant: "destructive",
 			});
 		}
@@ -108,209 +151,420 @@ export function ObjectsSection() {
 
 	const handleDeleteObject = async (id: string) => {
 		try {
-			objectsLogger.info("🗑️ Eliminando objeto:", id);
+			objectLogger.info("🗑️ Eliminando objeto...", id);
 			await deleteObject(id);
 			toast({
-				title: "Éxito",
-				description: "Objeto eliminado correctamente",
+				title: "✅ Objeto eliminado",
+				description: "El objeto se ha eliminado correctamente.",
 			});
 		} catch (error) {
-			objectsLogger.error("❌ Error al eliminar objeto:", error);
+			objectLogger.error("❌ Error al eliminar objeto:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar el objeto",
+				title: "❌ Error al eliminar objeto",
+				description: "No se pudo eliminar el objeto.",
 				variant: "destructive",
 			});
 		}
 	};
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
-			<CardHeader className="p-2 pb-0 bg-transparent">
-				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-					<span className="flex items-center gap-2 h-7">
-						<Box className="h-5 w-5" /> Objetos
-					</span>
-					{objects.length > 0 && (
-						<span className="text-xs text-muted-foreground/75">
-							{objects.length} {objects.length === 1 ? "objeto" : "objetos"}
-						</span>
+		<div className="space-y-4">
+			<div className="flex items-center justify-between">
+				<h2 className="text-lg font-semibold">Objetos</h2>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => loadObjects()}
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<span>Recargar</span>
 					)}
-				</CardTitle>
-			</CardHeader>
-			<Separator className="my-0" />
-			<CardContent className="p-2">
-				<div className="space-y-3">
-					<div className="flex items-center gap-2">
-						<div className="flex-1 min-w-0 space-y-1">
+				</Button>
+			</div>
+
+			<Card>
+				<CardContent className="p-4">
+					<form onSubmit={handleSubmitCreate} className="space-y-4">
+						<div className="grid gap-2">
+							<div className="flex items-center gap-2">
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											variant="outline"
+											size="icon"
+											className="h-8 w-8"
+											style={{
+												backgroundColor: newObject.color,
+											}}
+										>
+											<span className="text-lg">{newObject.emoji}</span>
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent
+										className="w-full p-0"
+										side="right"
+										align="start"
+									>
+										<EmojiPicker
+											onEmojiSelect={(emojiData: EmojiClickData) =>
+												setNewObject((prev) => ({
+													...prev,
+													emoji: emojiData.emoji,
+												}))
+											}
+										/>
+										<Separator className="my-2" />
+										<div className="p-2">
+											<CompactPicker
+												color={newObject.color}
+												onChange={(color) =>
+													setNewObject((prev) => ({
+														...prev,
+														color: color.hex,
+													}))
+												}
+											/>
+										</div>
+									</PopoverContent>
+								</Popover>
+								<Input
+									placeholder="Nombre del objeto"
+									value={newObject.name}
+									onChange={(e) =>
+										setNewObject((prev) => ({
+											...prev,
+											name: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+							</div>
 							<Input
-								value={newObject.name}
+								placeholder="Descripción"
+								value={newObject.description}
 								onChange={(e) =>
-									setNewObject({ ...newObject, name: e.target.value })
-								}
-								className="h-8 text-base border-none p-3"
-								placeholder="Nombre del objeto"
-							/>
-							<Input
-								value={newObject.description || ""}
-								onChange={(e) =>
-									setNewObject({
-										...newObject,
+									setNewObject((prev) => ({
+										...prev,
 										description: e.target.value,
-									})
+									}))
 								}
-								className="h-6 text-xs border-none p-2"
-								placeholder="Descripción (opcional)"
+								className="h-8"
+							/>
+							<div className="grid grid-cols-2 gap-2">
+								<Input
+									placeholder="Tipo"
+									value={newObject.type}
+									onChange={(e) =>
+										setNewObject((prev) => ({
+											...prev,
+											type: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+								<Input
+									placeholder="Rareza"
+									value={newObject.rarity}
+									onChange={(e) =>
+										setNewObject((prev) => ({
+											...prev,
+											rarity: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+							</div>
+							<div className="grid grid-cols-2 gap-2">
+								<Input
+									placeholder="Propiedades (JSON)"
+									value={newObject.properties}
+									onChange={(e) =>
+										setNewObject((prev) => ({
+											...prev,
+											properties: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+								<Input
+									placeholder="Requisitos (JSON)"
+									value={newObject.requirements}
+									onChange={(e) =>
+										setNewObject((prev) => ({
+											...prev,
+											requirements: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+							</div>
+							<Input
+								placeholder="Origen"
+								value={newObject.origin}
+								onChange={(e) =>
+									setNewObject((prev) => ({
+										...prev,
+										origin: e.target.value,
+									}))
+								}
+								className="h-8"
 							/>
 						</div>
-						<Button
-							size="sm"
-							className="h-8 text-xs px-3"
-							onClick={handleAddObject}
-							disabled={!newObject.name.trim()}
+						<div className="flex items-center justify-end">
+							<Button type="submit" size="sm" disabled={isLoading}>
+								{isLoading ? (
+									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+								) : null}
+								Crear objeto
+							</Button>
+						</div>
+					</form>
+				</CardContent>
+			</Card>
+
+			<div className="grid gap-4">
+				{error && (
+					<div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">
+						{error.message}
+					</div>
+				)}
+				{objects.length === 0 && !isLoading ? (
+					<div className="text-sm text-muted-foreground text-center py-4">
+						No hay objetos creados
+					</div>
+				) : (
+					objects.map((object) => (
+						<motion.div
+							key={object.id}
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.3 }}
 						>
-							Crear
-						</Button>
-					</div>
-
-					<Separator className="my-0" />
-
-					<div className="grid grid-cols-2 gap-2">
-						{isLoading ? (
-							<div className="col-span-2 py-8 text-center">
-								<Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">
-									Cargando objetos...
-								</p>
-							</div>
-						) : objects && objects.length > 0 ? (
-							objects.map((object, index) => (
-								<motion.div
-									key={object.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
-									className={cn(
-										"bg-muted/30 group rounded-sm relative",
-										editingId === object.id && "ring-1 ring-primary"
-									)}
-								>
-									<CardContent className="p-2">
-										{editingId === object.id ? (
-											<div className="space-y-2">
-												<div className="flex items-center gap-2">
-													<div className="flex-1 min-w-0 space-y-1">
-														<Input
-															value={editForm?.name}
-															onChange={(e) =>
-																setEditForm((prev) =>
-																	prev
-																		? { ...prev, name: e.target.value }
-																		: null
-																)
-															}
-															className="h-8 text-base border-none p-3"
-															placeholder="Nombre del objeto"
-														/>
-														<Input
-															value={editForm?.description || ""}
-															onChange={(e) =>
-																setEditForm((prev) =>
-																	prev
-																		? {
-																				...prev,
-																				description: e.target.value,
-																		  }
-																		: null
-																)
-															}
-															className="h-6 text-xs border-none p-2"
-															placeholder="Descripción (opcional)"
-														/>
-													</div>
+							<Card className="group relative overflow-hidden">
+								<CardContent className="p-4">
+									{!editingId && (
+										<div className="flex items-center gap-2 relative">
+											<div className="flex items-center gap-2 min-w-0">
+												<div
+													className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+													style={{ backgroundColor: object.color }}
+												>
+													<span className="text-lg">{object.emoji}</span>
 												</div>
-												<div className="flex justify-end gap-1">
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={handleCancelEdit}
-														className="h-7 text-xs text-destructive hover:text-destructive/90"
-													>
-														<XIcon className="h-3.5 w-3.5 mr-1" />
-														Cancelar
-													</Button>
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => handleSaveEdit(object.id)}
-														className="h-7 text-xs text-green-500 hover:text-green-600"
-													>
-														<CheckIcon className="h-3.5 w-3.5 mr-1" />
-														Guardar
-													</Button>
-												</div>
-											</div>
-										) : (
-											<div className="flex items-center gap-2 relative">
-												<div className="flex items-center gap-2 min-w-0">
-													<div className="flex-1 min-w-0">
-														<span className="text-xs font-semibold truncate pl-1">
-															{object.name}
+												<div className="flex-1 min-w-0">
+													<span className="text-xs font-semibold truncate pl-1">
+														{object.name}
+													</span>
+													{object.description && (
+														<p className="text-[10px] text-muted-foreground truncate pl-1">
+															{object.description}
+														</p>
+													)}
+													<div className="flex items-center gap-2 text-[10px] text-muted-foreground/75 truncate pl-1">
+														<span className="flex items-center gap-1">
+															<Target className="h-3 w-3" />{" "}
+															{object.type || "Sin tipo"}
 														</span>
-														{object.description && (
-															<p className="text-[10px] text-muted-foreground truncate pl-1">
-																{object.description}
-															</p>
-														)}
-														{object.count > 0 && (
-															<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-																{object.count}{" "}
-																{object.count === 1 ? "imagen" : "imágenes"}
-															</p>
-														)}
+														<span className="flex items-center gap-1">
+															<Sparkles className="h-3 w-3" />{" "}
+															{object.rarity || "Sin rareza"}
+														</span>
+														<span className="flex items-center gap-1">
+															<Scroll className="h-3 w-3" />{" "}
+															{object.origin || "Sin origen"}
+														</span>
 													</div>
-												</div>
-												<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleStartEdit(object)}
-														className="h-6 w-6"
-													>
-														<PencilIcon className="h-3 w-3" />
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleDeleteObject(object.id)}
-														className="h-6 w-6 text-red-500 hover:text-red-500/90"
-													>
-														<Trash2 className="h-3 w-3" />
-													</Button>
+													{object._count?.images > 0 && (
+														<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
+															{object._count.images}{" "}
+															{object._count.images === 1
+																? "imagen"
+																: "imágenes"}{" "}
+															• {formatBytes(object.totalSize)}
+														</p>
+													)}
 												</div>
 											</div>
-										)}
-									</CardContent>
-								</motion.div>
-							))
-						) : (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="py-4 text-center col-span-2"
-							>
-								<Box className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">
-									No hay objetos creados
-								</p>
-								<p className="text-[10px] mt-1 text-muted-foreground/75">
-									Crea un objeto para organizar tus imágenes
-								</p>
-							</motion.div>
-						)}
-					</div>
-				</div>
-			</CardContent>
-		</Card>
+											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleStartEdit(object)}
+													className="h-6 w-6"
+												>
+													<PencilIcon className="h-3 w-3" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleDeleteObject(object.id)}
+													className="h-6 w-6 text-red-500 hover:text-red-500/90"
+												>
+													<Trash2 className="h-3 w-3" />
+												</Button>
+											</div>
+										</div>
+									)}
+									{editingId === object.id && (
+										<form onSubmit={handleSubmitEdit} className="space-y-4">
+											<div className="grid gap-2">
+												<div className="flex items-center gap-2">
+													<Popover>
+														<PopoverTrigger asChild>
+															<Button
+																variant="outline"
+																size="icon"
+																className="h-8 w-8"
+																style={{
+																	backgroundColor: editForm?.color,
+																}}
+															>
+																<span className="text-lg">
+																	{editForm?.emoji}
+																</span>
+															</Button>
+														</PopoverTrigger>
+														<PopoverContent
+															className="w-full p-0"
+															side="right"
+															align="start"
+														>
+															<EmojiPicker
+																onEmojiSelect={(emojiData: EmojiClickData) =>
+																	setEditForm((prev) => ({
+																		...prev!,
+																		emoji: emojiData.emoji,
+																	}))
+																}
+															/>
+															<Separator className="my-2" />
+															<div className="p-2">
+																<CompactPicker
+																	color={editForm?.color}
+																	onChange={(color) =>
+																		setEditForm((prev) => ({
+																			...prev!,
+																			color: color.hex,
+																		}))
+																	}
+																/>
+															</div>
+														</PopoverContent>
+													</Popover>
+													<Input
+														placeholder="Nombre del objeto"
+														value={editForm?.name}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																name: e.target.value,
+															}))
+														}
+														className="h-8"
+													/>
+												</div>
+												<Input
+													placeholder="Descripción"
+													value={editForm?.description}
+													onChange={(e) =>
+														setEditForm((prev) => ({
+															...prev!,
+															description: e.target.value,
+														}))
+													}
+													className="h-8"
+												/>
+												<div className="grid grid-cols-2 gap-2">
+													<Input
+														placeholder="Tipo"
+														value={editForm?.type}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																type: e.target.value,
+															}))
+														}
+														className="h-8"
+													/>
+													<Input
+														placeholder="Rareza"
+														value={editForm?.rarity}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																rarity: e.target.value,
+															}))
+														}
+														className="h-8"
+													/>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													<Input
+														placeholder="Propiedades (JSON)"
+														value={editForm?.properties}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																properties: e.target.value,
+															}))
+														}
+														className="h-8"
+													/>
+													<Input
+														placeholder="Requisitos (JSON)"
+														value={editForm?.requirements}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																requirements: e.target.value,
+															}))
+														}
+														className="h-8"
+													/>
+												</div>
+												<Input
+													placeholder="Origen"
+													value={editForm?.origin}
+													onChange={(e) =>
+														setEditForm((prev) => ({
+															...prev!,
+															origin: e.target.value,
+														}))
+													}
+													className="h-8"
+												/>
+											</div>
+											<div className="flex items-center justify-end gap-2">
+												<Button
+													type="button"
+													variant="ghost"
+													size="sm"
+													onClick={() => {
+														setEditingId(null);
+														setEditForm(null);
+													}}
+												>
+													<XIcon className="h-4 w-4" />
+												</Button>
+												<Button type="submit" size="sm" disabled={isLoading}>
+													{isLoading ? (
+														<Loader2 className="h-4 w-4 animate-spin mr-2" />
+													) : (
+														<CheckIcon className="h-4 w-4" />
+													)}
+												</Button>
+											</div>
+										</form>
+									)}
+								</CardContent>
+							</Card>
+						</motion.div>
+					))
+				)}
+			</div>
+		</div>
 	);
 }

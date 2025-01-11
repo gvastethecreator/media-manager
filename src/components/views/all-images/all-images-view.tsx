@@ -12,12 +12,8 @@ import BlurFade from "@/components/ui/blur-fade";
 import { useFiles } from "@/context/file-context";
 
 export function AllImagesView() {
-	const {
-		currentItems: items,
-		handleSelectItem,
-		handleToggleFavorite,
-		isLoading,
-	} = useFiles();
+	const { currentItems: items, handleSelectItem, isLoading } = useFiles();
+	const { openViewer } = useImageViewer();
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {

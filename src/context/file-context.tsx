@@ -5,7 +5,10 @@ import { useFileManager } from "@/store/file-manager";
 import type { FileItem } from "@/types/file-item";
 import { statsService } from "@/services/stats.service";
 import { ActivityService } from "@/services/activity.service";
-import type { CacheInvalidationEvent } from "@/services/events.service";
+import {
+	eventsService,
+	type CacheInvalidationEvent,
+} from "@/services/events.service";
 
 interface FileContextType {
 	currentItems: FileItem[];
@@ -23,7 +26,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 		currentItems,
 		selectedItems,
 		isLoading,
-		handleSelectItem: baseHandleSelectItem,
+		selectItem: baseHandleSelectItem,
 		toggleItemSelection: baseToggleItemSelection,
 		clearSelection,
 	} = useFileManager();
@@ -40,13 +43,13 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 			});
 
 			// Incrementar estadísticas
-			await statsService.incrementView(item.id);
+			await statsService.incrementViewCount(item.id);
 		},
 		[baseHandleSelectItem]
 	);
 
 	const toggleItemSelection = useCallback(
-		(item: FileItem, multiSelect?: boolean) => {
+		(item: FileItem, multiSelect: boolean = false) => {
 			baseToggleItemSelection(item, multiSelect);
 
 			// Emitir evento de actualización si es necesario
@@ -59,10 +62,18 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 			if (item.isFavorite) events.push("favorites:modified");
 
 			if (events.length > 0) {
-				statsService.emitUpdateNeeded(events);
+				events.forEach((event) => eventsService.emit(event));
 			}
 		},
 		[baseToggleItemSelection]
+	);
+
+	const handleToggleSelection = useCallback(
+		(item: FileItem, isMultiSelect: boolean) => {
+			toggleItemSelection(item, isMultiSelect);
+			eventsService.emit("files:modified");
+		},
+		[toggleItemSelection]
 	);
 
 	const value = {

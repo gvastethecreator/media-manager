@@ -1,18 +1,15 @@
-import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useInView } from "react-intersection-observer";
-import { motion } from "motion/react";
 
-interface ImageCardProps {
+export interface ImageCardProps {
 	src: string;
 	alt: string;
 	width?: number;
 	height?: number;
-	priority?: boolean;
 	className?: string;
+	priority?: boolean;
 	onClick?: () => void;
+	onLoadingComplete?: () => void;
 }
 
 export function ImageCard({
@@ -20,63 +17,24 @@ export function ImageCard({
 	alt,
 	width = 300,
 	height = 300,
-	priority = false,
 	className,
+	priority = false,
 	onClick,
+	onLoadingComplete,
 }: ImageCardProps) {
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const { ref, inView } = useInView({
-		triggerOnce: true,
-		rootMargin: "50px 0px",
-	});
-
-	const handleError = () => {
-		setError("Error al cargar la imagen");
-		setIsLoading(false);
-	};
-
 	return (
-		<div
-			ref={ref}
-			className={cn("relative overflow-hidden rounded-lg bg-muted", className)}
-			style={{ aspectRatio: width / height }}
-		>
-			{error ? (
-				<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-					{error}
-				</div>
-			) : (
-				<>
-					{isLoading && (
-						<motion.div
-							animate={{ opacity: [1, 0] }}
-							className="absolute inset-0"
-						>
-							<Skeleton className="h-full w-full" />
-						</motion.div>
-					)}
-
-					{(inView || priority) && (
-						<Image
-							src={src}
-							alt={alt}
-							width={width}
-							height={height}
-							className={cn(
-								"object-cover transition-opacity duration-300",
-								isLoading ? "opacity-0" : "opacity-100"
-							)}
-							onClick={onClick}
-							priority={priority}
-							quality={80}
-							onLoad={() => setIsLoading(false)}
-							onError={handleError}
-							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-						/>
-					)}
-				</>
+		<Image
+			src={src}
+			alt={alt}
+			width={width}
+			height={height}
+			className={cn(
+				"object-cover transition-all duration-300 hover:scale-105",
+				className
 			)}
-		</div>
+			priority={priority}
+			onClick={onClick}
+			onLoadingComplete={onLoadingComplete}
+		/>
 	);
 }
