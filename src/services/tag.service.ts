@@ -1,5 +1,8 @@
 import type { Tag as PrismaTag } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
+import { logger } from "@/lib/logger";
+
+const tagLogger = logger.withContext("TagService");
 
 export interface Tag extends PrismaTag {
   count: number
@@ -26,7 +29,7 @@ export interface TagWithImages extends Tag {
   images: FileItem[]
 }
 
-export const tagService = {
+class TagService {
   async getTags(): Promise<TagWithStats[]> {
     try {
       const response = await fetch('/api/tags')
@@ -38,7 +41,7 @@ export const tagService = {
       console.error('Error fetching tags:', error)
       throw error
     }
-  },
+  }
 
   async getTag(id: string): Promise<TagWithStats | null> {
     try {
@@ -52,7 +55,7 @@ export const tagService = {
       console.error('Error fetching tag:', error)
       throw error
     }
-  },
+  }
 
   async createTag(data: TagCreate): Promise<Tag> {
     try {
@@ -74,7 +77,7 @@ export const tagService = {
       console.error('Error creating tag:', error)
       throw error
     }
-  },
+  }
 
   async updateTag(id: string, data: TagUpdate): Promise<Tag> {
     try {
@@ -96,7 +99,7 @@ export const tagService = {
       console.error('Error updating tag:', error)
       throw error
     }
-  },
+  }
 
   async deleteTag(id: string): Promise<void> {
     try {
@@ -112,23 +115,37 @@ export const tagService = {
       console.error('Error deleting tag:', error)
       throw error
     }
-  },
+  }
 
-  async addImageToTag(tagId: string, imageId: string): Promise<void> {
+  async addImageToTag(tagId: string, fileId: string) {
     try {
-      const response = await fetch(`/api/tags/${tagId}/images/${imageId}`, {
-        method: 'POST',
-      })
+      const response = await fetch(`/api/tags/${tagId}/files`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fileId }),
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to add image to tag')
+        throw new Error("Error al agregar imagen a la etiqueta");
       }
+
+      const data = await response.json();
+      tagLogger.info("✨ Imagen agregada a la etiqueta:", {
+        tagId,
+        fileId,
+      });
+      return data;
     } catch (error) {
-      console.error('Error adding image to tag:', error)
-      throw error
+      tagLogger.error("❌ Error al agregar imagen a la etiqueta:", {
+        error,
+        tagId,
+        fileId,
+      });
+      throw error;
     }
-  },
+  }
 
   async removeImageFromTag(tagId: string, imageId: string): Promise<void> {
     try {
@@ -144,7 +161,7 @@ export const tagService = {
       console.error('Error removing image from tag:', error)
       throw error
     }
-  },
+  }
 
   async getTagImages(tagId: string): Promise<FileItem[]> {
     try {
@@ -159,3 +176,6 @@ export const tagService = {
     }
   }
 }
+
+export const tagService = new TagService();
+export const { addImageToTag } = tagService;

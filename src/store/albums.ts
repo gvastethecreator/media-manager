@@ -11,6 +11,7 @@ interface AlbumsState {
   createAlbum: (data: AlbumCreate) => Promise<void>;
   updateAlbum: (id: string, data: AlbumUpdate) => Promise<void>;
   deleteAlbum: (id: string) => Promise<void>;
+  addImageToAlbum: (albumId: string, imageId: string) => Promise<void>;
 }
 
 export const useAlbumsStore = create<AlbumsState>((set, get) => ({
@@ -61,6 +62,17 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
       await get().loadAlbums();
     } catch (error) {
       albumLogger.error("❌ Error al eliminar álbum:", error);
+      throw error;
+    }
+  },
+
+  addImageToAlbum: async (albumId, imageId) => {
+    try {
+      albumLogger.info("➕ Agregando imagen a álbum:", { albumId, imageId });
+      await albumService.addImageToAlbum(albumId, imageId);
+      await get().loadAlbums();
+    } catch (error) {
+      albumLogger.error("❌ Error al agregar imagen a álbum:", error);
       throw error;
     }
   },

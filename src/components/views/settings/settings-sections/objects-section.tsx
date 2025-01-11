@@ -209,10 +209,10 @@ export function ObjectsSection() {
 										align="start"
 									>
 										<EmojiPicker
-											onEmojiSelect={(emojiData: EmojiClickData) =>
+											onEmojiSelect={(emoji: string) =>
 												setNewObject((prev) => ({
 													...prev,
-													emoji: emojiData.emoji,
+													emoji: emoji,
 												}))
 											}
 										/>
@@ -433,10 +433,10 @@ export function ObjectsSection() {
 															align="start"
 														>
 															<EmojiPicker
-																onEmojiSelect={(emojiData: EmojiClickData) =>
+																onEmojiSelect={(emoji: string) =>
 																	setEditForm((prev) => ({
 																		...prev!,
-																		emoji: emojiData.emoji,
+																		emoji: emoji,
 																	}))
 																}
 															/>

@@ -22,20 +22,8 @@ export interface ObjectCreate {
   filters?: string
 }
 
-export interface ObjectUpdate {
-  name?: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  type?: string
-  rarity?: string
-  properties?: string
-  requirements?: string
-  origin?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
+export interface ObjectUpdate extends Partial<ObjectCreate> {
+  id: string
 }
 
 export interface ObjectWithStats extends PrismaObject {
@@ -58,30 +46,18 @@ class ObjectService {
         orderBy: {
           createdAt: 'desc'
         }
-      }).catch((error) => {
-        objectLogger.error('❌ Error en prisma.object.findMany:', error)
-        throw error
       })
 
-      objectLogger.info('📊 Calculando estadísticas para', objects.length, 'objetos')
       const objectsWithStats = await Promise.all(
         objects.map(async (object) => {
-          try {
-            const totalSize = await prisma.image.aggregate({
-              where: { objects: { some: { id: object.id } } },
-              _sum: { size: true }
-            })
+          const totalSize = await prisma.image.aggregate({
+            where: { objects: { some: { id: object.id } } },
+            _sum: { size: true }
+          })
 
-            return {
-              ...object,
-              totalSize: totalSize._sum?.size || 0
-            }
-          } catch (error) {
-            objectLogger.error('❌ Error al calcular estadísticas del objeto:', { objectId: object.id, error: error instanceof Error ? error.message : 'Error desconocido' })
-            return {
-              ...object,
-              totalSize: 0
-            }
+          return {
+            ...object,
+            totalSize: totalSize._sum?.size || 0
           }
         })
       )
@@ -89,8 +65,8 @@ class ObjectService {
       objectLogger.info('✅ Objetos obtenidos correctamente:', { count: objects.length })
       return objectsWithStats
     } catch (error) {
-      objectLogger.error('❌ Error al obtener objetos:', error instanceof Error ? { message: error.message, stack: error.stack } : error)
-      throw new Error('Error al obtener los objetos: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al obtener objetos:', error)
+      throw error
     }
   }
 
@@ -117,8 +93,8 @@ class ObjectService {
         totalSize: totalSize._sum?.size || 0
       }
     } catch (error) {
-      objectLogger.error('❌ Error al obtener objeto:', { id, error })
-      throw new Error('Error al obtener el objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al obtener objeto:', error)
+      throw error
     }
   }
 
@@ -147,17 +123,18 @@ class ObjectService {
         }
       })
 
-      objectLogger.info('✨ Objeto creado:', { object })
-      const eventData: EventData = { type: 'create', id: object.id }
-      eventsService.emit('objects:modified', eventData)
-
-      return {
+      const objectWithStats = {
         ...object,
         totalSize: 0
       }
+
+      objectLogger.info('✨ Objeto creado:', object)
+      const eventData: EventData = { type: 'create', id: object.id }
+      eventsService.emit('objects:modified', eventData)
+      return objectWithStats
     } catch (error) {
-      objectLogger.error('❌ Error al crear objeto:', { data, error })
-      throw new Error('Error al crear el objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al crear objeto:', error)
+      throw error
     }
   }
 
@@ -188,8 +165,8 @@ class ObjectService {
       eventsService.emit('objects:modified', eventData)
       return objectWithStats
     } catch (error) {
-      objectLogger.error('❌ Error al actualizar objeto:', { id, data, error })
-      throw new Error('Error al actualizar el objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al actualizar objeto:', error)
+      throw error
     }
   }
 
@@ -198,50 +175,59 @@ class ObjectService {
       await prisma.object.delete({
         where: { id }
       })
-      objectLogger.info('🗑️ Objeto eliminado:', { id })
+      objectLogger.info('🗑️ Objeto eliminado:', id)
       const eventData: EventData = { type: 'delete', id }
       eventsService.emit('objects:modified', eventData)
     } catch (error) {
-      objectLogger.error('❌ Error al eliminar objeto:', { id, error })
-      throw new Error('Error al eliminar el objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al eliminar objeto:', error)
+      throw error
     }
   }
 
-  async addImageToObject(objectId: string, imageId: string): Promise<void> {
+  async addImageToObject(objectId: string, fileId: string) {
     try {
       await prisma.object.update({
         where: { id: objectId },
         data: {
           images: {
-            connect: { id: imageId }
+            connect: { id: fileId }
           }
         }
       })
-      objectLogger.info('📸 Imagen agregada a objeto:', { objectId, imageId })
-      const eventData: EventData = { type: 'addImage', objectId, imageId }
+
+      objectLogger.info('✨ Imagen agregada al objeto:', {
+        objectId,
+        fileId,
+      })
+
+      const eventData: EventData = { type: 'addImage', objectId, imageId: fileId }
       eventsService.emit('objects:modified', eventData)
     } catch (error) {
-      objectLogger.error('❌ Error al agregar imagen a objeto:', { objectId, imageId, error })
-      throw new Error('Error al agregar imagen al objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al agregar imagen al objeto:', {
+        error,
+        objectId,
+        fileId,
+      })
+      throw error
     }
   }
 
-  async removeImageFromObject(objectId: string, imageId: string): Promise<void> {
+  async removeImageFromObject(objectId: string, fileId: string): Promise<void> {
     try {
       await prisma.object.update({
         where: { id: objectId },
         data: {
           images: {
-            disconnect: { id: imageId }
+            disconnect: { id: fileId }
           }
         }
       })
-      objectLogger.info('🗑️ Imagen eliminada de objeto:', { objectId, imageId })
-      const eventData: EventData = { type: 'removeImage', objectId, imageId }
+      objectLogger.info('🗑️ Imagen eliminada del objeto:', { objectId, fileId })
+      const eventData: EventData = { type: 'removeImage', objectId, imageId: fileId }
       eventsService.emit('objects:modified', eventData)
     } catch (error) {
-      objectLogger.error('❌ Error al eliminar imagen de objeto:', { objectId, imageId, error })
-      throw new Error('Error al eliminar imagen del objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al eliminar imagen del objeto:', error)
+      throw error
     }
   }
 
@@ -266,6 +252,14 @@ class ObjectService {
             select: {
               id: true,
               name: true,
+              color: true
+            }
+          },
+          albums: {
+            select: {
+              id: true,
+              name: true,
+              emoji: true,
               color: true
             }
           },
@@ -294,10 +288,10 @@ class ObjectService {
             }
           }
         }
-      });
+      })
 
       return images.map(image => {
-        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined;
+        const metadata = image.metadata ? JSON.parse(image.metadata as string) : undefined
         return {
           id: image.id,
           name: image.name,
@@ -318,16 +312,18 @@ class ObjectService {
           updatedAt: image.updatedAt.toISOString(),
           collections: image.collections,
           tags: image.tags,
+          albums: image.albums,
           characters: image.characters,
           places: image.places,
           objects: image.objects
-        };
-      });
+        }
+      })
     } catch (error) {
-      objectLogger.error("❌ Error al obtener imágenes del objeto:", { error });
-      throw new Error('Error al obtener imágenes del objeto: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      objectLogger.error('❌ Error al obtener imágenes del objeto:', error)
+      throw error
     }
   }
 }
 
-export const objectService = new ObjectService();
+export const objectService = new ObjectService()
+export const { addImageToObject } = objectService

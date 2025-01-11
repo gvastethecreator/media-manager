@@ -52,197 +52,196 @@ Se han integrado las siguientes entidades en el panel de navegación:
 - Lugares (Places)
 - Objetos (Objects)
 
-Cambios realizados:
+#### 11/01/2024 - Integración de Nuevas Entidades en el Menú Contextual
 
-1. Actualización del store de gestión de archivos (FileManager)
+Se ha completado la integración de las nuevas entidades en el menú contextual de archivos:
 
-   - Nuevos estados para las entidades
-   - Nuevas acciones de navegación
-   - Actualización de la inicialización
+1. Álbumes
 
-2. Actualización del panel de navegación
+   - Creación de nuevos álbumes con emoji y color
+   - Asignación de imágenes a álbumes existentes
+   - Integración con el servicio y store correspondiente
 
-   - Nuevas categorías con iconos y colores
-   - Contadores de elementos
-   - Navegación entre vistas
+2. Personajes
 
-3. Preparación de componentes de vista
-   - Estructura base para las nuevas vistas
-   - Integración en el contenedor de vistas
-   - Animaciones de transición
+   - Creación de nuevos personajes con emoji y color
+   - Asignación de imágenes a personajes existentes
+   - Integración con el servicio y store correspondiente
 
-Próximos pasos:
+3. Lugares
 
-- Implementar la lógica de las nuevas vistas
-- Crear los servicios de API correspondientes
-- Agregar funcionalidad de gestión para cada entidad
+   - Creación de nuevos lugares con emoji y color
+   - Asignación de imágenes a lugares existentes
+   - Integración con el servicio y store correspondiente
 
-#### 12/01/2024 - Implementación de Secciones de Personajes, Lugares y Objetos
+4. Objetos
+   - Creación de nuevos objetos con emoji y color
+   - Asignación de imágenes a objetos existentes
+   - Integración con el servicio y store correspondiente
 
-Estado actual:
+Cambios técnicos realizados:
 
-1. Sección de Personajes (Characters)
+- Actualización de los stores para incluir métodos de addImageTo[Entity]
+- Integración con los servicios correspondientes
+- Implementación de manejo de errores y logging
+- Actualización del menú contextual con las nuevas opciones
+- Integración con el sistema de eventos para actualización en tiempo real
 
-   - ✅ Implementación completa del componente
-   - ✅ Servicio y store funcionales
-   - ✅ CRUD completo de personajes
-   - ✅ Gestión de imágenes asociadas
-   - ✅ Error de tipado resuelto con tipo local EmojiClickData
+#### 11/01/2024 - Corrección de Carga de Datos en el Menú Contextual
 
-2. Sección de Lugares (Places)
+Se ha implementado la carga inicial de datos para todas las entidades en el menú contextual:
 
-   - ✅ Actualización del modelo en schema.prisma
-   - ✅ Implementación del servicio y store
-   - ✅ Implementación del componente
-   - ✅ CRUD completo de lugares
-   - ✅ Gestión de imágenes asociadas
-   - ✅ Migración de base de datos aplicada
+- Implementación de useEffect para cargar datos al montar el componente
+- Carga paralela de álbumes, personajes, lugares y objetos
+- Manejo de errores y logging durante la carga
+- Optimización de rendimiento usando Promise.all para carga paralela
+- Actualización automática de las listas en el menú contextual
 
-3. Sección de Objetos (Objects)
-   - ✅ Actualización del modelo en schema.prisma
-   - ✅ Implementación del servicio y store
-   - ✅ Implementación del componente
-   - ✅ CRUD completo de objetos
-   - ✅ Gestión de imágenes asociadas
-   - ✅ Migración de base de datos aplicada
+#### 11/01/2024 - Actualización de Estilos del Breadcrumb
 
-Próximos pasos:
+Se han actualizado los estilos del breadcrumb en el componente `ViewToolbar` para alinearse con la documentación oficial de shadcn/ui:
 
-1. Realizar pruebas de integración
-2. Documentar el uso de cada sección
-3. Optimizar el rendimiento si es necesario
-4. Considerar mejoras en la interfaz de usuario
+- Implementación de estilos consistentes en todos los elementos del breadcrumb
+- Mejora en la legibilidad con tamaños de fuente y pesos adecuados
+- Adición de estados hover para los enlaces
+- Uso de colores de texto muted para elementos no interactivos
+- Mantenimiento de la jerarquía visual con separadores consistentes
 
-#### 20/01/2024 - Implementación de Vistas de Información para Todas las Entidades
+#### 12/01/2024 - Migración a Server Actions en Next.js 15
 
-Estado actual:
+Se ha realizado una migración importante para adaptar la aplicación a Next.js 15:
 
-1. Vistas Implementadas:
-   - ✅ all-images-info
-   - ✅ favorites-info
-   - ✅ search-info
-   - ✅ collection-content-info
-   - ✅ folder-content-info
-   - ✅ tag-content-info
-   - ✅ album-content-info
-   - ✅ character-content-info
-   - ✅ place-content-info
-   - ✅ object-content-info
+1. Creación de Server Actions
 
-Objetivos Completados:
+   - Implementación de acciones del servidor para Places
+   - Implementación de acciones del servidor para Objects
+   - Implementación de acciones del servidor para Characters
+   - Separación clara de la lógica cliente/servidor
 
-1. ✅ Implementar todas las vistas de información faltantes
-2. ✅ Mantener consistencia en el diseño y UX
-3. ✅ Asegurar tipado correcto y manejo de errores
-4. ✅ Integrar con el panel de información principal
+2. Actualización de Stores
 
-Próximos pasos:
+   - Migración del store de Places para usar Server Actions
+   - Migración del store de Objects para usar Server Actions
+   - Migración del store de Characters para usar Server Actions
+   - Corrección de tipos y manejo de errores
 
-- [x] Crear interfaces para cada tipo de entidad
-- [x] Implementar componentes de vista
-- [x] Integrar con el store correspondiente
-- [ ] Realizar pruebas de integración
-- [ ] Documentar el uso de cada vista
+3. Mejoras Técnicas
 
-Notas de la implementación:
+   - Implementación de revalidación de rutas
+   - Optimización de llamadas al servidor
+   - Mejora en el manejo de estados de carga
+   - Corrección de errores de tipado
 
-1. Se han creado componentes reutilizables para cada tipo de vista
-2. Se mantiene un diseño consistente en todas las vistas
-3. Se han agregado interfaces TypeScript para mejor tipado
-4. Se han incluido características específicas para cada tipo de entidad:
-   - Lugares: región, clima, peligros, recursos
-   - Personajes: edad, género, ocupación
-   - Objetos: tipo, material, propiedades, usos
-   - Álbumes: descripción, etiquetas
-   - Carpetas: ruta, tamaño
-   - Etiquetas: color, conteo
+4. Cambios en la Arquitectura
+   - Movimiento de lógica de Prisma al servidor
+   - Implementación de patrón de Server Actions
+   - Mejora en la estructura del proyecto
+   - Optimización de rendimiento
 
-#### 20/01/2024 - Implementación del Panel de Información de Configuración
+#### 12/01/2024 - Plan de Implementación de Server Actions para Entidades Restantes
 
-Estado actual:
+Se ha planificado la implementación de Server Actions para las entidades restantes:
 
-1. Panel de Configuración:
+1. Entidades a Migrar
 
-   - ✅ Creación del componente SettingsInfo
-   - ✅ Integración de ShortcutsSection
-   - ✅ Integración de SystemSection
-   - ✅ Actualización del InfoPanel
+   - Albums
+   - Tags
+   - Collections
+   - Folders
+   - Profiles
 
-2. Características implementadas:
+2. Componentes a Actualizar
 
-   - Vista de atajos de teclado
-   - Monitoreo del sistema
-   - Estado de recursos
-   - Acciones de mantenimiento
+   - Vistas de configuración
+   - Componentes de lista
+   - Componentes de detalle
+   - Menús contextuales
+   - Formularios de edición
 
-3. Mejoras:
-   - Diseño consistente con otros paneles
-   - Reutilización de componentes existentes
-   - Integración con el sistema de navegación
+3. Servicios y Stores
 
-Próximos pasos:
+   - Migración de servicios a Server Actions
+   - Actualización de stores para usar Server Actions
+   - Implementación de tipos y validaciones
+   - Optimización de consultas Prisma
 
-- [ ] Agregar más métricas del sistema
-- [ ] Implementar acciones de mantenimiento
-- [ ] Mejorar la visualización de recursos
-- [ ] Agregar tooltips informativos
+4. Mejoras de Sistema
 
-# Registro de Progreso
+   - Integración con sistema de eventos
+   - Implementación de revalidación
+   - Manejo de errores unificado
+   - Optimización de rendimiento
 
-## Última Actualización
+5. Tareas Específicas
 
-### Base de Datos
+   - Crear Server Actions para cada entidad
+   - Actualizar interfaces y tipos
+   - Implementar manejo de errores
+   - Optimizar consultas a base de datos
+   - Actualizar documentación
+   - Implementar pruebas
 
-- ✅ Actualización del modelo Place con nuevos campos
-  - Agregado campo `region` para ubicación geográfica
-  - Agregado campo `dangers` para lista de peligros
-  - Agregado campo `resources` para lista de recursos
-  - Agregado campo `lore` para historia y mitología
-  - Agregado índice para búsqueda por región
+6. Consideraciones Técnicas
 
-### Documentación
+   - Mantener compatibilidad con eventos en tiempo real
+   - Asegurar operaciones atómicas
+   - Implementar rollback en errores
+   - Mantener consistencia de estado
+   - Optimizar rendimiento de consultas
+   - Implementar caché donde sea necesario
 
-- ✅ Creada documentación detallada del schema
-- ✅ Actualizado README principal
-- ✅ Documentados nuevos modelos y relaciones
+7. Documentación
+   - Actualizar README.md
+   - Documentar nuevas APIs
+   - Actualizar ejemplos de uso
+   - Documentar patrones de migración
 
-### Próximos Pasos
+#### 12/01/2024 - Próximos Pasos para la Implementación de Server Actions
 
-- [ ] Implementar validaciones para campos JSON
-- [ ] Agregar enums para climate y type
-- [ ] Mejorar la documentación de la API
-- [ ] Crear guías de usuario
+1. Actualización de Servicios
 
-## Historial de Cambios
+   - Migrar servicios existentes a Server Actions
+   - Actualizar tipos y interfaces
+   - Implementar manejo de errores consistente
+   - Optimizar consultas a la base de datos
 
-### [2024-01-20]
+2. Actualización de Stores
 
-- Actualización del modelo Place
-- Mejora en la documentación
-- Corrección de errores en el seed
+   - Migrar stores para usar Server Actions
+   - Implementar manejo de estado optimizado
+   - Actualizar tipos y validaciones
+   - Mejorar manejo de errores
 
-### [2024-01-19]
+3. Actualización de Componentes
 
-- Implementación inicial de modelos base
-- Configuración del proyecto
-- Creación de estructura inicial
+   - Migrar componentes a usar los nuevos stores
+   - Implementar manejo de estado de carga
+   - Actualizar manejo de errores
+   - Optimizar renderizado
 
-## Tareas Pendientes
+4. Implementación de Sistema de Eventos
 
-### Alta Prioridad
+   - Integrar Server Actions con eventos
+   - Implementar revalidación de rutas
+   - Optimizar actualizaciones en tiempo real
+   - Mejorar manejo de caché
 
-- [ ] Implementar sistema de búsqueda por región
-- [ ] Agregar validaciones de datos
-- [ ] Mejorar el rendimiento de consultas
+5. Pruebas y Documentación
 
-### Media Prioridad
+   - Implementar pruebas unitarias
+   - Actualizar documentación de API
+   - Documentar patrones de uso
+   - Crear ejemplos de implementación
 
-- [ ] Crear vistas para nuevos campos
-- [ ] Implementar filtros avanzados
-- [ ] Mejorar la UI de gestión de lugares
+6. Optimización y Rendimiento
 
-### Baja Prioridad
+   - Optimizar consultas a la base de datos
+   - Implementar caché donde sea necesario
+   - Mejorar tiempos de respuesta
+   - Reducir uso de memoria
 
-- [ ] Agregar más ejemplos en la documentación
-- [ ] Optimizar consultas de base de datos
-- [ ] Mejorar la cobertura de pruebas
+7. Despliegue y Monitoreo
+   - Implementar logging mejorado
+   - Configurar monitoreo de rendimiento
+   - Establecer métricas de éxito
+   - Planificar rollback en caso necesario

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -12,15 +12,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "motion/react";
 import { cn, formatBytes } from "@/lib/utils";
-import {
-	FolderIcon,
-	ImageIcon,
-	Clock,
-} from "lucide-react";
+import { FolderIcon, ImageIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-	getFolders,
-} from "@/services/folder.service";
+import { getFolders } from "@/services/folder.service";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import {
@@ -30,13 +24,41 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation";
 import { useFileManager } from "@/store/file-manager";
-import { eventsService } from "@/services/events.service";
-import type { CacheInvalidationEvent } from "@/services/events.service";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+
+const viewLogger = logger.withContext("FoldersView");
+
+interface Folder {
+	id: string;
+	name: string;
+	path: string;
+	isWatched?: boolean;
+	totalFiles?: number;
+	totalSize?: number;
+	lastIndexed?: string | null;
+	createdAt?: string;
+	updatedAt?: string;
+	recentImages?: string[];
+	_count?: {
+		images: number;
+	};
+}
+
+interface ProcessStatus {
+	status?: string;
+	current?: number;
+	total?: number;
+	progress?: number;
+	currentFile?: string;
+	timestamp?: number;
+	folderId?: string;
+}
 
 interface FolderCardProps {
-	folder: any;
+	folder: Folder;
 	isProcessing: boolean;
-	processStatus: any;
+	processStatus: ProcessStatus;
 	onClick: () => void;
 }
 
@@ -55,14 +77,13 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-function FolderCard({
+const FolderCard = memo(function FolderCard({
 	folder,
 	isProcessing,
 	processStatus,
 	onClick,
 }: FolderCardProps) {
 	const gradient = getRandomGradient();
-
 
 	const isProcessingThis = isProcessing && processStatus.folderId === folder.id;
 
@@ -98,7 +119,6 @@ function FolderCard({
 								</CardDescription>
 							</div>
 						</div>
-
 					</div>
 				</CardHeader>
 
@@ -149,8 +169,8 @@ function FolderCard({
 						<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4">
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{folder._count?.images > 0
-									? `Ver ${folder._count.images} imágenes`
+								{(folder._count?.images ?? 0) > 0
+									? `Ver ${folder._count?.images} imágenes`
 									: "Carpeta vacía"}
 							</Button>
 						</div>
@@ -223,55 +243,54 @@ function FolderCard({
 			</Card>
 		</motion.div>
 	);
-}
+});
 
 export function FoldersView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentFolder } = useFileManager();
-	const [folders, setFolders] = useState<any[]>([]);
+	const [folders, setFolders] = useState<Folder[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [processStatus, setProcessStatus] = useState({});
+	const [processStatus, setProcessStatus] = useState<ProcessStatus>({});
+
+	const loadFolders = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando carpetas...");
+			const data = await getFolders();
+			setFolders(data);
+			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando carpetas:", error);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
 
 	useEffect(() => {
-		const loadFolders = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getFolders();
-				setFolders(data);
-			} catch (error) {
-				setError(error instanceof Error ? error.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
 		// Cargar carpetas inicialmente
 		loadFolders();
 
 		// Suscribirse a eventos relevantes
-		const unsubscribe = eventsService.subscribe(
-			(event: CacheInvalidationEvent) => {
-				if (
-					event === "folders:added" ||
-					event === "folders:deleted" ||
-					event === "folders:modified"
-				) {
-					loadFolders();
-				}
-			}
-		);
+		const handleFolderModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de carpetas recibido:", data);
+			loadFolders();
+		};
+
+		eventsService.on("folders:modified", handleFolderModified);
 
 		return () => {
-			unsubscribe();
+			eventsService.off("folders:modified", handleFolderModified);
 		};
-	}, []);
-
-
+	}, [loadFolders]);
 
 	const handleFolderClick = useCallback(
-		(folder: any) => {
+		(folder: Folder) => {
+			viewLogger.info("🖱️ Click en carpeta:", folder.name);
 			setCurrentView("folder-content");
 			setCurrentFolder(folder.id);
 		},
