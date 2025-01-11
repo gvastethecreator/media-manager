@@ -3,6 +3,7 @@
 import { NavPanel } from "@/components/panels/nav/nav-panel";
 import { RightPanel } from "@/components/panels/right-panel";
 import { ViewContainer } from "@/components/views/view-container";
+import { ViewToolbar } from "@/components/toolbar/view-toolbar";
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -34,7 +35,10 @@ export function MainLayout() {
 
 			{/* Contenido Principal - Default 60% */}
 			<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
-				<ViewContainer isResizing={isResizing} />
+				<div className="flex flex-col h-full">
+					<ViewToolbar />
+					<ViewContainer isResizing={isResizing} />
+				</div>
 			</ResizablePanel>
 			<ResizableHandle withHandle />
 

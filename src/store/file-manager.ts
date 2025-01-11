@@ -22,6 +22,15 @@ interface FileManagerState {
   currentPlaceId: string | null
   currentObjectId: string | null
 
+  // Objetos actuales
+  currentCollection: { id: string; name: string; count: number; color?: string; emoji?: string } | null
+  currentFolder: { id: string; name: string; count: number } | null
+  currentTag: string | null
+  currentAlbum: { id: string; name: string; count: number; emoji: string } | null
+  currentCharacter: { id: string; name: string; count: number; emoji: string } | null
+  currentPlace: { id: string; name: string; count: number; emoji: string } | null
+  currentObject: { id: string; name: string; count: number; emoji: string } | null
+
   // Metadatos
   collections: { id: string; name: string; count: number; color?: string; emoji?: string }[]
   folders: { id: string; name: string; count: number }[]
@@ -80,6 +89,13 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
   currentCharacterId: null,
   currentPlaceId: null,
   currentObjectId: null,
+  currentCollection: null,
+  currentFolder: null,
+  currentTag: null,
+  currentAlbum: null,
+  currentCharacter: null,
+  currentPlace: null,
+  currentObject: null,
   isLoading: false,
   error: null,
   collections: [],
@@ -192,27 +208,51 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
   // Navegación
   setCurrentFolder: async (id: string) => {
     const state = get()
+    const folder = state.folders.find(f => f.id === id) || null
     state.clearSelection()
-    set({ currentFolderId: id, currentCollectionId: null, currentTagId: null })
+    set({
+      currentFolderId: id,
+      currentCollectionId: null,
+      currentTagId: null,
+      currentFolder: folder,
+      currentCollection: null,
+      currentTag: null
+    })
     await state.loadItems(`/api/folders/${id}/images/all`)
   },
 
   setCurrentCollection: async (id: string) => {
     const state = get()
+    const collection = state.collections.find(c => c.id === id) || null
     state.clearSelection()
-    set({ currentFolderId: null, currentCollectionId: id, currentTagId: null })
+    set({
+      currentFolderId: null,
+      currentCollectionId: id,
+      currentTagId: null,
+      currentFolder: null,
+      currentCollection: collection,
+      currentTag: null
+    })
     await state.loadItems(`/api/collections/${id}/images/all`)
   },
 
   setCurrentTag: async (id: string) => {
     const state = get()
     state.clearSelection()
-    set({ currentFolderId: null, currentCollectionId: null, currentTagId: id })
+    set({
+      currentFolderId: null,
+      currentCollectionId: null,
+      currentTagId: id,
+      currentFolder: null,
+      currentCollection: null,
+      currentTag: id
+    })
     await state.loadItems(`/api/tags/${id}/images/all`)
   },
 
   setCurrentAlbum: async (id: string) => {
     const state = get()
+    const album = state.albums.find(a => a.id === id) || null
     state.clearSelection()
     set({
       currentFolderId: null,
@@ -221,13 +261,21 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       currentAlbumId: id,
       currentCharacterId: null,
       currentPlaceId: null,
-      currentObjectId: null
+      currentObjectId: null,
+      currentFolder: null,
+      currentCollection: null,
+      currentTag: null,
+      currentAlbum: album,
+      currentCharacter: null,
+      currentPlace: null,
+      currentObject: null
     })
     await state.loadItems(`/api/albums/${id}/images/all`)
   },
 
   setCurrentCharacter: async (id: string) => {
     const state = get()
+    const character = state.characters.find(c => c.id === id) || null
     state.clearSelection()
     set({
       currentFolderId: null,
@@ -236,13 +284,21 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       currentAlbumId: null,
       currentCharacterId: id,
       currentPlaceId: null,
-      currentObjectId: null
+      currentObjectId: null,
+      currentFolder: null,
+      currentCollection: null,
+      currentTag: null,
+      currentAlbum: null,
+      currentCharacter: character,
+      currentPlace: null,
+      currentObject: null
     })
     await state.loadItems(`/api/characters/${id}/images/all`)
   },
 
   setCurrentPlace: async (id: string) => {
     const state = get()
+    const place = state.places.find(p => p.id === id) || null
     state.clearSelection()
     set({
       currentFolderId: null,
@@ -251,13 +307,21 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       currentAlbumId: null,
       currentCharacterId: null,
       currentPlaceId: id,
-      currentObjectId: null
+      currentObjectId: null,
+      currentFolder: null,
+      currentCollection: null,
+      currentTag: null,
+      currentAlbum: null,
+      currentCharacter: null,
+      currentPlace: place,
+      currentObject: null
     })
     await state.loadItems(`/api/places/${id}/images/all`)
   },
 
   setCurrentObject: async (id: string) => {
     const state = get()
+    const object = state.objects.find(o => o.id === id) || null
     state.clearSelection()
     set({
       currentFolderId: null,
@@ -266,8 +330,15 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       currentAlbumId: null,
       currentCharacterId: null,
       currentPlaceId: null,
-      currentObjectId: id
+      currentObjectId: id,
+      currentFolder: null,
+      currentCollection: null,
+      currentTag: null,
+      currentAlbum: null,
+      currentCharacter: null,
+      currentPlace: null,
+      currentObject: object
     })
     await state.loadItems(`/api/objects/${id}/images/all`)
-  },
+  }
 }))
