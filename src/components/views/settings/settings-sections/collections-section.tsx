@@ -12,7 +12,6 @@ import {
 	XIcon,
 	Loader2,
 } from "lucide-react";
-import { useCollectionsStore } from "@/store/collections.store";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -20,40 +19,66 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { CompactPicker } from "react-color";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
+import {
+	getCollections,
+	createCollection,
+	updateCollection,
+	deleteCollection,
+} from "@/app/actions/collection.actions";
+import type { Collection } from "@prisma/client";
 import type {
 	CollectionCreate,
 	CollectionUpdate,
 } from "@/services/collection.service";
-import type { EmojiClickData } from "emoji-picker-react";
 
 const collectionLogger = logger.withContext("CollectionsSection");
 
+interface EditForm extends Omit<CollectionUpdate, "description"> {
+	description: string;
+}
+
 export function CollectionsSection() {
-	const {
-		collections,
-		isLoading,
-		createCollection,
-		updateCollection,
-		deleteCollection,
-		loadCollections,
-	} = useCollectionsStore();
+	const [collections, setCollections] = React.useState<
+		(Collection & { _count: { images: number }; totalSize: number })[]
+	>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
+	const [error, setError] = React.useState<Error | null>(null);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const [editForm, setEditForm] = React.useState<CollectionUpdate | null>(null);
+	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
 	const [newCollection, setNewCollection] = React.useState<CollectionCreate>({
 		name: "",
 		emoji: "🌟",
 		description: "",
 		color: "#3b82f6",
+		filters: "[]",
 	});
 	const { toast } = useToast();
 
-	// Cargar colecciones al montar el componente
+	const loadCollections = React.useCallback(async () => {
+		setIsLoading(true);
+		try {
+			collectionLogger.info("📚 Obteniendo lista de colecciones");
+			const data = await getCollections();
+			setCollections(data);
+			setError(null);
+		} catch (error) {
+			setError(error as Error);
+			toast({
+				title: "Error al cargar colecciones",
+				description: "No se pudieron cargar las colecciones.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [toast]);
+
 	React.useEffect(() => {
 		loadCollections();
 	}, [loadCollections]);
@@ -66,6 +91,7 @@ export function CollectionsSection() {
 			emoji: collection.emoji,
 			description: collection.description || "",
 			color: collection.color,
+			filters: collection.filters,
 		});
 	};
 
@@ -74,409 +100,366 @@ export function CollectionsSection() {
 		setEditForm(null);
 	};
 
-	const handleSaveEdit = async (id: string) => {
+	const handleSubmitEdit = async (e: React.FormEvent) => {
+		e.preventDefault();
 		if (!editForm) return;
+
+		setIsLoading(true);
 		try {
 			collectionLogger.info("💾 Guardando cambios en colección:", {
-				id,
+				id: editForm.id,
 				data: editForm,
 			});
-			await updateCollection(id, editForm);
+			await updateCollection(editForm.id, {
+				...editForm,
+				description: editForm.description || undefined,
+			});
+			await loadCollections();
 			handleCancelEdit();
 			toast({
-				title: "Éxito",
-				description: "Colección actualizada correctamente",
+				title: "✅ Colección actualizada",
+				description: "La colección se ha actualizado correctamente.",
 			});
 		} catch (error) {
 			collectionLogger.error("❌ Error al actualizar colección:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo actualizar la colección",
+				title: "Error al actualizar colección",
+				description: "No se pudo actualizar la colección.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	const handleEmojiSelect = (emojiData: EmojiClickData) => {
-		setNewCollection({ ...newCollection, emoji: emojiData.emoji });
-	};
-
-	const handleColorChange = (color: { hex: string }) => {
-		setNewCollection({ ...newCollection, color: color.hex });
-	};
-
-	const handleAddCollection = async () => {
+	const handleSubmitCreate = async (e: React.FormEvent) => {
+		e.preventDefault();
 		if (!newCollection.name) return;
 
+		setIsLoading(true);
 		try {
-			collectionLogger.info("➕ Creando nueva colección:", newCollection);
-			const newCollectionData = {
-				...newCollection,
-				sortBy: "name" as const,
-				filters: [] as any[],
-			};
-
-			await createCollection(newCollectionData as CollectionCreate);
+			collectionLogger.info("📝 Creando nueva colección:", newCollection);
+			await createCollection(newCollection);
+			await loadCollections();
 			setNewCollection({
 				name: "",
 				emoji: "🌟",
 				description: "",
 				color: "#3b82f6",
+				filters: "[]",
 			});
 			toast({
-				title: "Éxito",
-				description: "Colección creada correctamente",
+				title: "✅ Colección creada",
+				description: "La colección se ha creado correctamente.",
 			});
 		} catch (error) {
 			collectionLogger.error("❌ Error al crear colección:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo crear la colección",
+				title: "Error al crear colección",
+				description: "No se pudo crear la colección.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleDeleteCollection = async (id: string) => {
+		setIsLoading(true);
 		try {
-			collectionLogger.info("🗑️ Eliminando colección:", id);
+			collectionLogger.info("🗑️ Eliminando colección...", id);
 			await deleteCollection(id);
+			await loadCollections();
 			toast({
-				title: "Éxito",
-				description: "Colección eliminada correctamente",
+				title: "✅ Colección eliminada",
+				description: "La colección se ha eliminado correctamente.",
 			});
 		} catch (error) {
 			collectionLogger.error("❌ Error al eliminar colección:", error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar la colección",
+				title: "Error al eliminar colección",
+				description: "No se pudo eliminar la colección.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
+	const handleColorChange = (color: { hex: string }) => {
+		setNewCollection((prev) => ({ ...prev, color: color.hex }));
+	};
+
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
-			<CardHeader className="p-2 pb-0 bg-transparent">
-				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-					<span className="flex items-center gap-2 h-7">
-						<Smile className="h-5 w-5" /> Colecciones
-					</span>
-					{collections.length > 0 && (
-						<span className="text-xs text-muted-foreground/75">
-							{collections.length}{" "}
-							{collections.length === 1 ? "colección" : "colecciones"}
-						</span>
+		<div className="space-y-4">
+			<div className="flex items-center justify-between">
+				<h2 className="text-lg font-semibold">Colecciones</h2>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => loadCollections()}
+					disabled={isLoading}
+				>
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<span>Recargar</span>
 					)}
-				</CardTitle>
-			</CardHeader>
-			<Separator className="my-0" />
-			<CardContent className="p-2">
-				<div className="space-y-3">
-					<div className="flex items-center gap-2">
-						<div
-							className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-							style={{ backgroundColor: newCollection.color }}
-						>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-										<span className="text-lg">{newCollection.emoji}</span>
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-[320px] p-0" align="start">
-									<EmojiPicker onEmojiSelect={(emoji: string) =>
-										setNewCollection({ ...newCollection, emoji: emoji })
-									} />
-								</PopoverContent>
-							</Popover>
-						</div>
-						<div className="flex-1 min-w-0 space-y-1">
+				</Button>
+			</div>
+
+			<Card>
+				<CardContent className="p-4">
+					<form onSubmit={handleSubmitCreate} className="space-y-4">
+						<div className="grid gap-2">
+							<div className="flex items-center gap-2">
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											variant="outline"
+											size="icon"
+											className="h-8 w-8"
+											style={{
+												backgroundColor: newCollection.color,
+											}}
+										>
+											<span className="text-lg">{newCollection.emoji}</span>
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent
+										className="w-full p-0"
+										side="right"
+										align="start"
+									>
+										<EmojiPicker
+											onEmojiSelect={(emoji: string) =>
+												setNewCollection((prev) => ({
+													...prev,
+													emoji,
+												}))
+											}
+										/>
+										<Separator className="my-2" />
+										<div className="p-2">
+											<CompactPicker
+												color={newCollection.color}
+												onChange={handleColorChange}
+											/>
+										</div>
+									</PopoverContent>
+								</Popover>
+								<Input
+									placeholder="Nombre de la colección"
+									value={newCollection.name}
+									onChange={(e) =>
+										setNewCollection((prev) => ({
+											...prev,
+											name: e.target.value,
+										}))
+									}
+									className="h-8"
+								/>
+							</div>
 							<Input
-								value={newCollection.name}
+								placeholder="Descripción"
+								value={newCollection.description}
 								onChange={(e) =>
-									setNewCollection({ ...newCollection, name: e.target.value })
+									setNewCollection((prev) => ({
+										...prev,
+										description: e.target.value,
+									}))
 								}
-								className="h-8 text-base border-none p-3"
-								placeholder="Nombre de la colección"
+								className="h-8"
 							/>
-							<div className="flex gap-2">
-								<Input
-									value={newCollection.description || ""}
-									onChange={(e) =>
-										setNewCollection({
-											...newCollection,
-											description: e.target.value,
-										})
-									}
-									className="h-6 text-xs border-none p-2"
-									placeholder="Descripción (opcional)"
-								/>
-								<Input
-									value={newCollection.shortcut || ""}
-									onChange={(e) =>
-										setNewCollection({
-											...newCollection,
-											shortcut: e.target.value,
-										})
-									}
-									className="h-6 text-xs border-none p-2 w-24"
-									placeholder="Atajo"
-								/>
-							</div>
 						</div>
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-8 w-8 rounded-full"
-								>
-									<div
-										className="h-4 w-4 rounded-full"
-										style={{ backgroundColor: newCollection.color }}
-									/>
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent
-								className="w-auto p-0 bg-transparent border-none"
-								align="end"
+						<div className="flex items-center justify-end">
+							<Button
+								type="submit"
+								size="sm"
+								disabled={isLoading || !newCollection.name.trim()}
 							>
-								<CompactPicker
-									color={newCollection.color}
-									className="bg-black/90 text-white overflow-hidden"
-									onChange={(color) => handleColorChange(color)}
-								/>
-							</PopoverContent>
-						</Popover>
-						<Button
-							size="sm"
-							className="h-8 text-xs px-3"
-							onClick={handleAddCollection}
-							disabled={!newCollection.name.trim()}
-						>
-							Crear
-						</Button>
+								{isLoading ? (
+									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+								) : null}
+								Crear colección
+							</Button>
+						</div>
+					</form>
+				</CardContent>
+			</Card>
+
+			<div className="grid gap-4">
+				{error && (
+					<div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">
+						{error.message}
 					</div>
-
-					<Separator className="my-0" />
-
-					<div className="grid grid-cols-2 gap-2">
-						{isLoading ? (
-							<div className="col-span-2 py-8 text-center">
-								<Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">
-									Cargando colecciones...
-								</p>
-							</div>
-						) : collections && collections.length > 0 ? (
-							collections.map((collection, index) => (
-								<motion.div
-									key={collection.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
-									className={cn(
-										"bg-muted/30 group rounded-sm relative",
-										editingId === collection.id && "ring-1 ring-primary"
-									)}
-								>
-									<CardContent className="p-2">
-										{editingId === collection.id ? (
-											<div className="space-y-2">
+				)}
+				{collections.length === 0 && !isLoading ? (
+					<div className="text-sm text-muted-foreground text-center py-4">
+						No hay colecciones creadas
+					</div>
+				) : (
+					collections.map((collection) => (
+						<motion.div
+							key={collection.id}
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.3 }}
+						>
+							<Card className="group relative overflow-hidden">
+								<CardContent className="p-4">
+									{editingId === collection.id ? (
+										<form onSubmit={handleSubmitEdit} className="space-y-4">
+											<div className="grid gap-2">
 												<div className="flex items-center gap-2">
-													<div
-														className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-														style={{ backgroundColor: editForm?.color }}
-													>
-														<Popover>
-															<PopoverTrigger asChild>
-																<Button
-																	variant="ghost"
-																	size="icon"
-																	className="h-8 w-8 p-0"
-																>
-																	<span className="text-lg">
-																		{editForm?.emoji}
-																	</span>
-																</Button>
-															</PopoverTrigger>
-															<PopoverContent
-																className="w-[320px] p-0"
-																align="start"
-															>
-																<EmojiPicker
-																	onEmojiSelect={(emoji: string) =>
-																		setEditForm((prev) =>
-																			prev
-																				? { ...prev, emoji: emoji }
-																				: null
-																		)
-																	}
-																/>
-															</PopoverContent>
-														</Popover>
-													</div>
-													<div className="flex-1 min-w-0 space-y-1">
-														<Input
-															value={editForm?.name}
-															onChange={(e) =>
-																setEditForm((prev) =>
-																	prev
-																		? { ...prev, name: e.target.value }
-																		: null
-																)
-															}
-															className="h-8 text-base border-none p-3"
-															placeholder="Nombre de la colección"
-														/>
-														<div className="flex gap-2">
-															<Input
-																value={editForm?.description || ""}
-																onChange={(e) =>
-																	setEditForm((prev) =>
-																		prev
-																			? { ...prev, description: e.target.value }
-																			: null
-																	)
-																}
-																className="h-6 text-xs border-none p-2"
-																placeholder="Descripción (opcional)"
-															/>
-															<Input
-																value={editForm?.shortcut || ""}
-																onChange={(e) =>
-																	setEditForm((prev) =>
-																		prev
-																			? { ...prev, shortcut: e.target.value }
-																			: null
-																	)
-																}
-																className="h-6 text-xs border-none p-2 w-24"
-																placeholder="Atajo"
-															/>
-														</div>
-													</div>
 													<Popover>
 														<PopoverTrigger asChild>
 															<Button
-																variant="ghost"
+																variant="outline"
 																size="icon"
-																className="h-8 w-8 rounded-full"
+																className="h-8 w-8"
+																style={{
+																	backgroundColor: editForm?.color,
+																}}
 															>
-																<div
-																	className="h-4 w-4 rounded-full"
-																	style={{ backgroundColor: editForm?.color }}
-																/>
+																<span className="text-lg">
+																	{editForm?.emoji}
+																</span>
 															</Button>
 														</PopoverTrigger>
 														<PopoverContent
-															className="w-auto p-0 bg-transparent border-none"
-															align="end"
+															className="w-full p-0"
+															side="right"
+															align="start"
 														>
-															<CompactPicker
-																color={editForm?.color}
-																className="bg-black/90 text-white overflow-hidden"
-																onChange={(color) =>
-																	setEditForm((prev) =>
-																		prev ? { ...prev, color: color.hex } : null
-																	)
+															<EmojiPicker
+																onEmojiSelect={(emoji: string) =>
+																	setEditForm((prev) => ({
+																		...prev!,
+																		emoji,
+																	}))
 																}
 															/>
+															<Separator className="my-2" />
+															<div className="p-2">
+																<CompactPicker
+																	color={editForm?.color}
+																	onChange={(color) =>
+																		setEditForm((prev) => ({
+																			...prev!,
+																			color: color.hex,
+																		}))
+																	}
+																/>
+															</div>
 														</PopoverContent>
 													</Popover>
-												</div>
-												<div className="flex justify-end gap-1">
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={handleCancelEdit}
-														className="h-7 text-xs text-destructive hover:text-destructive/90"
-													>
-														<XIcon className="h-3.5 w-3.5 mr-1" />
-														Cancelar
-													</Button>
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => handleSaveEdit(collection.id)}
-														className="h-7 text-xs text-green-500 hover:text-green-600"
-													>
-														<CheckIcon className="h-3.5 w-3.5 mr-1" />
-														Guardar
-													</Button>
-												</div>
-											</div>
-										) : (
-											<div className="flex items-center gap-2 relative">
-												<div className="flex items-center gap-2 min-w-0">
-													<div
-														className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-														style={{ backgroundColor: collection.color }}
-													>
-														<span className="text-lg">{collection.emoji}</span>
-													</div>
-													<div className="flex-1 min-w-0">
-														<span className="text-xs font-semibold truncate pl-1">
-															{collection.name}
-														</span>
-														{collection.description && (
-															<p className="text-[10px] text-muted-foreground truncate pl-1">
-																{collection.description}
-															</p>
-														)}
-														{collection.count > 0 && (
-															<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-																{collection.count}{" "}
-																{collection.count === 1 ? "imagen" : "imágenes"}{" "}
-																• {collection.size}
-															</p>
-														)}
-													</div>
-												</div>
-												<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleStartEdit(collection)}
-														className="h-6 w-6"
-													>
-														<PencilIcon className="h-3 w-3" />
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() =>
-															handleDeleteCollection(collection.id)
+													<Input
+														placeholder="Nombre de la colección"
+														value={editForm?.name}
+														onChange={(e) =>
+															setEditForm((prev) => ({
+																...prev!,
+																name: e.target.value,
+															}))
 														}
-														className="h-6 w-6 text-red-500 hover:text-red-500/90"
-													>
-														<Trash2 className="h-3 w-3" />
-													</Button>
+														className="h-8"
+													/>
+												</div>
+												<Input
+													placeholder="Descripción"
+													value={editForm?.description}
+													onChange={(e) =>
+														setEditForm((prev) => ({
+															...prev!,
+															description: e.target.value,
+														}))
+													}
+													className="h-8"
+												/>
+											</div>
+											<div className="flex items-center justify-end gap-2">
+												<Button
+													type="button"
+													variant="ghost"
+													size="sm"
+													onClick={handleCancelEdit}
+													className="h-7 text-xs text-destructive hover:text-destructive/90"
+												>
+													<XIcon className="h-3.5 w-3.5 mr-1" />
+													Cancelar
+												</Button>
+												<Button
+													type="submit"
+													variant="ghost"
+													size="sm"
+													disabled={isLoading}
+													className="h-7 text-xs text-green-500 hover:text-green-600"
+												>
+													{isLoading ? (
+														<Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+													) : (
+														<CheckIcon className="h-3.5 w-3.5 mr-1" />
+													)}
+													Guardar
+												</Button>
+											</div>
+										</form>
+									) : (
+										<div className="flex items-center gap-2 relative">
+											<div className="flex items-center gap-2 min-w-0">
+												<div
+													className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+													style={{ backgroundColor: collection.color }}
+												>
+													<span className="text-lg">{collection.emoji}</span>
+												</div>
+												<div className="flex-1 min-w-0">
+													<span className="text-xs font-semibold truncate pl-1">
+														{collection.name}
+													</span>
+													{collection.description && (
+														<p className="text-[10px] text-muted-foreground truncate pl-1">
+															{collection.description}
+														</p>
+													)}
+													{collection._count?.images > 0 && (
+														<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
+															{collection._count.images}{" "}
+															{collection._count.images === 1
+																? "imagen"
+																: "imágenes"}{" "}
+															• {formatBytes(collection.totalSize)}
+														</p>
+													)}
 												</div>
 											</div>
-										)}
-									</CardContent>
-								</motion.div>
-							))
-						) : (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="py-4 text-center col-span-2"
-							>
-								<Smile className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">
-									No hay colecciones creadas
-								</p>
-								<p className="text-[10px] mt-1 text-muted-foreground/75">
-									Crea una colección para organizar tus imágenes
-								</p>
-							</motion.div>
-						)}
-					</div>
-				</div>
-			</CardContent>
-		</Card>
+											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleStartEdit(collection)}
+													className="h-6 w-6"
+												>
+													<PencilIcon className="h-3 w-3" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleDeleteCollection(collection.id)}
+													className="h-6 w-6 text-red-500 hover:text-red-500/90"
+												>
+													<Trash2 className="h-3 w-3" />
+												</Button>
+											</div>
+										</div>
+									)}
+								</CardContent>
+							</Card>
+						</motion.div>
+					))
+				)}
+			</div>
+		</div>
 	);
 }

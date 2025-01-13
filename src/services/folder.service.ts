@@ -38,7 +38,6 @@ export interface FolderResponse {
     id: string
     name: string
     path: string
-    isWatched?: boolean
     totalFiles?: number
     totalSize?: number
     lastIndexed?: string | null

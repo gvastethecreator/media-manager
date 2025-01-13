@@ -4,6 +4,12 @@ import { revalidatePath } from 'next/cache'
 import type { FileItem } from '@/types/file-item'
 import { imageConverterService } from '@/services/image-converter.service'
 import { cache } from 'react'
+import type { PrismaClient } from '@prisma/client'
+
+// Tipo para los modelos de Prisma que tienen operaciones CRUD
+type PrismaModelName = keyof {
+  [K in keyof PrismaClient as PrismaClient[K] extends { findMany: any; findUnique: any; create: any; update: any; delete: any } ? K : never]: true
+}
 
 export interface BaseStats {
   _count: {
@@ -40,9 +46,9 @@ export interface BaseEntityUpdate extends Partial<BaseEntityCreate> {
 }
 
 export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEntityCreate, UpdateDTO extends BaseEntityUpdate> {
-  protected abstract modelName: string
+  protected abstract modelName: PrismaModelName
   protected abstract revalidatePaths: string[]
-  protected logger = logger.withContext(this.modelName + 'Actions')
+  protected logger!: ReturnType<typeof logger.withContext>
   protected cacheTimeout = 5 * 60 * 1000 // 5 minutos por defecto
 
   protected constructor() {
@@ -51,15 +57,19 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
     this.getImages = cache(this.getImages.bind(this))
   }
 
+  protected initLogger() {
+    this.logger = logger.withContext(this.modelName + 'Actions')
+  }
+
   protected revalidateAllPaths() {
     this.revalidatePaths.forEach(path => revalidatePath(path))
     this.logger.info('🔄 Rutas revalidadas')
   }
 
-  protected async getAll(): Promise<T[]> {
+  protected async getAll(): Promise<(T & BaseStats)[]> {
     try {
       this.logger.info(`📚 Obteniendo lista de ${this.modelName}`)
-      const items = await prisma[this.modelName].findMany({
+      const items = await (prisma[this.modelName] as any).findMany({
         include: {
           _count: {
             select: {
@@ -70,7 +80,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
       })
 
       const itemsWithStats = await Promise.all(
-        items.map(async (item) => {
+        items.map(async (item: T) => {
           const totalSize = await this.calculateTotalSize(item.id)
           return {
             ...item,
@@ -87,10 +97,10 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
     }
   }
 
-  protected async getById(id: string): Promise<T> {
+  protected async getById(id: string): Promise<T & BaseStats> {
     try {
       this.logger.info(`🔍 Obteniendo ${this.modelName}:`, id)
-      const item = await prisma[this.modelName].findUnique({
+      const item = await (prisma[this.modelName] as any).findUnique({
         where: { id },
         include: {
           _count: {
@@ -122,7 +132,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
   protected async create(data: CreateDTO): Promise<T> {
     try {
       this.logger.info(`📝 Creando nuevo ${this.modelName}:`, data.name)
-      const item = await prisma[this.modelName].create({
+      const item = await (prisma[this.modelName] as any).create({
         data: {
           ...data,
           filters: data.filters || '[]',
@@ -140,7 +150,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
   protected async update(id: string, data: UpdateDTO): Promise<T> {
     try {
       this.logger.info(`📝 Actualizando ${this.modelName}:`, id)
-      const item = await prisma[this.modelName].update({
+      const item = await (prisma[this.modelName] as any).update({
         where: { id },
         data: {
           ...data,
@@ -159,7 +169,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
   protected async delete(id: string): Promise<void> {
     try {
       this.logger.info(`🗑️ Eliminando ${this.modelName}:`, id)
-      await prisma[this.modelName].delete({
+      await (prisma[this.modelName] as any).delete({
         where: { id },
       })
       this.logger.info(`✅ ${this.modelName} eliminado`)
@@ -231,7 +241,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
       })
 
       this.logger.info(`✅ ${images.length} imágenes obtenidas`)
-      return images.map(image => imageConverterService.convertServerImageToFileItem(image))
+      return images.map(image => imageConverterService.convertServerImageToFileItem(image as any))
     } catch (error) {
       this.logger.error(`❌ Error al obtener imágenes de ${this.modelName}:`, error)
       throw this.createError(`No se pudieron obtener las imágenes de ${this.modelName}`, error)
@@ -241,7 +251,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
   protected async addImage(entityId: string, imageId: string): Promise<void> {
     try {
       this.logger.info(`➕ Agregando imagen a ${this.modelName}:`, { entityId, imageId })
-      await prisma[this.modelName].update({
+      await (prisma[this.modelName] as any).update({
         where: { id: entityId },
         data: {
           images: {
@@ -262,7 +272,7 @@ export abstract class BaseActions<T extends BaseEntity, CreateDTO extends BaseEn
   protected async removeImage(entityId: string, imageId: string): Promise<void> {
     try {
       this.logger.info(`➖ Removiendo imagen de ${this.modelName}:`, { entityId, imageId })
-      await prisma[this.modelName].update({
+      await (prisma[this.modelName] as any).update({
         where: { id: entityId },
         data: {
           images: {
