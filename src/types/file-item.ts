@@ -19,90 +19,16 @@ export interface FileItem {
   name: string;
   path: string;
   type: string;
-  mimeType?: string;
   size: number;
-  width?: number;
-  height?: number;
+  mimeType?: string;
   metadata?: {
-    mimeType?: string;
-    size?: number;
     dimensions?: {
       width: number;
       height: number;
     };
-    extension?: string;
-    fileSystem?: {
-      size: number;
-      created: string;
-      modified: string;
-      accessed: string;
-    };
-    exif?: Record<string, any>;
-    generation?: Record<string, any>;
+    mimeType?: string;
   };
-  thumbnail?: string;
-  thumbnailSize?: number;
-  thumbnailWidth?: number;
-  thumbnailHeight?: number;
-  isFavorite?: boolean;
-  isPublic?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  folderId: string;
-  collections?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-  }>;
-  tags?: Array<{
-    id: string;
-    name: string;
-    color: string;
-  }>;
-  albums?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-  }>;
-  characters?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-    level?: number;
-    class?: string;
-    race?: string;
-  }>;
-  places?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-    region?: string;
-    type?: string;
-    climate?: string;
-  }>;
-  objects?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-    type?: string;
-    rarity?: string;
-  }>;
-  activities?: Array<{
-    id: string;
-    type: string;
-    description: string;
-    createdAt: string;
-  }>;
-  stats?: {
-    views: number;
-    downloads: number;
-    lastViewed: string;
-  };
+  url?: string;
 }
 
 export interface ViewProps {

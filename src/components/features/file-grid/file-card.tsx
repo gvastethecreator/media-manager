@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion } from "motion/react";
 import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
-import { thumbnailService } from "@/services/thumbnail.service";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
 import { ThumbnailQuality } from "@/types/thumbnails";
 import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
+import { getImageUrl } from "@/app/actions/images";
+import { useToast } from "@/components/ui/use-toast";
+import { ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
 
 interface ThumbnailResponse {
 	thumbnail: string;
@@ -69,43 +71,11 @@ export function FileCard({
 	const hasLoaded = useRef(false);
 	const { toggleItemSelection } = useFileManager();
 	const { openViewer } = useImageViewer();
-
-	const loadThumbnail = useCallback(async () => {
-		if (hasLoaded.current || !shouldLoad) return;
-
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const response = await thumbnailService.getThumbnail(
-				item.id,
-				ThumbnailQuality.MEDIUM
-			);
-
-			if (!response) {
-				throw new Error("No se recibió respuesta del servicio de thumbnails");
-			}
-
-			const mimeType = item.metadata?.mimeType || "image/webp";
-			const dataUrl = `data:${mimeType};base64,${response}`;
-			setThumbnail(dataUrl);
-			hasLoaded.current = true;
-		} catch (error) {
-			console.error("Error cargando miniatura:", error);
-			setError(error instanceof Error ? error.message : "Error desconocido");
-		} finally {
-			setIsLoading(false);
-		}
-	}, [item.id, shouldLoad, item.metadata?.mimeType]);
-
-	useEffect(() => {
-		if (shouldLoad) {
-			loadThumbnail();
-		}
-	}, [loadThumbnail, shouldLoad]);
+	const { toast } = useToast();
 
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
+			e.preventDefault();
 			e.stopPropagation();
 			toggleItemSelection(item, false);
 			if (onClick) onClick(item);
@@ -114,16 +84,51 @@ export function FileCard({
 	);
 
 	const handleDoubleClick = useCallback(
-		(e: React.MouseEvent) => {
+		async (e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			if (onDoubleClick) {
-				onDoubleClick(item);
-			} else {
-				openViewer([item]);
+
+			try {
+				if (onDoubleClick) {
+					onDoubleClick(item);
+					return;
+				}
+
+				const url = await getImageUrl(item.id);
+				if (!url) {
+					throw new Error("No se pudo obtener la URL de la imagen");
+				}
+
+				const imageToView = {
+					id: item.id,
+					name: item.name,
+					type: "image",
+					url,
+					src: url,
+					alt: item.name,
+					mimeType: item.metadata?.mimeType || "image/jpeg",
+					width: item.metadata?.dimensions?.width,
+					height: item.metadata?.dimensions?.height,
+					metadata: item.metadata,
+				} as ImageItem;
+
+				toast({
+					title: "Abriendo imagen",
+					description: `Cargando ${imageToView.name}...`,
+				});
+
+				openViewer([imageToView], 0);
+			} catch (error) {
+				console.error("Error al abrir imagen:", error);
+				toast({
+					title: "Error",
+					description: "No se pudo abrir la imagen",
+					variant: "destructive",
+				});
+				setError("Error al abrir la imagen");
 			}
 		},
-		[item, onDoubleClick, openViewer]
+		[item, onDoubleClick, openViewer, toast]
 	);
 
 	const handleHoverStart = useCallback(() => {
@@ -136,30 +141,26 @@ export function FileCard({
 		setIsHovered(false);
 	}, [shouldLoad]);
 
-	// Memoizar el thumbnail
-	const thumbnailMemo = useMemo(() => {
-		if (!thumbnail || isLoading || error) return null;
-		return (
-			<ImageCard
-				src={thumbnail}
-				alt={item.name}
-				width={item.metadata?.dimensions?.width || 300}
-				height={item.metadata?.dimensions?.height || 300}
-				className={cn(
-					"h-full w-full rounded-sm border-1 bg-black/50 border-white/10",
-					isSelected && "ring-2 ring-primary ring-offset-2"
-				)}
-				priority={false}
-			/>
-		);
-	}, [
-		thumbnail,
-		isLoading,
-		error,
-		item.name,
-		item.metadata?.dimensions,
-		isSelected,
-	]);
+	useEffect(() => {
+		if (shouldLoad && !hasLoaded.current) {
+			setIsLoading(true);
+			fetch(`/api/thumbnails/${item.id}?quality=medium`)
+				.then((res) => res.json())
+				.then((data) => {
+					setThumbnail(
+						`data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`
+					);
+					hasLoaded.current = true;
+				})
+				.catch((err) => {
+					console.error("Error cargando thumbnail:", err);
+					setError(err.message);
+				})
+				.finally(() => {
+					setIsLoading(false);
+				});
+		}
+	}, [item.id, shouldLoad]);
 
 	return (
 		<motion.div
@@ -215,7 +216,19 @@ export function FileCard({
 						layout
 					>
 						<div className="absolute inset-0 flex justify-center items-center">
-							{thumbnailMemo}
+							{thumbnail && (
+								<ImageCard
+									src={thumbnail}
+									alt={item.name}
+									width={item.metadata?.dimensions?.width || 300}
+									height={item.metadata?.dimensions?.height || 300}
+									className={cn(
+										"h-full w-full rounded-sm border-1 bg-black/50 border-white/10",
+										isSelected && "ring-2 ring-primary ring-offset-2"
+									)}
+									priority={false}
+								/>
+							)}
 						</div>
 						<motion.div
 							initial={{ opacity: 0, y: 10 }}
