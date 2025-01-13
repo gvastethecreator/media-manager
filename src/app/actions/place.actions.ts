@@ -1,11 +1,11 @@
-"use server";
+'use server'
 
-import { prisma } from "@/lib/prisma";
-import type { PlaceCreate, PlaceUpdate } from "@/services/place.service";
-import { revalidatePath } from "next/cache";
-import { logger } from "@/lib/logger";
+import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { revalidatePath } from 'next/cache'
+import type { Place } from '@prisma/client'
 
-const placeLogger = logger.withContext('PlaceActions');
+const placeLogger = logger.withContext('PlaceActions')
 
 const REVALIDATE_PATHS = [
   '/settings',
@@ -23,6 +23,37 @@ class PlaceError extends Error {
     super(message);
     this.name = 'PlaceError';
   }
+}
+
+export interface PlaceWithStats extends Place {
+  _count: {
+    images: number
+  }
+  totalSize: number
+}
+
+export interface PlaceCreate {
+  name: string;
+  emoji: string;
+  color: string;
+  description?: string | null;
+  shortcut?: string | null;
+  region: string;
+  type: string;
+  climate: string;
+  population: number;
+  government: string;
+  dangers: string;
+  resources: string;
+  lore: string;
+  history: string;
+  stats: string;
+  sortBy: string;
+  filters: string;
+}
+
+export interface PlaceUpdate extends Partial<PlaceCreate> {
+  id: string;
 }
 
 export async function getPlaces() {
@@ -119,10 +150,10 @@ export async function createPlace(data: PlaceCreate) {
     const place = await prisma.place.create({
       data: {
         ...data,
-        dangers: data.dangers ? JSON.stringify(data.dangers) : '[]',
-        resources: data.resources ? JSON.stringify(data.resources) : '[]',
-        stats: data.stats ? JSON.stringify(data.stats) : '{}',
-        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+        dangers: data.dangers || '[]',
+        resources: data.resources || '[]',
+        stats: data.stats || '{}',
+        filters: data.filters || '[]',
       },
     });
     placeLogger.info('✅ Lugar creado:', place.name);
@@ -141,10 +172,10 @@ export async function updatePlace(id: string, data: PlaceUpdate) {
       where: { id },
       data: {
         ...data,
-        dangers: data.dangers ? JSON.stringify(data.dangers) : undefined,
-        resources: data.resources ? JSON.stringify(data.resources) : undefined,
-        stats: data.stats ? JSON.stringify(data.stats) : undefined,
-        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+        dangers: data.dangers || undefined,
+        resources: data.resources || undefined,
+        stats: data.stats || undefined,
+        filters: data.filters || undefined,
       },
     });
     placeLogger.info('✅ Lugar actualizado:', place.name);

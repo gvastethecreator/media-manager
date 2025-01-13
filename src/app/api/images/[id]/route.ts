@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { generateThumbnail } from '@/lib/thumbnail'
 import { prisma } from '@/lib/prisma'
-import { ImageOptimizer } from '@/lib/image-optimizer'
-import path from 'path'
-import type { ThumbnailResult } from '@/lib/thumbnail'
+import { existsSync } from 'fs'
+import { ThumbnailQuality } from '@/types/thumbnails'
+import { logger } from '@/lib/logger'
 
-const imageOptimizer = new ImageOptimizer()
+const imageLogger = logger.withContext('ImageAPI')
 
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
   try {
+    const id = context.params.id
     const { searchParams } = new URL(request.url)
-    const width = searchParams.get('w') ? parseInt(searchParams.get('w')!) : undefined
-    const height = searchParams.get('h') ? parseInt(searchParams.get('h')!) : undefined
-    const quality = searchParams.get('q') ? parseInt(searchParams.get('q')!) : undefined
-    const format = searchParams.get('format') || 'webp'
+    const quality = (searchParams.get('quality') || 'medium') as ThumbnailQuality
 
+    // Obtener la imagen
     const image = await prisma.image.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     })
 
     if (!image) {
@@ -28,92 +28,73 @@ export async function GET(
       )
     }
 
-    // Verificar si es una solicitud de thumbnail
-    const isThumbnail = searchParams.get('thumbnail') === 'true'
-
-    if (isThumbnail) {
-      // Si ya tenemos un thumbnail guardado y no está corrupto, usarlo
-      if (image.thumbnail && !image.thumbnailError) {
-        return new NextResponse(image.thumbnail, {
-          headers: {
-            'Content-Type': 'image/webp',
-            'Cache-Control': 'public, max-age=31536000, immutable'
-          }
-        })
-      }
-
-      try {
-        // Generar nuevo thumbnail
-        const thumbnailResult = await imageOptimizer.generateThumbnail(image.path, {
-          width: 300,
-          height: 300,
-          quality: 60
-        })
-
-        // Guardar el thumbnail en la base de datos
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnail: thumbnailResult.buffer,
-            thumbnailWidth: thumbnailResult.width,
-            thumbnailHeight: thumbnailResult.height,
-            thumbnailSize: thumbnailResult.size,
-            thumbnailError: null,
-            thumbnailErrorAt: null
-          }
-        })
-
-        return new NextResponse(thumbnailResult.buffer, {
-          headers: {
-            'Content-Type': 'image/webp',
-            'Cache-Control': 'public, max-age=31536000, immutable'
-          }
-        })
-      } catch (error: unknown) {
-        console.error('Error generando thumbnail:', error)
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date()
-          }
-        })
-        throw error
-      }
+    // Verificar que el archivo existe
+    if (!existsSync(image.path)) {
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnailError: 'Archivo original no encontrado',
+          thumbnailErrorAt: new Date()
+        }
+      })
+      return NextResponse.json(
+        { error: 'Archivo original no encontrado' },
+        { status: 404 }
+      )
     }
 
-    // Para imágenes completas, optimizar según parámetros
-    const { buffer } = await imageOptimizer.optimizeImage(image.path, {
-      width,
-      height,
-      quality
-    })
+    try {
+      // Generar thumbnail
+      const result = await generateThumbnail(image.path, { quality })
 
-    // Actualizar estadísticas
-    await prisma.imageStats.upsert({
-      where: { imageId: image.id },
-      create: {
-        imageId: image.id,
-        views: 1,
-        downloads: 0,
-        lastViewed: new Date()
-      },
-      update: {
-        views: { increment: 1 },
-        lastViewed: new Date()
-      }
-    })
+      // Actualizar en base de datos
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnail: result.buffer,
+          thumbnailSize: result.size,
+          thumbnailWidth: result.width,
+          thumbnailHeight: result.height,
+          thumbnailError: null,
+          thumbnailErrorAt: null,
+          updatedAt: new Date()
+        }
+      })
 
-    return new NextResponse(buffer, {
-      headers: {
-        'Content-Type': `image/${format}`,
-        'Cache-Control': 'public, max-age=31536000, immutable'
-      }
-    })
+      // Devolver la imagen optimizada
+      return new NextResponse(result.buffer, {
+        headers: {
+          'Content-Type': 'image/webp',
+          'Cache-Control': 'public, max-age=31536000',
+          'Content-Length': result.size.toString()
+        }
+      })
+
+    } catch (error) {
+      imageLogger.error('Error procesando imagen:', error)
+
+      // Actualizar error en base de datos
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+          thumbnailErrorAt: new Date(),
+          thumbnail: null,
+          thumbnailSize: null,
+          thumbnailWidth: null,
+          thumbnailHeight: null
+        }
+      })
+
+      return NextResponse.json(
+        { error: 'Error procesando imagen' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
-    console.error('Error serving image:', error)
+    imageLogger.error('Error en ruta de imagen:', error)
     return NextResponse.json(
-      { error: 'Error al procesar la imagen' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }

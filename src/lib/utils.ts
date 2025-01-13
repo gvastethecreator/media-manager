@@ -5,6 +5,44 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  return function (this: any, ...args: Parameters<T>) {
+    const context = this
+
+    if (timeoutId) clearTimeout(timeoutId)
+
+    timeoutId = setTimeout(() => {
+      timeoutId = undefined
+      func.apply(context, args)
+    }, wait)
+  }
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean
+  let lastResult: ReturnType<T>
+
+  return function (this: any, ...args: Parameters<T>): any {
+    const context = this
+
+    if (!inThrottle) {
+      inThrottle = true
+      lastResult = func.apply(context, args)
+      setTimeout(() => (inThrottle = false), limit)
+    }
+
+    return lastResult
+  }
+}
+
 export function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return "0 Bytes"
 

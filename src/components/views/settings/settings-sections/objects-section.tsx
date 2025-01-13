@@ -19,7 +19,6 @@ import {
 	Crown,
 	Scroll,
 } from "lucide-react";
-import { useObjectsStore } from "@/store/objects";
 import { CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -33,32 +32,22 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import type {
-	ObjectCreate,
-	ObjectUpdate,
-	ObjectWithStats,
-} from "@/services/object.service";
-import type { EmojiClickData } from "@/types/emoji";
+import { getObjects, createObject, updateObject, deleteObject } from "@/app/actions/object.actions";
+import type { Object } from "@prisma/client";
 
 const objectLogger = logger.withContext("ObjectsSection");
 
-interface EditForm extends ObjectUpdate {
+interface EditForm extends Partial<Object> {
 	id: string;
 }
 
 export function ObjectsSection() {
-	const {
-		objects,
-		isLoading,
-		error,
-		createObject,
-		updateObject,
-		deleteObject,
-		loadObjects,
-	} = useObjectsStore();
+	const [objects, setObjects] = React.useState<Object[]>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
+	const [error, setError] = React.useState<Error | null>(null);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
-	const [newObject, setNewObject] = React.useState<ObjectCreate>({
+	const [newObject, setNewObject] = React.useState<Partial<Object>>({
 		name: "",
 		emoji: "🎯",
 		description: "",
@@ -72,11 +61,29 @@ export function ObjectsSection() {
 	});
 	const { toast } = useToast();
 
+	const loadObjects = React.useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const data = await getObjects();
+			setObjects(data);
+			setError(null);
+		} catch (error) {
+			setError(error as Error);
+			toast({
+				title: "Error al cargar objetos",
+				description: "No se pudieron cargar los objetos.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [toast]);
+
 	React.useEffect(() => {
 		loadObjects();
 	}, [loadObjects]);
 
-	const handleStartEdit = (object: ObjectWithStats) => {
+	const handleStartEdit = (object: Object) => {
 		setEditingId(object.id);
 		setEditForm({
 			id: object.id,
@@ -97,10 +104,12 @@ export function ObjectsSection() {
 		e.preventDefault();
 		if (!editForm) return;
 
+		setIsLoading(true);
 		try {
 			objectLogger.info("📝 Actualizando objeto...", editForm);
 			const { id, ...data } = editForm;
 			await updateObject(id, data);
+			await loadObjects();
 			setEditingId(null);
 			setEditForm(null);
 			toast({
@@ -114,15 +123,19 @@ export function ObjectsSection() {
 				description: "No se pudo actualizar el objeto.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleSubmitCreate = async (e: React.FormEvent) => {
 		e.preventDefault();
 
+		setIsLoading(true);
 		try {
 			objectLogger.info("✨ Creando objeto...", newObject);
 			await createObject(newObject);
+			await loadObjects();
 			setNewObject({
 				name: "",
 				emoji: "🎯",
@@ -146,13 +159,17 @@ export function ObjectsSection() {
 				description: "No se pudo crear el objeto.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleDeleteObject = async (id: string) => {
+		setIsLoading(true);
 		try {
 			objectLogger.info("🗑️ Eliminando objeto...", id);
 			await deleteObject(id);
+			await loadObjects();
 			toast({
 				title: "✅ Objeto eliminado",
 				description: "El objeto se ha eliminado correctamente.",
@@ -164,6 +181,8 @@ export function ObjectsSection() {
 				description: "No se pudo eliminar el objeto.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 

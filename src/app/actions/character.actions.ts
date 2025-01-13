@@ -1,11 +1,11 @@
-"use server";
+'use server'
 
-import { prisma } from "@/lib/prisma";
-import type { CharacterCreate, CharacterUpdate } from "@/services/character.service";
-import { revalidatePath } from "next/cache";
-import { logger } from "@/lib/logger";
+import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { revalidatePath } from 'next/cache'
+import type { Character } from '@prisma/client'
 
-const characterLogger = logger.withContext('CharacterActions');
+const characterLogger = logger.withContext('CharacterActions')
 
 const REVALIDATE_PATHS = [
   '/settings',
@@ -23,6 +23,33 @@ class CharacterError extends Error {
     super(message);
     this.name = 'CharacterError';
   }
+}
+
+export interface CharacterWithStats extends Character {
+  _count: {
+    images: number
+  }
+  totalSize: number
+}
+
+export interface CharacterCreate {
+  name: string;
+  emoji: string;
+  color: string;
+  description?: string | null;
+  shortcut?: string | null;
+  level: number;
+  class: string;
+  race: string;
+  alignment: string;
+  backstory: string;
+  stats: string;
+  sortBy: string;
+  filters: string;
+}
+
+export interface CharacterUpdate extends Partial<CharacterCreate> {
+  id: string;
 }
 
 export async function getCharacters() {
@@ -119,8 +146,8 @@ export async function createCharacter(data: CharacterCreate) {
     const character = await prisma.character.create({
       data: {
         ...data,
-        stats: data.stats ? JSON.stringify(data.stats) : '{}',
-        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+        stats: data.stats || '{}',
+        filters: data.filters || '[]',
       },
     });
     characterLogger.info('✅ Personaje creado:', character.name);
@@ -139,8 +166,8 @@ export async function updateCharacter(id: string, data: CharacterUpdate) {
       where: { id },
       data: {
         ...data,
-        stats: data.stats ? JSON.stringify(data.stats) : undefined,
-        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+        stats: data.stats || undefined,
+        filters: data.filters || undefined,
       },
     });
     characterLogger.info('✅ Personaje actualizado:', character.name);

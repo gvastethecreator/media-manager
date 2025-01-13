@@ -14,7 +14,7 @@ export async function GET(
   try {
     const id = context.params.id
     const { searchParams } = new URL(request.url)
-    const quality = searchParams.get('quality') || 'mid'
+    const quality = searchParams.get('quality') || 'medium'
     const qualityConfig = THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality]
 
     // Obtener la imagen
