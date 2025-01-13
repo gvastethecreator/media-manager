@@ -6,7 +6,7 @@ import type { CollectionContentProps } from "@/components/views/base";
 import { Library } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { FileItem } from "@/types/file-item";
-import { collectionService } from "@/services/collection.service";
+import { getCollectionImages } from "@/app/actions/collection.actions";
 
 export function CollectionContentView() {
 	const {
@@ -26,9 +26,7 @@ export function CollectionContentView() {
 
 		const loadImages = async () => {
 			try {
-				const images = await collectionService.getCollectionImages(
-					currentCollection.id
-				);
+				const images = await getCollectionImages(currentCollection.id);
 				setCollectionImages(images);
 			} catch (error) {
 				console.error("Error loading collection images:", error);
@@ -76,9 +74,7 @@ export function CollectionContentView() {
 			for (const imageId of imageIds) {
 				await addImageToCollection(currentCollection.id, imageId);
 				// Recargar imágenes después de agregar
-				const images = await collectionService.getCollectionImages(
-					currentCollection.id
-				);
+				const images = await getCollectionImages(currentCollection.id);
 				setCollectionImages(images);
 			}
 		},
