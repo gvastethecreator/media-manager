@@ -1,70 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ViewProps } from "../types";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
+import { useEffect, useState, useCallback } from "react";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { BaseContentProps } from "@/components/views/base";
 import { Box } from "lucide-react";
 import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
+import { logger } from "@/lib/logger";
+import { getObjectImages } from "@/app/actions/object.actions";
+import { eventsService, type EventData } from "@/services/events.service";
 
-export function ObjectContentView({ isResizing }: ViewProps) {
+const viewLogger = logger.withContext("ObjectContentView");
+
+export function ObjectContentView() {
 	const { currentObjectId } = useFileManager();
-	const [images, setImages] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchObjectImages = async () => {
-			if (!currentObjectId) return;
+	const loadObjectImages = useCallback(async () => {
+		if (!currentObjectId) return;
 
-			try {
-				setIsLoading(true);
-				const response = await fetch(`/api/objects/${currentObjectId}/images`);
-				const data = await response.json();
-				setImages(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchObjectImages();
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando imágenes del objeto...");
+			const data = await getObjectImages(currentObjectId);
+			setItems(data as unknown as FileItem[]);
+			viewLogger.info("✅ Imágenes cargadas");
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando imágenes:", errorMessage);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, [currentObjectId]);
 
-	if (!currentObjectId) {
-		return (
-			<EmptyState
-				icon={Box}
-				title="No hay objeto seleccionado"
-				description="Selecciona un objeto para ver su contenido."
-			/>
-		);
-	}
+	useEffect(() => {
+		// Cargar imágenes inicialmente
+		loadObjectImages();
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
+		// Suscribirse a eventos relevantes
+		const handleImagesModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de imágenes recibido:", data);
+			loadObjectImages();
+		};
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+		eventsService.on("images:modified", handleImagesModified);
+		eventsService.on("objects:modified", handleImagesModified);
 
-	if (!images || images.length === 0) {
-		return (
-			<EmptyState
-				icon={Box}
-				title="Objeto sin imágenes"
-				description="Este objeto no tiene imágenes asociadas."
-			/>
-		);
-	}
+		return () => {
+			eventsService.off("images:modified", handleImagesModified);
+			eventsService.off("objects:modified", handleImagesModified);
+		};
+	}, [loadObjectImages]);
 
-	return <FileGrid items={images} isResizing={isResizing} />;
+	const handleItemSelection = useCallback((item: FileItem) => {
+		viewLogger.info("🖱️ Item seleccionado:", item.name);
+	}, []);
+
+	const contentProps: BaseContentProps = {
+		items,
+		isLoading,
+		error,
+		toggleItemSelection: handleItemSelection,
+		currentContainerId: currentObjectId ?? null,
+		emptyState: !currentObjectId
+			? {
+					icon: Box,
+					title: "No hay objeto seleccionado",
+					description: "Selecciona un objeto para ver su contenido.",
+			  }
+			: {
+					icon: Box,
+					title: "Objeto sin imágenes",
+					description: "Este objeto no tiene imágenes asociadas.",
+			  },
+	};
+
+	return (
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView />
+		</ContentViewProvider>
+	);
 }

@@ -42,6 +42,15 @@ interface DetailsPanelProps {
 	onClose?: () => void;
 }
 
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
 export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const [imageError, setImageError] = React.useState(false);
 	const [isMarked, setIsMarked] = React.useState(false);
@@ -53,17 +62,15 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 
 	const handleOpenViewer = React.useCallback(
 		async (item: FileItem) => {
-			if (
-				item.type === "image" ||
-				item.metadata?.mimeType?.startsWith("image/")
-			) {
+			const metadata = getMetadata(item.metadata);
+			if (item.type === "image" || metadata?.mimeType?.startsWith("image/")) {
 				try {
 					// Usar las imágenes del directorio actual
 					const currentItems = fileManager.currentItems || [];
-					const allImages = currentItems.filter(
-						(i: FileItem) =>
-							i.type === "image" || i.metadata?.mimeType?.startsWith("image/")
-					);
+					const allImages = currentItems.filter((i: FileItem) => {
+						const meta = getMetadata(i.metadata);
+						return i.type === "image" || meta?.mimeType?.startsWith("image/");
+					});
 
 					if (allImages.length === 0) {
 						throw new Error("No hay imágenes disponibles");
@@ -108,9 +115,10 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 										src: originalUrl,
 										thumbnail: thumbnailUrl || originalUrl,
 										alt: img.name,
-										mimeType: img.metadata?.mimeType || "image/jpeg",
-										width: img.metadata?.dimensions?.width,
-										height: img.metadata?.dimensions?.height,
+										mimeType:
+											getMetadata(img.metadata)?.mimeType || "image/jpeg",
+										width: getMetadata(img.metadata)?.dimensions?.width,
+										height: getMetadata(img.metadata)?.dimensions?.height,
 										metadata: img.metadata,
 									} as ImageItem;
 								} catch (error) {
@@ -207,13 +215,14 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 
 			if (!imageUrl) return null;
 
+			const metadata = getMetadata(item.metadata);
 			return (
 				<div className="relative w-full h-full">
 					<ImageCard
 						src={imageUrl}
 						alt={item.name}
-						width={item.metadata?.dimensions?.width || 300}
-						height={item.metadata?.dimensions?.height || 300}
+						width={metadata?.dimensions?.width || 300}
+						height={metadata?.dimensions?.height || 300}
 						className="w-full h-full object-contain transition-transform rounded-none hover:scale-95 hover:rounded-sm cursor-pointer"
 						priority={true}
 						onClick={() => handleOpenViewer(item)}

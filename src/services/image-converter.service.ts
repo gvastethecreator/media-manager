@@ -1,7 +1,56 @@
-import type { FileItem } from '@/types/file-item'
+import type { FileItem, Dimensions } from '@/types/file-item'
 import { logger } from '@/lib/logger'
 
 const converterLogger = logger.withContext('ImageConverter')
+
+interface RelatedCollection {
+  id: string
+  name: string
+  emoji: string
+  color: string
+}
+
+interface RelatedTag {
+  id: string
+  name: string
+  color: string
+}
+
+interface RelatedAlbum {
+  id: string
+  name: string
+  emoji: string
+  color: string
+}
+
+interface RelatedCharacter {
+  id: string
+  name: string
+  emoji: string
+  color: string
+  level?: number
+  class?: string
+  race?: string
+}
+
+interface RelatedPlace {
+  id: string
+  name: string
+  emoji: string
+  color: string
+  region?: string
+  type?: string
+  climate?: string
+}
+
+interface RelatedObject {
+  id: string
+  name: string
+  emoji: string
+  color: string
+  type?: string
+  rarity?: string
+}
 
 export interface ServerImage {
   id: string
@@ -20,49 +69,12 @@ export interface ServerImage {
   folderId: string
   createdAt: Date
   updatedAt: Date
-  collections?: Array<{
-    id: string
-    name: string
-    emoji: string
-    color: string
-  }>
-  tags?: Array<{
-    id: string
-    name: string
-    color: string
-  }>
-  albums?: Array<{
-    id: string
-    name: string
-    emoji: string
-    color: string
-  }>
-  characters?: Array<{
-    id: string
-    name: string
-    emoji: string
-    color: string
-    level?: number
-    class?: string
-    race?: string
-  }>
-  places?: Array<{
-    id: string
-    name: string
-    emoji: string
-    color: string
-    region?: string
-    type?: string
-    climate?: string
-  }>
-  objects?: Array<{
-    id: string
-    name: string
-    emoji: string
-    color: string
-    type?: string
-    rarity?: string
-  }>
+  collections?: RelatedCollection[]
+  tags?: RelatedTag[]
+  albums?: RelatedAlbum[]
+  characters?: RelatedCharacter[]
+  places?: RelatedPlace[]
+  objects?: RelatedObject[]
 }
 
 const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
@@ -78,10 +90,9 @@ const validateMetadata = (metadata: string | null): Record<string, any> | undefi
 
 export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
   try {
-    const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
       ? Buffer.from(image.thumbnail).toString('base64')
-      : undefined
+      : null
 
     return {
       id: image.id,
@@ -89,15 +100,15 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
       path: image.path,
       type: 'image',
       size: image.size,
-      width: image.width ?? undefined,
-      height: image.height ?? undefined,
-      metadata,
+      width: image.width,
+      height: image.height,
+      metadata: image.metadata,
       thumbnail,
-      thumbnailSize: image.thumbnailSize ?? undefined,
-      thumbnailWidth: image.thumbnailWidth ?? undefined,
-      thumbnailHeight: image.thumbnailHeight ?? undefined,
-      createdAt: image.createdAt.toISOString(),
-      updatedAt: image.updatedAt.toISOString(),
+      thumbnailSize: image.thumbnailSize,
+      thumbnailWidth: image.thumbnailWidth,
+      thumbnailHeight: image.thumbnailHeight,
+      createdAt: image.createdAt,
+      updatedAt: image.updatedAt,
       isPublic: image.isPublic ?? false,
       isFavorite: image.isFavorite ?? false,
       folderId: image.folderId,

@@ -45,6 +45,15 @@ const variants = {
 	exit: { scale: 0.95, opacity: 0 },
 };
 
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
 export function FileCard({
 	item,
 	onClick,
@@ -89,12 +98,13 @@ export function FileCard({
 					throw new Error("No se pudo obtener la URL de la imagen");
 				}
 
+				const metadata = getMetadata(item.metadata);
 				const imageToView: ImageItem = {
 					...item,
 					url,
 					src: url,
 					alt: item.name,
-					mimeType: item.metadata?.mimeType || "image/jpeg",
+					mimeType: metadata?.mimeType || "image/jpeg",
 				};
 
 				toast({
@@ -205,8 +215,8 @@ export function FileCard({
 								<ImageCard
 									src={thumbnail}
 									alt={item.name}
-									width={item.metadata?.dimensions?.width || 300}
-									height={item.metadata?.dimensions?.height || 300}
+									width={getMetadata(item.metadata)?.dimensions?.width || 300}
+									height={getMetadata(item.metadata)?.dimensions?.height || 300}
 									className={cn(
 										"h-full w-full rounded-sm border-1 bg-black/50 border-white/10",
 										isSelected && "ring-2 ring-primary ring-offset-2"

@@ -131,6 +131,8 @@ export const useSettingsStore = create<SettingsState>()(
               sortDirection: 'asc',
               filters: [],
               count: 0,
+              createdAt: new Date(),
+              updatedAt: new Date(),
               ...collection
             }
             return {

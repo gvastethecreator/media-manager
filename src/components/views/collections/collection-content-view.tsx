@@ -1,83 +1,99 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useFileManager } from "@/store/file-manager.store";
-import { useImageViewer } from "@/store/image-viewer.store";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { LibraryBig } from "lucide-react";
+import { useCollectionsStore } from "@/store/collections.store";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { CollectionContentProps } from "@/components/views/base";
+import { Library } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import type { FileItem } from "@/types/file-item";
-import { LoadingScreen } from "@/components/core/feedback";
-import BlurFade from "@/components/ui/blur-fade";
-import { useFiles } from "@/context/file-context";
+import { collectionService } from "@/services/collection.service";
 
 export function CollectionContentView() {
 	const {
-		currentItems: items,
-		currentCollectionId,
-		setCurrentCollection,
-		isLoading,
-	} = useFileManager();
-	const { handleSelectItem } = useFiles();
-	const { openViewer } = useImageViewer();
+		loading: isLoading,
+		currentCollection,
+		addImageToCollection,
+	} = useCollectionsStore();
 
+	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
+
+	// Cargar imágenes cuando cambia la colección
 	useEffect(() => {
-		if (currentCollectionId) {
-			setCurrentCollection(currentCollectionId);
+		if (!currentCollection?.id) {
+			setCollectionImages([]);
+			return;
 		}
-	}, [currentCollectionId, setCurrentCollection]);
 
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
-			handleSelectItem(item);
+		const loadImages = async () => {
+			try {
+				const images = await collectionService.getCollectionImages(
+					currentCollection.id
+				);
+				setCollectionImages(images);
+			} catch (error) {
+				console.error("Error loading collection images:", error);
+			}
+		};
+
+		loadImages();
+	}, [currentCollection?.id]);
+
+	const handleToggleItemSelection = useCallback(
+		(item: FileItem, isMultiSelect: boolean) => {
+			const store = useCollectionsStore.getState();
+			store.toggleItemSelection(
+				{
+					id: item.id,
+					name: item.name,
+					emoji: "📷",
+					description: null,
+					color: "#3b82f6",
+					shortcut: null,
+					sortBy: "name",
+					filters: "[]",
+					createdAt: item.createdAt,
+					updatedAt: item.updatedAt,
+				},
+				isMultiSelect
+			);
 		},
-		[handleSelectItem]
+		[]
 	);
 
-	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
+	const contentProps: CollectionContentProps = {
+		items: collectionImages,
+		isLoading,
+		toggleItemSelection: handleToggleItemSelection,
+		currentContainerId: currentCollection?.id ?? null,
+		containerName: currentCollection?.name ?? null,
+		setCurrentContainer: async (id: string) => {
+			const store = useCollectionsStore.getState();
+			await store.loadCollectionContent(id);
+		},
+		addImagesToCollection: async (imageIds: string[]) => {
+			if (!currentCollection?.id) return;
+
+			for (const imageId of imageIds) {
+				await addImageToCollection(currentCollection.id, imageId);
+				// Recargar imágenes después de agregar
+				const images = await collectionService.getCollectionImages(
+					currentCollection.id
 				);
-				openViewer(
-					imageItems,
-					imageItems.findIndex((i) => i.id === item.id)
-				);
+				setCollectionImages(images);
 			}
 		},
-		[openViewer, items]
-	);
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!items || items.length === 0) {
-		return (
-			<EmptyState
-				icon={LibraryBig}
-				title="Colección vacía"
-				description="No se encontraron imágenes en esta colección"
-			/>
-		);
-	}
+		emptyState: {
+			icon: Library,
+			title: "Colección vacía",
+			description: `No se encontraron imágenes en ${
+				currentCollection?.name || "esta colección"
+			}`,
+		},
+	};
 
 	return (
-		<div className="h-full w-full flex overflow-hidden">
-			<div className="h-full w-full overflow-auto">
-				<BlurFade
-					className="h-full w-full overflow-auto"
-					delay={0.5}
-					inView={true}
-				>
-					<FileGrid
-						items={items}
-						onItemClick={handleItemClick}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
-				</BlurFade>
-			</div>
-		</div>
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView />
+		</ContentViewProvider>
 	);
 }

@@ -24,9 +24,16 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
+import { useRouter } from "next/navigation";
+import { getCharacters } from "@/app/actions/character.actions";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+import type { CharacterWithStats } from "@/app/actions/character.actions";
+
+const viewLogger = logger.withContext("CharactersView");
 
 interface CharacterCardProps {
-	character: any;
+	character: CharacterWithStats;
 	onClick: () => void;
 }
 
@@ -47,6 +54,16 @@ function getRandomGradient() {
 
 function CharacterCard({ character, onClick }: CharacterCardProps) {
 	const gradient = getRandomGradient();
+	const router = useRouter();
+
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando personaje:", character.name);
+			router.push("/settings/characters");
+		},
+		[router, character.name]
+	);
 
 	return (
 		<motion.div
@@ -70,10 +87,30 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 							</CardTitle>
 							<CardDescription className="flex items-center gap-2 text-xs">
 								<ImageIcon className="h-3 w-3" />
-								<span>{character.count} imágenes</span>
+								<span>{character._count.images} imágenes</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="p-4 pt-0">
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-2">
+									<Badge variant="secondary" className="font-normal">
+										{character.race}
+									</Badge>
+									<Badge variant="secondary" className="font-normal">
+										{character.class}
+									</Badge>
+								</div>
+								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8"
+										onClick={handleEdit}
+									>
+										<Settings2 className="w-4 h-4" />
+									</Button>
+								</div>
+							</div>
 							<div
 								className={cn(
 									"absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r",
@@ -97,7 +134,7 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 							</h4>
 							<div className="flex items-center gap-4">
 								<Badge variant="secondary" className="font-normal">
-									{character.count} imágenes
+									{character._count.images} imágenes
 								</Badge>
 							</div>
 						</div>
@@ -105,6 +142,7 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 text-muted-foreground"
+							onClick={handleEdit}
 						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
@@ -118,29 +156,50 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 export function CharactersView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCharacter } = useFileManager();
-	const [characters, setCharacters] = useState<any[]>([]);
+	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchCharacters = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch("/api/characters");
-				const data = await response.json();
-				setCharacters(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchCharacters();
+	const fetchCharacters = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando personajes...");
+			const data = await getCharacters();
+			setCharacters(data);
+			viewLogger.info(`✅ ${data.length} personajes cargados`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando personajes:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar personajes inicialmente
+		fetchCharacters();
+
+		// Suscribirse a eventos relevantes
+		const handleCharacterModified = (data?: EventData) => {
+			viewLogger.info(
+				"📢 Evento de modificación de personajes recibido:",
+				data
+			);
+			fetchCharacters();
+		};
+
+		eventsService.on("characters:modified", handleCharacterModified);
+
+		return () => {
+			eventsService.off("characters:modified", handleCharacterModified);
+		};
+	}, [fetchCharacters]);
+
 	const handleCharacterClick = useCallback(
-		(character: any) => {
+		(character: CharacterWithStats) => {
+			viewLogger.info("🖱️ Click en personaje:", character.name);
 			setCurrentView("character-content");
 			setCurrentCharacter(character.id);
 		},
