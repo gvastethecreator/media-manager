@@ -24,9 +24,16 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
+import { useRouter } from "next/navigation";
+import { getObjects } from "@/app/actions/object.actions";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+import type { ObjectWithStats } from "@/app/actions/object.actions";
+
+const viewLogger = logger.withContext("ObjectsView");
 
 interface ObjectCardProps {
-	object: any;
+	object: ObjectWithStats;
 	onClick: () => void;
 }
 
@@ -47,6 +54,16 @@ function getRandomGradient() {
 
 function ObjectCard({ object, onClick }: ObjectCardProps) {
 	const gradient = getRandomGradient();
+	const router = useRouter();
+
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando objeto:", object.name);
+			router.push("/settings/objects");
+		},
+		[router, object.name]
+	);
 
 	return (
 		<motion.div
@@ -70,10 +87,30 @@ function ObjectCard({ object, onClick }: ObjectCardProps) {
 							</CardTitle>
 							<CardDescription className="flex items-center gap-2 text-xs">
 								<ImageIcon className="h-3 w-3" />
-								<span>{object.count} imágenes</span>
+								<span>{object._count.images} imágenes</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="p-4 pt-0">
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-2">
+									<Badge variant="secondary" className="font-normal">
+										{object.type}
+									</Badge>
+									<Badge variant="secondary" className="font-normal">
+										{object.rarity}
+									</Badge>
+								</div>
+								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8"
+										onClick={handleEdit}
+									>
+										<Settings2 className="w-4 h-4" />
+									</Button>
+								</div>
+							</div>
 							<div
 								className={cn(
 									"absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r",
@@ -95,7 +132,7 @@ function ObjectCard({ object, onClick }: ObjectCardProps) {
 							</h4>
 							<div className="flex items-center gap-4">
 								<Badge variant="secondary" className="font-normal">
-									{object.count} imágenes
+									{object._count.images} imágenes
 								</Badge>
 							</div>
 						</div>
@@ -103,6 +140,7 @@ function ObjectCard({ object, onClick }: ObjectCardProps) {
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 text-muted-foreground"
+							onClick={handleEdit}
 						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
@@ -116,29 +154,47 @@ function ObjectCard({ object, onClick }: ObjectCardProps) {
 export function ObjectsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentObject } = useFileManager();
-	const [objects, setObjects] = useState<any[]>([]);
+	const [objects, setObjects] = useState<ObjectWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchObjects = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch("/api/objects");
-				const data = await response.json();
-				setObjects(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchObjects();
+	const fetchObjects = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando objetos...");
+			const data = await getObjects();
+			setObjects(data);
+			viewLogger.info(`✅ ${data.length} objetos cargados`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando objetos:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar objetos inicialmente
+		fetchObjects();
+
+		// Suscribirse a eventos relevantes
+		const handleObjectModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de objetos recibido:", data);
+			fetchObjects();
+		};
+
+		eventsService.on("objects:modified", handleObjectModified);
+
+		return () => {
+			eventsService.off("objects:modified", handleObjectModified);
+		};
+	}, [fetchObjects]);
+
 	const handleObjectClick = useCallback(
-		(object: any) => {
+		(object: ObjectWithStats) => {
+			viewLogger.info("🖱️ Click en objeto:", object.name);
 			setCurrentView("object-content");
 			setCurrentObject(object.id);
 		},

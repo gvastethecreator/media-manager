@@ -16,6 +16,15 @@ export interface ImageCardProps {
 	onError?: () => void;
 }
 
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
 export function ImageCard({
 	src,
 	alt,
@@ -35,8 +44,9 @@ export function ImageCard({
 		if (onClick) onClick();
 	};
 
+	const metadata = file?.metadata ? getMetadata(file.metadata) : null;
 	const imageSrc = file?.thumbnail
-		? `data:${file.metadata?.mimeType || "image/webp"};base64,${file.thumbnail}`
+		? `data:${metadata?.mimeType || "image/webp"};base64,${file.thumbnail}`
 		: src;
 
 	if (!imageSrc) {

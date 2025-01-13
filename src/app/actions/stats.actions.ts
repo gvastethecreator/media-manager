@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import { handlePrismaError } from '@/lib/errors'
 import { FileItem } from "@/types/file-item";
+import { convertServerImageToFileItem } from '@/services/image-converter.service'
 
 const statsLogger = logger.withContext('StatsActions')
 
@@ -101,26 +102,32 @@ export async function getGeneralStats(): Promise<GeneralStats> {
     ]);
 
     // Transformar imágenes populares al formato FileItem
-    const popularImages: FileItem[] = rawPopularImages.map(img => ({
-      id: img.id,
-      name: img.name,
-      path: img.path,
-      size: img.size,
-      type: 'image',
-      createdAt: img.createdAt,
-      updatedAt: img.updatedAt,
-      metadata: img.metadata ? JSON.parse(img.metadata) : {},
-      tags: img.tags.map(t => t.id),
-      collections: img.collections.map(c => c.id),
-      albums: img.albums.map(a => a.id),
-      characters: img.characters.map(c => c.id),
-      places: img.places.map(p => p.id),
-      objects: img.objects.map(o => o.id),
-      favorite: false,
-      views: img.stats?.views || 0,
-      downloads: img.stats?.downloads || 0,
-      count: 0,
-    }));
+    const popularImages = rawPopularImages.map(img => {
+      const fileItem = convertServerImageToFileItem({
+        ...img,
+        width: null,
+        height: null,
+        metadata: null,
+        thumbnail: null,
+        thumbnailSize: null,
+        thumbnailWidth: null,
+        thumbnailHeight: null,
+        isPublic: false,
+        isFavorite: false,
+        collections: img.collections,
+        tags: img.tags,
+        albums: img.albums,
+        characters: img.characters,
+        places: img.places,
+        objects: img.objects,
+      });
+
+      return {
+        ...fileItem,
+        views: img.stats?.views || 0,
+        downloads: img.stats?.downloads || 0,
+      };
+    });
 
     // Transformar actividades recientes
     const recentActivity = rawRecentActivity.map(activity => ({

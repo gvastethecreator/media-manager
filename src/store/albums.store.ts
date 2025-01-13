@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { logger } from '@/lib/logger'
 import type { FileItem } from '@/types/file-item'
 import {
@@ -14,7 +13,7 @@ import {
   type AlbumUpdate,
   type AlbumWithStats
 } from '@/app/actions/album.actions'
-import { createBaseStore, type BaseEntity, type BaseState, type BaseActions } from './base.store'
+import { createBaseStore, type BaseEntity, type BaseState, type BaseActions, type ExtendedStore } from './base.store'
 
 const albumLogger = logger.withContext('AlbumStore')
 
@@ -33,14 +32,13 @@ interface Album extends BaseEntity {
 }
 
 // Estado específico para Album
-interface AlbumState extends Omit<BaseState<Album>, 'error'> {
+interface AlbumState {
   currentAlbum: Album | null
   currentItems: FileItem[]
-  error: Error | null
 }
 
 // Acciones específicas para Album
-interface AlbumActions extends Omit<BaseActions<Album>, 'createItem' | 'updateItem'> {
+interface AlbumActions extends Omit<BaseActions<Album, AlbumCreate, AlbumUpdate>, 'createItem' | 'updateItem'> {
   createItem: (data: AlbumCreate) => Promise<void>
   updateItem: (id: string, data: AlbumUpdate) => Promise<void>
   addImageToAlbum: (albumId: string, imageId: string) => Promise<void>
@@ -48,25 +46,14 @@ interface AlbumActions extends Omit<BaseActions<Album>, 'createItem' | 'updateIt
   loadAlbumContent: (id: string) => Promise<void>
 }
 
-type AlbumStore = AlbumState & AlbumActions
-
-const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
-  if (!metadata) return undefined
-  try {
-    const parsed = JSON.parse(metadata)
-    return typeof parsed === 'object' ? parsed : undefined
-  } catch {
-    albumLogger.warn('⚠️ Error al parsear metadata de imagen')
-    return undefined
-  }
-}
+type AlbumStore = ExtendedStore<Album, AlbumState, AlbumCreate, AlbumUpdate> & AlbumActions
 
 const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getAlbumImages>>[0]): FileItem => {
   try {
-    const metadata = validateMetadata(image.metadata)
+    const metadata = image.metadata
     const thumbnail = image.thumbnail
       ? Buffer.from(image.thumbnail).toString('base64')
-      : undefined
+      : null
 
     return {
       id: image.id,
@@ -74,18 +61,24 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getAlbumI
       path: image.path,
       type: 'image',
       size: image.size,
-      width: image.width ?? undefined,
-      height: image.height ?? undefined,
+      width: image.width,
+      height: image.height,
       metadata,
       thumbnail,
-      thumbnailSize: image.thumbnailSize ?? undefined,
-      thumbnailWidth: image.thumbnailWidth ?? undefined,
-      thumbnailHeight: image.thumbnailHeight ?? undefined,
-      createdAt: image.createdAt.toISOString(),
-      updatedAt: image.updatedAt.toISOString(),
+      thumbnailSize: image.thumbnailSize,
+      thumbnailWidth: image.thumbnailWidth,
+      thumbnailHeight: image.thumbnailHeight,
       isPublic: image.isPublic ?? false,
       isFavorite: image.isFavorite ?? false,
       folderId: image.folderId,
+      createdAt: image.createdAt,
+      updatedAt: image.updatedAt,
+      collections: [],
+      tags: [],
+      albums: [],
+      characters: [],
+      places: [],
+      objects: []
     }
   } catch (error) {
     albumLogger.error('❌ Error al convertir imagen del servidor:', { error, image })
@@ -93,11 +86,11 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getAlbumI
   }
 }
 
-export const useAlbumsStore = createBaseStore<Album>(
+export const useAlbumsStore = createBaseStore<Album, AlbumState, AlbumCreate, AlbumUpdate>(
   'album',
   '/api/albums',
   { customLogger: albumLogger }
-)((set: (state: Partial<AlbumState>) => void, get: () => AlbumState) => {
+)((set, get) => {
   const baseStore: AlbumStore = {
     // Estado inicial
     currentAlbum: null,

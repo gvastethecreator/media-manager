@@ -389,3 +389,117 @@ Mejorar la calidad del código, eliminar redundancias y preparar la transición 
    - Se implementa el manejo de errores con tipos específicos
    - Se mejora la experiencia del usuario con feedback visual
    - Se optimiza el manejo de estado con React.useState y useCallback
+
+### 2024-03-XX: Implementación de BaseContentView
+
+#### Objetivo
+
+Crear un componente base reutilizable para todas las vistas de contenido (albums, collections, characters, etc.)
+
+#### Plan de Implementación
+
+1. Fase 1: Componente Base ✅
+
+   - [x] Crear BaseContentView
+   - [x] Implementar ContentViewProvider
+   - [x] Definir interfaces y tipos
+   - [x] Documentar componente
+
+2. Fase 2: Migración 🚧
+
+   - [x] Migrar folder-content-view a nuevo sistema
+     - [x] Implementación básica
+     - [x] Integración con FileGrid
+     - [x] Soporte para reindexado de carpetas
+     - [x] Estado vacío personalizado
+   - [x] Migrar collection-content-view a nuevo sistema
+     - [x] Implementación básica
+     - [x] Carga de imágenes
+     - [x] Manejo de selección
+     - [x] Acciones específicas de colección
+   - [x] Migrar all-images-view a nuevo sistema
+     - [x] Implementación básica
+     - [x] Integración con FileContext
+     - [x] Manejo de eventos
+   - [x] Migrar favorites-view a nuevo sistema
+     - [x] Implementación básica
+     - [x] Filtrado de favoritos
+     - [x] Manejo de eventos específicos
+   - [x] Migrar character-content-view a nuevo sistema
+     - [x] Implementación básica
+     - [x] Carga de imágenes por personaje
+     - [x] Manejo de errores mejorado
+   - [ ] Probar funcionalidad
+   - [x] Documentar proceso de migración
+
+3. Fase 3: Rollout (Pendiente)
+   - [ ] Migrar vistas restantes:
+     - [ ] albums-content-view
+     - [ ] places-content-view
+     - [ ] objects-content-view
+     - [ ] tags-content-view
+   - [ ] Pruebas de integración
+   - [ ] Optimización y ajustes finales
+
+#### Archivos Creados/Modificados
+
+- ✅ src/components/views/base/base-content-view.tsx
+  - Agregado manejo de errores
+  - Mejorada la tipografía de errores
+- ✅ src/components/views/base/content-view-provider.tsx
+  - Actualizado para incluir manejo de errores
+- ✅ src/components/views/base/types.ts
+  - Agregado tipo de error
+  - Actualizado tipo de icono para compatibilidad con Lucide
+- ✅ src/components/views/all-images/all-images-view.tsx
+  - Migrado a nuevo sistema base
+  - Integrado con FileContext
+- ✅ src/components/views/favorites/favorites-view.tsx
+  - Migrado a nuevo sistema base
+  - Mantenido filtrado de favoritos
+  - Integrado sistema de eventos
+- ✅ src/components/views/characters/character-content-view.tsx
+  - Migrado a nuevo sistema base
+  - Mejorado manejo de errores
+  - Integrado con API de personajes
+
+#### Cambios Realizados
+
+1. Sistema Base Mejorado
+
+   - Implementación de manejo de errores
+   - Actualización de tipos para mejor compatibilidad
+   - Mejora en la visualización de estados de error
+
+2. Migración de Vistas Adicionales
+
+   - All Images View:
+     - Integración con FileContext
+     - Manejo de eventos del sistema
+   - Favorites View:
+     - Mantenimiento de filtrado
+     - Sistema de eventos específicos
+   - Character Content View:
+     - Integración con API
+     - Manejo de errores mejorado
+
+3. Mejoras Generales
+   - Mejor tipado con Lucide Icons
+   - Sistema de errores consistente
+   - Manejo de eventos unificado
+
+#### Próximos Pasos
+
+1. Completar pruebas de las vistas migradas
+2. Iniciar migración de vistas restantes
+3. Implementar optimizaciones de rendimiento
+4. Agregar tests unitarios
+
+#### Consideraciones Técnicas
+
+- Mantener compatibilidad con Next.js 15 Server Components ✅
+- Asegurar que la lógica principal se ejecute en el servidor ✅
+- Mantener la funcionalidad existente del file-grid ✅
+- Sistema de tipos robusto implementado ✅
+- Manejo de errores mejorado ✅
+- Integración con servicios existentes ✅

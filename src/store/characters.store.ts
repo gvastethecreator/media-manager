@@ -14,7 +14,7 @@ import {
   type CharacterUpdate,
   type CharacterWithStats
 } from '@/app/actions/character.actions'
-import { createBaseStore, type BaseEntity, type BaseState, type BaseActions } from './base.store'
+import { createBaseStore, type BaseEntity, type BaseState, type BaseActions, type ExtendedStore } from './base.store'
 
 const characterLogger = logger.withContext('CharacterStore')
 
@@ -39,14 +39,13 @@ interface Character extends BaseEntity {
 }
 
 // Estado específico para Character
-interface CharacterState extends Omit<BaseState<Character>, 'error'> {
+interface CharacterState {
   currentCharacter: Character | null
   currentItems: FileItem[]
-  error: Error | null
 }
 
 // Acciones específicas para Character
-interface CharacterActions extends Omit<BaseActions<Character>, 'createItem' | 'updateItem'> {
+interface CharacterActions extends Omit<BaseActions<Character, CharacterCreate, CharacterUpdate>, 'createItem' | 'updateItem'> {
   createItem: (data: CharacterCreate) => Promise<void>
   updateItem: (id: string, data: CharacterUpdate) => Promise<void>
   addImageToCharacter: (characterId: string, imageId: string) => Promise<void>
@@ -54,16 +53,16 @@ interface CharacterActions extends Omit<BaseActions<Character>, 'createItem' | '
   loadCharacterContent: (id: string) => Promise<void>
 }
 
-type CharacterStore = CharacterState & CharacterActions
+type CharacterStore = ExtendedStore<Character, CharacterState, CharacterCreate, CharacterUpdate> & CharacterActions
 
-const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
-  if (!metadata) return undefined
+const validateMetadata = (metadata: string | null): string | null => {
+  if (!metadata) return null
   try {
-    const parsed = JSON.parse(metadata)
-    return typeof parsed === 'object' ? parsed : undefined
+    JSON.parse(metadata)
+    return metadata
   } catch {
     characterLogger.warn('⚠️ Error al parsear metadata de imagen')
-    return undefined
+    return null
   }
 }
 
@@ -72,7 +71,7 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getCharac
     const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
       ? Buffer.from(image.thumbnail).toString('base64')
-      : undefined
+      : null
 
     return {
       id: image.id,
@@ -80,18 +79,24 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getCharac
       path: image.path,
       type: 'image',
       size: image.size,
-      width: image.width ?? undefined,
-      height: image.height ?? undefined,
+      width: image.width,
+      height: image.height,
       metadata,
       thumbnail,
-      thumbnailSize: image.thumbnailSize ?? undefined,
-      thumbnailWidth: image.thumbnailWidth ?? undefined,
-      thumbnailHeight: image.thumbnailHeight ?? undefined,
-      createdAt: image.createdAt.toISOString(),
-      updatedAt: image.updatedAt.toISOString(),
+      thumbnailSize: image.thumbnailSize,
+      thumbnailWidth: image.thumbnailWidth,
+      thumbnailHeight: image.thumbnailHeight,
       isPublic: image.isPublic ?? false,
       isFavorite: image.isFavorite ?? false,
       folderId: image.folderId,
+      createdAt: image.createdAt,
+      updatedAt: image.updatedAt,
+      collections: [],
+      tags: [],
+      albums: [],
+      characters: [],
+      places: [],
+      objects: []
     }
   } catch (error) {
     characterLogger.error('❌ Error al convertir imagen del servidor:', { error, image })
@@ -99,11 +104,11 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getCharac
   }
 }
 
-export const useCharactersStore = createBaseStore<Character, 'character'>(
+export const useCharactersStore = createBaseStore<Character, CharacterState, CharacterCreate, CharacterUpdate>(
   'character',
   '/api/characters',
   { customLogger: characterLogger }
-)((set: (state: Partial<CharacterState>) => void, get: () => CharacterState) => {
+)((set, get) => {
   const baseStore: CharacterStore = {
     // Estado inicial
     currentCharacter: null,

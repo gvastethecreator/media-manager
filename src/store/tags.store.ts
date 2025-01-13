@@ -46,23 +46,11 @@ interface TagsState {
   loadTagContent: (id: string) => Promise<void>
 }
 
-const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
-  if (!metadata) return undefined
-  try {
-    const parsed = JSON.parse(metadata)
-    return typeof parsed === 'object' ? parsed : undefined
-  } catch {
-    tagLogger.warn('⚠️ Error al parsear metadata de imagen')
-    return undefined
-  }
-}
-
 const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
   try {
-    const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
       ? Buffer.from(image.thumbnail).toString('base64')
-      : undefined
+      : null;
 
     return {
       id: image.id,
@@ -70,18 +58,24 @@ const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
       path: image.path,
       type: 'image',
       size: image.size,
-      width: image.width ?? undefined,
-      height: image.height ?? undefined,
-      metadata,
+      width: image.width,
+      height: image.height,
+      metadata: image.metadata,
       thumbnail,
-      thumbnailSize: image.thumbnailSize ?? undefined,
-      thumbnailWidth: image.thumbnailWidth ?? undefined,
-      thumbnailHeight: image.thumbnailHeight ?? undefined,
-      createdAt: image.createdAt.toISOString(),
-      updatedAt: image.updatedAt.toISOString(),
+      thumbnailSize: image.thumbnailSize,
+      thumbnailWidth: image.thumbnailWidth,
+      thumbnailHeight: image.thumbnailHeight,
+      createdAt: image.createdAt,
+      updatedAt: image.updatedAt,
       isPublic: image.isPublic ?? false,
       isFavorite: image.isFavorite ?? false,
       folderId: image.folderId,
+      collections: [],
+      tags: [],
+      albums: [],
+      characters: [],
+      places: [],
+      objects: []
     }
   } catch (error) {
     tagLogger.error('❌ Error al convertir imagen del servidor:', { error, image })
