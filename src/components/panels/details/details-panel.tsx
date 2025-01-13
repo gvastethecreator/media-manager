@@ -3,9 +3,6 @@
 import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { FileItem } from "@/types/file-item";
-import { statsService } from "@/services/stats.service";
-import type { CacheInvalidationEvent } from "@/services/events.service";
-import { thumbnailService } from "@/services/thumbnail.service";
 import { ThumbnailQuality } from "@/types/thumbnails";
 import { useImageViewer } from "@/store/image-viewer";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
@@ -36,6 +33,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatsPanel } from "../stats/stats-panel";
 import { useToast } from "@/components/ui/use-toast";
+import { updateImageStats, getImageUrl } from "@/app/actions/images";
+import { useFileManager } from "@/store/file-manager";
+import { ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
 
 interface DetailsPanelProps {
 	selectedItems: FileItem[];
@@ -46,20 +46,145 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const [imageError, setImageError] = React.useState(false);
 	const [isMarked, setIsMarked] = React.useState(false);
 	const [isLoading, setIsLoading] = React.useState(false);
+	const [imageUrl, setImageUrl] = React.useState<string | null>(null);
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
+	const fileManager = useFileManager();
 
 	const handleOpenViewer = React.useCallback(
-		(item: FileItem) => {
+		async (item: FileItem) => {
 			if (
 				item.type === "image" ||
 				item.metadata?.mimeType?.startsWith("image/")
 			) {
-				openViewer([item], 0);
+				try {
+					// Usar las imágenes del directorio actual
+					const currentItems = fileManager.currentItems || [];
+					const allImages = currentItems.filter(
+						(i: FileItem) =>
+							i.type === "image" || i.metadata?.mimeType?.startsWith("image/")
+					);
+
+					if (allImages.length === 0) {
+						throw new Error("No hay imágenes disponibles");
+					}
+
+					// Procesar imágenes en lotes para evitar sobrecarga
+					const batchSize = 5;
+					const validImages: ImageItem[] = [];
+
+					for (let i = 0; i < allImages.length; i += batchSize) {
+						const batch = allImages.slice(i, i + batchSize);
+						const batchResults = await Promise.all(
+							batch.map(async (img: FileItem) => {
+								try {
+									// Obtener URL original
+									const originalUrl = await getImageUrl(img.id);
+
+									// Intentar obtener thumbnail del caché primero
+									let thumbnailUrl: string | null = null;
+									try {
+										const thumbnailResponse = await fetch(
+											`/api/thumbnails/${img.id}?quality=medium`
+										);
+										if (thumbnailResponse.ok) {
+											const data = await thumbnailResponse.json();
+											thumbnailUrl = `data:${
+												data.mimeType || "image/webp"
+											};base64,${data.thumbnail}`;
+										}
+									} catch (error) {
+										console.warn(
+											`No se pudo cargar el thumbnail para ${img.name}:`,
+											error
+										);
+									}
+
+									return {
+										id: img.id,
+										name: img.name,
+										type: "image",
+										url: originalUrl,
+										src: originalUrl,
+										thumbnail: thumbnailUrl || originalUrl,
+										alt: img.name,
+										mimeType: img.metadata?.mimeType || "image/jpeg",
+										width: img.metadata?.dimensions?.width,
+										height: img.metadata?.dimensions?.height,
+										metadata: img.metadata,
+									} as ImageItem;
+								} catch (error) {
+									console.error(`Error cargando imagen ${img.name}:`, error);
+									return null;
+								}
+							})
+						);
+
+						// Filtrar y agregar imágenes válidas
+						validImages.push(
+							...batchResults.filter((img): img is ImageItem => img !== null)
+						);
+
+						// Pequeña pausa entre lotes para evitar sobrecarga
+						if (i + batchSize < allImages.length) {
+							await new Promise((resolve) => setTimeout(resolve, 100));
+						}
+					}
+
+					if (validImages.length === 0) {
+						throw new Error("No se pudieron cargar las imágenes");
+					}
+
+					// Encontrar el índice de la imagen actual
+					const currentIndex = validImages.findIndex(
+						(img: ImageItem) => img.id === item.id
+					);
+
+					if (currentIndex === -1) {
+						throw new Error("No se encontró la imagen seleccionada");
+					}
+
+					console.log(
+						`🖼️ Abriendo visor con ${validImages.length} imágenes desde índice ${currentIndex}`
+					);
+					openViewer(validImages as unknown as FileItem[], currentIndex);
+					await updateImageStats(item.id, "view");
+				} catch (error) {
+					console.error("Error al abrir el visor:", error);
+					toast({
+						title: "Error",
+						description:
+							error instanceof Error
+								? error.message
+								: "No se pudo abrir la imagen",
+						variant: "destructive",
+					});
+				}
 			}
 		},
-		[openViewer]
+		[fileManager.currentItems, openViewer, toast]
 	);
+
+	// Cargar URL firmada cuando cambia el item seleccionado
+	React.useEffect(() => {
+		async function loadImageUrl() {
+			if (selectedItems.length !== 1) return;
+
+			try {
+				setIsLoading(true);
+				setImageError(false);
+				const url = await getImageUrl(selectedItems[0].id);
+				setImageUrl(url);
+			} catch (error) {
+				console.error("Error cargando imagen:", error);
+				setImageError(true);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		loadImageUrl();
+	}, [selectedItems]);
 
 	const renderImage = React.useCallback(
 		(item: FileItem) => {
@@ -80,10 +205,12 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 				);
 			}
 
+			if (!imageUrl) return null;
+
 			return (
 				<div className="relative w-full h-full">
 					<ImageCard
-						src={`/api/images/${item.id}/original`}
+						src={imageUrl}
 						alt={item.name}
 						width={item.metadata?.dimensions?.width || 300}
 						height={item.metadata?.dimensions?.height || 300}
@@ -98,7 +225,7 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 				</div>
 			);
 		},
-		[imageError, isLoading, handleOpenViewer]
+		[imageError, isLoading, handleOpenViewer, imageUrl]
 	);
 
 	React.useEffect(() => {
@@ -188,12 +315,21 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 							<Button
 								variant="outline"
 								size="sm"
-								onClick={() => {
-									// TODO: Implementar descarga
-									toast({
-										title: "Descarga iniciada",
-										description: selectedItem.name,
-									});
+								onClick={async () => {
+									try {
+										await updateImageStats(selectedItem.id, "download");
+										toast({
+											title: "Descarga iniciada",
+											description: selectedItem.name,
+										});
+									} catch (error) {
+										console.error("Error al descargar:", error);
+										toast({
+											title: "Error al descargar",
+											description: "No se pudo iniciar la descarga",
+											variant: "destructive",
+										});
+									}
 								}}
 							>
 								<Download className="mr-2 h-4 w-4" />
