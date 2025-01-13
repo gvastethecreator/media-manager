@@ -202,7 +202,6 @@ export const useSettingsStore = create<SettingsState>()(
               id: crypto.randomUUID(),
               name: folder.name || 'Nueva Carpeta',
               path: folder.path || '',
-              isWatched: true,
               isIndexed: false,
               lastIndexed: null,
               totalFiles: 0,

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
-import { toastService } from '@/services/toast.service'
 
 const apiLogger = logger.withContext('TagsAPI')
 
@@ -105,13 +104,11 @@ export async function DELETE(
 
     // Emitir evento de cambio
     statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE)
-    toastService.tag.imageRemoved(tag.name)
 
     apiLogger.info('🗑️ Tag eliminado de la imagen:', { tagId, imageId })
     return NextResponse.json({ success: true, tag })
   } catch (error) {
     apiLogger.error('❌ Error eliminando tag de la imagen:', error)
-    toastService.system.error('Error eliminando tag de la imagen')
     return NextResponse.json(
       { error: 'Error eliminando tag de la imagen' },
       { status: 500 }

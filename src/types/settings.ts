@@ -1,3 +1,5 @@
+import type { BaseEntity } from '@/app/actions/base.actions'
+
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type Language = 'es' | 'en'
 export type ThumbnailQuality = 'low' | 'medium' | 'high'
@@ -16,17 +18,43 @@ export interface Profile {
   isActive: boolean
 }
 
-export interface Collection {
-  id: string
-  name: string
-  emoji: string
-  color: string
-  description?: string
-  shortcut?: string
+export interface BaseEntityWithStats extends BaseEntity {
+  _count?: {
+    images: number
+  }
+  totalSize?: number
+}
+
+export interface Album extends BaseEntityWithStats {
+  type?: string
+  properties?: string
+  requirements?: string
+  stats?: string
+}
+
+export interface Collection extends Omit<BaseEntityWithStats, 'filters'> {
   sortBy: SortMode
   sortDirection: SortDirection
   filters: string[]
   count: number
+}
+
+export interface Object extends BaseEntityWithStats {
+  type: string
+  rarity: string
+  properties: string
+  requirements: string
+  origin: string
+  stats: string
+}
+
+export interface Place extends BaseEntityWithStats {
+  type: string
+  climate: string
+  population: number
+  government: string
+  history: string
+  stats: string
 }
 
 export interface Tag {
@@ -40,7 +68,6 @@ export interface Folder {
   id: string
   name: string
   path: string
-  isWatched: boolean
   isIndexed: boolean
   lastIndexed: string | null
   totalFiles: number

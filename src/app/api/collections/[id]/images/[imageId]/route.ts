@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
-import { toastService } from '@/services/toast.service'
 
 const apiLogger = logger.withContext('CollectionsAPI')
 
@@ -105,13 +104,11 @@ export async function DELETE(
 
     // Emitir evento de cambio
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE)
-    toastService.collection.imageRemoved(collection.name)
 
     apiLogger.info('🗑️ Imagen eliminada de la colección:', { collectionId, imageId })
     return NextResponse.json({ success: true, collection })
   } catch (error) {
     apiLogger.error('❌ Error eliminando imagen de la colección:', error)
-    toastService.system.error('Error eliminando imagen de la colección')
     return NextResponse.json(
       { error: 'Error eliminando imagen de la colección' },
       { status: 500 }
