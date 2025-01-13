@@ -4,44 +4,22 @@ import type { FileItem } from '@/types/file-item'
 import {
   getCharacters,
   getCharacter,
-  createCharacter as createCharacterAction,
-  updateCharacter as updateCharacterAction,
-  deleteCharacter as deleteCharacterAction,
-  addImageToCharacter as addImageToCharacterAction,
-  removeImageFromCharacter as removeImageFromCharacterAction,
-  getCharacterImages
-} from '@/app/actions/characters'
+  createCharacter,
+  updateCharacter,
+  deleteCharacter,
+  addImageToCharacter,
+  removeImageFromCharacter,
+  getCharacterImages,
+  type CharacterCreate,
+  type CharacterUpdate,
+  type CharacterWithStats
+} from '@/app/actions/character.actions'
 
 const characterLogger = logger.withContext('CharacterStore')
 
-export interface CharacterCreate {
-  name: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  level?: number
-  class?: string
-  race?: string
-  alignment?: string
-  backstory?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
-}
-
-export interface CharacterUpdate extends Partial<Omit<CharacterCreate, 'name'>> {
-  id: string
-  name?: string
-}
-
-export type Character = Awaited<ReturnType<typeof getCharacter>>
-export type CharacterWithStats = Awaited<ReturnType<typeof getCharacters>>[0]
-export type ImageFromServer = Awaited<ReturnType<typeof getCharacterImages>>[0]
-
 interface CharactersState {
   characters: CharacterWithStats[]
-  currentCharacter: Character | null
+  currentCharacter: CharacterWithStats | null
   currentItems: FileItem[]
   isLoading: boolean
   error: string | null
@@ -66,7 +44,7 @@ const validateMetadata = (metadata: string | null): Record<string, any> | undefi
   }
 }
 
-const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getCharacterImages>>[0]): FileItem => {
   try {
     const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
@@ -121,7 +99,7 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
   createCharacter: async (data: CharacterCreate) => {
     try {
       set({ isLoading: true, error: null })
-      const character = await createCharacterAction(data)
+      const character = await createCharacter(data)
       const characterWithStats = {
         ...character,
         _count: { images: 0 },
@@ -142,7 +120,7 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
   updateCharacter: async (id: string, data: CharacterUpdate) => {
     try {
       set({ isLoading: true, error: null })
-      const updatedCharacter = await updateCharacterAction(id, data)
+      const updatedCharacter = await updateCharacter(id, data)
       const currentStats = get().characters.find(c => c.id === id)
       const updatedCharacterWithStats = {
         ...updatedCharacter,
@@ -167,7 +145,7 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
   deleteCharacter: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      await deleteCharacterAction(id)
+      await deleteCharacter(id)
       set(state => ({
         characters: state.characters.filter(c => c.id !== id),
         currentCharacter: state.currentCharacter?.id === id ? null : state.currentCharacter,
@@ -184,7 +162,7 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
 
   addImageToCharacter: async (characterId: string, imageId: string) => {
     try {
-      await addImageToCharacterAction(characterId, imageId)
+      await addImageToCharacter(characterId, imageId)
       characterLogger.info('📸 Imagen agregada a personaje:', { characterId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
@@ -195,7 +173,7 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
 
   removeImageFromCharacter: async (characterId: string, imageId: string) => {
     try {
-      await removeImageFromCharacterAction(characterId, imageId)
+      await removeImageFromCharacter(characterId, imageId)
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }))

@@ -1,11 +1,11 @@
-"use server";
+'use server'
 
-import { prisma } from "@/lib/prisma";
-import type { AlbumCreate, AlbumUpdate } from "@/services/album.service";
-import { revalidatePath } from "next/cache";
-import { logger } from "@/lib/logger";
+import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { revalidatePath } from 'next/cache'
+import type { Album } from '@prisma/client'
 
-const albumLogger = logger.withContext('AlbumActions');
+const albumLogger = logger.withContext('AlbumActions')
 
 const REVALIDATE_PATHS = [
   '/settings',
@@ -23,6 +23,27 @@ class AlbumError extends Error {
     super(message);
     this.name = 'AlbumError';
   }
+}
+
+export interface AlbumWithStats extends Album {
+  _count: {
+    images: number
+  }
+  totalSize: number
+}
+
+export interface AlbumCreate {
+  name: string;
+  emoji: string;
+  color: string;
+  description?: string | null;
+  shortcut?: string | null;
+  sortBy: string;
+  filters: string;
+}
+
+export interface AlbumUpdate extends Partial<AlbumCreate> {
+  id: string;
 }
 
 export async function getAlbums() {
@@ -119,7 +140,7 @@ export async function createAlbum(data: AlbumCreate) {
     const album = await prisma.album.create({
       data: {
         ...data,
-        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+        filters: data.filters || '[]',
       },
     });
     albumLogger.info('✅ Álbum creado:', album.name);
@@ -138,7 +159,7 @@ export async function updateAlbum(id: string, data: AlbumUpdate) {
       where: { id },
       data: {
         ...data,
-        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+        filters: data.filters || undefined,
       },
     });
     albumLogger.info('✅ Álbum actualizado:', album.name);

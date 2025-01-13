@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { quality = 'mid', force = false } = await request.json()
+    const { quality = 'medium', force = false } = await request.json()
 
     // Verificar si la imagen existe
     const image = await prisma.image.findUnique({

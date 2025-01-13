@@ -1,11 +1,11 @@
-"use server";
+'use server'
 
-import { prisma } from "@/lib/prisma";
-import type { ObjectCreate, ObjectUpdate } from "@/services/object.service";
-import { revalidatePath } from "next/cache";
-import { logger } from "@/lib/logger";
+import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import { revalidatePath } from 'next/cache'
+import type { Object } from '@prisma/client'
 
-const objectLogger = logger.withContext('ObjectActions');
+const objectLogger = logger.withContext('ObjectActions')
 
 const REVALIDATE_PATHS = [
   '/settings',
@@ -23,6 +23,33 @@ class ObjectError extends Error {
     super(message);
     this.name = 'ObjectError';
   }
+}
+
+export interface ObjectWithStats extends Object {
+  _count: {
+    images: number
+  }
+  totalSize: number
+}
+
+export interface ObjectCreate {
+  name: string;
+  emoji: string;
+  color: string;
+  description?: string | null;
+  shortcut?: string | null;
+  type: string;
+  rarity: string;
+  properties: string;
+  requirements: string;
+  origin: string;
+  stats: string;
+  sortBy: string;
+  filters: string;
+}
+
+export interface ObjectUpdate extends Partial<ObjectCreate> {
+  id: string;
 }
 
 export async function getObjects() {
@@ -119,10 +146,10 @@ export async function createObject(data: ObjectCreate) {
     const object = await prisma.object.create({
       data: {
         ...data,
-        properties: data.properties ? JSON.stringify(data.properties) : '[]',
-        requirements: data.requirements ? JSON.stringify(data.requirements) : '{}',
-        stats: data.stats ? JSON.stringify(data.stats) : '{}',
-        filters: data.filters ? JSON.stringify(data.filters) : '[]',
+        properties: data.properties || '[]',
+        requirements: data.requirements || '{}',
+        stats: data.stats || '{}',
+        filters: data.filters || '[]',
       },
     });
     objectLogger.info('✅ Objeto creado:', object.name);
@@ -141,10 +168,10 @@ export async function updateObject(id: string, data: ObjectUpdate) {
       where: { id },
       data: {
         ...data,
-        properties: data.properties ? JSON.stringify(data.properties) : undefined,
-        requirements: data.requirements ? JSON.stringify(data.requirements) : undefined,
-        stats: data.stats ? JSON.stringify(data.stats) : undefined,
-        filters: data.filters ? JSON.stringify(data.filters) : undefined,
+        properties: data.properties || undefined,
+        requirements: data.requirements || undefined,
+        stats: data.stats || undefined,
+        filters: data.filters || undefined,
       },
     });
     objectLogger.info('✅ Objeto actualizado:', object.name);

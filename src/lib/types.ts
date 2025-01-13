@@ -41,7 +41,7 @@ export interface Settings {
   theme: "light" | "dark" | "system"
   language: "es" | "en"
   notifications: boolean
-  thumbnailQuality: "compressed" | "low" | "mid" | "high"
+  thumbnailQuality: "low" | "medium" | "high"
   autoBackup: boolean
   compressUploads: boolean
   defaultView: "grid" | "list"

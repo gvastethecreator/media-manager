@@ -1,24 +1,3 @@
-/**
- * @component FileGrid
- * @description Componente principal para mostrar una cuadrícula de archivos con virtualización y optimización de rendimiento.
- *
- * Flujo de integración:
- * 1. Recibe items (FileItem[]) desde el componente padre
- * 2. Utiliza virtualización para renderizar solo los elementos visibles
- * 3. Maneja la selección de archivos y la interacción del usuario
- * 4. Se integra con FileCard para renderizar cada elemento
- * 5. Soporta infinite scroll para cargar más elementos
- *
- * Optimizaciones:
- * - Virtualización con @tanstack/react-virtual
- * - Sistema de caché LRU para thumbnails
- * - Lazy loading con IntersectionObserver
- * - Prefetch inteligente de imágenes cercanas
- * - Gestión eficiente de memoria
- *
- * @param {FileGridProps} props - Propiedades del componente
- */
-
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
@@ -26,18 +5,21 @@ import { FileCard } from "./file-card";
 import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { DetailsPanel } from "@/components/panels/details/details-panel";
+import { useFileManager } from "@/store/file-manager";
 
-// Configuración optimizada del grid
+// Configuración optimizada del grid con valores ajustados
 const GRID_CONFIG = {
 	minColumns: 3,
 	maxColumns: 6,
 	gap: 4,
 	itemBaseWidth: 200,
-	overscanCount: 5, // Reducido para mejor rendimiento inicial
-	scrollingDelay: 150,
-	batchSize: 10, // Reducido para cargas más pequeñas
-	prefetchDistance: 2, // Número de filas a precargar
-	cacheSize: 200, // Tamaño máximo de la caché LRU
+	overscanCount: 3, // Reducido para mejor rendimiento
+	scrollingDelay: 300, // Aumentado para reducir actualizaciones
+	batchSize: 5, // Reducido para cargas más pequeñas
+	prefetchDistance: 1, // Reducido para optimizar la precarga
+	cacheSize: 100, // Reducido para mejor gestión de memoria
+	debounceTime: 150, // Nuevo: tiempo de debounce para actualizaciones
 	breakpoints: {
 		sm: 640,
 		md: 768,
@@ -46,33 +28,61 @@ const GRID_CONFIG = {
 	},
 } as const;
 
-// Sistema de caché LRU mejorado
-class LRUCache<K, V> {
-	private cache: Map<K, V>;
+// Sistema de caché LRU mejorado con tipos
+interface CacheItem {
+	timestamp: number;
+	value: boolean;
+}
+
+class LRUCache<K extends string> {
+	private cache: Map<K, CacheItem>;
 	private maxSize: number;
+	private cleanupInterval: number;
+	private cleanup: NodeJS.Timeout | null = null;
 
 	constructor(maxSize: number) {
-		this.cache = new Map<K, V>();
+		this.cache = new Map();
 		this.maxSize = maxSize;
+		this.cleanupInterval = 60000; // 1 minuto
+		this.startCleanup();
 	}
 
-	get(key: K): V | undefined {
-		const value = this.cache.get(key);
-		if (value) {
-			// Mover al final (más reciente)
+	private startCleanup() {
+		if (this.cleanup) {
+			clearInterval(this.cleanup);
+		}
+
+		this.cleanup = setInterval(() => {
+			const now = Date.now();
+			const maxAge = 5 * 60 * 1000; // 5 minutos
+
+			for (const [key, item] of this.cache.entries()) {
+				if (now - item.timestamp > maxAge) {
+					this.cache.delete(key);
+				}
+			}
+		}, this.cleanupInterval);
+	}
+
+	get(key: K): boolean {
+		const item = this.cache.get(key);
+		if (item) {
+			item.timestamp = Date.now();
 			this.cache.delete(key);
-			this.cache.set(key, value);
+			this.cache.set(key, item);
+			return item.value;
 		}
-		return value;
+		return false;
 	}
 
-	set(key: K, value: V): void {
+	set(key: K, value: boolean): void {
 		if (this.cache.size >= this.maxSize) {
-			// Eliminar el elemento más antiguo
-			const firstKey = this.cache.keys().next().value;
-			this.cache.delete(firstKey);
+			const oldestKey = this.cache.keys().next().value;
+			if (oldestKey) {
+				this.cache.delete(oldestKey);
+			}
 		}
-		this.cache.set(key, value);
+		this.cache.set(key, { value, timestamp: Date.now() });
 	}
 
 	has(key: K): boolean {
@@ -81,11 +91,19 @@ class LRUCache<K, V> {
 
 	clear(): void {
 		this.cache.clear();
+		if (this.cleanup) {
+			clearInterval(this.cleanup);
+			this.cleanup = null;
+		}
+	}
+
+	dispose(): void {
+		this.clear();
 	}
 }
 
-// Caché global de thumbnails renderizados
-const renderedItemsCache = new LRUCache<string, boolean>(GRID_CONFIG.cacheSize);
+// Caché global de thumbnails renderizados con tipo mejorado
+const renderedItemsCache = new LRUCache<string>(GRID_CONFIG.cacheSize);
 
 export interface FileGridProps {
 	items: FileItem[];
@@ -108,45 +126,10 @@ export function FileGrid({
 	const [containerWidth, setContainerWidth] = useState(0);
 	const [isScrolling, setIsScrolling] = useState(false);
 	const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
-	const scrollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-		undefined
-	);
-
-	// Configurar IntersectionObserver para infinite scroll con mejor rendimiento
-	useEffect(() => {
-		if (!loadMoreRef.current || !loadMoreItems) return;
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const [entry] = entries;
-				if (entry?.isIntersecting && !isScrolling) {
-					loadMoreItems();
-				}
-			},
-			{
-				rootMargin: "400px 0px", // Reducido para mejor rendimiento
-				threshold: 0,
-			}
-		);
-
-		observer.observe(loadMoreRef.current);
-		return () => observer.disconnect();
-	}, [loadMoreItems, isScrolling]);
-
-	// ResizeObserver optimizado
-	useEffect(() => {
-		if (!gridRef.current) return;
-
-		const resizeObserver = new ResizeObserver((entries) => {
-			const width = entries[0].contentRect.width;
-			if (width > 0 && width !== containerWidth) {
-				setContainerWidth(width);
-			}
-		});
-
-		resizeObserver.observe(gridRef.current);
-		return () => resizeObserver.disconnect();
-	}, [containerWidth]);
+	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const cacheRef = useRef(renderedItemsCache);
+	const { selectedItems } = useFileManager();
 
 	// Dimensiones del grid memoizadas
 	const { columns, itemSize } = useMemo(() => {
@@ -164,15 +147,148 @@ export function FileGrid({
 		return { columns: targetColumns, itemSize };
 	}, [containerWidth]);
 
-	// Calcular filas
-	const rowCount = Math.ceil(items.length / columns);
+	// Calcular filas con memoización
+	const rowCount = useMemo(
+		() => Math.ceil(items.length / columns),
+		[items.length, columns]
+	);
 
-	// Virtualizador optimizado
+	// Funciones de caché optimizadas y memoizadas
+	const isItemRendered = useCallback(
+		(itemId: string): boolean => {
+			if (!itemId || !cacheRef.current) return false;
+			try {
+				return cacheRef.current.has(itemId);
+			} catch {
+				return false;
+			}
+		},
+		[cacheRef]
+	);
+
+	const markItemAsRendered = useCallback(
+		(itemId: string): void => {
+			if (!itemId || !cacheRef.current) return;
+			try {
+				cacheRef.current.set(itemId, true);
+			} catch {
+				console.warn("Failed to mark item as rendered:", itemId);
+			}
+		},
+		[cacheRef]
+	);
+
+	// Sistema de visibilidad optimizado con debounce
+	const updateVisibleItems = useCallback(
+		(entries: IntersectionObserverEntry[]) => {
+			if (isScrolling) return;
+
+			setVisibleItems((prev) => {
+				const next = new Set(prev);
+				entries.forEach((entry) => {
+					const id = entry.target.getAttribute("data-id");
+					if (id) {
+						if (entry.isIntersecting) {
+							next.add(id);
+							if (!isItemRendered(id)) {
+								markItemAsRendered(id);
+							}
+						} else {
+							next.delete(id);
+						}
+					}
+				});
+				return next;
+			});
+		},
+		[isScrolling, isItemRendered, markItemAsRendered]
+	);
+
+	// Configurar observer para items visibles con opciones optimizadas
+	useEffect(() => {
+		observerRef.current = new IntersectionObserver(updateVisibleItems, {
+			root: gridRef.current,
+			rootMargin: "20px 0px",
+			threshold: 0,
+		});
+
+		const observer = observerRef.current;
+
+		return () => {
+			if (observer) {
+				observer.disconnect();
+			}
+		};
+	}, [updateVisibleItems]);
+
+	// Cleanup de timeouts mejorado
+	useEffect(() => {
+		return () => {
+			if (scrollingTimeoutRef.current) {
+				clearTimeout(scrollingTimeoutRef.current);
+			}
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+			if (cacheRef.current) {
+				cacheRef.current.clear();
+			}
+		};
+	}, []);
+
+	// Optimizar IntersectionObserver para infinite scroll
+	useEffect(() => {
+		if (!loadMoreRef.current || !loadMoreItems) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const [entry] = entries;
+				if (entry?.isIntersecting && !isScrolling) {
+					loadMoreItems();
+				}
+			},
+			{
+				rootMargin: "200px 0px",
+				threshold: 0,
+			}
+		);
+
+		observer.observe(loadMoreRef.current);
+		return () => observer.disconnect();
+	}, [loadMoreItems, isScrolling]);
+
+	// ResizeObserver optimizado con debounce
+	useEffect(() => {
+		if (!gridRef.current) return;
+
+		const resizeObserver = new ResizeObserver((entries) => {
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+
+			resizeTimeoutRef.current = setTimeout(() => {
+				const width = entries[0].contentRect.width;
+				if (width > 0 && width !== containerWidth) {
+					setContainerWidth(width);
+				}
+			}, GRID_CONFIG.debounceTime);
+		});
+
+		resizeObserver.observe(gridRef.current);
+		return () => {
+			resizeObserver.disconnect();
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+		};
+	}, [containerWidth]);
+
+	// Virtualizador optimizado con configuración ajustada
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		getScrollElement: () => gridRef.current,
 		estimateSize: useCallback(() => itemSize, [itemSize]),
-		overscan: isScrolling ? 2 : GRID_CONFIG.overscanCount,
+		overscan: isScrolling ? 1 : GRID_CONFIG.overscanCount,
 		onChange: (instance) => {
 			if (instance.isScrolling) {
 				setIsScrolling(true);
@@ -185,60 +301,6 @@ export function FileGrid({
 			}
 		},
 	});
-
-	// Cleanup de timeouts
-	useEffect(() => {
-		return () => {
-			if (scrollingTimeoutRef.current) {
-				clearTimeout(scrollingTimeoutRef.current);
-			}
-		};
-	}, []);
-
-	// Sistema de visibilidad optimizado
-	const updateVisibleItems = useCallback(
-		(entries: IntersectionObserverEntry[]) => {
-			setVisibleItems((prev) => {
-				const next = new Set(prev);
-				entries.forEach((entry) => {
-					const id = entry.target.getAttribute("data-id");
-					if (id) {
-						if (entry.isIntersecting) {
-							next.add(id);
-						} else {
-							next.delete(id);
-						}
-					}
-				});
-				return next;
-			});
-		},
-		[]
-	);
-
-	// Configurar observer para items visibles
-	useEffect(() => {
-		observerRef.current = new IntersectionObserver(updateVisibleItems, {
-			root: gridRef.current,
-			rootMargin: "50px 0px",
-			threshold: 0,
-		});
-
-		return () => {
-			if (observerRef.current) {
-				observerRef.current.disconnect();
-			}
-		};
-	}, [updateVisibleItems]);
-
-	// Funciones de caché optimizadas
-	const isItemRendered = useCallback((itemId: string) => {
-		return renderedItemsCache.has(itemId);
-	}, []);
-
-	const markItemAsRendered = useCallback((itemId: string) => {
-		renderedItemsCache.set(itemId, true);
-	}, []);
 
 	return (
 		<div
@@ -284,6 +346,9 @@ export function FileGrid({
 									const isVisible = visibleItems.has(item.id);
 									const shouldLoad =
 										(!isScrolling && isVisible) || hasBeenRendered;
+									const isSelected = selectedItems.some(
+										(selected) => selected.id === item.id
+									);
 
 									if (!hasBeenRendered && shouldLoad) {
 										markItemAsRendered(item.id);
@@ -312,6 +377,7 @@ export function FileGrid({
 												totalColumns={columns}
 												shouldLoad={shouldLoad}
 												hasBeenRendered={hasBeenRendered}
+												isSelected={isSelected}
 											/>
 										</div>
 									);

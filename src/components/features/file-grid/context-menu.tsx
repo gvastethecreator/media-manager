@@ -246,6 +246,8 @@ export function FileContextMenu({
 				emoji: newAlbum.emoji,
 				color: newAlbum.color,
 				description: newAlbum.description,
+				sortBy: "name",
+				filters: "[]",
 			});
 			setIsAlbumDialogOpen(false);
 			setNewAlbum({ name: "", emoji: "📸", color: "#3b82f6", description: "" });
@@ -263,6 +265,14 @@ export function FileContextMenu({
 				emoji: newCharacter.emoji,
 				color: newCharacter.color,
 				description: newCharacter.description,
+				level: 1,
+				class: "unknown",
+				race: "unknown",
+				alignment: "neutral",
+				backstory: "",
+				stats: "{}",
+				sortBy: "name",
+				filters: "[]",
 			});
 			setIsCharacterDialogOpen(false);
 			setNewCharacter({
@@ -285,6 +295,18 @@ export function FileContextMenu({
 				emoji: newPlace.emoji,
 				color: newPlace.color,
 				description: newPlace.description,
+				region: "unknown",
+				type: "unknown",
+				climate: "temperate",
+				population: 0,
+				government: "unknown",
+				dangers: "[]",
+				resources: "[]",
+				lore: "",
+				history: "",
+				stats: "{}",
+				sortBy: "name",
+				filters: "[]",
 			});
 			setIsPlaceDialogOpen(false);
 			setNewPlace({ name: "", emoji: "📍", color: "#3b82f6", description: "" });
@@ -302,6 +324,14 @@ export function FileContextMenu({
 				emoji: newObject.emoji,
 				color: newObject.color,
 				description: newObject.description,
+				type: "misc",
+				rarity: "common",
+				properties: "[]",
+				requirements: "{}",
+				origin: "",
+				stats: "{}",
+				sortBy: "name",
+				filters: "[]",
 			});
 			setIsObjectDialogOpen(false);
 			setNewObject({

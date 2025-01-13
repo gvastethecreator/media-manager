@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { logger } from '@/lib/logger'
+
+const thumbLogger = logger.withContext('ThumbnailRoute')
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -14,7 +17,9 @@ export async function GET(
     const params = await Promise.resolve(context.params)
     const { id } = params
     const { searchParams } = new URL(request.url)
-    const quality = (searchParams.get('quality') || 'mid') as ThumbnailQuality
+    const quality = (searchParams.get('quality') || 'medium') as ThumbnailQuality
+
+    thumbLogger.info('🔄 Solicitud de thumbnail:', { id, quality })
 
     if (!id) {
       return NextResponse.json(
@@ -29,6 +34,7 @@ export async function GET(
     })
 
     if (!image) {
+      thumbLogger.error('❌ Imagen no encontrada:', { id })
       return NextResponse.json(
         { error: 'Imagen no encontrada' },
         { status: 404 }
@@ -37,23 +43,39 @@ export async function GET(
 
     // Si ya tiene thumbnail, devolverlo
     if (image.thumbnail) {
-      const headers = new Headers()
-      headers.set('Content-Type', 'image/webp')
-      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      const base64Thumbnail = Buffer.from(image.thumbnail).toString('base64')
 
-      return new NextResponse(image.thumbnail, {
-        headers,
-        status: 200
+      thumbLogger.info('✅ Thumbnail encontrado en caché:', {
+        id,
+        size: image.thumbnailSize,
+        width: image.thumbnailWidth,
+        height: image.thumbnailHeight
+      })
+
+      return NextResponse.json({
+        thumbnail: base64Thumbnail,
+        width: image.thumbnailWidth,
+        height: image.thumbnailHeight,
+        size: image.thumbnailSize,
+        mimeType: 'image/webp'
+      }, {
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        }
       })
     }
 
     // Si no tiene thumbnail, generarlo
     try {
+      thumbLogger.info('🔄 Generando nuevo thumbnail:', { id, path: image.path })
       const thumbnail = await generateThumbnail(image.path, { quality: quality as ThumbnailQuality })
 
       if (!thumbnail || !thumbnail.buffer) {
         throw new Error('No se pudo generar el thumbnail')
       }
+
+      // Convertir el buffer a base64
+      const base64Thumbnail = Buffer.from(thumbnail.buffer).toString('base64')
 
       // Actualizar la imagen con el nuevo thumbnail
       await prisma.image.update({
@@ -66,23 +88,33 @@ export async function GET(
         }
       })
 
-      const headers = new Headers()
-      headers.set('Content-Type', 'image/webp')
-      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      thumbLogger.info('✅ Nuevo thumbnail generado:', {
+        id,
+        size: thumbnail.buffer.length,
+        width: thumbnail.width,
+        height: thumbnail.height
+      })
 
-      return new NextResponse(thumbnail.buffer, {
-        headers,
-        status: 200
+      return NextResponse.json({
+        thumbnail: base64Thumbnail,
+        width: thumbnail.width,
+        height: thumbnail.height,
+        size: thumbnail.buffer.length,
+        mimeType: 'image/webp'
+      }, {
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        }
       })
     } catch (error) {
-      console.error('Error generando thumbnail:', error)
+      thumbLogger.error('❌ Error generando thumbnail:', { id, error })
       return NextResponse.json(
         { error: 'Error generando thumbnail' },
         { status: 500 }
       )
     }
   } catch (error) {
-    console.error('Error en thumbnail route:', error)
+    thumbLogger.error('❌ Error en thumbnail route:', { error })
     return NextResponse.json(
       { error: 'Error al procesar la miniatura' },
       { status: 500 }
