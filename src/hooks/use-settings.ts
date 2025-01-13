@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useSettingsStore } from '@/store/settings'
+import { useSettingsStore } from '@/store/settings.store'
 import type {
   AppSettings,
   Profile,

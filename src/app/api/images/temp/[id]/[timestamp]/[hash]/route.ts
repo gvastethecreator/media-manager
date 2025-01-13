@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOriginalImage } from '@/app/actions/images'
+import { getOriginalImage } from '@/app/actions/image.actions'
 import { createHash } from 'crypto'
 
 // Función para validar hash

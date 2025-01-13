@@ -12,7 +12,7 @@ import {
 	XIcon,
 	Loader2,
 } from "lucide-react";
-import { useCollectionsStore } from "@/store/collections";
+import { useCollectionsStore } from "@/store/collections.store";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -116,7 +116,7 @@ export function CollectionsSection() {
 				filters: [] as any[],
 			};
 
-			await createCollection(newCollectionData);
+			await createCollection(newCollectionData as CollectionCreate);
 			setNewCollection({
 				name: "",
 				emoji: "🌟",

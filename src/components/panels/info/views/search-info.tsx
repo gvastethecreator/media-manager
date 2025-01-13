@@ -5,17 +5,18 @@ import { Progress } from "@/components/ui/progress";
 import { Icons } from "@/components/core/icons";
 import { formatBytes, formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useStats } from "@/hooks/use-stats";
+import { useStatsStore } from "@/store/stats.store";
+import { Search, Tag, Folder, Camera, HardDrive, Star, Download, Eye } from "lucide-react";
 
 export function SearchInfo() {
-	const { stats, isLoading } = useStats();
+	const { stats, isLoading } = useStatsStore();
 
 	return (
 		<div className="space-y-4 p-2">
 			{/* Resumen General */}
 			<div className="flex items-center gap-2">
 				<div className="h-8 w-8 rounded-sm bg-cyan-500/10 flex items-center justify-center">
-					<Icons.Search className="h-4 w-4 text-cyan-500" />
+					<Search className="h-4 w-4 text-cyan-500" />
 				</div>
 				<div className="flex flex-col">
 					<h3 className="text-sm font-medium">Búsqueda</h3>
@@ -39,7 +40,7 @@ export function SearchInfo() {
 						</div>
 						<div className="grid grid-cols-2 gap-2">
 							<div className="flex items-center gap-2">
-								<Icons.Tag className="h-3 w-3 text-muted-foreground" />
+								<Tag className="h-3 w-3 text-muted-foreground" />
 								<span className="text-xs">
 									{isLoading ? (
 										<Skeleton className="h-4 w-12" />
@@ -49,7 +50,7 @@ export function SearchInfo() {
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<Icons.BookImage className="h-3 w-3 text-muted-foreground" />
+								<Tag className="h-3 w-3 text-muted-foreground" />
 								<span className="text-xs">
 									{isLoading ? (
 										<Skeleton className="h-4 w-12" />
@@ -59,7 +60,7 @@ export function SearchInfo() {
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<Icons.Folder className="h-3 w-3 text-muted-foreground" />
+								<Folder className="h-3 w-3 text-muted-foreground" />
 								<span className="text-xs">
 									{isLoading ? (
 										<Skeleton className="h-4 w-12" />
@@ -69,7 +70,7 @@ export function SearchInfo() {
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<Icons.Camera className="h-3 w-3 text-muted-foreground" />
+								<Camera className="h-3 w-3 text-muted-foreground" />
 								<span className="text-xs">
 									{isLoading ? (
 										<Skeleton className="h-4 w-12" />
@@ -142,7 +143,7 @@ export function SearchInfo() {
 					{/* Estadísticas adicionales */}
 					<div className="grid grid-cols-2 gap-2">
 						<div className="flex items-center gap-2">
-							<Icons.Eye className="h-3 w-3 text-muted-foreground" />
+							<Eye className="h-3 w-3 text-muted-foreground" />
 							<span className="text-xs">
 								{isLoading ? (
 									<Skeleton className="h-4 w-12" />
@@ -153,7 +154,7 @@ export function SearchInfo() {
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
-							<Icons.Download className="h-3 w-3 text-muted-foreground" />
+							<Download className="h-3 w-3 text-muted-foreground" />
 							<span className="text-xs">
 								{isLoading ? (
 									<Skeleton className="h-4 w-12" />
@@ -164,7 +165,7 @@ export function SearchInfo() {
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
-							<Icons.Star className="h-3 w-3 text-muted-foreground" />
+							<Star className="h-3 w-3 text-muted-foreground" />
 							<span className="text-xs">
 								{isLoading ? (
 									<Skeleton className="h-4 w-12" />
@@ -175,7 +176,7 @@ export function SearchInfo() {
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
-							<Icons.HardDrive className="h-3 w-3 text-muted-foreground" />
+							<HardDrive className="h-3 w-3 text-muted-foreground" />
 							<span className="text-xs">
 								{isLoading ? (
 									<Skeleton className="h-4 w-12" />
@@ -202,7 +203,7 @@ export function SearchInfo() {
 								) : (
 									<>
 										<div className="h-8 w-8 rounded-sm bg-muted flex items-center justify-center">
-											<Icons.Search className="h-4 w-4 text-muted-foreground" />
+											<Search className="h-4 w-4 text-muted-foreground" />
 										</div>
 										<div className="flex flex-col flex-1">
 											<p className="text-xs">{activity?.description}</p>

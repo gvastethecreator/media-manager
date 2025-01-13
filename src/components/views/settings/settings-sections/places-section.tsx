@@ -32,7 +32,7 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { getPlaces, createPlace, updatePlace, deletePlace } from "@/app/actions/place.actions";
+import { getPlaces, createPlace, updatePlace, deletePlace, PlaceUpdate, PlaceCreate } from "@/app/actions/place.actions";
 import type { Place } from "@prisma/client";
 
 const placeLogger = logger.withContext("PlacesSection");
@@ -108,7 +108,7 @@ export function PlacesSection() {
 		try {
 			placeLogger.info("📝 Actualizando lugar...", editForm);
 			const { id, ...data } = editForm;
-			await updatePlace(id, data);
+			await updatePlace(id, data as PlaceUpdate);
 			await loadPlaces();
 			setEditingId(null);
 			setEditForm(null);
@@ -134,7 +134,7 @@ export function PlacesSection() {
 		setIsLoading(true);
 		try {
 			placeLogger.info("✨ Creando lugar...", newPlace);
-			await createPlace(newPlace);
+			await createPlace(newPlace as PlaceCreate);
 			await loadPlaces();
 			setNewPlace({
 				name: "",
@@ -263,7 +263,7 @@ export function PlacesSection() {
 							</div>
 							<Input
 								placeholder="Descripción"
-								value={newPlace.description}
+								value={newPlace.description || ""}
 								onChange={(e) =>
 									setNewPlace((prev) => ({
 										...prev,
@@ -492,7 +492,7 @@ export function PlacesSection() {
 												</div>
 												<Input
 													placeholder="Descripción"
-													value={editForm?.description}
+													value={editForm?.description || ""}
 													onChange={(e) =>
 														setEditForm((prev) => ({
 															...prev!,

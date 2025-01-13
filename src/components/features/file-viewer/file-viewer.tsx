@@ -1,13 +1,20 @@
 "use client";
 
 import { useMemo, useEffect, useState, useCallback } from "react";
-import { useImageViewer } from "@/store/image-viewer";
+import { useImageViewer } from "@/store/image-viewer.store";
 import dynamic from "next/dynamic";
-import type { FileItem } from "@/types/file-item";
-import { getImageUrl } from "@/app/actions/images";
+import type { FileItem, ImageItem } from "@/types/file-item";
+import { getImageUrl } from "@/app/actions/image.actions";
 import { logger } from "@/lib/logger";
 
 const viewerLogger = logger.withContext("FileViewer");
+
+interface AdvancedImageViewerProps {
+	images: ImageItem[];
+	initialIndex: number;
+	isOpen: boolean;
+	onClose: () => void;
+}
 
 // Lazy load del AdvancedImageViewer
 const AdvancedImageViewer = dynamic(
@@ -95,6 +102,8 @@ export function ImageViewer() {
 			width: img.metadata?.dimensions?.width,
 			height: img.metadata?.dimensions?.height,
 			mimeType: img.metadata?.mimeType,
+			path: img.path,
+			size: img.size,
 		}));
 	}, [images, signedUrls]);
 
@@ -133,7 +142,6 @@ export function ImageViewer() {
 			initialIndex={Math.min(currentIndex, mappedImages.length - 1)}
 			isOpen={isOpen}
 			onClose={closeViewer}
-			isLoading={isLoading}
 		/>
 	);
 }

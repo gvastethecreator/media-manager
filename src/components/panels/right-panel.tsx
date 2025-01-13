@@ -3,7 +3,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DetailsPanel } from "@/components/panels/details/details-panel";
 import { InfoPanel } from "@/components/panels/info/info-panel";
-import { useFileManager } from "@/store/file-manager";
+import { useFileManager } from "@/store/file-manager.store";
 import { motion, AnimatePresence } from "motion/react";
 
 export function RightPanel() {

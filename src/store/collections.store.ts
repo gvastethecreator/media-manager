@@ -10,7 +10,7 @@ import {
   addImageToCollection as addImageToCollectionAction,
   removeImageFromCollection as removeImageFromCollectionAction,
   getCollectionImages
-} from '@/app/actions/collections'
+} from '@/app/actions/collection.actions'
 
 const collectionsLogger = logger.withContext('CollectionsStore')
 
