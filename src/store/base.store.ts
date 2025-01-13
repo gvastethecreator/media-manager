@@ -3,16 +3,19 @@ import { logger } from '@/lib/logger'
 
 const baseLogger = logger.withContext('BaseStore')
 
-type PrismaModels = {
-  [K in keyof PrismaClient]: PrismaClient[K] extends { findMany: any } ? K : never
-}[keyof PrismaClient]
+// Tipo para los nombres de modelos de Prisma
+type PrismaModelName = Lowercase<keyof {
+  [K in keyof PrismaClient as PrismaClient[K] extends { findMany: any } ? K : never]: true
+}>
 
+// Tipo para las entidades base
 export interface BaseEntity {
   id: string
   name: string
   [key: string]: any
 }
 
+// Estado base
 export interface BaseState<T extends BaseEntity> {
   items: T[]
   loading: boolean
@@ -25,6 +28,7 @@ export interface BaseState<T extends BaseEntity> {
   lastSelectedItem: T | null
 }
 
+// Acciones base
 export interface BaseActions<T extends BaseEntity> {
   loadItems: () => Promise<void>
   loadMoreItems: () => Promise<void>
@@ -38,20 +42,34 @@ export interface BaseActions<T extends BaseEntity> {
   deleteItem: (id: string) => Promise<void>
 }
 
+// Store base completo
 export type BaseStore<T extends BaseEntity> = BaseState<T> & BaseActions<T>
 
+// Tipos para las funciones de estado
+interface SetState<T extends BaseEntity> {
+  (partial: Partial<BaseState<T>> | ((state: BaseState<T> & BaseActions<T>) => Partial<BaseState<T>>)): void
+}
+
+interface GetState<T extends BaseEntity> {
+  (): BaseState<T> & BaseActions<T>
+}
+
+// Opciones para la creación del store
+interface StoreOptions {
+  itemsPerPage?: number
+  customLogger?: typeof logger
+}
+
+// Función principal para crear el store
 export const createBaseStore = <T extends BaseEntity>(
-  modelName: PrismaModels,
+  modelName: PrismaModelName,
   apiEndpoint: string,
-  options: {
-    itemsPerPage?: number
-    customLogger?: typeof logger
-  } = {}
+  options: StoreOptions = {}
 ) => {
   const storeLogger = (options.customLogger || baseLogger).withContext(modelName)
   const ITEMS_PER_PAGE = options.itemsPerPage || 50
 
-  return (set: any, get: any) => ({
+  return (set: SetState<T>, get: GetState<T>): BaseStore<T> => ({
     // Estado inicial
     items: [],
     loading: false,
@@ -101,7 +119,7 @@ export const createBaseStore = <T extends BaseEntity>(
         const data = await response.json()
         storeLogger.info(`✅ ${data.items.length} items adicionales cargados`)
 
-        set(state => ({
+        set((state) => ({
           items: [...state.items, ...data.items],
           currentPage: data.page,
           loading: false
@@ -114,30 +132,30 @@ export const createBaseStore = <T extends BaseEntity>(
 
     refreshItems: async () => {
       const state = get()
-      state.clearSelection()
+      await state.clearSelection()
       await state.loadItems()
     },
 
     // Acciones de selección
-    selectItem: (item) => {
-      set(state => ({
+    selectItem: (item: T) => {
+      set((state) => ({
         selectedItem: item,
         selectedItems: [...state.selectedItems, item],
         lastSelectedItem: item
       }))
     },
 
-    deselectItem: (id) => {
-      set(state => ({
+    deselectItem: (id: string) => {
+      set((state) => ({
         selectedItem: state.selectedItem?.id === id ? null : state.selectedItem,
-        selectedItems: state.selectedItems.filter(item => item.id !== id),
+        selectedItems: state.selectedItems.filter((item: T) => item.id !== id),
         lastSelectedItem: state.lastSelectedItem?.id === id ? null : state.lastSelectedItem
       }))
     },
 
-    toggleItemSelection: (item, isMultiSelect) => {
+    toggleItemSelection: (item: T, isMultiSelect: boolean) => {
       const state = get()
-      const isSelected = state.selectedItems.some(i => i.id === item.id)
+      const isSelected = state.selectedItems.some((i: T) => i.id === item.id)
 
       if (!isMultiSelect) {
         set({
@@ -164,7 +182,7 @@ export const createBaseStore = <T extends BaseEntity>(
     },
 
     // Acciones CRUD
-    createItem: async (data) => {
+    createItem: async (data: Partial<T>) => {
       try {
         set({ loading: true, error: null })
         storeLogger.info('📤 Creando item:', data)
@@ -180,7 +198,7 @@ export const createBaseStore = <T extends BaseEntity>(
         const newItem = await response.json()
         storeLogger.info('✅ Item creado:', newItem)
 
-        set(state => ({
+        set((state) => ({
           items: [...state.items, newItem],
           loading: false
         }))
@@ -190,7 +208,7 @@ export const createBaseStore = <T extends BaseEntity>(
       }
     },
 
-    updateItem: async (id, data) => {
+    updateItem: async (id: string, data: Partial<T>) => {
       try {
         set({ loading: true, error: null })
         storeLogger.info('📤 Actualizando item:', { id, data })
@@ -206,8 +224,8 @@ export const createBaseStore = <T extends BaseEntity>(
         const updatedItem = await response.json()
         storeLogger.info('✅ Item actualizado:', updatedItem)
 
-        set(state => ({
-          items: state.items.map(item =>
+        set((state) => ({
+          items: state.items.map((item: T) =>
             item.id === id ? updatedItem : item
           ),
           loading: false
@@ -218,7 +236,7 @@ export const createBaseStore = <T extends BaseEntity>(
       }
     },
 
-    deleteItem: async (id) => {
+    deleteItem: async (id: string) => {
       try {
         set({ loading: true, error: null })
         storeLogger.info('🗑️ Eliminando item:', id)
@@ -231,8 +249,8 @@ export const createBaseStore = <T extends BaseEntity>(
 
         storeLogger.info('✅ Item eliminado:', id)
 
-        set(state => ({
-          items: state.items.filter(item => item.id !== id),
+        set((state) => ({
+          items: state.items.filter((item: T) => item.id !== id),
           loading: false
         }))
       } catch (error: any) {

@@ -32,22 +32,30 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { getObjects, createObject, updateObject, deleteObject, ObjectUpdate, ObjectCreate } from "@/app/actions/object.actions";
+import {
+	getObjects,
+	createObject,
+	updateObject,
+	deleteObject,
+	type ObjectCreate,
+	type ObjectUpdate,
+	type ObjectWithStats,
+} from "@/app/actions/object.actions";
 import type { Object } from "@prisma/client";
 
 const objectLogger = logger.withContext("ObjectsSection");
 
-interface EditForm extends Partial<Object> {
-	id: string;
+interface EditForm extends Omit<ObjectUpdate, "description"> {
+	description: string;
 }
 
 export function ObjectsSection() {
-	const [objects, setObjects] = React.useState<Object[]>([]);
+	const [objects, setObjects] = React.useState<ObjectWithStats[]>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [error, setError] = React.useState<Error | null>(null);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
-	const [newObject, setNewObject] = React.useState<Partial<Object>>({
+	const [newObject, setNewObject] = React.useState<ObjectCreate>({
 		name: "",
 		emoji: "🎯",
 		description: "",
@@ -58,12 +66,15 @@ export function ObjectsSection() {
 		requirements: "{}",
 		origin: "",
 		stats: "{}",
+		filters: "[]",
+		sortBy: "name",
 	});
 	const { toast } = useToast();
 
 	const loadObjects = React.useCallback(async () => {
 		setIsLoading(true);
 		try {
+			objectLogger.info("🎯 Obteniendo lista de objetos");
 			const data = await getObjects();
 			setObjects(data);
 			setError(null);
@@ -83,7 +94,7 @@ export function ObjectsSection() {
 		loadObjects();
 	}, [loadObjects]);
 
-	const handleStartEdit = (object: Object) => {
+	const handleStartEdit = (object: ObjectWithStats) => {
 		setEditingId(object.id);
 		setEditForm({
 			id: object.id,
@@ -97,7 +108,13 @@ export function ObjectsSection() {
 			requirements: object.requirements,
 			origin: object.origin,
 			stats: object.stats,
+			filters: object.filters,
 		});
+	};
+
+	const handleCancelEdit = () => {
+		setEditingId(null);
+		setEditForm(null);
 	};
 
 	const handleSubmitEdit = async (e: React.FormEvent) => {
@@ -106,12 +123,17 @@ export function ObjectsSection() {
 
 		setIsLoading(true);
 		try {
-			objectLogger.info("📝 Actualizando objeto...", editForm);
-			const { id, ...data } = editForm;
-			await updateObject(id, data as ObjectUpdate);
+			objectLogger.info("💾 Guardando cambios en objeto:", {
+				id: editForm.id,
+				data: editForm,
+			});
+			await updateObject(editForm.id, {
+				...editForm,
+				description: editForm.description || undefined,
+				sortBy: editForm.sortBy || "name",
+			});
 			await loadObjects();
-			setEditingId(null);
-			setEditForm(null);
+			handleCancelEdit();
 			toast({
 				title: "✅ Objeto actualizado",
 				description: "El objeto se ha actualizado correctamente.",
@@ -119,7 +141,7 @@ export function ObjectsSection() {
 		} catch (error) {
 			objectLogger.error("❌ Error al actualizar objeto:", error);
 			toast({
-				title: "❌ Error al actualizar objeto",
+				title: "Error al actualizar objeto",
 				description: "No se pudo actualizar el objeto.",
 				variant: "destructive",
 			});
@@ -130,11 +152,12 @@ export function ObjectsSection() {
 
 	const handleSubmitCreate = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!newObject.name) return;
 
 		setIsLoading(true);
 		try {
-			objectLogger.info("✨ Creando objeto...", newObject);
-			await createObject(newObject as ObjectCreate);
+			objectLogger.info("📝 Creando nuevo objeto:", newObject);
+			await createObject(newObject);
 			await loadObjects();
 			setNewObject({
 				name: "",
@@ -147,6 +170,8 @@ export function ObjectsSection() {
 				requirements: "{}",
 				origin: "",
 				stats: "{}",
+				filters: "[]",
+				sortBy: "name",
 			});
 			toast({
 				title: "✅ Objeto creado",
@@ -155,7 +180,7 @@ export function ObjectsSection() {
 		} catch (error) {
 			objectLogger.error("❌ Error al crear objeto:", error);
 			toast({
-				title: "❌ Error al crear objeto",
+				title: "Error al crear objeto",
 				description: "No se pudo crear el objeto.",
 				variant: "destructive",
 			});
@@ -177,13 +202,17 @@ export function ObjectsSection() {
 		} catch (error) {
 			objectLogger.error("❌ Error al eliminar objeto:", error);
 			toast({
-				title: "❌ Error al eliminar objeto",
+				title: "Error al eliminar objeto",
 				description: "No se pudo eliminar el objeto.",
 				variant: "destructive",
 			});
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const handleColorChange = (color: { hex: string }) => {
+		setNewObject((prev) => ({ ...prev, color: color.hex }));
 	};
 
 	return (
@@ -231,7 +260,7 @@ export function ObjectsSection() {
 											onEmojiSelect={(emoji: string) =>
 												setNewObject((prev) => ({
 													...prev,
-													emoji: emoji,
+													emoji,
 												}))
 											}
 										/>
@@ -239,12 +268,7 @@ export function ObjectsSection() {
 										<div className="p-2">
 											<CompactPicker
 												color={newObject.color}
-												onChange={(color) =>
-													setNewObject((prev) => ({
-														...prev,
-														color: color.hex,
-													}))
-												}
+												onChange={handleColorChange}
 											/>
 										</div>
 									</PopoverContent>
@@ -333,7 +357,11 @@ export function ObjectsSection() {
 							/>
 						</div>
 						<div className="flex items-center justify-end">
-							<Button type="submit" size="sm" disabled={isLoading}>
+							<Button
+								type="submit"
+								size="sm"
+								disabled={isLoading || !newObject.name.trim()}
+							>
 								{isLoading ? (
 									<Loader2 className="h-4 w-4 animate-spin mr-2" />
 								) : null}
@@ -364,70 +392,7 @@ export function ObjectsSection() {
 						>
 							<Card className="group relative overflow-hidden">
 								<CardContent className="p-4">
-									{!editingId && (
-										<div className="flex items-center gap-2 relative">
-											<div className="flex items-center gap-2 min-w-0">
-												<div
-													className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-													style={{ backgroundColor: object.color }}
-												>
-													<span className="text-lg">{object.emoji}</span>
-												</div>
-												<div className="flex-1 min-w-0">
-													<span className="text-xs font-semibold truncate pl-1">
-														{object.name}
-													</span>
-													{object.description && (
-														<p className="text-[10px] text-muted-foreground truncate pl-1">
-															{object.description}
-														</p>
-													)}
-													<div className="flex items-center gap-2 text-[10px] text-muted-foreground/75 truncate pl-1">
-														<span className="flex items-center gap-1">
-															<Target className="h-3 w-3" />{" "}
-															{object.type || "Sin tipo"}
-														</span>
-														<span className="flex items-center gap-1">
-															<Sparkles className="h-3 w-3" />{" "}
-															{object.rarity || "Sin rareza"}
-														</span>
-														<span className="flex items-center gap-1">
-															<Scroll className="h-3 w-3" />{" "}
-															{object.origin || "Sin origen"}
-														</span>
-													</div>
-													{object.images.length > 0 && (
-														<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-															{object.images.length}{" "}
-															{object.images.length === 1
-																? "imagen"
-																: "imágenes"}{" "}
-															• {formatBytes(object.images.reduce((acc, image) => acc + image.size, 0))}
-														</p>
-													)}
-												</div>
-											</div>
-											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => handleStartEdit(object)}
-													className="h-6 w-6"
-												>
-													<PencilIcon className="h-3 w-3" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => handleDeleteObject(object.id)}
-													className="h-6 w-6 text-red-500 hover:text-red-500/90"
-												>
-													<Trash2 className="h-3 w-3" />
-												</Button>
-											</div>
-										</div>
-									)}
-									{editingId === object.id && (
+									{editingId === object.id ? (
 										<form onSubmit={handleSubmitEdit} className="space-y-4">
 											<div className="grid gap-2">
 												<div className="flex items-center gap-2">
@@ -455,7 +420,7 @@ export function ObjectsSection() {
 																onEmojiSelect={(emoji: string) =>
 																	setEditForm((prev) => ({
 																		...prev!,
-																		emoji: emoji,
+																		emoji,
 																	}))
 																}
 															/>
@@ -561,22 +526,90 @@ export function ObjectsSection() {
 													type="button"
 													variant="ghost"
 													size="sm"
-													onClick={() => {
-														setEditingId(null);
-														setEditForm(null);
-													}}
+													onClick={handleCancelEdit}
+													className="h-7 text-xs text-destructive hover:text-destructive/90"
 												>
-													<XIcon className="h-4 w-4" />
+													<XIcon className="h-3.5 w-3.5 mr-1" />
+													Cancelar
 												</Button>
-												<Button type="submit" size="sm" disabled={isLoading}>
+												<Button
+													type="submit"
+													variant="ghost"
+													size="sm"
+													disabled={isLoading}
+													className="h-7 text-xs text-green-500 hover:text-green-600"
+												>
 													{isLoading ? (
-														<Loader2 className="h-4 w-4 animate-spin mr-2" />
+														<Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
 													) : (
-														<CheckIcon className="h-4 w-4" />
+														<CheckIcon className="h-3.5 w-3.5 mr-1" />
 													)}
+													Guardar
 												</Button>
 											</div>
 										</form>
+									) : (
+										<div className="flex items-center gap-2 relative">
+											<div className="flex items-center gap-2 min-w-0">
+												<div
+													className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+													style={{ backgroundColor: object.color }}
+												>
+													<span className="text-lg">{object.emoji}</span>
+												</div>
+												<div className="flex-1 min-w-0">
+													<span className="text-xs font-semibold truncate pl-1">
+														{object.name}
+													</span>
+													{object.description && (
+														<p className="text-[10px] text-muted-foreground truncate pl-1">
+															{object.description}
+														</p>
+													)}
+													<div className="flex items-center gap-2 text-[10px] text-muted-foreground/75 truncate pl-1">
+														<span className="flex items-center gap-1">
+															<Target className="h-3 w-3" />{" "}
+															{object.type || "Sin tipo"}
+														</span>
+														<span className="flex items-center gap-1">
+															<Sparkles className="h-3 w-3" />{" "}
+															{object.rarity || "Sin rareza"}
+														</span>
+														<span className="flex items-center gap-1">
+															<Scroll className="h-3 w-3" />{" "}
+															{object.origin || "Sin origen"}
+														</span>
+													</div>
+													{object._count?.images > 0 && (
+														<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
+															{object._count.images}{" "}
+															{object._count.images === 1
+																? "imagen"
+																: "imágenes"}{" "}
+															• {formatBytes(object.totalSize)}
+														</p>
+													)}
+												</div>
+											</div>
+											<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleStartEdit(object)}
+													className="h-6 w-6"
+												>
+													<PencilIcon className="h-3 w-3" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleDeleteObject(object.id)}
+													className="h-6 w-6 text-red-500 hover:text-red-500/90"
+												>
+													<Trash2 className="h-3 w-3" />
+												</Button>
+											</div>
+										</div>
 									)}
 								</CardContent>
 							</Card>

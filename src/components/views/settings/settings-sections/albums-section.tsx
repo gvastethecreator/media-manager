@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
 	Trash2,
-	Album,
+	Album as AlbumIcon,
 	PencilIcon,
 	CheckIcon,
 	XIcon,
@@ -33,20 +33,20 @@ import {
 	AlbumCreate,
 	AlbumUpdate,
 } from "@/app/actions/album.actions";
-import type { Album as PrismaAlbum } from "@prisma/client";
+import type { Album } from "@/types/settings";
 
 const albumLogger = logger.withContext("AlbumsSection");
 
-interface EditForm extends Partial<PrismaAlbum> {
+interface EditForm extends Album {
 	id: string;
 }
 
 export function AlbumsSection() {
-	const [albums, setAlbums] = React.useState<PrismaAlbum[]>([]);
+	const [albums, setAlbums] = React.useState<Album[]>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
-	const [newAlbum, setNewAlbum] = React.useState<Partial<PrismaAlbum>>({
+	const [newAlbum, setNewAlbum] = React.useState<Partial<Album>>({
 		name: "",
 		emoji: "📸",
 		description: "",
@@ -74,14 +74,11 @@ export function AlbumsSection() {
 		loadAlbums();
 	}, [loadAlbums]);
 
-	const handleStartEdit = (album: PrismaAlbum) => {
+	const handleStartEdit = (album: Album) => {
 		setEditingId(album.id);
 		setEditForm({
-			id: album.id,
-			name: album.name,
-			emoji: album.emoji,
+			...album,
 			description: album.description || "",
-			color: album.color,
 		});
 	};
 
@@ -92,14 +89,20 @@ export function AlbumsSection() {
 
 	const handleSaveEdit = async (id: string) => {
 		if (!editForm) return;
-		setIsLoading(true);
 		try {
 			albumLogger.info("💾 Guardando cambios en álbum:", {
 				id,
 				data: editForm,
 			});
-			const { id: _, ...data } = editForm;
-			await updateAlbum(id, data as AlbumUpdate);
+			const {
+				id: _,
+				_count,
+				totalSize,
+				createdAt,
+				updatedAt,
+				...updateData
+			} = editForm;
+			await updateAlbum(id, updateData as AlbumUpdate);
 			await loadAlbums();
 			handleCancelEdit();
 			toast({
@@ -113,8 +116,6 @@ export function AlbumsSection() {
 				description: "No se pudo actualizar el álbum",
 				variant: "destructive",
 			});
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -175,7 +176,7 @@ export function AlbumsSection() {
 			<CardHeader className="p-2 pb-0 bg-transparent">
 				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
 					<span className="flex items-center gap-2 h-7">
-						<Album className="h-5 w-5" /> Álbumes
+						<AlbumIcon className="h-5 w-5" /> Álbumes
 					</span>
 					{albums.length > 0 && (
 						<span className="text-xs text-muted-foreground/75">
@@ -441,15 +442,16 @@ export function AlbumsSection() {
 																{album.description}
 															</p>
 														)}
-														{album._count?.images > 0 && (
-															<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-																{album._count.images}{" "}
-																{album._count.images === 1
-																	? "imagen"
-																	: "imágenes"}{" "}
-																• {formatBytes(album.totalSize)}
-															</p>
-														)}
+														{album._count?.images !== undefined &&
+															album._count.images > 0 && (
+																<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
+																	{album._count.images}{" "}
+																	{album._count.images === 1
+																		? "imagen"
+																		: "imágenes"}{" "}
+																	• {formatBytes(album.totalSize || 0)}
+																</p>
+															)}
 													</div>
 												</div>
 												<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-l-sm px-1">
@@ -481,7 +483,7 @@ export function AlbumsSection() {
 								animate={{ opacity: 1, y: 0 }}
 								className="py-4 text-center col-span-2"
 							>
-								<Album className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
+								<AlbumIcon className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
 								<p className="text-xs text-muted-foreground">
 									No hay álbumes creados
 								</p>
