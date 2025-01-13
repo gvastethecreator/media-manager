@@ -163,14 +163,7 @@ const CollectionCard = memo(function CollectionCard({
 									className={cn("w-4 h-4", isFavorite && "fill-current")}
 								/>
 							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleEdit}
-							>
-								<Settings2 className="w-4 h-4" />
-							</Button>
+						
 							<Button variant="ghost" size="icon" className="h-8 w-8">
 								<ArrowUpRight className="w-4 h-4" />
 							</Button>

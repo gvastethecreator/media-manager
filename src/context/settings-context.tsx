@@ -1,11 +1,21 @@
-import type { Collection, Tag, Profile } from ".prisma/client";
+import type { Collection, Profile } from ".prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
 	collectionService,
 	CollectionCreate,
 	CollectionUpdate,
 } from "@/services/collection.service";
-import { tagService, TagCreate, TagUpdate } from "@/services/tag.service";
+import {
+	getTags,
+	createTag,
+	updateTag as updateTagAction,
+	deleteTag as deleteTagAction,
+} from "@/app/actions/tag.actions";
+import type {
+	TagCreate,
+	TagUpdate,
+	TagWithStats,
+} from "@/app/actions/tag.actions";
 import {
 	profileService,
 	ProfileCreate,
@@ -15,11 +25,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { ThumbnailQuality } from "@/types/thumbnails";
 
 interface CollectionWithStats extends Collection {
-	count: number;
-	size: string;
-}
-
-interface TagWithStats extends Tag {
 	count: number;
 	size: string;
 }
@@ -147,7 +152,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const loadTags = async () => {
 		try {
-			const tags = await tagService.getTags();
+			const tags = await getTags();
 			setSettings((prev) => ({ ...prev, tags }));
 		} catch (error) {
 			console.error("Error loading tags:", error);
@@ -221,10 +226,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (!id) {
 				// Crear nuevo tag
-				await tagService.createTag(data as TagCreate);
+				await createTag(data as TagCreate);
 			} else {
 				// Actualizar tag existente
-				await tagService.updateTag(id, data as TagUpdate);
+				await updateTagAction(id, data as TagUpdate);
 			}
 			await loadTags();
 			toast({
@@ -314,7 +319,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteTag = async (id: string) => {
 		try {
-			await tagService.deleteTag(id);
+			await deleteTagAction(id);
 			await loadTags();
 			toast({
 				title: "Éxito",

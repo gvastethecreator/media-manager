@@ -100,7 +100,7 @@ export function PlaceContentInfo() {
 									{place.dangers.map((danger, index) => (
 										<Badge
 											key={index}
-											variant="destructive"
+											variant="outline"
 											className="text-[10px]"
 										>
 											{danger}
