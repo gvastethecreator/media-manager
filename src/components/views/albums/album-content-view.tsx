@@ -1,70 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ViewProps } from "../types";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
+import { useEffect, useState, useCallback } from "react";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { BaseContentProps } from "@/components/views/base";
 import { Album } from "lucide-react";
 import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
+import { logger } from "@/lib/logger";
+import { getAlbumImages } from "@/app/actions/album.actions";
+import { eventsService, type EventData } from "@/services/events.service";
 
-export function AlbumContentView({ isResizing }: ViewProps) {
+const viewLogger = logger.withContext("AlbumContentView");
+
+export function AlbumContentView() {
 	const { currentAlbumId } = useFileManager();
-	const [images, setImages] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchAlbumImages = async () => {
-			if (!currentAlbumId) return;
+	const loadAlbumImages = useCallback(async () => {
+		if (!currentAlbumId) return;
 
-			try {
-				setIsLoading(true);
-				const response = await fetch(`/api/albums/${currentAlbumId}/images`);
-				const data = await response.json();
-				setImages(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchAlbumImages();
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando imágenes del álbum...");
+			const data = await getAlbumImages(currentAlbumId);
+			setItems(data as unknown as FileItem[]);
+			viewLogger.info("✅ Imágenes cargadas");
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando imágenes:", errorMessage);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, [currentAlbumId]);
 
-	if (!currentAlbumId) {
-		return (
-			<EmptyState
-				icon={Album}
-				title="No hay álbum seleccionado"
-				description="Selecciona un álbum para ver su contenido."
-			/>
-		);
-	}
+	useEffect(() => {
+		// Cargar imágenes inicialmente
+		loadAlbumImages();
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
+		// Suscribirse a eventos relevantes
+		const handleImagesModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de imágenes recibido:", data);
+			loadAlbumImages();
+		};
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+		eventsService.on("images:modified", handleImagesModified);
+		eventsService.on("albums:modified", handleImagesModified);
 
-	if (!images || images.length === 0) {
-		return (
-			<EmptyState
-				icon={Album}
-				title="Álbum vacío"
-				description="Este álbum no contiene imágenes."
-			/>
-		);
-	}
+		return () => {
+			eventsService.off("images:modified", handleImagesModified);
+			eventsService.off("albums:modified", handleImagesModified);
+		};
+	}, [loadAlbumImages]);
 
-	return <FileGrid items={images} isResizing={isResizing} />;
+	const handleItemSelection = useCallback((item: FileItem) => {
+		viewLogger.info("🖱️ Item seleccionado:", item.name);
+	}, []);
+
+	const contentProps: BaseContentProps = {
+		items,
+		isLoading,
+		error,
+		toggleItemSelection: handleItemSelection,
+		currentContainerId: currentAlbumId ?? null,
+		emptyState: !currentAlbumId
+			? {
+					icon: Album,
+					title: "No hay álbum seleccionado",
+					description: "Selecciona un álbum para ver su contenido.",
+			  }
+			: {
+					icon: Album,
+					title: "Álbum sin imágenes",
+					description: "Este álbum no tiene imágenes asociadas.",
+			  },
+	};
+
+	return (
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView />
+		</ContentViewProvider>
+	);
 }

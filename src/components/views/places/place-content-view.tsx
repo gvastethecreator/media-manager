@@ -1,29 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ViewProps } from "../types";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
-import { MapPin } from "lucide-react";
 import { useFileManager } from "@/store/file-manager.store";
-import { FileItem } from "@/types/file-item";
+import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
+import { MapPin } from "lucide-react";
+import { BaseContentView } from "../base/base-content-view";
+import { getPlaceImages } from "@/app/actions/place.actions";
+import { ContentViewProvider } from "../base/content-view-provider";
+import type { FileItem } from "@/types/file-item";
 
-export function PlaceContentView({ isResizing }: ViewProps) {
+export function PlaceContentView() {
 	const { currentPlaceId } = useFileManager();
-	const [images, setImages] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchPlaceImages = async () => {
+		const loadPlaceImages = async () => {
 			if (!currentPlaceId) return;
 
 			try {
 				setIsLoading(true);
-				const response = await fetch(`/api/places/${currentPlaceId}/images`);
-				const data = await response.json();
-				setImages(data);
+				const images = await getPlaceImages(currentPlaceId);
+				setItems(images as unknown as FileItem[]);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "Error desconocido");
 			} finally {
@@ -31,7 +30,7 @@ export function PlaceContentView({ isResizing }: ViewProps) {
 			}
 		};
 
-		fetchPlaceImages();
+		loadPlaceImages();
 	}, [currentPlaceId]);
 
 	if (!currentPlaceId) {
@@ -39,32 +38,25 @@ export function PlaceContentView({ isResizing }: ViewProps) {
 			<EmptyState
 				icon={MapPin}
 				title="No hay lugar seleccionado"
-				description="Selecciona un lugar para ver su contenido."
+				description="Selecciona un lugar para ver su contenido"
 			/>
 		);
 	}
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!images || images.length === 0) {
-		return (
-			<EmptyState
-				icon={MapPin}
-				title="Lugar sin imágenes"
-				description="Este lugar no tiene imágenes asociadas."
-			/>
-		);
-	}
-
-	return <FileGrid items={images} isResizing={isResizing} />;
+	return (
+		<ContentViewProvider
+			items={items}
+			isLoading={isLoading}
+			error={error}
+			currentContainerId={currentPlaceId}
+			containerName="lugar"
+			emptyState={{
+				icon: MapPin,
+				title: "No hay imágenes en este lugar",
+				description: "Este lugar no tiene imágenes asociadas",
+			}}
+		>
+			<BaseContentView />
+		</ContentViewProvider>
+	);
 }

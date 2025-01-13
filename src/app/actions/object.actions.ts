@@ -208,32 +208,31 @@ export async function getObjectImages(id: string) {
           },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        path: true,
-        size: true,
-        createdAt: true,
-        updatedAt: true,
-        hash: true,
-        width: true,
-        height: true,
-        metadata: true,
-        thumbnail: true,
-        thumbnailSize: true,
-        thumbnailWidth: true,
-        thumbnailHeight: true,
-        folderId: true,
-        isPublic: true,
-        isFavorite: true,
+      include: {
+        tags: {
+          select: { id: true },
+        },
+        collections: {
+          select: { id: true },
+        },
+        albums: {
+          select: { id: true },
+        },
+        characters: {
+          select: { id: true },
+        },
+        places: {
+          select: { id: true },
+        },
+        objects: {
+          select: { id: true },
+        },
+        stats: true,
       },
     });
 
     objectLogger.info(`✅ ${images.length} imágenes obtenidas`);
-    return images.map(image => ({
-      ...image,
-      type: 'image',
-    }));
+    return images;
   } catch (error) {
     objectLogger.error("❌ Error al obtener imágenes del objeto:", error);
     throw new ObjectError("No se pudieron obtener las imágenes del objeto", error);

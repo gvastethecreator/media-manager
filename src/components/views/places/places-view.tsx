@@ -24,9 +24,16 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
+import { useRouter } from "next/navigation";
+import { getPlaces } from "@/app/actions/place.actions";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+import type { PlaceWithStats } from "@/app/actions/place.actions";
+
+const viewLogger = logger.withContext("PlacesView");
 
 interface PlaceCardProps {
-	place: any;
+	place: PlaceWithStats;
 	onClick: () => void;
 }
 
@@ -47,6 +54,16 @@ function getRandomGradient() {
 
 function PlaceCard({ place, onClick }: PlaceCardProps) {
 	const gradient = getRandomGradient();
+	const router = useRouter();
+
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando lugar:", place.name);
+			router.push("/settings/places");
+		},
+		[router, place.name]
+	);
 
 	return (
 		<motion.div
@@ -70,10 +87,30 @@ function PlaceCard({ place, onClick }: PlaceCardProps) {
 							</CardTitle>
 							<CardDescription className="flex items-center gap-2 text-xs">
 								<ImageIcon className="h-3 w-3" />
-								<span>{place.count} imágenes</span>
+								<span>{place._count.images} imágenes</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="p-4 pt-0">
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-2">
+									<Badge variant="secondary" className="font-normal">
+										{place.region}
+									</Badge>
+									<Badge variant="secondary" className="font-normal">
+										{place.climate}
+									</Badge>
+								</div>
+								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8"
+										onClick={handleEdit}
+									>
+										<Settings2 className="w-4 h-4" />
+									</Button>
+								</div>
+							</div>
 							<div
 								className={cn(
 									"absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r",
@@ -95,7 +132,7 @@ function PlaceCard({ place, onClick }: PlaceCardProps) {
 							</h4>
 							<div className="flex items-center gap-4">
 								<Badge variant="secondary" className="font-normal">
-									{place.count} imágenes
+									{place._count.images} imágenes
 								</Badge>
 							</div>
 						</div>
@@ -103,6 +140,7 @@ function PlaceCard({ place, onClick }: PlaceCardProps) {
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 text-muted-foreground"
+							onClick={handleEdit}
 						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
@@ -116,29 +154,47 @@ function PlaceCard({ place, onClick }: PlaceCardProps) {
 export function PlacesView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentPlace } = useFileManager();
-	const [places, setPlaces] = useState<any[]>([]);
+	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchPlaces = async () => {
-			try {
-				setIsLoading(true);
-				const response = await fetch("/api/places");
-				const data = await response.json();
-				setPlaces(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchPlaces();
+	const fetchPlaces = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando lugares...");
+			const data = await getPlaces();
+			setPlaces(data);
+			viewLogger.info(`✅ ${data.length} lugares cargados`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando lugares:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar lugares inicialmente
+		fetchPlaces();
+
+		// Suscribirse a eventos relevantes
+		const handlePlaceModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de lugares recibido:", data);
+			fetchPlaces();
+		};
+
+		eventsService.on("places:modified", handlePlaceModified);
+
+		return () => {
+			eventsService.off("places:modified", handlePlaceModified);
+		};
+	}, [fetchPlaces]);
+
 	const handlePlaceClick = useCallback(
-		(place: any) => {
+		(place: PlaceWithStats) => {
+			viewLogger.info("🖱️ Click en lugar:", place.name);
 			setCurrentView("place-content");
 			setCurrentPlace(place.id);
 		},
