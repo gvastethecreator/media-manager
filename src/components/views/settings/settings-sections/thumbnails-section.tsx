@@ -29,7 +29,7 @@ import Image from "next/image";
 import { useSettingsContext } from "@/context/settings-context";
 import { useThumbnailStore } from "@/store/thumbnails";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
-import * as thumbnailActions from "@/actions/thumbnails";
+import * as thumbnailActions from "@/app/actions/thumbnails";
 import { formatBytes, cn } from "@/lib/utils";
 import {
 	ThumbnailQuality,

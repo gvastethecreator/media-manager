@@ -4,38 +4,22 @@ import type { FileItem } from '@/types/file-item';
 import {
   getAlbums,
   getAlbum,
-  createAlbum as createAlbumAction,
-  updateAlbum as updateAlbumAction,
-  deleteAlbum as deleteAlbumAction,
-  addImageToAlbum as addImageToAlbumAction,
-  removeImageFromAlbum as removeImageFromAlbumAction,
+  createAlbum,
+  updateAlbum,
+  deleteAlbum,
+  addImageToAlbum,
+  removeImageFromAlbum,
   getAlbumImages,
-} from '@/app/actions/albums';
+  type AlbumCreate,
+  type AlbumUpdate,
+  type AlbumWithStats
+} from '@/app/actions/album.actions';
 
 const albumLogger = logger.withContext("AlbumStore");
 
-export interface AlbumCreate {
-  name: string;
-  emoji?: string;
-  color?: string;
-  description?: string;
-  shortcut?: string;
-  sortBy?: string;
-  filters?: string;
-}
-
-export interface AlbumUpdate extends Partial<Omit<AlbumCreate, 'name'>> {
-  id: string;
-  name?: string;
-}
-
-export type Album = Awaited<ReturnType<typeof getAlbum>>;
-export type AlbumWithStats = Awaited<ReturnType<typeof getAlbums>>[0];
-export type ImageFromServer = Awaited<ReturnType<typeof getAlbumImages>>[0];
-
 interface AlbumsState {
   albums: AlbumWithStats[];
-  currentAlbum: Album | null;
+  currentAlbum: AlbumWithStats | null;
   currentItems: FileItem[];
   isLoading: boolean;
   error: string | null;
@@ -60,7 +44,7 @@ const validateMetadata = (metadata: string | null): Record<string, any> | undefi
   }
 };
 
-const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getAlbumImages>>[0]): FileItem => {
   try {
     const metadata = validateMetadata(image.metadata);
     const thumbnail = image.thumbnail
@@ -115,7 +99,7 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
   createAlbum: async (data: AlbumCreate) => {
     try {
       set({ isLoading: true, error: null });
-      const album = await createAlbumAction(data);
+      const album = await createAlbum(data);
       const albumWithStats = {
         ...album,
         _count: { images: 0 },
@@ -136,7 +120,7 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
   updateAlbum: async (id: string, data: AlbumUpdate) => {
     try {
       set({ isLoading: true, error: null });
-      const updatedAlbum = await updateAlbumAction(id, data);
+      const updatedAlbum = await updateAlbum(id, data);
       const currentStats = get().albums.find(a => a.id === id);
       const updatedAlbumWithStats = {
         ...updatedAlbum,
@@ -161,7 +145,7 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
   deleteAlbum: async (id: string) => {
     try {
       set({ isLoading: true, error: null });
-      await deleteAlbumAction(id);
+      await deleteAlbum(id);
       set(state => ({
         albums: state.albums.filter(a => a.id !== id),
         currentAlbum: state.currentAlbum?.id === id ? null : state.currentAlbum,
@@ -178,7 +162,7 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
 
   addImageToAlbum: async (albumId: string, imageId: string) => {
     try {
-      await addImageToAlbumAction(albumId, imageId);
+      await addImageToAlbum(albumId, imageId);
       albumLogger.info('📸 Imagen agregada a álbum:', { albumId, imageId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -189,7 +173,7 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
 
   removeImageFromAlbum: async (albumId: string, imageId: string) => {
     try {
-      await removeImageFromAlbumAction(albumId, imageId);
+      await removeImageFromAlbum(albumId, imageId);
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }));
