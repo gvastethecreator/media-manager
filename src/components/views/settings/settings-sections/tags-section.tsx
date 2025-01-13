@@ -25,12 +25,12 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import type { TagCreate, TagUpdate } from "@/services/tag.service";
+import type { TagCreate, TagUpdate } from "@/app/actions/tag.actions";
 
 const tagsLogger = logger.withContext("TagsSection");
 
 export function TagsSection() {
-	const { tags, isLoading, createTag, updateTag, deleteTag, loadTags } =
+	const { tags, createTag, updateTag, deleteTag, loadTags } =
 		useTagsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const [editForm, setEditForm] = React.useState<TagUpdate | null>(null);
@@ -220,14 +220,7 @@ export function TagsSection() {
 					<Separator className="my-0" />
 
 					<div className="grid grid-cols-2 gap-2">
-						{isLoading ? (
-							<div className="col-span-2 py-8 text-center">
-								<Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">
-									Cargando etiquetas...
-								</p>
-							</div>
-						) : tags && tags.length > 0 ? (
+						{tags && tags.length > 0 ? (
 							tags.map((tag, index) => (
 								<motion.div
 									key={tag.id}

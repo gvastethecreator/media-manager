@@ -38,9 +38,9 @@ import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
 import { useRouter } from "next/navigation";
 import {
-	collectionService,
 	CollectionWithStats,
-} from "@/services/collection.service";
+	getCollections,
+} from "@/app/actions/collection.actions";
 import { eventsService, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import Image from "next/image";
@@ -144,30 +144,7 @@ const CollectionCard = memo(function CollectionCard({
 								</CardDescription>
 							</div>
 						</div>
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleDownload}
-							>
-								<Download className="w-4 h-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className={cn("h-8 w-8", isFavorite && "text-red-500")}
-								onClick={handleFavorite}
-							>
-								<Heart
-									className={cn("w-4 h-4", isFavorite && "fill-current")}
-								/>
-							</Button>
-						
-							<Button variant="ghost" size="icon" className="h-8 w-8">
-								<ArrowUpRight className="w-4 h-4" />
-							</Button>
-						</div>
+					
 					</div>
 				</CardHeader>
 
@@ -240,11 +217,11 @@ const CollectionCard = memo(function CollectionCard({
 									<HoverCardTrigger asChild>
 										<div className="flex items-center gap-1.5 cursor-help">
 											<FolderIcon className="w-4 h-4" />
-											<span>{collection.count}</span>
+											<span>{collection._count.images}</span>
 										</div>
 									</HoverCardTrigger>
 									<HoverCardContent side="top" className="text-sm">
-										Esta colección contiene {collection.count} imágenes
+										Esta colección contiene {collection._count.images} imágenes
 									</HoverCardContent>
 								</HoverCard>
 
@@ -264,7 +241,7 @@ const CollectionCard = memo(function CollectionCard({
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{collection.size}</span>
+										<span>{collection.totalSize}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
@@ -319,7 +296,7 @@ export function CollectionsView({ isResizing }: ViewProps) {
 		try {
 			setIsLoading(true);
 			viewLogger.info("🔄 Cargando colecciones...");
-			const data = await collectionService.getCollections();
+			const data = await getCollections();
 			setCollections(data);
 			viewLogger.info(`✅ ${data.length} colecciones cargadas`);
 		} catch (err) {

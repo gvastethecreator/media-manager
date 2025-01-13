@@ -35,18 +35,20 @@ import type { Collection } from "@prisma/client";
 import type {
 	CollectionCreate,
 	CollectionUpdate,
-} from "@/services/collection.service";
+	CollectionWithStats,
+} from "@/app/actions/collection.actions";
 
 const collectionLogger = logger.withContext("CollectionsSection");
 
-interface EditForm extends Omit<CollectionUpdate, "description"> {
+interface EditForm extends Omit<CollectionUpdate, "description" | "filters"> {
 	description: string;
+	filters: string;
 }
 
 export function CollectionsSection() {
-	const [collections, setCollections] = React.useState<
-		(Collection & { _count: { images: number }; totalSize: number })[]
-	>([]);
+	const [collections, setCollections] = React.useState<CollectionWithStats[]>(
+		[]
+	);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [error, setError] = React.useState<Error | null>(null);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -57,6 +59,7 @@ export function CollectionsSection() {
 		description: "",
 		color: "#3b82f6",
 		filters: "[]",
+		sortBy: "name",
 	});
 	const { toast } = useToast();
 
@@ -83,7 +86,7 @@ export function CollectionsSection() {
 		loadCollections();
 	}, [loadCollections]);
 
-	const handleStartEdit = (collection: (typeof collections)[0]) => {
+	const handleStartEdit = (collection: CollectionWithStats) => {
 		setEditingId(collection.id);
 		setEditForm({
 			id: collection.id,
@@ -91,7 +94,8 @@ export function CollectionsSection() {
 			emoji: collection.emoji,
 			description: collection.description || "",
 			color: collection.color,
-			filters: collection.filters,
+			filters: collection.filters || "[]",
+			sortBy: collection.sortBy,
 		});
 	};
 
@@ -147,6 +151,7 @@ export function CollectionsSection() {
 				description: "",
 				color: "#3b82f6",
 				filters: "[]",
+				sortBy: "name",
 			});
 			toast({
 				title: "✅ Colección creada",
@@ -262,7 +267,7 @@ export function CollectionsSection() {
 							</div>
 							<Input
 								placeholder="Descripción"
-								value={newCollection.description}
+								value={newCollection.description || ""}
 								onChange={(e) =>
 									setNewCollection((prev) => ({
 										...prev,
