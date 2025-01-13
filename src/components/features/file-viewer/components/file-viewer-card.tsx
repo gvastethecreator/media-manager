@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { FileItem } from "@/types/file-item";
+import type { FileItem } from "@/types/file-item";
 
 export interface ImageCardProps {
 	src?: string;
@@ -11,7 +11,7 @@ export interface ImageCardProps {
 	height?: number;
 	className?: string;
 	priority?: boolean;
-	file?: FileItem;
+	file?: FileItem & { thumbnail?: string };
 	onClick?: () => void;
 	onError?: () => void;
 }

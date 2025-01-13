@@ -12,7 +12,7 @@ import {
 	XIcon,
 	Loader2,
 } from "lucide-react";
-import { useTagsStore } from "@/store/tags";
+import { useTagsStore } from "@/store/tags.store";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,

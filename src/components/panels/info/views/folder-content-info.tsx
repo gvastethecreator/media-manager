@@ -1,10 +1,9 @@
 "use client";
 
-import { useFileManager } from "@/store/file-manager";
-import { useStatsStore } from "@/store/stats";
+import { useFileManager } from "@/store/file-manager.store";
+import { useStatsStore } from "@/store/stats.store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { formatDate, formatBytes } from "@/lib/utils";
 import { FolderIcon } from "lucide-react";
 

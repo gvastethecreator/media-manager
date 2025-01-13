@@ -6,7 +6,7 @@ import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import { MapPin } from "lucide-react";
-import { useFileManager } from "@/store/file-manager";
+import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
 
 export function PlaceContentView({ isResizing }: ViewProps) {

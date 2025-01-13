@@ -10,7 +10,7 @@ import {
   addImageToTag as addImageToTagAction,
   removeImageFromTag as removeImageFromTagAction,
   getTagImages
-} from '@/app/actions/tags'
+} from '@/app/actions/tag.actions'
 
 const tagLogger = logger.withContext('TagStore')
 

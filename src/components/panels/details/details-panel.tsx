@@ -4,7 +4,7 @@ import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { FileItem } from "@/types/file-item";
 import { ThumbnailQuality } from "@/types/thumbnails";
-import { useImageViewer } from "@/store/image-viewer";
+import { useImageViewer } from "@/store/image-viewer.store";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
 import {
 	ImageOff,
@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatsPanel } from "../stats/stats-panel";
 import { useToast } from "@/components/ui/use-toast";
-import { updateImageStats, getImageUrl } from "@/app/actions/images";
-import { useFileManager } from "@/store/file-manager";
+import { updateImageStats, getImageUrl } from "@/app/actions/image.actions";
+import { useFileManager } from "@/store/file-manager.store";
 import { ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
 
 interface DetailsPanelProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useNavigationStore } from "@/store/navigation";
+import { useNavigationStore } from "@/store/navigation.store";
 import { ViewContainerProps } from "./types";
 import { SettingsView } from "./settings/settings-view";
 import { AllImagesView } from "./all-images/all-images-view";
