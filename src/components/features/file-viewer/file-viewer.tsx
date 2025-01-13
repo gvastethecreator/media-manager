@@ -28,6 +28,27 @@ const AdvancedImageViewer = dynamic(
 	}
 );
 
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
+interface ViewerImage extends Omit<FileItem, "width" | "height" | "metadata"> {
+	src: string;
+	alt: string;
+	thumbnail: string;
+	width?: number;
+	height?: number;
+	metadata?: {
+		dimensions?: { width: number; height: number };
+		mimeType?: string;
+	};
+}
+
 export function ImageViewer() {
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
 	const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
@@ -52,23 +73,15 @@ export function ImageViewer() {
 			const urls: Record<string, string> = {};
 			await Promise.all(
 				images.map(async (img) => {
-					if (!img.url) {
-						try {
-							urls[img.id] = await getImageUrl(img.id);
-							viewerLogger.info(
-								`🔗 URL cargada para ${img.name}:`,
-								urls[img.id]
-							);
-						} catch (error) {
-							viewerLogger.error(
-								`❌ Error cargando URL para ${img.name}:`,
-								error
-							);
-							urls[img.id] = ""; // URL vacía en caso de error
-						}
-					} else {
-						viewerLogger.info(`✅ URL existente para ${img.name}:`, img.url);
-						urls[img.id] = img.url;
+					try {
+						urls[img.id] = await getImageUrl(img.id);
+						viewerLogger.info(`🔗 URL cargada para ${img.name}:`, urls[img.id]);
+					} catch (error) {
+						viewerLogger.error(
+							`❌ Error cargando URL para ${img.name}:`,
+							error
+						);
+						urls[img.id] = ""; // URL vacía en caso de error
 					}
 				})
 			);
@@ -92,19 +105,21 @@ export function ImageViewer() {
 	const mappedImages = useMemo(() => {
 		if (!images || !images.length) return [];
 
-		return images.map((img) => ({
-			id: img.id,
-			name: img.name,
-			type: "image" as const,
-			thumbnail: `/api/thumbnails/${img.id}?quality=medium`,
-			src: signedUrls[img.id] || img.url || "",
-			alt: img.name,
-			width: img.metadata?.dimensions?.width,
-			height: img.metadata?.dimensions?.height,
-			mimeType: img.metadata?.mimeType,
-			path: img.path,
-			size: img.size,
-		}));
+		return images.map((img) => {
+			const parsedMetadata = getMetadata(img.metadata);
+			const width = parsedMetadata?.dimensions?.width;
+			const height = parsedMetadata?.dimensions?.height;
+
+			return {
+				...img,
+				width: width || undefined,
+				height: height || undefined,
+				src: signedUrls[img.id] || "",
+				alt: img.name,
+				thumbnail: `/api/thumbnails/${img.id}?quality=medium`,
+				metadata: parsedMetadata || undefined,
+			} as ViewerImage;
+		});
 	}, [images, signedUrls]);
 
 	// Si no está montado, no renderizamos nada

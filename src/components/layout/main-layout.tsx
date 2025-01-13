@@ -10,7 +10,7 @@ import {
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useState } from "react";
-import { AdvancedImageViewer } from "@/components/features/file-viewer/components/advanced-file-viewer";
+import { AdvancedImageViewer, ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
 import { useImageViewer } from "@/store/image-viewer.store";
 
 export function MainLayout() {
@@ -58,7 +58,7 @@ export function MainLayout() {
 			</ResizablePanelGroup>
 
 			<AdvancedImageViewer
-				images={images}
+				images={images as unknown as ImageItem[]}
 				initialIndex={currentIndex}
 				isOpen={isOpen}
 				onClose={closeViewer}

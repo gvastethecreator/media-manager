@@ -24,28 +24,16 @@ import {
 } from "@/components/ui/hover-card";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
+import { useRouter } from "next/navigation";
+import { getAlbums } from "@/app/actions/album.actions";
 import { eventsService, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
+import type { AlbumWithStats } from "@/app/actions/album.actions";
 
 const viewLogger = logger.withContext("AlbumsView");
 
-interface Album {
-	id: string;
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string;
-	shortcut?: string;
-	sortBy?: string;
-	filters?: string;
-	_count?: {
-		images: number;
-	};
-	totalSize?: number;
-}
-
 interface AlbumCardProps {
-	album: Album;
+	album: AlbumWithStats;
 	onClick: () => void;
 }
 
@@ -66,6 +54,16 @@ function getRandomGradient() {
 
 const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 	const gradient = getRandomGradient();
+	const router = useRouter();
+
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando álbum:", album.name);
+			router.push("/settings/albums");
+		},
+		[router, album.name]
+	);
 
 	return (
 		<motion.div
@@ -89,10 +87,34 @@ const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 							</CardTitle>
 							<CardDescription className="flex items-center gap-2 text-xs">
 								<ImageIcon className="h-3 w-3" />
-								<span>{album._count?.images ?? 0} imágenes</span>
+								<span>{album._count.images} imágenes</span>
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="p-4 pt-0">
+							<div className="flex items-center justify-between text-sm text-muted-foreground">
+								<div className="flex items-center gap-2">
+									{album.shortcut && (
+										<Badge variant="secondary" className="font-normal">
+											{album.shortcut}
+										</Badge>
+									)}
+									{album.sortBy && (
+										<Badge variant="secondary" className="font-normal">
+											{album.sortBy}
+										</Badge>
+									)}
+								</div>
+								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8"
+										onClick={handleEdit}
+									>
+										<Settings2 className="w-4 h-4" />
+									</Button>
+								</div>
+							</div>
 							<div
 								className={cn(
 									"absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r",
@@ -114,7 +136,7 @@ const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 							</h4>
 							<div className="flex items-center gap-4">
 								<Badge variant="secondary" className="font-normal">
-									{album._count?.images ?? 0} imágenes
+									{album._count.images} imágenes
 								</Badge>
 							</div>
 						</div>
@@ -122,6 +144,7 @@ const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 text-muted-foreground"
+							onClick={handleEdit}
 						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
@@ -135,7 +158,7 @@ const AlbumCard = memo(function AlbumCard({ album, onClick }: AlbumCardProps) {
 export function AlbumsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentAlbum } = useFileManager();
-	const [albums, setAlbums] = useState<Album[]>([]);
+	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -143,8 +166,7 @@ export function AlbumsView({ isResizing }: ViewProps) {
 		try {
 			setIsLoading(true);
 			viewLogger.info("🔄 Cargando álbumes...");
-			const response = await fetch("/api/albums");
-			const data = await response.json();
+			const data = await getAlbums();
 			setAlbums(data);
 			viewLogger.info(`✅ ${data.length} álbumes cargados`);
 		} catch (err) {
@@ -175,7 +197,7 @@ export function AlbumsView({ isResizing }: ViewProps) {
 	}, [fetchAlbums]);
 
 	const handleAlbumClick = useCallback(
-		(album: Album) => {
+		(album: AlbumWithStats) => {
 			viewLogger.info("🖱️ Click en álbum:", album.name);
 			setCurrentView("album-content");
 			setCurrentAlbum(album.id);

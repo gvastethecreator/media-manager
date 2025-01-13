@@ -212,32 +212,63 @@ export async function getPlaceImages(id: string) {
           },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        path: true,
-        size: true,
-        createdAt: true,
-        updatedAt: true,
-        hash: true,
-        width: true,
-        height: true,
-        metadata: true,
-        thumbnail: true,
-        thumbnailSize: true,
-        thumbnailWidth: true,
-        thumbnailHeight: true,
-        folderId: true,
-        isPublic: true,
-        isFavorite: true,
+      include: {
+        tags: {
+          select: { id: true },
+        },
+        collections: {
+          select: { id: true },
+        },
+        albums: {
+          select: { id: true },
+        },
+        characters: {
+          select: { id: true },
+        },
+        places: {
+          select: { id: true },
+        },
+        objects: {
+          select: { id: true },
+        },
+        stats: true,
       },
     });
 
     placeLogger.info(`✅ ${images.length} imágenes obtenidas`);
-    return images.map(image => ({
-      ...image,
-      type: 'image',
-    }));
+    return images.map(image => {
+      let parsedMetadata = undefined;
+      if (image.metadata) {
+        try {
+          const meta = JSON.parse(image.metadata);
+          parsedMetadata = {
+            dimensions: {
+              width: image.width,
+              height: image.height,
+            },
+            mimeType: meta.mimeType,
+          };
+        } catch (e) {
+          placeLogger.error("Error parsing metadata:", e);
+        }
+      }
+
+      return {
+        ...image,
+        type: 'image',
+        metadata: parsedMetadata,
+        tags: image.tags.map(t => t.id),
+        collections: image.collections.map(c => c.id),
+        albums: image.albums.map(a => a.id),
+        characters: image.characters.map(c => c.id),
+        places: image.places.map(p => p.id),
+        objects: image.objects.map(o => o.id),
+        favorite: image.isFavorite,
+        views: image.stats?.views || 0,
+        downloads: image.stats?.downloads || 0,
+        count: 0,
+      };
+    });
   } catch (error) {
     placeLogger.error("❌ Error al obtener imágenes del lugar:", error);
     throw new PlaceError("No se pudieron obtener las imágenes del lugar", error);

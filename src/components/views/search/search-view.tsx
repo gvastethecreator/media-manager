@@ -26,6 +26,15 @@ interface SearchFilters {
 
 const PAGE_SIZE = 100;
 
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
 export function SearchView({ isResizing }: ViewProps) {
 	const [filters, setFilters] = useState<SearchFilters>({
 		query: "",
@@ -62,10 +71,12 @@ export function SearchView({ isResizing }: ViewProps) {
 
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
-				);
+			const metadata = getMetadata(item.metadata);
+			if (item.type === "image" || metadata?.mimeType?.startsWith("image/")) {
+				const imageItems = (items || []).filter((i) => {
+					const meta = getMetadata(i.metadata);
+					return i.type === "image" || meta?.mimeType?.startsWith("image/");
+				});
 				openViewer(
 					imageItems,
 					imageItems.findIndex((i) => i.id === item.id)

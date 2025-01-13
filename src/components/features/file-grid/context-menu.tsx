@@ -59,6 +59,11 @@ import { useAlbumsStore } from "@/store/albums.store";
 import { useCharactersStore } from "@/store/characters.store";
 import { usePlacesStore } from "@/store/places.store";
 import { useObjectsStore } from "@/store/objects.store";
+import type { Collection } from "@prisma/client";
+import type { Album } from "@prisma/client";
+import type { Character } from "@prisma/client";
+import type { Place } from "@prisma/client";
+import type { Object } from "@prisma/client";
 
 const contextMenuLogger = logger.withContext("ContextMenu");
 
@@ -98,14 +103,16 @@ export function FileContextMenu({
 	// Stores
 	const { toggleFavorite, isFavorited } = useFavoritesStore();
 	const { collections, createCollection, addImageToCollection } =
-		useCollectionsStore();
+		useCollectionsStore() as any;
 	const { tags, createTag, addImageToTag } = useTagsStore();
-	const { albums, createAlbum, addImageToAlbum, loadAlbums } = useAlbumsStore();
+	const { albums, createAlbum, addImageToAlbum, loadAlbums } =
+		useAlbumsStore() as any;
 	const { characters, createCharacter, addImageToCharacter, loadCharacters } =
-		useCharactersStore();
-	const { places, createPlace, addImageToPlace, loadPlaces } = usePlacesStore();
+		useCharactersStore() as any;
+	const { places, createPlace, addImageToPlace, loadPlaces } =
+		usePlacesStore() as any;
 	const { objects, createObject, addImageToObject, loadObjects } =
-		useObjectsStore();
+		useObjectsStore() as any;
 
 	// Cargar datos iniciales
 	useEffect(() => {
@@ -347,7 +354,16 @@ export function FileContextMenu({
 		}
 	}, [newObject, createObject, file.id]);
 
-	const isImage = file.type === "image" || file.mimeType?.startsWith("image/");
+	const isImage =
+		file.type === "image" ||
+		(() => {
+			try {
+				const metadata = file.metadata ? JSON.parse(file.metadata) : null;
+				return metadata?.mimeType?.startsWith("image/") || false;
+			} catch {
+				return false;
+			}
+		})();
 
 	return (
 		<ContextMenu>
@@ -452,7 +468,7 @@ export function FileContextMenu({
 						</Dialog>
 						<ContextMenuSeparator />
 						{collections.length > 0 ? (
-							collections.map((collection) => (
+							collections.map((collection: Collection) => (
 								<ContextMenuItem
 									key={collection.id}
 									onClick={() => addImageToCollection(collection.id, file.id)}
@@ -647,7 +663,7 @@ export function FileContextMenu({
 						</Dialog>
 						<ContextMenuSeparator />
 						{albums.length > 0 ? (
-							albums.map((album) => (
+							albums.map((album: Album) => (
 								<ContextMenuItem
 									key={album.id}
 									onClick={() => addImageToAlbum(album.id, file.id)}
@@ -748,7 +764,7 @@ export function FileContextMenu({
 						</Dialog>
 						<ContextMenuSeparator />
 						{characters.length > 0 ? (
-							characters.map((character) => (
+							characters.map((character: Character) => (
 								<ContextMenuItem
 									key={character.id}
 									onClick={() => addImageToCharacter(character.id, file.id)}
@@ -849,7 +865,7 @@ export function FileContextMenu({
 						</Dialog>
 						<ContextMenuSeparator />
 						{places.length > 0 ? (
-							places.map((place) => (
+							places.map((place: Place) => (
 								<ContextMenuItem
 									key={place.id}
 									onClick={() => addImageToPlace(place.id, file.id)}
@@ -950,7 +966,7 @@ export function FileContextMenu({
 						</Dialog>
 						<ContextMenuSeparator />
 						{objects.length > 0 ? (
-							objects.map((object) => (
+							objects.map((object: Object) => (
 								<ContextMenuItem
 									key={object.id}
 									onClick={() => addImageToObject(object.id, file.id)}

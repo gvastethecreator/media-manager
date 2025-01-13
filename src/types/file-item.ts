@@ -14,24 +14,65 @@ export interface BaseItem {
   emoji?: string;
 }
 
+export interface Dimensions {
+  width: number;
+  height: number;
+}
+
 export interface FileItem {
   id: string;
   name: string;
   path: string;
   type: string;
   size: number;
-  width?: number;
-  height?: number;
-  metadata?: Record<string, any>;
-  thumbnail?: string;
-  thumbnailSize?: number;
-  thumbnailWidth?: number;
-  thumbnailHeight?: number;
-  createdAt: string;
-  updatedAt: string;
+  width: number | null;
+  height: number | null;
+  metadata: string | null;
+  thumbnail: string | null;
+  thumbnailSize: number | null;
+  thumbnailWidth: number | null;
+  thumbnailHeight: number | null;
   isPublic: boolean;
   isFavorite: boolean;
   folderId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  collections: RelatedCollection[];
+  tags: RelatedTag[];
+  albums: RelatedAlbum[];
+  characters: RelatedCharacter[];
+  places: RelatedPlace[];
+  objects: RelatedObject[];
+}
+
+export interface RelatedCollection {
+  id: string;
+  name: string;
+}
+
+export interface RelatedTag {
+  id: string;
+  name: string;
+}
+
+export interface RelatedAlbum {
+  id: string;
+  name: string;
+}
+
+export interface RelatedCharacter {
+  id: string;
+  name: string;
+}
+
+export interface RelatedPlace {
+  id: string;
+  name: string;
+}
+
+export interface RelatedObject {
+  id: string;
+  name: string;
 }
 
 export interface ImageItem extends FileItem {
