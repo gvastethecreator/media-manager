@@ -2,49 +2,41 @@
 
 ## Tareas Actuales
 
-### Optimización del Sistema de Thumbnails e Integración de Detalles
+### Corrección del Visor de Imágenes y Manejo de Eventos
 
 **Estado**: En progreso
-**Completado**: 85%
+**Completado**: 0%
 
 #### Objetivos
 
-- ✅ Corregir la carga de thumbnails en FileCard
-- ✅ Implementar vista previa en DetailsPanel
-- ✅ Optimizar el manejo de eventos y estados
-- ✅ Mejorar la interfaz de usuario y experiencia
-- ⚠️ Implementar acciones pendientes (descarga, favoritos, eliminación)
+- ⚠️ Corregir funcionalidad de doble click en FileCard
+- ⚠️ Arreglar visualización de imágenes en FileViewer
+- ⚠️ Optimizar manejo de eventos entre componentes
+- ⚠️ Actualizar tipos y corregir errores de TypeScript
 
 #### Plan de Acción
 
-##### Fase 1: Servicios e Infraestructura
+##### Fase 1: Diagnóstico y Corrección
 
-- ✅ Implementar método getOriginalImage
-- ✅ Crear endpoint para imágenes originales
-- ✅ Optimizar manejo de caché
-- ✅ Implementar logging detallado
+- ⚠️ Analizar flujo de eventos en FileCard
+- ⚠️ Verificar integración con ImageViewer
+- ⚠️ Corregir manejo de URLs temporales
+- ⚠️ Actualizar tipos en componentes
 
-##### Fase 2: Corrección de Componentes
+##### Fase 2: Pruebas y Validación
 
-- ✅ Corregir tipos en DetailsPanel
-- ✅ Optimizar FileCard
-- ✅ Mejorar FileViewer
-- ✅ Unificar manejo de eventos
-
-##### Fase 3: Integración y Pruebas
-
-- ✅ Integrar todos los componentes
-- ✅ Realizar pruebas de rendimiento
-- ✅ Optimizar carga de imágenes
-- ✅ Documentar cambios
+- ⚠️ Probar funcionalidad de doble click
+- ⚠️ Validar carga de imágenes originales
+- ⚠️ Verificar manejo de errores
+- ⚠️ Documentar cambios realizados
 
 #### Impacto
 
-- **Riesgo**: Medio
+- **Riesgo**: Bajo
 - **Prioridad**: Alta
-- **Tiempo Estimado**: 1-2 días
+- **Tiempo Estimado**: 1 día
 - **Estado**: En progreso
-- **Completado**: 85%
+- **Completado**: 0%
 
 #### Historial de Cambios
 
@@ -77,6 +69,44 @@
 - ✅ Mejorado manejo de tipos MIME
 - ✅ Corregido manejo asíncrono en Next.js 15
 
+##### 2024-01-19
+
+- ✅ Creadas server actions para manejo de imágenes
+- ✅ Actualizado DetailsPanel para usar server actions
+- ✅ Implementado sistema de estadísticas de uso
+- ✅ Optimizado manejo de errores en server actions
+
+##### 2024-01-20
+
+- ✅ Iniciada corrección del visor de imágenes
+- ✅ Identificado error en FileCard con viewerLogger
+- ✅ Actualizada interfaz ImageItem para compatibilidad
+- ✅ Mejorado manejo de URLs en FileCard
+- ✅ Corregido visor de imágenes y thumbnails
+- ✅ Implementada navegación entre imágenes en DetailsPanel
+- ✅ Corregido manejo de imágenes en DetailsPanel
+- ✅ Mejorada carga de thumbnails y URLs originales
+- ✅ Corregido acceso a items en FileManager
+- ✅ Optimizada carga de thumbnails con procesamiento por lotes
+- ⚠️ Pendiente resolver errores de tipado en FileItem
+- ⚠️ Pendiente optimizar flujo de apertura de imágenes
+- ⚠️ Pendiente mejorar manejo de errores en el visor
+
+#### Notas Técnicas
+
+- Se detectó un error en el logger del visor de imágenes
+- Se requiere optimizar el flujo de apertura de imágenes
+- Se necesita mejorar el manejo de errores en el visor
+- Se ha actualizado la interfaz ImageItem para compatibilidad con FileItem
+- Se ha mejorado el manejo de URLs firmadas en FileCard
+- Se ha optimizado la visualización de thumbnails en el visor
+- Se ha implementado navegación completa en DetailsPanel
+- Se ha corregido el manejo de imágenes en DetailsPanel para usar las imágenes correctas
+- Se ha implementado carga paralela de thumbnails y URLs originales
+- Se ha corregido el acceso a items en FileManager usando currentItems
+- Se ha implementado procesamiento por lotes para evitar sobrecarga
+- Se ha mejorado el manejo de caché de thumbnails
+
 #### Próximos Pasos
 
 1. Implementar funcionalidad de descarga de archivos
@@ -84,12 +114,12 @@
 3. Implementar eliminación de archivos
 4. Realizar pruebas de integración
 5. Documentar cambios finales
+6. Migrar funcionalidades restantes a server actions
 
 #### Notas
 
-- Se ha mejorado significativamente la experiencia de usuario
-- La carga de imágenes es más eficiente y directa
-- Se ha eliminado el procesamiento innecesario de imágenes grandes
-- Se ha implementado un sistema de caché robusto
-- Se necesita implementar las acciones pendientes
-- Considerar agregar más información en el panel de detalles
+- Se ha migrado exitosamente a server actions para mejor rendimiento
+- Se ha implementado un sistema de estadísticas de uso
+- Se ha mejorado el manejo de errores y logging
+- Se necesita completar la migración de funcionalidades restantes
+- Considerar implementar un sistema de caché más robusto

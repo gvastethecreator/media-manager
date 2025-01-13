@@ -9,18 +9,24 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageFallback } from "@/components/ui/image-fallback";
 
-interface ImageItem {
+export interface ImageItem {
 	id: string;
 	name: string;
-	type: "image";
+	type: string;
+	url?: string;
 	thumbnail?: string;
 	src?: string;
 	alt?: string;
 	width?: number;
 	height?: number;
-	duration?: number;
-	fps?: number;
 	mimeType?: string;
+	metadata?: {
+		dimensions?: {
+			width: number;
+			height: number;
+		};
+		mimeType?: string;
+	};
 }
 
 interface AdvancedImageViewerProps {
@@ -108,7 +114,7 @@ export function AdvancedImageViewer({
 
 	const getImageSource = (image?: ImageItem) => {
 		if (!image) return "";
-		return image.src || image.thumbnail || "";
+		return image.url || image.src || image.thumbnail || "";
 	};
 
 	const getImageAlt = (image?: ImageItem) => {
@@ -184,6 +190,11 @@ export function AdvancedImageViewer({
 	const handleZoom = (factor: number) => {
 		const newScale = Math.min(Math.max(0.1, scale * factor), 5);
 		setScale(newScale);
+	};
+
+	const getImageThumbnail = (image?: ImageItem) => {
+		if (!image) return "";
+		return image.thumbnail || image.src || image.url || "";
 	};
 
 	if (!isOpen || !images || !images.length) {
@@ -336,9 +347,9 @@ export function AdvancedImageViewer({
 									onClick={() => setIndex(i + Math.max(0, index - 3))}
 								>
 									<ImageFallback
-										src={image.thumbnail}
-										alt={image.name}
-										className="w-full h-full object-cover"
+										src={getImageThumbnail(image)}
+										alt={getImageAlt(image)}
+										className="w-full h-full object-cover transition-all duration-200 hover:scale-110"
 										gradientColors={[
 											`hsl(${
 												(parseInt(image.id.split("-")[1] || "0") * 40) % 360
@@ -348,7 +359,7 @@ export function AdvancedImageViewer({
 												360
 											}, 95%, 75%)`,
 										]}
-										showPlaceholder={!image.thumbnail}
+										showPlaceholder={!getImageThumbnail(image)}
 									/>
 								</motion.div>
 							))}
