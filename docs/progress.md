@@ -51,7 +51,7 @@
 
 ### Collections Service ✅
 
-- [x] Creado archivo `src/app/actions/collections.actions.ts`
+- [x] Creado archivo `src/app/actions/collection.actions.ts`
 - [x] Implementadas funciones:
   - `getCollections`
   - `getCollection`
@@ -61,11 +61,32 @@
   - `addImageToCollection`
   - `removeImageFromCollection`
   - `getCollectionImages`
+  - `getCollectionStats`
+  - `updateCollectionStats`
 - [x] Creado servicio de eventos específico para colecciones
 - [x] Agregado manejo de errores personalizado
 - [x] Agregado logging detallado
 - [x] Implementada revalidación de rutas
 - [x] Integrado con eventos del sistema
+- [x] Eliminado servicio antiguo y endpoints API
+
+### Album Service ✅
+
+- [x] Creado archivo `src/app/actions/album.actions.ts`
+- [x] Implementadas funciones:
+  - `getAlbums`
+  - `getAlbum`
+  - `createAlbum`
+  - `updateAlbum`
+  - `deleteAlbum`
+  - `getAlbumImages`
+  - `addImageToAlbum`
+  - `removeImageFromAlbum`
+- [x] Agregado manejo de errores personalizado
+- [x] Agregado logging detallado
+- [x] Implementada revalidación de rutas
+- [x] Integrado con eventos del sistema
+- [x] Eliminado servicio antiguo y endpoints API
 
 ## Fase 2: Migración de Servicios Complejos
 

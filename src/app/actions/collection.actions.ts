@@ -29,11 +29,18 @@ class CollectionError extends Error {
   }
 }
 
+export interface CollectionStats {
+  count: number;
+  size: number;
+  lastUpdated?: Date;
+}
+
 export interface CollectionWithStats extends Collection {
   _count: {
     images: number;
   };
   totalSize: number;
+  stats?: CollectionStats;
 }
 
 export interface CollectionWithImages extends Collection {
@@ -52,6 +59,14 @@ export interface CollectionCreate {
 
 export interface CollectionUpdate extends Partial<CollectionCreate> {
   id: string;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 export async function getCollections(): Promise<CollectionWithStats[]> {
@@ -279,5 +294,74 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
   } catch (error) {
     collectionLogger.error("❌ Error al eliminar imagen de la colección:", error);
     throw new CollectionError("No se pudo eliminar la imagen de la colección", error);
+  }
+}
+
+export async function getCollectionStats(id: string): Promise<CollectionStats> {
+  try {
+    collectionLogger.info('📊 Obteniendo estadísticas de colección:', id);
+    const collection = await prisma.collection.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: { images: true }
+        },
+        images: {
+          select: { size: true }
+        }
+      }
+    });
+
+    if (!collection) {
+      throw new CollectionError("Colección no encontrada");
+    }
+
+    const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
+    const stats = {
+      count: collection._count.images,
+      size: totalSize,
+      lastUpdated: new Date()
+    };
+
+    collectionLogger.info('✅ Estadísticas obtenidas:', stats);
+    return stats;
+  } catch (error) {
+    collectionLogger.error('❌ Error al obtener estadísticas:', error);
+    throw new CollectionError("No se pudieron obtener las estadísticas", error);
+  }
+}
+
+export async function updateCollectionStats(id: string, stats: Partial<CollectionStats>): Promise<CollectionStats> {
+  try {
+    collectionLogger.info('📝 Actualizando estadísticas de colección:', { id, stats });
+    const collection = await prisma.collection.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: { images: true }
+        },
+        images: {
+          select: { size: true }
+        }
+      }
+    });
+
+    if (!collection) {
+      throw new CollectionError("Colección no encontrada");
+    }
+
+    const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
+    const updatedStats = {
+      count: collection._count.images,
+      size: totalSize,
+      lastUpdated: new Date(),
+      ...stats
+    };
+
+    collectionLogger.info('✅ Estadísticas actualizadas:', updatedStats);
+    return updatedStats;
+  } catch (error) {
+    collectionLogger.error('❌ Error al actualizar estadísticas:', error);
+    throw new CollectionError("No se pudieron actualizar las estadísticas", error);
   }
 }

@@ -1,10 +1,12 @@
 import type { Collection, Profile } from ".prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-	collectionService,
 	CollectionCreate,
 	CollectionUpdate,
-} from "@/services/collection.service";
+	createCollection,
+	getCollections,
+	deleteCollection as deleteCollectionAction,
+} from "@/app/actions/collection.actions";
 import {
 	getTags,
 	createTag,
@@ -23,6 +25,7 @@ import {
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
 import { ThumbnailQuality } from "@/types/thumbnails";
+import { formatBytes } from "@/lib/utils";
 
 interface CollectionWithStats extends Collection {
 	count: number;
@@ -138,8 +141,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const loadCollections = async () => {
 		try {
-			const collections = await collectionService.getCollections();
-			setSettings((prev) => ({ ...prev, collections }));
+			const collections = await getCollections();
+			const mappedCollections = collections.map((c) => ({
+				...c,
+				count: c._count.images,
+				size: formatBytes(c.totalSize),
+			}));
+			setSettings((prev) => ({ ...prev, collections: mappedCollections }));
 		} catch (error) {
 			console.error("Error loading collections:", error);
 			toast({
@@ -197,10 +205,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (!id) {
 				// Crear nueva colección
-				await collectionService.createCollection(data as CollectionCreate);
+				await createCollection(data as CollectionCreate);
 			} else {
 				// Actualizar colección existente
-				await collectionService.updateCollection(id, data as CollectionUpdate);
+				await updateCollection(id, data as CollectionUpdate);
 			}
 
 			await loadCollections();
@@ -301,7 +309,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteCollection = async (id: string) => {
 		try {
-			await collectionService.deleteCollection(id);
+			await deleteCollection(id);
 			await loadCollections();
 			toast({
 				title: "Éxito",
