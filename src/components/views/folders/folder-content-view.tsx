@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useFileManager } from "@/store/file-manager";
 import { useImageViewer } from "@/store/image-viewer";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { FolderIcon} from "lucide-react";
+import { FolderIcon } from "lucide-react";
 import type { FileItem } from "@/types/file-item";
 import BlurFade from "@/components/ui/blur-fade";
 import { LoadingScreen } from "@/components/core/feedback";
+import { logger } from "@/lib/logger";
+
+const folderLogger = logger.withContext("FolderContentView");
 
 export function FolderContentView() {
 	const {
@@ -17,14 +20,62 @@ export function FolderContentView() {
 		currentFolderId,
 		setCurrentFolder,
 		isLoading,
+		currentFolder,
 	} = useFileManager();
 	const { openViewer } = useImageViewer();
+	const initialLoadRef = useRef(false);
+	const currentFolderIdRef = useRef(currentFolderId);
 
+	// Efecto principal para cargar la carpeta
 	useEffect(() => {
-		if (currentFolderId) {
-			setCurrentFolder(currentFolderId);
-		}
-	}, [currentFolderId, setCurrentFolder]);
+		// Si no hay ID o es el mismo que ya procesamos, no hacer nada
+		if (!currentFolderId || currentFolderId === currentFolderIdRef.current)
+			return;
+
+		let mounted = true;
+		currentFolderIdRef.current = currentFolderId;
+
+		folderLogger.info("🔄 Iniciando carga de carpeta:", {
+			id: currentFolderId,
+			currentFolder: currentFolder?.name,
+			isInitialLoad: !initialLoadRef.current,
+		});
+
+		const loadFolder = async () => {
+			try {
+				await setCurrentFolder(currentFolderId);
+				if (!mounted) return;
+
+				initialLoadRef.current = true;
+
+				folderLogger.info("✅ Carpeta cargada:", {
+					id: currentFolderId,
+					name: currentFolder?.name,
+					itemCount: items?.length || 0,
+				});
+			} catch (error) {
+				if (!mounted) return;
+				folderLogger.error("❌ Error al cargar carpeta:", {
+					id: currentFolderId,
+					error: error instanceof Error ? error.message : "Error desconocido",
+				});
+			}
+		};
+
+		loadFolder();
+
+		return () => {
+			mounted = false;
+		};
+	}, [currentFolderId]); // Solo depender del ID de la carpeta
+
+	// Reset cuando se desmonta el componente
+	useEffect(() => {
+		return () => {
+			initialLoadRef.current = false;
+			currentFolderIdRef.current = null;
+		};
+	}, []);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
@@ -35,20 +86,20 @@ export function FolderContentView() {
 
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
+			if (!items) return;
+
 			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
+				const imageItems = items.filter(
 					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
 				);
-				openViewer(
-					imageItems,
-					imageItems.findIndex((i) => i.id === item.id)
-				);
+				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+				openViewer(imageItems, currentIndex);
 			}
 		},
-		[openViewer, items]
+		[items, openViewer]
 	);
 
-	if (isLoading) {
+	if (!initialLoadRef.current && isLoading) {
 		return <LoadingScreen />;
 	}
 
@@ -57,7 +108,9 @@ export function FolderContentView() {
 			<EmptyState
 				icon={FolderIcon}
 				title="Carpeta vacía"
-				description="No se encontraron imágenes en esta carpeta"
+				description={`No se encontraron imágenes en ${
+					currentFolder?.name || "esta carpeta"
+				}`}
 			/>
 		);
 	}
@@ -65,7 +118,11 @@ export function FolderContentView() {
 	return (
 		<div className="h-full w-full flex overflow-hidden">
 			<div className="h-full w-full overflow-auto">
-				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
+				<BlurFade
+					className="h-full w-full overflow-auto"
+					delay={0.5}
+					inView={true}
+				>
 					<FileGrid
 						items={items}
 						onItemClick={handleItemClick}

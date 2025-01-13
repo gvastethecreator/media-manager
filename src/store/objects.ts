@@ -4,44 +4,22 @@ import type { FileItem } from '@/types/file-item'
 import {
   getObjects,
   getObject,
-  createObject as createObjectAction,
-  updateObject as updateObjectAction,
-  deleteObject as deleteObjectAction,
-  addImageToObject as addImageToObjectAction,
-  removeImageFromObject as removeImageFromObjectAction,
-  getObjectImages
-} from '@/app/actions/objects'
+  createObject,
+  updateObject,
+  deleteObject,
+  addImageToObject,
+  removeImageFromObject,
+  getObjectImages,
+  type ObjectCreate,
+  type ObjectUpdate,
+  type ObjectWithStats
+} from '@/app/actions/object.actions'
 
 const objectLogger = logger.withContext('ObjectStore')
 
-export interface ObjectCreate {
-  name: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  type?: string
-  rarity?: string
-  properties?: string
-  requirements?: string
-  origin?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
-}
-
-export interface ObjectUpdate extends Partial<Omit<ObjectCreate, 'name'>> {
-  id: string
-  name?: string
-}
-
-export type Object = Awaited<ReturnType<typeof getObject>>
-export type ObjectWithStats = Awaited<ReturnType<typeof getObjects>>[0]
-export type ImageFromServer = Awaited<ReturnType<typeof getObjectImages>>[0]
-
 interface ObjectsState {
   objects: ObjectWithStats[]
-  currentObject: Object | null
+  currentObject: ObjectWithStats | null
   currentItems: FileItem[]
   isLoading: boolean
   error: string | null
@@ -66,7 +44,7 @@ const validateMetadata = (metadata: string | null): Record<string, any> | undefi
   }
 }
 
-const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getObjectImages>>[0]): FileItem => {
   try {
     const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
@@ -121,7 +99,7 @@ export const useObjectsStore = create<ObjectsState>((set, get) => ({
   createObject: async (data: ObjectCreate) => {
     try {
       set({ isLoading: true, error: null })
-      const object = await createObjectAction(data)
+      const object = await createObject(data)
       const objectWithStats = {
         ...object,
         _count: { images: 0 },
@@ -142,7 +120,7 @@ export const useObjectsStore = create<ObjectsState>((set, get) => ({
   updateObject: async (id: string, data: ObjectUpdate) => {
     try {
       set({ isLoading: true, error: null })
-      const updatedObject = await updateObjectAction(id, data)
+      const updatedObject = await updateObject(id, data)
       const currentStats = get().objects.find(o => o.id === id)
       const updatedObjectWithStats = {
         ...updatedObject,
@@ -167,7 +145,7 @@ export const useObjectsStore = create<ObjectsState>((set, get) => ({
   deleteObject: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      await deleteObjectAction(id)
+      await deleteObject(id)
       set(state => ({
         objects: state.objects.filter(o => o.id !== id),
         currentObject: state.currentObject?.id === id ? null : state.currentObject,
@@ -184,7 +162,7 @@ export const useObjectsStore = create<ObjectsState>((set, get) => ({
 
   addImageToObject: async (objectId: string, imageId: string) => {
     try {
-      await addImageToObjectAction(objectId, imageId)
+      await addImageToObject(objectId, imageId)
       objectLogger.info('📸 Imagen agregada a objeto:', { objectId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
@@ -195,7 +173,7 @@ export const useObjectsStore = create<ObjectsState>((set, get) => ({
 
   removeImageFromObject: async (objectId: string, imageId: string) => {
     try {
-      await removeImageFromObjectAction(objectId, imageId)
+      await removeImageFromObject(objectId, imageId)
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }))

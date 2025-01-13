@@ -12,7 +12,6 @@ import {
 	XIcon,
 	Loader2,
 } from "lucide-react";
-import { useAlbumsStore } from "@/store/albums";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -20,28 +19,27 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { CompactPicker } from "react-color";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import type { AlbumCreate, AlbumUpdate } from "@/services/album.service";
+import { getAlbums, createAlbum, updateAlbum, deleteAlbum } from "@/app/actions/album.actions";
+import type { Album as PrismaAlbum } from "@prisma/client";
 
-const albumsLogger = logger.withContext("AlbumsSection");
+const albumLogger = logger.withContext("AlbumsSection");
+
+interface EditForm extends Partial<PrismaAlbum> {
+	id: string;
+}
 
 export function AlbumsSection() {
-	const {
-		albums,
-		isLoading,
-		createAlbum,
-		updateAlbum,
-		deleteAlbum,
-		loadAlbums,
-	} = useAlbumsStore();
+	const [albums, setAlbums] = React.useState<PrismaAlbum[]>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const [editForm, setEditForm] = React.useState<AlbumUpdate | null>(null);
-	const [newAlbum, setNewAlbum] = React.useState<AlbumCreate>({
+	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
+	const [newAlbum, setNewAlbum] = React.useState<Partial<PrismaAlbum>>({
 		name: "",
 		emoji: "📸",
 		description: "",
@@ -49,12 +47,27 @@ export function AlbumsSection() {
 	});
 	const { toast } = useToast();
 
-	// Cargar álbumes al montar el componente
+	const loadAlbums = React.useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const data = await getAlbums();
+			setAlbums(data);
+		} catch (error) {
+			toast({
+				title: "Error al cargar álbumes",
+				description: "No se pudieron cargar los álbumes.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [toast]);
+
 	React.useEffect(() => {
 		loadAlbums();
 	}, [loadAlbums]);
 
-	const handleStartEdit = (album: (typeof albums)[0]) => {
+	const handleStartEdit = (album: PrismaAlbum) => {
 		setEditingId(album.id);
 		setEditForm({
 			id: album.id,
@@ -72,44 +85,40 @@ export function AlbumsSection() {
 
 	const handleSaveEdit = async (id: string) => {
 		if (!editForm) return;
+		setIsLoading(true);
 		try {
-			albumsLogger.info("💾 Guardando cambios en álbum:", {
+			albumLogger.info("💾 Guardando cambios en álbum:", {
 				id,
 				data: editForm,
 			});
-			await updateAlbum(id, editForm);
+			const { id: _, ...data } = editForm;
+			await updateAlbum(id, data);
+			await loadAlbums();
 			handleCancelEdit();
 			toast({
 				title: "Éxito",
 				description: "Álbum actualizado correctamente",
 			});
 		} catch (error) {
-			albumsLogger.error("❌ Error al actualizar álbum:", error);
+			albumLogger.error("❌ Error al actualizar álbum:", error);
 			toast({
 				title: "Error",
 				description: "No se pudo actualizar el álbum",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
-	};
-
-
-	const handleColorChange = (color: { hex: string }) => {
-		setNewAlbum({ ...newAlbum, color: color.hex });
 	};
 
 	const handleAddAlbum = async () => {
 		if (!newAlbum.name) return;
 
+		setIsLoading(true);
 		try {
-			albumsLogger.info("➕ Creando nuevo álbum:", newAlbum);
-			const newAlbumData = {
-				...newAlbum,
-				sortBy: "name" as const,
-				filters: "",
-			};
-
-			await createAlbum(newAlbumData);
+			albumLogger.info("➕ Creando nuevo álbum:", newAlbum);
+			await createAlbum(newAlbum);
+			await loadAlbums();
 			setNewAlbum({
 				name: "",
 				emoji: "📸",
@@ -121,30 +130,36 @@ export function AlbumsSection() {
 				description: "Álbum creado correctamente",
 			});
 		} catch (error) {
-			albumsLogger.error("❌ Error al crear álbum:", error);
+			albumLogger.error("❌ Error al crear álbum:", error);
 			toast({
 				title: "Error",
 				description: "No se pudo crear el álbum",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleDeleteAlbum = async (id: string) => {
+		setIsLoading(true);
 		try {
-			albumsLogger.info("🗑️ Eliminando álbum:", id);
+			albumLogger.info("🗑️ Eliminando álbum:", id);
 			await deleteAlbum(id);
+			await loadAlbums();
 			toast({
 				title: "Éxito",
 				description: "Álbum eliminado correctamente",
 			});
 		} catch (error) {
-			albumsLogger.error("❌ Error al eliminar álbum:", error);
+			albumLogger.error("❌ Error al eliminar álbum:", error);
 			toast({
 				title: "Error",
 				description: "No se pudo eliminar el álbum",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -177,9 +192,11 @@ export function AlbumsSection() {
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-[320px] p-0" align="start">
-									<EmojiPicker onEmojiSelect={(emoji: string) =>
-										setNewAlbum({ ...newAlbum, emoji: emoji })
-									} />
+									<EmojiPicker
+										onEmojiSelect={(emoji: string) =>
+											setNewAlbum({ ...newAlbum, emoji: emoji })
+										}
+									/>
 								</PopoverContent>
 							</Popover>
 						</div>
@@ -237,7 +254,9 @@ export function AlbumsSection() {
 								<CompactPicker
 									color={newAlbum.color}
 									className="bg-black/90 text-white overflow-hidden"
-									onChange={(color) => handleColorChange(color)}
+									onChange={(color) =>
+										setNewAlbum({ ...newAlbum, color: color.hex })
+									}
 								/>
 							</PopoverContent>
 						</Popover>
@@ -245,7 +264,7 @@ export function AlbumsSection() {
 							size="sm"
 							className="h-8 text-xs px-3"
 							onClick={handleAddAlbum}
-							disabled={!newAlbum.name.trim()}
+							disabled={!newAlbum.name?.trim()}
 						>
 							Crear
 						</Button>
@@ -300,9 +319,7 @@ export function AlbumsSection() {
 																<EmojiPicker
 																	onEmojiSelect={(emoji: string) =>
 																		setEditForm((prev) =>
-																			prev
-																				? { ...prev, emoji: emoji }
-																				: null
+																			prev ? { ...prev, emoji: emoji } : null
 																		)
 																	}
 																/>
@@ -417,11 +434,13 @@ export function AlbumsSection() {
 																{album.description}
 															</p>
 														)}
-														{album.count > 0 && (
+														{album._count?.images > 0 && (
 															<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-																{album.count}{" "}
-																{album.count === 1 ? "imagen" : "imágenes"} •{" "}
-																{album.size}
+																{album._count.images}{" "}
+																{album._count.images === 1
+																	? "imagen"
+																	: "imágenes"}{" "}
+																• {formatBytes(album.totalSize)}
 															</p>
 														)}
 													</div>

@@ -96,7 +96,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 				const parsed = JSON.parse(savedSettings);
 				setSettings((prev) => ({
 					...prev,
-					thumbnailQuality: parsed.thumbnailQuality || "mid",
+					thumbnailQuality: parsed.thumbnailQuality || "medium",
 					videoThumbnailAnimation: parsed.videoThumbnailAnimation ?? true,
 					shortcuts: parsed.shortcuts || {},
 				}));

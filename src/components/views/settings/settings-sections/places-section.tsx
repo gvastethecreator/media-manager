@@ -19,7 +19,6 @@ import {
 	Mountain,
 	TreePine,
 } from "lucide-react";
-import { usePlacesStore } from "@/store/places";
 import { CardContent } from "@/components/ui/card";
 import {
 	Popover,
@@ -33,32 +32,22 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import type {
-	PlaceCreate,
-	PlaceUpdate,
-	PlaceWithStats,
-} from "@/services/place.service";
-import type { EmojiClickData } from "@/types/emoji";
+import { getPlaces, createPlace, updatePlace, deletePlace } from "@/app/actions/place.actions";
+import type { Place } from "@prisma/client";
 
 const placeLogger = logger.withContext("PlacesSection");
 
-interface EditForm extends PlaceUpdate {
+interface EditForm extends Partial<Place> {
 	id: string;
 }
 
 export function PlacesSection() {
-	const {
-		places,
-		isLoading,
-		error,
-		createPlace,
-		updatePlace,
-		deletePlace,
-		loadPlaces,
-	} = usePlacesStore();
+	const [places, setPlaces] = React.useState<Place[]>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
+	const [error, setError] = React.useState<Error | null>(null);
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const [editForm, setEditForm] = React.useState<EditForm | null>(null);
-	const [newPlace, setNewPlace] = React.useState<PlaceCreate>({
+	const [newPlace, setNewPlace] = React.useState<Partial<Place>>({
 		name: "",
 		emoji: "📍",
 		description: "",
@@ -72,11 +61,29 @@ export function PlacesSection() {
 	});
 	const { toast } = useToast();
 
+	const loadPlaces = React.useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const data = await getPlaces();
+			setPlaces(data);
+			setError(null);
+		} catch (error) {
+			setError(error as Error);
+			toast({
+				title: "Error al cargar lugares",
+				description: "No se pudieron cargar los lugares.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [toast]);
+
 	React.useEffect(() => {
 		loadPlaces();
 	}, [loadPlaces]);
 
-	const handleStartEdit = (place: PlaceWithStats) => {
+	const handleStartEdit = (place: Place) => {
 		setEditingId(place.id);
 		setEditForm({
 			id: place.id,
@@ -97,10 +104,12 @@ export function PlacesSection() {
 		e.preventDefault();
 		if (!editForm) return;
 
+		setIsLoading(true);
 		try {
 			placeLogger.info("📝 Actualizando lugar...", editForm);
 			const { id, ...data } = editForm;
 			await updatePlace(id, data);
+			await loadPlaces();
 			setEditingId(null);
 			setEditForm(null);
 			toast({
@@ -114,15 +123,19 @@ export function PlacesSection() {
 				description: "No se pudo actualizar el lugar.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleSubmitCreate = async (e: React.FormEvent) => {
 		e.preventDefault();
 
+		setIsLoading(true);
 		try {
 			placeLogger.info("✨ Creando lugar...", newPlace);
 			await createPlace(newPlace);
+			await loadPlaces();
 			setNewPlace({
 				name: "",
 				emoji: "📍",
@@ -146,13 +159,17 @@ export function PlacesSection() {
 				description: "No se pudo crear el lugar.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleDeletePlace = async (id: string) => {
+		setIsLoading(true);
 		try {
 			placeLogger.info("🗑️ Eliminando lugar...", id);
 			await deletePlace(id);
+			await loadPlaces();
 			toast({
 				title: "✅ Lugar eliminado",
 				description: "El lugar se ha eliminado correctamente.",
@@ -164,6 +181,8 @@ export function PlacesSection() {
 				description: "No se pudo eliminar el lugar.",
 				variant: "destructive",
 			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -329,7 +348,7 @@ export function PlacesSection() {
 			<div className="grid gap-4">
 				{error && (
 					<div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">
-						{error}
+						{error.message}
 					</div>
 				)}
 				{places.length === 0 && !isLoading ? (

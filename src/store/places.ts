@@ -4,48 +4,22 @@ import type { FileItem } from '@/types/file-item'
 import {
   getPlaces,
   getPlace,
-  createPlace as createPlaceAction,
-  updatePlace as updatePlaceAction,
-  deletePlace as deletePlaceAction,
-  addImageToPlace as addImageToPlaceAction,
-  removeImageFromPlace as removeImageFromPlaceAction,
-  getPlaceImages
-} from '@/app/actions/places'
+  createPlace,
+  updatePlace,
+  deletePlace,
+  addImageToPlace,
+  removeImageFromPlace,
+  getPlaceImages,
+  type PlaceCreate,
+  type PlaceUpdate,
+  type PlaceWithStats
+} from '@/app/actions/place.actions'
 
 const placeLogger = logger.withContext('PlaceStore')
 
-export interface PlaceCreate {
-  name: string
-  emoji?: string
-  color?: string
-  description?: string
-  shortcut?: string
-  region?: string
-  type?: string
-  climate?: string
-  population?: number
-  government?: string
-  dangers?: string
-  resources?: string
-  lore?: string
-  history?: string
-  stats?: string
-  sortBy?: string
-  filters?: string
-}
-
-export interface PlaceUpdate extends Partial<Omit<PlaceCreate, 'name'>> {
-  id: string
-  name?: string
-}
-
-export type Place = Awaited<ReturnType<typeof getPlace>>
-export type PlaceWithStats = Awaited<ReturnType<typeof getPlaces>>[0]
-export type ImageFromServer = Awaited<ReturnType<typeof getPlaceImages>>[0]
-
 interface PlacesState {
   places: PlaceWithStats[]
-  currentPlace: Place | null
+  currentPlace: PlaceWithStats | null
   currentItems: FileItem[]
   isLoading: boolean
   error: string | null
@@ -70,7 +44,7 @@ const validateMetadata = (metadata: string | null): Record<string, any> | undefi
   }
 }
 
-const convertServerImageToFileItem = (image: ImageFromServer): FileItem => {
+const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getPlaceImages>>[0]): FileItem => {
   try {
     const metadata = validateMetadata(image.metadata)
     const thumbnail = image.thumbnail
@@ -125,7 +99,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
   createPlace: async (data: PlaceCreate) => {
     try {
       set({ isLoading: true, error: null })
-      const place = await createPlaceAction(data)
+      const place = await createPlace(data)
       const placeWithStats = {
         ...place,
         _count: { images: 0 },
@@ -146,7 +120,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
   updatePlace: async (id: string, data: PlaceUpdate) => {
     try {
       set({ isLoading: true, error: null })
-      const updatedPlace = await updatePlaceAction(id, data)
+      const updatedPlace = await updatePlace(id, data)
       const currentStats = get().places.find(p => p.id === id)
       const updatedPlaceWithStats = {
         ...updatedPlace,
@@ -171,7 +145,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
   deletePlace: async (id: string) => {
     try {
       set({ isLoading: true, error: null })
-      await deletePlaceAction(id)
+      await deletePlace(id)
       set(state => ({
         places: state.places.filter(p => p.id !== id),
         currentPlace: state.currentPlace?.id === id ? null : state.currentPlace,
@@ -188,7 +162,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
 
   addImageToPlace: async (placeId: string, imageId: string) => {
     try {
-      await addImageToPlaceAction(placeId, imageId)
+      await addImageToPlace(placeId, imageId)
       placeLogger.info('📸 Imagen agregada a lugar:', { placeId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
@@ -199,7 +173,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => ({
 
   removeImageFromPlace: async (placeId: string, imageId: string) => {
     try {
-      await removeImageFromPlaceAction(placeId, imageId)
+      await removeImageFromPlace(placeId, imageId)
       set(state => ({
         currentItems: state.currentItems.filter(item => item.id !== imageId)
       }))

@@ -72,7 +72,7 @@ export async function GET(
 
     // Obtener calidad de la URL
     const { searchParams } = new URL(request.url)
-    const quality = (searchParams.get( 'quality') || 'mid') as 'compressed' | 'low' | 'mid' | 'high'
+    const quality = (searchParams.get( 'quality') || 'medium') as 'low' | 'medium' | 'high'
 
     // Si no tiene thumbnail, generarlo
     try {

@@ -276,59 +276,54 @@ class ThumbnailService extends EventEmitter {
 
   async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {
     try {
-      thumbLogger.info(`🖼️ Obteniendo miniatura para imagen ${imageId} con calidad ${quality}`);
+      thumbLogger.info('🔄 Obteniendo thumbnail:', { imageId, quality });
 
-      // Construir la URL correctamente
-      const url = `api/thumbnails/${encodeURIComponent(imageId)}`;
-      const params = new URLSearchParams({ quality });
+      // Validar calidad
+      const validQualities = Object.values(ThumbnailQuality);
+      if (!validQualities.includes(quality as ThumbnailQuality)) {
+        thumbLogger.error('❌ Calidad de thumbnail inválida:', { quality, validQualities });
+        throw new Error(`Calidad de thumbnail no válida. Debe ser una de: ${validQualities.join(', ')}`);
+      }
 
-      const response = await this.fetchWithTimeout(`${url}?${params}`, {
+      const config = THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality];
+      if (!config) {
+        throw new Error(`Configuración no encontrada para la calidad: ${quality}`);
+      }
+
+      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}`, {
         method: 'GET',
         headers: {
-          'Accept': 'image/*',
-          'Cache-Control': 'no-cache'
-        }
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'X-Thumbnail-Quality': quality
+        },
+        timeout: 10000 // 10 segundos máximo
       });
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Error desconocido');
-        throw new Error(`Error obteniendo miniatura (${response.status}): ${errorText}`);
+        throw new Error(`Error obteniendo thumbnail: ${response.statusText}`);
       }
 
-      // Obtener el blob de la imagen
-      const blob = await response.blob();
+      const data = await response.json();
 
-      // Verificar que el blob es una imagen
-      if (!blob.type.startsWith('image/')) {
-        throw new Error(`Tipo de respuesta inválido: ${blob.type}`);
+      if (!data.thumbnail) {
+        thumbLogger.error('❌ No se encontró thumbnail:', { imageId });
+        throw new Error('No se encontró el thumbnail');
       }
 
-      // Convertir el blob a base64 de manera segura
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          try {
-            if (typeof reader.result === 'string') {
-              // Extraer solo la parte base64 del data URL
-              const base64Data = reader.result.split(',')[1];
-              if (!base64Data) {
-                reject(new Error('Error al procesar la imagen'));
-                return;
-              }
-              resolve(base64Data);
-            } else {
-              reject(new Error('Resultado inválido al leer la imagen'));
-            }
-          } catch (error) {
-            reject(new Error(`Error procesando la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`));
-          }
-        };
-        reader.onerror = () => reject(new Error('Error leyendo la imagen'));
-        reader.readAsDataURL(blob);
+      thumbLogger.info('✅ Thumbnail obtenido:', {
+        imageId,
+        size: data.size,
+        quality
       });
 
+      return data.thumbnail;
     } catch (error) {
-      thumbLogger.error(`❌ Error obteniendo miniatura para imagen ${imageId}:`, error);
+      thumbLogger.error('❌ Error en getThumbnail:', {
+        imageId,
+        quality,
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
       throw error;
     }
   }
