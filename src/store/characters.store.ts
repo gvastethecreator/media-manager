@@ -1,4 +1,3 @@
-import { create } from 'zustand'
 import { logger } from '@/lib/logger'
 import type { FileItem } from '@/types/file-item'
 import {
@@ -14,20 +13,30 @@ import {
   type CharacterUpdate,
   type CharacterWithStats
 } from '@/app/actions/character.actions'
+import { createBaseStore, type BaseEntity } from './base.store'
 
 const characterLogger = logger.withContext('CharacterStore')
 
-interface CharactersState {
-  characters: CharacterWithStats[]
-  currentCharacter: CharacterWithStats | null
+interface Character extends BaseEntity {
+  emoji: string
+  description?: string
+  color: string
+  shortcut?: string
+  level: number
+  class: string
+  race: string
+  alignment: string
+  backstory: string
+  stats: string
+  sortBy: string
+  filters: string
+  _count: { images: number }
+  totalSize: number
+}
+
+interface CharacterState {
+  currentCharacter: Character | null
   currentItems: FileItem[]
-  isLoading: boolean
-  error: string | null
-  // Acciones
-  loadCharacters: () => Promise<void>
-  createCharacter: (data: CharacterCreate) => Promise<void>
-  updateCharacter: (id: string, data: CharacterUpdate) => Promise<void>
-  deleteCharacter: (id: string) => Promise<void>
   addImageToCharacter: (characterId: string, imageId: string) => Promise<void>
   removeImageFromCharacter: (characterId: string, imageId: string) => Promise<void>
   loadCharacterContent: (id: string) => Promise<void>
@@ -76,97 +85,100 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getCharac
   }
 }
 
-export const useCharactersStore = create<CharactersState>((set, get) => ({
-  characters: [],
+export const useCharactersStore = createBaseStore<Character>(
+  'Character',
+  '/api/characters',
+  { customLogger: characterLogger }
+)((set, get) => ({
   currentCharacter: null,
   currentItems: [],
-  isLoading: false,
-  error: null,
 
-  loadCharacters: async () => {
+  // Sobreescribir métodos del BaseStore
+  loadItems: async () => {
     try {
-      set({ isLoading: true, error: null })
+      set({ loading: true, error: null })
       const characters = await getCharacters()
-      set({ characters, isLoading: false })
+      set({ items: characters, loading: false })
       characterLogger.info('📥 Personajes cargados:', { count: characters.length })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
+      set({ error: new Error(errorMessage), loading: false })
       characterLogger.error('❌ Error al cargar personajes:', { error })
     }
   },
 
-  createCharacter: async (data: CharacterCreate) => {
+  createItem: async (data: CharacterCreate) => {
     try {
-      set({ isLoading: true, error: null })
+      set({ loading: true, error: null })
       const character = await createCharacter(data)
       const characterWithStats = {
         ...character,
         _count: { images: 0 },
         totalSize: 0,
-      } as CharacterWithStats
+      } as Character
       set(state => ({
-        characters: [...state.characters, characterWithStats],
-        isLoading: false
+        items: [...state.items, characterWithStats],
+        loading: false
       }))
       characterLogger.info('✨ Personaje creado:', { character })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
+      set({ error: new Error(errorMessage), loading: false })
       characterLogger.error('❌ Error al crear personaje:', { error })
     }
   },
 
-  updateCharacter: async (id: string, data: CharacterUpdate) => {
+  updateItem: async (id: string, data: CharacterUpdate) => {
     try {
-      set({ isLoading: true, error: null })
+      set({ loading: true, error: null })
       const updatedCharacter = await updateCharacter(id, data)
-      const currentStats = get().characters.find(c => c.id === id)
+      const currentStats = get().items.find(c => c.id === id)
       const updatedCharacterWithStats = {
         ...updatedCharacter,
         _count: currentStats?._count || { images: 0 },
         totalSize: currentStats?.totalSize || 0,
-      } as CharacterWithStats
+      } as Character
       set(state => ({
-        characters: state.characters.map(c =>
+        items: state.items.map(c =>
           c.id === id ? updatedCharacterWithStats : c
         ),
         currentCharacter: state.currentCharacter?.id === id ? updatedCharacterWithStats : state.currentCharacter,
-        isLoading: false
+        loading: false
       }))
       characterLogger.info('📝 Personaje actualizado:', { id, data })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
+      set({ error: new Error(errorMessage), loading: false })
       characterLogger.error('❌ Error al actualizar personaje:', { id, error })
     }
   },
 
-  deleteCharacter: async (id: string) => {
+  deleteItem: async (id: string) => {
     try {
-      set({ isLoading: true, error: null })
+      set({ loading: true, error: null })
       await deleteCharacter(id)
       set(state => ({
-        characters: state.characters.filter(c => c.id !== id),
+        items: state.items.filter(c => c.id !== id),
         currentCharacter: state.currentCharacter?.id === id ? null : state.currentCharacter,
         currentItems: state.currentCharacter?.id === id ? [] : state.currentItems,
-        isLoading: false
+        loading: false
       }))
       characterLogger.info('🗑️ Personaje eliminado:', { id })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
+      set({ error: new Error(errorMessage), loading: false })
       characterLogger.error('❌ Error al eliminar personaje:', { id, error })
     }
   },
 
+  // Métodos específicos de Character
   addImageToCharacter: async (characterId: string, imageId: string) => {
     try {
       await addImageToCharacter(characterId, imageId)
       characterLogger.info('📸 Imagen agregada a personaje:', { characterId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage })
+      set({ error: new Error(errorMessage) })
       characterLogger.error('❌ Error al agregar imagen a personaje:', { characterId, imageId, error })
     }
   },
@@ -180,14 +192,14 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
       characterLogger.info('🗑️ Imagen eliminada de personaje:', { characterId, imageId })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage })
+      set({ error: new Error(errorMessage) })
       characterLogger.error('❌ Error al eliminar imagen de personaje:', { characterId, imageId, error })
     }
   },
 
   loadCharacterContent: async (id: string) => {
     try {
-      set({ isLoading: true, error: null })
+      set({ loading: true, error: null })
       const [character, images] = await Promise.all([
         getCharacter(id),
         getCharacterImages(id)
@@ -199,14 +211,14 @@ export const useCharactersStore = create<CharactersState>((set, get) => ({
       const fileItems = images.map(convertServerImageToFileItem)
 
       set({
-        currentCharacter: character,
+        currentCharacter: character as Character,
         currentItems: fileItems,
-        isLoading: false
+        loading: false
       })
       characterLogger.info('📂 Contenido de personaje cargado:', { id })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
+      set({ error: new Error(errorMessage), loading: false })
       characterLogger.error('❌ Error al cargar contenido de personaje:', { id, error })
     }
   }

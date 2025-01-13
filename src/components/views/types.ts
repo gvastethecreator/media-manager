@@ -1,4 +1,4 @@
-import { ViewType as NavigationViewType } from '@/store/navigation'
+import { ViewType as NavigationViewType } from '@/store/navigation.store'
 
 export type ViewType = NavigationViewType;
 

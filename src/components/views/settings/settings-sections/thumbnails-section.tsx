@@ -27,9 +27,9 @@ import { Settings2, Trash2, Zap, AlertCircle } from "lucide-react";
 import { motion, AnimateSharedLayout } from "motion/react";
 import Image from "next/image";
 import { useSettingsContext } from "@/context/settings-context";
-import { useThumbnailStore } from "@/store/thumbnails";
+import { useThumbnailStore } from "@/store/thumbnails.store";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
-import * as thumbnailActions from "@/app/actions/thumbnails";
+import * as thumbnailActions from "@/app/actions/thumbnails.actions";
 import { formatBytes, cn } from "@/lib/utils";
 import {
 	ThumbnailQuality,

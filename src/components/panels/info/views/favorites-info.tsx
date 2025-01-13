@@ -5,10 +5,10 @@ import { Progress } from "@/components/ui/progress";
 import { Icons } from "@/components/core/icons";
 import { formatBytes, formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useStats } from "@/hooks/use-stats";
+import { useStatsStore } from "@/store/stats.store";
 
 export function FavoritesInfo() {
-	const { stats, isLoading } = useStats();
+	const { stats, isLoading } = useStatsStore();
 
 	const favoritesPercentage = stats?.totalImages
 		? (stats.totalFavorites / stats.totalImages) * 100
@@ -132,7 +132,7 @@ export function FavoritesInfo() {
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
-							<Icons.Calendar className="h-3 w-3 text-muted-foreground" />
+							<Icons.Clock className="h-3 w-3 text-muted-foreground" />
 							<span className="text-xs">
 								{isLoading ? (
 									<Skeleton className="h-4 w-12" />
