@@ -100,16 +100,7 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 										{character.class}
 									</Badge>
 								</div>
-								<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8"
-										onClick={handleEdit}
-									>
-										<Settings2 className="w-4 h-4" />
-									</Button>
-								</div>
+
 							</div>
 							<div
 								className={cn(
@@ -138,14 +129,7 @@ function CharacterCard({ character, onClick }: CharacterCardProps) {
 								</Badge>
 							</div>
 						</div>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 text-muted-foreground"
-							onClick={handleEdit}
-						>
-							<Settings2 className="h-4 w-4" />
-						</Button>
+						
 					</div>
 				</HoverCardContent>
 			</HoverCard>
