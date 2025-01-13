@@ -1,11 +1,37 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import type { TagCreate, TagUpdate } from "@/services/tag.service";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
+import type { Tag as PrismaTag } from '.prisma/client'
+import type { FileItem } from '@/types/file-item'
 
 const tagLogger = logger.withContext('TagActions');
+
+export interface TagCreate {
+  name: string
+  color?: string
+  description?: string
+  shortcut?: string
+}
+
+export interface TagUpdate extends Partial<Omit<TagCreate, 'name'>> {
+  id: string
+  name?: string
+}
+
+export interface Tag extends PrismaTag {
+  count: number
+}
+
+export interface TagWithStats extends Tag {
+  count: number
+  size: string
+}
+
+export interface TagWithImages extends Tag {
+  images: FileItem[]
+}
 
 const REVALIDATE_PATHS = [
   '/settings',
@@ -35,30 +61,21 @@ export async function getTags() {
             images: true,
           },
         },
+        images: {
+          select: { size: true }
+        }
       },
     });
 
-    const tagsWithStats = await Promise.all(
-      tags.map(async (tag) => {
-        const totalSize = await prisma.image.aggregate({
-          where: {
-            tags: {
-              some: {
-                id: tag.id,
-              },
-            },
-          },
-          _sum: {
-            size: true,
-          },
-        });
-
-        return {
-          ...tag,
-          totalSize: totalSize._sum.size || 0,
-        };
-      })
-    );
+    const tagsWithStats = tags.map(tag => {
+      const totalSize = tag.images.reduce((acc, img) => acc + img.size, 0);
+      return {
+        ...tag,
+        count: tag._count.images,
+        size: formatBytes(totalSize),
+        images: undefined
+      };
+    });
 
     tagLogger.info(`✅ ${tags.length} etiquetas obtenidas`);
     return tagsWithStats;
@@ -66,6 +83,14 @@ export async function getTags() {
     tagLogger.error("❌ Error al obtener etiquetas:", error);
     throw new TagError("No se pudieron obtener las etiquetas", error);
   }
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 export async function getTag(id: string) {
@@ -79,6 +104,9 @@ export async function getTag(id: string) {
             images: true,
           },
         },
+        images: {
+          select: { size: true }
+        }
       },
     });
 
@@ -86,22 +114,12 @@ export async function getTag(id: string) {
       throw new TagError("Etiqueta no encontrada");
     }
 
-    const totalSize = await prisma.image.aggregate({
-      where: {
-        tags: {
-          some: {
-            id: tag.id,
-          },
-        },
-      },
-      _sum: {
-        size: true,
-      },
-    });
-
+    const totalSize = tag.images.reduce((acc, img) => acc + img.size, 0);
     const result = {
       ...tag,
-      totalSize: totalSize._sum.size || 0,
+      count: tag._count.images,
+      size: formatBytes(totalSize),
+      images: undefined
     };
 
     tagLogger.info('✅ Etiqueta obtenida:', tag.name);
