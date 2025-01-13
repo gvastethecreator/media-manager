@@ -1,7 +1,7 @@
 "use client";
 
-import { useFileManager } from "@/store/file-manager";
-import { useStatsStore } from "@/store/stats";
+import { useFileManager } from "@/store/file-manager.store";
+import { useStatsStore } from "@/store/stats.store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function TagContentInfo() {
 
 	if (!currentTag) return null;
 
-	const tag = currentTag as Tag;
+	const tag = currentTag as unknown as Tag;
 
 	return (
 		<div className="space-y-2">

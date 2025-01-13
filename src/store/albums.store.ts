@@ -1,4 +1,3 @@
-import { create } from "zustand";
 import { logger } from "@/lib/logger";
 import type { FileItem } from '@/types/file-item';
 import {
@@ -14,20 +13,24 @@ import {
   type AlbumUpdate,
   type AlbumWithStats
 } from '@/app/actions/album.actions';
+import { createBaseStore, type BaseEntity } from './base.store';
 
 const albumLogger = logger.withContext("AlbumStore");
 
-interface AlbumsState {
-  albums: AlbumWithStats[];
-  currentAlbum: AlbumWithStats | null;
+interface Album extends BaseEntity {
+  emoji: string;
+  description?: string;
+  color: string;
+  shortcut?: string;
+  sortBy: string;
+  filters: string;
+  _count: { images: number };
+  totalSize: number;
+}
+
+interface AlbumState {
+  currentAlbum: Album | null;
   currentItems: FileItem[];
-  isLoading: boolean;
-  error: string | null;
-  // Acciones
-  loadAlbums: () => Promise<void>;
-  createAlbum: (data: AlbumCreate) => Promise<void>;
-  updateAlbum: (id: string, data: AlbumUpdate) => Promise<void>;
-  deleteAlbum: (id: string) => Promise<void>;
   addImageToAlbum: (albumId: string, imageId: string) => Promise<void>;
   removeImageFromAlbum: (albumId: string, imageId: string) => Promise<void>;
   loadAlbumContent: (id: string) => Promise<void>;
@@ -76,97 +79,100 @@ const convertServerImageToFileItem = (image: Awaited<ReturnType<typeof getAlbumI
   }
 };
 
-export const useAlbumsStore = create<AlbumsState>((set, get) => ({
-  albums: [],
+export const useAlbumsStore = createBaseStore<Album>(
+  'Album',
+  '/api/albums',
+  { customLogger: albumLogger }
+)((set, get) => ({
   currentAlbum: null,
   currentItems: [],
-  isLoading: false,
-  error: null,
 
-  loadAlbums: async () => {
+  // Sobreescribir métodos del BaseStore
+  loadItems: async () => {
     try {
-      set({ isLoading: true, error: null });
+      set({ loading: true, error: null });
       const albums = await getAlbums();
-      set({ albums, isLoading: false });
+      set({ items: albums, loading: false });
       albumLogger.info('📥 Álbumes cargados:', { count: albums.length });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage, isLoading: false });
+      set({ error: new Error(errorMessage), loading: false });
       albumLogger.error('❌ Error al cargar álbumes:', { error });
     }
   },
 
-  createAlbum: async (data: AlbumCreate) => {
+  createItem: async (data: AlbumCreate) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ loading: true, error: null });
       const album = await createAlbum(data);
       const albumWithStats = {
         ...album,
         _count: { images: 0 },
         totalSize: 0,
-      } as AlbumWithStats;
+      } as Album;
       set(state => ({
-        albums: [...state.albums, albumWithStats],
-        isLoading: false
+        items: [...state.items, albumWithStats],
+        loading: false
       }));
       albumLogger.info('✨ Álbum creado:', { album });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage, isLoading: false });
+      set({ error: new Error(errorMessage), loading: false });
       albumLogger.error('❌ Error al crear álbum:', { error });
     }
   },
 
-  updateAlbum: async (id: string, data: AlbumUpdate) => {
+  updateItem: async (id: string, data: AlbumUpdate) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ loading: true, error: null });
       const updatedAlbum = await updateAlbum(id, data);
-      const currentStats = get().albums.find(a => a.id === id);
+      const currentStats = get().items.find(a => a.id === id);
       const updatedAlbumWithStats = {
         ...updatedAlbum,
         _count: currentStats?._count || { images: 0 },
         totalSize: currentStats?.totalSize || 0,
-      } as AlbumWithStats;
+      } as Album;
       set(state => ({
-        albums: state.albums.map(a =>
+        items: state.items.map(a =>
           a.id === id ? updatedAlbumWithStats : a
         ),
         currentAlbum: state.currentAlbum?.id === id ? updatedAlbumWithStats : state.currentAlbum,
-        isLoading: false
+        loading: false
       }));
       albumLogger.info('📝 Álbum actualizado:', { id, data });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage, isLoading: false });
+      set({ error: new Error(errorMessage), loading: false });
       albumLogger.error('❌ Error al actualizar álbum:', { id, error });
     }
   },
 
-  deleteAlbum: async (id: string) => {
+  deleteItem: async (id: string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ loading: true, error: null });
       await deleteAlbum(id);
       set(state => ({
-        albums: state.albums.filter(a => a.id !== id),
+        items: state.items.filter(a => a.id !== id),
         currentAlbum: state.currentAlbum?.id === id ? null : state.currentAlbum,
         currentItems: state.currentAlbum?.id === id ? [] : state.currentItems,
-        isLoading: false
+        loading: false
       }));
       albumLogger.info('🗑️ Álbum eliminado:', { id });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage, isLoading: false });
+      set({ error: new Error(errorMessage), loading: false });
       albumLogger.error('❌ Error al eliminar álbum:', { id, error });
     }
   },
 
+  // Métodos específicos de Album
   addImageToAlbum: async (albumId: string, imageId: string) => {
     try {
       await addImageToAlbum(albumId, imageId);
       albumLogger.info('📸 Imagen agregada a álbum:', { albumId, imageId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage });
+      set({ error: new Error(errorMessage) });
       albumLogger.error('❌ Error al agregar imagen a álbum:', { albumId, imageId, error });
     }
   },
@@ -180,14 +186,14 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
       albumLogger.info('🗑️ Imagen eliminada de álbum:', { albumId, imageId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage });
+      set({ error: new Error(errorMessage) });
       albumLogger.error('❌ Error al eliminar imagen de álbum:', { albumId, imageId, error });
     }
   },
 
   loadAlbumContent: async (id: string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ loading: true, error: null });
       const [album, images] = await Promise.all([
         getAlbum(id),
         getAlbumImages(id)
@@ -199,14 +205,14 @@ export const useAlbumsStore = create<AlbumsState>((set, get) => ({
       const fileItems = images.map(convertServerImageToFileItem);
 
       set({
-        currentAlbum: album,
+        currentAlbum: album as Album,
         currentItems: fileItems,
-        isLoading: false
+        loading: false
       });
       albumLogger.info('📂 Contenido de álbum cargado:', { id });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      set({ error: errorMessage, isLoading: false });
+      set({ error: new Error(errorMessage), loading: false });
       albumLogger.error('❌ Error al cargar contenido de álbum:', { id, error });
     }
   }

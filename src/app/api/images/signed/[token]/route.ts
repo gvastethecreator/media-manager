@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
-import { getOriginalImage } from '@/app/actions/images'
+import { getOriginalImage } from '@/app/actions/image.actions'
 
 export async function GET(
   request: NextRequest,

@@ -1,24 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "motion/react";
-import { FileItem } from "@/types/file-item";
+import type { FileItem, ImageItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
-import { ThumbnailQuality } from "@/types/thumbnails";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
-import { getImageUrl } from "@/app/actions/images";
+import { useFileManager } from "@/store/file-manager.store";
+import { useImageViewer } from "@/store/image-viewer.store";
+import { getImageUrl } from "@/app/actions/image.actions";
 import { useToast } from "@/components/ui/use-toast";
-import { ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
-
-interface ThumbnailResponse {
-	thumbnail: string;
-	width?: number;
-	height?: number;
-	size?: number;
-	mimeType?: string;
-}
 
 type FileCardProps = {
 	item: FileItem;
@@ -99,18 +89,13 @@ export function FileCard({
 					throw new Error("No se pudo obtener la URL de la imagen");
 				}
 
-				const imageToView = {
-					id: item.id,
-					name: item.name,
-					type: "image",
+				const imageToView: ImageItem = {
+					...item,
 					url,
 					src: url,
 					alt: item.name,
 					mimeType: item.metadata?.mimeType || "image/jpeg",
-					width: item.metadata?.dimensions?.width,
-					height: item.metadata?.dimensions?.height,
-					metadata: item.metadata,
-				} as ImageItem;
+				};
 
 				toast({
 					title: "Abriendo imagen",

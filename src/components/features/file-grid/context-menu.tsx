@@ -50,15 +50,15 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { useFavoritesStore } from "@/store/favorites";
-import { useCollectionsStore } from "@/store/collections";
-import { useTagsStore } from "@/store/tags";
+import { useFavoritesStore } from "@/store/favorites.store";
+import { useCollectionsStore } from "@/store/collections.store";
+import { useTagsStore } from "@/store/tags.store";
 import { logger } from "@/lib/logger";
 import { statsService } from "@/services/stats.service";
-import { useAlbumsStore } from "@/store/albums";
-import { useCharactersStore } from "@/store/characters";
-import { usePlacesStore } from "@/store/places";
-import { useObjectsStore } from "@/store/objects";
+import { useAlbumsStore } from "@/store/albums.store";
+import { useCharactersStore } from "@/store/characters.store";
+import { usePlacesStore } from "@/store/places.store";
+import { useObjectsStore } from "@/store/objects.store";
 
 const contextMenuLogger = logger.withContext("ContextMenu");
 

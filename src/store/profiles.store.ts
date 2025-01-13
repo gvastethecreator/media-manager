@@ -8,7 +8,7 @@ import {
   deleteProfile as deleteProfileAction,
   activateProfile as activateProfileAction,
   getActiveProfile as getActiveProfileAction
-} from '@/app/actions/profiles'
+} from '@/app/actions/profile.actions'
 
 const profileLogger = logger.withContext('ProfileStore')
 

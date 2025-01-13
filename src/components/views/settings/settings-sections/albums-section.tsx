@@ -25,7 +25,14 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { getAlbums, createAlbum, updateAlbum, deleteAlbum } from "@/app/actions/album.actions";
+import {
+	getAlbums,
+	createAlbum,
+	updateAlbum,
+	deleteAlbum,
+	AlbumCreate,
+	AlbumUpdate,
+} from "@/app/actions/album.actions";
 import type { Album as PrismaAlbum } from "@prisma/client";
 
 const albumLogger = logger.withContext("AlbumsSection");
@@ -92,7 +99,7 @@ export function AlbumsSection() {
 				data: editForm,
 			});
 			const { id: _, ...data } = editForm;
-			await updateAlbum(id, data);
+			await updateAlbum(id, data as AlbumUpdate);
 			await loadAlbums();
 			handleCancelEdit();
 			toast({
@@ -117,7 +124,7 @@ export function AlbumsSection() {
 		setIsLoading(true);
 		try {
 			albumLogger.info("➕ Creando nuevo álbum:", newAlbum);
-			await createAlbum(newAlbum);
+			await createAlbum(newAlbum as AlbumCreate);
 			await loadAlbums();
 			setNewAlbum({
 				name: "",

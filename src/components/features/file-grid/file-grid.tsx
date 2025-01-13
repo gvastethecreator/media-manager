@@ -6,7 +6,7 @@ import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { DetailsPanel } from "@/components/panels/details/details-panel";
-import { useFileManager } from "@/store/file-manager";
+import { useFileManager } from "@/store/file-manager.store";
 
 // Configuración optimizada del grid con valores ajustados
 const GRID_CONFIG = {

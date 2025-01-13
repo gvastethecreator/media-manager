@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useCallback } from "react";
-import { useFileManager } from "@/store/file-manager";
+import { useFileManager } from "@/store/file-manager.store";
 import type { FileItem } from "@/types/file-item";
 import { statsService } from "@/services/stats.service";
 import { ActivityService } from "@/services/activity.service";

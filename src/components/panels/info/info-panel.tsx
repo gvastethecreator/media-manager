@@ -1,7 +1,7 @@
 "use client";
 
-import { useNavigationStore } from "@/store/navigation";
-import { useFileManager } from "@/store/file-manager";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useFileManager } from "@/store/file-manager.store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Icons } from "@/components/core/icons";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOriginalImage } from '@/app/actions/images'
+import { getOriginalImage } from '@/app/actions/image.actions'
 import { headers } from 'next/headers'
 
 export async function GET(

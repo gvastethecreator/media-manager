@@ -20,15 +20,33 @@ export interface FileItem {
   path: string;
   type: string;
   size: number;
-  mimeType?: string;
-  metadata?: {
-    dimensions?: {
-      width: number;
-      height: number;
-    };
-    mimeType?: string;
-  };
+  width?: number;
+  height?: number;
+  metadata?: Record<string, any>;
+  thumbnail?: string;
+  thumbnailSize?: number;
+  thumbnailWidth?: number;
+  thumbnailHeight?: number;
+  createdAt: string;
+  updatedAt: string;
+  isPublic: boolean;
+  isFavorite: boolean;
+  folderId: string;
+}
+
+export interface ImageItem extends FileItem {
   url?: string;
+  src: string;
+  alt: string;
+  mimeType?: string;
+}
+
+export interface ThumbnailResponse {
+  thumbnail: string;
+  width?: number;
+  height?: number;
+  size?: number;
+  mimeType?: string;
 }
 
 export interface ViewProps {

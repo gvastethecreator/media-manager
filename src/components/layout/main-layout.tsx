@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/resizable";
 import { useState } from "react";
 import { AdvancedImageViewer } from "@/components/features/file-viewer/components/advanced-file-viewer";
-import { useImageViewer } from "@/store/image-viewer";
+import { useImageViewer } from "@/store/image-viewer.store";
 
 export function MainLayout() {
 	const [isResizing, setIsResizing] = useState(false);

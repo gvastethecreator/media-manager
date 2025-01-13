@@ -32,7 +32,7 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { getObjects, createObject, updateObject, deleteObject } from "@/app/actions/object.actions";
+import { getObjects, createObject, updateObject, deleteObject, ObjectUpdate, ObjectCreate } from "@/app/actions/object.actions";
 import type { Object } from "@prisma/client";
 
 const objectLogger = logger.withContext("ObjectsSection");
@@ -108,7 +108,7 @@ export function ObjectsSection() {
 		try {
 			objectLogger.info("📝 Actualizando objeto...", editForm);
 			const { id, ...data } = editForm;
-			await updateObject(id, data);
+			await updateObject(id, data as ObjectUpdate);
 			await loadObjects();
 			setEditingId(null);
 			setEditForm(null);
@@ -134,7 +134,7 @@ export function ObjectsSection() {
 		setIsLoading(true);
 		try {
 			objectLogger.info("✨ Creando objeto...", newObject);
-			await createObject(newObject);
+			await createObject(newObject as ObjectCreate);
 			await loadObjects();
 			setNewObject({
 				name: "",
@@ -263,7 +263,7 @@ export function ObjectsSection() {
 							</div>
 							<Input
 								placeholder="Descripción"
-								value={newObject.description}
+								value={newObject.description || ""}
 								onChange={(e) =>
 									setNewObject((prev) => ({
 										...prev,
@@ -396,13 +396,13 @@ export function ObjectsSection() {
 															{object.origin || "Sin origen"}
 														</span>
 													</div>
-													{object._count?.images > 0 && (
+													{object.images.length > 0 && (
 														<p className="text-[10px] text-muted-foreground/75 truncate pl-1">
-															{object._count.images}{" "}
-															{object._count.images === 1
+															{object.images.length}{" "}
+															{object.images.length === 1
 																? "imagen"
 																: "imágenes"}{" "}
-															• {formatBytes(object.totalSize)}
+															• {formatBytes(object.images.reduce((acc, image) => acc + image.size, 0))}
 														</p>
 													)}
 												</div>

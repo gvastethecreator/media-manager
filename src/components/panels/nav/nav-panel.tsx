@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useFileManager } from "@/store/file-manager";
-import { useUIStore } from "@/store/ui";
-import { useStatsStore } from "@/store/stats";
+import { useFileManager } from "@/store/file-manager.store";
+import { useUIStore } from "@/store/ui.store";
+import { useStatsStore } from "@/store/stats.store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "next-themes";
 import { useSettingsContext } from "@/context/settings-context";
@@ -26,7 +26,7 @@ import {
 	User2,
 	Box,
 } from "lucide-react";
-import { useNavigationStore } from "@/store/navigation";
+import { useNavigationStore } from "@/store/navigation.store";
 import { ViewType } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 

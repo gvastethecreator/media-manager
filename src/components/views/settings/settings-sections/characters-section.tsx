@@ -32,7 +32,7 @@ import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { getCharacters, createCharacter, updateCharacter, deleteCharacter } from "@/app/actions/character.actions";
+import { getCharacters, createCharacter, updateCharacter, deleteCharacter, CharacterUpdate, CharacterCreate } from "@/app/actions/character.actions";
 import type { Character } from "@prisma/client";
 
 const characterLogger = logger.withContext("CharactersSection");
@@ -112,7 +112,7 @@ export function CharactersSection() {
 				data: editForm,
 			});
 			const { id: _, ...data } = editForm;
-			await updateCharacter(id, data);
+			await updateCharacter(id, data as CharacterUpdate);
 			await loadCharacters();
 			handleCancelEdit();
 			toast({
@@ -144,7 +144,7 @@ export function CharactersSection() {
 		setIsLoading(true);
 		try {
 			characterLogger.info("✨ Creando nuevo personaje:", newCharacter);
-			await createCharacter(newCharacter);
+			await createCharacter(newCharacter as CharacterCreate);
 			await loadCharacters();
 			setNewCharacter({
 				name: "",
@@ -307,7 +307,7 @@ export function CharactersSection() {
 								<ScrollText className="h-4 w-4 text-muted-foreground" />
 								<Textarea
 									placeholder="Descripción"
-									value={newCharacter.description}
+									value={newCharacter.description || ""}
 									onChange={(e) =>
 										setNewCharacter({
 											...newCharacter,
@@ -320,7 +320,7 @@ export function CharactersSection() {
 								<ScrollText className="h-4 w-4 text-muted-foreground" />
 								<Textarea
 									placeholder="Historia del personaje"
-									value={newCharacter.backstory}
+									value={newCharacter.backstory || ""}
 									onChange={(e) =>
 										setNewCharacter({
 											...newCharacter,
@@ -496,7 +496,7 @@ export function CharactersSection() {
 															<ScrollText className="h-4 w-4 text-muted-foreground" />
 															<Textarea
 																placeholder="Descripción"
-																value={editForm?.description}
+																value={editForm?.description || ""}
 																onChange={(e) =>
 																	setEditForm({
 																		...editForm!,
@@ -509,7 +509,7 @@ export function CharactersSection() {
 															<ScrollText className="h-4 w-4 text-muted-foreground" />
 															<Textarea
 																placeholder="Historia del personaje"
-																value={editForm?.backstory}
+																value={editForm?.backstory || ""}
 																onChange={(e) =>
 																	setEditForm({
 																		...editForm!,

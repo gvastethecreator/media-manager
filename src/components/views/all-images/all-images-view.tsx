@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
+import { useFileManager } from "@/store/file-manager.store";
+import { useImageViewer } from "@/store/image-viewer.store";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { ImageIcon } from "lucide-react";

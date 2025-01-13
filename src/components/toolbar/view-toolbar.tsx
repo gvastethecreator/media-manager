@@ -1,7 +1,7 @@
 "use client";
 
-import { useNavigationStore } from "@/store/navigation";
-import { useFileManager } from "@/store/file-manager";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useFileManager } from "@/store/file-manager.store";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,10 @@ export function ViewToolbar() {
 		const basePath = (
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink href="/" className="text-sm font-medium hover:text-foreground">
+					<BreadcrumbLink
+						href="/"
+						className="text-sm font-medium hover:text-foreground"
+					>
 						Inicio
 					</BreadcrumbLink>
 				</BreadcrumbItem>
@@ -65,7 +68,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Galería</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Galería
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -74,7 +79,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Favoritos</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Favoritos
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -83,7 +90,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Búsqueda</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Búsqueda
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -92,7 +101,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Colecciones</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Colecciones
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -101,11 +112,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/collections" className="text-sm font-medium hover:text-foreground">Colecciones</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/collections"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Colecciones
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentCollection?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentCollection?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -114,7 +132,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Carpetas</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Carpetas
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -123,11 +143,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/folders" className="text-sm font-medium hover:text-foreground">Carpetas</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/folders"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Carpetas
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentFolder?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentFolder?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -136,7 +163,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Etiquetas</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Etiquetas
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -145,11 +174,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/tags" className="text-sm font-medium hover:text-foreground">Etiquetas</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/tags"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Etiquetas
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentTag}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentTag}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -158,7 +194,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Álbumes</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Álbumes
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -167,11 +205,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/albums" className="text-sm font-medium hover:text-foreground">Álbumes</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/albums"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Álbumes
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentAlbum?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentAlbum?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -180,7 +225,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Personajes</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Personajes
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -189,11 +236,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/characters" className="text-sm font-medium hover:text-foreground">Personajes</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/characters"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Personajes
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentCharacter?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentCharacter?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -202,7 +256,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Lugares</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Lugares
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -211,11 +267,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/places" className="text-sm font-medium hover:text-foreground">Lugares</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/places"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Lugares
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentPlace?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentPlace?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -224,7 +287,9 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">Objetos</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								Objetos
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
@@ -233,11 +298,18 @@ export function ViewToolbar() {
 					<Breadcrumb>
 						{basePath}
 						<BreadcrumbItem>
-							<BreadcrumbLink href="/objects" className="text-sm font-medium hover:text-foreground">Objetos</BreadcrumbLink>
+							<BreadcrumbLink
+								href="/objects"
+								className="text-sm font-medium hover:text-foreground"
+							>
+								Objetos
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{currentObject?.name}</BreadcrumbPage>
+							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
+								{currentObject?.name}
+							</BreadcrumbPage>
 						</BreadcrumbItem>
 					</Breadcrumb>
 				);
