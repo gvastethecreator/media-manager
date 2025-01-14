@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageFallback } from "@/components/ui/image-fallback";
 import { getImageUrl } from "@/app/actions/image.actions";
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
 
 export interface ImageItem {
 	id: string;
@@ -345,8 +347,7 @@ export function AdvancedImageViewer({
 	// Función para cargar thumbnail
 	const loadThumbnail = useCallback(async (imageId: string) => {
 		try {
-			const response = await fetch(`/api/thumbnails/${imageId}?quality=medium`);
-			const data = await response.json();
+			const data = await getThumbnail(imageId, ThumbnailQuality.MEDIUM);
 			const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${
 				data.thumbnail
 			}`;

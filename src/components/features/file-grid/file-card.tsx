@@ -9,6 +9,8 @@ import { useFileManager } from "@/store/file-manager.store";
 import { useImageViewer } from "@/store/image-viewer.store";
 import { getImageUrl } from "@/app/actions/image.actions";
 import { useToast } from "@/components/ui/use-toast";
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
 
 type FileCardProps = {
 	item: FileItem;
@@ -139,8 +141,7 @@ export function FileCard({
 	useEffect(() => {
 		if (shouldLoad && !hasLoaded.current) {
 			setIsLoading(true);
-			fetch(`/api/thumbnails/${item.id}?quality=medium`)
-				.then((res) => res.json())
+			getThumbnail(item.id, ThumbnailQuality.MEDIUM)
 				.then((data) => {
 					setThumbnail(
 						`data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`

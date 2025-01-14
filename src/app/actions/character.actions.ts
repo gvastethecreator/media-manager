@@ -263,7 +263,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
     // Emitir eventos
     eventsService.emit('characters:modified');
     statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     characterLogger.info('✅ Imagen agregada al personaje');
     revalidateAllPaths();
@@ -288,7 +288,7 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
     // Emitir eventos
     eventsService.emit('characters:modified');
     statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     characterLogger.info('✅ Imagen removida del personaje');
     revalidateAllPaths();

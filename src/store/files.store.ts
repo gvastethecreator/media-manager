@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { FileItem } from '@/types/file-item'
+import { getTagImages } from "@/app/actions/tag.actions";
 
 interface FilesState {
   currentItems: FileItem[]
@@ -154,19 +155,11 @@ export const useFilesStore = create<FilesState>((set, get) => ({
   handleSelectTag: async (id) => {
     try {
       set({ isLoading: true, currentTagId: id })
-      const response = await fetch(`/api/tags/${id}/images/all`)
-      if (!response.ok) throw new Error('Error al cargar etiqueta')
-      const data = await response.json()
-      const items = data.items || []
-      set({
-        currentItems: items,
-        displayedItems: items.slice(0, ITEMS_PER_BATCH),
-        isProcessingThumbnails: true
-      })
+      const items = await getTagImages(id)
+      set({ currentItems: items, displayedItems: items.slice(0, ITEMS_PER_BATCH), isLoading: false })
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Error desconocido' })
-    } finally {
-      set({ isLoading: false, isProcessingThumbnails: false })
+      console.error('Error al cargar etiqueta:', error)
+      set({ error: 'Error al cargar etiqueta', isLoading: false })
     }
   },
 
