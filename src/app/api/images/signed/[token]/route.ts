@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySignedToken } from '@/app/actions/image.actions'
+import { verifySignedToken } from '@/app/actions/thumbnails.actions'
 
 export async function GET(
   request: NextRequest,

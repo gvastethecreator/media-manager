@@ -1,11 +1,25 @@
 export type ViewType =
-  | "folders"
+  | "all-images"
+  | "favorites"
   | "collections"
+  | "collection-content"
+  | "folders"
+  | "folder-content"
   | "tags"
+  | "tag-content"
+  | "search"
+  | "files"
+  | "settings"
+  | "development"
+  | "loading"
   | "albums"
+  | "album-content"
   | "characters"
+  | "character-content"
   | "places"
-  | "objects";
+  | "place-content"
+  | "objects"
+  | "object-content";
 
 export interface BaseItem {
   id: string;

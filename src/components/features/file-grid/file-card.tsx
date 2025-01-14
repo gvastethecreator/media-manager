@@ -168,9 +168,9 @@ export function FileCard({
 			variants={variants}
 			className={cn(
 				"relative overflow-hidden w-full h-full transition-all duration-200 rounded-sm cursor-pointer",
-				isHovered
-					? "ring-1 ring-white/30 ring-inset shadow-lg"
-					: "hover:ring-1 hover:ring-white/30 hover:ring-inset",
+				isHovered ?
+					"ring-1 ring-white/30 ring-inset shadow-lg"
+				:	"hover:ring-1 hover:ring-white/30 hover:ring-inset",
 				isSelected && "ring-2 ring-primary"
 			)}
 			onClick={handleClick}
@@ -185,14 +185,14 @@ export function FileCard({
 			layout
 		>
 			<div className="relative w-full h-full overflow-hidden">
-				{isLoading ? (
+				{isLoading ?
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						className="absolute inset-0 bg-black/50 flex items-center justify-center"
 					/>
-				) : error ? (
+				: error ?
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -203,8 +203,7 @@ export function FileCard({
 							Error al cargar
 						</div>
 					</motion.div>
-				) : (
-					<motion.div
+				:	<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -236,7 +235,7 @@ export function FileCard({
 							</p>
 						</motion.div>
 					</motion.div>
-				)}
+				}
 			</div>
 		</motion.div>
 	);
