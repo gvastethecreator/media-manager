@@ -2,39 +2,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { statsService } from '@/services/stats.service'
 import { logger } from '@/lib/logger'
 import type { ImageStats } from '@prisma/client'
+import type { GeneralStats } from '@/app/actions/stats.actions'
 
 const statsLogger = logger.withContext('StatsHook')
-
-export interface GeneralStats {
-  totalImages: number
-  totalFolders: number
-  totalTags: number
-  totalCollections: number
-  totalAlbums: number
-  totalCharacters: number
-  totalPlaces: number
-  totalObjects: number
-  totalFavorites: number
-  totalViews: number
-  totalDownloads: number
-  totalSize: number
-  totalActivities: number
-  popularImages: Array<{
-    id: string
-    name: string
-    views: number
-  }>
-  topTags: Array<{
-    name: string
-    color: string
-    count: number
-  }>
-  recentActivity: Array<{
-    description: string
-    timestamp: string
-    iconName: string
-  }>
-}
 
 export const STATS_QUERY_KEYS = {
   all: ['stats'] as const,
@@ -54,20 +24,13 @@ export function useStats() {
     queryKey: STATS_QUERY_KEYS.general(),
     queryFn: async () => {
       try {
-        const data = await statsService.getGeneralStats()
-        return {
-          ...data,
-          totalFavorites: 0,
-          totalActivities: 0,
-          popularImages: [],
-          topTags: [],
-          recentActivity: []
-        }
+        return await statsService.getGeneralStats()
       } catch (error) {
         statsLogger.error('Error al obtener estadísticas', { error })
         throw error
       }
     },
+    staleTime: 1000 * 60, // 1 minuto
   })
 
   const refreshStats = () => {
