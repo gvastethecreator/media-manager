@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import type { Place } from '@prisma/client'
+import { eventsService } from '@/services/events.service'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const placeLogger = logger.withContext('PlaceActions')
 
@@ -156,6 +158,11 @@ export async function createPlace(data: PlaceCreate) {
         filters: data.filters || '[]',
       },
     });
+
+    // Emitir eventos
+    eventsService.emit('places:modified');
+    statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
+
     placeLogger.info('✅ Lugar creado:', place.name);
     revalidateAllPaths();
     return place;
@@ -193,6 +200,11 @@ export async function deletePlace(id: string) {
     await prisma.place.delete({
       where: { id },
     });
+
+    // Emitir eventos
+    eventsService.emit('places:modified');
+    statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
+
     placeLogger.info('✅ Lugar eliminado');
     revalidateAllPaths();
   } catch (error) {
@@ -278,16 +290,20 @@ export async function getPlaceImages(id: string) {
 export async function addImageToPlace(placeId: string, imageId: string) {
   try {
     placeLogger.info('➕ Agregando imagen a lugar:', { placeId, imageId });
-    await prisma.place.update({
-      where: { id: placeId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
+        places: {
+          connect: { id: placeId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('places:modified');
+    statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     placeLogger.info('✅ Imagen agregada al lugar');
     revalidateAllPaths();
   } catch (error) {
@@ -299,16 +315,20 @@ export async function addImageToPlace(placeId: string, imageId: string) {
 export async function removeImageFromPlace(placeId: string, imageId: string) {
   try {
     placeLogger.info('➖ Removiendo imagen de lugar:', { placeId, imageId });
-    await prisma.place.update({
-      where: { id: placeId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          disconnect: {
-            id: imageId,
-          },
-        },
-      },
+        places: {
+          disconnect: { id: placeId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('places:modified');
+    statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     placeLogger.info('✅ Imagen removida del lugar');
     revalidateAllPaths();
   } catch (error) {

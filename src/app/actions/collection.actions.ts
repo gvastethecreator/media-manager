@@ -7,6 +7,8 @@ import type { Collection } from "@prisma/client";
 import { FileItem } from "@/types/file-item";
 import { convertServerImageToFileItem, type ServerImage } from "@/services/image-converter.service";
 import { collectionEventsService, COLLECTION_EVENTS } from "@/services/collection-events.service";
+import { eventsService } from '@/services/events.service';
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 
 const collectionLogger = logger.withContext("CollectionActions");
 
@@ -171,6 +173,9 @@ export async function createCollection(data: CollectionCreate): Promise<Collecti
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, { collection });
+    eventsService.emit('collections:modified');
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
+
     revalidateAllPaths();
 
     collectionLogger.info("✅ Colección creada:", collection.name);
@@ -211,6 +216,9 @@ export async function deleteCollection(id: string): Promise<void> {
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_DELETED, { collection });
+    eventsService.emit('collections:modified');
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
+
     revalidateAllPaths();
 
     collectionLogger.info("✅ Colección eliminada:", collection.name);
@@ -256,16 +264,20 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 export async function addImageToCollection(collectionId: string, imageId: string): Promise<void> {
   try {
     collectionLogger.info("➕ Agregando imagen a colección:", { collectionId, imageId });
-    await prisma.collection.update({
-      where: { id: collectionId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          connect: { id: imageId }
+        collections: {
+          connect: { id: collectionId }
         }
       }
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
+    eventsService.emit('collections:modified');
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     revalidateAllPaths();
 
     collectionLogger.info("✅ Imagen agregada a la colección");
@@ -278,16 +290,20 @@ export async function addImageToCollection(collectionId: string, imageId: string
 export async function removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
   try {
     collectionLogger.info("➖ Removiendo imagen de colección:", { collectionId, imageId });
-    await prisma.collection.update({
-      where: { id: collectionId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          disconnect: { id: imageId }
+        collections: {
+          disconnect: { id: collectionId }
         }
       }
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
+    eventsService.emit('collections:modified');
+    statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     revalidateAllPaths();
 
     collectionLogger.info("✅ Imagen removida de la colección");

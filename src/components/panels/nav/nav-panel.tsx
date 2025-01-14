@@ -29,6 +29,7 @@ import {
 import { useNavigationStore } from "@/store/navigation.store";
 import { ViewType } from "@/types/file-item";
 import { cn } from "@/lib/utils";
+import { NavigationData } from "@/app/actions/nav.actions";
 
 const navigationItems = [
 	{ id: "all-images" as ViewType, label: "Galería", icon: ImageIcon },
@@ -81,20 +82,46 @@ const categories = [
 	},
 ];
 
-export function NavPanel() {
-	const { stats, initialize: initializeStats } = useStatsStore();
+interface NavPanelProps {
+	initialData: NavigationData;
+}
+
+export function NavPanel({ initialData }: NavPanelProps) {
 	const { settings } = useSettingsContext();
 	const { profiles, activeProfile } = settings;
 	const activeProfileData = profiles.find((p) => p.id === activeProfile);
+
+	// Desestructurar initialData con valores por defecto
+	const {
+		stats = {
+			totalImages: 0,
+			totalFolders: 0,
+			totalCollections: 0,
+			totalTags: 0,
+			totalAlbums: 0,
+			totalCharacters: 0,
+			totalPlaces: 0,
+			totalObjects: 0,
+			totalViews: 0,
+			totalDownloads: 0,
+			totalFavorites: 0,
+			totalActivities: 0,
+			totalSize: 0,
+			popularImages: [],
+			topTags: [],
+			recentActivity: [],
+		},
+		folders = [],
+		collections = [],
+		tags = [],
+		albums = [],
+		characters = [],
+		places = [],
+		objects = [],
+	} = initialData || {};
+
 	const { currentView, setCurrentView } = useNavigationStore();
 	const {
-		collections,
-		folders,
-		tags,
-		albums,
-		characters,
-		places,
-		objects,
 		setCurrentCollection,
 		setCurrentFolder,
 		setCurrentTag,
@@ -109,17 +136,10 @@ export function NavPanel() {
 		currentCharacterId,
 		currentPlaceId,
 		currentObjectId,
-		initialize,
 	} = useFileManager();
 
 	const { toggleSettings } = useUIStore();
 	const { theme, setTheme } = useTheme();
-
-	useEffect(() => {
-		Promise.all([initialize(), initializeStats()]).catch((error) => {
-			console.error("Error initializing:", error);
-		});
-	}, [initialize, initializeStats]);
 
 	const handleThemeToggle = useCallback(() => {
 		setTheme(theme === "light" ? "dark" : "light");
@@ -164,12 +184,6 @@ export function NavPanel() {
 		},
 		[setCurrentView, setCurrentTag]
 	);
-
-	const handleResetApp = useCallback(() => {
-		Promise.all([initialize(), initializeStats()]).catch((error) => {
-			console.error("Error resetting app:", error);
-		});
-	}, [initialize, initializeStats]);
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
@@ -233,15 +247,6 @@ export function NavPanel() {
 							onClick={handleOpenDevelopment}
 						>
 							<Bug className="h-4 w-4" />
-						</Button>
-
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8"
-							onClick={handleResetApp}
-						>
-							<RefreshCcw className="h-4 w-4" />
 						</Button>
 
 						<Button
@@ -362,7 +367,7 @@ export function NavPanel() {
 													{collection.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{collection.count}
+													{collection._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -385,7 +390,7 @@ export function NavPanel() {
 													{folder.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{folder.count}
+													{folder._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -408,7 +413,7 @@ export function NavPanel() {
 													{album.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{album.count}
+													{album._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -431,7 +436,7 @@ export function NavPanel() {
 													{character.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{character.count}
+													{character._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -454,7 +459,7 @@ export function NavPanel() {
 													{place.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{place.count}
+													{place._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -477,7 +482,7 @@ export function NavPanel() {
 													{object.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{object.count}
+													{object._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -500,7 +505,7 @@ export function NavPanel() {
 														{tag.name}
 													</span>
 													<span className="text-[10px] h-4 text-white border-none">
-														{tag.count}
+														{tag._count?.images || 0}
 													</span>
 												</Button>
 											))}

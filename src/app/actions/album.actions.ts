@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import type { Album } from '@prisma/client'
+import { eventsService } from '@/services/events.service'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const albumLogger = logger.withContext('AlbumActions')
 
@@ -143,6 +145,11 @@ export async function createAlbum(data: AlbumCreate) {
         filters: data.filters || '[]',
       },
     });
+
+    // Emitir eventos
+    eventsService.emit('albums:modified');
+    statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
+
     albumLogger.info('✅ Álbum creado:', album.name);
     revalidateAllPaths();
     return album;
@@ -177,6 +184,11 @@ export async function deleteAlbum(id: string) {
     await prisma.album.delete({
       where: { id },
     });
+
+    // Emitir eventos
+    eventsService.emit('albums:modified');
+    statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
+
     albumLogger.info('✅ Álbum eliminado');
     revalidateAllPaths();
   } catch (error) {
@@ -231,16 +243,20 @@ export async function getAlbumImages(id: string) {
 export async function addImageToAlbum(albumId: string, imageId: string) {
   try {
     albumLogger.info('➕ Agregando imagen a álbum:', { albumId, imageId });
-    await prisma.album.update({
-      where: { id: albumId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
+        albums: {
+          connect: { id: albumId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('albums:modified');
+    statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     albumLogger.info('✅ Imagen agregada al álbum');
     revalidateAllPaths();
   } catch (error) {
@@ -252,16 +268,20 @@ export async function addImageToAlbum(albumId: string, imageId: string) {
 export async function removeImageFromAlbum(albumId: string, imageId: string) {
   try {
     albumLogger.info('➖ Removiendo imagen de álbum:', { albumId, imageId });
-    await prisma.album.update({
-      where: { id: albumId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          disconnect: {
-            id: imageId,
-          },
-        },
-      },
+        albums: {
+          disconnect: { id: albumId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('albums:modified');
+    statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     albumLogger.info('✅ Imagen removida del álbum');
     revalidateAllPaths();
   } catch (error) {
