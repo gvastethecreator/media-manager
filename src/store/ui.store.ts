@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger'
 
 const uiLogger = logger.withContext('UIStore')
 
-export type ViewMode = 'grid' | 'list' | 'details'
+export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards' | 'details'
 export type ThumbnailSize = 'small' | 'medium' | 'large'
 export type ThemeMode = 'light' | 'dark' | 'system'
 

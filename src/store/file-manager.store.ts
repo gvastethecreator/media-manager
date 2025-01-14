@@ -9,6 +9,7 @@ import { getPlaceImages } from '@/app/actions/place.actions'
 import { getObjectImages } from '@/app/actions/object.actions'
 import { getStats } from '@/app/actions/stats.actions'
 import { logger } from '@/lib/logger'
+import { ViewMode } from '@/types/settings'
 
 const fileManagerLogger = logger.withContext('FileManagerStore')
 
@@ -71,6 +72,7 @@ interface APIImageResponse {
 
 // Estado del store
 interface FileManagerState {
+  initialState: boolean
   // Estado de items
   currentItems: FileItem[]
   displayedItems: FileItem[]
@@ -131,11 +133,18 @@ interface FileManagerState {
   setItems: (items: FileItem[]) => void
   setIsLoading: (loading: boolean) => void
   resetState: () => void
+
+  // Estado de vista
+  viewMode: ViewMode
+}
+
+interface FileManagerActions {
+  setViewMode: (mode: "grid" | "list") => void
 }
 
 const ITEMS_PER_BATCH = 50
 
-const initialState = {
+const initialState: FileManagerState = {
   currentItems: [],
   displayedItems: [],
   selectedItem: null,
@@ -165,7 +174,8 @@ const initialState = {
   places: [],
   objects: [],
   isProcessingThumbnails: false,
-  lastUpdate: Date.now()
+  lastUpdate: Date.now(),
+  viewMode: "grid" as const
 }
 
 // Función auxiliar para validar tipos de datos
@@ -306,7 +316,7 @@ const transformToFileItem = (rawItem: any): FileItem => {
   }
 }
 
-export const useFileManager = create<FileManagerState>((set, get) => ({
+export const useFileManager = create<FileManagerState & FileManagerActions>((set, get) => ({
   ...initialState,
 
   // Inicialización
@@ -743,7 +753,11 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
   resetState: () => {
     fileManagerLogger.info('🔄 Restaurando estado inicial')
     set({ ...initialState, lastUpdate: Date.now() })
-  }
+  },
+
+  // Estado de vista
+  viewMode: initialState.viewMode,
+  setViewMode: (mode: "grid" | "list") => set({ viewMode: mode })
 }))
 
 // Tipos exportados para uso en componentes

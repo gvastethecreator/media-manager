@@ -13,6 +13,10 @@ import { thumbnailCache } from '@/lib/cache'
 import { existsSync } from 'fs'
 import path from 'path'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
+import { FileMetadata } from "@/types/file-item";
+import { ExifImage } from "exif";
+import { promisify } from "util";
+import { readFile } from "fs/promises";
 
 const imageLogger = logger.withContext('ImageActions')
 
@@ -20,21 +24,19 @@ export async function getImageUrl(imageId: string): Promise<string> {
   try {
     const image = await prisma.image.findUnique({
       where: { id: imageId },
-      select: {
-        id: true,
-        isPublic: true
-      }
-    })
+      select: { path: true },
+    });
 
     if (!image) {
-      throw new Error('Imagen no encontrada')
+      throw new Error("Imagen no encontrada");
     }
 
-    // Usar el nuevo endpoint
-    return `/api/images/${image.id}/content`
+    // Generar URL firmada o token temporal
+    const signedUrl = `file://${image.path}`;
+    return signedUrl;
   } catch (error) {
-    imageLogger.error('Error obteniendo URL de imagen', { imageId, error })
-    throw new Error('Error al obtener URL de imagen')
+    imageLogger.error("Error getting image URL:", error);
+    throw new Error("No se pudo obtener la URL de la imagen");
   }
 }
 
@@ -87,39 +89,33 @@ export async function generateThumbnail(imageId: string, quality: ThumbnailQuali
 
 export async function updateImageStats(imageId: string, type: 'view' | 'download'): Promise<void> {
   try {
-    const headersList = await headers()
-    const userAgent = headersList.get('user-agent') ?? 'unknown'
-
-    await prisma.imageStats.upsert({
+    const stats = await prisma.imageStats.findUnique({
       where: { imageId },
-      create: {
-        imageId,
-        views: type === 'view' ? 1 : 0,
-        downloads: type === 'download' ? 1 : 0,
-        lastViewed: new Date()
-      },
-      update: {
-        views: type === 'view' ? { increment: 1 } : undefined,
-        downloads: type === 'download' ? { increment: 1 } : undefined,
-        lastViewed: new Date()
-      }
-    })
+    });
 
-    await prisma.activity.create({
-      data: {
-        type: type === 'view' ? 'IMAGE_VIEW' : 'IMAGE_DOWNLOAD',
-        description: `Image ${type === 'view' ? 'viewed' : 'downloaded'} from ${userAgent}`,
-        imageId
-      }
-    })
+    if (stats) {
+      await prisma.imageStats.update({
+        where: { imageId },
+        data: {
+          views: type === 'view' ? stats.views + 1 : stats.views,
+          downloads: type === 'download' ? stats.downloads + 1 : stats.downloads,
+          lastViewed: new Date(),
+        },
+      });
+    } else {
+      await prisma.imageStats.create({
+        data: {
+          imageId,
+          views: type === 'view' ? 1 : 0,
+          downloads: type === 'download' ? 1 : 0,
+        },
+      });
+    }
 
-    // Emitir eventos
-
-    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE)
-
-    revalidatePath(`/api/stats/${imageId}`)
+    revalidatePath("/");
   } catch (error) {
-    imageLogger.error('Error actualizando estadísticas', { imageId, type, error })
+    imageLogger.error("Error updating image stats:", error);
+    throw new Error("No se pudo actualizar las estadísticas de la imagen");
   }
 }
 
@@ -799,5 +795,89 @@ export async function getImage(id: string): Promise<Image | null> {
   } catch (error) {
     imageLogger.error('Error getting image:', { id, error })
     throw new Error('Error al obtener la imagen')
+  }
+}
+
+export async function extractImageMetadata(
+  imagePath: string
+): Promise<FileMetadata> {
+  try {
+    const metadata: FileMetadata = {};
+
+    // Extraer información básica con Sharp
+    const imageInfo = await sharp(imagePath).metadata();
+
+    metadata.mimeType = `image/${imageInfo.format}`;
+    metadata.dimensions = {
+      width: imageInfo.width || 0,
+      height: imageInfo.height || 0,
+    };
+    metadata.colorSpace = imageInfo.space;
+    metadata.hasAlpha = imageInfo.hasAlpha;
+    metadata.isAnimated = imageInfo.pages ? imageInfo.pages > 1 : false;
+
+    // Extraer EXIF si existe
+    try {
+      const buffer = await readFile(imagePath);
+      const getExif = promisify(ExifImage);
+      const exifData = await getExif({ image: buffer });
+
+      metadata.exif = {
+        Make: exifData.image.Make,
+        Model: exifData.image.Model,
+        Software: exifData.image.Software,
+        DateTime: exifData.image.ModifyDate,
+        ExposureTime: exifData.exif.ExposureTime,
+        FNumber: exifData.exif.FNumber,
+        ISO: exifData.exif.ISO,
+        FocalLength: exifData.exif.FocalLength,
+      };
+    } catch (error) {
+      imageLogger.warn("No EXIF data found:", error);
+    }
+
+    // Intentar extraer metadata de generación AI
+    try {
+      const filename = path.basename(imagePath);
+      const match = filename.match(/(\{.*\})/);
+      if (match) {
+        const genData = JSON.parse(match[1]);
+        metadata.generation = {
+          prompt: genData.prompt,
+          negative_prompt: genData.negative_prompt,
+          model: genData.model,
+          steps: genData.steps,
+          cfg_scale: genData.cfg_scale,
+          seed: genData.seed,
+          sampler: genData.sampler,
+        };
+      }
+    } catch (error) {
+      imageLogger.warn("No generation metadata found:", error);
+    }
+
+    return metadata;
+  } catch (error) {
+    imageLogger.error("Error extracting metadata:", error);
+    throw new Error("No se pudo extraer la metadata de la imagen");
+  }
+}
+
+export async function updateImageMetadata(
+  imageId: string,
+  metadata: FileMetadata
+): Promise<void> {
+  try {
+    await prisma.image.update({
+      where: { id: imageId },
+      data: {
+        metadata: JSON.stringify(metadata),
+      },
+    });
+
+    revalidatePath("/");
+  } catch (error) {
+    imageLogger.error("Error updating metadata:", error);
+    throw new Error("No se pudo actualizar la metadata de la imagen");
   }
 }

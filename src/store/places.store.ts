@@ -6,56 +6,29 @@ import {
   deletePlace,
   getPlaces,
   updatePlace,
+  addImageToPlace as addImageToPlaceAction,
   type PlaceCreate,
   type PlaceUpdate
 } from '../app/actions/place.actions';
 
-// Estado extendido específico para Place
 interface PlaceState {
-  filters: {
-    searchQuery: string;
-    sortBy: 'name' | 'type' | 'createdAt' | 'updatedAt';
-    sortOrder: 'asc' | 'desc';
-    type: string[];
-    region: string[];
-    climate: string[];
-  };
+  searchQuery: string;
+  sortBy: 'name' | 'createdAt' | 'updatedAt';
+  sortOrder: 'asc' | 'desc';
 }
 
-export const usePlaceStore = createStoreFactory<Place, PlaceState, PlaceCreate, PlaceUpdate>(
+const basePlaceStore = createStoreFactory<Place, PlaceState, PlaceCreate, PlaceUpdate>(
   {
     name: 'places',
     logger,
     actions: {
       beforeCreate: async (data) => {
-        // Validar datos antes de crear
-        if (!data.name?.trim()) {
-          throw new Error('El nombre es requerido');
-        }
-        if (!data.type?.trim()) {
-          throw new Error('El tipo es requerido');
-        }
+        // Aquí podríamos hacer validaciones o transformaciones antes de crear
         return data;
       },
       afterCreate: async (place) => {
+        // Aquí podríamos hacer acciones después de crear, como notificaciones
         logger.info('Lugar creado exitosamente', { place });
-      },
-      beforeUpdate: async (id, data) => {
-        // Validar datos antes de actualizar
-        if (data.name !== undefined && !data.name.trim()) {
-          throw new Error('El nombre no puede estar vacío');
-        }
-        return data;
-      },
-      afterUpdate: async (place) => {
-        logger.info('Lugar actualizado exitosamente', { place });
-      },
-      beforeDelete: async (id) => {
-        // Aquí podríamos verificar si el lugar tiene imágenes asociadas
-        logger.info('Preparando eliminación de lugar', { id });
-      },
-      afterDelete: async (id) => {
-        logger.info('Lugar eliminado exitosamente', { id });
       }
     }
   },
@@ -66,3 +39,20 @@ export const usePlaceStore = createStoreFactory<Place, PlaceState, PlaceCreate, 
     deleteItem: deletePlace
   }
 );
+
+// Exportar el hook con funcionalidad extendida
+export const usePlaceStore = () => {
+  const store = basePlaceStore();
+  return {
+    ...store,
+    addImageToPlace: async (placeId: string, imageId: string) => {
+      try {
+        await addImageToPlaceAction(placeId, imageId);
+        await store.loadItems();
+      } catch (error) {
+        logger.error('Error adding image to place:', error);
+        throw error;
+      }
+    }
+  };
+};

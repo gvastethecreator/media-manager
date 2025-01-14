@@ -9,6 +9,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Home } from "lucide-react";
 
 interface BreadcrumbsProps {
 	currentView: ViewType;
@@ -25,6 +26,8 @@ interface BreadcrumbConfig {
 }
 
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> = {
+	files: { label: "Archivos", path: "/files" },
+	loading: { label: "Cargando", path: "/loading" },
 	"all-images": { label: "Galería", path: "/gallery" },
 	favorites: { label: "Favoritos", path: "/favorites" },
 	search: { label: "Búsqueda", path: "/search" },
@@ -99,8 +102,8 @@ export function ViewBreadcrumbs({
 
 	return (
 		<Breadcrumb>
-			{basePath}
-			<BreadcrumbItem>
+			<div className="flex items-center gap-1">
+				<BreadcrumbItem>
 				{isContentView ?
 					<>
 						<BreadcrumbLink
@@ -117,8 +120,9 @@ export function ViewBreadcrumbs({
 				:	<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
 						{config.label}
 					</BreadcrumbPage>
-				}
-			</BreadcrumbItem>
+					}
+				</BreadcrumbItem>
+			</div>
 		</Breadcrumb>
 	);
 }

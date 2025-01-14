@@ -33,11 +33,42 @@ export interface Dimensions {
   height: number;
 }
 
+export interface ExifData {
+  Make?: string;
+  Model?: string;
+  Software?: string;
+  DateTime?: string;
+  ExposureTime?: number;
+  FNumber?: number;
+  ISO?: number;
+  FocalLength?: number;
+}
+
+export interface GenerationData {
+  prompt?: string;
+  negative_prompt?: string;
+  model?: string;
+  steps?: number;
+  cfg_scale?: number;
+  seed?: number;
+  sampler?: string;
+}
+
+export interface FileMetadata {
+  mimeType?: string;
+  dimensions?: Dimensions;
+  colorSpace?: string;
+  hasAlpha?: boolean;
+  isAnimated?: boolean;
+  exif?: ExifData;
+  generation?: GenerationData;
+}
+
 export interface FileItem {
   id: string;
   name: string;
   path: string;
-  type: string;
+  type: "file" | "folder" | "image";
   size: number;
   width: number | null;
   height: number | null;
@@ -51,6 +82,8 @@ export interface FileItem {
   folderId: string;
   createdAt: Date;
   updatedAt: Date;
+  modifiedAt: Date;
+  accessedAt: Date;
   collections: RelatedCollection[];
   tags: RelatedTag[];
   albums: RelatedAlbum[];

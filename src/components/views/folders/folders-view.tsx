@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "motion/react";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatFileSize } from "@/lib/utils";
 import { FolderIcon, ImageIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFolders } from "@/services/folder.service";
@@ -28,21 +28,7 @@ import { eventsService, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 
 const viewLogger = logger.withContext("FoldersView");
-
-interface Folder {
-	id: string;
-	name: string;
-	path: string;
-	totalFiles?: number;
-	totalSize?: number;
-	lastIndexed?: string | null;
-	createdAt?: string;
-	updatedAt?: string;
-	recentImages?: string[];
-	_count?: {
-		images: number;
-	};
-}
+import { Folder } from "@/types/folders";
 
 interface ProcessStatus {
 	status?: string;
@@ -125,52 +111,52 @@ const FolderCard = memo(function FolderCard({
 					{/* Grid de imágenes recientes */}
 					<div className="relative group/grid flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{folder.recentImages && folder.recentImages.length > 0
-								? folder.recentImages.map((src: string, i: number) => (
-										<div
-											key={i}
-											className="relative rounded-md overflow-hidden aspect-square"
-										>
-											{src ? (
-												<img
-													src={src}
-													alt={`Imagen ${i + 1}`}
-													className="object-cover w-full h-full transition-transform group-hover/grid:scale-105"
-												/>
-											) : (
-												<div
-													className={cn(
-														"w-full h-full flex items-center justify-center bg-gradient-to-br",
-														getRandomGradient()
-													)}
-												>
-													<ImageIcon className="w-5 h-5 text-white/80" />
-												</div>
-											)}
-										</div>
-								  ))
-								: Array.from({ length: 9 }).map((_, i) => (
-										<div
-											key={i}
-											className={cn(
-												"relative rounded-md overflow-hidden aspect-square",
-												"flex items-center justify-center",
-												"bg-gradient-to-br transition-transform hover:scale-105",
-												getRandomGradient()
-											)}
-										>
-											<ImageIcon className="w-5 h-5 text-white/80" />
-										</div>
-								  ))}
+							{folder.recentImages && folder.recentImages.length > 0 ?
+								folder.recentImages.map((src: string, i: number) => (
+									<div
+										key={i}
+										className="relative rounded-md overflow-hidden aspect-square"
+									>
+										{src ?
+											<img
+												src={src}
+												alt={`Imagen ${i + 1}`}
+												className="object-cover w-full h-full transition-transform group-hover/grid:scale-105"
+											/>
+										:	<div
+												className={cn(
+													"w-full h-full flex items-center justify-center bg-gradient-to-br",
+													getRandomGradient()
+												)}
+											>
+												<ImageIcon className="w-5 h-5 text-white/80" />
+											</div>
+										}
+									</div>
+								))
+							:	Array.from({ length: 9 }).map((_, i) => (
+									<div
+										key={i}
+										className={cn(
+											"relative rounded-md overflow-hidden aspect-square",
+											"flex items-center justify-center",
+											"bg-gradient-to-br transition-transform hover:scale-105",
+											getRandomGradient()
+										)}
+									>
+										<ImageIcon className="w-5 h-5 text-white/80" />
+									</div>
+								))
+							}
 						</div>
 
 						{/* Overlay con hover */}
 						<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4">
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{(folder._count?.images ?? 0) > 0
-									? `Ver ${folder._count?.images} imágenes`
-									: "Carpeta vacía"}
+								{(folder._count?.images ?? 0) > 0 ?
+									`Ver ${folder._count?.images} imágenes`
+								:	"Carpeta vacía"}
 							</Button>
 						</div>
 					</div>
@@ -196,9 +182,9 @@ const FolderCard = memo(function FolderCard({
 										<div className="flex items-center gap-1.5 cursor-help">
 											<Clock className="w-4 h-4" />
 											<span>
-												{folder.lastIndexed
-													? new Date(folder.lastIndexed).toLocaleDateString()
-													: "Nunca"}
+												{folder.lastIndexed ?
+													new Date(folder.lastIndexed).toLocaleDateString()
+												:	"Nunca"}
 											</span>
 										</div>
 									</HoverCardTrigger>
@@ -211,7 +197,7 @@ const FolderCard = memo(function FolderCard({
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{formatBytes(Number(folder.totalSize || 0))}</span>
+										<span>{formatFileSize(Number(folder.totalSize || 0))}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
@@ -258,7 +244,13 @@ export function FoldersView({ isResizing }: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info("🔄 Cargando carpetas...");
 			const data = await getFolders();
-			setFolders(data);
+			const transformedData = data.map((folder) => ({
+				...folder,
+				lastIndexed: folder.lastIndexed?.toISOString() || null,
+				createdAt: folder.createdAt.toISOString(),
+				updatedAt: folder.updatedAt.toISOString(),
+			}));
+			setFolders(transformedData);
 			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
 		} catch (error) {
 			const errorMessage =
