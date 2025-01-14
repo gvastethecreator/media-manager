@@ -13,6 +13,7 @@ import { fsService } from '@/services/fs.server';
 import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 import type { Folder } from '@prisma/client';
+import type { FileItem } from '@/types/file-item'
 
 const folderLogger = logger.withContext('FolderActions');
 
@@ -205,7 +206,7 @@ export async function deleteFolder(id: string) {
     eventsService.emit('folders:modified');
     eventsService.emit('files:modified');
     statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
   } catch (error) {
@@ -377,7 +378,7 @@ export async function indexFolder(id: string): Promise<FolderResponse> {
     eventsService.emit('files:modified');
     eventsService.emit('folders:modified');
     statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
 
@@ -560,7 +561,7 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
     eventsService.emit('files:modified');
     eventsService.emit('folders:modified');
     statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
 
@@ -590,9 +591,37 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
   }
 }
 
+function transformImageToFileItem(image: any): FileItem {
+  return {
+    id: image.id,
+    name: image.name,
+    path: image.path,
+    type: 'image',
+    size: image.size,
+    width: image.width,
+    height: image.height,
+    metadata: image.metadata,
+    thumbnail: null,
+    thumbnailSize: image.thumbnailSize,
+    thumbnailWidth: image.thumbnailWidth,
+    thumbnailHeight: image.thumbnailHeight,
+    isPublic: image.isPublic,
+    isFavorite: image.isFavorite,
+    folderId: image.folderId,
+    createdAt: image.createdAt,
+    updatedAt: image.updatedAt,
+    collections: image.collections?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
+    tags: image.tags?.map((t: any) => ({ id: t.id, name: t.name })) ?? [],
+    albums: image.albums?.map((a: any) => ({ id: a.id, name: a.name })) ?? [],
+    characters: image.characters?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
+    places: image.places?.map((p: any) => ({ id: p.id, name: p.name })) ?? [],
+    objects: image.objects?.map((o: any) => ({ id: o.id, name: o.name })) ?? []
+  }
+}
+
 export async function getFolderImages(id: string) {
   try {
-    folderLogger.info('🔍 Buscando imágenes de la carpeta:', id);
+    folderLogger.info('🔍 Buscando imágenes de la carpeta:', id)
 
     const folder = await prisma.folder.findUnique({
       where: { id },
@@ -652,17 +681,18 @@ export async function getFolderImages(id: string) {
           }
         }
       }
-    });
+    })
 
     if (!folder) {
-      throw new FolderError('Carpeta no encontrada');
+      throw new FolderError('Carpeta no encontrada')
     }
 
-    folderLogger.info('✅ Imágenes obtenidas:', folder.images.length);
-    return folder.images;
+    const transformedImages = folder.images.map(transformImageToFileItem)
+    folderLogger.info('✅ Imágenes obtenidas:', transformedImages.length)
+    return transformedImages
   } catch (error) {
-    folderLogger.error('Error obteniendo imágenes:', error);
-    if (error instanceof FolderError) throw error;
-    throw new FolderError('Error al obtener las imágenes', error);
+    folderLogger.error('Error obteniendo imágenes:', error)
+    if (error instanceof FolderError) throw error
+    throw new FolderError('Error al obtener las imágenes', error)
   }
 }

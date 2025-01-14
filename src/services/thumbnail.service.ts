@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { optimizeThumbnail } from '@/lib/thumbnails'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { EventEmitter } from 'events'
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
 
 const thumbLogger = logger.withContext('ThumbnailService')
 
@@ -290,34 +291,18 @@ class ThumbnailService extends EventEmitter {
         throw new Error(`Configuración no encontrada para la calidad: ${quality}`);
       }
 
-      const response = await this.fetchWithTimeout(`/api/thumbnails/${imageId}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'X-Thumbnail-Quality': quality
-        },
-        timeout: 10000 // 10 segundos máximo
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error obteniendo thumbnail: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.thumbnail) {
-        thumbLogger.error('❌ No se encontró thumbnail:', { imageId });
-        throw new Error('No se encontró el thumbnail');
+      const response = await getThumbnail(imageId, quality as ThumbnailQuality);
+      if (!response) {
+        throw new Error('No se pudo obtener el thumbnail');
       }
 
       thumbLogger.info('✅ Thumbnail obtenido:', {
         imageId,
-        size: data.size,
+        size: response.size,
         quality
       });
 
-      return data.thumbnail;
+      return response.thumbnail;
     } catch (error) {
       thumbLogger.error('❌ Error en getThumbnail:', {
         imageId,

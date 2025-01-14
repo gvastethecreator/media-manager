@@ -302,7 +302,7 @@ export async function addImageToPlace(placeId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('places:modified');
     statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     placeLogger.info('✅ Imagen agregada al lugar');
     revalidateAllPaths();
@@ -327,7 +327,7 @@ export async function removeImageFromPlace(placeId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('places:modified');
     statsEventEmitter.emit(STATS_EVENTS.PLACE_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     placeLogger.info('✅ Imagen removida del lugar');
     revalidateAllPaths();

@@ -255,7 +255,7 @@ export async function addImageToAlbum(albumId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('albums:modified');
     statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     albumLogger.info('✅ Imagen agregada al álbum');
     revalidateAllPaths();
@@ -280,7 +280,7 @@ export async function removeImageFromAlbum(albumId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('albums:modified');
     statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     albumLogger.info('✅ Imagen removida del álbum');
     revalidateAllPaths();

@@ -200,62 +200,29 @@ export async function getTagImages(id: string) {
         },
       },
       include: {
-        tags: {
-          select: { id: true },
-        },
-        collections: {
-          select: { id: true },
-        },
-        albums: {
-          select: { id: true },
-        },
-        characters: {
-          select: { id: true },
-        },
-        places: {
-          select: { id: true },
-        },
-        objects: {
-          select: { id: true },
-        },
+        tags: true,
+        collections: true,
+        albums: true,
+        characters: true,
+        places: true,
+        objects: true,
         stats: true,
       },
     });
 
     tagLogger.info(`✅ ${images.length} imágenes obtenidas`);
-    return images.map(image => {
-      let parsedMetadata = undefined;
-      if (image.metadata) {
-        try {
-          const meta = JSON.parse(image.metadata);
-          parsedMetadata = {
-            dimensions: {
-              width: image.width,
-              height: image.height,
-            },
-            mimeType: meta.mimeType,
-          };
-        } catch (e) {
-          tagLogger.error("Error parsing metadata:", e);
-        }
-      }
-
-      return {
-        ...image,
-        type: 'image',
-        metadata: parsedMetadata,
-        tags: image.tags.map(t => t.id),
-        collections: image.collections.map(c => c.id),
-        albums: image.albums.map(a => a.id),
-        characters: image.characters.map(c => c.id),
-        places: image.places.map(p => p.id),
-        objects: image.objects.map(o => o.id),
-        favorite: image.isFavorite,
-        views: image.stats?.views || 0,
-        downloads: image.stats?.downloads || 0,
-        count: 0,
-      };
-    });
+    return images.map(image => ({
+      ...image,
+      type: 'image',
+      metadata: image.metadata,
+      tags: image.tags.map(t => ({ id: t.id, name: t.name })),
+      collections: image.collections.map(c => ({ id: c.id, name: c.name })),
+      albums: image.albums.map(a => ({ id: a.id, name: a.name })),
+      characters: image.characters.map(c => ({ id: c.id, name: c.name })),
+      places: image.places.map(p => ({ id: p.id, name: p.name })),
+      objects: image.objects.map(o => ({ id: o.id, name: o.name })),
+      thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
+    }));
   } catch (error) {
     tagLogger.error("❌ Error al obtener imágenes de la etiqueta:", error);
     throw new TagError("No se pudieron obtener las imágenes de la etiqueta", error);
@@ -318,7 +285,7 @@ export async function addTagToImage(tagId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('tags:modified');
     statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
   } catch (error) {
@@ -341,7 +308,7 @@ export async function removeTagFromImage(tagId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('tags:modified');
     statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
   } catch (error) {

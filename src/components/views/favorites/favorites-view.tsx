@@ -6,8 +6,9 @@ import { BaseContentView, ContentViewProvider } from "@/components/views/base";
 import type { BaseContentProps } from "@/components/views/base";
 import { Star } from "lucide-react";
 import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService } from "@/services/events.service";
 import { logger } from "@/lib/logger";
+import { getFavorites } from "@/app/actions/favorite.actions";
 
 const viewLogger = logger.withContext("FavoritesView");
 
@@ -15,19 +16,24 @@ export function FavoritesView() {
 	const {
 		currentItems: items,
 		toggleItemSelection,
-		loadItems,
+		setItems,
 		isLoading,
+		setIsLoading,
 	} = useFileManager();
 
 	const loadFavorites = useCallback(async () => {
 		try {
 			viewLogger.info("🔄 Cargando favoritos...");
-			await loadItems("/api/images/favorites/all");
+			setIsLoading(true);
+			const favorites = await getFavorites();
+			setItems(favorites.map((f) => f.image));
 			viewLogger.info("✅ Favoritos cargados");
 		} catch (error) {
 			viewLogger.error("❌ Error cargando favoritos:", error);
+		} finally {
+			setIsLoading(false);
 		}
-	}, [loadItems]);
+	}, [setItems, setIsLoading]);
 
 	useEffect(() => {
 		loadFavorites();

@@ -276,7 +276,7 @@ export async function addImageToCollection(collectionId: string, imageId: string
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
     eventsService.emit('collections:modified');
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
 
@@ -302,14 +302,14 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
     eventsService.emit('collections:modified');
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     revalidateAllPaths();
 
     collectionLogger.info("✅ Imagen removida de la colección");
   } catch (error) {
-    collectionLogger.error("❌ Error al eliminar imagen de la colección:", error);
-    throw new CollectionError("No se pudo eliminar la imagen de la colección", error);
+    collectionLogger.error("❌ Error al remover imagen de la colección:", error);
+    throw new CollectionError("No se pudo remover la imagen de la colección", error);
   }
 }
 

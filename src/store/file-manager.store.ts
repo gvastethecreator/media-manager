@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 import type { FileItem } from '@/types/file-item'
+import { getFolderImages } from '@/app/actions/folder.actions'
+import { getCollectionImages } from '@/app/actions/collection.actions'
+import { logger } from '@/lib/logger'
+
+const fileManagerLogger = logger.withContext('FileManagerStore')
 
 interface FileManagerState {
   // Estado de items
@@ -64,6 +69,10 @@ interface FileManagerState {
   setCurrentCharacter: (id: string) => Promise<void>
   setCurrentPlace: (id: string) => Promise<void>
   setCurrentObject: (id: string) => Promise<void>
+
+  // Acciones de estado
+  setItems: (items: FileItem[]) => void
+  setIsLoading: (loading: boolean) => void
 }
 
 const ITEMS_PER_BATCH = 50
@@ -207,33 +216,57 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
 
   // Navegación
   setCurrentFolder: async (id: string) => {
-    const state = get()
-    const folder = state.folders.find(f => f.id === id) || null
-    state.clearSelection()
-    set({
-      currentFolderId: id,
-      currentCollectionId: null,
-      currentTagId: null,
-      currentFolder: folder,
-      currentCollection: null,
-      currentTag: null
-    })
-    await state.loadItems(`/api/folders/${id}/images/all`)
+    try {
+      const state = get()
+      const folder = state.folders.find(f => f.id === id) || null
+      state.clearSelection()
+      set({
+        currentFolderId: id,
+        currentCollectionId: null,
+        currentTagId: null,
+        currentFolder: folder,
+        currentCollection: null,
+        currentTag: null,
+        isLoading: true
+      })
+
+      const images = await getFolderImages(id)
+      set({
+        currentItems: images,
+        displayedItems: images.slice(0, ITEMS_PER_BATCH),
+        isLoading: false
+      })
+    } catch (error) {
+      fileManagerLogger.error('Error al cargar carpeta:', error)
+      set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false })
+    }
   },
 
   setCurrentCollection: async (id: string) => {
-    const state = get()
-    const collection = state.collections.find(c => c.id === id) || null
-    state.clearSelection()
-    set({
-      currentFolderId: null,
-      currentCollectionId: id,
-      currentTagId: null,
-      currentFolder: null,
-      currentCollection: collection,
-      currentTag: null
-    })
-    await state.loadItems(`/api/collections/${id}/images/all`)
+    try {
+      const state = get()
+      const collection = state.collections.find(c => c.id === id) || null
+      state.clearSelection()
+      set({
+        currentFolderId: null,
+        currentCollectionId: id,
+        currentTagId: null,
+        currentFolder: null,
+        currentCollection: collection,
+        currentTag: null,
+        isLoading: true
+      })
+
+      const images = await getCollectionImages(id)
+      set({
+        currentItems: images,
+        displayedItems: images.slice(0, ITEMS_PER_BATCH),
+        isLoading: false
+      })
+    } catch (error) {
+      fileManagerLogger.error('Error al cargar colección:', error)
+      set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false })
+    }
   },
 
   setCurrentTag: async (id: string) => {
@@ -340,5 +373,17 @@ export const useFileManager = create<FileManagerState>((set, get) => ({
       currentObject: object
     })
     await state.loadItems(`/api/objects/${id}/images/all`)
+  },
+
+  // Acciones de estado
+  setItems: (items) => {
+    set({
+      currentItems: items,
+      displayedItems: items.slice(0, ITEMS_PER_BATCH)
+    })
+  },
+
+  setIsLoading: (loading) => {
+    set({ isLoading: loading })
   }
 }))

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { logger } from '@/lib/logger'
+import { getFavorites, toggleFavorite } from '@/app/actions/favorite.actions'
 
 const favoritesLogger = logger.withContext('FavoritesStore')
 
@@ -14,14 +15,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   favorites: [],
   toggleFavorite: async (id: string) => {
     try {
-      const response = await fetch(`/api/favorites/${id}`, {
-        method: 'POST'
-      })
+      await toggleFavorite(id)
 
-      if (!response.ok) {
-        throw new Error('Error al cambiar estado de favorito')
-      }
-
+      // Actualizar el estado local
       set((state) => ({
         favorites: state.favorites.includes(id)
           ? state.favorites.filter((fav) => fav !== id)
@@ -40,12 +36,8 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   isFavorited: (id: string) => get().favorites.includes(id),
   loadFavorites: async () => {
     try {
-      const response = await fetch('/api/favorites')
-      if (!response.ok) {
-        throw new Error('Error al cargar favoritos')
-      }
-      const favorites = await response.json()
-      set({ favorites })
+      const favorites = await getFavorites()
+      set({ favorites: favorites.map(f => f.imageId) })
       favoritesLogger.info('✅ Favoritos cargados:', { count: favorites.length })
     } catch (error) {
       favoritesLogger.error('❌ Error al cargar favoritos:', error)

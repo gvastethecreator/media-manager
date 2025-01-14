@@ -24,21 +24,21 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Settings2, Trash2, Zap, AlertCircle } from "lucide-react";
-import { motion, AnimateSharedLayout } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { useSettingsContext } from "@/context/settings-context";
 import { useThumbnailStore } from "@/store/thumbnails.store";
 import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
 import * as thumbnailActions from "@/app/actions/thumbnails.actions";
 import { formatBytes, cn } from "@/lib/utils";
-import {
-	ThumbnailQuality,
+import type {
 	LastProcessedThumbnail,
 	ThumbnailCallbacks,
 	OptimizeResult,
 	CleanResult,
 	ReprocessResult,
 } from "@/types/thumbnails";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{
@@ -48,6 +48,83 @@ const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{ value: ThumbnailQuality.MEDIUM, label: "Media (recomendado)" },
 	{ value: ThumbnailQuality.HIGH, label: "Alta (mejor calidad, más espacio)" },
 ];
+
+// ThumbnailItem component
+function ThumbnailItem({
+	image,
+	index,
+}: {
+	image: LastProcessedThumbnail;
+	index: number;
+}) {
+	const [thumbnail, setThumbnail] = React.useState<string | null>(null);
+	const [isLoading, setIsLoading] = React.useState(true);
+	const [error, setError] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		const loadThumbnail = async () => {
+			try {
+				setIsLoading(true);
+				const data = await thumbnailActions.getThumbnail(
+					image.id,
+					ThumbnailQuality.MEDIUM
+				);
+				setThumbnail(
+					`data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`
+				);
+			} catch (err) {
+				console.error("Error cargando thumbnail:", err);
+				setError(err instanceof Error ? err.message : "Error desconocido");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [image.id]);
+
+	return (
+		<motion.div
+			key={image.id}
+			initial={{ opacity: 0, scale: 0.8 }}
+			animate={{ opacity: 1, scale: 1 }}
+			exit={{ opacity: 0, scale: 0.8 }}
+			transition={{ delay: index * 0.1 }}
+			className="relative aspect-square rounded-md overflow-hidden bg-muted group"
+		>
+			{isLoading ? (
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+				</div>
+			) : error ? (
+				<div className="absolute inset-0 flex items-center justify-center text-red-500 text-xs">
+					Error
+				</div>
+			) : (
+				thumbnail && (
+					<>
+						<Image
+							src={thumbnail}
+							alt={image.path}
+							fill
+							className="object-cover transition-transform group-hover:scale-105"
+						/>
+						<motion.div
+							initial={{ opacity: 0 }}
+							whileHover={{ opacity: 1 }}
+							className="absolute inset-0 bg-black/60 p-1.5"
+						>
+							<p className="text-[10px] text-white truncate">{image.path}</p>
+							<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
+								{new Date(image.processedAt).toLocaleTimeString()}
+							</p>
+						</motion.div>
+					</>
+				)
+			)}
+		</motion.div>
+	);
+}
 
 export function ThumbnailsSection() {
 	const { toast } = useToast();
@@ -66,6 +143,21 @@ export function ThumbnailsSection() {
 	const [lastProcessedThumbnails, setLastProcessedThumbnails] = React.useState<
 		LastProcessedThumbnail[]
 	>([]);
+
+	// Cargar últimas miniaturas procesadas
+	React.useEffect(() => {
+		const loadLastProcessed = async () => {
+			try {
+				const thumbnails = await thumbnailActions.getLastProcessedThumbnails();
+				setLastProcessedThumbnails(thumbnails);
+			} catch (error) {
+				console.error("Error cargando últimas miniaturas:", error);
+			}
+		};
+
+		loadLastProcessed();
+		// Recargar cuando cambie el estado de procesamiento
+	}, [isThumbnailProcessing]);
 
 	// Inicializar eventos SSE y cargar estadísticas iniciales
 	React.useEffect(() => {
@@ -339,10 +431,45 @@ export function ThumbnailsSection() {
 									transition={{ delay: 0.1 }}
 									className="space-y-1.5"
 								>
-									<Label className="text-sm">Miniaturas Pendientes</Label>
+									<div className="flex items-center justify-between">
+										<Label className="text-sm">Miniaturas</Label>
+										<Badge variant="secondary" className="text-xs">
+											{formatBytes(thumbnailStats.totalSize || 0)}
+										</Badge>
+									</div>
 									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
 										<span className="text-sm font-medium">
-											{thumbnailStats.pending}
+											{thumbnailStats.totalFiles || 0} totales
+										</span>
+										<span className="text-sm text-muted-foreground">
+											{thumbnailStats.pending} pendientes
+										</span>
+									</div>
+								</motion.div>
+
+								<motion.div
+									initial={{ opacity: 0, x: 20 }}
+									animate={{ opacity: 1, x: 0 }}
+									transition={{ delay: 0.2 }}
+									className="space-y-1.5"
+								>
+									<div className="flex items-center justify-between">
+										<Label className="text-sm">Estado</Label>
+										{thumbnailStats.errors.length > 0 && (
+											<Button
+												variant="ghost"
+												size="sm"
+												className="h-6 text-xs text-red-500 hover:text-red-600"
+												onClick={() => setShowErrors(true)}
+											>
+												<AlertCircle className="h-3.5 w-3.5 mr-1" />
+												Ver errores
+											</Button>
+										)}
+									</div>
+									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+										<span className="text-sm font-medium">
+											{thumbnailStats.errors.length} errores
 										</span>
 										<Badge
 											variant="secondary"
@@ -354,38 +481,6 @@ export function ThumbnailsSection() {
 										>
 											{thumbnailStats.pending === 0 ? "Al día" : "Pendiente"}
 										</Badge>
-									</div>
-								</motion.div>
-
-								<motion.div
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.1 }}
-									className="space-y-1.5"
-								>
-									<Label className="text-sm">Errores en Miniaturas</Label>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">
-											{thumbnailStats.errors.length}
-										</span>
-										{thumbnailStats.errors.length > 0 ? (
-											<Button
-												variant="ghost"
-												size="sm"
-												className="h-6 text-xs text-red-500 hover:text-red-600"
-												onClick={() => setShowErrors(true)}
-											>
-												<AlertCircle className="h-3.5 w-3.5 mr-1" />
-												Ver detalles
-											</Button>
-										) : (
-											<Badge
-												variant="secondary"
-												className="text-xs bg-green-500/20 text-green-500"
-											>
-												Sin errores
-											</Badge>
-										)}
 									</div>
 								</motion.div>
 							</>
@@ -430,56 +525,11 @@ export function ThumbnailsSection() {
 						>
 							<Label className="text-sm">Últimas Procesadas</Label>
 							<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
-								<AnimateSharedLayout>
+								<AnimatePresence>
 									{lastProcessedThumbnails.map((image, index) => (
-										<motion.div
-											key={image.id}
-											initial={{ opacity: 0, scale: 0.8 }}
-											animate={{ opacity: 1, scale: 1 }}
-											exit={{ opacity: 0, scale: 0.8 }}
-											transition={{ delay: index * 0.1 }}
-											className="relative aspect-square rounded-md overflow-hidden bg-muted group"
-											style={{
-												transform: `scale(${
-													image.processedAt ===
-													thumbnailProcessStatus.currentFile
-														? 1.05
-														: 1
-												})`,
-											}}
-										>
-											<Image
-												src={`/api/images/${image.id}/thumbnail`}
-												alt={image.path}
-												fill
-												className="object-cover transition-transform group-hover:scale-105"
-											/>
-											<motion.div
-												initial={{ opacity: 0 }}
-												whileHover={{ opacity: 1 }}
-												className="absolute inset-0 bg-black/60 p-1.5"
-											>
-												<p className="text-[10px] text-white truncate">
-													{image.path}
-												</p>
-												<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
-													{new Date(image.processedAt).toLocaleTimeString()}
-												</p>
-											</motion.div>
-										</motion.div>
+										<ThumbnailItem key={image.id} image={image} index={index} />
 									))}
-									{Array(9 - lastProcessedThumbnails.length)
-										.fill(0)
-										.map((_, i) => (
-											<motion.div
-												key={`empty-${i}`}
-												initial={{ opacity: 0 }}
-												animate={{ opacity: 1 }}
-												transition={{ delay: 0.3 + i * 0.1 }}
-												className="aspect-square rounded-md bg-muted/50"
-											/>
-										))}
-								</AnimateSharedLayout>
+								</AnimatePresence>
 							</div>
 						</motion.div>
 					)}

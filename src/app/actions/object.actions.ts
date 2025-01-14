@@ -266,7 +266,7 @@ export async function addImageToObject(objectId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('objects:modified');
     statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     objectLogger.info('✅ Imagen agregada al objeto');
     revalidateAllPaths();
@@ -291,7 +291,7 @@ export async function removeImageFromObject(objectId: string, imageId: string) {
     // Emitir eventos
     eventsService.emit('objects:modified');
     statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
     objectLogger.info('✅ Imagen removida del objeto');
     revalidateAllPaths();
