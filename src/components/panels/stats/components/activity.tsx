@@ -1,66 +1,50 @@
 "use client";
 
 import { memo } from "react";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icons } from "@/components/core/icons";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface ActivityProps {
 	activity: {
 		id: string;
 		type: string;
 		description: string;
-		timestamp: Date;
+		createdAt: Date;
+		image: {
+			id: string;
+			name: string;
+			thumbnail: Uint8Array | null;
+		} | null;
 	};
-	isLoading?: boolean;
 }
 
-export const Activity = memo(function Activity({
-	activity,
-	isLoading = false,
-}: ActivityProps) {
-	if (isLoading) {
-		return (
-			<div className="flex items-center gap-3 py-1.5 px-2">
-				<Skeleton className="h-8 w-8 rounded-full" />
-				<div className="space-y-1.5 flex-1">
-					<Skeleton className="h-4 w-3/4" />
-					<Skeleton className="h-3 w-1/4" />
-				</div>
-			</div>
-		);
-	}
-
-	const getIcon = (type: string) => {
-		switch (type) {
-			case "view":
-				return "Eye";
-			case "download":
-				return "Download";
-			case "favorite":
-				return "Star";
-			case "tag":
-				return "Tag";
-			case "collection":
-				return "Bookmark";
-			case "album":
-				return "Album";
-			default:
-				return "Activity";
-		}
-	};
-
-	const Icon = Icons[getIcon(activity.type)];
-	const timeAgo = new Date(activity.timestamp).toLocaleDateString();
-
+export const Activity = memo(function Activity({ activity }: ActivityProps) {
 	return (
-		<div className="flex items-center gap-3 py-1.5 px-2 rounded-sm hover:bg-muted/50 transition-colors">
-			<div className="p-2 rounded-full bg-primary/10">
-				<Icon className="h-4 w-4 text-primary" />
-			</div>
-			<div className="flex-1 min-w-0">
-				<p className="text-sm line-clamp-1">{activity.description}</p>
-				<p className="text-xs text-muted-foreground">{timeAgo}</p>
+		<div className="flex items-center justify-between py-1.5">
+			<div className="flex items-center gap-2">
+				<Avatar className="h-8 w-8">
+					{activity.image?.thumbnail && (
+						<AvatarImage
+							src={`data:image/jpeg;base64,${Buffer.from(
+								activity.image.thumbnail
+							).toString("base64")}`}
+							alt={activity.image.name}
+						/>
+					)}
+					<AvatarFallback>
+						{activity.image?.name.charAt(0).toUpperCase() || "?"}
+					</AvatarFallback>
+				</Avatar>
+				<div className="space-y-1">
+					<p className="text-sm">{activity.description}</p>
+					<p className="text-xs text-muted-foreground">
+						{formatDistanceToNow(new Date(activity.createdAt), {
+							addSuffix: true,
+							locale: es,
+						})}
+					</p>
+				</div>
 			</div>
 		</div>
 	);

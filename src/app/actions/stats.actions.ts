@@ -1,112 +1,220 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 
-export async function getSystemStats() {
+const STATS_CACHE_TAG = 'stats'
+const STATS_REVALIDATE_SECONDS = 60 // 1 minuto
+
+export interface GeneralStats {
+  totalImages: number
+  totalFolders: number
+  totalTags: number
+  totalCollections: number
+  totalAlbums: number
+  totalCharacters: number
+  totalPlaces: number
+  totalObjects: number
+  totalFavorites: number
+  totalViews: number
+  totalDownloads: number
+  totalSize: number
+  totalActivities: number
+  topTags: Array<{
+    id: string
+    name: string
+    color: string
+    count: number
+  }>
+  recentActivity: Array<{
+    id: string
+    type: string
+    description: string
+    createdAt: Date
+    image: {
+      id: string
+      name: string
+      thumbnail: Uint8Array | null
+    } | null
+  }>
+}
+
+export const getSystemStats = unstable_cache(
+  async () => {
+    try {
+      const [
+        totalImages,
+        totalFolders,
+        totalCollections,
+        totalTags,
+        totalAlbums,
+        totalCharacters,
+        totalPlaces,
+        totalObjects,
+        totalFavorites,
+        totalActivities,
+        totalSize,
+        totalViews,
+        totalDownloads,
+        topTags,
+        recentActivity,
+      ] = await Promise.all([
+        prisma.image.count(),
+        prisma.folder.count(),
+        prisma.collection.count(),
+        prisma.tag.count(),
+        prisma.album.count(),
+        prisma.character.count(),
+        prisma.place.count(),
+        prisma.object.count(),
+        prisma.favorite.count(),
+        prisma.activity.count(),
+        prisma.folder.aggregate({
+          _sum: {
+            totalSize: true,
+          },
+        }),
+        prisma.imageStats.aggregate({
+          _sum: {
+            views: true,
+          },
+        }),
+        prisma.imageStats.aggregate({
+          _sum: {
+            downloads: true,
+          },
+        }),
+        prisma.tag.findMany({
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            _count: {
+              select: {
+                images: true,
+              },
+            },
+          },
+          orderBy: {
+            images: {
+              _count: "desc",
+            },
+          },
+          take: 5,
+        }),
+        prisma.activity.findMany({
+          select: {
+            id: true,
+            type: true,
+            description: true,
+            createdAt: true,
+            image: {
+              select: {
+                id: true,
+                name: true,
+                thumbnail: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 5,
+        }),
+      ]);
+
+      return {
+        totalImages,
+        totalFolders,
+        totalCollections,
+        totalTags,
+        totalAlbums,
+        totalCharacters,
+        totalPlaces,
+        totalObjects,
+        totalFavorites,
+        totalActivities,
+        totalSize: totalSize._sum.totalSize || 0,
+        totalViews: totalViews._sum.views || 0,
+        totalDownloads: totalDownloads._sum.downloads || 0,
+        topTags: topTags.map((tag) => ({
+          ...tag,
+          count: tag._count.images,
+        })),
+        recentActivity,
+      } satisfies GeneralStats;
+    } catch (error) {
+      console.error("Error getting system stats:", error);
+      throw new Error("Failed to get system stats");
+    }
+  },
+  ['system-stats'],
+  {
+    revalidate: STATS_REVALIDATE_SECONDS,
+    tags: [STATS_CACHE_TAG],
+  }
+)
+
+export async function invalidateStats() {
+  revalidatePath('/stats')
+}
+
+export async function getImageStats(imageId: string) {
   try {
-    const [
-      totalImages,
-      totalFolders,
-      totalCollections,
-      totalTags,
-      totalAlbums,
-      totalCharacters,
-      totalPlaces,
-      totalObjects,
-      totalFavorites,
-      totalActivities,
-      totalSize,
-      totalViews,
-      totalDownloads,
-      topTags,
-      recentActivity,
-    ] = await Promise.all([
-      prisma.image.count(),
-      prisma.folder.count(),
-      prisma.collection.count(),
-      prisma.tag.count(),
-      prisma.album.count(),
-      prisma.character.count(),
-      prisma.place.count(),
-      prisma.object.count(),
-      prisma.favorite.count(),
-      prisma.activity.count(),
-      prisma.folder.aggregate({
-        _sum: {
-          totalSize: true,
-        },
-      }),
-      prisma.imageStats.aggregate({
-        _sum: {
-          views: true,
-        },
-      }),
-      prisma.imageStats.aggregate({
-        _sum: {
-          downloads: true,
-        },
-      }),
-      prisma.tag.findMany({
-        select: {
-          id: true,
-          name: true,
-          color: true,
-          _count: {
-            select: {
-              images: true,
-            },
-          },
-        },
-        orderBy: {
-          images: {
-            _count: "desc",
-          },
-        },
-        take: 5,
-      }),
-      prisma.activity.findMany({
-        select: {
-          id: true,
-          type: true,
-          description: true,
-          createdAt: true,
-          image: {
-            select: {
-              id: true,
-              name: true,
-              thumbnail: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5,
-      }),
-    ]);
+    let stats = await prisma.imageStats.findUnique({
+      where: { imageId },
+    })
 
-    return {
-      totalImages,
-      totalFolders,
-      totalCollections,
-      totalTags,
-      totalAlbums,
-      totalCharacters,
-      totalPlaces,
-      totalObjects,
-      totalFavorites,
-      totalActivities,
-      totalSize: totalSize._sum.totalSize || 0,
-      totalViews: totalViews._sum.views || 0,
-      totalDownloads: totalDownloads._sum.downloads || 0,
-      topTags: topTags.map((tag) => ({
-        ...tag,
-        count: tag._count.images,
-      })),
-      recentActivity,
-    };
+    if (!stats) {
+      stats = await prisma.imageStats.create({
+        data: {
+          imageId,
+          views: 0,
+          downloads: 0,
+          lastViewed: new Date(),
+        },
+      })
+    }
+
+    return stats
   } catch (error) {
-    console.error("Error getting system stats:", error);
-    throw new Error("Failed to get system stats");
+    console.error('Error getting image stats:', error)
+    throw new Error('Failed to get image stats')
+  }
+}
+
+export async function incrementImageView(imageId: string) {
+  try {
+    const stats = await prisma.imageStats.update({
+      where: { imageId },
+      data: {
+        views: { increment: 1 },
+        lastViewed: new Date(),
+      },
+    })
+
+    revalidatePath('/stats')
+    return stats
+  } catch (error) {
+    console.error('Error incrementing image view:', error)
+    throw new Error('Failed to increment image view')
+  }
+}
+
+export async function incrementImageDownload(imageId: string) {
+  try {
+    const stats = await prisma.imageStats.update({
+      where: { imageId },
+      data: {
+        downloads: { increment: 1 },
+      },
+    })
+
+    revalidatePath('/stats')
+    return stats
+  } catch (error) {
+    console.error('Error incrementing image download:', error)
+    throw new Error('Failed to increment image download')
   }
 }

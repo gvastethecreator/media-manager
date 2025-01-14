@@ -5,7 +5,10 @@ import { MainLayout } from "@/components/layout/main-layout";
 export default function Home() {
 	return (
 		<main className="h-[100vh] w-full overflow-hidden">
-			<MainLayout />
+			<div className="h-full w-full">
+				<MainLayout> 
+				</MainLayout>
+			</div>
 		</main>
 	);
 }
