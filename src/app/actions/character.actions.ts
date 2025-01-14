@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import type { Character } from '@prisma/client'
+import { eventsService } from '@/services/events.service'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const characterLogger = logger.withContext('CharacterActions')
 
@@ -150,6 +152,11 @@ export async function createCharacter(data: CharacterCreate) {
         filters: data.filters || '[]',
       },
     });
+
+    // Emitir eventos
+    eventsService.emit('characters:modified');
+    statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+
     characterLogger.info('✅ Personaje creado:', character.name);
     revalidateAllPaths();
     return character;
@@ -185,6 +192,11 @@ export async function deleteCharacter(id: string) {
     await prisma.character.delete({
       where: { id },
     });
+
+    // Emitir eventos
+    eventsService.emit('characters:modified');
+    statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+
     characterLogger.info('✅ Personaje eliminado');
     revalidateAllPaths();
   } catch (error) {
@@ -239,16 +251,20 @@ export async function getCharacterImages(id: string) {
 export async function addImageToCharacter(characterId: string, imageId: string) {
   try {
     characterLogger.info('➕ Agregando imagen a personaje:', { characterId, imageId });
-    await prisma.character.update({
-      where: { id: characterId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
+        characters: {
+          connect: { id: characterId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('characters:modified');
+    statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     characterLogger.info('✅ Imagen agregada al personaje');
     revalidateAllPaths();
   } catch (error) {
@@ -260,16 +276,20 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 export async function removeImageFromCharacter(characterId: string, imageId: string) {
   try {
     characterLogger.info('➖ Removiendo imagen de personaje:', { characterId, imageId });
-    await prisma.character.update({
-      where: { id: characterId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          disconnect: {
-            id: imageId,
-          },
-        },
-      },
+        characters: {
+          disconnect: { id: characterId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('characters:modified');
+    statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     characterLogger.info('✅ Imagen removida del personaje');
     revalidateAllPaths();
   } catch (error) {

@@ -166,7 +166,7 @@ export async function createFolder(path: string) {
     // Emitir eventos
     eventsService.emit('folders:modified');
     statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+
     revalidateAllPaths();
 
     return folder;
@@ -205,7 +205,8 @@ export async function deleteFolder(id: string) {
     eventsService.emit('folders:modified');
     eventsService.emit('files:modified');
     statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     revalidateAllPaths();
   } catch (error) {
     folderLogger.error("❌ Error al eliminar carpeta:", error);
@@ -375,6 +376,9 @@ export async function indexFolder(id: string): Promise<FolderResponse> {
     // Emitir eventos
     eventsService.emit('files:modified');
     eventsService.emit('folders:modified');
+    statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     revalidateAllPaths();
 
     folderLogger.info('Procesamiento completado:', { processed, total });
@@ -555,6 +559,9 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
     // Emitir eventos
     eventsService.emit('files:modified');
     eventsService.emit('folders:modified');
+    statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     revalidateAllPaths();
 
     folderLogger.info('Procesamiento completado:', { processed, total });

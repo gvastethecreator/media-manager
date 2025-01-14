@@ -158,6 +158,31 @@
 - [ ] Índices y relaciones
 - [ ] Manejo de transacciones
 
+### Nav Panel Service 🚧
+
+- [x] Implementación de acciones del servidor
+  - [x] Consolidación de datos de navegación
+  - [x] Optimización de consultas
+  - [x] Sistema de caché
+- [x] Migración a Server Components
+  - [x] Separación de lógica cliente/servidor
+  - [x] Implementación de loading states
+  - [x] Optimización de revalidación
+- [ ] Optimización de stores
+  - [ ] Reducción de estado cliente
+  - [ ] Implementación de React Query/SWR
+  - [ ] Manejo eficiente de actualizaciones
+- [ ] Mejoras de rendimiento
+  - [ ] Implementación de Suspense
+  - [ ] Lazy loading de componentes
+  - [ ] Optimización de re-renders
+
+## Problemas Pendientes
+
+- [ ] Resolver problemas de importación con el logger
+- [ ] Configurar correctamente las rutas de alias en tsconfig.json
+- [ ] Optimizar el sistema de logging para server actions
+
 ## Notas Adicionales
 
 - Se ha completado la migración del servicio de carpetas con todas sus funcionalidades
@@ -170,3 +195,10 @@
 - Se ha optimizado la revalidación de rutas para mantener la UI actualizada
 - Se han eliminado los endpoints API antiguos que ya no se utilizan
 - Se ha actualizado el componente FoldersSection para usar server actions directamente
+- Se ha implementado el nuevo sistema de navegación con Server Components
+- Se ha optimizado la carga inicial de datos
+- Se ha mejorado el manejo de estados y revalidación
+- Se ha implementado un skeleton loader para mejor UX
+- Se ha corregido el error de Server Actions async
+- Pendiente optimizar los stores y el rendimiento general
+- Temporalmente usando console.log para logging mientras se resuelve el problema de importación
