@@ -8,6 +8,7 @@ import { promises as fs } from 'fs'
 import { imageConfig } from '@/config'
 import { logger } from '@/lib/logger'
 import { ThumbnailQuality } from '@/types/thumbnails'
+import { getImageMetadata as getMetadata } from '@/lib/metadata'
 
 const imageLogger = logger.withContext('ImageService')
 
@@ -222,6 +223,46 @@ class ImageService {
     } catch (error) {
       imageLogger.error('Error leyendo imagen original', { imageId, error });
       throw new Error('Error al leer la imagen original');
+    }
+  }
+
+  async getImageMetadata(path: string) {
+    try {
+      return await getMetadata(path)
+    } catch (error) {
+      imageLogger.error('Error getting image metadata:', { path, error })
+      throw error
+    }
+  }
+
+  async createBasicThumbnail(path: string, options: {
+    width?: number
+    height?: number
+    quality?: number
+  } = {}) {
+    const {
+      width = 200,
+      height = 200,
+      quality = 80
+    } = options
+
+    try {
+      const imageBuffer = await sharp(path)
+        .resize(width, height, {
+          fit: 'cover',
+          position: 'centre'
+        })
+        .webp({ quality })
+        .toBuffer()
+
+      return {
+        buffer: imageBuffer,
+        size: imageBuffer.length,
+        format: 'webp'
+      }
+    } catch (error) {
+      imageLogger.error('Error creating basic thumbnail:', { path, error })
+      throw error
     }
   }
 
