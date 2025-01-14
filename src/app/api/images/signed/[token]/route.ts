@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-import { getOriginalImage } from '@/app/actions/image.actions'
+import { verifySignedToken } from '@/app/actions/image.actions'
 
 export async function GET(
   request: NextRequest,
@@ -9,18 +8,8 @@ export async function GET(
   try {
     const { token } = context.params
 
-    // Verificar token
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'your-secret-key')
-    )
-
-    if (!payload.imageId || typeof payload.imageId !== 'string') {
-      return new NextResponse('Token inválido', { status: 401 })
-    }
-
-    // Obtener imagen
-    const { buffer, mimeType } = await getOriginalImage(payload.imageId)
+    // Verificar token y obtener imagen
+    const { buffer, mimeType } = await verifySignedToken(token)
 
     // Configurar headers de caché
     const response = new NextResponse(buffer, {

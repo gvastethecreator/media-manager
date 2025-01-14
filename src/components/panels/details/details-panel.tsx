@@ -51,6 +51,8 @@ const getMetadata = (metadata: string | null) => {
 	}
 };
 
+const isLocalFile = (url: string) => url.startsWith("file://");
+
 export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const [imageError, setImageError] = React.useState(false);
 	const [isMarked, setIsMarked] = React.useState(false);
