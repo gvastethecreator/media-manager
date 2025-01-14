@@ -1,250 +1,172 @@
 # Progreso de la Migración a Server Actions
 
-## Fase 1: Migración de Servicios Simples
+## Servicios Completados
 
 ### Stats Service ✅
 
-- [x] Creado archivo `src/app/actions/stats.actions.ts`
-- [x] Implementadas funciones:
-  - `getGeneralStats`
-  - `getImageStats`
-  - `incrementImageView`
-  - `incrementImageDownload`
-- [x] Agregado manejo de errores personalizado
-- [x] Agregado logging detallado
-- [x] Implementada revalidación de rutas
-- [x] Integrado con eventos del sistema
+- [x] Implementación de acciones del servidor
+- [x] Migración de endpoints a server actions
+- [x] Manejo de errores y logging
+- [x] Revalidación de rutas
 
 ### Favorite Service ✅
 
-- [x] Creado archivo `src/app/actions/favorite.actions.ts`
-- [x] Implementadas funciones:
-  - `addToFavorites`
-  - `removeFromFavorites`
-  - `getFavorites`
-  - `isFavorited`
-  - `toggleFavorite`
-  - `getRecentFavorites`
-- [x] Agregado manejo de errores personalizado
-- [x] Agregado logging detallado
-- [x] Implementada revalidación de rutas
-- [x] Integrado con eventos del sistema
-- [x] Eliminado servicio antiguo y endpoints API
+- [x] Implementación de acciones del servidor
+- [x] Migración de endpoints a server actions
+- [x] Manejo de errores y logging
+- [x] Revalidación de rutas
 
 ### Tag Service ✅
 
-- [x] Creado archivo `src/app/actions/tag.actions.ts`
-- [x] Implementadas funciones:
-  - `getTags`
-  - `getTag`
-  - `createTag`
-  - `updateTag`
-  - `deleteTag`
-  - `getTagImages`
-  - `addImageToTag`
-  - `removeImageFromTag`
-- [x] Agregado manejo de errores personalizado
-- [x] Agregado logging detallado
-- [x] Implementada revalidación de rutas
-- [x] Integrado con eventos del sistema
-- [x] Eliminado servicio antiguo y endpoints API
+- [x] Implementación de acciones del servidor
+- [x] Migración de endpoints a server actions
+- [x] Manejo de errores y logging
+- [x] Revalidación de rutas
 
 ### Collections Service ✅
 
-- [x] Creado archivo `src/app/actions/collection.actions.ts`
-- [x] Implementadas funciones:
-  - `getCollections`
-  - `getCollection`
-  - `createCollection`
-  - `updateCollection`
-  - `deleteCollection`
-  - `addImageToCollection`
-  - `removeImageFromCollection`
-  - `getCollectionImages`
-  - `getCollectionStats`
-  - `updateCollectionStats`
-- [x] Creado servicio de eventos específico para colecciones
-- [x] Agregado manejo de errores personalizado
-- [x] Agregado logging detallado
-- [x] Implementada revalidación de rutas
-- [x] Integrado con eventos del sistema
-- [x] Eliminado servicio antiguo y endpoints API
+- [x] Implementación de acciones del servidor
+- [x] Migración de endpoints a server actions
+- [x] Manejo de errores y logging
+- [x] Revalidación de rutas
 
 ### Album Service ✅
 
-- [x] Creado archivo `src/app/actions/album.actions.ts`
-- [x] Implementadas funciones:
-  - `getAlbums`
-  - `getAlbum`
-  - `createAlbum`
-  - `updateAlbum`
-  - `deleteAlbum`
-  - `getAlbumImages`
-  - `addImageToAlbum`
-  - `removeImageFromAlbum`
-- [x] Agregado manejo de errores personalizado
-- [x] Agregado logging detallado
-- [x] Implementada revalidación de rutas
-- [x] Integrado con eventos del sistema
-- [x] Eliminado servicio antiguo y endpoints API
+- [x] Implementación de acciones del servidor
+- [x] Migración de endpoints a server actions
+- [x] Manejo de errores y logging
+- [x] Revalidación de rutas
 
-## Fase 2: Migración de Servicios Complejos
+### Folder Service ✅
+
+- [x] Implementación de acciones del servidor
+  - [x] Creación de carpetas
+  - [x] Obtención de carpetas
+  - [x] Actualización de carpetas
+  - [x] Eliminación de carpetas
+  - [x] Indexación de carpetas
+  - [x] Reindexación de carpetas
+  - [x] Obtención de imágenes de carpetas
+- [x] Migración de endpoints a server actions
+  - [x] GET /api/folders
+  - [x] POST /api/folders
+  - [x] GET /api/folders/[id]
+  - [x] PUT /api/folders/[id]
+  - [x] DELETE /api/folders/[id]
+  - [x] POST /api/folders/[id]/index
+  - [x] POST /api/folders/[id]/reindex
+  - [x] GET /api/folders/[id]/images
+- [x] Manejo de errores y logging
+  - [x] Implementación de FolderError personalizado
+  - [x] Logging detallado de operaciones
+  - [x] Manejo de errores específicos
+- [x] Revalidación de rutas
+  - [x] Configuración de rutas a revalidar
+  - [x] Implementación de revalidación automática
+- [x] Optimizaciones
+  - [x] Procesamiento de archivos mejorado
+  - [x] Manejo eficiente de thumbnails
+  - [x] Gestión de metadatos
+  - [x] Eventos del sistema
+- [x] Actualización de componentes
+  - [x] Migración de FoldersSection a server actions
+  - [x] Manejo de estados y eventos
+  - [x] Integración con el sistema de eventos
+  - [x] Optimización de recargas y revalidaciones
 
 ### Image Service ✅
 
-- [x] Consolidar funcionalidades duplicadas:
-  - [x] Migrar funciones útiles de `src/lib/image.server.ts`
-  - [x] Eliminar `src/lib/image.service.ts` (duplicado)
-- [x] Migrar funciones del servicio principal a server actions:
-  - [x] `getImageUrl`
-  - [x] `getOriginalImage`
-  - [x] `getThumbnail`
-  - [x] `generateThumbnail`
-  - [x] `updateImageStats`
-  - [x] `createImage`
-  - [x] `processImage`
-  - [x] `optimizeThumbnail`
-  - [x] `cleanupThumbnails`
-  - [x] `getImages`
-  - [x] `getThumbnailStats`
-  - [x] `reprocessThumbnails`
-  - [x] `updateImage`
-  - [x] `updateFavoriteStatus`
-  - [x] `getFavoriteImages`
-  - [x] `getImage`
-  - [x] `generateSignedUrl`
-  - [x] `verifySignedToken`
-- [x] Eliminar endpoints API redundantes:
-  - [x] `/api/images/[id]/original`
-  - [x] `/api/images/[id]/thumbnail`
-  - [x] `/api/images/[id]/preview`
-  - [x] `/api/images/temp/[id]`
-  - [x] `/api/images/route.ts`
-  - [x] `/api/images/all`
-  - [x] `/api/images/thumbnail-stats`
-  - [x] `/api/images/reprocess-thumbnails`
-  - [x] `/api/images/[id]/favorite`
-  - [x] `/api/images/[id]`
-  - [x] `/api/images/favorites/all`
-  - [x] `/api/images/signed/[token]` (parcialmente - mantenido para servir imágenes)
-- [x] Agregar manejo de errores personalizado
-- [x] Agregar logging detallado
-- [x] Implementar revalidación de rutas
-- [x] Integrar con eventos del sistema
+- [x] Implementación de acciones del servidor
+  - [x] Obtención de imágenes
+  - [x] Obtención de imagen individual
+  - [x] Actualización de imagen
+  - [x] Eliminación de imagen
+  - [x] Procesamiento de imagen
+  - [x] Generación de URL firmada
+  - [x] Verificación de token
+  - [x] Manejo de favoritos
+  - [x] Estadísticas de imagen
+- [x] Migración de endpoints a server actions
+  - [x] GET /api/images
+  - [x] GET /api/images/[id]
+  - [x] PUT /api/images/[id]
+  - [x] DELETE /api/images/[id]
+  - [x] GET /api/images/[id]/original
+  - [x] GET /api/images/[id]/thumbnail
+  - [x] GET /api/images/[id]/preview
+  - [x] POST /api/images/[id]/favorite
+  - [x] GET /api/images/favorites
+  - [x] GET /api/images/signed/[token]
+- [x] Manejo de errores y logging
+  - [x] Implementación de ImageError personalizado
+  - [x] Logging detallado de operaciones
+  - [x] Manejo de errores específicos
+- [x] Revalidación de rutas
+  - [x] Configuración de rutas a revalidar
+  - [x] Implementación de revalidación automática
+- [x] Optimizaciones
+  - [x] Procesamiento de imágenes mejorado
+  - [x] Manejo eficiente de thumbnails
+  - [x] Gestión de metadatos
+  - [x] Sistema de caché
+  - [x] Eventos del sistema
 
-### Folder Service 🚧
-
-- [ ] Crear archivo `src/app/actions/folders.actions.ts`
-- [ ] Implementar funciones:
-  - [ ] `getFolders`
-  - [ ] `getFolder`
-  - [ ] `createFolder`
-  - [ ] `updateFolder`
-  - [ ] `deleteFolder`
-  - [ ] `indexFolder`
-  - [ ] `scanFolder`
-- [ ] Agregar manejo de errores personalizado
-- [ ] Agregar logging detallado
-- [ ] Implementar revalidación de rutas
-- [ ] Integrar con eventos del sistema
+## Servicios en Progreso
 
 ### Thumbnail Service 🚧
 
-- [ ] Crear archivo `src/app/actions/thumbnails.actions.ts`
-- [ ] Implementar funciones:
-  - [ ] `generateThumbnail`
-  - [ ] `optimizeThumbnail`
-  - [ ] `cleanThumbnails`
-- [ ] Agregar manejo de errores personalizado
-- [ ] Agregar logging detallado
-- [ ] Implementar revalidación de rutas
-- [ ] Integrar con eventos del sistema
+- [ ] Implementación de acciones del servidor
+  - [ ] Generación de thumbnails
+  - [ ] Optimización de thumbnails
+  - [ ] Limpieza de thumbnails
+  - [ ] Reindexación de thumbnails
+- [ ] Migración de endpoints a server actions
+  - [ ] POST /api/thumbnails/generate
+  - [ ] POST /api/thumbnails/optimize
+  - [ ] POST /api/thumbnails/clean
+  - [ ] POST /api/thumbnails/reindex
+- [ ] Manejo de errores y logging
+  - [ ] Implementación de ThumbnailError personalizado
+  - [ ] Logging detallado de operaciones
+  - [ ] Manejo de errores específicos
+- [ ] Revalidación de rutas
+  - [ ] Configuración de rutas a revalidar
+  - [ ] Implementación de revalidación automática
+- [ ] Optimizaciones
+  - [ ] Procesamiento en segundo plano
+  - [ ] Sistema de cola de trabajos
+  - [ ] Caché de thumbnails
+  - [ ] Eventos del sistema
 
-### Optimización del Servicio de Imágenes 🚧
+## Optimizaciones Pendientes
 
-- [x] Simplificar el manejo de imágenes locales:
-  - [x] Eliminar dependencia de jose para URLs firmadas
-  - [x] Implementar acceso directo a archivos locales
-  - [x] Optimizar el proceso de servir imágenes
-  - [x] Mantener thumbnails pero simplificar su generación
-- [x] Actualizar componentes relacionados:
-  - [x] Modificar `details-panel.tsx`
-  - [x] Actualizar `file-viewer.tsx`
-  - [x] Optimizar `file-viewer-card.tsx`
-  - [x] Mejorar `advanced-file-viewer.tsx`
-- [x] Implementar nueva estrategia de carga de imágenes:
-  - [x] Crear función directa para obtener rutas de archivo
-  - [x] Optimizar el proceso de carga de imágenes
-  - [x] Mejorar el manejo de caché
-  - [x] Implementar fallbacks para casos de error
-- [ ] Documentación y pruebas:
-  - [ ] Actualizar documentación de funciones
-  - [ ] Agregar ejemplos de uso
-  - [ ] Implementar pruebas de rendimiento
-  - [ ] Validar en diferentes escenarios
+### Sistema de Archivos Local
 
-### Integración con Sistema de Archivos Local 🚧
+- [ ] Optimización de lectura/escritura
+- [ ] Manejo de permisos
+- [ ] Gestión de caché
 
-- [x] Optimizar manejo de rutas de Windows:
-  - [x] Implementar normalización de rutas
-  - [x] Manejar correctamente unidades de disco
-  - [x] Validar permisos de acceso
-- [x] Mejorar rendimiento de carga:
-  - [x] Implementar streaming de imágenes grandes
-  - [x] Optimizar generación de thumbnails
-  - [x] Mejorar caché de archivos locales
-- [x] Actualizar visor de imágenes:
-  - [x] Integrar nuevo sistema de rutas
-  - [x] Mejorar manejo de errores
-  - [x] Optimizar carga de previsualizaciones
-  - [x] Implementar precarga de imágenes adyacentes
-  - [x] Agregar estados de carga y error
-  - [x] Mejorar UX con animaciones y transiciones
-- [ ] Pruebas y validación:
-  - [ ] Verificar compatibilidad con Windows 11
-  - [ ] Probar diferentes tipos de archivos
-  - [ ] Validar rendimiento con archivos grandes
+### Procesamiento de Imágenes
 
-### Mejoras Implementadas en el Visor de Imágenes 🆕
+- [ ] Optimización de generación de thumbnails
+- [ ] Procesamiento en segundo plano
+- [ ] Caché de resultados
 
-1. Manejo de Rutas Locales:
+### Base de Datos
 
-   - Normalización de rutas de Windows
-   - Codificación segura de caracteres especiales
-   - Validación de permisos de acceso
-   - Manejo de unidades de disco Windows
-
-2. Optimización de Rendimiento:
-
-   - Sistema de precarga de imágenes adyacentes
-   - Caché de imágenes cargadas
-   - Carga progresiva con estados visuales
-   - Optimización de thumbnails
-
-3. Mejoras en la Interfaz:
-
-   - Estados de carga mejorados
-   - Fallbacks para errores
-   - Animaciones suaves
-   - Mejor feedback visual
-
-4. Funcionalidades Agregadas:
-
-   - Zoom con gestos
-   - Navegación con teclado
-   - Copiar y descargar imágenes
-   - Vista previa de miniaturas
-
-5. Próximos Pasos:
-   - Implementar pruebas exhaustivas
-   - Optimizar para diferentes tipos de archivos
-   - Mejorar manejo de archivos grandes
-   - Documentar funcionalidades
+- [ ] Optimización de consultas
+- [ ] Índices y relaciones
+- [ ] Manejo de transacciones
 
 ## Notas Adicionales
 
-- Se ha creado un sistema de eventos específico para colecciones que podría servir como modelo para otros servicios
-- Se está utilizando el nuevo sistema de Server Actions de Next.js 14
-- Se ha implementado un sistema robusto de logging y manejo de errores
-- Se está utilizando revalidación de rutas para mantener la UI actualizada
-- Se están migrando los servicios gradualmente, empezando por los más simples
+- Se ha completado la migración del servicio de carpetas con todas sus funcionalidades
+- Se ha completado la migración del servicio de imágenes con optimizaciones
+- Se han implementado mejoras en el manejo de errores y logging
+- Se ha optimizado el proceso de indexación y reindexación
+- Se han agregado eventos del sistema para mejor integración
+- Se ha mejorado el sistema de caché y procesamiento de imágenes
+- Se ha implementado un sistema robusto de manejo de errores personalizado
+- Se ha optimizado la revalidación de rutas para mantener la UI actualizada
+- Se han eliminado los endpoints API antiguos que ya no se utilizan
+- Se ha actualizado el componente FoldersSection para usar server actions directamente
