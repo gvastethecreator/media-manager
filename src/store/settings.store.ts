@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { logger } from '../lib/logger'
 import {
   AppSettings,
   Profile,
@@ -8,13 +9,12 @@ import {
   Folder,
   ThumbnailSettings,
   SystemSettings,
-  ThemeMode,
-  Language,
-  ThumbnailQuality,
-  SortMode,
+  ViewSettings,
+  ShortcutSettings,
   DEFAULT_SETTINGS
 } from '@/types/settings'
 
+// Estado base para settings
 interface SettingsState extends AppSettings {
   // Acciones generales
   updateSettings: (settings: Partial<AppSettings>) => void
@@ -37,259 +37,190 @@ interface SettingsState extends AppSettings {
   updateFolder: (id: string | null, folder: Partial<Folder>) => void
   deleteFolder: (id: string) => void
 
-  // Acciones de miniaturas
+  // Acciones de configuración
+  updateViewSettings: (settings: Partial<ViewSettings>) => void
   updateThumbnailSettings: (settings: Partial<ThumbnailSettings>) => void
-
-  // Acciones de sistema
   updateSystemSettings: (settings: Partial<SystemSettings>) => void
-
-  // Acciones de atajos
-  updateShortcut: (action: string, keys: string) => void
-  deleteShortcut: (action: string) => void
+  updateShortcuts: (shortcuts: Partial<ShortcutSettings>) => void
 }
 
+const settingsLogger = logger.withContext('SettingsStore')
+
+// Función para filtrar valores undefined de los shortcuts
+function filterUndefinedValues(obj: Record<string, string | undefined>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, value]) => value !== undefined)
+  ) as Record<string, string>;
+}
+
+// Crear store con persistencia
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
-      ...DEFAULT_SETTINGS,
+    (set, get) => ({
+      // Estado inicial
+      ...DEFAULT_SETTINGS as AppSettings,
 
       // Acciones generales
-      updateSettings: (newSettings) =>
+      updateSettings: (settings) => {
+        settingsLogger.info('Actualizando configuración general', { settings })
         set((state) => ({
           ...state,
-          ...newSettings,
+          ...settings,
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
-      resetSettings: () =>
-        set(() => ({
-          ...DEFAULT_SETTINGS,
-          lastUpdate: new Date().toISOString()
-        })),
+      resetSettings: () => {
+        settingsLogger.info('Restaurando configuración por defecto')
+        set({ ...DEFAULT_SETTINGS as AppSettings, lastUpdate: new Date().toISOString() })
+      },
 
       // Acciones de perfil
-      updateProfile: (id, profile) =>
-        set((state) => {
-          if (id === null) {
-            // Crear nuevo perfil
-            const newProfile: Profile = {
-              id: crypto.randomUUID(),
-              name: profile.name || 'Nuevo Perfil',
-              emoji: profile.emoji || '👤',
-              color: profile.color || '#3b82f6',
-              theme: profile.theme || 'system',
-              language: profile.language || 'es',
-              isActive: false,
-              ...profile
-            }
-            return {
-              ...state,
-              profiles: [...state.profiles, newProfile],
-              lastUpdate: new Date().toISOString()
-            }
-          }
+      updateProfile: (id, profile) => {
+        settingsLogger.info('Actualizando perfil', { id, profile })
+        set((state) => ({
+          ...state,
+          profiles: id
+            ? state.profiles.map((p) => (p.id === id ? { ...p, ...profile } : p))
+            : [...state.profiles, { id: crypto.randomUUID(), ...profile } as Profile],
+          lastUpdate: new Date().toISOString()
+        }))
+      },
 
-          // Actualizar perfil existente
-          return {
-            ...state,
-            profiles: state.profiles.map((p) =>
-              p.id === id ? { ...p, ...profile } : p
-            ),
-            lastUpdate: new Date().toISOString()
-          }
-        }),
-
-      setActiveProfile: (id) =>
+      setActiveProfile: (id) => {
+        settingsLogger.info('Cambiando perfil activo', { id })
         set((state) => ({
           ...state,
           activeProfile: id,
-          profiles: state.profiles.map((p) => ({
-            ...p,
-            isActive: p.id === id
-          })),
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
-      deleteProfile: (id) =>
+      deleteProfile: (id) => {
+        settingsLogger.info('Eliminando perfil', { id })
         set((state) => ({
           ...state,
           profiles: state.profiles.filter((p) => p.id !== id),
+          activeProfile: state.activeProfile === id ? null : state.activeProfile,
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
       // Acciones de colección
-      updateCollection: (id, collection) =>
-        set((state) => {
-          if (id === null) {
-            // Crear nueva colección
-            const newCollection: Collection = {
-              id: crypto.randomUUID(),
-              name: collection.name || 'Nueva Colección',
-              emoji: collection.emoji || '📁',
-              color: collection.color || '#3b82f6',
-              sortBy: 'name' as SortMode,
-              sortDirection: 'asc',
-              filters: [],
-              count: 0,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              ...collection
-            }
-            return {
-              ...state,
-              collections: [...state.collections, newCollection],
-              lastUpdate: new Date().toISOString()
-            }
-          }
+      updateCollection: (id, collection) => {
+        settingsLogger.info('Actualizando colección', { id, collection })
+        set((state) => ({
+          ...state,
+          collections: id
+            ? state.collections.map((c) => (c.id === id ? { ...c, ...collection } : c))
+            : [...state.collections, { id: crypto.randomUUID(), ...collection } as Collection],
+          lastUpdate: new Date().toISOString()
+        }))
+      },
 
-          // Actualizar colección existente
-          return {
-            ...state,
-            collections: state.collections.map((c) =>
-              c.id === id ? { ...c, ...collection } : c
-            ),
-            lastUpdate: new Date().toISOString()
-          }
-        }),
-
-      deleteCollection: (id) =>
+      deleteCollection: (id) => {
+        settingsLogger.info('Eliminando colección', { id })
         set((state) => ({
           ...state,
           collections: state.collections.filter((c) => c.id !== id),
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
       // Acciones de etiquetas
-      updateTag: (id, tag) =>
-        set((state) => {
-          if (id === null) {
-            // Crear nueva etiqueta
-            const newTag: Tag = {
-              id: crypto.randomUUID(),
-              name: tag.name || 'Nueva Etiqueta',
-              color: tag.color || '#3b82f6',
-              count: 0,
-              ...tag
-            }
-            return {
-              ...state,
-              tags: [...state.tags, newTag],
-              lastUpdate: new Date().toISOString()
-            }
-          }
+      updateTag: (id, tag) => {
+        settingsLogger.info('Actualizando etiqueta', { id, tag })
+        set((state) => ({
+          ...state,
+          tags: id
+            ? state.tags.map((t) => (t.id === id ? { ...t, ...tag } : t))
+            : [...state.tags, { id: crypto.randomUUID(), ...tag } as Tag],
+          lastUpdate: new Date().toISOString()
+        }))
+      },
 
-          // Actualizar etiqueta existente
-          return {
-            ...state,
-            tags: state.tags.map((t) =>
-              t.id === id ? { ...t, ...tag } : t
-            ),
-            lastUpdate: new Date().toISOString()
-          }
-        }),
-
-      deleteTag: (id) =>
+      deleteTag: (id) => {
+        settingsLogger.info('Eliminando etiqueta', { id })
         set((state) => ({
           ...state,
           tags: state.tags.filter((t) => t.id !== id),
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
       // Acciones de carpetas
-      updateFolder: (id, folder) =>
-        set((state) => {
-          if (id === null) {
-            // Crear nueva carpeta
-            const newFolder: Folder = {
-              id: crypto.randomUUID(),
-              name: folder.name || 'Nueva Carpeta',
-              path: folder.path || '',
-              isIndexed: false,
-              lastIndexed: null,
-              totalFiles: 0,
-              totalSize: 0,
-              ...folder
-            }
-            return {
-              ...state,
-              folders: [...state.folders, newFolder],
-              lastUpdate: new Date().toISOString()
-            }
-          }
+      updateFolder: (id, folder) => {
+        settingsLogger.info('Actualizando carpeta', { id, folder })
+        set((state) => ({
+          ...state,
+          folders: id
+            ? state.folders.map((f) => (f.id === id ? { ...f, ...folder } : f))
+            : [...state.folders, { id: crypto.randomUUID(), ...folder } as Folder],
+          lastUpdate: new Date().toISOString()
+        }))
+      },
 
-          // Actualizar carpeta existente
-          return {
-            ...state,
-            folders: state.folders.map((f) =>
-              f.id === id ? { ...f, ...folder } : f
-            ),
-            lastUpdate: new Date().toISOString()
-          }
-        }),
-
-      deleteFolder: (id) =>
+      deleteFolder: (id) => {
+        settingsLogger.info('Eliminando carpeta', { id })
         set((state) => ({
           ...state,
           folders: state.folders.filter((f) => f.id !== id),
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
-      // Acciones de miniaturas
-      updateThumbnailSettings: (settings) =>
+      // Acciones de configuración
+      updateViewSettings: (settings) => {
+        settingsLogger.info('Actualizando configuración de vista', { settings })
+        set((state) => ({
+          ...state,
+          view: {
+            ...state.view,
+            ...settings,
+          },
+          lastUpdate: new Date().toISOString()
+        }))
+      },
+
+      updateThumbnailSettings: (settings) => {
+        settingsLogger.info('Actualizando configuración de miniaturas', { settings })
         set((state) => ({
           ...state,
           thumbnails: {
             ...state.thumbnails,
-            ...settings
+            ...settings,
           },
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
-      // Acciones de sistema
-      updateSystemSettings: (settings) =>
+      updateSystemSettings: (settings) => {
+        settingsLogger.info('Actualizando configuración del sistema', { settings })
         set((state) => ({
           ...state,
           system: {
             ...state.system,
-            ...settings
+            ...settings,
           },
           lastUpdate: new Date().toISOString()
-        })),
+        }))
+      },
 
-      // Acciones de atajos
-      updateShortcut: (action, keys) =>
+      updateShortcuts: (shortcuts) => {
+        settingsLogger.info('Actualizando atajos de teclado', { shortcuts })
         set((state) => ({
           ...state,
           shortcuts: {
             ...state.shortcuts,
-            [action]: keys
+            ...filterUndefinedValues(shortcuts),
           },
           lastUpdate: new Date().toISOString()
-        })),
-
-      deleteShortcut: (action) =>
-        set((state) => {
-          const { [action]: _, ...rest } = state.shortcuts
-          return {
-            ...state,
-            shortcuts: rest,
-            lastUpdate: new Date().toISOString()
-          }
-        })
+        }))
+      },
     }),
     {
-      name: 'app-settings',
+      name: 'settings-storage',
       version: 1,
-      migrate: (persistedState: any, version: number) => {
-        if (version === 0) {
-          // Migrar desde versión anterior si es necesario
-          return {
-            ...DEFAULT_SETTINGS,
-            ...persistedState
-          }
-        }
-        return persistedState
-      }
     }
   )
 )

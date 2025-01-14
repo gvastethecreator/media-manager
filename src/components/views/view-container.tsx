@@ -24,6 +24,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
 import { DotPattern } from "../ui/dot-pattern";
+import { X } from "lucide-react";
 
 const variants = {
 	enter: (direction: number) => ({
@@ -95,10 +96,14 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 	return (
 		<div className="relative w-full h-full overflow-hidden">
 			<DotPattern
+				x={6}
+				y={6}
+				width={8}
+				height={8}
 				className={cn(
-					"opacity-40",
-					"[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-					isResizing && "opacity-60 transition-opacity duration-150"
+					"opacity-10",
+					"[mask-image:radial-gradient(750px_circle_at_center,white,transparent)]",
+					isResizing && "opacity-20 transition-opacity duration-150"
 				)}
 			/>
 			<AnimatePresence initial={false} custom={navigationDirection}>

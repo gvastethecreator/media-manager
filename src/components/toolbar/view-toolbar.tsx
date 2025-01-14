@@ -5,14 +5,7 @@ import { useFileManager } from "@/store/file-manager.store";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { ViewBreadcrumbs } from "./breadcrumbs";
 import {
 	ImageIcon,
 	Star,
@@ -34,6 +27,7 @@ import {
 	Trash2,
 	Edit,
 } from "lucide-react";
+import { ViewType } from "@/types/file-item";
 
 export function ViewToolbar() {
 	const { currentView } = useNavigationStore();
@@ -47,274 +41,93 @@ export function ViewToolbar() {
 		currentObject,
 	} = useFileManager();
 
-	const renderBreadcrumb = () => {
-		const basePath = (
-			<BreadcrumbList>
-				<BreadcrumbItem>
-					<BreadcrumbLink
-						href="/"
-						className="text-sm font-medium hover:text-foreground"
-					>
-						Inicio
-					</BreadcrumbLink>
-				</BreadcrumbItem>
-				<BreadcrumbSeparator />
-			</BreadcrumbList>
-		);
+	const getCurrentItem = () => {
+		switch (currentView) {
+			case "collection-content":
+				return currentCollection ?
+						{
+							name: currentCollection.name,
+							path: `/collections/${currentCollection.id}`,
+						}
+					:	undefined;
+			case "folder-content":
+				return currentFolder ?
+						{
+							name: currentFolder.name,
+							path: `/folders/${currentFolder.id}`,
+						}
+					:	undefined;
+			case "tag-content":
+				return currentTag ?
+						{
+							name: currentTag.name,
+							path: `/tags/${currentTag.name}`,
+						}
+					:	undefined;
+			case "album-content":
+				return currentAlbum ?
+						{
+							name: currentAlbum.name,
+							path: `/albums/${currentAlbum.id}`,
+						}
+					:	undefined;
+			case "character-content":
+				return currentCharacter ?
+						{
+							name: currentCharacter.name,
+							path: `/characters/${currentCharacter.id}`,
+						}
+					:	undefined;
+			case "place-content":
+				return currentPlace ?
+						{
+							name: currentPlace.name,
+							path: `/places/${currentPlace.id}`,
+						}
+					:	undefined;
+			case "object-content":
+				return currentObject ?
+						{
+							name: currentObject.name,
+							path: `/objects/${currentObject.id}`,
+						}
+					:	undefined;
+			default:
+				return undefined;
+		}
+	};
 
+	const renderIcon = () => {
 		switch (currentView) {
 			case "all-images":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Galería
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "favorites":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Favoritos
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <Star className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "search":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Búsqueda
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <Search className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "collections":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Colecciones
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "collection-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/collections"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Colecciones
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentCollection?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <BookImage className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "folders":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Carpetas
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "folder-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/folders"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Carpetas
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentFolder?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <FolderIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "tags":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Etiquetas
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "tag-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/tags"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Etiquetas
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentTag}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <TagIcon className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "albums":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Álbumes
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "album-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/albums"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Álbumes
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentAlbum?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <Camera className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "characters":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Personajes
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "character-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/characters"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Personajes
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentCharacter?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <User2 className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "places":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Lugares
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "place-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/places"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Lugares
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentPlace?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <MapPin className="h-3.5 w-3.5 text-muted-foreground" />;
 			case "objects":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								Objetos
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
 			case "object-content":
-				return (
-					<Breadcrumb>
-						{basePath}
-						<BreadcrumbItem>
-							<BreadcrumbLink
-								href="/objects"
-								className="text-sm font-medium hover:text-foreground"
-							>
-								Objetos
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						<BreadcrumbItem>
-							<BreadcrumbPage className="text-sm font-medium text-muted-foreground">
-								{currentObject?.name}
-							</BreadcrumbPage>
-						</BreadcrumbItem>
-					</Breadcrumb>
-				);
+				return <Box className="h-3.5 w-3.5 text-muted-foreground" />;
 			default:
-				return basePath;
+				return null;
 		}
 	};
 
@@ -387,40 +200,6 @@ export function ViewToolbar() {
 		}
 	};
 
-	const renderIcon = () => {
-		switch (currentView) {
-			case "all-images":
-				return <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "favorites":
-				return <Star className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "search":
-				return <Search className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "collections":
-			case "collection-content":
-				return <BookImage className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "folders":
-			case "folder-content":
-				return <FolderIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "tags":
-			case "tag-content":
-				return <TagIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "albums":
-			case "album-content":
-				return <Camera className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "characters":
-			case "character-content":
-				return <User2 className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "places":
-			case "place-content":
-				return <MapPin className="h-3.5 w-3.5 text-muted-foreground" />;
-			case "objects":
-			case "object-content":
-				return <Box className="h-3.5 w-3.5 text-muted-foreground" />;
-			default:
-				return null;
-		}
-	};
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
@@ -432,7 +211,10 @@ export function ViewToolbar() {
 					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">
 						{renderIcon()}
 					</div>
-					{renderBreadcrumb()}
+					<ViewBreadcrumbs
+						currentView={currentView as ViewType}
+						currentItem={getCurrentItem()}
+					/>
 				</div>
 				<div className="flex items-center gap-2">{renderActions()}</div>
 			</div>
