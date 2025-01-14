@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, RotateCcw, ZoomIn, ZoomOut, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,14 @@ interface AdvancedImageViewerProps {
 
 const isLocalFile = (url: string) => url.startsWith("file://");
 
+// Configuración de animaciones mejorada
+const springConfig = {
+	type: "spring" as const,
+	stiffness: 300,
+	damping: 30,
+	mass: 0.5,
+};
+
 export function AdvancedImageViewer({
 	images,
 	initialIndex = 0,
@@ -54,6 +62,10 @@ export function AdvancedImageViewer({
 	const [error, setError] = useState<string | null>(null);
 	const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 	const [originalUrls, setOriginalUrls] = useState<Record<string, string>>({});
+	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+		{}
+	);
+	const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 	const containerRef = useRef<HTMLDivElement>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
 
@@ -303,10 +315,61 @@ export function AdvancedImageViewer({
 		setScale(newScale);
 	};
 
-	const getImageThumbnail = (image?: ImageItem) => {
-		if (!image) return "";
-		return image.thumbnail || image.src || image.url || "";
+	// Función mejorada para obtener thumbnail
+	const getImageThumbnail = (image?: ImageItem): string | undefined => {
+		if (!image) return undefined;
+		return (
+			thumbnails[image.id] ||
+			image.thumbnail ||
+			image.src ||
+			image.url ||
+			undefined
+		);
 	};
+
+	// Función para calcular dimensiones
+	const getImageDimensions = (image: ImageItem) => {
+		const defaultDimensions = { width: 1920, height: 1080 };
+
+		if (image.metadata?.dimensions) {
+			return image.metadata.dimensions;
+		}
+
+		if (image.width && image.height) {
+			return { width: image.width, height: image.height };
+		}
+
+		return defaultDimensions;
+	};
+
+	// Función para cargar thumbnail
+	const loadThumbnail = useCallback(async (imageId: string) => {
+		try {
+			const response = await fetch(`/api/thumbnails/${imageId}?quality=medium`);
+			const data = await response.json();
+			const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${
+				data.thumbnail
+			}`;
+			setThumbnails((prev) => ({ ...prev, [imageId]: thumbnailUrl }));
+		} catch (error) {
+			console.error("Error loading thumbnail:", error);
+		}
+	}, []);
+
+	// Cargar thumbnails cuando cambia el índice
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const currentImage = images[index];
+		const nextImage = images[(index + 1) % images.length];
+		const prevImage = images[index > 0 ? index - 1 : images.length - 1];
+
+		[currentImage, nextImage, prevImage].forEach((img) => {
+			if (img && !thumbnails[img.id]) {
+				loadThumbnail(img.id);
+			}
+		});
+	}, [isOpen, index, images, loadThumbnail, thumbnails]);
 
 	if (!isOpen || !images || !images.length) {
 		return null;
@@ -384,74 +447,118 @@ export function AdvancedImageViewer({
 					</Button>
 				</div>
 
-				{/* Main Image */}
+				{/* Main Image Container */}
 				<motion.div
 					key={currentImage.id}
 					className="absolute inset-0 flex items-center justify-center"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.3 }}
 				>
-					<AnimatePresence mode="wait">
-						{isLoading && (
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								className="absolute inset-0 flex items-center justify-center"
-							>
-								{currentImage.thumbnail ? (
-									<img
-										src={currentImage.thumbnail}
-										alt="Loading preview"
-										className="max-w-[90vw] max-h-[80vh] object-contain opacity-50 blur-sm"
-									/>
-								) : (
-									<Skeleton className="w-[80vw] h-[80vh] absolute" />
-								)}
-							</motion.div>
-						)}
-					</AnimatePresence>
-
-					{error ? (
-						<div className="text-center text-muted-foreground">
-							<p>{error}</p>
-						</div>
-					) : (
-						<motion.img
-							ref={imageRef}
-							src={getImageSource(currentImage)}
-							alt={getImageAlt(currentImage)}
-							onError={handleImageError}
-							className={cn(
-								"object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none",
-								isLoading ? "opacity-0" : "opacity-100"
-							)}
+					<div className="relative w-[90vw] h-[80vh] flex items-center justify-center overflow-hidden">
+						<div
+							className="relative w-full h-full"
 							style={{
-								cursor: "grab",
-								touchAction: "none",
+								aspectRatio: `${getImageDimensions(currentImage).width} / ${
+									getImageDimensions(currentImage).height
+								}`,
+								maxWidth: "100%",
+								maxHeight: "100%",
+								margin: "auto",
 							}}
-							animate={{
-								opacity: [0, 1],
-								scale,
-								x: position.x,
-								y: position.y,
-							}}
-							drag
-							dragConstraints={containerRef}
-							onDragStart={() => {
-								if (imageRef.current) {
-									imageRef.current.style.cursor = "grabbing";
-								}
-							}}
-							onDragEnd={() => {
-								if (imageRef.current) {
-									imageRef.current.style.cursor = "grab";
-								}
-							}}
-							onLoad={() => {
-								setIsLoading(false);
-								setError(null);
-							}}
-						/>
-					)}
+						>
+							<AnimatePresence mode="wait">
+								{isLoading && (
+									<motion.div
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.5 }}
+										className="absolute inset-0 flex items-center justify-center"
+									>
+										{thumbnails[currentImage.id] ? (
+											<motion.div
+												className="absolute inset-0 flex items-center justify-center"
+												initial={{ opacity: 0, filter: "blur(20px)" }}
+												animate={{ opacity: 1, filter: "blur(8px)" }}
+												exit={{ opacity: 0, filter: "blur(0px)" }}
+												transition={{
+													duration: 0.8,
+													opacity: { duration: 0.5 },
+													filter: { duration: 0.8 },
+												}}
+											>
+												<motion.img
+													src={thumbnails[currentImage.id]}
+													alt="Loading preview"
+													className="w-full h-full object-contain"
+													initial={{ scale: 1.1 }}
+													animate={{ scale: 1 }}
+													exit={{ scale: 0.95 }}
+													transition={{ duration: 0.5 }}
+												/>
+											</motion.div>
+										) : (
+											<Skeleton className="w-full h-full" />
+										)}
+									</motion.div>
+								)}
+							</AnimatePresence>
+
+							{error ? (
+								<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
+									<p>{error}</p>
+								</div>
+							) : (
+								<motion.img
+									ref={imageRef}
+									src={getImageSource(currentImage)}
+									alt={getImageAlt(currentImage)}
+									onError={handleImageError}
+									className={cn(
+										"absolute inset-0 w-full h-full object-contain shadow-2xl rounded-lg select-none",
+										isLoading ? "opacity-0" : "opacity-100"
+									)}
+									style={{
+										cursor: "grab",
+										touchAction: "none",
+									}}
+									initial={{ opacity: 0, scale: 0.95 }}
+									animate={{
+										opacity: isLoading ? 0 : 1,
+										scale: scale,
+										x: position.x,
+										y: position.y,
+									}}
+									transition={{
+										opacity: { duration: 0.5 },
+										scale: { ...springConfig, duration: 0.5 },
+										x: springConfig,
+										y: springConfig,
+									}}
+									drag
+									dragConstraints={containerRef}
+									onDragStart={() => {
+										if (imageRef.current) {
+											imageRef.current.style.cursor = "grabbing";
+										}
+									}}
+									onDragEnd={() => {
+										if (imageRef.current) {
+											imageRef.current.style.cursor = "grab";
+										}
+									}}
+									onLoad={() => {
+										setTimeout(() => {
+											setIsLoading(false);
+											setError(null);
+										}, 100);
+									}}
+								/>
+							)}
+						</div>
+					</div>
 				</motion.div>
 
 				{/* Thumbnails */}
@@ -459,40 +566,47 @@ export function AdvancedImageViewer({
 					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
 						{images
 							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
-							.map((image, i) => (
-								<motion.div
-									key={image.id}
-									animate={{
-										opacity: i + Math.max(0, index - 3) === index ? 1 : 0.7,
-										scale: i + Math.max(0, index - 3) === index ? 1 : 0.95,
-									}}
-									className={cn(
-										"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
-										i + Math.max(0, index - 3) === index &&
-											"ring-2 ring-primary ring-offset-2 ring-offset-background"
-									)}
-									style={{
-										zIndex: i + Math.max(0, index - 3) === index ? 10 : 1,
-									}}
-									onClick={() => setIndex(i + Math.max(0, index - 3))}
-								>
-									<ImageFallback
-										src={getImageThumbnail(image)}
-										alt={getImageAlt(image)}
-										className="w-full h-full object-cover transition-all duration-200 hover:scale-110"
-										gradientColors={[
-											`hsl(${
-												(parseInt(image.id.split("-")[1] || "0") * 40) % 360
-											}, 95%, 75%)`,
-											`hsl(${
-												(parseInt(image.id.split("-")[1] || "0") * 40 + 60) %
-												360
-											}, 95%, 75%)`,
-										]}
-										showPlaceholder={!getImageThumbnail(image)}
-									/>
-								</motion.div>
-							))}
+							.map((image, i) => {
+								const thumbSrc = getImageThumbnail(image);
+								return (
+									<motion.div
+										key={image.id}
+										animate={{
+											opacity: i + Math.max(0, index - 3) === index ? 1 : 0.7,
+											scale: i + Math.max(0, index - 3) === index ? 1 : 0.95,
+										}}
+										className={cn(
+											"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
+											i + Math.max(0, index - 3) === index &&
+												"ring-2 ring-primary ring-offset-2 ring-offset-background"
+										)}
+										style={{
+											zIndex: i + Math.max(0, index - 3) === index ? 10 : 1,
+										}}
+										onClick={() => setIndex(i + Math.max(0, index - 3))}
+									>
+										{thumbSrc ? (
+											<ImageFallback
+												src={thumbSrc}
+												alt={getImageAlt(image)}
+												className="w-full h-full object-cover transition-all duration-200 hover:scale-110"
+												gradientColors={[
+													`hsl(${
+														(parseInt(image.id.split("-")[1] || "0") * 40) % 360
+													}, 95%, 75%)`,
+													`hsl(${
+														(parseInt(image.id.split("-")[1] || "0") * 40 +
+															60) %
+														360
+													}, 95%, 75%)`,
+												]}
+											/>
+										) : (
+											<Skeleton className="w-full h-full" />
+										)}
+									</motion.div>
+								);
+							})}
 					</div>
 				</div>
 
