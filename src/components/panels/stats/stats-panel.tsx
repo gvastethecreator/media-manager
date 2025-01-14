@@ -6,17 +6,13 @@
 
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Meteors } from "@/components/ui/meteors";
+import { StatsContainer } from "./base/stats-view";
 import { StatsContent } from "./stats-content";
 
 export function StatsPanel() {
 	return (
-		<ScrollArea className="h-full w-full p-0">
-			<div className="p-0 w-full h-full">
-				<Meteors />
-				<StatsContent />
-			</div>
-		</ScrollArea>
+		<StatsContainer>
+			<StatsContent />
+		</StatsContainer>
 	);
 }
