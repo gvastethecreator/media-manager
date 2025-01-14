@@ -2,19 +2,16 @@ import { logger } from '@/lib/logger';
 import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 import { EventEmitter } from 'events';
+import {
+  getFolders as getFoldersAction,
+  createFolder as createFolderAction,
+  indexFolder as indexFolderAction,
+  reindexFolder as reindexFolderAction,
+  deleteFolder as deleteFolderAction,
+  type FolderResponse
+} from '@/app/actions/folder.actions';
 
 const folderLogger = logger.withContext('FolderService');
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-export enum FOLDER_EVENTS {
-  PROGRESS = 'folder:progress',
-  ERROR = 'folder:error',
-  COMPLETE = 'folder:complete',
-  STATS = 'folder:stats',
-  FOLDER_ADDED = 'folder:added',
-  FOLDER_DELETED = 'folder:deleted',
-  FOLDER_MODIFIED = 'folder:modified'
-}
 
 export interface ProcessStatus {
   status?: string
@@ -33,23 +30,16 @@ export interface ErrorResponse {
   timestamp?: number
 }
 
-export interface FolderResponse {
-  folder: {
-    id: string
-    name: string
-    path: string
-    totalFiles?: number
-    totalSize?: number
-    lastIndexed?: string | null
-    createdAt?: string
-    updatedAt?: string
-  }
-  stats?: {
-    processed: number
-    total: number
-    totalSize?: number
-  }
-  timestamp?: number
+export type { FolderResponse };
+
+export enum FOLDER_EVENTS {
+  PROGRESS = 'folder:progress',
+  ERROR = 'folder:error',
+  COMPLETE = 'folder:complete',
+  STATS = 'folder:stats',
+  FOLDER_ADDED = 'folder:added',
+  FOLDER_DELETED = 'folder:deleted',
+  FOLDER_MODIFIED = 'folder:modified'
 }
 
 export interface IndexCallbacks {
@@ -121,10 +111,6 @@ class FolderServiceClass extends EventEmitter {
     this.off(FOLDER_EVENTS.STATS, callback);
   }
 
-  private getFullUrl(path: string): string {
-    return `${BASE_URL}${path}`;
-  }
-
   // Control de concurrencia mejorado
   private async withConcurrencyControl<T>(operation: string, fn: () => Promise<T>): Promise<T> {
     if (this.operationsInProgress.get(operation)) {
@@ -144,14 +130,8 @@ class FolderServiceClass extends EventEmitter {
     return this.withConcurrencyControl('getFolders', async () => {
       try {
         folderLogger.info('📂 Obteniendo lista de carpetas...');
-        const response = await fetch(this.getFullUrl('/api/folders'));
+        const folders = await getFoldersAction();
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw { message: data.error || 'Error obteniendo carpetas', details: data.details };
-        }
-
-        const folders = await response.json();
         folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
         this.emit(FOLDER_EVENTS.STATS, { totalFolders: folders.length });
         return folders;
@@ -173,21 +153,7 @@ class FolderServiceClass extends EventEmitter {
       try {
         folderLogger.info('📁 Agregando nueva carpeta:', path);
 
-        const response = await fetch(this.getFullUrl('/api/folders'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ path })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw { message: data.error || 'Error creando carpeta', details: data.details };
-        }
-
-        const folder = await response.json();
+        const folder = await createFolderAction(path);
         folderLogger.info('✅ Carpeta creada:', folder);
 
         if (!folder || !folder.id) {
@@ -232,20 +198,7 @@ class FolderServiceClass extends EventEmitter {
         this.emit(FOLDER_EVENTS.PROGRESS, initialStatus);
         callbacks?.onProgress?.(initialStatus);
 
-        const response = await fetch(this.getFullUrl(`/api/folders/${id}/index`), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error en la indexación');
-        }
-
-        const result = await response.json();
+        const result = await indexFolderAction(id);
 
         // Emitir eventos relevantes
         this.emit(FOLDER_EVENTS.COMPLETE, result);
@@ -285,20 +238,7 @@ class FolderServiceClass extends EventEmitter {
         this.emit(FOLDER_EVENTS.PROGRESS, initialStatus);
         callbacks?.onProgress?.(initialStatus);
 
-        const response = await fetch(this.getFullUrl(`/api/folders/reindex/${id}`), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error en la reindexación');
-        }
-
-        const result = await response.json();
+        const result = await reindexFolderAction(id);
 
         // Emitir eventos relevantes
         this.emit(FOLDER_EVENTS.COMPLETE, result);
@@ -325,18 +265,7 @@ class FolderServiceClass extends EventEmitter {
     return this.withConcurrencyControl(`deleteFolder:${id}`, async () => {
       try {
         folderLogger.info('🗑️ Eliminando carpeta:', id);
-        const response = await fetch(this.getFullUrl(`/api/folders/${id}`), {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw { message: data.error || 'Error eliminando carpeta', details: data.details };
-        }
+        await deleteFolderAction(id);
 
         // Emitir eventos
         this.emit(FOLDER_EVENTS.FOLDER_DELETED, { id });
@@ -346,7 +275,6 @@ class FolderServiceClass extends EventEmitter {
         statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
 
         folderLogger.info('✅ Carpeta eliminada correctamente', { folderId: id });
-        return response.json();
       } catch (error) {
         const errorResponse: ErrorResponse = {
           message: error instanceof Error ? error.message : 'Error eliminando carpeta',

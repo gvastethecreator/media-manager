@@ -22,6 +22,12 @@ import {
 	type ErrorResponse,
 	type FolderResponse,
 } from "@/services/folder.service";
+import {
+	createFolder,
+	deleteFolder,
+	reindexFolder,
+	type FolderCreate,
+} from "@/app/actions/folder.actions";
 import { useToast } from "@/components/ui/use-toast";
 import {
 	Folder,
@@ -149,7 +155,14 @@ export function FoldersSection() {
 			setIsLoading(true);
 			setError(null);
 			const folders = await getFolders();
-			setFolders(folders);
+			setFolders(
+				folders.map((folder) => ({
+					...folder,
+					lastIndexed: folder.lastIndexed?.toISOString() || null,
+					createdAt: folder.createdAt.toISOString(),
+					updatedAt: folder.updatedAt.toISOString(),
+				}))
+			);
 			await loadStats();
 		} catch (error) {
 			console.error("Error cargando carpetas:", error);
@@ -181,7 +194,14 @@ export function FoldersSection() {
 				}, null as Date | null),
 			};
 			setStats(indexStats);
-			setFolders(folders);
+			setFolders(
+				folders.map((folder) => ({
+					...folder,
+					lastIndexed: folder.lastIndexed?.toISOString() || null,
+					createdAt: folder.createdAt.toISOString(),
+					updatedAt: folder.updatedAt.toISOString(),
+				}))
+			);
 		} catch (error) {
 			console.error("Error cargando estadísticas:", error);
 			setError("No se pudieron cargar las estadísticas");
@@ -206,8 +226,9 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
-			await folderService.addFolder(folderPath);
+			await createFolder(folderPath);
 			setFolderPath("");
+			await loadStats();
 		} catch (error) {
 			console.error("Error agregando carpeta:", error);
 			toast({
@@ -241,7 +262,8 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
-			await folderService.reindexFolder(folderId);
+			await reindexFolder(folderId);
+			await loadStats();
 		} catch (error) {
 			console.error("Error reindexando carpeta:", error);
 			toast({
@@ -257,15 +279,14 @@ export function FoldersSection() {
 			setIsProcessing(false);
 			setProcessProgress(0);
 			setProcessStatus({});
-			await loadStats();
 		}
 	};
 
 	const handleRemoveFolder = async (folderId: string) => {
 		try {
 			setError(null);
-			await folderService.deleteFolder(folderId);
-			await loadFolders();
+			await deleteFolder(folderId);
+			await loadStats();
 
 			toast({
 				title: "Carpeta eliminada",
@@ -287,7 +308,7 @@ export function FoldersSection() {
 	const handleFolderClick = async (folderId: string) => {
 		if (selectedFolder === folderId) {
 			try {
-				await folderService.deleteFolder(folderId);
+				await deleteFolder(folderId);
 				toast({
 					title: "Carpeta eliminada",
 					description: "La carpeta se eliminó correctamente",
