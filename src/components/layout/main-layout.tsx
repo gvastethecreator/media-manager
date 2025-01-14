@@ -9,16 +9,33 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useState } from "react";
-import { AdvancedImageViewer, ImageItem } from "@/components/features/file-viewer/components/advanced-file-viewer";
+import { useState, Suspense, useEffect } from "react";
+import {
+	AdvancedImageViewer,
+	ImageItem,
+} from "@/components/features/file-viewer/components/advanced-file-viewer";
 import { useImageViewer } from "@/store/image-viewer.store";
+import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
+import { getNavigationData } from "@/app/actions/nav.actions";
 
-export function MainLayout() {
+interface MainLayoutProps {
+	children: React.ReactNode;
+}
+
+export function MainLayout({ children }: MainLayoutProps) {
 	const [isResizing, setIsResizing] = useState(false);
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
+	const [navData, setNavData] = useState<Awaited<
+		ReturnType<typeof getNavigationData>
+	> | null>(null);
+
+	// Cargar datos de navegación
+	useEffect(() => {
+		getNavigationData().then(setNavData);
+	}, []);
 
 	return (
-		<>
+		<main className="flex h-screen">
 			<ResizablePanelGroup
 				direction="horizontal"
 				className="h-full"
@@ -32,7 +49,9 @@ export function MainLayout() {
 					maxSize={30}
 					className="bg-background/95"
 				>
-					<NavPanel />
+					<Suspense fallback={<NavPanelSkeleton />}>
+						{navData && <NavPanel initialData={navData} />}
+					</Suspense>
 				</ResizablePanel>
 
 				<ResizableHandle withHandle />
@@ -42,8 +61,10 @@ export function MainLayout() {
 					<div className="flex flex-col h-full">
 						<ViewToolbar />
 						<ViewContainer isResizing={isResizing} />
+						<div className="flex-1 overflow-auto">{children}</div>
 					</div>
 				</ResizablePanel>
+
 				<ResizableHandle withHandle />
 
 				{/* Panel Derecho - Default 20% */}
@@ -63,6 +84,6 @@ export function MainLayout() {
 				isOpen={isOpen}
 				onClose={closeViewer}
 			/>
-		</>
+		</main>
 	);
 }

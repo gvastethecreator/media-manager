@@ -1,3 +1,5 @@
+"use client";
+
 import type { Collection, Profile } from ".prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {

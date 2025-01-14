@@ -12,6 +12,7 @@ import fs from 'fs/promises'
 import { thumbnailCache } from '@/lib/cache'
 import { existsSync } from 'fs'
 import path from 'path'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const imageLogger = logger.withContext('ImageActions')
 
@@ -112,6 +113,10 @@ export async function updateImageStats(imageId: string, type: 'view' | 'download
       }
     })
 
+    // Emitir eventos
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
+
     revalidatePath(`/api/stats/${imageId}`)
   } catch (error) {
     imageLogger.error('Error actualizando estadísticas', { imageId, type, error })
@@ -172,6 +177,10 @@ export async function createImage(data: CreateImageInput) {
         imageId: image.id
       }
     })
+
+    // Emitir eventos
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
 
     revalidatePath('/api/images')
     revalidatePath(`/api/folders/${data.folderId}`)
@@ -642,6 +651,10 @@ export async function updateImage(id: string, data: Partial<Image>): Promise<Ima
       }
     })
 
+    // Emitir eventos
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
+
     revalidatePath(`/api/images/${id}`)
     return updatedImage
   } catch (error) {
@@ -670,6 +683,11 @@ export async function updateFavoriteStatus(id: string, isFavorite: boolean): Pro
         imageId: id
       }
     })
+
+    // Emitir eventos
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
 
     revalidatePath('/api/images/favorites')
     revalidatePath(`/api/images/${id}`)

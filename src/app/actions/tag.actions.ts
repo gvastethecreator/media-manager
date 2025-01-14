@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
 import type { Tag as PrismaTag } from '.prisma/client'
 import type { FileItem } from '@/types/file-item'
+import { eventsService } from '@/services/events.service';
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 
 const tagLogger = logger.withContext('TagActions');
 
@@ -137,6 +139,11 @@ export async function createTag(data: TagCreate) {
     const tag = await prisma.tag.create({
       data,
     });
+
+    // Emitir eventos
+    eventsService.emit('tags:modified');
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
+
     tagLogger.info('✅ Etiqueta creada:', tag.name);
     revalidateAllPaths();
     return tag;
@@ -168,6 +175,11 @@ export async function deleteTag(id: string) {
     await prisma.tag.delete({
       where: { id },
     });
+
+    // Emitir eventos
+    eventsService.emit('tags:modified');
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
+
     tagLogger.info('✅ Etiqueta eliminada');
     revalidateAllPaths();
   } catch (error) {
@@ -289,5 +301,51 @@ export async function removeImageFromTag(tagId: string, imageId: string) {
   } catch (error) {
     tagLogger.error("❌ Error al eliminar imagen de la etiqueta:", error);
     throw new TagError("No se pudo eliminar la imagen de la etiqueta", error);
+  }
+}
+
+export async function addTagToImage(tagId: string, imageId: string) {
+  try {
+    await prisma.image.update({
+      where: { id: imageId },
+      data: {
+        tags: {
+          connect: { id: tagId }
+        }
+      }
+    });
+
+    // Emitir eventos
+    eventsService.emit('tags:modified');
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
+    revalidateAllPaths();
+  } catch (error) {
+    tagLogger.error("❌ Error al agregar etiqueta a la imagen:", error);
+    throw new TagError("No se pudo agregar la etiqueta a la imagen", error);
+  }
+}
+
+export async function removeTagFromImage(tagId: string, imageId: string) {
+  try {
+    await prisma.image.update({
+      where: { id: imageId },
+      data: {
+        tags: {
+          disconnect: { id: tagId }
+        }
+      }
+    });
+
+    // Emitir eventos
+    eventsService.emit('tags:modified');
+    statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
+    revalidateAllPaths();
+  } catch (error) {
+    tagLogger.error("❌ Error al eliminar etiqueta de la imagen:", error);
+    throw new TagError("No se pudo eliminar la etiqueta de la imagen", error);
   }
 }
