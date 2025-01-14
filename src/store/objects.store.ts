@@ -6,56 +6,29 @@ import {
   deleteObject,
   getObjects,
   updateObject,
+  addImageToObject as addImageToObjectAction,
   type ObjectCreate,
   type ObjectUpdate
 } from '../app/actions/object.actions';
 
-// Estado extendido específico para Object
 interface ObjectState {
-  filters: {
-    searchQuery: string;
-    sortBy: 'name' | 'type' | 'rarity' | 'createdAt' | 'updatedAt';
-    sortOrder: 'asc' | 'desc';
-    type: string[];
-    rarity: string[];
-    status: string[];
-  };
+  searchQuery: string;
+  sortBy: 'name' | 'createdAt' | 'updatedAt';
+  sortOrder: 'asc' | 'desc';
 }
 
-export const useObjectStore = createStoreFactory<Object, ObjectState, ObjectCreate, ObjectUpdate>(
+const baseObjectStore = createStoreFactory<Object, ObjectState, ObjectCreate, ObjectUpdate>(
   {
     name: 'objects',
     logger,
     actions: {
       beforeCreate: async (data) => {
-        // Validar datos antes de crear
-        if (!data.name?.trim()) {
-          throw new Error('El nombre es requerido');
-        }
-        if (!data.type?.trim()) {
-          throw new Error('El tipo es requerido');
-        }
+        // Aquí podríamos hacer validaciones o transformaciones antes de crear
         return data;
       },
       afterCreate: async (object) => {
+        // Aquí podríamos hacer acciones después de crear, como notificaciones
         logger.info('Objeto creado exitosamente', { object });
-      },
-      beforeUpdate: async (id, data) => {
-        // Validar datos antes de actualizar
-        if (data.name !== undefined && !data.name.trim()) {
-          throw new Error('El nombre no puede estar vacío');
-        }
-        return data;
-      },
-      afterUpdate: async (object) => {
-        logger.info('Objeto actualizado exitosamente', { object });
-      },
-      beforeDelete: async (id) => {
-        // Aquí podríamos verificar si el objeto tiene imágenes asociadas
-        logger.info('Preparando eliminación de objeto', { id });
-      },
-      afterDelete: async (id) => {
-        logger.info('Objeto eliminado exitosamente', { id });
       }
     }
   },
@@ -66,3 +39,20 @@ export const useObjectStore = createStoreFactory<Object, ObjectState, ObjectCrea
     deleteItem: deleteObject
   }
 );
+
+// Exportar el hook con funcionalidad extendida
+export const useObjectStore = () => {
+  const store = baseObjectStore();
+  return {
+    ...store,
+    addImageToObject: async (objectId: string, imageId: string) => {
+      try {
+        await addImageToObjectAction(objectId, imageId);
+        await store.loadItems();
+      } catch (error) {
+        logger.error('Error adding image to object:', error);
+        throw error;
+      }
+    }
+  };
+};

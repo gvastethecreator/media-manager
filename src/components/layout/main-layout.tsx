@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/resizable";
 import { useState, Suspense, useEffect } from "react";
 import {
-	AdvancedImageViewer,
+	FileViewer,
 	ImageItem,
-} from "@/components/features/file-viewer/components/advanced-file-viewer";
+} from "@/components/features/file-viewer/file-viewer";
 import { useImageViewer } from "@/store/image-viewer.store";
 import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
 import { getNavigationData } from "@/app/actions/nav.actions";
@@ -78,7 +78,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 				</ResizablePanel>
 			</ResizablePanelGroup>
 
-			<AdvancedImageViewer
+			<FileViewer
 				images={images as unknown as ImageItem[]}
 				initialIndex={currentIndex}
 				isOpen={isOpen}

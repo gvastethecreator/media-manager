@@ -197,6 +197,7 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
       totalFiles,
       withThumbnail,
       pending,
+      processed: withThumbnail,
       totalSize: totalSize._sum.thumbnailSize || 0,
       errors: errors.map(error => ({
         imageId: error.id,
