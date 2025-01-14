@@ -1,26 +1,7 @@
 import { create } from 'zustand';
 import { logger } from '@/lib/logger';
-
-export interface ThumbnailError {
-  imageId: string;
-  imagePath: string;
-  error: string;
-  timestamp: string;
-}
-
-export interface ThumbnailStats {
-  pending: number;
-  processed: number;
-  errors: ThumbnailError[];
-  totalSize: number;
-  lastProcessed?: {
-    id: string;
-    path: string;
-    processedAt: string;
-  };
-  withThumbnail?: number;
-  totalFiles?: number;
-}
+import * as thumbnailActions from '@/app/actions/thumbnails.actions';
+import type { ThumbnailError, ThumbnailStats, ThumbnailProcessStatus } from '@/types/thumbnails';
 
 export interface ProcessStatus {
   status: string;
@@ -54,10 +35,10 @@ interface ThumbnailStore {
 const initialStats: ThumbnailStats = {
   pending: 0,
   processed: 0,
-  errors: [],
-  totalSize: 0,
+  totalFiles: 0,
   withThumbnail: 0,
-  totalFiles: 0
+  totalSize: 0,
+  errors: []
 };
 
 const initialProcessStatus: ProcessStatus = {
@@ -109,34 +90,13 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
     }
   })),
 
-  reset: () => set({
-    isLoading: false,
-    isProcessing: false,
-    error: null,
-    stats: initialStats,
-    processStatus: initialProcessStatus
-  }),
-
   initialize: async () => {
     const store = get();
     try {
       store.setLoading(true);
       store.setError(null);
 
-      const url = new URL('/api/thumbnails/stats', BASE_URL);
-      const response = await fetch(url.toString(), {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error obteniendo estadísticas');
-      }
-
-      const stats = await response.json();
+      const stats = await thumbnailActions.getThumbnailStats();
       store.setStats(stats);
     } catch (error) {
       logger.error('Error inicializando thumbnails:', error);
@@ -144,5 +104,13 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
     } finally {
       store.setLoading(false);
     }
-  }
+  },
+
+  reset: () => set({
+    isLoading: false,
+    isProcessing: false,
+    error: null,
+    stats: initialStats,
+    processStatus: initialProcessStatus
+  })
 }));

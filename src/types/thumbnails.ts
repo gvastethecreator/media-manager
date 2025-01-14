@@ -1,7 +1,9 @@
 export interface ThumbnailStats {
   pending: number;
   processed: number;
-  total: number;
+  totalFiles: number;
+  withThumbnail: number;
+  totalSize: number;
   errors: ThumbnailError[];
 }
 

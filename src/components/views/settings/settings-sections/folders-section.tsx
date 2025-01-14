@@ -44,6 +44,9 @@ import type {
 	ExtendedProcessStatus,
 	Folder as FolderType,
 } from "@/types/folders";
+import { logger } from "@/lib/logger";
+
+const folderLogger = logger.withContext("FoldersSection");
 
 const initialStats: FolderStats = {
 	totalFolders: 0,
@@ -67,19 +70,20 @@ export function FoldersSection() {
 	// Suscribirse a eventos del FolderService
 	useEffect(() => {
 		const handleProgress = (status: ProcessStatus) => {
-			if (status) {
-				const progress = status.progress || 0;
-				setProcessProgress(progress);
-				setProcessStatus((prevStatus) => ({
-					...prevStatus,
-					...status,
-					status: status.status || "Procesando...",
-				}));
-			}
+			if (!status) return;
+
+			folderLogger.info("📊 Progreso del proceso:", status);
+			const progress = status.progress || 0;
+			setProcessProgress(progress);
+			setProcessStatus((prevStatus) => ({
+				...prevStatus,
+				...status,
+				status: status.status || "Procesando...",
+			}));
 		};
 
 		const handleError = (error: ErrorResponse) => {
-			console.error("Error en el proceso:", error);
+			folderLogger.error("❌ Error en el proceso:", error);
 			let errorMessage = "Error desconocido al procesar la carpeta";
 
 			if (error instanceof Error) {
@@ -96,35 +100,41 @@ export function FoldersSection() {
 		};
 
 		const handleComplete = (data: FolderResponse) => {
-			if (data?.folder) {
-				setFolders((prevFolders) =>
-					prevFolders.map((folder) =>
-						folder.id === data.folder.id
-							? {
-									...folder,
-									...data.folder,
-									_count: {
-										images: data.stats?.total || folder._count?.images || 0,
-									},
-									totalSize: data.stats?.totalSize || folder.totalSize,
-									lastIndexed: new Date().toISOString(),
-							  }
-							: folder
-					)
-				);
+			if (!data?.folder) return;
 
-				if (data.stats) {
-					setStats((prevStats) => ({
-						...prevStats,
-						totalFiles: prevStats.totalFiles + (data.stats?.processed || 0),
-						totalSize: prevStats.totalSize + (data.stats?.totalSize || 0),
-						lastIndexed: new Date(),
-					}));
-				}
+			folderLogger.info("✅ Proceso completado:", {
+				folderId: data.folder.id,
+				stats: data.stats,
+			});
+
+			setFolders((prevFolders) =>
+				prevFolders.map((folder) =>
+					folder.id === data.folder.id
+						? {
+								...folder,
+								...data.folder,
+								_count: {
+									images: data.stats?.total || folder._count?.images || 0,
+								},
+								totalSize: data.stats?.totalSize || folder.totalSize,
+								lastIndexed: new Date().toISOString(),
+						  }
+						: folder
+				)
+			);
+
+			if (data.stats) {
+				setStats((prevStats) => ({
+					...prevStats,
+					totalFiles: prevStats.totalFiles + (data.stats?.processed || 0),
+					totalSize: prevStats.totalSize + (data.stats?.totalSize || 0),
+					lastIndexed: new Date(),
+				}));
 			}
 		};
 
 		const handleStats = (stats: any) => {
+			folderLogger.info("📊 Estadísticas actualizadas:", stats);
 			setStats((prevStats) => ({
 				...prevStats,
 				...stats,
@@ -139,6 +149,7 @@ export function FoldersSection() {
 
 		// Cleanup
 		return () => {
+			folderLogger.info("🧹 Limpiando suscripciones de eventos");
 			folderService.offProgress(handleProgress);
 			folderService.offError(handleError);
 			folderService.offComplete(handleComplete);
@@ -147,7 +158,20 @@ export function FoldersSection() {
 	}, [toast]);
 
 	useEffect(() => {
-		loadStats();
+		const loadInitialData = async () => {
+			folderLogger.info("🚀 Cargando datos iniciales");
+			await loadStats();
+			folderLogger.info("✅ Datos iniciales cargados");
+		};
+
+		loadInitialData().catch((error) => {
+			folderLogger.error("❌ Error cargando datos iniciales:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "Error cargando datos iniciales"
+			);
+		});
 	}, []);
 
 	const loadFolders = async () => {
@@ -155,18 +179,32 @@ export function FoldersSection() {
 			setIsLoading(true);
 			setError(null);
 			const folders = await getFolders();
-			setFolders(
-				folders.map((folder) => ({
-					...folder,
-					lastIndexed: folder.lastIndexed?.toISOString() || null,
-					createdAt: folder.createdAt.toISOString(),
-					updatedAt: folder.updatedAt.toISOString(),
-				}))
-			);
-			await loadStats();
+
+			// Transformar datos de manera segura
+			const transformedFolders = folders.map((folder) => ({
+				...folder,
+				lastIndexed: folder.lastIndexed?.toISOString?.() || null,
+				createdAt:
+					folder.createdAt?.toISOString?.() || new Date().toISOString(),
+				updatedAt:
+					folder.updatedAt?.toISOString?.() || new Date().toISOString(),
+				_count: {
+					images: folder._count?.images || 0,
+				},
+				totalSize: Number(folder.totalSize || 0),
+			}));
+
+			folderLogger.info("✅ Carpetas cargadas:", {
+				count: transformedFolders.length,
+			});
+			setFolders(transformedFolders);
 		} catch (error) {
-			console.error("Error cargando carpetas:", error);
-			setError("No se pudieron cargar las carpetas");
+			folderLogger.error("❌ Error cargando carpetas:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "No se pudieron cargar las carpetas"
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -177,34 +215,50 @@ export function FoldersSection() {
 			setIsLoading(true);
 			setError(null);
 			const folders = await getFolders();
+
+			// Calcular estadísticas de manera segura
 			const indexStats: FolderStats = {
 				totalFolders: folders.length,
 				totalFiles: folders.reduce(
-					(acc: number, folder: any) => acc + (folder._count?.images || 0),
+					(acc, folder) => acc + (folder._count?.images || 0),
 					0
 				),
 				totalSize: folders.reduce(
-					(acc: number, folder: any) => acc + Number(folder.totalSize || 0),
+					(acc, folder) => acc + Number(folder.totalSize || 0),
 					0
 				),
-				lastIndexed: folders.reduce((acc: Date | null, folder: any) => {
-					if (!acc || !folder.lastIndexed) return acc;
+				lastIndexed: folders.reduce((acc: Date | null, folder) => {
+					if (!folder.lastIndexed) return acc;
 					const date = new Date(folder.lastIndexed);
-					return acc > date ? acc : date;
-				}, null as Date | null),
+					return !acc || date > acc ? date : acc;
+				}, null),
 			};
+
+			folderLogger.info("✅ Estadísticas calculadas:", indexStats);
 			setStats(indexStats);
-			setFolders(
-				folders.map((folder) => ({
-					...folder,
-					lastIndexed: folder.lastIndexed?.toISOString() || null,
-					createdAt: folder.createdAt.toISOString(),
-					updatedAt: folder.updatedAt.toISOString(),
-				}))
-			);
+
+			// Actualizar carpetas con la misma transformación segura
+			const transformedFolders = folders.map((folder) => ({
+				...folder,
+				lastIndexed: folder.lastIndexed?.toISOString?.() || null,
+				createdAt:
+					folder.createdAt?.toISOString?.() || new Date().toISOString(),
+				updatedAt:
+					folder.updatedAt?.toISOString?.() || new Date().toISOString(),
+				_count: {
+					images: folder._count?.images || 0,
+				},
+				totalSize: Number(folder.totalSize || 0),
+			}));
+
+			setFolders(transformedFolders);
 		} catch (error) {
-			console.error("Error cargando estadísticas:", error);
-			setError("No se pudieron cargar las estadísticas");
+			folderLogger.error("❌ Error cargando estadísticas:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "No se pudieron cargar las estadísticas"
+			);
 			setStats(initialStats);
 		} finally {
 			setIsLoading(false);
@@ -226,11 +280,21 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
+			folderLogger.info("🔄 Agregando carpeta:", { path: folderPath });
 			await createFolder(folderPath);
+
+			folderLogger.info("✅ Carpeta agregada correctamente");
 			setFolderPath("");
+
+			// Recargar datos
 			await loadStats();
+
+			toast({
+				title: "Carpeta agregada",
+				description: "La carpeta se ha agregado correctamente",
+			});
 		} catch (error) {
-			console.error("Error agregando carpeta:", error);
+			folderLogger.error("❌ Error agregando carpeta:", error);
 			toast({
 				title: "Error",
 				description:
@@ -262,10 +326,20 @@ export function FoldersSection() {
 				progress: 0,
 			});
 
+			folderLogger.info("🔄 Reindexando carpeta:", { folderId });
 			await reindexFolder(folderId);
+
+			folderLogger.info("✅ Carpeta reindexada correctamente");
+
+			// Recargar datos
 			await loadStats();
+
+			toast({
+				title: "Carpeta reindexada",
+				description: "La carpeta se ha reindexado correctamente",
+			});
 		} catch (error) {
-			console.error("Error reindexando carpeta:", error);
+			folderLogger.error("❌ Error reindexando carpeta:", error);
 			toast({
 				title: "Error",
 				description:
@@ -285,15 +359,21 @@ export function FoldersSection() {
 	const handleRemoveFolder = async (folderId: string) => {
 		try {
 			setError(null);
+			folderLogger.info("🔄 Eliminando carpeta:", { folderId });
+
 			await deleteFolder(folderId);
+
+			folderLogger.info("✅ Carpeta eliminada correctamente");
+
+			// Recargar datos
 			await loadStats();
 
 			toast({
 				title: "Carpeta eliminada",
-				description: "Se ha eliminado la carpeta correctamente.",
+				description: "La carpeta se ha eliminado correctamente",
 			});
 		} catch (error) {
-			console.error("Error eliminando carpeta:", error);
+			folderLogger.error("❌ Error eliminando carpeta:", error);
 			toast({
 				title: "Error",
 				description:
@@ -308,15 +388,21 @@ export function FoldersSection() {
 	const handleFolderClick = async (folderId: string) => {
 		if (selectedFolder === folderId) {
 			try {
+				folderLogger.info("🗑️ Eliminando carpeta por doble click:", {
+					folderId,
+				});
 				await deleteFolder(folderId);
+
+				folderLogger.info("✅ Carpeta eliminada correctamente");
 				toast({
 					title: "Carpeta eliminada",
 					description: "La carpeta se eliminó correctamente",
 				});
+
 				await loadStats();
 				setSelectedFolder(null);
 			} catch (error) {
-				console.error("Error deleting folder:", error);
+				folderLogger.error("❌ Error eliminando carpeta:", error);
 				toast({
 					title: "Error",
 					description: "No se pudo eliminar la carpeta",
@@ -331,9 +417,22 @@ export function FoldersSection() {
 	if (error) {
 		return (
 			<Card className="p-4">
-				<div className="flex items-center gap-2 text-destructive">
-					<AlertCircle className="h-3.5 w-3.5" />
-					<p className="text-xs">{error}</p>
+				<div className="flex flex-col gap-2">
+					<div className="flex items-center gap-2 text-destructive">
+						<AlertCircle className="h-3.5 w-3.5" />
+						<p className="text-xs">{error}</p>
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => {
+							setError(null);
+							loadStats();
+						}}
+						className="w-full text-xs"
+					>
+						Reintentar
+					</Button>
 				</div>
 			</Card>
 		);

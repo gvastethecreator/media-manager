@@ -28,6 +28,34 @@ class FavoriteError extends Error {
   }
 }
 
+function transformImageToFileItem(image: any): FileItem {
+  return {
+    id: image.id,
+    name: image.name,
+    path: image.path,
+    type: 'image',
+    size: image.size,
+    width: image.width,
+    height: image.height,
+    metadata: image.metadata,
+    thumbnail: null,
+    thumbnailSize: image.thumbnailSize,
+    thumbnailWidth: image.thumbnailWidth,
+    thumbnailHeight: image.thumbnailHeight,
+    isPublic: image.isPublic,
+    isFavorite: image.isFavorite,
+    folderId: image.folderId,
+    createdAt: image.createdAt,
+    updatedAt: image.updatedAt,
+    collections: image.collections?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
+    tags: image.tags?.map((t: any) => ({ id: t.id, name: t.name })) ?? [],
+    albums: [],
+    characters: [],
+    places: [],
+    objects: []
+  }
+}
+
 export interface FavoriteWithImage extends Favorite {
   image: FileItem
 }
@@ -62,7 +90,7 @@ export async function addToFavorites(imageId: string): Promise<FavoriteWithImage
     revalidateAllPaths()
 
     favoriteLogger.info('✅ Imagen agregada a favoritos:', imageId)
-    return favorite as FavoriteWithImage
+    return { ...favorite, image: transformImageToFileItem(favorite.image) }
   } catch (error) {
     favoriteLogger.error('❌ Error al agregar a favoritos:', { imageId, error })
     throw new FavoriteError('No se pudo agregar la imagen a favoritos', error)
@@ -111,8 +139,13 @@ export async function getFavorites(): Promise<FavoriteWithImage[]> {
       }
     })
 
+    const transformedFavorites = favorites.map(favorite => ({
+      ...favorite,
+      image: transformImageToFileItem(favorite.image)
+    }))
+
     favoriteLogger.info('✅ Favoritos obtenidos:', { count: favorites.length })
-    return favorites as FavoriteWithImage[]
+    return transformedFavorites
   } catch (error) {
     favoriteLogger.error('❌ Error al obtener favoritos:', error)
     throw new FavoriteError('No se pudieron obtener los favoritos', error)
@@ -165,8 +198,13 @@ export async function getRecentFavorites(limit: number = 10): Promise<FavoriteWi
       }
     })
 
+    const transformedFavorites = favorites.map(favorite => ({
+      ...favorite,
+      image: transformImageToFileItem(favorite.image)
+    }))
+
     favoriteLogger.info('✅ Favoritos recientes obtenidos:', { count: favorites.length })
-    return favorites as FavoriteWithImage[]
+    return transformedFavorites
   } catch (error) {
     favoriteLogger.error('❌ Error al obtener favoritos recientes:', error)
     throw new FavoriteError('No se pudieron obtener los favoritos recientes', error)
