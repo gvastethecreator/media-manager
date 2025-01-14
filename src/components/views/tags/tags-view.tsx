@@ -33,22 +33,20 @@ import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
 import { eventsService, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
+import { getTags } from "@/app/actions/tag.actions";
 
 const viewLogger = logger.withContext("TagsView");
 
 interface Tag {
 	id: string;
 	name: string;
-	description?: string;
-	color?: string;
-	count?: number;
-	totalSize?: number;
-	recentImages?: string[];
-	relatedTags?: Array<{
-		id: string;
-		name: string;
-		count: number;
-	}>;
+	description: string | null;
+	color: string;
+	count: number;
+	size: string;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
 }
 
 interface TagCardProps {
@@ -111,60 +109,33 @@ const TagCard = memo(function TagCard({ tag, onClick }: TagCardProps) {
 								</CardDescription>
 							</div>
 						</div>
-				
 					</div>
 				</CardHeader>
 
 				<CardContent className="p-4 pt-2 flex-1 flex flex-col">
-					{/* Grid de imágenes recientes */}
+					{/* Grid de imágenes placeholder */}
 					<div className="relative group/grid flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{tag.recentImages && tag.recentImages.length > 0
-								? tag.recentImages.map((src, i) => (
-										<div
-											key={i}
-											className="relative rounded-md overflow-hidden aspect-square"
-										>
-											{src ? (
-												<img
-													src={src}
-													alt={`Imagen ${i + 1}`}
-													className="object-cover w-full h-full transition-transform group-hover/grid:scale-105"
-												/>
-											) : (
-												<div
-													className={cn(
-														"w-full h-full flex items-center justify-center bg-gradient-to-br",
-														getRandomGradient()
-													)}
-												>
-													<ImageIcon className="w-5 h-5 text-white/80" />
-												</div>
-											)}
-										</div>
-								  ))
-								: Array.from({ length: 9 }).map((_, i) => (
-										<div
-											key={i}
-											className={cn(
-												"relative rounded-md overflow-hidden aspect-square",
-												"flex items-center justify-center",
-												"bg-gradient-to-br transition-transform hover:scale-105",
-												getRandomGradient()
-											)}
-										>
-											<ImageIcon className="w-5 h-5 text-white/80" />
-										</div>
-								  ))}
+							{Array.from({ length: 9 }).map((_, i) => (
+								<div
+									key={i}
+									className={cn(
+										"relative rounded-md overflow-hidden aspect-square",
+										"flex items-center justify-center",
+										"bg-gradient-to-br transition-transform hover:scale-105",
+										getRandomGradient()
+									)}
+								>
+									<ImageIcon className="w-5 h-5 text-white/80" />
+								</div>
+							))}
 						</div>
 
 						{/* Overlay con hover */}
 						<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4">
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{(tag.count ?? 0) > 0
-									? `Ver ${tag.count} imágenes`
-									: "Sin imágenes"}
+								{tag.count > 0 ? `Ver ${tag.count} imágenes` : "Sin imágenes"}
 							</Button>
 						</div>
 					</div>
@@ -176,18 +147,18 @@ const TagCard = memo(function TagCard({ tag, onClick }: TagCardProps) {
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
 										<ImageIcon className="w-4 h-4" />
-										<span>{tag.count || 0} imágenes</span>
+										<span>{tag.count} imágenes</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
-									Esta etiqueta está presente en {tag.count || 0} imágenes
+									Esta etiqueta está presente en {tag.count} imágenes
 								</HoverCardContent>
 							</HoverCard>
 
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{formatBytes(tag.totalSize || 0)}</span>
+										<span>{tag.size}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
@@ -195,22 +166,6 @@ const TagCard = memo(function TagCard({ tag, onClick }: TagCardProps) {
 								</HoverCardContent>
 							</HoverCard>
 						</div>
-
-						{tag.relatedTags && tag.relatedTags.length > 0 && (
-							<>
-								<div className="flex flex-wrap gap-1">
-									{tag.relatedTags.map((relatedTag) => (
-										<Badge
-											key={relatedTag.id}
-											variant="secondary"
-											className="text-xs hover:bg-accent transition-colors"
-										>
-											{relatedTag.name}
-										</Badge>
-									))}
-								</div>
-							</>
-						)}
 					</div>
 				</CardContent>
 			</Card>
@@ -229,15 +184,14 @@ export function TagsView({ isResizing }: ViewProps) {
 		try {
 			setIsLoading(true);
 			viewLogger.info("🔄 Cargando etiquetas...");
-			const response = await fetch("/api/tags");
-			const data = await response.json();
+			const data = await getTags();
 			setTags(data);
 			viewLogger.info(`✅ ${data.length} etiquetas cargadas`);
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando etiquetas:", err);
-			setError(errorMessage);
+		} catch (error) {
+			viewLogger.error("❌ Error al cargar etiquetas:", error);
+			setError(
+				error instanceof Error ? error.message : "Error al cargar etiquetas"
+			);
 		} finally {
 			setIsLoading(false);
 		}

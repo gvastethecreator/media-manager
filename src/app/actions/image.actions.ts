@@ -114,8 +114,8 @@ export async function updateImageStats(imageId: string, type: 'view' | 'download
     })
 
     // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
-    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
+
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE)
 
     revalidatePath(`/api/stats/${imageId}`)
   } catch (error) {
@@ -179,8 +179,7 @@ export async function createImage(data: CreateImageInput) {
     })
 
     // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
-    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE)
 
     revalidatePath('/api/images')
     revalidatePath(`/api/folders/${data.folderId}`)
@@ -652,8 +651,7 @@ export async function updateImage(id: string, data: Partial<Image>): Promise<Ima
     })
 
     // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
-    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE)
 
     revalidatePath(`/api/images/${id}`)
     return updatedImage
@@ -685,9 +683,8 @@ export async function updateFavoriteStatus(id: string, isFavorite: boolean): Pro
     })
 
     // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE)
+    statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE)
     statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
-    statsEventEmitter.emit(STATS_EVENTS.ACTIVITY_CHANGE)
 
     revalidatePath('/api/images/favorites')
     revalidatePath(`/api/images/${id}`)

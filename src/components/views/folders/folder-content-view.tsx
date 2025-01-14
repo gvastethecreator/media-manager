@@ -5,7 +5,10 @@ import { BaseContentView, ContentViewProvider } from "@/components/views/base";
 import type { FolderContentProps } from "@/components/views/base";
 import { Folder } from "lucide-react";
 import { useCallback } from "react";
-import { folderService } from "@/services/folder.service";
+import { getFolderImages, reindexFolder } from "@/app/actions/folder.actions";
+import { logger } from "@/lib/logger";
+
+const viewLogger = logger.withContext("FolderContentView");
 
 export function FolderContentView() {
 	const {
@@ -15,21 +18,30 @@ export function FolderContentView() {
 		setCurrentFolder,
 		isLoading,
 		currentFolder,
+		setItems,
+		setIsLoading,
 	} = useFileManager();
 
 	const handleReindexFolder = useCallback(
 		async (id: string) => {
 			try {
-				await folderService.reindexFolder(id);
-				// Recargar la carpeta después de reindexar
-				if (setCurrentFolder) {
-					await setCurrentFolder(id);
+				viewLogger.info("🔄 Reindexando carpeta:", id);
+				setIsLoading(true);
+				await reindexFolder(id);
+
+				// Recargar las imágenes después de reindexar
+				if (id) {
+					const images = await getFolderImages(id);
+					setItems(images);
 				}
+				viewLogger.info("✅ Carpeta reindexada:", id);
 			} catch (error) {
-				console.error("Error reindexando carpeta:", error);
+				viewLogger.error("❌ Error reindexando carpeta:", error);
+			} finally {
+				setIsLoading(false);
 			}
 		},
-		[setCurrentFolder]
+		[setItems, setIsLoading]
 	);
 
 	const contentProps: FolderContentProps = {

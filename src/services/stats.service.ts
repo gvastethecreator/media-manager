@@ -24,7 +24,8 @@ export const STATS_EVENTS = {
   ALBUM_CHANGE: 'album_change',
   CHARACTER_CHANGE: 'character_change',
   PLACE_CHANGE: 'place_change',
-  OBJECT_CHANGE: 'object_change'
+  OBJECT_CHANGE: 'object_change',
+  FILES_CHANGE: 'files_change'
 } as const
 
 export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS]
@@ -37,6 +38,7 @@ export type StatsUpdateEvent =
   | 'character_change'
   | 'place_change'
   | 'object_change'
+  | 'files_change'
 export type StatsEvents = typeof STATS_EVENTS
 
 export const statsEventEmitter = new EventEmitter()

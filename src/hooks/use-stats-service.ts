@@ -10,7 +10,7 @@ export function useStatsService() {
   useEffect(() => {
     try {
       statsLogger.info('🔄 Inicializando servicio de estadísticas')
-      statsEventEmitter.init()
+      statsEventEmitter.emit('init')
     } catch (error) {
       statsLogger.error('❌ Error al inicializar servicio de estadísticas:', error)
     }
