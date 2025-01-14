@@ -1,9 +1,10 @@
 import { logger } from '@/lib/logger'
 import {
-  getGeneralStats,
+  getSystemStats,
   getImageStats,
   incrementImageView,
   incrementImageDownload,
+  invalidateStats,
   type GeneralStats,
 } from '@/app/actions/stats.actions'
 import { EventEmitter } from 'events'
@@ -41,21 +42,6 @@ export type StatsEvents = typeof STATS_EVENTS
 export const statsEventEmitter = new EventEmitter()
 statsEventEmitter.setMaxListeners(50)
 
-export type CacheInvalidationEvent =
-  | "collections:modified"
-  | "tags:modified"
-  | "favorites:modified"
-  | "albums:modified"
-  | "characters:modified"
-  | "places:modified"
-  | "objects:modified";
-
-export enum EVENTS {
-  UPDATE_NEEDED = 'update_needed',
-  STATS_UPDATED = 'stats_updated',
-  ERROR = 'error'
-}
-
 export class StatsService extends EventEmitter {
   private static instance: StatsService
   private isUpdating: boolean = false
@@ -73,44 +59,18 @@ export class StatsService extends EventEmitter {
     return StatsService.instance
   }
 
-  emitUpdateNeeded(events: CacheInvalidationEvent | CacheInvalidationEvent[]) {
-    const eventArray = Array.isArray(events) ? events : [events];
-    statsLogger.info('🔄 Emitiendo necesidad de actualización:', { events: eventArray })
-    this.emit(EVENTS.UPDATE_NEEDED, eventArray)
-  }
-
-  onUpdateNeeded(callback: (events: CacheInvalidationEvent[]) => void): void {
-    this.on(EVENTS.UPDATE_NEEDED, callback)
-  }
-
-  offUpdateNeeded(callback: (events: CacheInvalidationEvent[]) => void): void {
-    this.off(EVENTS.UPDATE_NEEDED, callback)
-  }
-
-  onStatsUpdated(callback: (stats: any) => void): void {
-    this.on(EVENTS.STATS_UPDATED, callback)
-  }
-
-  offStatsUpdated(callback: (stats: any) => void): void {
-    this.off(EVENTS.STATS_UPDATED, callback)
-  }
-
-  onError(callback: (error: any) => void): void {
-    this.on(EVENTS.ERROR, callback)
-  }
-
-  offError(callback: (error: any) => void): void {
-    this.off(EVENTS.ERROR, callback)
+  async invalidateStats() {
+    await invalidateStats()
   }
 
   async getGeneralStats(): Promise<GeneralStats> {
     try {
-      const stats = await getGeneralStats()
+      const stats = await getSystemStats()
       this.emit(STATS_EVENTS.STATS_UPDATED, stats)
       return stats
     } catch (error) {
       statsLogger.error('Error al obtener estadísticas generales', { error })
-      this.emit(EVENTS.ERROR, error)
+      this.emit('error', error)
       throw error
     }
   }
@@ -123,7 +83,7 @@ export class StatsService extends EventEmitter {
         error,
         imageId,
       })
-      this.emit(EVENTS.ERROR, error)
+      this.emit('error', error)
       throw error
     }
   }
@@ -135,7 +95,7 @@ export class StatsService extends EventEmitter {
       return stats
     } catch (error) {
       statsLogger.error('Error al incrementar vistas', { error, imageId })
-      this.emit(EVENTS.ERROR, error)
+      this.emit('error', error)
       throw error
     }
   }
@@ -150,50 +110,9 @@ export class StatsService extends EventEmitter {
       return stats
     } catch (error) {
       statsLogger.error('Error al incrementar descargas', { error, imageId })
-      this.emit(EVENTS.ERROR, error)
+      this.emit('error', error)
       throw error
     }
-  }
-
-  // Métodos para emitir eventos de cambios
-  emitCollectionChange(imageId: string) {
-    this.emit(STATS_EVENTS.COLLECTION_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['collection_change'])
-  }
-
-  emitTagChange(imageId: string) {
-    this.emit(STATS_EVENTS.TAG_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['tag_change'])
-  }
-
-  emitFavoriteChange(imageId: string) {
-    this.emit(STATS_EVENTS.FAVORITE_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['favorite_change'])
-  }
-
-  emitFolderChange(folderId: string) {
-    this.emit(STATS_EVENTS.FOLDER_CHANGE, { folderId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['folder_change'])
-  }
-
-  emitAlbumChange(imageId: string) {
-    this.emit(STATS_EVENTS.ALBUM_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['album_change'])
-  }
-
-  emitCharacterChange(imageId: string) {
-    this.emit(STATS_EVENTS.CHARACTER_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['character_change'])
-  }
-
-  emitPlaceChange(imageId: string) {
-    this.emit(STATS_EVENTS.PLACE_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['place_change'])
-  }
-
-  emitObjectChange(imageId: string) {
-    this.emit(STATS_EVENTS.OBJECT_CHANGE, { imageId })
-    this.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['object_change'])
   }
 }
 

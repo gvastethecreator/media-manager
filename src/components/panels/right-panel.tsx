@@ -44,9 +44,8 @@ export function RightPanel() {
 							<TabsContent value="info" className="h-[calc(100%-48px)]">
 								<InfoPanel />
 							</TabsContent>
-							<TabsContent value="stats" className="h-[calc(100%-48px)]">
-								<StatsPanel />
-							</TabsContent>
+							
+
 						</Tabs>
 					</motion.div>
 				)}

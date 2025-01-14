@@ -1,8 +1,6 @@
 "use client";
 
 import { memo } from "react";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 interface TagUsageProps {
@@ -12,22 +10,9 @@ interface TagUsageProps {
 		color: string;
 		count: number;
 	};
-	isLoading?: boolean;
 }
 
-export const TagUsage = memo(function TagUsage({
-	tag,
-	isLoading = false,
-}: TagUsageProps) {
-	if (isLoading) {
-		return (
-			<div className="flex items-center justify-between py-1.5 px-2">
-				<Skeleton className="h-5 w-24" />
-				<Skeleton className="h-5 w-12" />
-			</div>
-		);
-	}
-
+export const TagUsage = memo(function TagUsage({ tag }: TagUsageProps) {
 	const percentage = Math.min(100, (tag.count / 100) * 100);
 
 	return (
