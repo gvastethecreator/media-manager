@@ -1,82 +1,129 @@
-import { create } from 'zustand'
-import type { FileItem } from '@/types/file-item'
-import { logger } from '@/lib/logger'
+import { create } from 'zustand';
+import type { FileItem } from '@/types/file-item';
+import { logger } from '@/lib/logger';
 
-const viewerLogger = logger.withContext('ImageViewer')
+const viewerLogger = logger.withContext('ImageViewer');
 
+// Interfaz para el estado del visor
 interface ImageViewerState {
-  isOpen: boolean
-  images: FileItem[]
-  currentIndex: number
-  openViewer: (images: FileItem[], initialIndex?: number) => void
-  closeViewer: () => void
-  nextImage: () => void
-  previousImage: () => void
-  setCurrentIndex: (index: number) => void
+  isOpen: boolean;
+  images: FileItem[];
+  currentIndex: number;
+  zoom: number;
+  rotation: number;
+  openViewer: (images: FileItem[], initialIndex?: number) => void;
+  closeViewer: () => void;
+  nextImage: () => void;
+  previousImage: () => void;
+  setCurrentIndex: (index: number) => void;
+  setZoom: (zoom: number) => void;
+  setRotation: (rotation: number) => void;
 }
 
-export const useImageViewer = create<ImageViewerState>((set, get) => ({
+// Crear el store
+export const useImageViewerStore = create<ImageViewerState>((set, get) => ({
+  // Estado inicial
   isOpen: false,
   images: [],
   currentIndex: 0,
+  zoom: 1,
+  rotation: 0,
 
-  openViewer: (images, initialIndex = 0) => {
-    const state = get()
-    if (state.isOpen && state.images === images && state.currentIndex === initialIndex) {
-      viewerLogger.info('🔄 El visor ya está abierto con las mismas imágenes')
-      return
-    }
+  // Acciones
+  openViewer: (images: FileItem[], initialIndex = 0) => {
+    viewerLogger.info('Abriendo visor de imágenes', { filesCount: images.length, initialIndex });
 
-    viewerLogger.info('🖼️ Abriendo visor con', images.length, 'imágenes')
     set({
-      isOpen: true,
       images,
-      currentIndex: initialIndex
-    })
+      isOpen: true,
+      currentIndex: initialIndex,
+      zoom: 1,
+      rotation: 0
+    });
   },
 
   closeViewer: () => {
-    const state = get()
-    if (!state.isOpen) {
-      viewerLogger.info('🚫 El visor ya está cerrado')
-      return
-    }
-
-    viewerLogger.info('🚪 Cerrando visor')
+    viewerLogger.info('Cerrando visor de imágenes');
     set({
       isOpen: false,
       images: [],
-      currentIndex: 0
-    })
+      currentIndex: 0,
+      zoom: 1,
+      rotation: 0
+    });
   },
 
   nextImage: () => {
-    const { images, currentIndex } = get()
-    if (currentIndex < images.length - 1) {
-      viewerLogger.info('⏭️ Siguiente imagen:', currentIndex + 1)
-      set({ currentIndex: currentIndex + 1 })
-    } else {
-      viewerLogger.info('🔚 Ya estás en la última imagen')
-    }
+    const state = get();
+    if (!state.images.length) return;
+
+    const nextIndex = (state.currentIndex + 1) % state.images.length;
+    viewerLogger.debug('Navegando a siguiente imagen', { currentIndex: state.currentIndex, nextIndex });
+
+    set({
+      currentIndex: nextIndex,
+      zoom: 1,
+      rotation: 0
+    });
   },
 
   previousImage: () => {
-    const { currentIndex } = get()
-    if (currentIndex > 0) {
-      viewerLogger.info('⏮️ Imagen anterior:', currentIndex - 1)
-      set({ currentIndex: currentIndex - 1 })
-    } else {
-      viewerLogger.info('🔝 Ya estás en la primera imagen')
-    }
+    const state = get();
+    if (!state.images.length) return;
+
+    const prevIndex = state.currentIndex > 0 ? state.currentIndex - 1 : state.images.length - 1;
+    viewerLogger.debug('Navegando a imagen anterior', { currentIndex: state.currentIndex, prevIndex });
+
+    set({
+      currentIndex: prevIndex,
+      zoom: 1,
+      rotation: 0
+    });
   },
 
-  setCurrentIndex: (index) => {
-    const { images } = get()
-    if (index >= 0 && index < images.length) {
-      viewerLogger.info('🔄 Cambiando a imagen:', index)
-      set({ currentIndex: index })
-    } else {
-      viewerLogger.warn('⚠️ Índice fuera de rango:', index)
+  setCurrentIndex: (index: number) => {
+    const state = get();
+    if (index < 0 || index >= state.images.length) {
+      viewerLogger.warn('Índice fuera de rango', { index, totalItems: state.images.length });
+      return;
     }
+
+    viewerLogger.debug('Estableciendo índice actual', { previousIndex: state.currentIndex, newIndex: index });
+    set({
+      currentIndex: index,
+      zoom: 1,
+      rotation: 0
+    });
+  },
+
+  setZoom: (zoom: number) => {
+    viewerLogger.debug('Ajustando zoom', { previousZoom: get().zoom, newZoom: zoom });
+    set({ zoom });
+  },
+
+  setRotation: (rotation: number) => {
+    viewerLogger.debug('Ajustando rotación', { previousRotation: get().rotation, newRotation: rotation });
+    set({ rotation });
   }
-}))
+}));
+
+// Hook personalizado para facilitar el uso
+export const useImageViewer = () => {
+  const store = useImageViewerStore();
+
+  return {
+    isOpen: store.isOpen,
+    currentImage: store.images[store.currentIndex],
+    currentIndex: store.currentIndex,
+    images: store.images,
+    zoom: store.zoom,
+    rotation: store.rotation,
+    openViewer: store.openViewer,
+    closeViewer: store.closeViewer,
+    nextImage: store.nextImage,
+    previousImage: store.previousImage,
+    setCurrentIndex: store.setCurrentIndex,
+    setZoom: store.setZoom,
+    setRotation: store.setRotation
+  };
+};

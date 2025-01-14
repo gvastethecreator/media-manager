@@ -1,153 +1,131 @@
-import { create } from 'zustand'
-import { logger } from '@/lib/logger'
+import { create } from 'zustand';
+import type { Profile } from '@prisma/client';
+import { logger } from '../lib/logger';
 import {
-  getProfiles,
-  getProfile,
   createProfile as createProfileAction,
-  updateProfile as updateProfileAction,
   deleteProfile as deleteProfileAction,
+  getProfiles,
+  updateProfile as updateProfileAction,
   activateProfile as activateProfileAction,
-  getActiveProfile as getActiveProfileAction
-} from '@/app/actions/profile.actions'
+  getActiveProfile
+} from '../app/actions/profile.actions';
+import type {
+  ProfileCreate,
+  ProfileUpdate,
+  ProfileWithStats
+} from '../services/profile.service';
+import { createStoreFactory } from './store.factory';
+import type { BaseStore, ExtendedStore } from './types';
 
-const profileLogger = logger.withContext('ProfileStore')
-
-export interface ProfileCreate {
-  name: string
-  emoji?: string
-  color?: string
-  theme?: string
-  language?: string
-  description?: string
-  isActive?: boolean
+// Estado extendido específico para Profile
+interface ProfileState {
+  activeProfile: ProfileWithStats | null;
 }
 
-export interface ProfileUpdate extends Partial<Omit<ProfileCreate, 'name'>> {
-  id: string
-  name?: string
-}
+const profileLogger = logger.withContext('ProfileStore');
 
-export type Profile = Awaited<ReturnType<typeof getProfile>>
-
-interface ProfilesState {
-  profiles: Profile[]
-  currentProfile: Profile | null
-  activeProfile: Profile | null
-  isLoading: boolean
-  error: string | null
-  // Acciones
-  loadProfiles: () => Promise<void>
-  createProfile: (data: ProfileCreate) => Promise<void>
-  updateProfile: (id: string, data: ProfileUpdate) => Promise<void>
-  deleteProfile: (id: string) => Promise<void>
-  activateProfile: (id: string) => Promise<void>
-  loadActiveProfile: () => Promise<void>
-}
-
-export const useProfilesStore = create<ProfilesState>((set, get) => ({
-  profiles: [],
-  currentProfile: null,
-  activeProfile: null,
-  isLoading: false,
-  error: null,
-
-  loadProfiles: async () => {
-    try {
-      set({ isLoading: true, error: null })
-      const profiles = await getProfiles()
-      set({ profiles, isLoading: false })
-      profileLogger.info('📥 Perfiles cargados:', { count: profiles.length })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al cargar perfiles:', { error })
+// Store base usando StoreFactory
+const useBaseProfileStore = createStoreFactory<ProfileWithStats, ProfileState, ProfileCreate, ProfileUpdate>(
+  {
+    name: 'profiles',
+    logger: profileLogger,
+    initialState: {
+      items: [],
+      loading: false,
+      error: null,
+      currentPage: 1,
+      totalPages: 1,
+      itemsPerPage: 50,
+      selectedItem: null,
+      selectedItems: [],
+      lastSelectedItem: null
+    },
+    actions: {
+      beforeCreate: async (data) => {
+        // Validar datos antes de crear
+        if (!data.name?.trim()) {
+          throw new Error('El nombre es requerido');
+        }
+        return {
+          ...data,
+          emoji: data.emoji || '👤',
+          color: data.color || '#3b82f6',
+          theme: data.theme || 'system',
+          language: data.language || 'es',
+          isActive: false
+        };
+      },
+      afterCreate: async (profile) => {
+        profileLogger.info('Perfil creado exitosamente', { profile });
+      },
+      beforeUpdate: async (id, data) => {
+        // Validar datos antes de actualizar
+        if (data.name !== undefined && !data.name.trim()) {
+          throw new Error('El nombre no puede estar vacío');
+        }
+        return data;
+      },
+      afterUpdate: async (profile) => {
+        profileLogger.info('Perfil actualizado exitosamente', { profile });
+      },
+      beforeDelete: async (id) => {
+        // Verificar que no sea el perfil activo
+        const activeProfile = await getActiveProfile();
+        if (activeProfile?.id === id) {
+          throw new Error('No se puede eliminar el perfil activo');
+        }
+        profileLogger.info('Preparando eliminación de perfil', { id });
+      },
+      afterDelete: async (id) => {
+        profileLogger.info('Perfil eliminado exitosamente', { id });
+      }
     }
   },
-
-  createProfile: async (data: ProfileCreate) => {
-    try {
-      set({ isLoading: true, error: null })
-      const profile = await createProfileAction(data)
-      set(state => ({
-        profiles: [...state.profiles, profile],
-        isLoading: false
-      }))
-      profileLogger.info('✨ Perfil creado:', { profile })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al crear perfil:', { error })
-    }
-  },
-
-  updateProfile: async (id: string, data: ProfileUpdate) => {
-    try {
-      set({ isLoading: true, error: null })
-      const updatedProfile = await updateProfileAction(id, data)
-      set(state => ({
-        profiles: state.profiles.map(p =>
-          p.id === id ? updatedProfile : p
-        ),
-        currentProfile: state.currentProfile?.id === id ? updatedProfile : state.currentProfile,
-        activeProfile: state.activeProfile?.id === id ? updatedProfile : state.activeProfile,
-        isLoading: false
-      }))
-      profileLogger.info('📝 Perfil actualizado:', { id, data })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al actualizar perfil:', { id, error })
-    }
-  },
-
-  deleteProfile: async (id: string) => {
-    try {
-      set({ isLoading: true, error: null })
-      await deleteProfileAction(id)
-      set(state => ({
-        profiles: state.profiles.filter(p => p.id !== id),
-        currentProfile: state.currentProfile?.id === id ? null : state.currentProfile,
-        activeProfile: state.activeProfile?.id === id ? null : state.activeProfile,
-        isLoading: false
-      }))
-      profileLogger.info('🗑️ Perfil eliminado:', { id })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al eliminar perfil:', { id, error })
-    }
-  },
-
-  activateProfile: async (id: string) => {
-    try {
-      set({ isLoading: true, error: null })
-      const profile = await activateProfileAction(id)
-      set(state => ({
-        profiles: state.profiles.map(p => ({
-          ...p,
-          isActive: p.id === id
-        })),
-        activeProfile: profile,
-        isLoading: false
-      }))
-      profileLogger.info('🔔 Perfil activado:', { id })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al activar perfil:', { id, error })
-    }
-  },
-
-  loadActiveProfile: async () => {
-    try {
-      set({ isLoading: true, error: null })
-      const profile = await getActiveProfileAction()
-      set({ activeProfile: profile, isLoading: false })
-      profileLogger.info('📥 Perfil activo cargado:', { profile: profile.name })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-      set({ error: errorMessage, isLoading: false })
-      profileLogger.error('❌ Error al cargar perfil activo:', { error })
-    }
+  {
+    getItems: getProfiles,
+    createItem: createProfileAction,
+    updateItem: updateProfileAction,
+    deleteItem: deleteProfileAction
   }
-}))
+);
+
+// Crear el store extendido
+type ProfileStore = ExtendedStore<ProfileWithStats, ProfileState, ProfileCreate, ProfileUpdate>;
+
+// Exportar el hook con el nombre anterior para mantener compatibilidad
+export const useProfilesStore = create<ProfileStore>((set, get) => {
+  const baseStore = useBaseProfileStore();
+
+  return {
+    ...baseStore,
+    activeProfile: null,
+
+    // Acciones adicionales específicas de profiles
+    activateProfile: async (id: string) => {
+      try {
+        set({ loading: true, error: null });
+        await activateProfileAction(id);
+        const activeProfile = await getActiveProfile();
+        set({ activeProfile, loading: false });
+        profileLogger.info('Perfil activado exitosamente', { id });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        set({ error: new Error(errorMessage), loading: false });
+        profileLogger.error('Error al activar perfil:', { id, error });
+      }
+    },
+
+    loadActiveProfile: async () => {
+      try {
+        set({ loading: true, error: null });
+        const activeProfile = await getActiveProfile();
+        set({ activeProfile, loading: false });
+        profileLogger.info('Perfil activo cargado exitosamente');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        set({ error: new Error(errorMessage), loading: false });
+        profileLogger.error('Error al cargar perfil activo:', { error });
+      }
+    }
+  };
+});

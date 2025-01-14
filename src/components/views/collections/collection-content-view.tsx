@@ -1,23 +1,26 @@
 "use client";
 
-import { useCollectionsStore } from "@/store/collections.store";
+import { useCollectionStore } from "@/store/collections.store";
 import { BaseContentView, ContentViewProvider } from "@/components/views/base";
-import type { CollectionContentProps } from "@/components/views/base";
+import type { CollectionContentProps } from "@/components/views/base/types";
 import { Library } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FileItem } from "@/types/file-item";
 import { getCollectionImages } from "@/app/actions/collection.actions";
+import type { Collection } from "@prisma/client";
 
 export function CollectionContentView() {
 	const {
-		loading: isLoading,
-		currentCollection,
+		selectedItem: currentCollection,
 		addImageToCollection,
-	} = useCollectionsStore();
+		removeImageFromCollection,
+		selectItem,
+		loading: isLoading,
+	} = useCollectionStore();
 
 	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
+	const [error, setError] = useState<string | null>(null);
 
-	// Cargar imágenes cuando cambia la colección
 	useEffect(() => {
 		if (!currentCollection?.id) {
 			setCollectionImages([]);
@@ -28,62 +31,51 @@ export function CollectionContentView() {
 			try {
 				const images = await getCollectionImages(currentCollection.id);
 				setCollectionImages(images);
+				setError(null);
 			} catch (error) {
 				console.error("Error loading collection images:", error);
+				setError("Error al cargar las imágenes de la colección");
 			}
 		};
 
 		loadImages();
 	}, [currentCollection?.id]);
 
-	const handleToggleItemSelection = useCallback(
-		(item: FileItem, isMultiSelect: boolean) => {
-			const store = useCollectionsStore.getState();
-			store.toggleItemSelection(
-				{
-					id: item.id,
-					name: item.name,
-					emoji: "📷",
-					description: null,
-					color: "#3b82f6",
-					shortcut: null,
-					sortBy: "name",
-					filters: "[]",
-					createdAt: item.createdAt,
-					updatedAt: item.updatedAt,
-				},
-				isMultiSelect
-			);
-		},
-		[]
-	);
+	const handleToggleItemSelection = async (item: FileItem) => {
+		if (!currentCollection) return;
+
+		const isSelected = collectionImages.some((img) => img.id === item.id);
+
+		if (isSelected) {
+			await removeImageFromCollection(currentCollection.id, item.id);
+		} else {
+			await addImageToCollection(currentCollection.id, item.id);
+		}
+
+		// Recargar imágenes después de la operación
+		const updatedImages = await getCollectionImages(currentCollection.id);
+		setCollectionImages(updatedImages);
+	};
+
+	const setCurrentContainer = (collection: Collection) => {
+		selectItem(collection);
+	};
 
 	const contentProps: CollectionContentProps = {
 		items: collectionImages,
 		isLoading,
+		error,
 		toggleItemSelection: handleToggleItemSelection,
 		currentContainerId: currentCollection?.id ?? null,
 		containerName: currentCollection?.name ?? null,
 		setCurrentContainer: async (id: string) => {
-			const store = useCollectionsStore.getState();
-			await store.loadCollectionContent(id);
-		},
-		addImagesToCollection: async (imageIds: string[]) => {
-			if (!currentCollection?.id) return;
-
-			for (const imageId of imageIds) {
-				await addImageToCollection(currentCollection.id, imageId);
-				// Recargar imágenes después de agregar
-				const images = await getCollectionImages(currentCollection.id);
-				setCollectionImages(images);
-			}
+			const collection = { id, name: "" }; // Mínimo requerido para selección
+			selectItem(collection as Collection);
 		},
 		emptyState: {
 			icon: Library,
 			title: "Colección vacía",
-			description: `No se encontraron imágenes en ${
-				currentCollection?.name || "esta colección"
-			}`,
+			description: `No se encontraron imágenes en ${currentCollection?.name || "esta colección"}`,
 		},
 	};
 

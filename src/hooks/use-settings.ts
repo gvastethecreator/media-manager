@@ -110,8 +110,7 @@ export const useSettings = () => {
   const updateSystemSettings = store.updateSystemSettings
 
   // Acciones de atajos
-  const updateShortcut = store.updateShortcut
-  const deleteShortcut = store.deleteShortcut
+  const updateShortcuts = store.updateShortcuts
 
   // Acciones compuestas
   const createProfile = useCallback(

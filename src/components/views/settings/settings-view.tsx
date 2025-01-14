@@ -3,7 +3,13 @@
 import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DatabaseIcon, BookmarkIcon, CatIcon } from "lucide-react";
+import {
+	DatabaseIcon,
+	BookmarkIcon,
+	CatIcon,
+	TagIcon,
+	AlbumIcon,
+} from "lucide-react";
 
 // Importar las secciones
 import { FoldersSection } from "./settings-sections/folders-section";
@@ -34,7 +40,7 @@ export function SettingsView() {
 							<DatabaseIcon className="h-4 w-4 mr-2" /> Sistema
 						</TabsTrigger>
 
-						<TabsTrigger value="collections">
+						<TabsTrigger value="organize">
 							<BookmarkIcon className="h-4 w-4 mr-2" /> Organización
 						</TabsTrigger>
 
@@ -42,28 +48,20 @@ export function SettingsView() {
 							<CatIcon className="h-4 w-4 mr-2" /> Ayuda
 						</TabsTrigger>
 					</TabsList>
-
 					<TabsContent value="folders" className="gap-2 px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
-								<FoldersSection />
-								<ThumbnailsSection />
-
-
+							<FoldersSection />
+							<ThumbnailsSection />
 						</div>
 					</TabsContent>
-
-					<TabsContent value="collections" className="px-2">
-						<div className="grid grid-cols-2 gap-2 w-full">
-							<CollectionsSection />
-							<TagsSection />
-							<AlbumsSection />
-							<CharactersSection />
-							<ObjectsSection />
-							<PlacesSection />
-						</div>
+					<TabsContent value="organize" className="px-2">
+						<CollectionsSection />
+						<TagsSection />
+						<AlbumsSection />
+						<CharactersSection />
+						<ObjectsSection />
 					</TabsContent>
-
-					<TabsContent value="shortcuts" className="px-2">
+					<TabsContent value="help" className="px-2">
 						<ProfilesSection />
 					</TabsContent>
 				</Tabs>
