@@ -6,6 +6,7 @@ import {
   deleteAlbum,
   getAlbums,
   updateAlbum,
+  addImageToAlbum as addImageToAlbumAction,
   type AlbumCreate,
   type AlbumUpdate
 } from '../app/actions/album.actions';
@@ -16,7 +17,7 @@ interface AlbumState {
   sortOrder: 'asc' | 'desc';
 }
 
-export const useAlbumStore = createStoreFactory<Album, AlbumState, AlbumCreate, AlbumUpdate>(
+const baseAlbumStore = createStoreFactory<Album, AlbumState, AlbumCreate, AlbumUpdate>(
   {
     name: 'albums',
     logger,
@@ -38,3 +39,20 @@ export const useAlbumStore = createStoreFactory<Album, AlbumState, AlbumCreate, 
     deleteItem: deleteAlbum
   }
 );
+
+// Exportar el hook con funcionalidad extendida
+export const useAlbumStore = () => {
+  const store = baseAlbumStore();
+  return {
+    ...store,
+    addImageToAlbum: async (albumId: string, imageId: string) => {
+      try {
+        await addImageToAlbumAction(albumId, imageId);
+        await store.loadItems();
+      } catch (error) {
+        logger.error('Error adding image to album:', error);
+        throw error;
+      }
+    }
+  };
+};

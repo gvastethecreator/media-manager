@@ -6,61 +6,29 @@ import {
   deleteCharacter,
   getCharacters,
   updateCharacter,
+  addImageToCharacter as addImageToCharacterAction,
   type CharacterCreate,
   type CharacterUpdate
 } from '../app/actions/character.actions';
 
-// Estado extendido específico para Character
 interface CharacterState {
-  filters: {
-    searchQuery: string;
-    sortBy: 'name' | 'level' | 'class' | 'race' | 'createdAt' | 'updatedAt';
-    sortOrder: 'asc' | 'desc';
-    class: string[];
-    race: string[];
-    alignment: string[];
-    minLevel: number;
-    maxLevel: number;
-  };
+  searchQuery: string;
+  sortBy: 'name' | 'createdAt' | 'updatedAt';
+  sortOrder: 'asc' | 'desc';
 }
 
-export const useCharacterStore = createStoreFactory<Character, CharacterState, CharacterCreate, CharacterUpdate>(
+const baseCharacterStore = createStoreFactory<Character, CharacterState, CharacterCreate, CharacterUpdate>(
   {
     name: 'characters',
     logger,
     actions: {
       beforeCreate: async (data) => {
-        // Validar datos antes de crear
-        if (!data.name?.trim()) {
-          throw new Error('El nombre es requerido');
-        }
-        if (!data.class?.trim()) {
-          throw new Error('La clase es requerida');
-        }
-        if (!data.race?.trim()) {
-          throw new Error('La raza es requerida');
-        }
+        // Aquí podríamos hacer validaciones o transformaciones antes de crear
         return data;
       },
       afterCreate: async (character) => {
+        // Aquí podríamos hacer acciones después de crear, como notificaciones
         logger.info('Personaje creado exitosamente', { character });
-      },
-      beforeUpdate: async (id, data) => {
-        // Validar datos antes de actualizar
-        if (data.name !== undefined && !data.name.trim()) {
-          throw new Error('El nombre no puede estar vacío');
-        }
-        return data;
-      },
-      afterUpdate: async (character) => {
-        logger.info('Personaje actualizado exitosamente', { character });
-      },
-      beforeDelete: async (id) => {
-        // Aquí podríamos verificar si el personaje tiene imágenes asociadas
-        logger.info('Preparando eliminación de personaje', { id });
-      },
-      afterDelete: async (id) => {
-        logger.info('Personaje eliminado exitosamente', { id });
       }
     }
   },
@@ -71,3 +39,20 @@ export const useCharacterStore = createStoreFactory<Character, CharacterState, C
     deleteItem: deleteCharacter
   }
 );
+
+// Exportar el hook con funcionalidad extendida
+export const useCharacterStore = () => {
+  const store = baseCharacterStore();
+  return {
+    ...store,
+    addImageToCharacter: async (characterId: string, imageId: string) => {
+      try {
+        await addImageToCharacterAction(characterId, imageId);
+        await store.loadItems();
+      } catch (error) {
+        logger.error('Error adding image to character:', error);
+        throw error;
+      }
+    }
+  };
+};

@@ -5,7 +5,7 @@ export type Language = 'es' | 'en'
 export type ThumbnailQuality = 'low' | 'medium' | 'high'
 export type SortMode = 'name' | 'date' | 'size' | 'type'
 export type SortDirection = 'asc' | 'desc'
-export type ViewMode = 'grid' | 'list' | 'details'
+export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards'
 export type ThumbnailSize = 'sm' | 'md' | 'lg'
 
 export interface Profile {

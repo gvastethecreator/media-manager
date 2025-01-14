@@ -22,12 +22,15 @@ import {
 	SlidersHorizontal,
 	Grid,
 	List,
+	LayoutGrid,
+	GalleryHorizontal,
 	Download,
 	Share2,
 	Trash2,
 	Edit,
 } from "lucide-react";
 import { ViewType } from "@/types/file-item";
+import { Separator } from "@/components/ui/separator";
 
 export function ViewToolbar() {
 	const { currentView } = useNavigationStore();
@@ -39,6 +42,8 @@ export function ViewToolbar() {
 		currentCharacter,
 		currentPlace,
 		currentObject,
+		viewMode,
+		setViewMode,
 	} = useFileManager();
 
 	const getCurrentItem = () => {
@@ -134,15 +139,49 @@ export function ViewToolbar() {
 	const renderActions = () => {
 		const commonActions = (
 			<>
-				<Button variant="ghost" size="icon" className="h-7 w-7">
-					<Filter className="h-3.5 w-3.5" />
-				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7">
-					<SlidersHorizontal className="h-3.5 w-3.5" />
-				</Button>
-				<Button variant="ghost" size="icon" className="h-7 w-7">
-					<Grid className="h-3.5 w-3.5" />
-				</Button>
+				<Separator orientation="vertical" className="h-7 w-px bg-border" />
+				<div className="flex items-center gap-1 bg-black/50 rounded-md p-1">
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7"
+						onClick={() => setViewMode("grid")}
+						title="Vista de cuadrícula"
+						data-active={viewMode === "grid"}
+					>
+						<Grid className="h-3.5 w-3.5" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7"
+						onClick={() => setViewMode("masonry")}
+						title="Vista de mosaico"
+						data-active={viewMode === "masonry"}
+					>
+						<LayoutGrid className="h-3.5 w-3.5" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7"
+						onClick={() => setViewMode("cards")}
+						title="Vista de tarjetas"
+						data-active={viewMode === "cards"}
+					>
+						<GalleryHorizontal className="h-3.5 w-3.5" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7"
+						onClick={() => setViewMode("list")}
+						title="Vista de lista"
+						data-active={viewMode === "list"}
+					>
+						<List className="h-3.5 w-3.5" />
+					</Button>
+				</div>
 			</>
 		);
 
@@ -152,13 +191,13 @@ export function ViewToolbar() {
 			case "search":
 				return (
 					<div className="flex items-center gap-1">
-						{commonActions}
 						<Button variant="ghost" size="icon" className="h-7 w-7">
 							<Download className="h-3.5 w-3.5" />
 						</Button>
 						<Button variant="ghost" size="icon" className="h-7 w-7">
 							<Share2 className="h-3.5 w-3.5" />
 						</Button>
+						{commonActions}
 					</div>
 				);
 			case "collections":
@@ -186,13 +225,13 @@ export function ViewToolbar() {
 			case "object-content":
 				return (
 					<div className="flex items-center gap-1">
-						{commonActions}
 						<Button variant="ghost" size="icon" className="h-7 w-7">
 							<Edit className="h-3.5 w-3.5" />
 						</Button>
 						<Button variant="ghost" size="icon" className="h-7 w-7">
 							<Trash2 className="h-3.5 w-3.5" />
 						</Button>
+						{commonActions}
 					</div>
 				);
 			default:
@@ -204,9 +243,9 @@ export function ViewToolbar() {
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
-			className={cn("flex flex-col bg-primary/10 py-2 h-12", "border-b")}
+			className={cn("flex flex-col bg-primary/5 py-0", "border-b")}
 		>
-			<div className="flex w-full items-center justify-between gap-2 px-2">
+			<div className="flex w-full items-center justify-between gap-2 p-2">
 				<div className="flex items-center gap-4 w-full">
 					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">
 						{renderIcon()}

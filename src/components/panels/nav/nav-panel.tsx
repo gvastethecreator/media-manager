@@ -4,7 +4,7 @@ import { useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useFileManager } from "@/store/file-manager.store";
 import { useUIStore } from "@/store/ui.store";
-import { useStatsStore } from "@/store/stats.store";
+import { useStatsBaseStore } from "@/store/stats.store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "next-themes";
 import { useSettingsContext } from "@/context/settings-context";

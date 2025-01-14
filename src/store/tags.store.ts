@@ -6,6 +6,7 @@ import {
   deleteTag as deleteTagAction,
   getTags,
   updateTag as updateTagAction,
+  addTagToImage as addTagToImageAction,
   type TagCreate,
   type TagUpdate,
   type TagWithStats
@@ -97,6 +98,14 @@ export const useTagsStore = () => {
     loadTags: store.loadItems,
     createTag: store.createItem,
     updateTag: store.updateItem,
-    deleteTag: store.deleteItem
+    deleteTag: store.deleteItem,
+    addImageToTag: async (tagId: string, imageId: string) => {
+      try {
+        await addTagToImageAction(tagId, imageId);
+      } catch (error) {
+        logger.error('Error adding image to tag:', error);
+        throw error;
+      }
+    }
   };
 };
