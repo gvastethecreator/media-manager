@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
 import type { Object } from '@prisma/client'
+import { eventsService } from '@/services/events.service'
+import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 
 const objectLogger = logger.withContext('ObjectActions')
 
@@ -152,6 +154,11 @@ export async function createObject(data: ObjectCreate) {
         filters: data.filters || '[]',
       },
     });
+
+    // Emitir eventos
+    eventsService.emit('objects:modified');
+    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+
     objectLogger.info('✅ Objeto creado:', object.name);
     revalidateAllPaths();
     return object;
@@ -189,6 +196,11 @@ export async function deleteObject(id: string) {
     await prisma.object.delete({
       where: { id },
     });
+
+    // Emitir eventos
+    eventsService.emit('objects:modified');
+    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+
     objectLogger.info('✅ Objeto eliminado');
     revalidateAllPaths();
   } catch (error) {
@@ -242,16 +254,20 @@ export async function getObjectImages(id: string) {
 export async function addImageToObject(objectId: string, imageId: string) {
   try {
     objectLogger.info('➕ Agregando imagen a objeto:', { objectId, imageId });
-    await prisma.object.update({
-      where: { id: objectId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          connect: {
-            id: imageId,
-          },
-        },
-      },
+        objects: {
+          connect: { id: objectId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('objects:modified');
+    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     objectLogger.info('✅ Imagen agregada al objeto');
     revalidateAllPaths();
   } catch (error) {
@@ -263,16 +279,20 @@ export async function addImageToObject(objectId: string, imageId: string) {
 export async function removeImageFromObject(objectId: string, imageId: string) {
   try {
     objectLogger.info('➖ Removiendo imagen de objeto:', { objectId, imageId });
-    await prisma.object.update({
-      where: { id: objectId },
+    await prisma.image.update({
+      where: { id: imageId },
       data: {
-        images: {
-          disconnect: {
-            id: imageId,
-          },
-        },
-      },
+        objects: {
+          disconnect: { id: objectId }
+        }
+      }
     });
+
+    // Emitir eventos
+    eventsService.emit('objects:modified');
+    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+    statsEventEmitter.emit(STATS_EVENTS.IMAGE_CHANGE);
+
     objectLogger.info('✅ Imagen removida del objeto');
     revalidateAllPaths();
   } catch (error) {
