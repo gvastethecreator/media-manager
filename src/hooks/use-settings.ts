@@ -254,8 +254,6 @@ export const useSettings = () => {
     // Acciones de sistema
     updateSystem,
 
-    // Acciones de atajos
-    updateShortcut,
-    deleteShortcut
+   
   }
 }

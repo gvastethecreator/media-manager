@@ -63,4 +63,5 @@ export interface Folder {
   _count?: {
     images: number;
   };
+  recentImages?: string[];
 }

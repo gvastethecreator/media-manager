@@ -27,7 +27,7 @@ import {
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
 import { ThumbnailQuality } from "@/types/thumbnails";
-import { formatBytes } from "@/lib/utils";
+import { formatFileSize } from "@/lib/format";
 
 interface CollectionWithStats extends Collection {
 	count: number;
@@ -147,7 +147,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			const mappedCollections = collections.map((c) => ({
 				...c,
 				count: c._count.images,
-				size: formatBytes(c.totalSize),
+				size: formatFileSize(c.totalSize),
 			}));
 			setSettings((prev) => ({ ...prev, collections: mappedCollections }));
 		} catch (error) {
