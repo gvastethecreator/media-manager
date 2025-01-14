@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { X, RotateCcw, ZoomIn, ZoomOut, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageFallback } from "@/components/ui/image-fallback";
+import { getImageUrl } from "@/app/actions/image.actions";
 
 export interface ImageItem {
 	id: string;
@@ -26,6 +27,7 @@ export interface ImageItem {
 			height: number;
 		};
 		mimeType?: string;
+		isLocal?: boolean;
 	};
 }
 
@@ -35,6 +37,8 @@ interface AdvancedImageViewerProps {
 	isOpen: boolean;
 	onClose: () => void;
 }
+
+const isLocalFile = (url: string) => url.startsWith("file://");
 
 export function AdvancedImageViewer({
 	images,
@@ -48,8 +52,13 @@ export function AdvancedImageViewer({
 	const [position, setPosition] = useState({ x: 0, y: 0 });
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+	const [originalUrls, setOriginalUrls] = useState<Record<string, string>>({});
 	const containerRef = useRef<HTMLDivElement>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
+
+	// Get current image
+	const currentImage = images[index];
 
 	// Reset state when opening viewer
 	useEffect(() => {
@@ -72,6 +81,81 @@ export function AdvancedImageViewer({
 		}
 	}, [images, index]);
 
+	// Cargar solo las URLs necesarias inicialmente
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const loadInitialUrls = async () => {
+			const currentImage = images[index];
+			const nextImage = images[(index + 1) % images.length];
+			const prevImage = images[index > 0 ? index - 1 : images.length - 1];
+
+			const imagesToLoad = [currentImage, nextImage, prevImage];
+			const urls: Record<string, string> = {};
+
+			try {
+				await Promise.all(
+					imagesToLoad.map(async (img) => {
+						if (!img || urls[img.id]) return;
+						try {
+							const url = await getImageUrl(img.id);
+							urls[img.id] = url;
+							console.info(`URL inicial cargada para ${img.name}:`, url);
+						} catch (error) {
+							console.error(
+								`Error cargando URL inicial para ${img.name}:`,
+								error
+							);
+						}
+					})
+				);
+				setOriginalUrls((prev) => ({ ...prev, ...urls }));
+			} catch (error) {
+				console.error("Error cargando URLs iniciales:", error);
+				setError("Error cargando imágenes iniciales");
+			}
+		};
+
+		loadInitialUrls();
+	}, [isOpen, index, images]);
+
+	// Precargar siguiente/anterior cuando cambia el índice
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const preloadAdjacentImages = async () => {
+			const nextIndex = (index + 1) % images.length;
+			const prevIndex = index > 0 ? index - 1 : images.length - 1;
+			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter(
+				(img) => img && !originalUrls[img.id]
+			);
+
+			if (!imagesToPreload.length) return;
+
+			try {
+				const urls: Record<string, string> = {};
+				await Promise.all(
+					imagesToPreload.map(async (img) => {
+						if (!img) return;
+						try {
+							const url = await getImageUrl(img.id);
+							urls[img.id] = url;
+							console.info(`URL precargada para ${img.name}:`, url);
+						} catch (error) {
+							console.warn(`Error precargando URL para ${img.name}:`, error);
+						}
+					})
+				);
+				setOriginalUrls((prev) => ({ ...prev, ...urls }));
+			} catch (error) {
+				console.warn("Error en precarga de URLs:", error);
+			}
+		};
+
+		const timer = setTimeout(preloadAdjacentImages, 300);
+		return () => clearTimeout(timer);
+	}, [isOpen, index, images, originalUrls]);
+
 	// Keyboard navigation
 	useEffect(() => {
 		if (!isOpen) return;
@@ -90,6 +174,35 @@ export function AdvancedImageViewer({
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [isOpen, images.length, onClose]);
+
+	// Preload adjacent images with original URLs
+	useEffect(() => {
+		const preloadImage = (imageUrl: string) => {
+			if (!imageUrl || loadedImages.has(imageUrl)) return;
+
+			const img = new Image();
+			img.src = imageUrl;
+			img.onload = () => {
+				setLoadedImages((prev) => new Set([...prev, imageUrl]));
+			};
+		};
+
+		if (currentImage && originalUrls[currentImage.id]) {
+			const currentUrl = originalUrls[currentImage.id];
+			preloadImage(currentUrl);
+
+			// Preload next and previous images
+			const nextIndex = (index + 1) % images.length;
+			const prevIndex = index > 0 ? index - 1 : images.length - 1;
+
+			if (images[nextIndex] && originalUrls[images[nextIndex].id]) {
+				preloadImage(originalUrls[images[nextIndex].id]);
+			}
+			if (images[prevIndex] && originalUrls[images[prevIndex].id]) {
+				preloadImage(originalUrls[images[prevIndex].id]);
+			}
+		}
+	}, [index, images, loadedImages, originalUrls, currentImage]);
 
 	useEffect(() => {
 		// Reset position and scale when changing images
@@ -114,19 +227,19 @@ export function AdvancedImageViewer({
 
 	const getImageSource = (image?: ImageItem) => {
 		if (!image) return "";
-		return image.url || image.src || image.thumbnail || "";
+
+		// Si ya tenemos una URL original, usarla
+		if (originalUrls[image.id]) {
+			return originalUrls[image.id];
+		}
+
+		// Fallback a thumbnail mientras se carga la original
+		return image.thumbnail || "";
 	};
 
 	const getImageAlt = (image?: ImageItem) => {
 		if (!image) return "Image";
 		return image.alt || image.name || "Image";
-	};
-
-	const getCurrentImage = () => {
-		if (!images || !images.length || index < 0 || index >= images.length) {
-			return null;
-		}
-		return images[index];
 	};
 
 	const handleImageError = () => {
@@ -136,10 +249,9 @@ export function AdvancedImageViewer({
 
 	const handleCopy = async () => {
 		try {
-			const image = getCurrentImage();
-			if (!image) return;
+			if (!currentImage) return;
 
-			const response = await fetch(getImageSource(image));
+			const response = await fetch(getImageSource(currentImage));
 			const blob = await response.blob();
 			await navigator.clipboard.write([
 				new ClipboardItem({
@@ -161,15 +273,14 @@ export function AdvancedImageViewer({
 
 	const handleDownload = async () => {
 		try {
-			const image = getCurrentImage();
-			if (!image) return;
+			if (!currentImage) return;
 
-			const response = await fetch(getImageSource(image));
+			const response = await fetch(getImageSource(currentImage));
 			const blob = await response.blob();
 			const url = window.URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = url;
-			a.download = image.name;
+			a.download = currentImage.name;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
@@ -201,12 +312,11 @@ export function AdvancedImageViewer({
 		return null;
 	}
 
-	const currentImage = getCurrentImage();
 	if (!currentImage) {
 		return null;
 	}
 
-	return isOpen ? (
+	return (
 		<motion.div
 			animate={{ opacity: [0, 1] }}
 			className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
@@ -276,10 +386,30 @@ export function AdvancedImageViewer({
 
 				{/* Main Image */}
 				<motion.div
-					key={getImageSource(currentImage)}
+					key={currentImage.id}
 					className="absolute inset-0 flex items-center justify-center"
 				>
-					{isLoading && <Skeleton className="w-[80vw] h-[80vh] absolute" />}
+					<AnimatePresence mode="wait">
+						{isLoading && (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								className="absolute inset-0 flex items-center justify-center"
+							>
+								{currentImage.thumbnail ? (
+									<img
+										src={currentImage.thumbnail}
+										alt="Loading preview"
+										className="max-w-[90vw] max-h-[80vh] object-contain opacity-50 blur-sm"
+									/>
+								) : (
+									<Skeleton className="w-[80vw] h-[80vh] absolute" />
+								)}
+							</motion.div>
+						)}
+					</AnimatePresence>
+
 					{error ? (
 						<div className="text-center text-muted-foreground">
 							<p>{error}</p>
@@ -373,5 +503,5 @@ export function AdvancedImageViewer({
 				</div>
 			</div>
 		</motion.div>
-	) : null;
+	);
 }

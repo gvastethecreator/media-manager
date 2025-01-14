@@ -5,9 +5,6 @@ import { useImageViewer } from "@/store/image-viewer.store";
 import dynamic from "next/dynamic";
 import type { FileItem, ImageItem } from "@/types/file-item";
 import { getImageUrl } from "@/app/actions/image.actions";
-import { logger } from "@/lib/logger";
-
-const viewerLogger = logger.withContext("FileViewer");
 
 interface AdvancedImageViewerProps {
 	images: ImageItem[];
@@ -55,12 +52,40 @@ export function ImageViewer() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [isMounted, setIsMounted] = useState(false);
+	const [retryCount, setRetryCount] = useState<Record<string, number>>({});
 
 	// Efecto para manejar el montaje
 	useEffect(() => {
 		setIsMounted(true);
 		return () => setIsMounted(false);
 	}, []);
+
+	// Función para cargar una URL individual con reintentos
+	const loadSingleUrl = useCallback(
+		async (img: FileItem) => {
+			const maxRetries = 3;
+			const currentRetries = retryCount[img.id] || 0;
+
+			if (currentRetries >= maxRetries) {
+				console.error(`Máximo de reintentos alcanzado para ${img.name}`);
+				return "";
+			}
+
+			try {
+				const url = await getImageUrl(img.id);
+				setRetryCount((prev) => ({ ...prev, [img.id]: 0 }));
+				return url;
+			} catch (error) {
+				console.error(`Error cargando URL para ${img.name}:`, error);
+				setRetryCount((prev) => ({
+					...prev,
+					[img.id]: (prev[img.id] || 0) + 1,
+				}));
+				return "";
+			}
+		},
+		[retryCount]
+	);
 
 	// Cargar URLs temporales cuando cambian las imágenes
 	const loadUrls = useCallback(async () => {
@@ -73,30 +98,21 @@ export function ImageViewer() {
 			const urls: Record<string, string> = {};
 			await Promise.all(
 				images.map(async (img) => {
-					try {
-						urls[img.id] = await getImageUrl(img.id);
-						viewerLogger.info(`🔗 URL cargada para ${img.name}:`, urls[img.id]);
-					} catch (error) {
-						viewerLogger.error(
-							`❌ Error cargando URL para ${img.name}:`,
-							error
-						);
-						urls[img.id] = ""; // URL vacía en caso de error
-					}
+					urls[img.id] = await loadSingleUrl(img);
 				})
 			);
 			setSignedUrls(urls);
 		} catch (error) {
-			viewerLogger.error("Error cargando URLs:", error);
+			console.error("Error cargando URLs:", error);
 			setError("Error cargando imágenes");
 		} finally {
 			setIsLoading(false);
 		}
-	}, [images]);
+	}, [images, loadSingleUrl]);
 
 	useEffect(() => {
 		if (isOpen && isMounted) {
-			viewerLogger.info("🖼️ Cargando URLs para", images.length, "imágenes");
+			console.info("🖼️ Cargando URLs para", images.length, "imágenes");
 			loadUrls();
 		}
 	}, [isOpen, isMounted, loadUrls, images]);
@@ -109,15 +125,19 @@ export function ImageViewer() {
 			const parsedMetadata = getMetadata(img.metadata);
 			const width = parsedMetadata?.dimensions?.width;
 			const height = parsedMetadata?.dimensions?.height;
+			const url = signedUrls[img.id];
 
 			return {
 				...img,
 				width: width || undefined,
 				height: height || undefined,
-				src: signedUrls[img.id] || "",
+				src: url || "",
 				alt: img.name,
-				thumbnail: `/api/thumbnails/${img.id}?quality=medium`,
-				metadata: parsedMetadata || undefined,
+				thumbnail: url || "", // Usar la misma URL para thumbnail
+				metadata: {
+					...parsedMetadata,
+					isLocal: true, // Indicador para manejo especial de archivos locales
+				},
 			} as ViewerImage;
 		});
 	}, [images, signedUrls]);
@@ -146,11 +166,7 @@ export function ImageViewer() {
 		);
 	}
 
-	viewerLogger.info(
-		"🖼️ Renderizando visor con",
-		mappedImages.length,
-		"imágenes"
-	);
+	console.info("🖼️ Renderizando visor con", mappedImages.length, "imágenes");
 	return (
 		<AdvancedImageViewer
 			images={mappedImages}
