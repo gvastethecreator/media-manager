@@ -48,17 +48,27 @@ export interface AlbumUpdate extends Partial<AlbumCreate> {
   id: string;
 }
 
-export async function getAlbums() {
+export async function getAlbums(): Promise<AlbumWithStats[]> {
   try {
-    albumLogger.info('📚 Obteniendo lista de álbumes');
+    albumLogger.info('📚 Obteniendo álbumes');
     const albums = await prisma.album.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
+        }
       },
+      orderBy: { name: 'asc' },
     });
 
     const albumsWithStats = await Promise.all(
@@ -67,27 +77,36 @@ export async function getAlbums() {
           where: {
             albums: {
               some: {
-                id: album.id,
-              },
-            },
+                id: album.id
+              }
+            }
           },
           _sum: {
-            size: true,
-          },
+            size: true
+          }
         });
 
         return {
           ...album,
           totalSize: totalSize._sum.size || 0,
+          recentImages: album.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
         };
       })
     );
 
-    albumLogger.info(`✅ ${albums.length} álbumes obtenidos`);
+    albumLogger.info('✅ Álbumes obtenidos', { count: albums.length });
     return albumsWithStats;
   } catch (error) {
-    albumLogger.error("❌ Error al obtener álbumes:", error);
-    throw new AlbumError("No se pudieron obtener los álbumes", error);
+    albumLogger.error('❌ Error al obtener álbumes', error);
+    throw new AlbumError('No se pudieron obtener los álbumes', { cause: error });
   }
 }
 

@@ -55,35 +55,63 @@ class TagError extends Error {
 
 export async function getTags() {
   try {
-    tagLogger.info('🏷️ Obteniendo lista de etiquetas');
+    tagLogger.info('🏷️ Obteniendo etiquetas');
     const tags = await prisma.tag.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
         images: {
-          select: { size: true }
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
         }
       },
+      orderBy: { name: 'asc' },
     });
 
-    const tagsWithStats = tags.map(tag => {
-      const totalSize = tag.images.reduce((acc, img) => acc + img.size, 0);
-      return {
-        ...tag,
-        count: tag._count.images,
-        size: formatBytes(totalSize),
-        images: undefined
-      };
-    });
+    const tagsWithStats = await Promise.all(
+      tags.map(async (tag) => {
+        const totalSize = await prisma.image.aggregate({
+          where: {
+            tags: {
+              some: {
+                id: tag.id
+              }
+            }
+          },
+          _sum: {
+            size: true
+          }
+        });
 
-    tagLogger.info(`✅ ${tags.length} etiquetas obtenidas`);
+        return {
+          ...tag,
+          totalSize: totalSize._sum.size || 0,
+          recentImages: tag.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
+        };
+      })
+    );
+
+    tagLogger.info('✅ Etiquetas obtenidas', { count: tags.length });
     return tagsWithStats;
   } catch (error) {
-    tagLogger.error("❌ Error al obtener etiquetas:", error);
-    throw new TagError("No se pudieron obtener las etiquetas", error);
+    tagLogger.error('❌ Error al obtener etiquetas', error);
+    throw new TagError('No se pudieron obtener las etiquetas', { cause: error });
   }
 }
 
