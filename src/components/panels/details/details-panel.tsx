@@ -72,6 +72,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { updateImageStats, getImageUrl } from "@/app/actions/image.actions";
 import { useFileManager } from "@/store/file-manager.store";
 import { formatDate, formatBytes, cn } from "@/lib/utils";
+import { parseMetadata } from "@/lib/metadata-parser";
 
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -103,8 +104,14 @@ interface DetailsPanelProps {
 const getMetadata = (metadata: string | null): FileMetadata | null => {
 	if (!metadata) return null;
 	try {
-		return JSON.parse(metadata);
-	} catch {
+		const parsed = JSON.parse(metadata);
+		if (!parsed || typeof parsed !== "object") {
+			console.warn("Metadata inválida:", metadata);
+			return null;
+		}
+		return parsed;
+	} catch (error) {
+		console.error("Error parseando metadata:", error);
 		return null;
 	}
 };
@@ -292,34 +299,69 @@ const AIGenerationInfo = React.memo(function AIGenerationInfo({
 }: {
 	metadata: FileMetadata | null;
 }) {
+	const { toast } = useToast();
+
 	if (!metadata?.generation) return null;
 
 	const gen = metadata.generation;
-	const isSD = gen.type.includes("stable-diffusion");
+	const isSD = gen.type === "stable-diffusion";
 	const isComfyUI = gen.type === "comfyui";
-	const isInvokeAI = gen.type === "invokeai";
-	const isNovelAI = gen.type === "novelai";
+	const isInvokeAI = gen.type === "invoke-ai";
+	const isNovelAI = gen.type === "novel-ai";
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">
-				Información de Generación AI
-			</h3>
+			<div className="flex items-center justify-between">
+				<h3 className="text-xs font-medium text-muted-foreground">
+					Información de Generación AI
+				</h3>
+				<Badge
+					variant="outline"
+					className={cn(
+						"text-[10px] h-5 px-2",
+						isSD && "bg-blue-500/10 text-blue-500",
+						isComfyUI && "bg-green-500/10 text-green-500",
+						isInvokeAI && "bg-purple-500/10 text-purple-500",
+						isNovelAI && "bg-pink-500/10 text-pink-500"
+					)}
+				>
+					{isSD && "Stable Diffusion"}
+					{isComfyUI && "ComfyUI"}
+					{isInvokeAI && "InvokeAI"}
+					{isNovelAI && "NovelAI"}
+				</Badge>
+			</div>
+
 			<div className="flex flex-col gap-1.5">
+				{/* Prompt */}
 				{gen.prompt && (
-					<InfoItem
-						icon={<MessageSquare className="h-3.5 w-3.5 text-teal-400" />}
-						label="Prompt"
-						value={gen.prompt}
-					/>
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center gap-2">
+							<MessageSquare className="h-3.5 w-3.5 text-teal-400" />
+							<span className="text-xs text-muted-foreground">Prompt</span>
+						</div>
+						<div className="text-xs bg-muted/30 p-2 rounded-sm">
+							{gen.prompt}
+						</div>
+					</div>
 				)}
+
+				{/* Prompt Negativo */}
 				{gen.negative_prompt && (
-					<InfoItem
-						icon={<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />}
-						label="Prompt negativo"
-						value={gen.negative_prompt}
-					/>
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center gap-2">
+							<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />
+							<span className="text-xs text-muted-foreground">
+								Prompt Negativo
+							</span>
+						</div>
+						<div className="text-xs bg-muted/30 p-2 rounded-sm">
+							{gen.negative_prompt}
+						</div>
+					</div>
 				)}
+
+				{/* Modelo */}
 				{gen.model && (
 					<InfoItem
 						icon={<Box className="h-3.5 w-3.5 text-sky-400" />}
@@ -327,68 +369,105 @@ const AIGenerationInfo = React.memo(function AIGenerationInfo({
 						value={gen.model}
 					/>
 				)}
-				{gen.steps && (
-					<InfoItem
-						icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
-						label="Pasos"
-						value={gen.steps}
-					/>
-				)}
-				{(gen.cfg_scale || gen.cfg) && (
-					<InfoItem
-						icon={<Scale className="h-3.5 w-3.5 text-fuchsia-400" />}
-						label="Escala CFG"
-						value={gen.cfg_scale || gen.cfg}
-					/>
-				)}
-				{gen.seed && (
-					<InfoItem
-						icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
-						label="Semilla"
-						value={gen.seed}
-					/>
-				)}
-				{gen.sampler && (
-					<InfoItem
-						icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
-						label="Sampler"
-						value={gen.sampler}
-					/>
-				)}
-				{gen.scheduler && (
-					<InfoItem
-						icon={<Timer className="h-3.5 w-3.5 text-purple-400" />}
-						label="Scheduler"
-						value={gen.scheduler}
-					/>
-				)}
-				{isSD && gen.clip_skip && (
-					<InfoItem
-						icon={<Scissors className="h-3.5 w-3.5 text-orange-400" />}
-						label="CLIP Skip"
-						value={gen.clip_skip}
-					/>
-				)}
+
+				{/* Parámetros */}
+				<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+					{gen.steps && (
+						<InfoItem
+							icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
+							label="Pasos"
+							value={gen.steps}
+						/>
+					)}
+					{(gen.cfg_scale || gen.cfg) && (
+						<InfoItem
+							icon={<Scale className="h-3.5 w-3.5 text-fuchsia-400" />}
+							label="CFG"
+							value={gen.cfg_scale || gen.cfg}
+						/>
+					)}
+					{gen.seed && (
+						<InfoItem
+							icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
+							label="Semilla"
+							value={gen.seed}
+						/>
+					)}
+					{gen.sampler && (
+						<InfoItem
+							icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
+							label="Sampler"
+							value={gen.sampler}
+						/>
+					)}
+					{gen.scheduler && (
+						<InfoItem
+							icon={<Timer className="h-3.5 w-3.5 text-purple-400" />}
+							label="Scheduler"
+							value={gen.scheduler}
+						/>
+					)}
+					{isSD && gen.clip_skip && (
+						<InfoItem
+							icon={<Scissors className="h-3.5 w-3.5 text-orange-400" />}
+							label="CLIP Skip"
+							value={gen.clip_skip}
+						/>
+					)}
+				</div>
+
+				{/* Workflow (ComfyUI) */}
 				{isComfyUI && gen.workflow && (
-					<InfoItem
-						icon={<GitGraph className="h-3.5 w-3.5 text-blue-400" />}
-						label="Workflow"
-						value={gen.workflow}
-					/>
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center gap-2">
+							<GitGraph className="h-3.5 w-3.5 text-blue-400" />
+							<span className="text-xs text-muted-foreground">Workflow</span>
+						</div>
+						<div className="text-xs bg-muted/30 p-2 rounded-sm max-h-32 overflow-y-auto">
+							<pre className="whitespace-pre-wrap break-all">
+								{gen.workflow}
+							</pre>
+						</div>
+					</div>
 				)}
+
+				{/* Parámetros adicionales */}
 				{gen.extra_params && Object.keys(gen.extra_params).length > 0 && (
 					<div className="mt-2">
 						<h4 className="text-xs font-medium text-muted-foreground mb-1">
 							Parámetros adicionales
 						</h4>
-						{Object.entries(gen.extra_params).map(([key, value]) => (
-							<InfoItem
-								key={key}
-								icon={<Settings2 className="h-3.5 w-3.5 text-neutral-400" />}
-								label={key}
-								value={value}
-							/>
-						))}
+						<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+							{Object.entries(gen.extra_params).map(([key, value]) => (
+								<InfoItem
+									key={key}
+									icon={<Settings2 className="h-3.5 w-3.5 text-neutral-400" />}
+									label={key}
+									value={value}
+								/>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* Raw metadata */}
+				{gen.raw && (
+					<div className="mt-2">
+						<Button
+							variant="ghost"
+							size="sm"
+							className="w-full text-xs"
+							onClick={() => {
+								navigator.clipboard.writeText(gen.raw);
+								toast({
+									title: "Copiado",
+									description: "Metadata copiada al portapapeles",
+								});
+							}}
+						>
+							<Copy className="h-3.5 w-3.5 mr-2" />
+							Copiar metadata raw
+						</Button>
 					</div>
 				)}
 			</div>
@@ -763,10 +842,30 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 
 	// Memoizar metadata y selectedItem
 	const selectedItem = selectedItems[0];
-	const metadata = React.useMemo(
-		() => (selectedItem ? getMetadata(selectedItem.metadata) : null),
-		[selectedItem]
-	);
+	const metadata = React.useMemo(() => {
+		if (!selectedItem?.metadata) {
+			console.warn("No hay metadata disponible para:", selectedItem?.name);
+			return null;
+		}
+
+		console.log("🔍 Metadata raw:", selectedItem.metadata);
+
+		try {
+			const parsed = parseMetadata(selectedItem.metadata);
+			console.log("✅ Metadata parseada:", {
+				nombre: selectedItem.name,
+				keys: parsed ? Object.keys(parsed) : [],
+				metadata: parsed,
+			});
+			return parsed;
+		} catch (error) {
+			console.error("❌ Error parseando metadata:", {
+				error,
+				metadata: selectedItem.metadata,
+			});
+			return null;
+		}
+	}, [selectedItem?.metadata, selectedItem?.name]);
 
 	// Memoizar handlers
 	const handleAction = React.useCallback(

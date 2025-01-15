@@ -1,5 +1,6 @@
 import type { FileItem, Dimensions } from '@/types/file-item'
 import { logger } from '@/lib/logger'
+import { parseMetadata } from '@/lib/metadata-parser'
 
 const converterLogger = logger.withContext('ImageConverter')
 
@@ -75,17 +76,6 @@ export interface ServerImage {
   characters?: RelatedCharacter[]
   places?: RelatedPlace[]
   objects?: RelatedObject[]
-}
-
-const validateMetadata = (metadata: string | null): Record<string, any> | undefined => {
-  if (!metadata) return undefined
-  try {
-    const parsed = JSON.parse(metadata)
-    return typeof parsed === 'object' ? parsed : undefined
-  } catch {
-    converterLogger.warn('⚠️ Error al parsear metadata de imagen')
-    return undefined
-  }
 }
 
 export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
