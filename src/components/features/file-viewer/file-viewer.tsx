@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, RotateCcw, ZoomIn, ZoomOut, Copy, Download } from "lucide-react";
+import {
+	X,
+	RotateCcw,
+	ZoomIn,
+	ZoomOut,
+	Copy,
+	Download,
+	Image as ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -11,6 +19,7 @@ import { ImageFallback } from "@/components/ui/image-fallback";
 import { getImageUrl } from "@/app/actions/image.actions";
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
 import { ThumbnailQuality } from "@/config/thumbnail.config";
+import { useImageResources } from "@/store/image-resources.store";
 
 export interface ImageItem {
 	id: string;
@@ -42,13 +51,302 @@ interface FileViewerProps {
 
 const isLocalFile = (url: string) => url.startsWith("file://");
 
-// Configuración de animaciones mejorada
-const springConfig = {
+// Configuración de animaciones del visor
+const VIEWER_CONFIG = {
+	type: "spring" as const,
+	stiffness: 200,
+	damping: 25,
+	mass: 0.8,
+};
+
+// Configuración de dimensiones fijas para thumbnails
+const THUMBNAIL_SIZES = {
+	normal: {
+		width: 80,
+		height: 80,
+	},
+	active: {
+		width: 96,
+		height: 96,
+	},
+} as const;
+
+// Configuración de animaciones mejorada y suavizada para thumbnails
+const THUMBNAIL_ANIMATION = {
 	type: "spring" as const,
 	stiffness: 300,
 	damping: 30,
-	mass: 0.5,
+	mass: 0.8,
+	duration: 0.2,
 };
+
+// Cache optimizado con tiempo de vida
+const imageCache = new Map<
+	string,
+	{
+		url: string;
+		timestamp: number;
+		expiresIn: number;
+	}
+>();
+
+// Cache optimizado para thumbnails
+const thumbnailCache = new Map<string, { url: string; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+const getThumbnailFromCache = (id: string): string | null => {
+	const cached = thumbnailCache.get(id);
+	if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+		return cached.url;
+	}
+	thumbnailCache.delete(id); // Limpiar entradas expiradas
+	return null;
+};
+
+const setThumbnailInCache = (id: string, url: string) => {
+	thumbnailCache.set(id, { url, timestamp: Date.now() });
+
+	// Limpiar caché si es muy grande
+	if (thumbnailCache.size > 100) {
+		const now = Date.now();
+		for (const [key, value] of thumbnailCache.entries()) {
+			if (now - value.timestamp > CACHE_DURATION) {
+				thumbnailCache.delete(key);
+			}
+		}
+	}
+};
+
+// Función de debounce mejorada
+const createDebounce = (wait: number) => {
+	let timeout: NodeJS.Timeout;
+	let currentPromise: Promise<any> | null = null;
+
+	return (fn: () => Promise<any>) => {
+		if (currentPromise) return currentPromise;
+
+		currentPromise = new Promise((resolve) => {
+			if (timeout) clearTimeout(timeout);
+			timeout = setTimeout(async () => {
+				const result = await fn();
+				currentPromise = null;
+				resolve(result);
+			}, wait);
+		});
+
+		return currentPromise;
+	};
+};
+
+// Validación de src mejorada
+const isValidSrc = (src: string | undefined | null): src is string => {
+	return typeof src === "string" && src.trim() !== "";
+};
+
+// Componente para thumbnail individual optimizado
+function ThumbnailItem({
+	image,
+	isActive,
+	onClick,
+	images,
+}: {
+	image: ImageItem;
+	isActive: boolean;
+	onClick: () => void;
+	images: ImageItem[];
+}) {
+	const imageResources = useImageResources();
+	const [isLoading, setIsLoading] = useState(true);
+	const [thumbnail, setThumbnail] = useState<string | null>(() => {
+		if (!image?.id) return null;
+		const cached = getThumbnailFromCache(image.id);
+		return cached || null;
+	});
+	const [error, setError] = useState<string | null>(null);
+	const isMounted = useRef<boolean>(true);
+	const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Efecto para cargar el thumbnail con debounce
+	useEffect(() => {
+		let mounted = true;
+
+		const loadThumbnail = async () => {
+			if (!image?.id) return;
+
+			// Si ya tenemos el thumbnail en caché, lo usamos
+			const cached = getThumbnailFromCache(image.id);
+			if (cached) {
+				setThumbnail(cached);
+				setIsLoading(false);
+				return;
+			}
+
+			try {
+				setIsLoading(true);
+
+				// Debounce la carga
+				if (loadingTimeoutRef.current) {
+					clearTimeout(loadingTimeoutRef.current);
+				}
+
+				loadingTimeoutRef.current = setTimeout(async () => {
+					const url = await imageResources.getThumbnail(image.id);
+
+					if (mounted && url) {
+						setThumbnailInCache(image.id, url);
+						setThumbnail(url);
+						setError(null);
+					}
+				}, 100);
+			} catch (error) {
+				if (mounted) {
+					console.error("Error loading thumbnail:", error);
+					setError("Error al cargar miniatura");
+				}
+			} finally {
+				if (mounted) {
+					setIsLoading(false);
+				}
+			}
+		};
+
+		loadThumbnail();
+
+		return () => {
+			mounted = false;
+			if (loadingTimeoutRef.current) {
+				clearTimeout(loadingTimeoutRef.current);
+			}
+		};
+	}, [image?.id, imageResources]);
+
+	// Precargar thumbnails adyacentes cuando está activo
+	useEffect(() => {
+		if (isActive && image?.id && images?.length) {
+			const preloadAdjacentThumbnails = async () => {
+				const currentIndex = images.findIndex((img) => img.id === image.id);
+				const adjacentIndexes = [
+					currentIndex - 2,
+					currentIndex - 1,
+					currentIndex + 1,
+					currentIndex + 2,
+				].filter((i) => i >= 0 && i < images.length);
+
+				for (const index of adjacentIndexes) {
+					const adjacentImage = images[index];
+					if (adjacentImage?.id && !getThumbnailFromCache(adjacentImage.id)) {
+						try {
+							const url = await imageResources.getThumbnail(adjacentImage.id);
+							if (url) {
+								setThumbnailInCache(adjacentImage.id, url);
+							}
+						} catch (error) {
+							console.warn("Error preloading thumbnail:", error);
+						}
+					}
+				}
+			};
+
+			preloadAdjacentThumbnails();
+		}
+	}, [isActive, image?.id, imageResources, images]);
+
+	const baseClassName = cn(
+		"relative mx-1 overflow-hidden rounded-md transition-shadow duration-200",
+		isActive &&
+			"ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
+	);
+
+	if (isLoading) {
+		return (
+			<motion.div
+				className={baseClassName}
+				animate={{
+					width:
+						isActive ?
+							THUMBNAIL_SIZES.active.width
+						:	THUMBNAIL_SIZES.normal.width,
+					height:
+						isActive ?
+							THUMBNAIL_SIZES.active.height
+						:	THUMBNAIL_SIZES.normal.height,
+				}}
+				transition={THUMBNAIL_ANIMATION}
+			>
+				<Skeleton className="w-full h-full rounded-md" />
+			</motion.div>
+		);
+	}
+
+	if (error || !thumbnail) {
+		return (
+			<motion.div
+				className={baseClassName}
+				animate={{
+					width:
+						isActive ?
+							THUMBNAIL_SIZES.active.width
+						:	THUMBNAIL_SIZES.normal.width,
+					height:
+						isActive ?
+							THUMBNAIL_SIZES.active.height
+						:	THUMBNAIL_SIZES.normal.height,
+				}}
+				transition={THUMBNAIL_ANIMATION}
+			>
+				<div className="w-full h-full flex items-center justify-center bg-muted">
+					<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+				</div>
+			</motion.div>
+		);
+	}
+
+	return (
+		<motion.div
+			className={baseClassName}
+			animate={{
+				width:
+					isActive ?
+						THUMBNAIL_SIZES.active.width
+					:	THUMBNAIL_SIZES.normal.width,
+				height:
+					isActive ?
+						THUMBNAIL_SIZES.active.height
+					:	THUMBNAIL_SIZES.normal.height,
+				opacity: isActive ? 1 : 0.8,
+			}}
+			transition={THUMBNAIL_ANIMATION}
+			onClick={onClick}
+			whileHover={{
+				opacity: 1,
+				scale: 1.02,
+			}}
+			whileTap={{ scale: 0.98 }}
+		>
+			<div className="w-full h-full">
+				{isValidSrc(thumbnail) ?
+					<img
+						src={thumbnail}
+						alt={image.name}
+						className="w-full h-full object-cover"
+						loading="lazy"
+					/>
+				:	<div className="w-full h-full flex items-center justify-center bg-muted">
+						<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+					</div>
+				}
+			</div>
+			{isActive && (
+				<motion.div
+					className="absolute inset-0 bg-primary/10 pointer-events-none"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ duration: 0.2 }}
+				/>
+			)}
+		</motion.div>
+	);
+}
 
 export function FileViewer({
 	images,
@@ -239,17 +537,14 @@ export function FileViewer({
 		setPosition({ x: 0, y: 0 });
 	};
 
-	const getImageSource = (image?: ImageItem) => {
-		if (!image) return "";
-
-		// Si ya tenemos una URL original, usarla
-		if (originalUrls[image.id]) {
-			return originalUrls[image.id];
-		}
-
-		// Fallback a thumbnail mientras se carga la original
-		return image.thumbnail || "";
-	};
+	const getImageSource = useCallback(
+		(image?: ImageItem): string | undefined => {
+			if (!image) return undefined;
+			const url = originalUrls[image.id];
+			return isValidSrc(url) ? url : undefined;
+		},
+		[originalUrls]
+	);
 
 	const getImageAlt = (image?: ImageItem) => {
 		if (!image) return "Image";
@@ -264,8 +559,12 @@ export function FileViewer({
 	const handleCopy = async () => {
 		try {
 			if (!currentImage) return;
+			const imageUrl = getImageSource(currentImage);
+			if (!imageUrl) {
+				throw new Error("No se pudo obtener la URL de la imagen");
+			}
 
-			const response = await fetch(getImageSource(currentImage));
+			const response = await fetch(imageUrl);
 			const blob = await response.blob();
 			await navigator.clipboard.write([
 				new ClipboardItem({
@@ -288,8 +587,12 @@ export function FileViewer({
 	const handleDownload = async () => {
 		try {
 			if (!currentImage) return;
+			const imageUrl = getImageSource(currentImage);
+			if (!imageUrl) {
+				throw new Error("No se pudo obtener la URL de la imagen");
+			}
 
-			const response = await fetch(getImageSource(currentImage));
+			const response = await fetch(imageUrl);
 			const blob = await response.blob();
 			const url = window.URL.createObjectURL(blob);
 			const a = document.createElement("a");
@@ -520,9 +823,9 @@ export function FileViewer({
 								}}
 								transition={{
 									opacity: { duration: 0.3 },
-									scale: { ...springConfig, duration: 0.3 },
-									x: springConfig,
-									y: springConfig,
+									scale: { ...VIEWER_CONFIG },
+									x: { ...VIEWER_CONFIG },
+									y: { ...VIEWER_CONFIG },
 								}}
 								drag
 								dragConstraints={containerRef}
@@ -552,45 +855,15 @@ export function FileViewer({
 					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
 						{images
 							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
-							.map((image, i) => {
-								const thumbSrc = getImageThumbnail(image);
-								return (
-									<motion.div
-										key={image.id}
-										animate={{
-											opacity: i + Math.max(0, index - 3) === index ? 1 : 0.7,
-											scale: i + Math.max(0, index - 3) === index ? 1 : 0.95,
-										}}
-										className={cn(
-											"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
-											i + Math.max(0, index - 3) === index &&
-												"ring-2 ring-primary ring-offset-2 ring-offset-background"
-										)}
-										style={{
-											zIndex: i + Math.max(0, index - 3) === index ? 10 : 1,
-										}}
-										onClick={() => setIndex(i + Math.max(0, index - 3))}
-									>
-										{thumbSrc ?
-											<ImageFallback
-												src={thumbSrc}
-												alt={getImageAlt(image)}
-												className="w-full h-full object-cover transition-all duration-200 hover:scale-110"
-												gradientColors={[
-													`hsl(${
-														(parseInt(image.id.split("-")[1] || "0") * 40) % 360
-													}, 95%, 75%)`,
-													`hsl(${
-														(parseInt(image.id.split("-")[1] || "0") * 40 +
-															60) %
-														360
-													}, 95%, 75%)`,
-												]}
-											/>
-										:	<Skeleton className="w-full h-full" />}
-									</motion.div>
-								);
-							})}
+							.map((image, i) => (
+								<ThumbnailItem
+									key={image.id}
+									image={image}
+									images={images}
+									isActive={i + Math.max(0, index - 3) === index}
+									onClick={() => setIndex(i + Math.max(0, index - 3))}
+								/>
+							))}
 					</div>
 				</div>
 
