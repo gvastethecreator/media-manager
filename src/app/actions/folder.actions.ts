@@ -14,6 +14,7 @@ import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 import type { Folder } from '@prisma/client';
 import type { FileItem } from '@/types/file-item'
+import { parseMetadata } from '@/lib/metadata-parser';
 
 const folderLogger = logger.withContext('FolderActions');
 
