@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useSettingsStore } from '@/store/settings'
+import { useSettingsStore } from '@/store/settings.store'
 import type {
   AppSettings,
   Profile,
@@ -110,8 +110,7 @@ export const useSettings = () => {
   const updateSystemSettings = store.updateSystemSettings
 
   // Acciones de atajos
-  const updateShortcut = store.updateShortcut
-  const deleteShortcut = store.deleteShortcut
+  const updateShortcuts = store.updateShortcuts
 
   // Acciones compuestas
   const createProfile = useCallback(
@@ -255,8 +254,6 @@ export const useSettings = () => {
     // Acciones de sistema
     updateSystem,
 
-    // Acciones de atajos
-    updateShortcut,
-    deleteShortcut
+   
   }
 }

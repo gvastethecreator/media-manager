@@ -14,7 +14,6 @@ model Folder {
   id          String    @id @default(cuid())
   name        String
   path        String    @unique
-  isWatched   Boolean   @default(false)
   totalFiles  Int       @default(0)
   totalSize   Int       @default(0)
   lastIndexed DateTime? @default(now())
@@ -28,30 +27,36 @@ model Folder {
 }
 
 model Image {
-  id               String       @id @default(cuid())
-  hash             String
-  name             String
-  path             String
-  size             Int
-  width            Int
-  height           Int
-  metadata         String?
-  thumbnail        Bytes?
-  thumbnailSize    Int?
-  thumbnailWidth   Int?
-  thumbnailHeight  Int?
-  thumbnailError   String?
-  thumbnailErrorAt DateTime?
-  isPublic         Boolean      @default(false)
-  isFavorite       Boolean      @default(false)
-  folderId         String
-  folder           Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  collections      Collection[] @relation("ImageToCollection")
-  tags             Tag[]        @relation("ImageToTag")
-  favorites        Favorite[]
-  stats            ImageStats?
+  id                   String       @id @default(cuid())
+  hash                 String
+  name                 String
+  path                 String
+  size                 Int
+  width                Int
+  height               Int
+  metadata             String?
+  thumbnail            Bytes?
+  thumbnailSize        Int?
+  thumbnailWidth       Int?
+  thumbnailHeight      Int?
+  thumbnailError       String?
+  thumbnailErrorAt     DateTime?
+  thumbnailOptimizedAt DateTime?
+  isPublic             Boolean      @default(false)
+  isFavorite           Boolean      @default(false)
+  folderId             String
+  folder               Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  collections          Collection[] @relation("ImageToCollection")
+  tags                 Tag[]        @relation("ImageToTag")
+  favorites            Favorite[]
+  stats                ImageStats?
+  activities           Activity[]
+  albums               Album[]      @relation("ImageToAlbum")
+  characters           Character[]  @relation("ImageToCharacter")
+  places               Place[]      @relation("ImageToPlace")
+  objects              Object[]     @relation("ImageToObject")
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -116,15 +121,113 @@ model ImageStats {
 }
 
 model Profile {
-  id        String   @id @default(cuid())
-  name      String
-  emoji     String   @default("👤")
-  color     String   @default("#3b82f6")
-  theme     String   @default("system")
-  language  String   @default("es")
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  emoji       String   @default("👤")
+  color       String   @default("#3b82f6")
+  theme       String   @default("system")
+  language    String   @default("es")
+  description String?
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Album {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("📸")
+  description String?
+  color       String   @default("#3b82f6")
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToAlbum")
+
+  @@index([name])
+  @@index([createdAt])
+}
+
+model Character {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("👤")
+  color       String   @default("#3b82f6")
+  description String?
+  shortcut    String?
+  level       Int      @default(1)
+  class       String   @default("unknown")
+  race        String   @default("unknown")
+  alignment   String   @default("neutral")
+  backstory   String   @default("")
+  stats       String   @default("{}")
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToCharacter")
+
+  @@index([name])
+  @@index([createdAt])
+  @@index([class])
+  @@index([race])
+}
+
+model Place {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("📍")
+  color       String   @default("#3b82f6")
+  description String?
+  shortcut    String?
+  region      String   @default("unknown")
+  type        String   @default("unknown")
+  climate     String   @default("temperate")
+  population  Int      @default(0)
+  government  String   @default("unknown")
+  dangers     String   @default("[]")
+  resources   String   @default("[]")
+  lore        String   @default("")
+  history     String   @default("")
+  stats       String   @default("{}")
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToPlace")
+
+  @@index([name])
+  @@index([createdAt])
+  @@index([type])
+  @@index([climate])
+  @@index([region])
+}
+
+model Object {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  emoji        String   @default("🎯")
+  color        String   @default("#3b82f6")
+  description  String?
+  shortcut     String?
+  type         String   @default("misc")
+  rarity       String   @default("common")
+  properties   String   @default("[]")
+  requirements String   @default("{}")
+  origin       String   @default("")
+  stats        String   @default("{}")
+  sortBy       String   @default("name")
+  filters      String   @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  images       Image[]  @relation("ImageToObject")
+
+  @@index([name])
+  @@index([createdAt])
+  @@index([type])
+  @@index([rarity])
 }
 
 // Modelo para el sistema de colas
@@ -149,4 +252,16 @@ model QueueJob {
   @@index([status, createdAt])
   @@index([priority, status, createdAt])
   @@index([retryAt])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  description String
+  imageId     String?
+  image       Image?   @relation(fields: [imageId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([imageId])
 }

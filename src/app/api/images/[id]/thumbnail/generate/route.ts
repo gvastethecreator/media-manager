@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import sharp from 'sharp'
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/services/thumbnail.service'
-import { queueThumbnail } from '@/lib/queue'
 import { existsSync } from 'fs'
 import { pipeline } from 'stream/promises'
 import { createReadStream } from 'fs'
@@ -14,7 +13,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { quality = 'mid', force = false } = await request.json()
+    const { quality = 'medium', force = false } = await request.json()
 
     // Verificar si la imagen existe
     const image = await prisma.image.findUnique({
@@ -78,9 +77,8 @@ export async function POST(
       await prisma.image.update({
         where: { id: params.id },
         data: {
-          thumbnail: thumbnailBuffer.toString('base64'),
+          thumbnail: thumbnailBuffer,
           thumbnailSize: thumbnailBuffer.length,
-          thumbnailQuality: quality,
           thumbnailError: null,
           thumbnailErrorAt: null,
           updatedAt: new Date()

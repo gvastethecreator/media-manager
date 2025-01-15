@@ -1,25 +1,35 @@
+"use client";
+
+import type { Collection, Profile } from ".prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Collection, Tag, Profile } from "@prisma/client";
 import {
-	collectionService,
 	CollectionCreate,
 	CollectionUpdate,
-} from "@/services/collection.service";
-import { tagService, TagCreate, TagUpdate } from "@/services/tag.service";
+	createCollection,
+	getCollections,
+	deleteCollection as deleteCollectionAction,
+} from "@/app/actions/collection.actions";
+import {
+	getTags,
+	createTag,
+	updateTag as updateTagAction,
+	deleteTag as deleteTagAction,
+} from "@/app/actions/tag.actions";
+import type {
+	TagCreate,
+	TagUpdate,
+	TagWithStats,
+} from "@/app/actions/tag.actions";
 import {
 	profileService,
 	ProfileCreate,
 	ProfileUpdate,
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
-import { ThumbnailQuality } from "@/services/thumbnail.service";
+import { ThumbnailQuality } from "@/types/thumbnails";
+import { formatBytes } from "@/lib/utils";
 
 interface CollectionWithStats extends Collection {
-	count: number;
-	size: string;
-}
-
-interface TagWithStats extends Tag {
 	count: number;
 	size: string;
 }
@@ -32,6 +42,11 @@ export interface Settings {
 	thumbnailQuality: ThumbnailQuality;
 	videoThumbnailAnimation: boolean;
 	shortcuts: { [key: string]: string };
+	system: {
+		cpuUsage: number;
+		memoryUsage: number;
+		cacheSize: number;
+	};
 }
 
 interface SettingsContextType {
@@ -57,9 +72,14 @@ const defaultSettings: Settings = {
 	tags: [],
 	profiles: [],
 	activeProfile: null,
-	thumbnailQuality: "mid",
+	thumbnailQuality: ThumbnailQuality.MEDIUM,
 	videoThumbnailAnimation: true,
 	shortcuts: {},
+	system: {
+		cpuUsage: 0,
+		memoryUsage: 0,
+		cacheSize: 0,
+	},
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -86,7 +106,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 				const parsed = JSON.parse(savedSettings);
 				setSettings((prev) => ({
 					...prev,
-					thumbnailQuality: parsed.thumbnailQuality || "mid",
+					thumbnailQuality: parsed.thumbnailQuality || "medium",
 					videoThumbnailAnimation: parsed.videoThumbnailAnimation ?? true,
 					shortcuts: parsed.shortcuts || {},
 				}));
@@ -123,8 +143,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const loadCollections = async () => {
 		try {
-			const collections = await collectionService.getCollections();
-			setSettings((prev) => ({ ...prev, collections }));
+			const collections = await getCollections();
+			const mappedCollections = collections.map((c) => ({
+				...c,
+				count: c._count.images,
+				size: formatBytes(c.totalSize),
+			}));
+			setSettings((prev) => ({ ...prev, collections: mappedCollections }));
 		} catch (error) {
 			console.error("Error loading collections:", error);
 			toast({
@@ -137,7 +162,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const loadTags = async () => {
 		try {
-			const tags = await tagService.getTags();
+			const tags = await getTags();
 			setSettings((prev) => ({ ...prev, tags }));
 		} catch (error) {
 			console.error("Error loading tags:", error);
@@ -182,10 +207,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (!id) {
 				// Crear nueva colección
-				await collectionService.createCollection(data as CollectionCreate);
+				await createCollection(data as CollectionCreate);
 			} else {
 				// Actualizar colección existente
-				await collectionService.updateCollection(id, data as CollectionUpdate);
+				await updateCollection(id, data as CollectionUpdate);
 			}
 
 			await loadCollections();
@@ -211,10 +236,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (!id) {
 				// Crear nuevo tag
-				await tagService.createTag(data as TagCreate);
+				await createTag(data as TagCreate);
 			} else {
 				// Actualizar tag existente
-				await tagService.updateTag(id, data as TagUpdate);
+				await updateTagAction(id, data as TagUpdate);
 			}
 			await loadTags();
 			toast({
@@ -286,7 +311,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteCollection = async (id: string) => {
 		try {
-			await collectionService.deleteCollection(id);
+			await deleteCollection(id);
 			await loadCollections();
 			toast({
 				title: "Éxito",
@@ -304,7 +329,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteTag = async (id: string) => {
 		try {
-			await tagService.deleteTag(id);
+			await deleteTagAction(id);
 			await loadTags();
 			toast({
 				title: "Éxito",
@@ -368,4 +393,17 @@ export function useSettingsContext() {
 }
 
 // Alias para mantener compatibilidad
-export const useCollectionTagContext = useSettingsContext;
+export function useCollectionTagContext() {
+	const context = useContext(SettingsContext);
+	if (!context) {
+		throw new Error(
+			"useCollectionTagContext must be used within a SettingsProvider"
+		);
+	}
+	return {
+		collections: context.settings.collections,
+		updateCollection: context.updateCollection,
+		deleteCollection: context.deleteCollection,
+		settings: context.settings,
+	};
+}

@@ -1,4 +1,3 @@
-export { InitializationScreen } from './initialization-screen'
 export { LoadingScreen } from './loading-screen'
 
 // Types

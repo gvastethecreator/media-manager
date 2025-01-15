@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { generateThumbnail } from '@/lib/thumbnail'
-import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { optimizeThumbnail } from '@/lib/thumbnails'
+import { logger } from '@/lib/logger'
+
+const thumbLogger = logger.withContext('ThumbnailOptimize')
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -14,25 +15,24 @@ export async function GET(request: NextRequest) {
 
   const writeEvent = async (event: string, data: any) => {
     try {
-      await writer.write(
-        encoder.encode(`data: ${JSON.stringify({ type: event, data })}\n\n`)
-      )
+      const eventString = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+      await writer.write(encoder.encode(eventString))
     } catch (error) {
-      console.error('Error writing event:', error)
+      thumbLogger.error('Error writing event:', error)
     }
   }
 
   try {
-    // Obtener imágenes con thumbnail
+    // Obtener imágenes con miniaturas
     const images = await prisma.image.findMany({
       where: {
-        thumbnail: { not: null },
-        thumbnailError: null
+        thumbnail: { not: null }
       },
       select: {
         id: true,
         path: true,
         name: true,
+        thumbnail: true,
         thumbnailSize: true
       }
     })
@@ -55,70 +55,43 @@ export async function GET(request: NextRequest) {
       const progress = Math.round((current / total) * 100)
 
       try {
-        // Verificar que el archivo existe
-        if (!existsSync(image.path)) {
-          await writeEvent('error', {
-            imageId: image.id,
-            path: image.path,
-            error: 'Archivo no encontrado'
-          })
-          errors++
-          continue
-        }
+        // Optimizar miniatura
+        const result = await optimizeThumbnail(Buffer.from(image.thumbnail!))
 
-        const originalSize = image.thumbnailSize || 0
-
-        // Generar thumbnail optimizado
-        const thumbnail = await generateThumbnail(image.path, 'compressed' as ThumbnailQuality)
-
-        if (!thumbnail || !thumbnail.buffer) {
-          throw new Error('Error generando thumbnail optimizado')
-        }
-
-        // Si el nuevo thumbnail es más pequeño, actualizarlo
-        if (thumbnail.buffer.length < originalSize) {
+        if (result && result.size < (image.thumbnailSize || 0)) {
+          // Actualizar miniatura si es más pequeña
           await prisma.image.update({
             where: { id: image.id },
             data: {
-              thumbnail: thumbnail.buffer,
-              thumbnailSize: thumbnail.buffer.length,
-              thumbnailWidth: thumbnail.width,
-              thumbnailHeight: thumbnail.height,
-              thumbnailError: null,
-              thumbnailErrorAt: null
+              thumbnail: result.data,
+              thumbnailSize: result.size,
+              thumbnailWidth: result.width,
+              thumbnailHeight: result.height,
+              thumbnailOptimizedAt: new Date()
             }
           })
 
-          totalSaved += originalSize - thumbnail.buffer.length
+          const saved = (image.thumbnailSize || 0) - result.size
+          totalSaved += saved
           optimized++
+
+          await writeEvent('progress', {
+            current,
+            total,
+            progress,
+            currentFile: image.path,
+            status: `Optimizando ${current} de ${total}`,
+            lastProcessed: {
+              id: image.id,
+              path: image.path,
+              processedAt: new Date().toISOString(),
+              saved
+            }
+          })
         }
-
-        // Enviar progreso
-        await writeEvent('progress', {
-          current,
-          total,
-          progress,
-          currentFile: image.path,
-          status: `Optimizando ${current} de ${total}`,
-          lastProcessed: {
-            id: image.id,
-            path: image.path,
-            processedAt: new Date().toISOString(),
-            saved: originalSize - thumbnail.buffer.length
-          }
-        })
       } catch (error) {
-        console.error('Error optimizando imagen:', error)
+        thumbLogger.error('Error optimizing image:', error)
         errors++
-
-        // Actualizar error en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date()
-          }
-        })
 
         // Enviar error
         await writeEvent('error', {
@@ -141,7 +114,7 @@ export async function GET(request: NextRequest) {
     })
 
     await writer.close()
-    return new NextResponse(stream.readable, {
+    return new Response(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -149,12 +122,12 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Error en optimización:', error)
+    thumbLogger.error('Error en optimización:', error)
     await writeEvent('error', {
       error: error instanceof Error ? error.message : 'Error desconocido'
     })
     await writer.close()
-    return new NextResponse(stream.readable, {
+    return new Response(stream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',

@@ -6,6 +6,10 @@ import { join, extname } from 'path'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
+import { logger } from '@/lib/logger'
+import type { FileMetadata, AIMetadata } from '@/types/metadata'
+
+const reindexLogger = logger.withContext('ReindexAPI')
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -16,164 +20,177 @@ export async function POST(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
-  const folderId = context.params.id;
-  console.log('Iniciando reindexación para carpeta:', folderId);
-
   try {
+    // Esperar y extraer los parámetros de manera asíncrona
+    const params = await Promise.resolve(context.params);
+    const { id } = params;
+
+    reindexLogger.info('🔄 Iniciando reindexado para carpeta:', id)
+
     // Verificar que la carpeta existe
     const folder = await prisma.folder.findUnique({
-      where: { id: folderId }
-    });
+      where: { id },
+      select: {
+        id: true,
+        path: true,
+        name: true,
+      },
+    })
 
     if (!folder) {
-      console.error('Carpeta no encontrada:', folderId);
-      return new NextResponse(JSON.stringify({ error: 'Carpeta no encontrada' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      reindexLogger.error('Carpeta no encontrada:', id)
+      return NextResponse.json(
+        { error: 'FOLDER_NOT_FOUND' },
+        { status: 404 }
+      )
     }
 
     if (!existsSync(folder.path)) {
-      console.error('Carpeta no encontrada en el sistema:', folder.path);
-      return new NextResponse(JSON.stringify({ error: 'Carpeta no encontrada en el sistema' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      reindexLogger.error('Carpeta no encontrada en el sistema:', folder.path)
+      return NextResponse.json(
+        { error: 'PATH_NOT_FOUND' },
+        { status: 404 }
+      )
     }
 
-    // Iniciar proceso de reindexación
-    console.log('Iniciando proceso para carpeta:', folder.path);
-
-    // Eliminar imágenes existentes
-    await prisma.image.deleteMany({
-      where: { folderId }
-    });
-
     // Procesar archivos
-    const processDirectory = async (dirPath: string) => {
-      console.log('Procesando directorio:', dirPath);
-      const files = await readdir(dirPath);
-      let processed = 0;
-      let total = 0;
+    const processDirectory = async (dirPath: string): Promise<{ processed: number; total: number }> => {
+      try {
+        const files = await readdir(dirPath)
+        let processed = 0
+        let total = 0
 
-      // Contar archivos válidos
-      for (const file of files) {
-        const filePath = join(dirPath, file);
-        const stats = await stat(filePath);
-
-        if (stats.isDirectory()) {
-          const subDirStats = await processDirectory(filePath);
-          total += subDirStats.total;
-        } else {
-          const ext = extname(file).toLowerCase();
-          if (SUPPORTED_FORMATS.includes(ext)) {
-            total++;
-          }
-        }
-      }
-
-      // Procesar archivos
-      for (const file of files) {
-        try {
-          const filePath = join(dirPath, file);
-          const stats = await stat(filePath);
+        // Contar archivos primero
+        for (const file of files) {
+          const filePath = join(dirPath, file)
+          const stats = await stat(filePath)
 
           if (stats.isDirectory()) {
-            const subDirStats = await processDirectory(filePath);
-            processed += subDirStats.processed;
-            continue;
+            const subDirStats = await processDirectory(filePath)
+            total += subDirStats.total
+            continue
           }
 
-          const ext = extname(file).toLowerCase();
-          if (!SUPPORTED_FORMATS.includes(ext)) {
-            continue;
+          const ext = extname(file).toLowerCase()
+          if (SUPPORTED_FORMATS.includes(ext)) {
+            total++
           }
-
-          console.log('Procesando archivo:', filePath);
-
-          // Obtener metadata y hash
-          const [metadata, hash] = await Promise.all([
-            getImageMetadata(filePath),
-            computeHash(filePath)
-          ]);
-
-          // Generar thumbnail
-          let thumbnailData = null;
-          try {
-            const result = await generateThumbnail(filePath);
-            if (result?.buffer) {
-              thumbnailData = {
-                data: result.buffer,
-                size: result.buffer.length,
-                width: result.width,
-                height: result.height
-              };
-            }
-          } catch (error) {
-            console.error('Error generando thumbnail:', error);
-          }
-
-          // Crear entrada en la base de datos
-          await prisma.image.create({
-            data: {
-              path: filePath,
-              name: file,
-              size: stats.size,
-              hash,
-              width: metadata.width || 0,
-              height: metadata.height || 0,
-              metadata: JSON.stringify(metadata),
-              thumbnail: thumbnailData?.data || null,
-              thumbnailSize: thumbnailData?.size || null,
-              thumbnailWidth: thumbnailData?.width || null,
-              thumbnailHeight: thumbnailData?.height || null,
-              folderId,
-              createdAt: stats.birthtime,
-              updatedAt: stats.mtime
-            }
-          });
-
-          processed++;
-
-        } catch (error) {
-          console.error('Error procesando archivo:', error);
         }
+
+        // Procesar archivos
+        for (const file of files) {
+          try {
+            const filePath = join(dirPath, file)
+            const stats = await stat(filePath)
+
+            if (stats.isDirectory()) {
+              const subDirStats = await processDirectory(filePath)
+              processed += subDirStats.processed
+              continue
+            }
+
+            const ext = extname(file).toLowerCase()
+            if (!SUPPORTED_FORMATS.includes(ext)) {
+              continue
+            }
+
+            // Verificar si la imagen ya existe
+            const existingImage = await prisma.image.findFirst({
+              where: { path: filePath }
+            })
+
+            if (!existingImage) {
+              // Procesar nueva imagen
+              const hash = await computeHash(filePath)
+              const metadata = await getImageMetadata(filePath) as FileMetadata
+
+              await prisma.image.create({
+                data: {
+                  name: file,
+                  path: filePath,
+                  hash,
+                  size: stats.size,
+                  width: metadata.dimensions?.width || 0,
+                  height: metadata.dimensions?.height || 0,
+                  metadata: JSON.stringify(metadata),
+                  folderId: folder.id,
+                  isPublic: false
+                }
+              })
+
+              // Generar thumbnail
+              await generateThumbnail(filePath)
+              processed++
+            } else {
+              // Actualizar metadata si es necesario
+              const metadata = await getImageMetadata(filePath)
+              await prisma.image.update({
+                where: { id: existingImage.id },
+                data: {
+                  size: stats.size,
+                  metadata: JSON.stringify(metadata),
+                  updatedAt: new Date()
+                }
+              })
+              processed++
+            }
+          } catch (fileError) {
+            reindexLogger.error('Error procesando archivo:', {
+              path: file,
+              error: fileError instanceof Error ? fileError.message : 'Error desconocido'
+            })
+            continue
+          }
+        }
+
+        return { processed, total }
+      } catch (dirError) {
+        reindexLogger.error('Error procesando directorio:', {
+          path: dirPath,
+          error: dirError instanceof Error ? dirError.message : 'Error desconocido'
+        })
+        return { processed: 0, total: 0 }
       }
+    }
 
-      return { processed, total };
-    };
-
-    // Iniciar procesamiento
-    const { processed, total } = await processDirectory(folder.path);
+    // Procesar la carpeta
+    reindexLogger.info('Iniciando procesamiento de directorio:', folder.path)
+    const { processed, total } = await processDirectory(folder.path)
 
     // Actualizar estadísticas de la carpeta
     const stats = await prisma.image.aggregate({
-      where: { folderId },
+      where: { folderId: folder.id },
       _sum: { size: true },
       _count: true
-    });
+    })
 
-    await prisma.folder.update({
-      where: { id: folderId },
+    const updatedFolder = await prisma.folder.update({
+      where: { id: folder.id },
       data: {
         totalFiles: stats._count,
         totalSize: stats._sum.size || 0,
         lastIndexed: new Date()
       }
-    });
+    })
 
-    return new NextResponse(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    reindexLogger.info('Procesamiento completado:', { processed, total })
+    return NextResponse.json({
+      folder: updatedFolder,
+      stats: {
+        processed,
+        total,
+        totalSize: stats._sum.size || 0
+      }
+    })
 
   } catch (error) {
-    console.error('Error en reindexación:', error);
-
-    return new NextResponse(JSON.stringify({
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    reindexLogger.error('Error en reindexación:', error)
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        details: error instanceof Error ? error.stack : String(error)
+      },
+      { status: 500 }
+    )
   }
 }

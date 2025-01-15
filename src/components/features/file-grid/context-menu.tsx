@@ -15,6 +15,9 @@ import {
 	ImageIcon,
 	Palette,
 	Flag,
+	User,
+	MapPin,
+	Box,
 } from "lucide-react";
 import {
 	ContextMenu,
@@ -28,393 +31,489 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import type { FileItem } from "@/types/file-item";
-import { useEffect, useState } from "react";
-import { useCollectionTagContext } from "@/context/settings-context";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { GithubPicker } from "react-color";
+import { useEffect, useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { useFavoritesStore } from "@/store/favorites.store";
+import { useCollectionStore } from "@/store/collections.store";
+import { useTagsStore } from "@/store/tags.store";
+import { useAlbumStore } from "@/store/albums.store";
+import { useCharacterStore } from "@/store/characters.store";
+import { usePlaceStore } from "@/store/places.store";
+import { useObjectStore } from "@/store/objects.store";
+import { logger } from "@/lib/logger";
+import type {
+	Collection,
+	Album,
+	Character,
+	Place,
+	Object,
+	Tag,
+} from "@prisma/client";
+
+const contextMenuLogger = logger.withContext("ContextMenu");
+
+// Tipos de acciones del menú contextual
+export type ContextMenuAction =
+	| "mark-toggle"
+	| "favorite-toggle"
+	| "collection-add"
+	| "tag-add"
+	| "album-add"
+	| "character-add"
+	| "place-add"
+	| "object-add"
+	| "preview"
+	| "open"
+	| "download"
+	| "copy"
+	| "delete";
 
 interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
-	onAction: (action: string, file: FileItem, data?: any) => void;
+	onAction: (action: ContextMenuAction, file: FileItem, data?: any) => void;
 }
+
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return false;
+	}
+};
 
 export function FileContextMenu({
 	file,
 	children,
 	onAction,
 }: FileContextMenuProps) {
-	const { settings, updateCollection, updateTag } = useCollectionTagContext();
-	const { collections, tags } = settings;
+	// Stores con tipos correctos y valores por defecto
+	const { toggleFavorite, isFavorited } = useFavoritesStore();
+	const {
+		items: collections = [],
+		addImageToCollection,
+		loadItems: loadCollections,
+	} = useCollectionStore();
+	const { tags = [], addImageToTag, loadTags } = useTagsStore();
+	const {
+		items: albums = [],
+		addImageToAlbum,
+		loadItems: loadAlbums,
+	} = useAlbumStore();
+	const {
+		items: characters = [],
+		addImageToCharacter,
+		loadItems: loadCharacters,
+	} = useCharacterStore();
+	const {
+		items: places = [],
+		addImageToPlace,
+		loadItems: loadPlaces,
+	} = usePlaceStore();
+	const {
+		items: objects = [],
+		addImageToObject,
+		loadItems: loadObjects,
+	} = useObjectStore();
 
-	// Estados para nueva colección
-	const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
-	const [newCollection, setNewCollection] = useState({
-		name: "",
-		emoji: "📁",
-		description: "",
-		color: "#3b82f6",
-	});
+	// Estado para controlar si el menú está abierto
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [hasLoadedData, setHasLoadedData] = useState(false);
 
-	// Estados para nueva etiqueta
-	const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
-	const [newTag, setNewTag] = useState({
-		name: "",
-		color: "#3b82f6",
-		description: "",
-	});
-
-	const handleCreateCollection = async () => {
-		try {
-			const newCollectionData = {
-				name: newCollection.name,
-				emoji: newCollection.emoji,
-				description: newCollection.description,
-				color: newCollection.color,
-				sortBy: "name" as const,
-				filters: [],
-			};
-
-			await updateCollection(null, newCollectionData);
-
-			// Una vez creada la colección, la actualizamos para agregar el archivo
-			const collections = settings.collections;
-			const createdCollection = collections.find(
-				(c) => c.name === newCollection.name
-			);
-
-			if (createdCollection) {
-				await onAction("collection-add", file, {
-					collectionId: createdCollection.id,
-				});
+	// Cargar datos solo cuando se abre el menú por primera vez
+	useEffect(() => {
+		const loadInitialData = async () => {
+			if (isMenuOpen && !hasLoadedData) {
+				try {
+					contextMenuLogger.info("🔄 Cargando datos iniciales...");
+					await Promise.all([
+						loadCollections(),
+						loadTags(),
+						loadAlbums(),
+						loadCharacters(),
+						loadPlaces(),
+						loadObjects(),
+					]);
+					setHasLoadedData(true);
+					contextMenuLogger.info("✅ Datos iniciales cargados");
+				} catch (error) {
+					contextMenuLogger.error("❌ Error al cargar datos iniciales:", error);
+				}
 			}
+		};
 
-			setNewCollection({
-				name: "",
-				emoji: "📁",
-				description: "",
-				color: "#3b82f6",
-			});
-			setIsCollectionDialogOpen(false);
-		} catch (error) {
-			console.error("Error creating collection:", error);
-		}
-	};
+		loadInitialData();
+	}, [
+		isMenuOpen,
+		hasLoadedData,
+		loadCollections,
+		loadTags,
+		loadAlbums,
+		loadCharacters,
+		loadPlaces,
+		loadObjects,
+	]);
 
-	const handleCreateTag = async () => {
+	const handleToggleFavorite = useCallback(async () => {
 		try {
-			const newTagData = {
-				name: newTag.name,
-				color: newTag.color,
-				description: newTag.description,
-			};
-
-			await updateTag(null, newTagData);
-
-			// Una vez creado el tag, lo actualizamos para agregar el archivo
-			const tags = settings.tags;
-			const createdTag = tags.find((t) => t.name === newTag.name);
-
-			if (createdTag) {
-				await onAction("tag-add", file, {
-					tagId: createdTag.id,
-				});
-			}
-
-			setNewTag({
-				name: "",
-				color: "#3b82f6",
-				description: "",
-			});
-			setIsTagDialogOpen(false);
+			await toggleFavorite(file.id);
+			contextMenuLogger.info("✅ Estado de favorito cambiado");
 		} catch (error) {
-			console.error("Error creating tag:", error);
+			contextMenuLogger.error("❌ Error al cambiar estado de favorito:", error);
 		}
-	};
+	}, [file.id, toggleFavorite]);
 
-	const isImage = file.type === "image" || file.mimeType?.startsWith("image/");
+	const isImage =
+		file.type === "image" ||
+		(() => {
+			try {
+				const metadata = file.metadata ? JSON.parse(file.metadata) : null;
+				return metadata?.mimeType?.startsWith("image/") || false;
+			} catch {
+				return false;
+			}
+		})();
+
+	const handleDoubleClick = useCallback(
+		(event: MouseEvent) => {
+			onAction("preview", file);
+		},
+		[file, onAction]
+	);
+
+	const handleContextMenuAction = useCallback(
+		async (action: ContextMenuAction, file: FileItem, data?: any) => {
+			try {
+				switch (action) {
+					case "mark-toggle":
+						// Implementar marcado
+						break;
+					case "favorite-toggle":
+						await handleToggleFavorite();
+						break;
+					case "collection-add":
+						await addImageToCollection(data, file.id);
+						break;
+					case "tag-add":
+						await addImageToTag(data, file.id);
+						break;
+					case "album-add":
+						await addImageToAlbum(data, file.id);
+						break;
+					case "character-add":
+						await addImageToCharacter(data, file.id);
+						break;
+					case "place-add":
+						await addImageToPlace(data, file.id);
+						break;
+					case "object-add":
+						await addImageToObject(data, file.id);
+						break;
+					case "preview":
+						handleDoubleClick(new MouseEvent("doubleclick") as any);
+						break;
+					case "open":
+						// Implementar apertura de ubicación
+						break;
+					case "download":
+						// Implementar descarga
+						break;
+					case "copy":
+						// Implementar copiado
+						break;
+					case "delete":
+						// Implementar eliminación
+						break;
+					default:
+						break;
+				}
+			} catch (error) {
+				contextMenuLogger.error("❌ Error ejecutando acción:", error);
+			}
+		},
+		[
+			handleDoubleClick,
+			handleToggleFavorite,
+			addImageToCollection,
+			addImageToTag,
+			addImageToAlbum,
+			addImageToCharacter,
+			addImageToPlace,
+			addImageToObject,
+		]
+	);
 
 	return (
-		<ContextMenu>
+		<ContextMenu onOpenChange={setIsMenuOpen}>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-			<ContextMenuContent className="w-64">
-				<ContextMenuItem onClick={() => onAction("mark-toggle", file)}>
-					<Flag className="mr-2 h-4 w-4 text-warning" />
-					Marcar/Desmarcar
-					<ContextMenuShortcut>⌘M</ContextMenuShortcut>
-				</ContextMenuItem>
+			{isMenuOpen && (
+				<ContextMenuContent className="w-64">
+					{isImage && (
+						<>
+							<ContextMenuItem onClick={() => onAction("mark-toggle", file)}>
+								<Flag className="mr-2 h-4 w-4 text-warning" />
+								Marcar/Desmarcar
+								<ContextMenuShortcut>⌘M</ContextMenuShortcut>
+							</ContextMenuItem>
 
-				<ContextMenuItem onClick={() => onAction("favorite-toggle", file)}>
-					{file.isFavorite ? (
-						<>
-							<HeartOff className="mr-2 h-4 w-4" />
-							Quitar de favoritos
-						</>
-					) : (
-						<>
-							<Heart className="mr-2 h-4 w-4" />
-							Agregar a favoritos
+							<ContextMenuItem onClick={handleToggleFavorite}>
+								{isFavorited(file.id) ?
+									<>
+										<HeartOff className="mr-2 h-4 w-4" />
+										Quitar de favoritos
+									</>
+								:	<>
+										<Heart className="mr-2 h-4 w-4" />
+										Agregar a favoritos
+									</>
+								}
+								<ContextMenuShortcut>⌘F</ContextMenuShortcut>
+							</ContextMenuItem>
+
+							<ContextMenuSeparator />
+
+							{hasLoadedData && (
+								<>
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<BookmarkPlus className="mr-2 h-4 w-4" />
+											Agregar a colección
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{collections && collections.length > 0 ?
+												collections.map((collection: Collection) => (
+													<ContextMenuItem
+														key={collection.id}
+														onClick={() =>
+															onAction("collection-add", file, collection.id)
+														}
+													>
+														<div className="flex items-center">
+															{collection.emoji && (
+																<span className="mr-2">{collection.emoji}</span>
+															)}
+															<span className="flex-1 truncate">
+																{collection.name}
+															</span>
+															{collection.color && (
+																<div
+																	className="h-3 w-3 rounded-full"
+																	style={{
+																		backgroundColor: collection.color,
+																	}}
+																/>
+															)}
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													<span className="text-muted-foreground">
+														No hay colecciones
+													</span>
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<TagIcon className="mr-2 h-4 w-4" />
+											Etiquetas
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{tags && tags.length > 0 ?
+												tags.map((tag: Tag) => (
+													<ContextMenuItem
+														key={tag.id}
+														onClick={() => onAction("tag-add", file, tag.id)}
+													>
+														<div className="flex items-center gap-2 w-full">
+															<div
+																className="w-3 h-3 rounded"
+																style={{ backgroundColor: tag.color }}
+															/>
+															<span className="flex-1">{tag.name}</span>
+															{tag.shortcut && (
+																<Badge
+																	variant="outline"
+																	className="text-[10px] h-4 px-1"
+																>
+																	{tag.shortcut}
+																</Badge>
+															)}
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													No hay etiquetas disponibles
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<ImageIcon className="mr-2 h-4 w-4" />
+											Álbumes
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{albums.length > 0 ?
+												albums.map((album: Album) => (
+													<ContextMenuItem
+														key={album.id}
+														onClick={() => addImageToAlbum(album.id, file.id)}
+													>
+														<div className="flex items-center gap-2 w-full">
+															<span className="mr-2">{album.emoji}</span>
+															<span className="flex-1">{album.name}</span>
+															<div
+																className="w-3 h-3 rounded"
+																style={{ backgroundColor: album.color }}
+															/>
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													No hay álbumes disponibles
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<User className="mr-2 h-4 w-4" />
+											Personajes
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{characters.length > 0 ?
+												characters.map((character: Character) => (
+													<ContextMenuItem
+														key={character.id}
+														onClick={() =>
+															addImageToCharacter(character.id, file.id)
+														}
+													>
+														<div className="flex items-center gap-2 w-full">
+															<span className="mr-2">{character.emoji}</span>
+															<span className="flex-1">{character.name}</span>
+															<div
+																className="w-3 h-3 rounded"
+																style={{ backgroundColor: character.color }}
+															/>
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													No hay personajes disponibles
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<MapPin className="mr-2 h-4 w-4" />
+											Lugares
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{places.length > 0 ?
+												places.map((place: Place) => (
+													<ContextMenuItem
+														key={place.id}
+														onClick={() => addImageToPlace(place.id, file.id)}
+													>
+														<div className="flex items-center gap-2 w-full">
+															<span className="mr-2">{place.emoji}</span>
+															<span className="flex-1">{place.name}</span>
+															<div
+																className="w-3 h-3 rounded"
+																style={{ backgroundColor: place.color }}
+															/>
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													No hay lugares disponibles
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSub>
+										<ContextMenuSubTrigger>
+											<Box className="mr-2 h-4 w-4" />
+											Objetos
+										</ContextMenuSubTrigger>
+										<ContextMenuSubContent className="w-48">
+											{objects.length > 0 ?
+												objects.map((object: Object) => (
+													<ContextMenuItem
+														key={object.id}
+														onClick={() => addImageToObject(object.id, file.id)}
+													>
+														<div className="flex items-center gap-2 w-full">
+															<span className="mr-2">{object.emoji}</span>
+															<span className="flex-1">{object.name}</span>
+															<div
+																className="w-3 h-3 rounded"
+																style={{ backgroundColor: object.color }}
+															/>
+														</div>
+													</ContextMenuItem>
+												))
+											:	<ContextMenuItem disabled>
+													No hay objetos disponibles
+												</ContextMenuItem>
+											}
+										</ContextMenuSubContent>
+									</ContextMenuSub>
+
+									<ContextMenuSeparator />
+
+									<ContextMenuItem onClick={() => onAction("preview", file)}>
+										<ImageIcon className="mr-2 h-4 w-4" />
+										Ver imagen
+										<ContextMenuShortcut>⏎</ContextMenuShortcut>
+									</ContextMenuItem>
+
+									<ContextMenuItem onClick={() => onAction("open", file)}>
+										<FolderOpen className="mr-2 h-4 w-4" />
+										Abrir ubicación
+										<ContextMenuShortcut>⌘O</ContextMenuShortcut>
+									</ContextMenuItem>
+
+									<ContextMenuSeparator />
+
+									<ContextMenuItem onClick={() => onAction("download", file)}>
+										<Download className="mr-2 h-4 w-4" />
+										Descargar
+										<ContextMenuShortcut>⌘D</ContextMenuShortcut>
+									</ContextMenuItem>
+
+									<ContextMenuItem onClick={() => onAction("copy", file)}>
+										<Copy className="mr-2 h-4 w-4" />
+										Copiar
+										<ContextMenuShortcut>⌘C</ContextMenuShortcut>
+									</ContextMenuItem>
+
+									<ContextMenuSeparator />
+
+									<ContextMenuItem
+										onClick={() => onAction("delete", file)}
+										className="text-red-600"
+									>
+										<Trash2 className="mr-2 h-4 w-4" />
+										Eliminar
+										<ContextMenuShortcut>⌘⌫</ContextMenuShortcut>
+									</ContextMenuItem>
+								</>
+							)}
 						</>
 					)}
-					<ContextMenuShortcut>⌘F</ContextMenuShortcut>
-				</ContextMenuItem>
-
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>
-						<BookmarkPlus className="mr-2 h-4 w-4" />
-						Agregar a colección
-					</ContextMenuSubTrigger>
-					<ContextMenuSubContent className="w-48">
-						<Dialog
-							open={isCollectionDialogOpen}
-							onOpenChange={setIsCollectionDialogOpen}
-						>
-							<DialogTrigger asChild>
-								<ContextMenuItem onSelect={(e) => e.preventDefault()}>
-									<BookmarkPlus className="mr-2 h-4 w-4" />
-									Nueva colección...
-								</ContextMenuItem>
-							</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Crear nueva colección</DialogTitle>
-								</DialogHeader>
-								<div className="grid gap-4 py-4">
-									<div className="flex items-center gap-4">
-										<EmojiPicker
-											onEmojiSelect={(emoji: string) =>
-												setNewCollection({ ...newCollection, emoji })
-											}
-										/>
-										<Input
-											placeholder="Nombre de la colección"
-											value={newCollection.name}
-											onChange={(e) =>
-												setNewCollection({
-													...newCollection,
-													name: e.target.value,
-												})
-											}
-										/>
-									</div>
-									<div>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button variant="outline" className="w-full">
-													<div
-														className="w-4 h-4 rounded mr-2"
-														style={{
-															backgroundColor: newCollection.color,
-														}}
-													/>
-													Color
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<GithubPicker
-													color={newCollection.color}
-													onChange={(color) =>
-														setNewCollection({
-															...newCollection,
-															color: color.hex,
-														})
-													}
-												/>
-											</PopoverContent>
-										</Popover>
-									</div>
-									<Button
-										onClick={handleCreateCollection}
-										disabled={!newCollection.name.trim()}
-									>
-										Crear colección
-									</Button>
-								</div>
-							</DialogContent>
-						</Dialog>
-						<ContextMenuSeparator />
-						{collections.length > 0 ? (
-							collections.map((collection) => (
-								<ContextMenuItem
-									key={collection.id}
-									onClick={() =>
-										onAction("collection-add", file, {
-											collectionId: collection.id,
-										})
-									}
-								>
-									<div className="flex items-center gap-2 w-full">
-										<span className="mr-2">{collection.emoji}</span>
-										<span className="flex-1">{collection.name}</span>
-										<div
-											className="w-3 h-3 rounded"
-											style={{ backgroundColor: collection.color }}
-										/>
-									</div>
-								</ContextMenuItem>
-							))
-						) : (
-							<ContextMenuItem disabled>
-								No hay colecciones disponibles
-							</ContextMenuItem>
-						)}
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-
-				<ContextMenuSub>
-					<ContextMenuSubTrigger>
-						<TagIcon className="mr-2 h-4 w-4" />
-						Etiquetas
-					</ContextMenuSubTrigger>
-					<ContextMenuSubContent className="w-48">
-						<Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
-							<DialogTrigger asChild>
-								<ContextMenuItem onSelect={(e) => e.preventDefault()}>
-									<TagIcon className="mr-2 h-4 w-4" />
-									Nueva etiqueta...
-								</ContextMenuItem>
-							</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Crear nueva etiqueta</DialogTitle>
-								</DialogHeader>
-								<div className="grid gap-4 py-4">
-									<div className="flex items-center gap-4">
-										<Input
-											placeholder="Nombre de la etiqueta"
-											value={newTag.name}
-											onChange={(e) =>
-												setNewTag({
-													...newTag,
-													name: e.target.value,
-												})
-											}
-										/>
-									</div>
-									<div>
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button variant="outline" className="w-full">
-													<div
-														className="w-4 h-4 rounded mr-2"
-														style={{
-															backgroundColor: newTag.color,
-														}}
-													/>
-													Color
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<GithubPicker
-													color={newTag.color}
-													onChange={(color) =>
-														setNewTag({
-															...newTag,
-															color: color.hex,
-														})
-													}
-												/>
-											</PopoverContent>
-										</Popover>
-									</div>
-									<Button
-										onClick={handleCreateTag}
-										disabled={!newTag.name.trim()}
-									>
-										Crear etiqueta
-									</Button>
-								</div>
-							</DialogContent>
-						</Dialog>
-						<ContextMenuSeparator />
-						{tags.length > 0 ? (
-							tags.map((tag) => (
-								<ContextMenuItem
-									key={tag.id}
-									onClick={() =>
-										onAction("tag-add", file, {
-											tagId: tag.id,
-										})
-									}
-								>
-									<div className="flex items-center gap-2 w-full">
-										<div
-											className="w-3 h-3 rounded"
-											style={{ backgroundColor: tag.color }}
-										/>
-										<span className="flex-1">{tag.name}</span>
-										{tag.shortcut && (
-											<Badge variant="outline" className="text-[10px] h-4 px-1">
-												{tag.shortcut}
-											</Badge>
-										)}
-									</div>
-								</ContextMenuItem>
-							))
-						) : (
-							<ContextMenuItem disabled>
-								No hay etiquetas disponibles
-							</ContextMenuItem>
-						)}
-					</ContextMenuSubContent>
-				</ContextMenuSub>
-
-				<ContextMenuSeparator />
-
-				{isImage && (
-					<ContextMenuItem onClick={() => onAction("preview", file)}>
-						<ImageIcon className="mr-2 h-4 w-4" />
-						Ver imagen
-						<ContextMenuShortcut>⏎</ContextMenuShortcut>
-					</ContextMenuItem>
-				)}
-
-				<ContextMenuItem onClick={() => onAction("open", file)}>
-					<FolderOpen className="mr-2 h-4 w-4" />
-					Abrir ubicación
-					<ContextMenuShortcut>⌘O</ContextMenuShortcut>
-				</ContextMenuItem>
-
-				<ContextMenuSeparator />
-
-				<ContextMenuItem onClick={() => onAction("download", file)}>
-					<Download className="mr-2 h-4 w-4" />
-					Descargar
-					<ContextMenuShortcut>⌘D</ContextMenuShortcut>
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={() => onAction("copy", file)}>
-					<Copy className="mr-2 h-4 w-4" />
-					Copiar
-					<ContextMenuShortcut>⌘C</ContextMenuShortcut>
-				</ContextMenuItem>
-
-				<ContextMenuSeparator />
-
-				<ContextMenuItem
-					onClick={() => onAction("delete", file)}
-					className="text-red-600"
-				>
-					<Trash2 className="mr-2 h-4 w-4" />
-					Eliminar
-					<ContextMenuShortcut>⌘⌫</ContextMenuShortcut>
-				</ContextMenuItem>
-			</ContextMenuContent>
+				</ContextMenuContent>
+			)}
 		</ContextMenu>
 	);
 }

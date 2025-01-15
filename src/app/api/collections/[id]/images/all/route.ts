@@ -9,7 +9,8 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params
+    const params = await context.params
+    const { id } = params
 
     if (!id) {
       return NextResponse.json(

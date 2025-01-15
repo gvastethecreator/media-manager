@@ -1,33 +1,29 @@
 import { prisma } from '@/lib/prisma'
-import type { Image, Thumbnail } from '@prisma/client'
+import type { Image } from '@prisma/client'
 import { statsService } from './stats.service'
 import sharp from 'sharp'
-import { thumbnailCache, metadataCache } from '@/lib/cache'
+import { thumbnailCache } from '@/lib/cache'
 import { createHash } from 'crypto'
-import path from 'path'
 import { promises as fs } from 'fs'
+import { imageConfig } from '@/config'
+import { logger } from '@/lib/logger'
+import { ThumbnailQuality } from '@/types/thumbnails'
+import { getImageMetadata as getMetadata } from '@/lib/metadata'
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'mid' | 'high'
+const imageLogger = logger.withContext('ImageService')
 
-export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
-  compressed: { quality: 60, width: 200, height: 200 },
-  low: { quality: 70, width: 300, height: 300 },
-  mid: { quality: 80, width: 400, height: 400 },
-  high: { quality: 90, width: 500, height: 500 }
-}
+export type { ThumbnailQuality }
+export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities
 
 export type CreateImageInput = {
-  title: string
   name: string
-  description?: string
-  filePath: string
-  fileSize: number
-  mimeType: string
+  path: string
+  size: number
   width: number
   height: number
-  userId: string
+  hash: string
+  folderId: string
   metadata?: Record<string, any>
-  hash?: string
   isPublic?: boolean
 }
 
@@ -41,7 +37,7 @@ export type ImageProcessingOptions = {
 
 class ImageService {
   private static instance: ImageService
-  private readonly SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+  private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats
   private readonly CACHE_DIR = '.image-cache'
 
   private constructor() {
@@ -72,7 +68,7 @@ class ImageService {
   private async processImage(
     inputPath: string,
     options: ImageProcessingOptions = {}
-  ): Promise<{ buffer: Buffer; metadata: sharp.Metadata }> {
+  ): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
     let pipeline = sharp(inputPath)
     const metadata = await pipeline.metadata()
 
@@ -118,19 +114,25 @@ class ImageService {
   async createImage(data: CreateImageInput): Promise<Image> {
     const image = await prisma.image.create({
       data: {
-        ...data,
+        name: data.name,
+        path: data.path,
+        size: data.size,
+        width: data.width,
+        height: data.height,
+        hash: data.hash,
         metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        isPublic: data.isPublic ?? false,
+        folder: {
+          connect: { id: data.folderId }
+        }
       },
       include: {
-        thumbnails: true,
         tags: true,
       },
     })
 
     // Generar thumbnail automáticamente
-    await this.generateThumbnail(image.id, 'mid')
+    await this.generateThumbnail(image.id, ThumbnailQuality.MEDIUM)
 
     // Inicializar estadísticas
     await statsService.getOrCreateImageStats(image.id)
@@ -171,7 +173,7 @@ class ImageService {
       })
 
       // Actualizar caché
-      await thumbnailCache.set(cacheKey, buffer.toString('base64'))
+      await thumbnailCache.set(cacheKey, buffer)
 
     } catch (error) {
       console.error('Error generating thumbnail:', error)
@@ -179,34 +181,92 @@ class ImageService {
     }
   }
 
-  async getThumbnail(imageId: string, quality: ThumbnailQuality = 'mid'): Promise<string> {
-    const cacheKey = `thumbnail:${imageId}:${quality}`
+  async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
+    const cacheKey = `thumbnail:${imageId}:${quality}`;
 
     // Intentar obtener del caché
-    const cached = await thumbnailCache.get(cacheKey)
-    if (cached) return cached
+    const cached = await thumbnailCache.get(cacheKey);
+    if (cached) return cached.toString('base64');
 
     // Si no está en caché, generarlo
-    await this.generateThumbnail(imageId, quality)
+    await this.generateThumbnail(imageId, quality);
 
     // Intentar obtener el nuevo thumbnail
     const image = await prisma.image.findUnique({
       where: { id: imageId },
       select: { thumbnail: true }
-    })
+    });
 
     if (!image?.thumbnail) {
-      throw new Error('Error obteniendo thumbnail')
+      throw new Error('Error obteniendo thumbnail');
     }
 
-    const base64 = image.thumbnail.toString('base64')
-    await thumbnailCache.set(cacheKey, base64)
+    const base64 = (image.thumbnail as Buffer).toString('base64');
+    await thumbnailCache.set(cacheKey, Buffer.from(base64, 'base64'));
+    return base64;
+  }
 
-    return base64
+  async getOriginalImage(imageId: string): Promise<Buffer> {
+    const image = await prisma.image.findUnique({
+      where: { id: imageId },
+      select: { path: true }
+    });
+
+    if (!image) {
+      imageLogger.error('Imagen no encontrada', { imageId });
+      throw new Error('Imagen no encontrada');
+    }
+
+    try {
+      const buffer = await fs.readFile(image.path);
+      return buffer;
+    } catch (error) {
+      imageLogger.error('Error leyendo imagen original', { imageId, error });
+      throw new Error('Error al leer la imagen original');
+    }
+  }
+
+  async getImageMetadata(path: string) {
+    try {
+      return await getMetadata(path)
+    } catch (error) {
+      imageLogger.error('Error getting image metadata:', { path, error })
+      throw error
+    }
+  }
+
+  async createBasicThumbnail(path: string, options: {
+    width?: number
+    height?: number
+    quality?: number
+  } = {}) {
+    const {
+      width = 200,
+      height = 200,
+      quality = 80
+    } = options
+
+    try {
+      const imageBuffer = await sharp(path)
+        .resize(width, height, {
+          fit: 'cover',
+          position: 'centre'
+        })
+        .webp({ quality })
+        .toBuffer()
+
+      return {
+        buffer: imageBuffer,
+        size: imageBuffer.length,
+        format: 'webp'
+      }
+    } catch (error) {
+      imageLogger.error('Error creating basic thumbnail:', { path, error })
+      throw error
+    }
   }
 
   // Resto de métodos del servicio original...
 }
 
 export const imageService = ImageService.getInstance()
-

@@ -3,7 +3,16 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	Select,
 	SelectContent,
@@ -12,397 +21,290 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Settings2, Zap, ImageIcon, Trash2 } from "lucide-react";
-import { useSettingsContext } from "@/context/settings-context";
-import {
-	thumbnailService,
-	type ThumbnailStats,
-	type ThumbnailQuality,
-} from "@/services/thumbnail.service";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-	DialogFooter,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/components/ui/use-toast";
-import { formatBytes, cn } from "@/lib/utils";
-import Image from "next/image";
-import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { AnimateSharedLayout, motion } from "motion/react";
-
-interface LastProcessedThumbnail {
-	id: string;
-	path: string;
-	processedAt: string;
-}
-
-interface ProcessStatus {
-	status?: string;
-	currentFile?: string;
-	current?: number;
-	total?: number;
-	progress?: number;
-}
+import { useToast } from "@/components/ui/use-toast";
+import { Settings2, Trash2, Zap, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
+import { useSettingsContext } from "@/context/settings-context";
+import { useThumbnailStore } from "@/store/thumbnails.store";
+import { useThumbnailEvents } from "@/hooks/use-thumbnail-events";
+import * as thumbnailActions from "@/app/actions/thumbnails.actions";
+import { formatBytes, cn } from "@/lib/utils";
+import type {
+	LastProcessedThumbnail,
+	ThumbnailCallbacks,
+	OptimizeResult,
+	CleanResult,
+	ReprocessResult,
+} from "@/types/thumbnails";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
-	{ value: "compressed", label: "Comprimida (más rápido, menos espacio)" },
-	{ value: "low", label: "Baja (balance entre calidad y espacio)" },
-	{ value: "mid", label: "Media (recomendado)" },
-	{ value: "high", label: "Alta (mejor calidad, más espacio)" },
+	{
+		value: ThumbnailQuality.LOW,
+		label: "Baja (balance entre calidad y espacio)",
+	},
+	{ value: ThumbnailQuality.MEDIUM, label: "Media (recomendado)" },
+	{ value: ThumbnailQuality.HIGH, label: "Alta (mejor calidad, más espacio)" },
 ];
 
+// ThumbnailItem component
+function ThumbnailItem({
+	image,
+	index,
+}: {
+	image: LastProcessedThumbnail;
+	index: number;
+}) {
+	const [thumbnail, setThumbnail] = React.useState<string | null>(null);
+	const [isLoading, setIsLoading] = React.useState(true);
+	const [error, setError] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		const loadThumbnail = async () => {
+			try {
+				setIsLoading(true);
+				const data = await thumbnailActions.getThumbnail(
+					image.id,
+					ThumbnailQuality.MEDIUM
+				);
+				setThumbnail(
+					`data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`
+				);
+			} catch (err) {
+				console.error("Error cargando thumbnail:", err);
+				setError(err instanceof Error ? err.message : "Error desconocido");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [image.id]);
+
+	return (
+		<motion.div
+			key={image.id}
+			initial={{ opacity: 0, scale: 0.8 }}
+			animate={{ opacity: 1, scale: 1 }}
+			exit={{ opacity: 0, scale: 0.8 }}
+			transition={{ delay: index * 0.1 }}
+			className="relative aspect-square rounded-md overflow-hidden bg-muted group"
+		>
+			{isLoading ? (
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+				</div>
+			) : error ? (
+				<div className="absolute inset-0 flex items-center justify-center text-red-500 text-xs">
+					Error
+				</div>
+			) : (
+				thumbnail && (
+					<>
+						<Image
+							src={thumbnail}
+							alt={image.path}
+							fill
+							className="object-cover transition-transform group-hover:scale-105"
+						/>
+						<motion.div
+							initial={{ opacity: 0 }}
+							whileHover={{ opacity: 1 }}
+							className="absolute inset-0 bg-black/60 p-1.5"
+						>
+							<p className="text-[10px] text-white truncate">{image.path}</p>
+							<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
+								{new Date(image.processedAt).toLocaleTimeString()}
+							</p>
+						</motion.div>
+					</>
+				)
+			)}
+		</motion.div>
+	);
+}
+
 export function ThumbnailsSection() {
-	const { settings, updateSettings } = useSettingsContext();
-	const [stats, setStats] = useState<ThumbnailStats | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isProcessing, setIsProcessing] = useState(false);
-	const [isOptimizing, setIsOptimizing] = useState(false);
-	const [isCleaning, setIsCleaning] = useState(false);
-	const [showConfirmClean, setShowConfirmClean] = useState(false);
-	const [progress, setProgress] = useState<{
-		current: number;
-		total: number;
-		progress: number;
-		currentFile: string;
-		status: string;
-	} | null>(null);
-	const [showErrors, setShowErrors] = useState(false);
 	const { toast } = useToast();
-	const [error, setError] = useState<string | null>(null);
-	const [processProgress, setProcessProgress] = useState(0);
-	const [processStatus, setProcessStatus] = useState<ProcessStatus>({});
-	const [lastProcessedThumbnails, setLastProcessedThumbnails] = useState<
+	const { settings, updateSettings } = useSettingsContext();
+	const {
+		stats: thumbnailStats,
+		isLoading: isThumbnailLoading,
+		isProcessing: isThumbnailProcessing,
+		processStatus: thumbnailProcessStatus,
+		error: thumbnailError,
+		initialize: initializeThumbnails,
+		setProcessing: setThumbnailProcessing,
+	} = useThumbnailStore();
+
+	const [showErrors, setShowErrors] = React.useState(false);
+	const [lastProcessedThumbnails, setLastProcessedThumbnails] = React.useState<
 		LastProcessedThumbnail[]
 	>([]);
-	const [selectedQuality, setSelectedQuality] =
-		useState<ThumbnailQuality>("mid");
 
-	const loadStats = React.useCallback(async () => {
-		try {
-			const stats = await thumbnailService.getStats();
-			setStats(stats);
-		} catch (error) {
-			console.error("Error cargando estadísticas:", error);
+	// Cargar últimas miniaturas procesadas
+	React.useEffect(() => {
+		const loadLastProcessed = async () => {
+			try {
+				const thumbnails = await thumbnailActions.getLastProcessedThumbnails();
+				setLastProcessedThumbnails(thumbnails);
+			} catch (error) {
+				console.error("Error cargando últimas miniaturas:", error);
+			}
+		};
+
+		loadLastProcessed();
+		// Recargar cuando cambie el estado de procesamiento
+	}, [isThumbnailProcessing]);
+
+	// Inicializar eventos SSE y cargar estadísticas iniciales
+	React.useEffect(() => {
+		initializeThumbnails();
+	}, [initializeThumbnails]);
+
+	// Manejador común para procesos de miniaturas
+	const handleThumbnailProcess = async (
+		processFunction: (options: ThumbnailCallbacks) => Promise<void>,
+		processName: string
+	) => {
+		if (isThumbnailProcessing) {
 			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al cargar estadísticas de miniaturas",
-				variant: "destructive",
+				title: "Proceso en curso",
+				description: "Ya hay un proceso de miniaturas en ejecución",
+				variant: "default",
 			});
+			return;
 		}
-	}, [toast]);
-
-	const updateProgressSmooth = React.useCallback(
-		(newProgress: typeof progress) => {
-			if (!newProgress) return;
-
-			setProgress((prev) => {
-				if (!prev) return newProgress;
-
-				// Suavizar la transición del progreso
-				return {
-					...newProgress,
-					progress:
-						prev.progress + (newProgress.progress - prev.progress) * 0.3,
-				};
-			});
-		},
-		[]
-	);
-
-	const handleReprocessThumbnails = async () => {
-		if (isProcessing) return;
 
 		try {
-			setError(null);
-			setIsProcessing(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando reprocesamiento...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
-
-			await thumbnailService.reprocessAll({
+			setThumbnailProcessing(true);
+			await processFunction({
 				onProgress: (status) => {
-					console.log("Progreso recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Procesando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Procesando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
+					if (status?.lastProcessed) {
+						setLastProcessedThumbnails((prev) => [
+							status.lastProcessed as LastProcessedThumbnail,
+							...prev.slice(0, 4),
+						]);
 					}
 				},
-				onError: (error) => {
-					console.error("Error en proceso:", error);
+				onError: (error: unknown) => {
+					console.error(`Error en ${processName}:`, error);
 					toast({
 						title: "Error",
-						description: error.message || "Error al procesar miniaturas",
+						description:
+							error instanceof Error
+								? `Error: ${error.message}`
+								: typeof error === "object" && error && "message" in error
+								? String(error.message)
+								: `Error desconocido en ${processName}`,
 						variant: "destructive",
 					});
 				},
 				onComplete: (data) => {
-					console.log("Proceso completado:", data);
-					toast({
-						title: "Proceso completado",
-						description: `Se procesaron ${data.processed} de ${
-							data.total
-						} miniaturas${
-							data.errors > 0 ? ` con ${data.errors} errores` : ""
-						}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
+					let message = "";
+					if ("optimized" in data && "totalSaved" in data) {
+						message = `Se optimizaron ${
+							data.optimized
+						} miniaturas, ahorrando ${formatBytes(data.totalSaved)}`;
+					} else if ("cleaned" in data && "totalFreed" in data) {
+						message = `Se limpiaron ${
+							data.cleaned
+						} miniaturas, liberando ${formatBytes(data.totalFreed)}`;
+					} else if ("processed" in data) {
+						message = `Se reprocesaron ${data.processed} miniaturas`;
+					}
+
+					if (message) {
+						toast({
+							title: `${processName} completado`,
+							description: message,
+						});
+					}
+
+					initializeThumbnails();
 				},
 			});
-		} catch (error) {
-			console.error("Error reprocesando miniaturas:", error);
+		} catch (error: unknown) {
+			console.error(`Error en ${processName}:`, error);
 			toast({
 				title: "Error",
 				description:
 					error instanceof Error
-						? error.message
-						: "Error al reprocesar miniaturas",
+						? `Error: ${error.message}`
+						: typeof error === "object" && error && "message" in error
+						? String(error.message)
+						: `Error desconocido en ${processName}`,
 				variant: "destructive",
 			});
 		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
+			setThumbnailProcessing(false);
 		}
 	};
 
 	const handleQualityChange = async (quality: ThumbnailQuality) => {
-		await updateSettings({ thumbnailQuality: quality });
+		try {
+			await updateSettings({ thumbnailQuality: quality });
+			toast({
+				title: "Calidad actualizada",
+				description:
+					"La calidad de las miniaturas se ha actualizado correctamente",
+			});
+		} catch (error) {
+			console.error("Error actualizando calidad:", error);
+			toast({
+				title: "Error",
+				description: "No se pudo actualizar la calidad de las miniaturas",
+				variant: "destructive",
+			});
+		}
 	};
 
 	const handleVideoAnimationToggle = async (enabled: boolean) => {
-		await updateSettings({ videoThumbnailAnimation: enabled });
-	};
-
-	const handleCleanThumbnails = async () => {
-		if (isProcessing) return;
-
 		try {
-			setError(null);
-			setIsProcessing(true);
-			setIsCleaning(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando limpieza...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
-
-			await thumbnailService.cleanThumbnails({
-				onProgress: (status) => {
-					console.log("Progreso de limpieza recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Limpiando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Limpiando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
-					}
-				},
-				onError: (error) => {
-					console.error("Error en limpieza:", error);
-					toast({
-						title: "Error",
-						description: error.message || "Error al limpiar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					console.log("Limpieza completada:", data);
-					toast({
-						title: "Limpieza completada",
-						description: `Se limpiaron ${data.cleaned} de ${
-							data.total
-						} miniaturas. Espacio liberado: ${formatBytes(data.totalFreed)}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
-				},
+			await updateSettings({ videoThumbnailAnimation: enabled });
+			toast({
+				title: "Animación actualizada",
+				description: `La animación de videos se ha ${
+					enabled ? "activado" : "desactivado"
+				} correctamente`,
 			});
 		} catch (error) {
-			console.error("Error limpiando miniaturas:", error);
+			console.error("Error actualizando animación:", error);
 			toast({
 				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al limpiar miniaturas",
+				description: "No se pudo actualizar la configuración de animación",
 				variant: "destructive",
 			});
-		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setIsCleaning(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
 		}
 	};
 
-	const handleOptimizeThumbnails = async () => {
-		if (isProcessing) return;
+	const handleOptimizeThumbnails = () =>
+		handleThumbnailProcess(thumbnailActions.optimizeThumbnails, "Optimización");
 
-		try {
-			setError(null);
-			setIsProcessing(true);
-			setProcessProgress(0);
-			setProcessStatus({
-				status: "Iniciando optimización...",
-				current: 0,
-				total: 0,
-				progress: 0,
-			});
+	const handleReprocessThumbnails = () =>
+		handleThumbnailProcess(
+			thumbnailActions.reprocessThumbnails,
+			"Reprocesamiento"
+		);
 
-			await thumbnailService.optimizeThumbnails({
-				onProgress: (status) => {
-					console.log("Progreso de optimización recibido:", status);
-					setProcessProgress(status.progress || 0);
-					setProcessStatus((prevStatus) => ({
-						...prevStatus,
-						...status,
-						status: status.status || "Optimizando...",
-					}));
-
-					// Actualizar también el progreso suave
-					updateProgressSmooth({
-						current: status.current || 0,
-						total: status.total || 0,
-						progress: status.progress || 0,
-						currentFile: status.currentFile || "",
-						status: status.status || "Optimizando...",
-					});
-
-					if (status.lastProcessed) {
-						setLastProcessedThumbnails((prev) => {
-							const newThumbnails = [...prev];
-							newThumbnails.unshift(status.lastProcessed!);
-							return newThumbnails.slice(0, 9);
-						});
-					}
-				},
-				onError: (error) => {
-					console.error("Error en optimización:", error);
-					toast({
-						title: "Error",
-						description: error.message || "Error al optimizar miniaturas",
-						variant: "destructive",
-					});
-				},
-				onComplete: (data) => {
-					console.log("Optimización completada:", data);
-					toast({
-						title: "Optimización completada",
-						description: `Se optimizaron ${data.optimized} de ${
-							data.total
-						} miniaturas. Espacio ahorrado: ${formatBytes(data.totalSaved)}`,
-						variant: data.errors > 0 ? "destructive" : "default",
-					});
-					loadStats();
-				},
-			});
-		} catch (error) {
-			console.error("Error optimizando miniaturas:", error);
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al optimizar miniaturas",
-				variant: "destructive",
-			});
-		} finally {
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			setIsProcessing(false);
-			setProcessProgress(0);
-			setProcessStatus({});
-			setProgress(null);
-		}
-	};
-
-	const handleCancel = () => {
-		thumbnailService.cancelProcessing();
-		setIsProcessing(false);
-		setIsOptimizing(false);
-		setProgress(null);
-		toast({
-			title: "Cancelado",
-			description: "El proceso ha sido cancelado",
-		});
-	};
-
-	React.useEffect(() => {
-		loadStats();
-	}, [loadStats]);
+	const handleCleanThumbnails = () =>
+		handleThumbnailProcess(thumbnailActions.cleanThumbnails, "Limpieza");
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
 			<CardHeader className="p-2 pb-0 bg-transparent">
 				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
 					<span className="flex items-center gap-2 h-7">
-						<ImageIcon className="h-5 w-5" /> Configuración de Miniaturas
+						<Settings2 className="h-5 w-5" /> Miniaturas
 					</span>
 				</CardTitle>
 			</CardHeader>
 			<Separator className="my-0" />
 			<CardContent className="p-2">
-				<div className="grid grid-cols-1 gap-2">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-2 gap-2"
-					>
+				<div className="space-y-3">
+					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-1.5">
 							<Label className="text-sm">Calidad de Miniaturas</Label>
 							<Select
@@ -446,22 +348,17 @@ export function ThumbnailsSection() {
 								className="scale-90"
 							/>
 						</div>
-					</motion.div>
+					</div>
 
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.1 }}
-						className="flex flex-wrap gap-1.5 pt-2"
-					>
+					<div className="flex flex-wrap gap-1.5 pt-2">
 						<Button
 							variant="outline"
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleOptimizeThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isThumbnailLoading || isThumbnailProcessing}
 						>
-							{isOptimizing ? (
+							{isThumbnailProcessing ? (
 								<>
 									<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 									Optimizando...
@@ -478,9 +375,9 @@ export function ThumbnailsSection() {
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleReprocessThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isThumbnailLoading || isThumbnailProcessing}
 						>
-							{isProcessing ? (
+							{isThumbnailProcessing ? (
 								<>
 									<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 									Procesando...
@@ -497,9 +394,9 @@ export function ThumbnailsSection() {
 							size="sm"
 							className="h-7 text-xs"
 							onClick={handleCleanThumbnails}
-							disabled={isLoading || isOptimizing || isProcessing || isCleaning}
+							disabled={isThumbnailLoading || isThumbnailProcessing}
 						>
-							{isCleaning ? (
+							{isThumbnailProcessing ? (
 								<>
 									<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 									Limpiando...
@@ -512,89 +409,53 @@ export function ThumbnailsSection() {
 							)}
 						</Button>
 
-						{(isProcessing || isOptimizing || isCleaning) && (
+						{isThumbnailProcessing && (
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={handleCancel}
+								onClick={() => setThumbnailProcessing(false)}
 								className="h-7 text-xs text-red-500 hover:text-red-600"
 							>
 								Cancelar
 							</Button>
 						)}
-					</motion.div>
+					</div>
 
-					{stats && (
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.2 }}
-						>
-							<Separator className="my-2" />
-							<div className="grid grid-cols-2 gap-3">
-								<motion.div
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									className="space-y-1.5"
-								>
-									<Label className="text-sm">Total de Miniaturas</Label>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">{stats.total}</span>
-										<Badge variant="secondary" className="text-xs">
-											Generadas
-										</Badge>
-									</div>
-								</motion.div>
-
-								<motion.div
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									className="space-y-1.5"
-								>
-									<Label className="text-sm">Peso en Base de Datos</Label>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">
-											{formatBytes(stats.totalSize)}
-										</span>
-										<Badge variant="secondary" className="text-xs">
-											Optimizado
-										</Badge>
-									</div>
-								</motion.div>
-
+					<Separator className="my-2" />
+					<div className="grid grid-cols-2 gap-3">
+						{thumbnailStats && (
+							<>
 								<motion.div
 									initial={{ opacity: 0, x: -20 }}
 									animate={{ opacity: 1, x: 0 }}
 									transition={{ delay: 0.1 }}
 									className="space-y-1.5"
 								>
-									<Label className="text-sm">Pendientes</Label>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">{stats.pending}</span>
-										<Badge
-											variant="secondary"
-											className={cn(
-												"text-xs",
-												stats.pending === 0 && "bg-green-500/20 text-green-500"
-											)}
-										>
-											{stats.pending === 0 ? "Al día" : "Pendiente"}
+									<div className="flex items-center justify-between">
+										<Label className="text-sm">Miniaturas</Label>
+										<Badge variant="secondary" className="text-xs">
+											{formatBytes(thumbnailStats.totalSize || 0)}
 										</Badge>
+									</div>
+									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+										<span className="text-sm font-medium">
+											{thumbnailStats.totalFiles || 0} totales
+										</span>
+										<span className="text-sm text-muted-foreground">
+											{thumbnailStats.pending} pendientes
+										</span>
 									</div>
 								</motion.div>
 
 								<motion.div
 									initial={{ opacity: 0, x: 20 }}
 									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.1 }}
+									transition={{ delay: 0.2 }}
 									className="space-y-1.5"
 								>
-									<Label className="text-sm">Con Error</Label>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">
-											{stats.errors.length}
-										</span>
-										{stats.errors.length > 0 ? (
+									<div className="flex items-center justify-between">
+										<Label className="text-sm">Estado</Label>
+										{thumbnailStats.errors.length > 0 && (
 											<Button
 												variant="ghost"
 												size="sm"
@@ -602,106 +463,74 @@ export function ThumbnailsSection() {
 												onClick={() => setShowErrors(true)}
 											>
 												<AlertCircle className="h-3.5 w-3.5 mr-1" />
-												Ver detalles
+												Ver errores
 											</Button>
-										) : (
-											<Badge
-												variant="secondary"
-												className="text-xs bg-green-500/20 text-green-500"
-											>
-												Sin errores
-											</Badge>
 										)}
 									</div>
+									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+										<span className="text-sm font-medium">
+											{thumbnailStats.errors.length} errores
+										</span>
+										<Badge
+											variant="secondary"
+											className={cn(
+												"text-xs",
+												thumbnailStats.pending === 0 &&
+													"bg-green-500/20 text-green-500"
+											)}
+										>
+											{thumbnailStats.pending === 0 ? "Al día" : "Pendiente"}
+										</Badge>
+									</div>
 								</motion.div>
+							</>
+						)}
+					</div>
+
+					{isThumbnailProcessing && (
+						<motion.div
+							initial={{ opacity: 0, height: 0 }}
+							animate={{ opacity: 1, height: "auto" }}
+							exit={{ opacity: 0, height: 0 }}
+							className="space-y-1.5 bg-muted/30 p-3 rounded-lg mt-3"
+						>
+							<div className="flex justify-between text-xs">
+								<span>
+									{thumbnailProcessStatus.current || 0} de{" "}
+									{thumbnailProcessStatus.total || 0} (
+									{Math.round(thumbnailProcessStatus.progress || 0)}%)
+								</span>
+								<span className="text-muted-foreground">
+									{thumbnailProcessStatus.status || "Procesando..."}
+								</span>
 							</div>
-
-							{isProcessing && (
-								<motion.div
-									initial={{ opacity: 0, height: 0 }}
-									animate={{ opacity: 1, height: "auto" }}
-									exit={{ opacity: 0, height: 0 }}
-									className="space-y-1.5 bg-muted/30 p-3 rounded-lg mt-3"
-								>
-									<div className="flex justify-between text-xs">
-										<span>
-											{processStatus.current || 0} de {processStatus.total || 0}{" "}
-											({Math.round(processProgress)}%)
-										</span>
-										<span className="text-muted-foreground">
-											{processStatus.status || "Procesando..."}
-										</span>
-									</div>
-									<Progress value={processProgress} className="h-1.5" />
-									{processStatus.currentFile && (
-										<p className="text-xs text-muted-foreground truncate">
-											{processStatus.currentFile}
-										</p>
-									)}
-								</motion.div>
+							<Progress
+								value={thumbnailProcessStatus.progress}
+								className="h-1.5"
+							/>
+							{thumbnailProcessStatus.currentFile && (
+								<p className="text-xs text-muted-foreground truncate">
+									{thumbnailProcessStatus.currentFile}
+								</p>
 							)}
+						</motion.div>
+					)}
 
-							{lastProcessedThumbnails.length > 0 && (
-								<motion.div
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.3 }}
-									className="space-y-1.5 mt-3"
-								>
-									<Label className="text-sm">Últimas Procesadas</Label>
-									<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
-										<AnimateSharedLayout>
-											{lastProcessedThumbnails.map((image, index) => (
-												<motion.div
-													key={image.id}
-													initial={{ opacity: 0, scale: 0.8 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.8 }}
-													transition={{ delay: index * 0.1 }}
-													className="relative aspect-square rounded-md overflow-hidden bg-muted group"
-													style={{
-														transform: `scale(${
-															image.processedAt === processStatus.currentFile
-																? 1.05
-																: 1
-														})`,
-													}}
-												>
-													<Image
-														src={`/api/images/${image.id}/thumbnail`}
-														alt={image.path}
-														fill
-														className="object-cover transition-transform group-hover:scale-105"
-													/>
-													<motion.div
-														initial={{ opacity: 0 }}
-														whileHover={{ opacity: 1 }}
-														className="absolute inset-0 bg-black/60 p-1.5"
-													>
-														<p className="text-[10px] text-white truncate">
-															{image.path}
-														</p>
-														<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
-															{new Date(image.processedAt).toLocaleTimeString()}
-														</p>
-													</motion.div>
-												</motion.div>
-											))}
-											{Array(9 - lastProcessedThumbnails.length)
-												.fill(0)
-												.map((_, i) => (
-													<motion.div
-														key={`empty-${i}`}
-														initial={{ opacity: 0 }}
-														animate={{ opacity: 1 }}
-														transition={{ delay: 0.3 + i * 0.1 }}
-														className="aspect-square rounded-md bg-muted/50"
-													/>
-												))}
-										</AnimateSharedLayout>
-									</div>
-								</motion.div>
-							)}
+					{lastProcessedThumbnails.length > 0 && (
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.3 }}
+							className="space-y-1.5 mt-3"
+						>
+							<Label className="text-sm">Últimas Procesadas</Label>
+							<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
+								<AnimatePresence>
+									{lastProcessedThumbnails.map((image, index) => (
+										<ThumbnailItem key={image.id} image={image} index={index} />
+									))}
+								</AnimatePresence>
+							</div>
 						</motion.div>
 					)}
 				</div>
@@ -714,7 +543,7 @@ export function ThumbnailsSection() {
 					</DialogHeader>
 					<ScrollArea className="h-[400px] mt-4">
 						<div className="space-y-4">
-							{stats?.errors.map((error) => (
+							{thumbnailStats?.errors.map((error) => (
 								<motion.div
 									key={error.imageId}
 									initial={{ opacity: 0, y: 20 }}
