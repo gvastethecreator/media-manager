@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -29,11 +29,28 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useNavigationStore } from "@/store/navigation";
-import { useFileManager } from "@/store/file-manager";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useFileManager } from "@/store/file-manager.store";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+import { getTags } from "@/app/actions/tag.actions";
+
+const viewLogger = logger.withContext("TagsView");
+
+interface Tag {
+	id: string;
+	name: string;
+	description: string | null;
+	color: string;
+	count: number;
+	size: string;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
+}
 
 interface TagCardProps {
-	tag: any;
+	tag: Tag;
 	onClick: () => void;
 }
 
@@ -52,14 +69,18 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-function TagCard({ tag, onClick }: TagCardProps) {
+const TagCard = memo(function TagCard({ tag, onClick }: TagCardProps) {
 	const router = useRouter();
 	const gradient = getRandomGradient();
 
-	const handleEdit = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		router.push("/settings/tags");
-	};
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando etiqueta:", tag.name);
+			router.push("/settings/tags");
+		},
+		[router, tag.name]
+	);
 
 	return (
 		<motion.div animate={{ scale: 1 }} className="h-full">
@@ -88,63 +109,26 @@ function TagCard({ tag, onClick }: TagCardProps) {
 								</CardDescription>
 							</div>
 						</div>
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleEdit}
-							>
-								<Settings2 className="w-4 h-4" />
-							</Button>
-							<Button variant="ghost" size="icon" className="h-8 w-8">
-								<ArrowUpRight className="w-4 h-4" />
-							</Button>
-						</div>
 					</div>
 				</CardHeader>
 
 				<CardContent className="p-4 pt-2 flex-1 flex flex-col">
-					{/* Grid de imágenes recientes */}
+					{/* Grid de imágenes placeholder */}
 					<div className="relative group/grid flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{tag.recentImages && tag.recentImages.length > 0
-								? tag.recentImages.map((src: string, i: number) => (
-										<div
-											key={i}
-											className="relative rounded-md overflow-hidden aspect-square"
-										>
-											{src ? (
-												<img
-													src={src}
-													alt={`Imagen ${i + 1}`}
-													className="object-cover w-full h-full transition-transform group-hover/grid:scale-105"
-												/>
-											) : (
-												<div
-													className={cn(
-														"w-full h-full flex items-center justify-center bg-gradient-to-br",
-														getRandomGradient()
-													)}
-												>
-													<ImageIcon className="w-5 h-5 text-white/80" />
-												</div>
-											)}
-										</div>
-								  ))
-								: Array.from({ length: 9 }).map((_, i) => (
-										<div
-											key={i}
-											className={cn(
-												"relative rounded-md overflow-hidden aspect-square",
-												"flex items-center justify-center",
-												"bg-gradient-to-br transition-transform hover:scale-105",
-												getRandomGradient()
-											)}
-										>
-											<ImageIcon className="w-5 h-5 text-white/80" />
-										</div>
-								  ))}
+							{Array.from({ length: 9 }).map((_, i) => (
+								<div
+									key={i}
+									className={cn(
+										"relative rounded-md overflow-hidden aspect-square",
+										"flex items-center justify-center",
+										"bg-gradient-to-br transition-transform hover:scale-105",
+										getRandomGradient()
+									)}
+								>
+									<ImageIcon className="w-5 h-5 text-white/80" />
+								</div>
+							))}
 						</div>
 
 						{/* Overlay con hover */}
@@ -163,18 +147,18 @@ function TagCard({ tag, onClick }: TagCardProps) {
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
 										<ImageIcon className="w-4 h-4" />
-										<span>{tag.count || 0} imágenes</span>
+										<span>{tag.count} imágenes</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
-									Esta etiqueta está presente en {tag.count || 0} imágenes
+									Esta etiqueta está presente en {tag.count} imágenes
 								</HoverCardContent>
 							</HoverCard>
 
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{formatBytes(tag.totalSize || 0)}</span>
+										<span>{tag.size}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
@@ -182,56 +166,57 @@ function TagCard({ tag, onClick }: TagCardProps) {
 								</HoverCardContent>
 							</HoverCard>
 						</div>
-
-						{tag.relatedTags && tag.relatedTags.length > 0 && (
-							<>
-								<div className="flex flex-wrap gap-1">
-									{tag.relatedTags.map((relatedTag: any, i: number) => (
-										<Badge
-											key={i}
-											variant="secondary"
-											className="text-xs hover:bg-accent transition-colors"
-										>
-											{relatedTag.name}
-										</Badge>
-									))}
-								</div>
-							</>
-						)}
 					</div>
 				</CardContent>
 			</Card>
 		</motion.div>
 	);
-}
+});
 
 export function TagsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentTag } = useFileManager();
-	const [tags, setTags] = useState<any[]>([]);
+	const [tags, setTags] = useState<Tag[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchTags = async () => {
-			try {
-				setIsLoading(true);
-				// TODO: Implementar servicio de tags
-				const response = await fetch("/api/tags");
-				const data = await response.json();
-				setTags(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchTags();
+	const fetchTags = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando etiquetas...");
+			const data = await getTags();
+			setTags(data);
+			viewLogger.info(`✅ ${data.length} etiquetas cargadas`);
+		} catch (error) {
+			viewLogger.error("❌ Error al cargar etiquetas:", error);
+			setError(
+				error instanceof Error ? error.message : "Error al cargar etiquetas"
+			);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
+	useEffect(() => {
+		// Cargar etiquetas inicialmente
+		fetchTags();
+
+		// Suscribirse a eventos relevantes
+		const handleTagModified = (data?: EventData) => {
+			viewLogger.info("📢 Evento de modificación de etiquetas recibido:", data);
+			fetchTags();
+		};
+
+		eventsService.on("tags:modified", handleTagModified);
+
+		return () => {
+			eventsService.off("tags:modified", handleTagModified);
+		};
+	}, [fetchTags]);
+
 	const handleTagClick = useCallback(
-		(tag: any) => {
+		(tag: Tag) => {
+			viewLogger.info("🖱️ Click en etiqueta:", tag.name);
 			setCurrentView("tag-content");
 			setCurrentTag(tag.id);
 		},
@@ -255,26 +240,23 @@ export function TagsView({ isResizing }: ViewProps) {
 			<EmptyState
 				icon={TagIcon}
 				title="No hay etiquetas"
-				description="Las etiquetas te ayudan a organizar tus imágenes. Crea una nueva etiqueta desde el panel de configuración."
+				description="Las etiquetas te ayudan a organizar y encontrar tus imágenes. Crea una nueva etiqueta desde el panel de configuración."
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full w-full">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-				{tags.map((tag, index) => (
-					<motion.div
-						key={tag.id}
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: index * 0.1 }}
-					>
-						<TagCard tag={tag} onClick={() => handleTagClick(tag)} />
-					</motion.div>
-				))}
+		<ScrollArea className="h-full">
+			<div className="container mx-auto p-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{tags.map((tag) => (
+						<TagCard
+							key={tag.id}
+							tag={tag}
+							onClick={() => handleTagClick(tag)}
+						/>
+					))}
+				</div>
 			</div>
 		</ScrollArea>
 	);

@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useFileManager } from "@/store/file-manager";
-import { useUIStore } from "@/store/ui";
-import { useStatsStore } from "@/store/stats";
+import { useFileManager } from "@/store/file-manager.store";
+import { useUIStore } from "@/store/ui.store";
+import { useStatsBaseStore } from "@/store/stats.store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "next-themes";
 import { useSettingsContext } from "@/context/settings-context";
@@ -21,10 +21,15 @@ import {
 	Bug,
 	BookImage,
 	CornerDownRight,
+	Camera,
+	MapPin,
+	User2,
+	Box,
 } from "lucide-react";
-import { useNavigationStore } from "@/store/navigation";
+import { useNavigationStore } from "@/store/navigation.store";
 import { ViewType } from "@/types/file-item";
 import { cn } from "@/lib/utils";
+import { NavigationData } from "@/app/actions/nav.actions";
 
 const navigationItems = [
 	{ id: "all-images" as ViewType, label: "Galería", icon: ImageIcon },
@@ -46,6 +51,30 @@ const categories = [
 		color: "#ef4444",
 	},
 	{
+		id: "albums" as ViewType,
+		icon: Camera,
+		label: "Álbumes",
+		color: "#8b5cf6",
+	},
+	{
+		id: "characters" as ViewType,
+		icon: User2,
+		label: "Personajes",
+		color: "#ec4899",
+	},
+	{
+		id: "places" as ViewType,
+		icon: MapPin,
+		label: "Lugares",
+		color: "#14b8a6",
+	},
+	{
+		id: "objects" as ViewType,
+		icon: Box,
+		label: "Objetos",
+		color: "#f59e0b",
+	},
+	{
 		id: "tags" as ViewType,
 		icon: TagIcon,
 		label: "Etiquetas",
@@ -53,33 +82,64 @@ const categories = [
 	},
 ];
 
-export function NavPanel() {
-	const { stats, initialize: initializeStats } = useStatsStore();
+interface NavPanelProps {
+	initialData: NavigationData;
+}
+
+export function NavPanel({ initialData }: NavPanelProps) {
 	const { settings } = useSettingsContext();
 	const { profiles, activeProfile } = settings;
 	const activeProfileData = profiles.find((p) => p.id === activeProfile);
+
+	// Desestructurar initialData con valores por defecto
+	const {
+		stats = {
+			totalImages: 0,
+			totalFolders: 0,
+			totalCollections: 0,
+			totalTags: 0,
+			totalAlbums: 0,
+			totalCharacters: 0,
+			totalPlaces: 0,
+			totalObjects: 0,
+			totalViews: 0,
+			totalDownloads: 0,
+			totalFavorites: 0,
+			totalActivities: 0,
+			totalSize: 0,
+			popularImages: [],
+			topTags: [],
+			recentActivity: [],
+		},
+		folders = [],
+		collections = [],
+		tags = [],
+		albums = [],
+		characters = [],
+		places = [],
+		objects = [],
+	} = initialData || {};
+
 	const { currentView, setCurrentView } = useNavigationStore();
 	const {
-		collections,
-		folders,
-		tags,
 		setCurrentCollection,
 		setCurrentFolder,
 		setCurrentTag,
+		setCurrentAlbum,
+		setCurrentCharacter,
+		setCurrentPlace,
+		setCurrentObject,
 		currentCollectionId,
 		currentFolderId,
 		currentTagId,
-		initialize,
+		currentAlbumId,
+		currentCharacterId,
+		currentPlaceId,
+		currentObjectId,
 	} = useFileManager();
 
 	const { toggleSettings } = useUIStore();
 	const { theme, setTheme } = useTheme();
-
-	useEffect(() => {
-		Promise.all([initialize(), initializeStats()]).catch((error) => {
-			console.error("Error initializing:", error);
-		});
-	}, [initialize, initializeStats]);
 
 	const handleThemeToggle = useCallback(() => {
 		setTheme(theme === "light" ? "dark" : "light");
@@ -96,7 +156,7 @@ export function NavPanel() {
 
 	const handleItemClick = useCallback(
 		(id: ViewType) => {
-			setCurrentView(id);
+			setCurrentView(id as ViewType);
 		},
 		[setCurrentView]
 	);
@@ -125,11 +185,37 @@ export function NavPanel() {
 		[setCurrentView, setCurrentTag]
 	);
 
-	const handleResetApp = useCallback(() => {
-		Promise.all([initialize(), initializeStats()]).catch((error) => {
-			console.error("Error resetting app:", error);
-		});
-	}, [initialize, initializeStats]);
+	const handleAlbumClick = useCallback(
+		(albumId: string) => {
+			setCurrentView("album-content");
+			setCurrentAlbum(albumId);
+		},
+		[setCurrentView, setCurrentAlbum]
+	);
+
+	const handleCharacterClick = useCallback(
+		(characterId: string) => {
+			setCurrentView("character-content");
+			setCurrentCharacter(characterId);
+		},
+		[setCurrentView, setCurrentCharacter]
+	);
+
+	const handlePlaceClick = useCallback(
+		(placeId: string) => {
+			setCurrentView("place-content");
+			setCurrentPlace(placeId);
+		},
+		[setCurrentView, setCurrentPlace]
+	);
+
+	const handleObjectClick = useCallback(
+		(objectId: string) => {
+			setCurrentView("object-content");
+			setCurrentObject(objectId);
+		},
+		[setCurrentView, setCurrentObject]
+	);
 
 	return (
 		<div className="flex flex-col h-full">
@@ -161,15 +247,6 @@ export function NavPanel() {
 							onClick={handleOpenDevelopment}
 						>
 							<Bug className="h-4 w-4" />
-						</Button>
-
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8"
-							onClick={handleResetApp}
-						>
-							<RefreshCcw className="h-4 w-4" />
 						</Button>
 
 						<Button
@@ -243,6 +320,26 @@ export function NavPanel() {
 											{stats.totalFolders}
 										</span>
 									) : null}
+									{id === "albums" && stats?.totalAlbums ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalAlbums}
+										</span>
+									) : null}
+									{id === "characters" && stats?.totalCharacters ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalCharacters}
+										</span>
+									) : null}
+									{id === "places" && stats?.totalPlaces ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalPlaces}
+										</span>
+									) : null}
+									{id === "objects" && stats?.totalObjects ? (
+										<span className="ml-2 text-white border-none">
+											{stats.totalObjects}
+										</span>
+									) : null}
 									{id === "tags" && stats?.totalTags ? (
 										<span className="ml-2 text-white border-none">
 											{stats.totalTags}
@@ -270,7 +367,7 @@ export function NavPanel() {
 													{collection.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{collection.count}
+													{collection._count?.images || 0}
 												</span>
 											</Button>
 										))}
@@ -293,19 +390,111 @@ export function NavPanel() {
 													{folder.name}
 												</span>
 												<span className="ml-2 text-white border-none">
-													{folder.count}
+													{folder._count?.images || 0}
+												</span>
+											</Button>
+										))}
+									{id === "albums" &&
+										albums?.map((album) => (
+											<Button
+												key={album.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "album-content" &&
+														currentAlbumId === album.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleAlbumClick(album.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{album.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{album.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{album._count?.images || 0}
+												</span>
+											</Button>
+										))}
+									{id === "characters" &&
+										characters?.map((character) => (
+											<Button
+												key={character.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "character-content" &&
+														currentCharacterId === character.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleCharacterClick(character.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{character.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{character.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{character._count?.images || 0}
+												</span>
+											</Button>
+										))}
+									{id === "places" &&
+										places?.map((place) => (
+											<Button
+												key={place.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "place-content" &&
+														currentPlaceId === place.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handlePlaceClick(place.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{place.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{place.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{place._count?.images || 0}
+												</span>
+											</Button>
+										))}
+									{id === "objects" &&
+										objects?.map((object) => (
+											<Button
+												key={object.id}
+												variant="ghost"
+												className={cn(
+													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+													currentView === "object-content" &&
+														currentObjectId === object.id &&
+														"bg-gradient-to-r from-white/10 to-white/15"
+												)}
+												onClick={() => handleObjectClick(object.id)}
+											>
+												<CornerDownRight className="h-2 w-2 text-white/20" />
+												<span className="text-base">{object.emoji}</span>
+												<span className="flex-1 text-left truncate">
+													{object.name}
+												</span>
+												<span className="ml-2 text-white border-none">
+													{object._count?.images || 0}
 												</span>
 											</Button>
 										))}
 									{id === "tags" && (
-										<div className="flex flex-col-4 gap-2 mt-1">
+										<div className="flex w-full flex-wrap gap-2 mt-1">
 											{tags?.map((tag) => (
 												<Button
 													variant="ghost"
 													key={tag.id}
 													style={{ backgroundColor: tag.color }}
 													className={cn(
-														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl",
+														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold",
 														currentView === "tag-content" &&
 															currentTagId === tag.name &&
 															"bg-gradient-to-r from-black/30 to-black/35"
@@ -316,7 +505,7 @@ export function NavPanel() {
 														{tag.name}
 													</span>
 													<span className="text-[10px] h-4 text-white border-none">
-														{tag.count}
+														{tag._count?.images || 0}
 													</span>
 												</Button>
 											))}

@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileItem } from "@/types/file-item";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
+import { useFileManager } from "@/store/file-manager.store";
+import { useImageViewer } from "@/store/image-viewer.store";
 import { FileGrid } from "@/components/features/file-grid/file-grid";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { Search } from "lucide-react";
@@ -25,6 +25,15 @@ interface SearchFilters {
 }
 
 const PAGE_SIZE = 100;
+
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
 
 export function SearchView({ isResizing }: ViewProps) {
 	const [filters, setFilters] = useState<SearchFilters>({
@@ -62,10 +71,12 @@ export function SearchView({ isResizing }: ViewProps) {
 
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
-				);
+			const metadata = getMetadata(item.metadata);
+			if (item.type === "image" || metadata?.mimeType?.startsWith("image/")) {
+				const imageItems = (items || []).filter((i) => {
+					const meta = getMetadata(i.metadata);
+					return i.type === "image" || meta?.mimeType?.startsWith("image/");
+				});
 				openViewer(
 					imageItems,
 					imageItems.findIndex((i) => i.id === item.id)

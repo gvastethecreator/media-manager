@@ -461,7 +461,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 	useEffect(() => {
 		const loadMarkdownFiles = async () => {
 			try {
-				const files = ["PRD.md", "FRONTEND.md", "BACKEND.md", "ROADMAP.md"];
+				const files: string[] = [];
 				const contents: { [key: string]: string } = {};
 
 				for (const file of files) {

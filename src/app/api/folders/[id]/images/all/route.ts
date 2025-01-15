@@ -1,34 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import type { FileItem } from '@/types/file-item'
+import type { FileItem, RelatedCollection, RelatedTag } from '@/types/file-item'
+import { logger } from '@/lib/logger'
+import path from 'path'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+const imagesLogger = logger.withContext('ImagesAPI')
 
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
   try {
-    const params = await Promise.resolve(context.params)
-    const { id } = params
+    const { id } = context.params
+    imagesLogger.info('🔍 Buscando carpeta:', { id })
 
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID de carpeta no proporcionado' },
-        { status: 400 }
-      )
-    }
-
-    // Obtener la carpeta con sus imágenes
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
         images: {
           orderBy: {
-            createdAt: 'desc'
+            name: 'asc'
           },
           include: {
+            stats: true,
             tags: {
               select: {
                 id: true,
@@ -40,15 +34,7 @@ export async function GET(
               select: {
                 id: true,
                 name: true,
-                emoji: true,
                 color: true
-              }
-            },
-            stats: {
-              select: {
-                views: true,
-                downloads: true,
-                lastViewed: true
               }
             }
           }
@@ -57,80 +43,90 @@ export async function GET(
     })
 
     if (!folder) {
-      return NextResponse.json(
-        { error: 'Carpeta no encontrada', items: [] },
-        { status: 404 }
-      )
+      imagesLogger.error('❌ Carpeta no encontrada:', { id })
+      return new NextResponse('Carpeta no encontrada', { status: 404 })
     }
 
-    // Transformar los datos para mantener compatibilidad con la interfaz FileItem
-    const items: FileItem[] = folder.images.map(image => {
-      let metadata = {};
-      try {
-        metadata = image.metadata ? JSON.parse(image.metadata) : {};
-      } catch (e) {
-        console.warn('Error parsing metadata:', e);
+    imagesLogger.info('✅ Carpeta encontrada:', {
+      id: folder.id,
+      name: folder.name,
+      imageCount: folder.images.length
+    })
+
+    const files: FileItem[] = folder.images.map((image) => {
+      // Construir metadata
+      const metadata = {
+        mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
+        size: image.size,
+        dimensions: image.width && image.height
+          ? { width: image.width, height: image.height }
+          : undefined,
+        fileSystem: {
+          size: image.size,
+          created: image.createdAt.toISOString(),
+          modified: image.updatedAt.toISOString(),
+          accessed: image.updatedAt.toISOString()
+        },
+        extension: image.path ? path.extname(image.path).slice(1) : undefined,
+        exif: image.metadata ? JSON.parse(image.metadata).exif : undefined,
+        generation: image.metadata ? JSON.parse(image.metadata).generation : undefined
       }
+
+      // Mapear colecciones y tags al formato requerido
+      const collections: RelatedCollection[] = image.collections.map(c => ({
+        id: c.id,
+        name: c.name
+      }))
+
+      const tags: RelatedTag[] = image.tags.map(t => ({
+        id: t.id,
+        name: t.name,
+        color: t.color
+      }))
 
       return {
         id: image.id,
         name: image.name,
         path: image.path,
         type: 'image',
-        size: Number(image.size),
-        width: image.width || undefined,
-        height: image.height || undefined,
-        mimeType: metadata.mimeType,
-        thumbnail: image.thumbnail ? `/api/images/${image.id}/thumbnail` : undefined,
-        src: `/api/images/${image.id}`,
+        size: image.size,
+        width: image.width,
+        height: image.height,
+        metadata: JSON.stringify(metadata),
+        thumbnail: image.thumbnail
+          ? `data:${metadata.mimeType || 'image/webp'};base64,${Buffer.from(image.thumbnail).toString('base64')}`
+          : null,
+        thumbnailSize: image.thumbnailSize,
+        thumbnailWidth: image.thumbnailWidth,
+        thumbnailHeight: image.thumbnailHeight,
+        isPublic: image.isPublic || false,
         isFavorite: image.isFavorite || false,
+        folderId: folder.id,
         createdAt: image.createdAt,
         updatedAt: image.updatedAt,
-        tags: image.tags?.map(tag => ({
-          id: tag.id,
-          name: tag.name,
-          color: tag.color
-        })) || [],
-        collections: image.collections?.map(collection => ({
-          id: collection.id,
-          name: collection.name,
-          emoji: collection.emoji,
-          color: collection.color
-        })) || [],
-        stats: image.stats ? {
-          views: image.stats.views,
-          downloads: image.stats.downloads,
-          lastViewed: image.stats.lastViewed
-        } : undefined,
-        metadata: {
-          dimensions: image.width && image.height ? {
-            width: image.width,
-            height: image.height
-          } : undefined,
-          ...metadata
-        },
-        gridInfo: {
-          displayMode: 'normal'
-        }
-      }
+        modifiedAt: image.updatedAt,
+        accessedAt: image.updatedAt,
+        collections,
+        tags,
+        albums: [],
+        characters: [],
+        places: [],
+        objects: []
+      } as FileItem
     })
 
     return NextResponse.json({
-      success: true,
-      items
+      items: files,
+      folder: {
+        id: folder.id,
+        name: folder.name,
+        path: folder.path,
+        totalFiles: folder.totalFiles,
+        totalSize: folder.totalSize
+      }
     })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-    console.error('Error obteniendo imágenes:', errorMessage)
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Error al obtener las imágenes',
-        message: errorMessage,
-        items: []
-      },
-      { status: 500 }
-    )
+    imagesLogger.error('Error obteniendo imágenes:', error)
+    return new NextResponse('Error interno del servidor', { status: 500 })
   }
 }

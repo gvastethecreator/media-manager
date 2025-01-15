@@ -1,48 +1,73 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
+import path from 'path'
+
+const filesLogger = logger.withContext('FilesAPI')
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   context: { params: { id: string } }
 ) {
   try {
-    const params = await Promise.resolve(context.params)
-    const { id } = params
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID de carpeta no proporcionado' },
-        { status: 400 }
-      )
+    const { id } = context.params
+    filesLogger.info('🔍 Buscando carpeta:', { id })
+
+    const folder = await prisma.folder.findUnique({
+      where: { id },
+      include: {
+        images: {
+          orderBy: {
+            name: 'asc'
+          }
+        }
+      }
+    })
+
+    if (!folder) {
+      filesLogger.error('❌ Carpeta no encontrada:', { id })
+      return new NextResponse('Carpeta no encontrada', { status: 404 })
     }
 
-    // Obtener imágenes de la carpeta
-    const images = await prisma.image.findMany({
-      where: { folderId: id },
-      orderBy: { name: 'asc' }
+    filesLogger.info('✅ Carpeta encontrada:', {
+      id: folder.id,
+      name: folder.name,
+      imageCount: folder.images.length
     })
 
     // Convertir las imágenes al formato esperado por VirtualizedView
-    const files = images.map(image => ({
-      id: image.id,
-      name: image.name,
-      path: image.path,
-      size: image.size,
-      type: image.mimeType?.startsWith('image/') ? 'image' : 'file',
-      mimeType: image.mimeType,
-      lastModified: image.updatedAt,
-      isDirectory: false,
-      metadata: image.metadata ? JSON.parse(image.metadata) : null,
-      thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-      previewUrl: `/api/images/${image.id}/preview`,
-      downloadUrl: `/api/images/${image.id}/download`
-    }))
+    const files = folder.images.map((image) => {
+      const metadata = image.metadata ? JSON.parse(image.metadata) : null
+      const mimeType = metadata?.mimeType || `image/${path.extname(image.path).slice(1)}`
 
-    return NextResponse.json(files)
+      return {
+        id: image.id,
+        name: image.name,
+        path: image.path,
+        size: image.size,
+        type: 'image',
+        mimeType,
+        lastModified: image.updatedAt,
+        isDirectory: false,
+        metadata,
+        thumbnailUrl: `/api/thumbnails/${image.id}?quality=medium`,
+        previewUrl: image.path ? `/local-files/${image.path.split(path.sep).join('/')}` : null,
+        downloadUrl: `/api/images/${image.id}/download`
+      }
+    })
+
+    return NextResponse.json({
+      items: files,
+      folder: {
+        id: folder.id,
+        name: folder.name,
+        path: folder.path,
+        totalFiles: folder.totalFiles,
+        totalSize: folder.totalSize
+      }
+    })
   } catch (error) {
-    console.error('Error en GET /api/folders/[id]/files:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    filesLogger.error('Error obteniendo archivos:', error)
+    return new NextResponse('Error interno del servidor', { status: 500 })
   }
 }

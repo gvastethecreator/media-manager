@@ -1,6 +1,6 @@
-import { AppSettings } from '@/types/settings'
+import { AppSettings, DEFAULT_SETTINGS } from '@/types/settings'
 import defaultSettings from '@/config/settings.json'
-import { deepMerge } from '@/lib/utils'
+import { merge } from 'lodash'
 
 const SETTINGS_KEY = 'image-manager-settings'
 
@@ -8,14 +8,14 @@ export function loadSettings(): AppSettings {
   try {
     const savedSettings = localStorage.getItem(SETTINGS_KEY)
     if (!savedSettings) {
-      return defaultSettings as AppSettings
+      return DEFAULT_SETTINGS
     }
 
     const parsedSettings = JSON.parse(savedSettings)
-    return deepMerge(defaultSettings, parsedSettings) as AppSettings
+    return merge(DEFAULT_SETTINGS, parsedSettings)
   } catch (error) {
     console.error('Error loading settings:', error)
-    return defaultSettings as AppSettings
+    return DEFAULT_SETTINGS
   }
 }
 
@@ -29,12 +29,12 @@ export function saveSettings(settings: AppSettings): void {
 
 export function resetSettings(): AppSettings {
   localStorage.removeItem(SETTINGS_KEY)
-  return defaultSettings as AppSettings
+  return DEFAULT_SETTINGS
 }
 
 export function updateSettings(settings: Partial<AppSettings>): AppSettings {
   const currentSettings = loadSettings()
-  const newSettings = deepMerge(currentSettings, settings)
+  const newSettings = merge(currentSettings, settings)
   saveSettings(newSettings)
   return newSettings
 }
@@ -63,12 +63,12 @@ export function exportSettings(): string {
 export function importSettings(jsonString: string): AppSettings {
   try {
     const importedSettings = JSON.parse(jsonString)
-    const mergedSettings = deepMerge(defaultSettings, importedSettings)
+    const mergedSettings = merge(DEFAULT_SETTINGS, importedSettings)
     saveSettings(mergedSettings)
-    return mergedSettings as AppSettings
+    return mergedSettings
   } catch (error) {
     console.error('Error importing settings:', error)
-    return defaultSettings as AppSettings
+    return DEFAULT_SETTINGS
   }
 }
 
@@ -89,7 +89,6 @@ export function validateSettings(settings: unknown): settings is AppSettings {
   const requiredKeys: (keyof AppSettings)[] = [
     'version',
     'lastUpdate',
-    'appearance',
     'system',
   ]
 
