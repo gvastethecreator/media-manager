@@ -7,7 +7,7 @@ import { generateThumbnail } from '@/lib/thumbnail'
 import { getImageMetadata } from '@/lib/metadata'
 import { computeHash } from '@/lib/hash'
 import { logger } from '@/lib/logger'
-import type { ImageMetadata } from '@/types/metadata'
+import type { FileMetadata, AIMetadata } from '@/types/metadata'
 
 const reindexLogger = logger.withContext('ReindexAPI')
 
@@ -102,7 +102,7 @@ export async function POST(
             if (!existingImage) {
               // Procesar nueva imagen
               const hash = await computeHash(filePath)
-              const metadata = await getImageMetadata(filePath) as ImageMetadata
+              const metadata = await getImageMetadata(filePath) as FileMetadata
 
               await prisma.image.create({
                 data: {
