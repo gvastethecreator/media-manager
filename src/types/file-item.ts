@@ -56,12 +56,69 @@ export interface GenerationData {
 
 export interface FileMetadata {
   mimeType?: string;
-  dimensions?: Dimensions;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
   colorSpace?: string;
   hasAlpha?: boolean;
   isAnimated?: boolean;
-  exif?: ExifData;
-  generation?: GenerationData;
+
+  // EXIF metadata
+  exif?: {
+    make?: string;
+    model?: string;
+    software?: string;
+    dateTime?: string | Date;
+    exposureTime?: number;
+    fNumber?: number;
+    iso?: number;
+    focalLength?: number;
+    lens?: string;
+    copyright?: string;
+    artist?: string;
+    description?: string;
+    gps?: {
+      latitude: number;
+      longitude: number;
+      altitude?: number;
+    };
+  };
+
+  // XMP metadata
+  xmp?: {
+    title?: string;
+    creator?: string;
+    rights?: string;
+    subject?: string[];
+    rating?: number;
+  };
+
+  // IPTC metadata
+  iptc?: {
+    headline?: string;
+    caption?: string;
+    keywords?: string[];
+    copyright?: string;
+    source?: string;
+  };
+
+  // AI Generation metadata
+  generation?: {
+    type: "stable-diffusion" | "comfyui" | "midjourney" | "dalle" | string;
+    prompt?: string;
+    negative_prompt?: string;
+    model?: string;
+    steps?: number;
+    cfg_scale?: number;
+    cfg?: number; // Para ComfyUI
+    seed?: number | string;
+    sampler?: string;
+    scheduler?: string;
+    clip_skip?: number;
+    workflow?: string; // Para ComfyUI
+    extra_params?: Record<string, any>;
+  };
 }
 
 export interface FileItem {

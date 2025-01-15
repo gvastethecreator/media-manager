@@ -11,25 +11,29 @@ import { FileMetadata } from "@/types/file-item";
 const apiLogger = logger.withContext("ImageAPI");
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  context: { params: { id: string } }
 ) {
+  const headers = new Headers();
+
   try {
     const image = await prisma.image.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       select: {
+        id: true,
         path: true,
         metadata: true,
       },
     });
 
     if (!image) {
-      return new NextResponse("Imagen no encontrada", { status: 404 });
+      apiLogger.warn("Image not found:", context.params.id);
+      return new Response("Image not found", { status: 404 });
     }
 
     // Verificar que el archivo existe
     if (!existsSync(image.path)) {
-      return new NextResponse("Archivo no encontrado", { status: 404 });
+      return new Response("Archivo no encontrado", { status: 404 });
     }
 
     // Obtener metadata
@@ -53,24 +57,25 @@ export async function GET(
     const mimeType = metadata.mimeType || "image/jpeg";
 
     // Configurar headers
-    const headers = new Headers();
     headers.set("Content-Type", mimeType);
     headers.set("Content-Length", processedBuffer.length.toString());
     headers.set("Cache-Control", "public, max-age=31536000"); // 1 año
-    headers.set("ETag", `"${params.id}"`);
+    headers.set("ETag", `"${image.id}"`);
 
     // Registrar actividad
     await prisma.activity.create({
       data: {
         type: "IMAGE_VIEW",
         description: "Image viewed",
-        imageId: params.id,
+        imageId: image.id,
       },
     });
 
-    return new NextResponse(processedBuffer, { headers });
+    return new Response(processedBuffer, {
+      headers,
+    });
   } catch (error) {
-    apiLogger.error("Error serving image:", error);
-    return new NextResponse("Error interno del servidor", { status: 500 });
+    console.error("Error serving image:", error);
+    return new Response("Error serving image", { status: 500 });
   }
 }
