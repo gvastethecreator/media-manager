@@ -198,7 +198,13 @@ export const useFilesStore = create<FilesState>((set, get) => ({
   handleSelectTag: async (id) => {
     try {
       set({ isLoading: true, currentTagId: id })
-      const items = await getTagImages(id)
+      const rawItems = await getTagImages(id)
+      const items = rawItems.map(item => ({
+        ...item,
+        type: item.type === 'image' || item.type === 'file' || item.type === 'folder' ? item.type : 'file',
+        modifiedAt: new Date(item.updatedAt),
+        accessedAt: new Date(item.updatedAt)
+      })) as FileItem[]
       set({ currentItems: items, displayedItems: items.slice(0, ITEMS_PER_BATCH), isLoading: false })
     } catch (error) {
       console.error('Error al cargar etiqueta:', error)

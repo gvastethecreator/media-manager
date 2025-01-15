@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "motion/react";
-import { cn, formatFileSize } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { FolderIcon, ImageIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFolders } from "@/services/folder.service";
@@ -197,7 +197,7 @@ const FolderCard = memo(function FolderCard({
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{formatFileSize(Number(folder.totalSize || 0))}</span>
+										<span>{formatBytes(Number(folder.totalSize || 0))}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
