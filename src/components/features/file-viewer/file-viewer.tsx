@@ -1,22 +1,8 @@
 "use client";
 
-import React, {
-	useState,
-	useEffect,
-	useRef,
-	useCallback,
-	useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-	X,
-	RotateCcw,
-	ZoomIn,
-	ZoomOut,
-	Copy,
-	Download,
-	ImageOff,
-} from "lucide-react";
+import { X, RotateCcw, ZoomIn, ZoomOut, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -25,11 +11,30 @@ import { ImageFallback } from "@/components/ui/image-fallback";
 import { getImageUrl } from "@/app/actions/image.actions";
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
 import { ThumbnailQuality } from "@/config/thumbnail.config";
-import { useImageResources } from "@/store/image-resources.store";
-import type { FileItem } from "@/types/file-item";
+
+export interface ImageItem {
+	id: string;
+	name: string;
+	type: string;
+	url?: string;
+	thumbnail?: string;
+	src?: string;
+	alt?: string;
+	width?: number;
+	height?: number;
+	mimeType?: string;
+	metadata?: {
+		dimensions?: {
+			width: number;
+			height: number;
+		};
+		mimeType?: string;
+		isLocal?: boolean;
+	};
+}
 
 interface FileViewerProps {
-	images: FileItem[];
+	images: ImageItem[];
 	initialIndex?: number;
 	isOpen: boolean;
 	onClose: () => void;
@@ -37,363 +42,47 @@ interface FileViewerProps {
 
 const isLocalFile = (url: string) => url.startsWith("file://");
 
-// Configuración optimizada
-const VIEWER_CONFIG = {
-	preload: {
-		batchSize: 2,
-		delay: 2000,
-		maxConcurrent: 3,
-		retryDelay: 1000,
-		maxRetries: 2,
-	},
-	thumbnails: {
-		visibleItems: 7,
-		preloadItems: 2,
-		loadThreshold: 0.7,
-	},
-	transitions: {
-		duration: 0.3,
-		ease: [0.32, 0.72, 0, 1],
-	},
+// Configuración de animaciones mejorada
+const springConfig = {
+	type: "spring" as const,
+	stiffness: 300,
+	damping: 30,
+	mass: 0.5,
 };
 
-// Cache optimizado con tiempo de vida
-const imageCache = new Map<
-	string,
-	{
-		url: string;
-		timestamp: number;
-		expiresIn: number;
-	}
->();
-
-// Función de debounce mejorada
-const createDebounce = (wait: number) => {
-	let timeout: NodeJS.Timeout;
-	let currentPromise: Promise<any> | null = null;
-
-	return (fn: () => Promise<any>) => {
-		if (currentPromise) return currentPromise;
-
-		currentPromise = new Promise((resolve) => {
-			if (timeout) clearTimeout(timeout);
-			timeout = setTimeout(async () => {
-				const result = await fn();
-				currentPromise = null;
-				resolve(result);
-			}, wait);
-		});
-
-		return currentPromise;
-	};
-};
-
-// Componente para thumbnail individual
-function ThumbnailItem({
-	image,
-	isActive,
-	onClick,
-}: {
-	image: FileItem;
-	isActive: boolean;
-	onClick: () => void;
-}) {
-	const imageResources = useImageResources();
-	const isLoading = imageResources.isLoading(image.id);
-	const [thumbnail, setThumbnail] = useState<string | null>(null);
-
-	// Efecto para cargar el thumbnail
-	useEffect(() => {
-		let mounted = true;
-		const loadThumbnail = async () => {
-			try {
-				const url = await imageResources.getThumbnail(image.id);
-				if (mounted && url) {
-					setThumbnail(url);
-				}
-			} catch (error) {
-				console.error("Error loading thumbnail:", error);
-			}
-		};
-		loadThumbnail();
-		return () => {
-			mounted = false;
-		};
-	}, [image.id, imageResources]);
-
-	if (isLoading || !thumbnail) {
-		return (
-			<div
-				className={cn("relative mx-1", isActive ? "w-24 h-24" : "w-20 h-20")}
-			>
-				<Skeleton className="w-full h-full rounded-md" />
-			</div>
-		);
-	}
-
-	return (
-		<motion.div
-			animate={{
-				opacity: isActive ? 1 : 0.8,
-				scale: isActive ? 1 : 0.9,
-				width: isActive ? 96 : 80,
-				height: isActive ? 96 : 80,
-			}}
-			transition={{
-				duration: 0.2,
-				ease: "easeOut",
-			}}
-			className={cn(
-				"relative cursor-pointer rounded-md overflow-hidden mx-1",
-				isActive &&
-					"ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
-			)}
-			onClick={onClick}
-			whileHover={{
-				scale: isActive ? 1.02 : 0.95,
-				opacity: 1,
-			}}
-		>
-			<ImageFallback
-				src={thumbnail}
-				alt={image.name}
-				className="w-full h-full object-cover"
-			/>
-			{isActive && (
-				<motion.div
-					className="absolute inset-0 bg-primary/10 pointer-events-none"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ duration: 0.2 }}
-				/>
-			)}
-		</motion.div>
-	);
-}
-
-// Componente optimizado para la imagen principal
-const MainImage = React.memo(function MainImage({
-	image,
-	scale,
-	position,
-	imageRef,
-	containerRef,
-}: {
-	image: FileItem;
-	scale: number;
-	position: { x: number; y: number };
-	imageRef: React.RefObject<HTMLImageElement | null>;
-	containerRef: React.RefObject<HTMLDivElement | null>;
-}) {
-	const imageResources = useImageResources();
-	const [resources, setResources] = React.useState<{
-		thumbnail: string | null;
-		originalUrl: string | null;
-		error: string | null;
-		isLoading: boolean;
-		originalLoaded: boolean;
-	}>({
-		thumbnail: null,
-		originalUrl: null,
-		error: null,
-		isLoading: true,
-		originalLoaded: false,
-	});
-
-	// Efecto optimizado para cargar recursos
-	React.useEffect(() => {
-		let mounted = true;
-		let loadingTimeout: NodeJS.Timeout;
-
-		const loadResources = async () => {
-			if (!mounted) return;
-
-			try {
-				console.log("🔄 Cargando recursos para imagen:", image.id);
-
-				// Cargar thumbnail
-				const thumbUrl = await imageResources.getThumbnail(image.id);
-				console.log("📸 Thumbnail cargado:", !!thumbUrl);
-
-				if (mounted && thumbUrl) {
-					setResources((prev) => ({
-						...prev,
-						thumbnail: thumbUrl,
-						isLoading: false,
-					}));
-
-					// Cargar URL original
-					console.log("🖼️ Cargando URL original...");
-					const origUrl = await imageResources.getOriginalUrl(image.id);
-					console.log("🔗 URL original obtenida:", !!origUrl);
-
-					if (mounted && origUrl) {
-						// Precargar la imagen original
-						const img = new Image();
-
-						img.onload = () => {
-							console.log("✅ Imagen original cargada completamente");
-							if (mounted) {
-								setResources((prev) => ({
-									...prev,
-									originalUrl: origUrl,
-									originalLoaded: true,
-								}));
-							}
-						};
-
-						img.onerror = (error) => {
-							console.error("❌ Error cargando imagen original:", error);
-							if (mounted) {
-								setResources((prev) => ({
-									...prev,
-									error: "Error al cargar la imagen original",
-								}));
-							}
-						};
-
-						console.log("🔄 Iniciando precarga de imagen original");
-						img.src = origUrl;
-					}
-				}
-			} catch (error) {
-				console.error("Error loading resources:", error);
-				if (mounted) {
-					setResources((prev) => ({
-						...prev,
-						error:
-							error instanceof Error ?
-								error.message
-							:	"Error al cargar la imagen",
-						isLoading: false,
-					}));
-				}
-			}
-		};
-
-		// Reset state on image change
-		console.log("🔄 Cambiando imagen:", image.id);
-		setResources({
-			thumbnail: null,
-			originalUrl: null,
-			error: null,
-			isLoading: true,
-			originalLoaded: false,
-		});
-
-		loadResources();
-
-		return () => {
-			mounted = false;
-			if (loadingTimeout) {
-				clearTimeout(loadingTimeout);
-			}
-		};
-	}, [image.id, imageResources]);
-
-	if (resources.isLoading) {
-		return (
-			<div className="w-full h-full flex items-center justify-center">
-				<Skeleton className="w-full h-full" />
-			</div>
-		);
-	}
-
-	if (resources.error) {
-		return (
-			<div className="flex flex-col items-center justify-center w-full h-full text-muted-foreground">
-				<ImageOff className="h-8 w-8 mb-2" />
-				<span className="text-xs">{resources.error}</span>
-			</div>
-		);
-	}
-
-	return (
-		<motion.div className="relative w-full h-full">
-			{/* Thumbnail como fallback */}
-			{resources.thumbnail && (
-				<motion.img
-					src={resources.thumbnail}
-					alt={image.name}
-					className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: resources.originalLoaded ? 0 : 1 }}
-					transition={{ duration: 0.3 }}
-				/>
-			)}
-
-			{/* Imagen original con transición suave */}
-			{resources.originalUrl && resources.originalLoaded && (
-				<motion.img
-					ref={imageRef}
-					src={resources.originalUrl}
-					alt={image.name}
-					className="absolute inset-0 w-full h-full object-contain"
-					style={{
-						scale,
-						x: position.x,
-						y: position.y,
-						cursor: "grab",
-						touchAction: "none",
-					}}
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ duration: 0.3 }}
-					drag
-					dragConstraints={containerRef}
-					onDragStart={() => {
-						if (imageRef.current) {
-							imageRef.current.style.cursor = "grabbing";
-						}
-					}}
-					onDragEnd={() => {
-						if (imageRef.current) {
-							imageRef.current.style.cursor = "grab";
-						}
-					}}
-				/>
-			)}
-		</motion.div>
-	);
-});
-
-export const FileViewer = React.memo(function FileViewer({
+export function FileViewer({
 	images,
 	initialIndex = 0,
 	isOpen,
 	onClose,
 }: FileViewerProps) {
-	const imageResources = useImageResources();
 	const { toast } = useToast();
 	const [index, setIndex] = useState(initialIndex);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
+	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+	const [originalUrls, setOriginalUrls] = useState<Record<string, string>>({});
+	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+		{}
+	);
+	const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 	const containerRef = useRef<HTMLDivElement>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
-	const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
-	const preloadDebounce = useRef(createDebounce(VIEWER_CONFIG.preload.delay));
 
 	// Get current image
 	const currentImage = images[index];
 
-	// Optimizar precarga con useCallback
-	const preloadImages = useCallback(async () => {
-		if (!isOpen || !images.length || !currentImage) return;
-
-		const nextIndex = (index + 1) % images.length;
-		const prevIndex = index - 1 >= 0 ? index - 1 : images.length - 1;
-
-		return preloadDebounce.current(async () => {
-			const batch = [images[prevIndex].id, images[nextIndex].id];
-			return imageResources.preloadResources(batch);
-		});
-	}, [isOpen, index, images, imageResources, currentImage]);
-
-	// Efecto optimizado para precarga
+	// Reset state when opening viewer
 	useEffect(() => {
-		preloadImages();
-	}, [preloadImages]);
+		if (isOpen) {
+			setIndex(initialIndex);
+			resetView();
+			setIsLoading(true);
+			setError(null);
+		}
+	}, [isOpen, initialIndex]);
 
 	// Validate images and index
 	useEffect(() => {
@@ -406,9 +95,86 @@ export const FileViewer = React.memo(function FileViewer({
 		}
 	}, [images, index]);
 
-	// Keyboard navigation optimizado
-	const handleKeyDown = useCallback(
-		(e: KeyboardEvent) => {
+	// Cargar solo las URLs necesarias inicialmente
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const loadInitialUrls = async () => {
+			const currentImage = images[index];
+			const nextImage = images[(index + 1) % images.length];
+			const prevImage = images[index > 0 ? index - 1 : images.length - 1];
+
+			const imagesToLoad = [currentImage, nextImage, prevImage];
+			const urls: Record<string, string> = {};
+
+			try {
+				await Promise.all(
+					imagesToLoad.map(async (img) => {
+						if (!img || urls[img.id]) return;
+						try {
+							const url = await getImageUrl(img.id);
+							urls[img.id] = url;
+							console.info(`URL inicial cargada para ${img.name}:`, url);
+						} catch (error) {
+							console.error(
+								`Error cargando URL inicial para ${img.name}:`,
+								error
+							);
+						}
+					})
+				);
+				setOriginalUrls((prev) => ({ ...prev, ...urls }));
+			} catch (error) {
+				console.error("Error cargando URLs iniciales:", error);
+				setError("Error cargando imágenes iniciales");
+			}
+		};
+
+		loadInitialUrls();
+	}, [isOpen, index, images]);
+
+	// Precargar siguiente/anterior cuando cambia el índice
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const preloadAdjacentImages = async () => {
+			const nextIndex = (index + 1) % images.length;
+			const prevIndex = index > 0 ? index - 1 : images.length - 1;
+			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter(
+				(img) => img && !originalUrls[img.id]
+			);
+
+			if (!imagesToPreload.length) return;
+
+			try {
+				const urls: Record<string, string> = {};
+				await Promise.all(
+					imagesToPreload.map(async (img) => {
+						if (!img) return;
+						try {
+							const url = await getImageUrl(img.id);
+							urls[img.id] = url;
+							console.info(`URL precargada para ${img.name}:`, url);
+						} catch (error) {
+							console.warn(`Error precargando URL para ${img.name}:`, error);
+						}
+					})
+				);
+				setOriginalUrls((prev) => ({ ...prev, ...urls }));
+			} catch (error) {
+				console.warn("Error en precarga de URLs:", error);
+			}
+		};
+
+		const timer = setTimeout(preloadAdjacentImages, 300);
+		return () => clearTimeout(timer);
+	}, [isOpen, index, images, originalUrls]);
+
+	// Keyboard navigation
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === "Escape") onClose();
 			if (e.key === "ArrowLeft")
 				setIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -417,89 +183,200 @@ export const FileViewer = React.memo(function FileViewer({
 			if (e.key === "0" || e.key === "r") resetView();
 			if (e.key === "+") handleZoom(1.2);
 			if (e.key === "-") handleZoom(0.8);
-		},
-		[images.length, onClose]
-	);
+		};
 
-	useEffect(() => {
-		if (!isOpen) return;
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, handleKeyDown]);
+	}, [isOpen, images.length, onClose]);
 
-	const handleWheel = useCallback(
-		(e: React.WheelEvent) => {
-			e.preventDefault();
-			const zoomFactor = 0.1;
-			const newScale = Math.min(
-				Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
-				8
-			);
-			setScale(newScale);
-		},
-		[scale]
-	);
+	// Preload adjacent images with original URLs
+	useEffect(() => {
+		const preloadImage = (imageUrl: string) => {
+			if (!imageUrl || loadedImages.has(imageUrl)) return;
 
-	const resetView = useCallback(() => {
+			const img = new Image();
+			img.src = imageUrl;
+			img.onload = () => {
+				setLoadedImages((prev) => new Set([...prev, imageUrl]));
+			};
+		};
+
+		if (currentImage && originalUrls[currentImage.id]) {
+			const currentUrl = originalUrls[currentImage.id];
+			preloadImage(currentUrl);
+
+			// Preload next and previous images
+			const nextIndex = (index + 1) % images.length;
+			const prevIndex = index > 0 ? index - 1 : images.length - 1;
+
+			if (images[nextIndex] && originalUrls[images[nextIndex].id]) {
+				preloadImage(originalUrls[images[nextIndex].id]);
+			}
+			if (images[prevIndex] && originalUrls[images[prevIndex].id]) {
+				preloadImage(originalUrls[images[prevIndex].id]);
+			}
+		}
+	}, [index, images, loadedImages, originalUrls, currentImage]);
+
+	useEffect(() => {
+		// Reset position and scale when changing images
+		setPosition({ x: 0, y: 0 });
+		setScale(1);
+	}, [index]);
+
+	const handleWheel = (e: React.WheelEvent) => {
+		e.preventDefault();
+		const zoomFactor = 0.1;
+		const newScale = Math.min(
+			Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
+			8
+		);
+		setScale(newScale);
+	};
+
+	const resetView = () => {
 		setScale(1);
 		setPosition({ x: 0, y: 0 });
-	}, []);
+	};
 
-	const handleZoom = useCallback((factor: number) => {
-		setScale((prev) => Math.min(Math.max(0.1, prev * factor), 5));
-	}, []);
+	const getImageSource = (image?: ImageItem) => {
+		if (!image) return "";
 
-	// Optimizar cálculo de visibleRange
-	const calculateVisibleRange = useCallback(
-		(currentIndex: number, total: number) => {
-			const halfVisible = Math.floor(VIEWER_CONFIG.thumbnails.visibleItems / 2);
-			let start = currentIndex - halfVisible;
-			let end = currentIndex + halfVisible;
-
-			// Ajustar rangos si están fuera de límites
-			if (start < 0) {
-				end = Math.min(end - start, total - 1);
-				start = 0;
-			}
-			if (end >= total) {
-				start = Math.max(0, start - (end - total + 1));
-				end = total - 1;
-			}
-
-			return { start, end };
-		},
-		[]
-	);
-
-	// Actualizar visibleRange cuando cambia el índice
-	useEffect(() => {
-		if (images.length) {
-			const range = calculateVisibleRange(index, images.length);
-			setVisibleRange(range);
+		// Si ya tenemos una URL original, usarla
+		if (originalUrls[image.id]) {
+			return originalUrls[image.id];
 		}
-	}, [index, images.length, calculateVisibleRange]);
 
-	// Optimizar renderizado de thumbnails
-	const thumbnailsToRender = useMemo(() => {
-		if (!images.length) return [];
-		const { start, end } = visibleRange;
+		// Fallback a thumbnail mientras se carga la original
+		return image.thumbnail || "";
+	};
 
-		return images.slice(start, end + 1).map((image, i) => {
-			const actualIndex = start + i;
-			const isActive = actualIndex === index;
+	const getImageAlt = (image?: ImageItem) => {
+		if (!image) return "Image";
+		return image.alt || image.name || "Image";
+	};
 
-			return (
-				<ThumbnailItem
-					key={image.id}
-					image={image}
-					isActive={isActive}
-					onClick={() => setIndex(actualIndex)}
-				/>
-			);
+	const handleImageError = () => {
+		setError("No se pudo cargar la imagen");
+		setIsLoading(false);
+	};
+
+	const handleCopy = async () => {
+		try {
+			if (!currentImage) return;
+
+			const response = await fetch(getImageSource(currentImage));
+			const blob = await response.blob();
+			await navigator.clipboard.write([
+				new ClipboardItem({
+					[blob.type]: blob,
+				}),
+			]);
+			toast({
+				title: "Imagen copiada",
+				description: "La imagen ha sido copiada al portapapeles",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "No se pudo copiar la imagen",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleDownload = async () => {
+		try {
+			if (!currentImage) return;
+
+			const response = await fetch(getImageSource(currentImage));
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = currentImage.name;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);
+			toast({
+				title: "Descarga iniciada",
+				description: "La imagen se está descargando",
+			});
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "No se pudo descargar la imagen",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleZoom = (factor: number) => {
+		const newScale = Math.min(Math.max(0.1, scale * factor), 5);
+		setScale(newScale);
+	};
+
+	// Función mejorada para obtener thumbnail
+	const getImageThumbnail = (image?: ImageItem): string | undefined => {
+		if (!image) return undefined;
+		return (
+			thumbnails[image.id] ||
+			image.thumbnail ||
+			image.src ||
+			image.url ||
+			undefined
+		);
+	};
+
+	// Función para calcular dimensiones
+	const getImageDimensions = (image: ImageItem) => {
+		const defaultDimensions = { width: 1920, height: 1080 };
+
+		if (image.metadata?.dimensions) {
+			return image.metadata.dimensions;
+		}
+
+		if (image.width && image.height) {
+			return { width: image.width, height: image.height };
+		}
+
+		return defaultDimensions;
+	};
+
+	// Función para cargar thumbnail
+	const loadThumbnail = useCallback(async (imageId: string) => {
+		try {
+			const data = await getThumbnail(imageId, ThumbnailQuality.MEDIUM);
+			const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${
+				data.thumbnail
+			}`;
+			setThumbnails((prev) => ({ ...prev, [imageId]: thumbnailUrl }));
+		} catch (error) {
+			console.error("Error loading thumbnail:", error);
+		}
+	}, []);
+
+	// Cargar thumbnails cuando cambia el índice
+	useEffect(() => {
+		if (!isOpen || !images.length) return;
+
+		const currentImage = images[index];
+		const nextImage = images[(index + 1) % images.length];
+		const prevImage = images[index > 0 ? index - 1 : images.length - 1];
+
+		[currentImage, nextImage, prevImage].forEach((img) => {
+			if (img && !thumbnails[img.id]) {
+				loadThumbnail(img.id);
+			}
 		});
-	}, [images, index, visibleRange]);
+	}, [isOpen, index, images, loadThumbnail, thumbnails]);
 
-	if (!isOpen || !images || !images.length || !currentImage) {
+	if (!isOpen || !images || !images.length) {
+		return null;
+	}
+
+	if (!currentImage) {
 		return null;
 	}
 
@@ -543,6 +420,22 @@ export const FileViewer = React.memo(function FileViewer({
 						>
 							<RotateCcw className="h-4 w-4" />
 						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleCopy}
+							title="Copiar"
+						>
+							<Copy className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleDownload}
+							title="Descargar"
+						>
+							<Download className="h-4 w-4" />
+						</Button>
 					</div>
 
 					<Button
@@ -556,34 +449,157 @@ export const FileViewer = React.memo(function FileViewer({
 				</div>
 
 				{/* Main Image Container */}
-				<div className="absolute inset-0 flex items-center justify-center">
-					{error ?
-						<div className="text-center text-muted-foreground">
-							<p>{error}</p>
-						</div>
-					:	<MainImage
-							image={currentImage}
-							scale={scale}
-							position={position}
-							imageRef={imageRef}
-							containerRef={containerRef}
-						/>
-					}
-				</div>
+				<motion.div
+					key={currentImage.id}
+					className="absolute inset-0 flex items-center justify-center"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.3 }}
+				>
+					<div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+						<AnimatePresence mode="wait">
+							{isLoading && (
+								<motion.div
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									transition={{ duration: 0.3 }}
+									className="absolute inset-0 flex items-center justify-center"
+								>
+									{thumbnails[currentImage.id] ?
+										<motion.div
+											className="absolute inset-0 flex items-center justify-center"
+											initial={{ opacity: 0, filter: "blur(10px)" }}
+											animate={{ opacity: 1, filter: "blur(3px)" }}
+											exit={{ opacity: 0, filter: "blur(0px)" }}
+											transition={{
+												duration: 0.8,
+												opacity: { duration: 0.5 },
+												filter: { duration: 0.4 },
+											}}
+										>
+											<motion.img
+												src={thumbnails[currentImage.id]}
+												alt="Loading preview"
+												className="w-full h-full object-contain"
+												initial={{ scale: 1.1 }}
+												animate={{ scale: 1 }}
+												exit={{ scale: 1 }}
+												transition={{ duration: 0.5 }}
+											/>
+										</motion.div>
+									:	<Skeleton className="w-full h-full" />}
+								</motion.div>
+							)}
+						</AnimatePresence>
+
+						{error ?
+							<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
+								<p>{error}</p>
+							</div>
+						:	<motion.img
+								ref={imageRef}
+								src={getImageSource(currentImage)}
+								alt={getImageAlt(currentImage)}
+								onError={handleImageError}
+								className={cn(
+									"object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none",
+									isLoading ? "opacity-0" : "opacity-100"
+								)}
+								style={{
+									cursor: "grab",
+									touchAction: "none",
+								}}
+								initial={{ opacity: 0, scale: 0.95 }}
+								animate={{
+									opacity: isLoading ? 0 : 1,
+									scale: scale,
+									x: position.x,
+									y: position.y,
+								}}
+								transition={{
+									opacity: { duration: 0.3 },
+									scale: { ...springConfig, duration: 0.3 },
+									x: springConfig,
+									y: springConfig,
+								}}
+								drag
+								dragConstraints={containerRef}
+								onDragStart={() => {
+									if (imageRef.current) {
+										imageRef.current.style.cursor = "grabbing";
+									}
+								}}
+								onDragEnd={() => {
+									if (imageRef.current) {
+										imageRef.current.style.cursor = "grab";
+									}
+								}}
+								onLoad={() => {
+									setTimeout(() => {
+										setIsLoading(false);
+										setError(null);
+									}, 100);
+								}}
+							/>
+						}
+					</div>
+				</motion.div>
 
 				{/* Thumbnails */}
 				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
 					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
-						{thumbnailsToRender}
+						{images
+							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
+							.map((image, i) => {
+								const thumbSrc = getImageThumbnail(image);
+								return (
+									<motion.div
+										key={image.id}
+										animate={{
+											opacity: i + Math.max(0, index - 3) === index ? 1 : 0.7,
+											scale: i + Math.max(0, index - 3) === index ? 1 : 0.95,
+										}}
+										className={cn(
+											"w-20 h-20 relative cursor-pointer rounded-md overflow-hidden mx-1",
+											i + Math.max(0, index - 3) === index &&
+												"ring-2 ring-primary ring-offset-2 ring-offset-background"
+										)}
+										style={{
+											zIndex: i + Math.max(0, index - 3) === index ? 10 : 1,
+										}}
+										onClick={() => setIndex(i + Math.max(0, index - 3))}
+									>
+										{thumbSrc ?
+											<ImageFallback
+												src={thumbSrc}
+												alt={getImageAlt(image)}
+												className="w-full h-full object-cover transition-all duration-200 hover:scale-110"
+												gradientColors={[
+													`hsl(${
+														(parseInt(image.id.split("-")[1] || "0") * 40) % 360
+													}, 95%, 75%)`,
+													`hsl(${
+														(parseInt(image.id.split("-")[1] || "0") * 40 +
+															60) %
+														360
+													}, 95%, 75%)`,
+												]}
+											/>
+										:	<Skeleton className="w-full h-full" />}
+									</motion.div>
+								);
+							})}
 					</div>
 				</div>
 
 				{/* Navigation hints */}
-				<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none">
+				<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none max-w-[300px]">
 					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
 					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
 				</div>
 			</div>
 		</motion.div>
 	);
-});
+}

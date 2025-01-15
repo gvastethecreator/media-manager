@@ -1,11 +1,9 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { DetailsPanel } from "@/components/panels/details/details-panel";
 import { useFileManager } from "@/store/file-manager.store";
 import { motion, AnimatePresence } from "motion/react";
 import { Meteors } from "../ui/meteors";
-import { FileViewer } from "../features/file-viewer/file-viewer";
 
 export function RightPanel() {
 	const { selectedItems } = useFileManager();

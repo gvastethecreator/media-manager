@@ -166,32 +166,205 @@ const AI_RETRY_CONFIG: RetryConfig = {
   backoffFactor: 1.5
 };
 
+// Tipos de chunks PNG
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+const TEXT_CHUNK = 'tEXt';
+const ITXT_CHUNK = 'iTXt';
+const ZTXT_CHUNK = 'zTXt';
+
+interface PNGChunk {
+  length: number;
+  type: string;
+  data: Buffer;
+  crc: number;
+}
+
+async function readPNGChunks(buffer: Buffer): Promise<PNGChunk[]> {
+  const chunks: PNGChunk[] = [];
+  let offset = 0;
+
+  // Verificar firma PNG
+  if (!buffer.slice(0, 8).equals(PNG_SIGNATURE)) {
+    throw new Error('No es un archivo PNG válido');
+  }
+  offset += 8;
+
+  while (offset < buffer.length) {
+    // Leer chunk
+    const length = buffer.readUInt32BE(offset);
+    offset += 4;
+
+    const type = buffer.slice(offset, offset + 4).toString('ascii');
+    offset += 4;
+
+    const data = buffer.slice(offset, offset + length);
+    offset += length;
+
+    const crc = buffer.readUInt32BE(offset);
+    offset += 4;
+
+    chunks.push({ length, type, data, crc });
+  }
+
+  return chunks;
+}
+
+function parseTextChunk(data: Buffer): { keyword: string, text: string } {
+  const nullIndex = data.indexOf(0);
+  const keyword = data.slice(0, nullIndex).toString('ascii');
+  const text = data.slice(nullIndex + 1).toString('utf8');
+  return { keyword, text };
+}
+
 async function extractPNGMetadata(path: string): Promise<any> {
-  return withRetry(
-    async () => {
-      const buffer = await sharp(path).toBuffer();
-      const chunks = await exifr.parse(buffer, {
-        tiff: true,
-        xmp: true,
-        icc: true,
-        iptc: true,
-        jfif: true,
-        ihdr: true,
-        multiSegment: true,
-        mergeOutput: false
-      });
+  try {
+    const buffer = await sharp(path).toBuffer();
+    const chunks = await readPNGChunks(buffer);
 
-      metadataLogger.debug('Chunks PNG extraídos:', {
-        path,
-        chunkKeys: chunks ? Object.keys(chunks) : [],
-        chunks
-      });
+    const metadata: Record<string, any> = {};
 
-      return chunks;
-    },
-    PNG_RETRY_CONFIG,
-    { path, operation: 'extracción de chunks PNG' }
-  );
+    // Buscar chunks de texto
+    for (const chunk of chunks) {
+      if (chunk.type === TEXT_CHUNK) {
+        const { keyword, text } = parseTextChunk(chunk.data);
+        metadata[keyword] = text;
+
+        // Log para debugging
+        metadataLogger.debug('Chunk PNG encontrado:', {
+          type: chunk.type,
+          keyword,
+          textLength: text.length,
+          textPreview: text.substring(0, 100)
+        });
+      }
+    }
+
+    // Buscar parámetros de Stable Diffusion
+    if (metadata.parameters || metadata.Comment) {
+      const parameters = metadata.parameters || metadata.Comment;
+
+      // Intentar parsear parámetros
+      try {
+        const parsed = parseSDParameters(parameters);
+        if (parsed) {
+          return {
+            type: 'stable-diffusion',
+            ...parsed,
+            raw: parameters
+          };
+        }
+      } catch (error) {
+        metadataLogger.warn('Error parseando parámetros SD:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          parameters
+        });
+      }
+    }
+
+    return metadata;
+  } catch (error) {
+    metadataLogger.error('Error extrayendo metadata PNG:', {
+      path,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    throw error;
+  }
+}
+
+function parseSDParameters(text: string): any {
+  // Separar el prompt del resto de parámetros
+  const paramsSplit = text.split('\n');
+  const prompt = paramsSplit[0].trim();
+  const paramsText = paramsSplit.slice(1).join('\n');
+
+  // Patrones comunes en imágenes de Stable Diffusion
+  const patterns = {
+    steps: /Steps: (\d+)/,
+    sampler: /Sampler: ([^,]+)/,
+    cfg_scale: /CFG scale: (\d+\.?\d*)/,
+    seed: /Seed: (-?\d+)/,
+    model: /Model: ([^,\n]+)/,
+    size: /Size: (\d+x\d+)/,
+    // Parámetros adicionales
+    schedule_type: /Schedule type: ([^,]+)/,
+    distilled_cfg_scale: /Distilled CFG Scale: (\d+\.?\d*)/,
+    model_hash: /Model hash: ([^,\n]+)/,
+    version: /Version: ([^,\n]+)/,
+    clip_skip: /Clip skip: (\d+)/,
+  };
+
+  const result: Record<string, any> = {
+    prompt,
+    extra_params: {} as Record<string, any>
+  };
+
+  // Extraer valores usando los patrones
+  for (const [key, pattern] of Object.entries(patterns)) {
+    const match = paramsText.match(pattern);
+    if (match) {
+      let value: string | number = match[1].trim();
+
+      // Convertir valores numéricos
+      if (['steps', 'seed', 'clip_skip'].includes(key)) {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+          value = numValue;
+        }
+      } else if (['cfg_scale', 'distilled_cfg_scale'].includes(key)) {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          value = numValue;
+        }
+      }
+
+      // Almacenar en el lugar apropiado
+      if (['prompt', 'steps', 'sampler', 'cfg_scale', 'seed', 'model', 'clip_skip'].includes(key)) {
+        result[key] = value;
+      } else {
+        result.extra_params[key] = value;
+      }
+    }
+  }
+
+  // Extraer LoRAs
+  const loraMatches = text.match(/<lora:[^>]+>/g);
+  if (loraMatches) {
+    const loras = loraMatches.map(match => {
+      const [name, weight] = match.slice(6, -1).split(':');
+      return { name, weight: parseFloat(weight) || 1.0 };
+    });
+    if (loras.length > 0) {
+      result.extra_params.loras = loras;
+    }
+  }
+
+  // Extraer hashes de LoRA si existen
+  const loraHashMatch = text.match(/Lora hashes: "([^"]+)"/);
+  if (loraHashMatch) {
+    result.extra_params.lora_hashes = loraHashMatch[1];
+  }
+
+  // Extraer módulos
+  const moduleMatches = text.match(/Module \d+: ([^,\n]+)/g);
+  if (moduleMatches) {
+    result.extra_params.modules = moduleMatches.map(m => m.split(': ')[1]);
+  }
+
+  // Buscar prompt negativo
+  const negativeMatch = text.match(/Negative prompt: (.*?)(?=\n[A-Za-z]+:|\n?$)/s);
+  if (negativeMatch) {
+    result.negative_prompt = negativeMatch[1].trim();
+  }
+
+  // Log para debugging
+  metadataLogger.debug('Parámetros SD extraídos:', {
+    foundKeys: Object.keys(result),
+    result,
+    extraParams: result.extra_params
+  });
+
+  return Object.keys(result).length > 0 ? result : null;
 }
 
 function validateMetadata(metadata: FileMetadata): boolean {
@@ -285,18 +458,54 @@ export async function getImageMetadata(path: string): Promise<FileMetadata> {
 
         // 3. Extraer metadata EXIF/XMP/IPTC
         try {
-          const exifData = await exifr.parse(path, {
+          // Configuración extendida para exifr
+          const options = {
             tiff: true,
             xmp: true,
             icc: true,
             iptc: true,
             jfif: true,
             ihdr: true,
+            png: true,
             multiSegment: true,
-            mergeOutput: true,
+            mergeOutput: false,
             sanitize: true,
             translateKeys: true,
             translateValues: true,
+            reviveValues: true,
+            chunked: true,
+            firstChunkSize: 128 * 1024,
+            // Incluir todos los segmentos y bloques
+            segments: true,
+            blocks: true,
+            skip: [],
+            pick: []
+          };
+
+          // Leer el buffer de la imagen
+          const buffer = await sharp(path).toBuffer();
+
+          // Intentar diferentes métodos de extracción
+          const [exifData, gpsData, thumbnailData] = await Promise.all([
+            exifr.parse(buffer, options).catch(e => {
+              metadataLogger.warn('Error en parse general:', e);
+              return null;
+            }),
+            exifr.gps(buffer).catch(e => {
+              metadataLogger.warn('Error en GPS:', e);
+              return null;
+            }),
+            exifr.thumbnail(buffer).catch(e => {
+              metadataLogger.warn('Error en thumbnail:', e);
+              return null;
+            })
+          ]);
+
+          metadataLogger.debug('Resultados de extracción:', {
+            hasExif: !!exifData,
+            hasGPS: !!gpsData,
+            hasThumbnail: !!thumbnailData,
+            exifKeys: exifData ? Object.keys(exifData) : []
           });
 
           if (exifData) {
@@ -316,11 +525,11 @@ export async function getImageMetadata(path: string): Promise<FileMetadata> {
               description: exifData.ImageDescription || exifData.description
             };
 
-            // Procesar GPS
-            if (exifData.latitude && exifData.longitude) {
+            // Procesar GPS desde ambas fuentes
+            if (gpsData || exifData.latitude || exifData.longitude) {
               metadata.exif.gps = {
-                latitude: exifData.latitude,
-                longitude: exifData.longitude,
+                latitude: gpsData?.latitude || exifData.latitude,
+                longitude: gpsData?.longitude || exifData.longitude,
                 altitude: exifData.altitude
               };
             }
@@ -347,6 +556,15 @@ export async function getImageMetadata(path: string): Promise<FileMetadata> {
                 source: exifData.iptc.source || exifData.iptc.Source
               };
             }
+
+            // Log detallado de la metadata extraída
+            metadataLogger.debug('Metadata extraída:', {
+              path,
+              exif: metadata.exif ? Object.keys(metadata.exif) : [],
+              xmp: metadata.xmp ? Object.keys(metadata.xmp) : [],
+              iptc: metadata.iptc ? Object.keys(metadata.iptc) : [],
+              rawExif: exifData
+            });
           }
         } catch (error) {
           metadataLogger.error('Error extrayendo EXIF/XMP/IPTC:', {
@@ -422,75 +640,49 @@ export async function getImageMetadata(path: string): Promise<FileMetadata> {
 async function parseAIMetadata(pngMetadata: any, path: string): Promise<AIMetadata | null> {
   return withRetry(
     async () => {
-      // 1. Intentar extraer de parámetros en chunks PNG
+      metadataLogger.debug('Analizando metadata AI:', {
+        path,
+        keys: Object.keys(pngMetadata),
+        hasParameters: !!pngMetadata.parameters,
+        hasComment: !!pngMetadata.Comment
+      });
+
+      // Si ya tenemos metadata parseada de SD
+      if (pngMetadata.type === 'stable-diffusion') {
+        return pngMetadata;
+      }
+
+      // Intentar extraer de parámetros en chunks PNG
       if (pngMetadata.parameters || pngMetadata.Comment) {
         const parameters = pngMetadata.parameters || pngMetadata.Comment;
+        const parsed = parseSDParameters(parameters);
 
-        metadataLogger.debug('Analizando parámetros AI:', {
-          path,
-          hasParameters: !!pngMetadata.parameters,
-          hasComment: !!pngMetadata.Comment,
-          parameters
-        });
-
-        // Detectar tipo de generador
-        if (parameters.includes('Steps:') && parameters.includes('Sampler:')) {
-          // Stable Diffusion WebUI
-          const promptMatch = parameters.match(/^([^:]+)$/m);
-          const negativeMatch = parameters.match(/^Negative prompt: (.+)$/m);
-          const settingsMatch = parameters.match(/^Steps: (\d+), Sampler: ([^,]+), CFG scale: (\d+), Seed: (-?\d+)/);
-
-          if (!settingsMatch) {
-            throw new MetadataError(
-              'Formato de parámetros SD inválido',
-              path,
-              'SD_PARAMS_PARSE_ERROR',
-              { parameters }
-            );
-          }
-
+        if (parsed) {
           const metadata: AIMetadata = {
             type: 'stable-diffusion',
-            prompt: promptMatch?.[1]?.trim(),
-            negative_prompt: negativeMatch?.[1]?.trim(),
-            steps: settingsMatch[1] ? parseInt(settingsMatch[1]) : undefined,
-            sampler: settingsMatch[2]?.trim(),
-            cfg_scale: settingsMatch[3] ? parseFloat(settingsMatch[3]) : undefined,
-            seed: settingsMatch[4] ? parseInt(settingsMatch[4]) : undefined,
+            prompt: parsed.prompt,
+            negative_prompt: parsed.negative_prompt,
+            model: parsed.model,
+            steps: parsed.steps,
+            sampler: parsed.sampler,
+            cfg_scale: parsed.cfg_scale,
+            seed: parsed.seed,
+            clip_skip: parsed.clip_skip,
+            scheduler: parsed.scheduler,
+            extra_params: parsed.extra_params,
             raw: parameters
           };
 
-          metadataLogger.debug('Metadata Stable Diffusion extraída:', {
-            path,
-            metadata
-          });
-
-          return metadata;
-        } else if (parameters.includes('workflow')) {
-          // ComfyUI
-          const metadata: AIMetadata = {
-            type: 'comfyui',
-            workflow: parameters,
-            raw: parameters
-          };
-
-          metadataLogger.debug('Metadata ComfyUI extraída:', {
+          metadataLogger.debug('Metadata AI procesada:', {
             path,
             metadata
           });
 
           return metadata;
         }
-
-        throw new MetadataError(
-          'Tipo de generador AI no soportado',
-          path,
-          'UNSUPPORTED_AI_GENERATOR',
-          { parameters }
-        );
       }
 
-      // 2. Intentar extraer del nombre del archivo
+      // Intentar extraer del nombre del archivo
       const filename = path.split(/[\\/]/).pop() || '';
       const sdMatch = filename.match(/(\{.*\})/);
       if (sdMatch) {
@@ -505,13 +697,11 @@ async function parseAIMetadata(pngMetadata: any, path: string): Promise<AIMetada
             sampler: genData.sampler,
             cfg_scale: genData.cfg_scale,
             seed: genData.seed,
+            clip_skip: genData.clip_skip,
+            scheduler: genData.scheduler,
+            extra_params: genData.extra_params,
             raw: JSON.stringify(genData)
           };
-
-          metadataLogger.debug('Metadata extraída del nombre:', {
-            path,
-            metadata
-          });
 
           return metadata;
         } catch (error) {
