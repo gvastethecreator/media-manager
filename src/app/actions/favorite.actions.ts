@@ -47,6 +47,8 @@ function transformImageToFileItem(image: any): FileItem {
     folderId: image.folderId,
     createdAt: image.createdAt,
     updatedAt: image.updatedAt,
+    modifiedAt: image.updatedAt,
+    accessedAt: image.updatedAt,
     collections: image.collections?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
     tags: image.tags?.map((t: any) => ({ id: t.id, name: t.name })) ?? [],
     albums: [],

@@ -14,7 +14,7 @@ import { existsSync } from 'fs'
 import path from 'path'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 import { FileMetadata } from "@/types/file-item";
-import { ExifImage } from "exif";
+import * as exifr from "exifr";
 import { promisify } from "util";
 import { readFile } from "fs/promises";
 
@@ -798,15 +798,76 @@ export async function getImage(id: string): Promise<Image | null> {
   }
 }
 
+// Funciones auxiliares para parseo de metadata AI
+function parseA1111Format(text: string): any {
+  try {
+    // Buscar patrones de A1111
+    const promptRegex = /^([^:]+)$/m;
+    const negativeRegex = /^Negative prompt: (.+)$/m;
+    const settingsRegex = /^Steps: (\d+), Sampler: ([^,]+), CFG scale: (\d+), Seed: (-?\d+)/;
+
+    const promptMatch = text.match(promptRegex);
+    const negativeMatch = text.match(negativeRegex);
+    const settingsMatch = text.match(settingsRegex);
+
+    return {
+      type: "stable-diffusion-webui",
+      prompt: promptMatch?.[1]?.trim(),
+      negative_prompt: negativeMatch?.[1]?.trim(),
+      steps: settingsMatch?.[1] ? parseInt(settingsMatch[1]) : undefined,
+      sampler: settingsMatch?.[2]?.trim(),
+      cfg_scale: settingsMatch?.[3] ? parseFloat(settingsMatch[3]) : undefined,
+      seed: settingsMatch?.[4] ? parseInt(settingsMatch[4]) : undefined
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function parseInvokeAIFormat(data: any): any {
+  try {
+    return {
+      type: "invokeai",
+      prompt: data.prompt,
+      negative_prompt: data.negative_prompt,
+      steps: data.steps,
+      sampler: data.sampler,
+      cfg_scale: data.cfg_scale,
+      seed: data.seed,
+      model: data.model,
+      scheduler: data.scheduler
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function parseNovelAIFormat(data: any): any {
+  try {
+    return {
+      type: "novelai",
+      prompt: data.prompt,
+      negative_prompt: data.uc || data.negative_prompt,
+      steps: data.steps,
+      sampler: data.sampler,
+      cfg_scale: data.scale,
+      seed: data.seed,
+      model: data.model
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function extractImageMetadata(
   imagePath: string
 ): Promise<FileMetadata> {
   try {
     const metadata: FileMetadata = {};
+    const buffer = await readFile(imagePath);
 
-    // Extraer información básica con Sharp
-    const imageInfo = await sharp(imagePath).metadata();
-
+    // 1. Extraer información básica con Sharp
+    const imageInfo = await sharp(buffer).metadata();
     metadata.mimeType = `image/${imageInfo.format}`;
     metadata.dimensions = {
       width: imageInfo.width || 0,
@@ -816,44 +877,149 @@ export async function extractImageMetadata(
     metadata.hasAlpha = imageInfo.hasAlpha;
     metadata.isAnimated = imageInfo.pages ? imageInfo.pages > 1 : false;
 
-    // Extraer EXIF si existe
+    // 2. Extraer metadata completa con exifr
     try {
-      const buffer = await readFile(imagePath);
-      const getExif = promisify(ExifImage);
-      const exifData = await getExif({ image: buffer });
+      const exifData = await exifr.parse(buffer, {
+        tiff: true,
+        xmp: true,
+        icc: true,
+        iptc: true,
+        jfif: true,
+        ihdr: true,
+        png: true,
+        userComment: true
+      }) as any;
 
-      metadata.exif = {
-        Make: exifData.image.Make,
-        Model: exifData.image.Model,
-        Software: exifData.image.Software,
-        DateTime: exifData.image.ModifyDate,
-        ExposureTime: exifData.exif.ExposureTime,
-        FNumber: exifData.exif.FNumber,
-        ISO: exifData.exif.ISO,
-        FocalLength: exifData.exif.FocalLength,
-      };
-    } catch (error) {
-      imageLogger.warn("No EXIF data found:", error);
-    }
-
-    // Intentar extraer metadata de generación AI
-    try {
-      const filename = path.basename(imagePath);
-      const match = filename.match(/(\{.*\})/);
-      if (match) {
-        const genData = JSON.parse(match[1]);
-        metadata.generation = {
-          prompt: genData.prompt,
-          negative_prompt: genData.negative_prompt,
-          model: genData.model,
-          steps: genData.steps,
-          cfg_scale: genData.cfg_scale,
-          seed: genData.seed,
-          sampler: genData.sampler,
+      if (exifData) {
+        metadata.exif = {
+          make: exifData.make || exifData.Make,
+          model: exifData.model || exifData.Model,
+          software: exifData.software || exifData.Software,
+          dateTime: exifData.dateTimeOriginal || exifData.DateTimeOriginal ||
+            exifData.createDate || exifData.CreateDate ||
+            exifData.modifyDate || exifData.ModifyDate,
+          exposureTime: exifData.exposureTime || exifData.ExposureTime,
+          fNumber: exifData.fNumber || exifData.FNumber,
+          iso: exifData.iso || exifData.ISO,
+          focalLength: exifData.focalLength || exifData.FocalLength,
+          lens: exifData.lensModel || exifData.LensModel,
+          copyright: exifData.copyright || exifData.Copyright,
+          artist: exifData.artist || exifData.Artist,
+          description: exifData.imageDescription || exifData.ImageDescription,
+          gps: exifData.latitude && exifData.longitude ? {
+            latitude: exifData.latitude,
+            longitude: exifData.longitude,
+            altitude: exifData.altitude
+          } : undefined
         };
+
+        // Extraer XMP si existe
+        if (exifData.xmp) {
+          metadata.xmp = {
+            title: exifData.xmp.title,
+            creator: exifData.xmp.creator,
+            rights: exifData.xmp.rights,
+            subject: Array.isArray(exifData.xmp.subject) ? exifData.xmp.subject : [],
+            rating: typeof exifData.xmp.rating === 'number' ? exifData.xmp.rating : undefined
+          };
+        }
+
+        // Extraer IPTC si existe
+        if (exifData.iptc) {
+          metadata.iptc = {
+            headline: exifData.iptc.headline || exifData.iptc.Headline,
+            caption: exifData.iptc.caption || exifData.iptc.Caption,
+            keywords: Array.isArray(exifData.iptc.keywords) ? exifData.iptc.keywords :
+              Array.isArray(exifData.iptc.Keywords) ? exifData.iptc.Keywords : [],
+            copyright: exifData.iptc.copyright || exifData.iptc.CopyrightNotice,
+            source: exifData.iptc.source || exifData.iptc.Source
+          };
+        }
+
+        // Intentar extraer metadata de PNG si existe
+        if (exifData.parameters || exifData.userComment) {
+          const pngText = exifData.parameters || exifData.userComment;
+          const aiMetadata = parseA1111Format(pngText);
+          if (aiMetadata) {
+            metadata.generation = aiMetadata;
+          }
+        }
       }
     } catch (error) {
-      imageLogger.warn("No generation metadata found:", error);
+      imageLogger.warn("No EXIF/XMP/IPTC data found:", error);
+    }
+
+    // 3. Intentar extraer metadata de generación AI
+    try {
+      const filename = path.basename(imagePath);
+      let aiMetadata = null;
+
+      // Intentar extraer de PNG chunks (tEXt)
+      const pngInfo = await exifr.parse(buffer, { tEXt: true });
+      if (pngInfo?.parameters) {
+        aiMetadata = parseA1111Format(pngInfo.parameters);
+      }
+
+      // Si no hay metadata en PNG chunks, intentar desde el nombre
+      if (!aiMetadata) {
+        // Stable Diffusion WebUI format
+        const sdMatch = filename.match(/(\{.*\})/);
+        if (sdMatch) {
+          const genData = JSON.parse(sdMatch[1]);
+          aiMetadata = {
+            type: "stable-diffusion",
+            prompt: genData.prompt,
+            negative_prompt: genData.negative_prompt,
+            model: genData.model,
+            steps: genData.steps,
+            cfg_scale: genData.cfg_scale,
+            seed: genData.seed,
+            sampler: genData.sampler,
+            scheduler: genData.scheduler,
+            clip_skip: genData.clip_skip,
+            extra_params: genData.extra_params
+          };
+        }
+
+        // ComfyUI format
+        const comfyMatch = filename.match(/_\[(.*?)\]_/);
+        if (comfyMatch) {
+          const comfyData = JSON.parse(comfyMatch[1]);
+          aiMetadata = {
+            type: "comfyui",
+            workflow: comfyData.workflow,
+            prompt: comfyData.prompt,
+            negative_prompt: comfyData.negative_prompt,
+            model: comfyData.model,
+            steps: comfyData.steps,
+            cfg: comfyData.cfg,
+            seed: comfyData.seed,
+            scheduler: comfyData.scheduler,
+            extra_params: comfyData.extra_params
+          };
+        }
+
+        // InvokeAI format
+        const invokeMatch = filename.match(/_invokeai\[(.*?)\]_/);
+        if (invokeMatch) {
+          const invokeData = JSON.parse(invokeMatch[1]);
+          aiMetadata = parseInvokeAIFormat(invokeData);
+        }
+
+        // NovelAI format
+        const novelaiMatch = filename.match(/_novelai\[(.*?)\]_/);
+        if (novelaiMatch) {
+          const novelaiData = JSON.parse(novelaiMatch[1]);
+          aiMetadata = parseNovelAIFormat(novelaiData);
+        }
+      }
+
+      if (aiMetadata) {
+        metadata.generation = aiMetadata;
+      }
+
+    } catch (error) {
+      imageLogger.warn("No AI generation metadata found:", error);
     }
 
     return metadata;
