@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { logger } from '@/lib/logger'
 import type { FileItem } from '@/types/file-item'
+import type { TagWithStats, RelatedTag } from '@/types/tag'
 import { getTagImages } from '@/app/actions/tag.actions'
 import { getFolders } from '@/app/actions/folder.actions'
 import { getCollections } from '@/app/actions/collection.actions'
@@ -199,12 +200,22 @@ export const useFilesStore = create<FilesState>((set, get) => ({
     try {
       set({ isLoading: true, currentTagId: id })
       const rawItems = await getTagImages(id)
-      const items = rawItems.map(item => ({
-        ...item,
-        type: item.type === 'image' || item.type === 'file' || item.type === 'folder' ? item.type : 'file',
-        modifiedAt: new Date(item.updatedAt),
-        accessedAt: new Date(item.updatedAt)
-      })) as FileItem[]
+      const items = rawItems.map(item => {
+        const tags: RelatedTag[] = item.tags.map(t => ({
+          id: t.id,
+          name: t.name,
+          color: t.color || '#94a3b8'
+        }))
+
+        return {
+          ...item,
+          type: item.type === 'image' || item.type === 'file' || item.type === 'folder' ? item.type : 'file',
+          modifiedAt: new Date(item.updatedAt),
+          accessedAt: new Date(item.updatedAt),
+          tags
+        }
+      }) as FileItem[]
+
       set({ currentItems: items, displayedItems: items.slice(0, ITEMS_PER_BATCH), isLoading: false })
     } catch (error) {
       console.error('Error al cargar etiqueta:', error)

@@ -2,210 +2,211 @@ import { create } from "zustand";
 import { getImageUrl } from "@/app/actions/image.actions";
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
 import { ThumbnailQuality } from "@/config/thumbnail.config";
+import { logger } from "@/lib/logger";
+
+const resourceLogger = logger.withContext("ImageResources");
 
 interface ImageResource {
-  thumbnailUrl?: string;
+  id: string;
+  thumbnail?: string;
   originalUrl?: string;
   isLoading: boolean;
   error?: string;
-  lastLoaded?: number;
+  lastUpdate: number;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
 }
 
 interface ImageResourcesState {
-  resources: Record<string, ImageResource>;
+  resources: Map<string, ImageResource>;
   loadingQueue: Set<string>;
-  // Métodos
-  getThumbnail: (imageId: string) => Promise<string | undefined>;
-  getOriginalUrl: (imageId: string) => Promise<string | undefined>;
-  preloadResources: (imageIds: string[]) => Promise<void>;
+  preloadQueue: string[];
+  isProcessing: boolean;
+
+  // Métodos principales
+  getThumbnail: (id: string) => Promise<string | undefined>;
+  getOriginalUrl: (id: string) => Promise<string | undefined>;
+  preloadResources: (ids: string[]) => void;
+  isLoading: (id: string) => boolean;
   clearResources: () => void;
-  isLoading: (imageId: string) => boolean;
-  hasResource: (imageId: string) => boolean;
 }
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+// Configuración optimizada
+const CACHE_CONFIG = {
+  maxAge: 5 * 60 * 1000, // 5 minutos
+  cleanupInterval: 60 * 1000, // 1 minuto
+  maxQueueSize: 10,
+  preloadDelay: 500,
+  retryDelay: 2000,
+  maxRetries: 3
+};
 
-export const useImageResources = create<ImageResourcesState>((set, get) => ({
-  resources: {},
-  loadingQueue: new Set(),
-
-  getThumbnail: async (imageId: string) => {
+export const useImageResources = create<ImageResourcesState>((set, get) => {
+  // Limpieza periódica de caché
+  setInterval(() => {
     const state = get();
-    const resource = state.resources[imageId];
+    const now = Date.now();
+    const resources = new Map(state.resources);
 
-    // Si ya está cargado y no ha expirado, retornar
-    if (
-      resource?.thumbnailUrl &&
-      resource.lastLoaded &&
-      Date.now() - resource.lastLoaded < CACHE_DURATION
-    ) {
-      return resource.thumbnailUrl;
+    for (const [id, resource] of resources.entries()) {
+      if (now - resource.lastUpdate > CACHE_CONFIG.maxAge) {
+        resources.delete(id);
+      }
     }
 
-    // Si ya está en cola de carga, esperar
-    if (state.loadingQueue.has(imageId)) {
-      return new Promise((resolve) => {
-        const checkInterval = setInterval(() => {
-          const current = get().resources[imageId];
-          if (current?.thumbnailUrl) {
-            clearInterval(checkInterval);
-            resolve(current.thumbnailUrl);
-          }
-        }, 100);
+    set({ resources });
+  }, CACHE_CONFIG.cleanupInterval);
+
+  return {
+    resources: new Map(),
+    loadingQueue: new Set(),
+    preloadQueue: [],
+    isProcessing: false,
+
+    getThumbnail: async (id: string) => {
+      const state = get();
+      const resource = state.resources.get(id);
+
+      // Si ya tenemos el thumbnail y no está expirado, retornarlo
+      if (resource?.thumbnail &&
+        Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+        return resource.thumbnail;
+      }
+
+      // Si ya está en cola de carga, esperar
+      if (state.loadingQueue.has(id)) {
+        return new Promise((resolve) => {
+          const checkInterval = setInterval(() => {
+            const updatedResource = get().resources.get(id);
+            if (updatedResource?.thumbnail) {
+              clearInterval(checkInterval);
+              resolve(updatedResource.thumbnail);
+            }
+          }, 100);
+        });
+      }
+
+      try {
+        state.loadingQueue.add(id);
+        const data = await getThumbnail(id, ThumbnailQuality.MEDIUM);
+
+        if (data?.thumbnail) {
+          const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`;
+          set(state => ({
+            resources: new Map(state.resources).set(id, {
+              id,
+              thumbnail: thumbnailUrl,
+              isLoading: false,
+              lastUpdate: Date.now(),
+              dimensions: {
+                width: data.width,
+                height: data.height
+              }
+            })
+          }));
+          return thumbnailUrl;
+        }
+      } catch (error) {
+        resourceLogger.error("Error loading thumbnail:", { id, error });
+        set(state => ({
+          resources: new Map(state.resources).set(id, {
+            id,
+            isLoading: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+            lastUpdate: Date.now()
+          })
+        }));
+      } finally {
+        state.loadingQueue.delete(id);
+      }
+    },
+
+    getOriginalUrl: async (id: string) => {
+      const state = get();
+      const resource = state.resources.get(id);
+
+      // Si ya tenemos la URL original y no está expirada, retornarla
+      if (resource?.originalUrl &&
+        Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+        return resource.originalUrl;
+      }
+
+      try {
+        const url = await getImageUrl(id);
+        if (url) {
+          set(state => ({
+            resources: new Map(state.resources).set(id, {
+              ...(state.resources.get(id) || { id, isLoading: false }),
+              originalUrl: url,
+              lastUpdate: Date.now()
+            })
+          }));
+          return url;
+        }
+      } catch (error) {
+        resourceLogger.error("Error loading original URL:", { id, error });
+        set(state => ({
+          resources: new Map(state.resources).set(id, {
+            ...(state.resources.get(id) || { id, isLoading: false }),
+            error: error instanceof Error ? error.message : "Unknown error",
+            lastUpdate: Date.now()
+          })
+        }));
+      }
+    },
+
+    preloadResources: (ids: string[]) => {
+      const state = get();
+      if (state.isProcessing) return;
+
+      // Filtrar IDs que ya están cargados o en cola
+      const newIds = ids.filter(id => {
+        const resource = state.resources.get(id);
+        return !resource?.thumbnail && !state.loadingQueue.has(id);
+      });
+
+      if (newIds.length === 0) return;
+
+      set({
+        preloadQueue: [...state.preloadQueue, ...newIds].slice(0, CACHE_CONFIG.maxQueueSize),
+        isProcessing: true
+      });
+
+      // Procesar cola de precarga
+      const processQueue = async () => {
+        const currentState = get();
+        if (currentState.preloadQueue.length === 0) {
+          set({ isProcessing: false });
+          return;
+        }
+
+        const id = currentState.preloadQueue[0];
+        await currentState.getThumbnail(id);
+
+        set(state => ({
+          preloadQueue: state.preloadQueue.slice(1)
+        }));
+
+        setTimeout(processQueue, CACHE_CONFIG.preloadDelay);
+      };
+
+      processQueue();
+    },
+
+    isLoading: (id: string) => {
+      const state = get();
+      return state.loadingQueue.has(id);
+    },
+
+    clearResources: () => {
+      set({
+        resources: new Map(),
+        loadingQueue: new Set(),
+        preloadQueue: [],
+        isProcessing: false
       });
     }
-
-    try {
-      state.loadingQueue.add(imageId);
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            isLoading: true,
-          },
-        },
-      }));
-
-      const data = await getThumbnail(imageId, ThumbnailQuality.MEDIUM);
-      const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${data.thumbnail
-        }`;
-
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            thumbnailUrl,
-            isLoading: false,
-            lastLoaded: Date.now(),
-          },
-        },
-      }));
-
-      return thumbnailUrl;
-    } catch (error) {
-      console.error("Error loading thumbnail:", error);
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            error: "Error loading thumbnail",
-            isLoading: false,
-          },
-        },
-      }));
-      return undefined;
-    } finally {
-      state.loadingQueue.delete(imageId);
-    }
-  },
-
-  getOriginalUrl: async (imageId: string) => {
-    const state = get();
-    const resource = state.resources[imageId];
-
-    if (
-      resource?.originalUrl &&
-      resource.lastLoaded &&
-      Date.now() - resource.lastLoaded < CACHE_DURATION
-    ) {
-      return resource.originalUrl;
-    }
-
-    if (state.loadingQueue.has(imageId)) {
-      return new Promise((resolve) => {
-        const checkInterval = setInterval(() => {
-          const current = get().resources[imageId];
-          if (current?.originalUrl) {
-            clearInterval(checkInterval);
-            resolve(current.originalUrl);
-          }
-        }, 100);
-      });
-    }
-
-    try {
-      state.loadingQueue.add(imageId);
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            isLoading: true,
-          },
-        },
-      }));
-
-      const url = await getImageUrl(imageId);
-
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            originalUrl: url,
-            isLoading: false,
-            lastLoaded: Date.now(),
-          },
-        },
-      }));
-
-      return url;
-    } catch (error) {
-      console.error("Error loading original URL:", error);
-      set((state) => ({
-        resources: {
-          ...state.resources,
-          [imageId]: {
-            ...state.resources[imageId],
-            error: "Error loading original URL",
-            isLoading: false,
-          },
-        },
-      }));
-      return undefined;
-    } finally {
-      state.loadingQueue.delete(imageId);
-    }
-  },
-
-  preloadResources: async (imageIds: string[]) => {
-    const state = get();
-    const unloadedIds = imageIds.filter(
-      (id) => !state.hasResource(id) && !state.loadingQueue.has(id)
-    );
-
-    // Cargar en lotes de 5
-    for (let i = 0; i < unloadedIds.length; i += 5) {
-      const batch = unloadedIds.slice(i, i + 5);
-      await Promise.all([
-        ...batch.map((id) => state.getThumbnail(id)),
-        ...batch.map((id) => state.getOriginalUrl(id)),
-      ]);
-      // Pequeña pausa entre lotes
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-  },
-
-  clearResources: () => {
-    set({ resources: {}, loadingQueue: new Set() });
-  },
-
-  isLoading: (imageId: string) => {
-    const state = get();
-    return state.loadingQueue.has(imageId) || state.resources[imageId]?.isLoading;
-  },
-
-  hasResource: (imageId: string) => {
-    const state = get();
-    const resource = state.resources[imageId];
-    return !!(
-      resource &&
-      resource.lastLoaded &&
-      Date.now() - resource.lastLoaded < CACHE_DURATION &&
-      (resource.thumbnailUrl || resource.originalUrl)
-    );
-  },
-}));
+  };
+});

@@ -5,6 +5,7 @@ import { DetailsPanel } from "@/components/panels/details/details-panel";
 import { useFileManager } from "@/store/file-manager.store";
 import { motion, AnimatePresence } from "motion/react";
 import { Meteors } from "../ui/meteors";
+import { FileViewer } from "../features/file-viewer/file-viewer";
 
 export function RightPanel() {
 	const { selectedItems } = useFileManager();
@@ -13,10 +14,7 @@ export function RightPanel() {
 		<div className="flex flex-col h-full">
 			<AnimatePresence mode="wait">
 				{selectedItems.length > 0 ?
-
-
-							<DetailsPanel selectedItems={selectedItems} />
-
+					<DetailsPanel selectedItems={selectedItems} />
 				:	<motion.div
 						key="info"
 						initial={{ opacity: 0, x: -20 }}
