@@ -103,19 +103,132 @@ const LOAD_CONFIG = {
 	retryDelay: 1000,
 };
 
-export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
-	const [imageError, setImageError] = React.useState(false);
-	const [isMarked, setIsMarked] = React.useState(false);
-	const [thumbnailUrls, setThumbnailUrls] = React.useState<
-		Record<string, string>
-	>({});
-	const [originalUrls, setOriginalUrls] = React.useState<
-		Record<string, string>
-	>({});
-	const [loadingStates, setLoadingStates] = React.useState<
-		Record<string, boolean>
-	>({});
+// Componente para la vista previa de imagen
+function ImagePreview({ item }: { item: FileItem }) {
+	const imageResources = useImageResources();
+	const { openViewer } = useImageViewer();
+	const [resources, setResources] = React.useState<{
+		thumbnail: string | null;
+		originalUrl: string | null;
+		error: string | null;
+		isLoading: boolean;
+	}>({
+		thumbnail: null,
+		originalUrl: null,
+		error: null,
+		isLoading: true,
+	});
 
+	// Efecto para cargar la imagen original primero
+	React.useEffect(() => {
+		let mounted = true;
+
+		const loadOriginal = async () => {
+			if (!mounted) return;
+
+			try {
+				setResources((prev) => ({ ...prev, isLoading: true }));
+				const origUrl = await imageResources.getOriginalUrl(item.id);
+
+				if (!mounted) return;
+
+				if (origUrl) {
+					setResources((prev) => ({
+						...prev,
+						originalUrl: origUrl,
+						isLoading: false,
+					}));
+
+					// Cargar thumbnail en segundo plano
+					imageResources.getThumbnail(item.id).then((thumbUrl) => {
+						if (mounted && thumbUrl) {
+							setResources((prev) => ({
+								...prev,
+								thumbnail: thumbUrl,
+							}));
+						}
+					});
+				} else {
+					// Si no hay URL original, intentar con thumbnail
+					const thumbUrl = await imageResources.getThumbnail(item.id);
+					if (mounted) {
+						setResources({
+							thumbnail: thumbUrl || null,
+							originalUrl: null,
+							error: thumbUrl ? null : "Error al cargar la imagen",
+							isLoading: false,
+						});
+					}
+				}
+			} catch (error) {
+				console.error("Error loading resources:", error);
+				if (mounted) {
+					setResources({
+						thumbnail: null,
+						originalUrl: null,
+						error: "Error al cargar la imagen",
+						isLoading: false,
+					});
+				}
+			}
+		};
+
+		loadOriginal();
+		return () => {
+			mounted = false;
+		};
+	}, [item.id, imageResources]);
+
+	if (resources.isLoading) {
+		return (
+			<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
+				<div className="animate-pulse w-full h-full bg-muted/50" />
+			</div>
+		);
+	}
+
+	if (resources.error) {
+		return (
+			<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
+				<ImageOff className="h-8 w-8 mb-2" />
+				<span className="text-xs">{resources.error}</span>
+			</div>
+		);
+	}
+
+	const metadata = getMetadata(item.metadata);
+	return (
+		<div className="relative w-full h-full">
+			{/* Imagen original */}
+			{resources.originalUrl && (
+				<ImageCard
+					src={resources.originalUrl}
+					alt={item.name}
+					width={metadata?.dimensions?.width || 300}
+					height={metadata?.dimensions?.height || 300}
+					className="w-full h-full object-contain"
+					priority={true}
+					onClick={() => openViewer([item], 0)}
+				/>
+			)}
+			{/* Thumbnail como fallback */}
+			{!resources.originalUrl && resources.thumbnail && (
+				<ImageCard
+					src={resources.thumbnail}
+					alt={item.name}
+					width={metadata?.dimensions?.width || 300}
+					height={metadata?.dimensions?.height || 300}
+					className="w-full h-full object-contain"
+					priority={true}
+					onClick={() => openViewer([item], 0)}
+				/>
+			)}
+		</div>
+	);
+}
+
+export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
+	const [isMarked, setIsMarked] = React.useState(false);
 	const imageResources = useImageResources();
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
@@ -131,40 +244,6 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const isAnimated = metadata?.isAnimated;
 	const exif = metadata?.exif || {};
 	const generation = metadata?.generation || {};
-
-	// Limpiar errores y estados cuando cambian los items seleccionados
-	React.useEffect(() => {
-		if (selectedItems.length === 1) {
-			setImageError(false);
-			const itemId = selectedItems[0].id;
-
-			// Cargar thumbnail si no existe
-			if (!thumbnailUrls[itemId] && !loadingStates[itemId]) {
-				setLoadingStates((prev) => ({ ...prev, [itemId]: true }));
-				imageResources.getThumbnail(itemId).then((url) => {
-					if (url) {
-						setThumbnailUrls((prev) => ({ ...prev, [itemId]: url }));
-					}
-					setLoadingStates((prev) => ({ ...prev, [itemId]: false }));
-				});
-			}
-
-			// Cargar imagen original en segundo plano
-			if (thumbnailUrls[itemId] && !originalUrls[itemId]) {
-				imageResources.getOriginalUrl(itemId).then((url) => {
-					if (url) {
-						setOriginalUrls((prev) => ({ ...prev, [itemId]: url }));
-					}
-				});
-			}
-		}
-	}, [
-		selectedItems,
-		thumbnailUrls,
-		originalUrls,
-		loadingStates,
-		imageResources,
-	]);
 
 	const handleOpenViewer = React.useCallback(
 		async (item: FileItem) => {
@@ -186,51 +265,18 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 						throw new Error("No se encontró la imagen seleccionada");
 					}
 
-					const startIndex = Math.max(0, currentIndex - 2);
-					const endIndex = Math.min(allImages.length, currentIndex + 3);
-					const visibleImages = allImages.slice(startIndex, endIndex);
-
-					// Preparar imágenes iniciales con thumbnails
-					const viewerImages = await Promise.all(
-						visibleImages.map(async (img) => {
-							const thumbnail = await imageResources.getThumbnail(img.id);
-							return {
-								...img,
-								url: "", // Se cargará después
-								thumbnail: thumbnail || "",
-								mimeType: getMetadata(img.metadata)?.mimeType || "image/jpeg",
-							};
-						})
-					);
-
-					// Cargar URLs originales en segundo plano
-					const loadOriginals = async () => {
-						for (const img of visibleImages) {
-							const url = await imageResources.getOriginalUrl(img.id);
-							const index = viewerImages.findIndex((v) => v.id === img.id);
-							if (index !== -1 && url) {
-								viewerImages[index].url = url;
-							}
-						}
-					};
-
 					// Actualizar estadísticas y abrir visor
 					await updateImageStats(item.id, "view");
-					openViewer(viewerImages, currentIndex - startIndex);
+					openViewer(allImages, currentIndex);
 
-					// Cargar originales y precargar siguiente lote
-					loadOriginals();
-					const remainingImages = allImages.filter(
-						(img) => !visibleImages.find((v) => v.id === img.id)
-					);
-
-					if (remainingImages.length > 0) {
-						setTimeout(() => {
-							imageResources.preloadResources(
-								remainingImages.map((img) => img.id)
-							);
-						}, 1000);
-					}
+					// Precargar recursos en segundo plano
+					setTimeout(() => {
+						imageResources.preloadResources(
+							allImages
+								.slice(currentIndex + 1, currentIndex + 4)
+								.map((img) => img.id)
+						);
+					}, 1000);
 				} catch (error) {
 					console.error("Error al abrir el visor:", error);
 					toast({
@@ -245,71 +291,6 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 			}
 		},
 		[fileManager.currentItems, imageResources, openViewer, toast]
-	);
-
-	const renderImage = React.useCallback(
-		(item: FileItem) => {
-			const thumbnailUrl = thumbnailUrls[item.id];
-			const originalUrl = originalUrls[item.id];
-			const isLoading = loadingStates[item.id];
-
-			if (isLoading) {
-				return (
-					<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30">
-						<div className="animate-pulse w-full h-full bg-muted/50" />
-					</div>
-				);
-			}
-
-			if (imageError) {
-				return (
-					<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
-						<ImageOff className="h-8 w-8 mb-2" />
-						<span className="text-xs">Error al cargar la imagen</span>
-					</div>
-				);
-			}
-
-			if (!thumbnailUrl) return null;
-
-			const metadata = getMetadata(item.metadata);
-			return (
-				<div className="relative w-full h-full">
-					{thumbnailUrl && (
-						<>
-							{/* Thumbnail como fallback */}
-							<ImageCard
-								src={thumbnailUrl}
-								alt={item.name}
-								width={metadata?.dimensions?.width || 300}
-								height={metadata?.dimensions?.height || 300}
-								className={cn(
-									"w-full h-full object-contain transition-all rounded-none hover:scale-95 hover:rounded-sm cursor-pointer",
-									originalUrl ? "opacity-0" : "opacity-100"
-								)}
-								priority={true}
-								onClick={() => handleOpenViewer(item)}
-								onError={() => setImageError(true)}
-							/>
-							{/* Imagen original con fade-in */}
-							{originalUrl && (
-								<ImageCard
-									src={originalUrl}
-									alt={item.name}
-									width={metadata?.dimensions?.width || 300}
-									height={metadata?.dimensions?.height || 300}
-									className="w-full h-full object-contain transition-all rounded-none hover:scale-95 hover:rounded-sm cursor-pointer absolute inset-0 opacity-0 animate-fade-in"
-									priority={true}
-									onClick={() => handleOpenViewer(item)}
-									onError={() => setImageError(true)}
-								/>
-							)}
-						</>
-					)}
-				</div>
-			);
-		},
-		[imageError, handleOpenViewer, thumbnailUrls, originalUrls, loadingStates]
 	);
 
 	const handleAction = async (action: string) => {
@@ -590,7 +571,7 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 				<div className="flex flex-col gap-4 p-4">
 					{/* Vista previa */}
 					<div className="aspect-square w-full bg-muted/30 rounded-sm overflow-hidden">
-						{selectedItems.length === 1 && renderImage(selectedItems[0])}
+						{selectedItems.length === 1 && <ImagePreview item={selectedItem} />}
 					</div>
 
 					{/* Información */}
