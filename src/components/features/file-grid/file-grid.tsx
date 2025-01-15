@@ -6,6 +6,7 @@ import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useFileManager } from "@/store/file-manager.store";
+import { useImageResources } from "@/store/image-resources.store";
 
 // Configuración optimizada del grid con valores ajustados
 const GRID_CONFIG = {
@@ -141,6 +142,20 @@ export function FileGrid({
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const cacheRef = useRef(renderedItemsCache);
 	const { selectedItems, viewMode } = useFileManager();
+	const imageResources = useImageResources();
+
+	// Precargar recursos cuando cambian los items
+	useEffect(() => {
+		const imageItems = items.filter(
+			(item) =>
+				item.type === "image" ||
+				getMetadata(item.metadata)?.mimeType?.startsWith("image/")
+		);
+
+		if (imageItems.length > 0) {
+			imageResources.preloadResources(imageItems.map((item) => item.id));
+		}
+	}, [items]);
 
 	// Dimensiones del grid memoizadas
 	const { columns, itemSize } = useMemo(() => {

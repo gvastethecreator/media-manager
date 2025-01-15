@@ -139,12 +139,13 @@ interface FileManagerState {
 }
 
 interface FileManagerActions {
-  setViewMode: (mode: "grid" | "list") => void
+  setViewMode: (mode: "grid" | "list" | "masonry" | "cards") => void
 }
 
 const ITEMS_PER_BATCH = 50
 
 const initialState: FileManagerState = {
+  initialState: true,
   currentItems: [],
   displayedItems: [],
   selectedItem: null,
@@ -175,7 +176,25 @@ const initialState: FileManagerState = {
   objects: [],
   isProcessingThumbnails: false,
   lastUpdate: Date.now(),
-  viewMode: "grid" as const
+  viewMode: "grid" as const,
+  // Funciones stub que serán reemplazadas por las implementaciones reales
+  initialize: async () => { },
+  loadItems: async () => { },
+  loadMoreItems: () => { },
+  selectItem: () => { },
+  deselectItem: () => { },
+  toggleItemSelection: () => { },
+  clearSelection: () => { },
+  setCurrentFolder: async () => { },
+  setCurrentCollection: async () => { },
+  setCurrentTag: async () => { },
+  setCurrentAlbum: async () => { },
+  setCurrentCharacter: async () => { },
+  setCurrentPlace: async () => { },
+  setCurrentObject: async () => { },
+  setItems: () => { },
+  setIsLoading: () => { },
+  resetState: () => { }
 }
 
 // Función auxiliar para validar tipos de datos
@@ -274,7 +293,7 @@ const transformToFileItem = (rawItem: any): FileItem => {
       id: item.id,
       name: item.name,
       path: item.path,
-      type: item.type || 'image',
+      type: item.type === 'image' || item.type === 'file' || item.type === 'folder' ? item.type : 'file',
       size: item.size,
       width: item.width || null,
       height: item.height || null,
@@ -288,6 +307,8 @@ const transformToFileItem = (rawItem: any): FileItem => {
       folderId: item.folderId,
       createdAt: item.createdAt instanceof Date ? item.createdAt : new Date(item.createdAt),
       updatedAt: item.updatedAt instanceof Date ? item.updatedAt : new Date(item.updatedAt),
+      modifiedAt: item.updatedAt instanceof Date ? item.updatedAt : new Date(item.updatedAt),
+      accessedAt: item.updatedAt instanceof Date ? item.updatedAt : new Date(item.updatedAt),
       collections: Array.isArray(item.collections)
         ? item.collections.map(c => typeof c === 'string' ? { id: c, name: c } : { id: c.id, name: c.name || c.id })
         : [],
@@ -757,7 +778,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
   // Estado de vista
   viewMode: initialState.viewMode,
-  setViewMode: (mode: "grid" | "list") => set({ viewMode: mode })
+  setViewMode: (mode: "grid" | "list" | "masonry" | "cards") => set({ viewMode: mode })
 }))
 
 // Tipos exportados para uso en componentes

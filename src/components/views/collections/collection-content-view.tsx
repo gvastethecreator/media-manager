@@ -6,14 +6,13 @@ import type { CollectionContentProps } from "@/components/views/base/types";
 import { Library } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { FileItem } from "@/types/file-item";
-import { getCollectionImages } from "@/app/actions/collection.actions";
+import { getCollectionImages, removeImageFromCollection } from "@/app/actions/collection.actions";
 import type { Collection } from "@prisma/client";
 
 export function CollectionContentView() {
 	const {
 		selectedItem: currentCollection,
 		addImageToCollection,
-		removeImageFromCollection,
 		selectItem,
 		loading: isLoading,
 	} = useCollectionStore();

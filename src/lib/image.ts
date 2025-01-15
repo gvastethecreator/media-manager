@@ -1,7 +1,7 @@
 import sharp from 'sharp'
 import { existsSync } from 'fs'
 import { logger } from './logger'
-import { formatFileSize } from './format'
+import { formatBytes } from './utils'
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png'
 
@@ -121,7 +121,7 @@ export async function processImage(
     logger.debug('Imagen procesada:', {
       path: imagePath,
       originalSize: metadata.size,
-      newSize: formatFileSize(buffer.length),
+      newSize: formatBytes(buffer.length),
       dimensions: `${result.width}x${result.height}`
     })
 
@@ -170,8 +170,8 @@ export async function createThumbnail(
 
     logger.warn('Thumbnail demasiado grande, reintentando con menor calidad:', {
       path: imagePath,
-      size: formatFileSize(result.size),
-      maxSize: formatFileSize(MAX_THUMBNAIL_SIZE)
+      size: formatBytes(result.size),
+      maxSize: formatBytes(MAX_THUMBNAIL_SIZE)
     })
 
     // Reintentar con menor calidad
@@ -188,8 +188,8 @@ export async function createThumbnail(
 
     logger.info('Thumbnail generado con calidad reducida:', {
       path: imagePath,
-      originalSize: formatFileSize(result.size),
-      newSize: formatFileSize(lowerQualityResult.size),
+      originalSize: formatBytes(result.size),
+      newSize: formatBytes(lowerQualityResult.size),
       quality: options.quality
     })
 
