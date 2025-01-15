@@ -29,37 +29,38 @@ export class Logger {
     return new Date().toISOString()
   }
 
-  private formatMessage(level: string, message: string, ...args: any[]): string {
+  private formatMessage(level: string, message: string, context?: unknown): string {
     const timestamp = this.timestamp ? `[${this.getTimestamp()}] ` : ''
-    const context = `[${this.context}] `
-    return `${timestamp}${level} ${context}${message} ${args.length ? JSON.stringify(args) : ''}`
+    const contextStr = `[${this.context}] `
+    const contextData = context ? JSON.stringify(context) : ''
+    return `${timestamp}${level} ${contextStr}${message}${contextData ? ' ' + contextData : ''}`
   }
 
   withContext(context: string): Logger {
     return new Logger({ ...this, context })
   }
 
-  debug(message: string, ...args: any[]): void {
+  debug(message: string, context?: unknown): void {
     if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('🔍 DEBUG', message, ...args))
+      console.debug(this.formatMessage('🔍 DEBUG', message, context))
     }
   }
 
-  info(message: string, ...args: any[]): void {
+  info(message: string, context?: unknown): void {
     if (this.shouldLog('info')) {
-      console.info(this.formatMessage('ℹ️ INFO', message, ...args))
+      console.info(this.formatMessage('ℹ️ INFO', message, context))
     }
   }
 
-  warn(message: string, ...args: any[]): void {
+  warn(message: string, context?: unknown): void {
     if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('⚠️ WARN', message, ...args))
+      console.warn(this.formatMessage('⚠️ WARN', message, context))
     }
   }
 
-  error(message: string, ...args: any[]): void {
+  error(message: string, context?: unknown): void {
     if (this.shouldLog('error')) {
-      console.error(this.formatMessage('❌ ERROR', message, ...args))
+      console.error(this.formatMessage('❌ ERROR', message, context))
     }
   }
 

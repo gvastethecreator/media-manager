@@ -58,17 +58,27 @@ export interface PlaceUpdate extends Partial<PlaceCreate> {
   id: string;
 }
 
-export async function getPlaces() {
+export async function getPlaces(): Promise<PlaceWithStats[]> {
   try {
-    placeLogger.info('🗺️ Obteniendo lista de lugares');
+    placeLogger.info('📍 Obteniendo lugares');
     const places = await prisma.place.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
+        }
       },
+      orderBy: { name: 'asc' },
     });
 
     const placesWithStats = await Promise.all(
@@ -77,27 +87,36 @@ export async function getPlaces() {
           where: {
             places: {
               some: {
-                id: place.id,
-              },
-            },
+                id: place.id
+              }
+            }
           },
           _sum: {
-            size: true,
-          },
+            size: true
+          }
         });
 
         return {
           ...place,
           totalSize: totalSize._sum.size || 0,
+          recentImages: place.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
         };
       })
     );
 
-    placeLogger.info(`✅ ${places.length} lugares obtenidos`);
+    placeLogger.info('✅ Lugares obtenidos', { count: places.length });
     return placesWithStats;
   } catch (error) {
-    placeLogger.error("❌ Error al obtener lugares:", error);
-    throw new PlaceError("No se pudieron obtener los lugares", error);
+    placeLogger.error('❌ Error al obtener lugares', error);
+    throw new PlaceError('No se pudieron obtener los lugares', { cause: error });
   }
 }
 
