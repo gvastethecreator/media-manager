@@ -16,18 +16,40 @@ export interface ThumbnailResponse {
   height?: number;
   size?: number;
   mimeType?: string;
+  error?: string;
 }
 
 export async function getThumbnail(id: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<ThumbnailResponse> {
   try {
     thumbLogger.info('🔄 Obteniendo thumbnail:', { id, quality })
 
+    if (!id) {
+      throw new Error('ID no proporcionado')
+    }
+
     const image = await prisma.image.findUnique({
-      where: { id }
+      where: { id },
+      select: {
+        id: true,
+        path: true,
+        thumbnail: true,
+        thumbnailSize: true,
+        thumbnailWidth: true,
+        thumbnailHeight: true,
+        thumbnailError: true
+      }
     })
 
     if (!image) {
-      throw new Error('Imagen no encontrada')
+      throw new Error(`Imagen no encontrada: ${id}`)
+    }
+
+    // Si hay un error previo, intentar regenerar
+    if (image.thumbnailError) {
+      thumbLogger.warn('⚠️ Error previo detectado, intentando regenerar:', {
+        id,
+        error: image.thumbnailError
+      })
     }
 
     // Si ya tiene thumbnail, devolverlo
@@ -52,43 +74,63 @@ export async function getThumbnail(id: string, quality: ThumbnailQuality = Thumb
 
     // Si no tiene thumbnail, generarlo
     thumbLogger.info('🔄 Generando nuevo thumbnail:', { id, path: image.path })
-    const thumbnail = await generateThumbnail(image.path, { quality })
 
-    if (!thumbnail || !thumbnail.buffer) {
-      throw new Error('No se pudo generar el thumbnail')
-    }
+    try {
+      const thumbnail = await generateThumbnail(image.path, { quality })
 
-    // Convertir el buffer a base64
-    const base64Thumbnail = Buffer.from(thumbnail.buffer).toString('base64')
-
-    // Actualizar la imagen con el nuevo thumbnail
-    await prisma.image.update({
-      where: { id },
-      data: {
-        thumbnail: thumbnail.buffer,
-        thumbnailSize: thumbnail.buffer.length,
-        thumbnailWidth: thumbnail.width,
-        thumbnailHeight: thumbnail.height
+      if (!thumbnail || !thumbnail.buffer) {
+        throw new Error('No se pudo generar el thumbnail')
       }
-    })
 
-    thumbLogger.info('✅ Nuevo thumbnail generado:', {
-      id,
-      size: thumbnail.buffer.length,
-      width: thumbnail.width,
-      height: thumbnail.height
-    })
+      // Convertir el buffer a base64
+      const base64Thumbnail = Buffer.from(thumbnail.buffer).toString('base64')
 
-    return {
-      thumbnail: base64Thumbnail,
-      width: thumbnail.width,
-      height: thumbnail.height,
-      size: thumbnail.buffer.length,
-      mimeType: 'image/webp'
+      // Actualizar la imagen con el nuevo thumbnail
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnail: thumbnail.buffer,
+          thumbnailSize: thumbnail.buffer.length,
+          thumbnailWidth: thumbnail.width,
+          thumbnailHeight: thumbnail.height,
+          thumbnailError: null // Limpiar error previo si existía
+        }
+      })
+
+      thumbLogger.info('✅ Nuevo thumbnail generado:', {
+        id,
+        size: thumbnail.buffer.length,
+        width: thumbnail.width,
+        height: thumbnail.height
+      })
+
+      return {
+        thumbnail: base64Thumbnail,
+        width: thumbnail.width,
+        height: thumbnail.height,
+        size: thumbnail.buffer.length,
+        mimeType: 'image/webp'
+      }
+    } catch (error) {
+      const genError = error as Error
+      // Registrar el error en la base de datos
+      await prisma.image.update({
+        where: { id },
+        data: {
+          thumbnailError: genError.message
+        }
+      })
+
+      throw genError
     }
   } catch (error) {
-    thumbLogger.error('❌ Error obteniendo thumbnail:', { id, error })
-    throw error
+    const err = error as Error
+    thumbLogger.error('❌ Error obteniendo thumbnail:', { id, error: err })
+
+    return {
+      thumbnail: '',
+      error: err.message || 'Error desconocido generando thumbnail'
+    }
   }
 }
 

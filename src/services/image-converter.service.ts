@@ -109,6 +109,8 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
       thumbnailHeight: image.thumbnailHeight,
       createdAt: image.createdAt,
       updatedAt: image.updatedAt,
+      modifiedAt: image.updatedAt,
+      accessedAt: image.updatedAt,
       isPublic: image.isPublic ?? false,
       isFavorite: image.isFavorite ?? false,
       folderId: image.folderId,
