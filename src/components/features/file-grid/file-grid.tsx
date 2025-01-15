@@ -8,6 +8,16 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useFileManager } from "@/store/file-manager.store";
 import { useImageResources } from "@/store/image-resources.store";
 
+// Función auxiliar para parsear metadata
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
+
 // Configuración optimizada del grid con valores ajustados
 const GRID_CONFIG = {
 	minColumns: 3,

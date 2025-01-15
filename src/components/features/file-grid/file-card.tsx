@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "motion/react";
-import type { FileItem, ImageItem } from "@/types/file-item";
+import type { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
 import { useFileManager } from "@/store/file-manager.store";
+import { useImageResources } from "@/store/image-resources.store";
 import { useImageViewer } from "@/store/image-viewer.store";
 import { getImageUrl } from "@/app/actions/image.actions";
 import { useToast } from "@/components/ui/use-toast";
@@ -136,7 +137,8 @@ export function FileCard({
 	const [isHovered, setIsHovered] = useState(false);
 	const hasLoaded = useRef(false);
 	const loadingRef = useRef<NodeJS.Timeout | null>(null);
-	const { toggleItemSelection } = useFileManager();
+	const fileManager = useFileManager();
+	const imageResources = useImageResources();
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
 
@@ -144,10 +146,10 @@ export function FileCard({
 		(e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			toggleItemSelection(item, false);
+			fileManager.toggleItemSelection(item, false);
 			if (onClick) onClick(item);
 		},
-		[item, onClick, toggleItemSelection]
+		[item, onClick, fileManager]
 	);
 
 	const handleDoubleClick = useCallback(
@@ -161,37 +163,50 @@ export function FileCard({
 					return;
 				}
 
-				const url = await getImageUrl(item.id);
-				if (!url) {
-					throw new Error("No se pudo obtener la URL de la imagen");
-				}
-
-				const metadata = getMetadata(item.metadata);
-				const imageToView: ImageItem = {
-					...item,
-					url,
-					src: url,
-					alt: item.name,
-					mimeType: metadata?.mimeType || "image/jpeg",
-				};
-
 				toast({
 					title: "Abriendo imagen",
-					description: `Cargando ${imageToView.name}...`,
+					description: `Cargando ${item.name}...`,
 				});
 
-				openViewer([imageToView], 0);
+				// Obtener las imágenes del directorio actual
+				const currentItems = fileManager.currentItems || [];
+				const allImages = currentItems.filter((i: FileItem) => {
+					const meta = getMetadata(i.metadata);
+					return i.type === "image" || meta?.mimeType?.startsWith("image/");
+				});
+
+				if (allImages.length === 0) {
+					throw new Error("No hay imágenes disponibles");
+				}
+
+				const currentIndex = allImages.findIndex((img) => img.id === item.id);
+				if (currentIndex === -1) {
+					throw new Error("No se encontró la imagen seleccionada");
+				}
+
+				openViewer(allImages, currentIndex);
+
+				// Precargar recursos en segundo plano
+				setTimeout(() => {
+					imageResources.preloadResources(
+						allImages
+							.slice(currentIndex + 1, currentIndex + 4)
+							.map((img) => img.id)
+					);
+				}, 1000);
 			} catch (error) {
 				console.error("Error al abrir imagen:", error);
 				toast({
 					title: "Error",
-					description: "No se pudo abrir la imagen",
+					description:
+						error instanceof Error ?
+							error.message
+						:	"No se pudo abrir la imagen",
 					variant: "destructive",
 				});
-				setError("Error al abrir la imagen");
 			}
 		},
-		[item, onDoubleClick, openViewer, toast]
+		[item, onDoubleClick, openViewer, toast, fileManager, imageResources]
 	);
 
 	const handleHoverStart = useCallback(() => {
