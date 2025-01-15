@@ -1,82 +1,62 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
+import { useEffect, useState } from "react";
+import { useFileManager } from "@/store/file-manager.store";
 import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
 import { TagIcon } from "lucide-react";
+import { BaseContentView } from "../base/base-content-view";
+import { getTagImages } from "@/app/actions/tag.actions";
+import { ContentViewProvider } from "../base/content-view-provider";
 import type { FileItem } from "@/types/file-item";
-import { LoadingScreen } from "@/components/core/feedback";
-import BlurFade from "@/components/ui/blur-fade";
 
 export function TagContentView() {
-	const {
-		currentItems: items,
-		toggleItemSelection,
-		currentTagId,
-		setCurrentTag,
-		isLoading,
-	} = useFileManager();
-	const { openViewer } = useImageViewer();
+	const { currentTagId, setCurrentTag } = useFileManager();
+	const [items, setItems] = useState<FileItem[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (currentTagId) {
-			setCurrentTag(currentTagId);
-		}
-	}, [currentTagId, setCurrentTag]);
+		const loadTagImages = async () => {
+			if (!currentTagId) return;
 
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
-			toggleItemSelection(item, false);
-		},
-		[toggleItemSelection]
-	);
-
-	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
-				);
-				openViewer(
-					imageItems,
-					imageItems.findIndex((i) => i.id === item.id)
-				);
+			try {
+				setIsLoading(true);
+				const images = await getTagImages(currentTagId);
+				setItems(images as unknown as FileItem[]);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : "Error desconocido");
+			} finally {
+				setIsLoading(false);
 			}
-		},
-		[openViewer, items]
-	);
+		};
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+		loadTagImages();
+	}, [currentTagId]);
 
-	if (!items || items.length === 0) {
+	if (!currentTagId) {
 		return (
 			<EmptyState
 				icon={TagIcon}
-				title="No hay imágenes con esta etiqueta"
-				description="No se encontraron imágenes con esta etiqueta"
+				title="No hay etiqueta seleccionada"
+				description="Selecciona una etiqueta para ver su contenido"
 			/>
 		);
 	}
 
 	return (
-		<div className="h-full w-full flex overflow-hidden">
-			<div className="h-full w-full overflow-auto">
-				<BlurFade
-					className="h-full w-full overflow-auto"
-					delay={0.5}
-					inView={true}
-				>
-					<FileGrid
-						items={items}
-						onItemClick={handleItemClick}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
-				</BlurFade>
-			</div>
-		</div>
+		<ContentViewProvider
+			items={items}
+			isLoading={isLoading}
+			error={error}
+			currentContainerId={currentTagId}
+			containerName="etiqueta"
+			emptyState={{
+				icon: TagIcon,
+				title: "No hay imágenes con esta etiqueta",
+				description: "Esta etiqueta no tiene imágenes asociadas",
+			}}
+		>
+			<BaseContentView />
+		</ContentViewProvider>
 	);
 }

@@ -1,0 +1,72 @@
+import { loggerConfig, LogLevel } from './logger.config'
+
+const LOG_COLORS = {
+  debug: '\x1b[34m', // blue
+  info: '\x1b[32m',  // green
+  warn: '\x1b[33m',  // yellow
+  error: '\x1b[31m', // red
+  reset: '\x1b[0m',  // reset
+}
+
+interface LoggerOptions {
+  context?: string
+  timestamp?: boolean
+  level?: LogLevel
+}
+
+export class Logger {
+  private context: string
+  private timestamp: boolean
+  private level: LogLevel
+
+  constructor(options: LoggerOptions = {}) {
+    this.context = options.context || 'App'
+    this.timestamp = options.timestamp ?? true
+    this.level = options.level || 'info'
+  }
+
+  private getTimestamp(): string {
+    return new Date().toISOString()
+  }
+
+  private formatMessage(level: string, message: string, ...args: any[]): string {
+    const timestamp = this.timestamp ? `[${this.getTimestamp()}] ` : ''
+    const context = `[${this.context}] `
+    return `${timestamp}${level} ${context}${message} ${args.length ? JSON.stringify(args) : ''}`
+  }
+
+  withContext(context: string): Logger {
+    return new Logger({ ...this, context })
+  }
+
+  debug(message: string, ...args: any[]): void {
+    if (this.shouldLog('debug')) {
+      console.debug(this.formatMessage('🔍 DEBUG', message, ...args))
+    }
+  }
+
+  info(message: string, ...args: any[]): void {
+    if (this.shouldLog('info')) {
+      console.info(this.formatMessage('ℹ️ INFO', message, ...args))
+    }
+  }
+
+  warn(message: string, ...args: any[]): void {
+    if (this.shouldLog('warn')) {
+      console.warn(this.formatMessage('⚠️ WARN', message, ...args))
+    }
+  }
+
+  error(message: string, ...args: any[]): void {
+    if (this.shouldLog('error')) {
+      console.error(this.formatMessage('❌ ERROR', message, ...args))
+    }
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error']
+    return levels.indexOf(level) >= levels.indexOf(this.level)
+  }
+}
+
+export const logger = new Logger()

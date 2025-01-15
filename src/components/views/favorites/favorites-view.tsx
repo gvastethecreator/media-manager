@@ -1,84 +1,78 @@
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
+import { useFileManager } from "@/store/file-manager.store";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { BaseContentProps } from "@/components/views/base";
 import { Star } from "lucide-react";
-import type { FileItem } from "@/types/file-item";
-import { LoadingScreen } from "@/components/core/feedback";
-import BlurFade from "@/components/ui/blur-fade";
+import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
+import { eventsService } from "@/services/events.service";
+import { logger } from "@/lib/logger";
+import { getFavorites } from "@/app/actions/favorite.actions";
+
+const viewLogger = logger.withContext("FavoritesView");
 
 export function FavoritesView() {
 	const {
 		currentItems: items,
 		toggleItemSelection,
-		loadItems,
+		setItems,
 		isLoading,
+		setIsLoading,
 	} = useFileManager();
 
-	const { openViewer } = useImageViewer();
+	const loadFavorites = useCallback(async () => {
+		try {
+			viewLogger.info("🔄 Cargando favoritos...");
+			setIsLoading(true);
+			const favorites = await getFavorites();
+			setItems(favorites.map((f) => f.image));
+			viewLogger.info("✅ Favoritos cargados");
+		} catch (error) {
+			viewLogger.error("❌ Error cargando favoritos:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [setItems, setIsLoading]);
 
 	useEffect(() => {
-		loadItems("/api/images/favorites/all");
-	}, [loadItems]);
+		loadFavorites();
+
+		const handleFavoriteChange = () => {
+			viewLogger.info("📢 Evento de cambio en favoritos recibido");
+			loadFavorites();
+		};
+
+		statsEventEmitter.on(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
+		eventsService.on("favorites:modified", handleFavoriteChange);
+
+		return () => {
+			statsEventEmitter.off(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
+			eventsService.off("favorites:modified", handleFavoriteChange);
+		};
+	}, [loadFavorites]);
 
 	const favoriteItems = useMemo(() => {
-		return items.filter((item) => item.isFavorite);
+		const filtered = items.filter((item) => item.isFavorite);
+		viewLogger.debug("🔍 Filtrando favoritos:", { total: filtered.length });
+		return filtered;
 	}, [items]);
 
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
-			toggleItemSelection(item, false);
+	const contentProps: BaseContentProps = {
+		items: favoriteItems,
+		isLoading,
+		toggleItemSelection,
+		emptyState: {
+			icon: Star,
+			title: "No hay favoritos",
+			description:
+				"No se encontraron imágenes favoritas. Marca tus imágenes favoritas haciendo clic en el ícono de estrella.",
 		},
-		[toggleItemSelection]
-	);
-
-	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = favoriteItems.filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
-				);
-				openViewer(
-					imageItems,
-					imageItems.findIndex((i) => i.id === item.id)
-				);
-			}
-		},
-		[openViewer, favoriteItems]
-	);
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!favoriteItems || favoriteItems.length === 0) {
-		return (
-			<EmptyState
-				icon={Star}
-				title="No hay favoritos"
-				description="No se encontraron imágenes favoritas"
-			/>
-		);
-	}
+	};
 
 	return (
-		<div className="h-full w-full flex overflow-hidden">
-			<div className="h-full w-full overflow-auto">
-				<BlurFade
-					className="h-full w-full overflow-auto"
-					delay={0.5}
-					inView={true}
-				>
-					<FileGrid
-						items={favoriteItems}
-						onItemClick={handleItemClick}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
-				</BlurFade>
-			</div>
-		</div>
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView />
+		</ContentViewProvider>
 	);
 }

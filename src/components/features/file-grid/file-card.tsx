@@ -1,613 +1,212 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import {
-	motion
-} from "motion/react";
-import { FileItem } from "@/types/file-item";
-import { ThumbnailSize } from "@/types/ui";
-import { cn, formatBytes } from "@/lib/utils";
-import { thumbnailService } from "@/services/thumbnail.service";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion } from "motion/react";
+import type { FileItem } from "@/types/file-item";
+import { cn } from "@/lib/utils";
+import { useFileManager } from "@/store/file-manager.store";
+import { useImageResources } from "@/store/image-resources.store";
+import { useImageViewer } from "@/store/image-viewer.store";
+import { getImageUrl } from "@/app/actions/image.actions";
 import { useToast } from "@/components/ui/use-toast";
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
 import { FileContextMenu } from "./context-menu";
-import { useImageViewer } from "@/store/image-viewer";
-import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
-import { useFileManager } from "@/store/file-manager";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import {
-	FileIcon,
-	ImageIcon,
-	StarIcon,
-	CalendarIcon,
-	BookmarkIcon,
+	Heart,
+	Image as ImageIcon,
+	File,
+	Calendar,
+	HardDrive,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ViewMode } from "./types";
+import { ImageRenderer } from "./image-renderer";
 
-interface FileCardProps {
+type FileCardProps = {
 	item: FileItem;
-	thumbnailSize?: ThumbnailSize;
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	style?: React.CSSProperties;
 	index?: number;
 	totalColumns?: number;
 	shouldLoad?: boolean;
-	hasBeenRendered?: boolean;
-}
+	isSelected?: boolean;
+	viewMode: ViewMode;
+};
 
-// Configuración de animaciones simplificada
+// Configuración de animaciones mejorada
 const springConfig = {
 	type: "spring",
-	stiffness: 200,
-	damping: 20,
-	mass: 0.3,
+	stiffness: 300,
+	damping: 30,
+	mass: 0.5,
 };
 
-// Actualizamos las variantes para incluir todos los estados
+// Variantes de animación actualizadas
 const variants = {
+	initial: { scale: 0.95, opacity: 0 },
+	animate: { scale: 1, opacity: 1 },
 	hover: {
-		scale: 1,
+		scale: 1.02,
 		transition: springConfig,
 	},
-	selected: {
-		scale: 0.96,
-		transition: {
-			...springConfig,
-			stiffness: 400,
-			damping: 10,
-		},
-	},
-	marked: {
-		scale: 0.96,
-		transition: {
-			...springConfig,
-			stiffness: 400,
-			damping: 10,
-		},
-	},
 	tap: {
-		scale: 0.96,
-		transition: {
-			...springConfig,
-			stiffness: 400,
-			damping: 10,
-		},
+		scale: 0.98,
+		transition: springConfig,
 	},
+	exit: { scale: 0.95, opacity: 0 },
 };
 
-/**
- * Hook optimizado para manejar el efecto de brillo en las tarjetas
- * @param elementRef Referencia al elemento que tendrá el efecto
- */
-export function useGlowEffect(elementRef: React.RefObject<HTMLElement>) {
-	const handleMouseMove = useCallback(
-		(e: MouseEvent) => {
-			if (!elementRef.current) return;
+const getMetadata = (metadata: string | null) => {
+	if (!metadata) return null;
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return null;
+	}
+};
 
-			const rect = elementRef.current.getBoundingClientRect();
-			const x = e.clientX - rect.left;
-			const y = e.clientY - rect.top;
+const EntityBadge = ({
+	type,
+	name,
+	emoji = "🏷️",
+	className,
+}: {
+	type: string;
+	name: string;
+	emoji?: string;
+	className?: string;
+}) => (
+	<Badge
+		variant="secondary"
+		className={cn(
+			"text-[10px] h-4 px-1 flex items-center gap-1 whitespace-nowrap",
+			className
+		)}
+	>
+		<span className="text-[10px]">{emoji}</span>
+		<span className="truncate">{name}</span>
+	</Badge>
+);
 
-			requestAnimationFrame(() => {
-				elementRef.current?.style.setProperty("--mouse-x", `${x}px`);
-				elementRef.current?.style.setProperty("--mouse-y", `${y}px`);
-			});
-		},
-		[elementRef]
+const EntityGroup = ({
+	items,
+	type,
+	emoji,
+	max = 2,
+}: {
+	items: any[];
+	type: string;
+	emoji: string;
+	max?: number;
+}) => {
+	if (!items?.length) return null;
+
+	return (
+		<div className="flex gap-1 flex-wrap">
+			{items.slice(0, max).map((item) => (
+				<EntityBadge
+					key={item.id}
+					type={type}
+					name={item.name}
+					emoji={item.emoji || emoji}
+				/>
+			))}
+			{items.length > max && (
+				<Badge variant="secondary" className="text-[10px] h-4 px-1">
+					+{items.length - max}
+				</Badge>
+			)}
+		</div>
 	);
-
-	useEffect(() => {
-		const element = elementRef.current;
-		if (!element) return;
-
-		element.addEventListener("mousemove", handleMouseMove);
-
-		return () => {
-			element.removeEventListener("mousemove", handleMouseMove);
-		};
-	}, [elementRef, handleMouseMove]);
-}
+};
 
 export function FileCard({
 	item,
-	thumbnailSize = "medium",
 	onClick,
 	onDoubleClick,
 	style,
 	shouldLoad = false,
-	hasBeenRendered = false,
+	isSelected = false,
+	viewMode,
 }: FileCardProps) {
-	const cardRef = useRef<HTMLDivElement>(null);
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const { toast } = useToast();
-	const { openViewer } = useImageViewer();
-	const { toggleItemSelection, selectedItems } = useFileManager();
 	const [isHovered, setIsHovered] = useState(false);
-	const [isMarked, setIsMarked] = useState(false);
 	const hasLoaded = useRef(false);
+	const loadingRef = useRef<NodeJS.Timeout | null>(null);
+	const fileManager = useFileManager();
+	const imageResources = useImageResources();
+	const { openViewer } = useImageViewer();
+	const { toast } = useToast();
 
-	// Inicializar el efecto de brillo
-	useGlowEffect(cardRef as React.RefObject<HTMLElement>);
-
-	// Determinar si este item está seleccionado
-	const isSelected = selectedItems.some((i) => i.id === item.id);
-
-	// Función para manejar el marcado desde el menú contextual
-	const handleMarkToggle = useCallback(() => {
-		setIsMarked((prev) => !prev);
-	}, []);
-
-	const loadThumbnail = useCallback(async () => {
-		if (hasLoaded.current || !shouldLoad) return;
-
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const quality =
-				thumbnailSize === "small"
-					? "compressed"
-					: thumbnailSize === "large"
-					? "high"
-					: "mid";
-
-			const thumbnailData = await thumbnailService.getThumbnail(
-				item.id,
-				quality
-			);
-			setThumbnail(thumbnailData);
-			hasLoaded.current = true;
-			setIsLoading(false);
-		} catch (error) {
-			console.error("Error cargando miniatura:", error);
-			setError(
-				error instanceof Error ? error.message : "Error cargando miniatura"
-			);
-			setIsLoading(false);
-
-			if (
-				error instanceof Error &&
-				error.message.includes("después de reintentos")
-			) {
-				toast({
-					title: "Error",
-					description: "No se pudo cargar la miniatura",
-					variant: "destructive",
-				});
-			}
-		}
-	}, [item.id, thumbnailSize, toast, shouldLoad]);
-
-	useEffect(() => {
-		if (shouldLoad) {
-			loadThumbnail();
-		}
-	}, [loadThumbnail, shouldLoad]);
-
-	const handleClick = (e: React.MouseEvent) => {
-		// Prevenir la selección del DOM cuando se usa shift
-		if (e.shiftKey) {
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
 			e.preventDefault();
-		}
+			e.stopPropagation();
+			fileManager.toggleItemSelection(item, false);
+			if (onClick) onClick(item);
+		},
+		[item, onClick, fileManager]
+	);
 
-		// Toggle selección con shift o ctrl/cmd
-		toggleItemSelection(item, e.shiftKey || e.ctrlKey || e.metaKey);
-
-		// Llamar al onClick proporcionado si existe
-		if (onClick) onClick(item);
-	};
-
-	const handleDoubleClick = (e: React.MouseEvent) => {
-		// Prevenir la selección del DOM
-		e.preventDefault();
-
-		// Si es una imagen, abrimos el visor
-		if (item.metadata?.mimeType?.startsWith("image/")) {
-			openViewer([item], 0);
-		}
-		// Llamamos al onDoubleClick proporcionado si existe
-		if (onDoubleClick) onDoubleClick(item);
-	};
-
-	// Prevenir la selección del DOM al arrastrar
-	const handleMouseDown = (e: React.MouseEvent) => {
-		if (e.shiftKey || e.ctrlKey || e.metaKey) {
+	const handleDoubleClick = useCallback(
+		async (e: React.MouseEvent) => {
 			e.preventDefault();
-		}
-	};
+			e.stopPropagation();
 
-	const handleContextMenuAction = useCallback(
-		async (action: string, file: FileItem, data?: any) => {
 			try {
-				switch (action) {
-					case "mark-toggle":
-						handleMarkToggle();
-						break;
-					case "favorite-toggle":
-						try {
-							// Actualizar el estado local inmediatamente (optimista)
-							const newFavoriteState = !file.isFavorite;
-							const updatedFile = { ...file, isFavorite: newFavoriteState };
-							toggleItemSelection(updatedFile, false);
-
-							// Mostrar feedback inmediato
-							toast({
-								title: newFavoriteState
-									? "Agregado a favoritos"
-									: "Eliminado de favoritos",
-								description: `${file.name} ha sido ${
-									newFavoriteState ? "agregado a" : "eliminado de"
-								} favoritos`,
-							});
-
-							// Realizar la actualización en el servidor en segundo plano
-							const response = await fetch(`/api/images/${file.id}/favorite`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ isFavorite: newFavoriteState }),
-							});
-
-							if (!response.ok) {
-								// Si falla, revertir el cambio local
-								toggleItemSelection(
-									{ ...file, isFavorite: !newFavoriteState },
-									false
-								);
-								throw new Error("Error al actualizar favorito");
-							}
-						} catch (error) {
-							console.error("Error toggling favorite:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo actualizar el estado de favorito",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "collection-add":
-						try {
-							if (!data?.collectionId)
-								throw new Error("ID de colección no proporcionado");
-
-							// Mostrar feedback inmediato
-							toast({
-								title: "Agregando a colección",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(
-								`/api/collections/${data.collectionId}/files`,
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify({ fileId: file.id }),
-								}
-							);
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar a la colección"
-								);
-							}
-
-							if (!responseData?.success || !responseData?.collection) {
-								throw new Error("Respuesta inválida del servidor");
-							}
-
-							// Actualizar el estado local si es necesario
-							const updatedFile = {
-								...file,
-								collections: [
-									...(file.collections || []),
-									{
-										id: responseData.collection.id,
-										name: responseData.collection.name,
-										emoji: responseData.collection.emoji,
-										color: responseData.collection.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Agregado a la colección",
-								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding to collection:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar a la colección",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "tag-add":
-						try {
-							if (!data?.tagId)
-								throw new Error("ID de etiqueta no proporcionado");
-
-							// Mostrar feedback inmediato
-							toast({
-								title: "Agregando etiqueta",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(`/api/tags/${data.tagId}/files`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ fileId: file.id }),
-							});
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar la etiqueta"
-								);
-							}
-
-							if (!responseData?.success || !responseData?.tag) {
-								throw new Error("Respuesta inválida del servidor");
-							}
-
-							// Actualizar el estado local si es necesario
-							const updatedFile = {
-								...file,
-								tags: [
-									...(file.tags || []),
-									{
-										id: responseData.tag.id,
-										name: responseData.tag.name,
-										color: responseData.tag.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Etiqueta agregada",
-								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding tag:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar la etiqueta",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "preview":
-						if (file.metadata?.mimeType?.startsWith("image/")) {
-							openViewer([file], 0);
-						} else {
-							onDoubleClick?.(file);
-						}
-						break;
-
-					case "open":
-						try {
-							const response = await fetch(`/api/files/${file.id}/location`, {
-								method: "POST",
-							});
-
-							if (!response.ok) throw new Error("Error al abrir ubicación");
-
-							toast({
-								title: "Ubicación abierta",
-								description: "Se ha abierto la ubicación del archivo",
-							});
-						} catch (error) {
-							console.error("Error opening location:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo abrir la ubicación",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "download":
-						try {
-							const response = await fetch(`/api/files/${file.id}/download`);
-							if (!response.ok) throw new Error("Error al descargar archivo");
-
-							const blob = await response.blob();
-							const url = window.URL.createObjectURL(blob);
-							const a = document.createElement("a");
-							a.href = url;
-							a.download = file.name;
-							document.body.appendChild(a);
-							a.click();
-							window.URL.revokeObjectURL(url);
-							document.body.removeChild(a);
-
-							toast({
-								title: "Descarga iniciada",
-								description: `Se ha iniciado la descarga de ${file.name}`,
-							});
-						} catch (error) {
-							console.error("Error downloading file:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo descargar el archivo",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "copy":
-						try {
-							// Intentar obtener la imagen original primero
-							let response = await fetch(`/api/files/${file.id}/raw`);
-
-							// Si falla, intentar con el thumbnail
-							if (!response.ok) {
-								const thumbnailUrl = `/api/thumbnails/${file.id}?quality=high`;
-								response = await fetch(thumbnailUrl);
-							}
-
-							if (!response.ok) {
-								throw new Error("No se pudo obtener la imagen");
-							}
-
-							const blob = await response.blob();
-
-							// Función para intentar copiar usando el portapapeles
-							const tryClipboardCopy = async () => {
-								if (navigator.clipboard && navigator.clipboard.write) {
-									try {
-										// Asegurarnos de que el documento tiene el foco
-										window.focus();
-										await navigator.clipboard.write([
-											new ClipboardItem({
-												[blob.type]: blob,
-											}),
-										]);
-										return true;
-									} catch (clipboardError) {
-										console.warn(
-											"Error copying image to clipboard:",
-											clipboardError
-										);
-										return false;
-									}
-								}
-								return false;
-							};
-
-							// Intentar copiar usando el portapapeles
-							const clipboardSuccess = await tryClipboardCopy();
-							if (clipboardSuccess) {
-								toast({
-									title: "Copiado",
-									description: "Imagen copiada al portapapeles",
-								});
-								return;
-							}
-
-							// Si no se pudo usar el portapapeles, intentar con el método fallback
-							try {
-								const url = window.URL.createObjectURL(blob);
-								const img = document.createElement("img");
-								img.src = url;
-
-								// Crear un contenedor temporal
-								const container = document.createElement("div");
-								container.style.position = "fixed";
-								container.style.pointerEvents = "none";
-								container.style.opacity = "0";
-								container.appendChild(img);
-								document.body.appendChild(container);
-
-								// Esperar a que la imagen se cargue
-								await new Promise((resolve) => {
-									img.onload = resolve;
-								});
-
-								// Seleccionar y copiar
-								const range = document.createRange();
-								range.selectNode(img);
-								window.getSelection()?.removeAllRanges();
-								window.getSelection()?.addRange(range);
-
-								// Forzar el foco en el documento
-								window.focus();
-								const success = document.execCommand("copy");
-
-								// Limpiar
-								window.getSelection()?.removeAllRanges();
-								document.body.removeChild(container);
-								window.URL.revokeObjectURL(url);
-
-								if (success) {
-									toast({
-										title: "Copiado",
-										description: "Imagen copiada al portapapeles",
-									});
-									return;
-								}
-							} catch (fallbackError) {
-								console.warn(
-									"Error using fallback copy method:",
-									fallbackError
-								);
-							}
-
-							// Si todo lo anterior falló, copiar el path como último recurso
-							await navigator.clipboard.writeText(file.path);
-							toast({
-								title: "Copiado",
-								description:
-									"Ruta del archivo copiada al portapapeles (no se pudo copiar la imagen)",
-								variant: "destructive",
-							});
-						} catch (error) {
-							console.error("Error copying to clipboard:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo copiar al portapapeles",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					case "delete":
-						try {
-							const response = await fetch(`/api/files/${file.id}`, {
-								method: "DELETE",
-							});
-
-							if (!response.ok) throw new Error("Error al eliminar archivo");
-
-							toast({
-								title: "Archivo eliminado",
-								description: `${file.name} ha sido eliminado`,
-							});
-						} catch (error) {
-							console.error("Error deleting file:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo eliminar el archivo",
-								variant: "destructive",
-							});
-						}
-						break;
-
-					default:
-						console.warn("Acción no implementada:", action);
+				if (onDoubleClick) {
+					onDoubleClick(item);
+					return;
 				}
+
+				toast({
+					title: "Abriendo imagen",
+					description: `Cargando ${item.name}...`,
+				});
+
+				// Obtener las imágenes del directorio actual
+				const currentItems = fileManager.currentItems || [];
+				const allImages = currentItems.filter((i: FileItem) => {
+					const meta = getMetadata(i.metadata);
+					return i.type === "image" || meta?.mimeType?.startsWith("image/");
+				});
+
+				if (allImages.length === 0) {
+					throw new Error("No hay imágenes disponibles");
+				}
+
+				const currentIndex = allImages.findIndex((img) => img.id === item.id);
+				if (currentIndex === -1) {
+					throw new Error("No se encontró la imagen seleccionada");
+				}
+
+				openViewer(allImages, currentIndex);
+
+				// Precargar recursos en segundo plano
+				setTimeout(() => {
+					imageResources.preloadResources(
+						allImages
+							.slice(currentIndex + 1, currentIndex + 4)
+							.map((img) => img.id)
+					);
+				}, 1000);
 			} catch (error) {
-				console.error("Error ejecutando acción:", error);
+				console.error("Error al abrir imagen:", error);
 				toast({
 					title: "Error",
-					description: "No se pudo completar la acción",
+					description:
+						error instanceof Error ?
+							error.message
+						:	"No se pudo abrir la imagen",
 					variant: "destructive",
 				});
 			}
 		},
-		[handleMarkToggle, toast, openViewer, toggleItemSelection]
+		[item, onDoubleClick, openViewer, toast, fileManager, imageResources]
 	);
 
 	const handleHoverStart = useCallback(() => {
@@ -620,161 +219,369 @@ export function FileCard({
 		setIsHovered(false);
 	}, [shouldLoad]);
 
-	return (
-		<motion.div
-			ref={cardRef}
-			whileHover="hover"
-			whileTap="tap"
-			animate={isSelected ? "selected" : isMarked ? "marked" : ""}
-			variants={variants}
-			className={cn(
-				"card-glow relative overflow-hidden w-full h-full",
-				"transition-all duration-300 ease-out",
-				"ring-1 ring-white/10 ring-inset rounded-sm cursor-pointer",
-				"transform-gpu backdrop-blur-[1px]",
-				isSelected
-					? "ring-1 ring-primary ring-inset shadow-lg"
-					: isMarked
-					? "ring-1 ring-warning ring-inset shadow-lg"
-					: isHovered
-					? "ring-1 ring-white/30 ring-inset"
-					: "hover:ring-1 hover:ring-white/30 hover:ring-inset"
-			)}
-			data-selected={isSelected}
-			data-marked={isMarked}
-			onClick={handleClick}
-			onDoubleClick={handleDoubleClick}
-			onMouseDown={handleMouseDown}
-			onHoverStart={handleHoverStart}
-			onHoverEnd={handleHoverEnd}
-			style={{
-				...style,
-				height: "100%",
-				width: "100%",
-				willChange: "transform",
-			}}
-		>
-			<FileContextMenu file={item} onAction={handleContextMenuAction}>
-				<div className="relative w-full h-full overflow-hidden">
-					{isLoading ? (
-						<div className="absolute inset-0 bg-black/50 flex items-center justify-center" />
-					) : error ? (
-						<div className="absolute inset-0 bg-red-50/50 flex items-center justify-center">
-							<div className="text-red-500 text-xs text-center">
-								Error al cargar
-							</div>
-						</div>
-					) : thumbnail ? (
-						<div className="relative w-full h-full">
-							{/* Favorito siempre visible */}
-							{item.isFavorite && (
-								<div
-									className={cn(
-										"absolute top-2 right-2 z-30 transition-transform duration-200",
-										isSelected || isMarked || isHovered ? "scale-110" : ""
-									)}
-								>
-									<StarIcon
-										size={14}
-										className="text-yellow-400 drop-shadow-md"
-									/>
-								</div>
-							)}
+	// Cargar thumbnail con delay para evitar llamadas innecesarias
+	useEffect(() => {
+		if (shouldLoad && !hasLoaded.current) {
+			if (loadingRef.current) {
+				clearTimeout(loadingRef.current);
+			}
 
-							{/* Imagen principal */}
-							<div
-								className={cn(
-									"absolute inset-0 flex justify-center items-center transition-transform duration-200",
-									isSelected || isMarked || isHovered
-										? "scale-75 -translate-y-[20px]"
-										: ""
-								)}
-							>
-								<ImageCard
-									src={thumbnail || ""}
-									alt={item.name}
-									width={item.metadata?.dimensions?.width || 300}
-									height={item.metadata?.dimensions?.height || 300}
-									className="max-w-[95%] max-h-[95%] rounded-sm border-1 bg-black/50 border-white/10"
-									priority={false}
-								/>
-							</div>
+			loadingRef.current = setTimeout(() => {
+				setIsLoading(true);
+				getThumbnail(item.id, ThumbnailQuality.MEDIUM)
+					.then((data) => {
+						if (!data) return;
+						setThumbnail(
+							`data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`
+						);
+						hasLoaded.current = true;
+					})
+					.catch((err) => {
+						console.error("Error cargando thumbnail:", err);
+						setError(err.message);
+					})
+					.finally(() => {
+						setIsLoading(false);
+					});
+			}, 100); // Pequeño delay para evitar llamadas innecesarias
+		}
 
-							{/* Información */}
-							<div
-								className={cn(
-									"absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2 transition-[opacity,transform] duration-200",
-									isSelected || isMarked || isHovered
-										? "opacity-100 translate-y-0"
-										: "opacity-0 translate-y-2"
-								)}
-							>
-								<p className="text-[9px] text-white/90 font-medium truncate flex items-center gap-1">
-									<FileIcon size={10} />
-									<span>{item.name}</span>
-								</p>
-								<div className="grid grid-cols-2 gap-x-2 px-1">
-									<div className="space-y-0.5">
-										<div className="flex items-center gap-1 text-[8px] text-white/70">
-											<ImageIcon size={9} />
-											<span>{item.metadata?.extension?.toUpperCase()}</span>
-											<span>•</span>
-											<span>{formatBytes(item.metadata?.size || 0)}</span>
-										</div>
-										<div className="flex items-center gap-1 text-[9px] text-white/60">
-											<CalendarIcon size={9} />
-											<span>
-												{format(new Date(item.createdAt), "dd MMM yyyy", {
-													locale: es,
-												})}
-											</span>
-										</div>
-									</div>
-									<div className="text-right space-y-0.5">
-										{/* Tags y Colecciones */}
-										{item.collections && item.collections[0] && (
-											<div className="flex items-center justify-end gap-1 text-[9px] text-white/70">
-												<BookmarkIcon size={9} className="text-blue-400" />
-												<span>{item.collections[0].name}</span>
-												{item.collections.length > 1 && (
-													<span className="text-[8px] text-white/50">
-														+{item.collections.length - 1}
-													</span>
-												)}
-											</div>
-										)}
-										{item.tags && (
-											<div className="flex flex-wrap justify-end gap-1">
-												{item.tags.slice(0, 2).map((tag) => (
-													<Badge
-														key={tag.id}
-														variant="secondary"
-														className="h-4 text-[8px] bg-white/10 hover:bg-white/20"
-														style={{
-															borderColor: tag.color,
-														}}
-													>
-														<div
-															className="w-1.5 h-1.5 rounded-full mr-1"
-															style={{ backgroundColor: tag.color }}
-														/>
-														{tag.name}
-													</Badge>
-												))}
-												{item.tags.length > 2 && (
-													<span className="text-[8px] text-white/50 self-center">
-														+{item.tags.length - 2}
-													</span>
-												)}
-											</div>
-										)}
-									</div>
-								</div>
-							</div>
-						</div>
-					) : null}
-				</div>
-			</FileContextMenu>
-		</motion.div>
+		return () => {
+			if (loadingRef.current) {
+				clearTimeout(loadingRef.current);
+			}
+		};
+	}, [item.id, shouldLoad]);
+
+	const handleContextMenuAction = useCallback(
+		async (action: string, file: FileItem) => {
+			switch (action) {
+				case "preview":
+					handleDoubleClick(new MouseEvent("doubleclick") as any);
+					break;
+				case "mark-toggle":
+					// Implementar marcado
+					break;
+				case "open":
+					// Implementar apertura de ubicación
+					break;
+				case "download":
+					// Implementar descarga
+					break;
+				case "copy":
+					// Implementar copiado
+					break;
+				case "delete":
+					// Implementar eliminación
+					break;
+				default:
+					break;
+			}
+		},
+		[handleDoubleClick]
 	);
+
+	const renderGridView = () => (
+		<div className="relative w-full h-full overflow-hidden group">
+			<div className="aspect-square w-full">
+				{thumbnail && (
+					<ImageRenderer
+						src={thumbnail}
+						alt={item.name}
+						width={getMetadata(item.metadata)?.dimensions?.width || 300}
+						height={getMetadata(item.metadata)?.dimensions?.height || 300}
+						className={cn(
+							"h-full w-full rounded-sm transition-transform duration-200",
+							isSelected && "ring-2 ring-primary ring-offset-2",
+							"group-hover:scale-105"
+						)}
+						onError={() => setError("Error al cargar")}
+						quality={75}
+					/>
+				)}
+			</div>
+			<div className="absolute top-2 right-2">
+				{item.isFavorite && (
+					<Heart className="h-4 w-4 text-red-500 fill-current drop-shadow-lg" />
+				)}
+			</div>
+			<motion.div
+				initial={{ opacity: 0, y: "100%" }}
+				animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : "100%" }}
+				className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 flex flex-col gap-2"
+			>
+				<div className="flex items-start gap-2">
+					<p className="text-sm text-white font-medium truncate flex-1">
+						{item.name}
+					</p>
+				</div>
+				<div className="flex flex-col gap-1.5">
+					<div className="flex items-center gap-2 text-xs text-white/70">
+						<HardDrive className="h-3 w-3" />
+						<span>{formatBytes(item.size)}</span>
+						<span>•</span>
+						<Calendar className="h-3 w-3" />
+						<span>{new Date(item.createdAt).toLocaleDateString()}</span>
+					</div>
+					<EntityGroup items={item.tags} type="tag" emoji="🏷️" max={2} />
+					<EntityGroup
+						items={item.collections}
+						type="collection"
+						emoji="📁"
+						max={2}
+					/>
+					<EntityGroup items={item.albums} type="album" emoji="📸" max={2} />
+					<EntityGroup
+						items={item.characters}
+						type="character"
+						emoji="👤"
+						max={2}
+					/>
+					<EntityGroup items={item.places} type="place" emoji="📍" max={2} />
+					<EntityGroup items={item.objects} type="object" emoji="🎯" max={2} />
+				</div>
+			</motion.div>
+		</div>
+	);
+
+	const renderMasonryView = () => (
+		<div className="relative w-full overflow-hidden group">
+			<div className="aspect-[3/4] w-full">
+				{thumbnail && (
+					<ImageRenderer
+						src={thumbnail}
+						alt={item.name}
+						width={getMetadata(item.metadata)?.dimensions?.width || 300}
+						height={getMetadata(item.metadata)?.dimensions?.height || 300}
+						className={cn(
+							"h-full w-full rounded-sm transition-all duration-200",
+							isSelected && "ring-2 ring-primary ring-offset-2",
+							"group-hover:scale-102"
+						)}
+						onError={() => setError("Error al cargar")}
+						quality={75}
+					/>
+				)}
+			</div>
+			<div className="absolute top-2 right-2">
+				{item.isFavorite && (
+					<Heart className="h-4 w-4 text-red-500 fill-current drop-shadow-lg" />
+				)}
+			</div>
+			<motion.div
+				initial={{ opacity: 0, y: "100%" }}
+				animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : "100%" }}
+				className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 flex flex-col gap-2"
+			>
+				<div className="flex items-start gap-2">
+					<p className="text-sm text-white font-medium truncate flex-1">
+						{item.name}
+					</p>
+				</div>
+				<div className="flex flex-col gap-1.5">
+					<div className="flex items-center gap-2 text-xs text-white/70">
+						<HardDrive className="h-3 w-3" />
+						<span>{formatBytes(item.size)}</span>
+						<span>•</span>
+						<Calendar className="h-3 w-3" />
+						<span>{new Date(item.createdAt).toLocaleDateString()}</span>
+					</div>
+					<EntityGroup items={item.tags} type="tag" emoji="🏷️" max={3} />
+					<EntityGroup
+						items={item.collections}
+						type="collection"
+						emoji="📁"
+						max={2}
+					/>
+					<EntityGroup items={item.albums} type="album" emoji="📸" max={2} />
+					<EntityGroup
+						items={item.characters}
+						type="character"
+						emoji="👤"
+						max={2}
+					/>
+					<EntityGroup items={item.places} type="place" emoji="📍" max={2} />
+					<EntityGroup items={item.objects} type="object" emoji="🎯" max={2} />
+				</div>
+			</motion.div>
+		</div>
+	);
+
+	const renderCardsView = () => (
+		<div className="relative w-full bg-card rounded-lg border shadow-sm overflow-hidden group hover:shadow-md transition-all duration-200">
+			<div className="flex flex-col h-full">
+				<div className="relative aspect-[4/3] overflow-hidden">
+					{thumbnail ?
+						<ImageRenderer
+							src={thumbnail}
+							alt={item.name}
+							width={getMetadata(item.metadata)?.dimensions?.width || 300}
+							height={getMetadata(item.metadata)?.dimensions?.height || 300}
+							className={cn(
+								"h-full w-full transition-transform duration-200",
+								isSelected && "ring-2 ring-primary ring-offset-2",
+								"group-hover:scale-105"
+							)}
+							onError={() => setError("Error al cargar")}
+							quality={75}
+						/>
+					:	<div className="flex items-center justify-center h-full bg-muted">
+							<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+						</div>
+					}
+					<div className="absolute top-2 right-2">
+						{item.isFavorite && (
+							<Heart className="h-4 w-4 text-red-500 fill-current drop-shadow-lg" />
+						)}
+					</div>
+				</div>
+
+				<div className="flex flex-col p-4 gap-3">
+					<div className="flex items-start justify-between gap-2">
+						<h3 className="text-sm font-medium leading-tight truncate">
+							{item.name}
+						</h3>
+					</div>
+
+					<div className="flex items-center gap-2 text-xs text-muted-foreground">
+						<HardDrive className="h-3 w-3" />
+						<span>{formatBytes(item.size)}</span>
+						<span>•</span>
+						<Calendar className="h-3 w-3" />
+						<span>{new Date(item.createdAt).toLocaleDateString()}</span>
+					</div>
+
+					<div className="flex flex-col gap-2">
+						<EntityGroup items={item.tags} type="tag" emoji="🏷️" max={4} />
+						<EntityGroup
+							items={item.collections}
+							type="collection"
+							emoji="📁"
+							max={3}
+						/>
+						<EntityGroup items={item.albums} type="album" emoji="📸" max={3} />
+						<EntityGroup
+							items={item.characters}
+							type="character"
+							emoji="👤"
+							max={3}
+						/>
+						<EntityGroup items={item.places} type="place" emoji="📍" max={3} />
+						<EntityGroup
+							items={item.objects}
+							type="object"
+							emoji="🎯"
+							max={3}
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+
+	const renderListView = () => (
+		<div className="flex items-center gap-4 w-full p-2 hover:bg-accent/50 rounded-sm group">
+			<div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-sm">
+				{thumbnail ?
+					<ImageRenderer
+						src={thumbnail}
+						alt={item.name}
+						width={48}
+						height={48}
+						className={cn(
+							"h-full w-full transition-transform duration-200",
+							isSelected && "ring-2 ring-primary ring-offset-2",
+							"group-hover:scale-105"
+						)}
+						onError={() => setError("Error al cargar")}
+						quality={75}
+					/>
+				:	<div className="flex items-center justify-center h-full bg-muted">
+						<File className="h-4 w-4 text-muted-foreground/50" />
+					</div>
+				}
+				<div className="absolute top-0.5 right-0.5">
+					{item.isFavorite && (
+						<Heart className="h-3 w-3 text-red-500 fill-current drop-shadow-lg" />
+					)}
+				</div>
+			</div>
+
+			<div className="flex flex-col min-w-0 flex-1 gap-1">
+				<div className="flex items-center gap-2">
+					<p className="text-sm font-medium truncate">{item.name}</p>
+				</div>
+				<div className="flex items-center gap-2 text-xs text-muted-foreground">
+					<HardDrive className="h-3 w-3" />
+					<span>{formatBytes(item.size)}</span>
+					<span>•</span>
+					<Calendar className="h-3 w-3" />
+					<span>{new Date(item.createdAt).toLocaleDateString()}</span>
+				</div>
+			</div>
+
+			<div className="flex items-center gap-2 ml-auto">
+				<EntityGroup items={item.tags} type="tag" emoji="🏷️" max={2} />
+				<EntityGroup
+					items={item.collections}
+					type="collection"
+					emoji="📁"
+					max={1}
+				/>
+				<EntityGroup items={item.albums} type="album" emoji="📸" max={1} />
+				<EntityGroup
+					items={item.characters}
+					type="character"
+					emoji="👤"
+					max={1}
+				/>
+				<EntityGroup items={item.places} type="place" emoji="📍" max={1} />
+				<EntityGroup items={item.objects} type="object" emoji="🎯" max={1} />
+			</div>
+		</div>
+	);
+
+	return (
+		<FileContextMenu file={item} onAction={handleContextMenuAction}>
+			<motion.div
+				initial="initial"
+				animate="animate"
+				exit="exit"
+				whileHover="hover"
+				whileTap="tap"
+				variants={variants}
+				className={cn(
+					"relative overflow-hidden w-full transition-all duration-200 cursor-pointer",
+					viewMode === "grid" && "h-full rounded-sm hover:z-10",
+					viewMode === "masonry" && "rounded-sm hover:z-10",
+					viewMode === "cards" && "h-auto hover:z-10",
+					viewMode === "list" && "h-auto"
+				)}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				onHoverStart={handleHoverStart}
+				onHoverEnd={handleHoverEnd}
+				style={{
+					...style,
+					willChange: "transform",
+					contain: "layout style paint",
+				}}
+				layout
+			>
+				{viewMode === "grid" && renderGridView()}
+				{viewMode === "masonry" && renderMasonryView()}
+				{viewMode === "cards" && renderCardsView()}
+				{viewMode === "list" && renderListView()}
+			</motion.div>
+		</FileContextMenu>
+	);
+}
+
+// Utility function to format bytes
+function formatBytes(bytes: number): string {
+	if (bytes === 0) return "0 B";
+	const k = 1024;
+	const sizes = ["B", "KB", "MB", "GB", "TB"];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }

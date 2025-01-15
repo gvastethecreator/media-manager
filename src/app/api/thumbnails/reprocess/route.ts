@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/services/thumbnail.service'
+import { ThumbnailQuality } from '@/types/thumbnails'
+import { logger } from '@/lib/logger'
+
+const thumbLogger = logger.withContext('ThumbnailReprocessAPI')
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -12,7 +15,7 @@ export async function GET(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
 
-  // Configurar la respuesta SSE primero
+  // Configurar la respuesta SSE
   const response = new NextResponse(stream.readable, {
     headers: {
       'Content-Type': 'text/event-stream',
@@ -27,20 +30,19 @@ export async function GET(request: NextRequest) {
 
   const writeEvent = async (event: string, data: any) => {
     try {
-      // Formato correcto para SSE con retry
-      const formattedData = `retry: 1000\nid: ${Date.now()}\nevent: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+      const formattedData = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
       await writer.write(encoder.encode(formattedData))
-      console.log('Evento enviado:', { type: event, data })
+      thumbLogger.debug('📤 Evento enviado:', { type: event, data })
     } catch (error) {
-      console.error('Error writing event:', error)
+      thumbLogger.error('❌ Error escribiendo evento:', error)
     }
   }
 
   try {
-    // Enviar un ping inicial para mantener la conexión
+    // Enviar un ping inicial
     await writeEvent('ping', { timestamp: Date.now() })
 
-    // Obtener todas las imágenes que necesitan reprocesamiento
+    // Obtener imágenes que necesitan reprocesamiento
     const images = await prisma.image.findMany({
       where: {
         OR: [
@@ -86,7 +88,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Generar thumbnail
-        const thumbnail = await generateThumbnail(image.path, 'mid' as ThumbnailQuality)
+        const thumbnail = await generateThumbnail(image.path, { quality: ThumbnailQuality.MEDIUM })
 
         if (!thumbnail || !thumbnail.buffer) {
           throw new Error('Error generando thumbnail')
@@ -101,7 +103,8 @@ export async function GET(request: NextRequest) {
             thumbnailWidth: thumbnail.width,
             thumbnailHeight: thumbnail.height,
             thumbnailError: null,
-            thumbnailErrorAt: null
+            thumbnailErrorAt: null,
+            updatedAt: new Date()
           }
         })
 
@@ -121,12 +124,12 @@ export async function GET(request: NextRequest) {
           }
         })
 
-        // Enviar ping cada 10 segundos para mantener la conexión viva
+        // Enviar ping cada 10 imágenes
         if (current % 10 === 0) {
           await writeEvent('ping', { timestamp: Date.now() })
         }
       } catch (error) {
-        console.error('Error procesando imagen:', error)
+        thumbLogger.error('❌ Error procesando imagen:', error)
         errors++
 
         // Actualizar error en base de datos
@@ -134,7 +137,11 @@ export async function GET(request: NextRequest) {
           where: { id: image.id },
           data: {
             thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date()
+            thumbnailErrorAt: new Date(),
+            thumbnail: null,
+            thumbnailSize: null,
+            thumbnailWidth: null,
+            thumbnailHeight: null
           }
         })
 
@@ -154,15 +161,17 @@ export async function GET(request: NextRequest) {
     await writeEvent('complete', {
       processed,
       errors,
-      total
+      total,
+      timestamp: new Date().toISOString()
     })
 
     await writer.close()
     return response
   } catch (error) {
-    console.error('Error en reprocesamiento:', error)
+    thumbLogger.error('❌ Error en reprocesamiento:', error)
     await writeEvent('error', {
-      error: error instanceof Error ? error.message : 'Error desconocido'
+      error: error instanceof Error ? error.message : 'Error desconocido',
+      timestamp: new Date().toISOString()
     })
     await writer.close()
     return response

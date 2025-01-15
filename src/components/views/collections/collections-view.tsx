@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { ViewProps } from "../types";
 import {
 	Card,
@@ -34,14 +34,18 @@ import {
 import { toast } from "sonner";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
-import { useNavigationStore } from "@/store/navigation";
-import { useFileManager } from "@/store/file-manager";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useFileManager } from "@/store/file-manager.store";
 import { useRouter } from "next/navigation";
 import {
-	collectionService,
 	CollectionWithStats,
-} from "@/services/collection.service";
+	getCollections,
+} from "@/app/actions/collection.actions";
+import { eventsService, type EventData } from "@/services/events.service";
+import { logger } from "@/lib/logger";
 import Image from "next/image";
+
+const viewLogger = logger.withContext("CollectionsView");
 
 interface CollectionCardProps {
 	collection: CollectionWithStats & {
@@ -66,36 +70,54 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-function CollectionCard({ collection, onClick }: CollectionCardProps) {
+const CollectionCard = memo(function CollectionCard({
+	collection,
+	onClick,
+}: CollectionCardProps) {
 	const bgColor = collection.color || "#3b82f6";
 	const router = useRouter();
 	const [isFavorite, setIsFavorite] = useState(false);
 
-	const handleDownload = async (e: React.MouseEvent) => {
-		e.stopPropagation();
-		try {
-			toast.promise(fetch(`/api/collections/${collection.id}/download`), {
-				loading: "Preparando descarga...",
-				success: "Descarga iniciada",
-				error: "Error al descargar la colección",
+	const handleDownload = useCallback(
+		async (e: React.MouseEvent) => {
+			e.stopPropagation();
+			try {
+				viewLogger.info("📥 Iniciando descarga de colección:", collection.name);
+				toast.promise(fetch(`/api/collections/${collection.id}/download`), {
+					loading: "Preparando descarga...",
+					success: "Descarga iniciada",
+					error: "Error al descargar la colección",
+				});
+			} catch (error) {
+				viewLogger.error("❌ Error al descargar colección:", error);
+			}
+		},
+		[collection.id, collection.name]
+	);
+
+	const handleFavorite = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			setIsFavorite(!isFavorite);
+			viewLogger.info("❤️ Cambiando estado de favorito:", {
+				collection: collection.name,
+				isFavorite: !isFavorite,
 			});
-		} catch (error) {
-			console.error("Error downloading collection:", error);
-		}
-	};
+			toast.success(
+				isFavorite ? "Eliminado de favoritos" : "Agregado a favoritos"
+			);
+		},
+		[collection.name, isFavorite]
+	);
 
-	const handleFavorite = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		setIsFavorite(!isFavorite);
-		toast.success(
-			isFavorite ? "Eliminado de favoritos" : "Agregado a favoritos"
-		);
-	};
-
-	const handleEdit = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		router.push("/settings/collections");
-	};
+	const handleEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			viewLogger.info("⚙️ Editando colección:", collection.name);
+			router.push("/settings/collections");
+		},
+		[collection.name, router]
+	);
 
 	return (
 		<motion.div animate={{ scale: 1 }} className="h-full">
@@ -122,37 +144,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 								</CardDescription>
 							</div>
 						</div>
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleDownload}
-							>
-								<Download className="w-4 h-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className={cn("h-8 w-8", isFavorite && "text-red-500")}
-								onClick={handleFavorite}
-							>
-								<Heart
-									className={cn("w-4 h-4", isFavorite && "fill-current")}
-								/>
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8"
-								onClick={handleEdit}
-							>
-								<Settings2 className="w-4 h-4" />
-							</Button>
-							<Button variant="ghost" size="icon" className="h-8 w-8">
-								<ArrowUpRight className="w-4 h-4" />
-							</Button>
-						</div>
+					
 					</div>
 				</CardHeader>
 
@@ -225,11 +217,11 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 									<HoverCardTrigger asChild>
 										<div className="flex items-center gap-1.5 cursor-help">
 											<FolderIcon className="w-4 h-4" />
-											<span>{collection.count}</span>
+											<span>{collection._count.images}</span>
 										</div>
 									</HoverCardTrigger>
 									<HoverCardContent side="top" className="text-sm">
-										Esta colección contiene {collection.count} imágenes
+										Esta colección contiene {collection._count.images} imágenes
 									</HoverCardContent>
 								</HoverCard>
 
@@ -249,7 +241,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 							<HoverCard openDelay={200}>
 								<HoverCardTrigger asChild>
 									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{collection.size}</span>
+										<span>{collection.totalSize}</span>
 									</div>
 								</HoverCardTrigger>
 								<HoverCardContent side="top" className="text-sm">
@@ -279,7 +271,7 @@ function CollectionCard({ collection, onClick }: CollectionCardProps) {
 			</Card>
 		</motion.div>
 	);
-}
+});
 
 function LoadingSkeleton() {
 	return (
@@ -300,24 +292,46 @@ export function CollectionsView({ isResizing }: ViewProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	const fetchCollections = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			viewLogger.info("🔄 Cargando colecciones...");
+			const data = await getCollections();
+			setCollections(data);
+			viewLogger.info(`✅ ${data.length} colecciones cargadas`);
+		} catch (err) {
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando colecciones:", err);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
 	useEffect(() => {
-		const fetchCollections = async () => {
-			try {
-				setIsLoading(true);
-				const data = await collectionService.getCollections();
-				setCollections(data);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
-			} finally {
-				setIsLoading(false);
-			}
+		// Cargar colecciones inicialmente
+		fetchCollections();
+
+		// Suscribirse a eventos relevantes
+		const handleCollectionModified = (data?: EventData) => {
+			viewLogger.info(
+				"📢 Evento de modificación de colecciones recibido:",
+				data
+			);
+			fetchCollections();
 		};
 
-		fetchCollections();
-	}, []);
+		eventsService.on("collections:modified", handleCollectionModified);
+
+		return () => {
+			eventsService.off("collections:modified", handleCollectionModified);
+		};
+	}, [fetchCollections]);
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithStats) => {
+			viewLogger.info("🖱️ Click en colección:", collection.name);
 			setCurrentView("collection-content");
 			setCurrentCollection(collection.id);
 		},
@@ -336,7 +350,7 @@ export function CollectionsView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (collections.length === 0) {
+	if (!collections || collections.length === 0) {
 		return (
 			<EmptyState
 				icon={LibraryBig}
@@ -347,23 +361,17 @@ export function CollectionsView({ isResizing }: ViewProps) {
 	}
 
 	return (
-		<ScrollArea className="h-full w-full">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-				{collections.map((collection, index) => (
-					<motion.div
-						key={collection.id}
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: index * 0.1 }}
-					>
+		<ScrollArea className="h-full">
+			<div className="container mx-auto p-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{collections.map((collection) => (
 						<CollectionCard
+							key={collection.id}
 							collection={collection}
 							onClick={() => handleCollectionClick(collection)}
 						/>
-					</motion.div>
-				))}
+					))}
+				</div>
 			</div>
 		</ScrollArea>
 	);

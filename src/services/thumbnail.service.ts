@@ -1,99 +1,144 @@
-import { formatBytes } from "@/lib/utils"
-import { thumbnailCache } from "@/lib/cache"
-import { PrismaClient } from '@prisma/client'
-import { EventSourcePolyfill as EventSource, Event as EventSourceEvent } from 'event-source-polyfill'
+import { logger } from '@/lib/logger'
+import { optimizeThumbnail } from '@/lib/thumbnails'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
+import { EventEmitter } from 'events'
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
 
-const prisma = new PrismaClient()
+const thumbLogger = logger.withContext('ThumbnailService')
 
-export interface ThumbnailStats {
-  total: number
-  totalSize: number
-  pending: number
-  withThumbnail: number
-  recentlyProcessed: {
-    id: string
-    path: string
-    processedAt: Date
-  }[]
-  errors: ThumbnailError[]
+export { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG }
+
+export enum EVENTS {
+  PROGRESS = 'progress',
+  ERROR = 'error',
+  COMPLETE = 'complete',
+  STATS = 'stats'
 }
 
 export interface ThumbnailError {
   imageId: string
   imagePath: string
   error: string
-  timestamp: Date
+  timestamp: Date | string
 }
 
-export type ThumbnailQuality = 'compressed' | 'low' | 'mid' | 'high'
+export type ThumbnailErrorType = {
+  imageId: string
+  imagePath: string
+  error: string
+  timestamp: Date | string
+}
 
-export interface ThumbnailConfig {
-  quality: ThumbnailQuality
-  width: number
-  height: number
-  format: 'webp'
+export interface ProcessOptions {
+  onProgress?: (status: ProcessStatus) => void
+  onError?: (error: any) => void
+  onComplete?: (data: any) => void
+  onStats?: (stats: any) => void
 }
 
 export interface ProcessStatus {
   status?: string
+  currentFile?: string
   current?: number
   total?: number
   progress?: number
-  currentFile?: string
   lastProcessed?: {
     id: string
     path: string
     processedAt: string
+    saved?: number
   }
 }
 
-export interface ThumbnailCallbacks {
-  onProgress?: (status: ProcessStatus) => void
-  onError?: (error: Error) => void
-  onComplete?: (data: any) => void
-}
-
-export const THUMBNAIL_QUALITY_CONFIG: Record<ThumbnailQuality, { quality: number, width: number, height: number }> = {
-  compressed: { quality: 60, width: 200, height: 200 },
-  low: { quality: 70, width: 300, height: 300 },
-  mid: { quality: 80, width: 400, height: 400 },
-  high: { quality: 90, width: 500, height: 500 }
-}
-
-export type ThumbnailEventCallback = (event: { type: string, data: any }) => void;
-
-class ThumbnailService {
-  private static instance: ThumbnailService
-  private eventSource: EventSource | null = null
-  private timeout = 45000; // 45 segundos
-  private readonly maxRetries = 3;
-  private readonly retryDelay = 1000;
-  private preGenerationQueue: Set<string> = new Set();
-  private isProcessingQueue = false;
+class ThumbnailService extends EventEmitter {
+  private static instance: ThumbnailService;
+  private isProcessing: boolean = false;
 
   private constructor() {
-    // Inicializar el servicio
-    this.startQueueProcessor();
+    super()
+    thumbLogger.info('🚀 Inicializando ThumbnailService')
+    this.setMaxListeners(50)
   }
 
-  public static getInstance(): ThumbnailService {
+  static getInstance(): ThumbnailService {
     if (!ThumbnailService.instance) {
       ThumbnailService.instance = new ThumbnailService()
     }
     return ThumbnailService.instance
   }
 
+  // Métodos de eventos
+  onProgress(callback: (status: ProcessStatus) => void): void {
+    this.on(EVENTS.PROGRESS, callback)
+  }
+
+  offProgress(callback: (status: ProcessStatus) => void): void {
+    this.off(EVENTS.PROGRESS, callback)
+  }
+
+  onError(callback: (error: any) => void): void {
+    this.on(EVENTS.ERROR, callback)
+  }
+
+  offError(callback: (error: any) => void): void {
+    this.off(EVENTS.ERROR, callback)
+  }
+
+  onComplete(callback: (data: any) => void): void {
+    this.on(EVENTS.COMPLETE, callback)
+  }
+
+  offComplete(callback: (data: any) => void): void {
+    this.off(EVENTS.COMPLETE, callback)
+  }
+
+  onStats(callback: (stats: any) => void): void {
+    this.on(EVENTS.STATS, callback)
+  }
+
+  offStats(callback: (stats: any) => void): void {
+    this.off(EVENTS.STATS, callback)
+  }
+
+  private setupEventHandlers(callbacks?: ProcessOptions) {
+    return {
+      [EVENTS.PROGRESS]: (data: any) => {
+        this.emit(EVENTS.PROGRESS, data)
+        callbacks?.onProgress?.(data)
+      },
+      [EVENTS.ERROR]: (error: any) => {
+        this.emit(EVENTS.ERROR, error)
+        callbacks?.onError?.(error)
+      },
+      [EVENTS.COMPLETE]: (data: any) => {
+        this.emit(EVENTS.COMPLETE, data)
+        callbacks?.onComplete?.(data)
+      },
+      [EVENTS.STATS]: (stats: any) => {
+        this.emit(EVENTS.STATS, stats)
+        callbacks?.onStats?.(stats)
+      }
+    }
+  }
+
+  private getFullUrl(path: string): string {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`
+    return new URL(normalizedPath, baseUrl).toString()
+  }
+
   private async fetchWithTimeout(
-    input: RequestInfo | URL,
-    init?: RequestInit,
-    timeout = this.timeout
+    input: string,
+    init?: RequestInit & { timeout?: number }
   ): Promise<Response> {
+    const { timeout = 45000, ...restInit } = init || {}
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
 
     try {
-      const response = await fetch(input, {
-        ...init,
+      const url = this.getFullUrl(input)
+      const response = await fetch(url, {
+        ...restInit,
         signal: controller.signal
       })
       clearTimeout(id)
@@ -104,374 +149,169 @@ class ThumbnailService {
     }
   }
 
-  private async blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  }
+  private async handleProcess(endpoint: string, callbacks?: ProcessOptions): Promise<void> {
+    if (this.isProcessing) {
+      throw new Error('Ya hay un proceso en ejecución')
+    }
 
-  async getStats(): Promise<ThumbnailStats> {
+    this.isProcessing = true;
+    const handlers = this.setupEventHandlers(callbacks);
+    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
     try {
-      const response = await this.fetchWithTimeout('/api/thumbnails/stats', {
+      const response = await this.fetchWithTimeout(endpoint, {
         method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache'
         }
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || error.error || 'Error obteniendo estadísticas')
+        throw new Error(`Error iniciando el proceso: ${response.statusText}`);
       }
 
-      return await response.json()
+      const bodyReader = response.body?.getReader();
+      if (!bodyReader) {
+        throw new Error('No se pudo iniciar la lectura del stream');
+      }
+      reader = bodyReader;
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const [eventType, ...dataLines] = line.split('\n');
+            const event = eventType.replace('event: ', '');
+            const data = dataLines.join('\n').replace('data: ', '');
+            const parsedData = JSON.parse(data);
+
+            switch (event) {
+              case EVENTS.PROGRESS:
+                handlers[EVENTS.PROGRESS](parsedData);
+                break;
+              case EVENTS.ERROR:
+                handlers[EVENTS.ERROR](parsedData);
+                break;
+              case EVENTS.COMPLETE:
+                handlers[EVENTS.COMPLETE](parsedData);
+                break;
+              case EVENTS.STATS:
+                handlers[EVENTS.STATS](parsedData);
+                break;
+            }
+          } catch (error) {
+            thumbLogger.error('Error procesando evento:', error);
+          }
+        }
+      }
     } catch (error) {
-      console.error('Error en getStats:', error)
+      // Verificar si el error es por cancelación
+      if (error instanceof Error && error.name === 'AbortError') {
+        thumbLogger.warn('Conexión cancelada por el cliente');
+        return;
+      }
+
+      const formattedError = {
+        message: 'Error en la conexión',
+        details: error instanceof Error ? error.message : 'Error desconocido',
+        originalError: error
+      };
+      thumbLogger.error('Error en el proceso:', formattedError);
+      throw formattedError;
+    } finally {
+      if (reader) {
+        try {
+          await reader.cancel();
+        } catch (error) {
+          thumbLogger.warn('Error al cerrar el reader:', error);
+        }
+      }
+      this.isProcessing = false;
+    }
+  }
+
+  async optimizeThumbnails(options: ProcessOptions = {}): Promise<void> {
+    try {
+      thumbLogger.info('Starting thumbnail optimization')
+      await this.handleProcess('api/thumbnails/optimize', options)
+      thumbLogger.info('Thumbnail optimization completed')
+    } catch (error) {
+      thumbLogger.error('Error optimizing thumbnails:', error)
       throw error
     }
   }
 
-  private handleSSEConnection(
-    endpoint: string,
-    callbacks?: ThumbnailCallbacks
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let retryCount = 0;
-      const maxRetries = 3;
-      let lastEventTime = Date.now();
-      let timeoutId: NodeJS.Timeout;
-
-      const resetTimeout = () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        lastEventTime = Date.now();
-        timeoutId = setTimeout(() => {
-          if (Date.now() - lastEventTime > this.timeout) {
-            if (retryCount < maxRetries) {
-              console.log(`Reintentando conexión (${retryCount + 1}/${maxRetries})...`);
-              retryCount++;
-              this.eventSource?.close();
-              setupEventSource();
-            } else {
-              this.eventSource?.close();
-              reject(new Error('No se pudo establecer conexión después de varios intentos'));
-            }
-          }
-        }, this.timeout);
-      };
-
-      const handleEvent = (event: EventSourceEvent) => {
-        try {
-          const messageEvent = event as MessageEvent;
-          if (!messageEvent.data) return null;
-          resetTimeout();
-          return messageEvent;
-        } catch (error) {
-          console.error('Error procesando evento:', error);
-          return null;
-        }
-      };
-
-      const setupEventSource = () => {
-        if (this.eventSource) {
-          this.eventSource.close();
-        }
-
-        this.eventSource = new EventSource(`${endpoint}?_=${Date.now()}`, {
-          withCredentials: true
-        });
-
-        this.eventSource.onopen = () => {
-          console.log(`Conexión SSE establecida para ${endpoint}`);
-          resetTimeout();
-        };
-
-        this.eventSource.onerror = (error) => {
-          console.error('Error en conexión SSE:', error);
-          if (retryCount < maxRetries) {
-            console.log(`Reintentando conexión (${retryCount + 1}/${maxRetries})...`);
-            retryCount++;
-            setTimeout(setupEventSource, 1000 * retryCount);
-          } else {
-            this.eventSource?.close();
-            clearTimeout(timeoutId);
-            reject(new Error('Error en la conexión SSE después de varios intentos'));
-          }
-        };
-
-        this.eventSource.addEventListener('ping', (event) => {
-          const messageEvent = handleEvent(event);
-          if (messageEvent) {
-            console.log('Ping recibido:', messageEvent.data);
-          }
-        });
-
-        this.eventSource.addEventListener('start', (event) => {
-          const messageEvent = handleEvent(event);
-          if (messageEvent) {
-            try {
-              const data = JSON.parse(messageEvent.data);
-              callbacks?.onProgress?.({
-                status: data.status || "Iniciando...",
-                current: data.current,
-                total: data.total,
-                progress: data.progress || 0,
-                currentFile: data.currentFile
-              });
-            } catch (error) {
-              console.error('Error procesando evento start:', error);
-            }
-          }
-        });
-
-        this.eventSource.addEventListener('progress', (event) => {
-          const messageEvent = handleEvent(event);
-          if (messageEvent) {
-            try {
-              const data = JSON.parse(messageEvent.data);
-              callbacks?.onProgress?.({
-                status: data.status || "Procesando...",
-                current: data.current,
-                total: data.total,
-                progress: data.progress || 0,
-                currentFile: data.currentFile,
-                lastProcessed: data.lastProcessed
-              });
-            } catch (error) {
-              console.error('Error procesando evento progress:', error);
-            }
-          }
-        });
-
-        this.eventSource.addEventListener('error', (event) => {
-          const messageEvent = handleEvent(event);
-          if (messageEvent) {
-            try {
-              const data = JSON.parse(messageEvent.data);
-              const error = new Error(data.message || data.error);
-              error.name = data.type;
-              callbacks?.onError?.(error);
-              this.eventSource?.close();
-              clearTimeout(timeoutId);
-              reject(error);
-            } catch (error) {
-              // Si no podemos parsear el error, probablemente sea un error de conexión
-              console.error('Error procesando evento error:', error);
-            }
-          }
-        });
-
-        this.eventSource.addEventListener('complete', (event) => {
-          const messageEvent = handleEvent(event);
-          if (messageEvent) {
-            try {
-              const data = JSON.parse(messageEvent.data);
-              callbacks?.onComplete?.(data);
-              this.eventSource?.close();
-              clearTimeout(timeoutId);
-              resolve(data);
-            } catch (error) {
-              console.error('Error procesando evento complete:', error);
-              reject(error);
-            }
-          }
-        });
-      };
-
-      setupEventSource();
-    });
-  }
-
-  async optimizeThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+  async cleanThumbnails(options: ProcessOptions = {}): Promise<void> {
     try {
-      await this.handleSSEConnection('/api/thumbnails/optimize', callbacks);
+      thumbLogger.info('Starting thumbnail cleanup')
+      await this.handleProcess('api/thumbnails/clean', options)
+      thumbLogger.info('Thumbnail cleanup completed')
     } catch (error) {
-      console.error('Error en optimizeThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      thumbLogger.error('Error cleaning thumbnails:', error)
+      throw error
     }
   }
 
-  async cleanThumbnails(callbacks?: ThumbnailCallbacks): Promise<void> {
+  async reprocessAll(options: ProcessOptions = {}): Promise<void> {
     try {
-      await this.handleSSEConnection('/api/thumbnails/clean', callbacks);
+      thumbLogger.info('Starting thumbnail reprocessing')
+      await this.handleProcess('api/thumbnails/reprocess', options)
+      thumbLogger.info('Thumbnail reprocessing completed')
     } catch (error) {
-      console.error('Error en cleanThumbnails:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-      throw error;
+      thumbLogger.error('Error reprocessing thumbnails:', error)
+      throw error
     }
-  }
-
-  async reprocessAll(callbacks?: ThumbnailCallbacks): Promise<void> {
-    try {
-      await this.handleSSEConnection('/api/thumbnails/reprocess', callbacks);
-    } catch (error) {
-      console.error('Error en reprocessAll:', error);
-      callbacks?.onError?.(error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
-  }
-
-  private async startQueueProcessor() {
-    if (this.isProcessingQueue) return
-
-    this.isProcessingQueue = true
-    while (this.preGenerationQueue.size > 0) {
-      const [nextId] = this.preGenerationQueue
-      this.preGenerationQueue.delete(nextId)
-
-      try {
-        await this.generateThumbnail(nextId, 'mid')
-      } catch (error) {
-        console.error('Error pre-generando thumbnail:', error)
-      }
-
-      // Esperar un poco entre cada generación para no sobrecargar
-      await new Promise(resolve => setTimeout(resolve, 500))
-    }
-    this.isProcessingQueue = false
   }
 
   async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {
     try {
-      const cacheKey = `thumbnail:${imageId}:${quality}`
+      thumbLogger.info('🔄 Obteniendo thumbnail:', { imageId, quality });
 
-      // Intentar obtener del caché
-      const cached = await thumbnailCache.get(cacheKey)
-      if (cached) {
-        return cached
+      // Validar calidad
+      const validQualities = Object.values(ThumbnailQuality);
+      if (!validQualities.includes(quality as ThumbnailQuality)) {
+        thumbLogger.error('❌ Calidad de thumbnail inválida:', { quality, validQualities });
+        throw new Error(`Calidad de thumbnail no válida. Debe ser una de: ${validQualities.join(', ')}`);
       }
 
-      // Si no está en caché, intentar obtener con reintentos
-      let attempts = 0
-      let lastError: Error | null = null
-
-      while (attempts < this.maxRetries) {
-        try {
-          const response = await this.fetchWithTimeout(
-            `/api/thumbnails/${imageId}?quality=${quality}`,
-            {
-              headers: {
-                'Accept': 'image/webp',
-                'Cache-Control': 'no-cache'
-              }
-            }
-          )
-
-          if (!response.ok) {
-            const error = await response.text()
-            throw new Error(error || 'Error obteniendo miniatura')
-          }
-
-          const blob = await response.blob()
-          const base64 = await this.blobToBase64(blob)
-
-          // Guardar en caché
-          await thumbnailCache.set(cacheKey, base64)
-
-          return base64
-        } catch (error) {
-          lastError = error instanceof Error ? error : new Error('Error desconocido')
-          attempts++
-          if (attempts < this.maxRetries) {
-            await new Promise(resolve =>
-              setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
-            )
-          }
-        }
+      const config = THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality];
+      if (!config) {
+        throw new Error(`Configuración no encontrada para la calidad: ${quality}`);
       }
 
-      // Si llegamos aquí, agregar a la cola de pre-generación
-      this.preGenerationQueue.add(imageId)
-      this.startQueueProcessor()
+      const response = await getThumbnail(imageId, quality as ThumbnailQuality);
+      if (!response) {
+        throw new Error('No se pudo obtener el thumbnail');
+      }
 
-      throw lastError || new Error('Error al obtener la miniatura después de reintentos')
+      thumbLogger.info('✅ Thumbnail obtenido:', {
+        imageId,
+        size: response.size,
+        quality
+      });
+
+      return response.thumbnail;
     } catch (error) {
-      console.error('Error en getThumbnail:', error)
-      throw error instanceof Error ? error : new Error('Error al obtener la miniatura')
-    }
-  }
-
-  async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
-    let attempts = 0
-    let lastError: Error | null = null
-
-    while (attempts < this.maxRetries) {
-      try {
-        if (!imageId || !quality) {
-          throw new Error('ID de imagen y calidad son requeridos')
-        }
-
-        const config = THUMBNAIL_QUALITY_CONFIG[quality]
-        if (!config) {
-          throw new Error('Calidad de thumbnail inválida')
-        }
-
-        // Obtener la imagen
-        const image = await prisma.image.findUnique({
-          where: { id: imageId }
-        })
-
-        if (!image) {
-          throw new Error('Imagen no encontrada')
-        }
-
-        // Generar el thumbnail
-        const response = await fetch(`/api/thumbnails/generate/${imageId}?quality=${quality}`, {
-          method: 'POST'
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error generando thumbnail');
-        }
-
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.error || 'Error generando thumbnail');
-        }
-
-        // Invalidar caché para esta imagen
-        const cacheKey = `thumbnail:${imageId}:${quality}`
-        await thumbnailCache.delete(cacheKey)
-
-        return
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Error desconocido')
-        attempts++
-        if (attempts < this.maxRetries) {
-          await new Promise(resolve =>
-            setTimeout(resolve, this.retryDelay * Math.pow(2, attempts - 1))
-          )
-        }
-      }
-    }
-
-    throw lastError || new Error('Error al generar la miniatura después de reintentos')
-  }
-
-  async queueThumbnailGeneration(imageIds: string[]): Promise<void> {
-    imageIds.forEach(id => this.preGenerationQueue.add(id))
-    this.startQueueProcessor()
-  }
-
-  formatSize(bytes: number): string {
-    return formatBytes(bytes)
-  }
-
-  getQualityConfig(quality: ThumbnailQuality) {
-    return THUMBNAIL_QUALITY_CONFIG[quality]
-  }
-
-  cancelProcessing() {
-    if (this.eventSource) {
-      this.eventSource.close()
-      this.eventSource = null
+      thumbLogger.error('❌ Error en getThumbnail:', {
+        imageId,
+        quality,
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+      throw error;
     }
   }
 }
 
-export const thumbnailService = ThumbnailService.getInstance()
+export const thumbnailService = ThumbnailService.getInstance();

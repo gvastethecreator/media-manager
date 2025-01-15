@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useFileManager } from "@/store/file-manager";
-import { useImageViewer } from "@/store/image-viewer";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { FolderIcon} from "lucide-react";
-import type { FileItem } from "@/types/file-item";
-import BlurFade from "@/components/ui/blur-fade";
-import { LoadingScreen } from "@/components/core/feedback";
+import { useFileManager } from "@/store/file-manager.store";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { FolderContentProps } from "@/components/views/base";
+import { Folder } from "lucide-react";
+import { useCallback } from "react";
+import { getFolderImages, reindexFolder } from "@/app/actions/folder.actions";
+import { logger } from "@/lib/logger";
+
+const viewLogger = logger.withContext("FolderContentView");
 
 export function FolderContentView() {
 	const {
@@ -17,62 +17,53 @@ export function FolderContentView() {
 		currentFolderId,
 		setCurrentFolder,
 		isLoading,
+		currentFolder,
+		setItems,
+		setIsLoading,
 	} = useFileManager();
-	const { openViewer } = useImageViewer();
 
-	useEffect(() => {
-		if (currentFolderId) {
-			setCurrentFolder(currentFolderId);
-		}
-	}, [currentFolderId, setCurrentFolder]);
+	const handleReindexFolder = useCallback(
+		async (id: string) => {
+			try {
+				viewLogger.info("🔄 Reindexando carpeta:", id);
+				setIsLoading(true);
+				await reindexFolder(id);
 
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
-			toggleItemSelection(item, false);
-		},
-		[toggleItemSelection]
-	);
-
-	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
-			if (item.type === "image" || item.mimeType?.startsWith("image/")) {
-				const imageItems = (items || []).filter(
-					(i) => i.type === "image" || i.mimeType?.startsWith("image/")
-				);
-				openViewer(
-					imageItems,
-					imageItems.findIndex((i) => i.id === item.id)
-				);
+				// Recargar las imágenes después de reindexar
+				if (id) {
+					const images = await getFolderImages(id);
+					setItems(images);
+				}
+				viewLogger.info("✅ Carpeta reindexada:", id);
+			} catch (error) {
+				viewLogger.error("❌ Error reindexando carpeta:", error);
+			} finally {
+				setIsLoading(false);
 			}
 		},
-		[openViewer, items]
+		[setItems, setIsLoading]
 	);
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!items || items.length === 0) {
-		return (
-			<EmptyState
-				icon={FolderIcon}
-				title="Carpeta vacía"
-				description="No se encontraron imágenes en esta carpeta"
-			/>
-		);
-	}
+	const contentProps: FolderContentProps = {
+		items,
+		isLoading,
+		toggleItemSelection,
+		currentContainerId: currentFolderId ?? null,
+		containerName: currentFolder?.name ?? null,
+		setCurrentContainer: setCurrentFolder,
+		reindexFolder: handleReindexFolder,
+		emptyState: {
+			icon: Folder,
+			title: "Carpeta vacía",
+			description: `No se encontraron imágenes en ${
+				currentFolder?.name || "esta carpeta"
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
+		},
+	};
 
 	return (
-		<div className="h-full w-full flex overflow-hidden">
-			<div className="h-full w-full overflow-auto">
-				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					<FileGrid
-						items={items}
-						onItemClick={handleItemClick}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
-				</BlurFade>
-			</div>
-		</div>
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView />
+		</ContentViewProvider>
 	);
 }
