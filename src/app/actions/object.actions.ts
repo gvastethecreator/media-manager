@@ -54,17 +54,27 @@ export interface ObjectUpdate extends Partial<ObjectCreate> {
   id: string;
 }
 
-export async function getObjects() {
+export async function getObjects(): Promise<ObjectWithStats[]> {
   try {
-    objectLogger.info('🎯 Obteniendo lista de objetos');
+    objectLogger.info('🎯 Obteniendo objetos');
     const objects = await prisma.object.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
+        }
       },
+      orderBy: { name: 'asc' },
     });
 
     const objectsWithStats = await Promise.all(
@@ -73,27 +83,36 @@ export async function getObjects() {
           where: {
             objects: {
               some: {
-                id: object.id,
-              },
-            },
+                id: object.id
+              }
+            }
           },
           _sum: {
-            size: true,
-          },
+            size: true
+          }
         });
 
         return {
           ...object,
           totalSize: totalSize._sum.size || 0,
+          recentImages: object.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
         };
       })
     );
 
-    objectLogger.info(`✅ ${objects.length} objetos obtenidos`);
+    objectLogger.info('✅ Objetos obtenidos', { count: objects.length });
     return objectsWithStats;
   } catch (error) {
-    objectLogger.error("❌ Error al obtener objetos:", error);
-    throw new ObjectError("No se pudieron obtener los objetos", error);
+    objectLogger.error('❌ Error al obtener objetos', error);
+    throw new ObjectError('No se pudieron obtener los objetos', { cause: error });
   }
 }
 

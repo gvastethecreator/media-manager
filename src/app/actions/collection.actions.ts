@@ -73,18 +73,25 @@ function formatBytes(bytes: number): string {
 
 export async function getCollections(): Promise<CollectionWithStats[]> {
   try {
-    collectionLogger.info("📚 Obteniendo lista de colecciones");
+    collectionLogger.info('📚 Obteniendo colecciones');
     const collections = await prisma.collection.findMany({
       include: {
         _count: {
+          select: { images: true },
+        },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
           select: {
-            images: true
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
           }
         }
       },
-      orderBy: {
-        name: "asc"
-      }
+      orderBy: { name: 'asc' },
     });
 
     const collectionsWithStats = await Promise.all(
@@ -104,16 +111,25 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
 
         return {
           ...collection,
-          totalSize: totalSize._sum.size || 0
+          totalSize: totalSize._sum.size || 0,
+          recentImages: collection.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
         };
       })
     );
 
-    collectionLogger.info(`✅ ${collections.length} colecciones obtenidas`);
+    collectionLogger.info('✅ Colecciones obtenidas', { count: collections.length });
     return collectionsWithStats;
   } catch (error) {
-    collectionLogger.error("❌ Error al obtener colecciones:", error);
-    throw new CollectionError("No se pudieron obtener las colecciones", error);
+    collectionLogger.error('❌ Error al obtener colecciones', error);
+    throw new CollectionError('No se pudieron obtener las colecciones', { cause: error });
   }
 }
 

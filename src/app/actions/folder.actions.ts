@@ -82,22 +82,43 @@ const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
 
 export async function getFolders() {
   try {
-    folderLogger.info('📁 Obteniendo lista de carpetas');
+    folderLogger.info('📁 Iniciando obtención de carpetas');
     const folders = await prisma.folder.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
+        }
       },
+      orderBy: { name: 'asc' },
     });
 
-    folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
-    return folders;
+    folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
+    return folders.map(folder => ({
+      ...folder,
+      recentImages: folder.images
+        .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) // Solo incluir thumbnails menores a 100KB
+        .map(img => {
+          if (img.thumbnail) {
+            return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+          }
+          return null;
+        }),
+      images: undefined // Removemos las imágenes completas para no enviar datos innecesarios
+    }));
   } catch (error) {
-    folderLogger.error("❌ Error al obtener carpetas:", error);
-    throw new FolderError("No se pudieron obtener las carpetas", error);
+    folderLogger.error('❌ Error al obtener carpetas', error);
+    throw new FolderError('No se pudieron obtener las carpetas', { cause: error });
   }
 }
 

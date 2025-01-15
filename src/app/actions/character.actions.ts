@@ -54,17 +54,27 @@ export interface CharacterUpdate extends Partial<CharacterCreate> {
   id: string;
 }
 
-export async function getCharacters() {
+export async function getCharacters(): Promise<CharacterWithStats[]> {
   try {
-    characterLogger.info('👥 Obteniendo lista de personajes');
+    characterLogger.info('👤 Obteniendo personajes');
     const characters = await prisma.character.findMany({
       include: {
         _count: {
-          select: {
-            images: true,
-          },
+          select: { images: true },
         },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+          }
+        }
       },
+      orderBy: { name: 'asc' },
     });
 
     const charactersWithStats = await Promise.all(
@@ -73,27 +83,36 @@ export async function getCharacters() {
           where: {
             characters: {
               some: {
-                id: character.id,
-              },
-            },
+                id: character.id
+              }
+            }
           },
           _sum: {
-            size: true,
-          },
+            size: true
+          }
         });
 
         return {
           ...character,
           totalSize: totalSize._sum.size || 0,
+          recentImages: character.images
+            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+            .map(img => {
+              if (img.thumbnail) {
+                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+              }
+              return null;
+            }),
+          images: undefined
         };
       })
     );
 
-    characterLogger.info(`✅ ${characters.length} personajes obtenidos`);
+    characterLogger.info('✅ Personajes obtenidos', { count: characters.length });
     return charactersWithStats;
   } catch (error) {
-    characterLogger.error("❌ Error al obtener personajes:", error);
-    throw new CharacterError("No se pudieron obtener los personajes", error);
+    characterLogger.error('❌ Error al obtener personajes', error);
+    throw new CharacterError('No se pudieron obtener los personajes', { cause: error });
   }
 }
 
