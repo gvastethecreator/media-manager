@@ -80,7 +80,8 @@ export async function GET(
 
       const tags: RelatedTag[] = image.tags.map(t => ({
         id: t.id,
-        name: t.name
+        name: t.name,
+        color: t.color
       }))
 
       return {
@@ -103,6 +104,8 @@ export async function GET(
         folderId: folder.id,
         createdAt: image.createdAt,
         updatedAt: image.updatedAt,
+        modifiedAt: image.updatedAt,
+        accessedAt: image.updatedAt,
         collections,
         tags,
         albums: [],

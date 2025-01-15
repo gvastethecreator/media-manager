@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+	useState,
+	useEffect,
+	useRef,
+	useCallback,
+	useMemo,
+} from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	X,
@@ -20,30 +26,10 @@ import { getImageUrl } from "@/app/actions/image.actions";
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
 import { ThumbnailQuality } from "@/config/thumbnail.config";
 import { useImageResources } from "@/store/image-resources.store";
-
-export interface ImageItem {
-	id: string;
-	name: string;
-	type: string;
-	url?: string;
-	thumbnail?: string;
-	src?: string;
-	alt?: string;
-	width?: number;
-	height?: number;
-	mimeType?: string;
-	metadata?: {
-		dimensions?: {
-			width: number;
-			height: number;
-		};
-		mimeType?: string;
-		isLocal?: boolean;
-	};
-}
+import type { FileItem } from "@/types/file-item";
 
 interface FileViewerProps {
-	images: ImageItem[];
+	images: FileItem[];
 	initialIndex?: number;
 	isOpen: boolean;
 	onClose: () => void;
@@ -51,15 +37,7 @@ interface FileViewerProps {
 
 const isLocalFile = (url: string) => url.startsWith("file://");
 
-// Configuración de animaciones optimizada
-const springConfig = {
-	type: "spring" as const,
-	stiffness: 200,
-	damping: 25,
-	mass: 1,
-};
-
-// Configuración de reintentos y precarga
+// Configuración optimizada
 const VIEWER_CONFIG = {
 	preload: {
 		batchSize: 2,
@@ -72,6 +50,10 @@ const VIEWER_CONFIG = {
 		visibleItems: 7,
 		preloadItems: 2,
 		loadThreshold: 0.7,
+	},
+	transitions: {
+		duration: 0.3,
+		ease: [0.32, 0.72, 0, 1],
 	},
 };
 
@@ -112,7 +94,7 @@ function ThumbnailItem({
 	isActive,
 	onClick,
 }: {
-	image: ImageItem;
+	image: FileItem;
 	isActive: boolean;
 	onClick: () => void;
 }) {
@@ -189,15 +171,15 @@ function ThumbnailItem({
 	);
 }
 
-// Componente para la imagen principal
-function MainImage({
+// Componente optimizado para la imagen principal
+const MainImage = React.memo(function MainImage({
 	image,
 	scale,
 	position,
 	imageRef,
 	containerRef,
 }: {
-	image: ImageItem;
+	image: FileItem;
 	scale: number;
 	position: { x: number; y: number };
 	imageRef: React.RefObject<HTMLImageElement | null>;
@@ -209,70 +191,103 @@ function MainImage({
 		originalUrl: string | null;
 		error: string | null;
 		isLoading: boolean;
+		originalLoaded: boolean;
 	}>({
 		thumbnail: null,
 		originalUrl: null,
 		error: null,
 		isLoading: true,
+		originalLoaded: false,
 	});
 
-	// Efecto para cargar la imagen original primero
+	// Efecto optimizado para cargar recursos
 	React.useEffect(() => {
 		let mounted = true;
+		let loadingTimeout: NodeJS.Timeout;
 
-		const loadOriginal = async () => {
+		const loadResources = async () => {
 			if (!mounted) return;
 
 			try {
-				setResources((prev) => ({ ...prev, isLoading: true }));
-				const origUrl = await imageResources.getOriginalUrl(image.id);
+				console.log("🔄 Cargando recursos para imagen:", image.id);
 
-				if (!mounted) return;
+				// Cargar thumbnail
+				const thumbUrl = await imageResources.getThumbnail(image.id);
+				console.log("📸 Thumbnail cargado:", !!thumbUrl);
 
-				if (origUrl) {
+				if (mounted && thumbUrl) {
 					setResources((prev) => ({
 						...prev,
-						originalUrl: origUrl,
+						thumbnail: thumbUrl,
 						isLoading: false,
 					}));
 
-					// Cargar thumbnail en segundo plano
-					imageResources.getThumbnail(image.id).then((thumbUrl) => {
-						if (mounted && thumbUrl) {
-							setResources((prev) => ({
-								...prev,
-								thumbnail: thumbUrl,
-							}));
-						}
-					});
-				} else {
-					// Si no hay URL original, intentar con thumbnail
-					const thumbUrl = await imageResources.getThumbnail(image.id);
-					if (mounted) {
-						setResources({
-							thumbnail: thumbUrl || null,
-							originalUrl: null,
-							error: thumbUrl ? null : "Error al cargar la imagen",
-							isLoading: false,
-						});
+					// Cargar URL original
+					console.log("🖼️ Cargando URL original...");
+					const origUrl = await imageResources.getOriginalUrl(image.id);
+					console.log("🔗 URL original obtenida:", !!origUrl);
+
+					if (mounted && origUrl) {
+						// Precargar la imagen original
+						const img = new Image();
+
+						img.onload = () => {
+							console.log("✅ Imagen original cargada completamente");
+							if (mounted) {
+								setResources((prev) => ({
+									...prev,
+									originalUrl: origUrl,
+									originalLoaded: true,
+								}));
+							}
+						};
+
+						img.onerror = (error) => {
+							console.error("❌ Error cargando imagen original:", error);
+							if (mounted) {
+								setResources((prev) => ({
+									...prev,
+									error: "Error al cargar la imagen original",
+								}));
+							}
+						};
+
+						console.log("🔄 Iniciando precarga de imagen original");
+						img.src = origUrl;
 					}
 				}
 			} catch (error) {
 				console.error("Error loading resources:", error);
 				if (mounted) {
-					setResources({
-						thumbnail: null,
-						originalUrl: null,
-						error: "Error al cargar la imagen",
+					setResources((prev) => ({
+						...prev,
+						error:
+							error instanceof Error ?
+								error.message
+							:	"Error al cargar la imagen",
 						isLoading: false,
-					});
+					}));
 				}
 			}
 		};
 
-		loadOriginal();
+		// Reset state on image change
+		console.log("🔄 Cambiando imagen:", image.id);
+		setResources({
+			thumbnail: null,
+			originalUrl: null,
+			error: null,
+			isLoading: true,
+			originalLoaded: false,
+		});
+
+		loadResources();
+
 		return () => {
 			mounted = false;
+			if (loadingTimeout) {
+				clearTimeout(loadingTimeout);
+			}
 		};
 	}, [image.id, imageResources]);
 
@@ -295,8 +310,20 @@ function MainImage({
 
 	return (
 		<motion.div className="relative w-full h-full">
-			{/* Imagen original */}
-			{resources.originalUrl && (
+			{/* Thumbnail como fallback */}
+			{resources.thumbnail && (
+				<motion.img
+					src={resources.thumbnail}
+					alt={image.name}
+					className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: resources.originalLoaded ? 0 : 1 }}
+					transition={{ duration: 0.3 }}
+				/>
+			)}
+
+			{/* Imagen original con transición suave */}
+			{resources.originalUrl && resources.originalLoaded && (
 				<motion.img
 					ref={imageRef}
 					src={resources.originalUrl}
@@ -326,22 +353,11 @@ function MainImage({
 					}}
 				/>
 			)}
-			{/* Thumbnail como fallback */}
-			{!resources.originalUrl && resources.thumbnail && (
-				<motion.img
-					src={resources.thumbnail}
-					alt={image.name}
-					className="absolute inset-0 w-full h-full object-contain"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ duration: 0.3 }}
-				/>
-			)}
 		</motion.div>
 	);
-}
+});
 
-export function FileViewer({
+export const FileViewer = React.memo(function FileViewer({
 	images,
 	initialIndex = 0,
 	isOpen,
@@ -361,23 +377,23 @@ export function FileViewer({
 	// Get current image
 	const currentImage = images[index];
 
-	// Optimizar precarga
-	useEffect(() => {
+	// Optimizar precarga con useCallback
+	const preloadImages = useCallback(async () => {
 		if (!isOpen || !images.length || !currentImage) return;
 
-		const preloadImages = async () => {
-			const nextIndex = (index + 1) % images.length;
-			const prevIndex = index - 1 >= 0 ? index - 1 : images.length - 1;
+		const nextIndex = (index + 1) % images.length;
+		const prevIndex = index - 1 >= 0 ? index - 1 : images.length - 1;
 
-			// Precargar solo las imágenes adyacentes
-			return preloadDebounce.current(async () => {
-				const batch = [images[prevIndex].id, images[nextIndex].id];
-				return imageResources.preloadResources(batch);
-			});
-		};
-
-		preloadImages();
+		return preloadDebounce.current(async () => {
+			const batch = [images[prevIndex].id, images[nextIndex].id];
+			return imageResources.preloadResources(batch);
+		});
 	}, [isOpen, index, images, imageResources, currentImage]);
+
+	// Efecto optimizado para precarga
+	useEffect(() => {
+		preloadImages();
+	}, [preloadImages]);
 
 	// Validate images and index
 	useEffect(() => {
@@ -390,11 +406,9 @@ export function FileViewer({
 		}
 	}, [images, index]);
 
-	// Keyboard navigation
-	useEffect(() => {
-		if (!isOpen) return;
-
-		const handleKeyDown = (e: KeyboardEvent) => {
+	// Keyboard navigation optimizado
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
 			if (e.key === "Escape") onClose();
 			if (e.key === "ArrowLeft")
 				setIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -403,37 +417,72 @@ export function FileViewer({
 			if (e.key === "0" || e.key === "r") resetView();
 			if (e.key === "+") handleZoom(1.2);
 			if (e.key === "-") handleZoom(0.8);
-		};
+		},
+		[images.length, onClose]
+	);
 
+	useEffect(() => {
+		if (!isOpen) return;
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, images.length, onClose]);
+	}, [isOpen, handleKeyDown]);
 
-	const handleWheel = (e: React.WheelEvent) => {
-		e.preventDefault();
-		const zoomFactor = 0.1;
-		const newScale = Math.min(
-			Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
-			8
-		);
-		setScale(newScale);
-	};
+	const handleWheel = useCallback(
+		(e: React.WheelEvent) => {
+			e.preventDefault();
+			const zoomFactor = 0.1;
+			const newScale = Math.min(
+				Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
+				8
+			);
+			setScale(newScale);
+		},
+		[scale]
+	);
 
-	const resetView = () => {
+	const resetView = useCallback(() => {
 		setScale(1);
 		setPosition({ x: 0, y: 0 });
-	};
+	}, []);
 
-	const handleZoom = (factor: number) => {
-		const newScale = Math.min(Math.max(0.1, scale * factor), 5);
-		setScale(newScale);
-	};
+	const handleZoom = useCallback((factor: number) => {
+		setScale((prev) => Math.min(Math.max(0.1, prev * factor), 5));
+	}, []);
+
+	// Optimizar cálculo de visibleRange
+	const calculateVisibleRange = useCallback(
+		(currentIndex: number, total: number) => {
+			const halfVisible = Math.floor(VIEWER_CONFIG.thumbnails.visibleItems / 2);
+			let start = currentIndex - halfVisible;
+			let end = currentIndex + halfVisible;
+
+			// Ajustar rangos si están fuera de límites
+			if (start < 0) {
+				end = Math.min(end - start, total - 1);
+				start = 0;
+			}
+			if (end >= total) {
+				start = Math.max(0, start - (end - total + 1));
+				end = total - 1;
+			}
+
+			return { start, end };
+		},
+		[]
+	);
+
+	// Actualizar visibleRange cuando cambia el índice
+	useEffect(() => {
+		if (images.length) {
+			const range = calculateVisibleRange(index, images.length);
+			setVisibleRange(range);
+		}
+	}, [index, images.length, calculateVisibleRange]);
 
 	// Optimizar renderizado de thumbnails
-	const renderThumbnails = () => {
-		const start = Math.max(0, index - 3);
-		const end = Math.min(images.length - 1, index + 3);
-		setVisibleRange({ start, end });
+	const thumbnailsToRender = useMemo(() => {
+		if (!images.length) return [];
+		const { start, end } = visibleRange;
 
 		return images.slice(start, end + 1).map((image, i) => {
 			const actualIndex = start + i;
@@ -448,7 +497,7 @@ export function FileViewer({
 				/>
 			);
 		});
-	};
+	}, [images, index, visibleRange]);
 
 	if (!isOpen || !images || !images.length || !currentImage) {
 		return null;
@@ -525,7 +574,7 @@ export function FileViewer({
 				{/* Thumbnails */}
 				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
 					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
-						{renderThumbnails()}
+						{thumbnailsToRender}
 					</div>
 				</div>
 
@@ -537,4 +586,4 @@ export function FileViewer({
 			</div>
 		</motion.div>
 	);
-}
+});

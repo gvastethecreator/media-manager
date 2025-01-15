@@ -12,11 +12,11 @@ import {
 import { useState, Suspense, useEffect } from "react";
 import {
 	FileViewer,
-	ImageItem,
 } from "@/components/features/file-viewer/file-viewer";
 import { useImageViewer } from "@/store/image-viewer.store";
 import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
 import { getNavigationData } from "@/app/actions/nav.actions";
+import { ImageItem } from "@/types/file-item";
 
 interface MainLayoutProps {
 	children: React.ReactNode;
