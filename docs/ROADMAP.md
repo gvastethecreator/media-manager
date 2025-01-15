@@ -29,7 +29,6 @@ Este documento organiza las características pendientes por desarrollar según s
 - [ ] **Tests para componentes principales**
   - Tests unitarios para componentes críticos
   - Tests de integración de flujos principales
-  - Tests de accesibilidad
 
 ### Mejoras en Servicios Existentes
 
@@ -47,7 +46,7 @@ Este documento organiza las características pendientes por desarrollar según s
 
   - Selección múltiple de archivos
   - Acciones batch (mover, copiar, eliminar)
-  - Asignación batch de etiquetas/colecciones
+  - Asignación batch de etiquetas/colecciones/etc
   - Empaquetado y descarga de selecciones
 
 - [ ] **Navegación y Organización**

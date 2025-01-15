@@ -1,8 +1,6 @@
 import sharp from 'sharp'
 import { existsSync } from 'fs'
-import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
-import type { ImageMetadata } from './metadata'
-import { thumbnailLogger as logger } from './utils'
+import { logger } from './logger'
 import { formatBytes } from './utils'
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png'

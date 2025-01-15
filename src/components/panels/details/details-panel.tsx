@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { FileItem } from "@/types/file-item";
+import type { FileItem, FileMetadata } from "@/types/file-item";
+import { useImageViewer } from "@/store/image-viewer.store";
 import {
 	ImageOff,
 	Info,
@@ -10,319 +12,998 @@ import {
 	Folder,
 	Download,
 	Copy,
-	BookmarkPlus,
 	Heart,
-	Tag as TagIcon,
+	Flag,
 	Trash2,
 	FileText,
 	Calendar,
 	Image as ImageIcon,
 	Clock,
-	Info as InfoIcon,
-	Wand2,
-	Layers,
-	Scale,
-	Dice5,
-	Box,
-	GitBranch,
-	Gauge,
-	HardDrive,
-	Timer,
+	Play,
+	X,
 	Bug,
-	Camera,
-	Aperture,
-	Focus,
+	HardDrive,
+	GitBranch,
+	Wand2,
+	Box,
 	MessageSquare,
 	MessageSquareOff,
-	HeartOff,
-	StarIcon,
-	Flag,
+	Aperture,
+	Scale,
+	Focus,
+	Timer,
+	Camera,
+	Layers,
 	Palette,
-	Play,
+	Gauge,
+	Dice5,
+	Share2,
+	Plus,
+	BookImage,
+	TagIcon,
+	User2,
+	MapPin,
+	MoreVertical,
+	Scissors,
+	GitGraph,
+	Settings2,
+	Shield,
+	Tags,
+	Star,
+	Map,
+	Mountain,
+	AlignLeft,
+	Hash,
+	Copyright,
+	Link,
+	FileType,
+	Heading2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useImageViewer } from "@/store/image-viewer";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { motion } from "motion/react";
-import { ImageCard } from "@/components/features/file-viewer/components/file-viewer-card";
-import { useToast } from "@/components/ui/use-toast";
-import { useFileManager } from "@/store/file-manager";
-import { useCollectionTagContext } from "@/context/settings-context";
-import { cn } from "@/lib/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { ImageMetadata } from "@/lib/metadata";
-import { DashboardPanel, StatsPanel } from "../stats/stats-panel";
-interface DetailsPanelProps {
-	selectedItems: FileItem[];
-}
+import { StatsPanel } from "../stats/stats-panel";
+import { useToast } from "@/components/ui/use-toast";
+import { updateImageStats, getImageUrl } from "@/app/actions/image.actions";
+import { useFileManager } from "@/store/file-manager.store";
+import { formatDate, formatBytes, cn } from "@/lib/utils";
+import { parseMetadata } from "@/lib/metadata-parser";
+
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { useImageResources } from "@/store/image-resources.store";
 
 interface InfoItemProps {
 	icon: React.ReactNode;
 	label: string;
-	value: string | number | null | undefined;
-	tooltip?: string;
+	value: string | number | boolean | undefined | null | any;
 }
 
-const InfoItem = ({ icon, label, value, tooltip }: InfoItemProps) => {
-	if (!value) return null;
-
-	const content = (
-		<div className="flex items-center py-1 grid grid-cols-[auto_1fr] gap-2 align-start">
-			<div className="flex items-center gap-2 text-xs text-muted-foreground">
+function InfoItem({ icon, label, value }: InfoItemProps) {
+	return (
+		<div className="flex items-center justify-between text-sm">
+			<div className="flex items-center gap-2">
 				{icon}
-				<span>{label}</span>
+				<span className="text-muted-foreground">{label}</span>
 			</div>
-			<span className="font-mono text-[10px] px-2 py-0.5 bg-muted/50 hover:bg-muted/70 transition-colors rounded-sm">
-				{value}
-			</span>
+			<span className="font-medium">{value?.toString() || "N/A"}</span>
 		</div>
 	);
+}
 
-	if (tooltip) {
+interface DetailsPanelProps {
+	selectedItems: FileItem[];
+	onClose?: () => void;
+}
+
+const getMetadata = (metadata: string | null): FileMetadata | null => {
+	if (!metadata) return null;
+	try {
+		const parsed = JSON.parse(metadata);
+		if (!parsed || typeof parsed !== "object") {
+			console.warn("Metadata inválida:", metadata);
+			return null;
+		}
+		return parsed;
+	} catch (error) {
+		console.error("Error parseando metadata:", error);
+		return null;
+	}
+};
+
+// Configuración de carga de imágenes
+const LOAD_CONFIG = {
+	batchSize: 5,
+	retryAttempts: 3,
+	retryDelay: 1000,
+};
+
+// Componente para la vista previa de imagen
+const ImagePreview = React.memo(function ImagePreview({
+	item,
+}: {
+	item: FileItem;
+}) {
+	const { openViewer } = useImageViewer();
+	const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+	const [error, setError] = React.useState<string | null>(null);
+	const metadata = React.useMemo(
+		() => getMetadata(item.metadata),
+		[item.metadata]
+	);
+
+	React.useEffect(() => {
+		let mounted = true;
+
+		const loadImage = async () => {
+			try {
+				const url = await getImageUrl(item.id);
+				if (mounted && url) {
+					setImageUrl(url);
+				}
+			} catch (error) {
+				console.error("Error loading image:", error);
+				if (mounted) {
+					setError(
+						error instanceof Error ? error.message : "Error al cargar la imagen"
+					);
+				}
+			}
+		};
+
+		loadImage();
+
+		return () => {
+			mounted = false;
+		};
+	}, [item.id]);
+
+	const handleClick = React.useCallback(() => {
+		openViewer([item], 0);
+	}, [item, openViewer]);
+
+	if (error || !imageUrl) {
 		return (
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>{content}</TooltipTrigger>
-					<TooltipContent>
-						<p>{tooltip}</p>
-					</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
+			<div className="flex items-center justify-center h-full bg-muted">
+				<ImageOff className="h-8 w-8 text-muted-foreground" />
+			</div>
 		);
 	}
 
-	return content;
-};
+	return (
+		<div
+			className="relative w-full h-full cursor-pointer group"
+			onClick={handleClick}
+		>
+			<img
+				src={imageUrl}
+				alt={item.name}
+				className="w-full h-full object-contain"
+				loading="lazy"
+			/>
+			<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+				<Maximize2 className="h-6 w-6 text-white" />
+			</div>
+		</div>
+	);
+});
 
-export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
-	// 1. Estados
-	const [imageError, setImageError] = React.useState(false);
+// Componente optimizado para información básica
+const BasicInfo = React.memo(function BasicInfo({
+	item,
+	metadata,
+}: {
+	item: FileItem;
+	metadata: FileMetadata | null;
+}) {
+	return (
+		<div className="flex flex-col gap-1.5">
+			<InfoItem
+				icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
+				label="Nombre"
+				value={item.name}
+			/>
+			<InfoItem
+				icon={<ImageIcon className="h-3.5 w-3.5 text-green-400" />}
+				label="Tipo"
+				value={metadata?.mimeType?.split("/")[1] || "Desconocido"}
+			/>
+			<InfoItem
+				icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
+				label="Tamaño"
+				value={formatBytes(item.size)}
+			/>
+			{metadata?.dimensions && (
+				<InfoItem
+					icon={<Maximize2 className="h-3.5 w-3.5 text-yellow-400" />}
+					label="Dimensiones"
+					value={`${metadata.dimensions.width} × ${metadata.dimensions.height}`}
+				/>
+			)}
+			{metadata?.colorSpace && (
+				<InfoItem
+					icon={<Palette className="h-3.5 w-3.5 text-orange-400" />}
+					label="Espacio de color"
+					value={metadata.colorSpace}
+				/>
+			)}
+			{metadata?.hasAlpha && (
+				<InfoItem
+					icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />}
+					label="Canal alfa"
+					value="Sí"
+				/>
+			)}
+			{metadata?.isAnimated && (
+				<InfoItem
+					icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
+					label="Animada"
+					value="Sí"
+				/>
+			)}
+		</div>
+	);
+});
+
+// Componente para entidades relacionadas
+const RelatedEntities = React.memo(function RelatedEntities({
+	item,
+}: {
+	item: FileItem;
+}) {
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Entidades relacionadas
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				{item.collections?.length > 0 && (
+					<InfoItem
+						icon={<BookImage className="h-3.5 w-3.5 text-blue-400" />}
+						label="Colecciones"
+						value={`${item.collections.length} ${
+							item.collections.length === 1 ? "colección" : "colecciones"
+						}`}
+					/>
+				)}
+				{item.tags?.length > 0 && (
+					<InfoItem
+						icon={<TagIcon className="h-3.5 w-3.5 text-green-400" />}
+						label="Etiquetas"
+						value={`${item.tags.length} ${
+							item.tags.length === 1 ? "etiqueta" : "etiquetas"
+						}`}
+					/>
+				)}
+				{item.albums?.length > 0 && (
+					<InfoItem
+						icon={<Camera className="h-3.5 w-3.5 text-purple-400" />}
+						label="Álbumes"
+						value={`${item.albums.length} ${
+							item.albums.length === 1 ? "álbum" : "álbumes"
+						}`}
+					/>
+				)}
+				{item.characters?.length > 0 && (
+					<InfoItem
+						icon={<User2 className="h-3.5 w-3.5 text-yellow-400" />}
+						label="Personajes"
+						value={`${item.characters.length} ${
+							item.characters.length === 1 ? "personaje" : "personajes"
+						}`}
+					/>
+				)}
+				{item.places?.length > 0 && (
+					<InfoItem
+						icon={<MapPin className="h-3.5 w-3.5 text-orange-400" />}
+						label="Lugares"
+						value={`${item.places.length} ${
+							item.places.length === 1 ? "lugar" : "lugares"
+						}`}
+					/>
+				)}
+				{item.objects?.length > 0 && (
+					<InfoItem
+						icon={<Box className="h-3.5 w-3.5 text-indigo-400" />}
+						label="Objetos"
+						value={`${item.objects.length} ${
+							item.objects.length === 1 ? "objeto" : "objetos"
+						}`}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Componente optimizado para metadata de AI
+const AIGenerationInfo = React.memo(function AIGenerationInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	const { toast } = useToast();
+	const [isPromptExpanded, setIsPromptExpanded] = useState(false);
+	const [isNegativePromptExpanded, setIsNegativePromptExpanded] =
+		useState(false);
+	const [isWorkflowExpanded, setIsWorkflowExpanded] = useState(false);
+
+	if (!metadata?.generation) return null;
+
+	const gen = metadata.generation;
+	const isSD = gen.type === "stable-diffusion";
+	const isComfyUI = gen.type === "comfyui";
+	const isInvokeAI = gen.type === "invoke-ai";
+	const isNovelAI = gen.type === "novel-ai";
+
+	const truncateText = (text: string, maxLength: number = 150) => {
+		if (text.length <= maxLength) return text;
+		return text.slice(0, maxLength) + "...";
+	};
+
+	return (
+		<div className="flex flex-col gap-2">
+			<div className="flex items-center justify-between">
+				<h3 className="text-xs font-medium text-muted-foreground">
+					Información de Generación AI
+				</h3>
+				<Badge
+					variant="outline"
+					className={cn(
+						"text-[10px] h-5 px-2",
+						isSD && "bg-blue-500/10 text-blue-500",
+						isComfyUI && "bg-green-500/10 text-green-500",
+						isInvokeAI && "bg-purple-500/10 text-purple-500",
+						isNovelAI && "bg-pink-500/10 text-pink-500"
+					)}
+				>
+					{isSD && "Stable Diffusion"}
+					{isComfyUI && "ComfyUI"}
+					{isInvokeAI && "InvokeAI"}
+					{isNovelAI && "NovelAI"}
+				</Badge>
+			</div>
+
+			<div className="flex flex-col gap-1.5">
+				{/* Prompt */}
+				{gen.prompt && (
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<MessageSquare className="h-3.5 w-3.5 text-teal-400" />
+								<span className="text-xs text-muted-foreground">Prompt</span>
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-6 px-2"
+								onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+							>
+								{isPromptExpanded ? "Colapsar" : "Expandir"}
+							</Button>
+						</div>
+						<div
+							className={cn(
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isPromptExpanded && "max-h-24 overflow-hidden"
+							)}
+						>
+							<p className="whitespace-pre-wrap break-words">
+								{isPromptExpanded ? gen.prompt : truncateText(gen.prompt)}
+							</p>
+						</div>
+					</div>
+				)}
+
+				{/* Prompt Negativo */}
+				{gen.negative_prompt && (
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />
+								<span className="text-xs text-muted-foreground">
+									Prompt Negativo
+								</span>
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-6 px-2"
+								onClick={() =>
+									setIsNegativePromptExpanded(!isNegativePromptExpanded)
+								}
+							>
+								{isNegativePromptExpanded ? "Colapsar" : "Expandir"}
+							</Button>
+						</div>
+						<div
+							className={cn(
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isNegativePromptExpanded && "max-h-24 overflow-hidden"
+							)}
+						>
+							<p className="whitespace-pre-wrap break-words">
+								{isNegativePromptExpanded ?
+									gen.negative_prompt
+								:	truncateText(gen.negative_prompt)}
+							</p>
+						</div>
+					</div>
+				)}
+
+				{/* Modelo */}
+				{gen.model && (
+					<InfoItem
+						icon={<Box className="h-3.5 w-3.5 text-sky-400" />}
+						label="Modelo"
+						value={gen.model}
+					/>
+				)}
+
+				{/* Parámetros */}
+				<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+					{gen.steps && (
+						<InfoItem
+							icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
+							label="Pasos"
+							value={gen.steps}
+						/>
+					)}
+					{(gen.cfg_scale || gen.cfg) && (
+						<InfoItem
+							icon={<Scale className="h-3.5 w-3.5 text-fuchsia-400" />}
+							label="CFG"
+							value={gen.cfg_scale || gen.cfg}
+						/>
+					)}
+					{gen.seed && (
+						<InfoItem
+							icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
+							label="Semilla"
+							value={gen.seed}
+						/>
+					)}
+					{gen.sampler && (
+						<InfoItem
+							icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
+							label="Sampler"
+							value={gen.sampler}
+						/>
+					)}
+					{gen.scheduler && (
+						<InfoItem
+							icon={<Timer className="h-3.5 w-3.5 text-purple-400" />}
+							label="Scheduler"
+							value={gen.scheduler}
+						/>
+					)}
+					{isSD && gen.clip_skip && (
+						<InfoItem
+							icon={<Scissors className="h-3.5 w-3.5 text-orange-400" />}
+							label="CLIP Skip"
+							value={gen.clip_skip}
+						/>
+					)}
+				</div>
+
+				{/* Workflow (ComfyUI) */}
+				{isComfyUI && gen.workflow && (
+					<div className="flex flex-col gap-1">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<GitGraph className="h-3.5 w-3.5 text-blue-400" />
+								<span className="text-xs text-muted-foreground">Workflow</span>
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-6 px-2"
+								onClick={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
+							>
+								{isWorkflowExpanded ? "Colapsar" : "Expandir"}
+							</Button>
+						</div>
+						<div
+							className={cn(
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isWorkflowExpanded && "max-h-32 overflow-hidden"
+							)}
+						>
+							<pre className="whitespace-pre-wrap break-all">
+								{isWorkflowExpanded ?
+									gen.workflow
+								:	truncateText(gen.workflow, 300)}
+							</pre>
+						</div>
+					</div>
+				)}
+
+				{/* Parámetros adicionales */}
+				{gen.extra_params && Object.keys(gen.extra_params).length > 0 && (
+					<div className="mt-2">
+						<h4 className="text-xs font-medium text-muted-foreground mb-1">
+							Parámetros adicionales
+						</h4>
+						<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+							{Object.entries(gen.extra_params).map(([key, value]) => (
+								<InfoItem
+									key={key}
+									icon={<Settings2 className="h-3.5 w-3.5 text-neutral-400" />}
+									label={key}
+									value={value}
+								/>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* Metadata completa */}
+				<div className="mt-2">
+					<Button
+						variant="ghost"
+						size="sm"
+						className="w-full text-xs"
+						onClick={() => {
+							navigator.clipboard.writeText(JSON.stringify(gen));
+							toast({
+								title: "Copiado",
+								description: "Metadata copiada al portapapeles",
+							});
+						}}
+					>
+						<Copy className="h-3.5 w-3.5 mr-2" />
+						Copiar metadata completa
+					</Button>
+				</div>
+			</div>
+		</div>
+	);
+});
+
+// Componente para metadata XMP
+const XMPInfo = React.memo(function XMPInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	if (!metadata?.xmp) return null;
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información XMP
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				{metadata.xmp.title && (
+					<InfoItem
+						icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
+						label="Título"
+						value={metadata.xmp.title}
+					/>
+				)}
+				{metadata.xmp.creator && (
+					<InfoItem
+						icon={<User2 className="h-3.5 w-3.5 text-green-400" />}
+						label="Creador"
+						value={metadata.xmp.creator}
+					/>
+				)}
+				{metadata.xmp.rights && (
+					<InfoItem
+						icon={<Shield className="h-3.5 w-3.5 text-red-400" />}
+						label="Derechos"
+						value={metadata.xmp.rights}
+					/>
+				)}
+				{metadata.xmp.subject && metadata.xmp.subject.length > 0 && (
+					<InfoItem
+						icon={<Tags className="h-3.5 w-3.5 text-purple-400" />}
+						label="Temas"
+						value={metadata.xmp.subject.join(", ")}
+					/>
+				)}
+				{metadata.xmp.rating !== undefined && (
+					<InfoItem
+						icon={<Star className="h-3.5 w-3.5 text-yellow-400" />}
+						label="Valoración"
+						value={metadata.xmp.rating}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Componente para metadata IPTC
+const IPTCInfo = React.memo(function IPTCInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	if (!metadata?.iptc) return null;
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información IPTC
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				{metadata.iptc.headline && (
+					<InfoItem
+						icon={<Heading2 className="h-3.5 w-3.5 text-blue-400" />}
+						label="Titular"
+						value={metadata.iptc.headline}
+					/>
+				)}
+				{metadata.iptc.caption && (
+					<InfoItem
+						icon={<AlignLeft className="h-3.5 w-3.5 text-green-400" />}
+						label="Descripción"
+						value={metadata.iptc.caption}
+					/>
+				)}
+				{metadata.iptc.keywords && metadata.iptc.keywords.length > 0 && (
+					<InfoItem
+						icon={<Hash className="h-3.5 w-3.5 text-purple-400" />}
+						label="Palabras clave"
+						value={metadata.iptc.keywords.join(", ")}
+					/>
+				)}
+				{metadata.iptc.copyright && (
+					<InfoItem
+						icon={<Copyright className="h-3.5 w-3.5 text-red-400" />}
+						label="Copyright"
+						value={metadata.iptc.copyright}
+					/>
+				)}
+				{metadata.iptc.source && (
+					<InfoItem
+						icon={<Link className="h-3.5 w-3.5 text-cyan-400" />}
+						label="Fuente"
+						value={metadata.iptc.source}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Componente para metadata EXIF
+const ExifInfo = React.memo(function ExifInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	if (!metadata?.exif) return null;
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información EXIF
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				{metadata.exif.make && (
+					<InfoItem
+						icon={<Box className="h-3.5 w-3.5 text-indigo-400" />}
+						label="Fabricante"
+						value={metadata.exif.make}
+					/>
+				)}
+				{metadata.exif.model && (
+					<InfoItem
+						icon={<Camera className="h-3.5 w-3.5 text-pink-400" />}
+						label="Modelo"
+						value={metadata.exif.model}
+					/>
+				)}
+				{metadata.exif.software && (
+					<InfoItem
+						icon={<Layers className="h-3.5 w-3.5 text-cyan-400" />}
+						label="Software"
+						value={metadata.exif.software}
+					/>
+				)}
+				{metadata.exif.dateTime && (
+					<InfoItem
+						icon={<Calendar className="h-3.5 w-3.5 text-orange-400" />}
+						label="Fecha"
+						value={formatDate(metadata.exif.dateTime)}
+					/>
+				)}
+				{metadata.exif.exposureTime && (
+					<InfoItem
+						icon={<Timer className="h-3.5 w-3.5 text-red-400" />}
+						label="Tiempo de exposición"
+						value={`${metadata.exif.exposureTime}s`}
+					/>
+				)}
+				{metadata.exif.fNumber && (
+					<InfoItem
+						icon={<Aperture className="h-3.5 w-3.5 text-emerald-400" />}
+						label="Apertura"
+						value={`f/${metadata.exif.fNumber}`}
+					/>
+				)}
+				{metadata.exif.iso && (
+					<InfoItem
+						icon={<Scale className="h-3.5 w-3.5 text-violet-400" />}
+						label="ISO"
+						value={metadata.exif.iso}
+					/>
+				)}
+				{metadata.exif.focalLength && (
+					<InfoItem
+						icon={<Focus className="h-3.5 w-3.5 text-amber-400" />}
+						label="Distancia focal"
+						value={`${metadata.exif.focalLength}mm`}
+					/>
+				)}
+				{metadata.exif.lens && (
+					<InfoItem
+						icon={<Camera className="h-3.5 w-3.5 text-teal-400" />}
+						label="Lente"
+						value={metadata.exif.lens}
+					/>
+				)}
+				{metadata.exif.copyright && (
+					<InfoItem
+						icon={<Copyright className="h-3.5 w-3.5 text-red-400" />}
+						label="Copyright"
+						value={metadata.exif.copyright}
+					/>
+				)}
+				{metadata.exif.artist && (
+					<InfoItem
+						icon={<User2 className="h-3.5 w-3.5 text-purple-400" />}
+						label="Artista"
+						value={metadata.exif.artist}
+					/>
+				)}
+				{metadata.exif.description && (
+					<InfoItem
+						icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
+						label="Descripción"
+						value={metadata.exif.description}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Componente para información GPS
+const GPSInfo = React.memo(function GPSInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	if (!metadata?.exif?.gps) return null;
+
+	const { latitude, longitude, altitude } = metadata.exif.gps;
+	const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información GPS
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				<InfoItem
+					icon={<MapPin className="h-3.5 w-3.5 text-red-400" />}
+					label="Latitud"
+					value={latitude.toFixed(6)}
+				/>
+				<InfoItem
+					icon={<MapPin className="h-3.5 w-3.5 text-blue-400" />}
+					label="Longitud"
+					value={longitude.toFixed(6)}
+				/>
+				{altitude !== undefined && (
+					<InfoItem
+						icon={<Mountain className="h-3.5 w-3.5 text-green-400" />}
+						label="Altitud"
+						value={`${altitude.toFixed(1)}m`}
+					/>
+				)}
+				<Button
+					variant="ghost"
+					size="sm"
+					className="mt-1"
+					onClick={() => window.open(mapsUrl, "_blank")}
+				>
+					<Map className="h-3.5 w-3.5 mr-2" />
+					Ver en Google Maps
+				</Button>
+			</div>
+		</div>
+	);
+});
+
+// Componente para información técnica de la imagen
+const TechnicalInfo = React.memo(function TechnicalInfo({
+	metadata,
+}: {
+	metadata: FileMetadata | null;
+}) {
+	if (!metadata) return null;
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información Técnica
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				{metadata.mimeType && (
+					<InfoItem
+						icon={<FileType className="h-3.5 w-3.5 text-blue-400" />}
+						label="Formato"
+						value={metadata.mimeType.split("/")[1].toUpperCase()}
+					/>
+				)}
+				{metadata.dimensions && (
+					<InfoItem
+						icon={<Maximize2 className="h-3.5 w-3.5 text-green-400" />}
+						label="Dimensiones"
+						value={`${metadata.dimensions.width} × ${metadata.dimensions.height}`}
+					/>
+				)}
+				{metadata.colorSpace && (
+					<InfoItem
+						icon={<Palette className="h-3.5 w-3.5 text-purple-400" />}
+						label="Espacio de color"
+						value={metadata.colorSpace}
+					/>
+				)}
+				{metadata.hasAlpha !== undefined && (
+					<InfoItem
+						icon={<Layers className="h-3.5 w-3.5 text-orange-400" />}
+						label="Canal alfa"
+						value={metadata.hasAlpha ? "Sí" : "No"}
+					/>
+				)}
+				{metadata.isAnimated !== undefined && (
+					<InfoItem
+						icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
+						label="Animada"
+						value={metadata.isAnimated ? "Sí" : "No"}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Componente para información del sistema
+const SystemInfo = React.memo(function SystemInfo({
+	item,
+}: {
+	item: FileItem;
+}) {
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información del sistema
+			</h3>
+			<div className="flex flex-col gap-1.5">
+				<InfoItem
+					icon={<Calendar className="h-3.5 w-3.5 text-blue-400" />}
+					label="Creado"
+					value={formatDate(item.createdAt)}
+				/>
+				<InfoItem
+					icon={<Clock className="h-3.5 w-3.5 text-green-400" />}
+					label="Modificado"
+					value={formatDate(item.modifiedAt)}
+				/>
+				<InfoItem
+					icon={<Clock className="h-3.5 w-3.5 text-yellow-400" />}
+					label="Último acceso"
+					value={formatDate(item.accessedAt)}
+				/>
+				<InfoItem
+					icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
+					label="Tamaño"
+					value={formatBytes(item.size)}
+				/>
+				{item.folderId && (
+					<InfoItem
+						icon={<Folder className="h-3.5 w-3.5 text-orange-400" />}
+						label="ID de Carpeta"
+						value={item.folderId}
+					/>
+				)}
+			</div>
+		</div>
+	);
+});
+
+// Actualizar el componente principal
+export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const [isMarked, setIsMarked] = React.useState(false);
-
-	// 2. Hooks
+	const imageResources = useImageResources();
 	const { openViewer } = useImageViewer();
 	const { toast } = useToast();
-	const { toggleItemSelection } = useFileManager();
-	const { settings } = useCollectionTagContext();
+	const fileManager = useFileManager();
 
-	// Funciones de utilidad
-	const formatFileSize = (size: number | undefined) => {
-		if (!size || isNaN(size)) return "0 B";
-		const units = ["B", "KB", "MB", "GB", "TB"];
-		const i = Math.floor(Math.log(size) / Math.log(1024));
-		return `${(size / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
-	};
+	// Memoizar metadata y selectedItem
+	const selectedItem = selectedItems[0];
+	const metadata = React.useMemo(() => {
+		if (!selectedItem?.metadata) {
+			console.warn("No hay metadata disponible para:", selectedItem?.name);
+			return null;
+		}
 
-	const formatDate = (dateStr: string | undefined | null) => {
-		if (!dateStr) return "";
+		console.log("🔍 Metadata raw:", selectedItem.metadata);
+
 		try {
-			return new Date(dateStr).toLocaleString();
-		} catch (e) {
-			return dateStr;
+			const parsed = parseMetadata(selectedItem.metadata);
+			console.log("✅ Metadata parseada:", {
+				nombre: selectedItem.name,
+				keys: parsed ? Object.keys(parsed) : [],
+				metadata: parsed,
+			});
+			return parsed;
+		} catch (error) {
+			console.error("❌ Error parseando metadata:", {
+				error,
+				metadata: selectedItem.metadata,
+			});
+			return null;
 		}
-	};
+	}, [selectedItem?.metadata, selectedItem?.name]);
 
-	// Parsear metadata de manera segura
-	const parseMetadata = (metadata: any): ImageMetadata => {
-		if (!metadata) return {};
+	// Memoizar handlers
+	const handleAction = React.useCallback(
+		async (action: string) => {
+			if (!selectedItem) return;
 
-		if (typeof metadata === "string") {
-			try {
-				return JSON.parse(metadata);
-			} catch (e) {
-				console.error("Error parsing metadata:", e);
-				return {};
-			}
-		}
-
-		return metadata;
-	};
-
-	// 3. Efectos
-	React.useEffect(() => {
-		setImageError(false);
-		setIsMarked(false);
-	}, [selectedItems]);
-
-	// 4. Callbacks
-	const handleContextMenuAction = React.useCallback(
-		async (action: string, file: FileItem, data?: any) => {
 			try {
 				switch (action) {
-					case "mark-toggle":
-						setIsMarked((prev) => !prev);
+					case "mark":
+						setIsMarked(!isMarked);
+						toast({
+							title: isMarked ? "Desmarcado" : "Marcado",
+							description: selectedItem.name,
+						});
 						break;
-
-					case "favorite-toggle":
-						try {
-							const newFavoriteState = !file.isFavorite;
-							const updatedFile = { ...file, isFavorite: newFavoriteState };
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: newFavoriteState
-									? "Agregado a favoritos"
-									: "Eliminado de favoritos",
-								description: `${file.name} ha sido ${
-									newFavoriteState ? "agregado a" : "eliminado de"
-								} favoritos`,
-							});
-
-							const response = await fetch(`/api/images/${file.id}/favorite`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ isFavorite: newFavoriteState }),
-							});
-
-							if (!response.ok) {
-								toggleItemSelection(
-									{ ...file, isFavorite: !newFavoriteState },
-									false
-								);
-								throw new Error("Error al actualizar favorito");
-							}
-						} catch (error) {
-							console.error("Error toggling favorite:", error);
-							toast({
-								title: "Error",
-								description: "No se pudo actualizar el estado de favorito",
-								variant: "destructive",
-							});
-						}
+					case "favorite":
+						// TODO: Implementar toggle favorito
+						toast({
+							title:
+								selectedItem.isFavorite ?
+									"Eliminado de favoritos"
+								:	"Agregado a favoritos",
+							description: selectedItem.name,
+						});
 						break;
-
-					case "collection-add":
-						try {
-							if (!data?.collectionId)
-								throw new Error("ID de colección no proporcionado");
-
-							toast({
-								title: "Agregando a colección",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(
-								`/api/collections/${data.collectionId}/files`,
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify({ fileId: file.id }),
-								}
-							);
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar a la colección"
-								);
-							}
-
-							const updatedFile = {
-								...file,
-								collections: [
-									...(file.collections || []),
-									{
-										id: responseData.collection.id,
-										name: responseData.collection.name,
-										emoji: responseData.collection.emoji,
-										color: responseData.collection.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Agregado a la colección",
-								description: `${file.name} ha sido agregado a ${responseData.collection.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding to collection:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar a la colección",
-								variant: "destructive",
-							});
-						}
+					case "download":
+						await updateImageStats(selectedItem.id, "download");
+						toast({
+							title: "Descarga iniciada",
+							description: selectedItem.name,
+						});
 						break;
-
-					case "tag-add":
-						try {
-							if (!data?.tagId)
-								throw new Error("ID de etiqueta no proporcionado");
-
-							toast({
-								title: "Agregando etiqueta",
-								description: "Procesando...",
-							});
-
-							const response = await fetch(`/api/tags/${data.tagId}/files`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ fileId: file.id }),
-							});
-
-							const responseData = await response.json().catch(() => null);
-
-							if (!response.ok) {
-								throw new Error(
-									responseData?.error || "Error al agregar la etiqueta"
-								);
-							}
-
-							const updatedFile = {
-								...file,
-								tags: [
-									...(file.tags || []),
-									{
-										id: responseData.tag.id,
-										name: responseData.tag.name,
-										color: responseData.tag.color || "#000000",
-									},
-								],
-							};
-							toggleItemSelection(updatedFile, false);
-
-							toast({
-								title: "Etiqueta agregada",
-								description: `${file.name} ha sido etiquetado con ${responseData.tag.name}`,
-							});
-						} catch (error) {
-							console.error("Error adding tag:", error);
-							toast({
-								title: "Error",
-								description:
-									error instanceof Error
-										? error.message
-										: "No se pudo agregar la etiqueta",
-								variant: "destructive",
-							});
-						}
+					case "share":
+						// TODO: Implementar compartir
+						toast({
+							title: "Compartir",
+							description: "Función no implementada",
+						});
 						break;
-
+					case "delete":
+						// TODO: Implementar eliminación
+						toast({
+							title: "Archivo eliminado",
+							description: selectedItem.name,
+						});
+						break;
 					default:
-						console.warn("Acción no implementada:", action);
+						break;
 				}
 			} catch (error) {
 				console.error("Error ejecutando acción:", error);
@@ -333,178 +1014,10 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				});
 			}
 		},
-		[toggleItemSelection, toast]
+		[selectedItem, isMarked, toast]
 	);
 
-	const handleOpenViewer = React.useCallback(
-		(item: FileItem) => {
-			if (
-				item.type === "image" ||
-				item.metadata?.mimeType?.startsWith("image/")
-			) {
-				openViewer([item], 0);
-			}
-		},
-		[openViewer]
-	);
-
-	const handleCopy = React.useCallback(
-		async (path: string) => {
-			try {
-				// Intentar obtener la imagen original primero
-				let response = await fetch(`/api/files/${selectedItems[0].id}/raw`);
-
-				// Si falla, intentar con el thumbnail
-				if (!response.ok) {
-					const thumbnailUrl = `/api/thumbnails/${selectedItems[0].id}?quality=high`;
-					response = await fetch(thumbnailUrl);
-				}
-
-				if (!response.ok) {
-					throw new Error("No se pudo obtener la imagen");
-				}
-
-				const blob = await response.blob();
-
-				// Función para intentar copiar usando el portapapeles
-				const tryClipboardCopy = async () => {
-					if (navigator.clipboard && navigator.clipboard.write) {
-						try {
-							window.focus();
-							await navigator.clipboard.write([
-								new ClipboardItem({
-									[blob.type]: blob,
-								}),
-							]);
-							return true;
-						} catch (clipboardError) {
-							console.warn("Error copying image to clipboard:", clipboardError);
-							return false;
-						}
-					}
-					return false;
-				};
-
-				const clipboardSuccess = await tryClipboardCopy();
-				if (clipboardSuccess) {
-					toast({
-						title: "Copiado",
-						description: "Imagen copiada al portapapeles",
-					});
-					return;
-				}
-
-				// Si no se pudo usar el portapapeles, copiar el path
-				await navigator.clipboard.writeText(path);
-				toast({
-					title: "Copiado",
-					description: "Ruta del archivo copiada al portapapeles",
-				});
-			} catch (error) {
-				console.error("Error copying to clipboard:", error);
-				toast({
-					title: "Error",
-					description: "No se pudo copiar al portapapeles",
-					variant: "destructive",
-				});
-			}
-		},
-		[selectedItems, toast]
-	);
-
-	const handleDownload = React.useCallback(
-		async (path: string) => {
-			try {
-				const response = await fetch(
-					`/api/files/${selectedItems[0].id}/download`
-				);
-				if (!response.ok) throw new Error("Error al descargar archivo");
-
-				const blob = await response.blob();
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement("a");
-				a.href = url;
-				a.download = selectedItems[0].name;
-				document.body.appendChild(a);
-				a.click();
-				window.URL.revokeObjectURL(url);
-				document.body.removeChild(a);
-
-				toast({
-					title: "Descarga iniciada",
-					description: `Se ha iniciado la descarga de ${selectedItems[0].name}`,
-				});
-			} catch (error) {
-				console.error("Error downloading file:", error);
-				toast({
-					title: "Error",
-					description: "No se pudo descargar el archivo",
-					variant: "destructive",
-				});
-			}
-		},
-		[selectedItems, toast]
-	);
-
-	const handleOpenFolder = React.useCallback(
-		async (path: string) => {
-			try {
-				const response = await fetch(
-					`/api/files/${selectedItems[0].id}/location`,
-					{
-						method: "POST",
-					}
-				);
-
-				if (!response.ok) throw new Error("Error al abrir ubicación");
-
-				toast({
-					title: "Ubicación abierta",
-					description: "Se ha abierto la ubicación del archivo",
-				});
-			} catch (error) {
-				console.error("Error opening location:", error);
-				toast({
-					title: "Error",
-					description: "No se pudo abrir la ubicación",
-					variant: "destructive",
-				});
-			}
-		},
-		[selectedItems, toast]
-	);
-
-	const renderImage = React.useCallback(
-		(item: FileItem) => {
-			if (imageError || !item.thumbnail) {
-				return (
-					<div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 text-muted-foreground">
-						<ImageOff className="h-8 w-8 mb-2" />
-						<span className="text-xs">
-							{imageError
-								? "Error al cargar la imagen"
-								: "No hay vista previa disponible"}
-						</span>
-					</div>
-				);
-			}
-
-			return (
-				<ImageCard
-					src={item.thumbnail}
-					alt={item.name}
-					width={item.metadata?.dimensions?.width || 300}
-					height={item.metadata?.dimensions?.height || 300}
-					className="w-full h-full object-contain transition-transform rounded-none hover:scale-95 hover:rounded-sm cursor-pointer"
-					priority={true}
-					onClick={() => handleOpenViewer(item)}
-				/>
-			);
-		},
-		[imageError, handleOpenViewer]
-	);
-
-	// Early returns después de todos los hooks
+	// Renderizado condicional optimizado
 	if (!selectedItems.length) {
 		return (
 			<div className="flex-1 flex items-center justify-center p-4">
@@ -513,564 +1026,109 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 		);
 	}
 
-	if (selectedItems.length > 1) {
-		return (
-			<div className="flex-1 flex items-center justify-center p-4">
-				<Card className="w-full border-none rounded-none">
-					<CardContent className="pt-6">
-						<div className="flex flex-col items-center gap-2">
-							<div className="flex items-center justify-center w-12 h-12 rounded-none bg-primary/10">
-								<ImageIcon className="h-6 w-6 text-primary" />
-							</div>
-							<p className="text-sm font-medium">
-								{selectedItems.length} archivos seleccionados
-							</p>
-							<p className="text-xs text-muted-foreground text-center">
-								Tamaño total:{" "}
-								{formatFileSize(
-									selectedItems.reduce(
-										(acc, item) => acc + (item.metadata?.fileSystem?.size || 0),
-										0
-									)
-								)}
-							</p>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
-
-	const selectedItem = selectedItems[0];
-
-	// Parsear metadata de manera segura
-	const metadata = parseMetadata(selectedItem.metadata);
-	const {
-		dimensions = {},
-		exif = {},
-		fileSystem = {},
-		generation = {},
-		format = null,
-		colorSpace = null,
-		hasAlpha = false,
-		isAnimated = false,
-	} = metadata;
-
-	// Actualizamos la toolbar con el nuevo diseño
-	const renderToolbar = () => (
-		<div className="flex flex-col bg-primary/10 py-1">
-			<div className="flex items-center justify-between gap-2 px-2">
-				<div className="flex gap-2 items-center">
-					<div className="flex items-center justify-center h-5 w-5 rounded-sm bg-white/10">
-						<ImageIcon className="h-3 w-3" />
-					</div>
-					<span className="text-[10px] text-muted-foreground">
-						{selectedItem.metadata?.dimensions?.width || 0} ×{" "}
-						{selectedItem.metadata?.dimensions?.height || 0}
-					</span>
-				</div>
-				<div className="flex items-center gap-1">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleContextMenuAction("mark-toggle", selectedItem)}
-					>
-						<Flag className={cn("h-4 w-4", isMarked && "text-warning")} />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() =>
-							handleContextMenuAction("favorite-toggle", selectedItem)
-						}
-					>
-						{selectedItem.isFavorite ? (
-							<HeartOff className="h-4 w-4" />
-						) : (
-							<Heart
-								className={cn(
-									"h-4 w-4",
-									selectedItem.isFavorite && "text-yellow-500"
-								)}
-							/>
-						)}
-					</Button>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-7 w-7">
-								<BookmarkPlus className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-48">
-							{settings?.collections?.length > 0 ? (
-								settings.collections.map((collection) => (
-									<DropdownMenuItem
-										key={collection.id}
-										onClick={() =>
-											handleContextMenuAction("collection-add", selectedItem, {
-												collectionId: collection.id,
-											})
-										}
-									>
-										<div className="flex items-center gap-2 w-full">
-											<span className="mr-2">{collection.emoji}</span>
-											<span className="flex-1">{collection.name}</span>
-											<div
-												className="w-3 h-3 rounded"
-												style={{ backgroundColor: collection.color }}
-											/>
-										</div>
-									</DropdownMenuItem>
-								))
-							) : (
-								<DropdownMenuItem disabled>
-									No hay colecciones disponibles
-								</DropdownMenuItem>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-7 w-7">
-								<TagIcon className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-48">
-							{settings?.tags?.length > 0 ? (
-								settings.tags.map((tag) => (
-									<DropdownMenuItem
-										key={tag.id}
-										onClick={() =>
-											handleContextMenuAction("tag-add", selectedItem, {
-												tagId: tag.id,
-											})
-										}
-									>
-										<div className="flex items-center gap-2 w-full">
-											<div
-												className="w-3 h-3 rounded"
-												style={{ backgroundColor: tag.color }}
-											/>
-											<span className="flex-1">{tag.name}</span>
-											{tag.shortcut && (
-												<Badge
-													variant="outline"
-													className="text-[10px] h-4 px-1"
-												>
-													{tag.shortcut}
-												</Badge>
-											)}
-										</div>
-									</DropdownMenuItem>
-								))
-							) : (
-								<DropdownMenuItem disabled>
-									No hay etiquetas disponibles
-								</DropdownMenuItem>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleOpenFolder(selectedItem.path)}
-					>
-						<Folder className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleDownload(selectedItem.path)}
-					>
-						<Download className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7"
-						onClick={() => handleCopy(selectedItem.path)}
-					>
-						<Copy className="h-4 w-4" />
-					</Button>
-
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 text-destructive"
-						onClick={() => handleContextMenuAction("delete", selectedItem)}
-					>
-						<Trash2 className="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
-
-			{/* Sección de colecciones y tags actuales */}
-			{(selectedItem.collections?.length > 0 ||
-				selectedItem.tags?.length > 0) && (
-				<div className="flex items-center gap-2 px-2 py-1 mt-1 border-t border-border/50">
-					<div className="flex flex-wrap gap-1">
-						{selectedItem.collections?.map((collection) => (
-							<Badge
-								key={collection.id}
-								variant="secondary"
-								className="h-5 text-[10px] bg-white/10 hover:bg-white/20 gap-1"
-							>
-								<span>{collection.emoji}</span>
-								{collection.name}
-							</Badge>
-						))}
-						{selectedItem.tags?.map((tag) => (
-							<Badge
-								key={tag.id}
-								variant="outline"
-								className="h-5 text-[10px] hover:bg-white/10"
-								style={{ borderColor: tag.color }}
-							>
-								<div
-									className="w-1.5 h-1.5 rounded-full mr-1"
-									style={{ backgroundColor: tag.color }}
-								/>
-								{tag.name}
-							</Badge>
-						))}
-					</div>
-				</div>
-			)}
-		</div>
-	);
-
 	return (
-		<ScrollArea className="h-full pr-2">
-			<motion.div
-				key={selectedItem.id}
-				animate={{
-					opacity: [0, 1],
-					y: [20, 0],
-				}}
-				transition={{ delay: 0.5 }}
-				className="space-y-4"
-			>
-				{/* Vista previa de imagen */}
-				{(selectedItem.type === "image" ||
-					selectedItem.metadata?.mimeType?.startsWith("image/")) && (
-					<Card className="border-none rounded-none overflow-hidden">
-						<CardContent className="p-0 relative">
-							<motion.div
-								className="relative max-h-[500px] w-full overflow-hidden flex items-center justify-center"
-								animate={{ opacity: [0, 1], scale: [0.95, 1] }}
-							>
-								{/* Imagen principal */}
-								<div className="inset-0 flex items-center justify-center">
-									<div className="relative max-h-full">
-										{renderImage(selectedItem)}
-										{selectedItem.isFavorite && (
-											<motion.div
-												className="absolute top-2 right-2 z-10"
-												animate={{ scale: [0, 1] }}
-											>
-												<StarIcon className="h-5 w-5 text-yellow-400 drop-shadow-lg" />
-											</motion.div>
-										)}
-									</div>
-								</div>
-							</motion.div>
-						</CardContent>
-					</Card>
+		<div className="flex flex-col h-full">
+			{/* Cabecera */}
+			<div className="flex items-center justify-between p-4 border-b">
+				<div className="flex items-center gap-2">
+					<ImageIcon className="h-4 w-4" />
+					<span className="font-medium">Detalles</span>
+				</div>
+				{onClose && (
+					<Button variant="ghost" size="icon" onClick={onClose}>
+						<X className="h-4 w-4" />
+					</Button>
 				)}
+			</div>
 
-				{/* Toolbar */}
-				{renderToolbar()}
+			{/* Contenido */}
+			<ScrollArea className="flex-1">
+				<div className="flex flex-col gap-4 p-4">
+					{/* Vista previa */}
+					<div className="w-full bg-muted/30 rounded-sm overflow-hidden max-h-[600px]">
+						<ImagePreview item={selectedItem} />
+					</div>
 
-				{/* Información básica */}
-				<motion.div
-					animate={{
-						opacity: [0, 1],
-						y: [20, 0],
-					}}
-					transition={{ delay: 0.1 }}
-				>
-					<Card className="border-none rounded-none mt-2">
-						<CardHeader className="p-4 pb-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<FileText className="h-4 w-4 text-primary" />
-								Información básica
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-4 pt-2 space-y-1.5">
-							<InfoItem
-								icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
-								label="Nombre"
-								value={selectedItem.name}
-							/>
-							<InfoItem
-								icon={<ImageIcon className="h-3.5 w-3.5 text-green-400" />}
-								label="Tipo"
-								value={
-									format || selectedItem.metadata?.mimeType || "Desconocido"
-								}
-							/>
-							<InfoItem
-								icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
-								label="Tamaño"
-								value={formatFileSize(fileSystem.size)}
-							/>
-							{dimensions.width && dimensions.height && (
-								<InfoItem
-									icon={<Maximize2 className="h-3.5 w-3.5 text-yellow-400" />}
-									label="Dimensiones"
-									value={`${dimensions.width} × ${dimensions.height}`}
-								/>
-							)}
-							{colorSpace && (
-								<InfoItem
-									icon={<Palette className="h-3.5 w-3.5 text-orange-400" />}
-									label="Espacio de color"
-									value={colorSpace}
-								/>
-							)}
-							{hasAlpha && (
-								<InfoItem
-									icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />}
-									label="Canal alfa"
-									value="Sí"
-								/>
-							)}
-							{isAnimated && (
-								<InfoItem
-									icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
-									label="Animada"
-									value="Sí"
-								/>
-							)}
-						</CardContent>
-					</Card>
-				</motion.div>
+					{/* Acciones */}
+					<div className="flex items-center gap-2">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleAction("mark")}
+							className={cn(isMarked && "text-yellow-500")}
+						>
+							<Flag className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleAction("favorite")}
+							className={cn(selectedItem.isFavorite && "text-red-500")}
+						>
+							<Heart className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleAction("download")}
+						>
+							<Download className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleAction("share")}
+						>
+							<Share2 className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleAction("delete")}
+							className="text-red-500"
+						>
+							<Trash2 className="h-4 w-4" />
+						</Button>
+					</div>
 
-				{/* Información EXIF */}
-				{Object.keys(exif).length > 0 && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.2 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Camera className="h-4 w-4 text-primary" />
-									Información EXIF
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2 space-y-1.5">
-								{exif.Make && (
-									<InfoItem
-										icon={<Box className="h-3.5 w-3.5 text-indigo-400" />}
-										label="Fabricante"
-										value={exif.Make}
-									/>
-								)}
-								{exif.Model && (
-									<InfoItem
-										icon={<Camera className="h-3.5 w-3.5 text-pink-400" />}
-										label="Modelo"
-										value={exif.Model}
-									/>
-								)}
-								{exif.Software && (
-									<InfoItem
-										icon={<Layers className="h-3.5 w-3.5 text-cyan-400" />}
-										label="Software"
-										value={exif.Software}
-									/>
-								)}
-								{exif.DateTime && (
-									<InfoItem
-										icon={<Calendar className="h-3.5 w-3.5 text-orange-400" />}
-										label="Fecha"
-										value={formatDate(exif.DateTime)}
-									/>
-								)}
-								{exif.ExposureTime && (
-									<InfoItem
-										icon={<Timer className="h-3.5 w-3.5 text-red-400" />}
-										label="Tiempo de exposición"
-										value={`${exif.ExposureTime}s`}
-									/>
-								)}
-								{exif.FNumber && (
-									<InfoItem
-										icon={<Aperture className="h-3.5 w-3.5 text-emerald-400" />}
-										label="Apertura"
-										value={`f/${exif.FNumber}`}
-									/>
-								)}
-								{exif.ISO && (
-									<InfoItem
-										icon={<Scale className="h-3.5 w-3.5 text-violet-400" />}
-										label="ISO"
-										value={exif.ISO}
-									/>
-								)}
-								{exif.FocalLength && (
-									<InfoItem
-										icon={<Focus className="h-3.5 w-3.5 text-amber-400" />}
-										label="Distancia focal"
-										value={`${exif.FocalLength}mm`}
-									/>
-								)}
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
+					<div className="grid grid-cols-1 gap-4">
+						<h3 className="text-xs font-medium text-muted-foreground">
+							Información AI
+						</h3>
 
-				{/* Información de generación AI */}
-				{Object.keys(generation).length > 0 && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.3 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Wand2 className="h-4 w-4 text-primary" />
-									Información de generación
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2 space-y-1.5">
-								<>
-									{generation.prompt && (
-										<InfoItem
-											icon={
-												<MessageSquare className="h-3.5 w-3.5 text-teal-400" />
-											}
-											label="Prompt"
-											value={generation.prompt}
-										/>
-									)}
-									{generation.negative_prompt && (
-										<InfoItem
-											icon={
-												<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />
-											}
-											label="Prompt negativo"
-											value={generation.negative_prompt}
-										/>
-									)}
-									{generation.model && (
-										<InfoItem
-											icon={<Box className="h-3.5 w-3.5 text-sky-400" />}
-											label="Modelo"
-											value={generation.model}
-										/>
-									)}
-									{generation.steps && (
-										<InfoItem
-											icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
-											label="Pasos"
-											value={generation.steps}
-										/>
-									)}
-									{generation.cfg_scale && (
-										<InfoItem
-											icon={<Scale className="h-3.5 w-3.5 text-fuchsia-400" />}
-											label="Escala CFG"
-											value={generation.cfg_scale}
-										/>
-									)}
-									{generation.seed && (
-										<InfoItem
-											icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
-											label="Semilla"
-											value={generation.seed}
-										/>
-									)}
-									{generation.sampler && (
-										<InfoItem
-											icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
-											label="Sampler"
-											value={generation.sampler}
-										/>
-									)}
-								</>
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
+						{/* Información técnica */}
+						<TechnicalInfo metadata={metadata} />
 
-				{/* Información del sistema de archivos */}
-				<motion.div
-					animate={{
-						opacity: [0, 1],
-						y: [20, 0],
-					}}
-					transition={{ delay: 0.4 }}
-				>
-					<Card className="border-none rounded-none mt-2">
-						<CardHeader className="p-4 pb-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<HardDrive className="h-4 w-4 text-primary" />
-								Información del sistema
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-4 pt-2 space-y-1.5">
-							<InfoItem
-								icon={<Calendar className="h-3.5 w-3.5 text-blue-400" />}
-								label="Creado"
-								value={formatDate(fileSystem.created)}
-							/>
-							<InfoItem
-								icon={<Clock className="h-3.5 w-3.5 text-green-400" />}
-								label="Modificado"
-								value={formatDate(fileSystem.modified)}
-							/>
-							<InfoItem
-								icon={<Clock className="h-3.5 w-3.5 text-yellow-400" />}
-								label="Último acceso"
-								value={formatDate(fileSystem.accessed)}
-							/>
-						</CardContent>
-					</Card>
-				</motion.div>
+						{/* Información del sistema */}
+						<SystemInfo item={selectedItem} />
 
-				{/* Debug en desarrollo */}
-				{process.env.NODE_ENV === "development" && (
-					<motion.div
-						animate={{
-							opacity: [0, 1],
-							y: [20, 0],
-						}}
-						transition={{ delay: 0.5 }}
-					>
-						<Card className="border-none rounded-none mt-2">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<Bug className="h-4 w-4 text-primary" />
-									Debug
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="p-4 pt-2">
-								<pre className="text-[10px] overflow-x-auto p-2 bg-muted rounded-sm">
-									{JSON.stringify(metadata, null, 2)}
-								</pre>
-							</CardContent>
-						</Card>
-					</motion.div>
-				)}
-			</motion.div>
-		</ScrollArea>
+						{/* Información EXIF */}
+						<ExifInfo metadata={metadata} />
+
+						{/* Información XMP */}
+						<XMPInfo metadata={metadata} />
+
+						{/* Información IPTC */}
+						<IPTCInfo metadata={metadata} />
+
+						{/* Información GPS */}
+						<GPSInfo metadata={metadata} />
+
+						{/* Información de generación AI */}
+						<AIGenerationInfo metadata={metadata} />
+
+						{/* Entidades relacionadas */}
+						<RelatedEntities item={selectedItem} />
+
+						{/* Debug en desarrollo */}
+						{process.env.NODE_ENV === "development" && (
+							<pre className="text-[10px] overflow-x-auto p-2 bg-muted rounded-sm">
+								{JSON.stringify(metadata, null, 2)}
+							</pre>
+						)}
+					</div>
+				</div>
+			</ScrollArea>
+		</div>
 	);
 }

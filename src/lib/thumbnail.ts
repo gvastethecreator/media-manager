@@ -1,10 +1,17 @@
 import sharp from 'sharp'
-import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/services/thumbnail.service'
+import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { existsSync } from 'fs'
-import { extname } from 'path'
-import { thumbnailLogger as logger } from './utils'
+import { extname, join } from 'path'
+import { logger } from '@/lib/logger'
 import { formatBytes } from './utils'
 import type { ImageFormat } from './image'
+import { promises as fs } from 'fs'
+import { createHash } from 'crypto'
+
+const thumbLogger = logger.withContext('Thumbnail')
+
+// Configuración de caché
+const CACHE_DIR = '.thumbnail-cache'
 
 export interface ThumbnailOptions {
   quality: ThumbnailQuality
@@ -26,7 +33,7 @@ export interface ThumbnailResult {
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 
 const DEFAULT_OPTIONS: Partial<ThumbnailOptions> = {
-  quality: 'mid',
+  quality: ThumbnailQuality.MEDIUM,
   format: 'webp',
   preserveMetadata: false,
   progressive: true
@@ -34,6 +41,55 @@ const DEFAULT_OPTIONS: Partial<ThumbnailOptions> = {
 
 const MAX_DIMENSION = 2048 // Máxima dimensión permitida
 const MIN_DIMENSION = 16 // Mínima dimensión permitida
+
+// Funciones de caché
+async function ensureCacheDir() {
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true })
+  } catch (error) {
+    thumbLogger.error('Error creando directorio de caché:', error)
+  }
+}
+
+function getCacheKey(filePath: string, options: any): string {
+  const hash = createHash('md5')
+  hash.update(filePath + JSON.stringify(options))
+  return hash.digest('hex')
+}
+
+function getCachePath(cacheKey: string): string {
+  return join(CACHE_DIR, `${cacheKey}.webp`)
+}
+
+async function getFromCache(cacheKey: string): Promise<ThumbnailResult | null> {
+  const cachePath = getCachePath(cacheKey)
+  try {
+    const stats = await fs.stat(cachePath)
+    if (stats.isFile()) {
+      const buffer = await fs.readFile(cachePath)
+      const { info } = await sharp(buffer).toBuffer({ resolveWithObject: true })
+      return {
+        buffer,
+        width: info.width!,
+        height: info.height!,
+        format: 'webp',
+        size: buffer.length
+      }
+    }
+  } catch (error) {
+    return null
+  }
+  return null
+}
+
+async function saveToCache(cacheKey: string, buffer: Buffer): Promise<void> {
+  const cachePath = getCachePath(cacheKey)
+  try {
+    await fs.writeFile(cachePath, buffer)
+  } catch (error) {
+    thumbLogger.error('Error guardando en caché:', error)
+  }
+}
 
 /**
  * Valida y ajusta las dimensiones para el thumbnail
@@ -80,12 +136,25 @@ export async function generateThumbnail(
 
     // Combinar opciones
     const finalOptions = { ...DEFAULT_OPTIONS, ...options }
-    const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality]
+    const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality as ThumbnailQuality]
     if (!config) {
       throw new Error(`Calidad inválida: ${finalOptions.quality}`)
     }
 
-    logger.debug('Generando thumbnail:', {
+    // Verificar caché
+    await ensureCacheDir()
+    const cacheKey = getCacheKey(filePath, finalOptions)
+    const cached = await getFromCache(cacheKey)
+    if (cached) {
+      thumbLogger.debug('Thumbnail recuperado de caché:', {
+        path: filePath,
+        dimensions: `${cached.width}x${cached.height}`,
+        size: formatBytes(cached.size)
+      })
+      return cached
+    }
+
+    thumbLogger.debug('Generando thumbnail:', {
       path: filePath,
       options: finalOptions,
       config
@@ -180,7 +249,10 @@ export async function generateThumbnail(
       originalSize: metadata.size
     }
 
-    logger.debug('Thumbnail generado:', {
+    // Guardar en caché
+    await saveToCache(cacheKey, buffer)
+
+    thumbLogger.debug('Thumbnail generado:', {
       path: filePath,
       dimensions: `${result.width}x${result.height}`,
       originalSize: formatBytes(metadata.size || 0),
@@ -190,10 +262,24 @@ export async function generateThumbnail(
 
     return result
   } catch (error) {
-    logger.error('Error generando thumbnail:', {
+    thumbLogger.error('Error generando thumbnail:', {
       path: filePath,
       error: error instanceof Error ? error.message : error
     })
     throw error instanceof Error ? error : new Error('Error generando thumbnail')
+  }
+}
+
+// Función para limpiar la caché
+export async function clearThumbnailCache(): Promise<void> {
+  try {
+    const files = await fs.readdir(CACHE_DIR)
+    await Promise.all(
+      files.map(file => fs.unlink(join(CACHE_DIR, file)))
+    )
+    thumbLogger.info('Caché de thumbnails limpiada')
+  } catch (error) {
+    thumbLogger.error('Error limpiando caché:', error)
+    throw error
   }
 }

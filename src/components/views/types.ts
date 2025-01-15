@@ -1,21 +1,11 @@
-export type ViewType =
-	| "all-images"
-	| "favorites"
-	| "collections"
-	| "collection-content"
-	| "folders"
-	| "folder-content"
-	| "tags"
-	| "tag-content"
-	| "search"
-	| "files"
-	| "settings"
-	| "development"
-	| "loading";
+import { ViewType as NavigationViewType } from '@/store/navigation.store'
+
+export type ViewType = NavigationViewType;
 
 export interface ViewProps {
 	isResizing?: boolean;
 }
+
 export interface ViewContainerProps {
 	isResizing?: boolean;
 }
