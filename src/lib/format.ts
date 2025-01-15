@@ -1,20 +1,3 @@
-/**
- * Formatea un tamaño en bytes a una cadena legible
- * @param bytes Tamaño en bytes
- * @returns Cadena formateada (ej: "1.5 MB")
- */
-export function formatFileSize(bytes: number): string {
-  if (!bytes || bytes < 0) return '0 B'
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  const k = 1024
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  // Redondear a 2 decimales si es necesario
-  const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2))
-
-  return `${size} ${units[i]}`
-}
 
 /**
  * Formatea una fecha a una cadena legible en español

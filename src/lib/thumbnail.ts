@@ -3,7 +3,7 @@ import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { existsSync } from 'fs'
 import { extname, join } from 'path'
 import { logger } from '@/lib/logger'
-import { formatFileSize } from './format'
+import { formatBytes } from './utils'
 import type { ImageFormat } from './image'
 import { promises as fs } from 'fs'
 import { createHash } from 'crypto'
@@ -149,7 +149,7 @@ export async function generateThumbnail(
       thumbLogger.debug('Thumbnail recuperado de caché:', {
         path: filePath,
         dimensions: `${cached.width}x${cached.height}`,
-        size: formatFileSize(cached.size)
+        size: formatBytes(cached.size)
       })
       return cached
     }
@@ -255,8 +255,8 @@ export async function generateThumbnail(
     thumbLogger.debug('Thumbnail generado:', {
       path: filePath,
       dimensions: `${result.width}x${result.height}`,
-      originalSize: formatFileSize(metadata.size || 0),
-      newSize: formatFileSize(result.size),
+      originalSize: formatBytes(metadata.size || 0),
+      newSize: formatBytes(result.size),
       reduction: metadata.size ? `${((1 - result.size / metadata.size) * 100).toFixed(1)}%` : 'N/A'
     })
 

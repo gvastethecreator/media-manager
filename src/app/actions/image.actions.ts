@@ -31,9 +31,9 @@ export async function getImageUrl(imageId: string): Promise<string> {
       throw new Error("Imagen no encontrada");
     }
 
-    // Generar URL firmada o token temporal
-    const signedUrl = `file://${image.path}`;
-    return signedUrl;
+    // Generar URL para el endpoint de imágenes
+    const imageUrl = `/api/images/${imageId}/content`;
+    return imageUrl;
   } catch (error) {
     imageLogger.error("Error getting image URL:", error);
     throw new Error("No se pudo obtener la URL de la imagen");

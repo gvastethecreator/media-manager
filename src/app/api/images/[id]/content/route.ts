@@ -1,85 +1,76 @@
-import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { existsSync } from 'fs'
-import { createReadStream } from 'fs'
-import { logger } from '@/lib/logger'
-import { headers } from 'next/headers'
-import * as path from 'path'
-import * as mime from 'mime-types'
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { existsSync } from "fs";
+import { readFile } from "fs/promises";
+import { logger } from "@/lib/logger";
+import { headers } from "next/headers";
+import path from "path";
+import sharp from "sharp";
+import { FileMetadata } from "@/types/file-item";
 
-const imageLogger = logger.withContext('ImageContentAPI')
+const apiLogger = logger.withContext("ImageAPI");
 
 export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    // Esperar los parámetros dinámicos
-    const params = await Promise.resolve(context.params)
-    const { id } = params
-
     const image = await prisma.image.findUnique({
-      where: { id },
+      where: { id: params.id },
       select: {
         path: true,
-        name: true,
         metadata: true,
-      }
-    })
+      },
+    });
 
     if (!image) {
-      return new Response('Imagen no encontrada', { status: 404 })
+      return new NextResponse("Imagen no encontrada", { status: 404 });
     }
 
+    // Verificar que el archivo existe
     if (!existsSync(image.path)) {
-      return new Response('Archivo no encontrado', { status: 404 })
+      return new NextResponse("Archivo no encontrado", { status: 404 });
     }
 
-    // Obtener el tipo MIME
-    let mimeType = 'image/jpeg'
+    // Obtener metadata
+    let metadata: FileMetadata = {};
     try {
-      if (image.metadata) {
-        const metadata = JSON.parse(image.metadata)
-        mimeType = metadata.mimeType || mime.lookup(image.path) || 'image/jpeg'
-      }
+      metadata = JSON.parse(image.metadata || "{}") as FileMetadata;
     } catch (error) {
-      imageLogger.warn('Error parsing metadata:', { error, path: image.path })
+      apiLogger.warn("Error parsing metadata:", error);
     }
 
-    // Crear stream de lectura
-    const stream = createReadStream(image.path)
+    // Leer el archivo
+    const buffer = await readFile(image.path);
 
-    // Registrar la vista de forma asíncrona
-    const headersList = await headers()
-    const userAgent = headersList.get('user-agent') || 'unknown'
+    // Procesar la imagen si es necesario
+    const processedBuffer = await sharp(buffer)
+      .rotate() // Auto-rotate based on EXIF
+      .withMetadata() // Preserve metadata
+      .toBuffer();
 
-    // No esperamos a que se complete para no bloquear la respuesta
-    prisma.imageStats.upsert({
-      where: { imageId: id },
-      create: {
-        imageId: id,
-        views: 1,
-        downloads: 0,
-        lastViewed: new Date()
+    // Determinar el tipo MIME
+    const mimeType = metadata.mimeType || "image/jpeg";
+
+    // Configurar headers
+    const headers = new Headers();
+    headers.set("Content-Type", mimeType);
+    headers.set("Content-Length", processedBuffer.length.toString());
+    headers.set("Cache-Control", "public, max-age=31536000"); // 1 año
+    headers.set("ETag", `"${params.id}"`);
+
+    // Registrar actividad
+    await prisma.activity.create({
+      data: {
+        type: "IMAGE_VIEW",
+        description: "Image viewed",
+        imageId: params.id,
       },
-      update: {
-        views: { increment: 1 },
-        lastViewed: new Date()
-      }
-    }).catch(error => {
-      imageLogger.error('Error updating stats:', { error, imageId: id })
-    })
+    });
 
-    // Crear y retornar respuesta con stream
-    return new Response(stream as any, {
-      headers: {
-        'Content-Type': mimeType,
-        'Cache-Control': 'public, max-age=31536000',
-        'Content-Disposition': `inline; filename="${encodeURIComponent(image.name)}"`,
-      },
-    })
+    return new NextResponse(processedBuffer, { headers });
   } catch (error) {
-    imageLogger.error('Error serving image:', { error })
-    return new Response('Error interno del servidor', { status: 500 })
+    apiLogger.error("Error serving image:", error);
+    return new NextResponse("Error interno del servidor", { status: 500 });
   }
 }
