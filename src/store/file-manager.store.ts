@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { FileItem } from '@/types/file-item'
+import type { RelatedTag } from '@/types/tag'
 import { getFolderImages } from '@/app/actions/folder.actions'
 import { getCollectionImages } from '@/app/actions/collection.actions'
 import { getTagImages } from '@/app/actions/tag.actions'
@@ -313,7 +314,9 @@ const transformToFileItem = (rawItem: any): FileItem => {
         ? item.collections.map(c => typeof c === 'string' ? { id: c, name: c } : { id: c.id, name: c.name || c.id })
         : [],
       tags: Array.isArray(item.tags)
-        ? item.tags.map(t => typeof t === 'string' ? { id: t, name: t } : { id: t.id, name: t.name || t.id })
+        ? item.tags.map(t => typeof t === 'string'
+          ? { id: t, name: t, color: '#94a3b8' }
+          : { id: t.id, name: t.name || t.id, color: t.color || '#94a3b8' })
         : [],
       albums: Array.isArray(item.albums)
         ? item.albums.map(a => typeof a === 'string' ? { id: a, name: a } : { id: a.id, name: a.name || a.id })
