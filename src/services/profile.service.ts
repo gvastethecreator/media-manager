@@ -1,4 +1,5 @@
-import type { Profile } from '@/prisma/client'
+import type { Profile } from '@prisma/client'
+import type { BaseEntity } from '@/store/types'
 
 export interface ProfileCreate {
   name: string
@@ -18,8 +19,12 @@ export interface ProfileUpdate extends Partial<ProfileCreate> {
   isActive?: boolean
 }
 
-export interface ProfileWithStats extends Profile {
-  // Add any additional stats if needed
+export interface ProfileWithStats extends Profile, BaseEntity {
+  _count?: {
+    images: number
+  }
+  totalSize?: number
+  isActive: boolean
 }
 
 export const profileService = {
