@@ -185,7 +185,12 @@ export function TagsView({ isResizing }: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info("🔄 Cargando etiquetas...");
 			const data = await getTags();
-			setTags(data);
+			const transformedData = data.map((tag) => ({
+				...tag,
+				count: tag._count.images,
+				size: formatBytes(tag.totalSize),
+			}));
+			setTags(transformedData);
 			viewLogger.info(`✅ ${data.length} etiquetas cargadas`);
 		} catch (error) {
 			viewLogger.error("❌ Error al cargar etiquetas:", error);

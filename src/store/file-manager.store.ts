@@ -54,7 +54,7 @@ interface APIImageResponse {
   createdAt: string | Date
   updatedAt: string | Date
   collections?: Array<{ id: string; name?: string }> | string[]
-  tags?: Array<{ id: string; name?: string }> | string[]
+  tags?: Array<{ id: string; name?: string; color?: string }> | string[]
   albums?: Array<{ id: string; name?: string }> | string[]
   characters?: Array<{ id: string; name?: string }> | string[]
   places?: Array<{ id: string; name?: string }> | string[]
