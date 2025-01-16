@@ -1,111 +1,92 @@
-import { createStoreFactory } from './store.factory';
-import type { Tag as PrismaTag } from '@prisma/client';
-import { logger } from '../lib/logger';
-import {
-  createTag as createTagAction,
-  deleteTag as deleteTagAction,
-  getTags,
-  updateTag as updateTagAction,
-  addTagToImage as addTagToImageAction,
-  type TagCreate,
-  type TagUpdate,
-  type TagWithStats
-} from '../app/actions/tag.actions';
+import { create } from "zustand";
+import { Tag } from "@prisma/client";
+import { getTags, createTag as createTagAction, updateTag as updateTagAction, deleteTag as deleteTagAction, addTagToImage as addTagToImageAction, type TagWithStats, type TagCreate, type TagUpdate } from "@/app/actions/tag.actions";
+import { logger } from "@/lib/logger";
 
-// Estado extendido específico para Tag
-interface TagState {
-  filters: {
-    searchQuery: string;
-    sortBy: 'name' | 'category' | 'createdAt' | 'updatedAt';
-    sortOrder: 'asc' | 'desc';
-    category: string[];
-  };
+const tagsLogger = logger.withContext("TagsStore");
+
+interface TagsStore {
+  tags: TagWithStats[];
+  isLoading: boolean;
+  error: string | null;
+  loadTags: () => Promise<void>;
+  createTag: (tag: TagCreate) => Promise<void>;
+  updateTag: (id: string, tag: TagUpdate) => Promise<void>;
+  deleteTag: (id: string) => Promise<void>;
+  addTagToImage: (tagId: string, imageId: string) => Promise<void>;
 }
 
-// Función para formatear bytes a un string legible
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
-
-// Función para transformar PrismaTag a TagWithStats
-function transformToTagWithStats(tag: PrismaTag): TagWithStats {
-  return {
-    ...tag,
-    count: 0, // Por ahora dejamos el contador en 0
-    size: formatBytes(0) // Por ahora dejamos el tamaño en 0
-  };
-}
-
-const useTagStore = createStoreFactory<PrismaTag, TagState, TagCreate, TagUpdate>(
-  {
-    name: 'tags',
-    logger,
-    actions: {
-      beforeCreate: async (data) => {
-        // Validar datos antes de crear
-        if (!data.name?.trim()) {
-          throw new Error('El nombre es requerido');
-        }
-        // Normalizar el nombre del tag (lowercase, sin espacios extras)
-        data.name = data.name.trim().toLowerCase();
-        return data;
-      },
-      afterCreate: async (tag) => {
-        logger.info('Tag creado exitosamente', { tag });
-      },
-      beforeUpdate: async (id, data) => {
-        // Validar datos antes de actualizar
-        if (data.name !== undefined) {
-          if (!data.name.trim()) {
-            throw new Error('El nombre no puede estar vacío');
-          }
-          // Normalizar el nombre del tag
-          data.name = data.name.trim().toLowerCase();
-        }
-        return data;
-      },
-      afterUpdate: async (tag) => {
-        logger.info('Tag actualizado exitosamente', { tag });
-      },
-      beforeDelete: async (id) => {
-        // Aquí podríamos verificar si el tag tiene imágenes asociadas
-        logger.info('Preparando eliminación de tag', { id });
-      },
-      afterDelete: async (id) => {
-        logger.info('Tag eliminado exitosamente', { id });
-      }
+export const useTagsStore = create<TagsStore>((set, get) => ({
+  tags: [],
+  isLoading: false,
+  error: null,
+  loadTags: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      tagsLogger.info("Cargando etiquetas");
+      const tags = await getTags();
+      set({ tags, isLoading: false });
+      tagsLogger.info("✅ Etiquetas cargadas");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al cargar etiquetas";
+      tagsLogger.error("❌ Error al cargar etiquetas:", error);
+      set({ error: message, isLoading: false });
     }
   },
-  {
-    getItems: getTags,
-    createItem: createTagAction,
-    updateItem: updateTagAction,
-    deleteItem: deleteTagAction
-  }
-);
-
-// Exportar el hook con el nombre anterior para mantener compatibilidad
-export const useTagsStore = () => {
-  const store = useTagStore();
-  return {
-    tags: store.items.map(transformToTagWithStats),
-    loading: store.loading,
-    error: store.error,
-    loadTags: store.loadItems,
-    createTag: store.createItem,
-    updateTag: store.updateItem,
-    deleteTag: store.deleteItem,
-    addImageToTag: async (tagId: string, imageId: string) => {
-      try {
-        await addTagToImageAction(tagId, imageId);
-      } catch (error) {
-        logger.error('Error adding image to tag:', error);
-        throw error;
-      }
+  createTag: async (tag) => {
+    try {
+      set({ isLoading: true, error: null });
+      tagsLogger.info("✨ Creando etiqueta:", tag);
+      await createTagAction(tag);
+      const tags = await getTags();
+      set({ tags, isLoading: false });
+      tagsLogger.info("✅ Etiqueta creada");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al crear etiqueta";
+      tagsLogger.error("❌ Error al crear etiqueta:", error);
+      set({ error: message, isLoading: false });
     }
-  };
-};
+  },
+  updateTag: async (id, tag) => {
+    try {
+      set({ isLoading: true, error: null });
+      tagsLogger.info("💾 Actualizando etiqueta:", tag);
+      await updateTagAction(id, { ...tag, id });
+      const tags = await getTags();
+      set({ tags, isLoading: false });
+      tagsLogger.info("✅ Etiqueta actualizada");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al actualizar etiqueta";
+      tagsLogger.error("❌ Error al actualizar etiqueta:", error);
+      set({ error: message, isLoading: false });
+    }
+  },
+  deleteTag: async (id) => {
+    try {
+      set({ isLoading: true, error: null });
+      tagsLogger.info("🗑️ Eliminando etiqueta:", id);
+      await deleteTagAction(id);
+      const tags = await getTags();
+      set({ tags, isLoading: false });
+      tagsLogger.info("✅ Etiqueta eliminada");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al eliminar etiqueta";
+      tagsLogger.error("❌ Error al eliminar etiqueta:", error);
+      set({ error: message, isLoading: false });
+    }
+  },
+  addTagToImage: async (tagId, imageId) => {
+    try {
+      set({ isLoading: true, error: null });
+      tagsLogger.info("➕ Agregando etiqueta a imagen:", { tagId, imageId });
+      await addTagToImageAction(tagId, imageId);
+      const tags = await getTags();
+      set({ tags, isLoading: false });
+      tagsLogger.info("✅ Etiqueta agregada a la imagen");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al agregar etiqueta a la imagen";
+      tagsLogger.error("❌ Error al agregar etiqueta a la imagen:", error);
+      set({ error: message, isLoading: false });
+    }
+  }
+}));

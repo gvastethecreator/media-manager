@@ -32,6 +32,13 @@ export interface ObjectWithStats extends Object {
     images: number
   }
   totalSize: number
+  lastUpdated?: Date
+  distribution?: Array<{
+    name: string
+    count: number
+  }>
+  featuredImage?: string | null
+  recentImages?: (string | null)[]
 }
 
 export interface ObjectCreate {
@@ -71,6 +78,14 @@ export async function getObjects(): Promise<ObjectWithStats[]> {
             thumbnailWidth: true,
             thumbnailHeight: true,
             thumbnailSize: true,
+            isFavorite: true,
+            createdAt: true,
+            updatedAt: true,
+            folder: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       },
@@ -92,19 +107,47 @@ export async function getObjects(): Promise<ObjectWithStats[]> {
           }
         });
 
-        return {
+        // Obtener la última actualización
+        const lastImage = object.images?.[0];
+        const lastUpdated = lastImage?.updatedAt || object.updatedAt;
+
+        // Calcular distribución por carpetas
+        const folderDistribution = object.images?.reduce((acc, img) => {
+          const folderName = img.folder?.name || 'Sin carpeta';
+          acc[folderName] = (acc[folderName] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const distribution = Object.entries(folderDistribution || {}).map(([name, count]) => ({
+          name,
+          count
+        })).sort((a, b) => b.count - a.count);
+
+        const featuredImage = object.images?.find(img => img.isFavorite)?.thumbnail;
+        const recentImages = object.images
+          ?.filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+          .map(img => {
+            if (img.thumbnail) {
+              return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+            }
+            return null;
+          }) || [];
+
+        const result: ObjectWithStats = {
           ...object,
+          _count: {
+            images: object._count?.images || 0
+          },
           totalSize: totalSize._sum.size || 0,
-          recentImages: object.images
-            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-            .map(img => {
-              if (img.thumbnail) {
-                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-              }
-              return null;
-            }),
-          images: undefined
+          lastUpdated,
+          distribution,
+          featuredImage: featuredImage ?
+            `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` :
+            null,
+          recentImages
         };
+
+        return result;
       })
     );
 

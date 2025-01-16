@@ -21,7 +21,7 @@ import { PlacesSection } from "./settings-sections/places-section";
 import { CharactersSection } from "./settings-sections/characters-section";
 
 export function OrganizeView() {
-	const [activeTab, setActiveTab] = React.useState("folders");
+	const [activeTab, setActiveTab] = React.useState("albums");
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none">
 			<ScrollArea className="h-full">

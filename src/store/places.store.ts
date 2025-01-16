@@ -1,58 +1,96 @@
-import { createStoreFactory } from './store.factory';
-import type { Place } from '@prisma/client';
-import { logger } from '../lib/logger';
+import { create } from 'zustand';
+import { logger } from '@/lib/logger';
 import {
-  createPlace,
-  deletePlace,
   getPlaces,
+  createPlace,
   updatePlace,
-  addImageToPlace as addImageToPlaceAction,
+  deletePlace,
+  addImageToPlace,
+  type PlaceWithStats,
   type PlaceCreate,
   type PlaceUpdate
-} from '../app/actions/place.actions';
+} from '@/app/actions/place.actions';
 
-interface PlaceState {
-  searchQuery: string;
-  sortBy: 'name' | 'createdAt' | 'updatedAt';
-  sortOrder: 'asc' | 'desc';
+interface PlacesStore {
+  places: PlaceWithStats[];
+  isLoading: boolean;
+  error: Error | null;
+  loadPlaces: () => Promise<void>;
+  createPlace: (data: PlaceCreate) => Promise<void>;
+  updatePlace: (data: PlaceUpdate) => Promise<void>;
+  deletePlace: (id: string) => Promise<void>;
+  addImageToPlace: (placeId: string, imageId: string) => Promise<void>;
 }
 
-const basePlaceStore = createStoreFactory<Place, PlaceState, PlaceCreate, PlaceUpdate>(
-  {
-    name: 'places',
-    logger,
-    actions: {
-      beforeCreate: async (data) => {
-        // Aquí podríamos hacer validaciones o transformaciones antes de crear
-        return data;
-      },
-      afterCreate: async (place) => {
-        // Aquí podríamos hacer acciones después de crear, como notificaciones
-        logger.info('Lugar creado exitosamente', { place });
-      }
+const placesLogger = logger.withContext('PlacesStore');
+
+export const usePlacesStore = create<PlacesStore>((set, get) => ({
+  places: [],
+  isLoading: false,
+  error: null,
+
+  loadPlaces: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      placesLogger.info('🔄 Cargando lugares');
+      const places = await getPlaces();
+      set({ places, isLoading: false });
+      placesLogger.info('✅ Lugares cargados');
+    } catch (error) {
+      placesLogger.error('❌ Error al cargar lugares:', error);
+      set({ error: error as Error, isLoading: false });
     }
   },
-  {
-    getItems: getPlaces,
-    createItem: createPlace,
-    updateItem: updatePlace,
-    deleteItem: deletePlace
-  }
-);
 
-// Exportar el hook con funcionalidad extendida
-export const usePlaceStore = () => {
-  const store = basePlaceStore();
-  return {
-    ...store,
-    addImageToPlace: async (placeId: string, imageId: string) => {
-      try {
-        await addImageToPlaceAction(placeId, imageId);
-        await store.loadItems();
-      } catch (error) {
-        logger.error('Error adding image to place:', error);
-        throw error;
-      }
+  createPlace: async (data) => {
+    try {
+      set({ isLoading: true, error: null });
+      placesLogger.info('📝 Creando lugar:', data.name);
+      await createPlace(data);
+      await get().loadPlaces();
+      placesLogger.info('✅ Lugar creado');
+    } catch (error) {
+      placesLogger.error('❌ Error al crear lugar:', error);
+      set({ error: error as Error, isLoading: false });
     }
-  };
-};
+  },
+
+  updatePlace: async (data) => {
+    try {
+      set({ isLoading: true, error: null });
+      placesLogger.info('📝 Actualizando lugar:', data.id);
+      await updatePlace(data.id, data);
+      await get().loadPlaces();
+      placesLogger.info('✅ Lugar actualizado');
+    } catch (error) {
+      placesLogger.error('❌ Error al actualizar lugar:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  },
+
+  deletePlace: async (id) => {
+    try {
+      set({ isLoading: true, error: null });
+      placesLogger.info('🗑️ Eliminando lugar:', id);
+      await deletePlace(id);
+      await get().loadPlaces();
+      placesLogger.info('✅ Lugar eliminado');
+    } catch (error) {
+      placesLogger.error('❌ Error al eliminar lugar:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  },
+
+  addImageToPlace: async (placeId, imageId) => {
+    try {
+      set({ isLoading: true, error: null });
+      placesLogger.info('➕ Agregando imagen a lugar:', { placeId, imageId });
+      await addImageToPlace(placeId, imageId);
+      await get().loadPlaces();
+      placesLogger.info('✅ Imagen agregada al lugar');
+    } catch (error) {
+      placesLogger.error('❌ Error al agregar imagen al lugar:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  }
+}));

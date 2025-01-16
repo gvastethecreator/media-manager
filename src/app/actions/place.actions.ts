@@ -32,6 +32,13 @@ export interface PlaceWithStats extends Place {
     images: number
   }
   totalSize: number
+  lastUpdated: Date
+  distribution?: Array<{
+    name: string
+    count: number
+  }>
+  featuredImage?: string | null
+  recentImages?: (string | null)[]
 }
 
 export interface PlaceCreate {
@@ -60,7 +67,7 @@ export interface PlaceUpdate extends Partial<PlaceCreate> {
 
 export async function getPlaces(): Promise<PlaceWithStats[]> {
   try {
-    placeLogger.info('📍 Obteniendo lugares');
+    placeLogger.info('🎯 Obteniendo lugares');
     const places = await prisma.place.findMany({
       include: {
         _count: {
@@ -75,6 +82,13 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
             thumbnailWidth: true,
             thumbnailHeight: true,
             thumbnailSize: true,
+            isFavorite: true,
+            createdAt: true,
+            folder: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       },
@@ -96,19 +110,50 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
           }
         });
 
-        return {
+        const lastUpdated = place.images?.length > 0
+          ? place.images.reduce((latest, img) =>
+            img.createdAt > latest ? img.createdAt : latest,
+            place.images[0].createdAt
+          )
+          : place.updatedAt;
+
+        const folderDistribution = place.images?.reduce((acc, img) => {
+          const folderName = img.folder?.name || 'Sin carpeta';
+          acc[folderName] = (acc[folderName] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const distribution = folderDistribution
+          ? Object.entries(folderDistribution)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+          : [];
+
+        const featuredImage = place.images?.find(img => img.isFavorite)?.thumbnail;
+        const recentImages = place.images
+          ?.filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+          .map(img => {
+            if (img.thumbnail) {
+              return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+            }
+            return null;
+          }) || [];
+
+        const result: PlaceWithStats = {
           ...place,
+          _count: {
+            images: place._count?.images || 0
+          },
           totalSize: totalSize._sum.size || 0,
-          recentImages: place.images
-            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-            .map(img => {
-              if (img.thumbnail) {
-                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-              }
-              return null;
-            }),
-          images: undefined
+          lastUpdated,
+          distribution,
+          featuredImage: featuredImage ?
+            `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` :
+            null,
+          recentImages
         };
+
+        return result;
       })
     );
 

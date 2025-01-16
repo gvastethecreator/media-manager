@@ -42,7 +42,13 @@ export interface CollectionWithStats extends Collection {
     images: number;
   };
   totalSize: number;
-  stats?: CollectionStats;
+  lastUpdated: Date;
+  distribution?: Array<{
+    name: string;
+    count: number;
+  }>;
+  featuredImage?: string | null;
+  recentImages?: string[];
 }
 
 export interface CollectionWithImages extends Collection {
@@ -73,7 +79,7 @@ function formatBytes(bytes: number): string {
 
 export async function getCollections(): Promise<CollectionWithStats[]> {
   try {
-    collectionLogger.info('📚 Obteniendo colecciones');
+    collectionLogger.info('🎯 Obteniendo colecciones');
     const collections = await prisma.collection.findMany({
       include: {
         _count: {
@@ -88,6 +94,13 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
             thumbnailWidth: true,
             thumbnailHeight: true,
             thumbnailSize: true,
+            isFavorite: true,
+            createdAt: true,
+            folder: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       },
@@ -109,19 +122,50 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
           }
         });
 
-        return {
+        const lastUpdated = collection.images?.length > 0
+          ? collection.images.reduce((latest, img) =>
+            img.createdAt > latest ? img.createdAt : latest,
+            collection.images[0].createdAt
+          )
+          : collection.updatedAt;
+
+        const folderDistribution = collection.images?.reduce((acc, img) => {
+          const folderName = img.folder?.name || 'Sin carpeta';
+          acc[folderName] = (acc[folderName] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const distribution = folderDistribution
+          ? Object.entries(folderDistribution)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+          : [];
+
+        const featuredImage = collection.images?.find(img => img.isFavorite)?.thumbnail;
+        const recentImages = collection.images
+          ?.filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+          .map(img => {
+            if (img.thumbnail) {
+              return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+            }
+            return '';
+          });
+
+        const result: CollectionWithStats = {
           ...collection,
+          _count: {
+            images: collection._count?.images || 0
+          },
           totalSize: totalSize._sum.size || 0,
-          recentImages: collection.images
-            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-            .map(img => {
-              if (img.thumbnail) {
-                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-              }
-              return null;
-            }),
-          images: undefined
+          lastUpdated,
+          distribution,
+          featuredImage: featuredImage ?
+            `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` :
+            null,
+          recentImages: recentImages || []
         };
+
+        return result;
       })
     );
 
@@ -142,6 +186,24 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
         _count: {
           select: {
             images: true
+          }
+        },
+        images: {
+          take: 9,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            thumbnail: true,
+            thumbnailWidth: true,
+            thumbnailHeight: true,
+            thumbnailSize: true,
+            isFavorite: true,
+            createdAt: true,
+            folder: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       }
@@ -164,9 +226,47 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
       }
     });
 
-    const result = {
+    const lastUpdated = collection.images?.length > 0
+      ? collection.images.reduce((latest, img) =>
+        img.createdAt > latest ? img.createdAt : latest,
+        collection.images[0].createdAt
+      )
+      : collection.updatedAt;
+
+    const folderDistribution = collection.images?.reduce((acc, img) => {
+      const folderName = img.folder?.name || 'Sin carpeta';
+      acc[folderName] = (acc[folderName] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const distribution = folderDistribution
+      ? Object.entries(folderDistribution)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+      : [];
+
+    const featuredImage = collection.images?.find(img => img.isFavorite)?.thumbnail;
+    const recentImages = collection.images
+      ?.filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+      .map(img => {
+        if (img.thumbnail) {
+          return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+        }
+        return '';
+      });
+
+    const result: CollectionWithStats = {
       ...collection,
-      totalSize: totalSize._sum.size || 0
+      _count: {
+        images: collection._count?.images || 0
+      },
+      totalSize: totalSize._sum.size || 0,
+      lastUpdated,
+      distribution,
+      featuredImage: featuredImage ?
+        `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` :
+        null,
+      recentImages: recentImages || []
     };
 
     collectionLogger.info("✅ Colección obtenida:", collection.name);

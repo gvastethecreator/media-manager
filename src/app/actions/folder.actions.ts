@@ -89,13 +89,27 @@ export async function getFolders() {
         },
         images: {
           take: 9,
-          orderBy: { createdAt: 'desc' },
+          orderBy: [
+            { isFavorite: 'desc' },
+            { createdAt: 'desc' }
+          ],
           select: {
             id: true,
+            name: true,
+            path: true,
+            size: true,
+            width: true,
+            height: true,
+            metadata: true,
             thumbnail: true,
             thumbnailWidth: true,
             thumbnailHeight: true,
             thumbnailSize: true,
+            isPublic: true,
+            isFavorite: true,
+            folderId: true,
+            createdAt: true,
+            updatedAt: true
           }
         }
       },
@@ -105,14 +119,18 @@ export async function getFolders() {
     folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
     return folders.map(folder => ({
       ...folder,
-      recentImages: folder.images
-        .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) // Solo incluir thumbnails menores a 100KB
-        .map(img => {
-          if (img.thumbnail) {
+      recentImages: Array(9).fill(null).map((_, index) => {
+        const img = folder.images[index];
+        if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
+          try {
             return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+          } catch (error) {
+            folderLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
+            return null;
           }
-          return null;
-        }),
+        }
+        return null;
+      }),
       images: undefined // Removemos las imágenes completas para no enviar datos innecesarios
     }));
   } catch (error) {
@@ -613,32 +631,59 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 }
 
 function transformImageToFileItem(image: any): FileItem {
-  return {
-    id: image.id,
-    name: image.name,
-    path: image.path,
-    type: 'image',
-    size: image.size,
-    width: image.width,
-    height: image.height,
-    metadata: image.metadata,
-    thumbnail: null,
-    thumbnailSize: image.thumbnailSize,
-    thumbnailWidth: image.thumbnailWidth,
-    thumbnailHeight: image.thumbnailHeight,
-    isPublic: image.isPublic,
-    isFavorite: image.isFavorite,
-    folderId: image.folderId,
-    createdAt: image.createdAt,
-    updatedAt: image.updatedAt,
-    modifiedAt: image.updatedAt,
-    accessedAt: image.updatedAt,
-    collections: image.collections?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
-    tags: image.tags?.map((t: any) => ({ id: t.id, name: t.name })) ?? [],
-    albums: image.albums?.map((a: any) => ({ id: a.id, name: a.name })) ?? [],
-    characters: image.characters?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
-    places: image.places?.map((p: any) => ({ id: p.id, name: p.name })) ?? [],
-    objects: image.objects?.map((o: any) => ({ id: o.id, name: o.name })) ?? []
+  try {
+    if (!image || typeof image !== 'object') {
+      throw new Error('Invalid image object');
+    }
+
+    return {
+      id: image.id || '',
+      name: image.name || '',
+      path: image.path || '',
+      type: 'image',
+      size: Number(image.size) || 0,
+      width: Number(image.width) || 0,
+      height: Number(image.height) || 0,
+      metadata: image.metadata || null,
+      thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
+      thumbnailSize: Number(image.thumbnailSize) || 0,
+      thumbnailWidth: Number(image.thumbnailWidth) || 0,
+      thumbnailHeight: Number(image.thumbnailHeight) || 0,
+      isPublic: Boolean(image.isPublic),
+      isFavorite: Boolean(image.isFavorite),
+      folderId: image.folderId || '',
+      createdAt: image.createdAt instanceof Date ? image.createdAt : new Date(image.createdAt || Date.now()),
+      updatedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
+      modifiedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
+      accessedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
+      collections: Array.isArray(image.collections) ? image.collections.map((c: any) => ({
+        id: c?.id || '',
+        name: c?.name || ''
+      })) : [],
+      tags: Array.isArray(image.tags) ? image.tags.map((t: any) => ({
+        id: t?.id || '',
+        name: t?.name || ''
+      })) : [],
+      albums: Array.isArray(image.albums) ? image.albums.map((a: any) => ({
+        id: a?.id || '',
+        name: a?.name || ''
+      })) : [],
+      characters: Array.isArray(image.characters) ? image.characters.map((c: any) => ({
+        id: c?.id || '',
+        name: c?.name || ''
+      })) : [],
+      places: Array.isArray(image.places) ? image.places.map((p: any) => ({
+        id: p?.id || '',
+        name: p?.name || ''
+      })) : [],
+      objects: Array.isArray(image.objects) ? image.objects.map((o: any) => ({
+        id: o?.id || '',
+        name: o?.name || ''
+      })) : []
+    };
+  } catch (error) {
+    folderLogger.error('❌ Error transformando imagen:', error);
+    throw new Error(`Error transformando imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
   }
 }
 
@@ -650,56 +695,28 @@ export async function getFolderImages(id: string) {
       where: { id },
       include: {
         images: {
-          orderBy: {
-            name: 'asc'
-          },
+          orderBy: [
+            { isFavorite: 'desc' },
+            { createdAt: 'desc' }
+          ],
           include: {
-            stats: true,
-            tags: {
-              select: {
-                id: true,
-                name: true,
-                color: true
-              }
-            },
             collections: {
-              select: {
-                id: true,
-                name: true,
-                color: true
-              }
+              select: { id: true, name: true }
+            },
+            tags: {
+              select: { id: true, name: true }
             },
             albums: {
-              select: {
-                id: true,
-                name: true,
-                emoji: true,
-                color: true
-              }
+              select: { id: true, name: true }
             },
             characters: {
-              select: {
-                id: true,
-                name: true,
-                emoji: true,
-                color: true
-              }
+              select: { id: true, name: true }
             },
             places: {
-              select: {
-                id: true,
-                name: true,
-                emoji: true,
-                color: true
-              }
+              select: { id: true, name: true }
             },
             objects: {
-              select: {
-                id: true,
-                name: true,
-                emoji: true,
-                color: true
-              }
+              select: { id: true, name: true }
             }
           }
         }
@@ -710,7 +727,7 @@ export async function getFolderImages(id: string) {
       throw new FolderError('Carpeta no encontrada')
     }
 
-    const transformedImages = folder.images.map(transformImageToFileItem)
+    const transformedImages = folder.images.map(image => transformImageToFileItem(image))
     folderLogger.info('✅ Imágenes obtenidas:', transformedImages.length)
     return transformedImages
   } catch (error) {

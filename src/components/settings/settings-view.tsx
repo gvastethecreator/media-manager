@@ -3,34 +3,13 @@
 import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	DatabaseIcon,
-	BookmarkIcon,
-	CatIcon,
-	TagIcon,
-	AlbumIcon,
-	BoxIcon,
-	UserIcon,
-	Grid2X2Icon,
-	MapPinIcon,
-	KeyIcon,
-	SettingsIcon,
-	FolderIcon,
-	BlocksIcon,
-} from "lucide-react";
+import { SettingsIcon, BlocksIcon } from "lucide-react";
 
-// Importar las secciones
 import { FoldersSection } from "./settings-sections/folders-section";
 import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
-import { CollectionsSection } from "./settings-sections/collections-section";
-import { TagsSection } from "./settings-sections/tags-section";
 import { ShortcutsSection } from "./settings-sections/shortcuts-section";
 import { ProfilesSection } from "./settings-sections/profiles-section";
 import { SystemSection } from "./settings-sections/system-section";
-import { AlbumsSection } from "./settings-sections/albums-section";
-import { ObjectsSection } from "./settings-sections/objects-section";
-import { PlacesSection } from "./settings-sections/places-section";
-import { CharactersSection } from "./settings-sections/characters-section";
 import { OrganizeView } from "./organize-view";
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState("system");
@@ -68,8 +47,6 @@ export function SettingsView() {
 					<TabsContent value="shortcuts" className="px-2">
 						<ShortcutsSection />
 					</TabsContent>
-
-
 				</Tabs>
 			</ScrollArea>
 		</div>
