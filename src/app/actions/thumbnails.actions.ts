@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { generateThumbnail } from '@/lib/thumbnail'
 import { logger } from '@/lib/logger'
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails'
+import { revalidatePath } from 'next/cache'
 
 const thumbLogger = logger.withContext('ThumbnailActions')
 
@@ -251,5 +252,17 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
   } catch (error) {
     thumbLogger.error('❌ Error obteniendo estadísticas:', error)
     throw error
+  }
+}
+
+export async function verifySignedToken(token: string): Promise<{ buffer: Buffer; mimeType: string }> {
+  try {
+    thumbLogger.info('🔄 Verificando token firmado:', token)
+    const result = await thumbnailService.verifySignedToken(token)
+    thumbLogger.info('✅ Token verificado correctamente')
+    return result
+  } catch (error) {
+    thumbLogger.error('❌ Error verificando token:', error)
+    throw new Error('Token inválido o expirado')
   }
 }
