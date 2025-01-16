@@ -954,8 +954,8 @@ export async function extractImageMetadata(
       const filename = path.basename(imagePath);
       let aiMetadata = null;
 
-      // Intentar extraer de PNG chunks (tEXt)
-      const pngInfo = await exifr.parse(buffer, { tEXt: true });
+      // Intentar extraer de PNG chunks
+      const pngInfo = await exifr.parse(buffer);
       if (pngInfo?.parameters) {
         aiMetadata = parseA1111Format(pngInfo.parameters);
       }

@@ -163,7 +163,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 	const loadTags = async () => {
 		try {
 			const tags = await getTags();
-			setSettings((prev) => ({ ...prev, tags }));
+			const mappedTags = tags.map((tag) => ({
+				...tag,
+				count: tag._count.images,
+				size: formatBytes(tag.totalSize),
+			}));
+			setSettings((prev) => ({ ...prev, tags: mappedTags }));
 		} catch (error) {
 			console.error("Error loading tags:", error);
 			toast({
@@ -216,17 +221,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await loadCollections();
 			toast({
 				title: "Éxito",
-				description: id
-					? "Colección actualizada correctamente"
-					: "Colección creada correctamente",
+				description:
+					id ?
+						"Colección actualizada correctamente"
+					:	"Colección creada correctamente",
 			});
 		} catch (error) {
 			console.error("Error updating collection:", error);
 			toast({
 				title: "Error",
-				description: id
-					? "No se pudo actualizar la colección"
-					: "No se pudo crear la colección",
+				description:
+					id ?
+						"No se pudo actualizar la colección"
+					:	"No se pudo crear la colección",
 				variant: "destructive",
 			});
 		}
@@ -244,17 +251,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await loadTags();
 			toast({
 				title: "Éxito",
-				description: id
-					? "Etiqueta actualizada correctamente"
-					: "Etiqueta creada correctamente",
+				description:
+					id ?
+						"Etiqueta actualizada correctamente"
+					:	"Etiqueta creada correctamente",
 			});
 		} catch (error) {
 			console.error("Error updating tag:", error);
 			toast({
 				title: "Error",
-				description: id
-					? "No se pudo actualizar la etiqueta"
-					: "No se pudo crear la etiqueta",
+				description:
+					id ?
+						"No se pudo actualizar la etiqueta"
+					:	"No se pudo crear la etiqueta",
 				variant: "destructive",
 			});
 		}
@@ -275,17 +284,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await loadProfiles();
 			toast({
 				title: "Éxito",
-				description: id
-					? "Perfil actualizado correctamente"
-					: "Perfil creado correctamente",
+				description:
+					id ?
+						"Perfil actualizado correctamente"
+					:	"Perfil creado correctamente",
 			});
 		} catch (error) {
 			console.error("Error updating profile:", error);
 			toast({
 				title: "Error",
-				description: id
-					? "No se pudo actualizar el perfil"
-					: "No se pudo crear el perfil",
+				description:
+					id ? "No se pudo actualizar el perfil" : "No se pudo crear el perfil",
 				variant: "destructive",
 			});
 		}

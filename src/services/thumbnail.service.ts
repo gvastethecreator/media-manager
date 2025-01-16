@@ -3,6 +3,8 @@ import { optimizeThumbnail } from '@/lib/thumbnails'
 import { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG } from '@/types/thumbnails'
 import { EventEmitter } from 'events'
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
+import { createHash, createHmac } from 'crypto'
+import fs from 'fs/promises'
 
 const thumbLogger = logger.withContext('ThumbnailService')
 
@@ -53,6 +55,7 @@ export interface ProcessStatus {
 class ThumbnailService extends EventEmitter {
   private static instance: ThumbnailService;
   private isProcessing: boolean = false;
+  private readonly SECRET_KEY = process.env.THUMBNAIL_SECRET_KEY || 'default-secret-key';
 
   private constructor() {
     super()
@@ -310,6 +313,48 @@ class ThumbnailService extends EventEmitter {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
       throw error;
+    }
+  }
+
+  async verifySignedToken(token: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    try {
+      thumbLogger.info('🔄 Verificando token firmado:', token)
+
+      // Decodificar el token
+      const [signature, payload] = token.split('.')
+      if (!signature || !payload) {
+        throw new Error('Token inválido')
+      }
+
+      // Decodificar el payload
+      const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8')
+      const data = JSON.parse(decodedPayload)
+
+      // Verificar que el token no haya expirado
+      if (data.exp && Date.now() > data.exp) {
+        throw new Error('Token expirado')
+      }
+
+      // Generar firma para comparar
+      const hmac = createHmac('sha256', this.SECRET_KEY)
+      hmac.update(payload)
+      const expectedSignature = hmac.digest('base64url')
+
+      // Verificar firma
+      if (signature !== expectedSignature) {
+        throw new Error('Firma inválida')
+      }
+
+      // Obtener la imagen original
+      const imageBuffer = await fs.readFile(data.path)
+      const mimeType = data.mimeType || 'image/jpeg'
+
+      thumbLogger.info('✅ Token verificado correctamente')
+      return { buffer: imageBuffer, mimeType }
+
+    } catch (error) {
+      thumbLogger.error('❌ Error verificando token:', error)
+      throw new Error('Token inválido o expirado')
     }
   }
 }
