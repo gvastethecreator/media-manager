@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
-import type { Tag as PrismaTag } from '.prisma/client'
+import type { Tag as PrismaTag } from '@prisma/client'
 import type { FileItem } from '@/types/file-item'
 import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';

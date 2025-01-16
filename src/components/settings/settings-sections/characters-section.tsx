@@ -26,7 +26,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { cn } from "@/lib/utils";
 import { CompactPicker } from "react-color";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
