@@ -2,7 +2,7 @@
 
 import { useNavigationStore } from "@/store/navigation.store";
 import { ViewContainerProps } from "./types";
-import { SettingsView } from "./settings/settings-view";
+import { SettingsView } from "@/components/settings/settings-view";
 import { AllImagesView } from "./all-images/all-images-view";
 import { FavoritesView } from "./favorites/favorites-view";
 import { SearchView } from "./search/search-view";
@@ -24,7 +24,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { DevelopmentView } from "./development/development-view";
 import { cn } from "@/lib/utils";
 import { DotPattern } from "../ui/dot-pattern";
-import { X } from "lucide-react";
 
 const variants = {
 	enter: (direction: number) => ({
