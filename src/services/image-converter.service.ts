@@ -1,6 +1,5 @@
 import type { FileItem, Dimensions } from '@/types/file-item'
 import { logger } from '@/lib/logger'
-import { parseMetadata } from '@/lib/metadata-parser'
 
 const converterLogger = logger.withContext('ImageConverter')
 

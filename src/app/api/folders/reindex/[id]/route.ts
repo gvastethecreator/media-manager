@@ -4,7 +4,7 @@ import { existsSync } from 'fs'
 import { readdir, stat } from 'fs/promises'
 import { join, extname } from 'path'
 import { generateThumbnail } from '@/lib/thumbnail'
-import { getImageMetadata } from '@/lib/metadata'
+import { extractMetadata } from '@/app/actions/metadata.actions'
 import { computeHash } from '@/lib/hash'
 import { logger } from '@/lib/logger'
 import type { FileMetadata, AIMetadata } from '@/types/metadata'
@@ -102,7 +102,7 @@ export async function POST(
             if (!existingImage) {
               // Procesar nueva imagen
               const hash = await computeHash(filePath)
-              const metadata = await getImageMetadata(filePath) as FileMetadata
+              const metadata = await extractMetadata(filePath) as FileMetadata
 
               await prisma.image.create({
                 data: {
@@ -123,7 +123,7 @@ export async function POST(
               processed++
             } else {
               // Actualizar metadata si es necesario
-              const metadata = await getImageMetadata(filePath)
+              const metadata = await extractMetadata(filePath)
               await prisma.image.update({
                 where: { id: existingImage.id },
                 data: {
