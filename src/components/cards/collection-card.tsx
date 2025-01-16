@@ -21,11 +21,8 @@ interface CollectionCardProps {
 		recentImages?: string[];
 		topTags?: { name: string; count: number }[];
 	};
-	onEdit?: (
-		collection: Collection,
-		e: React.MouseEvent<HTMLButtonElement>
-	) => void;
-	onDelete?: (id: string, e: React.MouseEvent<HTMLButtonElement>) => void;
+	onEdit?: (collection: Collection) => void;
+	onDelete?: (id: string) => void;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 	className?: string;
 }
@@ -248,10 +245,7 @@ export function CollectionCard({
 								variant="ghost"
 								size="icon"
 								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm"
-								onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-									e.stopPropagation();
-									onEdit?.(collection, e);
-								}}
+								onClick={() => onEdit(collection)}
 							>
 								<PencilIcon className="h-4 w-4 text-white" />
 							</Button>
@@ -261,10 +255,7 @@ export function CollectionCard({
 								variant="ghost"
 								size="icon"
 								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm text-red-400"
-								onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-									e.stopPropagation();
-									onDelete?.(collection.id, e);
-								}}
+								onClick={() => onDelete(collection.id)}
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>

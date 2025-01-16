@@ -152,16 +152,11 @@ export function FolderCard({
 							"rounded-lg flex items-end justify-center p-4"
 						)}
 						onClick={(e) => {
-								e.stopPropagation();
-								onClick?.();
-							}}
+							e.stopPropagation();
+							onClick?.();
+						}}
 					>
-						<Button
-							variant="secondary"
-							size="sm"
-							className="gap-2"
-
-						>
+						<Button variant="secondary" size="sm" className="gap-2">
 							<FolderOpenIcon className="w-4 h-4" />
 							Ver contenido
 						</Button>
@@ -204,10 +199,7 @@ export function FolderCard({
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-							onClick={(e) => {
-								e.stopPropagation();
-								onEdit(folder);
-							}}
+							onClick={() => onEdit(folder)}
 						>
 							<PencilIcon className="h-4 w-4" />
 						</Button>
@@ -217,10 +209,7 @@ export function FolderCard({
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
-							onClick={(e) => {
-								e.stopPropagation();
-								onDelete(folder.id);
-							}}
+							onClick={() => onDelete(folder.id)}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
