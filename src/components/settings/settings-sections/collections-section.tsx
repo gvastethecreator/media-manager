@@ -31,7 +31,6 @@ import {
 	updateCollection,
 	deleteCollection,
 } from "@/app/actions/collection.actions";
-import type { Collection } from "@prisma/client";
 import type {
 	CollectionCreate,
 	CollectionUpdate,
