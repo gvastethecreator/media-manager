@@ -72,7 +72,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { updateImageStats, getImageUrl } from "@/app/actions/image.actions";
 import { useFileManager } from "@/store/file-manager.store";
 import { formatDate, formatBytes, cn } from "@/lib/utils";
-import { parseMetadata } from "@/lib/metadata-parser";
+import { parseMetadata } from "@/app/actions/metadata.actions";
 
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -930,31 +930,40 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 	const { toast } = useToast();
 	const fileManager = useFileManager();
 
-	// Memoizar metadata y selectedItem
+	// Estado para la metadata
+	const [parsedMetadata, setParsedMetadata] =
+		React.useState<FileMetadata | null>(null);
 	const selectedItem = selectedItems[0];
-	const metadata = React.useMemo(() => {
-		if (!selectedItem?.metadata) {
-			console.warn("No hay metadata disponible para:", selectedItem?.name);
-			return null;
+
+	// Efecto para cargar la metadata cuando cambia el item seleccionado
+	React.useEffect(() => {
+		async function loadMetadata() {
+			if (!selectedItem?.metadata) {
+				console.warn("No hay metadata disponible para:", selectedItem?.name);
+				setParsedMetadata(null);
+				return;
+			}
+
+			console.log("🔍 Metadata raw:", selectedItem.metadata);
+
+			try {
+				const parsed = await parseMetadata(selectedItem.metadata);
+				console.log("✅ Metadata parseada:", {
+					nombre: selectedItem.name,
+					keys: parsed ? Object.keys(parsed) : [],
+					metadata: parsed,
+				});
+				setParsedMetadata(parsed);
+			} catch (error) {
+				console.error("❌ Error parseando metadata:", {
+					error,
+					metadata: selectedItem.metadata,
+				});
+				setParsedMetadata(null);
+			}
 		}
 
-		console.log("🔍 Metadata raw:", selectedItem.metadata);
-
-		try {
-			const parsed = parseMetadata(selectedItem.metadata);
-			console.log("✅ Metadata parseada:", {
-				nombre: selectedItem.name,
-				keys: parsed ? Object.keys(parsed) : [],
-				metadata: parsed,
-			});
-			return parsed;
-		} catch (error) {
-			console.error("❌ Error parseando metadata:", {
-				error,
-				metadata: selectedItem.metadata,
-			});
-			return null;
-		}
+		loadMetadata();
 	}, [selectedItem?.metadata, selectedItem?.name]);
 
 	// Memoizar handlers
@@ -1097,25 +1106,25 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 						</h3>
 
 						{/* Información técnica */}
-						<TechnicalInfo metadata={metadata} />
+						<TechnicalInfo metadata={parsedMetadata} />
 
 						{/* Información del sistema */}
 						<SystemInfo item={selectedItem} />
 
 						{/* Información EXIF */}
-						<ExifInfo metadata={metadata} />
+						<ExifInfo metadata={parsedMetadata} />
 
 						{/* Información XMP */}
-						<XMPInfo metadata={metadata} />
+						<XMPInfo metadata={parsedMetadata} />
 
 						{/* Información IPTC */}
-						<IPTCInfo metadata={metadata} />
+						<IPTCInfo metadata={parsedMetadata} />
 
 						{/* Información GPS */}
-						<GPSInfo metadata={metadata} />
+						<GPSInfo metadata={parsedMetadata} />
 
 						{/* Información de generación AI */}
-						<AIGenerationInfo metadata={metadata} />
+						<AIGenerationInfo metadata={parsedMetadata} />
 
 						{/* Entidades relacionadas */}
 						<RelatedEntities item={selectedItem} />
@@ -1123,7 +1132,7 @@ export function DetailsPanel({ selectedItems, onClose }: DetailsPanelProps) {
 						{/* Debug en desarrollo */}
 						{process.env.NODE_ENV === "development" && (
 							<pre className="text-[10px] overflow-x-auto p-2 bg-muted rounded-sm">
-								{JSON.stringify(metadata, null, 2)}
+								{JSON.stringify(parsedMetadata, null, 2)}
 							</pre>
 						)}
 					</div>

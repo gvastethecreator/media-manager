@@ -7,14 +7,13 @@ import { existsSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { join, extname } from 'path';
 import { generateThumbnail } from '@/lib/thumbnail';
-import { getImageMetadata } from '@/lib/metadata';
+import { extractMetadata } from '@/app/actions/metadata.actions';
 import { computeHash } from '@/lib/hash';
 import { fsService } from '@/services/fs.server';
 import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 import type { Folder } from '@prisma/client';
 import type { FileItem } from '@/types/file-item'
-import { parseMetadata } from '@/lib/metadata-parser';
 
 const folderLogger = logger.withContext('FolderActions');
 
@@ -305,7 +304,7 @@ export async function indexFolder(id: string): Promise<FolderResponse> {
             }
 
             // Obtener metadata y hash
-            const metadata = await getImageMetadata(filePath);
+            const metadata = await extractMetadata(filePath);
             const hash = await computeHash(filePath);
 
             // Asegurarnos de que tenemos las dimensiones
@@ -500,7 +499,7 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
             if (!existingImage) {
               // Procesar nueva imagen
               const hash = await computeHash(filePath);
-              const metadata = await getImageMetadata(filePath);
+              const metadata = await extractMetadata(filePath);
 
               if (!metadata.dimensions?.width || !metadata.dimensions?.height) {
                 folderLogger.warn('No se pudieron obtener las dimensiones de la imagen:', {
@@ -529,7 +528,7 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
               processed++;
             } else {
               // Actualizar metadata si es necesario
-              const metadata = await getImageMetadata(filePath);
+              const metadata = await extractMetadata(filePath);
               await prisma.image.update({
                 where: { id: existingImage.id },
                 data: {
