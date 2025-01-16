@@ -24,11 +24,8 @@ interface CharacterCardProps {
 		totalSize?: number;
 		featuredImage?: string | null;
 	};
-	onEdit?: (
-		character: Character,
-		e: React.MouseEvent<HTMLButtonElement>
-	) => void;
-	onDelete?: (id: string, e: React.MouseEvent<HTMLButtonElement>) => void;
+	onEdit?: (character: Character) => void;
+	onDelete?: (id: string) => void;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 	className?: string;
 }
@@ -251,30 +248,21 @@ export function CharacterCard({
 					animate={{ opacity: isHovered ? 1 : 0 }}
 				>
 					{onEdit && (
-						<div
-							onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-								e.stopPropagation();
-								onEdit?.(character, e);
-							}}
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+							onClick={() => onEdit(character)}
 						>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-							>
-								<PencilIcon className="h-4 w-4" />
-							</Button>
-						</div>
+							<PencilIcon className="h-4 w-4" />
+						</Button>
 					)}
 					{onDelete && (
 						<Button
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
-							onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-								e.stopPropagation();
-								onDelete?.(character.id, e);
-							}}
+							onClick={() => onDelete(character.id)}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>

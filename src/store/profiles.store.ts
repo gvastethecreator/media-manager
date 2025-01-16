@@ -15,7 +15,7 @@ import type {
   ProfileWithStats
 } from '../services/profile.service';
 import { createStoreFactory } from './store.factory';
-import type { BaseStore, ExtendedStore } from './types';
+import type { BaseStore, ExtendedStore, BaseEntity } from './types';
 
 // Estado extendido específico para Profile
 interface ProfileState {

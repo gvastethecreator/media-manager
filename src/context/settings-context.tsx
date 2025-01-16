@@ -1,6 +1,6 @@
 "use client";
 
-import type { Collection, Profile } from ".prisma/client";
+import type { Collection, Profile } from "@prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
 	CollectionCreate,
@@ -24,6 +24,7 @@ import {
 	profileService,
 	ProfileCreate,
 	ProfileUpdate,
+	ProfileWithStats,
 } from "@/services/profile.service";
 import { useToast } from "@/components/ui/use-toast";
 import { ThumbnailQuality } from "@/types/thumbnails";
@@ -37,7 +38,7 @@ interface CollectionWithStats extends Collection {
 export interface Settings {
 	collections: CollectionWithStats[];
 	tags: TagWithStats[];
-	profiles: Profile[];
+	profiles: ProfileWithStats[];
 	activeProfile: string | null;
 	thumbnailQuality: ThumbnailQuality;
 	videoThumbnailAnimation: boolean;
