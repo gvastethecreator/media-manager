@@ -32,6 +32,15 @@ export interface CharacterWithStats extends Character {
     images: number
   }
   totalSize: number
+  images?: {
+    id: string
+    thumbnail: Buffer | null
+    thumbnailWidth: number | null
+    thumbnailHeight: number | null
+    thumbnailSize: number | null
+    url?: string
+  }[]
+  recentImages?: (string | null)[]
 }
 
 export interface CharacterCreate {

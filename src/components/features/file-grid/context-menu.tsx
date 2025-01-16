@@ -34,12 +34,12 @@ import type { FileItem } from "@/types/file-item";
 import { useEffect, useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useFavoritesStore } from "@/store/favorites.store";
-import { useCollectionStore } from "@/store/collections.store";
+import { useCollectionsStore } from "@/store/collections.store";
 import { useTagsStore } from "@/store/tags.store";
-import { useAlbumStore } from "@/store/albums.store";
-import { useCharacterStore } from "@/store/characters.store";
-import { usePlaceStore } from "@/store/places.store";
-import { useObjectStore } from "@/store/objects.store";
+import { useAlbumsStore } from "@/store/albums.store";
+import { useCharactersStore } from "@/store/characters.store";
+import { usePlacesStore } from "@/store/places.store";
+import { useObjectsStore } from "@/store/objects.store";
 import { logger } from "@/lib/logger";
 import type {
 	Collection,
@@ -90,32 +90,14 @@ export function FileContextMenu({
 }: FileContextMenuProps) {
 	// Stores con tipos correctos y valores por defecto
 	const { toggleFavorite, isFavorited } = useFavoritesStore();
-	const {
-		items: collections = [],
-		addImageToCollection,
-		loadItems: loadCollections,
-	} = useCollectionStore();
-	const { tags = [], addImageToTag, loadTags } = useTagsStore();
-	const {
-		items: albums = [],
-		addImageToAlbum,
-		loadItems: loadAlbums,
-	} = useAlbumStore();
-	const {
-		items: characters = [],
-		addImageToCharacter,
-		loadItems: loadCharacters,
-	} = useCharacterStore();
-	const {
-		items: places = [],
-		addImageToPlace,
-		loadItems: loadPlaces,
-	} = usePlaceStore();
-	const {
-		items: objects = [],
-		addImageToObject,
-		loadItems: loadObjects,
-	} = useObjectStore();
+	const { collections, addImageToCollection, loadCollections } =
+		useCollectionsStore();
+	const { tags, addTagToImage, loadTags } = useTagsStore();
+	const { albums, addImageToAlbum, loadAlbums } = useAlbumsStore();
+	const { characters, addImageToCharacter, loadCharacters } =
+		useCharactersStore();
+	const { places, addImageToPlace, loadPlaces } = usePlacesStore();
+	const { objects, addImageToObject, loadObjects } = useObjectsStore();
 
 	// Estado para controlar si el menú está abierto
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -196,7 +178,7 @@ export function FileContextMenu({
 						await addImageToCollection(data, file.id);
 						break;
 					case "tag-add":
-						await addImageToTag(data, file.id);
+						await addTagToImage(data, file.id);
 						break;
 					case "album-add":
 						await addImageToAlbum(data, file.id);
@@ -236,7 +218,7 @@ export function FileContextMenu({
 			handleDoubleClick,
 			handleToggleFavorite,
 			addImageToCollection,
-			addImageToTag,
+			addTagToImage,
 			addImageToAlbum,
 			addImageToCharacter,
 			addImageToPlace,
