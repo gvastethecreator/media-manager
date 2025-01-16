@@ -52,24 +52,27 @@
 
 ### Últimas Mejoras (21/03/2024)
 
-- Sección de Lugares:
+#### Correcciones de Tipos y Linting
 
-  - Corrección de tipos en el store
-  - Implementación de estadísticas detalladas
-  - Cálculo de distribución por carpetas
-  - Tracking de últimas actualizaciones
-  - Optimización de queries con Prisma
-  - Mejora en el manejo de errores
-  - Implementación de logging detallado
+- Cards:
 
-- Sección de Colecciones:
-  - Implementación del store con Zustand
-  - Integración de estadísticas detalladas
-  - Cálculo de distribución por carpetas
-  - Tracking de últimas actualizaciones
-  - Optimización de queries con Prisma
-  - Mejora en el manejo de errores
-  - Implementación de logging detallado
+  - Corrección de tipos en eventos onClick para character-card
+  - Ajuste de interfaces en collection-card
+  - Optimización de handlers en folder-card
+  - Estandarización con el patrón de album-card
+
+- Servicios y Store:
+  - Corrección de importaciones de prisma
+  - Ajuste de interfaces para ProfileWithStats
+  - Implementación correcta de BaseEntity
+  - Mejora en la tipado de estados y acciones
+
+#### Mejoras Técnicas
+
+- Optimización de tipos en componentes de tarjetas
+- Estandarización de patrones de eventos
+- Corrección de importaciones y dependencias
+- Mejora en la consistencia de tipos a través del proyecto
 
 ### Próximas Tareas
 
@@ -85,3 +88,4 @@
 - Se ha mejorado significativamente el manejo de errores y logging
 - Las estadísticas ahora incluyen información más detallada y útil
 - Se ha completado la migración a Zustand en todas las secciones
+- Se ha mejorado la tipificación y el manejo de eventos en los componentes
