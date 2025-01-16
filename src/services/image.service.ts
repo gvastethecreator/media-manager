@@ -8,7 +8,7 @@ import { promises as fs } from 'fs'
 import { imageConfig } from '@/config'
 import { logger } from '@/lib/logger'
 import { ThumbnailQuality } from '@/types/thumbnails'
-import { getImageMetadata as getMetadata } from '@/lib/metadata'
+import { extractMetadata } from '@/app/actions/metadata.actions'
 
 const imageLogger = logger.withContext('ImageService')
 
@@ -228,7 +228,7 @@ class ImageService {
 
   async getImageMetadata(path: string) {
     try {
-      return await getMetadata(path)
+      return await extractMetadata(path)
     } catch (error) {
       imageLogger.error('Error getting image metadata:', { path, error })
       throw error
