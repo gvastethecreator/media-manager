@@ -10,9 +10,7 @@ import {
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useState, Suspense, useEffect } from "react";
-import {
-	FileViewer,
-} from "@/components/features/file-viewer/file-viewer";
+import { FileViewer } from "@/components/features/file-viewer/file-viewer";
 import { useImageViewer } from "@/store/image-viewer.store";
 import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
 import { getNavigationData } from "@/app/actions/nav.actions";
@@ -79,7 +77,10 @@ export function MainLayout({ children }: MainLayoutProps) {
 			</ResizablePanelGroup>
 
 			<FileViewer
-				images={images as unknown as ImageItem[]}
+				images={images.map((img) => ({
+					...img,
+					parsedMetadata: img.metadata ? JSON.parse(img.metadata) : undefined,
+				}))}
 				initialIndex={currentIndex}
 				isOpen={isOpen}
 				onClose={closeViewer}

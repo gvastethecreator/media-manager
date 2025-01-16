@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { logger } from '@/lib/logger'
-import type { FileItem } from '@/types/file-item'
-import type { TagWithStats, RelatedTag } from '@/types/tag'
+import type { FileItem, RelatedTag } from '@/types/file-item'
+import type { TagWithStats } from '@/types/tag'
 import { getTagImages } from '@/app/actions/tag.actions'
 import { getFolders } from '@/app/actions/folder.actions'
 import { getCollections } from '@/app/actions/collection.actions'
@@ -32,6 +32,12 @@ interface TagWithCount {
   _count: {
     images: number
   }
+}
+
+interface TagMapping {
+  id: string
+  name: string
+  color?: string
 }
 
 export interface FilesState {
@@ -201,7 +207,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
       set({ isLoading: true, currentTagId: id })
       const rawItems = await getTagImages(id)
       const items = rawItems.map(item => {
-        const tags: RelatedTag[] = item.tags.map(t => ({
+        const tags: RelatedTag[] = (item.tags as TagMapping[]).map(t => ({
           id: t.id,
           name: t.name,
           color: t.color || '#94a3b8'

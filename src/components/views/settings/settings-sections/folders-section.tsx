@@ -53,6 +53,8 @@ const initialStats: FolderStats = {
 	totalFiles: 0,
 	totalSize: 0,
 	lastIndexed: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
 export function FoldersSection() {
@@ -109,17 +111,31 @@ export function FoldersSection() {
 
 			setFolders((prevFolders) =>
 				prevFolders.map((folder) =>
-					folder.id === data.folder.id
-						? {
-								...folder,
-								...data.folder,
-								_count: {
-									images: data.stats?.total || folder._count?.images || 0,
-								},
-								totalSize: data.stats?.totalSize || folder.totalSize,
-								lastIndexed: new Date().toISOString(),
-						  }
-						: folder
+					folder.id === data.folder.id ?
+						{
+							...folder,
+							...data.folder,
+							_count: {
+								images: data.stats?.total || folder._count?.images || 0,
+							},
+							totalSize: data.stats?.totalSize || folder.totalSize,
+							lastIndexed: new Date(),
+							createdAt:
+								data.folder.createdAt ?
+									new Date(data.folder.createdAt)
+								:	new Date(),
+							updatedAt:
+								data.folder.updatedAt ?
+									new Date(data.folder.updatedAt)
+								:	new Date(),
+						}
+					:	{
+							...folder,
+							lastIndexed:
+								folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+							createdAt: new Date(folder.createdAt),
+							updatedAt: new Date(folder.updatedAt),
+						}
 				)
 			);
 
@@ -167,9 +183,9 @@ export function FoldersSection() {
 		loadInitialData().catch((error) => {
 			folderLogger.error("❌ Error cargando datos iniciales:", error);
 			setError(
-				error instanceof Error
-					? error.message
-					: "Error cargando datos iniciales"
+				error instanceof Error ?
+					error.message
+				:	"Error cargando datos iniciales"
 			);
 		});
 	}, []);
@@ -183,11 +199,9 @@ export function FoldersSection() {
 			// Transformar datos de manera segura
 			const transformedFolders = folders.map((folder) => ({
 				...folder,
-				lastIndexed: folder.lastIndexed?.toISOString?.() || null,
-				createdAt:
-					folder.createdAt?.toISOString?.() || new Date().toISOString(),
-				updatedAt:
-					folder.updatedAt?.toISOString?.() || new Date().toISOString(),
+				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+				createdAt: new Date(folder.createdAt || new Date()),
+				updatedAt: new Date(folder.updatedAt || new Date()),
 				_count: {
 					images: folder._count?.images || 0,
 				},
@@ -201,9 +215,9 @@ export function FoldersSection() {
 		} catch (error) {
 			folderLogger.error("❌ Error cargando carpetas:", error);
 			setError(
-				error instanceof Error
-					? error.message
-					: "No se pudieron cargar las carpetas"
+				error instanceof Error ?
+					error.message
+				:	"No se pudieron cargar las carpetas"
 			);
 		} finally {
 			setIsLoading(false);
@@ -232,6 +246,8 @@ export function FoldersSection() {
 					const date = new Date(folder.lastIndexed);
 					return !acc || date > acc ? date : acc;
 				}, null),
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			};
 
 			folderLogger.info("✅ Estadísticas calculadas:", indexStats);
@@ -240,11 +256,9 @@ export function FoldersSection() {
 			// Actualizar carpetas con la misma transformación segura
 			const transformedFolders = folders.map((folder) => ({
 				...folder,
-				lastIndexed: folder.lastIndexed?.toISOString?.() || null,
-				createdAt:
-					folder.createdAt?.toISOString?.() || new Date().toISOString(),
-				updatedAt:
-					folder.updatedAt?.toISOString?.() || new Date().toISOString(),
+				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+				createdAt: new Date(folder.createdAt || new Date()),
+				updatedAt: new Date(folder.updatedAt || new Date()),
 				_count: {
 					images: folder._count?.images || 0,
 				},
@@ -255,9 +269,9 @@ export function FoldersSection() {
 		} catch (error) {
 			folderLogger.error("❌ Error cargando estadísticas:", error);
 			setError(
-				error instanceof Error
-					? error.message
-					: "No se pudieron cargar las estadísticas"
+				error instanceof Error ?
+					error.message
+				:	"No se pudieron cargar las estadísticas"
 			);
 			setStats(initialStats);
 		} finally {
@@ -298,9 +312,9 @@ export function FoldersSection() {
 			toast({
 				title: "Error",
 				description:
-					error instanceof Error
-						? error.message
-						: "Error al agregar la carpeta",
+					error instanceof Error ?
+						error.message
+					:	"Error al agregar la carpeta",
 				variant: "destructive",
 			});
 		} finally {
@@ -343,9 +357,9 @@ export function FoldersSection() {
 			toast({
 				title: "Error",
 				description:
-					error instanceof Error
-						? error.message
-						: "Error al reindexar la carpeta",
+					error instanceof Error ?
+						error.message
+					:	"Error al reindexar la carpeta",
 				variant: "destructive",
 			});
 		} finally {
@@ -377,9 +391,9 @@ export function FoldersSection() {
 			toast({
 				title: "Error",
 				description:
-					error instanceof Error
-						? error.message
-						: "Error al eliminar la carpeta",
+					error instanceof Error ?
+						error.message
+					:	"Error al eliminar la carpeta",
 				variant: "destructive",
 			});
 		}
@@ -481,17 +495,16 @@ export function FoldersSection() {
 								onClick={handleAddFolder}
 								disabled={isLoading || isProcessing || !folderPath.trim()}
 							>
-								{isProcessing ? (
+								{isProcessing ?
 									<>
 										<RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
 										<span>Agregando...</span>
 									</>
-								) : (
-									<>
+								:	<>
 										<FolderPlus className="h-3.5 w-3.5 mr-1.5" />
 										<span>Agregar</span>
 									</>
-								)}
+								}
 							</Button>
 						</div>
 
@@ -534,9 +547,9 @@ export function FoldersSection() {
 															{formatBytes(Number(folder.totalSize || 0))}
 														</Badge>
 														<span className="text-[10px] text-muted-foreground">
-															{folder.lastIndexed
-																? new Date(folder.lastIndexed).toLocaleString()
-																: "No indexado"}
+															{folder.lastIndexed ?
+																new Date(folder.lastIndexed).toLocaleString()
+															:	"No indexado"}
 														</span>
 													</div>
 												</div>
@@ -597,9 +610,9 @@ export function FoldersSection() {
 															</Button>
 														</TooltipTrigger>
 														<TooltipContent className="text-xs">
-															{selectedFolder === folder.id
-																? "Haz clic de nuevo para eliminar"
-																: "Haz clic para eliminar"}
+															{selectedFolder === folder.id ?
+																"Haz clic de nuevo para eliminar"
+															:	"Haz clic para eliminar"}
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>

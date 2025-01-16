@@ -112,7 +112,7 @@ const FolderCard = memo(function FolderCard({
 					<div className="relative group/grid flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
 							{folder.recentImages && folder.recentImages.length > 0 ?
-								folder.recentImages.map((src: string, i: number) => (
+								folder.recentImages.map((src: string | null, i: number) => (
 									<div
 										key={i}
 										className="relative rounded-md overflow-hidden aspect-square"
@@ -246,9 +246,9 @@ export function FoldersView({ isResizing }: ViewProps) {
 			const data = await getFolders();
 			const transformedData = data.map((folder) => ({
 				...folder,
-				lastIndexed: folder.lastIndexed?.toISOString() || null,
-				createdAt: folder.createdAt.toISOString(),
-				updatedAt: folder.updatedAt.toISOString(),
+				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+				createdAt: new Date(folder.createdAt),
+				updatedAt: new Date(folder.updatedAt),
 			}));
 			setFolders(transformedData);
 			viewLogger.info(`✅ ${data.length} carpetas cargadas`);

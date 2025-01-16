@@ -25,14 +25,17 @@ export interface ImageItem {
 	id: string;
 	name: string;
 	type: string;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
 	url?: string;
-	thumbnail?: string;
+	thumbnail: string | null;
 	src?: string;
 	alt?: string;
-	width?: number;
-	height?: number;
 	mimeType?: string;
-	metadata?: {
+	metadata: string | null;
+	parsedMetadata?: {
 		dimensions?: {
 			width: number;
 			height: number;
@@ -636,8 +639,8 @@ export function FileViewer({
 	const getImageDimensions = (image: ImageItem) => {
 		const defaultDimensions = { width: 1920, height: 1080 };
 
-		if (image.metadata?.dimensions) {
-			return image.metadata.dimensions;
+		if (image.parsedMetadata?.dimensions) {
+			return image.parsedMetadata.dimensions;
 		}
 
 		if (image.width && image.height) {
