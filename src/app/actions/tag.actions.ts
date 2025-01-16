@@ -3,32 +3,38 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
-import type { Tag as PrismaTag } from '@prisma/client'
+import type { Tag as PrismaTag } from "@prisma/client";
 import type { FileItem } from '@/types/file-item'
 import { eventsService } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 
-const tagLogger = logger.withContext('TagActions');
+const tagLogger = logger.withContext("TagActions");
 
 export interface TagCreate {
-  name: string
-  color?: string
-  description?: string
-  shortcut?: string
+  name: string;
+  color?: string;
+  description?: string | null;
+  shortcut?: string | null;
 }
 
-export interface TagUpdate extends Partial<Omit<TagCreate, 'name'>> {
-  id: string
-  name?: string
+export interface TagUpdate extends Partial<TagCreate> {
+  id: string;
 }
 
 export interface Tag extends PrismaTag {
-  count: number
+  count?: number;
 }
 
-export interface TagWithStats extends Tag {
-  count: number
-  size: string
+export interface TagWithStats extends PrismaTag {
+  _count: {
+    images: number;
+  };
+  totalSize: number;
+  lastUpdated: Date;
+  distribution?: Array<{
+    name: string;
+    count: number;
+  }>;
 }
 
 export interface TagWithImages extends Tag {
@@ -53,65 +59,103 @@ class TagError extends Error {
   }
 }
 
-export async function getTags() {
+export async function getTags(): Promise<TagWithStats[]> {
   try {
-    tagLogger.info('🏷️ Obteniendo etiquetas');
+    tagLogger.info("🏷️ Obteniendo etiquetas con estadísticas");
+
+    // Obtener etiquetas con conteos y estadísticas
     const tags = await prisma.tag.findMany({
       include: {
         _count: {
           select: { images: true },
         },
         images: {
-          take: 9,
-          orderBy: { createdAt: 'desc' },
           select: {
-            id: true,
-            thumbnail: true,
-            thumbnailWidth: true,
-            thumbnailHeight: true,
-            thumbnailSize: true,
-          }
-        }
+            size: true,
+            updatedAt: true,
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+          take: 1,
+        },
       },
-      orderBy: { name: 'asc' },
+      orderBy: [
+        {
+          images: {
+            _count: "desc",
+          },
+        },
+        {
+          name: "asc",
+        },
+      ],
     });
 
+    // Calcular estadísticas adicionales
     const tagsWithStats = await Promise.all(
       tags.map(async (tag) => {
+        // Calcular tamaño total
         const totalSize = await prisma.image.aggregate({
           where: {
             tags: {
               some: {
-                id: tag.id
-              }
-            }
+                id: tag.id,
+              },
+            },
           },
           _sum: {
-            size: true
-          }
+            size: true,
+          },
+        });
+
+        // Obtener distribución por carpetas
+        const distribution = await prisma.folder.findMany({
+          where: {
+            images: {
+              some: {
+                tags: {
+                  some: {
+                    id: tag.id,
+                  },
+                },
+              },
+            },
+          },
+          select: {
+            name: true,
+            _count: {
+              select: {
+                images: true,
+              },
+            },
+          },
+          take: 5,
+          orderBy: {
+            images: {
+              _count: "desc",
+            },
+          },
         });
 
         return {
           ...tag,
+          _count: tag._count,
           totalSize: totalSize._sum.size || 0,
-          recentImages: tag.images
-            .filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-            .map(img => {
-              if (img.thumbnail) {
-                return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-              }
-              return null;
-            }),
-          images: undefined
+          lastUpdated: tag.images[0]?.updatedAt || tag.updatedAt,
+          distribution: distribution.map((d) => ({
+            name: d.name,
+            count: d._count.images,
+          })),
         };
       })
     );
 
-    tagLogger.info('✅ Etiquetas obtenidas', { count: tags.length });
+    tagLogger.info("✅ Etiquetas obtenidas", { count: tags.length });
     return tagsWithStats;
   } catch (error) {
-    tagLogger.error('❌ Error al obtener etiquetas', error);
-    throw new TagError('No se pudieron obtener las etiquetas', { cause: error });
+    tagLogger.error("❌ Error al obtener etiquetas", error);
+    throw new Error("No se pudieron obtener las etiquetas");
   }
 }
 

@@ -1,58 +1,104 @@
-import { createStoreFactory } from './store.factory';
+import { create } from 'zustand';
+import { logger } from '@/lib/logger';
 import type { Collection } from '@prisma/client';
-import { logger } from '../lib/logger';
 import {
-  createCollection,
-  deleteCollection,
   getCollections,
+  createCollection,
   updateCollection,
-  addImageToCollection as addImageToCollectionAction,
+  deleteCollection,
+  addImageToCollection,
+  type CollectionWithStats,
   type CollectionCreate,
   type CollectionUpdate
-} from '../app/actions/collection.actions';
+} from '@/app/actions/collection.actions';
 
-interface CollectionState {
-  searchQuery: string;
-  sortBy: 'name' | 'createdAt' | 'updatedAt';
-  sortOrder: 'asc' | 'desc';
+interface CollectionsStore {
+  collections: CollectionWithStats[];
+  isLoading: boolean;
+  error: Error | null;
+  selectedItem: Collection | null;
+  loadCollections: () => Promise<void>;
+  createCollection: (data: CollectionCreate) => Promise<void>;
+  updateCollection: (data: CollectionUpdate) => Promise<void>;
+  deleteCollection: (id: string) => Promise<void>;
+  addImageToCollection: (collectionId: string, imageId: string) => Promise<void>;
+  selectItem: (collection: Collection) => void;
 }
 
-const baseCollectionStore = createStoreFactory<Collection, CollectionState, CollectionCreate, CollectionUpdate>(
-  {
-    name: 'collections',
-    logger,
-    actions: {
-      beforeCreate: async (data) => {
-        // Aquí podríamos hacer validaciones o transformaciones antes de crear
-        return data;
-      },
-      afterCreate: async (collection) => {
-        // Aquí podríamos hacer acciones después de crear, como notificaciones
-        logger.info('Colección creada exitosamente', { collection });
-      }
+const collectionsLogger = logger.withContext('CollectionsStore');
+
+export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
+  collections: [],
+  isLoading: false,
+  error: null,
+  selectedItem: null,
+
+  loadCollections: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      collectionsLogger.info('🔄 Cargando colecciones');
+      const collections = await getCollections();
+      set({ collections, isLoading: false });
+      collectionsLogger.info('✅ Colecciones cargadas');
+    } catch (error) {
+      collectionsLogger.error('❌ Error al cargar colecciones:', error);
+      set({ error: error as Error, isLoading: false });
     }
   },
-  {
-    getItems: getCollections,
-    createItem: createCollection,
-    updateItem: updateCollection,
-    deleteItem: deleteCollection
-  }
-);
 
-// Exportar el hook con funcionalidad extendida
-export const useCollectionStore = () => {
-  const store = baseCollectionStore();
-  return {
-    ...store,
-    addImageToCollection: async (collectionId: string, imageId: string) => {
-      try {
-        await addImageToCollectionAction(collectionId, imageId);
-        await store.loadItems();
-      } catch (error) {
-        logger.error('Error adding image to collection:', error);
-        throw error;
-      }
+  selectItem: (collection) => {
+    set({ selectedItem: collection });
+  },
+
+  createCollection: async (data) => {
+    try {
+      set({ isLoading: true, error: null });
+      collectionsLogger.info('📝 Creando colección:', data.name);
+      await createCollection(data);
+      await get().loadCollections();
+      collectionsLogger.info('✅ Colección creada');
+    } catch (error) {
+      collectionsLogger.error('❌ Error al crear colección:', error);
+      set({ error: error as Error, isLoading: false });
     }
-  };
-};
+  },
+
+  updateCollection: async (data) => {
+    try {
+      set({ isLoading: true, error: null });
+      collectionsLogger.info('📝 Actualizando colección:', data.id);
+      await updateCollection(data.id, data);
+      await get().loadCollections();
+      collectionsLogger.info('✅ Colección actualizada');
+    } catch (error) {
+      collectionsLogger.error('❌ Error al actualizar colección:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  },
+
+  deleteCollection: async (id) => {
+    try {
+      set({ isLoading: true, error: null });
+      collectionsLogger.info('🗑️ Eliminando colección:', id);
+      await deleteCollection(id);
+      await get().loadCollections();
+      collectionsLogger.info('✅ Colección eliminada');
+    } catch (error) {
+      collectionsLogger.error('❌ Error al eliminar colección:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  },
+
+  addImageToCollection: async (collectionId, imageId) => {
+    try {
+      set({ isLoading: true, error: null });
+      collectionsLogger.info('➕ Agregando imagen a colección:', { collectionId, imageId });
+      await addImageToCollection(collectionId, imageId);
+      await get().loadCollections();
+      collectionsLogger.info('✅ Imagen agregada a la colección');
+    } catch (error) {
+      collectionsLogger.error('❌ Error al agregar imagen a la colección:', error);
+      set({ error: error as Error, isLoading: false });
+    }
+  }
+}));

@@ -1,12 +1,15 @@
 "use client";
 
-import { useCollectionStore } from "@/store/collections.store";
+import { useCollectionsStore } from "@/store/collections.store";
 import { BaseContentView, ContentViewProvider } from "@/components/views/base";
 import type { CollectionContentProps } from "@/components/views/base/types";
 import { Library } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { FileItem } from "@/types/file-item";
-import { getCollectionImages, removeImageFromCollection } from "@/app/actions/collection.actions";
+import {
+	getCollectionImages,
+	removeImageFromCollection,
+} from "@/app/actions/collection.actions";
 import type { Collection } from "@prisma/client";
 
 export function CollectionContentView() {
@@ -14,8 +17,8 @@ export function CollectionContentView() {
 		selectedItem: currentCollection,
 		addImageToCollection,
 		selectItem,
-		loading: isLoading,
-	} = useCollectionStore();
+		isLoading,
+	} = useCollectionsStore();
 
 	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
 	const [error, setError] = useState<string | null>(null);
