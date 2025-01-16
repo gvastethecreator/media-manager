@@ -1,37 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ViewProps } from "../types";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import {
-	ImageIcon,
-	FolderIcon,
-	TagIcon,
-	ArrowUpRight,
-	Download,
-	Heart,
-	Settings2,
-	LibraryBig,
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import {
-	HoverCard,
-	HoverCardContent,
-	HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { toast } from "sonner";
+import { LibraryBig } from "lucide-react";
 import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import { useNavigationStore } from "@/store/navigation.store";
@@ -43,251 +16,14 @@ import {
 } from "@/app/actions/collection.actions";
 import { eventsService, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
-import Image from "next/image";
+import { CollectionCard } from "@/components/cards/collection-card";
 
 const viewLogger = logger.withContext("CollectionsView");
-
-interface CollectionCardProps {
-	collection: CollectionWithStats & {
-		recentImages?: string[];
-		topTags?: { name: string; count: number }[];
-	};
-	onClick: () => void;
-}
-
-function getRandomGradient() {
-	const gradients = [
-		"from-rose-500 to-indigo-500",
-		"from-emerald-500 to-sky-500",
-		"from-amber-500 to-pink-500",
-		"from-violet-500 to-orange-500",
-		"from-cyan-500 to-yellow-500",
-		"from-fuchsia-500 to-lime-500",
-		"from-purple-500 to-teal-500",
-		"from-blue-500 to-red-500",
-		"from-green-500 to-purple-500",
-	];
-	return gradients[Math.floor(Math.random() * gradients.length)];
-}
-
-const CollectionCard = memo(function CollectionCard({
-	collection,
-	onClick,
-}: CollectionCardProps) {
-	const bgColor = collection.color || "#3b82f6";
-	const router = useRouter();
-	const [isFavorite, setIsFavorite] = useState(false);
-
-	const handleDownload = useCallback(
-		async (e: React.MouseEvent) => {
-			e.stopPropagation();
-			try {
-				viewLogger.info("📥 Iniciando descarga de colección:", collection.name);
-				toast.promise(fetch(`/api/collections/${collection.id}/download`), {
-					loading: "Preparando descarga...",
-					success: "Descarga iniciada",
-					error: "Error al descargar la colección",
-				});
-			} catch (error) {
-				viewLogger.error("❌ Error al descargar colección:", error);
-			}
-		},
-		[collection.id, collection.name]
-	);
-
-	const handleFavorite = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			setIsFavorite(!isFavorite);
-			viewLogger.info("❤️ Cambiando estado de favorito:", {
-				collection: collection.name,
-				isFavorite: !isFavorite,
-			});
-			toast.success(
-				isFavorite ? "Eliminado de favoritos" : "Agregado a favoritos"
-			);
-		},
-		[collection.name, isFavorite]
-	);
-
-	const handleEdit = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			viewLogger.info("⚙️ Editando colección:", collection.name);
-			router.push("/settings/collections");
-		},
-		[collection.name, router]
-	);
-
-	return (
-		<motion.div animate={{ scale: 1 }} className="h-full">
-			<Card
-				className={cn(
-					"w-full h-full cursor-pointer overflow-hidden group",
-					"transition-all duration-200 hover:shadow-lg",
-					"border-2 flex flex-col"
-				)}
-				style={{
-					borderColor: `${bgColor}50`,
-					background: `linear-gradient(160deg, ${bgColor}10 0%, ${bgColor}05 100%)`,
-				}}
-				onClick={onClick}
-			>
-				<CardHeader className="relative p-4 pb-2 flex-none">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-2">
-							<span className="text-3xl">{collection.emoji}</span>
-							<div>
-								<CardTitle className="text-xl">{collection.name}</CardTitle>
-								<CardDescription className="line-clamp-1">
-									{collection.description || "Sin descripción"}
-								</CardDescription>
-							</div>
-						</div>
-					
-					</div>
-				</CardHeader>
-
-				<CardContent className="p-4 pt-2 flex-1 flex flex-col">
-					{/* Grid de imágenes recientes */}
-					<div className="relative group/grid flex-1">
-						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{collection.recentImages && collection.recentImages.length > 0
-								? collection.recentImages.map((src, i) => (
-										<div
-											key={i}
-											className="relative rounded-md overflow-hidden aspect-square"
-										>
-											{src ? (
-												<div className="relative w-full h-full">
-													<Image
-														src={src}
-														alt={`Imagen ${i + 1}`}
-														fill
-														className="object-cover transition-transform group-hover/grid:scale-105"
-													/>
-												</div>
-											) : (
-												<div
-													className={cn(
-														"w-full h-full flex items-center justify-center bg-gradient-to-br",
-														getRandomGradient()
-													)}
-												>
-													<ImageIcon className="w-5 h-5 text-white/80" />
-												</div>
-											)}
-										</div>
-								  ))
-								: Array.from({ length: 9 }).map((_, i) => (
-										<div
-											key={i}
-											className={cn(
-												"relative rounded-md overflow-hidden aspect-square",
-												"flex items-center justify-center",
-												"bg-gradient-to-br transition-transform hover:scale-105",
-												getRandomGradient()
-											)}
-										>
-											<ImageIcon className="w-5 h-5 text-white/80" />
-										</div>
-								  ))}
-						</div>
-
-						{/* Overlay con hover */}
-						<div
-							className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover/grid:opacity-100 transition-opacity rounded-lg flex items-end justify-center p-4"
-							onClick={onClick}
-						>
-							<Button variant="secondary" size="sm" className="gap-2">
-								<ImageIcon className="w-4 h-4" />
-								{collection.recentImages && collection.recentImages.length > 0
-									? "Ver todas las imágenes"
-									: "Colección vacía"}
-							</Button>
-						</div>
-					</div>
-
-					{/* Footer con stats */}
-					<div className="mt-4 space-y-3">
-						{/* Estadísticas */}
-						<div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
-							<div className="flex items-center gap-4">
-								<HoverCard openDelay={200}>
-									<HoverCardTrigger asChild>
-										<div className="flex items-center gap-1.5 cursor-help">
-											<FolderIcon className="w-4 h-4" />
-											<span>{collection._count.images}</span>
-										</div>
-									</HoverCardTrigger>
-									<HoverCardContent side="top" className="text-sm">
-										Esta colección contiene {collection._count.images} imágenes
-									</HoverCardContent>
-								</HoverCard>
-
-								<HoverCard openDelay={200}>
-									<HoverCardTrigger asChild>
-										<div className="flex items-center gap-1.5 cursor-help">
-											<TagIcon className="w-4 h-4" />
-											<span>{collection.topTags?.length || 0}</span>
-										</div>
-									</HoverCardTrigger>
-									<HoverCardContent side="top" className="text-sm">
-										Etiquetas más usadas en esta colección
-									</HoverCardContent>
-								</HoverCard>
-							</div>
-
-							<HoverCard openDelay={200}>
-								<HoverCardTrigger asChild>
-									<div className="flex items-center gap-1.5 cursor-help">
-										<span>{collection.totalSize}</span>
-									</div>
-								</HoverCardTrigger>
-								<HoverCardContent side="top" className="text-sm">
-									Espacio total usado por las imágenes
-								</HoverCardContent>
-							</HoverCard>
-						</div>
-
-						{collection.topTags && collection.topTags.length > 0 && (
-							<>
-								<Separator />
-								<div className="flex flex-wrap gap-1">
-									{collection.topTags.map((tag, i) => (
-										<Badge
-											key={i}
-											variant="secondary"
-											className="text-xs hover:bg-accent transition-colors"
-										>
-											{tag.name} ({tag.count})
-										</Badge>
-									))}
-								</div>
-							</>
-						)}
-					</div>
-				</CardContent>
-			</Card>
-		</motion.div>
-	);
-});
-
-function LoadingSkeleton() {
-	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-			{Array(4)
-				.fill(0)
-				.map((_, i) => (
-					<Skeleton key={i} className="w-full aspect-[4/3]" />
-				))}
-		</div>
-	);
-}
 
 export function CollectionsView({ isResizing }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCollection } = useFileManager();
+	const router = useRouter();
 	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -338,6 +74,14 @@ export function CollectionsView({ isResizing }: ViewProps) {
 		[setCurrentView, setCurrentCollection]
 	);
 
+	const handleEdit = useCallback(
+		(collection: { id: string; name: string }) => {
+			viewLogger.info("⚙️ Editando colección:", collection.name);
+			router.push("/settings/collections");
+		},
+		[router]
+	);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -363,13 +107,24 @@ export function CollectionsView({ isResizing }: ViewProps) {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{collections.map((collection) => (
-						<CollectionCard
+						<motion.div
 							key={collection.id}
-							collection={collection}
-							onClick={() => handleCollectionClick(collection)}
-						/>
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.3 }}
+						>
+							<CollectionCard
+								collection={{
+									...collection,
+									_count: collection._count || { images: 0 },
+									totalSize: collection.totalSize || 0,
+								}}
+								onClick={() => handleCollectionClick(collection)}
+								onEdit={handleEdit}
+							/>
+						</motion.div>
 					))}
 				</div>
 			</div>

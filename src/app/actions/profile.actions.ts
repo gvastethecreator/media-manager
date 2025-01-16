@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import type { ProfileCreate, ProfileUpdate } from "@/services/profile.service";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
+import type { Profile } from '@prisma/client';
 
 const profileLogger = logger.withContext('ProfileActions');
 
@@ -23,6 +24,20 @@ class ProfileError extends Error {
     super(message);
     this.name = 'ProfileError';
   }
+}
+
+export interface ProfileWithStats extends Profile {
+  id: string;
+  name: string;
+  _count: {
+    images: number;
+  };
+  totalSize: number;
+  lastUpdated: Date;
+  distribution?: Array<{
+    name: string;
+    count: number;
+  }>;
 }
 
 export async function getProfiles() {
