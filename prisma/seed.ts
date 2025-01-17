@@ -88,18 +88,6 @@ async function main() {
         totalSize: 0,
       },
       {
-        name: 'NEGRO',
-        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\NEGRO',
-        totalFiles: 0,
-        totalSize: 0,
-      },
-      {
-        name: 'BLANCO',
-        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BLANCO',
-        totalFiles: 0,
-        totalSize: 0,
-      },
-      {
         name: 'ARTESANOS',
         path: 'A:\\FUERZAS ESPECIALES\\Datasets\\ARTESANOS',
         totalFiles: 0,

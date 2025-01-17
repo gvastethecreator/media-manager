@@ -79,6 +79,34 @@ export function FoldersSection() {
 			totalFolders: 0,
 			errors: [],
 		});
+	const [globalProcessingState, setGlobalProcessingState] = useState<{
+		isProcessing: boolean;
+		currentFolder: string | null;
+		currentFile: string | null;
+		fileProgress: {
+			processed: number;
+			total: number;
+			current: string;
+		};
+	}>({
+		isProcessing: false,
+		currentFolder: null,
+		currentFile: null,
+		fileProgress: {
+			processed: 0,
+			total: 0,
+			current: "",
+		},
+	});
+	const [extendedStats, setExtendedStats] = useState<
+		ProcessStatus["extendedStats"]
+	>({
+		fileTypes: {},
+		averageSize: 0,
+		processingSpeed: 0,
+		errorsByType: {},
+		healthScore: 100,
+	});
 
 	// Suscribirse a eventos del FolderService
 	useEffect(() => {
@@ -87,9 +115,27 @@ export function FoldersSection() {
 
 			folderLogger.info("📊 Progreso del proceso:", status);
 
+			// Actualizar estado global de procesamiento
+			if (status.currentFile) {
+				setGlobalProcessingState((prev) => ({
+					...prev,
+					isProcessing: true,
+					currentFolder:
+						status.folderId ?
+							folders.find((f) => f.id === status.folderId)?.name ||
+							prev.currentFolder
+						:	prev.currentFolder,
+					currentFile: status.currentFile || null,
+					fileProgress: {
+						processed: status.filesProcessed || 0,
+						total: status.totalFiles || 0,
+						current: status.currentFile || "",
+					},
+				}));
+			}
+
 			// Actualizar progreso general
-			const progress = status.progress || 0;
-			setProcessProgress(progress);
+			setProcessProgress(status.progress || 0);
 
 			// Actualizar estado del proceso
 			setProcessStatus((prevStatus) => ({
@@ -99,11 +145,35 @@ export function FoldersSection() {
 				phase: status.phase || prevStatus.phase,
 				filesProcessed: status.filesProcessed || prevStatus.filesProcessed,
 				totalFiles: status.totalFiles || prevStatus.totalFiles,
-				processingSpeed: status.processingSpeed || prevStatus.processingSpeed,
-				estimatedTimeRemaining:
-					status.estimatedTimeRemaining || prevStatus.estimatedTimeRemaining,
-				errors: status.errors || prevStatus.errors,
-				globalProgress: status.globalProgress,
+				fileDetails: status.fileDetails || prevStatus.fileDetails,
+				extendedStats:
+					status.extendedStats ?
+						{
+							...prevStatus.extendedStats,
+							...status.extendedStats,
+							fileTypes: {
+								...prevStatus.extendedStats?.fileTypes,
+								...status.extendedStats.fileTypes,
+							},
+							errorsByType: {
+								...prevStatus.extendedStats?.errorsByType,
+								...status.extendedStats.errorsByType,
+							},
+						}
+					:	prevStatus.extendedStats,
+				errors:
+					status.errors ?
+						[
+							...(prevStatus.errors || []),
+							...status.errors.filter(
+								(error) =>
+									!prevStatus.errors?.some(
+										(e) => e.file === error.file && e.error === error.error
+									)
+							),
+						]
+					:	prevStatus.errors,
+				globalProgress: status.globalProgress || prevStatus.globalProgress,
 			}));
 
 			// Si hay progreso global, actualizar el estado global
@@ -204,6 +274,18 @@ export function FoldersSection() {
 			folderLogger.info("✅ Proceso completado:", {
 				folderId: data.folder.id,
 				stats: data.stats,
+			});
+
+			// Resetear estado global de procesamiento
+			setGlobalProcessingState({
+				isProcessing: false,
+				currentFolder: null,
+				currentFile: null,
+				fileProgress: {
+					processed: 0,
+					total: 0,
+					current: "",
+				},
 			});
 
 			setFolders((prevFolders) =>
@@ -580,6 +662,36 @@ export function FoldersSection() {
 						:	"Procesando"}
 					</Badge>
 				</div>
+
+				{status.currentFile && (
+					<div className="flex justify-between items-center">
+						<span>Archivo actual:</span>
+						<span className="truncate max-w-[200px]">{status.currentFile}</span>
+					</div>
+				)}
+
+				{status.fileDetails && (
+					<div className="space-y-1">
+						<div className="flex justify-between items-center">
+							<span>Tamaño:</span>
+							<span>{formatBytes(status.fileDetails.size)}</span>
+						</div>
+						{status.fileDetails.dimensions && (
+							<div className="flex justify-between items-center">
+								<span>Dimensiones:</span>
+								<span>
+									{status.fileDetails.dimensions.width}x
+									{status.fileDetails.dimensions.height}
+								</span>
+							</div>
+						)}
+						<div className="flex justify-between items-center">
+							<span>Tipo:</span>
+							<span>{status.fileDetails.type}</span>
+						</div>
+					</div>
+				)}
+
 				{status.filesProcessed !== undefined &&
 					status.totalFiles !== undefined && (
 						<div className="flex justify-between items-center">
@@ -589,28 +701,98 @@ export function FoldersSection() {
 							</span>
 						</div>
 					)}
-				{status.processingSpeed !== undefined && (
-					<div className="flex justify-between items-center">
-						<span>Velocidad:</span>
-						<span>{status.processingSpeed.toFixed(2)} archivos/s</span>
+
+				{status.extendedStats && (
+					<div className="space-y-1 mt-2 pt-2 border-t border-border/30">
+						<div className="text-[11px] font-medium mb-1">
+							Estadísticas extendidas:
+						</div>
+
+						{status.extendedStats.processingSpeed > 0 && (
+							<div className="flex justify-between items-center">
+								<span>Velocidad:</span>
+								<span>
+									{status.extendedStats.processingSpeed.toFixed(2)} archivos/s
+								</span>
+							</div>
+						)}
+
+						{status.extendedStats.averageSize > 0 && (
+							<div className="flex justify-between items-center">
+								<span>Tamaño promedio:</span>
+								<span>{formatBytes(status.extendedStats.averageSize)}</span>
+							</div>
+						)}
+
+						{Object.keys(status.extendedStats.fileTypes).length > 0 && (
+							<div className="space-y-1">
+								<div className="text-[10px] text-muted-foreground/80">
+									Tipos de archivo:
+								</div>
+								<div className="grid grid-cols-2 gap-1">
+									{Object.entries(status.extendedStats.fileTypes).map(
+										([type, count]) => (
+											<div
+												key={type}
+												className="flex justify-between items-center text-[10px]"
+											>
+												<span>{type}:</span>
+												<span>{count}</span>
+											</div>
+										)
+									)}
+								</div>
+							</div>
+						)}
+
+						{Object.keys(status.extendedStats.errorsByType).length > 0 && (
+							<div className="space-y-1 mt-1">
+								<div className="text-[10px] text-destructive/80">
+									Errores por tipo:
+								</div>
+								<div className="grid grid-cols-2 gap-1">
+									{Object.entries(status.extendedStats.errorsByType).map(
+										([type, count]) => (
+											<div
+												key={type}
+												className="flex justify-between items-center text-[10px] text-destructive/90"
+											>
+												<span>{type}:</span>
+												<span>{count}</span>
+											</div>
+										)
+									)}
+								</div>
+							</div>
+						)}
+
+						<div className="flex justify-between items-center">
+							<span>Estado de salud:</span>
+							<div className="flex items-center gap-1">
+								<span
+									className={cn(
+										status.extendedStats.healthScore > 80 ? "text-green-500"
+										: status.extendedStats.healthScore > 60 ? "text-yellow-500"
+										: "text-destructive"
+									)}
+								>
+									{status.extendedStats.healthScore}%
+								</span>
+							</div>
+						</div>
 					</div>
 				)}
-				{status.estimatedTimeRemaining !== undefined && (
-					<div className="flex justify-between items-center">
-						<span>Tiempo restante:</span>
-						<span>{Math.ceil(status.estimatedTimeRemaining)}s</span>
-					</div>
-				)}
+
 				{status.errors && status.errors.length > 0 && (
-					<div className="mt-2">
-						<p className="text-destructive">
+					<div className="mt-2 pt-2 border-t border-border/30">
+						<p className="text-destructive text-[11px] font-medium">
 							Errores encontrados: {status.errors.length}
 						</p>
-						<div className="max-h-20 overflow-y-auto">
+						<div className="max-h-20 overflow-y-auto mt-1">
 							{status.errors.map((error, index) => (
 								<p
 									key={index}
-									className="text-[10px] text-destructive truncate"
+									className="text-[10px] text-destructive/90 truncate"
 								>
 									{error.file}: {error.error}
 								</p>
@@ -621,6 +803,9 @@ export function FoldersSection() {
 			</div>
 		);
 	};
+
+	const isGloballyProcessing =
+		globalProcessingState.isProcessing || globalReindexStatus.isProcessing;
 
 	if (error) {
 		return (
@@ -659,9 +844,7 @@ export function FoldersSection() {
 							size="sm"
 							onClick={handleReindexAll}
 							className="h-7 text-xs"
-							disabled={
-								isLoading || isProcessing || globalReindexStatus.isProcessing
-							}
+							disabled={isLoading || isGloballyProcessing}
 						>
 							<RefreshCw
 								className={cn(
@@ -763,7 +946,7 @@ export function FoldersSection() {
 																variant="ghost"
 																className="h-6 w-6"
 																onClick={() => handleReindexFolder(folder.id)}
-																disabled={isProcessing}
+																disabled={isGloballyProcessing}
 															>
 																<RefreshCw
 																	className={cn(
@@ -793,7 +976,7 @@ export function FoldersSection() {
 																		"bg-destructive hover:bg-destructive/90"
 																)}
 																onClick={() => handleFolderClick(folder.id)}
-																disabled={isProcessing}
+																disabled={isGloballyProcessing}
 															>
 																<Trash2
 																	className={cn(
