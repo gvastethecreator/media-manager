@@ -8,7 +8,7 @@ import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
 import { logger } from "@/lib/logger";
 import { getAlbumImages } from "@/app/actions/album.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 
 const viewLogger = logger.withContext("AlbumContentView");
 
@@ -47,12 +47,12 @@ export function AlbumContentView() {
 			loadAlbumImages();
 		};
 
-		eventsService.on("images:modified", handleImagesModified);
-		eventsService.on("albums:modified", handleImagesModified);
+		eventsService.on("images:modified" as EventType, handleImagesModified);
+		eventsService.on("albums:modified" as EventType, handleImagesModified);
 
 		return () => {
-			eventsService.off("images:modified", handleImagesModified);
-			eventsService.off("albums:modified", handleImagesModified);
+			eventsService.off("images:modified" as EventType, handleImagesModified);
+			eventsService.off("albums:modified" as EventType, handleImagesModified);
 		};
 	}, [loadAlbumImages]);
 
