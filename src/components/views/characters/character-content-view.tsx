@@ -8,7 +8,7 @@ import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
 import { logger } from "@/lib/logger";
 import { getCharacterImages } from "@/app/actions/character.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 
 const viewLogger = logger.withContext("CharacterContentView");
 
@@ -47,12 +47,12 @@ export function CharacterContentView() {
 			loadCharacterImages();
 		};
 
-		eventsService.on("images:modified", handleImagesModified);
-		eventsService.on("characters:modified", handleImagesModified);
+		eventsService.on("images:modified" as EventType, handleImagesModified);
+		eventsService.on("characters:modified" as EventType, handleImagesModified);
 
 		return () => {
-			eventsService.off("images:modified", handleImagesModified);
-			eventsService.off("characters:modified", handleImagesModified);
+			eventsService.off("images:modified" as EventType, handleImagesModified);
+			eventsService.off("characters:modified" as EventType, handleImagesModified);
 		};
 	}, [loadCharacterImages]);
 

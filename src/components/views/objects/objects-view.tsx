@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/core/data-display";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
 import { getObjects } from "@/app/actions/object.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import type { ObjectWithStats } from "@/app/actions/object.actions";
 import { ObjectCard } from "@/components/cards/object-card";
@@ -52,10 +52,10 @@ export function ObjectsView({ isResizing }: ViewProps) {
 			fetchObjects();
 		};
 
-		eventsService.on("objects:modified", handleObjectModified);
+		eventsService.on("objects:modified" as EventType, handleObjectModified);
 
 		return () => {
-			eventsService.off("objects:modified", handleObjectModified);
+			eventsService.off("objects:modified" as EventType, handleObjectModified);
 		};
 	}, [fetchObjects]);
 

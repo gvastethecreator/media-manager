@@ -14,7 +14,7 @@ import {
 	CollectionWithStats,
 	getCollections,
 } from "@/app/actions/collection.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { CollectionCard } from "@/components/cards/collection-card";
 
@@ -58,10 +58,10 @@ export function CollectionsView({ isResizing }: ViewProps) {
 			fetchCollections();
 		};
 
-		eventsService.on("collections:modified", handleCollectionModified);
+		eventsService.on("collections:modified" as EventType, handleCollectionModified);
 
 		return () => {
-			eventsService.off("collections:modified", handleCollectionModified);
+			eventsService.off("collections:modified" as EventType, handleCollectionModified);
 		};
 	}, [fetchCollections]);
 

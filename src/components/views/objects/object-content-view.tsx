@@ -8,7 +8,7 @@ import { useFileManager } from "@/store/file-manager.store";
 import { FileItem } from "@/types/file-item";
 import { logger } from "@/lib/logger";
 import { getObjectImages } from "@/app/actions/object.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 
 const viewLogger = logger.withContext("ObjectContentView");
 
@@ -47,12 +47,12 @@ export function ObjectContentView() {
 			loadObjectImages();
 		};
 
-		eventsService.on("images:modified", handleImagesModified);
-		eventsService.on("objects:modified", handleImagesModified);
+		eventsService.on("images:modified" as EventType, handleImagesModified);
+		eventsService.on("objects:modified" as EventType, handleImagesModified);
 
 		return () => {
-			eventsService.off("images:modified", handleImagesModified);
-			eventsService.off("objects:modified", handleImagesModified);
+			eventsService.off("images:modified" as EventType, handleImagesModified);
+			eventsService.off("objects:modified" as EventType, handleImagesModified);
 		};
 	}, [loadObjectImages]);
 

@@ -11,7 +11,7 @@ import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
 import { useRouter } from "next/navigation";
 import { getAlbums } from "@/app/actions/album.actions";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { AlbumCard } from "@/components/cards/album-card";
 import type { AlbumWithStats } from "@/app/actions/album.actions";
@@ -53,10 +53,10 @@ export function AlbumsView({ isResizing }: ViewProps) {
 			fetchAlbums();
 		};
 
-		eventsService.on("albums:modified", handleAlbumModified);
+		eventsService.on("albums:modified" as EventType, handleAlbumModified);
 
 		return () => {
-			eventsService.off("albums:modified", handleAlbumModified);
+			eventsService.off("albums:modified" as EventType, handleAlbumModified);
 		};
 	}, [fetchAlbums]);
 

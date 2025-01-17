@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/core/data-display";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
 import { useTagsStore } from "@/store/tags.store";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { TagCard } from "@/components/cards/tag-card";
 
@@ -39,10 +39,10 @@ export function TagsView({ isResizing }: ViewProps) {
 			fetchTags();
 		};
 
-		eventsService.on("tags:modified", handleTagModified);
+		eventsService.on("tags:modified" as EventType, handleTagModified);
 
 		return () => {
-			eventsService.off("tags:modified", handleTagModified);
+			eventsService.off("tags:modified" as EventType, handleTagModified);
 		};
 	}, [fetchTags]);
 

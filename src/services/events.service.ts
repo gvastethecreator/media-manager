@@ -1,9 +1,25 @@
 import { EventEmitter } from 'events'
 import { logger } from '@/lib/logger'
+import { ProcessStatus } from './folder.service'
 
 const eventsLogger = logger.withContext('EventsService')
 
-export type EventType = 'create' | 'update' | 'delete' | 'addImage' | 'removeImage'
+export type EventType =
+  | 'create' | 'update' | 'delete' | 'addImage' | 'removeImage'
+  | 'collections:modified'
+  | 'tags:modified'
+  | 'albums:modified'
+  | 'characters:modified'
+  | 'places:modified'
+  | 'objects:modified'
+  | 'favorites:modified'
+  | 'images:modified'
+  | 'files:modified'
+  | 'folders:modified'
+  | 'folder:progress'
+  | 'folder:error'
+  | 'folder:complete'
+  | 'folder:stats';
 
 export interface EventData {
   type: EventType
@@ -24,27 +40,50 @@ export type CacheInvalidationEvent =
   | 'images:modified'
   | 'files:modified'
   | 'folders:modified'
+  | 'folder:progress'
+  | 'folder:error'
+  | 'folder:complete'
+  | 'folder:stats'
 
 class EventsService extends EventEmitter {
-  constructor() {
+  private static instance: EventsService
+
+  private constructor() {
     super()
     this.setMaxListeners(20)
   }
 
-  emit(event: CacheInvalidationEvent, data?: EventData) {
-    eventsLogger.info('📢 Emitiendo evento:', { event, data })
-    return super.emit(event, data)
+  static getInstance(): EventsService {
+    if (!EventsService.instance) {
+      EventsService.instance = new EventsService()
+    }
+    return EventsService.instance
   }
 
-  on(event: CacheInvalidationEvent, listener: (data?: EventData) => void) {
-    eventsLogger.info('👂 Suscribiendo a evento:', { event })
+  emit(event: EventType, ...args: any[]): boolean {
+    return super.emit(event, ...args)
+  }
+
+  on(event: EventType, listener: (...args: any[]) => void): this {
     return super.on(event, listener)
   }
 
-  off(event: CacheInvalidationEvent, listener: (data?: EventData) => void) {
-    eventsLogger.info('🔕 Desuscribiendo de evento:', { event })
+  off(event: EventType, listener: (...args: any[]) => void): this {
     return super.off(event, listener)
+  }
+
+  // Métodos específicos para eventos de progreso
+  emitProgress(status: ProcessStatus): boolean {
+    return this.emit('folder:progress', status)
+  }
+
+  onProgress(listener: (status: ProcessStatus) => void): this {
+    return this.on('folder:progress', listener)
+  }
+
+  offProgress(listener: (status: ProcessStatus) => void): this {
+    return this.off('folder:progress', listener)
   }
 }
 
-export const eventsService = new EventsService()
+export const eventsService = EventsService.getInstance()

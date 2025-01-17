@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { eventsService } from './events.service'
+import { eventsService, EventType } from './events.service'
 
 const activityLogger = logger.withContext('ActivityService')
 
@@ -30,7 +30,7 @@ export class ActivityService {
       })
 
       // Emitir evento de actividad
-      eventsService.emit('files:modified')
+      eventsService.emit('files:modified' as EventType)
 
       return activity
     } catch (error) {

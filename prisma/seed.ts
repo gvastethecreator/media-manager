@@ -19,11 +19,11 @@ async function main() {
   await prisma.character.deleteMany()
 
   // Crear perfil por defecto
-  seedLogger.info('👤 Creando perfil por defecto...')
+  seedLogger.info('👤 Creando perfil default...')
   const defaultProfile = await prisma.profile.create({
     data: {
       name: 'Default',
-      emoji: '👤',
+      emoji: '🐸',
       color: '#AE3F94FF',
       description: 'Perfil por defecto',
     },
@@ -34,7 +34,7 @@ async function main() {
   const defaultFolders = await prisma.folder.createMany({
     data: [
       {
-        name: 'COMFY',
+        name: '2025-01-01',
         path: 'G:\\#OUTPUTS\\COMFY\\2025-01-01',
         totalFiles: 0,
         totalSize: 0,
@@ -60,6 +60,444 @@ async function main() {
       {
         name: 'retro',
         path: 'D:\\Pictures\\retro',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'AMARILLO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\AMARILLO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'ROJO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\ROJO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'AZUL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\AZUL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'VERDE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\VERDE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'NEGRO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\NEGRO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BLANCO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BLANCO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'ARTESANOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\ARTESANOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'ASCENSOR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\ASCENSOR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BAILANDO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BAILANDO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BAR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BAR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BARRO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BARRO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BASURAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BASURAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'BOSQUE NOCHE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\BOSQUE NOCHE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CAMINANDO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CAMINANDO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CAMINANDO EN TUNEL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CAMINANDO EN TUNEL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CAMINANDO KAWAI',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CAMINANDO KAWAI',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CARAS Y CUERPOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CARAS Y CUERPOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CEMENTERIO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CEMENTERIO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CENA CON AMIGOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CENA CON AMIGOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CENA FAMILIAR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CENA FAMILIAR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CINE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CINE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'COLEGIO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\COLEGIO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'COQUIMBANOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\COQUIMBANOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'COSPLAY',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\COSPLAY',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CREEPY TOWARDS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CREEPY TOWARDS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'CUMPLEAÑITOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\CUMPLEAÑITOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'OTAKU TUMBLR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\OTAKU TUMBLR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'OTAKU TUMBLR 2',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\OTAKU TUMBLR 2',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'OTAKU UNDER',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\OTAKU UNDER',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'PAPARAZZI',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\PAPARAZZI',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'PLAZA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\PLAZA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'PRIMIGENIOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\PRIMIGENIOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'RANCHADA CON AMIGOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\RANCHADA CON AMIGOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'RESTAURANT',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\RESTAURANT',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'RETRATOS VARIOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\RETRATOS VARIOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'SCREENSHOTS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\SCREENSHOTS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'SCREENSHOTS SELFIE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\SCREENSHOTS SELFIE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'SELEC FALOPA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\SELEC FALOPA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'SEWERS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\SEWERS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'SUPERMERCA2',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\SUPERMERCA2',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'TALENT SHOWS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\TALENT SHOWS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'TOMANDO CERVEZA MEDIEVAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\TOMANDO CERVEZA MEDIEVAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO BORROSO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO BORROSO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO BORROSO MEDIEVAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO BORROSO MEDIEVAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO COLOR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO COLOR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO LIMINAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO LIMINAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO LUGAR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO LUGAR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FONDO NEGRO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FONDO NEGRO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FOTOS GRUPALES',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FOTOS GRUPALES',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FROM THE FLOOR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FROM THE FLOOR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FUNERALES',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FUNERALES',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'GRIS OSCURO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\GRIS OSCURO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'GRIS OSCURO HAPPY',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\GRIS OSCURO HAPPY',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'GRUPASL VARIAS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\GRUPASL VARIAS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'GUERRA DE COMIDA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\GUERRA DE COMIDA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'HOSPITAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\HOSPITAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'IGLESIA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\IGLESIA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'KARAOKE TIME',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\KARAOKE TIME',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'MALL GLASS DOOR',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\MALL GLASS DOOR',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'MARRON',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\MARRON',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'MERCADO LOCAL',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\MERCADO LOCAL',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'MOKLOPALLUZA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\MOKLOPALLUZA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'NIEVE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\NIEVE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'DESFILE DE MODA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\DESFILE DE MODA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'DIGITAL CAMERA OTAKU CONVENTION',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\DIGITAL CAMERA OTAKU CONVENTION',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'DJ PARTY',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\DJ PARTY',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'DORMITORIOS',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\DORMITORIOS',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'EN LA OFICINA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\EN LA OFICINA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'EN LA PILE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\EN LA PILE',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'ESTACIÓN DE SERVICIO',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\ESTACIÓN DE SERVICIO',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'EXTERIORES',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\EXTERIORES',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FERIA',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FERIA',
+        totalFiles: 0,
+        totalSize: 0,
+      },
+      {
+        name: 'FERIA PARQUE',
+        path: 'A:\\FUERZAS ESPECIALES\\Datasets\\FERIA PARQUE',
         totalFiles: 0,
         totalSize: 0,
       },
@@ -112,6 +550,27 @@ async function main() {
         description: 'Upscales',
         shortcut: 'up',
       },
+      {
+        name: 'Diseños',
+        emoji: '🖌️',
+        color: '#3498db',
+        description: 'Diseños y prototipos',
+        shortcut: 'dis',
+      },
+      {
+        name: 'Ilustraciones',
+        emoji: '🎭',
+        color: '#f1c40f',
+        description: 'Ilustraciones y dibujos',
+        shortcut: 'ilu',
+      },
+      {
+        name: 'Fotografía',
+        emoji: '📸',
+        color: '#2ecc71',
+        description: 'Fotografías y capturas',
+        shortcut: 'fot',
+      },
     ],
   })
 
@@ -162,6 +621,27 @@ async function main() {
         description: '3D',
         shortcut: '3d',
       },
+      {
+        name: 'Anime',
+        emoji: '🎬',
+        color: '#8b5cf6',
+        description: 'Anime',
+        shortcut: 'ani',
+      },
+      {
+        name: 'Manga',
+        emoji: '📚',
+        color: '#f1c40f',
+        description: 'Manga',
+        shortcut: 'man',
+      },
+      {
+        name: 'Videojuegos',
+        emoji: '🎮',
+        color: '#10b981',
+        description: 'Videojuegos',
+        shortcut: 'vj',
+      },
     ],
   })
 
@@ -200,6 +680,38 @@ async function main() {
       {
         name: 'Tests',
         color: '#C63AC6FF',
+      },
+      {
+        name: 'Retro',
+        color: '#FF69B4',
+      },
+      {
+        name: 'Cyberpunk',
+        color: '#4B5154',
+      },
+      {
+        name: 'Fantasía',
+        color: '#8B9467',
+      },
+      {
+        name: 'Aventura',
+        color: '#34A85A',
+      },
+      {
+        name: 'Misterio',
+        color: '#6c5ce7',
+      },
+      {
+        name: 'Romance',
+        color: '#FFC5C5',
+      },
+      {
+        name: 'Acción',
+        color: '#FF9900',
+      },
+      {
+        name: 'Comedia',
+        color: '#F7DC6F',
       },
     ],
   })
@@ -362,6 +874,119 @@ async function main() {
           strength: 25
         }),
         origin: 'Forjada por los herreros de la Bestia en la Montaña de la Bestia'
+      },
+      {
+        name: 'Espada de la Justicia',
+        emoji: '⚔️',
+        color: '#3b82f6',
+        description: 'Una espada imbuida de poder divino',
+        shortcut: 'esp',
+        type: 'sword',
+        rarity: 'rare',
+        properties: JSON.stringify([
+          'Imbuida de poder divino',
+          'Aumenta la resistencia mágica'
+        ]),
+        requirements: JSON.stringify({
+          level: 25,
+          class: ['Paladin', 'Cleric'],
+          strength: 30
+        }),
+        origin: 'Forjada por los paladines en el Templo de la Justicia'
+      },
+      {
+        name: 'Poción de la Vida',
+        emoji: '🧪',
+        color: '#10b981',
+        description: 'Una poción que restaura la vida',
+        shortcut: 'poc',
+        type: 'potion',
+        rarity: 'common',
+        properties: JSON.stringify([
+          'Restaura la vida',
+          'Aumenta la regeneración'
+        ]),
+        requirements: JSON.stringify({
+          level: 1,
+          class: ['All'],
+          intelligence: 5
+        }),
+        origin: 'Creada por los alquimistas en la Torre de la Vida'
+      },
+      {
+        name: 'Anillo de la Sabiduría',
+        emoji: '💍',
+        color: '#10b981',
+        description: 'Un anillo que aumenta la sabiduría',
+        shortcut: 'ani',
+        type: 'ring',
+        rarity: 'uncommon',
+        properties: JSON.stringify([
+          'Aumenta la sabiduría',
+          'Aumenta la regeneración de maná'
+        ]),
+        requirements: JSON.stringify({
+          level: 10,
+          class: ['Mage', 'Sorcerer'],
+          intelligence: 15
+        }),
+        origin: 'Forjado por los magos en la Torre de la Sabiduría'
+      },
+      {
+        name: 'Báculo de la Muerte',
+        emoji: '🏴',
+        color: '#3b82f6',
+        description: 'Un báculo que invoca la muerte',
+        shortcut: 'bac',
+        type: 'staff',
+        rarity: 'legendary',
+        properties: JSON.stringify([
+          'Invoca la muerte',
+          'Aumenta la resistencia mágica'
+        ]),
+        requirements: JSON.stringify({
+          level: 30,
+          class: ['Necromancer', 'Warlock'],
+          intelligence: 35
+        }),
+        origin: 'Obtenido de la Parca en el Reino de la Muerte'
+      },
+      {
+        name: 'Arco de la Luna',
+        emoji: '🏹',
+        color: '#8b5cf6',
+        description: 'Un arco imbuido de la energía de la luna',
+        shortcut: 'arc',
+        type: 'bow',
+        rarity: 'rare',
+        properties: JSON.stringify([
+          'Imbuido de la energía de la luna',
+          'Aumenta la precisión'
+        ]),
+        requirements: JSON.stringify({
+          level: 20,
+          class: ['Ranger', 'Archer'],
+          dexterity: 25
+        }),
+        origin: 'Forjado por los elfos en el Bosque de la Luna'
+      },
+      {
+        name: 'Poción de la Fuerza',
+        emoji: '🧪',
+        color: '#10b981',
+        description: 'Una poción que aumenta la fuerza',
+        shortcut: 'pof',
+        type: 'potion',
+        rarity: 'common',
+        properties: JSON.stringify([
+          'Aumenta la fuerza',
+          'Aumenta la regeneración de energía'
+        ]),
+        requirements: JSON.stringify({
+          level: 5,
+          class: ['Warrior', 'Knight'],
+        }),
+        origin: 'Forjada por los guerreros en la Forja de la Fuerza'
       },
     ],
   })
@@ -617,6 +1242,66 @@ async function main() {
           intelligence: 20,
           wisdom: 18,
           charisma: 16
+        })
+      },
+      {
+        name: 'Maria the Swift',
+        emoji: '🏹',
+        color: '#8b5cf6',
+        description: 'Arquera experta y cazadora de recompensas',
+        shortcut: 'mar',
+        level: 25,
+        class: 'Ranger',
+        race: 'Elf',
+        alignment: 'Chaotic Good',
+        backstory: 'Una arquera experta que viaja por el mundo en busca de recompensas. Su habilidad con el arco y su velocidad son legendarias.',
+        stats: JSON.stringify({
+          strength: 16,
+          dexterity: 20,
+          constitution: 14,
+          intelligence: 12,
+          wisdom: 16,
+          charisma: 14
+        })
+      },
+      {
+        name: 'Hector the Wise',
+        emoji: '📚',
+        color: '#10b981',
+        description: 'Sabio erudito y maestro de la magia',
+        shortcut: 'hec',
+        level: 30,
+        class: 'Wizard',
+        race: 'Human',
+        alignment: 'Lawful Neutral',
+        backstory: 'Un erudito sabio que ha dedicado su vida al estudio de la magia. Su conocimiento y sabiduría son inigualables.',
+        stats: JSON.stringify({
+          strength: 10,
+          dexterity: 12,
+          constitution: 14,
+          intelligence: 25,
+          wisdom: 20,
+          charisma: 16
+        })
+      },
+      {
+        name: 'Luna the Enchantress',
+        emoji: '🔮',
+        color: '#f2a365',
+        description: 'Hechicera misteriosa y manipuladora de la luna',
+        shortcut: 'lun',
+        level: 35,
+        class: 'Sorcerer',
+        race: 'Elf',
+        alignment: 'Neutral Evil',
+        backstory: 'Una hechicera misteriosa que ha dominado el poder de la luna. Se dice que puede controlar las mareas y predecir el futuro.',
+        stats: JSON.stringify({
+          strength: 12,
+          dexterity: 14,
+          constitution: 16,
+          intelligence: 30,
+          wisdom: 25,
+          charisma: 20
         })
       },
     ],
