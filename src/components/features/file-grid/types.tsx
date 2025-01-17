@@ -1,37 +1,32 @@
-export type ViewMode = "grid" | "masonry" | "cards" | "list" | "details";
+import { FOLDER_EVENTS } from "@/services/folder.service";
 
-export interface GridConfig {
-	minColumns: number;
-	maxColumns: number;
-	gap: number;
-	itemBaseWidth: number;
-	overscanCount: number;
-	scrollingDelay: number;
-	batchSize: number;
-	prefetchDistance: number;
-	cacheSize: number;
-	debounceTime: number;
-	breakpoints: {
-		sm: number;
-		md: number;
-		lg: number;
-		xl: number;
-		"2xl": number;
-	};
-	masonry: {
-		minColumns: number;
-		maxColumns: number;
-		gap: number;
-		itemBaseWidth: number;
-	};
-	cards: {
-		minColumns: number;
-		maxColumns: number;
-		gap: number;
-		itemBaseWidth: number;
-	};
-	list: {
-		gap: number;
-		itemHeight: number;
+export interface ProcessStatus {
+	status?: string;
+	current?: number;
+	total?: number;
+	progress?: number;
+	currentFile?: string;
+	timestamp?: number;
+	folderId?: string;
+	phase?: "scanning" | "indexing" | "thumbnails" | "metadata";
+	filesProcessed?: number;
+	totalFiles?: number;
+	errors?: Array<{
+		file: string;
+		error: string;
+		timestamp: number;
+	}>;
+	startTime?: number;
+	estimatedTimeRemaining?: number;
+	processingSpeed?: number;
+}
+
+export interface ExtendedProcessStatus extends ProcessStatus {
+	globalProgress?: {
+		current: number;
+		total: number;
+		progress: number;
 	};
 }
+
+export type { FOLDER_EVENTS };

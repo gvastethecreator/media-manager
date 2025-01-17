@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
 	TooltipProvider,
@@ -18,9 +17,9 @@ import {
 import {
 	folderService,
 	getFolders,
-	type ProcessStatus,
 	type ErrorResponse,
 	type FolderResponse,
+	FOLDER_EVENTS,
 } from "@/services/folder.service";
 import {
 	createFolder,
@@ -40,10 +39,14 @@ import {
 import { formatBytes, cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import type {
-	FolderStats,
+	ProcessStatus,
 	ExtendedProcessStatus,
-	Folder as FolderType,
-} from "@/types/folders";
+	ReindexProgress,
+	ReindexAllProgressData,
+	ReindexAllCompleteData,
+	ProcessPhase,
+} from "@/types/process";
+import type { FolderStats, Folder as FolderType } from "@/types/folders";
 import { logger } from "@/lib/logger";
 
 const folderLogger = logger.withContext("FoldersSection");
@@ -68,6 +71,14 @@ export function FoldersSection() {
 	const [folders, setFolders] = useState<FolderType[]>([]);
 	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+	const [globalReindexStatus, setGlobalReindexStatus] =
+		useState<ReindexProgress>({
+			isProcessing: false,
+			progress: 0,
+			processedFolders: 0,
+			totalFolders: 0,
+			errors: [],
+		});
 
 	// Suscribirse a eventos del FolderService
 	useEffect(() => {
@@ -75,13 +86,35 @@ export function FoldersSection() {
 			if (!status) return;
 
 			folderLogger.info("📊 Progreso del proceso:", status);
+
+			// Actualizar progreso general
 			const progress = status.progress || 0;
 			setProcessProgress(progress);
+
+			// Actualizar estado del proceso
 			setProcessStatus((prevStatus) => ({
 				...prevStatus,
 				...status,
 				status: status.status || "Procesando...",
+				phase: status.phase || prevStatus.phase,
+				filesProcessed: status.filesProcessed || prevStatus.filesProcessed,
+				totalFiles: status.totalFiles || prevStatus.totalFiles,
+				processingSpeed: status.processingSpeed || prevStatus.processingSpeed,
+				estimatedTimeRemaining:
+					status.estimatedTimeRemaining || prevStatus.estimatedTimeRemaining,
+				errors: status.errors || prevStatus.errors,
+				globalProgress: status.globalProgress,
 			}));
+
+			// Si hay progreso global, actualizar el estado global
+			if (status.globalProgress?.progress !== undefined) {
+				setGlobalReindexStatus((prev) => ({
+					...prev,
+					progress: status.globalProgress?.progress || 0,
+					processedFolders: status.globalProgress?.current || 0,
+					totalFolders: status.globalProgress?.total || 0,
+				}));
+			}
 		};
 
 		const handleError = (error: ErrorResponse) => {
@@ -99,6 +132,70 @@ export function FoldersSection() {
 				description: errorMessage,
 				variant: "destructive",
 			});
+		};
+
+		const handleReindexAllStart = (data: { totalFolders: number }) => {
+			setGlobalReindexStatus((prev) => ({
+				...prev,
+				isProcessing: true,
+				progress: 0,
+				processedFolders: 0,
+				totalFolders: data.totalFolders,
+				errors: [],
+			}));
+
+			// Resetear el estado de proceso individual
+			setProcessStatus({});
+			setProcessProgress(0);
+		};
+
+		const handleReindexAllProgress = (data: ReindexAllProgressData) => {
+			setGlobalReindexStatus((prev) => ({
+				...prev,
+				progress: data.progress,
+				currentFolder: data.currentFolder,
+				processedFolders: data.current,
+			}));
+
+			// Actualizar también el estado de proceso individual
+			if (data.phase) {
+				setProcessStatus((prev) => ({
+					...prev,
+					phase: data.phase,
+					status: data.status,
+					progress: data.progress,
+				}));
+			}
+		};
+
+		const handleReindexAllComplete = (data: ReindexAllCompleteData) => {
+			setGlobalReindexStatus((prev) => ({
+				...prev,
+				isProcessing: false,
+				processedFolders: data.processedFolders,
+				progress: data.progress || 100,
+				errors: data.errors,
+			}));
+
+			// Limpiar el estado de proceso individual
+			setProcessStatus({});
+			setProcessProgress(0);
+
+			if (data.errors.length > 0) {
+				toast({
+					title: "Reindexación completada con errores",
+					description: `${data.processedFolders} de ${data.totalFolders} carpetas procesadas. ${data.errors.length} errores encontrados.`,
+					variant: "destructive",
+				});
+			} else {
+				toast({
+					title: "Reindexación completada",
+					description: `${data.processedFolders} carpetas procesadas correctamente.`,
+				});
+			}
+
+			// Recargar los datos
+			loadStats();
 		};
 
 		const handleComplete = (data: FolderResponse) => {
@@ -163,6 +260,16 @@ export function FoldersSection() {
 		folderService.onComplete(handleComplete);
 		folderService.onStats(handleStats);
 
+		folderService.on(FOLDER_EVENTS.REINDEX_ALL_START, handleReindexAllStart);
+		folderService.on(
+			FOLDER_EVENTS.REINDEX_ALL_PROGRESS,
+			handleReindexAllProgress
+		);
+		folderService.on(
+			FOLDER_EVENTS.REINDEX_ALL_COMPLETE,
+			handleReindexAllComplete
+		);
+
 		// Cleanup
 		return () => {
 			folderLogger.info("🧹 Limpiando suscripciones de eventos");
@@ -170,6 +277,15 @@ export function FoldersSection() {
 			folderService.offError(handleError);
 			folderService.offComplete(handleComplete);
 			folderService.offStats(handleStats);
+			folderService.off(FOLDER_EVENTS.REINDEX_ALL_START, handleReindexAllStart);
+			folderService.off(
+				FOLDER_EVENTS.REINDEX_ALL_PROGRESS,
+				handleReindexAllProgress
+			);
+			folderService.off(
+				FOLDER_EVENTS.REINDEX_ALL_COMPLETE,
+				handleReindexAllComplete
+			);
 		};
 	}, [toast]);
 
@@ -428,6 +544,84 @@ export function FoldersSection() {
 		}
 	};
 
+	const handleReindexAll = async () => {
+		try {
+			setError(null);
+			await folderService.reindexAll();
+		} catch (error) {
+			folderLogger.error("❌ Error reindexando todas las carpetas:", error);
+			toast({
+				title: "Error",
+				description:
+					error instanceof Error ?
+						error.message
+					:	"Error al reindexar las carpetas",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const renderProgressDetails = (status: ExtendedProcessStatus) => {
+		if (!status.phase) return null;
+
+		return (
+			<div className="space-y-1.5 text-xs text-muted-foreground">
+				<div className="flex justify-between items-center">
+					<span>Fase actual:</span>
+					<Badge variant="secondary" className="text-[10px]">
+						{status.phase === "scanning" ?
+							"Escaneando"
+						: status.phase === "indexing" ?
+							"Indexando"
+						: status.phase === "thumbnails" ?
+							"Generando miniaturas"
+						: status.phase === "metadata" ?
+							"Extrayendo metadata"
+						:	"Procesando"}
+					</Badge>
+				</div>
+				{status.filesProcessed !== undefined &&
+					status.totalFiles !== undefined && (
+						<div className="flex justify-between items-center">
+							<span>Archivos procesados:</span>
+							<span>
+								{status.filesProcessed} / {status.totalFiles}
+							</span>
+						</div>
+					)}
+				{status.processingSpeed !== undefined && (
+					<div className="flex justify-between items-center">
+						<span>Velocidad:</span>
+						<span>{status.processingSpeed.toFixed(2)} archivos/s</span>
+					</div>
+				)}
+				{status.estimatedTimeRemaining !== undefined && (
+					<div className="flex justify-between items-center">
+						<span>Tiempo restante:</span>
+						<span>{Math.ceil(status.estimatedTimeRemaining)}s</span>
+					</div>
+				)}
+				{status.errors && status.errors.length > 0 && (
+					<div className="mt-2">
+						<p className="text-destructive">
+							Errores encontrados: {status.errors.length}
+						</p>
+						<div className="max-h-20 overflow-y-auto">
+							{status.errors.map((error, index) => (
+								<p
+									key={index}
+									className="text-[10px] text-destructive truncate"
+								>
+									{error.file}: {error.error}
+								</p>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+		);
+	};
+
 	if (error) {
 		return (
 			<Card className="p-4">
@@ -463,13 +657,22 @@ export function FoldersSection() {
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={loadStats}
+							onClick={handleReindexAll}
 							className="h-7 text-xs"
-							disabled={isLoading || isProcessing}
+							disabled={
+								isLoading || isProcessing || globalReindexStatus.isProcessing
+							}
 						>
 							<RefreshCw
-								className={cn("h-3.5 w-3.5", isLoading && "animate-spin")}
+								className={cn(
+									"h-3.5 w-3.5",
+									(isLoading || globalReindexStatus.isProcessing) &&
+										"animate-spin"
+								)}
 							/>
+							{globalReindexStatus.isProcessing ?
+								`Reindexando (${Math.round(globalReindexStatus.progress)}%)`
+							:	"Reindexar todo"}
 						</Button>
 					</div>
 				</CardTitle>
@@ -498,7 +701,7 @@ export function FoldersSection() {
 								{isProcessing ?
 									<>
 										<RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-										<span>Agregando...</span>
+										<span>Procesando...</span>
 									</>
 								:	<>
 										<FolderPlus className="h-3.5 w-3.5 mr-1.5" />
@@ -508,7 +711,7 @@ export function FoldersSection() {
 							</Button>
 						</div>
 
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 gap-2">
 							{folders.map((folder, index) => (
 								<motion.div
 									key={folder.id}
@@ -526,13 +729,10 @@ export function FoldersSection() {
 										<div className="flex items-center justify-between relative">
 											<div className="flex items-center justify-between gap-1 w-full">
 												<div className="min-w-full">
-													<span className="text-xs font-xs block truncate inline-flex items-center gap-1">
-														<Folder className="h-3.5 w-3.5 text-muted-foreground" />
-														{folder.name}
-													</span>
-													<p className="text-[10px] text-muted-foreground truncate">
+													<Folder className="h-3.5 w-3.5 justify-center text-muted-foreground inline-block mr-1" />
+													<span className="text-xs font-xs text-muted-foreground truncate inline-flex items-center">
 														{folder.path}
-													</p>
+													</span>
 													<div className="flex items-center justify-between gap-2 w-full mt-2">
 														<Badge
 															variant="secondary"
@@ -554,12 +754,7 @@ export function FoldersSection() {
 													</div>
 												</div>
 											</div>
-
-											<motion.div
-												initial={{ opacity: 0, x: 20 }}
-												whileHover={{ opacity: 1, x: 0 }}
-												className="flex items-center gap-1 absolute right-0 top-0"
-											>
+											<div className="flex items-center gap-1 absolute right-0 top-0">
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -616,7 +811,7 @@ export function FoldersSection() {
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
-											</motion.div>
+											</div>
 										</div>
 
 										{isProcessing && processStatus.folderId === folder.id && (
@@ -631,20 +826,7 @@ export function FoldersSection() {
 													<span>{Math.round(processProgress)}%</span>
 												</div>
 												<Progress value={processProgress} className="h-1.5" />
-												<div className="flex flex-col gap-1">
-													{processStatus.currentFile && (
-														<p className="text-[10px] text-muted-foreground truncate">
-															Archivo actual: {processStatus.currentFile}
-														</p>
-													)}
-													{processStatus.current !== undefined &&
-														processStatus.total !== undefined && (
-															<p className="text-[10px] text-muted-foreground">
-																{processStatus.current} de {processStatus.total}{" "}
-																archivos procesados
-															</p>
-														)}
-												</div>
+												{renderProgressDetails(processStatus)}
 											</motion.div>
 										)}
 									</CardContent>

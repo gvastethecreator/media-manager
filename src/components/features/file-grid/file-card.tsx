@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { useFileManager } from "@/store/file-manager.store";
 import { useImageResources } from "@/store/image-resources.store";
 import { useImageViewer } from "@/store/image-viewer.store";
-import { useToast } from "@/components/ui/use-toast";
 import { getThumbnail } from "@/app/actions/thumbnails.actions";
 import { ThumbnailQuality } from "@/config/thumbnail.config";
 import { FileContextMenu } from "./context-menu";
@@ -19,8 +18,8 @@ import {
 	HardDrive,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ViewMode } from "./types";
 import { ImageRenderer } from "./image-renderer";
+import { ViewMode } from "@/types/settings";
 
 type FileCardProps = {
 	item: FileItem;

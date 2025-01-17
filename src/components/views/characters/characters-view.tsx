@@ -9,7 +9,7 @@ import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { CharacterCard } from "@/components/cards/character-card";
 import type { CharacterWithStats } from "@/app/actions/character.actions";
@@ -54,10 +54,10 @@ export function CharactersView({ isResizing }: ViewProps) {
 			fetchCharacters();
 		};
 
-		eventsService.on("characters:modified", handleCharacterModified);
+		eventsService.on("characters:modified" as EventType, handleCharacterModified);
 
 		return () => {
-			eventsService.off("characters:modified", handleCharacterModified);
+			eventsService.off("characters:modified" as EventType, handleCharacterModified);
 		};
 	}, [fetchCharacters]);
 

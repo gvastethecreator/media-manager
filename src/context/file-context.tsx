@@ -6,6 +6,7 @@ import type { FileItem } from "@/types/file-item";
 import { ActivityService } from "@/services/activity.service";
 import {
 	eventsService,
+	EventType,
 	type CacheInvalidationEvent,
 } from "@/services/events.service";
 
@@ -59,7 +60,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 			if (item.isFavorite) events.push("favorites:modified");
 
 			if (events.length > 0) {
-				events.forEach((event) => eventsService.emit(event));
+				events.forEach((event) => eventsService.emit(event as EventType));
 			}
 		},
 		[baseToggleItemSelection]
@@ -68,7 +69,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 	const handleToggleSelection = useCallback(
 		(item: FileItem, isMultiSelect: boolean) => {
 			toggleItemSelection(item, isMultiSelect);
-			eventsService.emit("files:modified");
+			eventsService.emit("files:modified" as EventType);
 		},
 		[toggleItemSelection]
 	);

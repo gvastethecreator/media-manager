@@ -18,9 +18,8 @@ import {
 	MapPin,
 	Box,
 	Plus,
-	Filter,
-	SlidersHorizontal,
 	Grid,
+	Grid2X2,
 	List,
 	LayoutGrid,
 	GalleryHorizontal,
@@ -29,7 +28,6 @@ import {
 	Trash2,
 	Edit,
 } from "lucide-react";
-import { ViewMode } from "@/components/features/file-grid/types";
 import { ViewType } from "@/types/file-item";
 import { Separator } from "@/components/ui/separator";
 

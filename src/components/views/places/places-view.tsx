@@ -9,7 +9,7 @@ import { LoadingScreen } from "@/components/core/feedback";
 import { EmptyState } from "@/components/core/data-display";
 import { useNavigationStore } from "@/store/navigation.store";
 import { useFileManager } from "@/store/file-manager.store";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { getPlaces, type PlaceWithStats } from "@/app/actions/place.actions";
 import { PlaceCard } from "@/components/cards/place-card";
@@ -48,10 +48,10 @@ export function PlacesView({ isResizing }: ViewProps) {
 			fetchPlaces();
 		};
 
-		eventsService.on("places:modified", handlePlaceModified);
+		eventsService.on("places:modified" as EventType, handlePlaceModified);
 
 		return () => {
-			eventsService.off("places:modified", handlePlaceModified);
+			eventsService.off("places:modified" as EventType, handlePlaceModified);
 		};
 	}, [fetchPlaces]);
 
