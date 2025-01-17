@@ -5,7 +5,7 @@ import { BaseContentView, ContentViewProvider } from "@/components/views/base";
 import type { BaseContentProps } from "@/components/views/base";
 import { ImageIcon } from "lucide-react";
 import { useCallback, useEffect } from "react";
-import { eventsService, type EventData } from "@/services/events.service";
+import { eventsService, EventType, type EventData } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 
 const viewLogger = logger.withContext("AllImagesView");
@@ -19,10 +19,10 @@ export function AllImagesView() {
 			// La actualización de imágenes se maneja automáticamente a través del FileManager
 		};
 
-		eventsService.on("images:modified", handleImagesModified);
+		eventsService.on("images:modified" as EventType, handleImagesModified);
 
 		return () => {
-			eventsService.off("images:modified", handleImagesModified);
+			eventsService.off("images:modified" as EventType, handleImagesModified);
 		};
 	}, []);
 

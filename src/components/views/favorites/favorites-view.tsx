@@ -6,7 +6,7 @@ import { BaseContentView, ContentViewProvider } from "@/components/views/base";
 import type { BaseContentProps } from "@/components/views/base";
 import { Star } from "lucide-react";
 import { statsEventEmitter, STATS_EVENTS } from "@/services/stats.service";
-import { eventsService } from "@/services/events.service";
+import { eventsService, EventType } from "@/services/events.service";
 import { logger } from "@/lib/logger";
 import { getFavorites } from "@/app/actions/favorite.actions";
 
@@ -44,11 +44,11 @@ export function FavoritesView() {
 		};
 
 		statsEventEmitter.on(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
-		eventsService.on("favorites:modified", handleFavoriteChange);
+		eventsService.on("favorites:modified" as EventType, handleFavoriteChange);
 
 		return () => {
 			statsEventEmitter.off(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
-			eventsService.off("favorites:modified", handleFavoriteChange);
+			eventsService.off("favorites:modified" as EventType, handleFavoriteChange);
 		};
 	}, [loadFavorites]);
 
