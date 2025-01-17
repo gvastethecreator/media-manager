@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { FileCard } from "./file-card";
 import { FileItem } from "@/types/file-item";
 import { cn } from "@/lib/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 import { useFileManager } from "@/store/file-manager.store";
 import { useImageResources } from "@/store/image-resources.store";
 
@@ -142,126 +142,105 @@ export function FileGrid({
 	onItemDoubleClick,
 	loadMoreItems,
 }: FileGridProps) {
-	const gridRef = useRef<HTMLDivElement>(null);
+	const parentRef = useRef<HTMLDivElement>(null);
 	const loadMoreRef = useRef<HTMLDivElement>(null);
-	const observerRef = useRef<IntersectionObserver | null>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
 	const [isScrolling, setIsScrolling] = useState(false);
-	const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
 	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const cacheRef = useRef(renderedItemsCache);
 	const { selectedItems, viewMode } = useFileManager();
-	const imageResources = useImageResources();
-
-	// Precargar recursos cuando cambian los items
-	useEffect(() => {
-		const imageItems = items.filter(
-			(item) =>
-				item.type === "image" ||
-				getMetadata(item.metadata)?.mimeType?.startsWith("image/")
-		);
-
-		if (imageItems.length > 0) {
-			imageResources.preloadResources(imageItems.map((item) => item.id));
-		}
-	}, [items]);
 
 	// Dimensiones del grid memoizadas
-	const { columns, itemSize } = useMemo(() => {
-		const availableWidth = containerWidth || window.innerWidth;
+	const { columns, itemSize, gap } = useMemo(() => {
+		const availableWidth = containerWidth || window.innerWidth - 32; // Ajuste para padding
 		let targetColumns;
 		let itemSize;
+		let gap;
 
 		switch (viewMode) {
 			case "masonry":
+				gap = GRID_CONFIG.masonry.gap;
 				targetColumns = Math.floor(
-					availableWidth / GRID_CONFIG.masonry.itemBaseWidth
+					(availableWidth + gap) / (GRID_CONFIG.masonry.itemBaseWidth + gap)
 				);
 				targetColumns = Math.max(
 					GRID_CONFIG.masonry.minColumns,
 					Math.min(GRID_CONFIG.masonry.maxColumns, targetColumns)
 				);
 				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * GRID_CONFIG.masonry.gap) /
-						targetColumns
+					(availableWidth - (targetColumns - 1) * gap) / targetColumns
 				);
 				break;
 			case "cards":
+				gap = GRID_CONFIG.cards.gap;
 				targetColumns = Math.floor(
-					availableWidth / GRID_CONFIG.cards.itemBaseWidth
+					(availableWidth + gap) / (GRID_CONFIG.cards.itemBaseWidth + gap)
 				);
 				targetColumns = Math.max(
 					GRID_CONFIG.cards.minColumns,
 					Math.min(GRID_CONFIG.cards.maxColumns, targetColumns)
 				);
 				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * GRID_CONFIG.cards.gap) /
-						targetColumns
+					(availableWidth - (targetColumns - 1) * gap) / targetColumns
 				);
 				break;
 			case "list":
 				targetColumns = 1;
+				gap = 8;
 				itemSize = availableWidth;
 				break;
 			default:
-				targetColumns = Math.floor(availableWidth / GRID_CONFIG.itemBaseWidth);
+				gap = GRID_CONFIG.gap;
+				targetColumns = Math.floor(
+					(availableWidth + gap) / (GRID_CONFIG.itemBaseWidth + gap)
+				);
 				targetColumns = Math.max(
 					GRID_CONFIG.minColumns,
 					Math.min(GRID_CONFIG.maxColumns, targetColumns)
 				);
 				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * GRID_CONFIG.gap) /
-						targetColumns
+					(availableWidth - (targetColumns - 1) * gap) / targetColumns
 				);
 		}
 
-		return { columns: targetColumns, itemSize };
+		return { columns: targetColumns, itemSize, gap };
 	}, [containerWidth, viewMode]);
 
-	// Calcular filas con memoización
-	const rowCount = useMemo(
-		() => Math.ceil(items.length / columns),
-		[items.length, columns]
-	);
-
-	// Optimizar la actualización de items visibles
-	const updateVisibleItems = useCallback(
-		(entries: IntersectionObserverEntry[]) => {
-			if (isScrolling) return;
-
-			const visibleIds = new Set<string>();
-			entries.forEach((entry) => {
-				const id = entry.target.getAttribute("data-id");
-				if (id && entry.isIntersecting) {
-					visibleIds.add(id);
-					if (!cacheRef.current.has(id)) {
-						cacheRef.current.set(id, true);
-					}
-				}
-			});
-
-			setVisibleItems(visibleIds);
-		},
-		[isScrolling]
-	);
-
-	// Configurar observer con opciones optimizadas
+	// Optimizar ResizeObserver
 	useEffect(() => {
-		if (!gridRef.current) return;
+		if (!parentRef.current) return;
 
-		observerRef.current = new IntersectionObserver(updateVisibleItems, {
-			root: gridRef.current,
-			rootMargin: "50px 0px",
-			threshold: 0,
-		});
-
-		return () => {
-			if (observerRef.current) {
-				observerRef.current.disconnect();
+		const updateWidth = (width: number) => {
+			if (width > 0 && width !== containerWidth) {
+				setContainerWidth(width);
 			}
 		};
-	}, [updateVisibleItems]);
+
+		const resizeObserver = new ResizeObserver((entries) => {
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+
+			const width = entries[0].contentRect.width;
+			if (isResizing) {
+				// Durante el resize, actualizamos con un debounce más largo
+				resizeTimeoutRef.current = setTimeout(() => {
+					updateWidth(width);
+				}, 100);
+			} else {
+				// Si no hay resize activo, actualizamos inmediatamente
+				updateWidth(width);
+			}
+		});
+
+		resizeObserver.observe(parentRef.current);
+		return () => {
+			resizeObserver.disconnect();
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+		};
+	}, [containerWidth, isResizing]);
 
 	// Optimizar el manejo del scroll infinito
 	useEffect(() => {
@@ -286,166 +265,123 @@ export function FileGrid({
 		return () => observer.disconnect();
 	}, [loadMoreItems, isScrolling]);
 
-	// Optimizar ResizeObserver
-	useEffect(() => {
-		if (!gridRef.current) return;
+	const handleScroll = useCallback(() => {
+		if (scrollingTimeoutRef.current) {
+			clearTimeout(scrollingTimeoutRef.current);
+		}
+		setIsScrolling(true);
+		scrollingTimeoutRef.current = setTimeout(() => {
+			setIsScrolling(false);
+		}, 150);
+	}, []);
 
-		const resizeObserver = new ResizeObserver((entries) => {
-			if (resizeTimeoutRef.current) {
-				clearTimeout(resizeTimeoutRef.current);
+	// Configuración de virtualización optimizada
+	const virtualizer = useVirtualizer({
+		count: items.length,
+		getScrollElement: () => parentRef.current,
+		estimateSize: useCallback(() => {
+			switch (viewMode) {
+				case "list":
+					return 72;
+				case "cards":
+					return itemSize * 1.5;
+				case "masonry":
+					return itemSize;
+				default:
+					return itemSize;
 			}
-
-			resizeTimeoutRef.current = setTimeout(() => {
-				const width = entries[0].contentRect.width;
-				if (width > 0 && width !== containerWidth) {
-					setContainerWidth(width);
-				}
-			}, GRID_CONFIG.debounceTime);
-		});
-
-		resizeObserver.observe(gridRef.current);
-		return () => {
-			resizeObserver.disconnect();
-			if (resizeTimeoutRef.current) {
-				clearTimeout(resizeTimeoutRef.current);
-			}
-		};
-	}, [containerWidth]);
-
-	// Virtualizador optimizado
-	const rowVirtualizer = useVirtualizer({
-		count: rowCount,
-		getScrollElement: () => gridRef.current,
-		estimateSize: useCallback(() => itemSize, [itemSize]),
-		overscan: isScrolling ? 1 : GRID_CONFIG.overscanCount,
-		onChange: (instance) => {
-			if (instance.isScrolling) {
-				setIsScrolling(true);
-				if (scrollingTimeoutRef.current) {
-					clearTimeout(scrollingTimeoutRef.current);
-				}
-				scrollingTimeoutRef.current = setTimeout(() => {
-					setIsScrolling(false);
-				}, GRID_CONFIG.scrollingDelay);
-			}
-		},
+		}, [viewMode, itemSize]),
+		overscan: Math.ceil(window.innerHeight / itemSize) * 2,
+		horizontal: false,
+		lanes: viewMode === "list" ? 1 : columns,
+		gap: gap,
+		scrollPaddingStart: gap,
+		scrollPaddingEnd: gap,
+		scrollMargin: gap,
+		debug: false,
 	});
+
+	const renderVirtualItem = useCallback(
+		(virtualItem: VirtualItem) => {
+			const item = items[virtualItem.index];
+			if (!item) return null;
+
+			const isSelected = selectedItems.some(
+				(selected) => selected.id === item.id
+			);
+
+			const style: React.CSSProperties = {
+				position: "absolute",
+				top: 0,
+				left: 0,
+				transform: `translate3d(${
+					viewMode === "list" ? 0 : virtualItem.lane * (itemSize + gap)
+				}px, ${virtualItem.start}px, 0)`,
+				width: viewMode === "list" ? "100%" : `${itemSize}px`,
+				height: viewMode === "list" ? "72px" : `${itemSize}px`,
+				padding: gap / 2,
+				willChange: "transform",
+				contain: "content",
+			};
+
+			return (
+				<div
+					key={virtualItem.key}
+					data-index={virtualItem.index}
+					className={cn("absolute", viewMode === "list" && "w-full")}
+					style={style}
+				>
+					<FileCard
+						item={item}
+						onClick={onItemClick}
+						onDoubleClick={onItemDoubleClick}
+						index={virtualItem.index}
+						totalColumns={columns}
+						shouldLoad={!isScrolling}
+						isSelected={isSelected}
+						viewMode={viewMode}
+					/>
+				</div>
+			);
+		},
+		[
+			items,
+			selectedItems,
+			columns,
+			itemSize,
+			gap,
+			isScrolling,
+			viewMode,
+			onItemClick,
+			onItemDoubleClick,
+		]
+	);
 
 	return (
 		<div
-			ref={gridRef}
+			ref={parentRef}
 			className={cn(
 				"h-full w-full overflow-auto relative",
 				viewMode === "list" && "px-4 py-2"
 			)}
+			onScroll={handleScroll}
 			style={{
-				padding:
-					viewMode === "grid" || viewMode === "masonry" ? `${GRID_CONFIG.gap}px`
-					: viewMode === "cards" ? `${GRID_CONFIG.cards.gap}px`
-					: undefined,
-				contain: "size layout paint style",
+				height: "100%",
+				width: "100%",
+				position: "relative",
+				contain: "strict",
+				willChange: "transform",
 			}}
 		>
 			<div
 				style={{
-					height: `${rowVirtualizer.getTotalSize()}px`,
+					height: virtualizer.getTotalSize(),
 					width: "100%",
 					position: "relative",
-					willChange: "transform",
-					contain: "size layout",
+					contain: "strict",
 				}}
 			>
-				{rowVirtualizer.getVirtualItems().map((virtualRow) => {
-					const rowStartIndex = virtualRow.index * columns;
-					const rowItems = items.slice(rowStartIndex, rowStartIndex + columns);
-
-					return (
-						<div
-							key={virtualRow.key}
-							style={{
-								position: "absolute",
-								top: 0,
-								left: 0,
-								width: "100%",
-								height:
-									viewMode === "grid" || viewMode === "masonry" ?
-										`${itemSize}px`
-									: viewMode === "cards" ? "auto"
-									: "auto",
-								transform: `translateY(${virtualRow.start}px)`,
-								willChange: "transform",
-								contain: "size layout",
-							}}
-						>
-							<div
-								className={cn(
-									viewMode === "grid" || viewMode === "masonry" ? "grid h-full"
-									: viewMode === "cards" ? "grid gap-4"
-									: "flex flex-col gap-2"
-								)}
-								style={
-									viewMode === "grid" || viewMode === "masonry" ?
-										{
-											gridTemplateColumns: `repeat(${columns}, 1fr)`,
-											columnGap:
-												viewMode === "masonry" ?
-													GRID_CONFIG.masonry.gap
-												:	GRID_CONFIG.gap,
-										}
-									: viewMode === "cards" ?
-										{
-											gridTemplateColumns: `repeat(${columns}, 1fr)`,
-											gap: GRID_CONFIG.cards.gap,
-										}
-									:	undefined
-								}
-							>
-								{rowItems.map((item, columnIndex) => {
-									const index = rowStartIndex + columnIndex;
-									const isVisible = visibleItems.has(item.id);
-									const shouldLoad = !isScrolling && isVisible;
-									const isSelected = selectedItems.some(
-										(selected) => selected.id === item.id
-									);
-
-									return (
-										<div
-											key={item.id}
-											data-id={item.id}
-											className={cn(
-												"relative w-full",
-												viewMode === "grid" || viewMode === "masonry" ?
-													"py-2 px-1"
-												: viewMode === "cards" ? "py-2"
-												: "py-1"
-											)}
-											ref={(el) => {
-												if (el && observerRef.current) {
-													observerRef.current.observe(el);
-												}
-											}}
-											style={{
-												willChange: "transform",
-												contain: "layout style paint",
-											}}
-										>
-											<FileCard
-												item={item}
-												onClick={onItemClick}
-												onDoubleClick={onItemDoubleClick}
-												index={index}
-												totalColumns={columns}
-												shouldLoad={shouldLoad}
-												isSelected={isSelected}
-												viewMode={viewMode}
-											/>
-										</div>
-									);
-								})}
-							</div>
-						</div>
-					);
-				})}
+				{virtualizer.getVirtualItems().map(renderVirtualItem)}
 			</div>
 			<div ref={loadMoreRef} className="h-px w-full" />
 		</div>
