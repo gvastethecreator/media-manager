@@ -56,6 +56,35 @@ export interface ProcessStatus {
   currentFile?: string;
   timestamp?: number;
   folderId?: string;
+  phase?: 'scanning' | 'indexing' | 'thumbnails' | 'metadata';
+  filesProcessed?: number;
+  totalFiles?: number;
+  fileDetails?: {
+    name: string;
+    size: number;
+    type: string;
+    dimensions?: {
+      width: number;
+      height: number;
+    };
+  };
+  extendedStats?: {
+    fileTypes: { [key: string]: number };
+    averageSize: number;
+    processingSpeed: number;
+    errorsByType: { [key: string]: number };
+    healthScore: number;
+  };
+  errors?: Array<{
+    file: string;
+    error: string;
+    timestamp: number;
+  }>;
+  globalProgress?: {
+    current: number;
+    total: number;
+    progress: number;
+  };
 }
 
 export interface FolderResponse {
@@ -531,6 +560,15 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
         id: true,
         path: true,
         name: true,
+        images: {
+          select: {
+            id: true,
+            path: true,
+            hash: true,
+            size: true,
+            updatedAt: true
+          }
+        }
       },
     });
 
@@ -543,11 +581,21 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
       throw new FolderError('PATH_NOT_FOUND');
     }
 
-    const processDirectory = async (dirPath: string): Promise<{ processed: number; total: number }> => {
+    const processDirectory = async (dirPath: string): Promise<{ processed: number; total: number; totalSize: number }> => {
       try {
         const files = await readdir(dirPath);
         let processed = 0;
         let total = 0;
+        let totalSize = 0;
+        let fileTypes: { [key: string]: number } = {};
+        let errorsByType: { [key: string]: number } = {};
+        let processedFiles = 0;
+        let startTime = Date.now();
+
+        // Crear mapa de archivos existentes
+        const existingFiles = new Map(
+          folder.images.map(img => [img.path, img])
+        );
 
         // Contar archivos primero
         for (const file of files) {
@@ -557,14 +605,37 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
           if (stats.isDirectory()) {
             const subDirStats = await processDirectory(filePath);
             total += subDirStats.total;
+            totalSize += subDirStats.totalSize;
             continue;
           }
 
           const ext = extname(file).toLowerCase();
           if (SUPPORTED_FORMATS.includes(ext)) {
             total++;
+            totalSize += stats.size;
+            fileTypes[ext] = (fileTypes[ext] || 0) + 1;
           }
         }
+
+        // Emitir progreso inicial
+        eventsService.emitProgress({
+          status: 'Escaneando archivos...',
+          phase: 'scanning',
+          current: 0,
+          total,
+          progress: 0,
+          folderId: id,
+          filesProcessed: 0,
+          totalFiles: total,
+          timestamp: Date.now(),
+          extendedStats: {
+            fileTypes,
+            averageSize: totalSize / total,
+            processingSpeed: 0,
+            errorsByType,
+            healthScore: 100
+          }
+        });
 
         // Procesar archivos
         for (const file of files) {
@@ -583,89 +654,193 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
               continue;
             }
 
-            // Verificar si la imagen ya existe
-            const existingImage = await prisma.image.findFirst({
-              where: { path: filePath }
+            const existingFile = existingFiles.get(filePath);
+            const fileStats = await stat(filePath);
+            const needsUpdate = !existingFile ||
+              existingFile.size !== fileStats.size ||
+              new Date(existingFile.updatedAt) < fileStats.mtime;
+
+            if (!needsUpdate) {
+              processed++;
+              processedFiles++;
+              continue;
+            }
+
+            // Emitir progreso del archivo actual
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            const speed = processedFiles / (elapsedTime || 1);
+
+            eventsService.emitProgress({
+              status: `Procesando ${file}...`,
+              phase: 'indexing',
+              current: processed,
+              total,
+              progress: (processed / total) * 100,
+              currentFile: file,
+              folderId: id,
+              filesProcessed: processedFiles,
+              totalFiles: total,
+              timestamp: Date.now(),
+              fileDetails: {
+                name: file,
+                size: stats.size,
+                type: ext,
+              },
+              extendedStats: {
+                fileTypes,
+                averageSize: totalSize / total,
+                processingSpeed: speed,
+                errorsByType,
+                healthScore: 100 - (Object.keys(errorsByType).length * 10)
+              }
             });
 
-            if (!existingImage) {
-              // Procesar nueva imagen
-              const hash = await computeHash(filePath);
-              const metadata = await extractMetadata(filePath);
+            // Obtener metadata y hash
+            const metadata = await extractMetadata(filePath);
+            const hash = await computeHash(filePath);
 
-              if (!metadata.dimensions?.width || !metadata.dimensions?.height) {
-                folderLogger.warn('No se pudieron obtener las dimensiones de la imagen:', {
-                  file: filePath,
-                  metadata
-                });
-                continue;
+            if (!metadata.dimensions?.width || !metadata.dimensions?.height) {
+              errorsByType['dimensions'] = (errorsByType['dimensions'] || 0) + 1;
+              continue;
+            }
+
+            // Emitir progreso de generación de thumbnail
+            eventsService.emitProgress({
+              status: `Generando miniatura para ${file}...`,
+              phase: 'thumbnails',
+              current: processed,
+              total,
+              progress: (processed / total) * 100,
+              currentFile: file,
+              folderId: id,
+              filesProcessed: processedFiles,
+              totalFiles: total,
+              timestamp: Date.now(),
+              fileDetails: {
+                name: file,
+                size: stats.size,
+                type: ext,
+                dimensions: metadata.dimensions
+              },
+              extendedStats: {
+                fileTypes,
+                averageSize: totalSize / total,
+                processingSpeed: speed,
+                errorsByType,
+                healthScore: 100 - (Object.keys(errorsByType).length * 10)
               }
+            });
 
-              await prisma.image.create({
+            // Generar thumbnail
+            let thumbnailData = null;
+            try {
+              const result = await generateThumbnail(filePath);
+              if (result?.buffer) {
+                thumbnailData = {
+                  data: result.buffer,
+                  size: result.buffer.length,
+                  width: result.width,
+                  height: result.height
+                };
+              }
+            } catch (thumbnailError) {
+              errorsByType['thumbnail'] = (errorsByType['thumbnail'] || 0) + 1;
+              folderLogger.error('Error generando thumbnail:', {
+                file: filePath,
+                error: thumbnailError
+              });
+            }
+
+            // Actualizar o crear imagen
+            if (existingFile) {
+              await prisma.image.update({
+                where: { id: existingFile.id },
                 data: {
-                  name: file,
-                  path: filePath,
-                  hash,
                   size: stats.size,
+                  hash,
                   width: metadata.dimensions.width,
                   height: metadata.dimensions.height,
                   metadata: JSON.stringify(metadata),
-                  folderId: folder.id,
-                  isPublic: false
-                }
-              });
-
-              // Generar thumbnail
-              await generateThumbnail(filePath);
-              processed++;
-            } else {
-              // Actualizar metadata si es necesario
-              const metadata = await extractMetadata(filePath);
-              await prisma.image.update({
-                where: { id: existingImage.id },
-                data: {
-                  size: stats.size,
-                  metadata: JSON.stringify(metadata),
+                  thumbnail: thumbnailData?.data,
+                  thumbnailSize: thumbnailData?.size,
+                  thumbnailWidth: thumbnailData?.width,
+                  thumbnailHeight: thumbnailData?.height,
                   updatedAt: new Date()
                 }
               });
-              processed++;
+            } else {
+              await prisma.image.create({
+                data: {
+                  path: filePath,
+                  name: file,
+                  size: stats.size,
+                  hash,
+                  width: metadata.dimensions.width,
+                  height: metadata.dimensions.height,
+                  metadata: JSON.stringify(metadata),
+                  thumbnail: thumbnailData?.data,
+                  thumbnailSize: thumbnailData?.size,
+                  thumbnailWidth: thumbnailData?.width,
+                  thumbnailHeight: thumbnailData?.height,
+                  folderId: id,
+                  createdAt: metadata.fileSystem?.created ? new Date(metadata.fileSystem.created) : new Date(),
+                  updatedAt: metadata.fileSystem?.modified ? new Date(metadata.fileSystem.modified) : new Date()
+                }
+              });
             }
+
+            processed++;
+            processedFiles++;
+
+            // Emitir progreso después de cada archivo
+            eventsService.emitProgress({
+              status: `Procesados ${processed} de ${total} archivos...`,
+              phase: 'indexing',
+              current: processed,
+              total,
+              progress: (processed / total) * 100,
+              folderId: id,
+              filesProcessed: processedFiles,
+              totalFiles: total,
+              timestamp: Date.now(),
+              extendedStats: {
+                fileTypes,
+                averageSize: totalSize / total,
+                processingSpeed: speed,
+                errorsByType,
+                healthScore: 100 - (Object.keys(errorsByType).length * 10)
+              }
+            });
           } catch (fileError) {
+            errorsByType['processing'] = (errorsByType['processing'] || 0) + 1;
             folderLogger.error('Error procesando archivo:', {
-              path: file,
+              file,
+              path: dirPath,
               error: fileError instanceof Error ? fileError.message : 'Error desconocido'
             });
-            continue;
           }
         }
 
-        return { processed, total };
+        return { processed, total, totalSize };
       } catch (dirError) {
         folderLogger.error('Error procesando directorio:', {
           path: dirPath,
           error: dirError instanceof Error ? dirError.message : 'Error desconocido'
         });
-        return { processed: 0, total: 0 };
+        return { processed: 0, total: 0, totalSize: 0 };
       }
     };
 
     // Procesar la carpeta
     folderLogger.info('Iniciando procesamiento de directorio:', folder.path);
-    const { processed, total } = await processDirectory(folder.path);
+    const { processed, total, totalSize } = await processDirectory(folder.path);
 
     // Actualizar estadísticas de la carpeta
-    const stats = await prisma.image.aggregate({
-      where: { folderId: folder.id },
-      _sum: { size: true },
-      _count: true
-    });
-
     const updatedFolder = await prisma.folder.update({
       where: { id: folder.id },
       data: {
-        totalFiles: stats._count,
-        totalSize: stats._sum.size || 0,
+        totalFiles: total,
+        totalSize: totalSize,
         lastIndexed: new Date()
       }
     });
@@ -693,7 +868,7 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
       stats: {
         processed,
         total,
-        totalSize: stats._sum.size || 0
+        totalSize
       },
       timestamp: Date.now()
     };

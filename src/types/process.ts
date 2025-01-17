@@ -24,6 +24,22 @@ export interface ProcessStatus {
     total: number;
     progress: number;
   };
+  fileDetails?: {
+    name: string;
+    size: number;
+    type: string;
+    dimensions?: {
+      width: number;
+      height: number;
+    };
+  };
+  extendedStats?: {
+    fileTypes: { [key: string]: number };
+    averageSize: number;
+    processingSpeed: number;
+    errorsByType: { [key: string]: number };
+    healthScore: number;
+  };
 }
 
 export interface ExtendedProcessStatus extends ProcessStatus {
