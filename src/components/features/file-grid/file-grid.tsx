@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { FileCard } from "./file-card";
 import { FileItem } from "@/types/file-item";
+import { ViewMode } from "@/types/settings";
 import { cn } from "@/lib/utils";
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 import { useFileManager } from "@/store/file-manager.store";
@@ -18,37 +19,92 @@ const getMetadata = (metadata: string | null) => {
 	}
 };
 
-// Configuración optimizada del grid con valores ajustados
-const GRID_CONFIG = {
-	minColumns: 3,
-	maxColumns: 6,
-	gap: 4,
-	itemBaseWidth: 200,
-	overscanCount: 2,
-	scrollingDelay: 150,
-	batchSize: 5,
-	prefetchDistance: 1,
-	cacheSize: 50,
-	debounceTime: 100,
-	breakpoints: {
-		sm: 640,
-		md: 768,
-		lg: 1024,
-		xl: 1280,
+// Tipos para la configuración del grid
+interface BaseGridConfig {
+	minColumns: number;
+	maxColumns: number;
+	itemBaseWidth: number;
+	padding: number;
+}
+
+interface GridViewConfig extends BaseGridConfig {
+	rowHeight: number;
+	aspectRatio: number;
+}
+
+interface MasonryConfig extends BaseGridConfig {
+	maxHeight: number;
+	minHeight: number;
+	columnGap: number;
+	rowGap: number;
+}
+
+interface CardsConfig extends BaseGridConfig {
+	rowHeight: number;
+	aspectRatio: number;
+}
+
+interface ListConfig {
+	height: number;
+	padding: number;
+}
+
+interface GridGaps {
+	grid: number;
+	masonry: number;
+	cards: number;
+	list: number;
+}
+
+interface GridConfig {
+	gap: GridGaps;
+	grid: GridViewConfig;
+	masonry: MasonryConfig;
+	cards: CardsConfig;
+	list: ListConfig;
+	overscan: number;
+}
+
+// Configuración base del grid optimizada
+export const GRID_CONFIG: GridConfig = {
+	gap: {
+		grid: 8,
+		masonry: 8,
+		cards: 16,
+		list: 4,
+	},
+	grid: {
+		minColumns: 4,
+		maxColumns: 8,
+		itemBaseWidth: 200,
+		rowHeight: 200,
+		padding: 8,
+		aspectRatio: 1,
 	},
 	masonry: {
-		minColumns: 2,
-		maxColumns: 4,
-		gap: 8,
-		itemBaseWidth: 300,
+		minColumns: 4,
+		maxColumns: 8,
+		itemBaseWidth: 220,
+		maxHeight: 600,
+		minHeight: 100,
+		padding: 8,
+		columnGap: 8,
+		rowGap: 8,
 	},
 	cards: {
 		minColumns: 2,
-		maxColumns: 4,
-		gap: 16,
-		itemBaseWidth: 300,
+		maxColumns: 3,
+		itemBaseWidth: 360,
+		rowHeight: 420,
+		padding: 16,
+		aspectRatio: 1.4,
 	},
-} as const;
+	list: {
+		height: 80,
+		padding: 4,
+	},
+	overscan: 10,
+};
 
 // Sistema de caché LRU mejorado con tipos
 interface CacheItem {
@@ -125,7 +181,7 @@ class LRUCache<K extends string> {
 }
 
 // Caché global de thumbnails renderizados con tipo mejorado
-const renderedItemsCache = new LRUCache<string>(GRID_CONFIG.cacheSize);
+const renderedItemsCache = new LRUCache<string>(50);
 
 export interface FileGridProps {
 	items: FileItem[];
@@ -146,73 +202,129 @@ export function FileGrid({
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
 	const [isScrolling, setIsScrolling] = useState(false);
+	const [isTransitioning, setIsTransitioning] = useState(false);
 	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const previousViewMode = useRef<ViewMode | null>(null);
 	const { selectedItems, viewMode } = useFileManager();
 
-	// Dimensiones del grid memoizadas
-	const { columns, itemSize, gap } = useMemo(() => {
-		const availableWidth = containerWidth || window.innerWidth - 32; // Ajuste para padding
-		let targetColumns;
-		let itemSize;
-		let gap;
+	// Limpiar timeouts
+	useEffect(() => {
+		return () => {
+			if (scrollingTimeoutRef.current)
+				clearTimeout(scrollingTimeoutRef.current);
+			if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
+			if (transitionTimeoutRef.current)
+				clearTimeout(transitionTimeoutRef.current);
+		};
+	}, []);
+
+	// Forzar recálculo al cambiar de vista
+	useEffect(() => {
+		if (previousViewMode.current !== viewMode) {
+			setIsTransitioning(true);
+			if (transitionTimeoutRef.current) {
+				clearTimeout(transitionTimeoutRef.current);
+			}
+
+			// Resetear scroll
+			if (parentRef.current) {
+				parentRef.current.scrollTop = 0;
+			}
+
+			// Forzar recálculo después de un breve delay
+			transitionTimeoutRef.current = setTimeout(() => {
+				if (parentRef.current) {
+					const width = parentRef.current.offsetWidth;
+					setContainerWidth(width);
+					previousViewMode.current = viewMode;
+					setIsTransitioning(false);
+				}
+			}, 50);
+		}
+	}, [viewMode]);
+
+	// Dimensiones del grid memoizadas y optimizadas
+	const { columns, itemSize, rowHeight } = useMemo(() => {
+		const availableWidth = containerWidth || window.innerWidth - 48;
+		const currentGap = GRID_CONFIG.gap[viewMode];
+		const config = GRID_CONFIG[viewMode];
+
+		const calculateColumns = (config: BaseGridConfig) => {
+			const { minColumns, maxColumns, itemBaseWidth, padding } = config;
+			const totalPadding = padding * 2;
+			const totalGapWidth = currentGap * (maxColumns - 1);
+			const availableWidthWithGap = availableWidth - totalPadding;
+			const calculatedCols = Math.floor(
+				availableWidthWithGap / (itemBaseWidth + currentGap)
+			);
+			return Math.max(minColumns, Math.min(maxColumns, calculatedCols));
+		};
+
+		const calculateItemSize = (cols: number, config: BaseGridConfig) => {
+			const totalPadding = config.padding * 2;
+			const totalGapWidth = currentGap * (cols - 1);
+			const availableWidthWithGap = availableWidth - totalPadding;
+			const itemWidth = Math.floor(
+				(availableWidthWithGap - totalGapWidth) / cols
+			);
+
+			// Asegurar que el tamaño no exceda el máximo para el modo
+			return Math.min(
+				itemWidth,
+				viewMode === "masonry" ? config.itemBaseWidth * 1.5 : itemWidth
+			);
+		};
+
+		let cols: number;
+		let size: number;
+		let height: number;
 
 		switch (viewMode) {
-			case "masonry":
-				gap = GRID_CONFIG.masonry.gap;
-				targetColumns = Math.floor(
-					(availableWidth + gap) / (GRID_CONFIG.masonry.itemBaseWidth + gap)
-				);
-				targetColumns = Math.max(
-					GRID_CONFIG.masonry.minColumns,
-					Math.min(GRID_CONFIG.masonry.maxColumns, targetColumns)
-				);
-				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * gap) / targetColumns
-				);
+			case "masonry": {
+				const config = GRID_CONFIG.masonry;
+				cols = calculateColumns(config);
+				size = calculateItemSize(cols, config);
+				height = 0;
 				break;
-			case "cards":
-				gap = GRID_CONFIG.cards.gap;
-				targetColumns = Math.floor(
-					(availableWidth + gap) / (GRID_CONFIG.cards.itemBaseWidth + gap)
-				);
-				targetColumns = Math.max(
-					GRID_CONFIG.cards.minColumns,
-					Math.min(GRID_CONFIG.cards.maxColumns, targetColumns)
-				);
-				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * gap) / targetColumns
-				);
+			}
+			case "cards": {
+				const config = GRID_CONFIG.cards;
+				cols = calculateColumns(config);
+				size = calculateItemSize(cols, config);
+				height = config.rowHeight;
 				break;
-			case "list":
-				targetColumns = 1;
-				gap = 8;
-				itemSize = availableWidth;
+			}
+			case "list": {
+				const config = GRID_CONFIG.list;
+				cols = 1;
+				size = availableWidth - currentGap * 2 - config.padding * 2;
+				height = config.height;
 				break;
-			default:
-				gap = GRID_CONFIG.gap;
-				targetColumns = Math.floor(
-					(availableWidth + gap) / (GRID_CONFIG.itemBaseWidth + gap)
-				);
-				targetColumns = Math.max(
-					GRID_CONFIG.minColumns,
-					Math.min(GRID_CONFIG.maxColumns, targetColumns)
-				);
-				itemSize = Math.floor(
-					(availableWidth - (targetColumns - 1) * gap) / targetColumns
-				);
+			}
+			default: {
+				const config = GRID_CONFIG.grid;
+				cols = calculateColumns(config);
+				size = calculateItemSize(cols, config);
+				height = size;
+			}
 		}
 
-		return { columns: targetColumns, itemSize, gap };
+		return { columns: cols, itemSize: size, rowHeight: height };
 	}, [containerWidth, viewMode]);
 
-	// Optimizar ResizeObserver
+	// Optimizar ResizeObserver con mejor manejo de cambios
 	useEffect(() => {
 		if (!parentRef.current) return;
 
 		const updateWidth = (width: number) => {
-			if (width > 0 && width !== containerWidth) {
+			if (
+				width > 0 &&
+				(width !== containerWidth || previousViewMode.current !== viewMode)
+			) {
 				setContainerWidth(width);
+				previousViewMode.current = viewMode;
 			}
 		};
 
@@ -223,12 +335,10 @@ export function FileGrid({
 
 			const width = entries[0].contentRect.width;
 			if (isResizing) {
-				// Durante el resize, actualizamos con un debounce más largo
 				resizeTimeoutRef.current = setTimeout(() => {
 					updateWidth(width);
 				}, 100);
 			} else {
-				// Si no hay resize activo, actualizamos inmediatamente
 				updateWidth(width);
 			}
 		});
@@ -240,7 +350,29 @@ export function FileGrid({
 				clearTimeout(resizeTimeoutRef.current);
 			}
 		};
-	}, [containerWidth, isResizing]);
+	}, [containerWidth, isResizing, viewMode]);
+
+	// Optimizar el cálculo de altura para masonry
+	const calculateMasonryHeight = useCallback(
+		(item: FileItem, baseWidth: number) => {
+			const metadata = getMetadata(item.metadata);
+			const config = GRID_CONFIG.masonry;
+
+			if (!metadata?.dimensions) {
+				return config.minHeight;
+			}
+
+			const aspectRatio =
+				metadata.dimensions.width / metadata.dimensions.height;
+			const calculatedHeight = Math.round(baseWidth / aspectRatio);
+
+			return Math.max(
+				config.minHeight,
+				Math.min(calculatedHeight, config.maxHeight)
+			);
+		},
+		[]
+	);
 
 	// Optimizar el manejo del scroll infinito
 	useEffect(() => {
@@ -275,94 +407,48 @@ export function FileGrid({
 		}, 150);
 	}, []);
 
-	// Configuración de virtualización optimizada
+	// Actualizar virtualizer con soporte mejorado para masonry
 	const virtualizer = useVirtualizer({
 		count: items.length,
 		getScrollElement: () => parentRef.current,
-		estimateSize: useCallback(() => {
-			switch (viewMode) {
-				case "list":
-					return 72;
-				case "cards":
-					return itemSize * 1.5;
-				case "masonry":
-					return itemSize;
-				default:
-					return itemSize;
-			}
-		}, [viewMode, itemSize]),
-		overscan: Math.ceil(window.innerHeight / itemSize) * 2,
+		estimateSize: useCallback(
+			(index: number) => {
+				const item = items[index];
+				if (!item) return rowHeight + GRID_CONFIG.gap[viewMode];
+
+				switch (viewMode) {
+					case "masonry": {
+						const height = calculateMasonryHeight(item, itemSize);
+						return height + GRID_CONFIG.masonry.rowGap;
+					}
+					case "cards":
+						return GRID_CONFIG.cards.rowHeight + GRID_CONFIG.gap[viewMode];
+					case "list":
+						return GRID_CONFIG.list.height + GRID_CONFIG.gap[viewMode];
+					default:
+						return itemSize + GRID_CONFIG.gap[viewMode];
+				}
+			},
+			[items, viewMode, itemSize, rowHeight, calculateMasonryHeight]
+		),
+		overscan: GRID_CONFIG.overscan,
 		horizontal: false,
 		lanes: viewMode === "list" ? 1 : columns,
-		gap: gap,
-		scrollPaddingStart: gap,
-		scrollPaddingEnd: gap,
-		scrollMargin: gap,
-		debug: false,
+		gap:
+			viewMode === "masonry" ?
+				GRID_CONFIG.masonry.columnGap
+			:	GRID_CONFIG.gap[viewMode],
+		scrollPaddingStart: GRID_CONFIG.gap[viewMode],
+		scrollPaddingEnd: GRID_CONFIG.gap[viewMode],
 	});
-
-	const renderVirtualItem = useCallback(
-		(virtualItem: VirtualItem) => {
-			const item = items[virtualItem.index];
-			if (!item) return null;
-
-			const isSelected = selectedItems.some(
-				(selected) => selected.id === item.id
-			);
-
-			const style: React.CSSProperties = {
-				position: "absolute",
-				top: 0,
-				left: 0,
-				transform: `translate3d(${
-					viewMode === "list" ? 0 : virtualItem.lane * (itemSize + gap)
-				}px, ${virtualItem.start}px, 0)`,
-				width: viewMode === "list" ? "100%" : `${itemSize}px`,
-				height: viewMode === "list" ? "72px" : `${itemSize}px`,
-				padding: gap / 2,
-				willChange: "transform",
-				contain: "content",
-			};
-
-			return (
-				<div
-					key={virtualItem.key}
-					data-index={virtualItem.index}
-					className={cn("absolute", viewMode === "list" && "w-full")}
-					style={style}
-				>
-					<FileCard
-						item={item}
-						onClick={onItemClick}
-						onDoubleClick={onItemDoubleClick}
-						index={virtualItem.index}
-						totalColumns={columns}
-						shouldLoad={!isScrolling}
-						isSelected={isSelected}
-						viewMode={viewMode}
-					/>
-				</div>
-			);
-		},
-		[
-			items,
-			selectedItems,
-			columns,
-			itemSize,
-			gap,
-			isScrolling,
-			viewMode,
-			onItemClick,
-			onItemDoubleClick,
-		]
-	);
 
 	return (
 		<div
 			ref={parentRef}
 			className={cn(
 				"h-full w-full overflow-auto relative",
-				viewMode === "list" && "px-4 py-2"
+				viewMode === "list" && "px-2 py-1",
+				isTransitioning && "opacity-0 transition-opacity duration-50"
 			)}
 			onScroll={handleScroll}
 			style={{
@@ -371,6 +457,7 @@ export function FileGrid({
 				position: "relative",
 				contain: "strict",
 				willChange: "transform",
+				padding: GRID_CONFIG[viewMode].padding,
 			}}
 		>
 			<div
@@ -381,7 +468,60 @@ export function FileGrid({
 					contain: "strict",
 				}}
 			>
-				{virtualizer.getVirtualItems().map(renderVirtualItem)}
+				{!isTransitioning &&
+					virtualizer.getVirtualItems().map((virtualItem) => {
+						const item = items[virtualItem.index];
+						if (!item) return null;
+
+						const style: React.CSSProperties = {
+							position: "absolute",
+							top: 0,
+							left: 0,
+							transform: `translate3d(${
+								viewMode === "list" ? 0 : (
+									virtualItem.lane *
+									(itemSize +
+										(viewMode === "masonry" ?
+											GRID_CONFIG.masonry.columnGap
+										:	GRID_CONFIG.gap[viewMode]))
+								)
+							}px, ${virtualItem.start}px, 0)`,
+							width: viewMode === "list" ? "100%" : itemSize,
+							height:
+								viewMode === "masonry" ?
+									calculateMasonryHeight(item, itemSize)
+								:	virtualItem.size - GRID_CONFIG.gap[viewMode],
+							padding: 0,
+							willChange: "transform",
+						};
+
+						return (
+							<div
+								key={`${viewMode}-${virtualItem.key}`}
+								data-index={virtualItem.index}
+								className={cn("absolute")}
+								style={style}
+							>
+								<FileCard
+									item={item}
+									onClick={onItemClick}
+									onDoubleClick={onItemDoubleClick}
+									index={virtualItem.index}
+									totalColumns={columns}
+									shouldLoad={!isScrolling && !isTransitioning}
+									isSelected={selectedItems.some(
+										(selected) => selected.id === item.id
+									)}
+									viewMode={viewMode}
+									itemSize={itemSize}
+									style={{
+										width: "100%",
+										height: "100%",
+									}}
+								/>
+							</div>
+						);
+					})}
 			</div>
 			<div ref={loadMoreRef} className="h-px w-full" />
 		</div>
