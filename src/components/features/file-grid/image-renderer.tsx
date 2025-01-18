@@ -74,24 +74,26 @@ export function ImageRenderer({
 	return (
 		<div className={cn("relative overflow-hidden", className)}>
 			{isLoading && <div className="absolute inset-0 bg-muted animate-pulse" />}
-			<Image
-				src={src}
-				alt={alt}
-				width={width}
-				height={height}
-				className={cn(
-					"transition-all duration-300",
-					objectFit === "cover" ? "object-cover" : "object-contain",
-					isLoading ? "scale-105 blur-sm" : "scale-100 blur-0"
-				)}
-				priority={priority}
-				quality={quality}
-				sizes={sizes}
-				loading={priority ? "eager" : "lazy"}
-				onError={handleError}
-				onLoad={handleLoad}
-				onClick={handleClick}
-			/>
+
+				<Image
+					src={src}
+					alt={alt}
+					width={width}
+					height={height}
+					className={cn(
+						"transition-all duration-300 object-contain w-full h-full",
+						objectFit === "cover" ? "object-cover" : "object-contain",
+						isLoading ? "scale-80 blur-sm brightness-10" : "scale-100 blur-0 brightness-100"
+					)}
+					priority={priority}
+					quality={quality}
+					sizes={sizes}
+					loading={priority ? "eager" : "lazy"}
+					onError={handleError}
+					onLoad={handleLoad}
+					onClick={handleClick}
+				/>
+			
 		</div>
 	);
 }
