@@ -16,6 +16,7 @@ import {
 	File,
 	Calendar,
 	HardDrive,
+	Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ImageRenderer } from "./image-renderer";
@@ -246,17 +247,12 @@ const FileCard = memo(function FileCard({
 	// Memoizar componentes de renderizado
 	const gridView = useMemo(
 		() => (
-			<div className="relative w-full h-full overflow-hidden group">
+			<div className="relative w-full h-full group">
 				<div
-					className="w-full h-full bg-muted/50 rounded-sm"
-					style={{
-						aspectRatio,
-					}}
-				>
-					{thumbnail ?
-						<div className="relative w-full h-full">
+					className="w-full h-full bg-muted/30 rounded-sm">					{thumbnail ?
+						<div className="relative w-full h-full p-0">
 							<div
-								className="absolute inset-0 bg-cover bg-center blur-md opacity-25"
+								className="absolute inset-0 bg-cover bg-center blur-lg opacity-80 brightness-20"
 								style={{
 									backgroundImage: `url(${thumbnail})`,
 								}}
@@ -264,25 +260,23 @@ const FileCard = memo(function FileCard({
 							<ImageRenderer
 								src={thumbnail}
 								alt={item.name}
-								width={metadata?.dimensions?.width || 300}
-								height={metadata?.dimensions?.height || 300}
+								objectFit="contain"
 								className={cn(
-									"h-full w-full object-contain rounded-sm transition-transform duration-200",
-									isSelected && "ring-2 ring-primary ring-offset-2",
+									"h-full w-full rounded-sm transition-transform duration-200",
+									isSelected && "shadow-sm",
 									"group-hover:scale-105"
 								)}
 								onError={() => setError("Error al cargar")}
-								quality={75}
 							/>
 						</div>
 					:	<div className="flex items-center justify-center h-full">
-							<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+							<ImageIcon className="h-8 w-8 text-muted-foreground/50 animate-ping " />
 						</div>
 					}
 				</div>
 				<div className="absolute top-2 right-2">
 					{item.isFavorite && (
-						<Heart className="h-4 w-4 text-red-500 fill-current drop-shadow-lg" />
+						<Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-lg shadow-black" />
 					)}
 				</div>
 				<motion.div
@@ -341,13 +335,8 @@ const FileCard = memo(function FileCard({
 					}}
 				>
 					{thumbnail ?
-						<div className="relative w-full h-full">
-							<div
-								className="absolute inset-0 bg-cover bg-center blur-md opacity-25"
-								style={{
-									backgroundImage: `url(${thumbnail})`,
-								}}
-							/>
+						<div className="relative">
+						
 							<ImageRenderer
 								src={thumbnail}
 								alt={item.name}
