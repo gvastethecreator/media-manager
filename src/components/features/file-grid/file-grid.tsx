@@ -1,13 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import { FileCard } from "./file-card";
+import { GridView } from "./views/grid-view";
+import { MasonryView } from "./views/masonry-view";
+import { CardsView } from "./views/cards-view";
+import { ListView } from "./views/list-view";
 import { FileItem } from "@/types/file-item";
 import { ViewMode } from "@/types/settings";
 import { cn } from "@/lib/utils";
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 import { useFileManager } from "@/store/file-manager.store";
 import { useImageResources } from "@/store/image-resources.store";
+import { getThumbnail } from "@/app/actions/thumbnails.actions";
+import { ThumbnailQuality } from "@/config/thumbnail.config";
+import type { ContextMenuAction } from "./context-menu";
 
 // Función auxiliar para parsear metadata
 const getMetadata = (metadata: string | null) => {
@@ -68,28 +74,28 @@ interface GridConfig {
 // Configuración base del grid optimizada
 export const GRID_CONFIG: GridConfig = {
 	gap: {
-		grid: 8,
+		grid: 0,
 		masonry: 8,
 		cards: 16,
 		list: 4,
 	},
 	grid: {
 		minColumns: 4,
-		maxColumns: 8,
-		itemBaseWidth: 200,
-		rowHeight: 200,
-		padding: 8,
+		maxColumns: 6,
+		itemBaseWidth: 140,
+		rowHeight: 140,
+		padding: 0,
 		aspectRatio: 1,
 	},
 	masonry: {
 		minColumns: 4,
-		maxColumns: 8,
-		itemBaseWidth: 220,
-		maxHeight: 600,
+		maxColumns: 6,
+		itemBaseWidth: 140,
+		maxHeight: 300,
 		minHeight: 100,
-		padding: 8,
-		columnGap: 8,
-		rowGap: 8,
+		padding: 0,
+		columnGap: 2,
+		rowGap: 2,
 	},
 	cards: {
 		minColumns: 2,
@@ -103,85 +109,8 @@ export const GRID_CONFIG: GridConfig = {
 		height: 80,
 		padding: 4,
 	},
-	overscan: 10,
+	overscan: 30,
 };
-
-// Sistema de caché LRU mejorado con tipos
-interface CacheItem {
-	timestamp: number;
-	value: boolean;
-}
-
-class LRUCache<K extends string> {
-	private cache: Map<K, CacheItem>;
-	private maxSize: number;
-	private cleanupInterval: number;
-	private cleanup: NodeJS.Timeout | null = null;
-
-	constructor(maxSize: number) {
-		this.cache = new Map();
-		this.maxSize = maxSize;
-		this.cleanupInterval = 60000; // 1 minuto
-		this.startCleanup();
-	}
-
-	private startCleanup() {
-		if (this.cleanup) {
-			clearInterval(this.cleanup);
-		}
-
-		this.cleanup = setInterval(() => {
-			const now = Date.now();
-			const maxAge = 5 * 60 * 1000; // 5 minutos
-
-			for (const [key, item] of this.cache.entries()) {
-				if (now - item.timestamp > maxAge) {
-					this.cache.delete(key);
-				}
-			}
-		}, this.cleanupInterval);
-	}
-
-	get(key: K): boolean {
-		const item = this.cache.get(key);
-		if (item) {
-			item.timestamp = Date.now();
-			this.cache.delete(key);
-			this.cache.set(key, item);
-			return item.value;
-		}
-		return false;
-	}
-
-	set(key: K, value: boolean): void {
-		if (this.cache.size >= this.maxSize) {
-			const oldestKey = this.cache.keys().next().value;
-			if (oldestKey) {
-				this.cache.delete(oldestKey);
-			}
-		}
-		this.cache.set(key, { value, timestamp: Date.now() });
-	}
-
-	has(key: K): boolean {
-		return this.cache.has(key);
-	}
-
-	clear(): void {
-		this.cache.clear();
-		if (this.cleanup) {
-			clearInterval(this.cleanup);
-			this.cleanup = null;
-		}
-	}
-
-	dispose(): void {
-		this.clear();
-	}
-}
-
-// Caché global de thumbnails renderizados con tipo mejorado
-const renderedItemsCache = new LRUCache<string>(50);
 
 export interface FileGridProps {
 	items: FileItem[];
@@ -208,42 +137,12 @@ export function FileGrid({
 	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const previousViewMode = useRef<ViewMode | null>(null);
 	const { selectedItems, viewMode } = useFileManager();
+	const imageResources = useImageResources();
 
-	// Limpiar timeouts
-	useEffect(() => {
-		return () => {
-			if (scrollingTimeoutRef.current)
-				clearTimeout(scrollingTimeoutRef.current);
-			if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-			if (transitionTimeoutRef.current)
-				clearTimeout(transitionTimeoutRef.current);
-		};
-	}, []);
-
-	// Forzar recálculo al cambiar de vista
-	useEffect(() => {
-		if (previousViewMode.current !== viewMode) {
-			setIsTransitioning(true);
-			if (transitionTimeoutRef.current) {
-				clearTimeout(transitionTimeoutRef.current);
-			}
-
-			// Resetear scroll
-			if (parentRef.current) {
-				parentRef.current.scrollTop = 0;
-			}
-
-			// Forzar recálculo después de un breve delay
-			transitionTimeoutRef.current = setTimeout(() => {
-				if (parentRef.current) {
-					const width = parentRef.current.offsetWidth;
-					setContainerWidth(width);
-					previousViewMode.current = viewMode;
-					setIsTransitioning(false);
-				}
-			}, 50);
-		}
-	}, [viewMode]);
+	// Referencia para la cola de carga
+	const loadQueueRef = useRef<Set<string>>(new Set());
+	const retryCountRef = useRef<Map<string, number>>(new Map());
+	const MAX_RETRIES = 3;
 
 	// Dimensiones del grid memoizadas y optimizadas
 	const { columns, itemSize, rowHeight } = useMemo(() => {
@@ -314,6 +213,156 @@ export function FileGrid({
 		return { columns: cols, itemSize: size, rowHeight: height };
 	}, [containerWidth, viewMode]);
 
+	// Optimizar el cálculo de altura para masonry
+	const calculateMasonryHeight = useCallback(
+		(item: FileItem, baseWidth: number) => {
+			const metadata = getMetadata(item.metadata);
+			const config = GRID_CONFIG.masonry;
+
+			if (!metadata?.dimensions) {
+				return config.minHeight;
+			}
+
+			const aspectRatio =
+				metadata.dimensions.width / metadata.dimensions.height;
+			const calculatedHeight = Math.round(baseWidth / aspectRatio);
+
+			return Math.max(
+				config.minHeight,
+				Math.min(calculatedHeight, config.maxHeight)
+			);
+		},
+		[]
+	);
+
+	// Actualizar virtualizer con soporte mejorado para masonry
+	const virtualizer = useVirtualizer({
+		count: items.length,
+		getScrollElement: () => parentRef.current,
+		estimateSize: useCallback(
+			(index: number) => {
+				const item = items[index];
+				if (!item) return rowHeight + GRID_CONFIG.gap[viewMode];
+
+				switch (viewMode) {
+					case "masonry": {
+						const height = calculateMasonryHeight(item, itemSize);
+						return height + GRID_CONFIG.masonry.rowGap;
+					}
+					case "cards":
+						return GRID_CONFIG.cards.rowHeight + GRID_CONFIG.gap[viewMode];
+					case "list":
+						return GRID_CONFIG.list.height + GRID_CONFIG.gap[viewMode];
+					default:
+						return itemSize + GRID_CONFIG.gap[viewMode];
+				}
+			},
+			[items, viewMode, itemSize, rowHeight, calculateMasonryHeight]
+		),
+		overscan: GRID_CONFIG.overscan,
+		horizontal: false,
+		lanes: viewMode === "list" ? 1 : columns,
+		gap:
+			viewMode === "masonry" ?
+				GRID_CONFIG.masonry.columnGap
+			:	GRID_CONFIG.gap[viewMode],
+		scrollPaddingStart: GRID_CONFIG.gap[viewMode],
+		scrollPaddingEnd: GRID_CONFIG.gap[viewMode],
+	});
+
+	// Función mejorada para cargar thumbnails con reintentos
+	const loadThumbnail = useCallback(
+		async (itemId: string) => {
+			if (loadQueueRef.current.has(itemId)) return null;
+
+			const retryCount = retryCountRef.current.get(itemId) || 0;
+			if (retryCount >= MAX_RETRIES) return null;
+
+			try {
+				loadQueueRef.current.add(itemId);
+				const thumbnail = await imageResources.getThumbnail(itemId);
+				loadQueueRef.current.delete(itemId);
+				if (thumbnail) {
+					retryCountRef.current.delete(itemId);
+					return thumbnail;
+				}
+				// Si no hay thumbnail, incrementar contador de reintentos
+				retryCountRef.current.set(itemId, retryCount + 1);
+				return null;
+			} catch (err) {
+				console.error("Error loading thumbnail:", err);
+				loadQueueRef.current.delete(itemId);
+				retryCountRef.current.set(itemId, retryCount + 1);
+				return null;
+			}
+		},
+		[imageResources]
+	);
+
+	// Efecto mejorado para precargar thumbnails
+	useEffect(() => {
+		const loadVisibleThumbnails = async () => {
+			const visibleItems = virtualizer
+				.getVirtualItems()
+				.map((virtualItem) => items[virtualItem.index])
+				.filter((item): item is FileItem => !!item);
+
+			// Precargar thumbnails de items visibles
+			const visibleIds = visibleItems.map((item) => item.id);
+			imageResources.preloadResources(visibleIds);
+
+			// Procesar items sin thumbnail en orden
+			for (const item of visibleItems) {
+				const resource = imageResources.resources.get(item.id);
+				if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
+					await loadThumbnail(item.id);
+				}
+			}
+		};
+
+		// Cargar thumbnails inmediatamente y después de un breve delay
+		loadVisibleThumbnails();
+		const timeoutId = setTimeout(loadVisibleThumbnails, 500);
+
+		return () => clearTimeout(timeoutId);
+	}, [items, imageResources, loadThumbnail, virtualizer]);
+
+	// Limpiar timeouts
+	useEffect(() => {
+		return () => {
+			if (scrollingTimeoutRef.current)
+				clearTimeout(scrollingTimeoutRef.current);
+			if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
+			if (transitionTimeoutRef.current)
+				clearTimeout(transitionTimeoutRef.current);
+		};
+	}, []);
+
+	// Forzar recálculo al cambiar de vista
+	useEffect(() => {
+		if (previousViewMode.current !== viewMode) {
+			setIsTransitioning(true);
+			if (transitionTimeoutRef.current) {
+				clearTimeout(transitionTimeoutRef.current);
+			}
+
+			// Resetear scroll
+			if (parentRef.current) {
+				parentRef.current.scrollTop = 0;
+			}
+
+			// Forzar recálculo después de un breve delay
+			transitionTimeoutRef.current = setTimeout(() => {
+				if (parentRef.current) {
+					const width = parentRef.current.offsetWidth;
+					setContainerWidth(width);
+					previousViewMode.current = viewMode;
+					setIsTransitioning(false);
+				}
+			}, 50);
+		}
+	}, [viewMode]);
+
 	// Optimizar ResizeObserver con mejor manejo de cambios
 	useEffect(() => {
 		if (!parentRef.current) return;
@@ -352,28 +401,6 @@ export function FileGrid({
 		};
 	}, [containerWidth, isResizing, viewMode]);
 
-	// Optimizar el cálculo de altura para masonry
-	const calculateMasonryHeight = useCallback(
-		(item: FileItem, baseWidth: number) => {
-			const metadata = getMetadata(item.metadata);
-			const config = GRID_CONFIG.masonry;
-
-			if (!metadata?.dimensions) {
-				return config.minHeight;
-			}
-
-			const aspectRatio =
-				metadata.dimensions.width / metadata.dimensions.height;
-			const calculatedHeight = Math.round(baseWidth / aspectRatio);
-
-			return Math.max(
-				config.minHeight,
-				Math.min(calculatedHeight, config.maxHeight)
-			);
-		},
-		[]
-	);
-
 	// Optimizar el manejo del scroll infinito
 	useEffect(() => {
 		if (!loadMoreRef.current || !loadMoreItems) return;
@@ -397,50 +424,45 @@ export function FileGrid({
 		return () => observer.disconnect();
 	}, [loadMoreItems, isScrolling]);
 
+	// Mejorar el manejo de scroll
 	const handleScroll = useCallback(() => {
 		if (scrollingTimeoutRef.current) {
 			clearTimeout(scrollingTimeoutRef.current);
 		}
+
+		// No bloquear la carga durante el scroll
+		const visibleItems = virtualizer
+			.getVirtualItems()
+			.map((virtualItem) => items[virtualItem.index])
+			.filter((item): item is FileItem => !!item);
+
+		// Intentar cargar thumbnails faltantes durante el scroll
+		visibleItems.forEach((item) => {
+			const resource = imageResources.resources.get(item.id);
+			if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
+				loadThumbnail(item.id);
+			}
+		});
+
 		setIsScrolling(true);
 		scrollingTimeoutRef.current = setTimeout(() => {
 			setIsScrolling(false);
 		}, 150);
-	}, []);
+	}, [items, virtualizer, loadThumbnail, imageResources]);
 
-	// Actualizar virtualizer con soporte mejorado para masonry
-	const virtualizer = useVirtualizer({
-		count: items.length,
-		getScrollElement: () => parentRef.current,
-		estimateSize: useCallback(
-			(index: number) => {
-				const item = items[index];
-				if (!item) return rowHeight + GRID_CONFIG.gap[viewMode];
-
-				switch (viewMode) {
-					case "masonry": {
-						const height = calculateMasonryHeight(item, itemSize);
-						return height + GRID_CONFIG.masonry.rowGap;
-					}
-					case "cards":
-						return GRID_CONFIG.cards.rowHeight + GRID_CONFIG.gap[viewMode];
-					case "list":
-						return GRID_CONFIG.list.height + GRID_CONFIG.gap[viewMode];
-					default:
-						return itemSize + GRID_CONFIG.gap[viewMode];
-				}
-			},
-			[items, viewMode, itemSize, rowHeight, calculateMasonryHeight]
-		),
-		overscan: GRID_CONFIG.overscan,
-		horizontal: false,
-		lanes: viewMode === "list" ? 1 : columns,
-		gap:
-			viewMode === "masonry" ?
-				GRID_CONFIG.masonry.columnGap
-			:	GRID_CONFIG.gap[viewMode],
-		scrollPaddingStart: GRID_CONFIG.gap[viewMode],
-		scrollPaddingEnd: GRID_CONFIG.gap[viewMode],
-	});
+	const handleContextAction = useCallback(
+		(action: ContextMenuAction, item: FileItem, data?: any) => {
+			switch (action) {
+				case "preview":
+					onItemDoubleClick?.(item);
+					break;
+				// Aquí se pueden manejar más acciones según sea necesario
+				default:
+					break;
+			}
+		},
+		[onItemDoubleClick]
+	);
 
 	return (
 		<div
@@ -479,11 +501,7 @@ export function FileGrid({
 							left: 0,
 							transform: `translate3d(${
 								viewMode === "list" ? 0 : (
-									virtualItem.lane *
-									(itemSize +
-										(viewMode === "masonry" ?
-											GRID_CONFIG.masonry.columnGap
-										:	GRID_CONFIG.gap[viewMode]))
+									virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
 								)
 							}px, ${virtualItem.start}px, 0)`,
 							width: viewMode === "list" ? "100%" : itemSize,
@@ -495,6 +513,16 @@ export function FileGrid({
 							willChange: "transform",
 						};
 
+						const ViewComponent = {
+							grid: GridView,
+							masonry: MasonryView,
+							cards: CardsView,
+							list: ListView,
+						}[viewMode];
+
+						const resource = imageResources.resources.get(item.id);
+						const thumbnail = resource?.thumbnail || null;
+
 						return (
 							<div
 								key={`${viewMode}-${virtualItem.key}`}
@@ -502,18 +530,17 @@ export function FileGrid({
 								className={cn("absolute")}
 								style={style}
 							>
-								<FileCard
+								<ViewComponent
 									item={item}
 									onClick={onItemClick}
 									onDoubleClick={onItemDoubleClick}
-									index={virtualItem.index}
-									totalColumns={columns}
-									shouldLoad={!isScrolling && !isTransitioning}
+									onContextAction={handleContextAction}
+									shouldLoad={true}
 									isSelected={selectedItems.some(
 										(selected) => selected.id === item.id
 									)}
-									viewMode={viewMode}
 									itemSize={itemSize}
+									thumbnail={thumbnail}
 									style={{
 										width: "100%",
 										height: "100%",
