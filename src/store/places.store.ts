@@ -11,6 +11,13 @@ import {
   type PlaceUpdate
 } from '@/app/actions/place.actions';
 
+const mapToPlaceWithStats = (place: Awaited<ReturnType<typeof getPlaces>>[0]): PlaceWithStats => ({
+  ...place,
+  totalSize: 0,
+  lastUpdated: new Date(),
+  recentImages: []
+});
+
 interface PlacesStore {
   places: PlaceWithStats[];
   isLoading: boolean;
@@ -33,7 +40,8 @@ export const usePlacesStore = create<PlacesStore>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       placesLogger.info('🔄 Cargando lugares');
-      const places = await getPlaces();
+      const rawPlaces = await getPlaces();
+      const places = rawPlaces.map(mapToPlaceWithStats);
       set({ places, isLoading: false });
       placesLogger.info('✅ Lugares cargados');
     } catch (error) {
@@ -47,7 +55,9 @@ export const usePlacesStore = create<PlacesStore>((set, get) => ({
       set({ isLoading: true, error: null });
       placesLogger.info('📝 Creando lugar:', data.name);
       await createPlace(data);
-      await get().loadPlaces();
+      const rawPlaces = await getPlaces();
+      const places = rawPlaces.map(mapToPlaceWithStats);
+      set({ places, isLoading: false });
       placesLogger.info('✅ Lugar creado');
     } catch (error) {
       placesLogger.error('❌ Error al crear lugar:', error);
@@ -60,7 +70,9 @@ export const usePlacesStore = create<PlacesStore>((set, get) => ({
       set({ isLoading: true, error: null });
       placesLogger.info('📝 Actualizando lugar:', data.id);
       await updatePlace(data.id, data);
-      await get().loadPlaces();
+      const rawPlaces = await getPlaces();
+      const places = rawPlaces.map(mapToPlaceWithStats);
+      set({ places, isLoading: false });
       placesLogger.info('✅ Lugar actualizado');
     } catch (error) {
       placesLogger.error('❌ Error al actualizar lugar:', error);
@@ -73,7 +85,9 @@ export const usePlacesStore = create<PlacesStore>((set, get) => ({
       set({ isLoading: true, error: null });
       placesLogger.info('🗑️ Eliminando lugar:', id);
       await deletePlace(id);
-      await get().loadPlaces();
+      const rawPlaces = await getPlaces();
+      const places = rawPlaces.map(mapToPlaceWithStats);
+      set({ places, isLoading: false });
       placesLogger.info('✅ Lugar eliminado');
     } catch (error) {
       placesLogger.error('❌ Error al eliminar lugar:', error);
@@ -86,7 +100,9 @@ export const usePlacesStore = create<PlacesStore>((set, get) => ({
       set({ isLoading: true, error: null });
       placesLogger.info('➕ Agregando imagen a lugar:', { placeId, imageId });
       await addImageToPlace(placeId, imageId);
-      await get().loadPlaces();
+      const rawPlaces = await getPlaces();
+      const places = rawPlaces.map(mapToPlaceWithStats);
+      set({ places, isLoading: false });
       placesLogger.info('✅ Imagen agregada al lugar');
     } catch (error) {
       placesLogger.error('❌ Error al agregar imagen al lugar:', error);

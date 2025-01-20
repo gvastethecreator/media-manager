@@ -11,14 +11,46 @@ import { logger } from "@/lib/logger";
 import { useTagsStore } from "@/store/tags.store";
 import { TagForm } from "@/components/forms/tag-form";
 import { TagCard } from "@/components/cards/tag-card";
-import {
-	tagToFormData,
-	formDataToTag,
-	type TagFormData,
-} from "@/components/forms/entity-types";
+import { type TagFormData } from "@/components/forms/entity-types";
+import { type TagWithStats } from "@/app/actions/tag.actions";
 import { StatsCard } from "@/components/ui/stats-card";
 
 const tagsLogger = logger.withContext("TagsSection");
+
+function tagToFormData(tag: TagWithStats): TagFormData {
+	return {
+		id: tag.id,
+		name: tag.name,
+		description: tag.description || undefined,
+		emoji: tag.emoji || "🏷️",
+		color: tag.color || "#3b82f6",
+		shortcut: tag.shortcut || undefined,
+		tags: [],
+		featuredImage: null,
+		isFavorite: false,
+	};
+}
+
+function createTagData(data: TagFormData) {
+	return {
+		name: data.name,
+		description: data.description || null,
+		emoji: data.emoji,
+		color: data.color,
+		shortcut: data.shortcut || null,
+	};
+}
+
+function updateTagData(data: TagFormData, id: string) {
+	return {
+		id,
+		name: data.name,
+		description: data.description || null,
+		emoji: data.emoji,
+		color: data.color,
+		shortcut: data.shortcut || null,
+	};
+}
 
 export function TagsSection() {
 	const { tags, createTag, updateTag, deleteTag, loadTags } = useTagsStore();
@@ -28,6 +60,13 @@ export function TagsSection() {
 
 	// Calcular estadísticas
 	const stats = React.useMemo(() => {
+		const basicStats = {
+			total: tags.length,
+			active: tags.length,
+			favorite: 0,
+			archived: 0,
+		};
+
 		const totalImages = tags.reduce(
 			(acc, tag) => acc + (tag._count?.images || 0),
 			0
@@ -39,36 +78,47 @@ export function TagsSection() {
 			(a, b) => (b._count?.images || 0) - (a._count?.images || 0)
 		);
 
-		// Calcular distribución por rango de imágenes
-		const distribution = [
-			{ name: "0 imágenes", count: 0 },
-			{ name: "1-10 imágenes", count: 0 },
-			{ name: "11-50 imágenes", count: 0 },
-			{ name: "51-100 imágenes", count: 0 },
-			{ name: "100+ imágenes", count: 0 },
-		];
-
-		tags.forEach((tag) => {
-			const count = tag._count?.images || 0;
-			if (count === 0) distribution[0].count++;
-			else if (count <= 10) distribution[1].count++;
-			else if (count <= 50) distribution[2].count++;
-			else if (count <= 100) distribution[3].count++;
-			else distribution[4].count++;
-		});
-
 		return {
+			...basicStats,
 			totalItems: tags.length,
 			totalImages,
 			totalSize,
-			lastUpdated: sortedTags[0]?.lastUpdated,
+			lastUpdated: sortedTags[0]?.updatedAt,
 			recentItems: sortedTags.slice(0, 5).map((tag) => ({
 				id: tag.id,
 				name: tag.name,
 				color: tag.color || "#94a3b8",
 				count: tag._count?.images || 0,
 			})),
-			distribution: distribution.filter((d) => d.count > 0),
+			distribution: [
+				{
+					name: "0 imágenes",
+					count: tags.filter((t) => !t._count?.images).length,
+				},
+				{
+					name: "1-10 imágenes",
+					count: tags.filter(
+						(t) => (t._count?.images || 0) > 0 && (t._count?.images || 0) <= 10
+					).length,
+				},
+				{
+					name: "11-50 imágenes",
+					count: tags.filter(
+						(t) => (t._count?.images || 0) > 10 && (t._count?.images || 0) <= 50
+					).length,
+				},
+				{
+					name: "51-100 imágenes",
+					count: tags.filter(
+						(t) =>
+							(t._count?.images || 0) > 50 && (t._count?.images || 0) <= 100
+					).length,
+				},
+				{
+					name: "100+ imágenes",
+					count: tags.filter((t) => (t._count?.images || 0) > 100).length,
+				},
+			].filter((d) => d.count > 0),
 		};
 	}, [tags]);
 
@@ -80,11 +130,7 @@ export function TagsSection() {
 		try {
 			setIsLoading(true);
 			tagsLogger.info("✨ Creando nueva etiqueta:", data);
-			await createTag({
-				...formDataToTag(data),
-				description: data.description || null,
-				shortcut: data.shortcut || null,
-			});
+			await createTag(createTagData(data));
 			toast({
 				title: "Éxito",
 				description: "Etiqueta creada correctamente",
@@ -106,11 +152,7 @@ export function TagsSection() {
 		try {
 			setIsLoading(true);
 			tagsLogger.info("💾 Actualizando etiqueta:", data);
-			await updateTag(editingId, {
-				...formDataToTag(data, editingId),
-				description: data.description || null,
-				shortcut: data.shortcut || null,
-			});
+			await updateTag(editingId, updateTagData(data, editingId));
 			setEditingId(null);
 			toast({
 				title: "Éxito",

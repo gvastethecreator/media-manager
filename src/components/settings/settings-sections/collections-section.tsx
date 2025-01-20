@@ -101,10 +101,10 @@ export function CollectionsSection() {
 	};
 
 	const handleUpdate = async (data: CollectionFormData) => {
-		if (!editingId) return;
+		if (!data.id) return;
 		try {
 			collectionLogger.info("💾 Actualizando colección:", data);
-			await updateCollection(formDataToCollection(data, editingId));
+			await updateCollection(formDataToCollection(data));
 			toast({
 				title: "Colección actualizada",
 				description: "La colección se ha actualizado correctamente.",
@@ -157,7 +157,7 @@ export function CollectionsSection() {
 					title="Estadísticas"
 					icon={<CollectionIcon className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats}
+					stats={stats as any}
 				/>
 			</div>
 
