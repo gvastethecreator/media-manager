@@ -32,6 +32,10 @@ export function TagForm({
 			color: "#3b82f6",
 			description: "",
 			shortcut: "",
+			emoji: "",
+			tags: [],
+			featuredImage: "",
+			isFavorite: false,
 		}
 	);
 
@@ -42,7 +46,7 @@ export function TagForm({
 	};
 
 	const handleChange = (field: keyof TagFormData, value: string) => {
-		setFormData((prev) => ({
+		setFormData((prev: TagFormData) => ({
 			...prev,
 			[field]: value,
 		}));

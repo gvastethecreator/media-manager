@@ -172,7 +172,7 @@ export function CharactersSection() {
 					title="Estadísticas"
 					icon={<Users className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats}
+					stats={stats as any}
 				/>
 			</div>
 

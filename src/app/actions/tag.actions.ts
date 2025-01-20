@@ -17,8 +17,13 @@ export interface TagCreate {
   shortcut?: string | null;
 }
 
-export interface TagUpdate extends Partial<TagCreate> {
+export interface TagUpdate {
   id: string;
+  name?: string;
+  color?: string;
+  description?: string | null;
+  shortcut?: string | null;
+  emoji?: string;
 }
 
 export interface Tag extends PrismaTag {
@@ -31,6 +36,9 @@ export interface TagWithStats extends PrismaTag {
   };
   totalSize: number;
   lastUpdated: Date;
+  emoji?: string;
+  isFavorite?: boolean;
+  isArchived?: boolean;
   distribution?: Array<{
     name: string;
     count: number;
