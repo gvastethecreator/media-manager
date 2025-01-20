@@ -70,14 +70,17 @@ model Image {
 }
 
 model Tag {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  color       String   @default("#3b82f6")
-  description String?
-  shortcut    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      Image[]  @relation("ImageToTag")
+  id            String   @id @default(cuid())
+  name          String   @unique
+  emoji         String   @default("🏷️")
+  color         String   @default("#3b82f6")
+  description   String?
+  shortcut      String?
+  featuredImage String?
+  isFavorite    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  images        Image[]  @relation("ImageToTag")
 
   @@index([name])
   @@index([createdAt])

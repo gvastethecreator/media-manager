@@ -14,13 +14,12 @@ import { AttributeForm } from "@/components/forms/attribute-form";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns/attribute-columns";
-import { useAttributeStore } from "@/stores/attribute-store";
+import { useAttributeStore } from "@/store/attribute.store";
 import {
 	type AttributeFormData,
 	attributeToFormData,
 	formDataToAttribute,
 } from "@/components/forms/entity-types";
-import { type Attribute } from "@/types/entities";
 
 export function AttributesSection() {
 	const [open, setOpen] = React.useState(false);

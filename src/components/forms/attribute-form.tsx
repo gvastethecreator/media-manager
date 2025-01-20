@@ -1,10 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { EntityForm } from "./entity-form";
-import { AttributeFormData } from "./entity-types";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { CompactPicker } from "react-color";
+import { Separator } from "@/components/ui/separator";
+import { AttributeFormData } from "./entity-types";
+import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -12,6 +21,29 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+
+const ATTRIBUTE_TYPES = [
+	{ value: "text", label: "Texto" },
+	{ value: "number", label: "Número" },
+	{ value: "boolean", label: "Booleano" },
+	{ value: "date", label: "Fecha" },
+	{ value: "color", label: "Color" },
+	{ value: "range", label: "Rango" },
+	{ value: "select", label: "Selección" },
+	{ value: "multiselect", label: "Selección Múltiple" },
+];
+
+const ATTRIBUTE_CATEGORIES = [
+	{ value: "general", label: "General" },
+	{ value: "character", label: "Personaje" },
+	{ value: "place", label: "Lugar" },
+	{ value: "object", label: "Objeto" },
+	{ value: "concept", label: "Concepto" },
+	{ value: "prompt", label: "Prompt" },
+	{ value: "note", label: "Nota" },
+	{ value: "system", label: "Sistema" },
+];
 
 interface AttributeFormProps {
 	initialData?: AttributeFormData;
@@ -20,99 +52,181 @@ interface AttributeFormProps {
 	isLoading?: boolean;
 }
 
-const ATTRIBUTE_TYPES = [
-	"string",
-	"number",
-	"boolean",
-	"date",
-	"array",
-	"object",
-	"custom",
-] as const;
-
-const ATTRIBUTE_CATEGORIES = [
-	"general",
-	"character",
-	"place",
-	"object",
-	"story",
-	"system",
-	"custom",
-] as const;
-
 export function AttributeForm({
 	initialData,
 	onSubmit,
 	onCancel,
 	isLoading,
 }: AttributeFormProps) {
-	const handleSubmit = async (data: AttributeFormData) => {
-		await onSubmit(data);
+	const [formData, setFormData] = React.useState<AttributeFormData>(
+		initialData || {
+			name: "",
+			emoji: "⚡",
+			color: "#3b82f6",
+			description: "",
+			type: "text",
+			value: "",
+			category: "general",
+			metadata: "{}",
+			featuredImage: null,
+			isFavorite: false,
+		}
+	);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!formData.name.trim()) return;
+		await onSubmit(formData);
+	};
+
+	const handleChange = (field: keyof AttributeFormData, value: any) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
 	};
 
 	return (
-		<EntityForm<AttributeFormData>
-			initialData={initialData}
-			onSubmit={handleSubmit}
-			onCancel={onCancel}
-			isLoading={isLoading}
-			title={initialData ? "Editar Atributo" : "Nuevo Atributo"}
-			submitLabel={initialData ? "Guardar Cambios" : "Crear Atributo"}
-			extraFields={
-				<div className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<label className="text-sm font-medium">Tipo</label>
-							<Select defaultValue={initialData?.type || "string"}>
-								<SelectTrigger>
-									<SelectValue placeholder="Tipo de atributo" />
-								</SelectTrigger>
-								<SelectContent>
-									{ATTRIBUTE_TYPES.map((type) => (
-										<SelectItem key={type} value={type}>
-											{type.charAt(0).toUpperCase() + type.slice(1)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-sm font-medium">Categoría</label>
-							<Select defaultValue={initialData?.category || "general"}>
-								<SelectTrigger>
-									<SelectValue placeholder="Categoría" />
-								</SelectTrigger>
-								<SelectContent>
-									{ATTRIBUTE_CATEGORIES.map((category) => (
-										<SelectItem key={category} value={category}>
-											{category.charAt(0).toUpperCase() + category.slice(1)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-
-					<div className="space-y-2">
-						<label className="text-sm font-medium">Valor</label>
-						<Textarea
-							placeholder="Valor del atributo..."
-							defaultValue={initialData?.value}
-							className="font-mono"
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<label className="text-sm font-medium">Metadatos (JSON)</label>
-						<Textarea
-							placeholder="{ ... }"
-							defaultValue={initialData?.metadata}
-							className="font-mono"
-						/>
-					</div>
+		<form onSubmit={handleSubmit} className="space-y-4">
+			<div className="flex items-center gap-2">
+				<div
+					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+					style={{ backgroundColor: formData.color }}
+				>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+								<span className="text-lg">{formData.emoji}</span>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-full p-0" align="start">
+							<EmojiPicker
+								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
+							/>
+							<Separator className="my-2" />
+							<div className="p-2">
+								<CompactPicker
+									color={formData.color}
+									onChange={(color) => handleChange("color", color.hex)}
+								/>
+							</div>
+						</PopoverContent>
+					</Popover>
 				</div>
-			}
-		/>
+
+				<div className="flex-1 min-w-0">
+					<Input
+						value={formData.name}
+						onChange={(e) => handleChange("name", e.target.value)}
+						className="h-8 text-base"
+						placeholder="Nombre"
+					/>
+					<Input
+						value={formData.description || ""}
+						onChange={(e) => handleChange("description", e.target.value)}
+						className="h-6 text-xs mt-1"
+						placeholder="Descripción (opcional)"
+					/>
+				</div>
+			</div>
+
+			<div className="grid grid-cols-2 gap-4">
+				<div className="space-y-2">
+					<Label>Tipo</Label>
+					<Select
+						value={formData.type}
+						onValueChange={(value) => handleChange("type", value)}
+					>
+						<SelectTrigger className="h-8">
+							<SelectValue placeholder="Selecciona un tipo" />
+						</SelectTrigger>
+						<SelectContent>
+							{ATTRIBUTE_TYPES.map((type) => (
+								<SelectItem key={type.value} value={type.value}>
+									{type.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Categoría</Label>
+					<Select
+						value={formData.category}
+						onValueChange={(value) => handleChange("category", value)}
+					>
+						<SelectTrigger className="h-8">
+							<SelectValue placeholder="Selecciona una categoría" />
+						</SelectTrigger>
+						<SelectContent>
+							{ATTRIBUTE_CATEGORIES.map((category) => (
+								<SelectItem key={category.value} value={category.value}>
+									{category.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Valor</Label>
+				<Input
+					value={formData.value}
+					onChange={(e) => handleChange("value", e.target.value)}
+					className="h-8"
+					placeholder="Valor del atributo"
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Metadata (JSON)</Label>
+				<Textarea
+					value={formData.metadata}
+					onChange={(e) => {
+						try {
+							JSON.parse(e.target.value);
+							handleChange("metadata", e.target.value);
+						} catch {
+							// Si no es JSON válido, mantener el valor anterior
+						}
+					}}
+					className="font-mono text-sm min-h-[100px]"
+					placeholder="{}"
+				/>
+			</div>
+
+			<div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+				<div className="space-y-0.5">
+					<Label>Favorito</Label>
+					<p className="text-sm text-muted-foreground">Marcar como favorito</p>
+				</div>
+				<Switch
+					checked={formData.isFavorite}
+					onCheckedChange={(checked) => handleChange("isFavorite", checked)}
+				/>
+			</div>
+
+			<div className="flex justify-end gap-2">
+				{onCancel && (
+					<Button
+						type="button"
+						variant="ghost"
+						onClick={onCancel}
+						disabled={isLoading}
+					>
+						Cancelar
+					</Button>
+				)}
+				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
+					{isLoading ?
+						"Guardando..."
+					: initialData ?
+						"Actualizar"
+					:	"Crear"}
+				</Button>
+			</div>
+		</form>
 	);
 }
