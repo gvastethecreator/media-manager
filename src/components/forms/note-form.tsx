@@ -1,32 +1,60 @@
 "use client";
 
 import * as React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Separator } from "../ui/separator";
 import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { type NoteFormData } from "@/stores/note-store";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
+import { EmojiPicker } from "../ui/emoji-picker";
+import { CompactPicker } from "react-color";
+import { useState } from "react";
+import { Label } from "../ui/label";
 
-const formSchema = z.object({
-	name: z.string().min(1, "El nombre es requerido"),
-	description: z.string().optional(),
-	content: z.string().min(1, "El contenido es requerido"),
-	type: z.string().optional(),
-	tags: z.array(z.string()).default([]),
-});
+const NOTE_CATEGORIES = [
+	{ value: "personal", label: "Personal" },
+	{ value: "work", label: "Trabajo" },
+	{ value: "study", label: "Estudio" },
+	{ value: "project", label: "Proyecto" },
+	{ value: "other", label: "Otro" },
+];
+
+const NOTE_STATUS = [
+	{ value: "draft", label: "Borrador" },
+	{ value: "active", label: "Activo" },
+	{ value: "archived", label: "Archivado" },
+];
+
+const NOTE_PRIORITY = [
+	{ value: 0, label: "Baja" },
+	{ value: 1, label: "Media" },
+	{ value: 2, label: "Alta" },
+] as const;
+
+interface NoteFormData {
+	name: string;
+	emoji: string;
+	color: string;
+	description: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number;
+	status: string;
+	tags: string[];
+	featuredImage?: string | null;
+	isFavorite: boolean;
+}
 
 interface NoteFormProps {
-	initialData?: NoteFormData;
+	initialData?: Partial<NoteFormData>;
 	onSubmit: (data: NoteFormData) => void;
 	onCancel?: () => void;
 	isLoading?: boolean;
@@ -38,103 +66,231 @@ export function NoteForm({
 	onCancel,
 	isLoading,
 }: NoteFormProps) {
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: initialData?.name || "",
-			description: initialData?.description || "",
-			content: initialData?.content || "",
-			type: initialData?.type || "default",
-			tags: initialData?.tags || [],
-		},
+	const [formData, setFormData] = useState<NoteFormData>({
+		name: initialData?.name || "",
+		emoji: initialData?.emoji || "📝",
+		color: initialData?.color || "#3b82f6",
+		description: initialData?.description || "",
+		title: initialData?.title || "",
+		content: initialData?.content || "",
+		category: initialData?.category || "personal",
+		priority: initialData?.priority || 0,
+		status: initialData?.status || "draft",
+		tags: initialData?.tags || [],
+		featuredImage: initialData?.featuredImage || null,
+		isFavorite: initialData?.isFavorite || false,
 	});
 
-	const handleSubmit = (data: z.infer<typeof formSchema>) => {
-		onSubmit(data);
-		if (!initialData) {
-			form.reset();
+	const [tagsError, setTagsError] = useState<string>("");
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!formData.name.trim() || !formData.title.trim()) {
+			alert("El nombre y título son requeridos");
+			return;
+		}
+		onSubmit(formData);
+	};
+
+	const handleChange = (field: keyof NoteFormData, value: any) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
+	};
+
+	const handleTagsChange = (value: string) => {
+		try {
+			const parsedTags = JSON.parse(value);
+			if (Array.isArray(parsedTags)) {
+				handleChange("tags", parsedTags);
+				setTagsError("");
+			} else {
+				setTagsError("Los tags deben ser un array de strings");
+			}
+		} catch (error) {
+			setTagsError("JSON inválido");
 		}
 	};
 
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nombre</FormLabel>
-							<FormControl>
-								<Input placeholder="Nombre de la nota" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Descripción</FormLabel>
-							<FormControl>
-								<Input placeholder="Descripción de la nota" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="content"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Contenido</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Contenido de la nota"
-									className="min-h-[100px]"
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="type"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Tipo</FormLabel>
-							<FormControl>
-								<Input placeholder="Tipo de nota" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<div className="flex justify-end gap-4">
-					{onCancel && (
+		<form onSubmit={handleSubmit} className="space-y-4">
+			<div className="flex items-center space-x-4">
+				<Popover>
+					<PopoverTrigger asChild>
 						<Button
 							type="button"
 							variant="outline"
-							onClick={onCancel}
-							disabled={isLoading}
+							className="w-12 h-12 text-2xl"
 						>
-							Cancelar
+							{formData.emoji}
 						</Button>
-					)}
-					<Button type="submit" disabled={isLoading}>
-						{isLoading ?
-							"Guardando..."
-						: initialData ?
-							"Guardar cambios"
-						:	"Crear nota"}
-					</Button>
+					</PopoverTrigger>
+					<PopoverContent className="p-0">
+						<EmojiPicker
+							onEmojiSelect={(emoji: string) => {
+								handleChange("emoji", emoji);
+							}}
+						/>
+					</PopoverContent>
+				</Popover>
+
+				<Popover>
+					<PopoverTrigger asChild>
+						<Button
+							type="button"
+							variant="outline"
+							className="w-12 h-12"
+							style={{ backgroundColor: formData.color }}
+						/>
+					</PopoverTrigger>
+					<PopoverContent className="p-0">
+						<CompactPicker
+							color={formData.color}
+							onChange={(color) => {
+								handleChange("color", color.hex);
+							}}
+						/>
+					</PopoverContent>
+				</Popover>
+
+				<Input
+					placeholder="Nombre de la nota"
+					value={formData.name}
+					onChange={(e) => handleChange("name", e.target.value)}
+					required
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Título</Label>
+				<Input
+					value={formData.title}
+					onChange={(e) => handleChange("title", e.target.value)}
+					className="h-8"
+					placeholder="Título de la nota..."
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Descripción</Label>
+				<Textarea
+					value={formData.description}
+					onChange={(e) => handleChange("description", e.target.value)}
+					className="h-6 text-xs mt-1"
+					placeholder="Descripción (opcional)"
+				/>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Contenido</Label>
+				<Textarea
+					value={formData.content}
+					onChange={(e) => handleChange("content", e.target.value)}
+					className="min-h-[200px]"
+					placeholder="Contenido de la nota..."
+				/>
+			</div>
+
+			<div className="grid grid-cols-3 gap-4">
+				<div className="space-y-2">
+					<Label>Categoría</Label>
+					<Select
+						value={formData.category}
+						onValueChange={(value) => handleChange("category", value)}
+					>
+						<SelectTrigger>
+							<SelectValue placeholder="Selecciona categoría" />
+						</SelectTrigger>
+						<SelectContent>
+							{NOTE_CATEGORIES.map((category) => (
+								<SelectItem key={category.value} value={category.value}>
+									{category.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
-			</form>
-		</Form>
+
+				<div className="space-y-2">
+					<Label>Estado</Label>
+					<Select
+						value={formData.status}
+						onValueChange={(value) => handleChange("status", value)}
+					>
+						<SelectTrigger>
+							<SelectValue placeholder="Selecciona estado" />
+						</SelectTrigger>
+						<SelectContent>
+							{NOTE_STATUS.map((status) => (
+								<SelectItem key={status.value} value={status.value}>
+									{status.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Prioridad</Label>
+					<Select
+						value={formData.priority.toString()}
+						onValueChange={(value) =>
+							handleChange("priority", parseInt(value, 10))
+						}
+					>
+						<SelectTrigger>
+							<SelectValue placeholder="Selecciona prioridad" />
+						</SelectTrigger>
+						<SelectContent>
+							{NOTE_PRIORITY.map((priority) => (
+								<SelectItem
+									key={priority.value}
+									value={priority.value.toString()}
+								>
+									{priority.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+			</div>
+
+			<div className="space-y-2">
+				<Label>Etiquetas (JSON)</Label>
+				<Textarea
+					value={JSON.stringify(formData.tags, null, 2)}
+					onChange={(e) => handleTagsChange(e.target.value)}
+					className="font-mono text-sm min-h-[80px]"
+					placeholder='["tag1", "tag2", ...]'
+				/>
+				{tagsError && <p className="text-red-500 text-sm mt-1">{tagsError}</p>}
+			</div>
+
+			<div className="flex justify-end gap-2">
+				{onCancel && (
+					<Button
+						type="button"
+						variant="ghost"
+						onClick={onCancel}
+						disabled={isLoading}
+					>
+						Cancelar
+					</Button>
+				)}
+				<Button
+					type="submit"
+					disabled={
+						isLoading || !formData.name.trim() || !formData.title.trim()
+					}
+				>
+					{isLoading ?
+						"Guardando..."
+					: initialData ?
+						"Actualizar"
+					:	"Crear"}
+				</Button>
+			</div>
+		</form>
 	);
 }

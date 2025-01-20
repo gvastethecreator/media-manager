@@ -20,8 +20,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@bull-board/api": "^6.6.2",
-    "@bull-board/express": "^6.6.2",
+    "@bull-board/api": "^6.7.0",
+    "@bull-board/express": "^6.7.0",
     "@prisma/client": "^6.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-aspect-ratio": "^1.1.1",
@@ -47,8 +47,8 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
-    "@tanstack/react-query": "^5.64.1",
-    "@tanstack/react-query-devtools": "^5.64.1",
+    "@tanstack/react-query": "^5.64.2",
+    "@tanstack/react-query-devtools": "^5.64.2",
     "@tanstack/react-table": "^8.20.6",
     "@tanstack/react-virtual": "^3.11.2",
     "@types/mime-types": "^2.1.4",
@@ -94,10 +94,10 @@
     "tanstack": "^1.0.0",
     "uuid": "^11.0.5",
     "virtua": "^0.39.3",
-    "zod": "^3.24.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^3.10.0",
     "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -119,10 +119,12 @@
     "node-mocks-http": "^1.16.2",
     "postcss": "^8.5.1",
     "prisma": "^6.2.1",
+    "react-hook-form": "^7.54.2",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.2.5",
     "ts-jest-mock-import-meta": "^1.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "zod": "^3.24.1"
   }
 }

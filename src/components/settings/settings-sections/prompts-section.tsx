@@ -8,7 +8,7 @@ import { Loader2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { usePromptStore, type PromptFormData } from "@/stores/prompt-store";
+import { usePromptStore, type PromptFormData } from "@/store/prompt.store";
 import { PromptForm } from "@/components/forms/prompt-form";
 import { PromptCard } from "@/components/cards/prompt-card";
 import { StatsCard } from "@/components/ui/stats-card";

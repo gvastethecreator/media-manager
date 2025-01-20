@@ -1,9 +1,11 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
+import { Table } from "@tanstack/react-table";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 
 interface DataTableToolbarProps<TData> {
 	table: Table<TData>;
@@ -36,6 +38,7 @@ export function DataTableToolbar<TData>({
 					</Button>
 				)}
 			</div>
+			<DataTableViewOptions table={table} />
 		</div>
 	);
 }
