@@ -17,6 +17,12 @@ async function main() {
   await prisma.object.deleteMany()
   await prisma.place.deleteMany()
   await prisma.character.deleteMany()
+  await prisma.concept.deleteMany()
+  await prisma.prompt.deleteMany()
+  await prisma.note.deleteMany()
+  await prisma.attribute.deleteMany()
+  await prisma.systemImage.deleteMany()
+  await prisma.universalFavorite.deleteMany()
 
   // Crear perfil por defecto
   seedLogger.info('👤 Creando perfil default...')
@@ -1291,6 +1297,230 @@ async function main() {
           wisdom: 25,
           charisma: 20
         })
+      },
+    ],
+  })
+
+  // Crear conceptos por defecto
+  seedLogger.info('💡 Creando conceptos por defecto...')
+  const defaultConcepts = await prisma.concept.createMany({
+    data: [
+      {
+        name: 'Magia Elemental',
+        emoji: '🔮',
+        color: '#8b5cf6',
+        description: 'Sistema de magia basado en los elementos',
+        content: 'La magia elemental se basa en el control y manipulación de los elementos naturales: fuego, agua, tierra y aire.',
+        category: 'magic',
+        tags: JSON.stringify(['magic', 'elements', 'system']),
+      },
+      {
+        name: 'Tecnología Arcana',
+        emoji: '⚡',
+        color: '#3b82f6',
+        description: 'Fusión de magia y tecnología',
+        content: 'La tecnología arcana combina principios mágicos con avances tecnológicos para crear dispositivos únicos.',
+        category: 'technology',
+        tags: JSON.stringify(['magic', 'technology', 'innovation']),
+      },
+      {
+        name: 'Sociedades Secretas',
+        emoji: '🎭',
+        color: '#10b981',
+        description: 'Organizaciones ocultas y sus influencias',
+        content: 'Las sociedades secretas operan desde las sombras, influyendo en eventos importantes del mundo.',
+        category: 'society',
+        tags: JSON.stringify(['society', 'mystery', 'power']),
+      },
+    ],
+  })
+
+  // Crear prompts por defecto
+  seedLogger.info('🎯 Creando prompts por defecto...')
+  const defaultPrompts = await prisma.prompt.createMany({
+    data: [
+      {
+        name: 'Retrato de Personaje',
+        emoji: '👤',
+        color: '#8b5cf6',
+        description: 'Prompt para generar retratos de personajes',
+        content: 'Retrato detallado de [nombre], un [raza] [clase]. [descripción física], [vestimenta], [expresión].',
+        category: 'character',
+        parameters: JSON.stringify({
+          nombre: 'string',
+          raza: 'string',
+          clase: 'string',
+          descripción: 'string',
+          vestimenta: 'string',
+          expresión: 'string',
+        }),
+        tags: JSON.stringify(['character', 'portrait', 'generation']),
+      },
+      {
+        name: 'Escena de Batalla',
+        emoji: '⚔️',
+        color: '#ef4444',
+        description: 'Prompt para generar escenas de batalla',
+        content: 'Escena épica de batalla entre [personajes] en [ubicación]. [ambiente], [acción], [efectos].',
+        category: 'scene',
+        parameters: JSON.stringify({
+          personajes: 'string[]',
+          ubicación: 'string',
+          ambiente: 'string',
+          acción: 'string',
+          efectos: 'string',
+        }),
+        tags: JSON.stringify(['battle', 'scene', 'action']),
+      },
+      {
+        name: 'Paisaje Fantástico',
+        emoji: '🏔️',
+        color: '#10b981',
+        description: 'Prompt para generar paisajes fantásticos',
+        content: 'Paisaje fantástico de [tipo] con [elementos]. [tiempo], [iluminación], [detalles].',
+        category: 'landscape',
+        parameters: JSON.stringify({
+          tipo: 'string',
+          elementos: 'string[]',
+          tiempo: 'string',
+          iluminación: 'string',
+          detalles: 'string',
+        }),
+        tags: JSON.stringify(['landscape', 'fantasy', 'environment']),
+      },
+    ],
+  })
+
+  // Crear notas por defecto
+  seedLogger.info('📝 Creando notas por defecto...')
+  const defaultNotes = await prisma.note.createMany({
+    data: [
+      {
+        title: 'Ideas para Aventuras',
+        content: '1. Búsqueda del artefacto perdido\n2. Investigación de rituales antiguos\n3. Exploración de ruinas misteriosas',
+        category: 'adventure',
+        priority: 1,
+        status: 'active',
+        tags: JSON.stringify(['adventure', 'quest', 'ideas']),
+      },
+      {
+        title: 'Sistema de Magia',
+        content: 'Reglas básicas del sistema de magia:\n- Costos de hechizos\n- Límites de poder\n- Consecuencias',
+        category: 'system',
+        priority: 2,
+        status: 'active',
+        tags: JSON.stringify(['magic', 'rules', 'system']),
+      },
+      {
+        title: 'Personajes Pendientes',
+        content: 'Lista de personajes por desarrollar:\n1. Mercader misterioso\n2. Guardián del bosque\n3. Hechicero errante',
+        category: 'character',
+        priority: 3,
+        status: 'pending',
+        tags: JSON.stringify(['character', 'development', 'pending']),
+      },
+    ],
+  })
+
+  // Crear atributos por defecto
+  seedLogger.info('🏷️ Creando atributos por defecto...')
+  const defaultAttributes = await prisma.attribute.createMany({
+    data: [
+      {
+        name: 'Nivel de Poder',
+        type: 'number',
+        value: '0',
+        category: 'stats',
+        description: 'Nivel de poder general del personaje',
+        metadata: JSON.stringify({
+          min: 0,
+          max: 100,
+          step: 1,
+        }),
+      },
+      {
+        name: 'Alineamiento Moral',
+        type: 'select',
+        value: 'neutral',
+        category: 'personality',
+        description: 'Orientación moral del personaje',
+        metadata: JSON.stringify({
+          options: [
+            'lawful_good',
+            'neutral_good',
+            'chaotic_good',
+            'lawful_neutral',
+            'true_neutral',
+            'chaotic_neutral',
+            'lawful_evil',
+            'neutral_evil',
+            'chaotic_evil',
+          ],
+        }),
+      },
+      {
+        name: 'Habilidades Especiales',
+        type: 'array',
+        value: '[]',
+        category: 'abilities',
+        description: 'Lista de habilidades especiales',
+        metadata: JSON.stringify({
+          itemType: 'string',
+          maxItems: 10,
+        }),
+      },
+    ],
+  })
+
+  // Crear imágenes del sistema por defecto
+  seedLogger.info('🖼️ Creando imágenes del sistema por defecto...')
+  const defaultSystemImages = await prisma.systemImage.createMany({
+    data: [
+      {
+        name: 'Default Avatar',
+        path: '/system/images/default-avatar.png',
+        type: 'avatar',
+        category: 'default',
+        size: 1024,
+        width: 256,
+        height: 256,
+      },
+      {
+        name: 'Default Background',
+        path: '/system/images/default-background.jpg',
+        type: 'background',
+        category: 'default',
+        size: 2048,
+        width: 1920,
+        height: 1080,
+      },
+      {
+        name: 'Default Icon',
+        path: '/system/images/default-icon.png',
+        type: 'icon',
+        category: 'default',
+        size: 512,
+        width: 128,
+        height: 128,
+      },
+    ],
+  })
+
+  // Crear algunos favoritos universales de ejemplo
+  seedLogger.info('⭐ Creando favoritos universales de ejemplo...')
+  const defaultUniversalFavorites = await prisma.universalFavorite.createMany({
+    data: [
+      {
+        entityId: (await prisma.character.findFirst())?.id || '',
+        entityType: 'character',
+      },
+      {
+        entityId: (await prisma.place.findFirst())?.id || '',
+        entityType: 'place',
+      },
+      {
+        entityId: (await prisma.object.findFirst())?.id || '',
+        entityType: 'object',
       },
     ],
   })

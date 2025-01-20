@@ -14,6 +14,13 @@ import {
 
 const objectsLogger = logger.withContext('ObjectsStore');
 
+const mapToObjectWithStats = (object: Awaited<ReturnType<typeof getObjects>>[0]): ObjectWithStats => ({
+  ...object,
+  totalSize: 0,
+  lastUpdated: new Date(),
+  recentImages: []
+});
+
 interface ObjectsStore {
   objects: ObjectWithStats[];
   isLoading: boolean;
@@ -33,7 +40,8 @@ export const useObjectsStore = create<ObjectsStore>((set) => ({
     try {
       set({ isLoading: true, error: null });
       objectsLogger.info('🔄 Cargando objetos...');
-      const objects = await getObjects();
+      const rawObjects = await getObjects();
+      const objects = rawObjects.map(mapToObjectWithStats);
       set({ objects, isLoading: false });
       objectsLogger.info(`✅ ${objects.length} objetos cargados`);
     } catch (error) {
@@ -47,7 +55,8 @@ export const useObjectsStore = create<ObjectsStore>((set) => ({
       set({ isLoading: true, error: null });
       objectsLogger.info('✨ Creando objeto:', object);
       await createObjectAction(object);
-      const objects = await getObjects();
+      const rawObjects = await getObjects();
+      const objects = rawObjects.map(mapToObjectWithStats);
       set({ objects, isLoading: false });
       objectsLogger.info('✅ Objeto creado');
     } catch (error) {
@@ -61,7 +70,8 @@ export const useObjectsStore = create<ObjectsStore>((set) => ({
       set({ isLoading: true, error: null });
       objectsLogger.info('💾 Actualizando objeto:', object);
       await updateObjectAction(id, { ...object, id });
-      const objects = await getObjects();
+      const rawObjects = await getObjects();
+      const objects = rawObjects.map(mapToObjectWithStats);
       set({ objects, isLoading: false });
       objectsLogger.info('✅ Objeto actualizado');
     } catch (error) {
@@ -75,7 +85,8 @@ export const useObjectsStore = create<ObjectsStore>((set) => ({
       set({ isLoading: true, error: null });
       objectsLogger.info('🗑️ Eliminando objeto:', id);
       await deleteObjectAction(id);
-      const objects = await getObjects();
+      const rawObjects = await getObjects();
+      const objects = rawObjects.map(mapToObjectWithStats);
       set({ objects, isLoading: false });
       objectsLogger.info('✅ Objeto eliminado');
     } catch (error) {
@@ -89,7 +100,8 @@ export const useObjectsStore = create<ObjectsStore>((set) => ({
       set({ isLoading: true, error: null });
       objectsLogger.info('➕ Agregando imagen a objeto:', { objectId, imageId });
       await addImageToObjectAction(objectId, imageId);
-      const objects = await getObjects();
+      const rawObjects = await getObjects();
+      const objects = rawObjects.map(mapToObjectWithStats);
       set({ objects, isLoading: false });
       objectsLogger.info('✅ Imagen agregada al objeto');
     } catch (error) {

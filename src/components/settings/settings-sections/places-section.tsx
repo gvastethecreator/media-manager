@@ -104,7 +104,7 @@ export function PlacesSection() {
 		if (!data.id) return;
 		try {
 			placeLogger.info("💾 Actualizando lugar:", data);
-			await updatePlace(formDataToPlace(data, data.id));
+			await updatePlace(formDataToPlace(data));
 			setEditingId(null);
 			toast({
 				title: "Éxito",
@@ -158,7 +158,7 @@ export function PlacesSection() {
 					title="Estadísticas"
 					icon={<MapPin className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats}
+					stats={stats as any}
 				/>
 			</div>
 

@@ -3,9 +3,11 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
-import type { Object } from '@prisma/client'
-import { eventsService } from '@/services/events.service'
+import type { Object as PrismaObject, Image } from '@prisma/client'
+import { eventsService, type EventType } from '@/services/events.service'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
+import type { FileItem } from '@/types/file-item'
+import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service'
 
 const objectLogger = logger.withContext('ObjectActions')
 
@@ -27,18 +29,18 @@ class ObjectError extends Error {
   }
 }
 
-export interface ObjectWithStats extends Object {
+export interface ObjectWithStats extends Omit<PrismaObject, 'featuredImage'> {
   _count: {
-    images: number
-  }
-  totalSize: number
-  lastUpdated?: Date
+    images: number;
+  };
+  totalSize: number;
+  lastUpdated: Date;
   distribution?: Array<{
-    name: string
-    count: number
-  }>
-  featuredImage?: string | null
-  recentImages?: (string | null)[]
+    name: string;
+    count: number;
+  }>;
+  featuredImage: string | null;
+  recentImages: string[];
 }
 
 export interface ObjectCreate {
@@ -46,128 +48,67 @@ export interface ObjectCreate {
   emoji: string;
   color: string;
   description?: string | null;
-  shortcut?: string | null;
-  type: string;
-  rarity: string;
+  category: string;
   properties: string;
-  requirements: string;
-  origin: string;
-  stats: string;
-  sortBy: string;
-  filters: string;
+  featuredImage?: string | null;
 }
 
 export interface ObjectUpdate extends Partial<ObjectCreate> {
   id: string;
 }
 
-export async function getObjects(): Promise<ObjectWithStats[]> {
+export interface ObjectWithImages extends PrismaObject {
+  images: FileItem[];
+}
+
+export interface ExtendedObject extends PrismaObject {
+  images: Image[];
+}
+
+export async function getObjects() {
   try {
-    objectLogger.info('🎯 Obteniendo objetos');
+    objectLogger.info('📚 Obteniendo lista de objetos');
     const objects = await prisma.object.findMany({
       include: {
         _count: {
-          select: { images: true },
+          select: {
+            images: true,
+          },
         },
         images: {
-          take: 9,
-          orderBy: { createdAt: 'desc' },
+          take: 1,
           select: {
             id: true,
-            thumbnail: true,
-            thumbnailWidth: true,
-            thumbnailHeight: true,
-            thumbnailSize: true,
-            isFavorite: true,
-            createdAt: true,
-            updatedAt: true,
-            folder: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
+            name: true,
+          },
+        },
       },
-      orderBy: { name: 'asc' },
     });
 
-    const objectsWithStats = await Promise.all(
-      objects.map(async (object) => {
-        const totalSize = await prisma.image.aggregate({
-          where: {
-            objects: {
-              some: {
-                id: object.id
-              }
-            }
-          },
-          _sum: {
-            size: true
-          }
-        });
-
-        // Obtener la última actualización
-        const lastImage = object.images?.[0];
-        const lastUpdated = lastImage?.updatedAt || object.updatedAt;
-
-        // Calcular distribución por carpetas
-        const folderDistribution = object.images?.reduce((acc, img) => {
-          const folderName = img.folder?.name || 'Sin carpeta';
-          acc[folderName] = (acc[folderName] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-
-        const distribution = Object.entries(folderDistribution || {}).map(([name, count]) => ({
-          name,
-          count
-        })).sort((a, b) => b.count - a.count);
-
-        const featuredImage = object.images?.find(img => img.isFavorite)?.thumbnail;
-        const recentImages = object.images
-          ?.filter(img => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-          .map(img => {
-            if (img.thumbnail) {
-              return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-            }
-            return null;
-          }) || [];
-
-        const result: ObjectWithStats = {
-          ...object,
-          _count: {
-            images: object._count?.images || 0
-          },
-          totalSize: totalSize._sum.size || 0,
-          lastUpdated,
-          distribution,
-          featuredImage: featuredImage ?
-            `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` :
-            null,
-          recentImages
-        };
-
-        return result;
-      })
-    );
-
-    objectLogger.info('✅ Objetos obtenidos', { count: objects.length });
-    return objectsWithStats;
+    objectLogger.info(`✅ ${objects.length} objetos obtenidos`);
+    return objects;
   } catch (error) {
-    objectLogger.error('❌ Error al obtener objetos', error);
-    throw new ObjectError('No se pudieron obtener los objetos', { cause: error });
+    objectLogger.error("❌ Error al obtener objetos:", error);
+    throw new ObjectError("No se pudieron obtener los objetos", error);
   }
 }
 
-export async function getObject(id: string) {
+export async function getObjectById(id: string) {
   try {
-    objectLogger.info('🔍 Obteniendo objeto:', id);
+    objectLogger.info('🔍 Buscando objeto:', id);
     const object = await prisma.object.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
             images: true,
+          },
+        },
+        images: {
+          take: 5,
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
@@ -177,49 +118,28 @@ export async function getObject(id: string) {
       throw new ObjectError("Objeto no encontrado");
     }
 
-    const totalSize = await prisma.image.aggregate({
-      where: {
-        objects: {
-          some: {
-            id: object.id,
-          },
-        },
-      },
-      _sum: {
-        size: true,
-      },
-    });
-
-    const result = {
-      ...object,
-      totalSize: totalSize._sum.size || 0,
-    };
-
-    objectLogger.info('✅ Objeto obtenido:', object.name);
-    return result;
+    objectLogger.info('✅ Objeto encontrado:', object.name);
+    return object;
   } catch (error) {
     objectLogger.error("❌ Error al obtener objeto:", error);
-    if (error instanceof ObjectError) throw error;
     throw new ObjectError("No se pudo obtener el objeto", error);
   }
 }
 
 export async function createObject(data: ObjectCreate) {
   try {
-    objectLogger.info('📝 Creando nuevo objeto:', data.name);
+    objectLogger.info('📝 Creando objeto:', data.name);
     const object = await prisma.object.create({
       data: {
         ...data,
-        properties: data.properties || '[]',
-        requirements: data.requirements || '{}',
-        stats: data.stats || '{}',
-        filters: data.filters || '[]',
+        properties: data.properties || '{}',
+        featuredImage: data.featuredImage || null,
       },
     });
 
     // Emitir eventos
-    eventsService.emit('objects:modified');
-    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+    eventsService.emit('objects:modified' as EventType);
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
     objectLogger.info('✅ Objeto creado:', object.name);
     revalidateAllPaths();
@@ -235,14 +155,13 @@ export async function updateObject(id: string, data: ObjectUpdate) {
     objectLogger.info('📝 Actualizando objeto:', id);
     const object = await prisma.object.update({
       where: { id },
-      data: {
-        ...data,
-        properties: data.properties || undefined,
-        requirements: data.requirements || undefined,
-        stats: data.stats || undefined,
-        filters: data.filters || undefined,
-      },
+      data,
     });
+
+    // Emitir eventos
+    eventsService.emit('objects:modified' as EventType);
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+
     objectLogger.info('✅ Objeto actualizado:', object.name);
     revalidateAllPaths();
     return object;
@@ -260,8 +179,8 @@ export async function deleteObject(id: string) {
     });
 
     // Emitir eventos
-    eventsService.emit('objects:modified');
-    statsEventEmitter.emit(STATS_EVENTS.OBJECT_CHANGE);
+    eventsService.emit('objects:modified' as EventType);
+    statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
     objectLogger.info('✅ Objeto eliminado');
     revalidateAllPaths();
@@ -274,36 +193,23 @@ export async function deleteObject(id: string) {
 export async function getObjectImages(id: string) {
   try {
     objectLogger.info('🖼️ Obteniendo imágenes del objeto:', id);
-    const images = await prisma.image.findMany({
-      where: {
-        objects: {
-          some: {
-            id,
+    const object = await prisma.object.findUnique({
+      where: { id },
+      include: {
+        images: {
+          include: {
+            tags: true,
+            stats: true,
           },
         },
       },
-      include: {
-        tags: {
-          select: { id: true },
-        },
-        collections: {
-          select: { id: true },
-        },
-        albums: {
-          select: { id: true },
-        },
-        characters: {
-          select: { id: true },
-        },
-        places: {
-          select: { id: true },
-        },
-        objects: {
-          select: { id: true },
-        },
-        stats: true,
-      },
-    });
+    }) as ExtendedObject | null;
+
+    if (!object) {
+      throw new ObjectError("Objeto no encontrado");
+    }
+
+    const images = object.images.map(img => convertServerImageToFileItem(img as ServerImage));
 
     objectLogger.info(`✅ ${images.length} imágenes obtenidas`);
     return images;

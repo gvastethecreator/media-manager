@@ -115,10 +115,10 @@ export function ObjectsSection() {
 	};
 
 	const handleUpdate = async (data: ObjectFormData) => {
-		if (!editingId) return;
+		if (!data.id) return;
 		try {
 			objectLogger.info("🎯 Actualizando objeto:", data.name);
-			await updateObject(editingId, formDataToObject(data, editingId));
+			await updateObject(data.id, formDataToObject(data));
 			toast({
 				title: "Objeto actualizado",
 				description: "El objeto se ha actualizado correctamente.",
@@ -171,7 +171,7 @@ export function ObjectsSection() {
 					title="Estadísticas"
 					icon={<Box className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats}
+					stats={stats as any}
 				/>
 			</div>
 

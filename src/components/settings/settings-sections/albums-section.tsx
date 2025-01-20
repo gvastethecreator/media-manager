@@ -17,6 +17,7 @@ import {
 	type AlbumFormData,
 } from "@/components/forms/entity-types";
 import { StatsCard } from "@/components/ui/stats-card";
+import { AlbumForm } from "@/components/forms/album-form";
 
 const albumLogger = logger.withContext("AlbumsSection");
 
@@ -59,7 +60,7 @@ export function AlbumsSection() {
 		if (!data.id) return;
 		try {
 			albumLogger.info("💾 Actualizando álbum:", data);
-			await updateAlbum(data.id, formDataToAlbum(data, data.id));
+			await updateAlbum(data.id, formDataToAlbum(data));
 			setEditingId(null);
 			toast({
 				title: "Éxito",
@@ -154,12 +155,7 @@ export function AlbumsSection() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<EntityForm<AlbumFormData>
-							onSubmit={handleCreate}
-							isLoading={isLoading}
-							title="Álbum"
-							submitLabel="Crear"
-						/>
+						<AlbumForm onSubmit={handleCreate} isLoading={isLoading} />
 					</CardContent>
 				</Card>
 
@@ -167,7 +163,7 @@ export function AlbumsSection() {
 					title="Estadísticas"
 					icon={<AlbumIcon className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats}
+					stats={stats as any}
 				/>
 			</div>
 
@@ -231,13 +227,11 @@ export function AlbumsSection() {
 										{editingId === album.id ?
 											<Card className="relative">
 												<CardContent className="p-4">
-													<EntityForm<AlbumFormData>
+													<AlbumForm
 														initialData={albumToFormData(album)}
 														onSubmit={handleUpdate}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}
-														title="Álbum"
-														submitLabel="Actualizar"
 													/>
 												</CardContent>
 											</Card>

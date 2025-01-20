@@ -1,19 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+import { EntityForm } from "./entity-form";
+import { CollectionFormData } from "./entity-types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { CompactPicker } from "react-color";
-import { Loader2, XIcon, CheckIcon } from "lucide-react";
-import type { CollectionFormData } from "./entity-types";
 
 interface CollectionFormProps {
 	initialData?: CollectionFormData;
@@ -28,113 +19,102 @@ export function CollectionForm({
 	onCancel,
 	isLoading = false,
 }: CollectionFormProps) {
-	const [formData, setFormData] = React.useState<CollectionFormData>(
-		initialData || {
-			name: "",
-			emoji: "🌟",
-			description: "",
-			color: "#3b82f6",
-			filters: "[]",
-			sortBy: "name",
-		}
-	);
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!formData.name.trim()) return;
-		await onSubmit(formData);
-	};
-
-	const handleColorChange = (color: { hex: string }) => {
-		setFormData((prev) => ({ ...prev, color: color.hex }));
+	const handleSubmit = async (data: CollectionFormData) => {
+		await onSubmit(data);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			<div className="grid gap-2">
-				<div className="flex items-center gap-2">
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								type="button"
-								variant="outline"
-								size="icon"
-								className="h-8 w-8"
-								style={{
-									backgroundColor: formData.color,
-								}}
-							>
-								<span className="text-lg">{formData.emoji}</span>
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-full p-0" side="right" align="start">
-							<EmojiPicker
-								onEmojiSelect={(emoji: string) =>
-									setFormData((prev) => ({
-										...prev,
-										emoji,
-									}))
-								}
+		<EntityForm<CollectionFormData>
+			initialData={initialData}
+			onSubmit={handleSubmit}
+			onCancel={onCancel}
+			isLoading={isLoading}
+			title={initialData ? "Editar Colección" : "Nueva Colección"}
+			submitLabel={initialData ? "Guardar Cambios" : "Crear"}
+			extraFields={
+				<div className="space-y-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">URL</label>
+							<Input
+								name="url"
+								placeholder="URL de la colección"
+								defaultValue={initialData?.url}
 							/>
-							<Separator className="my-2" />
-							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={handleColorChange}
-								/>
-							</div>
-						</PopoverContent>
-					</Popover>
-					<Input
-						placeholder="Nombre de la colección"
-						value={formData.name}
-						onChange={(e) =>
-							setFormData((prev) => ({
-								...prev,
-								name: e.target.value,
-							}))
-						}
-						className="h-8"
-					/>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">URL Alternativa</label>
+							<Input
+								name="alternativeUrl"
+								placeholder="URL alternativa"
+								defaultValue={initialData?.alternativeUrl}
+							/>
+						</div>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Imagen de Origen</label>
+							<Input
+								name="sourceImage"
+								placeholder="Imagen de origen"
+								defaultValue={initialData?.sourceImage}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Plataforma</label>
+							<Input
+								name="platform"
+								placeholder="Plataforma"
+								defaultValue={initialData?.platform}
+							/>
+						</div>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Precio</label>
+							<Input
+								type="number"
+								name="price"
+								placeholder="Precio"
+								defaultValue={initialData?.price?.toString()}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Ordenar Por</label>
+							<Input
+								name="sortBy"
+								placeholder="Campo de ordenamiento"
+								defaultValue={initialData?.sortBy || "name"}
+							/>
+						</div>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Ediciones (JSON)</label>
+						<Textarea
+							name="editions"
+							placeholder="[]"
+							defaultValue={initialData?.editions}
+							className="font-mono text-sm"
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Filtros (JSON)</label>
+						<Textarea
+							name="filters"
+							placeholder="[]"
+							defaultValue={initialData?.filters}
+							className="font-mono text-sm"
+						/>
+					</div>
 				</div>
-				<Textarea
-					placeholder="Descripción (opcional)"
-					value={formData.description}
-					onChange={(e) =>
-						setFormData((prev) => ({
-							...prev,
-							description: e.target.value,
-						}))
-					}
-					className="h-20 resize-none"
-				/>
-			</div>
-			<div className="flex items-center justify-end gap-2">
-				{onCancel && (
-					<Button
-						type="button"
-						variant="ghost"
-						size="sm"
-						onClick={onCancel}
-						className="h-7 text-xs text-destructive hover:text-destructive/90"
-					>
-						<XIcon className="h-3.5 w-3.5 mr-1" />
-						Cancelar
-					</Button>
-				)}
-				<Button
-					type="submit"
-					variant="ghost"
-					size="sm"
-					disabled={isLoading || !formData.name.trim()}
-					className="h-7 text-xs text-green-500 hover:text-green-600"
-				>
-					{isLoading ?
-						<Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-					:	<CheckIcon className="h-3.5 w-3.5 mr-1" />}
-					{initialData ? "Guardar" : "Crear"}
-				</Button>
-			</div>
-		</form>
+			}
+		/>
 	);
 }

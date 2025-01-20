@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
 	Popover,
 	PopoverContent,
@@ -13,18 +12,32 @@ import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { CompactPicker } from "react-color";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-
-// Tipos base para las entidades
-export interface BaseEntityFormData {
-	id?: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string;
-	shortcut?: string;
-	filters?: string;
-	sortBy?: string;
-}
+import { TagInput } from "@/components/ui/tag-input";
+import { ImagePicker } from "@/components/ui/image-picker";
+import { BaseEntityFormData } from "./entity-types";
+import {
+	type BaseFormData,
+	type EntityFormProps,
+	type FormField,
+} from "@/types/form.types";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { ShortcutPicker } from "@/components/ui/shortcut-picker";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 // Props específicas para el formulario
 export interface EntityFormProps<T extends BaseEntityFormData> {
@@ -36,114 +49,171 @@ export interface EntityFormProps<T extends BaseEntityFormData> {
 	submitLabel?: string;
 	className?: string;
 	extraFields?: React.ReactNode;
+	fields?: FormField[];
 }
 
 // Componente genérico del formulario
-export function EntityForm<T extends BaseEntityFormData>({
+export function EntityForm<T extends BaseFormData>({
+	title,
+	submitLabel,
 	initialData,
 	onSubmit,
 	onCancel,
-	isLoading = false,
-	title = "Nueva Entidad",
-	submitLabel = "Guardar",
-	className,
-	extraFields,
+	isLoading,
+	fields = [],
 }: EntityFormProps<T>) {
-	const [formData, setFormData] = React.useState<T>(
-		(initialData as T) ||
-			({
-				name: "",
-				emoji: "🌟",
-				color: "#3b82f6",
-				description: "",
-				shortcut: "",
-				filters: "[]",
-				sortBy: "name",
-			} as T)
-	);
-
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!formData.name?.trim()) return;
-		await onSubmit(formData);
+		const formData = new FormData(e.currentTarget);
+		const data = Object.fromEntries(formData.entries()) as T;
+
+		// Convertir tags de string a array
+		if (formData.has("tags")) {
+			const tags = formData.get("tags") as string;
+			if (tags) {
+				(data as any).tags = tags.split(",").map((t) => t.trim());
+			}
+		}
+
+		await onSubmit(data);
 	};
 
-	const handleChange = (field: keyof T, value: string | number | boolean) => {
-		setFormData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
+	const renderField = (field: FormField) => {
+		const value = initialData?.[field.name as keyof T];
+
+		switch (field.type) {
+			case "textarea":
+				return (
+					<Textarea
+						key={field.name}
+						name={field.name}
+						placeholder={field.placeholder}
+						defaultValue={value as string}
+						required={field.required}
+						className="min-h-[100px] resize-y"
+					/>
+				);
+			case "select":
+				return (
+					<Select
+						key={field.name}
+						name={field.name}
+						defaultValue={value as string}
+					>
+						<SelectTrigger>
+							<SelectValue placeholder={field.placeholder} />
+						</SelectTrigger>
+						<SelectContent>
+							{field.options?.map((option) => (
+								<SelectItem key={option.value} value={option.value}>
+									{option.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				);
+			case "tags":
+				return (
+					<TagInput
+						key={field.name}
+						name={field.name}
+						placeholder={field.placeholder}
+						defaultValue={value as string[]}
+					/>
+				);
+			case "image":
+				return (
+					<ImagePicker
+						key={field.name}
+						name={field.name}
+						defaultValue={value as string}
+					/>
+				);
+			case "emoji":
+				return (
+					<EmojiPicker
+						key={field.name}
+						name={field.name}
+						defaultValue={value as string}
+					/>
+				);
+			case "color":
+				return (
+					<ColorPicker
+						key={field.name}
+						name={field.name}
+						defaultValue={value as string}
+					/>
+				);
+			case "shortcut":
+				return (
+					<ShortcutPicker
+						key={field.name}
+						name={field.name}
+						defaultValue={value as string}
+					/>
+				);
+			default:
+				return (
+					<Input
+						key={field.name}
+						type="text"
+						name={field.name}
+						placeholder={field.placeholder}
+						defaultValue={value as string}
+						required={field.required}
+					/>
+				);
+		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
-			<div className="flex items-center gap-2">
-				<div
-					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
-					style={{ backgroundColor: formData.color }}
-				>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-								<span className="text-lg">{formData.emoji}</span>
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-full p-0" align="start">
-							<EmojiPicker
-								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
-							/>
-							<Separator className="my-2" />
-							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={(color) => handleChange("color", color.hex)}
-								/>
-							</div>
-						</PopoverContent>
-					</Popover>
-				</div>
-
-				<div className="flex-1 min-w-0 space-y-1">
-					<Input
-						value={formData.name}
-						onChange={(e) => handleChange("name", e.target.value)}
-						className="h-8 text-base"
-						placeholder="Nombre"
-					/>
-					<div className="flex gap-2">
+		<form onSubmit={handleSubmit}>
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-lg">{title}</CardTitle>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Nombre</label>
 						<Input
-							value={formData.description || ""}
-							onChange={(e) => handleChange("description", e.target.value)}
-							className="h-6 text-xs"
-							placeholder="Descripción (opcional)"
-						/>
-						<Input
-							value={formData.shortcut || ""}
-							onChange={(e) => handleChange("shortcut", e.target.value)}
-							className="h-6 text-xs w-24"
-							placeholder="Atajo"
+							type="text"
+							name="name"
+							placeholder="Nombre..."
+							defaultValue={initialData?.name}
+							required
 						/>
 					</div>
-				</div>
-			</div>
 
-			{extraFields}
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Descripción</label>
+						<Textarea
+							name="description"
+							placeholder="Descripción..."
+							defaultValue={initialData?.description}
+							className="resize-y"
+						/>
+					</div>
 
-			<div className="flex justify-end gap-2">
-				{onCancel && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={onCancel}
-						disabled={isLoading}
-					>
-						Cancelar
+					{fields.map((field) => (
+						<div key={field.name} className="space-y-2">
+							<label className="text-sm font-medium">{field.label}</label>
+							{renderField(field)}
+						</div>
+					))}
+				</CardContent>
+				<CardFooter className="flex justify-end gap-2">
+					{onCancel && (
+						<Button type="button" variant="outline" onClick={onCancel}>
+							Cancelar
+						</Button>
+					)}
+					<Button type="submit" disabled={isLoading}>
+						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						{submitLabel}
 					</Button>
-				)}
-				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ? "Guardando..." : submitLabel}
-				</Button>
-			</div>
+				</CardFooter>
+			</Card>
 		</form>
 	);
 }

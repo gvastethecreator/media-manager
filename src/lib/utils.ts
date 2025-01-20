@@ -16,12 +16,16 @@ export function formatDate(date: string | Date | undefined): string {
   });
 }
 
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
+export function formatBytes(bytes: number, decimals = 2) {
+  if (!+bytes) return "0 Bytes";
+
   const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
 export function getFileExtension(filename: string): string {
@@ -45,33 +49,45 @@ export function generateSlug(str: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+export function formatNumber(number: number) {
+  return new Intl.NumberFormat("es-ES").format(number);
+}
+
+export function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
+export function truncate(text: string, length: number) {
+  if (text.length <= length) return text;
+  return text.slice(0, length) + "...";
+}
+
 export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+  fn: T,
+  delay: number
+) {
+  let timeoutId: NodeJS.Timeout;
+  return function (...args: Parameters<T>) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
   };
 }
 
 export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return function executedFunction(...args: Parameters<T>) {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
+  fn: T,
+  delay: number
+) {
+  let lastCall = 0;
+  return function (...args: Parameters<T>) {
+    const now = Date.now();
+    if (now - lastCall < delay) return;
+    lastCall = now;
+    return fn(...args);
   };
 }
