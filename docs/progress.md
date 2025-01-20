@@ -1,203 +1,75 @@
-## Plan de Implementación - Expansión del Sistema
+# Progreso del Proyecto
 
-### Fase 1: Schema y Modelos
+## Formularios
 
-- [x] Agregar FeaturedImage a todas las entidades
-- [x] Implementar sistema universal de favoritos
-- [x] Crear modelo para imágenes del sistema
-- [x] Expandir modelo Character
-- [x] Actualizar modelo Collection
-- [x] Crear nuevos modelos:
-  - [x] Concepto
-  - [x] Prompt
-  - [x] Notas
-  - [x] Atributo
-- [x] Implementar relaciones entre entidades
-- [x] Actualizar seed.ts con datos de prueba
+### Completado ✅
 
-### Fase 2: Lógica de Negocio
+- `tag-form.tsx`: Actualizado para usar el nuevo patrón con useState y manejo directo del estado
+- `place-form.tsx`: Convertido para usar el nuevo patrón con mejor UX
+- `object-form.tsx`: Actualizado para usar el nuevo patrón y mejorada la interfaz
+- `attribute-form.tsx`: Convertido al nuevo patrón y corregidos errores de tipado
+- `character-form.tsx`: Actualizado para usar el nuevo patrón y mejorada la UX
+- `concept-form.tsx`: Actualizado al nuevo patrón y corregidos errores de tipado
+- `entity-form.tsx`: Actualizado para incluir campos base comunes y corregidas rutas de importación
+- `note-form.tsx`: Corregido el manejo de prioridad y tipos
+- `prompt-form.tsx`: Creado con validación JSON y categorías predefinidas
 
-- [x] Generar tipos Prisma
-  - [x] Ejecutar prisma generate
-  - [x] Verificar tipos generados
-  - [x] Ajustar tipos si es necesario
-- [x] Actualizar tipos TypeScript
-  - [x] Crear tipos para nuevas entidades
-  - [x] Actualizar tipos existentes
-  - [x] Implementar tipos de relaciones
-- [x] Implementar servicios necesarios
-  - [x] Servicio de favoritos universal
-    - [x] Gestión de favoritos
-    - [x] Eventos de favoritos
-  - [x] Servicio de imágenes del sistema
-    - [x] Gestión de archivos
-    - [x] Optimización
-    - [x] Caché
-  - [x] Servicios para nuevas entidades
-    - [x] Concept Service
-    - [x] Prompt Service
-    - [x] Note Service
-    - [x] Attribute Service
-- [x] Crear/Actualizar server actions
-  - [x] Acciones para Concept
-    - [x] CRUD básico
-    - [x] Manejo de relaciones
-    - [x] Gestión de favoritos
-  - [x] Acciones para Prompt
-    - [x] CRUD básico
-    - [x] Manejo de relaciones
-    - [x] Gestión de favoritos
-  - [x] Acciones para Note
-    - [x] CRUD básico
-    - [x] Manejo de relaciones
-    - [x] Gestión de favoritos
-  - [x] Acciones para Attribute
-    - [x] CRUD básico
-    - [x] Manejo de relaciones
-    - [x] Gestión de favoritos
-  - [x] Acciones para UniversalFavorite
-    - [x] Agregar/Quitar favoritos
-    - [x] Listar favoritos por tipo
-    - [x] Búsqueda y filtrado
-  - [x] Acciones para SystemImage
-    - [x] CRUD básico
-    - [x] Gestión de archivos
-    - [x] Optimización de imágenes
-- [x] Actualizar sistema de eventos
-  - [x] Eventos para favoritos
-  - [x] Eventos para relaciones
-  - [x] Eventos para nuevas entidades
-- [x] Implementar stores para nuevas entidades
-  - [x] Store de conceptos
-  - [x] Store de prompts
-  - [x] Store de notas
-  - [x] Store de atributos
+### Pendiente 🚧
 
-### Fase 3: UI/UX
+- Corregir errores de importación en todos los formularios
+- Implementar pruebas unitarias para validar la conversión de tipos
 
-- [x] Diseñar nuevos componentes
-  - [x] TagInput
-  - [x] ImagePicker
-  - [x] EntityForm base
-- [x] Implementar formularios
-  - [x] Concept Form
-  - [x] Prompt Form
-  - [x] Note Form
-  - [x] Collection Form
-  - [x] Character Form
-  - [x] Attribute Form
-  - [x] Object Form
-  - [x] Place Form
-  - [x] Album Form
-- [ ] Consolidar secciones de configuración
-  - [ ] Crear tipos y utilidades comunes
-    - [ ] Interfaces base para stores
-    - [ ] Tipos para DataTable
-    - [ ] Utilidades de conversión de datos
-  - [ ] Estandarizar stores
-    - [ ] Implementar métodos CRUD consistentes
-    - [ ] Agregar tipos faltantes
-  - [ ] Actualizar secciones
-    - [ ] Prompts Section
-    - [ ] Tags Section
-    - [ ] Places Section
-    - [ ] Objects Section
-    - [ ] Notes Section
-    - [ ] Concepts Section
-    - [ ] Collections Section
-    - [ ] Attributes Section
-    - [ ] Albums Section
-  - [ ] Implementar mejoras comunes
-    - [ ] StatsCard en todas las secciones
-    - [ ] Manejo consistente de estados de carga
-    - [ ] Animaciones y transiciones
-    - [ ] Mensajes de error/vacío estandarizados
-- [ ] Implementar vistas para nuevas entidades
-  - [ ] Vista de conceptos
-  - [ ] Vista de prompts
-  - [ ] Vista de notas
-  - [ ] Vista de atributos
-- [ ] Actualizar paneles existentes
-  - [ ] Panel de navegación
-  - [ ] Panel de detalles
-  - [ ] Panel de relaciones
-- [ ] Implementar nuevas interacciones
-  - [ ] Drag & Drop para relaciones
-  - [ ] Búsqueda universal
-  - [ ] Filtros avanzados
+## Mejoras Implementadas 🎯
 
-### Seguimiento de Cambios
+1. Nuevo Patrón de Formularios:
 
-#### 2024-03-XX - Inicio de Expansión
+   - Estado local con useState
+   - Manejo directo de campos
+   - Mejor validación y UX
+   - Selección de emoji y color integrada
+   - Validación de JSON en campos especiales
+   - Mejor manejo de arrays en campos JSON
+   - Campos base comunes en entity-form.tsx
+   - Manejo avanzado de estados y prioridades
+   - Rutas de importación corregidas
+   - Validación de objetos JSON para parámetros
+   - Categorías predefinidas para prompts
+   - Corrección de tipos numéricos y string
 
-- [x] Creación del plan de implementación
-- [x] Actualización del schema.prisma
-  - [x] Agregado FeaturedImage a todas las entidades
-  - [x] Implementado sistema universal de favoritos
-  - [x] Creado modelo para imágenes del sistema
-  - [x] Expandido modelo Character
-  - [x] Actualizado modelo Collection
-  - [x] Creados nuevos modelos (Concept, Prompt, Note, Attribute)
-  - [x] Implementadas relaciones entre entidades
-- [x] Actualización de seed.ts
-  - [x] Agregados datos de prueba para nuevas entidades
-  - [x] Implementada limpieza de nuevas tablas
-  - [x] Agregados ejemplos de favoritos universales
-- [x] Implementación de servicios core
-  - [x] Servicio de favoritos universal
-  - [x] Servicio de imágenes del sistema
-  - [x] Servicio de conceptos
-  - [x] Servicio de prompts
-  - [x] Servicio de notas
-  - [x] Servicio de atributos
-- [x] Implementación de server actions
-  - [x] Concept Actions
-  - [x] Prompt Actions
-  - [x] Note Actions
-  - [x] Attribute Actions
-- [x] Implementación de stores
-  - [x] Concept Store
-  - [x] Prompt Store
-  - [x] Note Store
-  - [x] Attribute Store
-- [x] Implementación de componentes base
-  - [x] TagInput
-  - [x] ImagePicker
-  - [x] EntityForm
-- [x] Implementación de formularios
-  - [x] Concept Form
-  - [x] Prompt Form
-  - [x] Note Form
-  - [x] Collection Form
-  - [x] Character Form
-  - [x] Attribute Form
-  - [x] Object Form
-  - [x] Place Form
-  - [x] Album Form
+2. Interfaz de Usuario:
+   - Campos controlados directamente
+   - Mejor feedback visual
+   - Validaciones más claras
+   - Diseño consistente en todos los formularios
+   - Mejor manejo de campos JSON
+   - Ayudas visuales para formatos JSON
+   - Selección intuitiva de estados y prioridades
+   - Ejemplos de formato para campos JSON
+   - Validación en tiempo real de JSON
+   - Manejo mejorado de prioridades numéricas
 
-#### Próximos Pasos
+## Próximos Pasos 📋
 
-1. Implementar vistas para nuevas entidades:
-   - Vista de conceptos
-   - Vista de prompts
-   - Vista de notas
-   - Vista de atributos
-2. Actualizar paneles existentes:
-   - Panel de navegación
-   - Panel de detalles
-   - Panel de relaciones
-3. Implementar nuevas interacciones:
-   - Drag & Drop para relaciones
-   - Búsqueda universal
-   - Filtros avanzados
+1. Mejoras de Tipos:
 
-#### Estado Actual
+   - Implementar tipos estrictos para parámetros
+   - Validar conversiones JSON-objeto
+   - Asegurar consistencia en tipos numéricos
+   - Documentar tipos y conversiones
+   - Agregar tipos para valores predefinidos
 
-- Schema actualizado y seed.ts completado
-- Tipos Prisma generados
-- Servicios core implementados
-- Server Actions implementadas
-- Stores implementados
-- Componentes base implementados
-- Formularios implementados
-- Pendiente implementación de vistas y paneles
+2. Mejoras Generales:
+   - Revisar y unificar validaciones
+   - Mejorar el manejo de errores en campos JSON
+   - Considerar agregar previsualización de JSON
+   - Optimizar la experiencia de usuario en campos complejos
+   - Implementar feedback visual para validaciones
+   - Considerar agregar tooltips con ejemplos
+   - Evaluar la posibilidad de componentes reutilizables para campos JSON
+   - Implementar sistema de autoguardado para notas
+   - Considerar vista previa de markdown para notas
+   - Unificar rutas de importación en todos los componentes
+   - Agregar validación de tipos para parámetros de prompts
+   - Implementar previsualización de prompts
+   - Agregar pruebas unitarias para conversión de tipos
+   - Implementar validación de esquemas JSON
