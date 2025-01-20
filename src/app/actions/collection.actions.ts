@@ -7,7 +7,7 @@ import type { Collection } from "@prisma/client";
 import { FileItem } from "@/types/file-item";
 import { convertServerImageToFileItem, type ServerImage } from "@/services/image-converter.service";
 import { collectionEventsService, COLLECTION_EVENTS } from "@/services/collection-events.service";
-import { eventsService } from '@/services/events.service';
+import { eventsService, type EventType } from '@/services/events.service';
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service';
 
 const collectionLogger = logger.withContext("CollectionActions");
@@ -47,8 +47,8 @@ export interface CollectionWithStats extends Collection {
     name: string;
     count: number;
   }>;
-  featuredImage?: string | null;
-  recentImages?: string[];
+  featuredImage: string | null;
+  recentImages: string[];
 }
 
 export interface CollectionWithImages extends Collection {
@@ -122,12 +122,8 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
           }
         });
 
-        const lastUpdated = collection.images?.length > 0
-          ? collection.images.reduce((latest, img) =>
-            img.createdAt > latest ? img.createdAt : latest,
-            collection.images[0].createdAt
-          )
-          : collection.updatedAt;
+        const lastImage = collection.images?.[0];
+        const lastUpdated = lastImage?.createdAt || collection.updatedAt;
 
         const folderDistribution = collection.images?.reduce((acc, img) => {
           const folderName = img.folder?.name || 'Sin carpeta';
@@ -135,11 +131,10 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
           return acc;
         }, {} as Record<string, number>);
 
-        const distribution = folderDistribution
-          ? Object.entries(folderDistribution)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count)
-          : [];
+        const distribution = Object.entries(folderDistribution || {}).map(([name, count]) => ({
+          name,
+          count
+        })).sort((a, b) => b.count - a.count);
 
         const featuredImage = collection.images?.find(img => img.isFavorite)?.thumbnail;
         const recentImages = collection.images
@@ -149,7 +144,7 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
               return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
             }
             return '';
-          });
+          }).filter(Boolean);
 
         const result: CollectionWithStats = {
           ...collection,
@@ -226,12 +221,8 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
       }
     });
 
-    const lastUpdated = collection.images?.length > 0
-      ? collection.images.reduce((latest, img) =>
-        img.createdAt > latest ? img.createdAt : latest,
-        collection.images[0].createdAt
-      )
-      : collection.updatedAt;
+    const lastImage = collection.images?.[0];
+    const lastUpdated = lastImage?.createdAt || collection.updatedAt;
 
     const folderDistribution = collection.images?.reduce((acc, img) => {
       const folderName = img.folder?.name || 'Sin carpeta';
@@ -239,11 +230,10 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
       return acc;
     }, {} as Record<string, number>);
 
-    const distribution = folderDistribution
-      ? Object.entries(folderDistribution)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-      : [];
+    const distribution = Object.entries(folderDistribution || {}).map(([name, count]) => ({
+      name,
+      count
+    })).sort((a, b) => b.count - a.count);
 
     const featuredImage = collection.images?.find(img => img.isFavorite)?.thumbnail;
     const recentImages = collection.images
@@ -253,7 +243,7 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
           return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
         }
         return '';
-      });
+      }).filter(Boolean);
 
     const result: CollectionWithStats = {
       ...collection,
@@ -289,7 +279,7 @@ export async function createCollection(data: CollectionCreate): Promise<Collecti
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, { collection });
-    eventsService.emit('collections:modified');
+    eventsService.emit('collections:modified' as EventType);
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
 
     revalidateAllPaths();
@@ -332,7 +322,7 @@ export async function deleteCollection(id: string): Promise<void> {
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_DELETED, { collection });
-    eventsService.emit('collections:modified');
+    eventsService.emit('collections:modified' as EventType);
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
 
     revalidateAllPaths();
@@ -355,9 +345,7 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
             tags: true,
             collections: true,
             albums: true,
-            characters: true,
-            places: true,
-            objects: true
+            stats: true,
           }
         }
       }
@@ -390,7 +378,7 @@ export async function addImageToCollection(collectionId: string, imageId: string
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
-    eventsService.emit('collections:modified');
+    eventsService.emit('collections:modified' as EventType);
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
     statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
@@ -416,7 +404,7 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
-    eventsService.emit('collections:modified');
+    eventsService.emit('collections:modified' as EventType);
     statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
     statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 

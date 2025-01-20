@@ -1,39 +1,87 @@
-import { BaseEntityFormData } from "./entity-form";
-import type { Character, Album, Collection, Object, Place, Tag } from "@prisma/client";
-
-// Tipos de formulario
-export interface AlbumFormData extends BaseEntityFormData {
-  // Los álbumes usan solo los campos base
-}
-
-export interface CollectionFormData extends BaseEntityFormData {
-  filters: string;
-  sortBy: string;
+// Interfaces base
+export interface BaseFormData {
+  id?: string;
+  name: string;
+  description?: string;
+  emoji?: string;
   shortcut?: string;
+  color?: string;
+  tags?: string[];
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface CharacterFormData extends BaseEntityFormData {
+// Interfaces específicas
+export interface ConceptFormData extends BaseFormData {
+  content: string;
+  category: string;
+}
+
+export interface PromptFormData extends BaseFormData {
+  content: string;
+  category: string;
+  parameters: string;
+}
+
+export interface NoteFormData extends BaseFormData {
+  title: string;
+  content: string;
+  category: string;
+  priority: number;
+  status: string;
+}
+
+export interface CharacterFormData extends BaseFormData {
   level: number;
   class: string;
   race: string;
   alignment: string;
   backstory: string;
   stats: string;
+  psychologicalProfile: string;
+  socialProfile: string;
+  relationships: string;
+  goals: string;
+  fears: string;
+  beliefs: string;
+  personality: string;
 }
 
-export interface ObjectFormData extends BaseEntityFormData {
+export interface CollectionFormData extends BaseFormData {
+  url?: string;
+  alternativeUrl?: string;
+  sourceImage?: string;
+  platform?: string;
+  price?: number;
+  editions: string;
+  sortBy: string;
+  filters: string;
+}
+
+export interface AttributeFormData extends BaseFormData {
+  type: string;
+  value: string;
+  category: string;
+  metadata: string;
+}
+
+export interface ObjectFormData extends BaseFormData {
   type: string;
   rarity: string;
   properties: string;
   requirements: string;
   origin: string;
   stats: string;
+  sortBy: string;
+  filters: string;
 }
 
-export interface PlaceFormData extends BaseEntityFormData {
-  region: string;
+export interface PlaceFormData extends BaseFormData {
   type: string;
   climate: string;
+  region: string;
   population: number;
   government: string;
   dangers: string;
@@ -41,213 +89,135 @@ export interface PlaceFormData extends BaseEntityFormData {
   lore: string;
   history: string;
   stats: string;
+  sortBy: string;
+  filters: string;
 }
 
-export interface TagFormData {
-  id?: string;
-  name: string;
+export interface AlbumFormData extends BaseFormData {
+  sortBy: string;
+  filters: string;
+}
+
+export interface TagFormData extends BaseFormData {
   color: string;
-  description?: string;
+  emoji: string;
   shortcut?: string;
 }
 
-// Funciones de conversión para Characters
-export function characterToFormData(character: Character): CharacterFormData {
+// Funciones de conversión base
+export function formDataToEntity<T extends BaseFormData>(formData: T): any {
   return {
-    id: character.id,
-    name: character.name,
-    emoji: character.emoji,
-    color: character.color,
-    description: character.description || undefined,
-    shortcut: character.shortcut || undefined,
-    filters: character.filters,
-    sortBy: character.sortBy,
-    level: character.level,
-    class: character.class,
-    race: character.race,
-    alignment: character.alignment,
-    backstory: character.backstory,
-    stats: character.stats,
+    ...formData,
+    tags: Array.isArray(formData.tags)
+      ? formData.tags
+      : JSON.parse(formData.tags as unknown as string),
   };
 }
 
-export function formDataToCharacter(data: CharacterFormData, id?: string): Omit<Character, "createdAt" | "updatedAt"> {
+export function entityToFormData<T extends BaseFormData>(entity: any): T {
   return {
-    id: id || "",
-    name: data.name,
-    emoji: data.emoji,
-    color: data.color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    filters: data.filters || "[]",
-    sortBy: data.sortBy || "name",
-    level: data.level,
-    class: data.class,
-    race: data.race,
-    alignment: data.alignment,
-    backstory: data.backstory,
-    stats: data.stats,
+    ...entity,
+    tags: Array.isArray(entity.tags)
+      ? entity.tags
+      : JSON.parse(entity.tags),
+    featuredImage: entity.featuredImage || null,
+    isFavorite: entity.isFavorite || false,
+  } as T;
+}
+
+// Funciones específicas para cada tipo
+export function formDataToConcept(formData: ConceptFormData) {
+  return formDataToEntity(formData);
+}
+
+export function conceptToFormData(concept: any): ConceptFormData {
+  return entityToFormData(concept);
+}
+
+export function formDataToPrompt(formData: PromptFormData) {
+  return formDataToEntity(formData);
+}
+
+export function promptToFormData(prompt: any): PromptFormData {
+  return entityToFormData(prompt);
+}
+
+export function formDataToNote(formData: NoteFormData) {
+  return {
+    ...formDataToEntity(formData),
+    priority: Number(formData.priority),
   };
 }
 
-// Funciones de conversión para Albums
-export function albumToFormData(album: Album): AlbumFormData {
+export function noteToFormData(note: any): NoteFormData {
   return {
-    id: album.id,
-    name: album.name,
-    emoji: album.emoji,
-    color: album.color,
-    description: album.description || undefined,
-    shortcut: album.shortcut || undefined,
-    filters: album.filters,
-    sortBy: album.sortBy,
+    ...entityToFormData(note),
+    priority: Number(note.priority),
   };
 }
 
-export function formDataToAlbum(data: AlbumFormData, id?: string): Omit<Album, "createdAt" | "updatedAt"> {
+export function formDataToCharacter(formData: CharacterFormData) {
   return {
-    id: id || "",
-    name: data.name,
-    emoji: data.emoji,
-    color: data.color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    filters: data.filters || "[]",
-    sortBy: data.sortBy || "name",
+    ...formDataToEntity(formData),
+    level: Number(formData.level),
   };
 }
 
-export function collectionToFormData(collection: Collection): CollectionFormData {
+export function characterToFormData(character: any): CharacterFormData {
   return {
-    name: collection.name,
-    description: collection.description || "",
-    emoji: collection.emoji,
-    color: collection.color,
-    filters: collection.filters,
-    sortBy: collection.sortBy,
-    shortcut: collection.shortcut || undefined,
+    ...entityToFormData(character),
+    level: Number(character.level),
   };
 }
 
-export function formDataToCollection(
-  data: CollectionFormData,
-  id?: string
-): Omit<Collection, "createdAt" | "updatedAt"> {
+export function formDataToCollection(formData: CollectionFormData) {
   return {
-    id: id || crypto.randomUUID(),
-    name: data.name,
-    description: data.description || null,
-    emoji: data.emoji,
-    color: data.color,
-    filters: data.filters,
-    sortBy: data.sortBy,
-    shortcut: data.shortcut || null,
+    ...formDataToEntity(formData),
+    price: formData.price ? Number(formData.price) : undefined,
   };
 }
 
-// Funciones de conversión para Objects
-export function objectToFormData(object: Object): ObjectFormData {
+export function collectionToFormData(collection: any): CollectionFormData {
   return {
-    id: object.id,
-    name: object.name,
-    emoji: object.emoji,
-    color: object.color,
-    description: object.description || undefined,
-    shortcut: object.shortcut || undefined,
-    filters: object.filters,
-    sortBy: object.sortBy,
-    type: object.type,
-    rarity: object.rarity,
-    properties: object.properties,
-    requirements: object.requirements,
-    origin: object.origin,
-    stats: object.stats,
+    ...entityToFormData(collection),
+    price: collection.price ? Number(collection.price) : undefined,
   };
 }
 
-export function formDataToObject(data: ObjectFormData, id?: string): Omit<Object, "createdAt" | "updatedAt"> {
+export function formDataToAttribute(formData: AttributeFormData) {
+  return formDataToEntity(formData);
+}
+
+export function attributeToFormData(attribute: any): AttributeFormData {
+  return entityToFormData(attribute);
+}
+
+export function formDataToObject(formData: ObjectFormData) {
+  return formDataToEntity(formData);
+}
+
+export function objectToFormData(object: any): ObjectFormData {
+  return entityToFormData(object);
+}
+
+export function formDataToPlace(formData: PlaceFormData) {
   return {
-    id: id || "",
-    name: data.name,
-    emoji: data.emoji,
-    color: data.color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    filters: data.filters || "[]",
-    sortBy: data.sortBy || "name",
-    type: data.type,
-    rarity: data.rarity,
-    properties: data.properties,
-    requirements: data.requirements,
-    origin: data.origin,
-    stats: data.stats,
+    ...formDataToEntity(formData),
+    population: Number(formData.population),
   };
 }
 
-// Funciones de conversión para Places
-export function placeToFormData(place: Place): PlaceFormData {
+export function placeToFormData(place: any): PlaceFormData {
   return {
-    id: place.id,
-    name: place.name,
-    emoji: place.emoji,
-    color: place.color,
-    description: place.description || undefined,
-    shortcut: place.shortcut || undefined,
-    filters: place.filters,
-    sortBy: place.sortBy,
-    region: place.region,
-    type: place.type,
-    climate: place.climate,
-    population: place.population,
-    government: place.government,
-    dangers: place.dangers,
-    resources: place.resources,
-    lore: place.lore,
-    history: place.history,
-    stats: place.stats,
+    ...entityToFormData(place),
+    population: Number(place.population),
   };
 }
 
-export function formDataToPlace(data: PlaceFormData, id?: string): Omit<Place, "createdAt" | "updatedAt"> {
-  return {
-    id: id || "",
-    name: data.name,
-    emoji: data.emoji,
-    color: data.color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    filters: data.filters || "[]",
-    sortBy: data.sortBy || "name",
-    region: data.region,
-    type: data.type,
-    climate: data.climate,
-    population: data.population,
-    government: data.government,
-    dangers: data.dangers,
-    resources: data.resources,
-    lore: data.lore,
-    history: data.history,
-    stats: data.stats,
-  };
+export function formDataToAlbum(formData: AlbumFormData) {
+  return formDataToEntity(formData);
 }
 
-// Funciones de conversión para Tags
-export function tagToFormData(tag: Tag): TagFormData {
-  return {
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    description: tag.description || undefined,
-    shortcut: tag.shortcut || undefined,
-  };
-}
-
-export function formDataToTag(data: TagFormData, id?: string): Omit<Tag, "createdAt" | "updatedAt"> {
-  return {
-    id: id || "",
-    name: data.name,
-    color: data.color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-  };
+export function albumToFormData(album: any): AlbumFormData {
+  return entityToFormData(album);
 }

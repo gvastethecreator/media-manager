@@ -21,26 +21,29 @@ interface ObjectFormProps {
 }
 
 const OBJECT_TYPES = [
-	"Arma",
-	"Armadura",
-	"Accesorio",
-	"Poción",
-	"Pergamino",
-	"Gema",
-	"Reliquia",
-	"Herramienta",
-	"Contenedor",
-	"Vestimenta",
-	"Otro",
+	"weapon",
+	"armor",
+	"tool",
+	"potion",
+	"scroll",
+	"ring",
+	"wand",
+	"staff",
+	"book",
+	"container",
+	"vehicle",
+	"artifact",
+	"custom",
 ];
 
 const OBJECT_RARITIES = [
-	"Común",
-	"Poco común",
-	"Raro",
-	"Muy raro",
-	"Legendario",
-	"Mítico",
+	"common",
+	"uncommon",
+	"rare",
+	"very-rare",
+	"legendary",
+	"artifact",
+	"unique",
 ];
 
 export function ObjectForm({
@@ -49,88 +52,105 @@ export function ObjectForm({
 	onCancel,
 	isLoading,
 }: ObjectFormProps) {
-	const extraFields = (
-		<div className="space-y-4">
-			<div className="grid grid-cols-2 gap-4">
-				<div className="space-y-2">
-					<label className="text-sm font-medium">Tipo</label>
-					<Select name="type">
-						<SelectTrigger className="h-8">
-							<SelectValue placeholder="Selecciona un tipo" />
-						</SelectTrigger>
-						<SelectContent>
-							{OBJECT_TYPES.map((type) => (
-								<SelectItem key={type} value={type}>
-									{type}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="space-y-2">
-					<label className="text-sm font-medium">Rareza</label>
-					<Select name="rarity">
-						<SelectTrigger className="h-8">
-							<SelectValue placeholder="Selecciona rareza" />
-						</SelectTrigger>
-						<SelectContent>
-							{OBJECT_RARITIES.map((rarity) => (
-								<SelectItem key={rarity} value={rarity}>
-									{rarity}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-			</div>
-
-			<div className="space-y-2">
-				<label className="text-sm font-medium">Propiedades (JSON)</label>
-				<Textarea
-					placeholder='["Mágico", "Indestructible", ...]'
-					name="properties"
-					className="font-mono text-sm min-h-[80px]"
-				/>
-			</div>
-
-			<div className="space-y-2">
-				<label className="text-sm font-medium">Requisitos (JSON)</label>
-				<Textarea
-					placeholder='{"nivel": 5, "clase": "Mago", ...}'
-					name="requirements"
-					className="font-mono text-sm min-h-[80px]"
-				/>
-			</div>
-
-			<div className="space-y-2">
-				<label className="text-sm font-medium">Origen</label>
-				<Input
-					placeholder="Origen del objeto..."
-					name="origin"
-					className="h-8"
-				/>
-			</div>
-
-			<div className="space-y-2">
-				<label className="text-sm font-medium">Estadísticas (JSON)</label>
-				<Textarea
-					placeholder='{"daño": "2d6", "defensa": 5, ...}'
-					name="stats"
-					className="font-mono text-sm min-h-[80px]"
-				/>
-			</div>
-		</div>
-	);
+	const handleSubmit = async (data: ObjectFormData) => {
+		await onSubmit(data);
+	};
 
 	return (
 		<EntityForm<ObjectFormData>
 			initialData={initialData}
-			onSubmit={onSubmit}
+			onSubmit={handleSubmit}
 			onCancel={onCancel}
 			isLoading={isLoading}
-			title="Objeto"
-			submitLabel={initialData ? "Actualizar" : "Crear"}
-			extraFields={extraFields}
+			title={initialData ? "Editar Objeto" : "Nuevo Objeto"}
+			submitLabel={initialData ? "Guardar Cambios" : "Crear Objeto"}
+			extraFields={
+				<div className="space-y-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Tipo</label>
+							<Select defaultValue={initialData?.type || "weapon"}>
+								<SelectTrigger>
+									<SelectValue placeholder="Tipo de objeto" />
+								</SelectTrigger>
+								<SelectContent>
+									{OBJECT_TYPES.map((type) => (
+										<SelectItem key={type} value={type}>
+											{type.charAt(0).toUpperCase() + type.slice(1)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Rareza</label>
+							<Select defaultValue={initialData?.rarity || "common"}>
+								<SelectTrigger>
+									<SelectValue placeholder="Rareza" />
+								</SelectTrigger>
+								<SelectContent>
+									{OBJECT_RARITIES.map((rarity) => (
+										<SelectItem key={rarity} value={rarity}>
+											{rarity.charAt(0).toUpperCase() + rarity.slice(1)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Propiedades</label>
+						<Textarea
+							placeholder="Propiedades del objeto..."
+							defaultValue={initialData?.properties}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Requisitos</label>
+						<Textarea
+							placeholder="Requisitos para usar el objeto..."
+							defaultValue={initialData?.requirements}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Origen</label>
+						<Textarea
+							placeholder="Origen del objeto..."
+							defaultValue={initialData?.origin}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Estadísticas</label>
+						<Textarea
+							placeholder="Estadísticas del objeto..."
+							defaultValue={initialData?.stats}
+							className="font-mono"
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Ordenar Por</label>
+						<Input
+							placeholder="Campo de ordenamiento"
+							defaultValue={initialData?.sortBy || "name"}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Filtros (JSON)</label>
+						<Textarea
+							placeholder="[]"
+							defaultValue={initialData?.filters}
+							className="font-mono text-sm"
+						/>
+					</div>
+				</div>
+			}
 		/>
 	);
 }
