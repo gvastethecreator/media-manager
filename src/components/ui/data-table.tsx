@@ -2,15 +2,18 @@
 
 import * as React from "react";
 import {
-	ColumnDef,
+	type ColumnDef,
+	type ColumnFiltersState,
+	type SortingState,
+	type VisibilityState,
 	flexRender,
 	getCoreRowModel,
-	useReactTable,
+	getFacetedRowModel,
+	getFacetedUniqueValues,
+	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	getFilteredRowModel,
-	SortingState,
-	ColumnFiltersState,
+	useReactTable,
 } from "@tanstack/react-table";
 
 import {
@@ -21,9 +24,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-
-import { DataTablePagination } from "./data-table-pagination";
-import { DataTableToolbar } from "./data-table-toolbar";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -38,27 +40,34 @@ export function DataTable<TData, TValue>({
 	onUpdate,
 	onDelete,
 }: DataTableProps<TData, TValue>) {
-	const [sorting, setSorting] = React.useState<SortingState>([]);
+	const [rowSelection, setRowSelection] = React.useState({});
+	const [columnVisibility, setColumnVisibility] =
+		React.useState<VisibilityState>({});
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[]
 	);
-	const [rowSelection, setRowSelection] = React.useState({});
+	const [sorting, setSorting] = React.useState<SortingState>([]);
 
 	const table = useReactTable({
 		data,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		onSortingChange: setSorting,
-		onColumnFiltersChange: setColumnFilters,
-		onRowSelectionChange: setRowSelection,
 		state: {
 			sorting,
-			columnFilters,
+			columnVisibility,
 			rowSelection,
+			columnFilters,
 		},
+		enableRowSelection: true,
+		onRowSelectionChange: setRowSelection,
+		onSortingChange: setSorting,
+		onColumnFiltersChange: setColumnFilters,
+		onColumnVisibilityChange: setColumnVisibility,
+		getCoreRowModel: getCoreRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFacetedRowModel: getFacetedRowModel(),
+		getFacetedUniqueValues: getFacetedUniqueValues(),
 	});
 
 	return (

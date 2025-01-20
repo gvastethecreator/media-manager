@@ -12,6 +12,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { Separator } from "@/components/ui/separator";
 
 interface TagFormProps {
 	initialData?: TagFormData;
@@ -29,12 +31,10 @@ export function TagForm({
 	const [formData, setFormData] = React.useState<TagFormData>(
 		initialData || {
 			name: "",
+			emoji: "🏷️",
 			color: "#3b82f6",
 			description: "",
 			shortcut: "",
-			emoji: "",
-			tags: [],
-			featuredImage: "",
 			isFavorite: false,
 		}
 	);
@@ -45,8 +45,8 @@ export function TagForm({
 		await onSubmit(formData);
 	};
 
-	const handleChange = (field: keyof TagFormData, value: string) => {
-		setFormData((prev: TagFormData) => ({
+	const handleChange = (field: keyof TagFormData, value: string | boolean) => {
+		setFormData((prev) => ({
 			...prev,
 			[field]: value,
 		}));
@@ -59,7 +59,25 @@ export function TagForm({
 					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
 					style={{ backgroundColor: formData.color }}
 				>
-					<Palette className="h-4 w-4 text-white/90" />
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+								<span className="text-lg">{formData.emoji}</span>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-full p-0" align="start">
+							<EmojiPicker
+								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
+							/>
+							<Separator className="my-2" />
+							<div className="p-2">
+								<CompactPicker
+									color={formData.color}
+									onChange={(color) => handleChange("color", color.hex)}
+								/>
+							</div>
+						</PopoverContent>
+					</Popover>
 				</div>
 				<div className="flex-1 min-w-0 space-y-1">
 					<Input
@@ -83,30 +101,6 @@ export function TagForm({
 						/>
 					</div>
 				</div>
-				<Popover>
-					<PopoverTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 rounded-full"
-						>
-							<div
-								className="h-4 w-4 rounded-full"
-								style={{ backgroundColor: formData.color }}
-							/>
-						</Button>
-					</PopoverTrigger>
-					<PopoverContent
-						className="w-auto p-0 bg-transparent border-none"
-						align="end"
-					>
-						<CompactPicker
-							color={formData.color}
-							className="bg-black/90 text-white overflow-hidden"
-							onChange={(color) => handleChange("color", color.hex)}
-						/>
-					</PopoverContent>
-				</Popover>
 			</div>
 
 			<div className="flex justify-end gap-2">

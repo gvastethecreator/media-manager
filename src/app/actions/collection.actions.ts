@@ -63,6 +63,14 @@ export interface CollectionCreate {
   shortcut?: string | null;
   sortBy: string;
   filters: string;
+  url?: string | null;
+  alternativeUrl?: string | null;
+  sourceImage?: string | null;
+  platform?: string | null;
+  price?: number | null;
+  editions: string;
+  featuredImage?: string | null;
+  isFavorite?: boolean;
 }
 
 export interface CollectionUpdate extends Partial<CollectionCreate> {
@@ -270,12 +278,25 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 
 export async function createCollection(data: CollectionCreate): Promise<Collection> {
   try {
-    collectionLogger.info("📝 Creando nueva colección:", data.name);
+    collectionLogger.info("📝 Creando colección:", data.name);
     const collection = await prisma.collection.create({
       data: {
-        ...data,
-        filters: data.filters ? JSON.stringify(data.filters) : "[]"
-      }
+        name: data.name,
+        emoji: data.emoji,
+        color: data.color,
+        description: data.description || null,
+        shortcut: data.shortcut || null,
+        sortBy: data.sortBy,
+        filters: data.filters,
+        url: data.url || null,
+        alternativeUrl: data.alternativeUrl || null,
+        sourceImage: data.sourceImage || null,
+        platform: data.platform || null,
+        price: data.price || null,
+        editions: data.editions,
+        featuredImage: data.featuredImage || null,
+        isFavorite: data.isFavorite || false,
+      },
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, { collection });
@@ -284,11 +305,11 @@ export async function createCollection(data: CollectionCreate): Promise<Collecti
 
     revalidateAllPaths();
 
-    collectionLogger.info("✅ Colección creada:", collection.name);
+    collectionLogger.info("✅ Colección creada:", collection.id);
     return collection;
   } catch (error) {
     collectionLogger.error("❌ Error al crear colección:", error);
-    throw new CollectionError("No se pudo crear la colección", error);
+    throw new CollectionError("No se pudo crear la colección", { cause: error });
   }
 }
 
@@ -298,19 +319,34 @@ export async function updateCollection(id: string, data: CollectionUpdate): Prom
     const collection = await prisma.collection.update({
       where: { id },
       data: {
-        ...data,
-        filters: data.filters ? JSON.stringify(data.filters) : undefined
-      }
+        name: data.name,
+        emoji: data.emoji,
+        color: data.color,
+        description: data.description || null,
+        shortcut: data.shortcut || null,
+        sortBy: data.sortBy,
+        filters: data.filters,
+        url: data.url || null,
+        alternativeUrl: data.alternativeUrl || null,
+        sourceImage: data.sourceImage || null,
+        platform: data.platform || null,
+        price: data.price || null,
+        editions: data.editions,
+        featuredImage: data.featuredImage || null,
+        isFavorite: data.isFavorite || false,
+      },
     });
 
     collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_UPDATED, { collection });
     revalidateAllPaths();
 
-    collectionLogger.info("✅ Colección actualizada:", collection.name);
+    collectionLogger.info("✅ Colección actualizada:", id);
     return collection;
   } catch (error) {
     collectionLogger.error("❌ Error al actualizar colección:", error);
-    throw new CollectionError("No se pudo actualizar la colección", error);
+    throw new CollectionError("No se pudo actualizar la colección", {
+      cause: error,
+    });
   }
 }
 

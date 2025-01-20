@@ -1,15 +1,27 @@
 import { type BaseEntity } from "./store.types";
+import type {
+  Character as PrismaCharacter,
+  Place as PrismaPlace,
+  Object as PrismaObject,
+  Collection as PrismaCollection,
+  Album as PrismaAlbum,
+  Tag as PrismaTag,
+  Note as PrismaNote,
+  Concept as PrismaConcept,
+  Prompt as PrismaPrompt,
+  Attribute as PrismaAttribute,
+} from "@prisma/client";
 
 export interface BaseEntityCreate {
-  name: string
-  emoji?: string
-  color?: string
-  description?: string | null
-  shortcut?: string | null
-  sortBy?: string
-  filters?: string
-  featuredImage?: string | null
-  isFavorite?: boolean
+  name: string;
+  description?: string | null;
+  emoji?: string;
+  color?: string;
+  shortcut?: string;
+  filters?: string;
+  sortBy?: string;
+  featuredImage?: string | null;
+  isFavorite?: boolean;
 }
 
 export interface AlbumCreate extends BaseEntityCreate {
@@ -172,16 +184,21 @@ export type AttributeType =
   | 'text'
   | 'number'
   | 'boolean'
+  | 'date'
+  | 'color'
+  | 'range'
   | 'select'
   | 'multiselect'
-  | 'array'
+
+export type AttributeCategory =
+  | 'general'
+  | 'character'
+  | 'place'
   | 'object'
-  | 'date'
-  | 'datetime'
-  | 'color'
-  | 'image'
-  | 'file'
-  | 'relation'
+  | 'concept'
+  | 'prompt'
+  | 'note'
+  | 'system'
 
 export type SystemImageType =
   | 'icon'
@@ -194,79 +211,13 @@ export type SystemImageType =
   | 'texture'
   | 'ui'
 
-export interface Prompt extends BaseEntity {
-  content: string;
-  type?: string;
-  tags: string[];
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Tag extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Place extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  location?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Object extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  type?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Note extends BaseEntity {
-  content: string;
-  type?: string;
-  tags: string[];
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Concept extends BaseEntity {
-  content: string;
-  type?: string;
-  tags: string[];
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Collection extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  type?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Attribute extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  type?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
-
-export interface Album extends BaseEntity {
-  emoji: string;
-  color: string;
-  shortcut?: string;
-  type?: string;
-  featuredImage?: string | null;
-  isFavorite: boolean;
-}
+export type Character = PrismaCharacter;
+export type Place = PrismaPlace;
+export type Object = PrismaObject;
+export type Collection = PrismaCollection;
+export type Album = PrismaAlbum;
+export type Tag = PrismaTag;
+export type Note = PrismaNote;
+export type Concept = PrismaConcept;
+export type Prompt = PrismaPrompt;
+export type Attribute = PrismaAttribute;

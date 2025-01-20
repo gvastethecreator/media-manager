@@ -8,7 +8,7 @@ import { Loader2, Lightbulb } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { useConceptStore, type ConceptFormData } from "@/stores/concept-store";
+import { useConceptStore, type ConceptFormData } from "@/store/concept.store";
 import { ConceptForm } from "@/components/forms/concept-form";
 import { ConceptCard } from "@/components/cards/concept-card";
 import { StatsCard } from "@/components/ui/stats-card";

@@ -8,6 +8,7 @@ import { eventsService, type EventType } from '@/services/events.service'
 import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
 import type { FileItem } from '@/types/file-item'
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service'
+import { type Attribute as AttributeType } from '@/types/entities'
 
 const attributeLogger = logger.withContext('AttributeActions')
 
@@ -29,23 +30,13 @@ class AttributeError extends Error {
   }
 }
 
-export interface AttributeWithStats extends Omit<Attribute, 'featuredImage'> {
-  _count: {
-    characters: number;
-    places: number;
-    objects: number;
-    concepts: number;
-    prompts: number;
-    notes: number;
+export interface AttributeWithStats extends Omit<AttributeType, 'featuredImage'> {
+  stats: {
+    total: number;
+    active: number;
+    favorite: number;
+    archived: number;
   };
-  totalSize: number;
-  lastUpdated: Date;
-  distribution?: Array<{
-    name: string;
-    count: number;
-  }>;
-  featuredImage?: string | null;
-  recentImages?: (string | null)[];
 }
 
 export interface AttributeCreate {
@@ -53,47 +44,49 @@ export interface AttributeCreate {
   type: string;
   value: string;
   category: string;
-  description?: string | null;
-  metadata: string;
-  featuredImage?: string | null;
+  description?: string;
+  metadata?: string;
+  featuredImage?: string;
+  isFavorite?: boolean;
 }
 
 export interface AttributeUpdate extends Partial<AttributeCreate> {
   id: string;
 }
 
-export interface AttributeWithImages extends Attribute {
-  images: FileItem[];
+export interface RelatedImage {
+  id: string;
+  name: string;
+  path: string;
 }
 
-export interface ExtendedAttribute extends Attribute {
-  characters: (Character & {
-    images: Image[];
-  })[];
+export interface RelatedEntity {
+  id: string;
+  name: string;
+  images: RelatedImage[];
+}
+
+export interface AttributeWithImages extends AttributeType {
+  characters: RelatedEntity[];
+  places: RelatedEntity[];
+  objects: RelatedEntity[];
+}
+
+export interface ExtendedAttribute extends AttributeWithImages {
+  stats: {
+    total: number;
+    active: number;
+    favorite: number;
+    archived: number;
+  };
 }
 
 export async function getAttributes() {
   try {
     attributeLogger.info('📚 Obteniendo lista de atributos');
     const attributes = await prisma.attribute.findMany({
-      include: {
-        _count: {
-          select: {
-            characters: true,
-            places: true,
-            objects: true,
-            concepts: true,
-            prompts: true,
-            notes: true,
-          },
-        },
-        characters: {
-          take: 1,
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 
@@ -111,21 +104,40 @@ export async function getAttributeById(id: string) {
     const attribute = await prisma.attribute.findUnique({
       where: { id },
       include: {
-        _count: {
-          select: {
-            characters: true,
-            places: true,
-            objects: true,
-            concepts: true,
-            prompts: true,
-            notes: true,
-          },
-        },
         characters: {
-          take: 5,
           select: {
             id: true,
             name: true,
+          },
+        },
+        places: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        objects: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        concepts: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        prompts: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        notes: {
+          select: {
+            id: true,
+            title: true,
           },
         },
       },
@@ -148,9 +160,14 @@ export async function createAttribute(data: AttributeCreate) {
     attributeLogger.info('📝 Creando atributo:', data.name);
     const attribute = await prisma.attribute.create({
       data: {
-        ...data,
+        name: data.name,
+        type: data.type,
+        value: data.value,
+        category: data.category,
+        description: data.description || null,
         metadata: data.metadata || '{}',
         featuredImage: data.featuredImage || null,
+        isFavorite: data.isFavorite || false,
       },
     });
 
@@ -172,7 +189,16 @@ export async function updateAttribute(id: string, data: AttributeUpdate) {
     attributeLogger.info('📝 Actualizando atributo:', id);
     const attribute = await prisma.attribute.update({
       where: { id },
-      data,
+      data: {
+        name: data.name,
+        type: data.type,
+        value: data.value,
+        category: data.category,
+        description: data.description,
+        metadata: data.metadata,
+        featuredImage: data.featuredImage,
+        isFavorite: data.isFavorite,
+      },
     });
 
     // Emitir eventos
@@ -201,6 +227,7 @@ export async function deleteAttribute(id: string) {
 
     attributeLogger.info('✅ Atributo eliminado');
     revalidateAllPaths();
+    return true;
   } catch (error) {
     attributeLogger.error("❌ Error al eliminar atributo:", error);
     throw new AttributeError("No se pudo eliminar el atributo", error);
@@ -216,11 +243,32 @@ export async function getAttributeImages(id: string) {
         characters: {
           include: {
             images: {
-              include: {
-                tags: true,
-                collections: true,
-                albums: true,
-                stats: true,
+              select: {
+                id: true,
+                name: true,
+                path: true,
+              },
+            },
+          },
+        },
+        places: {
+          include: {
+            images: {
+              select: {
+                id: true,
+                name: true,
+                path: true,
+              },
+            },
+          },
+        },
+        objects: {
+          include: {
+            images: {
+              select: {
+                id: true,
+                name: true,
+                path: true,
               },
             },
           },
@@ -232,9 +280,11 @@ export async function getAttributeImages(id: string) {
       throw new AttributeError("Atributo no encontrado");
     }
 
-    const images = attribute.characters.flatMap(char =>
-      char.images.map(img => convertServerImageToFileItem(img as ServerImage))
-    );
+    const images = [
+      ...attribute.characters.flatMap((char) => char.images),
+      ...attribute.places.flatMap((place) => place.images),
+      ...attribute.objects.flatMap((obj) => obj.images),
+    ];
 
     attributeLogger.info(`✅ ${images.length} imágenes obtenidas`);
     return images;

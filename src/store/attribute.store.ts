@@ -1,18 +1,23 @@
 import { create } from "zustand";
 import { Attribute } from "@prisma/client";
-import { getAttributes, createAttribute as createAttributeAction, updateAttribute as updateAttributeAction, deleteAttribute as deleteAttributeAction, type AttributeWithStats, type AttributeCreate, type AttributeUpdate } from "@/app/actions/attribute.actions";
+import { getAttributes, createAttribute as createAttributeAction, updateAttribute as updateAttributeAction, deleteAttribute as deleteAttributeAction, type AttributeCreate, type AttributeUpdate } from "@/app/actions/attribute.actions";
 import { logger } from "@/lib/logger";
 
 const attributeLogger = logger.withContext("AttributeStore");
 
-const mapToAttributeWithStats = (attribute: Awaited<ReturnType<typeof getAttributes>>[0]): AttributeWithStats => ({
+interface LocalAttributeWithStats extends Attribute {
+  totalSize: number;
+  lastUpdated: Date;
+}
+
+const mapToAttributeWithStats = (attribute: Awaited<ReturnType<typeof getAttributes>>[0]): LocalAttributeWithStats => ({
   ...attribute,
   totalSize: 0,
   lastUpdated: new Date()
 });
 
 interface AttributeStore {
-  attributes: AttributeWithStats[];
+  attributes: LocalAttributeWithStats[];
   isLoading: boolean;
   error: string | null;
   loadAttributes: () => Promise<void>;

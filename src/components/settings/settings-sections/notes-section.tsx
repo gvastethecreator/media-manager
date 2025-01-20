@@ -8,7 +8,7 @@ import { Loader2, StickyNote } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { useNoteStore, type NoteFormData } from "@/stores/note-store";
+import { useNoteStore, type NoteFormData } from "@/store/note.store";
 import { NoteForm } from "@/components/forms/note-form";
 import { NoteCard } from "@/components/cards/note-card";
 import { StatsCard } from "@/components/ui/stats-card";
