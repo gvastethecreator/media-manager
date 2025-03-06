@@ -1,0 +1,12 @@
+---
+description: Concise TypeScript coding standards for code quality and type safety.
+globs: **/*.{ts,tsx}
+---
+- **Strict Mode in `tsconfig.json`:** Enable strict mode for enhanced type checking.
+- **Interfaces vs Types:** Use `interface` for object shapes, `type` for utility types and aliases.
+- **Type Guards & Assertions:** Implement type guards and assertions for runtime type safety.
+- **Generics for Reusability:** Utilize generics for reusable, type-safe components and functions.
+- **Enums vs Union Types:** Consider enums for fixed value sets, union types for literal strings.
+- **Code Linting with Biome:** Integrate Biome for linting and automatic code formatting.
+- **Documentation with JSDoc:** Document code with JSDoc for improved readability and documentation generation.
+- **Code Reviews:** Conduct regular code reviews to ensure TypeScript code quality and type safety.

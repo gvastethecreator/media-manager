@@ -1,0 +1,192 @@
+---
+description: Any task on server actions
+globs: app/actions/**/*.ts
+---
+# Reglas para Server Actions en Next.js 15
+
+## Estructura Base
+
+```mermaid
+graph TD
+    A[Server Action File] --> B[Utility Functions Files]
+    B --> C[State Management]
+    C --> D[Exported Async Functions]
+    B --> E[Types & Interfaces]
+    B --> F[Event Types]
+```
+
+## Reglas Fundamentales
+
+1. **Marcado de Archivos**
+   - SIEMPRE usar 'use server' en la primera línea del archivo
+   - NO incluir imports antes de 'use server'
+
+2. **Estructura Funcional**
+   - NO usar clases ni patrones OOP
+   - Implementar funciones utilitarias puras
+   - Usar closures para estado compartido
+   - Evitar el uso de `this` y `super`
+   - Archivo de utils siempre en su carpeta correspondiente.
+
+```typescript
+// ❌ NO usar clases
+class EntityActions {
+    private static instance: EntityActions;
+    // ...
+}
+
+// ✅ Usar funciones y closures
+const createEntityActions = () => {
+    const logger = createLogger('EntityActions');
+    const REVALIDATE_PATHS = ['/entity', '/entity/[id]'] as const;
+
+    const revalidateEntityPaths = async () => {
+        for (const path of REVALIDATE_PATHS) {
+            await revalidatePath(path);
+        }
+        logger.info('🔄 Rutas revalidadas');
+    };
+
+    return {
+        revalidateEntityPaths,
+        // otras funciones...
+    };
+};
+```
+
+3. **Estado Compartido**
+   - Usar closures para encapsular estado
+   - Mantener estado inmutable
+   - Evitar variables globales mutables
+
+```typescript
+// ✅ Estado compartido con closure
+const createEntityState = () => {
+    const cache = new Map();
+
+    return {
+        get: (key: string) => cache.get(key),
+        set: (key: string, value: unknown) => cache.set(key, value),
+        clear: () => cache.clear()
+    };
+};
+```
+
+4. **Manejo de Errores**
+   - Usar funciones para crear errores
+   - Mantener tipos de error como enums
+   - Implementar errores como objetos simples
+
+```typescript
+// Tipos de error
+enum EntityErrorCode {
+    NOT_FOUND = 'NOT_FOUND',
+    VALIDATION_ERROR = 'VALIDATION_ERROR'
+}
+
+// Función creadora de errores
+const createEntityError = (code: EntityErrorCode, message: string, cause?: unknown) => ({
+    code,
+    message,
+    cause,
+    name: 'EntityError'
+});
+```
+
+5. **Exportaciones**
+   - SOLO exportar funciones async
+   - Usar nombres descriptivos
+   - Incluir tipos TypeScript
+
+```typescript
+// ✅ Exportaciones correctas
+export async function createEntity(data: EntityCreate): Promise<Entity> {
+    // implementación
+}
+
+export async function updateEntity(id: string, data: EntityUpdate): Promise<Entity> {
+    // implementación
+}
+```
+
+6. **Eventos y Revalidación**
+   - Definir tipos de eventos como constantes
+   - Implementar revalidación funcional
+   - Usar constantes para rutas
+
+```typescript
+const EVENTS = {
+    ENTITY_MODIFIED: 'entity:modified'
+} as const;
+
+const REVALIDATE_PATHS = ['/entity', '/entity/[id]'] as const;
+
+const revalidatePaths = async () => {
+    for (const path of REVALIDATE_PATHS) {
+        await revalidatePath(path);
+    }
+};
+```
+
+7. **Funciones Utilitarias**
+   - Implementar como funciones puras
+   - Evitar efectos secundarios
+   - Mantener funciones pequeñas y focalizadas
+
+```typescript
+const transformData = (data: RawData): ProcessedData => ({
+    // transformación pura
+});
+
+const validateInput = (input: unknown): boolean => {
+    // validación pura
+};
+```
+
+## Checklist de Implementación
+
+- [ ] Archivo marcado con 'use server'
+- [ ] Sin uso de clases o patrones OOP
+- [ ] Estado manejado con closures
+- [ ] Solo funciones async exportadas
+- [ ] Tipos y interfaces definidos
+- [ ] Manejo de errores funcional
+- [ ] Eventos y revalidación configurados
+- [ ] Logging implementado funcionalmente
+
+## Ejemplos de Errores Comunes
+
+```typescript
+// ❌ NO usar clases
+export class EntityActions {}
+
+// ❌ NO usar this o super
+class EntityError extends Error {
+    constructor() {
+        super();
+        this.name = 'EntityError';
+    }
+}
+
+// ❌ NO exportar instancias
+export const entityActions = createEntityActions();
+
+// ✅ Exportar solo funciones async
+export async function getEntity() {
+    // implementación
+}
+```
+
+## Notas Adicionales
+
+1. Mantener la consistencia en el enfoque funcional
+2. Evitar efectos secundarios en funciones utilitarias
+3. Documentar cualquier desviación del patrón
+4. Actualizar tests para el enfoque funcional
+5. Revisar el rendimiento de las operaciones async
+
+## Referencias
+
+- [Next.js 15 Server Actions Documentation](mdc:https:/nextjs.org/docs/app/api-reference/functions/server-actions)
+- [Functional Programming in TypeScript](mdc:https:/www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-func.html)
+- [JavaScript Closures](mdc:https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Closures)

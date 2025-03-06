@@ -1,1 +1,140 @@
-{}
+{
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "git.autofetch": true,
+  "editor.wordWrap": "on",
+  "editor.mouseWheelZoom": true,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "editor.smoothScrolling": true,
+  "terminal.integrated.mouseWheelScrollSensitivity": 0.7,
+  "prettier.useTabs": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "gitlens.views.repositories.files.layout": "tree",
+
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "smoothtype.duration": 140,
+  "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
+  "files.autoGuessEncoding": true,
+  "editor.inlineSuggest.enabled": true,
+  "files.autoSave": "afterDelay",
+  "editor.suggest.preview": true,
+  "terminal.integrated.fontFamily": "DroidSansMono NFM",
+  "terminal.integrated.fontSize": 9,
+  "files.trimTrailingWhitespace": true,
+  "workbench.list.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  "smoothtype.autoReload": true,
+  "files.associations": {
+    "*.py": "python"
+  },
+  "editor.formatOnType": true,
+  "editor.suggest.localityBonus": true,
+  "editor.formatOnPaste": true,
+  "editor.stickyScroll.enabled": true,
+  "git.openRepositoryInParentFolders": "never",
+  "explorer.confirmDelete": false,
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.fastScrollSensitivity": 10,
+  "editor.fontSize": 12,
+  "editor.fontFamily": "DroidSansMono NFM",
+  "editor.fontVariations": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.colorTheme": "Dark",
+  "editor.autoClosingComments": "always",
+  "window.autoDetectColorScheme": true,
+  "extensions.experimental.deferredStartupFinishedActivation": true,
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.preferredDarkColorTheme": "Cursor Dark Anysphere",
+  "git.enableSmartCommit": true,
+  "workbench.activityBar.location": "top",
+  "powermode.enabled": true,
+  "powermode.presets": "simple-rift",
+  "powermode.combo.location": "off",
+  "powermode.combo.counterEnabled": "hide",
+  "powermode.combo.timerEnabled": "hide",
+  "powermode.shake.enabled": false,
+  "prisma.scriptRunner": "pnpm",
+  "editor.inlayHints.fontSize": 9,
+  "notebook.output.fontSize": 8,
+  "notebook.markup.fontSize": 8,
+  "gitlens.currentLine.fontSize": 9,
+  "gitlens.blame.fontSize": 9,
+  "chat.editor.fontSize": 12,
+  "markdown.preview.fontSize": 12,
+  "markdown.preview.fontFamily": "Archivo, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif",
+  "editor.minimap.sectionHeaderFontSize": 6,
+  "debug.console.fontSize": 12,
+  "scm.inputFontSize": 12,
+  "workbench.colorCustomizations": {},
+  "biome.rename": true,
+  "workbench.panel.showLabels": false,
+  "editor.codeActions.triggerOnFocusChange": true,
+  "editor.experimentalEditContextEnabled": true,
+  "diffEditor.experimental.showMoves": true,
+  "diffEditor.experimental.useTrueInlineView": true,
+  "workbench.commandPalette.experimental.suggestCommands": true,
+  "workbench.panel.defaultLocation": "right",
+  "workbench.startupEditor": "none",
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.view.showQuietly": {
+    "workbench.panel.output": true
+  },
+  "workbench.editor.preferHistoryBasedLanguageDetection": true,
+  "explorer.incrementalNaming": "smart",
+  "problems.showCurrentInStatus": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "biome_lsp.trace.server": "verbose",
+  "git.confirmSync": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.defaultFormatter": "biomejs.biome",
+  "emmet.showExpandedAbbreviation": "never",
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "CodeGPT.apiKey": "Ollama",
+  "[markdown]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "files.autoSaveDelay": 1000,
+  "editor.detectIndentation": true,
+  "editor.insertSpaces": false,
+  "python.defaultInterpreterPath": "./venv/bin/python"
+}

@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "ankitcode.firefly",
+    "biomejs.biome",
+    "alefragnani.bookmarks",
+    "spywhere.guides",
+    "eamodio.gitlens",
+    "visualstudioexptteam.vscodeintellicode",
+    "visualstudioexptteam.intellicode-api-usage-examples",
+    "orta.vscode-jest",
+    "davidanson.vscode-markdownlint",
+    "christian-kohler.npm-intellisense",
+    "ibm.output-colorizer",
+    "christian-kohler.path-intellisense",
+    "jacano.vscode-pnpm",
+    "esbenp.prettier-vscode",
+    "yoavbls.pretty-ts-errors",
+    "prisma.prisma",
+    "jakob101.relativepath",
+    "mutantdino.resourcemonitor",
+    "dexxiez.shadcn-color-preview",
+    "tyriar.sort-lines",
+    "bradlc.vscode-tailwindcss",
+    "ms-ceintl.vscode-language-pack-es",
+    "beardedbear.beardedicons"
+  ]
+}

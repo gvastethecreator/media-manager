@@ -1,0 +1,12 @@
+---
+description: Concise best practices for reliable and performant Bull queue system usage.
+globs: services/**/*.ts, app/api/**/*.ts, lib/bull.ts
+---
+- **Separate Queues by Job Type:** Use distinct queues for different job categories.
+- **Error Handling & Retry Mechanism:** Implement robust error handling and retry mechanisms for job failures.
+- **Bull Board for Monitoring & Management:** Utilize Bull Board for queue monitoring and management.
+- **Separate Workers from Main Application:** Run Bull workers in separate processes for scalability.
+- **Idempotent Job Processing:** Design job processors to be idempotent for reliability.
+- **Queue Cleanup:** Implement a queue cleanup strategy to remove completed/failed jobs.
+- **Job Prioritization:** Use Bull's prioritization options for critical jobs.
+- **Bull Queue Security:** Consider security measures for sensitive data in Bull queues.

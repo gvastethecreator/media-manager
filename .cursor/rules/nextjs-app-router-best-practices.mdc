@@ -1,0 +1,11 @@
+---
+description: Concise best practices for Next.js 15 App Router to optimize performance and organization.
+globs: app/**/*.{ts,tsx}
+---
+- **Default to Server Components:** Maximize Server Components for rendering & data fetching; use Client Components only for browser interactivity.
+- **Server Data Fetching & Actions:** Fetch data in Server Components; use Server Actions for server-side mutations and logic.
+- **Optimize Dynamic Routes:** Use `generateStaticParams` for static route pre-generation; consider SSR or revalidation for dynamic data.
+- **Error Handling with Boundaries & `notFound`/`redirect`:** Implement `ErrorBoundary` and use `notFound()`/`redirect()` for route errors and redirects.
+- **Logical Route & Folder Structure:** Organize routes within `app/` with clear folder and file naming conventions.
+- **Utilize `useSearchParams` & `usePathname`:** Efficiently access query parameters and pathname in Client Components.
+- **Backend Logic for API Calls:** Prefer Server Components/Actions for API calls; use internal API Routes as intermediaries if needed from Client Components.

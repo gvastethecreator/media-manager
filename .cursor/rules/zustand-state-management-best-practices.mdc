@@ -1,0 +1,11 @@
+---
+description: Concise best practices for efficient and organized Zustand state management.
+globs: store/**/*.ts, components/**/*.{ts,tsx}, app/**/*.{ts,tsx}
+---
+- **Small, Focused Stores (Bounded Context):** Divide global state into smaller, feature-specific stores.
+- **Zustand Middleware (Persist, Immer):** Utilize middleware like `persist` and `immer` for enhanced state management.
+- **Selectors for Optimized Re-renders:** Use selectors to derive state and prevent unnecessary component re-renders.
+- **Actions Within Stores:** Define state modification logic (actions) within Zustand stores.
+- **TypeScript & Strong Typing in Stores:** Use TypeScript for type safety in Zustand stores.
+- **Avoid Store Bloating:** Limit Zustand to global shared state; use local component state when appropriate.
+- **Testing Zustand Stores:** Write unit tests for Zustand stores, focusing on actions and selectors.
