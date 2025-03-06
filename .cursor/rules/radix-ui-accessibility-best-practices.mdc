@@ -1,0 +1,9 @@
+---
+description: Concise best practices for accessible Radix UI component implementation.
+globs: components/**/*.{ts,tsx,js,jsx}, app/**/*.{ts,tsx,js,jsx}
+---
+- **Use Radix UI Primitives:** Build custom components with accessible Radix UI primitives.
+- **Follow Radix UI Accessibility Guides:** Adhere to Radix UI's accessibility guidelines for all components.
+- **Radix UI Composition & Variants:** Leverage composition patterns and variants for complex UI elements.
+- **Keyboard Navigation Support:** Ensure full keyboard navigation for all components.
+- **Correct ARIA Attributes:** Verify proper ARIA attribute usage in components.

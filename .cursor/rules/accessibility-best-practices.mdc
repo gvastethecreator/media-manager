@@ -1,0 +1,12 @@
+---
+description: Concise general web accessibility best practices, complementing Radix UI rules.
+globs: **/*.{ts,tsx,js,jsx}
+---
+- **Semantic HTML:** Use semantic HTML elements correctly for content structure.
+- **ARIA Attributes:** Utilize ARIA attributes appropriately for accessibility.
+- **Keyboard Navigation:** Ensure full keyboard navigation and focus management.
+- **Alternative Text for Images:** Provide descriptive `alt` text for all images.
+- **Labels for Form Elements:** Associate labels correctly with form elements.
+- **State Indicators:** Provide clear state indicators for errors, loading, and success.
+- **Clear Visual Focus:** Ensure a clear visual focus indicator for keyboard navigation.
+- **Skip Links:** Implement skip links for keyboard navigation.

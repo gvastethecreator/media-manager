@@ -1,0 +1,11 @@
+---
+description: Concise best practices for React Query data fetching, caching, and mutations.
+globs: app/**/*.{ts,tsx} services/**/*.ts, hooks/**/*.ts
+---
+- **`useQuery` for Fetching, `useMutation` for Mutations:** Clearly separate data fetching and modification operations.
+- **Error Handling & Loading States:** Implement robust error and loading state management.
+- **Query Caching & `staleTime`/`cacheTime`:** Leverage React Query caching for performance optimization.
+- **Cache Invalidation & Revalidation:** Strategically invalidate and revalidate query caches after mutations.
+- **Strategic Query Keys:** Define clear and organized query keys for effective cache management.
+- **Pagination & Infinite Loading:** Implement pagination and infinite scrolling with React Query features.
+- **Prefetching for User Experience:** Prefetch data for anticipated user interactions to improve perceived performance.

@@ -1,0 +1,16 @@
+---
+description: Concise best practices for Prisma ORM data access, optimizing performance and security.
+globs: lib/prisma.ts, services/**/*.ts, app/actions/**/*.ts
+---
+---
+description: 
+globs: 
+---
+- **Single Prisma Client Instance:** Ensure one shared Prisma Client instance across the application.
+- **Robust Error Handling in Prisma Queries:** Implement proper error handling for Prisma interactions.
+- **Prisma Transactions for Complex Operations:** Use transactions for data integrity in multi-write operations.
+- **Efficient Prisma Queries:** Optimize queries with `select`, `include`, `cursor` and `take`.
+- **Zod Validation Before Persistence:** Validate input data with Zod before database persistence.
+- **Secure Prisma Queries:** Isolate data access logic in Server Actions/Services, exposing only necessary data.
+- **Prisma Migrations & Schema Versioning:** Manage schema updates and migrations effectively.
+- **Database Seeding:** Utilize Prisma seeding for database initialization with test or initial data.

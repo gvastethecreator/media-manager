@@ -1,0 +1,8 @@
+---
+description: Best practices for React component development
+globs: **/*.{ts,tsx,js,jsx}
+---
+- Use functional components with hooks instead of class components
+- Keep components small and focused on a single responsibility
+- Utilize memoization techniques like `useMemo` and `useCallback` for performance
+- Implement proper state management using Context API or state management libraries
