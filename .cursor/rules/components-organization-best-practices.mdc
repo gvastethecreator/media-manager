@@ -1,0 +1,12 @@
+---
+description: Concise best practices for organized and maintainable React component structure.
+globs: components/**/*.{ts,tsx,js,jsx}, app/**/*.{ts,tsx,js,jsx}
+---
+- **Separate by Component Type:** Organize components by type into `ui/`, `features/`, `layout/`, and `app/` folders.
+- **Reusable UI Components in `components/ui/`:** Design generic, reusable UI components in `components/ui/`.
+- **Composition in Feature Components:** Build feature components by composing UI components and adding feature logic.
+- **Descriptive Component Names:** Use clear, consistent, and descriptive component names.
+- **Folders for Complex Components:** Group complex components with sub-components in folders with `index.ts` export files.
+- **Unit Tests for Components:** Write unit tests for React components, especially in `ui/` and `features/`.
+- **Server Components by Default:** Default to Server Components, using Client Components only when necessary ('use client').
+- **Typed Props with TypeScript:** Define component prop types using TypeScript interfaces or types.

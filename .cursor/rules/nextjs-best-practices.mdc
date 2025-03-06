@@ -1,0 +1,15 @@
+---
+description: Best practices for Next.js 15 App Router
+globs: app/**/*.{ts,tsx}, app/**/*.{ts,tsx}
+---
+
+- Default to Server Components for rendering & data fetching
+- Use Client Components only for browser interactivity
+- Fetch data in Server Components
+- Use Server Actions for server-side mutations and logic
+- Use `generateStaticParams` for static route pre-generation
+- Implement ErrorBoundary for route errors
+- Use `notFound()`/`redirect()` for route handling
+- Organize routes within `app/` with clear naming
+- Use `useSearchParams` & `usePathname` in Client Components
+- Prefer Server Components/Actions for API calls	
