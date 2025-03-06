@@ -79,7 +79,7 @@ export const CardsView = memo(function CardsView({
 		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
 			<div
 				className={cn(
-					"relative w-full h-full bg-card rounded-lg border shadow-sm overflow-hidden group hover:shadow-md transition-all duration-200",
+					"relative w-full h-full bg-card rounded-lg border shadow-xs overflow-hidden group hover:shadow-md transition-all duration-200",
 					isSelected && "ring-2 ring-primary",
 					isScrolling && "opacity-50"
 				)}
@@ -112,7 +112,7 @@ export const CardsView = memo(function CardsView({
 						{shouldLoad && thumbnail ?
 							<div className="relative w-full h-full">
 								<div
-									className="absolute inset-0 bg-cover bg-center blur-sm opacity-30 brightness-50"
+									className="absolute inset-0 bg-cover bg-center blur-xs opacity-30 brightness-50"
 									style={{
 										backgroundImage: `url(${thumbnail})`,
 									}}

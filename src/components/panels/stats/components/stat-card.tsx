@@ -50,7 +50,7 @@ export const StatCard = memo(function StatCard({
 	const Icon = ICONS[icon];
 
 	return (
-		<div className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-sm">
+		<div className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-xs">
 			<div className="flex items-center gap-2">
 				<Icon className={`h-4 w-4 ${color}`} />
 				<span className="text-sm font-medium">{title}</span>

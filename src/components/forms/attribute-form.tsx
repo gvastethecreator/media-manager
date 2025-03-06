@@ -90,7 +90,7 @@ export function AttributeForm({
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="flex items-center gap-2">
 				<div
-					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+					className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
 					style={{ backgroundColor: formData.color }}
 				>
 					<Popover>
@@ -197,7 +197,7 @@ export function AttributeForm({
 				/>
 			</div>
 
-			<div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+			<div className="flex items-center justify-between rounded-lg border p-3 shadow-xs">
 				<div className="space-y-0.5">
 					<Label>Favorito</Label>
 					<p className="text-sm text-muted-foreground">Marcar como favorito</p>

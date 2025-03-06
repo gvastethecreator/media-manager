@@ -73,8 +73,8 @@ export function CollectionCard({
 		>
 			<div
 				className={cn(
-					"relative w-full aspect-[3/4] rounded-lg overflow-hidden cursor-pointer",
-					"bg-gradient-to-br from-background to-muted",
+					"relative w-full aspect-3/4 rounded-lg overflow-hidden cursor-pointer",
+					"bg-linear-to-br from-background to-muted",
 					"shadow-lg hover:shadow-xl transition-all duration-300"
 				)}
 			>
@@ -161,7 +161,7 @@ export function CollectionCard({
 										:	<div
 												className={cn(
 													"w-full h-full flex items-center justify-center",
-													"bg-gradient-to-br",
+													"bg-linear-to-br",
 													gradient
 												)}
 											>
@@ -176,7 +176,7 @@ export function CollectionCard({
 										className={cn(
 											"relative rounded-md overflow-hidden aspect-square",
 											"flex items-center justify-center",
-											"bg-gradient-to-br",
+											"bg-linear-to-br",
 											gradient
 										)}
 									>
@@ -189,7 +189,7 @@ export function CollectionCard({
 						{/* Overlay con hover */}
 						<div
 							className={cn(
-								"absolute inset-0 bg-gradient-to-t from-background/80 to-transparent",
+								"absolute inset-0 bg-linear-to-t from-background/80 to-transparent",
 								"opacity-0 group-hover:opacity-100 transition-opacity",
 								"rounded-lg flex items-end justify-center p-4"
 							)}
@@ -244,7 +244,7 @@ export function CollectionCard({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm"
+								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-xs"
 								onClick={() => onEdit(collection)}
 							>
 								<PencilIcon className="h-4 w-4 text-white" />
@@ -254,7 +254,7 @@ export function CollectionCard({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm text-red-400"
+								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-xs text-red-400"
 								onClick={() => onDelete(collection.id)}
 							>
 								<Trash2 className="h-4 w-4" />
