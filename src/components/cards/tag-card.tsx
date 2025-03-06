@@ -42,7 +42,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 		<motion.div
 			className={cn(
 				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
-				"bg-gradient-to-br from-background/50 to-muted/50",
+				"bg-linear-to-br from-background/50 to-muted/50",
 				"shadow-lg hover:shadow-xl transition-all duration-300",
 				"cursor-pointer perspective-1000",
 				className
@@ -129,13 +129,13 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 			/>
 
 			{/* Contenido de la carta */}
-			<div className="relative h-full p-4 flex flex-col backdrop-blur-sm">
+			<div className="relative h-full p-4 flex flex-col backdrop-blur-xs">
 				{/* Encabezado */}
 				<div className="flex items-center gap-3 mb-4">
 					<div
 						className={cn(
 							"h-12 w-12 rounded-full flex items-center justify-center",
-							"bg-gradient-to-br shadow-inner relative overflow-hidden",
+							"bg-linear-to-br shadow-inner relative overflow-hidden",
 							"group-hover:shadow-lg transition-shadow duration-300"
 						)}
 						style={{
@@ -235,7 +235,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs"
 							onClick={() => onEdit(tag)}
 						>
 							<PencilIcon className="h-4 w-4" />
@@ -245,7 +245,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs text-destructive"
 							onClick={() => onDelete(tag.id)}
 						>
 							<Trash2 className="h-4 w-4" />

@@ -689,7 +689,7 @@ export function FileViewer({
 	return (
 		<motion.div
 			animate={{ opacity: [0, 1] }}
-			className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
+			className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xs"
 			onClick={onClose}
 		>
 			<div
@@ -855,7 +855,7 @@ export function FileViewer({
 
 				{/* Thumbnails */}
 				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
-					<div className="flex items-center bg-background/5 backdrop-blur-sm px-2 py-1 rounded-lg">
+					<div className="flex items-center bg-background/5 backdrop-blur-xs px-2 py-1 rounded-lg">
 						{images
 							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
 							.map((image, i) => (

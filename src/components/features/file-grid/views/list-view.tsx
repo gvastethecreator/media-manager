@@ -93,11 +93,11 @@ export const ListView = memo(function ListView({
 					onDoubleClick?.(item);
 				}}
 			>
-				<div className="relative h-[72px] aspect-square flex-shrink-0 overflow-hidden rounded-sm">
+				<div className="relative h-[72px] aspect-square shrink-0 overflow-hidden rounded-sm">
 					{shouldLoad && thumbnail ?
 						<div className="relative w-full h-full">
 							<div
-								className="absolute inset-0 bg-cover bg-center blur-sm opacity-30 brightness-50"
+								className="absolute inset-0 bg-cover bg-center blur-xs opacity-30 brightness-50"
 								style={{
 									backgroundImage: `url(${thumbnail})`,
 								}}

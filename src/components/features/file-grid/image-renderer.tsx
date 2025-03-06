@@ -83,7 +83,7 @@ export function ImageRenderer({
 					className={cn(
 						"transition-all duration-300 object-contain w-full h-full",
 						objectFit === "cover" ? "object-cover" : "object-contain",
-						isLoading ? "scale-80 blur-sm brightness-10" : "scale-100 blur-0 brightness-100"
+						isLoading ? "scale-80 blur-xs brightness-10" : "scale-100 blur-0 brightness-100"
 					)}
 					priority={priority}
 					quality={quality}

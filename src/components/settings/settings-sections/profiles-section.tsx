@@ -178,7 +178,7 @@ export function ProfilesSection() {
 									<div className="flex items-center gap-2 relative">
 										<div className="flex items-center gap-2 min-w-0">
 											<div
-												className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+												className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
 												style={{ backgroundColor: profile.color }}
 											>
 												<span className="text-lg">{profile.emoji}</span>

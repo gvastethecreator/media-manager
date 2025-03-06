@@ -117,7 +117,7 @@ export function CharacterForm({
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="flex items-center gap-2">
 				<div
-					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+					className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
 					style={{ backgroundColor: formData.color }}
 				>
 					<Popover>

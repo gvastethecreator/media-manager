@@ -103,7 +103,7 @@ export const MasonryView = memo(function MasonryView({
 							)}
 							quality={75}
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+						<div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 					</div>
 				:	<div className="flex items-center justify-center h-full bg-muted/50 rounded-sm">
 						<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
@@ -149,11 +149,11 @@ export const MasonryView = memo(function MasonryView({
 					)}
 				>
 					<div className="flex items-start justify-between gap-2">
-						<p className="text-xs text-white font-medium truncate flex-1 drop-shadow">
+						<p className="text-xs text-white font-medium truncate flex-1 drop-shadow-sm">
 							{item.name}
 						</p>
 						{metadata?.dimensions && (
-							<span className="text-[10px] text-white/90 font-medium drop-shadow">
+							<span className="text-[10px] text-white/90 font-medium drop-shadow-sm">
 								{metadata.dimensions.width} × {metadata.dimensions.height}
 							</span>
 						)}
