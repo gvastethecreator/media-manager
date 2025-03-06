@@ -1,0 +1,9 @@
+---
+description: Concise best practices for efficient Lodash usage, minimizing bundle size.
+globs: **/*.{ts,js}
+---
+- **Import Necessary Functions Only (Tree-shaking):** Import individual Lodash functions to reduce bundle size.
+- **Judicious Lodash Usage (Native JS Alternatives):** Consider native JavaScript alternatives before using Lodash functions.
+- **Lodash Chaining for Complex Transformations:** Use chaining for readable complex data manipulations.
+- **Lodash Documentation Reference:** Consult Lodash documentation for function understanding.
+- **Test Custom Lodash Functions:** Unit test custom functions utilizing Lodash.
