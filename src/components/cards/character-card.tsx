@@ -69,7 +69,7 @@ export function CharacterCard({
 		<motion.div
 			className={cn(
 				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
-				"bg-gradient-to-br from-background to-muted",
+				"bg-linear-to-br from-background to-muted",
 				"shadow-lg hover:shadow-xl transition-all duration-300",
 				"cursor-pointer",
 				className
@@ -83,7 +83,7 @@ export function CharacterCard({
 			{/* Fondo holográfico */}
 			<div
 				className={cn(
-					"absolute inset-0 bg-gradient-to-br opacity-30",
+					"absolute inset-0 bg-linear-to-br opacity-30",
 					classGradient
 				)}
 				style={{
@@ -159,14 +159,14 @@ export function CharacterCard({
 						<div
 							className={cn(
 								"h-12 w-12 rounded-full flex items-center justify-center",
-								"bg-gradient-to-br shadow-inner",
+								"bg-linear-to-br shadow-inner",
 								classGradient
 							)}
 							style={{
 								border: `2px solid ${character.color}88`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow">
+							<span className="text-2xl filter drop-shadow-sm">
 								{character.emoji || classSymbol}
 							</span>
 						</div>
@@ -186,7 +186,7 @@ export function CharacterCard({
 					<div
 						className={cn(
 							"px-2 py-1 rounded text-sm font-semibold",
-							"bg-gradient-to-br shadow-sm",
+							"bg-linear-to-br shadow-xs",
 							classGradient
 						)}
 					>
@@ -211,7 +211,7 @@ export function CharacterCard({
 
 				{/* Descripción */}
 				{character.description && (
-					<div className="mb-4 z-10 bg-background/80 backdrop-blur-sm rounded-lg p-2">
+					<div className="mb-4 z-10 bg-background/80 backdrop-blur-xs rounded-lg p-2">
 						<p className="text-sm text-muted-foreground line-clamp-2">
 							{character.description}
 						</p>
@@ -228,7 +228,7 @@ export function CharacterCard({
 										key={key}
 										className={cn(
 											"rounded px-2 py-1 text-center",
-											"bg-gradient-to-br shadow-sm bg-background/80 backdrop-blur-sm",
+											"bg-linear-to-br shadow-xs bg-background/80 backdrop-blur-xs",
 											classGradient
 										)}
 									>
@@ -251,7 +251,7 @@ export function CharacterCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs"
 							onClick={() => onEdit(character)}
 						>
 							<PencilIcon className="h-4 w-4" />
@@ -261,7 +261,7 @@ export function CharacterCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs text-destructive"
 							onClick={() => onDelete(character.id)}
 						>
 							<Trash2 className="h-4 w-4" />
@@ -271,7 +271,7 @@ export function CharacterCard({
 
 				{/* Contador de imágenes */}
 				{character._count?.images !== undefined && (
-					<div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 z-10">
+					<div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-xs rounded-full px-2 py-0.5 z-10">
 						{character._count.images}{" "}
 						{character._count.images === 1 ? "imagen" : "imágenes"}
 					</div>

@@ -141,7 +141,7 @@ export function ObjectCard({
 			ref={cardRef}
 			className={cn(
 				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
-				"bg-gradient-to-br from-zinc-900 to-stone-800",
+				"bg-linear-to-br from-zinc-900 to-stone-800",
 				"shadow-lg hover:shadow-xl transition-all duration-300",
 				"cursor-pointer perspective-1000",
 				className
@@ -242,14 +242,14 @@ export function ObjectCard({
 			/>
 
 			{/* Contenido de la carta */}
-			<div className="relative h-full p-4 flex flex-col backdrop-blur-sm">
+			<div className="relative h-full p-4 flex flex-col backdrop-blur-xs">
 				{/* Encabezado con tipo y rareza */}
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
 								"h-12 w-12 rounded-lg flex items-center justify-center",
-								"bg-gradient-to-br shadow-inner relative overflow-hidden",
+								"bg-linear-to-br shadow-inner relative overflow-hidden",
 								rarityGradient
 							)}
 							style={{
@@ -257,7 +257,7 @@ export function ObjectCard({
 								boxShadow: `inset 0 2px 4px ${object.color}22`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow relative z-10">
+							<span className="text-2xl filter drop-shadow-sm relative z-10">
 								{object.emoji}
 							</span>
 							{/* Destello del emoji */}
@@ -312,7 +312,7 @@ export function ObjectCard({
 									key={index}
 									className={cn(
 										"text-xs px-2 py-1 rounded relative overflow-hidden",
-										"bg-zinc-900/50 backdrop-blur-sm",
+										"bg-zinc-900/50 backdrop-blur-xs",
 										rarityGradient
 									)}
 								>
@@ -350,7 +350,7 @@ export function ObjectCard({
 									key={key}
 									className={cn(
 										"flex items-center justify-between px-2 py-1 rounded relative overflow-hidden",
-										"bg-zinc-900/50 backdrop-blur-sm",
+										"bg-zinc-900/50 backdrop-blur-xs",
 										rarityGradient
 									)}
 								>
@@ -380,7 +380,7 @@ export function ObjectCard({
 
 				{/* Origen */}
 				{object.origin && (
-					<div className="mt-4 bg-zinc-900/50 backdrop-blur-sm rounded-lg p-2">
+					<div className="mt-4 bg-zinc-900/50 backdrop-blur-xs rounded-lg p-2">
 						<div className="flex items-center gap-2 mb-1">
 							<Scroll className="h-4 w-4" style={{ color: object.color }} />
 							<span className="text-sm font-medium text-zinc-300">Origen</span>
@@ -400,7 +400,7 @@ export function ObjectCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-sm hover:bg-zinc-900/80"
+							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80"
 							onClick={handleEdit}
 						>
 							<PencilIcon className="h-4 w-4" />
@@ -410,7 +410,7 @@ export function ObjectCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-sm hover:bg-zinc-900/80 text-destructive"
+							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80 text-destructive"
 							onClick={handleDelete}
 						>
 							<Trash2 className="h-4 w-4" />
@@ -420,7 +420,7 @@ export function ObjectCard({
 
 				{/* Contador de imágenes */}
 				{object._count?.images !== undefined && (
-					<div className="absolute bottom-2 right-2 text-[10px] text-zinc-400 bg-zinc-950/80 backdrop-blur-sm rounded-full px-2 py-0.5">
+					<div className="absolute bottom-2 right-2 text-[10px] text-zinc-400 bg-zinc-950/80 backdrop-blur-xs rounded-full px-2 py-0.5">
 						{object._count.images}{" "}
 						{object._count.images === 1 ? "imagen" : "imágenes"}
 					</div>
@@ -477,7 +477,7 @@ export function ObjectCard({
 									:	<div
 											className={cn(
 												"w-full h-full flex items-center justify-center",
-												"bg-gradient-to-br",
+												"bg-linear-to-br",
 												rarityGradient
 											)}
 										>

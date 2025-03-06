@@ -73,7 +73,7 @@ export function EntityForm<T extends BaseEntityFormData>({
 		<form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
 			<div className="flex items-center gap-2">
 				<div
-					className="h-8 w-8 rounded-full flex items-center justify-center shadow-sm"
+					className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
 					style={{ backgroundColor: formData.color }}
 				>
 					<Popover>

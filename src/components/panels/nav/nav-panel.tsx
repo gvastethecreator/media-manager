@@ -284,7 +284,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								className={cn(
 									"gap-2 h-7 px-3 transition-colors rounded-sm flex-1 text-center",
 									currentView === id &&
-										"bg-gradient-to-r from-white/10 to-white/15"
+										"bg-linear-to-r from-white/10 to-white/15"
 								)}
 								onClick={() => handleItemClick(id)}
 							>
@@ -304,7 +304,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 									className={cn(
 										"w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm bg-white/5 mt-2",
 										currentView === id &&
-											"bg-gradient-to-r from-white/10 to-white/15"
+											"bg-linear-to-r from-white/10 to-white/15"
 									)}
 									onClick={() => handleItemClick(id)}
 								>
@@ -357,7 +357,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "collection-content" &&
 														currentCollectionId === collection.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handleCollectionClick(collection.id)}
 											>
@@ -380,7 +380,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"w-full justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs",
 													currentView === "folder-content" &&
 														currentFolderId === folder.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handleFolderClick(folder.id)}
 											>
@@ -403,7 +403,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "album-content" &&
 														currentAlbumId === album.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handleAlbumClick(album.id)}
 											>
@@ -426,7 +426,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "character-content" &&
 														currentCharacterId === character.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handleCharacterClick(character.id)}
 											>
@@ -449,7 +449,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "place-content" &&
 														currentPlaceId === place.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handlePlaceClick(place.id)}
 											>
@@ -472,7 +472,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 													"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
 													currentView === "object-content" &&
 														currentObjectId === object.id &&
-														"bg-gradient-to-r from-white/10 to-white/15"
+														"bg-linear-to-r from-white/10 to-white/15"
 												)}
 												onClick={() => handleObjectClick(object.id)}
 											>
@@ -497,11 +497,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 														"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold",
 														currentView === "tag-content" &&
 															currentTagId === tag.name &&
-															"bg-gradient-to-r from-black/30 to-black/35"
+															"bg-linear-to-r from-black/30 to-black/35"
 													)}
 													onClick={() => handleTagClick(tag.name)}
 												>
-													<span className="flex-1 text-left  text-[10px] truncate shadow-sm">
+													<span className="flex-1 text-left  text-[10px] truncate shadow-xs">
 														{tag.name}
 													</span>
 													<span className="text-[10px] h-4 text-white border-none">
