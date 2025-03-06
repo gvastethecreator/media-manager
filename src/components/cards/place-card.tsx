@@ -116,7 +116,7 @@ export function PlaceCard({
 			ref={cardRef}
 			className={cn(
 				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
-				"bg-gradient-to-br from-zinc-950 to-stone-900",
+				"bg-linear-to-br from-zinc-950 to-stone-900",
 				"shadow-lg hover:shadow-xl transition-all duration-300",
 				"cursor-pointer perspective-1000",
 				className
@@ -236,7 +236,7 @@ export function PlaceCard({
 								:	<div
 										className={cn(
 											"w-full h-full flex items-center justify-center",
-											"bg-gradient-to-br from-zinc-900 to-stone-800"
+											"bg-linear-to-br from-zinc-900 to-stone-800"
 										)}
 									>
 										<ImageIcon className="w-4 h-4 text-white/80" />
@@ -255,7 +255,7 @@ export function PlaceCard({
 					<div
 						className={cn(
 							"h-12 w-12 rounded-lg flex items-center justify-center",
-							"bg-gradient-to-br shadow-inner",
+							"bg-linear-to-br shadow-inner",
 							"from-zinc-900 to-stone-800"
 						)}
 						style={{
@@ -263,7 +263,7 @@ export function PlaceCard({
 							boxShadow: `inset 0 2px 4px ${place.color}22`,
 						}}
 					>
-						<span className="text-2xl filter drop-shadow">{place.emoji}</span>
+						<span className="text-2xl filter drop-shadow-sm">{place.emoji}</span>
 					</div>
 					<div className="flex-1 min-w-0">
 						<h3 className="font-bold text-lg leading-tight truncate text-zinc-100">
@@ -413,7 +413,7 @@ export function PlaceCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-sm hover:bg-zinc-900/80"
+							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80"
 							onClick={() => onEdit(place)}
 						>
 							<PencilIcon className="h-4 w-4" />
@@ -423,7 +423,7 @@ export function PlaceCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-sm hover:bg-zinc-900/80 text-destructive"
+							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80 text-destructive"
 							onClick={() => onDelete(place.id)}
 						>
 							<Trash2 className="h-4 w-4" />

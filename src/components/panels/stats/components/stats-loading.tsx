@@ -19,7 +19,7 @@ export function StatsLoading() {
 					.map((_, i) => (
 						<div
 							key={i}
-							className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-sm"
+							className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-xs"
 						>
 							<div className="flex items-center gap-2">
 								<Skeleton className="h-4 w-4" />

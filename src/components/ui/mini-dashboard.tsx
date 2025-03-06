@@ -8,7 +8,7 @@ interface MiniDashboardProps {
 
 export function MiniDashboard({ title, items }: MiniDashboardProps) {
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="rounded-lg border bg-card text-card-foreground shadow-xs">
       <div className="p-4">
         <h3 className="text-sm font-semibold leading-none tracking-tight">
           {title}

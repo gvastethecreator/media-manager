@@ -51,8 +51,8 @@ export function FolderCard({
 	return (
 		<motion.div
 			className={cn(
-				"relative w-full aspect-[3/4] rounded-lg overflow-hidden",
-				"bg-gradient-to-br from-background to-muted",
+				"relative w-full aspect-3/4 rounded-lg overflow-hidden",
+				"bg-linear-to-br from-background to-muted",
 				"shadow-lg hover:shadow-xl transition-all duration-300",
 				className
 			)}
@@ -65,7 +65,7 @@ export function FolderCard({
 			{/* Fondo holográfico */}
 			<div
 				className={cn(
-					"absolute inset-0 bg-gradient-to-br opacity-30",
+					"absolute inset-0 bg-linear-to-br opacity-30",
 					gradient
 				)}
 				style={{
@@ -98,7 +98,7 @@ export function FolderCard({
 						<div
 							className={cn(
 								"h-12 w-12 rounded-full flex items-center justify-center",
-								"bg-gradient-to-br shadow-inner",
+								"bg-linear-to-br shadow-inner",
 								gradient
 							)}
 						>
@@ -133,7 +133,7 @@ export function FolderCard({
 								:	<div
 										className={cn(
 											"w-full h-full flex items-center justify-center",
-											"bg-gradient-to-br",
+											"bg-linear-to-br",
 											gradient
 										)}
 									>
@@ -147,7 +147,7 @@ export function FolderCard({
 					{/* Overlay con hover */}
 					<div
 						className={cn(
-							"absolute inset-0 bg-gradient-to-t from-background/80 to-transparent",
+							"absolute inset-0 bg-linear-to-t from-background/80 to-transparent",
 							"opacity-0 group-hover/grid:opacity-100 transition-opacity",
 							"rounded-lg flex items-end justify-center p-4"
 						)}
@@ -198,7 +198,7 @@ export function FolderCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs"
 							onClick={() => onEdit(folder)}
 						>
 							<PencilIcon className="h-4 w-4" />
@@ -208,7 +208,7 @@ export function FolderCard({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 backdrop-blur-sm text-destructive"
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs text-destructive"
 							onClick={() => onDelete(folder.id)}
 						>
 							<Trash2 className="h-4 w-4" />
