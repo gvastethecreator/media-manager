@@ -1,4 +1,4 @@
-import { ViewType as NavigationViewType } from '@/store/navigation.store'
+import type { ViewType as NavigationViewType } from '@/store/navigation.store';
 
 export type ViewType = NavigationViewType;
 
@@ -9,4 +9,3 @@ export interface ViewProps {
 export interface ViewContainerProps {
 	isResizing?: boolean;
 }
-

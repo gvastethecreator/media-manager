@@ -10,11 +10,12 @@ import {
 	Download,
 	Eye,
 	FileText,
-	Folder,
 	Focus,
+	Folder,
 	HardDrive,
 	Image,
 	Layers,
+	type LucideIcon,
 	MapPin,
 	Palette,
 	Play,
@@ -24,8 +25,7 @@ import {
 	Timer,
 	Users,
 	Wand2,
-	type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
 export type Icon = LucideIcon;
 

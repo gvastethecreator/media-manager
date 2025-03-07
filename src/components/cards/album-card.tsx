@@ -1,35 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import {
-	Album as AlbumIcon,
-	Image as ImageIcon,
-	PencilIcon,
-	Trash2,
-	Clock,
-	Hash,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { AlbumWithStats } from "@/app/actions/album.actions";
-import { formatBytes, formatDate } from "@/lib/utils";
+import type { AlbumWithStats } from '@/app/actions/album.actions';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { formatBytes, formatDate } from '@/lib/utils';
+import { Album as AlbumIcon, Clock, Hash, Image as ImageIcon, PencilIcon, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
 interface AlbumCardProps {
 	album: AlbumWithStats;
-	onClick?: (album: AlbumWithStats) => void;
 	onEdit?: (album: AlbumWithStats) => void;
 	onDelete?: (id: string) => void;
 	className?: string;
 }
 
-export function AlbumCard({
-	album,
-	onClick,
-	onEdit,
-	onDelete,
-	className,
-}: AlbumCardProps) {
+export function AlbumCard({ album, onEdit, onDelete, className }: AlbumCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
@@ -44,10 +30,10 @@ export function AlbumCard({
 	return (
 		<motion.div
 			className={cn(
-				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
-				"bg-linear-to-br from-background/50 to-muted/50",
-				"shadow-lg hover:shadow-xl transition-all duration-300",
-				"cursor-pointer perspective-1000",
+				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group',
+				'bg-linear-to-br from-background/50 to-muted/50',
+				'shadow-lg hover:shadow-xl transition-all duration-300',
+				'cursor-pointer perspective-1000',
 				className
 			)}
 			onHoverStart={() => setIsHovered(true)}
@@ -57,8 +43,8 @@ export function AlbumCard({
 			transition={{ duration: 0.2 }}
 			style={
 				{
-					"--x": `${mousePosition.x}%`,
-					"--y": `${mousePosition.y}%`,
+					'--x': `${mousePosition.x}%`,
+					'--y': `${mousePosition.y}%`,
 				} as React.CSSProperties
 			}
 		>
@@ -137,9 +123,9 @@ export function AlbumCard({
 				<div className="flex items-center gap-3 mb-4">
 					<div
 						className={cn(
-							"h-12 w-12 rounded-full flex items-center justify-center",
-							"bg-linear-to-br shadow-inner relative overflow-hidden",
-							"group-hover:shadow-lg transition-shadow duration-300"
+							'h-12 w-12 rounded-full flex items-center justify-center',
+							'bg-linear-to-br shadow-inner relative overflow-hidden',
+							'group-hover:shadow-lg transition-shadow duration-300'
 						)}
 						style={{
 							background: `
@@ -152,15 +138,16 @@ export function AlbumCard({
 							border: `2px solid ${album.color}44`,
 						}}
 					>
-						{album.emoji ?
+						{album.emoji ? (
 							<span className="text-2xl relative z-10 transition-transform duration-300 group-hover:rotate-12">
 								{album.emoji}
 							</span>
-						:	<AlbumIcon
+						) : (
+							<AlbumIcon
 								className="h-6 w-6 relative z-10 transition-transform duration-300 group-hover:rotate-12"
 								style={{ color: album.color }}
 							/>
-						}
+						)}
 						{/* Aura mística */}
 						<div
 							className="absolute inset-0 opacity-0 group-hover:opacity-50 transition-opacity duration-300"
@@ -176,9 +163,7 @@ export function AlbumCard({
 						/>
 					</div>
 					<div className="flex-1 min-w-0">
-						<h3 className="font-bold text-lg leading-tight truncate">
-							{album.name}
-						</h3>
+						<h3 className="font-bold text-lg leading-tight truncate">{album.name}</h3>
 						{album.shortcut && (
 							<div className="flex items-center gap-1 text-sm text-muted-foreground">
 								<Hash className="h-3 w-3" />
@@ -204,9 +189,7 @@ export function AlbumCard({
 				{/* Descripción */}
 				{album.description && (
 					<div className="mb-4">
-						<p className="text-sm text-muted-foreground line-clamp-3">
-							{album.description}
-						</p>
+						<p className="text-sm text-muted-foreground line-clamp-3">{album.description}</p>
 					</div>
 				)}
 
@@ -215,8 +198,7 @@ export function AlbumCard({
 					<div className="flex items-center gap-1 text-sm text-muted-foreground">
 						<ImageIcon className="h-3 w-3" />
 						<span>
-							{album._count.images}{" "}
-							{album._count.images === 1 ? "imagen" : "imágenes"}
+							{album._count.images} {album._count.images === 1 ? 'imagen' : 'imágenes'}
 						</span>
 						<span className="mx-1">•</span>
 						<span>{formatBytes(album.totalSize)}</span>

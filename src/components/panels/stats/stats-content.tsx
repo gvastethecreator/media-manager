@@ -4,12 +4,12 @@
  * Se comunica con la base de datos a través de Server Actions
  */
 
-import { Card } from "@/components/ui/card";
-import { Suspense } from "react";
-import { GeneralStats } from "./components/general-stats";
-import { TopTags } from "./components/top-tags";
-import { RecentActivity } from "./components/recent-activity";
-import { StatsLoading } from "./components/stats-loading";
+import { Card } from '@/components/ui/card';
+import { Suspense } from 'react';
+import { GeneralStats } from './components/general-stats';
+import { RecentActivity } from './components/recent-activity';
+import { StatsLoading } from './components/stats-loading';
+import { TopTags } from './components/top-tags';
 
 export async function StatsContent() {
 	return (

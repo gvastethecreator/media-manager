@@ -1,179 +1,176 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { generateThumbnail } from '@/lib/thumbnail'
-import { existsSync } from 'fs'
-import { ThumbnailQuality } from '@/types/thumbnails'
-import { logger } from '@/lib/logger'
+import { existsSync } from 'fs';
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import { generateThumbnail } from '@/lib/thumbnail';
+import { ThumbnailQuality } from '@/types/thumbnails';
+import { type NextRequest, NextResponse } from 'next/server';
 
-const thumbLogger = logger.withContext('ThumbnailReprocessAPI')
+const thumbLogger = logger.withContext('ThumbnailReprocessAPI');
 
-export const dynamic = 'force-dynamic'
-export const maxDuration = 300
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
 
-export async function GET(request: NextRequest) {
-  const encoder = new TextEncoder()
-  const stream = new TransformStream()
-  const writer = stream.writable.getWriter()
+export async function GET(_request: NextRequest) {
+	const encoder = new TextEncoder();
+	const stream = new TransformStream();
+	const writer = stream.writable.getWriter();
 
-  // Configurar la respuesta SSE
-  const response = new NextResponse(stream.readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'X-Accel-Buffering': 'no'
-    }
-  })
+	// Configurar la respuesta SSE
+	const response = new NextResponse(stream.readable, {
+		headers: {
+			'Content-Type': 'text/event-stream',
+			'Cache-Control': 'no-cache, no-transform',
+			Connection: 'keep-alive',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET',
+			'Access-Control-Allow-Headers': 'Content-Type',
+			'X-Accel-Buffering': 'no',
+		},
+	});
 
-  const writeEvent = async (event: string, data: any) => {
-    try {
-      const formattedData = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
-      await writer.write(encoder.encode(formattedData))
-      thumbLogger.debug('📤 Evento enviado:', { type: event, data })
-    } catch (error) {
-      thumbLogger.error('❌ Error escribiendo evento:', error)
-    }
-  }
+	const writeEvent = async (event: string, data: Record<string, unknown>) => {
+		try {
+			const formattedData = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+			await writer.write(encoder.encode(formattedData));
+			thumbLogger.debug('📤 Evento enviado:', { type: event, data });
+		} catch (error) {
+			thumbLogger.error('❌ Error escribiendo evento:', error);
+		}
+	};
 
-  try {
-    // Enviar un ping inicial
-    await writeEvent('ping', { timestamp: Date.now() })
+	try {
+		// Enviar un ping inicial
+		await writeEvent('ping', { timestamp: Date.now() });
 
-    // Obtener imágenes que necesitan reprocesamiento
-    const images = await prisma.image.findMany({
-      where: {
-        OR: [
-          { thumbnail: null },
-          { thumbnailError: { not: null } }
-        ]
-      },
-      select: {
-        id: true,
-        path: true,
-        name: true
-      }
-    })
+		// Obtener imágenes que necesitan reprocesamiento
+		const images = await prisma.image.findMany({
+			where: {
+				OR: [{ thumbnail: null }, { thumbnailError: { not: null } }],
+			},
+			select: {
+				id: true,
+				path: true,
+				name: true,
+			},
+		});
 
-    const total = images.length
-    let current = 0
-    let processed = 0
-    let errors = 0
+		const total = images.length;
+		let current = 0;
+		let processed = 0;
+		let errors = 0;
 
-    // Enviar estado inicial
-    await writeEvent('start', {
-      total,
-      current: 0,
-      progress: 0,
-      status: 'Iniciando reprocesamiento...'
-    })
+		// Enviar estado inicial
+		await writeEvent('start', {
+			total,
+			current: 0,
+			progress: 0,
+			status: 'Iniciando reprocesamiento...',
+		});
 
-    // Procesar cada imagen
-    for (const image of images) {
-      current++
-      const progress = Math.round((current / total) * 100)
+		// Procesar cada imagen
+		for (const image of images) {
+			current++;
+			const progress = Math.round((current / total) * 100);
 
-      try {
-        // Verificar que el archivo existe
-        if (!existsSync(image.path)) {
-          await writeEvent('error', {
-            imageId: image.id,
-            path: image.path,
-            error: 'Archivo no encontrado'
-          })
-          errors++
-          continue
-        }
+			try {
+				// Verificar que el archivo existe
+				if (!existsSync(image.path)) {
+					await writeEvent('error', {
+						imageId: image.id,
+						path: image.path,
+						error: 'Archivo no encontrado',
+					});
+					errors++;
+					continue;
+				}
 
-        // Generar thumbnail
-        const thumbnail = await generateThumbnail(image.path, { quality: ThumbnailQuality.MEDIUM })
+				// Generar thumbnail
+				const thumbnail = await generateThumbnail(image.path, { quality: ThumbnailQuality.MEDIUM });
 
-        if (!thumbnail || !thumbnail.buffer) {
-          throw new Error('Error generando thumbnail')
-        }
+				if (!thumbnail || !thumbnail.buffer) {
+					throw new Error('Error generando thumbnail');
+				}
 
-        // Actualizar en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnail: thumbnail.buffer,
-            thumbnailSize: thumbnail.buffer.length,
-            thumbnailWidth: thumbnail.width,
-            thumbnailHeight: thumbnail.height,
-            thumbnailError: null,
-            thumbnailErrorAt: null,
-            updatedAt: new Date()
-          }
-        })
+				// Actualizar en base de datos
+				await prisma.image.update({
+					where: { id: image.id },
+					data: {
+						thumbnail: thumbnail.buffer,
+						thumbnailSize: thumbnail.buffer.length,
+						thumbnailWidth: thumbnail.width,
+						thumbnailHeight: thumbnail.height,
+						thumbnailError: null,
+						thumbnailErrorAt: null,
+						updatedAt: new Date(),
+					},
+				});
 
-        processed++
+				processed++;
 
-        // Enviar progreso
-        await writeEvent('progress', {
-          current,
-          total,
-          progress,
-          currentFile: image.path,
-          status: `Procesando ${current} de ${total}`,
-          lastProcessed: {
-            id: image.id,
-            path: image.path,
-            processedAt: new Date().toISOString()
-          }
-        })
+				// Enviar progreso
+				await writeEvent('progress', {
+					current,
+					total,
+					progress,
+					currentFile: image.path,
+					status: `Procesando ${current} de ${total}`,
+					lastProcessed: {
+						id: image.id,
+						path: image.path,
+						processedAt: new Date().toISOString(),
+					},
+				});
 
-        // Enviar ping cada 10 imágenes
-        if (current % 10 === 0) {
-          await writeEvent('ping', { timestamp: Date.now() })
-        }
-      } catch (error) {
-        thumbLogger.error('❌ Error procesando imagen:', error)
-        errors++
+				// Enviar ping cada 10 imágenes
+				if (current % 10 === 0) {
+					await writeEvent('ping', { timestamp: Date.now() });
+				}
+			} catch (error) {
+				thumbLogger.error('❌ Error procesando imagen:', error);
+				errors++;
 
-        // Actualizar error en base de datos
-        await prisma.image.update({
-          where: { id: image.id },
-          data: {
-            thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
-            thumbnailErrorAt: new Date(),
-            thumbnail: null,
-            thumbnailSize: null,
-            thumbnailWidth: null,
-            thumbnailHeight: null
-          }
-        })
+				// Actualizar error en base de datos
+				await prisma.image.update({
+					where: { id: image.id },
+					data: {
+						thumbnailError: error instanceof Error ? error.message : 'Error desconocido',
+						thumbnailErrorAt: new Date(),
+						thumbnail: null,
+						thumbnailSize: null,
+						thumbnailWidth: null,
+						thumbnailHeight: null,
+					},
+				});
 
-        // Enviar error
-        await writeEvent('error', {
-          imageId: image.id,
-          path: image.path,
-          error: error instanceof Error ? error.message : 'Error desconocido'
-        })
-      }
+				// Enviar error
+				await writeEvent('error', {
+					imageId: image.id,
+					path: image.path,
+					error: error instanceof Error ? error.message : 'Error desconocido',
+				});
+			}
 
-      // Pequeña pausa para no sobrecargar
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
+			// Pequeña pausa para no sobrecargar
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
 
-    // Enviar evento de finalización
-    await writeEvent('complete', {
-      processed,
-      errors,
-      total,
-      timestamp: new Date().toISOString()
-    })
+		// Enviar evento de finalización
+		await writeEvent('complete', {
+			processed,
+			errors,
+			total,
+			timestamp: new Date().toISOString(),
+		});
 
-    await writer.close()
-    return response
-  } catch (error) {
-    thumbLogger.error('❌ Error en reprocesamiento:', error)
-    await writeEvent('error', {
-      error: error instanceof Error ? error.message : 'Error desconocido',
-      timestamp: new Date().toISOString()
-    })
-    await writer.close()
-    return response
-  }
+		await writer.close();
+		return response;
+	} catch (error) {
+		thumbLogger.error('❌ Error en reprocesamiento:', error);
+		await writeEvent('error', {
+			error: error instanceof Error ? error.message : 'Error desconocido',
+			timestamp: new Date().toISOString(),
+		});
+		await writer.close();
+		return response;
+	}
 }

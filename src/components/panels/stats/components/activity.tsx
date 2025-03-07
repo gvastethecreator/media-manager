@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { memo } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { memo } from 'react';
 
 interface ActivityProps {
 	activity: {
@@ -26,15 +26,11 @@ export const Activity = memo(function Activity({ activity }: ActivityProps) {
 				<Avatar className="h-8 w-8">
 					{activity.image?.thumbnail && (
 						<AvatarImage
-							src={`data:image/jpeg;base64,${Buffer.from(
-								activity.image.thumbnail
-							).toString("base64")}`}
+							src={`data:image/jpeg;base64,${Buffer.from(activity.image.thumbnail).toString('base64')}`}
 							alt={activity.image.name}
 						/>
 					)}
-					<AvatarFallback>
-						{activity.image?.name.charAt(0).toUpperCase() || "?"}
-					</AvatarFallback>
+					<AvatarFallback>{activity.image?.name.charAt(0).toUpperCase() || '?'}</AvatarFallback>
 				</Avatar>
 				<div className="space-y-1">
 					<p className="text-sm">{activity.description}</p>
@@ -50,4 +46,4 @@ export const Activity = memo(function Activity({ activity }: ActivityProps) {
 	);
 });
 
-Activity.displayName = "Activity";
+Activity.displayName = 'Activity';

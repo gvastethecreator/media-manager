@@ -1,20 +1,17 @@
-"use client";
+'use client';
 
-import { NavPanel } from "@/components/panels/nav/nav-panel";
-import { RightPanel } from "@/components/panels/right-panel";
-import { ViewContainer } from "@/components/views/view-container";
-import { ViewToolbar } from "@/components/toolbar/view-toolbar";
-import {
-	ResizableHandle,
-	ResizablePanel,
-	ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useState, Suspense, useEffect } from "react";
-import { FileViewer } from "@/components/features/file-viewer/file-viewer";
-import { useImageViewer } from "@/store/image-viewer.store";
-import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
-import { getNavigationData } from "@/app/actions/nav.actions";
-import { ImageItem } from "@/types/file-item";
+import { getNavigationData } from '@/app/actions/nav.actions';
+import { FileViewer } from '@/components/features/file-viewer/file-viewer';
+import { NavPanel } from '@/components/panels/nav/nav-panel';
+import { NavPanelSkeleton } from '@/components/panels/nav/nav-panel-skeleton';
+import { RightPanel } from '@/components/panels/right-panel';
+import { ViewToolbar } from '@/components/toolbar/view-toolbar';
+import { ResizablePanel, ResizablePanelGroup, ResizablePanelHandle } from '@/components/ui/resizable';
+import { ViewContainer } from '@/components/views/view-container';
+import { useImageViewer } from '@/store/image-viewer.store';
+import { ImageItem } from '@/types/file-item';
+import type * as React from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 interface MainLayoutProps {
 	children: React.ReactNode;
@@ -23,9 +20,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
 	const [isResizing, setIsResizing] = useState(false);
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
-	const [navData, setNavData] = useState<Awaited<
-		ReturnType<typeof getNavigationData>
-	> | null>(null);
+	const [navData, setNavData] = useState<Awaited<ReturnType<typeof getNavigationData>> | null>(null);
 
 	// Cargar datos de navegación
 	useEffect(() => {
@@ -41,18 +36,11 @@ export function MainLayout({ children }: MainLayoutProps) {
 				onDragEnd={() => setIsResizing(false)}
 			>
 				{/* Panel Izquierdo - Default 20% */}
-				<ResizablePanel
-					defaultSize={20}
-					minSize={15}
-					maxSize={30}
-					className="bg-background/95"
-				>
-					<Suspense fallback={<NavPanelSkeleton />}>
-						{navData && <NavPanel initialData={navData} />}
-					</Suspense>
+				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background/95">
+					<Suspense fallback={<NavPanelSkeleton />}>{navData && <NavPanel initialData={navData} />}</Suspense>
 				</ResizablePanel>
 
-				<ResizableHandle withHandle />
+				<ResizablePanelHandle withHandle />
 
 				{/* Contenido Principal - Default 60% */}
 				<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
@@ -63,15 +51,10 @@ export function MainLayout({ children }: MainLayoutProps) {
 					</div>
 				</ResizablePanel>
 
-				<ResizableHandle withHandle />
+				<ResizablePanelHandle withHandle />
 
 				{/* Panel Derecho - Default 20% */}
-				<ResizablePanel
-					defaultSize={20}
-					minSize={15}
-					maxSize={30}
-					className="bg-background/95"
-				>
+				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background/95">
 					<RightPanel />
 				</ResizablePanel>
 			</ResizablePanelGroup>

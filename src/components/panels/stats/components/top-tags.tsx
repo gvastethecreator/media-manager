@@ -1,7 +1,7 @@
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tag } from "lucide-react";
-import { TagUsage } from "./tag-usage";
-import { getSystemStats } from "@/app/actions/stats.actions";
+import { getSystemStats } from '@/app/actions/stats.actions';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tag } from 'lucide-react';
+import { TagUsage } from './tag-usage';
 
 export async function TopTags() {
 	const stats = await getSystemStats();
@@ -15,8 +15,8 @@ export async function TopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-1 w-full gap-2">
-				{stats.topTags.map((tag, i) => (
-					<TagUsage key={i} tag={tag} />
+				{stats.topTags.map((tag) => (
+					<TagUsage key={tag.id} tag={tag} />
 				))}
 			</CardContent>
 		</>

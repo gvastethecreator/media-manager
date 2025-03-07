@@ -1,4 +1,4 @@
-import { FOLDER_EVENTS } from "@/services/folder.service";
+import type { FOLDER_EVENTS } from '@/services/folder.service';
 
 export interface ProcessStatus {
 	status?: string;
@@ -8,7 +8,7 @@ export interface ProcessStatus {
 	currentFile?: string;
 	timestamp?: number;
 	folderId?: string;
-	phase?: "scanning" | "indexing" | "thumbnails" | "metadata";
+	phase?: 'scanning' | 'indexing' | 'thumbnails' | 'metadata';
 	filesProcessed?: number;
 	totalFiles?: number;
 	errors?: Array<{

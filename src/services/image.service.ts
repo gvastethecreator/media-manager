@@ -1,272 +1,280 @@
-import { prisma } from '@/lib/prisma'
-import type { Image } from '@prisma/client'
-import { statsService } from './stats.service'
-import sharp from 'sharp'
-import { thumbnailCache } from '@/lib/cache'
-import { createHash } from 'crypto'
-import { promises as fs } from 'fs'
-import { imageConfig } from '@/config'
-import { logger } from '@/lib/logger'
-import { ThumbnailQuality } from '@/types/thumbnails'
-import { extractMetadata } from '@/app/actions/metadata.actions'
+import { promises as fs } from 'fs';
+import { createHash } from 'node:crypto';
+import { extractMetadata } from '@/app/actions/metadata.actions';
+import { imageConfig } from '@/config';
+import { thumbnailCache } from '@/lib/cache';
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import { ThumbnailQuality } from '@/types/thumbnails';
+import type { Image } from '@prisma/client';
+import sharp from 'sharp';
+import { statsService } from './stats.service';
 
-const imageLogger = logger.withContext('ImageService')
+const imageLogger = logger.withContext('ImageService');
 
-export type { ThumbnailQuality }
-export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities
+export type { ThumbnailQuality };
+export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities;
 
 export type CreateImageInput = {
-  name: string
-  path: string
-  size: number
-  width: number
-  height: number
-  hash: string
-  folderId: string
-  metadata?: Record<string, any>
-  isPublic?: boolean
-}
+	name: string;
+	path: string;
+	size: number;
+	width: number;
+	height: number;
+	hash: string;
+	folderId: string;
+	metadata?: Record<string, string | number | boolean | string[] | null | undefined>;
+	isPublic?: boolean;
+};
 
 export type ImageProcessingOptions = {
-  quality?: number
-  width?: number
-  height?: number
-  format?: 'webp' | 'jpeg' | 'png'
-  fit?: 'cover' | 'contain' | 'inside' | 'outside'
-}
+	quality?: number;
+	width?: number;
+	height?: number;
+	format?: 'webp' | 'jpeg' | 'png';
+	fit?: 'cover' | 'contain' | 'inside' | 'outside';
+};
 
 class ImageService {
-  private static instance: ImageService
-  private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats
-  private readonly CACHE_DIR = '.image-cache'
+	private static instance: ImageService;
+	private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats;
+	private readonly CACHE_DIR = '.image-cache';
 
-  private constructor() {
-    this.ensureCacheDir()
-  }
+	private constructor() {
+		this.ensureCacheDir();
+	}
 
-  public static getInstance(): ImageService {
-    if (!ImageService.instance) {
-      ImageService.instance = new ImageService()
-    }
-    return ImageService.instance
-  }
+	public static getInstance(): ImageService {
+		if (!ImageService.instance) {
+			ImageService.instance = new ImageService();
+		}
+		return ImageService.instance;
+	}
 
-  private async ensureCacheDir() {
-    try {
-      await fs.mkdir(this.CACHE_DIR, { recursive: true })
-    } catch (error) {
-      console.error('Error creating cache directory:', error)
-    }
-  }
+	private async ensureCacheDir() {
+		try {
+			await fs.mkdir(this.CACHE_DIR, { recursive: true });
+		} catch (error) {
+			console.error('Error creating cache directory:', error);
+		}
+	}
 
-  private getCacheKey(filePath: string, options: any): string {
-    const hash = createHash('md5')
-    hash.update(filePath + JSON.stringify(options))
-    return hash.digest('hex')
-  }
+	private getCacheKey(filePath: string, options: ImageProcessingOptions): string {
+		const hash = createHash('md5');
+		hash.update(filePath + JSON.stringify(options));
+		return hash.digest('hex');
+	}
 
-  private async processImage(
-    inputPath: string,
-    options: ImageProcessingOptions = {}
-  ): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
-    let pipeline = sharp(inputPath)
-    const metadata = await pipeline.metadata()
+	private async processImage(
+		inputPath: string,
+		options: ImageProcessingOptions = {}
+	): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
+		let pipeline = sharp(inputPath);
+		const metadata = await pipeline.metadata();
 
-    if (options.width || options.height) {
-      const aspectRatio = metadata.width! / metadata.height!
-      let targetWidth = options.width
-      let targetHeight = options.height
+		// Verificar que los valores de ancho y alto existen antes de usarlos
+		const width = metadata.width ?? 0;
+		const height = metadata.height ?? 0;
 
-      if (aspectRatio > 1 && targetWidth) {
-        targetHeight = Math.round(targetWidth / aspectRatio)
-      } else if (targetHeight) {
-        targetWidth = Math.round(targetHeight * aspectRatio)
-      }
+		if (options.width || options.height) {
+			const aspectRatio = width > 0 && height > 0 ? width / height : 1;
+			let targetWidth = options.width;
+			let targetHeight = options.height;
 
-      pipeline = pipeline.resize(targetWidth, targetHeight, {
-        fit: options.fit || 'cover',
-        withoutEnlargement: true
-      })
-    }
+			if (aspectRatio > 1 && targetWidth) {
+				targetHeight = Math.round(targetWidth / aspectRatio);
+			} else if (targetHeight) {
+				targetWidth = Math.round(targetHeight * aspectRatio);
+			}
 
-    if (options.format === 'webp') {
-      pipeline = pipeline.webp({
-        quality: options.quality || 80,
-        effort: 4,
-        nearLossless: true
-      })
-    } else if (options.format === 'jpeg') {
-      pipeline = pipeline.jpeg({
-        quality: options.quality || 80,
-        progressive: true
-      })
-    } else if (options.format === 'png') {
-      pipeline = pipeline.png({
-        progressive: true,
-        compressionLevel: 9
-      })
-    }
+			pipeline = pipeline.resize(targetWidth, targetHeight, {
+				fit: options.fit || 'cover',
+				withoutEnlargement: true,
+			});
+		}
 
-    const { data, info } = await pipeline.toBuffer({ resolveWithObject: true })
-    return { buffer: data, metadata: info }
-  }
+		if (options.format === 'webp') {
+			pipeline = pipeline.webp({
+				quality: options.quality || 80,
+				effort: 4,
+				nearLossless: true,
+			});
+		} else if (options.format === 'jpeg') {
+			pipeline = pipeline.jpeg({
+				quality: options.quality || 80,
+				progressive: true,
+			});
+		} else if (options.format === 'png') {
+			pipeline = pipeline.png({
+				progressive: true,
+				compressionLevel: 9,
+			});
+		}
 
-  async createImage(data: CreateImageInput): Promise<Image> {
-    const image = await prisma.image.create({
-      data: {
-        name: data.name,
-        path: data.path,
-        size: data.size,
-        width: data.width,
-        height: data.height,
-        hash: data.hash,
-        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-        isPublic: data.isPublic ?? false,
-        folder: {
-          connect: { id: data.folderId }
-        }
-      },
-      include: {
-        tags: true,
-      },
-    })
+		const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
+		return { buffer: data, metadata: info };
+	}
 
-    // Generar thumbnail automáticamente
-    await this.generateThumbnail(image.id, ThumbnailQuality.MEDIUM)
+	async createImage(data: CreateImageInput): Promise<Image> {
+		const image = await prisma.image.create({
+			data: {
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				width: data.width,
+				height: data.height,
+				hash: data.hash,
+				metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+				isPublic: data.isPublic ?? false,
+				folder: {
+					connect: { id: data.folderId },
+				},
+			},
+			include: {
+				tags: true,
+			},
+		});
 
-    // Inicializar estadísticas
-    await statsService.getOrCreateImageStats(image.id)
+		// Generar thumbnail automáticamente
+		await this.generateThumbnail(image.id, ThumbnailQuality.MEDIUM);
 
-    return image
-  }
+		// Inicializar estadísticas
+		await statsService.getOrCreateImageStats(image.id);
 
-  async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
-    const image = await prisma.image.findUnique({
-      where: { id: imageId }
-    })
+		return image;
+	}
 
-    if (!image) throw new Error('Imagen no encontrada')
+	async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+		});
 
-    const config = THUMBNAIL_QUALITY_CONFIG[quality]
-    if (!config) throw new Error('Calidad de thumbnail inválida')
+		if (!image) {
+			throw new Error('Imagen no encontrada');
+		}
 
-    const cacheKey = this.getCacheKey(image.path, { ...config, type: 'thumbnail' })
+		const config = THUMBNAIL_QUALITY_CONFIG[quality];
+		if (!config) {
+			throw new Error('Calidad de thumbnail inválida');
+		}
 
-    try {
-      const { buffer, metadata } = await this.processImage(image.path, {
-        width: config.width,
-        height: config.height,
-        quality: config.quality,
-        format: 'webp',
-        fit: 'cover'
-      })
+		const cacheKey = this.getCacheKey(image.path, { ...config, type: 'thumbnail' });
 
-      await prisma.image.update({
-        where: { id: imageId },
-        data: {
-          thumbnail: buffer,
-          thumbnailSize: buffer.length,
-          thumbnailWidth: metadata.width,
-          thumbnailHeight: metadata.height,
-          updatedAt: new Date()
-        }
-      })
+		try {
+			const { buffer, metadata } = await this.processImage(image.path, {
+				width: config.width,
+				height: config.height,
+				quality: config.quality,
+				format: 'webp',
+				fit: 'cover',
+			});
 
-      // Actualizar caché
-      await thumbnailCache.set(cacheKey, buffer)
+			await prisma.image.update({
+				where: { id: imageId },
+				data: {
+					thumbnail: buffer,
+					thumbnailSize: buffer.length,
+					thumbnailWidth: metadata.width,
+					thumbnailHeight: metadata.height,
+					updatedAt: new Date(),
+				},
+			});
 
-    } catch (error) {
-      console.error('Error generating thumbnail:', error)
-      throw error
-    }
-  }
+			// Actualizar caché
+			await thumbnailCache.set(cacheKey, buffer);
+		} catch (error) {
+			console.error('Error generating thumbnail:', error);
+			throw error;
+		}
+	}
 
-  async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
-    const cacheKey = `thumbnail:${imageId}:${quality}`;
+	async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
+		const cacheKey = `thumbnail:${imageId}:${quality}`;
 
-    // Intentar obtener del caché
-    const cached = await thumbnailCache.get(cacheKey);
-    if (cached) return cached.toString('base64');
+		// Intentar obtener del caché
+		const cached = await thumbnailCache.get(cacheKey);
+		if (cached) {
+			return cached.toString('base64');
+		}
 
-    // Si no está en caché, generarlo
-    await this.generateThumbnail(imageId, quality);
+		// Si no está en caché, generarlo
+		await this.generateThumbnail(imageId, quality);
 
-    // Intentar obtener el nuevo thumbnail
-    const image = await prisma.image.findUnique({
-      where: { id: imageId },
-      select: { thumbnail: true }
-    });
+		// Intentar obtener el nuevo thumbnail
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+			select: { thumbnail: true },
+		});
 
-    if (!image?.thumbnail) {
-      throw new Error('Error obteniendo thumbnail');
-    }
+		if (!image?.thumbnail) {
+			throw new Error('Error obteniendo thumbnail');
+		}
 
-    const base64 = (image.thumbnail as Buffer).toString('base64');
-    await thumbnailCache.set(cacheKey, Buffer.from(base64, 'base64'));
-    return base64;
-  }
+		const base64 = (image.thumbnail as Buffer).toString('base64');
+		await thumbnailCache.set(cacheKey, Buffer.from(base64, 'base64'));
+		return base64;
+	}
 
-  async getOriginalImage(imageId: string): Promise<Buffer> {
-    const image = await prisma.image.findUnique({
-      where: { id: imageId },
-      select: { path: true }
-    });
+	async getOriginalImage(imageId: string): Promise<Buffer> {
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+			select: { path: true },
+		});
 
-    if (!image) {
-      imageLogger.error('Imagen no encontrada', { imageId });
-      throw new Error('Imagen no encontrada');
-    }
+		if (!image) {
+			imageLogger.error('Imagen no encontrada', { imageId });
+			throw new Error('Imagen no encontrada');
+		}
 
-    try {
-      const buffer = await fs.readFile(image.path);
-      return buffer;
-    } catch (error) {
-      imageLogger.error('Error leyendo imagen original', { imageId, error });
-      throw new Error('Error al leer la imagen original');
-    }
-  }
+		try {
+			const buffer = await fs.readFile(image.path);
+			return buffer;
+		} catch (error) {
+			imageLogger.error('Error leyendo imagen original', { imageId, error });
+			throw new Error('Error al leer la imagen original');
+		}
+	}
 
-  async getImageMetadata(path: string) {
-    try {
-      return await extractMetadata(path)
-    } catch (error) {
-      imageLogger.error('Error getting image metadata:', { path, error })
-      throw error
-    }
-  }
+	async getImageMetadata(path: string) {
+		try {
+			return await extractMetadata(path);
+		} catch (error) {
+			imageLogger.error('Error getting image metadata:', { path, error });
+			throw error;
+		}
+	}
 
-  async createBasicThumbnail(path: string, options: {
-    width?: number
-    height?: number
-    quality?: number
-  } = {}) {
-    const {
-      width = 200,
-      height = 200,
-      quality = 80
-    } = options
+	async createBasicThumbnail(
+		path: string,
+		options: {
+			width?: number;
+			height?: number;
+			quality?: number;
+		} = {}
+	) {
+		const { width = 200, height = 200, quality = 80 } = options;
 
-    try {
-      const imageBuffer = await sharp(path)
-        .resize(width, height, {
-          fit: 'cover',
-          position: 'centre'
-        })
-        .webp({ quality })
-        .toBuffer()
+		try {
+			const imageBuffer = await sharp(path)
+				.resize(width, height, {
+					fit: 'cover',
+					position: 'centre',
+				})
+				.webp({ quality })
+				.toBuffer();
 
-      return {
-        buffer: imageBuffer,
-        size: imageBuffer.length,
-        format: 'webp'
-      }
-    } catch (error) {
-      imageLogger.error('Error creating basic thumbnail:', { path, error })
-      throw error
-    }
-  }
+			return {
+				buffer: imageBuffer,
+				size: imageBuffer.length,
+				format: 'webp',
+			};
+		} catch (error) {
+			imageLogger.error('Error creating basic thumbnail:', { path, error });
+			throw error;
+		}
+	}
 
-  // Resto de métodos del servicio original...
+	// Resto de métodos del servicio original...
 }
 
-export const imageService = ImageService.getInstance()
+export const imageService = ImageService.getInstance();

@@ -1,415 +1,454 @@
-import { prisma } from '@/lib/prisma'
-import { logger } from '@/lib/logger'
-import { EventEmitter } from 'events'
+import { processImage } from '@/lib/image-processing';
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import { emit } from '@/lib/server/events.server';
+import type { SystemImageType } from '@/types/entities';
 import type {
-  SystemImageMetadata,
-  SystemImageDimensions,
-  SystemImageStats,
-  SystemImageFilters,
-  SystemImageResult,
-  SystemImageResults,
-  CreateSystemImageParams,
-  UpdateSystemImageParams,
-  GetSystemImagesParams,
-  SystemImageEvents,
-  SystemImageProcessingOptions,
-} from '@/types/system-images'
-import { SystemImageType } from '@/types/entities'
-import { processImage } from '@/lib/image-processing'
+	CreateSystemImageParams,
+	GetSystemImagesParams,
+	SystemImageDimensions,
+	SystemImageEvents,
+	SystemImageFilters,
+	SystemImageMetadata,
+	SystemImageProcessingOptions,
+	SystemImageResult,
+	SystemImageResults,
+	SystemImageStats,
+	UpdateSystemImageParams,
+} from '@/types/system-images';
 
-const systemImagesLogger = logger.withContext('SystemImagesService')
+const systemImagesLogger = logger.withContext('SystemImagesService');
 
 interface WhereClause {
-  type?: SystemImageType;
-  category?: string;
-  size?: {
-    gte?: number;
-    lte?: number;
-  };
-  width?: {
-    gte?: number;
-    lte?: number;
-  };
-  height?: {
-    gte?: number;
-    lte?: number;
-  };
-  OR?: Array<{
-    name: { contains: string; mode: 'insensitive' };
-  } | {
-    category: { contains: string; mode: 'insensitive' };
-  }>;
+	type?: SystemImageType;
+	category?: string;
+	size?: {
+		gte?: number;
+		lte?: number;
+	};
+	width?: {
+		gte?: number;
+		lte?: number;
+	};
+	height?: {
+		gte?: number;
+		lte?: number;
+	};
+	OR?: Array<
+		| {
+				name: { contains: string; mode: 'insensitive' };
+		  }
+		| {
+				category: { contains: string; mode: 'insensitive' };
+		  }
+	>;
 }
 
-class SystemImagesService extends EventEmitter {
-  private static instance: SystemImagesService
-  private readonly EVENTS: SystemImageEvents = {
-    IMAGE_CREATED: 'system-image:created',
-    IMAGE_UPDATED: 'system-image:updated',
-    IMAGE_DELETED: 'system-image:deleted',
-    IMAGES_CHANGED: 'system-images:changed',
-  }
+class SystemImagesService {
+	private static instance: SystemImagesService;
+	private readonly EVENTS: SystemImageEvents = {
+		IMAGE_CREATED: 'system-image:created',
+		IMAGE_UPDATED: 'system-image:updated',
+		IMAGE_DELETED: 'system-image:deleted',
+		IMAGES_CHANGED: 'system-images:changed',
+	};
 
-  private constructor() {
-    super()
-  }
+	private constructor() {
+		// Ya no es necesario llamar a super()
+	}
 
-  public static getInstance(): SystemImagesService {
-    if (!SystemImagesService.instance) {
-      SystemImagesService.instance = new SystemImagesService()
-    }
-    return SystemImagesService.instance
-  }
+	public static getInstance(): SystemImagesService {
+		if (!SystemImagesService.instance) {
+			SystemImagesService.instance = new SystemImagesService();
+		}
+		return SystemImagesService.instance;
+	}
 
-  public async createImage(params: CreateSystemImageParams): Promise<SystemImageResult> {
-    try {
-      const {
-        name,
-        file,
-        type,
-        category,
-        dimensions,
-        metadata = {},
-        processingOptions,
-      } = params
+	// Método privado para emitir eventos usando serverEvents
+	private async emitEvent(event: string, data: unknown): Promise<void> {
+		// Emitir con el nuevo sistema
+		await emit({
+			type: event,
+			data,
+		});
+	}
 
-      // Procesar imagen si se especifican opciones
-      let processedPath = file.path
-      let processedMetadata: SystemImageMetadata = metadata
-      if (processingOptions) {
-        const processed = await this.processImage(file.path, processingOptions)
-        processedPath = processed.path
-        processedMetadata = {
-          ...metadata,
-          ...processed.metadata,
-        }
-      }
+	public async createImage(params: CreateSystemImageParams): Promise<SystemImageResult> {
+		try {
+			const { name, file, type, category, dimensions, metadata = {}, processingOptions } = params;
 
-      // Crear imagen en la base de datos
-      const image = await prisma.systemImage.create({
-        data: {
-          name,
-          path: processedPath,
-          type,
-          category,
-          size: file.size,
-          width: dimensions.width,
-          height: dimensions.height,
-          metadata: JSON.stringify(processedMetadata),
-        },
-      })
+			// Procesar imagen si se especifican opciones
+			let processedPath = file.path;
+			let processedMetadata: SystemImageMetadata = metadata;
+			if (processingOptions) {
+				const processed = await this.processImage(file.path, processingOptions);
+				processedPath = processed.path;
+				processedMetadata = {
+					...metadata,
+					...processed.metadata,
+				};
+			}
 
-      // Calcular dimensiones
-      const calculatedDimensions = this.calculateDimensions(dimensions.width, dimensions.height)
+			// Crear imagen en la base de datos
+			const image = await prisma.systemImage.create({
+				data: {
+					name,
+					path: processedPath,
+					type,
+					category,
+					size: file.size,
+					width: dimensions.width,
+					height: dimensions.height,
+					metadata: JSON.stringify(processedMetadata),
+				},
+			});
 
-      // Emitir eventos
-      this.emit(this.EVENTS.IMAGE_CREATED, image)
-      this.emit(this.EVENTS.IMAGES_CHANGED)
+			// Calcular dimensiones
+			const calculatedDimensions = this.calculateDimensions(dimensions.width, dimensions.height);
 
-      return {
-        ...image,
-        type: image.type as SystemImageType,
-        dimensions: calculatedDimensions,
-        url: this.getImageUrl(image.path),
-        thumbnailUrl: this.getThumbnailUrl(image.path),
-        metadata: processedMetadata,
-      }
-    } catch (error) {
-      systemImagesLogger.error('Error creating system image:', { params, error })
-      throw new Error('Error al crear imagen del sistema')
-    }
-  }
+			// Emitir eventos con el nuevo sistema
+			await this.emitEvent(this.EVENTS.IMAGE_CREATED, { id: image.id, type, category });
+			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { type, category });
 
-  public async updateImage(
-    id: string,
-    params: UpdateSystemImageParams
-  ): Promise<SystemImageResult> {
-    try {
-      const {
-        name,
-        file,
-        type,
-        category,
-        dimensions,
-        metadata,
-        processingOptions,
-      } = params
+			// Transformar y devolver resultado
+			const result: SystemImageResult = {
+				id: image.id,
+				name: image.name,
+				path: image.path,
+				type: image.type as SystemImageType,
+				category: image.category,
+				size: image.size,
+				width: image.width,
+				height: image.height,
+				url: this.getImageUrl(image.path),
+				thumbnailUrl: this.getThumbnailUrl(image.path),
+				dimensions: calculatedDimensions,
+				metadata: JSON.parse(image.metadata || '{}'),
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+			};
 
-      // Obtener imagen actual
-      const currentImage = await prisma.systemImage.findUnique({
-        where: { id },
-      })
+			return result;
+		} catch (error) {
+			systemImagesLogger.error('Error creando imagen:', error);
+			throw new Error(`Error creando imagen: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
 
-      if (!currentImage) {
-        throw new Error('Imagen no encontrada')
-      }
+	public async updateImage(id: string, params: UpdateSystemImageParams): Promise<SystemImageResult> {
+		try {
+			const { name, type, category, dimensions, metadata } = params;
 
-      // Procesar nueva imagen si se proporciona
-      let processedPath = file ? file.path : currentImage.path
-      let processedMetadata = metadata ? metadata : JSON.parse(currentImage.metadata || '{}')
-      if (file && processingOptions) {
-        const processed = await this.processImage(file.path, processingOptions)
-        processedPath = processed.path
-        processedMetadata = {
-          ...processedMetadata,
-          ...processed.metadata,
-        }
-      }
+			// Buscar imagen existente
+			const existingImage = await prisma.systemImage.findUnique({
+				where: { id },
+			});
 
-      // Actualizar imagen
-      const image = await prisma.systemImage.update({
-        where: { id },
-        data: {
-          name: name || currentImage.name,
-          path: processedPath,
-          type: type || currentImage.type,
-          category: category || currentImage.category,
-          size: file?.size || currentImage.size,
-          width: dimensions?.width || currentImage.width,
-          height: dimensions?.height || currentImage.height,
-          metadata: JSON.stringify(processedMetadata),
-        },
-      })
+			if (!existingImage) {
+				throw new Error(`Imagen no encontrada: ${id}`);
+			}
 
-      // Calcular dimensiones
-      const calculatedDimensions = this.calculateDimensions(
-        dimensions?.width || currentImage.width,
-        dimensions?.height || currentImage.height
-      )
+			// Datos a actualizar
+			const updateData: Record<string, unknown> = {};
 
-      // Emitir eventos
-      this.emit(this.EVENTS.IMAGE_UPDATED, image)
-      this.emit(this.EVENTS.IMAGES_CHANGED)
+			if (name) {
+				updateData.name = name;
+			}
 
-      return {
-        ...image,
-        type: image.type as SystemImageType,
-        dimensions: calculatedDimensions,
-        url: this.getImageUrl(image.path),
-        thumbnailUrl: this.getThumbnailUrl(image.path),
-        metadata: processedMetadata,
-      }
-    } catch (error) {
-      systemImagesLogger.error('Error updating system image:', { id, params, error })
-      throw new Error('Error al actualizar imagen del sistema')
-    }
-  }
+			if (type) {
+				updateData.type = type;
+			}
 
-  public async deleteImage(id: string): Promise<void> {
-    try {
-      // Obtener imagen
-      const image = await prisma.systemImage.findUnique({
-        where: { id },
-      })
+			if (category) {
+				updateData.category = category;
+			}
 
-      if (!image) {
-        throw new Error('Imagen no encontrada')
-      }
+			if (dimensions) {
+				if (dimensions.width) {
+					updateData.width = dimensions.width;
+				}
+				if (dimensions.height) {
+					updateData.height = dimensions.height;
+				}
+			}
 
-      // Eliminar archivo físico
-      await this.deleteImageFile(image.path)
+			if (metadata) {
+				const existingMetadata = JSON.parse(existingImage.metadata || '{}');
+				updateData.metadata = JSON.stringify({
+					...existingMetadata,
+					...metadata,
+				});
+			}
 
-      // Eliminar registro
-      await prisma.systemImage.delete({
-        where: { id },
-      })
+			// Actualizar en base de datos
+			const image = await prisma.systemImage.update({
+				where: { id },
+				data: updateData,
+			});
 
-      // Emitir eventos
-      this.emit(this.EVENTS.IMAGE_DELETED, image)
-      this.emit(this.EVENTS.IMAGES_CHANGED)
-    } catch (error) {
-      systemImagesLogger.error('Error deleting system image:', { id, error })
-      throw new Error('Error al eliminar imagen del sistema')
-    }
-  }
+			// Calcular dimensiones
+			const calculatedDimensions = this.calculateDimensions(
+				image.width,
+				image.height,
+				dimensions as SystemImageDimensions
+			);
 
-  public async getImages(params: GetSystemImagesParams = {}): Promise<SystemImageResults> {
-    try {
-      const {
-        filters = {},
-        targetDimensions,
-      } = params
+			// Emitir eventos con el nuevo sistema
+			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, { id, type, category });
+			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { type, category });
 
-      const {
-        type,
-        category,
-        minSize,
-        maxSize,
-        minWidth,
-        maxWidth,
-        minHeight,
-        maxHeight,
-        search,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-        page = 0,
-        pageSize = 50,
-      } = filters
+			return {
+				id: image.id,
+				name: image.name,
+				path: image.path,
+				type: image.type as SystemImageType,
+				category: image.category,
+				size: image.size,
+				dimensions: calculatedDimensions,
+				url: this.getImageUrl(image.path),
+				thumbnailUrl: this.getThumbnailUrl(image.path),
+				metadata: JSON.parse(image.metadata || '{}'),
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+			};
+		} catch (error) {
+			systemImagesLogger.error('Error updating system image:', { id, params, error });
+			throw new Error('Error al actualizar imagen del sistema');
+		}
+	}
 
-      // Construir where
-      const where: WhereClause = {}
-      if (type) where.type = type
-      if (category) where.category = category
-      if (minSize || maxSize) {
-        where.size = {}
-        if (minSize) where.size.gte = minSize
-        if (maxSize) where.size.lte = maxSize
-      }
-      if (minWidth || maxWidth) {
-        where.width = {}
-        if (minWidth) where.width.gte = minWidth
-        if (maxWidth) where.width.lte = maxWidth
-      }
-      if (minHeight || maxHeight) {
-        where.height = {}
-        if (minHeight) where.height.gte = minHeight
-        if (maxHeight) where.height.lte = maxHeight
-      }
-      if (search) {
-        where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { category: { contains: search, mode: 'insensitive' } },
-        ]
-      }
+	public async deleteImage(id: string): Promise<void> {
+		try {
+			// Buscar imagen existente
+			const image = await prisma.systemImage.findUnique({
+				where: { id },
+			});
 
-      // Obtener total
-      const total = await prisma.systemImage.count({ where })
+			if (!image) {
+				throw new Error(`Imagen no encontrada: ${id}`);
+			}
 
-      // Obtener imágenes
-      const rawImages = await prisma.systemImage.findMany({
-        where,
-        orderBy: {
-          [sortBy]: sortOrder,
-        },
-        skip: page * pageSize,
-        take: pageSize,
-      })
+			// Eliminar archivo físico
+			if (image.path) {
+				await this.deleteImageFile(image.path);
+			}
 
-      // Obtener estadísticas
-      const stats = await this.getImageStats()
+			// Eliminar de la base de datos
+			await prisma.systemImage.delete({
+				where: { id },
+			});
 
-      // Procesar resultados
-      const items = rawImages.map((image) => ({
-        ...image,
-        type: image.type as SystemImageType,
-        dimensions: targetDimensions
-          ? this.calculateDimensions(image.width, image.height, targetDimensions)
-          : this.calculateDimensions(image.width, image.height),
-        url: this.getImageUrl(image.path),
-        thumbnailUrl: this.getThumbnailUrl(image.path),
-        metadata: JSON.parse(image.metadata || '{}'),
-      }))
+			// Emitir eventos con el nuevo sistema
+			await this.emitEvent(this.EVENTS.IMAGE_DELETED, { id, type: image.type, category: image.category });
+			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { type: image.type, category: image.category });
+		} catch (error) {
+			systemImagesLogger.error('Error deleting system image:', { id, error });
+			throw new Error('Error al eliminar imagen del sistema');
+		}
+	}
 
-      return {
-        items,
-        total,
-        page,
-        pageSize,
-        stats,
-      }
-    } catch (error) {
-      systemImagesLogger.error('Error getting system images:', { params, error })
-      throw new Error('Error al obtener imágenes del sistema')
-    }
-  }
+	public async getImages(params: GetSystemImagesParams = {}): Promise<SystemImageResults> {
+		try {
+			const { filters = {}, targetDimensions } = params;
 
-  public async getImageStats(): Promise<SystemImageStats> {
-    try {
-      const total = await prisma.systemImage.count()
-      const byType = await prisma.systemImage.groupBy({
-        by: ['type'],
-        _count: true,
-        _sum: {
-          size: true,
-        },
-      })
+			const {
+				type,
+				category,
+				minSize,
+				maxSize,
+				minWidth,
+				maxWidth,
+				minHeight,
+				maxHeight,
+				search,
+				sortBy = 'createdAt',
+				sortOrder = 'desc',
+				page = 0,
+				pageSize = 50,
+			} = filters;
 
-      const stats: Record<SystemImageType, number> = {} as Record<SystemImageType, number>
-      let totalSize = 0
-      byType.forEach((item) => {
-        stats[item.type as SystemImageType] = item._count
-        totalSize += item._sum.size || 0
-      })
+			// Construir where
+			const where: WhereClause = {};
+			if (type) {
+				where.type = type;
+			}
+			if (category) {
+				where.category = category;
+			}
+			if (minSize || maxSize) {
+				where.size = {};
+				if (minSize) {
+					where.size.gte = minSize;
+				}
+				if (maxSize) {
+					where.size.lte = maxSize;
+				}
+			}
+			if (minWidth || maxWidth) {
+				where.width = {};
+				if (minWidth) {
+					where.width.gte = minWidth;
+				}
+				if (maxWidth) {
+					where.width.lte = maxWidth;
+				}
+			}
+			if (minHeight || maxHeight) {
+				where.height = {};
+				if (minHeight) {
+					where.height.gte = minHeight;
+				}
+				if (maxHeight) {
+					where.height.lte = maxHeight;
+				}
+			}
+			if (search) {
+				where.OR = [
+					{ name: { contains: search, mode: 'insensitive' } },
+					{ category: { contains: search, mode: 'insensitive' } },
+				];
+			}
 
-      return {
-        total,
-        byType: stats,
-        totalSize,
-        averageSize: total > 0 ? totalSize / total : 0,
-      }
-    } catch (error) {
-      systemImagesLogger.error('Error getting image stats:', error)
-      throw new Error('Error al obtener estadísticas de imágenes')
-    }
-  }
+			// Obtener total
+			const total = await prisma.systemImage.count({ where });
 
-  private calculateDimensions(
-    width: number,
-    height: number,
-    targetDimensions?: SystemImageDimensions
-  ): SystemImageDimensions {
-    const aspectRatio = width / height
+			// Obtener imágenes
+			const rawImages = await prisma.systemImage.findMany({
+				where,
+				orderBy: {
+					[sortBy]: sortOrder,
+				},
+				skip: page * pageSize,
+				take: pageSize,
+			});
 
-    if (targetDimensions) {
-      const { width: targetWidth, height: targetHeight } = targetDimensions
-      if (targetWidth && targetHeight) {
-        return {
-          width: targetWidth,
-          height: targetHeight,
-          aspectRatio,
-        }
-      } else if (targetWidth) {
-        return {
-          width: targetWidth,
-          height: Math.round(targetWidth / aspectRatio),
-          aspectRatio,
-        }
-      } else if (targetHeight) {
-        return {
-          width: Math.round(targetHeight * aspectRatio),
-          height: targetHeight,
-          aspectRatio,
-        }
-      }
-    }
+			// Obtener estadísticas
+			const stats = await this.getImageStats();
 
-    return {
-      width,
-      height,
-      aspectRatio,
-    }
-  }
+			// Procesar resultados
+			const items = rawImages.map((image) => ({
+				...image,
+				type: image.type as SystemImageType,
+				dimensions: targetDimensions
+					? this.calculateDimensions(image.width, image.height, targetDimensions)
+					: this.calculateDimensions(image.width, image.height),
+				url: this.getImageUrl(image.path),
+				thumbnailUrl: this.getThumbnailUrl(image.path),
+				metadata: JSON.parse(image.metadata || '{}'),
+			}));
 
-  private async processImage(
-    path: string,
-    options: SystemImageProcessingOptions
-  ): Promise<{ path: string; metadata: SystemImageMetadata }> {
-    try {
-      return await processImage(path, options)
-    } catch (error) {
-      systemImagesLogger.error('Error processing image:', { path, options, error })
-      throw new Error('Error al procesar imagen')
-    }
-  }
+			return {
+				items,
+				total,
+				page,
+				pageSize,
+				stats,
+			};
+		} catch (error) {
+			systemImagesLogger.error('Error getting system images:', { params, error });
+			throw new Error('Error al obtener imágenes del sistema');
+		}
+	}
 
-  private async deleteImageFile(path: string): Promise<void> {
-    try {
-      // TODO: Implementar eliminación de archivo físico
-    } catch (error) {
-      systemImagesLogger.error('Error deleting image file:', { path, error })
-      throw new Error('Error al eliminar archivo de imagen')
-    }
-  }
+	public async getImageStats(): Promise<SystemImageStats> {
+		try {
+			const total = await prisma.systemImage.count();
+			const byType = await prisma.systemImage.groupBy({
+				by: ['type'],
+				_count: true,
+				_sum: {
+					size: true,
+				},
+			});
 
-  private getImageUrl(path: string): string {
-    // TODO: Implementar generación de URL
-    return path
-  }
+			const stats: Record<SystemImageType, number> = {} as Record<SystemImageType, number>;
+			let totalSize = 0;
 
-  private getThumbnailUrl(path: string): string {
-    // TODO: Implementar generación de URL de miniatura
-    return path
-  }
+			for (const item of byType) {
+				stats[item.type as SystemImageType] = item._count;
+				totalSize += item._sum.size || 0;
+			}
+
+			return {
+				total,
+				byType: stats,
+				totalSize,
+				averageSize: total > 0 ? totalSize / total : 0,
+			};
+		} catch (error) {
+			systemImagesLogger.error('Error getting image stats:', error);
+			throw new Error('Error al obtener estadísticas de imágenes');
+		}
+	}
+
+	private calculateDimensions(
+		width: number,
+		height: number,
+		targetDimensions?: SystemImageDimensions
+	): SystemImageDimensions {
+		const aspectRatio = width / height;
+
+		if (targetDimensions) {
+			const { width: targetWidth, height: targetHeight } = targetDimensions;
+			if (targetWidth && targetHeight) {
+				return {
+					width: targetWidth,
+					height: targetHeight,
+					aspectRatio,
+				};
+			}
+			if (targetWidth) {
+				return {
+					width: targetWidth,
+					height: Math.round(targetWidth / aspectRatio),
+					aspectRatio,
+				};
+			}
+			if (targetHeight) {
+				return {
+					width: Math.round(targetHeight * aspectRatio),
+					height: targetHeight,
+					aspectRatio,
+				};
+			}
+		}
+
+		return {
+			width,
+			height,
+			aspectRatio,
+		};
+	}
+
+	private async processImage(
+		path: string,
+		options: SystemImageProcessingOptions
+	): Promise<{ path: string; metadata: SystemImageMetadata }> {
+		try {
+			return await processImage(path, options);
+		} catch (error) {
+			systemImagesLogger.error('Error processing image:', { path, options, error });
+			throw new Error('Error al procesar imagen');
+		}
+	}
+
+	private async deleteImageFile(path: string): Promise<void> {
+		// Solo log por ahora, ya que es un TODO
+		systemImagesLogger.info('Simulando eliminación de archivo:', path);
+		// TODO: Implementar eliminación real del archivo físico
+		// La implementación futura podría ser algo como:
+		// await fs.unlink(path);
+	}
+
+	private getImageUrl(path: string): string {
+		// TODO: Implementar generación de URL
+		return path;
+	}
+
+	private getThumbnailUrl(path: string): string {
+		// TODO: Implementar generación de URL de miniatura
+		return path;
+	}
 }
 
-export const systemImagesService = SystemImagesService.getInstance()
+export const systemImagesService = SystemImagesService.getInstance();

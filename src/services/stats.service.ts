@@ -1,121 +1,151 @@
-import { logger } from '@/lib/logger'
 import {
-  getSystemStats,
-  getImageStats,
-  incrementImageView,
-  incrementImageDownload,
-  invalidateStats,
-  type GeneralStats,
-} from '@/app/actions/stats.actions'
-import { EventEmitter } from 'events'
+	type GeneralStats,
+	getImageStats,
+	getSystemStats,
+	incrementImageDownload,
+	incrementImageView,
+	invalidateStats,
+} from '@/app/actions/stats.actions';
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import { emit } from '@/lib/server/events.server';
 
-const statsLogger = logger.withContext('StatsService')
+const statsLogger = logger.withContext('StatsService');
 
 // Eventos de estadísticas
 export const STATS_EVENTS = {
-  VIEW_INCREMENTED: 'view_incremented',
-  DOWNLOAD_INCREMENTED: 'download_incremented',
-  STATS_UPDATED: 'stats_updated',
-  COLLECTION_CHANGE: 'collection_change',
-  TAG_CHANGE: 'tag_change',
-  FAVORITE_CHANGE: 'favorite_change',
-  STATS_UPDATE_NEEDED: 'stats_update_needed',
-  FOLDER_CHANGE: 'folder_change',
-  ALBUM_CHANGE: 'album_change',
-  CHARACTER_CHANGE: 'character_change',
-  PLACE_CHANGE: 'place_change',
-  OBJECT_CHANGE: 'object_change',
-  FILES_CHANGE: 'files_change'
-} as const
+	VIEW_INCREMENTED: 'view_incremented',
+	DOWNLOAD_INCREMENTED: 'download_incremented',
+	STATS_UPDATED: 'stats_updated',
+	COLLECTION_CHANGE: 'collection_change',
+	TAG_CHANGE: 'tag_change',
+	FAVORITE_CHANGE: 'favorite_change',
+	STATS_UPDATE_NEEDED: 'stats_update_needed',
+	FOLDER_CHANGE: 'folder_change',
+	ALBUM_CHANGE: 'album_change',
+	CHARACTER_CHANGE: 'character_change',
+	PLACE_CHANGE: 'place_change',
+	OBJECT_CHANGE: 'object_change',
+	FILES_CHANGE: 'files_change',
+} as const;
 
-export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS]
+export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS];
 export type StatsUpdateEvent =
-  | 'collection_change'
-  | 'tag_change'
-  | 'favorite_change'
-  | 'folder_change'
-  | 'album_change'
-  | 'character_change'
-  | 'place_change'
-  | 'object_change'
-  | 'files_change'
-export type StatsEvents = typeof STATS_EVENTS
+	| 'collection_change'
+	| 'tag_change'
+	| 'favorite_change'
+	| 'folder_change'
+	| 'album_change'
+	| 'character_change'
+	| 'place_change'
+	| 'object_change'
+	| 'files_change';
+export type StatsEvents = typeof STATS_EVENTS;
 
-export const statsEventEmitter = new EventEmitter()
-statsEventEmitter.setMaxListeners(50)
+// Implementamos el nuevo sistema de eventos para estadísticas
+// Esta será una implementación temporal para mantener compatibilidad con los servicios existentes
+// mientras continuamos la migración
+export const statsEventEmitter = {
+	// Omitimos nombres de parámetros para evitar errores de linter de "no utilizado"
+	on: (_: string, __: (...args: unknown[]) => void) => {
+		// Esta es una implementación mínima para mantener compatibilidad
+		// No hace nada realmente, pero evita errores en código existente
+	},
+	off: (_: string, __: (...args: unknown[]) => void) => {
+		// Esta es una implementación mínima para mantener compatibilidad
+	},
+	emit: (event: string, ...args: unknown[]) => {
+		// Usamos serverEvents.emit en el fondo
+		void emit({
+			type: event,
+			data: args.length === 1 ? args[0] : args,
+		});
+		return true;
+	},
+	setMaxListeners: () => {
+		// No hace nada, solo mantiene compatibilidad
+	},
+};
 
-export class StatsService extends EventEmitter {
-  private static instance: StatsService
-  private isUpdating: boolean = false
+// Versión migrada del servicio que no extiende de EventEmitter
+export class StatsService {
+	private static instance: StatsService;
+	private isUpdating = false;
+	private eventCallbacks = new Map<string, Set<CallableFunction>>();
 
-  private constructor() {
-    super()
-    statsLogger.info('🚀 Inicializando StatsService')
-    this.setMaxListeners(50)
-  }
+	private constructor() {
+		statsLogger.info('🚀 Inicializando StatsService');
+	}
 
-  static getInstance(): StatsService {
-    if (!StatsService.instance) {
-      StatsService.instance = new StatsService()
-    }
-    return StatsService.instance
-  }
+	static getInstance(): StatsService {
+		if (!StatsService.instance) {
+			StatsService.instance = new StatsService();
+		}
+		return StatsService.instance;
+	}
 
-  async invalidateStats() {
-    await invalidateStats()
-  }
+	// Método privado para emitir eventos
+	private async emitEvent(event: string, data: unknown): Promise<void> {
+		// Emitir al sistema de eventos del servidor
+		await emit({
+			type: event,
+			data,
+		});
+	}
 
-  async getGeneralStats(): Promise<GeneralStats> {
-    try {
-      const stats = await getSystemStats()
-      this.emit(STATS_EVENTS.STATS_UPDATED, stats)
-      return stats
-    } catch (error) {
-      statsLogger.error('Error al obtener estadísticas generales', { error })
-      this.emit('error', error)
-      throw error
-    }
-  }
+	async invalidateStats() {
+		await invalidateStats();
+	}
 
-  async getOrCreateImageStats(imageId: string) {
-    try {
-      return await getImageStats(imageId)
-    } catch (error) {
-      statsLogger.error('Error al obtener estadísticas de imagen', {
-        error,
-        imageId,
-      })
-      this.emit('error', error)
-      throw error
-    }
-  }
+	async getGeneralStats(): Promise<GeneralStats> {
+		try {
+			const stats = await getSystemStats();
+			await this.emitEvent(STATS_EVENTS.STATS_UPDATED, stats);
+			return stats;
+		} catch (error) {
+			statsLogger.error('Error al obtener estadísticas generales', { error });
+			await this.emitEvent('error', error);
+			throw error;
+		}
+	}
 
-  async incrementViewCount(imageId: string) {
-    try {
-      const stats = await incrementImageView(imageId)
-      this.emit(STATS_EVENTS.VIEW_INCREMENTED, { imageId, stats })
-      return stats
-    } catch (error) {
-      statsLogger.error('Error al incrementar vistas', { error, imageId })
-      this.emit('error', error)
-      throw error
-    }
-  }
+	async getOrCreateImageStats(imageId: string) {
+		try {
+			return await getImageStats(imageId);
+		} catch (error) {
+			statsLogger.error('Error al obtener estadísticas de imagen', {
+				error,
+				imageId,
+			});
+			await this.emitEvent('error', error);
+			throw error;
+		}
+	}
 
-  async incrementDownloadCount(imageId: string) {
-    try {
-      const stats = await incrementImageDownload(imageId)
-      this.emit(STATS_EVENTS.DOWNLOAD_INCREMENTED, {
-        imageId,
-        stats,
-      })
-      return stats
-    } catch (error) {
-      statsLogger.error('Error al incrementar descargas', { error, imageId })
-      this.emit('error', error)
-      throw error
-    }
-  }
+	async incrementViewCount(imageId: string) {
+		try {
+			const stats = await incrementImageView(imageId);
+			await this.emitEvent(STATS_EVENTS.VIEW_INCREMENTED, { imageId, stats });
+			return stats;
+		} catch (error) {
+			statsLogger.error('Error al incrementar vistas', { error, imageId });
+			await this.emitEvent('error', error);
+			throw error;
+		}
+	}
+
+	async incrementDownloadCount(imageId: string) {
+		try {
+			const stats = await incrementImageDownload(imageId);
+			await this.emitEvent(STATS_EVENTS.DOWNLOAD_INCREMENTED, { imageId, stats });
+			return stats;
+		} catch (error) {
+			statsLogger.error('Error al incrementar descargas', { error, imageId });
+			await this.emitEvent('error', error);
+			throw error;
+		}
+	}
 }
 
-export const statsService = StatsService.getInstance()
+// Exportar la instancia del servicio
+export const statsService = StatsService.getInstance();

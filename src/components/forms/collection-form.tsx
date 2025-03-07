@@ -1,27 +1,17 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { CompactPicker } from "react-color";
-import { Loader2, XIcon, CheckIcon } from "lucide-react";
-import type { CollectionFormData } from "./entity-types";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { CheckIcon, Loader2, XIcon } from 'lucide-react';
+import * as React from 'react';
+import { CompactPicker } from 'react-color';
+import type { CollectionFormData } from './entity-types';
 
 interface CollectionFormProps {
 	initialData?: CollectionFormData;
@@ -30,37 +20,27 @@ interface CollectionFormProps {
 	isLoading?: boolean;
 }
 
-const PLATFORMS = [
-	"Steam",
-	"Epic Games",
-	"GOG",
-	"Humble Bundle",
-	"Itch.io",
-	"Other",
-];
+const PLATFORMS = ['Steam', 'Epic Games', 'GOG', 'Humble Bundle', 'Itch.io', 'Other'];
 
-export function CollectionForm({
-	initialData,
-	onSubmit,
-	onCancel,
-	isLoading = false,
-}: CollectionFormProps) {
+export function CollectionForm({ initialData, onSubmit, onCancel, isLoading = false }: CollectionFormProps) {
 	const [formData, setFormData] = React.useState<CollectionFormData>(
 		initialData || {
-			name: "",
-			emoji: "🌟",
-			description: "",
-			color: "#3b82f6",
-			filters: "[]",
-			sortBy: "name",
-			editions: "[]",
+			name: '',
+			emoji: '🌟',
+			description: '',
+			color: '#3b82f6',
+			filters: '[]',
+			sortBy: 'name',
+			editions: '[]',
 			isFavorite: false,
 		}
 	);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.name.trim()) return;
+		if (!formData.name.trim()) {
+			return;
+		}
 		await onSubmit(formData);
 	};
 
@@ -97,10 +77,7 @@ export function CollectionForm({
 							/>
 							<Separator className="my-2" />
 							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={handleColorChange}
-								/>
+								<CompactPicker color={formData.color} onChange={handleColorChange} />
 							</div>
 						</PopoverContent>
 					</Popover>
@@ -134,9 +111,7 @@ export function CollectionForm({
 						<Label>Plataforma</Label>
 						<Select
 							value={formData.platform}
-							onValueChange={(value) =>
-								setFormData((prev) => ({ ...prev, platform: value }))
-							}
+							onValueChange={(value) => setFormData((prev) => ({ ...prev, platform: value }))}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Selecciona plataforma" />
@@ -156,11 +131,11 @@ export function CollectionForm({
 						<Input
 							type="number"
 							placeholder="Precio"
-							value={formData.price || ""}
+							value={formData.price || ''}
 							onChange={(e) =>
 								setFormData((prev) => ({
 									...prev,
-									price: parseFloat(e.target.value) || undefined,
+									price: Number.parseFloat(e.target.value) || undefined,
 								}))
 							}
 							className="h-8"
@@ -173,7 +148,7 @@ export function CollectionForm({
 						<Label>URL</Label>
 						<Input
 							placeholder="URL"
-							value={formData.url || ""}
+							value={formData.url || ''}
 							onChange={(e) =>
 								setFormData((prev) => ({
 									...prev,
@@ -188,7 +163,7 @@ export function CollectionForm({
 						<Label>URL Alternativa</Label>
 						<Input
 							placeholder="URL Alternativa"
-							value={formData.alternativeUrl || ""}
+							value={formData.alternativeUrl || ''}
 							onChange={(e) =>
 								setFormData((prev) => ({
 									...prev,
@@ -236,10 +211,12 @@ export function CollectionForm({
 					disabled={isLoading || !formData.name.trim()}
 					className="h-7 text-xs text-green-500 hover:text-green-600"
 				>
-					{isLoading ?
+					{isLoading ? (
 						<Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-					:	<CheckIcon className="h-3.5 w-3.5 mr-1" />}
-					{initialData ? "Guardar" : "Crear"}
+					) : (
+						<CheckIcon className="h-3.5 w-3.5 mr-1" />
+					)}
+					{initialData ? 'Guardar' : 'Crear'}
 				</Button>
 			</div>
 		</form>

@@ -1,31 +1,23 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Card } from "@/components/ui/card";
-import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { useToast } from "@/components/ui/use-toast";
-import { logger } from "@/lib/logger";
-import { usePromptStore, type PromptFormData } from "@/store/prompt.store";
-import { PromptForm } from "@/components/forms/prompt-form";
-import { PromptCard } from "@/components/cards/prompt-card";
-import { StatsCard } from "@/components/ui/stats-card";
-import { calculateStats } from "@/lib/entity.utils";
+import { PromptCard } from '@/components/cards/prompt-card';
+import { PromptForm } from '@/components/forms/prompt-form';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatsCard } from '@/components/ui/stats-card';
+import { useToast } from '@/components/ui/use-toast';
+import { calculateStats } from '@/lib/entity.utils';
+import { logger } from '@/lib/logger';
+import { type PromptFormData, usePromptStore } from '@/store/prompt.store';
+import { Loader2, MessageSquare } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import * as React from 'react';
 
-const promptLogger = logger.withContext("PromptsSection");
+const promptLogger = logger.withContext('PromptsSection');
 
 export function PromptsSection() {
-	const {
-		prompts,
-		isLoading,
-		error,
-		loadItems,
-		createPrompt,
-		updatePrompt,
-		deletePrompt,
-	} = usePromptStore();
+	const { prompts, isLoading, error, loadItems, createPrompt, updatePrompt, deletePrompt } = usePromptStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
@@ -35,57 +27,61 @@ export function PromptsSection() {
 
 	const handleCreate = async (data: PromptFormData) => {
 		try {
-			promptLogger.info("✨ Creando nuevo prompt:", data);
+			promptLogger.info('✨ Creando nuevo prompt:', data);
 			await createPrompt(data);
 			toast({
-				title: "Éxito",
-				description: "Prompt creado correctamente",
+				title: 'Éxito',
+				description: 'Prompt creado correctamente',
 			});
 		} catch (error) {
-			promptLogger.error("❌ Error al crear prompt:", error);
+			promptLogger.error('❌ Error al crear prompt:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo crear el prompt",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo crear el prompt',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const handleUpdate = async (data: PromptFormData) => {
-		if (!editingId) return;
+		if (!editingId) {
+			return;
+		}
 		try {
-			promptLogger.info("💾 Actualizando prompt:", data);
+			promptLogger.info('💾 Actualizando prompt:', data);
 			await updatePrompt(editingId, data);
 			setEditingId(null);
 			toast({
-				title: "Éxito",
-				description: "Prompt actualizado correctamente",
+				title: 'Éxito',
+				description: 'Prompt actualizado correctamente',
 			});
 		} catch (error) {
-			promptLogger.error("❌ Error al actualizar prompt:", error);
+			promptLogger.error('❌ Error al actualizar prompt:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo actualizar el prompt",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo actualizar el prompt',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("¿Estás seguro de eliminar este prompt?")) return;
+		if (!confirm('¿Estás seguro de eliminar este prompt?')) {
+			return;
+		}
 		try {
-			promptLogger.info("🗑️ Eliminando prompt:", { id });
+			promptLogger.info('🗑️ Eliminando prompt:', { id });
 			await deletePrompt(id);
 			toast({
-				title: "Éxito",
-				description: "Prompt eliminado correctamente",
+				title: 'Éxito',
+				description: 'Prompt eliminado correctamente',
 			});
 		} catch (error) {
-			promptLogger.error("❌ Error al eliminar prompt:", error);
+			promptLogger.error('❌ Error al eliminar prompt:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar el prompt",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo eliminar el prompt',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -123,43 +119,31 @@ export function PromptsSection() {
 							<MessageSquare className="h-5 w-5" />
 							Prompts
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => loadItems()}
-							disabled={isLoading}
-						>
-							{isLoading ?
-								<Loader2 className="h-4 w-4 animate-spin" />
-							:	"Recargar"}
+						<Button variant="outline" size="sm" onClick={() => loadItems()} disabled={isLoading}>
+							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
 						</Button>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					{isLoading && prompts.length === 0 ?
+					{isLoading && prompts.length === 0 ? (
 						<div className="flex items-center justify-center p-8">
 							<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
 						</div>
-					: error ?
+					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">
-								{error.message}
-							</p>
+							<p className="text-sm text-muted-foreground text-center">{error.message}</p>
 							<Button variant="outline" size="sm" onClick={() => loadItems()}>
 								Reintentar
 							</Button>
 						</div>
-					: prompts.length === 0 ?
+					) : prompts.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<MessageSquare className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">
-								No hay prompts creados
-							</p>
-							<p className="text-xs text-muted-foreground/75">
-								Crea un prompt para empezar
-							</p>
+							<p className="text-sm text-muted-foreground text-center">No hay prompts creados</p>
+							<p className="text-xs text-muted-foreground/75">Crea un prompt para empezar</p>
 						</div>
-					:	<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+					) : (
+						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 							<AnimatePresence>
 								{prompts.map((prompt) => (
 									<motion.div
@@ -170,10 +154,10 @@ export function PromptsSection() {
 										exit={{ opacity: 0, scale: 0.9 }}
 										transition={{
 											duration: 0.2,
-											ease: "easeInOut",
+											ease: 'easeInOut',
 										}}
 									>
-										{editingId === prompt.id ?
+										{editingId === prompt.id ? (
 											<Card className="relative">
 												<CardContent className="p-4">
 													<PromptForm
@@ -191,17 +175,14 @@ export function PromptsSection() {
 													/>
 												</CardContent>
 											</Card>
-										:	<PromptCard
-												prompt={prompt}
-												onEdit={() => setEditingId(prompt.id)}
-												onDelete={handleDelete}
-											/>
-										}
+										) : (
+											<PromptCard prompt={prompt} onEdit={() => setEditingId(prompt.id)} onDelete={handleDelete} />
+										)}
 									</motion.div>
 								))}
 							</AnimatePresence>
 						</div>
-					}
+					)}
 				</CardContent>
 			</Card>
 		</div>

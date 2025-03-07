@@ -1,3 +1,3 @@
-export * from "./base-content-view";
-export * from "./content-view-provider";
-export * from "./types";
+export * from './base-content-view';
+export * from './content-view-provider';
+export * from './types';

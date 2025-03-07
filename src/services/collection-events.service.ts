@@ -1,45 +1,59 @@
-import { EventEmitter } from 'events'
-import { logger } from '@/lib/logger'
-import { Collection } from '@prisma/client'
+import { logger } from '@/lib/logger';
+import { emit } from '@/lib/server/events.server';
+import type { Collection } from '@prisma/client';
 
-const collectionEventsLogger = logger.withContext('CollectionEventsService')
+const collectionEventsLogger = logger.withContext('CollectionEventsService');
 
 export const COLLECTION_EVENTS = {
-  COLLECTION_CREATED: 'collection:created',
-  COLLECTION_UPDATED: 'collection:updated',
-  COLLECTION_DELETED: 'collection:deleted',
-  IMAGE_ADDED: 'collection:image:added',
-  IMAGE_REMOVED: 'collection:image:removed'
-} as const
+	COLLECTION_CREATED: 'collection:created',
+	COLLECTION_UPDATED: 'collection:updated',
+	COLLECTION_DELETED: 'collection:deleted',
+	IMAGE_ADDED: 'collection:image:added',
+	IMAGE_REMOVED: 'collection:image:removed',
+} as const;
 
-export type CollectionEventType = typeof COLLECTION_EVENTS[keyof typeof COLLECTION_EVENTS]
+export type CollectionEventType = (typeof COLLECTION_EVENTS)[keyof typeof COLLECTION_EVENTS];
 
 export interface CollectionEventData {
-  collection?: Collection
-  collectionId?: string
-  imageId?: string
+	collection?: Collection;
+	collectionId?: string;
+	imageId?: string;
 }
 
-class CollectionEventsService extends EventEmitter {
-  constructor() {
-    super()
-    this.setMaxListeners(20)
-  }
+/**
+ * Servicio para gestionar eventos de colecciones
+ * Migrado a usar serverEvents en lugar de EventEmitter
+ */
+export const CollectionEventsService = {
+	/**
+	 * Emite un evento de colección
+	 */
+	async emit(event: CollectionEventType, data: CollectionEventData) {
+		collectionEventsLogger.info('📢 Emitiendo evento:', { event, data });
 
-  emit(event: CollectionEventType, data: CollectionEventData) {
-    collectionEventsLogger.info('📢 Emitiendo evento:', { event, data })
-    return super.emit(event, data)
-  }
+		// Mapear el tipo de evento a un tipo de evento del servidor
+		let eventType: 'collections:modified' | 'update' | 'delete' = 'collections:modified';
 
-  on(event: CollectionEventType, listener: (data: CollectionEventData) => void) {
-    collectionEventsLogger.info('👂 Suscribiendo a evento:', { event })
-    return super.on(event, listener)
-  }
+		if (event === COLLECTION_EVENTS.COLLECTION_DELETED) {
+			eventType = 'delete';
+		} else if (event === COLLECTION_EVENTS.COLLECTION_CREATED || event === COLLECTION_EVENTS.COLLECTION_UPDATED) {
+			eventType = 'update';
+		}
 
-  off(event: CollectionEventType, listener: (data: CollectionEventData) => void) {
-    collectionEventsLogger.info('🔕 Desuscribiendo de evento:', { event })
-    return super.off(event, listener)
-  }
-}
+		// Emitir el evento con el nuevo sistema
+		await emit({
+			type: eventType,
+			id: data.collectionId,
+			imageId: data.imageId,
+			data: {
+				action: event,
+				entity: data.collection,
+				eventType: event,
+			},
+		});
 
-export const collectionEventsService = new CollectionEventsService()
+		return true;
+	},
+};
+
+export const collectionEventsService = CollectionEventsService;

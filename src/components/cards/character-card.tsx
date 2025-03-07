@@ -1,22 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import {
-	Swords,
-	Crown,
-	Users,
-	Heart,
-	ScrollText,
-	PencilIcon,
-	Trash2,
-	Shield,
-	Sparkles,
-	ImageIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { Character } from "@prisma/client";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import type { Character } from '@prisma/client';
+import { Crown, Heart, ImageIcon, PencilIcon, ScrollText, Shield, Sparkles, Swords, Trash2, Users } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
 interface CharacterCardProps {
 	character: Character & {
@@ -32,35 +21,27 @@ interface CharacterCardProps {
 
 const getClassGradient = (characterClass: string) => {
 	const gradients = {
-		Guerrero: "from-red-500/20 via-orange-500/20 to-red-500/20",
-		Mago: "from-blue-500/20 via-purple-500/20 to-blue-500/20",
-		Clérigo: "from-yellow-500/20 via-white/20 to-yellow-500/20",
-		Pícaro: "from-green-500/20 via-emerald-500/20 to-green-500/20",
-		default: "from-slate-500/20 via-gray-500/20 to-slate-500/20",
+		Guerrero: 'from-red-500/20 via-orange-500/20 to-red-500/20',
+		Mago: 'from-blue-500/20 via-purple-500/20 to-blue-500/20',
+		Clérigo: 'from-yellow-500/20 via-white/20 to-yellow-500/20',
+		Pícaro: 'from-green-500/20 via-emerald-500/20 to-green-500/20',
+		default: 'from-slate-500/20 via-gray-500/20 to-slate-500/20',
 	};
-	return (
-		gradients[characterClass as keyof typeof gradients] || gradients.default
-	);
+	return gradients[characterClass as keyof typeof gradients] || gradients.default;
 };
 
 const getClassSymbol = (characterClass: string) => {
 	const symbols = {
-		Guerrero: "⚔️",
-		Mago: "🔮",
-		Clérigo: "✨",
-		Pícaro: "🗡️",
-		default: "⭐",
+		Guerrero: '⚔️',
+		Mago: '🔮',
+		Clérigo: '✨',
+		Pícaro: '🗡️',
+		default: '⭐',
 	};
 	return symbols[characterClass as keyof typeof symbols] || symbols.default;
 };
 
-export function CharacterCard({
-	character,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-}: CharacterCardProps) {
+export function CharacterCard({ character, onEdit, onDelete, onClick, className }: CharacterCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const classGradient = getClassGradient(character.class);
 	const classSymbol = getClassSymbol(character.class);
@@ -68,10 +49,10 @@ export function CharacterCard({
 	return (
 		<motion.div
 			className={cn(
-				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
-				"bg-linear-to-br from-background to-muted",
-				"shadow-lg hover:shadow-xl transition-all duration-300",
-				"cursor-pointer",
+				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden',
+				'bg-linear-to-br from-background to-muted',
+				'shadow-lg hover:shadow-xl transition-all duration-300',
+				'cursor-pointer',
 				className
 			)}
 			onHoverStart={() => setIsHovered(true)}
@@ -82,13 +63,10 @@ export function CharacterCard({
 		>
 			{/* Fondo holográfico */}
 			<div
-				className={cn(
-					"absolute inset-0 bg-linear-to-br opacity-30",
-					classGradient
-				)}
+				className={cn('absolute inset-0 bg-linear-to-br opacity-30', classGradient)}
 				style={{
-					backgroundSize: "200% 200%",
-					animation: isHovered ? "gradient 3s ease infinite" : "none",
+					backgroundSize: '200% 200%',
+					animation: isHovered ? 'gradient 3s ease infinite' : 'none',
 				}}
 			/>
 
@@ -100,16 +78,12 @@ export function CharacterCard({
 						style={{
 							backgroundImage: `url(${character.featuredImage})`,
 							opacity: 0.15,
-							filter: "blur(8px)",
+							filter: 'blur(8px)',
 						}}
 					/>
 					<div className="absolute inset-x-0 top-20 bottom-40 px-4">
 						<div className="relative w-full h-full rounded-lg overflow-hidden">
-							<img
-								src={character.featuredImage}
-								alt={character.name}
-								className="object-cover w-full h-full"
-							/>
+							<img src={character.featuredImage} alt={character.name} className="object-cover w-full h-full" />
 							<div
 								className="absolute inset-0"
 								style={{
@@ -158,22 +132,18 @@ export function CharacterCard({
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								"h-12 w-12 rounded-full flex items-center justify-center",
-								"bg-linear-to-br shadow-inner",
+								'h-12 w-12 rounded-full flex items-center justify-center',
+								'bg-linear-to-br shadow-inner',
 								classGradient
 							)}
 							style={{
 								border: `2px solid ${character.color}88`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-sm">
-								{character.emoji || classSymbol}
-							</span>
+							<span className="text-2xl filter drop-shadow-sm">{character.emoji || classSymbol}</span>
 						</div>
 						<div>
-							<h3 className="font-bold text-lg leading-tight">
-								{character.name}
-							</h3>
+							<h3 className="font-bold text-lg leading-tight">{character.name}</h3>
 							<div className="flex items-center gap-1 text-sm text-muted-foreground">
 								<Users className="h-3 w-3" />
 								<span>{character.race}</span>
@@ -183,13 +153,7 @@ export function CharacterCard({
 							</div>
 						</div>
 					</div>
-					<div
-						className={cn(
-							"px-2 py-1 rounded text-sm font-semibold",
-							"bg-linear-to-br shadow-xs",
-							classGradient
-						)}
-					>
+					<div className={cn('px-2 py-1 rounded text-sm font-semibold', 'bg-linear-to-br shadow-xs', classGradient)}>
 						{character.class}
 					</div>
 				</div>
@@ -212,9 +176,7 @@ export function CharacterCard({
 				{/* Descripción */}
 				{character.description && (
 					<div className="mb-4 z-10 bg-background/80 backdrop-blur-xs rounded-lg p-2">
-						<p className="text-sm text-muted-foreground line-clamp-2">
-							{character.description}
-						</p>
+						<p className="text-sm text-muted-foreground line-clamp-2">{character.description}</p>
 					</div>
 				)}
 
@@ -222,21 +184,19 @@ export function CharacterCard({
 				{character.stats && (
 					<div className="mt-auto pt-4 z-10">
 						<div className="grid grid-cols-3 gap-2 text-[10px] font-medium">
-							{Object.entries(JSON.parse(character.stats)).map(
-								([key, value]) => (
-									<div
-										key={key}
-										className={cn(
-											"rounded px-2 py-1 text-center",
-											"bg-linear-to-br shadow-xs bg-background/80 backdrop-blur-xs",
-											classGradient
-										)}
-									>
-										<div className="uppercase text-muted-foreground">{key}</div>
-										<div className="text-sm">{value as string}</div>
-									</div>
-								)
-							)}
+							{Object.entries(JSON.parse(character.stats)).map(([key, value]) => (
+								<div
+									key={key}
+									className={cn(
+										'rounded px-2 py-1 text-center',
+										'bg-linear-to-br shadow-xs bg-background/80 backdrop-blur-xs',
+										classGradient
+									)}
+								>
+									<div className="uppercase text-muted-foreground">{key}</div>
+									<div className="text-sm">{value as string}</div>
+								</div>
+							))}
 						</div>
 					</div>
 				)}
@@ -272,8 +232,7 @@ export function CharacterCard({
 				{/* Contador de imágenes */}
 				{character._count?.images !== undefined && (
 					<div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground bg-background/80 backdrop-blur-xs rounded-full px-2 py-0.5 z-10">
-						{character._count.images}{" "}
-						{character._count.images === 1 ? "imagen" : "imágenes"}
+						{character._count.images} {character._count.images === 1 ? 'imagen' : 'imágenes'}
 					</div>
 				)}
 			</div>

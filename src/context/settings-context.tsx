@@ -1,34 +1,31 @@
-"use client";
+'use client';
 
-import type { Collection, Profile } from "@prisma/client";
-import { createContext, useContext, useEffect, useState } from "react";
 import {
-	CollectionCreate,
-	CollectionUpdate,
+	type CollectionCreate,
+	type CollectionUpdate,
 	createCollection,
-	getCollections,
 	deleteCollection as deleteCollectionAction,
-} from "@/app/actions/collection.actions";
+	getCollections,
+} from '@/app/actions/collection.actions';
 import {
-	getTags,
 	createTag,
-	updateTag as updateTagAction,
 	deleteTag as deleteTagAction,
-} from "@/app/actions/tag.actions";
-import type {
-	TagCreate,
-	TagUpdate,
-	TagWithStats,
-} from "@/app/actions/tag.actions";
+	getTags,
+	updateTag as updateTagAction,
+} from '@/app/actions/tag.actions';
+import type { TagCreate, TagUpdate, TagWithStats } from '@/app/actions/tag.actions';
+import { useToast } from '@/components/ui/use-toast';
+import { formatBytes } from '@/lib/utils';
 import {
+	type ProfileCreate,
+	type ProfileUpdate,
+	type ProfileWithStats,
 	profileService,
-	ProfileCreate,
-	ProfileUpdate,
-	ProfileWithStats,
-} from "@/services/profile.service";
-import { useToast } from "@/components/ui/use-toast";
-import { ThumbnailQuality } from "@/types/thumbnails";
-import { formatBytes } from "@/lib/utils";
+} from '@/services/profile.service';
+import { ThumbnailQuality } from '@/types/thumbnails';
+import type { Collection, Profile } from '@prisma/client';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type * as React from 'react';
 
 interface CollectionWithStats extends Collection {
 	count: number;
@@ -53,15 +50,9 @@ export interface Settings {
 interface SettingsContextType {
 	settings: Settings;
 	updateSettings: (settings: Partial<Settings>) => Promise<void>;
-	updateCollection: (
-		id: string | null,
-		data: CollectionCreate | CollectionUpdate
-	) => Promise<void>;
+	updateCollection: (id: string | null, data: CollectionCreate | CollectionUpdate) => Promise<void>;
 	updateTag: (id: string | null, data: TagCreate | TagUpdate) => Promise<void>;
-	updateProfile: (
-		id: string | null,
-		data: ProfileCreate | ProfileUpdate
-	) => Promise<void>;
+	updateProfile: (id: string | null, data: ProfileCreate | ProfileUpdate) => Promise<void>;
 	setActiveProfile: (id: string) => Promise<void>;
 	deleteCollection: (id: string) => Promise<void>;
 	deleteTag: (id: string) => Promise<void>;
@@ -99,69 +90,49 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 	const [settings, setSettings] = useState<Settings>(defaultSettings);
 	const { toast } = useToast();
 
-	const loadSettings = async () => {
+	const loadSettings = useCallback(async () => {
 		try {
 			// Cargar configuración desde localStorage o API
-			const savedSettings = localStorage.getItem("settings");
+			const savedSettings = localStorage.getItem('settings');
 			if (savedSettings) {
 				const parsed = JSON.parse(savedSettings);
 				setSettings((prev) => ({
 					...prev,
-					thumbnailQuality: parsed.thumbnailQuality || "medium",
+					thumbnailQuality: parsed.thumbnailQuality || 'medium',
 					videoThumbnailAnimation: parsed.videoThumbnailAnimation ?? true,
 					shortcuts: parsed.shortcuts || {},
 				}));
 			}
 		} catch (error) {
-			console.error("Error loading settings:", error);
-		}
-	};
-
-	const updateSettings = async (newSettings: Partial<Settings>) => {
-		try {
-			setSettings((prev) => {
-				const updated = { ...prev, ...newSettings };
-				// Guardar en localStorage
-				localStorage.setItem(
-					"settings",
-					JSON.stringify({
-						thumbnailQuality: updated.thumbnailQuality,
-						videoThumbnailAnimation: updated.videoThumbnailAnimation,
-						shortcuts: updated.shortcuts,
-					})
-				);
-				return updated;
-			});
-		} catch (error) {
-			console.error("Error updating settings:", error);
+			console.error('Error cargando configuración:', error);
 			toast({
-				title: "Error",
-				description: "No se pudieron actualizar las configuraciones",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo cargar la configuración',
+				variant: 'destructive',
 			});
 		}
-	};
+	}, [toast]);
 
-	const loadCollections = async () => {
+	const loadCollections = useCallback(async () => {
 		try {
 			const collections = await getCollections();
-			const mappedCollections = collections.map((c) => ({
-				...c,
-				count: c._count.images,
-				size: formatBytes(c.totalSize),
+			const mappedCollections = collections.map((collection) => ({
+				...collection,
+				count: collection._count.images,
+				size: formatBytes(collection.totalSize),
 			}));
 			setSettings((prev) => ({ ...prev, collections: mappedCollections }));
 		} catch (error) {
-			console.error("Error loading collections:", error);
+			console.error('Error cargando colecciones:', error);
 			toast({
-				title: "Error",
-				description: "No se pudieron cargar las colecciones",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudieron cargar las colecciones',
+				variant: 'destructive',
 			});
 		}
-	};
+	}, [toast]);
 
-	const loadTags = async () => {
+	const loadTags = useCallback(async () => {
 		try {
 			const tags = await getTags();
 			const mappedTags = tags.map((tag) => ({
@@ -171,16 +142,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			}));
 			setSettings((prev) => ({ ...prev, tags: mappedTags }));
 		} catch (error) {
-			console.error("Error loading tags:", error);
+			console.error('Error cargando etiquetas:', error);
 			toast({
-				title: "Error",
-				description: "No se pudieron cargar las etiquetas",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudieron cargar las etiquetas',
+				variant: 'destructive',
 			});
 		}
-	};
+	}, [toast]);
 
-	const loadProfiles = async () => {
+	const loadProfiles = useCallback(async () => {
 		try {
 			const profiles = await profileService.getProfiles();
 			const activeProfile = profiles.find((p) => p.isActive);
@@ -190,26 +161,48 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 				activeProfile: activeProfile?.id || null,
 			}));
 		} catch (error) {
-			console.error("Error loading profiles:", error);
+			console.error('Error cargando perfiles:', error);
 			toast({
-				title: "Error",
-				description: "No se pudieron cargar los perfiles",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudieron cargar los perfiles',
+				variant: 'destructive',
 			});
 		}
-	};
+	}, [toast]);
 
 	useEffect(() => {
 		loadSettings();
 		loadCollections();
 		loadTags();
 		loadProfiles();
-	}, []);
+	}, [loadSettings, loadCollections, loadTags, loadProfiles]);
 
-	const updateCollection = async (
-		id: string | null,
-		data: CollectionCreate | CollectionUpdate
-	) => {
+	const updateSettings = async (newSettings: Partial<Settings>) => {
+		try {
+			setSettings((prev) => {
+				const updated = { ...prev, ...newSettings };
+				// Guardar en localStorage
+				localStorage.setItem(
+					'settings',
+					JSON.stringify({
+						thumbnailQuality: updated.thumbnailQuality,
+						videoThumbnailAnimation: updated.videoThumbnailAnimation,
+						shortcuts: updated.shortcuts,
+					})
+				);
+				return updated;
+			});
+		} catch (error) {
+			console.error('Error updating settings:', error);
+			toast({
+				title: 'Error',
+				description: 'No se pudieron actualizar las configuraciones',
+				variant: 'destructive',
+			});
+		}
+	};
+
+	const updateCollection = async (id: string | null, data: CollectionCreate | CollectionUpdate) => {
 		try {
 			if (!id) {
 				// Crear nueva colección
@@ -221,21 +214,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 			await loadCollections();
 			toast({
-				title: "Éxito",
-				description:
-					id ?
-						"Colección actualizada correctamente"
-					:	"Colección creada correctamente",
+				title: 'Éxito',
+				description: id ? 'Colección actualizada correctamente' : 'Colección creada correctamente',
 			});
 		} catch (error) {
-			console.error("Error updating collection:", error);
+			console.error('Error updating collection:', error);
 			toast({
-				title: "Error",
-				description:
-					id ?
-						"No se pudo actualizar la colección"
-					:	"No se pudo crear la colección",
-				variant: "destructive",
+				title: 'Error',
+				description: id ? 'No se pudo actualizar la colección' : 'No se pudo crear la colección',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -251,29 +238,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			}
 			await loadTags();
 			toast({
-				title: "Éxito",
-				description:
-					id ?
-						"Etiqueta actualizada correctamente"
-					:	"Etiqueta creada correctamente",
+				title: 'Éxito',
+				description: id ? 'Etiqueta actualizada correctamente' : 'Etiqueta creada correctamente',
 			});
 		} catch (error) {
-			console.error("Error updating tag:", error);
+			console.error('Error updating tag:', error);
 			toast({
-				title: "Error",
-				description:
-					id ?
-						"No se pudo actualizar la etiqueta"
-					:	"No se pudo crear la etiqueta",
-				variant: "destructive",
+				title: 'Error',
+				description: id ? 'No se pudo actualizar la etiqueta' : 'No se pudo crear la etiqueta',
+				variant: 'destructive',
 			});
 		}
 	};
 
-	const updateProfile = async (
-		id: string | null,
-		data: ProfileCreate | ProfileUpdate
-	) => {
+	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
 		try {
 			if (!id) {
 				// Crear nuevo perfil
@@ -284,19 +262,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			}
 			await loadProfiles();
 			toast({
-				title: "Éxito",
-				description:
-					id ?
-						"Perfil actualizado correctamente"
-					:	"Perfil creado correctamente",
+				title: 'Éxito',
+				description: id ? 'Perfil actualizado correctamente' : 'Perfil creado correctamente',
 			});
 		} catch (error) {
-			console.error("Error updating profile:", error);
+			console.error('Error updating profile:', error);
 			toast({
-				title: "Error",
-				description:
-					id ? "No se pudo actualizar el perfil" : "No se pudo crear el perfil",
-				variant: "destructive",
+				title: 'Error',
+				description: id ? 'No se pudo actualizar el perfil' : 'No se pudo crear el perfil',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -306,33 +280,33 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await profileService.setActiveProfile(id);
 			await loadProfiles();
 			toast({
-				title: "Éxito",
-				description: "Perfil activo actualizado correctamente",
+				title: 'Éxito',
+				description: 'Perfil activo actualizado correctamente',
 			});
 		} catch (error) {
-			console.error("Error setting active profile:", error);
+			console.error('Error setting active profile:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo actualizar el perfil activo",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo actualizar el perfil activo',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const deleteCollection = async (id: string) => {
 		try {
-			await deleteCollection(id);
+			await deleteCollectionAction(id);
 			await loadCollections();
 			toast({
-				title: "Éxito",
-				description: "Colección eliminada correctamente",
+				title: 'Éxito',
+				description: 'Colección eliminada correctamente',
 			});
 		} catch (error) {
-			console.error("Error deleting collection:", error);
+			console.error('Error deleting collection:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar la colección",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo eliminar la colección',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -342,15 +316,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await deleteTagAction(id);
 			await loadTags();
 			toast({
-				title: "Éxito",
-				description: "Etiqueta eliminada correctamente",
+				title: 'Éxito',
+				description: 'Etiqueta eliminada correctamente',
 			});
 		} catch (error) {
-			console.error("Error deleting tag:", error);
+			console.error('Error deleting tag:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar la etiqueta",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo eliminar la etiqueta',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -360,15 +334,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 			await profileService.deleteProfile(id);
 			await loadProfiles();
 			toast({
-				title: "Éxito",
-				description: "Perfil eliminado correctamente",
+				title: 'Éxito',
+				description: 'Perfil eliminado correctamente',
 			});
 		} catch (error) {
-			console.error("Error deleting profile:", error);
+			console.error('Error deleting profile:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar el perfil",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo eliminar el perfil',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -395,9 +369,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettingsContext() {
 	const context = useContext(SettingsContext);
 	if (!context) {
-		throw new Error(
-			"useSettingsContext must be used within a SettingsProvider"
-		);
+		throw new Error('useSettingsContext must be used within a SettingsProvider');
 	}
 	return context;
 }
@@ -406,9 +378,7 @@ export function useSettingsContext() {
 export function useCollectionTagContext() {
 	const context = useContext(SettingsContext);
 	if (!context) {
-		throw new Error(
-			"useCollectionTagContext must be used within a SettingsProvider"
-		);
+		throw new Error('useCollectionTagContext must be used within a SettingsProvider');
 	}
 	return {
 		collections: context.settings.collections,

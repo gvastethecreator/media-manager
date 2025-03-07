@@ -1,40 +1,42 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { ViewProps } from "../types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "motion/react";
-import { Users } from "lucide-react";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
-import { useNavigationStore } from "@/store/navigation.store";
-import { useFileManager } from "@/store/file-manager.store";
-import { eventsService, EventType, type EventData } from "@/services/events.service";
-import { logger } from "@/lib/logger";
-import { CharacterCard } from "@/components/cards/character-card";
-import type { CharacterWithStats } from "@/app/actions/character.actions";
-import { getCharacters } from "@/app/actions/character.actions";
+import type { CharacterWithStats } from '@/app/actions/character.actions';
+import { getCharacters } from '@/app/actions/character.actions';
+import { CharacterCard } from '@/components/cards/character-card';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { Users } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("CharactersView");
+const viewLogger = logger.withContext('CharactersView');
 
-export function CharactersView({ isResizing }: ViewProps) {
+export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCharacter } = useFileManager();
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usar el hook de eventos optimistas del cliente
+	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
+
 	const fetchCharacters = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando personajes...");
+			viewLogger.info('🔄 Cargando personajes...');
 			const data = await getCharacters();
 			setCharacters(data);
 			viewLogger.info(`✅ ${data.length} personajes cargados`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando personajes:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando personajes:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -44,27 +46,12 @@ export function CharactersView({ isResizing }: ViewProps) {
 	useEffect(() => {
 		// Cargar personajes inicialmente
 		fetchCharacters();
-
-		// Suscribirse a eventos relevantes
-		const handleCharacterModified = (data?: EventData) => {
-			viewLogger.info(
-				"📢 Evento de modificación de personajes recibido:",
-				data
-			);
-			fetchCharacters();
-		};
-
-		eventsService.on("characters:modified" as EventType, handleCharacterModified);
-
-		return () => {
-			eventsService.off("characters:modified" as EventType, handleCharacterModified);
-		};
 	}, [fetchCharacters]);
 
 	const handleCharacterClick = useCallback(
 		(character: CharacterWithStats) => {
-			viewLogger.info("🖱️ Click en personaje:", character.name);
-			setCurrentView("character-content");
+			viewLogger.info('🖱️ Click en personaje:', character.name);
+			setCurrentView('character-content');
 			setCurrentCharacter(character.id);
 		},
 		[setCurrentView, setCurrentCharacter]
@@ -82,7 +69,7 @@ export function CharactersView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!characters || characters.length === 0) {
+	if (!optimisticCharacters || optimisticCharacters.length === 0) {
 		return (
 			<EmptyState
 				icon={Users}
@@ -96,12 +83,12 @@ export function CharactersView({ isResizing }: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{characters.map((character) => (
+					{optimisticCharacters.map((character, index) => (
 						<motion.div
 							key={character.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3 }}
+							transition={{ delay: index * 0.1 }}
 						>
 							<CharacterCard
 								character={{

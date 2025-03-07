@@ -1,36 +1,36 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { formatBytes, formatDate } from '@/lib/utils';
+import type { Object as PrismaObject } from '@prisma/client';
 import {
-	Target,
-	Sparkles,
-	Scroll,
-	PencilIcon,
-	Trash2,
-	Image as ImageIcon,
 	Clock,
-	Gem,
-	ScrollText,
-	Swords,
-	Shield,
-	Crown,
 	Cog,
+	Crown,
 	Gauge,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { Object } from "@prisma/client";
-import { formatBytes, formatDate } from "@/lib/utils";
+	Gem,
+	Image as ImageIcon,
+	PencilIcon,
+	Scroll,
+	ScrollText,
+	Shield,
+	Sparkles,
+	Swords,
+	Target,
+	Trash2,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
 interface ObjectCardProps {
-	object: Object & {
+	object: PrismaObject & {
 		_count?: { images: number };
 		totalSize?: number;
 		featuredImage?: string | null;
 		recentImages?: (string | null)[];
 	};
-	onEdit?: (object: Object) => void;
+	onEdit?: (object: PrismaObject) => void;
 	onDelete?: (id: string) => void;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 	className?: string;
@@ -38,46 +38,37 @@ interface ObjectCardProps {
 
 const getRarityGradient = (rarity: string) => {
 	const gradients = {
-		Común: "from-zinc-500/20 via-slate-400/20 to-zinc-500/20",
-		Poco_común: "from-emerald-500/20 via-green-400/20 to-emerald-500/20",
-		Raro: "from-blue-500/20 via-indigo-400/20 to-blue-500/20",
-		Muy_raro: "from-violet-500/20 via-purple-400/20 to-violet-500/20",
-		Legendario: "from-amber-500/20 via-yellow-400/20 to-amber-500/20",
-		Mítico: "from-rose-500/20 via-red-400/20 to-rose-500/20",
-		default: "from-zinc-500/20 via-slate-400/20 to-zinc-500/20",
+		Común: 'from-zinc-500/20 via-slate-400/20 to-zinc-500/20',
+		Poco_común: 'from-emerald-500/20 via-green-400/20 to-emerald-500/20',
+		Raro: 'from-blue-500/20 via-indigo-400/20 to-blue-500/20',
+		Muy_raro: 'from-violet-500/20 via-purple-400/20 to-violet-500/20',
+		Legendario: 'from-amber-500/20 via-yellow-400/20 to-amber-500/20',
+		Mítico: 'from-rose-500/20 via-red-400/20 to-rose-500/20',
+		default: 'from-zinc-500/20 via-slate-400/20 to-zinc-500/20',
 	};
-	return (
-		gradients[rarity.replace(" ", "_") as keyof typeof gradients] ||
-		gradients.default
-	);
+	return gradients[rarity.replace(' ', '_') as keyof typeof gradients] || gradients.default;
 };
 
 const getTypeIcon = (type: string) => {
 	switch (type.toLowerCase()) {
-		case "arma":
+		case 'arma':
 			return Swords;
-		case "armadura":
+		case 'armadura':
 			return Shield;
-		case "accesorio":
+		case 'accesorio':
 			return Crown;
-		case "poción":
+		case 'poción':
 			return Sparkles;
-		case "pergamino":
+		case 'pergamino':
 			return ScrollText;
-		case "gema":
+		case 'gema':
 			return Gem;
 		default:
 			return Target;
 	}
 };
 
-export function ObjectCard({
-	object,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-}: ObjectCardProps) {
+export function ObjectCard({ object, onEdit, onDelete, onClick, className }: ObjectCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const [rotation, setRotation] = React.useState({ main: 0, secondary: 0 });
@@ -87,7 +78,9 @@ export function ObjectCard({
 
 	// Manejar el movimiento del mouse para efectos metálicos
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!cardRef.current) return;
+		if (!cardRef.current) {
+			return;
+		}
 		const rect = cardRef.current.getBoundingClientRect();
 		const x = ((e.clientX - rect.left) / rect.width) * 100;
 		const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -140,10 +133,10 @@ export function ObjectCard({
 		<motion.div
 			ref={cardRef}
 			className={cn(
-				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
-				"bg-linear-to-br from-zinc-900 to-stone-800",
-				"shadow-lg hover:shadow-xl transition-all duration-300",
-				"cursor-pointer perspective-1000",
+				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group',
+				'bg-linear-to-br from-zinc-900 to-stone-800',
+				'shadow-lg hover:shadow-xl transition-all duration-300',
+				'cursor-pointer perspective-1000',
 				className
 			)}
 			onHoverStart={() => setIsHovered(true)}
@@ -154,8 +147,8 @@ export function ObjectCard({
 			onClick={onClick}
 			style={
 				{
-					"--x": `${mousePosition.x}%`,
-					"--y": `${mousePosition.y}%`,
+					'--x': `${mousePosition.x}%`,
+					'--y': `${mousePosition.y}%`,
 				} as React.CSSProperties
 			}
 		>
@@ -176,8 +169,8 @@ export function ObjectCard({
 							transparent
 						)
 					`,
-					backgroundSize: "200% 200%, 200% 200%",
-					backgroundPosition: "var(--x) var(--y), var(--x) var(--y)",
+					backgroundSize: '200% 200%, 200% 200%',
+					backgroundPosition: 'var(--x) var(--y), var(--x) var(--y)',
 				}}
 			/>
 
@@ -248,8 +241,8 @@ export function ObjectCard({
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								"h-12 w-12 rounded-lg flex items-center justify-center",
-								"bg-linear-to-br shadow-inner relative overflow-hidden",
+								'h-12 w-12 rounded-lg flex items-center justify-center',
+								'bg-linear-to-br shadow-inner relative overflow-hidden',
 								rarityGradient
 							)}
 							style={{
@@ -257,9 +250,7 @@ export function ObjectCard({
 								boxShadow: `inset 0 2px 4px ${object.color}22`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-sm relative z-10">
-								{object.emoji}
-							</span>
+							<span className="text-2xl filter drop-shadow-sm relative z-10">{object.emoji}</span>
 							{/* Destello del emoji */}
 							<div
 								className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
@@ -274,9 +265,7 @@ export function ObjectCard({
 							/>
 						</div>
 						<div>
-							<h3 className="font-bold text-lg leading-tight text-zinc-100">
-								{object.name}
-							</h3>
+							<h3 className="font-bold text-lg leading-tight text-zinc-100">{object.name}</h3>
 							<div className="flex items-center gap-1 text-sm text-zinc-400">
 								<TypeIcon className="h-3 w-3" />
 								<span>{object.type}</span>
@@ -291,9 +280,7 @@ export function ObjectCard({
 				{/* Descripción */}
 				{object.description && (
 					<div className="mb-4">
-						<p className="text-sm text-zinc-400 line-clamp-2">
-							{object.description}
-						</p>
+						<p className="text-sm text-zinc-400 line-clamp-2">{object.description}</p>
 					</div>
 				)}
 
@@ -302,17 +289,15 @@ export function ObjectCard({
 					<div className="flex-1 overflow-hidden">
 						<div className="flex items-center gap-2 mb-2">
 							<Gauge className="h-4 w-4" style={{ color: object.color }} />
-							<span className="text-sm font-medium text-zinc-300">
-								Propiedades
-							</span>
+							<span className="text-sm font-medium text-zinc-300">Propiedades</span>
 						</div>
 						<div className="grid grid-cols-2 gap-2">
 							{properties.map((prop: string, index: number) => (
 								<div
-									key={index}
+									key={`${object.id}-property-${index}-${prop.substring(0, 10)}`}
 									className={cn(
-										"text-xs px-2 py-1 rounded relative overflow-hidden",
-										"bg-zinc-900/50 backdrop-blur-xs",
+										'text-xs px-2 py-1 rounded relative overflow-hidden',
+										'bg-zinc-900/50 backdrop-blur-xs',
 										rarityGradient
 									)}
 								>
@@ -340,26 +325,20 @@ export function ObjectCard({
 					<div className="mt-4">
 						<div className="flex items-center gap-2 mb-2">
 							<Shield className="h-4 w-4" style={{ color: object.color }} />
-							<span className="text-sm font-medium text-zinc-300">
-								Requisitos
-							</span>
+							<span className="text-sm font-medium text-zinc-300">Requisitos</span>
 						</div>
 						<div className="grid grid-cols-2 gap-2">
 							{Object.entries(requirements).map(([key, value]) => (
 								<div
 									key={key}
 									className={cn(
-										"flex items-center justify-between px-2 py-1 rounded relative overflow-hidden",
-										"bg-zinc-900/50 backdrop-blur-xs",
+										'flex items-center justify-between px-2 py-1 rounded relative overflow-hidden',
+										'bg-zinc-900/50 backdrop-blur-xs',
 										rarityGradient
 									)}
 								>
-									<span className="uppercase text-zinc-500 text-xs relative z-10">
-										{key}
-									</span>
-									<span className="text-zinc-300 text-xs relative z-10">
-										{value as string}
-									</span>
+									<span className="uppercase text-zinc-500 text-xs relative z-10">{key}</span>
+									<span className="text-zinc-300 text-xs relative z-10">{value as string}</span>
 									{/* Destello de requisito */}
 									<div
 										className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
@@ -421,8 +400,7 @@ export function ObjectCard({
 				{/* Contador de imágenes */}
 				{object._count?.images !== undefined && (
 					<div className="absolute bottom-2 right-2 text-[10px] text-zinc-400 bg-zinc-950/80 backdrop-blur-xs rounded-full px-2 py-0.5">
-						{object._count.images}{" "}
-						{object._count.images === 1 ? "imagen" : "imágenes"}
+						{object._count.images} {object._count.images === 1 ? 'imagen' : 'imágenes'}
 					</div>
 				)}
 
@@ -434,16 +412,12 @@ export function ObjectCard({
 							style={{
 								backgroundImage: `url(${object.featuredImage})`,
 								opacity: 0.15,
-								filter: "blur(8px)",
+								filter: 'blur(8px)',
 							}}
 						/>
 						<div className="absolute inset-x-0 top-20 bottom-40 px-4">
 							<div className="relative w-full h-full rounded-lg overflow-hidden">
-								<img
-									src={object.featuredImage}
-									alt={object.name}
-									className="object-cover w-full h-full"
-								/>
+								<img src={object.featuredImage} alt={object.name} className="object-cover w-full h-full" />
 								<div
 									className="absolute inset-0"
 									style={{
@@ -465,25 +439,22 @@ export function ObjectCard({
 						<div className="grid grid-cols-3 gap-2 h-full">
 							{object.recentImages.slice(0, 3).map((src, i) => (
 								<div
-									key={i}
+									key={`${object.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
 									className="relative rounded-md overflow-hidden aspect-square"
 								>
-									{src ?
-										<img
-											src={src}
-											alt={`Imagen ${i + 1}`}
-											className="object-cover w-full h-full"
-										/>
-									:	<div
+									{src ? (
+										<img src={src} alt={`Imagen ${i + 1}`} className="object-cover w-full h-full" />
+									) : (
+										<div
 											className={cn(
-												"w-full h-full flex items-center justify-center",
-												"bg-linear-to-br",
+												'w-full h-full flex items-center justify-center',
+												'bg-linear-to-br',
 												rarityGradient
 											)}
 										>
 											<ImageIcon className="w-4 h-4 text-white/80" />
 										</div>
-									}
+									)}
 								</div>
 							))}
 						</div>

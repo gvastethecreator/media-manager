@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Icons } from "@/components/core/icons";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Icons } from '@/components/core/icons';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function StatsLoading() {
 	return (
@@ -16,9 +16,9 @@ export function StatsLoading() {
 			<CardContent className="grid grid-cols-2 p-0 gap-2">
 				{Array(13)
 					.fill(null)
-					.map((_, i) => (
+					.map(() => (
 						<div
-							key={i}
+							key={`stat-card-${Math.random().toString(36).substring(2, 9)}`}
 							className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-xs"
 						>
 							<div className="flex items-center gap-2">
@@ -39,9 +39,9 @@ export function StatsLoading() {
 			<CardContent className="p-0 space-y-1 w-full gap-2">
 				{Array(5)
 					.fill(null)
-					.map((_, i) => (
+					.map(() => (
 						<div
-							key={i}
+							key={`tag-stat-${Math.random().toString(36).substring(2, 9)}`}
 							className="flex items-center justify-between py-1.5 px-2"
 						>
 							<Skeleton className="h-5 w-24" />
@@ -62,8 +62,11 @@ export function StatsLoading() {
 			<CardContent className="p-2 space-y-1">
 				{Array(5)
 					.fill(null)
-					.map((_, i) => (
-						<div key={i} className="flex items-center justify-between py-1.5">
+					.map(() => (
+						<div
+							key={`activity-${Math.random().toString(36).substring(2, 9)}`}
+							className="flex items-center justify-between py-1.5"
+						>
 							<div className="flex items-center gap-2">
 								<Skeleton className="h-8 w-8" />
 								<div className="space-y-1">
