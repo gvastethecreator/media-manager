@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { DetailsPanel } from "@/components/panels/details/details-panel";
-import { useFileManager } from "@/store/file-manager.store";
-import { motion, AnimatePresence } from "motion/react";
-import { Meteors } from "../ui/meteors";
+import { DetailsPanel } from '@/components/panels/details/details-panel';
+import { useFileManager } from '@/store/file-manager.store';
+import { AnimatePresence, motion } from 'motion/react';
+import { Meteors } from '../ui/meteors';
 
 export function RightPanel() {
 	const { selectedItems } = useFileManager();
@@ -11,21 +11,22 @@ export function RightPanel() {
 	return (
 		<div className="flex flex-col h-full">
 			<AnimatePresence mode="wait">
-				{selectedItems.length > 0 ?
+				{selectedItems.length > 0 ? (
 					<DetailsPanel selectedItems={selectedItems} />
-				:	<motion.div
+				) : (
+					<motion.div
 						key="info"
 						initial={{ opacity: 0, x: -20 }}
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
 						className="flex-1"
-						transition={{ type: "spring", damping: 25, stiffness: 200 }}
+						transition={{ type: 'spring', damping: 25, stiffness: 200 }}
 					>
 						<div className="flex-1 w-full h-full relative">
 							<Meteors />
 						</div>
 					</motion.div>
-				}
+				)}
 			</AnimatePresence>
 		</div>
 	);

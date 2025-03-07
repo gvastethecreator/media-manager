@@ -1,132 +1,127 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import type { FileItem, RelatedCollection, RelatedTag } from '@/types/file-item'
-import { logger } from '@/lib/logger'
-import path from 'path'
+import path from 'node:path';
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import type { FileItem, RelatedCollection, RelatedTag } from '@/types/file-item';
+import { type NextRequest, NextResponse } from 'next/server';
 
-const imagesLogger = logger.withContext('ImagesAPI')
+const imagesLogger = logger.withContext('ImagesAPI');
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  try {
-    const { id } = context.params
-    imagesLogger.info('🔍 Buscando carpeta:', { id })
+export async function GET(_request: NextRequest, context: { params: { id: string } }) {
+	try {
+		const { id } = context.params;
+		imagesLogger.info('🔍 Buscando carpeta:', { id });
 
-    const folder = await prisma.folder.findUnique({
-      where: { id },
-      include: {
-        images: {
-          orderBy: {
-            name: 'asc'
-          },
-          include: {
-            stats: true,
-            tags: {
-              select: {
-                id: true,
-                name: true,
-                color: true
-              }
-            },
-            collections: {
-              select: {
-                id: true,
-                name: true,
-                color: true
-              }
-            }
-          }
-        }
-      }
-    })
+		const folder = await prisma.folder.findUnique({
+			where: { id },
+			include: {
+				images: {
+					orderBy: {
+						name: 'asc',
+					},
+					include: {
+						stats: true,
+						tags: {
+							select: {
+								id: true,
+								name: true,
+								color: true,
+							},
+						},
+						collections: {
+							select: {
+								id: true,
+								name: true,
+								color: true,
+							},
+						},
+					},
+				},
+			},
+		});
 
-    if (!folder) {
-      imagesLogger.error('❌ Carpeta no encontrada:', { id })
-      return new NextResponse('Carpeta no encontrada', { status: 404 })
-    }
+		if (!folder) {
+			imagesLogger.error('❌ Carpeta no encontrada:', { id });
+			return new NextResponse('Carpeta no encontrada', { status: 404 });
+		}
 
-    imagesLogger.info('✅ Carpeta encontrada:', {
-      id: folder.id,
-      name: folder.name,
-      imageCount: folder.images.length
-    })
+		imagesLogger.info('✅ Carpeta encontrada:', {
+			id: folder.id,
+			name: folder.name,
+			imageCount: folder.images.length,
+		});
 
-    const files: FileItem[] = folder.images.map((image) => {
-      // Construir metadata
-      const metadata = {
-        mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
-        size: image.size,
-        dimensions: image.width && image.height
-          ? { width: image.width, height: image.height }
-          : undefined,
-        fileSystem: {
-          size: image.size,
-          created: image.createdAt.toISOString(),
-          modified: image.updatedAt.toISOString(),
-          accessed: image.updatedAt.toISOString()
-        },
-        extension: image.path ? path.extname(image.path).slice(1) : undefined,
-        exif: image.metadata ? JSON.parse(image.metadata).exif : undefined,
-        generation: image.metadata ? JSON.parse(image.metadata).generation : undefined
-      }
+		const files: FileItem[] = folder.images.map((image) => {
+			// Construir metadata
+			const metadata = {
+				mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
+				size: image.size,
+				dimensions: image.width && image.height ? { width: image.width, height: image.height } : undefined,
+				fileSystem: {
+					size: image.size,
+					created: image.createdAt.toISOString(),
+					modified: image.updatedAt.toISOString(),
+					accessed: image.updatedAt.toISOString(),
+				},
+				extension: image.path ? path.extname(image.path).slice(1) : undefined,
+				exif: image.metadata ? JSON.parse(image.metadata).exif : undefined,
+				generation: image.metadata ? JSON.parse(image.metadata).generation : undefined,
+			};
 
-      // Mapear colecciones y tags al formato requerido
-      const collections: RelatedCollection[] = image.collections.map(c => ({
-        id: c.id,
-        name: c.name
-      }))
+			// Mapear colecciones y tags al formato requerido
+			const collections: RelatedCollection[] = image.collections.map((c) => ({
+				id: c.id,
+				name: c.name,
+			}));
 
-      const tags: RelatedTag[] = image.tags.map(t => ({
-        id: t.id,
-        name: t.name,
-        color: t.color
-      }))
+			const tags: RelatedTag[] = image.tags.map((t) => ({
+				id: t.id,
+				name: t.name,
+				color: t.color,
+			}));
 
-      return {
-        id: image.id,
-        name: image.name,
-        path: image.path,
-        type: 'image',
-        size: image.size,
-        width: image.width,
-        height: image.height,
-        metadata: JSON.stringify(metadata),
-        thumbnail: image.thumbnail
-          ? `data:${metadata.mimeType || 'image/webp'};base64,${Buffer.from(image.thumbnail).toString('base64')}`
-          : null,
-        thumbnailSize: image.thumbnailSize,
-        thumbnailWidth: image.thumbnailWidth,
-        thumbnailHeight: image.thumbnailHeight,
-        isPublic: image.isPublic || false,
-        isFavorite: image.isFavorite || false,
-        folderId: folder.id,
-        createdAt: image.createdAt,
-        updatedAt: image.updatedAt,
-        modifiedAt: image.updatedAt,
-        accessedAt: image.updatedAt,
-        collections,
-        tags,
-        albums: [],
-        characters: [],
-        places: [],
-        objects: []
-      } as FileItem
-    })
+			return {
+				id: image.id,
+				name: image.name,
+				path: image.path,
+				type: 'image',
+				size: image.size,
+				width: image.width,
+				height: image.height,
+				metadata: JSON.stringify(metadata),
+				thumbnail: image.thumbnail
+					? `data:${metadata.mimeType || 'image/webp'};base64,${Buffer.from(image.thumbnail).toString('base64')}`
+					: null,
+				thumbnailSize: image.thumbnailSize,
+				thumbnailWidth: image.thumbnailWidth,
+				thumbnailHeight: image.thumbnailHeight,
+				isPublic: image.isPublic || false,
+				isFavorite: image.isFavorite || false,
+				folderId: folder.id,
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+				modifiedAt: image.updatedAt,
+				accessedAt: image.updatedAt,
+				collections,
+				tags,
+				albums: [],
+				characters: [],
+				places: [],
+				objects: [],
+			} as FileItem;
+		});
 
-    return NextResponse.json({
-      items: files,
-      folder: {
-        id: folder.id,
-        name: folder.name,
-        path: folder.path,
-        totalFiles: folder.totalFiles,
-        totalSize: folder.totalSize
-      }
-    })
-  } catch (error) {
-    imagesLogger.error('Error obteniendo imágenes:', error)
-    return new NextResponse('Error interno del servidor', { status: 500 })
-  }
+		return NextResponse.json({
+			items: files,
+			folder: {
+				id: folder.id,
+				name: folder.name,
+				path: folder.path,
+				totalFiles: folder.totalFiles,
+				totalSize: folder.totalSize,
+			},
+		});
+	} catch (error) {
+		imagesLogger.error('Error obteniendo imágenes:', error);
+		return new NextResponse('Error interno del servidor', { status: 500 });
+	}
 }

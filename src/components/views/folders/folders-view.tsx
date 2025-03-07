@@ -1,33 +1,36 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { ViewProps } from "../types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "motion/react";
-import { FolderIcon } from "lucide-react";
-import { getFolders } from "@/services/folder.service";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
-import { useNavigationStore } from "@/store/navigation.store";
-import { useFileManager } from "@/store/file-manager.store";
-import { eventsService, type EventData } from "@/services/events.service";
-import { logger } from "@/lib/logger";
-import { FolderCard } from "@/components/cards/folder-card";
-import type { Folder } from "@/types/folders";
+import { FolderCard } from '@/components/cards/folder-card';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { getFolders } from '@/services/folder.service';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import type { Folder } from '@/types/folders';
+import { FolderIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("FoldersView");
+const viewLogger = logger.withContext('FoldersView');
 
-export function FoldersView({ isResizing }: ViewProps) {
+export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentFolder } = useFileManager();
 	const [folders, setFolders] = useState<Folder[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usar el nuevo hook de eventos optimistas del cliente
+	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
+
 	const loadFolders = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando carpetas...");
+			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await getFolders();
 			const transformedData = data.map((folder) => ({
 				...folder,
@@ -38,9 +41,8 @@ export function FoldersView({ isResizing }: ViewProps) {
 			setFolders(transformedData);
 			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando carpetas:", error);
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando carpetas:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -48,26 +50,13 @@ export function FoldersView({ isResizing }: ViewProps) {
 	}, []);
 
 	useEffect(() => {
-		// Cargar carpetas inicialmente
 		loadFolders();
-
-		// Suscribirse a eventos relevantes
-		const handleFolderModified = (data?: EventData) => {
-			viewLogger.info("📢 Evento de modificación de carpetas recibido:", data);
-			loadFolders();
-		};
-
-		eventsService.on("folders:modified", handleFolderModified);
-
-		return () => {
-			eventsService.off("folders:modified", handleFolderModified);
-		};
 	}, [loadFolders]);
 
 	const handleFolderClick = useCallback(
 		(folder: Folder) => {
-			viewLogger.info("🖱️ Click en carpeta:", folder.name);
-			setCurrentView("folder-content");
+			viewLogger.info('🖱️ Click en carpeta:', folder.name);
+			setCurrentView('folder-content');
 			setCurrentFolder(folder.id);
 		},
 		[setCurrentView, setCurrentFolder]
@@ -85,7 +74,7 @@ export function FoldersView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!folders || folders.length === 0) {
+	if (!optimisticFolders || optimisticFolders.length === 0) {
 		return (
 			<EmptyState
 				icon={FolderIcon}
@@ -99,17 +88,14 @@ export function FoldersView({ isResizing }: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{folders.map((folder, index) => (
+					{optimisticFolders.map((folder, index) => (
 						<motion.div
 							key={folder.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<FolderCard
-								folder={folder}
-								onClick={() => handleFolderClick(folder)}
-							/>
+							<FolderCard folder={folder} onClick={() => handleFolderClick(folder)} />
 						</motion.div>
 					))}
 				</div>

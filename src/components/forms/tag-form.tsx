@@ -1,19 +1,15 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CompactPicker } from "react-color";
-import { cn } from "@/lib/utils";
-import { TagFormData } from "./entity-types";
-import { Palette } from "lucide-react";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { Separator } from "@/components/ui/separator";
+import { Button } from '@/components/ui/button';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { Palette } from 'lucide-react';
+import * as React from 'react';
+import { CompactPicker } from 'react-color';
+import type { TagFormData } from './entity-types';
 
 interface TagFormProps {
 	initialData?: TagFormData;
@@ -22,26 +18,23 @@ interface TagFormProps {
 	isLoading?: boolean;
 }
 
-export function TagForm({
-	initialData,
-	onSubmit,
-	onCancel,
-	isLoading,
-}: TagFormProps) {
+export function TagForm({ initialData, onSubmit, onCancel, isLoading }: TagFormProps) {
 	const [formData, setFormData] = React.useState<TagFormData>(
 		initialData || {
-			name: "",
-			emoji: "🏷️",
-			color: "#3b82f6",
-			description: "",
-			shortcut: "",
+			name: '',
+			emoji: '🏷️',
+			color: '#3b82f6',
+			description: '',
+			shortcut: '',
 			isFavorite: false,
 		}
 	);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.name?.trim()) return;
+		if (!formData.name?.trim()) {
+			return;
+		}
 		await onSubmit(formData);
 	};
 
@@ -66,15 +59,10 @@ export function TagForm({
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className="w-full p-0" align="start">
-							<EmojiPicker
-								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
-							/>
+							<EmojiPicker onEmojiSelect={(emoji: string) => handleChange('emoji', emoji)} />
 							<Separator className="my-2" />
 							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={(color) => handleChange("color", color.hex)}
-								/>
+								<CompactPicker color={formData.color} onChange={(color) => handleChange('color', color.hex)} />
 							</div>
 						</PopoverContent>
 					</Popover>
@@ -82,20 +70,20 @@ export function TagForm({
 				<div className="flex-1 min-w-0 space-y-1">
 					<Input
 						value={formData.name}
-						onChange={(e) => handleChange("name", e.target.value)}
+						onChange={(e) => handleChange('name', e.target.value)}
 						className="h-8 text-base"
 						placeholder="Nombre"
 					/>
 					<div className="flex gap-2">
 						<Input
-							value={formData.description || ""}
-							onChange={(e) => handleChange("description", e.target.value)}
+							value={formData.description || ''}
+							onChange={(e) => handleChange('description', e.target.value)}
 							className="h-6 text-xs"
 							placeholder="Descripción (opcional)"
 						/>
 						<Input
-							value={formData.shortcut || ""}
-							onChange={(e) => handleChange("shortcut", e.target.value)}
+							value={formData.shortcut || ''}
+							onChange={(e) => handleChange('shortcut', e.target.value)}
 							className="h-6 text-xs w-24"
 							placeholder="Atajo"
 						/>
@@ -105,21 +93,12 @@ export function TagForm({
 
 			<div className="flex justify-end gap-2">
 				{onCancel && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={onCancel}
-						disabled={isLoading}
-					>
+					<Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
 						Cancelar
 					</Button>
 				)}
 				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ?
-						"Guardando..."
-					: initialData ?
-						"Actualizar"
-					:	"Crear"}
+					{isLoading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
 				</Button>
 			</div>
 		</form>

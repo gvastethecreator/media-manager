@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { BaseContentView, ContentViewProvider } from "@/components/views/base";
-import type { BaseContentProps } from "@/components/views/base";
-import { Users } from "lucide-react";
-import { useFileManager } from "@/store/file-manager.store";
-import { FileItem } from "@/types/file-item";
-import { logger } from "@/lib/logger";
-import { getCharacterImages } from "@/app/actions/character.actions";
-import { eventsService, EventType, type EventData } from "@/services/events.service";
+import { getCharacterImages } from '@/app/actions/character.actions';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import type { BaseContentProps } from '@/components/views/base';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import type { FileItem } from '@/types/file-item';
+import { Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
-const viewLogger = logger.withContext("CharacterContentView");
+const viewLogger = logger.withContext('CharacterContentView');
 
 export function CharacterContentView() {
 	const { currentCharacterId } = useFileManager();
@@ -18,19 +18,23 @@ export function CharacterContentView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usar el hook de eventos optimistas del cliente
+	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
+
 	const loadCharacterImages = useCallback(async () => {
-		if (!currentCharacterId) return;
+		if (!currentCharacterId) {
+			return;
+		}
 
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando imágenes del personaje...");
+			viewLogger.info('🔄 Cargando imágenes del personaje...');
 			const data = await getCharacterImages(currentCharacterId);
 			setItems(data as unknown as FileItem[]);
-			viewLogger.info("✅ Imágenes cargadas");
+			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando imágenes:", errorMessage);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando imágenes:', errorMessage);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -40,28 +44,14 @@ export function CharacterContentView() {
 	useEffect(() => {
 		// Cargar imágenes inicialmente
 		loadCharacterImages();
-
-		// Suscribirse a eventos relevantes
-		const handleImagesModified = (data?: EventData) => {
-			viewLogger.info("📢 Evento de modificación de imágenes recibido:", data);
-			loadCharacterImages();
-		};
-
-		eventsService.on("images:modified" as EventType, handleImagesModified);
-		eventsService.on("characters:modified" as EventType, handleImagesModified);
-
-		return () => {
-			eventsService.off("images:modified" as EventType, handleImagesModified);
-			eventsService.off("characters:modified" as EventType, handleImagesModified);
-		};
 	}, [loadCharacterImages]);
 
 	const handleItemSelection = useCallback((item: FileItem) => {
-		viewLogger.info("🖱️ Item seleccionado:", item.name);
+		viewLogger.info('🖱️ Item seleccionado:', item.name);
 	}, []);
 
 	const contentProps: BaseContentProps = {
-		items,
+		items: optimisticItems,
 		isLoading,
 		error,
 		toggleItemSelection: handleItemSelection,
@@ -69,14 +59,14 @@ export function CharacterContentView() {
 		emptyState: !currentCharacterId
 			? {
 					icon: Users,
-					title: "No hay personaje seleccionado",
-					description: "Selecciona un personaje para ver su contenido.",
-			  }
+					title: 'No hay personaje seleccionado',
+					description: 'Selecciona un personaje para ver su contenido.',
+				}
 			: {
 					icon: Users,
-					title: "Personaje sin imágenes",
-					description: "Este personaje no tiene imágenes asociadas.",
-			  },
+					title: 'Personaje sin imágenes',
+					description: 'Este personaje no tiene imágenes asociadas.',
+				},
 	};
 
 	return (

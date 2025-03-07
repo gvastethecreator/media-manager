@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Meteors } from "@/components/ui/meteors";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from '@/components/ui/card';
+import { Meteors } from '@/components/ui/meteors';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import type React from 'react';
 
 interface StatsViewProps {
 	icon?: React.ReactNode;
@@ -13,32 +14,20 @@ interface StatsViewProps {
 	className?: string;
 }
 
-export function StatsView({
-	icon,
-	title,
-	subtitle,
-	children,
-	className,
-}: StatsViewProps) {
+export function StatsView({ icon, title, subtitle, children, className }: StatsViewProps) {
 	return (
 		<div className="space-y-4 p-2">
 			{/* Encabezado */}
 			<div className="flex items-center gap-2">
-				{icon && (
-					<div className="h-8 w-8 rounded-sm bg-primary/10 flex items-center justify-center">
-						{icon}
-					</div>
-				)}
+				{icon && <div className="h-8 w-8 rounded-sm bg-primary/10 flex items-center justify-center">{icon}</div>}
 				<div className="flex flex-col">
 					<h3 className="text-sm font-medium">{title}</h3>
-					{subtitle && (
-						<div className="text-xs text-muted-foreground">{subtitle}</div>
-					)}
+					{subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
 				</div>
 			</div>
 
 			{/* Contenido */}
-			<Card className={cn("border-none bg-muted/50", className)}>
+			<Card className={cn('border-none bg-muted/50', className)}>
 				<CardContent className="p-4 space-y-3">{children}</CardContent>
 			</Card>
 		</div>
@@ -70,10 +59,8 @@ export function StatCard({
 	className?: string;
 }) {
 	return (
-		<div className={cn("flex items-center gap-2", className)}>
-			<div className="h-8 w-8 rounded-sm bg-muted flex items-center justify-center">
-				{icon}
-			</div>
+		<div className={cn('flex items-center gap-2', className)}>
+			<div className="h-8 w-8 rounded-sm bg-muted flex items-center justify-center">{icon}</div>
 			<div className="flex flex-col">
 				<span className="text-xs text-muted-foreground">{title}</span>
 				<span className="text-sm font-medium">{value}</span>
@@ -96,7 +83,7 @@ export function StatProgress({
 	className?: string;
 }) {
 	return (
-		<div className={cn("space-y-1", className)}>
+		<div className={cn('space-y-1', className)}>
 			<div className="flex items-center justify-between text-xs">
 				<span className="text-xs text-muted-foreground">{title}</span>
 				<span>
@@ -104,10 +91,7 @@ export function StatProgress({
 				</span>
 			</div>
 			<div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-				<div
-					className="h-full bg-primary transition-all duration-300 ease-in-out"
-					style={{ width: `${progress}%` }}
-				/>
+				<div className="h-full bg-primary transition-all duration-300 ease-in-out" style={{ width: `${progress}%` }} />
 			</div>
 		</div>
 	);

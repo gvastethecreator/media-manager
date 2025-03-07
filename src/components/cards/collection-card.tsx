@@ -1,18 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { cn, formatBytes } from "@/lib/utils";
-import { motion } from "motion/react";
-import {
-	ImageIcon,
-	TagIcon,
-	FolderIcon,
-	Trash2,
-	PencilIcon,
-} from "lucide-react";
-import type { Collection } from "@prisma/client";
-import Image from "next/image";
+import { Button } from '@/components/ui/button';
+import { cn, formatBytes } from '@/lib/utils';
+import type { Collection } from '@prisma/client';
+import { FolderIcon, ImageIcon, PencilIcon, TagIcon, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import Image from 'next/image';
+import * as React from 'react';
 
 interface CollectionCardProps {
 	collection: Collection & {
@@ -29,26 +23,20 @@ interface CollectionCardProps {
 
 function getRandomGradient() {
 	const gradients = [
-		"from-rose-500/20 to-indigo-500/20",
-		"from-emerald-500/20 to-sky-500/20",
-		"from-amber-500/20 to-pink-500/20",
-		"from-violet-500/20 to-orange-500/20",
-		"from-cyan-500/20 to-yellow-500/20",
-		"from-fuchsia-500/20 to-lime-500/20",
-		"from-purple-500/20 to-teal-500/20",
-		"from-blue-500/20 to-red-500/20",
-		"from-green-500/20 to-purple-500/20",
+		'from-rose-500/20 to-indigo-500/20',
+		'from-emerald-500/20 to-sky-500/20',
+		'from-amber-500/20 to-pink-500/20',
+		'from-violet-500/20 to-orange-500/20',
+		'from-cyan-500/20 to-yellow-500/20',
+		'from-fuchsia-500/20 to-lime-500/20',
+		'from-purple-500/20 to-teal-500/20',
+		'from-blue-500/20 to-red-500/20',
+		'from-green-500/20 to-purple-500/20',
 	];
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-export function CollectionCard({
-	collection,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-}: CollectionCardProps) {
+export function CollectionCard({ collection, onEdit, onDelete, onClick, className }: CollectionCardProps) {
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const [isHovered, setIsHovered] = React.useState(false);
 	const gradient = getRandomGradient();
@@ -62,7 +50,7 @@ export function CollectionCard({
 
 	return (
 		<motion.div
-			className={cn("group relative", className)}
+			className={cn('group relative', className)}
 			onMouseMove={handleMouseMove}
 			onHoverStart={() => setIsHovered(true)}
 			onHoverEnd={() => setIsHovered(false)}
@@ -73,26 +61,26 @@ export function CollectionCard({
 		>
 			<div
 				className={cn(
-					"relative w-full aspect-3/4 rounded-lg overflow-hidden cursor-pointer",
-					"bg-linear-to-br from-background to-muted",
-					"shadow-lg hover:shadow-xl transition-all duration-300"
+					'relative w-full aspect-3/4 rounded-lg overflow-hidden cursor-pointer',
+					'bg-linear-to-br from-background to-muted',
+					'shadow-lg hover:shadow-xl transition-all duration-300'
 				)}
 			>
 				{/* Efecto holográfico base */}
 				<div
 					className={cn(
-						"absolute inset-0 z-10",
-						"before:absolute before:inset-0",
-						"before:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_60%)]",
-						"after:absolute after:inset-0",
-						"after:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.4)_0%,rgba(255,255,255,0)_30%)]",
-						"after:opacity-0 after:transition-opacity after:duration-300",
-						"group-hover:after:opacity-100"
+						'absolute inset-0 z-10',
+						'before:absolute before:inset-0',
+						'before:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_60%)]',
+						'after:absolute after:inset-0',
+						'after:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.4)_0%,rgba(255,255,255,0)_30%)]',
+						'after:opacity-0 after:transition-opacity after:duration-300',
+						'group-hover:after:opacity-100'
 					)}
 					style={
 						{
-							"--x": `${mousePosition.x}%`,
-							"--y": `${mousePosition.y}%`,
+							'--x': `${mousePosition.x}%`,
+							'--y': `${mousePosition.y}%`,
 						} as React.CSSProperties
 					}
 				/>
@@ -124,81 +112,69 @@ export function CollectionCard({
 								background: `linear-gradient(135deg, ${collection.color}, ${collection.color}80)`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-lg">
-								{collection.emoji}
-							</span>
+							<span className="text-2xl filter drop-shadow-lg">{collection.emoji}</span>
 						</div>
 						<div className="flex-1 min-w-0">
-							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">
-								{collection.name}
-							</h3>
-							{collection.description && (
-								<p className="text-sm text-white/80 truncate">
-									{collection.description}
-								</p>
-							)}
+							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{collection.name}</h3>
+							{collection.description && <p className="text-sm text-white/80 truncate">{collection.description}</p>}
 						</div>
 					</div>
 
 					{/* Grid de imágenes recientes */}
 					<div className="relative mt-4 flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{collection.recentImages && collection.recentImages.length > 0 ?
-								collection.recentImages.map((src, i) => (
-									<div
-										key={i}
-										className="relative rounded-md overflow-hidden aspect-square"
-									>
-										{src ?
-											<div className="relative w-full h-full">
-												<Image
-													src={src}
-													alt={`Imagen ${i + 1}`}
-													fill
-													className="object-cover transition-transform group-hover:scale-105"
-												/>
-											</div>
-										:	<div
-												className={cn(
-													"w-full h-full flex items-center justify-center",
-													"bg-linear-to-br",
-													gradient
-												)}
-											>
-												<ImageIcon className="w-4 h-4 text-white/80" />
-											</div>
-										}
-									</div>
-								))
-							:	Array.from({ length: 9 }).map((_, i) => (
-									<div
-										key={i}
-										className={cn(
-											"relative rounded-md overflow-hidden aspect-square",
-											"flex items-center justify-center",
-											"bg-linear-to-br",
-											gradient
-										)}
-									>
-										<ImageIcon className="w-4 h-4 text-white/80" />
-									</div>
-								))
-							}
+							{collection.recentImages && collection.recentImages.length > 0
+								? collection.recentImages.map((src, i) => (
+										<div
+											key={`${collection.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
+											className="relative rounded-md overflow-hidden aspect-square"
+										>
+											{src ? (
+												<div className="relative w-full h-full">
+													<Image
+														src={src}
+														alt={`Imagen ${i + 1}`}
+														fill
+														className="object-cover transition-transform group-hover:scale-105"
+													/>
+												</div>
+											) : (
+												<div
+													className={cn('w-full h-full flex items-center justify-center', 'bg-linear-to-br', gradient)}
+												>
+													<ImageIcon className="w-4 h-4 text-white/80" />
+												</div>
+											)}
+										</div>
+									))
+								: Array.from({ length: 9 }).map((_, i) => (
+										<div
+											key={`${collection.id}-placeholder-${i}`}
+											className={cn(
+												'relative rounded-md overflow-hidden aspect-square',
+												'flex items-center justify-center',
+												'bg-linear-to-br',
+												gradient
+											)}
+										>
+											<ImageIcon className="w-4 h-4 text-white/80" />
+										</div>
+									))}
 						</div>
 
 						{/* Overlay con hover */}
 						<div
 							className={cn(
-								"absolute inset-0 bg-linear-to-t from-background/80 to-transparent",
-								"opacity-0 group-hover:opacity-100 transition-opacity",
-								"rounded-lg flex items-end justify-center p-4"
+								'absolute inset-0 bg-linear-to-t from-background/80 to-transparent',
+								'opacity-0 group-hover:opacity-100 transition-opacity',
+								'rounded-lg flex items-end justify-center p-4'
 							)}
 						>
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{collection.recentImages && collection.recentImages.length > 0 ?
-									"Ver todas las imágenes"
-								:	"Colección vacía"}
+								{collection.recentImages && collection.recentImages.length > 0
+									? 'Ver todas las imágenes'
+									: 'Colección vacía'}
 							</Button>
 						</div>
 					</div>
@@ -224,7 +200,7 @@ export function CollectionCard({
 							<div className="flex flex-wrap gap-1">
 								{collection.topTags.slice(0, 3).map((tag, i) => (
 									<div
-										key={i}
+										key={`${collection.id}-tag-${tag.name}-${i}`}
 										className="px-2 py-0.5 rounded-full text-[10px] bg-white/10"
 									>
 										{tag.name} ({tag.count})

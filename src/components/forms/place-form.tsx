@@ -1,26 +1,16 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { CompactPicker } from "react-color";
-import { Separator } from "@/components/ui/separator";
-import { PlaceFormData } from "./entity-types";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import * as React from 'react';
+import { CompactPicker } from 'react-color';
+import type { PlaceFormData } from './entity-types';
 
 interface PlaceFormProps {
 	initialData?: PlaceFormData;
@@ -30,78 +20,66 @@ interface PlaceFormProps {
 }
 
 const PLACE_TYPES = [
-	"Ciudad",
-	"Pueblo",
-	"Castillo",
-	"Fortaleza",
-	"Ruinas",
-	"Mazmorra",
-	"Bosque",
-	"Montaña",
-	"Desierto",
-	"Costa",
-	"Isla",
-	"Templo",
-	"Otro",
+	'Ciudad',
+	'Pueblo',
+	'Castillo',
+	'Fortaleza',
+	'Ruinas',
+	'Mazmorra',
+	'Bosque',
+	'Montaña',
+	'Desierto',
+	'Costa',
+	'Isla',
+	'Templo',
+	'Otro',
 ];
 
-const CLIMATE_TYPES = [
-	"Tropical",
-	"Templado",
-	"Continental",
-	"Polar",
-	"Árido",
-	"Mediterráneo",
-	"Montañoso",
-	"Otro",
-];
+const CLIMATE_TYPES = ['Tropical', 'Templado', 'Continental', 'Polar', 'Árido', 'Mediterráneo', 'Montañoso', 'Otro'];
 
 const GOVERNMENT_TYPES = [
-	"Monarquía",
-	"República",
-	"Oligarquía",
-	"Teocracia",
-	"Anarquía",
-	"Dictadura",
-	"Consejo",
-	"Otro",
+	'Monarquía',
+	'República',
+	'Oligarquía',
+	'Teocracia',
+	'Anarquía',
+	'Dictadura',
+	'Consejo',
+	'Otro',
 ];
 
-export function PlaceForm({
-	initialData,
-	onSubmit,
-	onCancel,
-	isLoading,
-}: PlaceFormProps) {
+export function PlaceForm({ initialData, onSubmit, onCancel, isLoading }: PlaceFormProps) {
 	const [formData, setFormData] = React.useState<PlaceFormData>(
 		initialData || {
-			name: "",
-			emoji: "📍",
-			color: "#3b82f6",
-			description: "",
-			region: "",
-			type: "Ciudad",
-			climate: "Templado",
+			name: '',
+			emoji: '📍',
+			color: '#3b82f6',
+			description: '',
+			region: '',
+			type: 'Ciudad',
+			climate: 'Templado',
 			population: 0,
-			government: "Monarquía",
-			dangers: "[]",
-			resources: "[]",
-			lore: "",
-			history: "",
-			stats: "{}",
-			sortBy: "name",
-			filters: "[]",
+			government: 'Monarquía',
+			dangers: '[]',
+			resources: '[]',
+			lore: '',
+			history: '',
+			stats: '{}',
+			sortBy: 'name',
+			filters: '[]',
 			isFavorite: false,
 		}
 	);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.name.trim()) return;
+		if (!formData.name.trim()) {
+			return;
+		}
 		await onSubmit(formData);
 	};
 
-	const handleChange = (field: keyof PlaceFormData, value: any) => {
+	const handleChange = <T extends keyof PlaceFormData>(field: T, value: PlaceFormData[T]) => {
 		setFormData((prev) => ({
 			...prev,
 			[field]: value,
@@ -122,15 +100,10 @@ export function PlaceForm({
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className="w-full p-0" align="start">
-							<EmojiPicker
-								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
-							/>
+							<EmojiPicker onEmojiSelect={(emoji: string) => handleChange('emoji', emoji)} />
 							<Separator className="my-2" />
 							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={(color) => handleChange("color", color.hex)}
-								/>
+								<CompactPicker color={formData.color} onChange={(color) => handleChange('color', color.hex)} />
 							</div>
 						</PopoverContent>
 					</Popover>
@@ -139,13 +112,13 @@ export function PlaceForm({
 				<div className="flex-1 min-w-0">
 					<Input
 						value={formData.name}
-						onChange={(e) => handleChange("name", e.target.value)}
+						onChange={(e) => handleChange('name', e.target.value)}
 						className="h-8 text-base"
 						placeholder="Nombre"
 					/>
 					<Input
-						value={formData.description || ""}
-						onChange={(e) => handleChange("description", e.target.value)}
+						value={formData.description || ''}
+						onChange={(e) => handleChange('description', e.target.value)}
 						className="h-6 text-xs mt-1"
 						placeholder="Descripción (opcional)"
 					/>
@@ -158,16 +131,13 @@ export function PlaceForm({
 					<Input
 						placeholder="Nombre de la región..."
 						value={formData.region}
-						onChange={(e) => handleChange("region", e.target.value)}
+						onChange={(e) => handleChange('region', e.target.value)}
 						className="h-8"
 					/>
 				</div>
 				<div className="space-y-2">
 					<Label>Tipo</Label>
-					<Select
-						value={formData.type}
-						onValueChange={(value) => handleChange("type", value)}
-					>
+					<Select value={formData.type} onValueChange={(value) => handleChange('type', value)}>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona un tipo" />
 						</SelectTrigger>
@@ -185,10 +155,7 @@ export function PlaceForm({
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-2">
 					<Label>Clima</Label>
-					<Select
-						value={formData.climate}
-						onValueChange={(value) => handleChange("climate", value)}
-					>
+					<Select value={formData.climate} onValueChange={(value) => handleChange('climate', value)}>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona un clima" />
 						</SelectTrigger>
@@ -203,10 +170,7 @@ export function PlaceForm({
 				</div>
 				<div className="space-y-2">
 					<Label>Gobierno</Label>
-					<Select
-						value={formData.government}
-						onValueChange={(value) => handleChange("government", value)}
-					>
+					<Select value={formData.government} onValueChange={(value) => handleChange('government', value)}>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona un gobierno" />
 						</SelectTrigger>
@@ -228,9 +192,7 @@ export function PlaceForm({
 					min={0}
 					placeholder="Número de habitantes..."
 					value={formData.population}
-					onChange={(e) =>
-						handleChange("population", parseInt(e.target.value) || 0)
-					}
+					onChange={(e) => handleChange('population', Number.parseInt(e.target.value) || 0)}
 					className="h-8"
 				/>
 			</div>
@@ -240,7 +202,7 @@ export function PlaceForm({
 				<Textarea
 					placeholder='["Bandidos", "Monstruos", ...]'
 					value={formData.dangers}
-					onChange={(e) => handleChange("dangers", e.target.value)}
+					onChange={(e) => handleChange('dangers', e.target.value)}
 					className="font-mono text-sm min-h-[80px]"
 				/>
 			</div>
@@ -250,7 +212,7 @@ export function PlaceForm({
 				<Textarea
 					placeholder='["Oro", "Madera", "Hierro", ...]'
 					value={formData.resources}
-					onChange={(e) => handleChange("resources", e.target.value)}
+					onChange={(e) => handleChange('resources', e.target.value)}
 					className="font-mono text-sm min-h-[80px]"
 				/>
 			</div>
@@ -260,7 +222,7 @@ export function PlaceForm({
 				<Textarea
 					placeholder="Historia del lugar..."
 					value={formData.history}
-					onChange={(e) => handleChange("history", e.target.value)}
+					onChange={(e) => handleChange('history', e.target.value)}
 					className="min-h-[100px]"
 				/>
 			</div>
@@ -270,7 +232,7 @@ export function PlaceForm({
 				<Textarea
 					placeholder="Leyendas y mitos del lugar..."
 					value={formData.lore}
-					onChange={(e) => handleChange("lore", e.target.value)}
+					onChange={(e) => handleChange('lore', e.target.value)}
 					className="min-h-[100px]"
 				/>
 			</div>
@@ -280,28 +242,19 @@ export function PlaceForm({
 				<Textarea
 					placeholder='{"defensa": 10, "comercio": 8, ...}'
 					value={formData.stats}
-					onChange={(e) => handleChange("stats", e.target.value)}
+					onChange={(e) => handleChange('stats', e.target.value)}
 					className="font-mono text-sm min-h-[80px]"
 				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
 				{onCancel && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={onCancel}
-						disabled={isLoading}
-					>
+					<Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
 						Cancelar
 					</Button>
 				)}
 				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ?
-						"Guardando..."
-					: initialData ?
-						"Actualizar"
-					:	"Crear"}
+					{isLoading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
 				</Button>
 			</div>
 		</form>

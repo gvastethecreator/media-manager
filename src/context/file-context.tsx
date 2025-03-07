@@ -1,14 +1,12 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useCallback } from "react";
-import { useFileManager } from "@/store/file-manager.store";
-import type { FileItem } from "@/types/file-item";
-import { ActivityService } from "@/services/activity.service";
-import {
-	eventsService,
-	EventType,
-	type CacheInvalidationEvent,
-} from "@/services/events.service";
+import { clientEvents } from '@/lib/client/events.client';
+import type { EventType } from '@/lib/server/events.server';
+import { ActivityService } from '@/services/activity.service';
+import { useFileManager } from '@/store/file-manager.store';
+import type { FileItem } from '@/types/file-item';
+import type React from 'react';
+import { createContext, useCallback, useContext } from 'react';
 
 interface FileContextType {
 	currentItems: FileItem[];
@@ -31,47 +29,56 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 		clearSelection,
 	} = useFileManager();
 
+	// Usamos el hook de eventos optimistas del cliente
+	const [_optimisticState, addEvent] = clientEvents.useEvents({});
+
 	const handleSelectItem = useCallback(
 		async (item: FileItem) => {
 			baseHandleSelectItem(item);
 
 			// Registrar actividad de vista
 			await ActivityService.logActivity({
-				type: "view",
+				type: 'view',
 				description: `Vista de ${item.name}`,
 				imageId: item.id,
 			});
-
 		},
 		[baseHandleSelectItem]
 	);
 
 	const toggleItemSelection = useCallback(
-		(item: FileItem, multiSelect: boolean = false) => {
+		(item: FileItem, multiSelect = false) => {
 			baseToggleItemSelection(item, multiSelect);
 
 			// Emitir evento de actualización si es necesario
-			const events: CacheInvalidationEvent[] = [];
-			if (item.collections?.length) events.push("collections:modified");
-			if (item.tags?.length) events.push("tags:modified");
-			if (item.characters?.length) events.push("characters:modified");
-			if (item.places?.length) events.push("places:modified");
-			if (item.objects?.length) events.push("objects:modified");
-			if (item.isFavorite) events.push("favorites:modified");
-
-			if (events.length > 0) {
-				events.forEach((event) => eventsService.emit(event as EventType));
+			if (item.collections?.length) {
+				addEvent({ type: 'collections:modified', data: { item } });
+			}
+			if (item.tags?.length) {
+				addEvent({ type: 'tags:modified', data: { item } });
+			}
+			if (item.characters?.length) {
+				addEvent({ type: 'characters:modified', data: { item } });
+			}
+			if (item.places?.length) {
+				addEvent({ type: 'places:modified', data: { item } });
+			}
+			if (item.objects?.length) {
+				addEvent({ type: 'objects:modified', data: { item } });
+			}
+			if (item.isFavorite) {
+				addEvent({ type: 'favorites:modified', data: { item } });
 			}
 		},
-		[baseToggleItemSelection]
+		[baseToggleItemSelection, addEvent]
 	);
 
-	const handleToggleSelection = useCallback(
+	const _handleToggleSelection = useCallback(
 		(item: FileItem, isMultiSelect: boolean) => {
 			toggleItemSelection(item, isMultiSelect);
-			eventsService.emit("files:modified" as EventType);
+			addEvent({ type: 'files:modified', data: { item } });
 		},
-		[toggleItemSelection]
+		[toggleItemSelection, addEvent]
 	);
 
 	const value = {
@@ -89,7 +96,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
 export function useFiles() {
 	const context = useContext(FileContext);
 	if (context === undefined) {
-		throw new Error("useFiles must be used within a FileProvider");
+		throw new Error('useFiles must be used within a FileProvider');
 	}
 	return context;
 }

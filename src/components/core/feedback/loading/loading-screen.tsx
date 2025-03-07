@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { motion } from "motion/react";
-import { Circle, CircleDashed, Diameter, Loader, LoaderPinwheel } from "lucide-react";
+import { Circle, CircleDashed, Diameter, Loader, LoaderPinwheel } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface LoadingScreenProps {
 	message?: string;
 }
 
-export function LoadingScreen({ message = "Cargando..." }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Cargando...' }: LoadingScreenProps) {
 	return (
 		<motion.div
 			animate={{ opacity: [0, 1] }}

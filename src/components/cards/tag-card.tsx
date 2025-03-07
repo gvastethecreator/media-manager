@@ -1,20 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
-import {
-	Tag as TagIcon,
-	Image as ImageIcon,
-	PencilIcon,
-	Trash2,
-	Clock,
-	Hash,
-	Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { Tag } from "@prisma/client";
-import { formatBytes, formatDate } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { formatBytes, formatDate } from '@/lib/utils';
+import type { Tag } from '@prisma/client';
+import { Clock, Hash, Image as ImageIcon, PencilIcon, Sparkles, Tag as TagIcon, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
 interface TagCardProps {
 	tag: Tag & {
@@ -41,10 +33,10 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 	return (
 		<motion.div
 			className={cn(
-				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
-				"bg-linear-to-br from-background/50 to-muted/50",
-				"shadow-lg hover:shadow-xl transition-all duration-300",
-				"cursor-pointer perspective-1000",
+				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group',
+				'bg-linear-to-br from-background/50 to-muted/50',
+				'shadow-lg hover:shadow-xl transition-all duration-300',
+				'cursor-pointer perspective-1000',
 				className
 			)}
 			onHoverStart={() => setIsHovered(true)}
@@ -54,8 +46,8 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 			transition={{ duration: 0.2 }}
 			style={
 				{
-					"--x": `${mousePosition.x}%`,
-					"--y": `${mousePosition.y}%`,
+					'--x': `${mousePosition.x}%`,
+					'--y': `${mousePosition.y}%`,
 				} as React.CSSProperties
 			}
 		>
@@ -134,9 +126,9 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 				<div className="flex items-center gap-3 mb-4">
 					<div
 						className={cn(
-							"h-12 w-12 rounded-full flex items-center justify-center",
-							"bg-linear-to-br shadow-inner relative overflow-hidden",
-							"group-hover:shadow-lg transition-shadow duration-300"
+							'h-12 w-12 rounded-full flex items-center justify-center',
+							'bg-linear-to-br shadow-inner relative overflow-hidden',
+							'group-hover:shadow-lg transition-shadow duration-300'
 						)}
 						style={{
 							background: `
@@ -168,9 +160,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 						/>
 					</div>
 					<div className="flex-1 min-w-0">
-						<h3 className="font-bold text-lg leading-tight truncate">
-							{tag.name}
-						</h3>
+						<h3 className="font-bold text-lg leading-tight truncate">{tag.name}</h3>
 						{tag.shortcut && (
 							<div className="flex items-center gap-1 text-sm text-muted-foreground">
 								<Hash className="h-3 w-3" />
@@ -196,9 +186,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 				{/* Descripción */}
 				{tag.description && (
 					<div className="mb-4">
-						<p className="text-sm text-muted-foreground line-clamp-3">
-							{tag.description}
-						</p>
+						<p className="text-sm text-muted-foreground line-clamp-3">{tag.description}</p>
 					</div>
 				)}
 
@@ -208,8 +196,7 @@ export function TagCard({ tag, onEdit, onDelete, className }: TagCardProps) {
 						<div className="flex items-center gap-1 text-sm text-muted-foreground">
 							<ImageIcon className="h-3 w-3" />
 							<span>
-								{tag._count.images}{" "}
-								{tag._count.images === 1 ? "imagen" : "imágenes"}
+								{tag._count.images} {tag._count.images === 1 ? 'imagen' : 'imágenes'}
 							</span>
 							{tag.totalSize && (
 								<>

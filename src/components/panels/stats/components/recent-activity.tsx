@@ -1,7 +1,7 @@
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock } from "lucide-react";
-import { Activity } from "./activity";
-import { getSystemStats } from "@/app/actions/stats.actions";
+import { getSystemStats } from '@/app/actions/stats.actions';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock } from 'lucide-react';
+import { Activity } from './activity';
 
 export async function RecentActivity() {
 	const stats = await getSystemStats();
@@ -15,8 +15,8 @@ export async function RecentActivity() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2 space-y-1">
-				{stats.recentActivity.map((activity, i) => (
-					<Activity key={i} activity={activity} />
+				{stats.recentActivity.map((activity) => (
+					<Activity key={activity.id} activity={activity} />
 				))}
 			</CardContent>
 		</>

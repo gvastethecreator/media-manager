@@ -1,103 +1,96 @@
-'use client'
+'use client';
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { ImageIcon } from "lucide-react"
+import { cn } from '@/lib/utils';
+import { ImageIcon } from 'lucide-react';
+import * as React from 'react';
 
-export interface ImageFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  fallbackClassName?: string
-  gradientColors?: string[]
-  showPlaceholder?: boolean
+// Propiedades básicas para el componente
+type ImageFallbackProps = {
+	src?: string;
+	alt: string;
+	className?: string;
+	fallbackClassName?: string;
+	width?: number | string;
+	height?: number | string;
+	onLoad?: () => void;
+	onError?: () => void;
+};
+
+/**
+ * Componente que muestra una imagen con un fallback para cuando la imagen
+ * no puede cargarse o mientras está en proceso de carga.
+ */
+export function ImageFallback({
+	src,
+	alt,
+	className,
+	fallbackClassName,
+	width,
+	height,
+	onLoad,
+	onError,
+}: ImageFallbackProps) {
+	const [hasError, setHasError] = React.useState(false);
+	const [isLoaded, setIsLoaded] = React.useState(false);
+	const imgRef = React.useRef<HTMLImageElement>(null);
+
+	// Manejadores de eventos
+	const handleError = React.useCallback(() => {
+		setHasError(true);
+		setIsLoaded(false);
+		onError?.();
+	}, [onError]);
+
+	const handleLoad = React.useCallback(() => {
+		setIsLoaded(true);
+		onLoad?.();
+	}, [onLoad]);
+
+	// Estilos para el contenedor
+	const containerStyle: React.CSSProperties = {
+		width: width || 'auto',
+		height: height || 'auto',
+		position: 'relative',
+	};
+
+	// Si hay error, mostrar un placeholder
+	if (hasError) {
+		return (
+			<div
+				className={cn('flex items-center justify-center bg-muted/50 rounded-md', className, fallbackClassName)}
+				style={containerStyle}
+				role="img"
+				aria-label={alt}
+			>
+				<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
+			</div>
+		);
+	}
+
+	// Renderizar la imagen con su placeholder
+	return (
+		<div className={cn('relative', className)} style={containerStyle}>
+			<img
+				ref={imgRef}
+				src={src}
+				alt={alt}
+				className="w-full h-full object-cover transition-opacity duration-300"
+				style={{ opacity: isLoaded ? 1 : 0 }}
+				onError={handleError}
+				onLoad={handleLoad}
+			/>
+
+			{!isLoaded && (
+				<div
+					className={cn('absolute inset-0 flex items-center justify-center bg-muted/50', fallbackClassName)}
+					aria-hidden="true"
+				>
+					<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
+				</div>
+			)}
+		</div>
+	);
 }
 
-export const ImageFallback = React.forwardRef<HTMLImageElement, ImageFallbackProps>(
-  ({
-    src,
-    alt,
-    className,
-    fallbackClassName,
-    gradientColors = ["#f6d365", "#fda085"],
-    showPlaceholder = true,
-    ...props
-  }, ref) => {
-    const [error, setError] = React.useState(false)
-    const [loaded, setLoaded] = React.useState(false)
-    const gradientId = React.useId()
-
-    const handleError = () => {
-      setError(true)
-      setLoaded(false)
-    }
-
-    const handleLoad = () => {
-      setLoaded(true)
-    }
-
-    const renderPlaceholder = () => (
-      <div
-        className={cn(
-          "relative w-full h-full rounded-md overflow-hidden bg-muted/50",
-          fallbackClassName
-        )}
-      >
-        <svg
-          className="absolute inset-0 w-full h-full"
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient
-              id={gradientId}
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              {gradientColors.map((color, index) => (
-                <stop
-                  key={index}
-                  offset={`${(index / (gradientColors.length - 1)) * 100}%`}
-                  stopColor={color}
-                />
-              ))}
-            </linearGradient>
-          </defs>
-          <rect
-            width="100%"
-            height="100%"
-            fill={`url(#${gradientId})`}
-            opacity="0.5"
-          />
-        </svg>
-        {showPlaceholder && (
-          <ImageIcon
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-muted-foreground/20"
-          />
-        )}
-      </div>
-    )
-
-    return (
-      <div className={cn("relative w-full h-full", className)}>
-        {!error && (
-          <img
-            ref={ref}
-            src={src}
-            alt={alt}
-            className={cn(
-              "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-              !loaded && "opacity-0"
-            )}
-            onError={handleError}
-            onLoad={handleLoad}
-            {...props}
-          />
-        )}
-        {(!loaded || error) && renderPlaceholder()}
-      </div>
-    )
-  }
-)
-
-ImageFallback.displayName = "ImageFallback"
+// Nombre para DevTools
+ImageFallback.displayName = 'ImageFallback';

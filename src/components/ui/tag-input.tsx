@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
+import * as React from 'react';
 
 export interface TagInputProps {
 	value?: string[];
@@ -19,12 +19,12 @@ export function TagInput({
 	value,
 	defaultValue = [],
 	onChange,
-	placeholder = "Presiona Enter para agregar",
+	placeholder = 'Presiona Enter para agregar',
 	className,
 	disabled = false,
 }: TagInputProps) {
 	const [tags, setTags] = React.useState<string[]>(value || defaultValue);
-	const [input, setInput] = React.useState("");
+	const [input, setInput] = React.useState('');
 
 	React.useEffect(() => {
 		if (value) {
@@ -48,32 +48,29 @@ export function TagInput({
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === "Enter") {
+		if (e.key === 'Enter') {
 			e.preventDefault();
 			addTag(input);
-			setInput("");
-		} else if (e.key === "Backspace" && !input && tags.length > 0) {
+			setInput('');
+		} else if (e.key === 'Backspace' && !input && tags.length > 0) {
 			removeTag(tags.length - 1);
 		}
 	};
 
 	return (
-		<div className={cn("space-y-2", className)}>
+		<div className={cn('space-y-2', className)}>
 			<div className="flex flex-wrap gap-2">
-				{tags.map((tag, index) => (
+				{tags.map((tag) => (
 					<Badge
-						key={index}
+						key={`tag-${tag}-${Math.random().toString(36).substring(2, 9)}`}
 						variant="secondary"
-						className={cn(
-							"px-2 py-1 text-xs",
-							disabled && "opacity-50 cursor-not-allowed"
-						)}
+						className={cn('px-2 py-1 text-xs', disabled && 'opacity-50 cursor-not-allowed')}
 					>
 						{tag}
 						{!disabled && (
 							<button
 								type="button"
-								onClick={() => removeTag(index)}
+								onClick={() => removeTag(tags.indexOf(tag))}
 								className="ml-1 hover:text-destructive"
 							>
 								<X className="h-3 w-3" />

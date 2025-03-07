@@ -1,55 +1,48 @@
-"use client";
+'use client';
 
-import { useEffect, useCallback } from "react";
-import { ViewProps } from "../types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "motion/react";
-import { TagIcon } from "lucide-react";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
-import { useNavigationStore } from "@/store/navigation.store";
-import { useFileManager } from "@/store/file-manager.store";
-import { useTagsStore } from "@/store/tags.store";
-import { eventsService, EventType, type EventData } from "@/services/events.service";
-import { logger } from "@/lib/logger";
-import { TagCard } from "@/components/cards/tag-card";
+import { TagCard } from '@/components/cards/tag-card';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { useTagsStore } from '@/store/tags.store';
+import { TagIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useEffect } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("TagsView");
+const viewLogger = logger.withContext('TagsView');
 
-export function TagsView({ isResizing }: ViewProps) {
+export function TagsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentTag } = useFileManager();
 	const { tags, isLoading, error, loadTags } = useTagsStore();
 
+	// Usar el nuevo hook de eventos optimistas
+	const [optimisticTags] = clientEvents.useEvents(tags);
+
 	const fetchTags = useCallback(async () => {
 		try {
-			viewLogger.info("🔄 Cargando etiquetas...");
+			viewLogger.info('🔄 Cargando etiquetas...');
 			await loadTags();
 			viewLogger.info(`✅ ${tags.length} etiquetas cargadas`);
 		} catch (error) {
-			viewLogger.error("❌ Error al cargar etiquetas:", error);
+			viewLogger.error('❌ Error al cargar etiquetas:', error);
 		}
 	}, [loadTags, tags.length]);
 
 	useEffect(() => {
 		fetchTags();
-
-		const handleTagModified = (data?: EventData) => {
-			viewLogger.info("📢 Evento de modificación de etiquetas recibido:", data);
-			fetchTags();
-		};
-
-		eventsService.on("tags:modified" as EventType, handleTagModified);
-
-		return () => {
-			eventsService.off("tags:modified" as EventType, handleTagModified);
-		};
 	}, [fetchTags]);
 
 	const handleTagClick = useCallback(
 		(tagId: string) => {
-			viewLogger.info("🖱️ Click en etiqueta:", tagId);
-			setCurrentView("tag-content");
+			viewLogger.info('🔍 Ver etiqueta:', tagId);
+			setCurrentView('tag-content');
 			setCurrentTag(tagId);
 		},
 		[setCurrentView, setCurrentTag]
@@ -67,7 +60,7 @@ export function TagsView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!tags || tags.length === 0) {
+	if (!optimisticTags || optimisticTags.length === 0) {
 		return (
 			<EmptyState
 				icon={TagIcon}
@@ -81,20 +74,18 @@ export function TagsView({ isResizing }: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{tags.map((tag) => (
-						<div
+					{optimisticTags.map((tag) => (
+						<button
 							key={tag.id}
-							className="cursor-pointer"
+							type="button"
+							className="cursor-pointer text-left w-full"
 							onClick={() => handleTagClick(tag.id)}
+							aria-label={`Ver etiqueta ${tag.name}`}
 						>
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.3 }}
-							>
+							<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 								<TagCard tag={tag} />
 							</motion.div>
-						</div>
+						</button>
 					))}
 				</div>
 			</div>

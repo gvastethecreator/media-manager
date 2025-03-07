@@ -1,174 +1,153 @@
-import { promises as fs } from 'fs'
-import path from 'path'
-import crypto from 'crypto'
-import { prisma } from '@/lib/prisma'
+import { promises as fs } from 'fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+import { prisma } from '@/lib/prisma';
 
 // Esta función debe ser llamada solo en el servidor
 export const fsService = {
-  async validatePath(folderPath: string): Promise<{ valid: boolean; error?: string }> {
-    try {
-      // Normalizar la ruta para Windows
-      const normalizedPath = this.normalizePath(folderPath)
+	async validatePath(folderPath: string): Promise<{ valid: boolean; error?: string }> {
+		try {
+			// Normalizar la ruta para Windows
+			const normalizedPath = this.normalizePath(folderPath);
 
-      // Verificar si la ruta existe
-      const stats = await fs.stat(normalizedPath)
+			// Verificar si la ruta existe
+			const stats = await fs.stat(normalizedPath);
 
-      if (!stats.isDirectory()) {
-        return { valid: false, error: 'La ruta no es un directorio' }
-      }
+			if (!stats.isDirectory()) {
+				return { valid: false, error: 'La ruta no es un directorio' };
+			}
 
-      // Verificar permisos de lectura
-      try {
-        await fs.access(normalizedPath, fs.constants.R_OK)
-      } catch (error) {
-        return { valid: false, error: 'No tienes permisos de lectura en esta carpeta' }
-      }
+			// Verificar permisos de lectura
+			try {
+				await fs.access(normalizedPath, fs.constants.R_OK);
+			} catch (_error) {
+				return { valid: false, error: 'No tienes permisos de lectura en esta carpeta' };
+			}
 
-      return { valid: true }
-    } catch (error) {
-      console.error('Error validando ruta:', error)
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        return { valid: false, error: 'La carpeta no existe' }
-      }
-      return { valid: false, error: 'La ruta no es accesible' }
-    }
-  },
+			return { valid: true };
+		} catch (error) {
+			console.error('Error validando ruta:', error);
+			if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+				return { valid: false, error: 'La carpeta no existe' };
+			}
+			return { valid: false, error: 'La ruta no es accesible' };
+		}
+	},
 
-  async listFiles(folderPath: string): Promise<{ name: string; path: string; size: number }[]> {
-    try {
-      const normalizedPath = this.normalizePath(folderPath)
-      console.log('📂 Listing files in:', normalizedPath)
+	async listFiles(folderPath: string): Promise<{ name: string; path: string; size: number }[]> {
+		try {
+			const normalizedPath = this.normalizePath(folderPath);
 
-      const files = await fs.readdir(normalizedPath)
-      const fileDetails = await Promise.all(
-        files.map(async (file) => {
-          const filePath = path.join(normalizedPath, file)
-          try {
-            const stats = await fs.stat(filePath)
-            if (stats.isFile()) {
-              const normalizedFilePath = this.normalizePath(filePath)
-              console.log('📄 Found file:', {
-                name: file,
-                path: normalizedFilePath,
-                size: stats.size
-              })
-              return {
-                name: file,
-                path: normalizedFilePath,
-                size: stats.size
-              }
-            }
-            return null
-          } catch (error) {
-            console.error(`❌ Error processing file ${file}:`, error)
-            return null
-          }
-        })
-      )
+			const files = await fs.readdir(normalizedPath);
+			const fileDetails = await Promise.all(
+				files.map(async (file) => {
+					const filePath = path.join(normalizedPath, file);
+					try {
+						const stats = await fs.stat(filePath);
+						if (stats.isFile()) {
+							const normalizedFilePath = this.normalizePath(filePath);
+							return {
+								name: file,
+								path: normalizedFilePath,
+								size: stats.size,
+							};
+						}
+						return null;
+					} catch (error) {
+						console.error(`❌ Error processing file ${file}:`, error);
+						return null;
+					}
+				})
+			);
 
-      const validFiles = fileDetails.filter((file): file is NonNullable<typeof file> => file !== null)
-      console.log(`✅ Found ${validFiles.length} valid files`)
-      return validFiles
+			const validFiles = fileDetails.filter((file): file is NonNullable<typeof file> => file !== null);
+			return validFiles;
+		} catch (error) {
+			console.error('❌ Error listing files:', error);
+			throw new Error('No se pudo listar los archivos del directorio');
+		}
+	},
 
-    } catch (error) {
-      console.error('❌ Error listing files:', error)
-      throw new Error('No se pudo listar los archivos del directorio')
-    }
-  },
+	async calculateFileHash(filePath: string): Promise<string> {
+		try {
+			const normalizedPath = this.normalizePath(filePath);
+			const fileBuffer = await fs.readFile(normalizedPath);
+			const hashSum = crypto.createHash('sha256');
+			hashSum.update(fileBuffer);
+			return hashSum.digest('hex');
+		} catch (error) {
+			console.error('Error calculando hash:', error);
+			throw new Error('No se pudo calcular el hash del archivo');
+		}
+	},
 
-  async calculateFileHash(filePath: string): Promise<string> {
-    try {
-      const normalizedPath = this.normalizePath(filePath)
-      const fileBuffer = await fs.readFile(normalizedPath)
-      const hashSum = crypto.createHash('sha256')
-      hashSum.update(fileBuffer)
-      return hashSum.digest('hex')
-    } catch (error) {
-      console.error('Error calculando hash:', error)
-      throw new Error('No se pudo calcular el hash del archivo')
-    }
-  },
+	async getFileMetadata(filePath: string) {
+		try {
+			const normalizedPath = this.normalizePath(filePath);
+			const stats = await fs.stat(normalizedPath);
+			return {
+				size: stats.size,
+				created: stats.birthtime,
+				modified: stats.mtime,
+				accessed: stats.atime,
+			};
+		} catch (error) {
+			console.error('Error obteniendo metadata:', error);
+			throw new Error('No se pudo obtener la metadata del archivo');
+		}
+	},
 
-  async getFileMetadata(filePath: string) {
-    try {
-      const normalizedPath = this.normalizePath(filePath)
-      const stats = await fs.stat(normalizedPath)
-      return {
-        size: stats.size,
-        created: stats.birthtime,
-        modified: stats.mtime,
-        accessed: stats.atime
-      }
-    } catch (error) {
-      console.error('Error obteniendo metadata:', error)
-      throw new Error('No se pudo obtener la metadata del archivo')
-    }
-  },
+	async isImage(filePath: string): Promise<boolean> {
+		const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff'];
+		const ext = path.extname(filePath).toLowerCase();
+		return imageExtensions.includes(ext);
+	},
 
-  async isImage(filePath: string): Promise<boolean> {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff']
-    const ext = path.extname(filePath).toLowerCase()
-    return imageExtensions.includes(ext)
-  },
+	normalizePath(folderPath: string): string {
+		try {
+			// Normalizar la ruta para Windows
+			let normalized = path.normalize(folderPath);
 
-  normalizePath(folderPath: string): string {
-    try {
-      // Normalizar la ruta para Windows
-      let normalized = path.normalize(folderPath)
+			// Asegurarnos de que use backslashes en Windows
+			if (process.platform === 'win32') {
+				normalized = normalized.replace(/\//g, '\\');
+			}
 
-      // Asegurarnos de que use backslashes en Windows
-      if (process.platform === 'win32') {
-        normalized = normalized.replace(/\//g, '\\')
-      }
-
-      console.log('🔄 Normalized path:', {
-        original: folderPath,
-        normalized
-      })
-
-      return normalized
-    } catch (error) {
-      console.error('❌ Error normalizing path:', error)
-      return folderPath
-    }
-  }
-}
+			return normalized;
+		} catch (error) {
+			console.error('❌ Error normalizing path:', error);
+			return folderPath;
+		}
+	},
+};
 
 export async function initializeFileSystem() {
-  try {
-    // Verificar y crear directorios necesarios
-    const requiredDirs = [
-      'uploads',
-      'thumbnails',
-      'temp',
-      'cache'
-    ]
+	try {
+		// Verificar y crear directorios necesarios
+		const requiredDirs = ['uploads', 'thumbnails', 'temp', 'cache'];
 
-    for (const dir of requiredDirs) {
-      const dirPath = path.join(process.cwd(), dir)
-      try {
-        await fs.access(dirPath)
-      } catch {
-        await fs.mkdir(dirPath, { recursive: true })
-        console.log(`📁 [FileSystem] Directorio creado: ${dir}`)
-      }
-    }
+		for (const dir of requiredDirs) {
+			const dirPath = path.join(process.cwd(), dir);
+			try {
+				await fs.access(dirPath);
+			} catch {
+				await fs.mkdir(dirPath, { recursive: true });
+			}
+		}
 
-    // Sincronizar carpetas en la base de datos
-    const folders = await prisma.folder.findMany()
-    for (const folder of folders) {
-      try {
-        await fs.access(folder.path)
-      } catch {
-        console.warn(`⚠️ [FileSystem] Carpeta no encontrada: ${folder.path}`)
-        // Opcional: Marcar la carpeta como no disponible en la base de datos
-      }
-    }
-
-    console.log('📂 [FileSystem] Sistema de archivos inicializado')
-    return true
-  } catch (error) {
-    console.error('❌ [FileSystem] Error al inicializar:', error)
-    throw error
-  }
+		// Sincronizar carpetas en la base de datos
+		const folders = await prisma.folder.findMany();
+		for (const folder of folders) {
+			try {
+				await fs.access(folder.path);
+			} catch {
+				console.warn(`⚠️ [FileSystem] Carpeta no encontrada: ${folder.path}`);
+				// Opcional: Marcar la carpeta como no disponible en la base de datos
+			}
+		}
+		return true;
+	} catch (error) {
+		console.error('❌ [FileSystem] Error al inicializar:', error);
+		throw error;
+	}
 }

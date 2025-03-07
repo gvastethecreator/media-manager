@@ -4,10 +4,10 @@
  * Delega la lógica de datos al StatsContent (Server Component)
  */
 
-"use client";
+'use client';
 
-import { StatsContainer } from "./base/stats-view";
-import { StatsContent } from "./stats-content";
+import { StatsContainer } from './base/stats-view';
+import { StatsContent } from './stats-content';
 
 export function StatsPanel() {
 	return (
