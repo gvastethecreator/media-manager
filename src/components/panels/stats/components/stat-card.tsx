@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { memo } from "react";
 import {
 	Activity,
 	Album,
@@ -11,12 +10,13 @@ import {
 	Folder,
 	HardDrive,
 	Image,
+	type LucideIcon,
 	MapPin,
 	Star,
 	Tag,
 	Users,
-	type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
+import { memo } from 'react';
 
 const ICONS = {
 	Activity,
@@ -41,12 +41,7 @@ interface StatCardProps {
 	color: string;
 }
 
-export const StatCard = memo(function StatCard({
-	title,
-	value,
-	icon,
-	color,
-}: StatCardProps) {
+export const StatCard = memo(function StatCard({ title, value, icon, color }: StatCardProps) {
 	const Icon = ICONS[icon];
 
 	return (
@@ -60,4 +55,4 @@ export const StatCard = memo(function StatCard({
 	);
 });
 
-StatCard.displayName = "StatCard";
+StatCard.displayName = 'StatCard';

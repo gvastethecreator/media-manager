@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { ViewProps } from "../types";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileItem } from "@/types/file-item";
-import { useFileManager } from "@/store/file-manager.store";
-import { useImageViewer } from "@/store/image-viewer.store";
-import { FileGrid } from "@/components/features/file-grid/file-grid";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { Search } from "lucide-react";
-import { LoadingScreen } from "@/components/core/feedback";
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileGrid } from '@/components/features/file-grid/file-grid';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useFileManager } from '@/store/file-manager.store';
+import { useImageViewer } from '@/store/image-viewer.store';
+import type { FileItem } from '@/types/file-item';
+import { Search } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import type { ViewProps } from '../types';
 
 interface SearchFilters {
 	query: string;
-	type: "name" | "content" | "metadata" | "all";
+	type: 'name' | 'content' | 'metadata' | 'all';
 	dateFrom?: Date;
 	dateTo?: Date;
 	tags?: string[];
@@ -24,10 +24,12 @@ interface SearchFilters {
 	folders?: string[];
 }
 
-const PAGE_SIZE = 100;
+const _PAGE_SIZE = 100;
 
 const getMetadata = (metadata: string | null) => {
-	if (!metadata) return null;
+	if (!metadata) {
+		return null;
+	}
 	try {
 		return JSON.parse(metadata);
 	} catch {
@@ -35,30 +37,18 @@ const getMetadata = (metadata: string | null) => {
 	}
 };
 
-export function SearchView({ isResizing }: ViewProps) {
+export function SearchView(_props: ViewProps) {
 	const [filters, setFilters] = useState<SearchFilters>({
-		query: "",
-		type: "all",
+		query: '',
+		type: 'all',
 	});
 
-	const {
-		currentItems: items,
-		selectedItem,
-		selectedItems,
-		toggleItemSelection,
-		loadItems,
-		isLoading,
-		isProcessingThumbnails,
-	} = useFileManager();
+	const { currentItems: items, toggleItemSelection, loadItems, isLoading } = useFileManager();
 	const { openViewer } = useImageViewer();
 
 	const handleSearch = useCallback(() => {
 		if (filters.query) {
-			loadItems(
-				`/api/search?query=${encodeURIComponent(filters.query)}&type=${
-					filters.type
-				}`
-			);
+			loadItems(`/api/search?query=${encodeURIComponent(filters.query)}&type=${filters.type}`);
 		}
 	}, [filters, loadItems]);
 
@@ -72,10 +62,10 @@ export function SearchView({ isResizing }: ViewProps) {
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
 			const metadata = getMetadata(item.metadata);
-			if (item.type === "image" || metadata?.mimeType?.startsWith("image/")) {
+			if (item.type === 'image' || metadata?.mimeType?.startsWith('image/')) {
 				const imageItems = (items || []).filter((i) => {
 					const meta = getMetadata(i.metadata);
-					return i.type === "image" || meta?.mimeType?.startsWith("image/");
+					return i.type === 'image' || meta?.mimeType?.startsWith('image/');
 				});
 				openViewer(
 					imageItems,
@@ -95,11 +85,9 @@ export function SearchView({ isResizing }: ViewProps) {
 							<Input
 								placeholder="Buscar imágenes..."
 								value={filters.query}
-								onChange={(e) =>
-									setFilters((prev) => ({ ...prev, query: e.target.value }))
-								}
+								onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
 								onKeyDown={(e) => {
-									if (e.key === "Enter") {
+									if (e.key === 'Enter') {
 										handleSearch();
 									}
 								}}
@@ -112,12 +100,8 @@ export function SearchView({ isResizing }: ViewProps) {
 								<TabsTrigger value="basic">Básica</TabsTrigger>
 								<TabsTrigger value="advanced">Avanzada</TabsTrigger>
 							</TabsList>
-							<TabsContent value="basic">
-								{/* TODO: Implementar filtros básicos */}
-							</TabsContent>
-							<TabsContent value="advanced">
-								{/* TODO: Implementar filtros avanzados */}
-							</TabsContent>
+							<TabsContent value="basic">{/* TODO: Implementar filtros básicos */}</TabsContent>
+							<TabsContent value="advanced">{/* TODO: Implementar filtros avanzados */}</TabsContent>
 						</Tabs>
 					</div>
 				</CardContent>
@@ -127,11 +111,7 @@ export function SearchView({ isResizing }: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen />
 				) : items && items.length > 0 ? (
-					<FileGrid
-						items={items}
-						onItemClick={handleItemClick}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
+					<FileGrid items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
 				) : filters.query ? (
 					<EmptyState
 						icon={Search}

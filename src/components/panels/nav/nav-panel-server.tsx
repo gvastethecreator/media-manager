@@ -1,7 +1,7 @@
-import { Suspense } from "react";
-import { getNavigationData } from "@/app/actions/nav.actions";
-import { NavPanel } from "./nav-panel";
-import { NavPanelSkeleton } from "./nav-panel-skeleton";
+import { getNavigationData } from '@/app/actions/nav.actions';
+import { Suspense } from 'react';
+import { NavPanel } from './nav-panel';
+import { NavPanelSkeleton } from './nav-panel-skeleton';
 
 export async function NavPanelServer() {
 	const data = await getNavigationData();

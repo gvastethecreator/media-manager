@@ -1,16 +1,16 @@
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server';
 
 export interface StreamData {
-  stream: ReadableStream
-  writer: WritableStreamDefaultWriter
+	stream: ReadableStream;
+	writer: WritableStreamDefaultWriter;
 }
 
-export async function createStream(id: string, request: NextRequest): Promise<StreamData> {
-  const { readable, writable } = new TransformStream()
-  const writer = writable.getWriter()
+export async function createStream(_id: string, _request: NextRequest): Promise<StreamData> {
+	const { readable, writable } = new TransformStream();
+	const writer = writable.getWriter();
 
-  return {
-    stream: readable,
-    writer
-  }
+	return {
+		stream: readable,
+		writer,
+	};
 }

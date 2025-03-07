@@ -1,30 +1,32 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useFileManager } from "@/store/file-manager.store";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { TagIcon } from "lucide-react";
-import { BaseContentView } from "../base/base-content-view";
-import { getTagImages } from "@/app/actions/tag.actions";
-import { ContentViewProvider } from "../base/content-view-provider";
-import type { FileItem } from "@/types/file-item";
+import { getTagImages } from '@/app/actions/tag.actions';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { useFileManager } from '@/store/file-manager.store';
+import type { FileItem } from '@/types/file-item';
+import { TagIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BaseContentView } from '../base/base-content-view';
+import { ContentViewProvider } from '../base/content-view-provider';
 
 export function TagContentView() {
-	const { currentTagId, setCurrentTag } = useFileManager();
+	const { currentTagId } = useFileManager();
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const loadTagImages = async () => {
-			if (!currentTagId) return;
+			if (!currentTagId) {
+				return;
+			}
 
 			try {
 				setIsLoading(true);
 				const images = await getTagImages(currentTagId);
 				setItems(images as unknown as FileItem[]);
 			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
+				setError(err instanceof Error ? err.message : 'Error desconocido');
 			} finally {
 				setIsLoading(false);
 			}
@@ -52,8 +54,8 @@ export function TagContentView() {
 			containerName="etiqueta"
 			emptyState={{
 				icon: TagIcon,
-				title: "No hay imágenes con esta etiqueta",
-				description: "Esta etiqueta no tiene imágenes asociadas",
+				title: 'No hay imágenes con esta etiqueta',
+				description: 'Esta etiqueta no tiene imágenes asociadas',
 			}}
 		>
 			<BaseContentView />
