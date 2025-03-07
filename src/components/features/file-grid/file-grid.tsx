@@ -1,23 +1,26 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import { GridView } from "./views/grid-view";
-import { MasonryView } from "./views/masonry-view";
-import { CardsView } from "./views/cards-view";
-import { ListView } from "./views/list-view";
-import { FileItem } from "@/types/file-item";
-import { ViewMode } from "@/types/settings";
-import { cn } from "@/lib/utils";
-import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
-import { useFileManager } from "@/store/file-manager.store";
-import { useImageResources } from "@/store/image-resources.store";
-import { getThumbnail } from "@/app/actions/thumbnails.actions";
-import { ThumbnailQuality } from "@/config/thumbnail.config";
-import type { ContextMenuAction } from "./context-menu";
+import { getThumbnail } from '@/app/actions/thumbnails.actions';
+import { ThumbnailQuality } from '@/config/thumbnail.config';
+import { cn } from '@/lib/utils';
+import { useFileManager } from '@/store/file-manager.store';
+import { useImageResources } from '@/store/image-resources.store';
+import type { FileItem } from '@/types/file-item';
+import type { ViewMode } from '@/types/settings';
+import { type VirtualItem, useVirtualizer } from '@tanstack/react-virtual';
+import type * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ContextMenuAction } from './context-menu';
+import { CardsView } from './views/cards-view';
+import { GridView } from './views/grid-view';
+import { ListView } from './views/list-view';
+import { MasonryView } from './views/masonry-view';
 
 // Función auxiliar para parsear metadata
 const getMetadata = (metadata: string | null) => {
-	if (!metadata) return null;
+	if (!metadata) {
+		return null;
+	}
 	try {
 		return JSON.parse(metadata);
 	} catch {
@@ -120,13 +123,7 @@ export interface FileGridProps {
 	loadMoreItems?: () => void;
 }
 
-export function FileGrid({
-	items,
-	isResizing,
-	onItemClick,
-	onItemDoubleClick,
-	loadMoreItems,
-}: FileGridProps) {
+export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileGridProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
@@ -148,16 +145,14 @@ export function FileGrid({
 	const { columns, itemSize, rowHeight } = useMemo(() => {
 		const availableWidth = containerWidth || window.innerWidth - 48;
 		const currentGap = GRID_CONFIG.gap[viewMode];
-		const config = GRID_CONFIG[viewMode];
+		const _config = GRID_CONFIG[viewMode];
 
 		const calculateColumns = (config: BaseGridConfig) => {
 			const { minColumns, maxColumns, itemBaseWidth, padding } = config;
 			const totalPadding = padding * 2;
-			const totalGapWidth = currentGap * (maxColumns - 1);
+			const _totalGapWidth = currentGap * (maxColumns - 1);
 			const availableWidthWithGap = availableWidth - totalPadding;
-			const calculatedCols = Math.floor(
-				availableWidthWithGap / (itemBaseWidth + currentGap)
-			);
+			const calculatedCols = Math.floor(availableWidthWithGap / (itemBaseWidth + currentGap));
 			return Math.max(minColumns, Math.min(maxColumns, calculatedCols));
 		};
 
@@ -165,15 +160,10 @@ export function FileGrid({
 			const totalPadding = config.padding * 2;
 			const totalGapWidth = currentGap * (cols - 1);
 			const availableWidthWithGap = availableWidth - totalPadding;
-			const itemWidth = Math.floor(
-				(availableWidthWithGap - totalGapWidth) / cols
-			);
+			const itemWidth = Math.floor((availableWidthWithGap - totalGapWidth) / cols);
 
 			// Asegurar que el tamaño no exceda el máximo para el modo
-			return Math.min(
-				itemWidth,
-				viewMode === "masonry" ? config.itemBaseWidth * 1.5 : itemWidth
-			);
+			return Math.min(itemWidth, viewMode === 'masonry' ? config.itemBaseWidth * 1.5 : itemWidth);
 		};
 
 		let cols: number;
@@ -181,21 +171,21 @@ export function FileGrid({
 		let height: number;
 
 		switch (viewMode) {
-			case "masonry": {
+			case 'masonry': {
 				const config = GRID_CONFIG.masonry;
 				cols = calculateColumns(config);
 				size = calculateItemSize(cols, config);
 				height = 0;
 				break;
 			}
-			case "cards": {
+			case 'cards': {
 				const config = GRID_CONFIG.cards;
 				cols = calculateColumns(config);
 				size = calculateItemSize(cols, config);
 				height = config.rowHeight;
 				break;
 			}
-			case "list": {
+			case 'list': {
 				const config = GRID_CONFIG.list;
 				cols = 1;
 				size = availableWidth - currentGap * 2 - config.padding * 2;
@@ -214,26 +204,19 @@ export function FileGrid({
 	}, [containerWidth, viewMode]);
 
 	// Optimizar el cálculo de altura para masonry
-	const calculateMasonryHeight = useCallback(
-		(item: FileItem, baseWidth: number) => {
-			const metadata = getMetadata(item.metadata);
-			const config = GRID_CONFIG.masonry;
+	const calculateMasonryHeight = useCallback((item: FileItem, baseWidth: number) => {
+		const metadata = getMetadata(item.metadata);
+		const config = GRID_CONFIG.masonry;
 
-			if (!metadata?.dimensions) {
-				return config.minHeight;
-			}
+		if (!metadata?.dimensions) {
+			return config.minHeight;
+		}
 
-			const aspectRatio =
-				metadata.dimensions.width / metadata.dimensions.height;
-			const calculatedHeight = Math.round(baseWidth / aspectRatio);
+		const aspectRatio = metadata.dimensions.width / metadata.dimensions.height;
+		const calculatedHeight = Math.round(baseWidth / aspectRatio);
 
-			return Math.max(
-				config.minHeight,
-				Math.min(calculatedHeight, config.maxHeight)
-			);
-		},
-		[]
-	);
+		return Math.max(config.minHeight, Math.min(calculatedHeight, config.maxHeight));
+	}, []);
 
 	// Actualizar virtualizer con soporte mejorado para masonry
 	const virtualizer = useVirtualizer({
@@ -242,16 +225,18 @@ export function FileGrid({
 		estimateSize: useCallback(
 			(index: number) => {
 				const item = items[index];
-				if (!item) return rowHeight + GRID_CONFIG.gap[viewMode];
+				if (!item) {
+					return rowHeight + GRID_CONFIG.gap[viewMode];
+				}
 
 				switch (viewMode) {
-					case "masonry": {
+					case 'masonry': {
 						const height = calculateMasonryHeight(item, itemSize);
 						return height + GRID_CONFIG.masonry.rowGap;
 					}
-					case "cards":
+					case 'cards':
 						return GRID_CONFIG.cards.rowHeight + GRID_CONFIG.gap[viewMode];
-					case "list":
+					case 'list':
 						return GRID_CONFIG.list.height + GRID_CONFIG.gap[viewMode];
 					default:
 						return itemSize + GRID_CONFIG.gap[viewMode];
@@ -261,11 +246,8 @@ export function FileGrid({
 		),
 		overscan: GRID_CONFIG.overscan,
 		horizontal: false,
-		lanes: viewMode === "list" ? 1 : columns,
-		gap:
-			viewMode === "masonry" ?
-				GRID_CONFIG.masonry.columnGap
-			:	GRID_CONFIG.gap[viewMode],
+		lanes: viewMode === 'list' ? 1 : columns,
+		gap: viewMode === 'masonry' ? GRID_CONFIG.masonry.columnGap : GRID_CONFIG.gap[viewMode],
 		scrollPaddingStart: GRID_CONFIG.gap[viewMode],
 		scrollPaddingEnd: GRID_CONFIG.gap[viewMode],
 	});
@@ -273,10 +255,14 @@ export function FileGrid({
 	// Función mejorada para cargar thumbnails con reintentos
 	const loadThumbnail = useCallback(
 		async (itemId: string) => {
-			if (loadQueueRef.current.has(itemId)) return null;
+			if (loadQueueRef.current.has(itemId)) {
+				return null;
+			}
 
 			const retryCount = retryCountRef.current.get(itemId) || 0;
-			if (retryCount >= MAX_RETRIES) return null;
+			if (retryCount >= MAX_RETRIES) {
+				return null;
+			}
 
 			try {
 				loadQueueRef.current.add(itemId);
@@ -290,7 +276,7 @@ export function FileGrid({
 				retryCountRef.current.set(itemId, retryCount + 1);
 				return null;
 			} catch (err) {
-				console.error("Error loading thumbnail:", err);
+				console.error('Error loading thumbnail:', err);
 				loadQueueRef.current.delete(itemId);
 				retryCountRef.current.set(itemId, retryCount + 1);
 				return null;
@@ -330,11 +316,15 @@ export function FileGrid({
 	// Limpiar timeouts
 	useEffect(() => {
 		return () => {
-			if (scrollingTimeoutRef.current)
+			if (scrollingTimeoutRef.current) {
 				clearTimeout(scrollingTimeoutRef.current);
-			if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-			if (transitionTimeoutRef.current)
+			}
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+			if (transitionTimeoutRef.current) {
 				clearTimeout(transitionTimeoutRef.current);
+			}
 		};
 	}, []);
 
@@ -365,13 +355,12 @@ export function FileGrid({
 
 	// Optimizar ResizeObserver con mejor manejo de cambios
 	useEffect(() => {
-		if (!parentRef.current) return;
+		if (!parentRef.current) {
+			return;
+		}
 
 		const updateWidth = (width: number) => {
-			if (
-				width > 0 &&
-				(width !== containerWidth || previousViewMode.current !== viewMode)
-			) {
+			if (width > 0 && (width !== containerWidth || previousViewMode.current !== viewMode)) {
 				setContainerWidth(width);
 				previousViewMode.current = viewMode;
 			}
@@ -403,7 +392,9 @@ export function FileGrid({
 
 	// Optimizar el manejo del scroll infinito
 	useEffect(() => {
-		if (!loadMoreRef.current || !loadMoreItems) return;
+		if (!loadMoreRef.current || !loadMoreItems) {
+			return;
+		}
 
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -415,7 +406,7 @@ export function FileGrid({
 				}
 			},
 			{
-				rootMargin: "100px 0px",
+				rootMargin: '100px 0px',
 				threshold: 0,
 			}
 		);
@@ -437,12 +428,12 @@ export function FileGrid({
 			.filter((item): item is FileItem => !!item);
 
 		// Intentar cargar thumbnails faltantes durante el scroll
-		visibleItems.forEach((item) => {
+		for (const item of visibleItems) {
 			const resource = imageResources.resources.get(item.id);
 			if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
 				loadThumbnail(item.id);
 			}
-		});
+		}
 
 		setIsScrolling(true);
 		scrollingTimeoutRef.current = setTimeout(() => {
@@ -451,9 +442,9 @@ export function FileGrid({
 	}, [items, virtualizer, loadThumbnail, imageResources]);
 
 	const handleContextAction = useCallback(
-		(action: ContextMenuAction, item: FileItem, data?: any) => {
+		(action: ContextMenuAction, item: FileItem, _data?: Record<string, unknown>) => {
 			switch (action) {
-				case "preview":
+				case 'preview':
 					onItemDoubleClick?.(item);
 					break;
 				// Aquí se pueden manejar más acciones según sea necesario
@@ -468,49 +459,49 @@ export function FileGrid({
 		<div
 			ref={parentRef}
 			className={cn(
-				"h-full w-full overflow-auto relative",
-				viewMode === "list" && "px-2 py-1",
-				isTransitioning && "opacity-0 transition-opacity duration-50"
+				'h-full w-full overflow-auto relative',
+				viewMode === 'list' && 'px-2 py-1',
+				isTransitioning && 'opacity-0 transition-opacity duration-50'
 			)}
 			onScroll={handleScroll}
 			style={{
-				height: "100%",
-				width: "100%",
-				position: "relative",
-				contain: "strict",
-				willChange: "transform",
+				height: '100%',
+				width: '100%',
+				position: 'relative',
+				contain: 'strict',
+				willChange: 'transform',
 				padding: GRID_CONFIG[viewMode].padding,
 			}}
 		>
 			<div
 				style={{
 					height: virtualizer.getTotalSize(),
-					width: "100%",
-					position: "relative",
-					contain: "strict",
+					width: '100%',
+					position: 'relative',
+					contain: 'strict',
 				}}
 			>
 				{!isTransitioning &&
 					virtualizer.getVirtualItems().map((virtualItem) => {
 						const item = items[virtualItem.index];
-						if (!item) return null;
+						if (!item) {
+							return null;
+						}
 
 						const style: React.CSSProperties = {
-							position: "absolute",
+							position: 'absolute',
 							top: 0,
 							left: 0,
 							transform: `translate3d(${
-								viewMode === "list" ? 0 : (
-									virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
-								)
+								viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
 							}px, ${virtualItem.start}px, 0)`,
-							width: viewMode === "list" ? "100%" : itemSize,
+							width: viewMode === 'list' ? '100%' : itemSize,
 							height:
-								viewMode === "masonry" ?
-									calculateMasonryHeight(item, itemSize)
-								:	virtualItem.size - GRID_CONFIG.gap[viewMode],
+								viewMode === 'masonry'
+									? calculateMasonryHeight(item, itemSize)
+									: virtualItem.size - GRID_CONFIG.gap[viewMode],
 							padding: 0,
-							willChange: "transform",
+							willChange: 'transform',
 						};
 
 						const ViewComponent = {
@@ -527,7 +518,7 @@ export function FileGrid({
 							<div
 								key={`${viewMode}-${virtualItem.key}`}
 								data-index={virtualItem.index}
-								className={cn("absolute")}
+								className={cn('absolute')}
 								style={style}
 							>
 								<ViewComponent
@@ -536,14 +527,12 @@ export function FileGrid({
 									onDoubleClick={onItemDoubleClick}
 									onContextAction={handleContextAction}
 									shouldLoad={true}
-									isSelected={selectedItems.some(
-										(selected) => selected.id === item.id
-									)}
+									isSelected={selectedItems.some((selected) => selected.id === item.id)}
 									itemSize={itemSize}
 									thumbnail={thumbnail}
 									style={{
-										width: "100%",
-										height: "100%",
+										width: '100%',
+										height: '100%',
 									}}
 								/>
 							</div>

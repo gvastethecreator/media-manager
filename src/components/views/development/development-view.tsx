@@ -1,86 +1,77 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { ViewProps } from "../types";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useFileManager } from '@/lib/hooks/use-file-manager';
+import { useSettings } from '@/lib/hooks/use-settings';
+import { cn, formatBytes } from '@/lib/utils';
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "motion/react";
-import { cn, formatBytes } from "@/lib/utils";
-import {
+	Activity,
+	AlertTriangle,
+	BarChart,
+	Boxes,
 	Bug,
-	Folder,
-	RefreshCw,
+	CheckCircle2,
+	Clock,
 	Code2,
+	Cpu,
 	Database,
+	FileCode2,
 	FileJson,
+	Folder,
 	HardDrive,
 	ImageIcon,
-	Library,
-	Settings,
-	Zap,
-	AlertTriangle,
-	CheckCircle2,
-	XCircle,
 	Info,
-	FileCode2,
+	Library,
+	RefreshCw,
 	Server,
+	Settings,
 	Tag,
-	Clock,
-	Activity,
-	BarChart,
-	Cpu,
-	Boxes,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+	XCircle,
+	Zap,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
-	HoverCard,
-	HoverCardContent,
-	HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { useFileManager } from "@/lib/hooks/use-file-manager";
-import { useSettings } from "@/lib/hooks/use-settings";
-import ReactMarkdown from "react-markdown";
-import {
-	AreaChart,
 	Area,
-	BarChart as RechartsBarChart,
+	AreaChart,
 	Bar,
-	PieChart as RechartsPieChart,
-	Pie,
+	CartesianGrid,
 	Cell,
-	LineChart as RechartsLineChart,
 	Line,
+	Pie,
+	BarChart as RechartsBarChart,
+	LineChart as RechartsLineChart,
+	PieChart as RechartsPieChart,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	ResponsiveContainer,
-} from "recharts";
+} from 'recharts';
+import type { ViewProps } from '../types';
 
 interface ServiceStatus {
 	name: string;
-	status: "online" | "offline" | "warning";
+	status: 'online' | 'offline' | 'warning';
 	description: string;
-	icon: any;
+	icon: ReactNode;
 }
 
 interface SystemMetric {
 	name: string;
 	value: number | string;
 	unit: string;
-	icon: any;
+	icon: ReactNode;
 	change?: {
 		value: number;
-		type: "increase" | "decrease";
+		type: 'increase' | 'decrease';
 	};
 	chart?: {
 		data: number[];
@@ -92,12 +83,12 @@ interface ProcessingMetric {
 	name: string;
 	value: number;
 	max: number;
-	icon: any;
+	icon: ReactNode;
 }
 
 interface Feature {
 	name: string;
-	status: "completed" | "in-progress" | "pending" | "failed";
+	status: 'completed' | 'in-progress' | 'pending' | 'failed';
 	description: string;
 	progress?: number;
 }
@@ -106,28 +97,28 @@ interface Issue {
 	id: string;
 	title: string;
 	description: string;
-	severity: "low" | "medium" | "high" | "critical";
-	status: "open" | "in-progress" | "resolved";
+	severity: 'low' | 'medium' | 'high' | 'critical';
+	status: 'open' | 'in-progress' | 'resolved';
 }
 
 function StatusBadge({ status }: { status: string }) {
 	const getStatusColor = () => {
 		switch (status) {
-			case "online":
-			case "completed":
-			case "resolved":
-				return "bg-green-500/20 text-green-500 hover:bg-green-500/30";
-			case "warning":
-			case "in-progress":
-				return "bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30";
-			case "offline":
-			case "failed":
-			case "critical":
-				return "bg-red-500/20 text-red-500 hover:bg-red-500/30";
-			case "pending":
-				return "bg-blue-500/20 text-blue-500 hover:bg-blue-500/30";
+			case 'online':
+			case 'completed':
+			case 'resolved':
+				return 'bg-green-500/20 text-green-500 hover:bg-green-500/30';
+			case 'warning':
+			case 'in-progress':
+				return 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30';
+			case 'offline':
+			case 'failed':
+			case 'critical':
+				return 'bg-red-500/20 text-red-500 hover:bg-red-500/30';
+			case 'pending':
+				return 'bg-blue-500/20 text-blue-500 hover:bg-blue-500/30';
 			default:
-				return "bg-gray-500/20 text-gray-500 hover:bg-gray-500/30";
+				return 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30';
 		}
 	};
 
@@ -135,7 +126,7 @@ function StatusBadge({ status }: { status: string }) {
 		<Badge
 			variant="secondary"
 			className={cn(
-				"transition-colors text-[10px] absolute top-2 right-2 p-2 h-4 rounded-lg border-2 border-primary/10",
+				'transition-colors text-[10px] absolute top-2 right-2 p-2 h-4 rounded-lg border-2 border-primary/10',
 				getStatusColor()
 			)}
 		>
@@ -154,19 +145,17 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								"p-2 rounded-md border-2 border-primary/10",
-								service.status === "online" && "bg-green-500/20",
-								service.status === "warning" && "bg-yellow-500/20",
-								service.status === "offline" && "bg-red-500/20"
+								'p-2 rounded-md border-2 border-primary/10',
+								service.status === 'online' && 'bg-green-500/20',
+								service.status === 'warning' && 'bg-yellow-500/20',
+								service.status === 'offline' && 'bg-red-500/20'
 							)}
 						>
 							<Icon className="h-4 w-4" />
 						</div>
 						<div>
 							<CardTitle className="text-sm">{service.name}</CardTitle>
-							<CardDescription className="text-[10px] truncate">
-								{service.description}
-							</CardDescription>
+							<CardDescription className="text-[10px] truncate">{service.description}</CardDescription>
 						</div>
 					</div>
 					<StatusBadge status={service.status} />
@@ -191,20 +180,16 @@ function MetricCard({ metric }: { metric: SystemMetric }) {
 						<div className="flex items-end gap-2">
 							<p className="text-2xl font-semibold">
 								{metric.value}
-								<span className="text-sm text-muted-foreground ml-1">
-									{metric.unit}
-								</span>
+								<span className="text-sm text-muted-foreground ml-1">{metric.unit}</span>
 							</p>
 							{metric.change && (
 								<div
 									className={cn(
-										"text-xs font-medium flex items-center gap-1",
-										metric.change.type === "increase"
-											? "text-green-500"
-											: "text-red-500"
+										'text-xs font-medium flex items-center gap-1',
+										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
 									)}
 								>
-									{metric.change.type === "increase" ? "+" : "-"}
+									{metric.change.type === 'increase' ? '+' : '-'}
 									{metric.change.value}%
 								</div>
 							)}
@@ -215,10 +200,10 @@ function MetricCard({ metric }: { metric: SystemMetric }) {
 					<div className="mt-4 h-[60px]">
 						{metric.chart.data.map((value, index) => (
 							<div
-								key={index}
+								key={`chart-bar-${metric.name}-${index}`}
 								className="inline-block w-[8px] mx-[2px] bg-primary/20 rounded-sm"
 								style={{
-									height: `${(value / Math.max(...metric.chart!.data)) * 100}%`,
+									height: metric.chart.data.length > 0 ? `${(value / Math.max(...metric.chart.data)) * 100}%` : '0%',
 								}}
 							/>
 						))}
@@ -260,18 +245,14 @@ function FeatureCard({ feature }: { feature: Feature }) {
 				<div className="flex items-center justify-between mb-2 relative">
 					<div>
 						<h3 className="font-medium">{feature.name}</h3>
-						<p className="text-sm text-muted-foreground">
-							{feature.description}
-						</p>
+						<p className="text-sm text-muted-foreground">{feature.description}</p>
 					</div>
 					<StatusBadge status={feature.status} />
 				</div>
 				{feature.progress !== undefined && (
 					<div className="space-y-1">
 						<Progress value={feature.progress} className="h-1" />
-						<p className="text-xs text-right text-muted-foreground">
-							{feature.progress}%
-						</p>
+						<p className="text-xs text-right text-muted-foreground">{feature.progress}%</p>
 					</div>
 				)}
 			</CardContent>
@@ -282,13 +263,13 @@ function FeatureCard({ feature }: { feature: Feature }) {
 function IssueCard({ issue }: { issue: Issue }) {
 	const getSeverityIcon = () => {
 		switch (issue.severity) {
-			case "critical":
+			case 'critical':
 				return <XCircle className="h-4 w-4 text-red-500" />;
-			case "high":
+			case 'high':
 				return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-			case "medium":
+			case 'medium':
 				return <Info className="h-4 w-4 text-yellow-500" />;
-			case "low":
+			case 'low':
 				return <CheckCircle2 className="h-4 w-4 text-green-500" />;
 		}
 	};
@@ -311,24 +292,24 @@ function IssueCard({ issue }: { issue: Issue }) {
 	);
 }
 
-export function DevelopmentView({ isResizing }: ViewProps) {
-	const fileManager = useFileManager();
-	const settings = useSettings();
+export function DevelopmentView(_props: ViewProps) {
+	const _fileManager = useFileManager();
+	const _settings = useSettings();
 	const [processingMetrics] = useState<ProcessingMetric[]>([
 		{
-			name: "Cola de Procesamiento",
+			name: 'Cola de Procesamiento',
 			value: 24,
 			max: 100,
 			icon: Activity,
 		},
 		{
-			name: "Uso de CPU",
+			name: 'Uso de CPU',
 			value: 45,
 			max: 100,
 			icon: Cpu,
 		},
 		{
-			name: "Memoria en Uso",
+			name: 'Memoria en Uso',
 			value: 2.1,
 			max: 8,
 			icon: Boxes,
@@ -337,120 +318,119 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 
 	const [metrics] = useState<SystemMetric[]>([
 		{
-			name: "Archivos Indexados",
+			name: 'Archivos Indexados',
 			value: 12458,
-			unit: "archivos",
+			unit: 'archivos',
 			icon: FileJson,
 			change: {
 				value: 5.2,
-				type: "increase",
+				type: 'increase',
 			},
 			chart: {
 				data: [45, 52, 38, 65, 42, 58, 72],
-				labels: ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"],
+				labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
 			},
 		},
 		{
-			name: "Espacio Total",
+			name: 'Espacio Total',
 			value: formatBytes(275_409_203_200),
-			unit: "usados",
+			unit: 'usados',
 			icon: HardDrive,
 			change: {
 				value: 2.8,
-				type: "increase",
+				type: 'increase',
 			},
 		},
 		{
-			name: "Carpetas Monitoreadas",
+			name: 'Carpetas Monitoreadas',
 			value: 8,
-			unit: "carpetas",
+			unit: 'carpetas',
 			icon: Folder,
 			chart: {
 				data: [8, 8, 7, 7, 8, 8, 8],
-				labels: ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"],
+				labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
 			},
 		},
 		{
-			name: "Colecciones",
+			name: 'Colecciones',
 			value: 24,
-			unit: "total",
+			unit: 'total',
 			icon: Library,
 			change: {
 				value: 12.5,
-				type: "increase",
+				type: 'increase',
 			},
 		},
 		{
-			name: "Etiquetas",
+			name: 'Etiquetas',
 			value: 156,
-			unit: "total",
+			unit: 'total',
 			icon: Tag,
 			chart: {
 				data: [120, 125, 135, 142, 148, 152, 156],
-				labels: ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"],
+				labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
 			},
 		},
 		{
-			name: "Tiempo de Indexado",
-			value: "1.2",
-			unit: "s/archivo",
+			name: 'Tiempo de Indexado',
+			value: '1.2',
+			unit: 's/archivo',
 			icon: Clock,
 			change: {
 				value: 15.3,
-				type: "decrease",
+				type: 'decrease',
 			},
 		},
 	]);
 
 	const [features] = useState<Feature[]>([
 		{
-			name: "Indexación de Carpetas",
-			status: "completed",
-			description: "Sistema base de indexación de archivos",
+			name: 'Indexación de Carpetas',
+			status: 'completed',
+			description: 'Sistema base de indexación de archivos',
 			progress: 100,
 		},
 		{
-			name: "Procesamiento de Imágenes",
-			status: "in-progress",
-			description: "Optimización y generación de thumbnails",
+			name: 'Procesamiento de Imágenes',
+			status: 'in-progress',
+			description: 'Optimización y generación de thumbnails',
 			progress: 75,
 		},
 		{
-			name: "Sistema de Etiquetas",
-			status: "in-progress",
-			description: "Gestión y organización de etiquetas",
+			name: 'Sistema de Etiquetas',
+			status: 'in-progress',
+			description: 'Gestión y organización de etiquetas',
 			progress: 60,
 		},
 		{
-			name: "Búsqueda Avanzada",
-			status: "pending",
-			description: "Sistema de búsqueda con filtros",
+			name: 'Búsqueda Avanzada',
+			status: 'pending',
+			description: 'Sistema de búsqueda con filtros',
 			progress: 0,
 		},
 	]);
 
 	const [issues] = useState<Issue[]>([
 		{
-			id: "ISS-001",
-			title: "Optimización de Thumbnails",
-			description:
-				"El proceso de generación de thumbnails consume demasiada memoria",
-			severity: "high",
-			status: "in-progress",
+			id: 'ISS-001',
+			title: 'Optimización de Thumbnails',
+			description: 'El proceso de generación de thumbnails consume demasiada memoria',
+			severity: 'high',
+			status: 'in-progress',
 		},
 		{
-			id: "ISS-002",
-			title: "Monitoreo de Carpetas",
-			description: "Falsos positivos en la detección de cambios",
-			severity: "medium",
-			status: "open",
+			id: 'ISS-002',
+			title: 'Monitoreo de Carpetas',
+			description: 'Falsos positivos en la detección de cambios',
+			severity: 'medium',
+			status: 'open',
 		},
 		{
-			id: "ISS-003",
-			title: "Caché de Imágenes",
-			description: "El sistema de caché no limpia entradas antiguas",
-			severity: "low",
-			status: "resolved",
+			id: 'ISS-003',
+			title: 'Caché de Imágenes',
+			description: 'El sistema de caché no limpia entradas antiguas',
+			severity: 'low',
+			status: 'resolved',
 		},
 	]);
 
@@ -473,7 +453,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 
 				setMarkdownContent(contents);
 			} catch (error) {
-				console.error("Error loading markdown files:", error);
+				console.error('Error loading markdown files:', error);
 			}
 		};
 
@@ -487,9 +467,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 				<div className="flex items-center justify-between">
 					<div>
 						<h1 className="text-2xl font-bold">Panel de Desarrollo</h1>
-						<p className="text-muted-foreground">
-							Monitoreo y gestión del sistema
-						</p>
+						<p className="text-muted-foreground">Monitoreo y gestión del sistema</p>
 					</div>
 					<Button variant="outline" className="gap-2">
 						<RefreshCw className="h-4 w-4" />
@@ -525,39 +503,39 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							{[
 								{
-									name: "Indexación de Archivos",
-									status: "online" as const,
-									description: "Servicio de indexado y monitoreo",
+									name: 'Indexación de Archivos',
+									status: 'online' as const,
+									description: 'Servicio de indexado y monitoreo',
 									icon: Folder,
 								},
 								{
-									name: "Procesamiento de Imágenes",
-									status: "warning" as const,
-									description: "Generación de thumbnails y optimización",
+									name: 'Procesamiento de Imágenes',
+									status: 'warning' as const,
+									description: 'Generación de thumbnails y optimización',
 									icon: ImageIcon,
 								},
 								{
-									name: "Base de Datos",
-									status: "online" as const,
-									description: "SQLite y Prisma ORM",
+									name: 'Base de Datos',
+									status: 'online' as const,
+									description: 'SQLite y Prisma ORM',
 									icon: Database,
 								},
 								{
-									name: "API REST",
-									status: "online" as const,
-									description: "Endpoints y servicios",
+									name: 'API REST',
+									status: 'online' as const,
+									description: 'Endpoints y servicios',
 									icon: Server,
 								},
 								{
-									name: "Sistema de Caché",
-									status: "warning" as const,
-									description: "Caché de archivos y consultas",
+									name: 'Sistema de Caché',
+									status: 'warning' as const,
+									description: 'Caché de archivos y consultas',
 									icon: Zap,
 								},
 								{
-									name: "Background Jobs",
-									status: "online" as const,
-									description: "Procesamiento en segundo plano",
+									name: 'Background Jobs',
+									status: 'online' as const,
+									description: 'Procesamiento en segundo plano',
 									icon: Settings,
 								},
 							].map((service, index) => (
@@ -609,50 +587,40 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 									{[
 										{
-											name: "PRD.md",
-											title: "Product Requirements Document",
-											description: "Documento de requerimientos del producto",
+											name: 'PRD.md',
+											title: 'Product Requirements Document',
+											description: 'Documento de requerimientos del producto',
 										},
 										{
-											name: "FRONTEND.md",
-											title: "Frontend Documentation",
-											description: "Documentación del frontend",
+											name: 'FRONTEND.md',
+											title: 'Frontend Documentation',
+											description: 'Documentación del frontend',
 										},
 										{
-											name: "BACKEND.md",
-											title: "Backend Documentation",
-											description: "Documentación del backend",
+											name: 'BACKEND.md',
+											title: 'Backend Documentation',
+											description: 'Documentación del backend',
 										},
 										{
-											name: "ROADMAP.md",
-											title: "Roadmap",
-											description: "Plan de desarrollo y features",
+											name: 'ROADMAP.md',
+											title: 'Roadmap',
+											description: 'Plan de desarrollo y features',
 										},
 									].map((doc) => (
 										<HoverCard key={doc.name}>
 											<HoverCardTrigger asChild>
-												<Button
-													variant="outline"
-													className="w-full justify-start gap-2"
-												>
+												<Button variant="outline" className="w-full justify-start gap-2">
 													<FileCode2 className="h-4 w-4" />
 													{doc.name}
 												</Button>
 											</HoverCardTrigger>
-											<HoverCardContent
-												side="right"
-												className="w-[450px] max-h-[500px] overflow-auto"
-											>
+											<HoverCardContent side="right" className="w-[450px] max-h-[500px] overflow-auto">
 												<h4 className="font-medium mb-2">{doc.title}</h4>
 												<div className="prose prose-sm dark:prose-invert">
 													{markdownContent[doc.name] ? (
-														<ReactMarkdown>
-															{markdownContent[doc.name]}
-														</ReactMarkdown>
+														<ReactMarkdown>{markdownContent[doc.name]}</ReactMarkdown>
 													) : (
-														<p className="text-muted-foreground">
-															Cargando documentación...
-														</p>
+														<p className="text-muted-foreground">Cargando documentación...</p>
 													)}
 												</div>
 											</HoverCardContent>
@@ -669,9 +637,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
-											<CardTitle className="text-sm font-medium">
-												Distribución de Archivos
-											</CardTitle>
+											<CardTitle className="text-sm font-medium">Distribución de Archivos</CardTitle>
 										</CardHeader>
 										<CardContent>
 											<div className="h-[200px]">
@@ -679,9 +645,9 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 													<RechartsPieChart>
 														<Pie
 															data={[
-																{ name: "Imágenes", value: 8500 },
-																{ name: "Videos", value: 2500 },
-																{ name: "Documentos", value: 1458 },
+																{ name: 'Imágenes', value: 8500 },
+																{ name: 'Videos', value: 2500 },
+																{ name: 'Documentos', value: 1458 },
 															]}
 															cx="50%"
 															cy="50%"
@@ -704,43 +670,27 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 
 									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
-											<CardTitle className="text-sm font-medium">
-												Actividad de Indexación
-											</CardTitle>
+											<CardTitle className="text-sm font-medium">Actividad de Indexación</CardTitle>
 										</CardHeader>
 										<CardContent>
 											<div className="h-[200px]">
 												<ResponsiveContainer width="100%" height="100%">
 													<AreaChart
 														data={[
-															{ name: "Lun", archivos: 450 },
-															{ name: "Mar", archivos: 520 },
-															{ name: "Mie", archivos: 380 },
-															{ name: "Jue", archivos: 650 },
-															{ name: "Vie", archivos: 420 },
-															{ name: "Sab", archivos: 580 },
-															{ name: "Dom", archivos: 720 },
+															{ name: 'Lun', archivos: 450 },
+															{ name: 'Mar', archivos: 520 },
+															{ name: 'Mie', archivos: 380 },
+															{ name: 'Jue', archivos: 650 },
+															{ name: 'Vie', archivos: 420 },
+															{ name: 'Sab', archivos: 580 },
+															{ name: 'Dom', archivos: 720 },
 														]}
 														margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
 													>
 														<defs>
-															<linearGradient
-																id="colorArchivos"
-																x1="0"
-																y1="0"
-																x2="0"
-																y2="1"
-															>
-																<stop
-																	offset="5%"
-																	stopColor="#3b82f6"
-																	stopOpacity={0.8}
-																/>
-																<stop
-																	offset="95%"
-																	stopColor="#3b82f6"
-																	stopOpacity={0}
-																/>
+															<linearGradient id="colorArchivos" x1="0" y1="0" x2="0" y2="1">
+																<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+																<stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
 															</linearGradient>
 														</defs>
 														<XAxis dataKey="name" />
@@ -762,19 +712,17 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 
 									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
-											<CardTitle className="text-sm font-medium">
-												Uso de Recursos
-											</CardTitle>
+											<CardTitle className="text-sm font-medium">Uso de Recursos</CardTitle>
 										</CardHeader>
 										<CardContent>
 											<div className="h-[200px]">
 												<ResponsiveContainer width="100%" height="100%">
 													<RechartsBarChart
 														data={[
-															{ name: "CPU", valor: 45 },
-															{ name: "RAM", valor: 62 },
-															{ name: "Disco", valor: 78 },
-															{ name: "Red", valor: 25 },
+															{ name: 'CPU', valor: 45 },
+															{ name: 'RAM', valor: 62 },
+															{ name: 'Disco', valor: 78 },
+															{ name: 'Red', valor: 25 },
 														]}
 														margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
 													>
@@ -791,21 +739,19 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 
 									<Card className="h-full border-2 border-primary/10">
 										<CardHeader>
-											<CardTitle className="text-sm font-medium">
-												Rendimiento del Sistema
-											</CardTitle>
+											<CardTitle className="text-sm font-medium">Rendimiento del Sistema</CardTitle>
 										</CardHeader>
 										<CardContent>
 											<div className="h-[200px]">
 												<ResponsiveContainer width="100%" height="100%">
 													<RechartsLineChart
 														data={[
-															{ name: "00:00", valor: 85 },
-															{ name: "04:00", valor: 92 },
-															{ name: "08:00", valor: 78 },
-															{ name: "12:00", valor: 65 },
-															{ name: "16:00", valor: 88 },
-															{ name: "20:00", valor: 95 },
+															{ name: '00:00', valor: 85 },
+															{ name: '04:00', valor: 92 },
+															{ name: '08:00', valor: 78 },
+															{ name: '12:00', valor: 65 },
+															{ name: '16:00', valor: 88 },
+															{ name: '20:00', valor: 95 },
 														]}
 														margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
 													>
@@ -813,12 +759,7 @@ export function DevelopmentView({ isResizing }: ViewProps) {
 														<YAxis />
 														<CartesianGrid strokeDasharray="3 3" />
 														<Tooltip />
-														<Line
-															type="monotone"
-															dataKey="valor"
-															stroke="#f59e0b"
-															strokeWidth={2}
-														/>
+														<Line type="monotone" dataKey="valor" stroke="#f59e0b" strokeWidth={2} />
 													</RechartsLineChart>
 												</ResponsiveContainer>
 											</div>

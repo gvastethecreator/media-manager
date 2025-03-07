@@ -1,28 +1,28 @@
 export default function imageLoader({
-  src,
-  width,
-  quality,
+	src,
+	width,
+	quality,
 }: {
-  src: string
-  width: number
-  quality?: number
+	src: string;
+	width: number;
+	quality?: number;
 }) {
-  // Si la URL ya es absoluta o es una data URL, la devolvemos tal cual
-  if (src.startsWith('http') || src.startsWith('data:')) {
-    return src
-  }
+	// Si la URL ya es absoluta o es una data URL, la devolvemos tal cual
+	if (src.startsWith('http') || src.startsWith('data:')) {
+		return src;
+	}
 
-  // Si es una ruta de API, agregamos los parámetros de optimización
-  if (src.startsWith('/api/images/')) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const url = new URL(src, baseUrl)
-    url.searchParams.set('w', width.toString())
-    if (quality) {
-      url.searchParams.set('q', quality.toString())
-    }
-    return url.toString()
-  }
+	// Si es una ruta de API, agregamos los parámetros de optimización
+	if (src.startsWith('/api/images/')) {
+		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+		const url = new URL(src, baseUrl);
+		url.searchParams.set('w', width.toString());
+		if (quality) {
+			url.searchParams.set('q', quality.toString());
+		}
+		return url.toString();
+	}
 
-  // Para imágenes locales en public/, usar la ruta relativa
-  return src
+	// Para imágenes locales en public/, usar la ruta relativa
+	return src;
 }

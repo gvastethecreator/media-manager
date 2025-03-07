@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 interface ErrorBoundaryProps {
 	children: React.ReactNode;
@@ -12,10 +12,7 @@ interface ErrorBoundaryState {
 	error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<
-	ErrorBoundaryProps,
-	ErrorBoundaryState
-> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
 	constructor(props: ErrorBoundaryProps) {
 		super(props);
 		this.state = { hasError: false, error: null };
@@ -26,7 +23,7 @@ export class ErrorBoundary extends React.Component<
 	}
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-		console.error("Error caught by ErrorBoundary:", error, errorInfo);
+		console.error('Error caught by ErrorBoundary:', error, errorInfo);
 	}
 
 	render() {
@@ -38,10 +35,7 @@ export class ErrorBoundary extends React.Component<
 	}
 }
 
-export function withErrorBoundary<P extends object>(
-	Component: React.ComponentType<P>,
-	fallback: React.ReactNode
-) {
+export function withErrorBoundary<P extends object>(Component: React.ComponentType<P>, fallback: React.ReactNode) {
 	return function WithErrorBoundary(props: P) {
 		return (
 			<ErrorBoundary fallback={fallback}>

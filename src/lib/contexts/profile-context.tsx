@@ -1,55 +1,51 @@
-"use client"
+'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-import type { Collection, Folder, Tag, User } from "@/lib/types"
+import type { Collection, Folder, Tag, User } from '@/lib/types';
+import { type ReactNode, createContext, useContext, useState } from 'react';
 
-type ViewType = "files" | "collections" | "folders" | "tags"
+type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 
 type ProfileContextType = {
-  currentUser: User
-  openProfileSettings: () => void
-  openSettingsTab: (tab: string) => void
-  collections: Collection[]
-  folders: Folder[]
-  tags: Tag[]
-  currentView: ViewType
-  setCurrentView: (view: ViewType) => void
-}
+	currentUser: User;
+	openProfileSettings: () => void;
+	openSettingsTab: (tab: string) => void;
+	collections: Collection[];
+	folders: Folder[];
+	tags: Tag[];
+	currentView: ViewType;
+	setCurrentView: (view: ViewType) => void;
+};
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
+const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [currentView, setCurrentView] = useState<ViewType>("files")
+	const [currentView, setCurrentView] = useState<ViewType>('files');
 
-  const value = {
-    currentUser: {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      totalImages: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    openProfileSettings: () => {},
-    openSettingsTab: () => {},
-    collections: [],
-    folders: [],
-    tags: [],
-    currentView,
-    setCurrentView,
-  }
+	const value = {
+		currentUser: {
+			id: '1',
+			name: 'John Doe',
+			email: 'john@example.com',
+			totalImages: 0,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		},
+		openProfileSettings: () => {},
+		openSettingsTab: () => {},
+		collections: [],
+		folders: [],
+		tags: [],
+		currentView,
+		setCurrentView,
+	};
 
-  return (
-    <ProfileContext.Provider value={value}>
-      {children}
-    </ProfileContext.Provider>
-  )
+	return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
 
 export function useProfile() {
-  const context = useContext(ProfileContext)
-  if (context === undefined) {
-    throw new Error("useProfile must be used within a ProfileProvider")
-  }
-  return context
+	const context = useContext(ProfileContext);
+	if (context === undefined) {
+		throw new Error('useProfile must be used within a ProfileProvider');
+	}
+	return context;
 }

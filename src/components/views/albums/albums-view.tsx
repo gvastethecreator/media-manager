@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { ViewProps } from "../types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "motion/react";
-import { Album as AlbumIcon } from "lucide-react";
-import { LoadingScreen } from "@/components/core/feedback";
-import { EmptyState } from "@/components/core/data-display";
-import { useNavigationStore } from "@/store/navigation.store";
-import { useFileManager } from "@/store/file-manager.store";
-import { useRouter } from "next/navigation";
-import { getAlbums } from "@/app/actions/album.actions";
-import { eventsService, EventType, type EventData } from "@/services/events.service";
-import { logger } from "@/lib/logger";
-import { AlbumCard } from "@/components/cards/album-card";
-import type { AlbumWithStats } from "@/app/actions/album.actions";
+import { getAlbums } from '@/app/actions/album.actions';
+import type { AlbumWithStats } from '@/app/actions/album.actions';
+import { AlbumCard } from '@/components/cards/album-card';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { Album as AlbumIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("AlbumsView");
+const viewLogger = logger.withContext('AlbumsView');
 
-export function AlbumsView({ isResizing }: ViewProps) {
+export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentAlbum } = useFileManager();
 	const router = useRouter();
@@ -26,17 +26,19 @@ export function AlbumsView({ isResizing }: ViewProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usar el hook de eventos optimistas del cliente
+	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithStats[]>(albums);
+
 	const fetchAlbums = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando álbumes...");
+			viewLogger.info('🔄 Cargando álbumes...');
 			const data = await getAlbums();
 			setAlbums(data);
 			viewLogger.info(`✅ ${data.length} álbumes cargados`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando álbumes:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando álbumes:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -46,24 +48,12 @@ export function AlbumsView({ isResizing }: ViewProps) {
 	useEffect(() => {
 		// Cargar álbumes inicialmente
 		fetchAlbums();
-
-		// Suscribirse a eventos relevantes
-		const handleAlbumModified = (data?: EventData) => {
-			viewLogger.info("📢 Evento de modificación de álbumes recibido:", data);
-			fetchAlbums();
-		};
-
-		eventsService.on("albums:modified" as EventType, handleAlbumModified);
-
-		return () => {
-			eventsService.off("albums:modified" as EventType, handleAlbumModified);
-		};
 	}, [fetchAlbums]);
 
 	const handleAlbumClick = useCallback(
 		(album: AlbumWithStats) => {
-			viewLogger.info("🖱️ Click en álbum:", album.name);
-			setCurrentView("album-content");
+			viewLogger.info('🖱️ Click en álbum:', album.name);
+			setCurrentView('album-content');
 			setCurrentAlbum(album.id);
 		},
 		[setCurrentView, setCurrentAlbum]
@@ -71,8 +61,8 @@ export function AlbumsView({ isResizing }: ViewProps) {
 
 	const handleEditAlbum = useCallback(
 		(album: AlbumWithStats) => {
-			viewLogger.info("⚙️ Editando álbum:", album.name);
-			router.push("/settings/albums");
+			viewLogger.info('⚙️ Editando álbum:', album.name);
+			router.push('/settings/albums');
 		},
 		[router]
 	);
@@ -89,7 +79,7 @@ export function AlbumsView({ isResizing }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!albums || albums.length === 0) {
+	if (!optimisticAlbums || optimisticAlbums.length === 0) {
 		return (
 			<EmptyState
 				icon={AlbumIcon}
@@ -103,18 +93,14 @@ export function AlbumsView({ isResizing }: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{albums.map((album) => (
+					{optimisticAlbums.map((album, index) => (
 						<motion.div
 							key={album.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3 }}
+							transition={{ delay: index * 0.1 }}
 						>
-							<AlbumCard
-								album={album}
-								onClick={handleAlbumClick}
-								onEdit={handleEditAlbum}
-							/>
+							<AlbumCard album={album} onClick={() => handleAlbumClick(album)} onEdit={() => handleEditAlbum(album)} />
 						</motion.div>
 					))}
 				</div>

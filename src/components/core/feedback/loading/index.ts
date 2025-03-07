@@ -1,4 +1,4 @@
-export { LoadingScreen } from './loading-screen'
+export { LoadingScreen } from './loading-screen';
 
 // Types
 export interface LoadingScreenProps {

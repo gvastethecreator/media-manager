@@ -1,14 +1,13 @@
-
 /**
  * Formatea una fecha a una cadena legible en español
  * @param date Fecha a formatear
  * @returns Cadena formateada (ej: "5 ene 2024, 14:30")
  */
 export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('es-ES', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date)
+	return new Intl.DateTimeFormat('es-ES', {
+		dateStyle: 'medium',
+		timeStyle: 'short',
+	}).format(date);
 }
 
 /**
@@ -17,7 +16,7 @@ export function formatDate(date: Date): string {
  * @returns Nombre sin extensión
  */
 export function formatFileName(name: string): string {
-  return name.replace(/\.[^/.]+$/, "")
+	return name.replace(/\.[^/.]+$/, '');
 }
 
 /**
@@ -26,7 +25,7 @@ export function formatFileName(name: string): string {
  * @returns Cadena formateada (ej: "1.234.567")
  */
 export function formatNumber(num: number): string {
-  return new Intl.NumberFormat('es-ES').format(num)
+	return new Intl.NumberFormat('es-ES').format(num);
 }
 
 /**
@@ -35,17 +34,19 @@ export function formatNumber(num: number): string {
  * @returns Cadena formateada (ej: "2m 30s")
  */
 export function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`
+	if (ms < 1000) {
+		return `${ms}ms`;
+	}
 
-  const seconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
+	const seconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
 
-  if (hours > 0) {
-    return `${hours}h ${minutes % 60}m`
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds % 60}s`
-  }
-  return `${seconds}s`
+	if (hours > 0) {
+		return `${hours}h ${minutes % 60}m`;
+	}
+	if (minutes > 0) {
+		return `${minutes}m ${seconds % 60}s`;
+	}
+	return `${seconds}s`;
 }

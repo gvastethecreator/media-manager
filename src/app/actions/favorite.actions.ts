@@ -1,214 +1,243 @@
-'use server'
+'use server';
 
-import { prisma } from '@/lib/prisma'
-import { logger } from '@/lib/logger'
-import { revalidatePath } from 'next/cache'
-import type { Favorite } from '@prisma/client'
-import { eventsService } from '@/services/events.service'
-import { statsEventEmitter, STATS_EVENTS } from '@/services/stats.service'
-import type { FileItem } from '@/types/file-item'
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma';
+import { emit } from '@/lib/server/events.server';
+import type { ImageMetadata } from '@/lib/types';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import type { FileItem } from '@/types/files';
+import type { Favorite, Image } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
-const favoriteLogger = logger.withContext('FavoriteActions')
+const favoriteLogger = logger.withContext('FavoriteActions');
 
-const REVALIDATE_PATHS = [
-  '/settings',
-  '/favorites',
-  '/images/[id]'
-] as const
+// Definir interfaces para los tipos relacionados
+interface ImageWithRelations extends Image {
+	collections?: Array<{ id: string; name: string; emoji?: string; color?: string }>;
+	tags?: Array<{ id: string; name: string; color?: string }>;
+	updatedAt: Date;
+}
+
+const REVALIDATE_PATHS = ['/settings', '/favorites', '/images/[id]'] as const;
 
 const revalidateAllPaths = () => {
-  REVALIDATE_PATHS.forEach(path => revalidatePath(path))
-  favoriteLogger.info('🔄 Rutas revalidadas')
-}
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	favoriteLogger.info('🔄 Rutas revalidadas');
+};
 
 class FavoriteError extends Error {
-  constructor(message: string, public cause?: unknown) {
-    super(message)
-    this.name = 'FavoriteError'
-  }
+	constructor(
+		message: string,
+		public cause?: unknown
+	) {
+		super(message);
+		this.name = 'FavoriteError';
+	}
 }
 
-function transformImageToFileItem(image: any): FileItem {
-  return {
-    id: image.id,
-    name: image.name,
-    path: image.path,
-    type: 'image',
-    size: image.size,
-    width: image.width,
-    height: image.height,
-    metadata: image.metadata,
-    thumbnail: null,
-    thumbnailSize: image.thumbnailSize,
-    thumbnailWidth: image.thumbnailWidth,
-    thumbnailHeight: image.thumbnailHeight,
-    isPublic: image.isPublic,
-    isFavorite: image.isFavorite,
-    folderId: image.folderId,
-    createdAt: image.createdAt,
-    updatedAt: image.updatedAt,
-    modifiedAt: image.updatedAt,
-    accessedAt: image.updatedAt,
-    collections: image.collections?.map((c: any) => ({ id: c.id, name: c.name })) ?? [],
-    tags: image.tags?.map((t: any) => ({ id: t.id, name: t.name })) ?? [],
-    albums: [],
-    characters: [],
-    places: [],
-    objects: []
-  }
+function transformImageToFileItem(image: ImageWithRelations): FileItem {
+	return {
+		id: image.id,
+		name: image.name,
+		path: image.path,
+		type: 'image',
+		size: image.size,
+		width: image.width || 0,
+		height: image.height || 0,
+		metadata: image.metadata as unknown as ImageMetadata,
+		thumbnail: '',
+		thumbnailSize: image.thumbnailSize || 0,
+		thumbnailWidth: image.thumbnailWidth || 0,
+		thumbnailHeight: image.thumbnailHeight || 0,
+		src: `api/images/${image.id}`,
+		isPublic: image.isPublic,
+		isFavorite: image.isFavorite,
+		createdAt: image.createdAt,
+		updatedAt: image.updatedAt,
+		collections:
+			image.collections?.map((c: { id: string; name: string; emoji?: string; color?: string }) => ({
+				id: c.id,
+				name: c.name,
+				emoji: c.emoji || '📁',
+				color: c.color || '#6366f1',
+			})) ?? [],
+		tags:
+			image.tags?.map((t: { id: string; name: string; color?: string }) => ({
+				id: t.id,
+				name: t.name,
+				color: t.color || '#cccccc',
+			})) ?? [],
+		stats: {
+			views: 0,
+			downloads: 0,
+			lastViewed: image.updatedAt,
+		},
+	};
 }
 
 export interface FavoriteWithImage extends Favorite {
-  image: FileItem
+	image: FileItem;
 }
 
 export async function addToFavorites(imageId: string): Promise<FavoriteWithImage> {
-  try {
-    favoriteLogger.info('⭐ Agregando imagen a favoritos:', imageId)
-    const favorite = await prisma.favorite.create({
-      data: {
-        imageId,
-        createdAt: new Date()
-      },
-      include: {
-        image: {
-          include: {
-            tags: true,
-            collections: true
-          }
-        }
-      }
-    })
+	try {
+		favoriteLogger.info('⭐ Agregando imagen a favoritos:', imageId);
+		const favorite = await prisma.favorite.create({
+			data: {
+				imageId,
+				createdAt: new Date(),
+			},
+			include: {
+				image: {
+					include: {
+						tags: true,
+						collections: true,
+					},
+				},
+			},
+		});
 
-    // Actualizar el campo isFavorite de la imagen
-    await prisma.image.update({
-      where: { id: imageId },
-      data: { isFavorite: true }
-    })
+		// Actualizar el campo isFavorite de la imagen
+		await prisma.image.update({
+			where: { id: imageId },
+			data: { isFavorite: true },
+		});
 
-    // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
-    eventsService.emit('files:modified')
-    revalidateAllPaths()
+		// Emitir eventos usando el nuevo sistema del servidor
+		await emit({
+			type: 'favorites:modified',
+			imageId,
+			data: { action: 'add' },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE);
+		revalidateAllPaths();
 
-    favoriteLogger.info('✅ Imagen agregada a favoritos:', imageId)
-    return { ...favorite, image: transformImageToFileItem(favorite.image) }
-  } catch (error) {
-    favoriteLogger.error('❌ Error al agregar a favoritos:', { imageId, error })
-    throw new FavoriteError('No se pudo agregar la imagen a favoritos', error)
-  }
+		return {
+			...favorite,
+			image: transformImageToFileItem(favorite.image as ImageWithRelations),
+		};
+	} catch (error) {
+		favoriteLogger.error('❌ Error al agregar a favoritos:', error);
+		throw new FavoriteError('No se pudo agregar a favoritos', error);
+	}
 }
 
 export async function removeFromFavorites(imageId: string): Promise<void> {
-  try {
-    favoriteLogger.info('🗑️ Eliminando imagen de favoritos:', imageId)
-    await prisma.favorite.deleteMany({
-      where: { imageId }
-    })
+	try {
+		favoriteLogger.info('🗑️ Eliminando imagen de favoritos:', imageId);
+		await prisma.favorite.deleteMany({
+			where: { imageId },
+		});
 
-    // Actualizar el campo isFavorite de la imagen
-    await prisma.image.update({
-      where: { id: imageId },
-      data: { isFavorite: false }
-    })
+		// Actualizar el campo isFavorite de la imagen
+		await prisma.image.update({
+			where: { id: imageId },
+			data: { isFavorite: false },
+		});
 
-    // Emitir eventos
-    statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE)
-    eventsService.emit('files:modified')
-    revalidateAllPaths()
-
-    favoriteLogger.info('✅ Imagen eliminada de favoritos:', imageId)
-  } catch (error) {
-    favoriteLogger.error('❌ Error al eliminar de favoritos:', { imageId, error })
-    throw new FavoriteError('No se pudo eliminar la imagen de favoritos', error)
-  }
+		// Emitir eventos usando el nuevo sistema del servidor
+		await emit({
+			type: 'favorites:modified',
+			imageId,
+			data: { action: 'remove' },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE);
+		revalidateAllPaths();
+	} catch (error) {
+		favoriteLogger.error('❌ Error al eliminar de favoritos:', error);
+		throw new FavoriteError('No se pudo eliminar de favoritos', error);
+	}
 }
 
 export async function getFavorites(): Promise<FavoriteWithImage[]> {
-  try {
-    favoriteLogger.info('📥 Obteniendo lista de favoritos')
-    const favorites = await prisma.favorite.findMany({
-      include: {
-        image: {
-          include: {
-            tags: true,
-            collections: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+	try {
+		favoriteLogger.info('📥 Obteniendo lista de favoritos');
+		const favorites = await prisma.favorite.findMany({
+			include: {
+				image: {
+					include: {
+						tags: true,
+						collections: true,
+					},
+				},
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+		});
 
-    const transformedFavorites = favorites.map(favorite => ({
-      ...favorite,
-      image: transformImageToFileItem(favorite.image)
-    }))
+		const transformedFavorites = favorites.map((favorite) => ({
+			...favorite,
+			image: transformImageToFileItem(favorite.image),
+		}));
 
-    favoriteLogger.info('✅ Favoritos obtenidos:', { count: favorites.length })
-    return transformedFavorites
-  } catch (error) {
-    favoriteLogger.error('❌ Error al obtener favoritos:', error)
-    throw new FavoriteError('No se pudieron obtener los favoritos', error)
-  }
+		favoriteLogger.info('✅ Favoritos obtenidos:', { count: favorites.length });
+		return transformedFavorites;
+	} catch (error) {
+		favoriteLogger.error('❌ Error al obtener favoritos:', error);
+		throw new FavoriteError('No se pudieron obtener los favoritos', error);
+	}
 }
 
 export async function isFavorited(imageId: string): Promise<boolean> {
-  try {
-    const favorite = await prisma.favorite.findFirst({
-      where: { imageId }
-    })
-    return !!favorite
-  } catch (error) {
-    favoriteLogger.error('❌ Error al verificar favorito:', { imageId, error })
-    throw new FavoriteError('No se pudo verificar si la imagen está en favoritos', error)
-  }
+	try {
+		const favorite = await prisma.favorite.findFirst({
+			where: { imageId },
+		});
+		return !!favorite;
+	} catch (error) {
+		favoriteLogger.error('❌ Error al verificar favorito:', { imageId, error });
+		throw new FavoriteError('No se pudo verificar si la imagen está en favoritos', error);
+	}
 }
 
 export async function toggleFavorite(imageId: string): Promise<boolean> {
-  try {
-    const isFav = await isFavorited(imageId)
-    if (isFav) {
-      await removeFromFavorites(imageId)
-      return false
-    } else {
-      await addToFavorites(imageId)
-      return true
-    }
-  } catch (error) {
-    favoriteLogger.error('❌ Error al alternar favorito:', { imageId, error })
-    throw new FavoriteError('No se pudo alternar el estado de favorito', error)
-  }
+	try {
+		favoriteLogger.info('🔄 Alternando estado de favorito:', imageId);
+		const isFavorite = await isFavorited(imageId);
+
+		if (isFavorite) {
+			await removeFromFavorites(imageId);
+			return false;
+		}
+
+		await addToFavorites(imageId);
+		return true;
+	} catch (error) {
+		favoriteLogger.error('❌ Error al alternar favorito:', error);
+		throw new FavoriteError('No se pudo alternar el estado de favorito', error);
+	}
 }
 
-export async function getRecentFavorites(limit: number = 10): Promise<FavoriteWithImage[]> {
-  try {
-    favoriteLogger.info('📥 Obteniendo favoritos recientes')
-    const favorites = await prisma.favorite.findMany({
-      take: limit,
-      include: {
-        image: {
-          include: {
-            tags: true,
-            collections: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+export async function getRecentFavorites(limit = 10): Promise<FavoriteWithImage[]> {
+	try {
+		favoriteLogger.info('📥 Obteniendo favoritos recientes');
+		const favorites = await prisma.favorite.findMany({
+			take: limit,
+			include: {
+				image: {
+					include: {
+						tags: true,
+						collections: true,
+					},
+				},
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+		});
 
-    const transformedFavorites = favorites.map(favorite => ({
-      ...favorite,
-      image: transformImageToFileItem(favorite.image)
-    }))
+		const transformedFavorites = favorites.map((favorite) => ({
+			...favorite,
+			image: transformImageToFileItem(favorite.image),
+		}));
 
-    favoriteLogger.info('✅ Favoritos recientes obtenidos:', { count: favorites.length })
-    return transformedFavorites
-  } catch (error) {
-    favoriteLogger.error('❌ Error al obtener favoritos recientes:', error)
-    throw new FavoriteError('No se pudieron obtener los favoritos recientes', error)
-  }
+		favoriteLogger.info('✅ Favoritos recientes obtenidos:', { count: favorites.length });
+		return transformedFavorites;
+	} catch (error) {
+		favoriteLogger.error('❌ Error al obtener favoritos recientes:', error);
+		throw new FavoriteError('No se pudieron obtener los favoritos recientes', error);
+	}
 }

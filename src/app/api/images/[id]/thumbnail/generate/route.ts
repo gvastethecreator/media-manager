@@ -1,118 +1,102 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import sharp from 'sharp'
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/services/thumbnail.service'
-import { existsSync } from 'fs'
-import { pipeline } from 'stream/promises'
-import { createReadStream } from 'fs'
+import { existsSync } from 'fs';
+import { createReadStream } from 'fs';
+import { pipeline } from 'node:stream/promises';
+import { prisma } from '@/lib/prisma';
+import { THUMBNAIL_QUALITY_CONFIG, type ThumbnailQuality } from '@/services/thumbnail.service';
+import { type NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { quality = 'medium', force = false } = await request.json()
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+	try {
+		const { quality = 'medium', force = false } = await request.json();
 
-    // Verificar si la imagen existe
-    const image = await prisma.image.findUnique({
-      where: { id: params.id }
-    })
+		// Verificar si la imagen existe
+		const image = await prisma.image.findUnique({
+			where: { id: params.id },
+		});
 
-    if (!image) {
-      return NextResponse.json(
-        { error: 'Image not found' },
-        { status: 404 }
-      )
-    }
+		if (!image) {
+			return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+		}
 
-    // Verificar que el archivo existe
-    if (!existsSync(image.path)) {
-      await prisma.image.update({
-        where: { id: params.id },
-        data: {
-          thumbnailError: 'Original file not found',
-          thumbnailErrorAt: new Date()
-        }
-      })
-      return NextResponse.json(
-        { error: 'Original file not found' },
-        { status: 404 }
-      )
-    }
+		// Verificar que el archivo existe
+		if (!existsSync(image.path)) {
+			await prisma.image.update({
+				where: { id: params.id },
+				data: {
+					thumbnailError: 'Original file not found',
+					thumbnailErrorAt: new Date(),
+				},
+			});
+			return NextResponse.json({ error: 'Original file not found' }, { status: 404 });
+		}
 
-    // Si force es false y ya tiene thumbnail, no regenerar
-    if (!force && image.thumbnail) {
-      return NextResponse.json({ status: 'skipped', message: 'Thumbnail already exists' })
-    }
+		// Si force es false y ya tiene thumbnail, no regenerar
+		if (!force && image.thumbnail) {
+			return NextResponse.json({ status: 'skipped', message: 'Thumbnail already exists' });
+		}
 
-    try {
-      // Verificar tamaño del archivo
-      const metadata = await sharp(image.path).metadata()
-      if (metadata.size && metadata.size > MAX_FILE_SIZE) {
-        throw new Error(`File size exceeds maximum allowed (${MAX_FILE_SIZE} bytes)`)
-      }
+		try {
+			// Verificar tamaño del archivo
+			const metadata = await sharp(image.path).metadata();
+			if (metadata.size && metadata.size > MAX_FILE_SIZE) {
+				throw new Error(`File size exceeds maximum allowed (${MAX_FILE_SIZE} bytes)`);
+			}
 
-      // Procesar imagen en streaming
-      const transformer = sharp()
-        .resize(THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].width,
-          THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].height, {
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .webp({ quality: THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].quality })
+			// Procesar imagen en streaming
+			const transformer = sharp()
+				.resize(
+					THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].width,
+					THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].height,
+					{
+						fit: 'inside',
+						withoutEnlargement: true,
+					}
+				)
+				.webp({ quality: THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].quality });
 
-      const chunks: Buffer[] = []
-      transformer.on('data', chunk => chunks.push(chunk))
+			const chunks: Buffer[] = [];
+			transformer.on('data', (chunk) => chunks.push(chunk));
 
-      await pipeline(
-        createReadStream(image.path),
-        transformer
-      )
+			await pipeline(createReadStream(image.path), transformer);
 
-      const thumbnailBuffer = Buffer.concat(chunks)
+			const thumbnailBuffer = Buffer.concat(chunks);
 
-      // Actualizar en base de datos
-      await prisma.image.update({
-        where: { id: params.id },
-        data: {
-          thumbnail: thumbnailBuffer,
-          thumbnailSize: thumbnailBuffer.length,
-          thumbnailError: null,
-          thumbnailErrorAt: null,
-          updatedAt: new Date()
-        }
-      })
+			// Actualizar en base de datos
+			await prisma.image.update({
+				where: { id: params.id },
+				data: {
+					thumbnail: thumbnailBuffer,
+					thumbnailSize: thumbnailBuffer.length,
+					thumbnailError: null,
+					thumbnailErrorAt: null,
+					updatedAt: new Date(),
+				},
+			});
 
-      return NextResponse.json({
-        status: 'success',
-        size: thumbnailBuffer.length,
-        quality
-      })
+			return NextResponse.json({
+				status: 'success',
+				size: thumbnailBuffer.length,
+				quality,
+			});
+		} catch (error) {
+			console.error('Error processing thumbnail:', error);
 
-    } catch (error) {
-      console.error('Error processing thumbnail:', error)
+			// Actualizar error en base de datos
+			await prisma.image.update({
+				where: { id: params.id },
+				data: {
+					thumbnailError: error instanceof Error ? error.message : 'Unknown error',
+					thumbnailErrorAt: new Date(),
+				},
+			});
 
-      // Actualizar error en base de datos
-      await prisma.image.update({
-        where: { id: params.id },
-        data: {
-          thumbnailError: error instanceof Error ? error.message : 'Unknown error',
-          thumbnailErrorAt: new Date()
-        }
-      })
-
-      return NextResponse.json(
-        { error: 'Error generating thumbnail' },
-        { status: 500 }
-      )
-    }
-  } catch (error) {
-    console.error('Error in thumbnail generation:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+			return NextResponse.json({ error: 'Error generating thumbnail' }, { status: 500 });
+		}
+	} catch (error) {
+		console.error('Error in thumbnail generation:', error);
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+	}
 }
