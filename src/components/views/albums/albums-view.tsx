@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { getAlbums } from '@/app/actions/album.actions';
-import type { AlbumWithStats } from '@/app/actions/album.actions';
-import { AlbumCard } from '@/components/cards/album-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import { Album as AlbumIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import type { ViewProps } from '../types';
+import { getAlbums } from "@/app/actions/album.actions";
+import type { AlbumWithStats } from "@/app/actions/album.actions";
+import { EmptyState } from "@/components/core/data-display";
+import { LoadingScreen } from "@/components/core/feedback";
+import { AlbumCard } from "@/components/features/entity-cards/cards/album-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { clientEvents } from "@/lib/client/events.client";
+import { logger } from "@/lib/logger";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import { Album as AlbumIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import type { ViewProps } from "../types";
 
-const viewLogger = logger.withContext('AlbumsView');
+const viewLogger = logger.withContext("AlbumsView");
 
 export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -27,18 +27,20 @@ export function AlbumsView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithStats[]>(albums);
+	const [optimisticAlbums, _addEvent] =
+		clientEvents.useEvents<AlbumWithStats[]>(albums);
 
 	const fetchAlbums = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info('🔄 Cargando álbumes...');
+			viewLogger.info("🔄 Cargando álbumes...");
 			const data = await getAlbums();
 			setAlbums(data);
 			viewLogger.info(`✅ ${data.length} álbumes cargados`);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando álbumes:', err);
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando álbumes:", err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -52,8 +54,8 @@ export function AlbumsView(_props: ViewProps) {
 
 	const handleAlbumClick = useCallback(
 		(album: AlbumWithStats) => {
-			viewLogger.info('🖱️ Click en álbum:', album.name);
-			setCurrentView('album-content');
+			viewLogger.info("🖱️ Click en álbum:", album.name);
+			setCurrentView("album-content");
 			setCurrentAlbum(album.id);
 		},
 		[setCurrentView, setCurrentAlbum]
@@ -61,8 +63,8 @@ export function AlbumsView(_props: ViewProps) {
 
 	const handleEditAlbum = useCallback(
 		(album: AlbumWithStats) => {
-			viewLogger.info('⚙️ Editando álbum:', album.name);
-			router.push('/settings/albums');
+			viewLogger.info("⚙️ Editando álbum:", album.name);
+			router.push("/settings/albums");
 		},
 		[router]
 	);
@@ -100,7 +102,11 @@ export function AlbumsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<AlbumCard album={album} onClick={() => handleAlbumClick(album)} onEdit={() => handleEditAlbum(album)} />
+							<AlbumCard
+								album={album}
+								onClick={() => handleAlbumClick(album)}
+								onEdit={() => handleEditAlbum(album)}
+							/>
 						</motion.div>
 					))}
 				</div>

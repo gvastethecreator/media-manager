@@ -5,7 +5,7 @@ import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/panels/nav/nav-panel';
 import { NavPanelSkeleton } from '@/components/panels/nav/nav-panel-skeleton';
 import { RightPanel } from '@/components/panels/right-panel';
-import { ViewToolbar } from '@/components/toolbar/view-toolbar';
+import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizablePanel, ResizablePanelGroup, ResizablePanelHandle } from '@/components/ui/resizable';
 import { ViewContainer } from '@/components/views/view-container';
 import { useImageViewer } from '@/store/image-viewer.store';
