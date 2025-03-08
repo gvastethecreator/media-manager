@@ -2,6 +2,7 @@
 
 import { getThumbnail } from '@/app/actions/thumbnails.actions';
 import { ThumbnailQuality } from '@/config/thumbnail.config';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useFileManager } from '@/store/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
@@ -15,6 +16,8 @@ import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
+
+const gridLogger = logger.withContext('FileGrid');
 
 // Función auxiliar para parsear metadata
 const getMetadata = (metadata: string | null) => {
@@ -442,13 +445,108 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 	}, [items, virtualizer, loadThumbnail, imageResources]);
 
 	const handleContextAction = useCallback(
-		(action: ContextMenuAction, item: FileItem, _data?: Record<string, unknown>) => {
+		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
+			gridLogger.info(`⚡ Acción del menú contextual: ${action}`, {
+				item: item.id,
+				data,
+			});
+
 			switch (action) {
 				case 'preview':
 					onItemDoubleClick?.(item);
 					break;
-				// Aquí se pueden manejar más acciones según sea necesario
+				case 'mark-toggle':
+					gridLogger.info('🚩 Toggling mark status');
+					// Implementar lógica para marcar/desmarcar
+					break;
+				case 'open':
+					gridLogger.info('📂 Abriendo ubicación del archivo', item.path);
+					// Abrir ubicación del archivo en el explorador de archivos
+					if (item.path) {
+						window.electron?.openPath(item.path);
+					}
+					break;
+				case 'download':
+					gridLogger.info('⬇️ Descargando archivo', item.path);
+					// Implementar descarga del archivo
+					if (item.path) {
+						window.electron?.downloadFile(item.path);
+					}
+					break;
+				case 'copy':
+					gridLogger.info('📋 Copiando archivo al portapapeles', item.path);
+					// Copiar al portapapeles
+					if (item.path) {
+						window.electron?.copyFileToClipboard(item.path);
+					}
+					break;
+				case 'delete':
+					gridLogger.info('🗑️ Eliminando archivo', item.path);
+					// Implementar eliminación del archivo con confirmación
+					if (item.path) {
+						if (window.confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
+							window.electron?.deleteFile(item.path);
+						}
+					}
+					break;
+				// Acciones de creación de entidades
+				case 'collection-create':
+					gridLogger.info('🆕 Creando nueva colección');
+					// Mostrar diálogo para crear colección
+					window.dispatchEvent(
+						new CustomEvent('open-create-collection-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'tag-create':
+					gridLogger.info('🆕 Creando nueva etiqueta');
+					// Mostrar diálogo para crear etiqueta
+					window.dispatchEvent(
+						new CustomEvent('open-create-tag-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'album-create':
+					gridLogger.info('🆕 Creando nuevo álbum');
+					// Mostrar diálogo para crear álbum
+					window.dispatchEvent(
+						new CustomEvent('open-create-album-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'character-create':
+					gridLogger.info('🆕 Creando nuevo personaje');
+					// Mostrar diálogo para crear personaje
+					window.dispatchEvent(
+						new CustomEvent('open-create-character-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'place-create':
+					gridLogger.info('🆕 Creando nuevo lugar');
+					// Mostrar diálogo para crear lugar
+					window.dispatchEvent(
+						new CustomEvent('open-create-place-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'object-create':
+					gridLogger.info('🆕 Creando nuevo objeto');
+					// Mostrar diálogo para crear objeto
+					window.dispatchEvent(
+						new CustomEvent('open-create-object-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
 				default:
+					// Las demás acciones son manejadas por los stores directamente
+					gridLogger.info(`🔄 Acción ${action} delegada a los stores`);
 					break;
 			}
 		},
