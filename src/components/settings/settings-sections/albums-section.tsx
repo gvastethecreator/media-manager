@@ -1,24 +1,36 @@
-'use client';
+"use client";
 
-import { AlbumCard } from '@/components/cards/album-card';
-import { AlbumForm } from '@/components/forms/album-form';
-import { EntityForm } from '@/components/forms/entity-form';
-import { type AlbumFormData, albumToFormData, formDataToAlbum } from '@/components/forms/entity-types';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
-import { useAlbumsStore } from '@/store/albums.store';
-import { Album as AlbumIcon, Loader2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import * as React from 'react';
+import { AlbumCard } from "@/components/features/entity-cards/cards/album-card";
+import { AlbumForm } from "@/components/features/entity-cards/forms/album-form";
+import { EntityForm } from "@/components/features/entity-cards/forms/entity-form";
+import {
+	type AlbumFormData,
+	albumToFormData,
+	formDataToAlbum,
+} from "@/components/features/entity-cards/forms/entity-types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCard, type StatsCardProps } from "@/components/ui/stats-card";
+import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
+import { useAlbumsStore } from "@/store/albums.store";
+import { Album as AlbumIcon, Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import * as React from "react";
 
-const albumLogger = logger.withContext('AlbumsSection');
+const albumLogger = logger.withContext("AlbumsSection");
 
 export function AlbumsSection() {
-	const { albums, isLoading, error, loadAlbums, createAlbum, updateAlbum, deleteAlbum } = useAlbumsStore();
+	const {
+		albums,
+		isLoading,
+		error,
+		loadAlbums,
+		createAlbum,
+		updateAlbum,
+		deleteAlbum,
+	} = useAlbumsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
@@ -28,18 +40,18 @@ export function AlbumsSection() {
 
 	const handleCreate = async (data: AlbumFormData) => {
 		try {
-			albumLogger.info('✨ Creando nuevo álbum:', data);
+			albumLogger.info("✨ Creando nuevo álbum:", data);
 			await createAlbum(formDataToAlbum(data));
 			toast({
-				title: 'Éxito',
-				description: 'Álbum creado correctamente',
+				title: "Éxito",
+				description: "Álbum creado correctamente",
 			});
 		} catch (error) {
-			albumLogger.error('❌ Error al crear álbum:', error);
+			albumLogger.error("❌ Error al crear álbum:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo crear el álbum',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo crear el álbum",
+				variant: "destructive",
 			});
 		}
 	};
@@ -49,59 +61,67 @@ export function AlbumsSection() {
 			return;
 		}
 		try {
-			albumLogger.info('💾 Actualizando álbum:', data);
+			albumLogger.info("💾 Actualizando álbum:", data);
 			await updateAlbum(data.id, formDataToAlbum(data));
 			setEditingId(null);
 			toast({
-				title: 'Éxito',
-				description: 'Álbum actualizado correctamente',
+				title: "Éxito",
+				description: "Álbum actualizado correctamente",
 			});
 		} catch (error) {
-			albumLogger.error('❌ Error al actualizar álbum:', error);
+			albumLogger.error("❌ Error al actualizar álbum:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo actualizar el álbum',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo actualizar el álbum",
+				variant: "destructive",
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm('¿Estás seguro de eliminar este álbum?')) {
+		if (!confirm("¿Estás seguro de eliminar este álbum?")) {
 			return;
 		}
 		try {
-			albumLogger.info('🗑️ Eliminando álbum:', { id });
+			albumLogger.info("🗑️ Eliminando álbum:", { id });
 			await deleteAlbum(id);
 			toast({
-				title: 'Éxito',
-				description: 'Álbum eliminado correctamente',
+				title: "Éxito",
+				description: "Álbum eliminado correctamente",
 			});
 		} catch (error) {
-			albumLogger.error('❌ Error al eliminar álbum:', error);
+			albumLogger.error("❌ Error al eliminar álbum:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo eliminar el álbum',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo eliminar el álbum",
+				variant: "destructive",
 			});
 		}
 	};
 
 	// Calcular estadísticas
 	const stats = React.useMemo(() => {
-		const totalImages = albums.reduce((acc, album) => acc + (album._count?.images || 0), 0);
-		const totalSize = albums.reduce((acc, album) => acc + (album.totalSize || 0), 0);
+		const totalImages = albums.reduce(
+			(acc, album) => acc + (album._count?.images || 0),
+			0
+		);
+		const totalSize = albums.reduce(
+			(acc, album) => acc + (album.totalSize || 0),
+			0
+		);
 
 		// Ordenar álbumes por número de imágenes
-		const sortedAlbums = [...albums].sort((a, b) => (b._count?.images || 0) - (a._count?.images || 0));
+		const sortedAlbums = [...albums].sort(
+			(a, b) => (b._count?.images || 0) - (a._count?.images || 0)
+		);
 
 		// Calcular distribución por rango de imágenes
 		const distribution = [
-			{ name: '0 imágenes', count: 0 },
-			{ name: '1-10 imágenes', count: 0 },
-			{ name: '11-50 imágenes', count: 0 },
-			{ name: '51-100 imágenes', count: 0 },
-			{ name: '100+ imágenes', count: 0 },
+			{ name: "0 imágenes", count: 0 },
+			{ name: "1-10 imágenes", count: 0 },
+			{ name: "11-50 imágenes", count: 0 },
+			{ name: "51-100 imágenes", count: 0 },
+			{ name: "100+ imágenes", count: 0 },
 		];
 
 		for (const album of albums) {
@@ -127,7 +147,7 @@ export function AlbumsSection() {
 			recentItems: sortedAlbums.slice(0, 5).map((album) => ({
 				id: album.id,
 				name: album.name,
-				emoji: album.emoji || '📷',
+				emoji: album.emoji || "📷",
 				count: album._count?.images || 0,
 			})),
 			distribution: distribution.filter((d) => d.count > 0),
@@ -153,7 +173,7 @@ export function AlbumsSection() {
 					title="Estadísticas"
 					icon={<AlbumIcon className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats as StatsCardProps['stats']}
+					stats={stats as StatsCardProps["stats"]}
 				/>
 			</div>
 
@@ -164,8 +184,17 @@ export function AlbumsSection() {
 							<AlbumIcon className="h-5 w-5" />
 							Álbumes
 						</div>
-						<Button variant="outline" size="sm" onClick={() => loadAlbums()} disabled={isLoading}>
-							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => loadAlbums()}
+							disabled={isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Recargar"
+							)}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -176,7 +205,9 @@ export function AlbumsSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">{error}</p>
+							<p className="text-sm text-muted-foreground text-center">
+								{error}
+							</p>
 							<Button variant="outline" size="sm" onClick={() => loadAlbums()}>
 								Reintentar
 							</Button>
@@ -184,8 +215,12 @@ export function AlbumsSection() {
 					) : albums.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<AlbumIcon className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">No hay álbumes creados</p>
-							<p className="text-xs text-muted-foreground/75">Crea un álbum para organizar tus imágenes</p>
+							<p className="text-sm text-muted-foreground text-center">
+								No hay álbumes creados
+							</p>
+							<p className="text-xs text-muted-foreground/75">
+								Crea un álbum para organizar tus imágenes
+							</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -199,7 +234,7 @@ export function AlbumsSection() {
 										exit={{ opacity: 0, scale: 0.9 }}
 										transition={{
 											duration: 0.2,
-											ease: 'easeInOut',
+											ease: "easeInOut",
 										}}
 									>
 										{editingId === album.id ? (
@@ -214,7 +249,11 @@ export function AlbumsSection() {
 												</CardContent>
 											</Card>
 										) : (
-											<AlbumCard album={album} onEdit={() => setEditingId(album.id)} onDelete={handleDelete} />
+											<AlbumCard
+												album={album}
+												onEdit={() => setEditingId(album.id)}
+												onDelete={handleDelete}
+											/>
 										)}
 									</motion.div>
 								))}
