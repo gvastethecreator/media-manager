@@ -1,23 +1,35 @@
-'use client';
+"use client";
 
-import { ObjectCard } from '@/components/cards/object-card';
-import { type ObjectFormData, formDataToObject, objectToFormData } from '@/components/forms/entity-types';
-import { ObjectForm } from '@/components/forms/object-form';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
-import { useObjectsStore } from '@/store/objects.store';
-import { Box, Loader2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
+import { ObjectCard } from "@/components/features/entity-cards/cards/object-card";
+import {
+	type ObjectFormData,
+	formDataToObject,
+	objectToFormData,
+} from "@/components/features/entity-cards/forms/entity-types";
+import { ObjectForm } from "@/components/features/entity-cards/forms/object-form";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCard, type StatsCardProps } from "@/components/ui/stats-card";
+import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
+import { useObjectsStore } from "@/store/objects.store";
+import { Box, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
 
-const objectLogger = logger.withContext('ObjectsSection');
+const objectLogger = logger.withContext("ObjectsSection");
 
 export function ObjectsSection() {
-	const { objects, isLoading, error, loadObjects, createObject, updateObject, deleteObject } = useObjectsStore();
+	const {
+		objects,
+		isLoading,
+		error,
+		loadObjects,
+		createObject,
+		updateObject,
+		deleteObject,
+	} = useObjectsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
@@ -34,13 +46,19 @@ export function ObjectsSection() {
 			};
 		}
 
-		const totalImages = objects.reduce((acc, obj) => acc + (obj._count?.images || 0), 0);
-		const totalSize = objects.reduce((acc, obj) => acc + (obj.totalSize || 0), 0);
+		const totalImages = objects.reduce(
+			(acc, obj) => acc + (obj._count?.images || 0),
+			0
+		);
+		const totalSize = objects.reduce(
+			(acc, obj) => acc + (obj.totalSize || 0),
+			0
+		);
 
 		// Calcular distribución por tipo
 		const typeDistribution = objects.reduce(
 			(acc, obj) => {
-				const type = obj.type || 'Sin tipo';
+				const type = obj.type || "Sin tipo";
 				acc[type] = (acc[type] || 0) + 1;
 				return acc;
 			},
@@ -53,7 +71,10 @@ export function ObjectsSection() {
 
 		// Obtener objetos recientes
 		const recentObjects = [...objects]
-			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.sort(
+				(a, b) =>
+					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+			)
 			.slice(0, 5)
 			.map((obj) => ({
 				id: obj.id,
@@ -78,18 +99,18 @@ export function ObjectsSection() {
 
 	const handleCreate = async (data: ObjectFormData) => {
 		try {
-			objectLogger.info('🎯 Creando nuevo objeto:', data.name);
+			objectLogger.info("🎯 Creando nuevo objeto:", data.name);
 			await createObject(formDataToObject(data));
 			toast({
-				title: 'Objeto creado',
-				description: 'El objeto se ha creado correctamente.',
+				title: "Objeto creado",
+				description: "El objeto se ha creado correctamente.",
 			});
 		} catch (error) {
-			objectLogger.error('❌ Error creando objeto:', error);
+			objectLogger.error("❌ Error creando objeto:", error);
 			toast({
-				title: 'Error al crear objeto',
-				description: 'No se pudo crear el objeto.',
-				variant: 'destructive',
+				title: "Error al crear objeto",
+				description: "No se pudo crear el objeto.",
+				variant: "destructive",
 			});
 		}
 	};
@@ -99,37 +120,37 @@ export function ObjectsSection() {
 			return;
 		}
 		try {
-			objectLogger.info('🎯 Actualizando objeto:', data.name);
+			objectLogger.info("🎯 Actualizando objeto:", data.name);
 			await updateObject(data.id, formDataToObject(data));
 			toast({
-				title: 'Objeto actualizado',
-				description: 'El objeto se ha actualizado correctamente.',
+				title: "Objeto actualizado",
+				description: "El objeto se ha actualizado correctamente.",
 			});
 			setEditingId(null);
 		} catch (error) {
-			objectLogger.error('❌ Error actualizando objeto:', error);
+			objectLogger.error("❌ Error actualizando objeto:", error);
 			toast({
-				title: 'Error al actualizar objeto',
-				description: 'No se pudo actualizar el objeto.',
-				variant: 'destructive',
+				title: "Error al actualizar objeto",
+				description: "No se pudo actualizar el objeto.",
+				variant: "destructive",
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
-			objectLogger.info('🎯 Eliminando objeto:', id);
+			objectLogger.info("🎯 Eliminando objeto:", id);
 			await deleteObject(id);
 			toast({
-				title: 'Objeto eliminado',
-				description: 'El objeto se ha eliminado correctamente.',
+				title: "Objeto eliminado",
+				description: "El objeto se ha eliminado correctamente.",
 			});
 		} catch (error) {
-			objectLogger.error('❌ Error eliminando objeto:', error);
+			objectLogger.error("❌ Error eliminando objeto:", error);
 			toast({
-				title: 'Error al eliminar objeto',
-				description: 'No se pudo eliminar el objeto.',
-				variant: 'destructive',
+				title: "Error al eliminar objeto",
+				description: "No se pudo eliminar el objeto.",
+				variant: "destructive",
 			});
 		}
 	};
@@ -153,7 +174,7 @@ export function ObjectsSection() {
 					title="Estadísticas"
 					icon={<Box className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats as StatsCardProps['stats']}
+					stats={stats as StatsCardProps["stats"]}
 				/>
 			</div>
 
@@ -164,15 +185,30 @@ export function ObjectsSection() {
 							<Box className="h-5 w-5" />
 							Objetos
 						</div>
-						<Button variant="outline" size="sm" onClick={() => loadObjects()} disabled={isLoading}>
-							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => loadObjects()}
+							disabled={isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Recargar"
+							)}
 						</Button>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					{error && <div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">{error}</div>}
+					{error && (
+						<div className="text-sm text-red-500 p-2 bg-red-50 rounded-md">
+							{error}
+						</div>
+					)}
 					{objects.length === 0 && !isLoading ? (
-						<div className="text-sm text-muted-foreground text-center py-4">No hay objetos creados</div>
+						<div className="text-sm text-muted-foreground text-center py-4">
+							No hay objetos creados
+						</div>
 					) : (
 						<div className="grid grid-cols-4 gap-4">
 							{objects.map((object) => (

@@ -1,25 +1,31 @@
-'use client';
+"use client";
 
-import type * as React from 'react';
-import { useState } from 'react';
-import { CompactPicker } from 'react-color';
-import { Button } from '../ui/button';
-import { EmojiPicker } from '../ui/emoji-picker';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Separator } from '../ui/separator';
-import { Textarea } from '../ui/textarea';
+import type * as React from "react";
+import { useState } from "react";
+import { CompactPicker } from "react-color";
+import { Button } from "../../../ui/button";
+import { EmojiPicker } from "../../../ui/emoji-picker";
+import { Input } from "../../../ui/input";
+import { Label } from "../../../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../../../ui/select";
+import { Separator } from "../../../ui/separator";
+import { Textarea } from "../../../ui/textarea";
 
 const PROMPT_CATEGORIES = [
-	{ value: 'general', label: 'General' },
-	{ value: 'character', label: 'Personaje' },
-	{ value: 'scene', label: 'Escena' },
-	{ value: 'story', label: 'Historia' },
-	{ value: 'dialogue', label: 'Diálogo' },
-	{ value: 'description', label: 'Descripción' },
-	{ value: 'action', label: 'Acción' },
+	{ value: "general", label: "General" },
+	{ value: "character", label: "Personaje" },
+	{ value: "scene", label: "Escena" },
+	{ value: "story", label: "Historia" },
+	{ value: "dialogue", label: "Diálogo" },
+	{ value: "description", label: "Descripción" },
+	{ value: "action", label: "Acción" },
 ];
 
 interface PromptFormData {
@@ -42,33 +48,41 @@ interface PromptFormProps {
 	isLoading?: boolean;
 }
 
-export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: PromptFormProps) {
+export function PromptForm({
+	initialData,
+	onSubmit,
+	onCancel,
+	isLoading,
+}: PromptFormProps) {
 	const [formData, setFormData] = useState<PromptFormData>({
-		name: initialData?.name || '',
-		emoji: initialData?.emoji || '🎯',
-		color: initialData?.color || '#3b82f6',
-		description: initialData?.description || '',
-		content: initialData?.content || '',
-		category: initialData?.category || 'general',
+		name: initialData?.name || "",
+		emoji: initialData?.emoji || "🎯",
+		color: initialData?.color || "#3b82f6",
+		description: initialData?.description || "",
+		content: initialData?.content || "",
+		category: initialData?.category || "general",
 		parameters: initialData?.parameters || {},
 		tags: initialData?.tags || [],
 		featuredImage: initialData?.featuredImage || null,
 		isFavorite: initialData?.isFavorite || false,
 	});
 
-	const [parametersError, setParametersError] = useState<string>('');
-	const [tagsError, setTagsError] = useState<string>('');
+	const [parametersError, setParametersError] = useState<string>("");
+	const [tagsError, setTagsError] = useState<string>("");
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!formData.name.trim()) {
-			alert('El nombre es requerido');
+			alert("El nombre es requerido");
 			return;
 		}
 		onSubmit(formData);
 	};
 
-	const handleChange = <T extends keyof PromptFormData>(field: T, value: PromptFormData[T]) => {
+	const handleChange = <T extends keyof PromptFormData>(
+		field: T,
+		value: PromptFormData[T]
+	) => {
 		setFormData((prev) => ({
 			...prev,
 			[field]: value,
@@ -78,14 +92,14 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 	const handleParametersChange = (value: string) => {
 		try {
 			const parsedParameters = JSON.parse(value);
-			if (typeof parsedParameters === 'object' && parsedParameters !== null) {
-				handleChange('parameters', parsedParameters);
-				setParametersError('');
+			if (typeof parsedParameters === "object" && parsedParameters !== null) {
+				handleChange("parameters", parsedParameters);
+				setParametersError("");
 			} else {
-				setParametersError('Los parámetros deben ser un objeto JSON válido');
+				setParametersError("Los parámetros deben ser un objeto JSON válido");
 			}
 		} catch (_error) {
-			setParametersError('JSON inválido');
+			setParametersError("JSON inválido");
 		}
 	};
 
@@ -93,13 +107,13 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 		try {
 			const parsedTags = JSON.parse(value);
 			if (Array.isArray(parsedTags)) {
-				handleChange('tags', parsedTags);
-				setTagsError('');
+				handleChange("tags", parsedTags);
+				setTagsError("");
 			} else {
-				setTagsError('Los tags deben ser un array de strings');
+				setTagsError("Los tags deben ser un array de strings");
 			}
 		} catch (_error) {
-			setTagsError('JSON inválido');
+			setTagsError("JSON inválido");
 		}
 	};
 
@@ -108,14 +122,18 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 			<div className="flex items-center space-x-4">
 				<Popover>
 					<PopoverTrigger asChild>
-						<Button type="button" variant="outline" className="w-12 h-12 text-2xl">
+						<Button
+							type="button"
+							variant="outline"
+							className="w-12 h-12 text-2xl"
+						>
 							{formData.emoji}
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="p-0">
 						<EmojiPicker
 							onEmojiSelect={(emoji: string) => {
-								handleChange('emoji', emoji);
+								handleChange("emoji", emoji);
 							}}
 						/>
 					</PopoverContent>
@@ -123,13 +141,18 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 
 				<Popover>
 					<PopoverTrigger asChild>
-						<Button type="button" variant="outline" className="w-12 h-12" style={{ backgroundColor: formData.color }} />
+						<Button
+							type="button"
+							variant="outline"
+							className="w-12 h-12"
+							style={{ backgroundColor: formData.color }}
+						/>
 					</PopoverTrigger>
 					<PopoverContent className="p-0">
 						<CompactPicker
 							color={formData.color}
 							onChange={(color) => {
-								handleChange('color', color.hex);
+								handleChange("color", color.hex);
 							}}
 						/>
 					</PopoverContent>
@@ -138,7 +161,7 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 				<Input
 					placeholder="Nombre del prompt"
 					value={formData.name}
-					onChange={(e) => handleChange('name', e.target.value)}
+					onChange={(e) => handleChange("name", e.target.value)}
 					required
 				/>
 			</div>
@@ -147,7 +170,7 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 				<Label>Descripción</Label>
 				<Textarea
 					value={formData.description}
-					onChange={(e) => handleChange('description', e.target.value)}
+					onChange={(e) => handleChange("description", e.target.value)}
 					placeholder="Descripción (opcional)"
 				/>
 			</div>
@@ -156,7 +179,7 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 				<Label>Contenido</Label>
 				<Textarea
 					value={formData.content}
-					onChange={(e) => handleChange('content', e.target.value)}
+					onChange={(e) => handleChange("content", e.target.value)}
 					className="min-h-[200px]"
 					placeholder="Contenido del prompt..."
 				/>
@@ -164,7 +187,10 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 
 			<div className="space-y-2">
 				<Label>Categoría</Label>
-				<Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
+				<Select
+					value={formData.category}
+					onValueChange={(value) => handleChange("category", value)}
+				>
 					<SelectTrigger>
 						<SelectValue placeholder="Selecciona categoría" />
 					</SelectTrigger>
@@ -190,7 +216,9 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
   "top_p": 1
 }'
 				/>
-				{parametersError && <p className="text-red-500 text-sm mt-1">{parametersError}</p>}
+				{parametersError && (
+					<p className="text-red-500 text-sm mt-1">{parametersError}</p>
+				)}
 			</div>
 
 			<div className="space-y-2">
@@ -206,12 +234,17 @@ export function PromptForm({ initialData, onSubmit, onCancel, isLoading }: Promp
 
 			<div className="flex justify-end gap-2">
 				{onCancel && (
-					<Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
+					<Button
+						type="button"
+						variant="ghost"
+						onClick={onCancel}
+						disabled={isLoading}
+					>
 						Cancelar
 					</Button>
 				)}
 				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
+					{isLoading ? "Guardando..." : initialData ? "Actualizar" : "Crear"}
 				</Button>
 			</div>
 		</form>
