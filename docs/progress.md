@@ -1,294 +1,101 @@
-# Correcciones del Sistema de Eventos
+# Plan de Mejora para el Panel de Navegación
 
-## Problemas Identificados
+## Requisitos
 
-Hemos intentado corregir los problemas con el sistema de eventos y hemos encontrado varios desafíos técnicos:
+1. Mostrar información de conteo para cada categoría:
+   - Cantidad de ítems
+   - Cantidad de imágenes
 
-1. **Restricciones de Next.js 15**: Un archivo con directiva 'use server' solo puede exportar funciones asíncronas, no objetos.
-2. **Problemas con la Re-exportación**: Los tipos y funciones re-exportados desde archivos 'use server' a archivos intermedios no son reconocidos correctamente por ESLint/TypeScript.
-3. **Problemas de Importación**: Los archivos que importan desde '@/lib/events' no reconocen correctamente los miembros exportados.
+2. Implementar funcionalidad de colapsar/expandir:
+   - Al hacer clic en el título de cada categoría
+   - Lógica de interacción:
+     - Si está expandido y no seleccionado: seleccionar
+     - Si está colapsado y no seleccionado: expandir y seleccionar
+     - Si está expandido y seleccionado: colapsar
+     - Si hay un elemento hijo seleccionado: mantenerlo visible aunque se colapse
 
-## Propuesta de Solución
+3. Agregar nuevas entidades faltantes:
+   - Concepts
+   - Prompts
+   - Notes
 
-Dado los problemas identificados, proponemos el siguiente enfoque para resolver los problemas:
+## Tareas
 
-### 1. Enfoque Directo: Importación Directa
+### Fase 1: Preparación
+- [x] Analizar la estructura actual del componente NavPanel
+- [x] Identificar los archivos que necesitan ser modificados
+- [x] Actualizar tipos ViewType para incluir nuevas entidades
 
-Modificar todos los servicios y acciones para que importen directamente del archivo fuente:
+### Fase 2: Implementación de colapso/expansión
+- [x] Agregar estado para controlar qué categorías están colapsadas
+- [x] Implementar lógica de colapso/expansión para cada categoría
+- [x] Modificar la visualización para mostrar/ocultar elementos según el estado
 
-```typescript
-// Cambiar esto:
-import { serverEvents } from '@/lib/server/events.server';
+### Fase 3: Mejora de indicadores de conteo
+- [x] Asegurar que cada categoría muestre el número de ítems
+- [x] Asegurar que cada categoría muestre el número de imágenes asociadas
 
-// Por esto:
-import { emit, emitProgress } from '@/lib/server/events.server';
-```
+### Fase 4: Nuevas entidades
+- [x] Agregar nuevas categorías: Concepts, Prompts y Notes
+- [x] Crear handlers para estas nuevas categorías
+- [x] Actualizar NavigationData para incluir las nuevas entidades
 
-Esto evitaría los problemas de importación y exportación, aunque requiere modificar más archivos.
+### Fase 5: Pruebas y ajustes
+- [x] Verificar que todas las funcionalidades se comporten como se espera
+- [x] Ajustar estilos para mantener la coherencia visual
+- [x] Asegurar que no se rompa la navegación existente
 
-### 2. Dividir el Sistema de Eventos
+### Fase 6: Correcciones adicionales
+- [x] Agregar cursor pointer a todos los elementos clickeables para mejorar la UX
+- [x] Agregar iconos específicos para las estadísticas de cada tipo de categoría/ítem
+- [x] Separar la funcionalidad de colapso/expansión de la selección de categoría
 
-Dividir completamente el sistema de eventos en dos partes completamente separadas:
+## Integraciones Completadas
 
-1. **Eventos del Servidor**: Mantener solo funciones asíncronas en archivos 'use server'
-2. **Eventos del Cliente**: Mantener la lógica del cliente en archivos 'use client'
-3. **Sin Capa Intermedia**: Eliminar la capa de compatibilidad que está causando problemas
+1. **Actualización de Tipos**:
+   - Se actualizó el tipo `ViewType` en `src/types/file-item.ts` y `src/store/navigation.store.ts`
+   - Se agregaron interfaces para relaciones con las nuevas entidades: `RelatedConcept`, `RelatedPrompt` y `RelatedNote`
 
-### 3. Adaptar la Arquitectura del Sistema
+2. **Creación de Acciones del Servidor**:
+   - Se implementaron los archivos de acciones para las nuevas entidades:
+     - `src/app/actions/concept.actions.ts`
+     - `src/app/actions/prompt.actions.ts`
+     - `src/app/actions/note.actions.ts`
+   - Cada acción proporciona métodos CRUD completos para su entidad
 
-Para facilitar la migración y mejorar la arquitectura a largo plazo:
+3. **Actualización de Eventos**:
+   - Se agregaron eventos de cambio en `src/services/stats.service.ts`:
+     - `CONCEPT_CHANGE`, `PROMPT_CHANGE` y `NOTE_CHANGE`
+     - Se actualizó el tipo `StatsUpdateEvent` para incluir estos nuevos eventos
 
-- Crear una nueva estructura de carpetas con clara separación cliente/servidor
-- Simplificar la API de eventos para reducir la sobrecarga
-- Documentar claramente el uso correcto del sistema
+4. **Actualización de NavigationData**:
+   - Se modificó `src/app/actions/nav.actions.ts` para incluir las nuevas entidades en:
+     - La interfaz `NavigationData`
+     - La función `getNavigationData`
 
-## Lista de Tareas Actualizada
+5. **Actualización del Store de Administración de Archivos**:
+   - Se modificó `src/store/file-manager.store.ts` para agregar soporte para las nuevas entidades:
+     - Se agregaron estados para IDs y objetos actuales
+     - Se agregaron listas de objetos de cada tipo
+     - Se implementaron métodos para establecer los objetos actuales
 
-### 1. Migración Directa
-
-- [x] Modificar cada servicio y acción para usar las funciones directamente de '@/lib/server/events.server'
-- [x] Remover todas las referencias a 'serverEvents' y reemplazarlas por llamadas directas a 'emit' y 'emitProgress'
-- [ ] Actualizar documentación para reflejar el nuevo patrón de uso
-
-### Archivos a Modificar
-
-**Acciones de Servidor:**
-- [x] src/app/actions/note.actions.ts
-- [x] src/app/actions/object.actions.ts
-- [x] src/app/actions/folder.actions.ts (ya usaba correctamente emit)
-- [x] src/app/actions/place.actions.ts
-- [x] src/app/actions/favorite.actions.ts
-- [x] src/app/actions/concept.actions.ts
-- [x] src/app/actions/collection.actions.ts
-- [x] src/app/actions/character.actions.ts
-- [x] src/app/actions/base.actions.ts
-- [x] src/app/actions/attribute.actions.ts
-- [x] src/app/actions/album.actions.ts
-- [x] src/app/actions/activity.actions.ts (ya usaba correctamente emit)
-- [x] src/app/actions/tag.actions.ts
-- [x] src/app/actions/prompt.actions.ts
-
-**Servicios:**
-- [x] src/services/thumbnail.service.ts (ya usaba correctamente emit)
-- [x] src/services/system-images.service.ts (ya usaba correctamente emit)
-- [x] src/services/stats.service.ts (ya usaba correctamente emit)
-- [x] src/services/prompt.service.ts (ya usaba correctamente emit)
-- [x] src/services/note.service.ts (eliminada importación innecesaria de EventEmitter)
-- [x] src/services/folder.service.ts (ya usaba correctamente emit)
-- [x] src/services/favorites.service.ts (eliminada importación innecesaria de EventEmitter)
-- [x] src/services/concept.service.ts (eliminada importación innecesaria de EventEmitter)
-- [x] src/services/collection-events.service.ts (eliminada importación innecesaria de EventEmitter)
-- [x] src/services/attribute.service.ts (eliminada importación innecesaria de EventEmitter)
-- [x] src/services/activity.service.ts (ya usaba correctamente emit)
-
-### 2. Pruebas y Verificación
-
-- [ ] Ejecutar la aplicación para verificar que no haya errores de compilación
-- [ ] Verificar que el sistema de eventos funcione correctamente
-- [ ] Comprobar que las rutas se revaliden adecuadamente
-- [ ] Validar que las actualizaciones optimistas funcionen en los componentes del cliente
-
-## Correcciones Adicionales Realizadas
-
-1. Se corrigió un error de linter en `favorite.actions.ts` eliminando una cláusula `else` innecesaria
-2. Se corrigió un error de linter en `tag.actions.ts` ajustando la interfaz `TagWithStats` para usar `Omit`
-3. Se eliminaron importaciones innecesarias de `EventEmitter` de varios servicios
-4. Se corrigieron errores de tipo en `favorite.actions.ts`:
-   - Se cambió la importación para usar la definición correcta de `FileItem` desde `@/types/files`
-   - Se corrigieron tipos incompatibles (cambiando `null` por cadenas vacías o valores por defecto)
-   - Se añadieron propiedades faltantes a las colecciones (emoji, color)
-   - Se añadieron propiedades faltantes a las etiquetas (color)
-   - Se ajustó la estructura para coincidir con la definición correcta de `FileItem`
-5. Se añadió la importación de React en `stats-view.tsx` para corregir errores de `React variable is undeclared`
-6. Se corrigieron errores de `noArrayIndexKey` en varios componentes:
-   - Se modificaron las claves en `stats-loading.tsx` para usar prefijos con los índices
-   - Se cambiaron las claves en `general-stats.tsx` para usar propiedades únicas de los elementos
-7. Se corrigieron errores de `noExplicitAny` en componentes de estadísticas:
-   - Se reemplazó `any` por `StatsCardProps['stats']` en diversos archivos de secciones
-8. Se corrigió un error de `useSemanticElements` en `file-viewer.tsx`:
-   - Se reemplazó un div con `role="dialog"` por un elemento `<dialog>` semántico
-   - Se añadió un controlador `onKeyDown` para cumplir con las reglas de accesibilidad
-9. Se corrigió un error de `useExhaustiveDependencies` eliminando una dependencia innecesaria en un useEffect
-
-## Nota sobre Problemas Técnicos
-
-Los problemas encontrados están relacionados con limitaciones de Next.js 15 y su sistema de compilación. Las restricciones sobre archivos 'use server' y la forma en que se manejan las importaciones/exportaciones hacen que sea complejo mantener una capa de compatibilidad sin enfrentar problemas técnicos.
-
-Hemos adoptado el enfoque directo y migrado todos los archivos para usar las funciones apropiadas directamente desde sus fuentes, evitando cualquier capa intermedia de abstracción.
+6. **Mejoras de Experiencia de Usuario**:
+   - Se agregó un botón específico para colapsar/expandir categorías
+   - Se agregaron iconos específicos para mostrar las estadísticas de cada tipo de categoría
+   - Se mejoró la accesibilidad con información aria y eventos de teclado
+   - Se añadió cursor pointer a todos los elementos clickeables
 
 ## Próximos Pasos
 
-1. Ejecutar pruebas exhaustivas para verificar el funcionamiento correcto del sistema de eventos
-2. Actualizar la documentación para reflejar el nuevo patrón de uso
-3. Considerar la implementación de un esquema de tipado más estricto para los eventos
-4. Evaluar si se necesitan optimizaciones adicionales para el rendimiento
+Para completar la integración, se necesita:
 
-# Mejoras al Menú Contextual de Archivos
+1. Crear las vistas para las nuevas entidades:
+   - Crear archivos `concepts-view.tsx`, `prompts-view.tsx` y `notes-view.tsx`
+   - Crear archivos `concept-content-view.tsx`, `prompt-content-view.tsx` y `note-content-view.tsx`
 
-## Problemas Identificados y Mejoras Requeridas
+2. Implementar servicios especializados para cada entidad (opcional):
+   - `concepts.store.ts`, `prompts.store.ts` y `notes.store.ts`
 
-Hemos identificado varios problemas y áreas de mejora en el menú contextual de archivos (`context-menu.tsx`):
-
-1. **Carga prematura de entidades**: Actualmente, las entidades (colecciones, etiquetas, etc.) se cargan cuando se monta el componente, lo que es ineficiente.
-2. **Falta de indicador de carga**: No hay un estado visual de carga mientras se obtienen las entidades.
-3. **Problemas de desplazamiento**: Cuando hay muchas entidades (más de 10), no hay un área de desplazamiento adecuada.
-4. **Falta de opción para crear entidades**: No existe una opción para crear nuevas entidades directamente desde el menú contextual.
-5. **Implementación incompleta de funciones**: Algunas acciones del menú contextual no están completamente implementadas.
-
-## Plan de Mejoras
-
-### 1. Optimización de la Carga de Datos
-
-- [x] Modificar el sistema de carga para que las entidades se carguen solo cuando el usuario intenta abrir un submenú
-- [x] Implementar carga lazy para cada tipo de entidad por separado
-- [x] Añadir estado de carga individual para cada submenú
-
-### 2. Mejoras en la Interfaz de Usuario
-
-- [x] Implementar componente ScrollArea para submenús con muchos elementos
-- [x] Añadir indicadores de carga visual para cada submenú
-- [x] Agregar botón "Nuevo [entidad]" al principio de cada submenú
-- [x] Mejorar la estructura visual de los elementos del menú
-
-### 3. Implementación de Funcionalidades Faltantes
-
-- [x] Implementar función para crear nuevas entidades desde el menú contextual
-- [x] Completar la implementación de acciones faltantes (marcar, abrir ubicación, etc.)
-- [x] Mejorar la gestión de errores en las operaciones del menú
-
-### 4. Optimizaciones Adicionales
-
-- [x] Refactorizar el código para reducir la complejidad
-- [x] Mejorar el sistema de log para diagnóstico más efectivo
-- [x] Optimizar renderizado para evitar re-renders innecesarios
-
-## Lista de Tareas
-
-1. [x] Refactorizar el sistema de carga de datos en el componente FileContextMenu
-2. [x] Implementar estados de carga individuales para cada tipo de entidad
-3. [x] Crear componentes de submenú con ScrollArea para mejor usabilidad con muchos elementos
-4. [x] Implementar botones "Nuevo [entidad]" y su funcionalidad
-5. [x] Completar implementación de acciones faltantes (mark-toggle, open, download, copy, delete)
-6. [x] Agregar manejo de errores y feedback visual durante la carga
-7. [ ] Pruebas exhaustivas para verificar el correcto funcionamiento
-
-## Implementación Actual
-
-Hemos completado con éxito las siguientes mejoras en el menú contextual:
-
-1. **Optimización de carga**: Ahora las entidades se cargan solo cuando el usuario abre el submenú correspondiente, lo que mejora significativamente el rendimiento.
-2. **Indicadores de carga**: Se han agregado spinners y mensajes de carga para proporcionar feedback visual mientras se obtienen los datos.
-3. **Áreas de desplazamiento**: Se implementó ScrollArea para submenús con más de 10 elementos, mejorando la usabilidad.
-4. **Creación de entidades**: Se agregaron botones "Nuevo [entidad]" al principio de cada submenú.
-5. **Manejo de errores**: Se mejoró el sistema de logs y el manejo de errores para proporcionar feedback más claro.
-6. **Acciones implementadas**: Se han completado las implementaciones de todas las acciones del menú contextual:
-   - Marcar/Desmarcar
-   - Agregar/quitar de favoritos
-   - Agregar a colecciones, etiquetas, álbumes, personajes, lugares y objetos
-   - Ver imagen (preview)
-   - Abrir ubicación del archivo
-   - Descargar archivo
-   - Copiar archivo
-   - Eliminar archivo
-7. **Creación de entidades**: Se han implementado las acciones para crear nuevas entidades mediante eventos personalizados que pueden ser capturados por componentes de diálogo.
-
-## Próximos Pasos
-
-1. Implementar los diálogos de creación de entidades (colecciones, etiquetas, álbumes, personajes, lugares y objetos).
-2. Realizar pruebas exhaustivas para verificar el correcto funcionamiento del menú contextual en diferentes escenarios.
-3. Optimizar la experiencia de usuario con transiciones suaves entre estados.
-4. Considerar la implementación de una funcionalidad de "deshacer" para acciones irreversibles como la eliminación.
-
-## Beneficios Esperados
-
-- Mejor rendimiento al cargar datos solo cuando son necesarios
-- Experiencia de usuario mejorada con feedback visual durante la carga
-- Mayor funcionalidad al permitir la creación de entidades desde el menú
-- Mejor usabilidad con áreas de desplazamiento para muchos elementos
-- Interfaz más intuitiva y completa
-
-## Diagrama de Flujo del Menú Contextual
-
-```mermaid
-flowchart TD
-    A[Usuario hace clic derecho en archivo] --> B[Se abre el menú contextual principal]
-    B --> C{Usuario selecciona submenú}
-
-    C -->|No selecciona| D[Acciones principales]
-    D -->|Favorito| D1[Toggle Favorito]
-    D -->|Marcar| D2[Toggle Marca]
-    D -->|Ver| D3[Abrir Preview]
-    D -->|Ubicación| D4[Abrir en Explorador]
-    D -->|Descargar| D5[Descargar archivo]
-    D -->|Copiar| D6[Copiar al portapapeles]
-    D -->|Eliminar| D7[Eliminar archivo]
-
-    C -->|Selecciona| E[Inicia carga del submenú]
-    E --> F[Muestra spinner de carga]
-    F --> G[Carga datos desde API]
-    G --> H[Almacena en store]
-    H --> I[Muestra datos en submenú]
-
-    I --> J{Usuario selecciona acción}
-    J -->|"Nuevo [entidad]"| K[Envía evento para abrir diálogo]
-    J -->|Entidad existente| L[Asocia entidad con imagen]
-
-    K --> M[Cierra menú contextual]
-    L --> M
-```
-
-## Diagrama de Componentes
-
-```mermaid
-graph TD
-    A[FileGrid] --> B[FileContextMenu]
-    A -->|handleContextAction| C[Acciones del Menú]
-
-    B --> D[ContextMenu]
-    B --> E[ContextMenuSub]
-
-    E -->|"onOpenChange"| F[Carga Lazy]
-    F --> G[Estados de Carga]
-
-    E --> H[ScrollArea]
-    H --> I[Lista de Entidades]
-
-    C --> J[Electron API]
-    J --> K[OS File System]
-
-    C --> L[Custom Events]
-    L --> M[UI Dialogs]
-```
-
-## Resumen de Cambios Implementados
-
-La mejora del menú contextual ha sido completada exitosamente, abordando diversos aspectos clave:
-
-### 1. Mejoras de Rendimiento
-
-- **Carga Lazy de Entidades**: Las entidades ahora se cargan solo cuando son necesarias (cuando se abre un submenú)
-- **Estado de Carga Individualizado**: Cada tipo de entidad tiene su propio estado de carga independiente
-- **Cacheado de Datos**: Una vez cargados, los datos se mantienen en memoria mientras el menú está abierto
-
-### 2. Mejoras de Interfaz de Usuario
-
-- **Indicadores de Carga**: Se agregaron spinners y mensajes durante la carga de datos
-- **Áreas de Desplazamiento**: ScrollArea para submenús con más de 10 elementos
-- **Botones de Creación**: Nueva opción para crear entidades al inicio de cada submenú
-- **Mejor Organización**: Estructura mejorada y más consistente en cada submenú
-
-### 3. Nuevas Funcionalidades
-
-- **Acciones Completas**: Implementación de todas las acciones del menú (marcar, favoritos, previsualizar, abrir, descargar, copiar, eliminar)
-- **Creación de Entidades**: Sistema de eventos para crear nuevas entidades desde el menú contextual
-- **Manejo de Errores**: Mejor sistema de logs y feedback para el usuario
-
-### 4. Impacto en la Aplicación
-
-La mejora del menú contextual tiene un impacto significativo en la experiencia de usuario:
-
-- **Mayor Eficiencia**: El usuario puede realizar más acciones directamente desde el menú contextual
-- **Mejor Rendimiento**: La aplicación responde más rápidamente al no cargar datos innecesarios
-- **Flujo de Trabajo Optimizado**: Creación y asignación de entidades sin interrumpir el flujo principal
-
-Estos cambios establecen una base sólida para futuras mejoras, como la implementación de los diálogos de creación de entidades y la optimización continua de la experiencia del usuario.
+3. Actualizar el sistema de estadísticas para incluir contadores para las nuevas entidades:
+   - Agregar campos en `SystemStats` para contar conceptos, prompts y notas
+   - Implementar lógica de cálculo en `getSystemStats`

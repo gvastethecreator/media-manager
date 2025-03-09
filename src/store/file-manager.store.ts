@@ -94,6 +94,9 @@ interface FileManagerState {
 	currentCharacterId: string | null;
 	currentPlaceId: string | null;
 	currentObjectId: string | null;
+	currentConceptId: string | null;
+	currentPromptId: string | null;
+	currentNoteId: string | null;
 
 	// Objetos actuales
 	currentCollection: CollectionEntity | null;
@@ -103,6 +106,9 @@ interface FileManagerState {
 	currentCharacter: EntityWithEmoji | null;
 	currentPlace: EntityWithEmoji | null;
 	currentObject: EntityWithEmoji | null;
+	currentConcept: EntityWithEmoji | null;
+	currentPrompt: EntityWithEmoji | null;
+	currentNote: BaseEntity | null;
 
 	// Metadatos
 	collections: CollectionEntity[];
@@ -112,6 +118,9 @@ interface FileManagerState {
 	characters: EntityWithEmoji[];
 	places: EntityWithEmoji[];
 	objects: EntityWithEmoji[];
+	concepts: EntityWithEmoji[];
+	prompts: EntityWithEmoji[];
+	notes: BaseEntity[];
 
 	// Estado de procesamiento
 	isProcessingThumbnails: boolean;
@@ -131,6 +140,9 @@ interface FileManagerState {
 	setCurrentCharacter: (id: string) => Promise<void>;
 	setCurrentPlace: (id: string) => Promise<void>;
 	setCurrentObject: (id: string) => Promise<void>;
+	setCurrentConcept: (id: string) => Promise<void>;
+	setCurrentPrompt: (id: string) => Promise<void>;
+	setCurrentNote: (id: string) => Promise<void>;
 	setItems: (items: FileItem[]) => void;
 	setIsLoading: (loading: boolean) => void;
 	resetState: () => void;
@@ -159,6 +171,9 @@ const initialState: FileManagerState = {
 	currentCharacterId: null,
 	currentPlaceId: null,
 	currentObjectId: null,
+	currentConceptId: null,
+	currentPromptId: null,
+	currentNoteId: null,
 	currentCollection: null,
 	currentFolder: null,
 	currentTag: null,
@@ -166,6 +181,9 @@ const initialState: FileManagerState = {
 	currentCharacter: null,
 	currentPlace: null,
 	currentObject: null,
+	currentConcept: null,
+	currentPrompt: null,
+	currentNote: null,
 	isLoading: false,
 	error: null,
 	collections: [],
@@ -175,6 +193,9 @@ const initialState: FileManagerState = {
 	characters: [],
 	places: [],
 	objects: [],
+	concepts: [],
+	prompts: [],
+	notes: [],
 	isProcessingThumbnails: false,
 	lastUpdate: Date.now(),
 	viewMode: 'grid' as const,
@@ -193,6 +214,9 @@ const initialState: FileManagerState = {
 	setCurrentCharacter: async () => {},
 	setCurrentPlace: async () => {},
 	setCurrentObject: async () => {},
+	setCurrentConcept: async () => {},
+	setCurrentPrompt: async () => {},
+	setCurrentNote: async () => {},
 	setItems: () => {},
 	setIsLoading: () => {},
 	resetState: () => {},
@@ -398,6 +422,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				characters: stats.characters || [],
 				places: stats.places || [],
 				objects: stats.objects || [],
+				concepts: stats.concepts || [],
+				prompts: stats.prompts || [],
+				notes: stats.notes || [],
 				lastUpdate: Date.now(),
 			});
 
@@ -521,6 +548,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: null,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: folder,
 				currentCollection: null,
 				currentTag: null,
@@ -528,6 +558,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: null,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -563,6 +596,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: null,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: collection,
 				currentTag: null,
@@ -570,6 +606,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: null,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -605,6 +644,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: null,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: tag,
@@ -612,6 +654,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: null,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -647,6 +692,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: null,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
@@ -654,6 +702,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: null,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -689,6 +740,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: id,
 				currentPlaceId: null,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
@@ -696,6 +750,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: character,
 				currentPlace: null,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -731,6 +788,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: id,
 				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
@@ -738,6 +798,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: place,
 				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -773,6 +836,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlaceId: null,
 				currentObjectId: id,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
@@ -780,6 +846,9 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlace: null,
 				currentObject: object,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -796,6 +865,150 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 			fileManagerLogger.info(`✅ Objeto cargado con ${images.length} imágenes`);
 		} catch (error) {
 			fileManagerLogger.error('❌ Error al cargar objeto:', error);
+			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+		}
+	},
+
+	setCurrentConcept: async (id: string) => {
+		try {
+			fileManagerLogger.info('💡 Cambiando a concepto:', id);
+			const state = get();
+			const concept = state.concepts.find((c) => c.id === id) || null;
+			state.clearSelection();
+
+			set({
+				currentFolderId: null,
+				currentCollectionId: null,
+				currentTagId: null,
+				currentAlbumId: null,
+				currentCharacterId: null,
+				currentPlaceId: null,
+				currentObjectId: null,
+				currentConceptId: id,
+				currentPromptId: null,
+				currentNoteId: null,
+				currentFolder: null,
+				currentCollection: null,
+				currentTag: null,
+				currentAlbum: null,
+				currentCharacter: null,
+				currentPlace: null,
+				currentObject: null,
+				currentConcept: concept,
+				currentPrompt: null,
+				currentNote: null,
+				isLoading: true,
+				lastUpdate: Date.now(),
+			});
+
+			const rawImages = await getTagImages(id);
+			const images = rawImages.map(transformToFileItem);
+			set({
+				currentItems: images,
+				displayedItems: images.slice(0, ITEMS_PER_BATCH),
+				isLoading: false,
+				lastUpdate: Date.now(),
+			});
+
+			fileManagerLogger.info(`✅ Concepto cargado con ${images.length} imágenes`);
+		} catch (error) {
+			fileManagerLogger.error('❌ Error al cargar concepto:', error);
+			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+		}
+	},
+
+	setCurrentPrompt: async (id: string) => {
+		try {
+			fileManagerLogger.info('💬 Cambiando a prompt:', id);
+			const state = get();
+			const prompt = state.prompts.find((p) => p.id === id) || null;
+			state.clearSelection();
+
+			set({
+				currentFolderId: null,
+				currentCollectionId: null,
+				currentTagId: null,
+				currentAlbumId: null,
+				currentCharacterId: null,
+				currentPlaceId: null,
+				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: id,
+				currentNoteId: null,
+				currentFolder: null,
+				currentCollection: null,
+				currentTag: null,
+				currentAlbum: null,
+				currentCharacter: null,
+				currentPlace: null,
+				currentObject: null,
+				currentConcept: null,
+				currentPrompt: prompt,
+				currentNote: null,
+				isLoading: true,
+				lastUpdate: Date.now(),
+			});
+
+			const rawImages = await getTagImages(id);
+			const images = rawImages.map(transformToFileItem);
+			set({
+				currentItems: images,
+				displayedItems: images.slice(0, ITEMS_PER_BATCH),
+				isLoading: false,
+				lastUpdate: Date.now(),
+			});
+
+			fileManagerLogger.info(`✅ Prompt cargado con ${images.length} imágenes`);
+		} catch (error) {
+			fileManagerLogger.error('❌ Error al cargar prompt:', error);
+			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+		}
+	},
+
+	setCurrentNote: async (id: string) => {
+		try {
+			fileManagerLogger.info('📝 Cambiando a nota:', id);
+			const state = get();
+			const note = state.notes.find((n) => n.id === id) || null;
+			state.clearSelection();
+
+			set({
+				currentFolderId: null,
+				currentCollectionId: null,
+				currentTagId: null,
+				currentAlbumId: null,
+				currentCharacterId: null,
+				currentPlaceId: null,
+				currentObjectId: null,
+				currentConceptId: null,
+				currentPromptId: null,
+				currentNoteId: id,
+				currentFolder: null,
+				currentCollection: null,
+				currentTag: null,
+				currentAlbum: null,
+				currentCharacter: null,
+				currentPlace: null,
+				currentObject: null,
+				currentConcept: null,
+				currentPrompt: null,
+				currentNote: note,
+				isLoading: true,
+				lastUpdate: Date.now(),
+			});
+
+			const rawImages = await getTagImages(id);
+			const images = rawImages.map(transformToFileItem);
+			set({
+				currentItems: images,
+				displayedItems: images.slice(0, ITEMS_PER_BATCH),
+				isLoading: false,
+				lastUpdate: Date.now(),
+			});
+
+			fileManagerLogger.info(`✅ Nota cargada con ${images.length} imágenes`);
+		} catch (error) {
+			fileManagerLogger.error('❌ Error al cargar nota:', error);
 			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
 		}
 	},

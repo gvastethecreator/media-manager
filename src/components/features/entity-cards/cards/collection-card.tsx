@@ -1,20 +1,27 @@
 'use client';
 
+import type { CollectionFormData } from '@/components/features/entity-cards/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { cn, formatBytes } from '@/lib/utils';
 import type { Collection } from '@prisma/client';
 import { FolderIcon, ImageIcon, PencilIcon, TagIcon, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 import * as React from 'react';
 
+type CardData =
+	| (Collection & {
+			_count?: { images: number };
+			totalSize?: number;
+			recentImages?: string[];
+			topTags?: { name: string; count: number }[];
+	  })
+	| CollectionFormData;
+
 interface CollectionCardProps {
-	collection: Collection & {
-		_count?: { images: number };
-		totalSize?: number;
-		recentImages?: string[];
-		topTags?: { name: string; count: number }[];
-	};
+	data: CardData;
+	isPreview?: boolean;
 	onEdit?: (collection: Collection) => void;
 	onDelete?: (id: string) => void;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -36,10 +43,45 @@ function getRandomGradient() {
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-export function CollectionCard({ collection, onEdit, onDelete, onClick, className }: CollectionCardProps) {
+// Función auxiliar para verificar si estamos en modo preview
+function isFormData(data: CardData): data is CollectionFormData {
+	return 'editions' in data;
+}
+
+export function CollectionCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: CollectionCardProps) {
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const [isHovered, setIsHovered] = React.useState(false);
 	const gradient = getRandomGradient();
+
+	// Para componente preview, detectar cambios y animar
+	const [animateUpdate, setAnimateUpdate] = React.useState(false);
+	const prevDataRef = React.useRef<CardData | null>(null);
+
+	// Para modo preview, animar cambios
+	React.useEffect(() => {
+		if (!isPreview) {
+			return;
+		}
+
+		if (!prevDataRef.current) {
+			prevDataRef.current = { ...data };
+			return;
+		}
+
+		const prevData = prevDataRef.current;
+		const hasChanged =
+			prevData.name !== data.name ||
+			prevData.emoji !== data.emoji ||
+			prevData.color !== data.color ||
+			prevData.description !== data.description;
+
+		if (hasChanged) {
+			setAnimateUpdate(true);
+			const timer = setTimeout(() => setAnimateUpdate(false), 300);
+			prevDataRef.current = { ...data };
+			return () => clearTimeout(timer);
+		}
+	}, [data, isPreview]);
 
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
 		const rect = e.currentTarget.getBoundingClientRect();
@@ -48,85 +90,151 @@ export function CollectionCard({ collection, onEdit, onDelete, onClick, classNam
 		setMousePosition({ x, y });
 	};
 
+	// Renderizar versión para preview en diálogos
+	if (isPreview) {
+		return (
+			<AnimatePresence mode="wait">
+				<motion.div
+					key={`${data.name}-${data.emoji}-${animateUpdate ? Date.now() : 'static'}`}
+					className={cn(
+						'group relative flex h-48 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200',
+						animateUpdate ? 'ring-2 ring-primary' : 'hover:border-primary',
+						className
+					)}
+					initial={{ opacity: 0, scale: 0.9 }}
+					animate={{
+						opacity: 1,
+						scale: 1,
+						transition: { type: 'spring', stiffness: 500, damping: 30 },
+					}}
+					exit={{ opacity: 0, scale: 0.9 }}
+					onMouseMove={handleMouseMove}
+					onMouseEnter={() => setIsHovered(true)}
+					onMouseLeave={() => setIsHovered(false)}
+				>
+					{/* Gradiente de fondo */}
+					<div
+						className={cn(
+							'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
+							gradient,
+							isHovered && 'opacity-80'
+						)}
+						style={{
+							backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+						}}
+					/>
+
+					{/* Contenido */}
+					<div className="z-10 flex flex-1 flex-col">
+						<div className="flex items-center space-x-2">
+							<span className="text-2xl">{data.emoji || '📁'}</span>
+							<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
+						</div>
+
+						{/* Descripción */}
+						{data.description && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
+
+						{/* Detalles */}
+						<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+							<div className="flex items-center space-x-2">
+								<span className="flex items-center">
+									<span
+										className="mr-1.5 h-2.5 w-2.5 rounded-full"
+										style={{ backgroundColor: data.color || '#3b82f6' }}
+									/>
+									Vista previa
+								</span>
+							</div>
+							<div className="flex items-center space-x-2">
+								<span className="flex items-center">0 imágenes</span>
+							</div>
+						</div>
+					</div>
+				</motion.div>
+			</AnimatePresence>
+		);
+	}
+
+	// Renderizar tarjeta completa para vista normal
 	return (
 		<motion.div
-			className={cn('group relative', className)}
-			onMouseMove={handleMouseMove}
-			onHoverStart={() => setIsHovered(true)}
-			onHoverEnd={() => setIsHovered(false)}
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
+			className={cn(
+				'group relative overflow-hidden rounded-xl h-60 bg-background shadow-md transition-all duration-300 hover:shadow-lg',
+				className
+			)}
+			whileHover={{ y: -5 }}
+			layout
 			onClick={onClick}
+			onMouseMove={handleMouseMove}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
 		>
+			{/* Fondo con gradiente  */}
+			<div
+				className={cn('absolute inset-0 bg-gradient-to-b from-primary/5 to-background')}
+				style={{
+					backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+				}}
+			/>
+
+			{/* Overlay de hover */}
 			<div
 				className={cn(
-					'relative w-full aspect-3/4 rounded-lg overflow-hidden cursor-pointer',
-					'bg-linear-to-br from-background to-muted',
-					'shadow-lg hover:shadow-xl transition-all duration-300'
+					'absolute inset-0 bg-gradient-to-b from-transparent to-background/80 transition-opacity duration-300',
+					isHovered ? 'opacity-100' : 'opacity-0'
 				)}
-			>
-				{/* Efecto holográfico base */}
-				<div
-					className={cn(
-						'absolute inset-0 z-10',
-						'before:absolute before:inset-0',
-						'before:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_60%)]',
-						'after:absolute after:inset-0',
-						'after:bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.4)_0%,rgba(255,255,255,0)_30%)]',
-						'after:opacity-0 after:transition-opacity after:duration-300',
-						'group-hover:after:opacity-100'
-					)}
-					style={
-						{
-							'--x': `${mousePosition.x}%`,
-							'--y': `${mousePosition.y}%`,
-						} as React.CSSProperties
-					}
-				/>
+			/>
 
-				{/* Fondo con patrón de constelaciones */}
-				<div
-					className="absolute inset-0 bg-repeat opacity-10"
-					style={{
-						backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-					}}
-				/>
-
-				{/* Marco holográfico */}
-				<div
-					className="absolute inset-0 border-[3px] rounded-lg z-20"
-					style={{
-						background: `linear-gradient(${mousePosition.x}deg, ${collection.color}20, ${collection.color}40)`,
-						borderImage: `linear-gradient(${mousePosition.y}deg, ${collection.color}, transparent) 1`,
-					}}
-				/>
-
-				{/* Contenido de la tarjeta */}
+			{isFormData(data) ? (
+				<div className="relative z-30 h-full p-4 flex flex-col">
+					{/* Contenido para data tipo CollectionFormData */}
+					<div className="flex items-center gap-2">
+						<div
+							className="h-12 w-12 rounded-full flex items-center justify-center shadow-lg"
+							style={{
+								background: `linear-gradient(135deg, ${data.color}, ${data.color}80)`,
+							}}
+						>
+							<span className="text-2xl filter drop-shadow-lg">{data.emoji}</span>
+						</div>
+						<div className="flex-1 min-w-0">
+							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{data.name}</h3>
+							{data.description && <p className="text-sm text-white/80 truncate">{data.description}</p>}
+						</div>
+					</div>
+					<div className="mt-auto">
+						<Button variant="secondary" size="sm" className="gap-2 w-full">
+							<FolderIcon className="w-4 h-4" />
+							Vista previa de colección
+						</Button>
+					</div>
+				</div>
+			) : (
+				// Contenido para Collection completa
 				<div className="relative z-30 h-full p-4 flex flex-col">
 					{/* Encabezado */}
 					<div className="flex items-center gap-2">
 						<div
 							className="h-12 w-12 rounded-full flex items-center justify-center shadow-lg"
 							style={{
-								background: `linear-gradient(135deg, ${collection.color}, ${collection.color}80)`,
+								background: `linear-gradient(135deg, ${data.color}, ${data.color}80)`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-lg">{collection.emoji}</span>
+							<span className="text-2xl filter drop-shadow-lg">{data.emoji}</span>
 						</div>
 						<div className="flex-1 min-w-0">
-							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{collection.name}</h3>
-							{collection.description && <p className="text-sm text-white/80 truncate">{collection.description}</p>}
+							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{data.name}</h3>
+							{data.description && <p className="text-sm text-white/80 truncate">{data.description}</p>}
 						</div>
 					</div>
 
 					{/* Grid de imágenes recientes */}
 					<div className="relative mt-4 flex-1">
 						<div className="grid grid-cols-3 gap-2 h-full bg-background/50 rounded-lg p-2">
-							{collection.recentImages && collection.recentImages.length > 0
-								? collection.recentImages.map((src, i) => (
+							{data.recentImages && data.recentImages.length > 0
+								? data.recentImages.map((src, i) => (
 										<div
-											key={`${collection.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
+											key={`${data.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
 											className="relative rounded-md overflow-hidden aspect-square"
 										>
 											{src ? (
@@ -149,7 +257,7 @@ export function CollectionCard({ collection, onEdit, onDelete, onClick, classNam
 									))
 								: Array.from({ length: 9 }).map((_, i) => (
 										<div
-											key={`${collection.id}-placeholder-${i}`}
+											key={`${data.id}-placeholder-${i}`}
 											className={cn(
 												'relative rounded-md overflow-hidden aspect-square',
 												'flex items-center justify-center',
@@ -172,73 +280,62 @@ export function CollectionCard({ collection, onEdit, onDelete, onClick, classNam
 						>
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{collection.recentImages && collection.recentImages.length > 0
-									? 'Ver todas las imágenes'
-									: 'Colección vacía'}
+								{data.recentImages && data.recentImages.length > 0 ? 'Ver todas las imágenes' : 'Colección vacía'}
 							</Button>
 						</div>
 					</div>
 
 					{/* Estadísticas */}
-					<div className="mt-4 space-y-2">
-						<div className="flex items-center justify-between px-1 text-sm text-white/60">
-							<div className="flex items-center gap-4">
-								<div className="flex items-center gap-1.5">
-									<FolderIcon className="w-4 h-4" />
-									<span>{collection._count?.images || 0}</span>
-								</div>
-								<div className="flex items-center gap-1.5">
-									<TagIcon className="w-4 h-4" />
-									<span>{collection.topTags?.length || 0}</span>
-								</div>
-							</div>
-							<span>{formatBytes(collection.totalSize || 0)}</span>
+					<div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+						<div className="flex items-center gap-2">
+							<span className="flex items-center gap-1">
+								<ImageIcon className="w-3.5 h-3.5" />
+								{data._count?.images || 0} imágenes
+							</span>
+							<span className="flex items-center gap-1">
+								<TagIcon className="w-3.5 h-3.5" />
+								{data.topTags?.length || 0} etiquetas
+							</span>
 						</div>
-
-						{/* Etiquetas */}
-						{collection.topTags && collection.topTags.length > 0 && (
-							<div className="flex flex-wrap gap-1">
-								{collection.topTags.slice(0, 3).map((tag, i) => (
-									<div
-										key={`${collection.id}-tag-${tag.name}-${i}`}
-										className="px-2 py-0.5 rounded-full text-[10px] bg-white/10"
-									>
-										{tag.name} ({tag.count})
-									</div>
-								))}
-							</div>
-						)}
+						<span className="text-xs">{data.totalSize ? formatBytes(data.totalSize) : '0 B'}</span>
 					</div>
 
 					{/* Acciones */}
-					<motion.div
-						className="absolute top-2 right-2 flex gap-1 z-40"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: isHovered ? 1 : 0 }}
+					<div
+						className={cn(
+							'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
+							isHovered && 'opacity-100'
+						)}
 					>
 						{onEdit && (
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-xs"
-								onClick={() => onEdit(collection)}
+								className="h-8 w-8 bg-background/80 hover:bg-background"
+								onClick={(e) => {
+									e.stopPropagation();
+									onEdit(data as Collection);
+								}}
 							>
-								<PencilIcon className="h-4 w-4 text-white" />
+								<PencilIcon className="h-4 w-4" />
 							</Button>
 						)}
 						{onDelete && (
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-xs text-red-400"
-								onClick={() => onDelete(collection.id)}
+								className="h-8 w-8 bg-background/80 hover:bg-background hover:text-destructive"
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete(data.id);
+								}}
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>
 						)}
-					</motion.div>
+					</div>
 				</div>
-			</div>
+			)}
 		</motion.div>
 	);
 }
