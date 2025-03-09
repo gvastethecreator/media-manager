@@ -6,7 +6,7 @@ import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Concept, Image } from '@prisma/client';
+import type { Concept as PrismaConcept } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const conceptLogger = logger.withContext('ConceptActions');
@@ -30,30 +30,14 @@ class ConceptError extends Error {
 	}
 }
 
-export interface ConceptWithStats extends Omit<Concept, 'featuredImage'> {
-	_count: {
-		characters: number;
-		places: number;
-		objects: number;
-	};
-	totalSize: number;
-	lastUpdated: Date;
-	distribution?: Array<{
-		name: string;
-		count: number;
-	}>;
-	featuredImage: string | null;
-	recentImages: string[];
-}
-
 export interface ConceptCreate {
 	name: string;
-	emoji: string;
-	color: string;
+	emoji?: string;
 	description?: string | null;
-	content: string;
-	category: string;
-	tags: string;
+	color?: string;
+	content?: string;
+	category?: string;
+	tags?: string;
 	featuredImage?: string | null;
 }
 
@@ -61,70 +45,89 @@ export interface ConceptUpdate extends Partial<ConceptCreate> {
 	id: string;
 }
 
-export interface ConceptWithImages extends Concept {
+export interface Concept extends PrismaConcept {
+	count?: number;
+}
+
+export interface ConceptWithStats extends PrismaConcept {
+	_count: {
+		prompts: number;
+		notes: number;
+		characters: number;
+		places: number;
+		objects: number;
+	};
+	lastUpdated: Date;
+}
+
+export interface ConceptWithImages extends PrismaConcept {
 	images: FileItem[];
 }
 
-export interface ExtendedConcept extends Concept {
+export interface ExtendedConcept extends PrismaConcept {
 	characters: {
-		images: Image[];
+		images: PrismaConcept[];
 	}[];
 	places: {
-		images: Image[];
+		images: PrismaConcept[];
 	}[];
 	objects: {
-		images: Image[];
+		images: PrismaConcept[];
 	}[];
 }
 
-export async function getConcepts() {
+export async function getConcepts(): Promise<ConceptWithStats[]> {
 	try {
-		conceptLogger.info('📚 Obteniendo lista de conceptos');
+		conceptLogger.info('💡 Obteniendo conceptos con estadísticas');
+
+		// Obtener conceptos con conteos y estadísticas
 		const concepts = await prisma.concept.findMany({
 			include: {
 				_count: {
 					select: {
+						prompts: true,
+						notes: true,
 						characters: true,
 						places: true,
 						objects: true,
 					},
 				},
-				characters: {
-					take: 1,
-					select: {
-						id: true,
-						name: true,
-					},
-				},
 			},
+			orderBy: [
+				{
+					name: 'asc',
+				},
+			],
 		});
 
-		conceptLogger.info(`✅ ${concepts.length} conceptos obtenidos`);
-		return concepts;
+		// Mapear conceptos a formato con estadísticas
+		const conceptsWithStats = concepts.map((concept) => ({
+			...concept,
+			_count: concept._count,
+			lastUpdated: concept.updatedAt,
+		}));
+
+		conceptLogger.info('✅ Conceptos obtenidos', { count: concepts.length });
+		return conceptsWithStats;
 	} catch (error) {
-		conceptLogger.error('❌ Error al obtener conceptos:', error);
-		throw new ConceptError('No se pudieron obtener los conceptos', error);
+		conceptLogger.error('❌ Error al obtener conceptos', error);
+		throw new ConceptError('No se pudieron obtener los conceptos');
 	}
 }
 
-export async function getConceptById(id: string) {
+export async function getConcept(id: string): Promise<Concept> {
 	try {
-		conceptLogger.info('🔍 Buscando concepto:', id);
+		conceptLogger.info('🔍 Obteniendo concepto:', id);
 		const concept = await prisma.concept.findUnique({
 			where: { id },
 			include: {
 				_count: {
 					select: {
+						prompts: true,
+						notes: true,
 						characters: true,
 						places: true,
 						objects: true,
-					},
-				},
-				characters: {
-					take: 5,
-					select: {
-						id: true,
-						name: true,
 					},
 				},
 			},
@@ -134,32 +137,42 @@ export async function getConceptById(id: string) {
 			throw new ConceptError('Concepto no encontrado');
 		}
 
-		conceptLogger.info('✅ Concepto encontrado:', concept.name);
-		return concept;
+		conceptLogger.info('✅ Concepto obtenido:', concept.name);
+		return {
+			...concept,
+			count: Object.values(concept._count).reduce((acc, count) => acc + count, 0),
+		};
 	} catch (error) {
 		conceptLogger.error('❌ Error al obtener concepto:', error);
+		if (error instanceof ConceptError) {
+			throw error;
+		}
 		throw new ConceptError('No se pudo obtener el concepto', error);
 	}
 }
 
-export async function createConcept(data: ConceptCreate) {
+export async function createConcept(data: ConceptCreate): Promise<Concept> {
 	try {
 		conceptLogger.info('📝 Creando concepto:', data.name);
 		const concept = await prisma.concept.create({
 			data: {
-				...data,
-				tags: data.tags || '[]',
+				name: data.name,
+				emoji: data.emoji || '💡',
+				description: data.description || null,
+				color: data.color || '#3b82f6',
 				content: data.content || '',
+				category: data.category || 'general',
+				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
 			},
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'concepts:modified',
-			data: { action: 'create', entity: concept },
+			data: { action: 'create', concept },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto creado:', concept.name);
 		revalidateAllPaths();
@@ -170,7 +183,7 @@ export async function createConcept(data: ConceptCreate) {
 	}
 }
 
-export async function updateConcept(id: string, data: ConceptUpdate) {
+export async function updateConcept(id: string, data: ConceptUpdate): Promise<Concept> {
 	try {
 		conceptLogger.info('📝 Actualizando concepto:', id);
 		const concept = await prisma.concept.update({
@@ -178,13 +191,13 @@ export async function updateConcept(id: string, data: ConceptUpdate) {
 			data,
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'concepts:modified',
 			id,
-			data: { action: 'update', entity: concept },
+			data: { action: 'update', concept },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto actualizado:', concept.name);
 		revalidateAllPaths();
@@ -195,20 +208,20 @@ export async function updateConcept(id: string, data: ConceptUpdate) {
 	}
 }
 
-export async function deleteConcept(id: string) {
+export async function deleteConcept(id: string): Promise<void> {
 	try {
 		conceptLogger.info('🗑️ Eliminando concepto:', id);
 		await prisma.concept.delete({
 			where: { id },
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'concepts:modified',
 			id,
-			data: { action: 'delete' },
+			data: { action: 'delete', id },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto eliminado');
 		revalidateAllPaths();

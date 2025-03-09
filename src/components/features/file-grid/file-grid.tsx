@@ -3,9 +3,19 @@
 import { getThumbnail } from '@/app/actions/thumbnails.actions';
 import { ThumbnailQuality } from '@/config/thumbnail.config';
 import { logger } from '@/lib/logger';
+import { toastService } from '@/lib/toast';
 import { cn } from '@/lib/utils';
+import { useAlbumsStore } from '@/store/albums.store';
+import { useCharactersStore } from '@/store/characters.store';
+import { useCollectionsStore } from '@/store/collections.store';
+import { useConceptStore } from '@/store/concept.store';
 import { useFileManager } from '@/store/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
+import { useNoteStore } from '@/store/note.store';
+import { useObjectsStore } from '@/store/objects.store';
+import { usePlacesStore } from '@/store/places.store';
+import { usePromptStore } from '@/store/prompt.store';
+import { useTagsStore } from '@/store/tags.store';
 import type { FileItem } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import { type VirtualItem, useVirtualizer } from '@tanstack/react-virtual';
@@ -136,7 +146,7 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const previousViewMode = useRef<ViewMode | null>(null);
-	const { selectedItems, viewMode } = useFileManager();
+	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
 	const imageResources = useImageResources();
 
 	// Referencia para la cola de carga
@@ -451,13 +461,18 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 				data,
 			});
 
+			// Acciones que no son de asociación de entidades
 			switch (action) {
 				case 'preview':
 					onItemDoubleClick?.(item);
 					break;
 				case 'mark-toggle':
 					gridLogger.info('🚩 Toggling mark status');
-					// Implementar lógica para marcar/desmarcar
+					// Utilizar toggleItemSelection para marcar/desmarcar
+					// Pasamos true como segundo parámetro para indicar que es una selección múltiple
+					// esto permite mantener los elementos ya marcados
+					toggleItemSelection(item, true);
+					toastService.system.info('Estado de selección cambiado');
 					break;
 				case 'open':
 					gridLogger.info('📂 Abriendo ubicación del archivo', item.path);
@@ -471,6 +486,7 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 					// Implementar descarga del archivo
 					if (item.path) {
 						window.electron?.downloadFile(item.path);
+						toastService.system.success('Descarga iniciada');
 					}
 					break;
 				case 'copy':
@@ -478,6 +494,23 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 					// Copiar al portapapeles
 					if (item.path) {
 						window.electron?.copyFileToClipboard(item.path);
+						toastService.system.success('Imagen copiada al portapapeles');
+					}
+					break;
+				case 'copy-path':
+					gridLogger.info('📋 Copiando ruta del archivo al portapapeles', item.path);
+					// Copiar ruta al portapapeles
+					if (item.path) {
+						navigator.clipboard
+							.writeText(item.path)
+							.then(() => {
+								gridLogger.info('✅ Ruta copiada al portapapeles');
+								toastService.system.success('Ruta copiada al portapapeles');
+							})
+							.catch((error) => {
+								gridLogger.error('❌ Error al copiar ruta:', error);
+								toastService.system.error('Error al copiar la ruta');
+							});
 					}
 					break;
 				case 'delete':
@@ -486,6 +519,7 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 					if (item.path) {
 						if (window.confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
 							window.electron?.deleteFile(item.path);
+							toastService.system.info('Archivo enviado a la papelera');
 						}
 					}
 					break;
@@ -544,13 +578,171 @@ export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, lo
 						})
 					);
 					break;
+				case 'prompt-create':
+					gridLogger.info('🆕 Creando nuevo prompt');
+					// Mostrar diálogo para crear prompt
+					window.dispatchEvent(
+						new CustomEvent('open-create-prompt-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'note-create':
+					gridLogger.info('🆕 Creando nueva nota');
+					// Mostrar diálogo para crear nota
+					window.dispatchEvent(
+						new CustomEvent('open-create-note-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				case 'concept-create':
+					gridLogger.info('🆕 Creando nuevo concepto');
+					// Mostrar diálogo para crear concepto
+					window.dispatchEvent(
+						new CustomEvent('open-create-concept-dialog', {
+							detail: { imageId: item.id },
+						})
+					);
+					break;
+				// Acciones de asociación de entidades
+				case 'collection-add':
+					gridLogger.info('➕ Añadiendo imagen a colección', data);
+					if (data?.id) {
+						const collectionId = data.id as string;
+						// Buscar la colección en el store para obtener el nombre
+						const collection = useCollectionsStore.getState().collections.find((c) => c.id === collectionId);
+						try {
+							useCollectionsStore.getState().addImageToCollection(collectionId, item.id);
+							toastService.collection.imageAdded(collection?.name);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir imagen a colección:', error);
+							toastService.system.error('Error al añadir imagen a la colección');
+						}
+					}
+					break;
+				case 'tag-add':
+					gridLogger.info('➕ Añadiendo etiqueta a imagen', data);
+					if (data?.id) {
+						const tagId = data.id as string;
+						const tag = useTagsStore.getState().tags.find((t) => t.id === tagId);
+						try {
+							useTagsStore.getState().addTagToImage(tagId, item.id);
+							toastService.tag.imageAdded(tag?.name);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir etiqueta a imagen:', error);
+							toastService.system.error('Error al añadir etiqueta a la imagen');
+						}
+					}
+					break;
+				case 'album-add':
+					gridLogger.info('➕ Añadiendo imagen a álbum', data);
+					if (data?.id) {
+						const albumId = data.id as string;
+						const album = useAlbumsStore.getState().albums.find((a) => a.id === albumId);
+						try {
+							useAlbumsStore.getState().addImageToAlbum(albumId, item.id);
+							toastService.system.success(`Imagen añadida al álbum "${album?.name || ''}"`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir imagen a álbum:', error);
+							toastService.system.error('Error al añadir imagen al álbum');
+						}
+					}
+					break;
+				case 'character-add':
+					gridLogger.info('➕ Añadiendo imagen a personaje', data);
+					if (data?.id) {
+						const characterId = data.id as string;
+						const character = useCharactersStore.getState().characters.find((c) => c.id === characterId);
+						try {
+							useCharactersStore.getState().addImageToCharacter(characterId, item.id);
+							toastService.system.success(`Imagen añadida al personaje "${character?.name || ''}"`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir imagen a personaje:', error);
+							toastService.system.error('Error al añadir imagen al personaje');
+						}
+					}
+					break;
+				case 'place-add':
+					gridLogger.info('➕ Añadiendo imagen a lugar', data);
+					if (data?.id) {
+						const placeId = data.id as string;
+						const place = usePlacesStore.getState().places.find((p) => p.id === placeId);
+						try {
+							usePlacesStore.getState().addImageToPlace(placeId, item.id);
+							toastService.system.success(`Imagen añadida al lugar "${place?.name || ''}"`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir imagen a lugar:', error);
+							toastService.system.error('Error al añadir imagen al lugar');
+						}
+					}
+					break;
+				case 'object-add':
+					gridLogger.info('➕ Añadiendo imagen a objeto', data);
+					if (data?.id) {
+						const objectId = data.id as string;
+						const objectEntity = useObjectsStore.getState().objects.find((o) => o.id === objectId);
+						try {
+							useObjectsStore.getState().addImageToObject(objectId, item.id);
+							toastService.system.success(`Imagen añadida al objeto "${objectEntity?.name || ''}"`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir imagen a objeto:', error);
+							toastService.system.error('Error al añadir imagen al objeto');
+						}
+					}
+					break;
+				case 'prompt-add':
+					gridLogger.info('➕ Añadiendo prompt a imagen', data);
+					if (data?.id) {
+						const promptId = data.id as string;
+						const prompt = usePromptStore.getState().prompts.find((p) => p.id === promptId);
+						try {
+							// Suponiendo que existe una función addPromptToImage en el store de prompts
+							if (usePromptStore.getState().addPromptToImage) {
+								usePromptStore.getState().addPromptToImage(promptId, item.id);
+								toastService.system.success(`Prompt "${prompt?.name || ''}" añadido a la imagen`);
+							}
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir prompt a imagen:', error);
+							toastService.system.error('Error al añadir prompt a la imagen');
+						}
+					}
+					break;
+				case 'note-add':
+					gridLogger.info('➕ Añadiendo nota a imagen', data);
+					if (data?.id) {
+						const noteId = data.id as string;
+						const note = useNoteStore.getState().notes.find((n) => n.id === noteId);
+						try {
+							useNoteStore.getState().addNoteToImage(noteId, item.id);
+							toastService.system.success(`Nota "${note?.name || ''}" añadida a la imagen`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir nota a imagen:', error);
+							toastService.system.error('Error al añadir nota a la imagen');
+						}
+					}
+					break;
+				case 'concept-add':
+					gridLogger.info('➕ Añadiendo concepto a imagen', data);
+					if (data?.id) {
+						const conceptId = data.id as string;
+						const concept = useConceptStore.getState().concepts.find((c) => c.id === conceptId);
+						try {
+							useConceptStore.getState().addConceptToImage(conceptId, item.id);
+							toastService.system.success(`Concepto "${concept?.name || ''}" añadido a la imagen`);
+						} catch (error) {
+							gridLogger.error('❌ Error al añadir concepto a imagen:', error);
+							toastService.system.error('Error al añadir concepto a la imagen');
+						}
+					}
+					break;
 				default:
-					// Las demás acciones son manejadas por los stores directamente
-					gridLogger.info(`🔄 Acción ${action} delegada a los stores`);
+					// No hay acción definida
+					gridLogger.warn(`⚠️ Acción no implementada: ${action}`);
 					break;
 			}
 		},
-		[onItemDoubleClick]
+		[onItemDoubleClick, toggleItemSelection]
 	);
 
 	return (

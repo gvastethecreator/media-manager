@@ -27,6 +27,9 @@ export const STATS_EVENTS = {
 	PLACE_CHANGE: 'place_change',
 	OBJECT_CHANGE: 'object_change',
 	FILES_CHANGE: 'files_change',
+	CONCEPT_CHANGE: 'concept_change',
+	PROMPT_CHANGE: 'prompt_change',
+	NOTE_CHANGE: 'note_change',
 } as const;
 
 export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS];
@@ -39,7 +42,10 @@ export type StatsUpdateEvent =
 	| 'character_change'
 	| 'place_change'
 	| 'object_change'
-	| 'files_change';
+	| 'files_change'
+	| 'concept_change'
+	| 'prompt_change'
+	| 'note_change';
 export type StatsEvents = typeof STATS_EVENTS;
 
 // Implementamos el nuevo sistema de eventos para estadísticas

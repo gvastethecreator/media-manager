@@ -30,29 +30,13 @@ class NoteError extends Error {
 	}
 }
 
-export interface NoteWithStats extends Omit<Note, 'featuredImage'> {
-	_count: {
-		characters: number;
-		places: number;
-		objects: number;
-	};
-	totalSize: number;
-	lastUpdated: Date;
-	distribution?: Array<{
-		name: string;
-		count: number;
-	}>;
-	featuredImage: string | null;
-	recentImages: string[];
-}
-
 export interface NoteCreate {
 	title: string;
-	content: string;
-	category: string;
-	priority: number;
-	status: string;
-	tags: string;
+	content?: string;
+	category?: string;
+	priority?: number;
+	status?: string;
+	tags?: string;
 	featuredImage?: string | null;
 }
 
@@ -76,54 +60,72 @@ export interface ExtendedNote extends Note {
 	}[];
 }
 
-export async function getNotes() {
+export interface NoteWithStats extends Note {
+	_count: {
+		concepts: number;
+		prompts: number;
+		characters: number;
+		places: number;
+		objects: number;
+	};
+	lastUpdated: Date;
+}
+
+export async function getNotes(): Promise<NoteWithStats[]> {
 	try {
-		noteLogger.info('📚 Obteniendo lista de notas');
+		noteLogger.info('📝 Obteniendo notas con estadísticas');
+
+		// Obtener notas con conteos y estadísticas
 		const notes = await prisma.note.findMany({
 			include: {
 				_count: {
 					select: {
+						concepts: true,
+						prompts: true,
 						characters: true,
 						places: true,
 						objects: true,
 					},
 				},
-				characters: {
-					take: 1,
-					select: {
-						id: true,
-						name: true,
-					},
-				},
 			},
+			orderBy: [
+				{
+					priority: 'desc',
+				},
+				{
+					title: 'asc',
+				},
+			],
 		});
 
-		noteLogger.info(`✅ ${notes.length} notas obtenidas`);
-		return notes;
+		// Mapear notas a formato con estadísticas
+		const notesWithStats = notes.map((note) => ({
+			...note,
+			_count: note._count,
+			lastUpdated: note.updatedAt,
+		}));
+
+		noteLogger.info('✅ Notas obtenidas', { count: notes.length });
+		return notesWithStats;
 	} catch (error) {
-		noteLogger.error('❌ Error al obtener notas:', error);
-		throw new NoteError('No se pudieron obtener las notas', error);
+		noteLogger.error('❌ Error al obtener notas', error);
+		throw new NoteError('No se pudieron obtener las notas');
 	}
 }
 
-export async function getNoteById(id: string) {
+export async function getNote(id: string): Promise<Note> {
 	try {
-		noteLogger.info('🔍 Buscando nota:', id);
+		noteLogger.info('🔍 Obteniendo nota:', id);
 		const note = await prisma.note.findUnique({
 			where: { id },
 			include: {
 				_count: {
 					select: {
+						concepts: true,
+						prompts: true,
 						characters: true,
 						places: true,
 						objects: true,
-					},
-				},
-				characters: {
-					take: 5,
-					select: {
-						id: true,
-						name: true,
 					},
 				},
 			},
@@ -133,34 +135,41 @@ export async function getNoteById(id: string) {
 			throw new NoteError('Nota no encontrada');
 		}
 
-		noteLogger.info('✅ Nota encontrada:', note.title);
-		return note;
+		noteLogger.info('✅ Nota obtenida:', note.title);
+		return {
+			...note,
+			count: Object.values(note._count).reduce((acc, count) => acc + count, 0),
+		};
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener nota:', error);
+		if (error instanceof NoteError) {
+			throw error;
+		}
 		throw new NoteError('No se pudo obtener la nota', error);
 	}
 }
 
-export async function createNote(data: NoteCreate) {
+export async function createNote(data: NoteCreate): Promise<Note> {
 	try {
 		noteLogger.info('📝 Creando nota:', data.title);
 		const note = await prisma.note.create({
 			data: {
-				...data,
-				tags: data.tags || '[]',
+				title: data.title,
 				content: data.content || '',
-				status: data.status || 'active',
+				category: data.category || 'general',
 				priority: data.priority || 0,
+				status: data.status || 'active',
+				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
 			},
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'notes:modified',
-			data: { action: 'create', entity: note },
+			data: { action: 'create', note },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota creada:', note.title);
 		revalidateAllPaths();
@@ -171,7 +180,7 @@ export async function createNote(data: NoteCreate) {
 	}
 }
 
-export async function updateNote(id: string, data: NoteUpdate) {
+export async function updateNote(id: string, data: NoteUpdate): Promise<Note> {
 	try {
 		noteLogger.info('📝 Actualizando nota:', id);
 		const note = await prisma.note.update({
@@ -179,13 +188,13 @@ export async function updateNote(id: string, data: NoteUpdate) {
 			data,
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'notes:modified',
 			id,
-			data: { action: 'update', entity: note },
+			data: { action: 'update', note },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota actualizada:', note.title);
 		revalidateAllPaths();
@@ -196,20 +205,20 @@ export async function updateNote(id: string, data: NoteUpdate) {
 	}
 }
 
-export async function deleteNote(id: string) {
+export async function deleteNote(id: string): Promise<void> {
 	try {
 		noteLogger.info('🗑️ Eliminando nota:', id);
 		await prisma.note.delete({
 			where: { id },
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'notes:modified',
 			id,
-			data: { action: 'delete' },
+			data: { action: 'delete', id },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota eliminada');
 		revalidateAllPaths();

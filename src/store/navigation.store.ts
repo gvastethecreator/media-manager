@@ -21,7 +21,13 @@ export type ViewType =
 	| 'places'
 	| 'place-content'
 	| 'objects'
-	| 'object-content';
+	| 'object-content'
+	| 'concepts'
+	| 'concept-content'
+	| 'prompts'
+	| 'prompt-content'
+	| 'notes'
+	| 'note-content';
 
 interface NavigationState {
 	currentView: ViewType;

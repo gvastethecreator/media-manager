@@ -5,9 +5,12 @@ import { revalidatePath } from 'next/cache';
 import { getAlbums } from './album.actions';
 import { getCharacters } from './character.actions';
 import { getCollections } from './collection.actions';
+import { getConcepts } from './concept.actions';
 import { getFolders } from './folder.actions';
+import { getNotes } from './note.actions';
 import { getObjects } from './object.actions';
 import { getPlaces } from './place.actions';
+import { getPrompts } from './prompt.actions';
 import { getSystemStats } from './stats.actions';
 import { getTags } from './tag.actions';
 
@@ -83,6 +86,9 @@ export interface NavigationData {
 	characters: Awaited<ReturnType<typeof getCharacters>>;
 	places: Awaited<ReturnType<typeof getPlaces>>;
 	objects: Awaited<ReturnType<typeof getObjects>>;
+	concepts: Awaited<ReturnType<typeof getConcepts>>;
+	prompts: Awaited<ReturnType<typeof getPrompts>>;
+	notes: Awaited<ReturnType<typeof getNotes>>;
 	stats: SystemStats;
 }
 
@@ -90,16 +96,20 @@ export async function getNavigationData(): Promise<NavigationData> {
 	try {
 		navLogger.info('🧭 Obteniendo datos de navegación');
 
-		const [folders, collections, tags, albums, characters, places, objects, stats] = await Promise.allSettled([
-			getFolders(),
-			getCollections(),
-			getTags(),
-			getAlbums(),
-			getCharacters(),
-			getPlaces(),
-			getObjects(),
-			getSystemStats(),
-		]);
+		const [folders, collections, tags, albums, characters, places, objects, concepts, prompts, notes, stats] =
+			await Promise.allSettled([
+				getFolders(),
+				getCollections(),
+				getTags(),
+				getAlbums(),
+				getCharacters(),
+				getPlaces(),
+				getObjects(),
+				getConcepts(),
+				getPrompts(),
+				getNotes(),
+				getSystemStats(),
+			]);
 
 		navLogger.info('✅ Datos de navegación obtenidos exitosamente');
 
@@ -129,6 +139,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 			characters: characters.status === 'fulfilled' ? characters.value : [],
 			places: places.status === 'fulfilled' ? places.value : [],
 			objects: objects.status === 'fulfilled' ? objects.value : [],
+			concepts: concepts.status === 'fulfilled' ? concepts.value : [],
+			prompts: prompts.status === 'fulfilled' ? prompts.value : [],
+			notes: notes.status === 'fulfilled' ? notes.value : [],
 			stats: stats.status === 'fulfilled' ? stats.value : defaultStats,
 		};
 	} catch (error) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { EntityDialogsProvider } from '@/components/features/entity-cards/dialogs/entity-dialogs-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { FileProvider } from '@/context/file-context';
 import { CacheProvider } from '@/providers/cache-provider';
@@ -12,6 +13,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 			<CacheProvider>
 				<FileProvider>
 					<Toaster position="bottom-right" richColors closeButton />
+					<EntityDialogsProvider />
 					{children}
 				</FileProvider>
 			</CacheProvider>

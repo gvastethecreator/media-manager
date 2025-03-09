@@ -19,7 +19,13 @@ export type ViewType =
 	| 'places'
 	| 'place-content'
 	| 'objects'
-	| 'object-content';
+	| 'object-content'
+	| 'concepts'
+	| 'concept-content'
+	| 'prompts'
+	| 'prompt-content'
+	| 'notes'
+	| 'note-content';
 
 export interface BaseItem {
 	id: string;
@@ -176,6 +182,21 @@ export interface RelatedPlace {
 }
 
 export interface RelatedObject {
+	id: string;
+	name: string;
+}
+
+export interface RelatedConcept {
+	id: string;
+	name: string;
+}
+
+export interface RelatedPrompt {
+	id: string;
+	name: string;
+}
+
+export interface RelatedNote {
 	id: string;
 	name: string;
 }

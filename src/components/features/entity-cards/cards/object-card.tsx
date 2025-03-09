@@ -1,10 +1,13 @@
 'use client';
 
+import type { ObjectFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatBytes, formatDate } from '@/lib/utils';
 import type { Object as PrismaObject } from '@prisma/client';
 import {
+	Box,
 	Clock,
 	Cog,
 	Crown,
@@ -22,14 +25,20 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
+import { useEffect, useRef } from 'react';
+
+type CardData =
+	| (PrismaObject & {
+			_count?: { images: number };
+			totalSize?: number;
+			featuredImage?: string | null;
+			recentImages?: (string | null)[];
+	  })
+	| ObjectFormData;
 
 interface ObjectCardProps {
-	object: PrismaObject & {
-		_count?: { images: number };
-		totalSize?: number;
-		featuredImage?: string | null;
-		recentImages?: (string | null)[];
-	};
+	data: CardData;
+	isPreview?: boolean;
 	onEdit?: (object: PrismaObject) => void;
 	onDelete?: (id: string) => void;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -52,335 +61,318 @@ const getRarityGradient = (rarity: string) => {
 const getTypeIcon = (type: string) => {
 	switch (type.toLowerCase()) {
 		case 'arma':
-			return Swords;
+			return <Swords className="h-4 w-4" />;
 		case 'armadura':
-			return Shield;
+			return <Shield className="h-4 w-4" />;
 		case 'accesorio':
-			return Crown;
-		case 'poción':
-			return Sparkles;
-		case 'pergamino':
-			return ScrollText;
+			return <Crown className="h-4 w-4" />;
+		case 'consumible':
+			return <Scroll className="h-4 w-4" />;
+		case 'herramienta':
+			return <Cog className="h-4 w-4" />;
 		case 'gema':
-			return Gem;
+			return <Gem className="h-4 w-4" />;
+		case 'reliquia':
+			return <Sparkles className="h-4 w-4" />;
 		default:
-			return Target;
+			return <Box className="h-4 w-4" />;
 	}
 };
 
-export function ObjectCard({ object, onEdit, onDelete, onClick, className }: ObjectCardProps) {
+function getRandomGradient() {
+	const gradients = [
+		'from-orange-500/20 to-amber-500/20',
+		'from-purple-500/20 to-indigo-500/20',
+		'from-teal-500/20 to-green-500/20',
+		'from-rose-500/20 to-red-500/20',
+		'from-blue-500/20 to-sky-500/20',
+	];
+	return gradients[Math.floor(Math.random() * gradients.length)];
+}
+
+export function ObjectCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: ObjectCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-	const [rotation, setRotation] = React.useState({ main: 0, secondary: 0 });
-	const cardRef = React.useRef<HTMLDivElement>(null);
-	const rarityGradient = getRarityGradient(object.rarity);
-	const TypeIcon = getTypeIcon(object.type);
+	const gradient = getRandomGradient();
 
-	// Manejar el movimiento del mouse para efectos metálicos
-	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!cardRef.current) {
+	// Para modo preview, detectar cambios
+	const prevDataRef = useRef<CardData | null>(null);
+
+	// Para modo preview, animar cambios
+	useEffect(() => {
+		if (!isPreview) {
 			return;
 		}
-		const rect = cardRef.current.getBoundingClientRect();
+
+		if (!prevDataRef.current) {
+			prevDataRef.current = { ...data };
+			return;
+		}
+
+		prevDataRef.current = { ...data };
+	}, [data, isPreview]);
+
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		const rect = e.currentTarget.getBoundingClientRect();
 		const x = ((e.clientX - rect.left) / rect.width) * 100;
 		const y = ((e.clientY - rect.top) / rect.height) * 100;
 		setMousePosition({ x, y });
 	};
 
-	// Efecto de rotación de engranajes
-	React.useEffect(() => {
-		let animationFrame: number;
-		const animate = () => {
-			setRotation((prev) => ({
-				main: (prev.main + 0.2) % 360,
-				secondary: (prev.secondary - 0.3) % 360,
-			}));
-			animationFrame = requestAnimationFrame(animate);
-		};
-		if (isHovered) {
-			animate();
-		}
-		return () => cancelAnimationFrame(animationFrame);
-	}, [isHovered]);
-
-	// Parsear propiedades y requisitos
-	const properties = React.useMemo(() => {
-		try {
-			return JSON.parse(object.properties);
-		} catch {
-			return [];
-		}
-	}, [object.properties]);
-
-	const requirements = React.useMemo(() => {
-		try {
-			return JSON.parse(object.requirements);
-		} catch {
-			return {};
-		}
-	}, [object.requirements]);
-
-	// Manejadores de eventos
-	const handleEdit = React.useCallback(() => {
-		onEdit?.(object);
-	}, [onEdit, object]);
-
-	const handleDelete = React.useCallback(() => {
-		onDelete?.(object.id);
-	}, [onDelete, object.id]);
-
-	return (
-		<motion.div
-			ref={cardRef}
-			className={cn(
-				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group',
-				'bg-linear-to-br from-zinc-900 to-stone-800',
-				'shadow-lg hover:shadow-xl transition-all duration-300',
-				'cursor-pointer perspective-1000',
-				className
-			)}
-			onHoverStart={() => setIsHovered(true)}
-			onHoverEnd={() => setIsHovered(false)}
-			onMouseMove={handleMouseMove}
-			whileHover={{ scale: 1.02 }}
-			transition={{ duration: 0.2 }}
-			onClick={onClick}
-			style={
-				{
-					'--x': `${mousePosition.x}%`,
-					'--y': `${mousePosition.y}%`,
-				} as React.CSSProperties
-			}
-		>
-			{/* Fondo metálico con efecto de pulido */}
-			<div
-				className="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity duration-300"
-				style={{
-					backgroundImage: `
-						radial-gradient(
-							circle at var(--x) var(--y),
-							${object.color}44,
-							transparent 50%
-						),
-						linear-gradient(
-							${135 + (mousePosition.x / 100) * 90}deg,
-							transparent,
-							${object.color}22,
-							transparent
-						)
-					`,
-					backgroundSize: '200% 200%, 200% 200%',
-					backgroundPosition: 'var(--x) var(--y), var(--x) var(--y)',
-				}}
-			/>
-
-			{/* Patrón de engranajes */}
-			<div className="absolute inset-0">
-				{/* Engranaje principal */}
+	// Renderizar versión para preview en diálogos
+	if (isPreview) {
+		return (
+			<motion.div
+				className={cn(
+					'group relative flex h-52 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary',
+					isHovered && 'shadow-lg',
+					className
+				)}
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				onMouseMove={handleMouseMove}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
+				{/* Gradiente de fondo */}
 				<div
-					className="absolute -top-16 -right-16 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity duration-300"
+					className={cn(
+						'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
+						gradient,
+						isHovered && 'opacity-80'
+					)}
 					style={{
-						backgroundImage: `conic-gradient(
-							from ${rotation.main}deg at center,
-							${object.color}22,
-							transparent 60deg,
-							${object.color}22 120deg,
-							transparent 180deg,
-							${object.color}22 240deg,
-							transparent 300deg,
-							${object.color}22 360deg
-						)`,
-						WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9.8-.8l-1.9.5a7 7 0 0 1-.6 1.5l1.2 1.5a1 1 0 0 1-.1 1.4l-1.4 1.4a1 1 0 0 1-1.4.1l-1.5-1.2a7 7 0 0 1-1.5.6l-.5 1.9a1 1 0 0 1-1 .8h-2a1 1 0 0 1-1-.8l-.5-1.9a7 7 0 0 1-1.5-.6l-1.5 1.2a1 1 0 0 1-1.4-.1l-1.4-1.4a1 1 0 0 1-.1-1.4l1.2-1.5a7 7 0 0 1-.6-1.5L2.2 12a1 1 0 0 1-.8-1v-2a1 1 0 0 1 .8-1l1.9-.5a7 7 0 0 1 .6-1.5L3.5 4.6a1 1 0 0 1 .1-1.4l1.4-1.4a1 1 0 0 1 1.4-.1l1.5 1.2a7 7 0 0 1 1.5-.6l.5-1.9A1 1 0 0 1 11 0h2a1 1 0 0 1 1 .8l.5 1.9a7 7 0 0 1 1.5.6l1.5-1.2a1 1 0 0 1 1.4.1l1.4 1.4a1 1 0 0 1 .1 1.4l-1.2 1.5a7 7 0 0 1 .6 1.5l1.9.5a1 1 0 0 1 .8 1v2a1 1 0 0 1-.8 1z'/%3E%3C/svg%3E")`,
-						maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9.8-.8l-1.9.5a7 7 0 0 1-.6 1.5l1.2 1.5a1 1 0 0 1-.1 1.4l-1.4 1.4a1 1 0 0 1-1.4.1l-1.5-1.2a7 7 0 0 1-1.5.6l-.5 1.9a1 1 0 0 1-1 .8h-2a1 1 0 0 1-1-.8l-.5-1.9a7 7 0 0 1-1.5-.6l-1.5 1.2a1 1 0 0 1-1.4-.1l-1.4-1.4a1 1 0 0 1-.1-1.4l1.2-1.5a7 7 0 0 1-.6-1.5L2.2 12a1 1 0 0 1-.8-1v-2a1 1 0 0 1 .8-1l1.9-.5a7 7 0 0 1 .6-1.5L3.5 4.6a1 1 0 0 1 .1-1.4l1.4-1.4a1 1 0 0 1 1.4-.1l1.5 1.2a7 7 0 0 1 1.5-.6l.5-1.9A1 1 0 0 1 11 0h2a1 1 0 0 1 1 .8l.5 1.9a7 7 0 0 1 1.5.6l1.5-1.2a1 1 0 0 1 1.4.1l1.4 1.4a1 1 0 0 1 .1 1.4l-1.2 1.5a7 7 0 0 1 .6 1.5l1.9.5a1 1 0 0 1 .8 1v2a1 1 0 0 1-.8 1z'/%3E%3C/svg%3E")`,
-						transform: `rotate(${rotation.main}deg)`,
+						backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
 					}}
 				/>
 
-				{/* Engranaje secundario */}
-				<div
-					className="absolute -bottom-8 -left-8 w-24 h-24 opacity-10 group-hover:opacity-20 transition-opacity duration-300"
-					style={{
-						backgroundImage: `conic-gradient(
-							from ${rotation.secondary}deg at center,
-							${object.color}22,
-							transparent 60deg,
-							${object.color}22 120deg,
-							transparent 180deg,
-							${object.color}22 240deg,
-							transparent 300deg,
-							${object.color}22 360deg
-						)`,
-						WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9.8-.8l-1.9.5a7 7 0 0 1-.6 1.5l1.2 1.5a1 1 0 0 1-.1 1.4l-1.4 1.4a1 1 0 0 1-1.4.1l-1.5-1.2a7 7 0 0 1-1.5.6l-.5 1.9a1 1 0 0 1-1 .8h-2a1 1 0 0 1-1-.8l-.5-1.9a7 7 0 0 1-1.5-.6l-1.5 1.2a1 1 0 0 1-1.4-.1l-1.4-1.4a1 1 0 0 1-.1-1.4l1.2-1.5a7 7 0 0 1-.6-1.5L2.2 12a1 1 0 0 1-.8-1v-2a1 1 0 0 1 .8-1l1.9-.5a7 7 0 0 1 .6-1.5L3.5 4.6a1 1 0 0 1 .1-1.4l1.4-1.4a1 1 0 0 1 1.4-.1l1.5 1.2a7 7 0 0 1 1.5-.6l.5-1.9A1 1 0 0 1 11 0h2a1 1 0 0 1 1 .8l.5 1.9a7 7 0 0 1 1.5.6l1.5-1.2a1 1 0 0 1 1.4.1l1.4 1.4a1 1 0 0 1 .1 1.4l-1.2 1.5a7 7 0 0 1 .6 1.5l1.9.5a1 1 0 0 1 .8 1v2a1 1 0 0 1-.8 1z'/%3E%3C/svg%3E")`,
-						maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9.8-.8l-1.9.5a7 7 0 0 1-.6 1.5l1.2 1.5a1 1 0 0 1-.1 1.4l-1.4 1.4a1 1 0 0 1-1.4.1l-1.5-1.2a7 7 0 0 1-1.5.6l-.5 1.9a1 1 0 0 1-1 .8h-2a1 1 0 0 1-1-.8l-.5-1.9a7 7 0 0 1-1.5-.6l-1.5 1.2a1 1 0 0 1-1.4-.1l-1.4-1.4a1 1 0 0 1-.1-1.4l1.2-1.5a7 7 0 0 1-.6-1.5L2.2 12a1 1 0 0 1-.8-1v-2a1 1 0 0 1 .8-1l1.9-.5a7 7 0 0 1 .6-1.5L3.5 4.6a1 1 0 0 1 .1-1.4l1.4-1.4a1 1 0 0 1 1.4-.1l1.5 1.2a7 7 0 0 1 1.5-.6l.5-1.9A1 1 0 0 1 11 0h2a1 1 0 0 1 1 .8l.5 1.9a7 7 0 0 1 1.5.6l1.5-1.2a1 1 0 0 1 1.4.1l1.4 1.4a1 1 0 0 1 .1 1.4l-1.2 1.5a7 7 0 0 1 .6 1.5l1.9.5a1 1 0 0 1 .8 1v2a1 1 0 0 1-.8 1z'/%3E%3C/svg%3E")`,
-						transform: `rotate(${rotation.secondary}deg)`,
-					}}
-				/>
-			</div>
+				{/* Contenido */}
+				<div className="z-10 flex flex-1 flex-col">
+					<div className="flex items-center space-x-2">
+						<span className="text-2xl">{data.emoji || '🧩'}</span>
+						<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
+						{'category' in data && data.category && (
+							<Badge variant="outline" className="ml-auto">
+								{data.category}
+							</Badge>
+						)}
+					</div>
 
-			{/* Marco metálico */}
-			<div
-				className="absolute inset-[2px] rounded-lg border-2 transition-all duration-300"
-				style={{
-					borderImage: `linear-gradient(
-						${45 + (mousePosition.x / 100) * 90}deg,
-						${object.color}88,
-						transparent,
-						${object.color}88
-					) 1`,
-					boxShadow: `
-						inset 0 0 20px ${object.color}22,
-						0 0 10px ${object.color}22
-					`,
-				}}
-			/>
+					{/* Campos destacados */}
+					<div className="mt-2 space-y-1">
+						{data.description && <p className="text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
 
-			{/* Contenido de la carta */}
-			<div className="relative h-full p-4 flex flex-col backdrop-blur-xs">
-				{/* Encabezado con tipo y rareza */}
-				<div className="flex items-center justify-between mb-4">
-					<div className="flex items-center gap-2">
-						<div
-							className={cn(
-								'h-12 w-12 rounded-lg flex items-center justify-center',
-								'bg-linear-to-br shadow-inner relative overflow-hidden',
-								rarityGradient
-							)}
-							style={{
-								border: `2px solid ${object.color}88`,
-								boxShadow: `inset 0 2px 4px ${object.color}22`,
-							}}
-						>
-							<span className="text-2xl filter drop-shadow-sm relative z-10">{object.emoji}</span>
-							{/* Destello del emoji */}
-							<div
-								className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
-								style={{
-									background: `linear-gradient(
-										${45 + (mousePosition.x / 100) * 90}deg,
-										transparent,
-										${object.color}88,
-										transparent
-									)`,
-								}}
-							/>
-						</div>
-						<div>
-							<h3 className="font-bold text-lg leading-tight text-zinc-100">{object.name}</h3>
-							<div className="flex items-center gap-1 text-sm text-zinc-400">
-								<TypeIcon className="h-3 w-3" />
-								<span>{object.type}</span>
-								<span className="mx-1">•</span>
-								<Sparkles className="h-3 w-3" />
-								<span>{object.rarity}</span>
+						{'origin' in data && data.origin && (
+							<div className="flex items-center mt-2">
+								<span className="text-xs font-medium text-muted-foreground mr-2">Origen:</span>
+								<span className="text-xs">{data.origin}</span>
 							</div>
+						)}
+
+						{'materials' in data && data.materials && (
+							<div className="flex items-center">
+								<span className="text-xs font-medium text-muted-foreground mr-2">Materiales:</span>
+								<span className="text-xs">{data.materials}</span>
+							</div>
+						)}
+					</div>
+
+					{/* Detalles */}
+					<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+						<div className="flex items-center space-x-2">
+							<span className="flex items-center">
+								<div className="mr-1.5 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: data.color || '#f97316' }} />
+								Vista previa
+							</span>
+						</div>
+						<div className="flex items-center space-x-2">
+							<Box className="h-3.5 w-3.5 mr-1" />
+							<span>Objeto</span>
 						</div>
 					</div>
 				</div>
+			</motion.div>
+		);
+	}
+
+	// Para la tarjeta regular, necesitamos acceder a propiedades específicas
+	let rarityGradient = 'from-zinc-500/20 via-slate-400/20 to-zinc-500/20';
+	let typeIcon = <Box className="h-4 w-4" />;
+
+	if ('rarity' in data && data.rarity) {
+		rarityGradient = getRarityGradient(data.rarity);
+	}
+
+	if ('type' in data && data.type) {
+		typeIcon = getTypeIcon(data.type);
+	}
+
+	return (
+		<motion.div
+			className={cn(
+				'relative h-[500px] w-full rounded-lg shadow-md hover:shadow-lg overflow-hidden bg-card',
+				className
+			)}
+			whileHover={{ y: -5 }}
+			onClick={onClick}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			{/* Fondo con gradiente */}
+			<div
+				className={cn(
+					'absolute inset-0 bg-gradient-to-br z-0 opacity-40',
+					'rarity' in data && data.rarity ? rarityGradient : 'from-orange-500/20 to-amber-500/20'
+				)}
+			/>
+
+			{/* Overlay de hover */}
+			<div
+				className={cn(
+					'absolute inset-0 bg-gradient-to-t from-background to-transparent transition-opacity duration-300 z-0',
+					isHovered ? 'opacity-60' : 'opacity-40'
+				)}
+			/>
+
+			{/* Contenido */}
+			<div className="relative h-full p-5 flex flex-col z-10">
+				{/* Encabezado */}
+				<div className="flex items-start gap-3 mb-4">
+					<div
+						className="flex flex-shrink-0 h-12 w-12 rounded-lg items-center justify-center shadow-md"
+						style={{ backgroundColor: data.color || '#f97316' }}
+					>
+						<span className="text-2xl text-white">{data.emoji}</span>
+					</div>
+					<div className="flex-1 min-w-0">
+						<h3 className="text-xl font-bold leading-tight truncate">{data.name}</h3>
+						{'category' in data && data.category && (
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								{typeIcon}
+								<span>{data.category}</span>
+							</div>
+						)}
+					</div>
+					{'rarity' in data && data.rarity && (
+						<Badge
+							className={cn(
+								'ml-auto',
+								data.rarity.toLowerCase().includes('legendario') &&
+									'bg-amber-500/20 text-amber-600 hover:bg-amber-500/30',
+								data.rarity.toLowerCase().includes('mítico') && 'bg-rose-500/20 text-rose-600 hover:bg-rose-500/30',
+								data.rarity.toLowerCase().includes('raro') && 'bg-blue-500/20 text-blue-600 hover:bg-blue-500/30'
+							)}
+						>
+							{data.rarity}
+						</Badge>
+					)}
+				</div>
 
 				{/* Descripción */}
-				{object.description && (
-					<div className="mb-4">
-						<p className="text-sm text-zinc-400 line-clamp-2">{object.description}</p>
+				{data.description && (
+					<div className="mb-4 rounded-md bg-background/60 backdrop-blur-sm p-3">
+						<p className="text-sm line-clamp-4">{data.description}</p>
 					</div>
 				)}
 
-				{/* Propiedades */}
-				{properties.length > 0 && (
-					<div className="flex-1 overflow-hidden">
-						<div className="flex items-center gap-2 mb-2">
-							<Gauge className="h-4 w-4" style={{ color: object.color }} />
-							<span className="text-sm font-medium text-zinc-300">Propiedades</span>
+				{/* Atributos en grid */}
+				<div className="grid grid-cols-2 gap-3 mb-4">
+					{'origin' in data && data.origin && (
+						<div className="flex items-center text-sm rounded-md p-2 bg-muted/50">
+							<Gem className="h-4 w-4 mr-2 text-muted-foreground" />
+							<div>
+								<span className="text-xs text-muted-foreground">Origen</span>
+								<p className="text-sm">{data.origin}</p>
+							</div>
 						</div>
-						<div className="grid grid-cols-2 gap-2">
-							{properties.map((prop: string, index: number) => (
+					)}
+
+					{'materials' in data && data.materials && (
+						<div className="flex items-center text-sm rounded-md p-2 bg-muted/50">
+							<Shield className="h-4 w-4 mr-2 text-muted-foreground" />
+							<div>
+								<span className="text-xs text-muted-foreground">Materiales</span>
+								<p className="text-sm">{data.materials}</p>
+							</div>
+						</div>
+					)}
+
+					{'properties' in data && data.properties && (
+						<div className="flex items-center text-sm rounded-md p-2 bg-muted/50">
+							<Sparkles className="h-4 w-4 mr-2 text-muted-foreground" />
+							<div>
+								<span className="text-xs text-muted-foreground">Propiedades</span>
+								<p className="text-sm">{data.properties}</p>
+							</div>
+						</div>
+					)}
+
+					{'history' in data && data.history && (
+						<div className="flex items-center text-sm rounded-md p-2 bg-muted/50">
+							<ScrollText className="h-4 w-4 mr-2 text-muted-foreground" />
+							<div>
+								<span className="text-xs text-muted-foreground">Historia</span>
+								<p className="text-sm line-clamp-1">{data.history}</p>
+							</div>
+						</div>
+					)}
+				</div>
+
+				{/* Información adicional */}
+				<div className="mt-auto">
+					{'_count' in data && data._count && (
+						<div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
+							<div className="flex items-center gap-2">
+								<ImageIcon className="h-4 w-4" />
+								<span>{data._count.images} imágenes</span>
+							</div>
+							{'totalSize' in data && data.totalSize && <span>{formatBytes(data.totalSize)}</span>}
+						</div>
+					)}
+
+					{/* Mosaico de imágenes recientes */}
+					{'recentImages' in data && data.recentImages && data.recentImages.length > 0 && (
+						<div className="grid grid-cols-4 gap-1 mb-3">
+							{data.recentImages.slice(0, 4).map((img, i) => (
 								<div
-									key={`${object.id}-property-${index}-${prop.substring(0, 10)}`}
-									className={cn(
-										'text-xs px-2 py-1 rounded relative overflow-hidden',
-										'bg-zinc-900/50 backdrop-blur-xs',
-										rarityGradient
-									)}
+									key={`obj-img-${data.id}-${i}-${Date.now()}`}
+									className="aspect-square rounded-md overflow-hidden bg-muted"
 								>
-									<span className="relative z-10 text-zinc-300">{prop}</span>
-									{/* Destello de propiedad */}
-									<div
-										className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
-										style={{
-											background: `linear-gradient(
-												${45 + (mousePosition.x / 100) * 90}deg,
-												transparent,
-												${object.color}44,
-												transparent
-											)`,
-										}}
-									/>
+									{img ? (
+										<img src={img} alt="" className="object-cover w-full h-full" />
+									) : (
+										<Box className="h-4 w-4 absolute inset-0 m-auto text-muted-foreground" />
+									)}
 								</div>
 							))}
 						</div>
-					</div>
-				)}
+					)}
 
-				{/* Requisitos */}
-				{Object.keys(requirements).length > 0 && (
-					<div className="mt-4">
-						<div className="flex items-center gap-2 mb-2">
-							<Shield className="h-4 w-4" style={{ color: object.color }} />
-							<span className="text-sm font-medium text-zinc-300">Requisitos</span>
+					{/* Fecha */}
+					{'createdAt' in data && (
+						<div className="flex items-center text-xs text-muted-foreground">
+							<Clock className="h-3.5 w-3.5 mr-1.5" />
+							<span>Creado {formatDate(data.createdAt)}</span>
 						</div>
-						<div className="grid grid-cols-2 gap-2">
-							{Object.entries(requirements).map(([key, value]) => (
-								<div
-									key={key}
-									className={cn(
-										'flex items-center justify-between px-2 py-1 rounded relative overflow-hidden',
-										'bg-zinc-900/50 backdrop-blur-xs',
-										rarityGradient
-									)}
-								>
-									<span className="uppercase text-zinc-500 text-xs relative z-10">{key}</span>
-									<span className="text-zinc-300 text-xs relative z-10">{value as string}</span>
-									{/* Destello de requisito */}
-									<div
-										className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
-										style={{
-											background: `linear-gradient(
-												${45 + (mousePosition.x / 100) * 90}deg,
-												transparent,
-												${object.color}44,
-												transparent
-											)`,
-										}}
-									/>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Origen */}
-				{object.origin && (
-					<div className="mt-4 bg-zinc-900/50 backdrop-blur-xs rounded-lg p-2">
-						<div className="flex items-center gap-2 mb-1">
-							<Scroll className="h-4 w-4" style={{ color: object.color }} />
-							<span className="text-sm font-medium text-zinc-300">Origen</span>
-						</div>
-						<p className="text-xs text-zinc-400">{object.origin}</p>
-					</div>
-				)}
+					)}
+				</div>
 
 				{/* Acciones */}
-				<motion.div
-					className="absolute top-2 right-2 flex gap-1"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: isHovered ? 1 : 0 }}
-					onClick={(e: React.MouseEvent) => e.stopPropagation()}
+				<div
+					className={cn(
+						'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
+						isHovered && 'opacity-100'
+					)}
 				>
 					{onEdit && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80"
-							onClick={handleEdit}
+							className="h-8 w-8 bg-background/80 hover:bg-background"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit(data as PrismaObject);
+							}}
 						>
 							<PencilIcon className="h-4 w-4" />
 						</Button>
@@ -389,77 +381,16 @@ export function ObjectCard({ object, onEdit, onDelete, onClick, className }: Obj
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80 text-destructive"
-							onClick={handleDelete}
+							className="h-8 w-8 bg-background/80 hover:bg-background hover:text-destructive"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDelete(data.id);
+							}}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					)}
-				</motion.div>
-
-				{/* Contador de imágenes */}
-				{object._count?.images !== undefined && (
-					<div className="absolute bottom-2 right-2 text-[10px] text-zinc-400 bg-zinc-950/80 backdrop-blur-xs rounded-full px-2 py-0.5">
-						{object._count.images} {object._count.images === 1 ? 'imagen' : 'imágenes'}
-					</div>
-				)}
-
-				{/* Imagen destacada */}
-				{object.featuredImage && (
-					<div className="absolute inset-0 z-0">
-						<div
-							className="absolute inset-0 bg-cover bg-center"
-							style={{
-								backgroundImage: `url(${object.featuredImage})`,
-								opacity: 0.15,
-								filter: 'blur(8px)',
-							}}
-						/>
-						<div className="absolute inset-x-0 top-20 bottom-40 px-4">
-							<div className="relative w-full h-full rounded-lg overflow-hidden">
-								<img src={object.featuredImage} alt={object.name} className="object-cover w-full h-full" />
-								<div
-									className="absolute inset-0"
-									style={{
-										background: `linear-gradient(to bottom,
-											transparent 0%,
-											${object.color}22 50%,
-											${object.color}44 100%
-										)`,
-									}}
-								/>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* Grid de imágenes recientes */}
-				{object.recentImages && object.recentImages.length > 0 && (
-					<div className="absolute inset-x-0 bottom-20 h-32 px-4 z-0">
-						<div className="grid grid-cols-3 gap-2 h-full">
-							{object.recentImages.slice(0, 3).map((src, i) => (
-								<div
-									key={`${object.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
-									className="relative rounded-md overflow-hidden aspect-square"
-								>
-									{src ? (
-										<img src={src} alt={`Imagen ${i + 1}`} className="object-cover w-full h-full" />
-									) : (
-										<div
-											className={cn(
-												'w-full h-full flex items-center justify-center',
-												'bg-linear-to-br',
-												rarityGradient
-											)}
-										>
-											<ImageIcon className="w-4 h-4 text-white/80" />
-										</div>
-									)}
-								</div>
-							))}
-						</div>
-					</div>
-				)}
+				</div>
 			</div>
 		</motion.div>
 	);
