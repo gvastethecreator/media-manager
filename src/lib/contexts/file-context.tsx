@@ -1,6 +1,14 @@
-'use client';
+"use client";
 
-import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
+import { clientEvents } from "@/lib/client/events.client";
+import { ActivityService } from "@/services/activity.service";
+import {
+	type ReactNode,
+	createContext,
+	useCallback,
+	useContext,
+	useState,
+} from "react";
 
 export interface FileItem {
 	id: string;
@@ -17,17 +25,24 @@ export interface FileItem {
 	};
 	tags?: string[];
 	collections?: string[];
+	characters?: string[];
+	places?: string[];
+	objects?: string[];
 	favorite?: boolean;
+	isFavorite?: boolean;
 	thumbnail?: string;
 }
 
 interface FileContextType {
 	files: FileItem[];
 	selectedFiles: string[];
-	sortBy: 'name' | 'date' | 'size';
-	sortOrder: 'asc' | 'desc';
-	viewMode: 'grid' | 'list';
-	thumbnailSize: 'small' | 'medium' | 'large';
+	currentItems: FileItem[];
+	selectedItems: FileItem[];
+	isLoading: boolean;
+	sortBy: "name" | "date" | "size";
+	sortOrder: "asc" | "desc";
+	viewMode: "grid" | "list";
+	thumbnailSize: "small" | "medium" | "large";
 	loading: boolean;
 	error: string | null;
 
@@ -38,10 +53,12 @@ interface FileContextType {
 	selectFiles: (fileIds: string[]) => void;
 	deselectFiles: (fileIds: string[]) => void;
 	clearSelection: () => void;
-	setSortBy: (sortBy: 'name' | 'date' | 'size') => void;
-	setSortOrder: (order: 'asc' | 'desc') => void;
-	setViewMode: (mode: 'grid' | 'list') => void;
-	setThumbnailSize: (size: 'small' | 'medium' | 'large') => void;
+	handleSelectItem: (item: FileItem) => void;
+	toggleItemSelection: (item: FileItem, multiSelect?: boolean) => void;
+	setSortBy: (sortBy: "name" | "date" | "size") => void;
+	setSortOrder: (order: "asc" | "desc") => void;
+	setViewMode: (mode: "grid" | "list") => void;
+	setThumbnailSize: (size: "small" | "medium" | "large") => void;
 	toggleFavorite: (fileId: string) => void;
 	addToCollection: (fileIds: string[], collectionId: string) => void;
 	removeFromCollection: (fileIds: string[], collectionId: string) => void;
@@ -60,13 +77,19 @@ const FileContext = createContext<FileContextType | undefined>(undefined);
 export function FileProvider({ children }: { children: ReactNode }) {
 	const [files, setFiles] = useState<FileItem[]>([]);
 	const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-	const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
-	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-	const [thumbnailSize, setThumbnailSize] = useState<'small' | 'medium' | 'large'>('medium');
+	const [sortBy, setSortBy] = useState<"name" | "date" | "size">("date");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [thumbnailSize, setThumbnailSize] = useState<
+		"small" | "medium" | "large"
+	>("medium");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	// Usamos el hook de eventos optimistas del cliente
+	const [_optimisticState, addEvent] = clientEvents.useEvents({});
+
+	// Métodos del contexto original
 	const addFiles = useCallback((newFiles: FileItem[]) => {
 		setFiles((prev) => [...prev, ...newFiles]);
 	}, []);
@@ -88,76 +111,187 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		setSelectedFiles([]);
 	}, []);
 
-	const toggleFavorite = useCallback((fileId: string) => {
-		setFiles((prev) => prev.map((file) => (file.id === fileId ? { ...file, favorite: !file.favorite } : file)));
-	}, []);
+	// Métodos del contexto de src/context/file-context.tsx
+	const handleSelectItem = useCallback(
+		async (item: FileItem) => {
+			// Seleccionar el item
+			selectFiles([item.id]);
 
-	const addToCollection = useCallback((fileIds: string[], collectionId: string) => {
-		setFiles((prev) =>
-			prev.map((file) =>
-				fileIds.includes(file.id)
-					? {
+			// Registrar actividad de vista
+			await ActivityService.logActivity({
+				type: "view",
+				description: `Vista de ${item.name}`,
+				imageId: item.id,
+			});
+		},
+		[selectFiles]
+	);
+
+	const toggleItemSelection = useCallback(
+		(item: FileItem, multiSelect = false) => {
+			const isSelected = selectedFiles.includes(item.id);
+
+			if (isSelected) {
+				if (multiSelect) {
+					deselectFiles([item.id]);
+				} else {
+					// Si no es multiselección, deseleccionar todo y seleccionar solo este
+					setSelectedFiles([]);
+				}
+			} else {
+				if (multiSelect) {
+					// Añadir a la selección existente
+					selectFiles([item.id]);
+				} else {
+					// Reemplazar la selección actual
+					setSelectedFiles([item.id]);
+				}
+			}
+
+			// Emitir evento de actualización si es necesario
+			if (item.collections?.length) {
+				addEvent({ type: "collections:modified", data: { item } });
+			}
+			if (item.tags?.length) {
+				addEvent({ type: "tags:modified", data: { item } });
+			}
+			if (item.characters?.length) {
+				addEvent({ type: "characters:modified", data: { item } });
+			}
+			if (item.places?.length) {
+				addEvent({ type: "places:modified", data: { item } });
+			}
+			if (item.objects?.length) {
+				addEvent({ type: "objects:modified", data: { item } });
+			}
+			if (item.isFavorite || item.favorite) {
+				addEvent({ type: "favorites:modified", data: { item } });
+			}
+		},
+		[selectedFiles, selectFiles, deselectFiles, addEvent]
+	);
+
+	// Resto de métodos del contexto original en lib/contexts/file-context.tsx
+	const toggleFavorite = useCallback(
+		(fileId: string) => {
+			setFiles((prev) =>
+				prev.map((file) => {
+					if (file.id === fileId) {
+						const newFile = {
+							...file,
+							favorite: !file.favorite,
+							isFavorite: !file.isFavorite,
+						};
+						addEvent({ type: "favorites:modified", data: { item: newFile } });
+						return newFile;
+					}
+					return file;
+				})
+			);
+		},
+		[addEvent]
+	);
+
+	const addToCollection = useCallback(
+		(fileIds: string[], collectionId: string) => {
+			setFiles((prev) =>
+				prev.map((file) => {
+					if (fileIds.includes(file.id)) {
+						const newFile = {
 							...file,
 							collections: [...(file.collections || []), collectionId],
-						}
-					: file
-			)
-		);
-	}, []);
+						};
+						addEvent({ type: "collections:modified", data: { item: newFile } });
+						return newFile;
+					}
+					return file;
+				})
+			);
+		},
+		[addEvent]
+	);
 
-	const removeFromCollection = useCallback((fileIds: string[], collectionId: string) => {
-		setFiles((prev) =>
-			prev.map((file) =>
-				fileIds.includes(file.id)
-					? {
+	const removeFromCollection = useCallback(
+		(fileIds: string[], collectionId: string) => {
+			setFiles((prev) =>
+				prev.map((file) => {
+					if (fileIds.includes(file.id)) {
+						const newFile = {
 							...file,
-							collections: file.collections?.filter((id) => id !== collectionId),
-						}
-					: file
-			)
-		);
-	}, []);
+							collections: file.collections?.filter(
+								(id) => id !== collectionId
+							),
+						};
+						addEvent({ type: "collections:modified", data: { item: newFile } });
+						return newFile;
+					}
+					return file;
+				})
+			);
+		},
+		[addEvent]
+	);
 
-	const addTags = useCallback((fileIds: string[], tags: string[]) => {
-		setFiles((prev) =>
-			prev.map((file) =>
-				fileIds.includes(file.id)
-					? {
+	const addTags = useCallback(
+		(fileIds: string[], tags: string[]) => {
+			setFiles((prev) =>
+				prev.map((file) => {
+					if (fileIds.includes(file.id)) {
+						const newFile = {
 							...file,
 							tags: [...new Set([...(file.tags || []), ...tags])],
-						}
-					: file
-			)
-		);
-	}, []);
+						};
+						addEvent({ type: "tags:modified", data: { item: newFile } });
+						return newFile;
+					}
+					return file;
+				})
+			);
+		},
+		[addEvent]
+	);
 
-	const removeTags = useCallback((fileIds: string[], tags: string[]) => {
-		setFiles((prev) =>
-			prev.map((file) =>
-				fileIds.includes(file.id)
-					? {
+	const removeTags = useCallback(
+		(fileIds: string[], tags: string[]) => {
+			setFiles((prev) =>
+				prev.map((file) => {
+					if (fileIds.includes(file.id)) {
+						const newFile = {
 							...file,
 							tags: file.tags?.filter((tag) => !tags.includes(tag)),
-						}
-					: file
-			)
-		);
-	}, []);
-
-	const moveFiles = useCallback(async (fileIds: string[], targetPath: string) => {
-		try {
-			setLoading(true);
-			// Implementar lógica de movimiento de archivos
-			setFiles((prev) =>
-				prev.map((file) => (fileIds.includes(file.id) ? { ...file, path: `${targetPath}/${file.name}` } : file))
+						};
+						addEvent({ type: "tags:modified", data: { item: newFile } });
+						return newFile;
+					}
+					return file;
+				})
 			);
-		} catch (err) {
-			setError('Error moving files');
-			console.error(err);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
+		},
+		[addEvent]
+	);
+
+	// Resto de funciones del contexto original
+	const moveFiles = useCallback(
+		async (fileIds: string[], targetPath: string) => {
+			try {
+				setLoading(true);
+				// Implementar lógica de movimiento de archivos
+				setFiles((prev) =>
+					prev.map((file) =>
+						fileIds.includes(file.id)
+							? { ...file, path: `${targetPath}/${file.name}` }
+							: file
+					)
+				);
+			} catch (err) {
+				setError("Error moving files");
+				console.error(err);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[]
+	);
 
 	const copyFiles = useCallback(
 		async (fileIds: string[], targetPath: string) => {
@@ -170,15 +304,15 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					id: crypto.randomUUID(),
 					path: `${targetPath}/${file.name}`,
 				}));
-				setFiles((prev) => [...prev, ...copiedFiles]);
+				addFiles(copiedFiles);
 			} catch (err) {
-				setError('Error copying files');
+				setError("Error copying files");
 				console.error(err);
 			} finally {
 				setLoading(false);
 			}
 		},
-		[files]
+		[files, addFiles]
 	);
 
 	const renameFile = useCallback((fileId: string, newName: string) => {
@@ -221,7 +355,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				);
 				addFiles(newFiles);
 			} catch (err) {
-				setError('Error uploading files');
+				setError("Error uploading files");
 				console.error(err);
 			} finally {
 				setLoading(false);
@@ -234,18 +368,20 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		async (fileIds: string[]) => {
 			try {
 				setLoading(true);
-				const filesToDownload = files.filter((file) => fileIds.includes(file.id));
+				const filesToDownload = files.filter((file) =>
+					fileIds.includes(file.id)
+				);
 				// Implementar lógica de descarga de archivos
 				for (const file of filesToDownload) {
-					const link = document.createElement('a');
-					link.href = file.thumbnail || '';
+					const link = document.createElement("a");
+					link.href = file.thumbnail || "";
 					link.download = file.name;
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
 				}
 			} catch (err) {
-				setError('Error downloading files');
+				setError("Error downloading files");
 				console.error(err);
 			} finally {
 				setLoading(false);
@@ -254,27 +390,38 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		[files]
 	);
 
+	// Método para obtener archivos ordenados según criterios actuales
 	const getSortedFiles = useCallback(() => {
 		return [...files].sort((a, b) => {
 			let comparison = 0;
 			switch (sortBy) {
-				case 'name':
+				case "name":
 					comparison = a.name.localeCompare(b.name);
 					break;
-				case 'date':
+				case "date":
 					comparison = a.modified.getTime() - b.modified.getTime();
 					break;
-				case 'size':
+				case "size":
 					comparison = a.size - b.size;
 					break;
+				default:
+					comparison = 0;
 			}
-			return sortOrder === 'asc' ? comparison : -comparison;
+			return sortOrder === "asc" ? comparison : -comparison;
 		});
 	}, [files, sortBy, sortOrder]);
+
+	// Compatibilidad con contexto original
+	const currentItems = files;
+	const selectedItems = files.filter((file) => selectedFiles.includes(file.id));
+	const isLoading = loading;
 
 	const value = {
 		files,
 		selectedFiles,
+		currentItems,
+		selectedItems,
+		isLoading,
 		sortBy,
 		sortOrder,
 		viewMode,
@@ -287,6 +434,8 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		selectFiles,
 		deselectFiles,
 		clearSelection,
+		handleSelectItem,
+		toggleItemSelection,
 		setSortBy,
 		setSortOrder,
 		setViewMode,
@@ -310,7 +459,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 export function useFiles() {
 	const context = useContext(FileContext);
 	if (context === undefined) {
-		throw new Error('useFiles must be used within a FileProvider');
+		throw new Error("useFiles must be used within a FileProvider");
 	}
 	return context;
 }

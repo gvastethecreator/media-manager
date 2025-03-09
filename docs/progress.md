@@ -49,6 +49,7 @@
 - [x] Agregar cursor pointer a todos los elementos clickeables para mejorar la UX
 - [x] Agregar iconos específicos para las estadísticas de cada tipo de categoría/ítem
 - [x] Separar la funcionalidad de colapso/expansión de la selección de categoría
+- [x] Corregir error de hidratación reestructurando el componente para evitar botones anidados
 
 ## Integraciones Completadas
 
@@ -84,6 +85,7 @@
    - Se agregaron iconos específicos para mostrar las estadísticas de cada tipo de categoría
    - Se mejoró la accesibilidad con información aria y eventos de teclado
    - Se añadió cursor pointer a todos los elementos clickeables
+   - Se reestructuró el componente para evitar errores de hidratación con botones anidados
 
 ## Próximos Pasos
 

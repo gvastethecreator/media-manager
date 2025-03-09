@@ -6,7 +6,7 @@ import { getAlbums } from './album.actions';
 import { getCharacters } from './character.actions';
 import { getCollections } from './collection.actions';
 import { getConcepts } from './concept.actions';
-import { getFolders } from './folder.actions';
+import { getFolders } from './folders/folder.actions';
 import { getNotes } from './note.actions';
 import { getObjects } from './object.actions';
 import { getPlaces } from './place.actions';

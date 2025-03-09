@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
 	type FolderCreate,
@@ -6,28 +6,36 @@ import {
 	deleteFolder,
 	reindexFolder,
 	updateFolderAutoReindex,
-} from '@/app/actions/folder.actions';
-import { FolderIndexStatusBadge, type IndexStatus } from '@/components/settings/folder-index-status-badge';
-import { ReindexConfirmationDialog } from '@/components/settings/reindex-confirmation-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
-import { cn, formatBytes } from '@/lib/utils';
+} from "@/app/actions/folders/folder.actions";
+import {
+	FolderIndexStatusBadge,
+	type IndexStatus,
+} from "@/components/settings/folder-index-status-badge";
+import { ReindexConfirmationDialog } from "@/components/settings/reindex-confirmation-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
+import { cn, formatBytes } from "@/lib/utils";
 import {
 	type ErrorResponse,
 	FOLDER_EVENTS,
 	type FolderResponse,
 	folderService,
 	getFolders,
-} from '@/services/folder.service';
-import type { FolderStats, Folder as FolderType } from '@/types/folders';
+} from "@/services/folder.service";
+import type { FolderStats, Folder as FolderType } from "@/types/folders";
 import type {
 	ExtendedProcessStatus,
 	ProcessPhase,
@@ -35,13 +43,20 @@ import type {
 	ReindexAllCompleteData,
 	ReindexAllProgressData,
 	ReindexProgress,
-} from '@/types/process';
-import { AlertCircle, Folder, FolderIcon, FolderPlus, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+} from "@/types/process";
+import {
+	AlertCircle,
+	Folder,
+	FolderIcon,
+	FolderPlus,
+	RefreshCw,
+	Trash2,
+} from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
-const folderLogger = logger.withContext('FoldersSection');
+const folderLogger = logger.withContext("FoldersSection");
 
 const initialStats: FolderStats = {
 	totalFolders: 0,
@@ -53,7 +68,8 @@ const initialStats: FolderStats = {
 };
 
 // Extender la interfaz Folder para incluir las propiedades adicionales
-interface ExtendedFolder extends Omit<FolderResponse, 'lastIndexed' | 'createdAt' | 'updatedAt'> {
+interface ExtendedFolder
+	extends Omit<FolderResponse, "lastIndexed" | "createdAt" | "updatedAt"> {
 	lastIndexed: Date | null;
 	createdAt: Date;
 	updatedAt: Date;
@@ -70,7 +86,7 @@ export function FoldersSection() {
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [processProgress, setProcessProgress] = useState(0);
 	const [stats, setStats] = useState<FolderStats>(initialStats);
-	const [folderPath, setFolderPath] = useState('');
+	const [folderPath, setFolderPath] = useState("");
 	const [folders, setFolders] = useState<FolderType[]>([]);
 	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -110,10 +126,12 @@ export function FoldersSection() {
 		fileProgress: {
 			processed: 0,
 			total: 0,
-			current: '',
+			current: "",
 		},
 	});
-	const [_extendedStats, _setExtendedStats] = useState<ProcessStatus['extendedStats']>({
+	const [_extendedStats, _setExtendedStats] = useState<
+		ProcessStatus["extendedStats"]
+	>({
 		fileTypes: {},
 		averageSize: 0,
 		processingSpeed: 0,
@@ -129,7 +147,7 @@ export function FoldersSection() {
 				return;
 			}
 
-			folderLogger.info('📊 Progreso del proceso:', status);
+			folderLogger.info("📊 Progreso del proceso:", status);
 
 			// Actualizar estado global de procesamiento
 			if (status.currentFile) {
@@ -137,13 +155,14 @@ export function FoldersSection() {
 					...prev,
 					isProcessing: true,
 					currentFolder: status.folderId
-						? folders.find((f) => f.id === status.folderId)?.name || prev.currentFolder
+						? folders.find((f) => f.id === status.folderId)?.name ||
+							prev.currentFolder
 						: prev.currentFolder,
 					currentFile: status.currentFile || null,
 					fileProgress: {
 						processed: status.filesProcessed || 0,
 						total: status.totalFiles || 0,
-						current: status.currentFile || '',
+						current: status.currentFile || "",
 					},
 				}));
 			}
@@ -155,7 +174,7 @@ export function FoldersSection() {
 			setProcessStatus((prevStatus) => ({
 				...prevStatus,
 				...status,
-				status: status.status || 'Procesando...',
+				status: status.status || "Procesando...",
 				phase: status.phase || prevStatus.phase,
 				filesProcessed: status.filesProcessed || prevStatus.filesProcessed,
 				totalFiles: status.totalFiles || prevStatus.totalFiles,
@@ -178,7 +197,10 @@ export function FoldersSection() {
 					? [
 							...(prevStatus.errors || []),
 							...status.errors.filter(
-								(error) => !prevStatus.errors?.some((e) => e.file === error.file && e.error === error.error)
+								(error) =>
+									!prevStatus.errors?.some(
+										(e) => e.file === error.file && e.error === error.error
+									)
 							),
 						]
 					: prevStatus.errors,
@@ -197,24 +219,26 @@ export function FoldersSection() {
 		};
 
 		const handleError = (error: ErrorResponse) => {
-			folderLogger.error('❌ Error en el proceso:', error);
-			let errorMessage = 'Error desconocido al procesar la carpeta';
+			folderLogger.error("❌ Error en el proceso:", error);
+			let errorMessage = "Error desconocido al procesar la carpeta";
 
 			if (error instanceof Error) {
 				errorMessage = error.message;
-			} else if (typeof error === 'object' && error !== null) {
+			} else if (typeof error === "object" && error !== null) {
 				errorMessage = error.message || error.details || JSON.stringify(error);
 			}
 
 			toast({
-				title: 'Error',
+				title: "Error",
 				description: errorMessage,
-				variant: 'destructive',
+				variant: "destructive",
 			});
 		};
 
 		const handleReindexAllStart = (data: { totalFolders: number }) => {
-			folderLogger.info(`🚀 Iniciando reindexación de ${data.totalFolders} carpetas`);
+			folderLogger.info(
+				`🚀 Iniciando reindexación de ${data.totalFolders} carpetas`
+			);
 
 			// Reiniciar el estado global de reindexación
 			setGlobalReindexStatus((prev) => ({
@@ -225,7 +249,7 @@ export function FoldersSection() {
 				totalFolders: data.totalFolders,
 				errors: [],
 				startTime: Date.now(),
-				currentFolder: '',
+				currentFolder: "",
 			}));
 
 			// Resetear el estado de proceso individual
@@ -234,13 +258,16 @@ export function FoldersSection() {
 
 			// Notificar al usuario
 			toast({
-				title: 'Reindexación iniciada',
+				title: "Reindexación iniciada",
 				description: `Comenzando a reindexar ${data.totalFolders} carpetas. Este proceso puede tomar varios minutos.`,
 			});
 		};
 
 		const handleReindexAllProgress = (data: ReindexAllProgressData) => {
-			folderLogger.debug(`📊 Progreso de reindexación: ${data.progress.toFixed(2)}%`, data);
+			folderLogger.debug(
+				`📊 Progreso de reindexación: ${data.progress.toFixed(2)}%`,
+				data
+			);
 
 			// Actualizar el estado global
 			setGlobalReindexStatus((prev) => ({
@@ -248,8 +275,10 @@ export function FoldersSection() {
 				progress: data.progress,
 				currentFolder: data.currentFolder,
 				processedFolders: data.current,
-				status: data.status || `Procesando carpeta ${data.current + 1} de ${data.total}`,
-				phase: data.phase || 'processing',
+				status:
+					data.status ||
+					`Procesando carpeta ${data.current + 1} de ${data.total}`,
+				phase: data.phase || "processing",
 				lastUpdate: Date.now(),
 			}));
 
@@ -285,7 +314,7 @@ export function FoldersSection() {
 				errors: data.errors,
 				endTime,
 				duration,
-				status: 'completed',
+				status: "completed",
 			}));
 
 			// Limpiar el estado de proceso individual
@@ -299,15 +328,15 @@ export function FoldersSection() {
 			// Notificar al usuario del resultado
 			if (data.errors.length > 0) {
 				toast({
-					title: 'Reindexación completada con errores',
+					title: "Reindexación completada con errores",
 					description: `${data.processedFolders} de ${data.totalFolders} carpetas procesadas en ${duration}s. ${data.errors.length} errores encontrados.`,
-					variant: 'destructive',
+					variant: "destructive",
 				});
 			} else {
 				toast({
-					title: 'Reindexación completada',
+					title: "Reindexación completada",
 					description: `${data.processedFolders} carpetas procesadas exitosamente en ${duration}s.`,
-					variant: 'default',
+					variant: "default",
 				});
 			}
 		};
@@ -317,7 +346,7 @@ export function FoldersSection() {
 				return;
 			}
 
-			folderLogger.info('✅ Proceso completado:', {
+			folderLogger.info("✅ Proceso completado:", {
 				folderId: data.folder.id,
 				stats: data.stats,
 			});
@@ -330,7 +359,7 @@ export function FoldersSection() {
 				fileProgress: {
 					processed: 0,
 					total: 0,
-					current: '',
+					current: "",
 				},
 			});
 
@@ -345,12 +374,18 @@ export function FoldersSection() {
 								},
 								totalSize: data.stats?.totalSize || folder.totalSize,
 								lastIndexed: new Date(),
-								createdAt: data.folder.createdAt ? new Date(data.folder.createdAt) : new Date(),
-								updatedAt: data.folder.updatedAt ? new Date(data.folder.updatedAt) : new Date(),
+								createdAt: data.folder.createdAt
+									? new Date(data.folder.createdAt)
+									: new Date(),
+								updatedAt: data.folder.updatedAt
+									? new Date(data.folder.updatedAt)
+									: new Date(),
 							}
 						: {
 								...folder,
-								lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+								lastIndexed: folder.lastIndexed
+									? new Date(folder.lastIndexed)
+									: null,
 								createdAt: new Date(folder.createdAt),
 								updatedAt: new Date(folder.updatedAt),
 							}
@@ -368,7 +403,7 @@ export function FoldersSection() {
 		};
 
 		const handleStats = (stats: FolderStats) => {
-			folderLogger.info('📊 Estadísticas actualizadas:', stats);
+			folderLogger.info("📊 Estadísticas actualizadas:", stats);
 			setStats((prevStats) => ({
 				...prevStats,
 				...stats,
@@ -382,12 +417,18 @@ export function FoldersSection() {
 		folderService.onStats(handleStats);
 
 		folderService.on(FOLDER_EVENTS.REINDEX_ALL_START, handleReindexAllStart);
-		folderService.on(FOLDER_EVENTS.REINDEX_ALL_PROGRESS, handleReindexAllProgress);
-		folderService.on(FOLDER_EVENTS.REINDEX_ALL_COMPLETE, handleReindexAllComplete);
+		folderService.on(
+			FOLDER_EVENTS.REINDEX_ALL_PROGRESS,
+			handleReindexAllProgress
+		);
+		folderService.on(
+			FOLDER_EVENTS.REINDEX_ALL_COMPLETE,
+			handleReindexAllComplete
+		);
 
 		// Cleanup
 		return () => {
-			folderLogger.info('🧹 Limpiando suscripciones de eventos');
+			folderLogger.info("🧹 Limpiando suscripciones de eventos");
 			// Cancelar suscripciones específicas
 			folderService.offProgress(handleProgress);
 			folderService.offError(handleError);
@@ -396,21 +437,31 @@ export function FoldersSection() {
 
 			// Cancelar suscripciones genéricas
 			folderService.off(FOLDER_EVENTS.REINDEX_ALL_START, handleReindexAllStart);
-			folderService.off(FOLDER_EVENTS.REINDEX_ALL_PROGRESS, handleReindexAllProgress);
-			folderService.off(FOLDER_EVENTS.REINDEX_ALL_COMPLETE, handleReindexAllComplete);
+			folderService.off(
+				FOLDER_EVENTS.REINDEX_ALL_PROGRESS,
+				handleReindexAllProgress
+			);
+			folderService.off(
+				FOLDER_EVENTS.REINDEX_ALL_COMPLETE,
+				handleReindexAllComplete
+			);
 		};
 	}, [folders, toast, globalReindexStatus.startTime]);
 
 	useEffect(() => {
 		const loadInitialData = async () => {
-			folderLogger.info('🚀 Cargando datos iniciales');
+			folderLogger.info("🚀 Cargando datos iniciales");
 			await loadStats();
-			folderLogger.info('✅ Datos iniciales cargados');
+			folderLogger.info("✅ Datos iniciales cargados");
 		};
 
 		loadInitialData().catch((error) => {
-			folderLogger.error('❌ Error cargando datos iniciales:', error);
-			setError(error instanceof Error ? error.message : 'Error cargando datos iniciales');
+			folderLogger.error("❌ Error cargando datos iniciales:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "Error cargando datos iniciales"
+			);
 		});
 	}, []);
 
@@ -433,13 +484,17 @@ export function FoldersSection() {
 				autoReindex: folder.autoReindex || false,
 			}));
 
-			folderLogger.info('✅ Carpetas cargadas:', {
+			folderLogger.info("✅ Carpetas cargadas:", {
 				count: transformedFolders.length,
 			});
 			setFolders(transformedFolders);
 		} catch (error) {
-			folderLogger.error('❌ Error cargando carpetas:', error);
-			setError(error instanceof Error ? error.message : 'No se pudieron cargar las carpetas');
+			folderLogger.error("❌ Error cargando carpetas:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "No se pudieron cargar las carpetas"
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -454,8 +509,14 @@ export function FoldersSection() {
 			// Calcular estadísticas de manera segura
 			const indexStats: FolderStats = {
 				totalFolders: folders.length,
-				totalFiles: folders.reduce((acc, folder) => acc + (folder._count?.images || 0), 0),
-				totalSize: folders.reduce((acc, folder) => acc + Number(folder.totalSize || 0), 0),
+				totalFiles: folders.reduce(
+					(acc, folder) => acc + (folder._count?.images || 0),
+					0
+				),
+				totalSize: folders.reduce(
+					(acc, folder) => acc + Number(folder.totalSize || 0),
+					0
+				),
 				lastIndexed: folders.reduce((acc: Date | null, folder) => {
 					if (!folder.lastIndexed) {
 						return acc;
@@ -467,7 +528,7 @@ export function FoldersSection() {
 				updatedAt: new Date(),
 			};
 
-			folderLogger.info('✅ Estadísticas calculadas:', indexStats);
+			folderLogger.info("✅ Estadísticas calculadas:", indexStats);
 			setStats(indexStats);
 
 			// Actualizar carpetas con la misma transformación segura
@@ -484,8 +545,12 @@ export function FoldersSection() {
 
 			setFolders(transformedFolders);
 		} catch (error) {
-			folderLogger.error('❌ Error cargando estadísticas:', error);
-			setError(error instanceof Error ? error.message : 'No se pudieron cargar las estadísticas');
+			folderLogger.error("❌ Error cargando estadísticas:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "No se pudieron cargar las estadísticas"
+			);
 			setStats(initialStats);
 		} finally {
 			setIsLoading(false);
@@ -502,32 +567,35 @@ export function FoldersSection() {
 			setIsProcessing(true);
 			setProcessProgress(0);
 			setProcessStatus({
-				status: 'Iniciando proceso...',
-				currentFile: '',
+				status: "Iniciando proceso...",
+				currentFile: "",
 				current: 0,
 				total: 0,
 				progress: 0,
 			});
 
-			folderLogger.info('🔄 Agregando carpeta:', { path: folderPath });
+			folderLogger.info("🔄 Agregando carpeta:", { path: folderPath });
 			await createFolder(folderPath);
 
-			folderLogger.info('✅ Carpeta agregada correctamente');
-			setFolderPath('');
+			folderLogger.info("✅ Carpeta agregada correctamente");
+			setFolderPath("");
 
 			// Recargar datos
 			await loadStats();
 
 			toast({
-				title: 'Carpeta agregada',
-				description: 'La carpeta se ha agregado correctamente',
+				title: "Carpeta agregada",
+				description: "La carpeta se ha agregado correctamente",
 			});
 		} catch (error) {
-			folderLogger.error('❌ Error agregando carpeta:', error);
+			folderLogger.error("❌ Error agregando carpeta:", error);
 			toast({
-				title: 'Error',
-				description: error instanceof Error ? error.message : 'Error al agregar la carpeta',
-				variant: 'destructive',
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al agregar la carpeta",
+				variant: "destructive",
 			});
 		} finally {
 			await new Promise((resolve) => setTimeout(resolve, 500));
@@ -548,30 +616,33 @@ export function FoldersSection() {
 			setProcessProgress(0);
 			setProcessStatus({
 				folderId,
-				status: 'Iniciando reindexación...',
+				status: "Iniciando reindexación...",
 				current: 0,
 				total: 0,
 				progress: 0,
 			});
 
-			folderLogger.info('🔄 Reindexando carpeta:', { folderId });
+			folderLogger.info("🔄 Reindexando carpeta:", { folderId });
 			await reindexFolder(folderId);
 
-			folderLogger.info('✅ Carpeta reindexada correctamente');
+			folderLogger.info("✅ Carpeta reindexada correctamente");
 
 			// Recargar datos
 			await loadStats();
 
 			toast({
-				title: 'Carpeta reindexada',
-				description: 'La carpeta se ha reindexado correctamente',
+				title: "Carpeta reindexada",
+				description: "La carpeta se ha reindexado correctamente",
 			});
 		} catch (error) {
-			folderLogger.error('❌ Error reindexando carpeta:', error);
+			folderLogger.error("❌ Error reindexando carpeta:", error);
 			toast({
-				title: 'Error',
-				description: error instanceof Error ? error.message : 'Error al reindexar la carpeta',
-				variant: 'destructive',
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al reindexar la carpeta",
+				variant: "destructive",
 			});
 		} finally {
 			await new Promise((resolve) => setTimeout(resolve, 500));
@@ -584,25 +655,28 @@ export function FoldersSection() {
 	const _handleRemoveFolder = async (folderId: string) => {
 		try {
 			setError(null);
-			folderLogger.info('🔄 Eliminando carpeta:', { folderId });
+			folderLogger.info("🔄 Eliminando carpeta:", { folderId });
 
 			await deleteFolder(folderId);
 
-			folderLogger.info('✅ Carpeta eliminada correctamente');
+			folderLogger.info("✅ Carpeta eliminada correctamente");
 
 			// Recargar datos
 			await loadStats();
 
 			toast({
-				title: 'Carpeta eliminada',
-				description: 'La carpeta se ha eliminado correctamente',
+				title: "Carpeta eliminada",
+				description: "La carpeta se ha eliminado correctamente",
 			});
 		} catch (error) {
-			folderLogger.error('❌ Error eliminando carpeta:', error);
+			folderLogger.error("❌ Error eliminando carpeta:", error);
 			toast({
-				title: 'Error',
-				description: error instanceof Error ? error.message : 'Error al eliminar la carpeta',
-				variant: 'destructive',
+				title: "Error",
+				description:
+					error instanceof Error
+						? error.message
+						: "Error al eliminar la carpeta",
+				variant: "destructive",
 			});
 		}
 	};
@@ -610,25 +684,25 @@ export function FoldersSection() {
 	const handleFolderClick = async (folderId: string) => {
 		if (selectedFolder === folderId) {
 			try {
-				folderLogger.info('🗑️ Eliminando carpeta por doble click:', {
+				folderLogger.info("🗑️ Eliminando carpeta por doble click:", {
 					folderId,
 				});
 				await deleteFolder(folderId);
 
-				folderLogger.info('✅ Carpeta eliminada correctamente');
+				folderLogger.info("✅ Carpeta eliminada correctamente");
 				toast({
-					title: 'Carpeta eliminada',
-					description: 'La carpeta se eliminó correctamente',
+					title: "Carpeta eliminada",
+					description: "La carpeta se eliminó correctamente",
 				});
 
 				await loadStats();
 				setSelectedFolder(null);
 			} catch (error) {
-				folderLogger.error('❌ Error eliminando carpeta:', error);
+				folderLogger.error("❌ Error eliminando carpeta:", error);
 				toast({
-					title: 'Error',
-					description: 'No se pudo eliminar la carpeta',
-					variant: 'destructive',
+					title: "Error",
+					description: "No se pudo eliminar la carpeta",
+					variant: "destructive",
 				});
 			}
 		} else {
@@ -641,9 +715,9 @@ export function FoldersSection() {
 			// Verificar si ya hay un proceso de reindexación en curso
 			if (globalReindexStatus.isProcessing) {
 				toast({
-					title: 'Proceso en curso',
-					description: 'Ya hay un proceso de reindexación en ejecución',
-					variant: 'warning',
+					title: "Proceso en curso",
+					description: "Ya hay un proceso de reindexación en ejecución",
+					variant: "warning",
 				});
 				return;
 			}
@@ -651,18 +725,18 @@ export function FoldersSection() {
 			// Mostrar diálogo de confirmación
 			setShowReindexDialog(true);
 		} catch (error) {
-			folderLogger.error('❌ Error al iniciar reindexación:', error);
+			folderLogger.error("❌ Error al iniciar reindexación:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo iniciar el proceso de reindexación',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo iniciar el proceso de reindexación",
+				variant: "destructive",
 			});
 		}
 	};
 
 	const handleConfirmReindexAll = async () => {
 		try {
-			folderLogger.info('🔄 Iniciando reindexación de todas las carpetas');
+			folderLogger.info("🔄 Iniciando reindexación de todas las carpetas");
 			setError(null);
 
 			// Iniciar proceso antes del evento para dar feedback inmediato
@@ -673,13 +747,13 @@ export function FoldersSection() {
 				processedFolders: 0,
 				errors: [],
 				startTime: Date.now(),
-				status: 'Iniciando...',
+				status: "Iniciando...",
 			}));
 
 			// Iniciar el proceso de reindexación
 			await folderService.reindexAll();
 
-			folderLogger.info('✅ Solicitud de reindexación iniciada correctamente');
+			folderLogger.info("✅ Solicitud de reindexación iniciada correctamente");
 		} catch (error) {
 			setGlobalReindexStatus((prev) => ({
 				...prev,
@@ -687,17 +761,18 @@ export function FoldersSection() {
 				errors: [
 					...(prev.errors || []),
 					{
-						message: error instanceof Error ? error.message : 'Error desconocido',
+						message:
+							error instanceof Error ? error.message : "Error desconocido",
 						timestamp: Date.now(),
 					},
 				],
 			}));
 
-			folderLogger.error('❌ Error al iniciar reindexación:', error);
+			folderLogger.error("❌ Error al iniciar reindexación:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo iniciar el proceso de reindexación',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo iniciar el proceso de reindexación",
+				variant: "destructive",
 			});
 
 			// Cerramos el diálogo en caso de error
@@ -708,25 +783,34 @@ export function FoldersSection() {
 	// Función para actualizar el autoReindex de una carpeta
 	const handleAutoReindexToggle = async (folderId: string, value: boolean) => {
 		try {
-			folderLogger.info(`${value ? '✅' : '❌'} Configurando auto-reindexado para la carpeta ${folderId}: ${value}`);
+			folderLogger.info(
+				`${value ? "✅" : "❌"} Configurando auto-reindexado para la carpeta ${folderId}: ${value}`
+			);
 
 			// Llamar a la acción del servidor para actualizar la configuración
 			await updateFolderAutoReindex(folderId, value);
 
 			// Actualizar el estado local
-			setFolders((prev) => prev.map((folder) => (folder.id === folderId ? { ...folder, autoReindex: value } : folder)));
+			setFolders((prev) =>
+				prev.map((folder) =>
+					folder.id === folderId ? { ...folder, autoReindex: value } : folder
+				)
+			);
 
 			toast({
-				title: 'Configuración actualizada',
-				description: `Auto-reindexado ${value ? 'activado' : 'desactivado'} para esta carpeta`,
-				variant: 'default',
+				title: "Configuración actualizada",
+				description: `Auto-reindexado ${value ? "activado" : "desactivado"} para esta carpeta`,
+				variant: "default",
 			});
 		} catch (error) {
-			folderLogger.error('❌ Error actualizando configuración de auto-reindexado:', error);
+			folderLogger.error(
+				"❌ Error actualizando configuración de auto-reindexado:",
+				error
+			);
 			toast({
-				title: 'Error',
-				description: 'No se pudo actualizar la configuración',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo actualizar la configuración",
+				variant: "destructive",
 			});
 		}
 	};
@@ -734,18 +818,20 @@ export function FoldersSection() {
 	// Determinar el estado de indexación de una carpeta
 	const getFolderIndexStatus = (folder: ExtendedFolder): IndexStatus => {
 		if (!folder.lastIndexed) {
-			return 'pending';
+			return "pending";
 		}
 
 		const now = new Date();
 		const lastIndexed = new Date(folder.lastIndexed);
-		const diffDays = Math.floor((now.getTime() - lastIndexed.getTime()) / (1000 * 60 * 60 * 24));
+		const diffDays = Math.floor(
+			(now.getTime() - lastIndexed.getTime()) / (1000 * 60 * 60 * 24)
+		);
 
 		if (diffDays > 7) {
-			return 'outdated';
+			return "outdated";
 		}
 
-		return 'indexed';
+		return "indexed";
 	};
 
 	const renderProgressDetails = (status: ExtendedProcessStatus) => {
@@ -758,15 +844,15 @@ export function FoldersSection() {
 				<div className="flex justify-between items-center">
 					<span>Fase actual:</span>
 					<Badge variant="secondary" className="text-[10px]">
-						{status.phase === 'scanning'
-							? 'Escaneando'
-							: status.phase === 'indexing'
-								? 'Indexando'
-								: status.phase === 'thumbnails'
-									? 'Generando miniaturas'
-									: status.phase === 'metadata'
-										? 'Extrayendo metadata'
-										: 'Procesando'}
+						{status.phase === "scanning"
+							? "Escaneando"
+							: status.phase === "indexing"
+								? "Indexando"
+								: status.phase === "thumbnails"
+									? "Generando miniaturas"
+									: status.phase === "metadata"
+										? "Extrayendo metadata"
+										: "Procesando"}
 					</Badge>
 				</div>
 
@@ -787,7 +873,8 @@ export function FoldersSection() {
 							<div className="flex justify-between items-center">
 								<span>Dimensiones:</span>
 								<span>
-									{status.fileDetails.dimensions.width}x{status.fileDetails.dimensions.height}
+									{status.fileDetails.dimensions.width}x
+									{status.fileDetails.dimensions.height}
 								</span>
 							</div>
 						)}
@@ -798,23 +885,28 @@ export function FoldersSection() {
 					</div>
 				)}
 
-				{status.filesProcessed !== undefined && status.totalFiles !== undefined && (
-					<div className="flex justify-between items-center">
-						<span>Archivos procesados:</span>
-						<span>
-							{status.filesProcessed} / {status.totalFiles}
-						</span>
-					</div>
-				)}
+				{status.filesProcessed !== undefined &&
+					status.totalFiles !== undefined && (
+						<div className="flex justify-between items-center">
+							<span>Archivos procesados:</span>
+							<span>
+								{status.filesProcessed} / {status.totalFiles}
+							</span>
+						</div>
+					)}
 
 				{status.extendedStats && (
 					<div className="space-y-1 mt-2 pt-2 border-t border-border/30">
-						<div className="text-[11px] font-medium mb-1">Estadísticas extendidas:</div>
+						<div className="text-[11px] font-medium mb-1">
+							Estadísticas extendidas:
+						</div>
 
 						{status.extendedStats.processingSpeed > 0 && (
 							<div className="flex justify-between items-center">
 								<span>Velocidad:</span>
-								<span>{status.extendedStats.processingSpeed.toFixed(2)} archivos/s</span>
+								<span>
+									{status.extendedStats.processingSpeed.toFixed(2)} archivos/s
+								</span>
 							</div>
 						)}
 
@@ -827,28 +919,42 @@ export function FoldersSection() {
 
 						{Object.keys(status.extendedStats.fileTypes).length > 0 && (
 							<div className="space-y-1">
-								<div className="text-[10px] text-muted-foreground/80">Tipos de archivo:</div>
+								<div className="text-[10px] text-muted-foreground/80">
+									Tipos de archivo:
+								</div>
 								<div className="grid grid-cols-2 gap-1">
-									{Object.entries(status.extendedStats.fileTypes).map(([type, count]) => (
-										<div key={type} className="flex justify-between items-center text-[10px]">
-											<span>{type}:</span>
-											<span>{count}</span>
-										</div>
-									))}
+									{Object.entries(status.extendedStats.fileTypes).map(
+										([type, count]) => (
+											<div
+												key={type}
+												className="flex justify-between items-center text-[10px]"
+											>
+												<span>{type}:</span>
+												<span>{count}</span>
+											</div>
+										)
+									)}
 								</div>
 							</div>
 						)}
 
 						{Object.keys(status.extendedStats.errorsByType).length > 0 && (
 							<div className="space-y-1 mt-1">
-								<div className="text-[10px] text-destructive/80">Errores por tipo:</div>
+								<div className="text-[10px] text-destructive/80">
+									Errores por tipo:
+								</div>
 								<div className="grid grid-cols-2 gap-1">
-									{Object.entries(status.extendedStats.errorsByType).map(([type, count]) => (
-										<div key={type} className="flex justify-between items-center text-[10px] text-destructive/90">
-											<span>{type}:</span>
-											<span>{count}</span>
-										</div>
-									))}
+									{Object.entries(status.extendedStats.errorsByType).map(
+										([type, count]) => (
+											<div
+												key={type}
+												className="flex justify-between items-center text-[10px] text-destructive/90"
+											>
+												<span>{type}:</span>
+												<span>{count}</span>
+											</div>
+										)
+									)}
 								</div>
 							</div>
 						)}
@@ -859,10 +965,10 @@ export function FoldersSection() {
 								<span
 									className={cn(
 										status.extendedStats.healthScore > 80
-											? 'text-green-500'
+											? "text-green-500"
 											: status.extendedStats.healthScore > 60
-												? 'text-yellow-500'
-												: 'text-destructive'
+												? "text-yellow-500"
+												: "text-destructive"
 									)}
 								>
 									{status.extendedStats.healthScore}%
@@ -874,7 +980,9 @@ export function FoldersSection() {
 
 				{status.errors && status.errors.length > 0 && (
 					<div className="mt-2 pt-2 border-t border-border/30">
-						<p className="text-destructive text-[11px] font-medium">Errores encontrados: {status.errors.length}</p>
+						<p className="text-destructive text-[11px] font-medium">
+							Errores encontrados: {status.errors.length}
+						</p>
 						<div className="max-h-20 overflow-y-auto mt-1">
 							{status.errors.map((error) => (
 								<p
@@ -891,7 +999,8 @@ export function FoldersSection() {
 		);
 	};
 
-	const isGloballyProcessing = globalProcessingState.isProcessing || globalReindexStatus.isProcessing;
+	const isGloballyProcessing =
+		globalProcessingState.isProcessing || globalReindexStatus.isProcessing;
 
 	if (error) {
 		return (
@@ -933,11 +1042,15 @@ export function FoldersSection() {
 							disabled={isLoading || isGloballyProcessing}
 						>
 							<RefreshCw
-								className={cn('h-3.5 w-3.5', (isLoading || globalReindexStatus.isProcessing) && 'animate-spin')}
+								className={cn(
+									"h-3.5 w-3.5",
+									(isLoading || globalReindexStatus.isProcessing) &&
+										"animate-spin"
+								)}
 							/>
 							{globalReindexStatus.isProcessing
 								? `Reindexando (${Math.round(globalReindexStatus.progress)}%)`
-								: 'Reindexar todo'}
+								: "Reindexar todo"}
 						</Button>
 					</div>
 				</CardTitle>
@@ -986,7 +1099,10 @@ export function FoldersSection() {
 										y: [20, 0],
 									}}
 									transition={{ delay: index * 0.1 }}
-									className={cn('bg-muted/30 group rounded-sm', selectedFolder === folder.id && 'ring-1 ring-primary')}
+									className={cn(
+										"bg-muted/30 group rounded-sm",
+										selectedFolder === folder.id && "ring-1 ring-primary"
+									)}
 								>
 									<CardContent className="p-2">
 										<div className="flex items-center justify-between relative">
@@ -997,14 +1113,22 @@ export function FoldersSection() {
 														{folder.path}
 													</span>
 													<div className="flex items-center justify-between gap-2 w-full mt-2">
-														<Badge variant="secondary" className="text-[10px] px-2 h-4">
+														<Badge
+															variant="secondary"
+															className="text-[10px] px-2 h-4"
+														>
 															{folder._count?.images || 0} imágenes
 														</Badge>
-														<Badge variant="secondary" className="text-[10px] px-1 h-4">
+														<Badge
+															variant="secondary"
+															className="text-[10px] px-1 h-4"
+														>
 															{formatBytes(Number(folder.totalSize || 0))}
 														</Badge>
 														<FolderIndexStatusBadge
-															status={getFolderIndexStatus(folder as ExtendedFolder)}
+															status={getFolderIndexStatus(
+																folder as ExtendedFolder
+															)}
 															lastIndexed={folder.lastIndexed}
 														/>
 													</div>
@@ -1017,18 +1141,24 @@ export function FoldersSection() {
 															<div className="flex items-center gap-1.5 p-1">
 																<Switch
 																	size="sm"
-																	checked={(folder as ExtendedFolder).autoReindex}
-																	onCheckedChange={(checked) => handleAutoReindexToggle(folder.id, checked)}
+																	checked={
+																		(folder as ExtendedFolder).autoReindex
+																	}
+																	onCheckedChange={(checked) =>
+																		handleAutoReindexToggle(folder.id, checked)
+																	}
 																	disabled={isGloballyProcessing}
 																	className="scale-75"
 																/>
-																<span className="text-[10px] text-muted-foreground mr-1">Auto</span>
+																<span className="text-[10px] text-muted-foreground mr-1">
+																	Auto
+																</span>
 															</div>
 														</TooltipTrigger>
 														<TooltipContent className="text-xs">
 															{(folder as ExtendedFolder).autoReindex
-																? 'Desactivar reindexado automático'
-																: 'Activar reindexado automático'}
+																? "Desactivar reindexado automático"
+																: "Activar reindexado automático"}
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
@@ -1045,13 +1175,17 @@ export function FoldersSection() {
 															>
 																<RefreshCw
 																	className={cn(
-																		'h-3.5 w-3.5',
-																		isProcessing && processStatus.folderId === folder.id && 'animate-spin'
+																		"h-3.5 w-3.5",
+																		isProcessing &&
+																			processStatus.folderId === folder.id &&
+																			"animate-spin"
 																	)}
 																/>
 															</Button>
 														</TooltipTrigger>
-														<TooltipContent className="text-xs">Reindexar carpeta</TooltipContent>
+														<TooltipContent className="text-xs">
+															Reindexar carpeta
+														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
 
@@ -1062,22 +1196,27 @@ export function FoldersSection() {
 																size="icon"
 																variant="ghost"
 																className={cn(
-																	'h-6 w-6',
-																	selectedFolder === folder.id && 'bg-destructive hover:bg-destructive/90'
+																	"h-6 w-6",
+																	selectedFolder === folder.id &&
+																		"bg-destructive hover:bg-destructive/90"
 																)}
 																onClick={() => handleFolderClick(folder.id)}
 																disabled={isGloballyProcessing}
 															>
 																<Trash2
 																	className={cn(
-																		'h-3.5 w-3.5',
-																		selectedFolder === folder.id ? 'text-background' : 'text-muted-foreground'
+																		"h-3.5 w-3.5",
+																		selectedFolder === folder.id
+																			? "text-background"
+																			: "text-muted-foreground"
 																	)}
 																/>
 															</Button>
 														</TooltipTrigger>
 														<TooltipContent className="text-xs">
-															{selectedFolder === folder.id ? 'Confirmar eliminar' : 'Eliminar carpeta'}
+															{selectedFolder === folder.id
+																? "Confirmar eliminar"
+																: "Eliminar carpeta"}
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
@@ -1087,12 +1226,12 @@ export function FoldersSection() {
 										{isProcessing && processStatus.folderId === folder.id && (
 											<motion.div
 												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: 'auto' }}
+												animate={{ opacity: 1, height: "auto" }}
 												exit={{ opacity: 0, height: 0 }}
 												className="mt-3 space-y-1.5"
 											>
 												<div className="flex justify-between text-xs text-muted-foreground">
-													<span>{processStatus.status || 'Procesando...'}</span>
+													<span>{processStatus.status || "Procesando..."}</span>
 													<span>{Math.round(processProgress)}%</span>
 												</div>
 												<Progress value={processProgress} className="h-1.5" />
@@ -1112,7 +1251,9 @@ export function FoldersSection() {
 									className="py-4 text-center col-span-2"
 								>
 									<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-									<p className="text-xs text-muted-foreground">No hay carpetas indexadas</p>
+									<p className="text-xs text-muted-foreground">
+										No hay carpetas indexadas
+									</p>
 									<p className="text-[10px] mt-1 text-muted-foreground/75">
 										Agrega una carpeta para comenzar a indexar imágenes
 									</p>
@@ -1123,16 +1264,26 @@ export function FoldersSection() {
 
 					<Separator className="my-2" />
 					<div className="grid grid-cols-2 gap-3">
-						<motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-1.5">
+						<motion.div
+							initial={{ opacity: 0, x: -20 }}
+							animate={{ opacity: 1, x: 0 }}
+							className="space-y-1.5"
+						>
 							<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-								<span className="text-sm font-medium">{stats.totalFolders}</span>
+								<span className="text-sm font-medium">
+									{stats.totalFolders}
+								</span>
 								<Badge variant="secondary" className="text-xs">
 									Carpetas
 								</Badge>
 							</div>
 						</motion.div>
 
-						<motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-1.5">
+						<motion.div
+							initial={{ opacity: 0, x: 20 }}
+							animate={{ opacity: 1, x: 0 }}
+							className="space-y-1.5"
+						>
 							<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
 								<span className="text-sm font-medium">{stats.totalFiles}</span>
 								<Badge variant="secondary" className="text-xs">

@@ -1,21 +1,24 @@
-'use client';
+"use client";
 
-import { getImageUrl, updateImageStats } from '@/app/actions/image.actions';
-import { parseMetadata } from '@/app/actions/metadata.actions';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+	getImageUrl,
+	updateImageStats,
+} from "@/app/actions/images/image.actions";
+import { parseMetadata } from "@/app/actions/metadata.actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
-import { cn, formatBytes, formatDate } from '@/lib/utils';
-import { useFileManager } from '@/store/file-manager.store';
-import { useImageViewer } from '@/store/image-viewer.store';
-import type { FileItem, FileMetadata } from '@/types/file-item';
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
+import { cn, formatBytes, formatDate } from "@/lib/utils";
+import { useFileManager } from "@/store/file-manager.store";
+import { useImageViewer } from "@/store/image-viewer.store";
+import type { FileItem, FileMetadata } from "@/types/file-item";
 import {
 	AlignLeft,
 	Aperture,
@@ -70,14 +73,14 @@ import {
 	User2,
 	Wand2,
 	X,
-} from 'lucide-react';
-import * as React from 'react';
-import { useState } from 'react';
-import { StatsPanel } from '../stats/stats-panel';
+} from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
+import { StatsPanel } from "../stats/stats-panel";
 
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useImageResources } from '@/store/image-resources.store';
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useImageResources } from "@/store/image-resources.store";
 
 interface InfoItemProps {
 	icon: React.ReactNode;
@@ -92,7 +95,7 @@ function InfoItem({ icon, label, value }: InfoItemProps) {
 				{icon}
 				<span className="text-muted-foreground">{label}</span>
 			</div>
-			<span className="font-medium">{value?.toString() || 'N/A'}</span>
+			<span className="font-medium">{value?.toString() || "N/A"}</span>
 		</div>
 	);
 }
@@ -108,13 +111,13 @@ const getMetadata = (metadata: string | null): FileMetadata | null => {
 	}
 	try {
 		const parsed = JSON.parse(metadata);
-		if (!parsed || typeof parsed !== 'object') {
-			console.warn('Metadata inválida:', metadata);
+		if (!parsed || typeof parsed !== "object") {
+			console.warn("Metadata inválida:", metadata);
 			return null;
 		}
 		return parsed;
 	} catch (error) {
-		console.error('Error parseando metadata:', error);
+		console.error("Error parseando metadata:", error);
 		return null;
 	}
 };
@@ -135,7 +138,10 @@ const _ImagePreview = React.memo(function ImagePreview({
 	const { openViewer } = useImageViewer();
 	const [imageUrl, setImageUrl] = React.useState<string | null>(null);
 	const [error, setError] = React.useState<string | null>(null);
-	const _metadata = React.useMemo(() => getMetadata(item.metadata), [item.metadata]);
+	const _metadata = React.useMemo(
+		() => getMetadata(item.metadata),
+		[item.metadata]
+	);
 
 	React.useEffect(() => {
 		let mounted = true;
@@ -147,9 +153,11 @@ const _ImagePreview = React.memo(function ImagePreview({
 					setImageUrl(url);
 				}
 			} catch (error) {
-				console.error('Error loading image:', error);
+				console.error("Error loading image:", error);
 				if (mounted) {
-					setError(error instanceof Error ? error.message : 'Error al cargar la imagen');
+					setError(
+						error instanceof Error ? error.message : "Error al cargar la imagen"
+					);
 				}
 			}
 		};
@@ -178,14 +186,19 @@ const _ImagePreview = React.memo(function ImagePreview({
 			type="button"
 			onClick={handleClick}
 			onKeyDown={(e) => {
-				if (e.key === 'Enter' || e.key === ' ') {
+				if (e.key === "Enter" || e.key === " ") {
 					handleClick();
 				}
 			}}
 			className="w-full h-full relative group outline-none"
 			aria-label="Ver imagen"
 		>
-			<img src={imageUrl} alt={item.name} className="w-full h-full object-contain" loading="lazy" />
+			<img
+				src={imageUrl}
+				alt={item.name}
+				className="w-full h-full object-contain"
+				loading="lazy"
+			/>
 			<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
 				<Maximize2 className="h-6 w-6 text-white" />
 			</div>
@@ -203,11 +216,15 @@ const _BasicInfo = React.memo(function BasicInfo({
 }) {
 	return (
 		<div className="flex flex-col gap-1.5">
-			<InfoItem icon={<FileText className="h-3.5 w-3.5 text-blue-400" />} label="Nombre" value={item.name} />
+			<InfoItem
+				icon={<FileText className="h-3.5 w-3.5 text-blue-400" />}
+				label="Nombre"
+				value={item.name}
+			/>
 			<InfoItem
 				icon={<ImageIcon className="h-3.5 w-3.5 text-green-400" />}
 				label="Tipo"
-				value={metadata?.mimeType?.split('/')[1] || 'Desconocido'}
+				value={metadata?.mimeType?.split("/")[1] || "Desconocido"}
 			/>
 			<InfoItem
 				icon={<HardDrive className="h-3.5 w-3.5 text-purple-400" />}
@@ -229,10 +246,18 @@ const _BasicInfo = React.memo(function BasicInfo({
 				/>
 			)}
 			{metadata?.hasAlpha && (
-				<InfoItem icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />} label="Canal alfa" value="Sí" />
+				<InfoItem
+					icon={<Layers className="h-3.5 w-3.5 text-indigo-400" />}
+					label="Canal alfa"
+					value="Sí"
+				/>
 			)}
 			{metadata?.isAnimated && (
-				<InfoItem icon={<Play className="h-3.5 w-3.5 text-pink-400" />} label="Animada" value="Sí" />
+				<InfoItem
+					icon={<Play className="h-3.5 w-3.5 text-pink-400" />}
+					label="Animada"
+					value="Sí"
+				/>
 			)}
 		</div>
 	);
@@ -246,48 +271,50 @@ const _RelatedEntities = React.memo(function RelatedEntities({
 }) {
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Entidades relacionadas</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Entidades relacionadas
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{item.collections?.length > 0 && (
 					<InfoItem
 						icon={<BookImage className="h-3.5 w-3.5 text-blue-400" />}
 						label="Colecciones"
-						value={`${item.collections.length} ${item.collections.length === 1 ? 'colección' : 'colecciones'}`}
+						value={`${item.collections.length} ${item.collections.length === 1 ? "colección" : "colecciones"}`}
 					/>
 				)}
 				{item.tags?.length > 0 && (
 					<InfoItem
 						icon={<TagIcon className="h-3.5 w-3.5 text-green-400" />}
 						label="Etiquetas"
-						value={`${item.tags.length} ${item.tags.length === 1 ? 'etiqueta' : 'etiquetas'}`}
+						value={`${item.tags.length} ${item.tags.length === 1 ? "etiqueta" : "etiquetas"}`}
 					/>
 				)}
 				{item.albums?.length > 0 && (
 					<InfoItem
 						icon={<Camera className="h-3.5 w-3.5 text-purple-400" />}
 						label="Álbumes"
-						value={`${item.albums.length} ${item.albums.length === 1 ? 'álbum' : 'álbumes'}`}
+						value={`${item.albums.length} ${item.albums.length === 1 ? "álbum" : "álbumes"}`}
 					/>
 				)}
 				{item.characters?.length > 0 && (
 					<InfoItem
 						icon={<User2 className="h-3.5 w-3.5 text-yellow-400" />}
 						label="Personajes"
-						value={`${item.characters.length} ${item.characters.length === 1 ? 'personaje' : 'personajes'}`}
+						value={`${item.characters.length} ${item.characters.length === 1 ? "personaje" : "personajes"}`}
 					/>
 				)}
 				{item.places?.length > 0 && (
 					<InfoItem
 						icon={<MapPin className="h-3.5 w-3.5 text-orange-400" />}
 						label="Lugares"
-						value={`${item.places.length} ${item.places.length === 1 ? 'lugar' : 'lugares'}`}
+						value={`${item.places.length} ${item.places.length === 1 ? "lugar" : "lugares"}`}
 					/>
 				)}
 				{item.objects?.length > 0 && (
 					<InfoItem
 						icon={<Box className="h-3.5 w-3.5 text-indigo-400" />}
 						label="Objetos"
-						value={`${item.objects.length} ${item.objects.length === 1 ? 'objeto' : 'objetos'}`}
+						value={`${item.objects.length} ${item.objects.length === 1 ? "objeto" : "objetos"}`}
 					/>
 				)}
 			</div>
@@ -303,7 +330,8 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 }) {
 	const { toast } = useToast();
 	const [isPromptExpanded, setIsPromptExpanded] = useState(false);
-	const [isNegativePromptExpanded, setIsNegativePromptExpanded] = useState(false);
+	const [isNegativePromptExpanded, setIsNegativePromptExpanded] =
+		useState(false);
 	const [isWorkflowExpanded, setIsWorkflowExpanded] = useState(false);
 
 	if (!metadata?.generation) {
@@ -311,10 +339,10 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 	}
 
 	const gen = metadata.generation;
-	const isSD = gen.type === 'stable-diffusion';
-	const isComfyUI = gen.type === 'comfyui';
-	const isInvokeAI = gen.type === 'invoke-ai';
-	const isNovelAI = gen.type === 'novel-ai';
+	const isSD = gen.type === "stable-diffusion";
+	const isComfyUI = gen.type === "comfyui";
+	const isInvokeAI = gen.type === "invoke-ai";
+	const isNovelAI = gen.type === "novel-ai";
 
 	const truncateText = (text: string, maxLength = 150) => {
 		if (text.length <= maxLength) {
@@ -326,21 +354,23 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 	return (
 		<div className="flex flex-col gap-2">
 			<div className="flex items-center justify-between">
-				<h3 className="text-xs font-medium text-muted-foreground">Información de Generación AI</h3>
+				<h3 className="text-xs font-medium text-muted-foreground">
+					Información de Generación AI
+				</h3>
 				<Badge
 					variant="outline"
 					className={cn(
-						'text-[10px] h-5 px-2',
-						isSD && 'bg-blue-500/10 text-blue-500',
-						isComfyUI && 'bg-green-500/10 text-green-500',
-						isInvokeAI && 'bg-purple-500/10 text-purple-500',
-						isNovelAI && 'bg-pink-500/10 text-pink-500'
+						"text-[10px] h-5 px-2",
+						isSD && "bg-blue-500/10 text-blue-500",
+						isComfyUI && "bg-green-500/10 text-green-500",
+						isInvokeAI && "bg-purple-500/10 text-purple-500",
+						isNovelAI && "bg-pink-500/10 text-pink-500"
 					)}
 				>
-					{isSD && 'Stable Diffusion'}
-					{isComfyUI && 'ComfyUI'}
-					{isInvokeAI && 'InvokeAI'}
-					{isNovelAI && 'NovelAI'}
+					{isSD && "Stable Diffusion"}
+					{isComfyUI && "ComfyUI"}
+					{isInvokeAI && "InvokeAI"}
+					{isNovelAI && "NovelAI"}
 				</Badge>
 			</div>
 
@@ -359,10 +389,15 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 								className="h-6 px-2"
 								onClick={() => setIsPromptExpanded(!isPromptExpanded)}
 							>
-								{isPromptExpanded ? 'Colapsar' : 'Expandir'}
+								{isPromptExpanded ? "Colapsar" : "Expandir"}
 							</Button>
 						</div>
-						<div className={cn('text-xs bg-muted/30 p-2 rounded-sm', !isPromptExpanded && 'max-h-24 overflow-hidden')}>
+						<div
+							className={cn(
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isPromptExpanded && "max-h-24 overflow-hidden"
+							)}
+						>
 							<p className="whitespace-pre-wrap break-words">
 								{isPromptExpanded ? gen.prompt : truncateText(gen.prompt)}
 							</p>
@@ -376,37 +411,53 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<MessageSquareOff className="h-3.5 w-3.5 text-rose-400" />
-								<span className="text-xs text-muted-foreground">Prompt Negativo</span>
+								<span className="text-xs text-muted-foreground">
+									Prompt Negativo
+								</span>
 							</div>
 							<Button
 								variant="ghost"
 								size="sm"
 								className="h-6 px-2"
-								onClick={() => setIsNegativePromptExpanded(!isNegativePromptExpanded)}
+								onClick={() =>
+									setIsNegativePromptExpanded(!isNegativePromptExpanded)
+								}
 							>
-								{isNegativePromptExpanded ? 'Colapsar' : 'Expandir'}
+								{isNegativePromptExpanded ? "Colapsar" : "Expandir"}
 							</Button>
 						</div>
 						<div
 							className={cn(
-								'text-xs bg-muted/30 p-2 rounded-sm',
-								!isNegativePromptExpanded && 'max-h-24 overflow-hidden'
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isNegativePromptExpanded && "max-h-24 overflow-hidden"
 							)}
 						>
 							<p className="whitespace-pre-wrap break-words">
-								{isNegativePromptExpanded ? gen.negative_prompt : truncateText(gen.negative_prompt)}
+								{isNegativePromptExpanded
+									? gen.negative_prompt
+									: truncateText(gen.negative_prompt)}
 							</p>
 						</div>
 					</div>
 				)}
 
 				{/* Modelo */}
-				{gen.model && <InfoItem icon={<Box className="h-3.5 w-3.5 text-sky-400" />} label="Modelo" value={gen.model} />}
+				{gen.model && (
+					<InfoItem
+						icon={<Box className="h-3.5 w-3.5 text-sky-400" />}
+						label="Modelo"
+						value={gen.model}
+					/>
+				)}
 
 				{/* Parámetros */}
 				<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
 					{gen.steps && (
-						<InfoItem icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />} label="Pasos" value={gen.steps} />
+						<InfoItem
+							icon={<GitBranch className="h-3.5 w-3.5 text-lime-400" />}
+							label="Pasos"
+							value={gen.steps}
+						/>
 					)}
 					{(gen.cfg_scale || gen.cfg) && (
 						<InfoItem
@@ -416,10 +467,18 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 						/>
 					)}
 					{gen.seed && (
-						<InfoItem icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />} label="Semilla" value={gen.seed} />
+						<InfoItem
+							icon={<Dice5 className="h-3.5 w-3.5 text-amber-400" />}
+							label="Semilla"
+							value={gen.seed}
+						/>
 					)}
 					{gen.sampler && (
-						<InfoItem icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />} label="Sampler" value={gen.sampler} />
+						<InfoItem
+							icon={<Gauge className="h-3.5 w-3.5 text-indigo-400" />}
+							label="Sampler"
+							value={gen.sampler}
+						/>
 					)}
 					{gen.scheduler && (
 						<InfoItem
@@ -451,14 +510,19 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 								className="h-6 px-2"
 								onClick={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
 							>
-								{isWorkflowExpanded ? 'Colapsar' : 'Expandir'}
+								{isWorkflowExpanded ? "Colapsar" : "Expandir"}
 							</Button>
 						</div>
 						<div
-							className={cn('text-xs bg-muted/30 p-2 rounded-sm', !isWorkflowExpanded && 'max-h-32 overflow-hidden')}
+							className={cn(
+								"text-xs bg-muted/30 p-2 rounded-sm",
+								!isWorkflowExpanded && "max-h-32 overflow-hidden"
+							)}
 						>
 							<pre className="whitespace-pre-wrap break-all">
-								{isWorkflowExpanded ? gen.workflow : truncateText(gen.workflow, 300)}
+								{isWorkflowExpanded
+									? gen.workflow
+									: truncateText(gen.workflow, 300)}
 							</pre>
 						</div>
 					</div>
@@ -467,7 +531,9 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 				{/* Parámetros adicionales */}
 				{gen.extra_params && Object.keys(gen.extra_params).length > 0 && (
 					<div className="mt-2">
-						<h4 className="text-xs font-medium text-muted-foreground mb-1">Parámetros adicionales</h4>
+						<h4 className="text-xs font-medium text-muted-foreground mb-1">
+							Parámetros adicionales
+						</h4>
 						<div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
 							{Object.entries(gen.extra_params).map(([key, value]) => (
 								<InfoItem
@@ -490,8 +556,8 @@ const _AIGenerationInfo = React.memo(function AIGenerationInfo({
 						onClick={() => {
 							navigator.clipboard.writeText(JSON.stringify(gen));
 							toast({
-								title: 'Copiado',
-								description: 'Metadata copiada al portapapeles',
+								title: "Copiado",
+								description: "Metadata copiada al portapapeles",
 							});
 						}}
 					>
@@ -516,7 +582,9 @@ const _XMPInfo = React.memo(function XMPInfo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información XMP</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información XMP
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.xmp.title && (
 					<InfoItem
@@ -543,7 +611,7 @@ const _XMPInfo = React.memo(function XMPInfo({
 					<InfoItem
 						icon={<Tags className="h-3.5 w-3.5 text-purple-400" />}
 						label="Temas"
-						value={metadata.xmp.subject.join(', ')}
+						value={metadata.xmp.subject.join(", ")}
 					/>
 				)}
 				{metadata.xmp.rating !== undefined && (
@@ -570,7 +638,9 @@ const _IPTCInfo = React.memo(function IPTCInfo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información IPTC</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información IPTC
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.iptc.headline && (
 					<InfoItem
@@ -590,7 +660,7 @@ const _IPTCInfo = React.memo(function IPTCInfo({
 					<InfoItem
 						icon={<Hash className="h-3.5 w-3.5 text-purple-400" />}
 						label="Palabras clave"
-						value={metadata.iptc.keywords.join(', ')}
+						value={metadata.iptc.keywords.join(", ")}
 					/>
 				)}
 				{metadata.iptc.copyright && (
@@ -601,7 +671,11 @@ const _IPTCInfo = React.memo(function IPTCInfo({
 					/>
 				)}
 				{metadata.iptc.source && (
-					<InfoItem icon={<Link className="h-3.5 w-3.5 text-cyan-400" />} label="Fuente" value={metadata.iptc.source} />
+					<InfoItem
+						icon={<Link className="h-3.5 w-3.5 text-cyan-400" />}
+						label="Fuente"
+						value={metadata.iptc.source}
+					/>
 				)}
 			</div>
 		</div>
@@ -620,7 +694,9 @@ const _ExifInfo = React.memo(function ExifInfo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información EXIF</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información EXIF
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.exif.make && (
 					<InfoItem
@@ -665,7 +741,11 @@ const _ExifInfo = React.memo(function ExifInfo({
 					/>
 				)}
 				{metadata.exif.iso && (
-					<InfoItem icon={<Scale className="h-3.5 w-3.5 text-violet-400" />} label="ISO" value={metadata.exif.iso} />
+					<InfoItem
+						icon={<Scale className="h-3.5 w-3.5 text-violet-400" />}
+						label="ISO"
+						value={metadata.exif.iso}
+					/>
 				)}
 				{metadata.exif.focalLength && (
 					<InfoItem
@@ -675,7 +755,11 @@ const _ExifInfo = React.memo(function ExifInfo({
 					/>
 				)}
 				{metadata.exif.lens && (
-					<InfoItem icon={<Camera className="h-3.5 w-3.5 text-teal-400" />} label="Lente" value={metadata.exif.lens} />
+					<InfoItem
+						icon={<Camera className="h-3.5 w-3.5 text-teal-400" />}
+						label="Lente"
+						value={metadata.exif.lens}
+					/>
 				)}
 				{metadata.exif.copyright && (
 					<InfoItem
@@ -718,9 +802,15 @@ const _GPSInfo = React.memo(function GPSInfo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información GPS</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información GPS
+			</h3>
 			<div className="flex flex-col gap-1.5">
-				<InfoItem icon={<MapPin className="h-3.5 w-3.5 text-red-400" />} label="Latitud" value={latitude.toFixed(6)} />
+				<InfoItem
+					icon={<MapPin className="h-3.5 w-3.5 text-red-400" />}
+					label="Latitud"
+					value={latitude.toFixed(6)}
+				/>
 				<InfoItem
 					icon={<MapPin className="h-3.5 w-3.5 text-blue-400" />}
 					label="Longitud"
@@ -733,7 +823,12 @@ const _GPSInfo = React.memo(function GPSInfo({
 						value={`${altitude.toFixed(1)}m`}
 					/>
 				)}
-				<Button variant="ghost" size="sm" className="mt-1" onClick={() => window.open(mapsUrl, '_blank')}>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="mt-1"
+					onClick={() => window.open(mapsUrl, "_blank")}
+				>
 					<MapIcon className="h-3.5 w-3.5 mr-2" />
 					Ver en Google Maps
 				</Button>
@@ -754,13 +849,15 @@ const _TechnicalInfo = React.memo(function TechnicalInfo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información Técnica</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información Técnica
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.mimeType && (
 					<InfoItem
 						icon={<FileType className="h-3.5 w-3.5 text-blue-400" />}
 						label="Formato"
-						value={metadata.mimeType.split('/')[1].toUpperCase()}
+						value={metadata.mimeType.split("/")[1].toUpperCase()}
 					/>
 				)}
 				{metadata.dimensions && (
@@ -812,11 +909,11 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				}
 			} catch (error) {
 				if (mounted) {
-					console.error('Error cargando metadata:', error);
+					console.error("Error cargando metadata:", error);
 					toast({
-						title: 'Error',
-						description: 'No se pudo cargar la información de la imagen',
-						variant: 'destructive',
+						title: "Error",
+						description: "No se pudo cargar la información de la imagen",
+						variant: "destructive",
 					});
 				}
 			} finally {
