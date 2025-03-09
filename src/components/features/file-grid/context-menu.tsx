@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -11,31 +11,45 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
-} from '@/components/ui/context-menu';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { logger } from '@/lib/logger';
-import { useAlbumsStore } from '@/store/albums.store';
-import { useCharactersStore } from '@/store/characters.store';
-import { useCollectionsStore } from '@/store/collections.store';
-import { useFavoritesStore } from '@/store/favorites.store';
-import { useObjectsStore } from '@/store/objects.store';
-import { usePlacesStore } from '@/store/places.store';
-import { useTagsStore } from '@/store/tags.store';
-import type { FileItem } from '@/types/file-item';
-import type { Album, Character, Collection, Object as ObjectEntity, Place, Tag } from '@prisma/client';
+} from "@/components/ui/context-menu";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { logger } from "@/lib/logger";
+import { toastService } from "@/lib/toast";
+import { useAlbumsStore } from "@/store/albums.store";
+import { useCharactersStore } from "@/store/characters.store";
+import { useCollectionsStore } from "@/store/collections.store";
+import { useConceptStore } from "@/store/concept.store";
+import { useFavoritesStore } from "@/store/favorites.store";
+import { useNoteStore } from "@/store/note.store";
+import { useObjectsStore } from "@/store/objects.store";
+import { usePlacesStore } from "@/store/places.store";
+import { usePromptStore } from "@/store/prompt.store";
+import { useTagsStore } from "@/store/tags.store";
+import type { FileItem } from "@/types/file-item";
+import type {
+	Album,
+	Character,
+	Collection,
+	Object as ObjectEntity,
+	Place,
+	Tag,
+} from "@prisma/client";
 import {
 	BookmarkPlus,
 	Box,
 	Copy,
 	Download,
+	FileText,
 	Flag,
 	FolderOpen,
 	Heart,
 	HeartOff,
 	ImageIcon,
 	Info,
+	Lightbulb,
 	MapPin,
+	MessageSquare,
 	Palette,
 	Pencil,
 	Plus,
@@ -43,38 +57,49 @@ import {
 	Tag as TagIcon,
 	Trash2,
 	User,
-} from 'lucide-react';
-import type * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+} from "lucide-react";
+import type * as React from "react";
+import { useCallback, useEffect, useState } from "react";
 
-const contextMenuLogger = logger.withContext('ContextMenu');
+const contextMenuLogger = logger.withContext("ContextMenu");
 
 // Tipos de acciones del menú contextual
 export type ContextMenuAction =
-	| 'mark-toggle'
-	| 'favorite-toggle'
-	| 'collection-add'
-	| 'tag-add'
-	| 'album-add'
-	| 'character-add'
-	| 'place-add'
-	| 'object-add'
-	| 'collection-create'
-	| 'tag-create'
-	| 'album-create'
-	| 'character-create'
-	| 'place-create'
-	| 'object-create'
-	| 'preview'
-	| 'open'
-	| 'download'
-	| 'copy'
-	| 'delete';
+	| "mark-toggle"
+	| "favorite-toggle"
+	| "collection-add"
+	| "tag-add"
+	| "album-add"
+	| "character-add"
+	| "place-add"
+	| "object-add"
+	| "collection-create"
+	| "tag-create"
+	| "album-create"
+	| "character-create"
+	| "place-create"
+	| "object-create"
+	| "prompt-add"
+	| "note-add"
+	| "concept-add"
+	| "prompt-create"
+	| "note-create"
+	| "concept-create"
+	| "preview"
+	| "open"
+	| "download"
+	| "copy"
+	| "copy-path"
+	| "delete";
 
 interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
-	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+	onAction: (
+		action: ContextMenuAction,
+		file: FileItem,
+		data?: Record<string, unknown>
+	) => void;
 }
 
 const _getMetadata = (metadata: string | null) => {
@@ -139,16 +164,21 @@ function EntitySubMenu<T>({
 						<ContextMenuSeparator />
 
 						{entities && entities.length > 0 ? (
-							<ScrollArea className={entities.length > 10 ? 'h-[300px]' : ''}>
+							<ScrollArea className={entities.length > 10 ? "h-[300px]" : ""}>
 								{entities.map((entity, index) => (
-									<ContextMenuItem key={`entity-${index}`} onClick={() => onSelect(entity)}>
+									<ContextMenuItem
+										key={`entity-${index}`}
+										onClick={() => onSelect(entity)}
+									>
 										{renderItem(entity)}
 									</ContextMenuItem>
 								))}
 							</ScrollArea>
 						) : (
 							<ContextMenuItem disabled>
-								<span className="text-muted-foreground">No hay {entityName}s disponibles</span>
+								<span className="text-muted-foreground">
+									No hay {entityName}s disponibles
+								</span>
 							</ContextMenuItem>
 						)}
 					</>
@@ -158,15 +188,29 @@ function EntitySubMenu<T>({
 	);
 }
 
-export function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
+export function FileContextMenu({
+	file,
+	children,
+	onAction,
+}: FileContextMenuProps) {
 	// Stores con tipos correctos y valores por defecto
 	const { toggleFavorite, isFavorited } = useFavoritesStore();
-	const { collections, addImageToCollection, loadCollections, createCollection } = useCollectionsStore();
+	const {
+		collections,
+		addImageToCollection,
+		loadCollections,
+		createCollection,
+	} = useCollectionsStore();
 	const { tags, addTagToImage, loadTags, createTag } = useTagsStore();
 	const { albums, addImageToAlbum, loadAlbums, createAlbum } = useAlbumsStore();
-	const { characters, addImageToCharacter, loadCharacters, createCharacter } = useCharactersStore();
+	const { characters, addImageToCharacter, loadCharacters, createCharacter } =
+		useCharactersStore();
 	const { places, addImageToPlace, loadPlaces, createPlace } = usePlacesStore();
-	const { objects, addImageToObject, loadObjects, createObject } = useObjectsStore();
+	const { objects, addImageToObject, loadObjects, createObject } =
+		useObjectsStore();
+	const { prompts, loadPrompts } = usePromptStore();
+	const { notes, loadNotes } = useNoteStore();
+	const { concepts, loadConcepts } = useConceptStore();
 
 	// Estado para controlar si el menú está abierto
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -179,10 +223,16 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 		characters: { loading: false, open: false, loaded: false },
 		places: { loading: false, open: false, loaded: false },
 		objects: { loading: false, open: false, loaded: false },
+		prompts: { loading: false, open: false, loaded: false },
+		notes: { loading: false, open: false, loaded: false },
+		concepts: { loading: false, open: false, loaded: false },
 	});
 
 	// Función para cargar datos cuando se abre un submenú
-	const handleOpenChange = (entity: keyof typeof loadingStates, isOpen: boolean) => {
+	const handleOpenChange = (
+		entity: keyof typeof loadingStates,
+		isOpen: boolean
+	) => {
 		setLoadingStates((prev) => ({
 			...prev,
 			[entity]: { ...prev[entity], open: isOpen },
@@ -208,23 +258,32 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 			contextMenuLogger.info(`🔄 Cargando ${entity}...`);
 
 			switch (entity) {
-				case 'collections':
+				case "collections":
 					await loadCollections();
 					break;
-				case 'tags':
+				case "tags":
 					await loadTags();
 					break;
-				case 'albums':
+				case "albums":
 					await loadAlbums();
 					break;
-				case 'characters':
+				case "characters":
 					await loadCharacters();
 					break;
-				case 'places':
+				case "places":
 					await loadPlaces();
 					break;
-				case 'objects':
+				case "objects":
 					await loadObjects();
+					break;
+				case "prompts":
+					await loadPrompts();
+					break;
+				case "notes":
+					await loadNotes();
+					break;
+				case "concepts":
+					await loadConcepts();
 					break;
 				default:
 					contextMenuLogger.warn(`⚠️ Tipo de entidad desconocido: ${entity}`);
@@ -250,18 +309,24 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 	const handleToggleFavorite = useCallback(async () => {
 		try {
 			await toggleFavorite(file.id);
-			contextMenuLogger.info('✅ Estado de favorito cambiado');
+			contextMenuLogger.info("✅ Estado de favorito cambiado");
+			if (isFavorited(file.id)) {
+				toastService.favorite.removed();
+			} else {
+				toastService.favorite.added();
+			}
 		} catch (error) {
-			contextMenuLogger.error('❌ Error al cambiar estado de favorito:', error);
+			contextMenuLogger.error("❌ Error al cambiar estado de favorito:", error);
+			toastService.system.error("Error al cambiar estado de favorito");
 		}
-	}, [file.id, toggleFavorite]);
+	}, [file.id, toggleFavorite, isFavorited]);
 
 	const isImage =
-		file.type === 'image' ||
+		file.type === "image" ||
 		(() => {
 			try {
 				const metadata = file.metadata ? JSON.parse(file.metadata) : null;
-				return metadata?.mimeType?.startsWith('image/') || false;
+				return metadata?.mimeType?.startsWith("image/") || false;
 			} catch {
 				return false;
 			}
@@ -269,35 +334,85 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 	const _handleDoubleClick = useCallback(
 		(_event: MouseEvent) => {
-			onAction('preview', file);
+			onAction("preview", file);
 		},
 		[file, onAction]
 	);
 
 	// Manejadores para crear nuevas entidades
 	const handleCreateCollection = useCallback(() => {
-		onAction('collection-create', file);
+		onAction("collection-create", file);
 	}, [file, onAction]);
 
 	const handleCreateTag = useCallback(() => {
-		onAction('tag-create', file);
+		onAction("tag-create", file);
 	}, [file, onAction]);
 
 	const handleCreateAlbum = useCallback(() => {
-		onAction('album-create', file);
+		onAction("album-create", file);
 	}, [file, onAction]);
 
 	const handleCreateCharacter = useCallback(() => {
-		onAction('character-create', file);
+		onAction("character-create", file);
 	}, [file, onAction]);
 
 	const handleCreatePlace = useCallback(() => {
-		onAction('place-create', file);
+		onAction("place-create", file);
 	}, [file, onAction]);
 
 	const handleCreateObject = useCallback(() => {
-		onAction('object-create', file);
+		onAction("object-create", file);
 	}, [file, onAction]);
+
+	const handleCreatePrompt = useCallback(() => {
+		onAction("prompt-create", file);
+	}, [file, onAction]);
+
+	const handleCreateNote = useCallback(() => {
+		onAction("note-create", file);
+	}, [file, onAction]);
+
+	const handleCreateConcept = useCallback(() => {
+		onAction("concept-create", file);
+	}, [file, onAction]);
+
+	// Función para manejar acciones con notificaciones
+	const handleActionWithToast = useCallback(
+		(action: ContextMenuAction, data?: Record<string, unknown>) => {
+			// Primero ejecutamos la acción
+			onAction(action, file, data);
+
+			// Luego, dependiendo de la acción, mostramos una notificación
+			switch (action) {
+				case "mark-toggle":
+					toastService.system.info("Estado de selección cambiado");
+					break;
+				case "preview":
+					// No necesita toast (es una acción visual)
+					break;
+				case "open":
+					// No necesita toast (abre el archivo)
+					break;
+				case "download":
+					toastService.system.success("Descarga iniciada");
+					break;
+				case "copy":
+					toastService.system.success("Imagen copiada al portapapeles");
+					break;
+				case "copy-path":
+					toastService.system.success("Ruta copiada al portapapeles");
+					break;
+				case "delete":
+					toastService.system.info("Archivo enviado a la papelera");
+					break;
+				default:
+					// Para acciones relacionadas con entidades, las notificaciones
+					// se manejan en sus respectivas funciones handler
+					break;
+			}
+		},
+		[file, onAction]
+	);
 
 	return (
 		<ContextMenu onOpenChange={setIsMenuOpen}>
@@ -306,7 +421,9 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 				<ContextMenuContent className="w-64">
 					{isImage && (
 						<>
-							<ContextMenuItem onClick={() => onAction('mark-toggle', file)}>
+							<ContextMenuItem
+								onClick={() => handleActionWithToast("mark-toggle")}
+							>
 								<Flag className="mr-2 h-4 w-4 text-warning" />
 								Marcar/Desmarcar
 								<ContextMenuShortcut>⌘M</ContextMenuShortcut>
@@ -329,7 +446,9 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 							<ContextMenuSeparator />
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('collections', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("collections", open)}
+							>
 								<ContextMenuSubTrigger>
 									<BookmarkPlus className="mr-2 h-4 w-4" />
 									Agregar a colección
@@ -338,11 +457,16 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 									{loadingStates.collections.loading ? (
 										<div className="flex justify-center items-center py-2">
 											<LoadingSpinner size={16} />
-											<span className="ml-2 text-sm">Cargando colecciones...</span>
+											<span className="ml-2 text-sm">
+												Cargando colecciones...
+											</span>
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreateCollection} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreateCollection}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nueva colección</span>
 											</ContextMenuItem>
@@ -350,19 +474,27 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{collections && collections.length > 0 ? (
-												<ScrollArea className={collections.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={collections.length > 10 ? "h-[300px]" : ""}
+												>
 													{collections.map((collection: Collection) => (
 														<ContextMenuItem
 															key={collection.id}
 															onClick={() =>
-																onAction('collection-add', file, {
+																onAction("collection-add", file, {
 																	id: collection.id,
 																})
 															}
 														>
 															<div className="flex items-center w-full">
-																{collection.emoji && <span className="mr-2">{collection.emoji}</span>}
-																<span className="flex-1 truncate">{collection.name}</span>
+																{collection.emoji && (
+																	<span className="mr-2">
+																		{collection.emoji}
+																	</span>
+																)}
+																<span className="flex-1 truncate">
+																	{collection.name}
+																</span>
 																{collection.color && (
 																	<div
 																		className="h-3 w-3 rounded-full"
@@ -377,7 +509,9 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 												</ScrollArea>
 											) : (
 												<ContextMenuItem disabled>
-													<span className="text-muted-foreground">No hay colecciones</span>
+													<span className="text-muted-foreground">
+														No hay colecciones
+													</span>
 												</ContextMenuItem>
 											)}
 										</>
@@ -385,7 +519,9 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 								</ContextMenuSubContent>
 							</ContextMenuSub>
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('tags', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("tags", open)}
+							>
 								<ContextMenuSubTrigger>
 									<TagIcon className="mr-2 h-4 w-4" />
 									Etiquetas
@@ -394,11 +530,16 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 									{loadingStates.tags.loading ? (
 										<div className="flex justify-center items-center py-2">
 											<LoadingSpinner size={16} />
-											<span className="ml-2 text-sm">Cargando etiquetas...</span>
+											<span className="ml-2 text-sm">
+												Cargando etiquetas...
+											</span>
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreateTag} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreateTag}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nueva etiqueta</span>
 											</ContextMenuItem>
@@ -406,14 +547,27 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{tags && tags.length > 0 ? (
-												<ScrollArea className={tags.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={tags.length > 10 ? "h-[300px]" : ""}
+												>
 													{tags.map((tag: Tag) => (
-														<ContextMenuItem key={tag.id} onClick={() => onAction('tag-add', file, { id: tag.id })}>
+														<ContextMenuItem
+															key={tag.id}
+															onClick={() =>
+																onAction("tag-add", file, { id: tag.id })
+															}
+														>
 															<div className="flex items-center gap-2 w-full">
-																<div className="w-3 h-3 rounded" style={{ backgroundColor: tag.color }} />
+																<div
+																	className="w-3 h-3 rounded"
+																	style={{ backgroundColor: tag.color }}
+																/>
 																<span className="flex-1">{tag.name}</span>
 																{tag.shortcut && (
-																	<Badge variant="outline" className="text-[10px] h-4 px-1">
+																	<Badge
+																		variant="outline"
+																		className="text-[10px] h-4 px-1"
+																	>
 																		{tag.shortcut}
 																	</Badge>
 																)}
@@ -422,14 +576,18 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 													))}
 												</ScrollArea>
 											) : (
-												<ContextMenuItem disabled>No hay etiquetas disponibles</ContextMenuItem>
+												<ContextMenuItem disabled>
+													No hay etiquetas disponibles
+												</ContextMenuItem>
 											)}
 										</>
 									)}
 								</ContextMenuSubContent>
 							</ContextMenuSub>
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('albums', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("albums", open)}
+							>
 								<ContextMenuSubTrigger>
 									<ImageIcon className="mr-2 h-4 w-4" />
 									Álbumes
@@ -442,7 +600,10 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreateAlbum} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreateAlbum}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nuevo álbum</span>
 											</ContextMenuItem>
@@ -450,29 +611,40 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{albums.length > 0 ? (
-												<ScrollArea className={albums.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={albums.length > 10 ? "h-[300px]" : ""}
+												>
 													{albums.map((album: Album) => (
 														<ContextMenuItem
 															key={album.id}
-															onClick={() => onAction('album-add', file, { id: album.id })}
+															onClick={() =>
+																onAction("album-add", file, { id: album.id })
+															}
 														>
 															<div className="flex items-center gap-2 w-full">
 																<span className="mr-2">{album.emoji}</span>
 																<span className="flex-1">{album.name}</span>
-																<div className="w-3 h-3 rounded" style={{ backgroundColor: album.color }} />
+																<div
+																	className="w-3 h-3 rounded"
+																	style={{ backgroundColor: album.color }}
+																/>
 															</div>
 														</ContextMenuItem>
 													))}
 												</ScrollArea>
 											) : (
-												<ContextMenuItem disabled>No hay álbumes disponibles</ContextMenuItem>
+												<ContextMenuItem disabled>
+													No hay álbumes disponibles
+												</ContextMenuItem>
 											)}
 										</>
 									)}
 								</ContextMenuSubContent>
 							</ContextMenuSub>
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('characters', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("characters", open)}
+							>
 								<ContextMenuSubTrigger>
 									<User className="mr-2 h-4 w-4" />
 									Personajes
@@ -481,11 +653,16 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 									{loadingStates.characters.loading ? (
 										<div className="flex justify-center items-center py-2">
 											<LoadingSpinner size={16} />
-											<span className="ml-2 text-sm">Cargando personajes...</span>
+											<span className="ml-2 text-sm">
+												Cargando personajes...
+											</span>
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreateCharacter} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreateCharacter}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nuevo personaje</span>
 											</ContextMenuItem>
@@ -493,12 +670,14 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{characters.length > 0 ? (
-												<ScrollArea className={characters.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={characters.length > 10 ? "h-[300px]" : ""}
+												>
 													{characters.map((character: Character) => (
 														<ContextMenuItem
 															key={character.id}
 															onClick={() =>
-																onAction('character-add', file, {
+																onAction("character-add", file, {
 																	id: character.id,
 																})
 															}
@@ -506,20 +685,27 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 															<div className="flex items-center gap-2 w-full">
 																<span className="mr-2">{character.emoji}</span>
 																<span className="flex-1">{character.name}</span>
-																<div className="w-3 h-3 rounded" style={{ backgroundColor: character.color }} />
+																<div
+																	className="w-3 h-3 rounded"
+																	style={{ backgroundColor: character.color }}
+																/>
 															</div>
 														</ContextMenuItem>
 													))}
 												</ScrollArea>
 											) : (
-												<ContextMenuItem disabled>No hay personajes disponibles</ContextMenuItem>
+												<ContextMenuItem disabled>
+													No hay personajes disponibles
+												</ContextMenuItem>
 											)}
 										</>
 									)}
 								</ContextMenuSubContent>
 							</ContextMenuSub>
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('places', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("places", open)}
+							>
 								<ContextMenuSubTrigger>
 									<MapPin className="mr-2 h-4 w-4" />
 									Lugares
@@ -532,7 +718,10 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreatePlace} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreatePlace}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nuevo lugar</span>
 											</ContextMenuItem>
@@ -540,29 +729,40 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{places.length > 0 ? (
-												<ScrollArea className={places.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={places.length > 10 ? "h-[300px]" : ""}
+												>
 													{places.map((place: Place) => (
 														<ContextMenuItem
 															key={place.id}
-															onClick={() => onAction('place-add', file, { id: place.id })}
+															onClick={() =>
+																onAction("place-add", file, { id: place.id })
+															}
 														>
 															<div className="flex items-center gap-2 w-full">
 																<span className="mr-2">{place.emoji}</span>
 																<span className="flex-1">{place.name}</span>
-																<div className="w-3 h-3 rounded" style={{ backgroundColor: place.color }} />
+																<div
+																	className="w-3 h-3 rounded"
+																	style={{ backgroundColor: place.color }}
+																/>
 															</div>
 														</ContextMenuItem>
 													))}
 												</ScrollArea>
 											) : (
-												<ContextMenuItem disabled>No hay lugares disponibles</ContextMenuItem>
+												<ContextMenuItem disabled>
+													No hay lugares disponibles
+												</ContextMenuItem>
 											)}
 										</>
 									)}
 								</ContextMenuSubContent>
 							</ContextMenuSub>
 
-							<ContextMenuSub onOpenChange={(open) => handleOpenChange('objects', open)}>
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("objects", open)}
+							>
 								<ContextMenuSubTrigger>
 									<Box className="mr-2 h-4 w-4" />
 									Objetos
@@ -575,7 +775,10 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 										</div>
 									) : (
 										<>
-											<ContextMenuItem onClick={handleCreateObject} className="text-primary">
+											<ContextMenuItem
+												onClick={handleCreateObject}
+												className="text-primary"
+											>
 												<Plus className="mr-2 h-4 w-4" />
 												<span>Nuevo objeto</span>
 											</ContextMenuItem>
@@ -583,22 +786,191 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 											<ContextMenuSeparator />
 
 											{objects.length > 0 ? (
-												<ScrollArea className={objects.length > 10 ? 'h-[300px]' : ''}>
+												<ScrollArea
+													className={objects.length > 10 ? "h-[300px]" : ""}
+												>
 													{objects.map((object: ObjectEntity) => (
 														<ContextMenuItem
 															key={object.id}
-															onClick={() => onAction('object-add', file, { id: object.id })}
+															onClick={() =>
+																onAction("object-add", file, { id: object.id })
+															}
 														>
 															<div className="flex items-center gap-2 w-full">
 																<span className="mr-2">{object.emoji}</span>
 																<span className="flex-1">{object.name}</span>
-																<div className="w-3 h-3 rounded" style={{ backgroundColor: object.color }} />
+																<div
+																	className="w-3 h-3 rounded"
+																	style={{ backgroundColor: object.color }}
+																/>
 															</div>
 														</ContextMenuItem>
 													))}
 												</ScrollArea>
 											) : (
-												<ContextMenuItem disabled>No hay objetos disponibles</ContextMenuItem>
+												<ContextMenuItem disabled>
+													No hay objetos disponibles
+												</ContextMenuItem>
+											)}
+										</>
+									)}
+								</ContextMenuSubContent>
+							</ContextMenuSub>
+
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("prompts", open)}
+							>
+								<ContextMenuSubTrigger>
+									<MessageSquare className="mr-2 h-4 w-4" />
+									Prompts
+								</ContextMenuSubTrigger>
+								<ContextMenuSubContent className="w-56">
+									{loadingStates.prompts.loading ? (
+										<div className="flex justify-center items-center py-2">
+											<LoadingSpinner size={16} />
+											<span className="ml-2 text-sm">Cargando prompts...</span>
+										</div>
+									) : (
+										<>
+											<ContextMenuItem
+												onClick={handleCreatePrompt}
+												className="text-primary"
+											>
+												<Plus className="mr-2 h-4 w-4" />
+												<span>Nuevo prompt</span>
+											</ContextMenuItem>
+
+											<ContextMenuSeparator />
+
+											{prompts.length > 0 ? (
+												<ScrollArea
+													className={prompts.length > 10 ? "h-[300px]" : ""}
+												>
+													{prompts.map((prompt) => (
+														<ContextMenuItem
+															key={prompt.id}
+															onClick={() =>
+																onAction("prompt-add", file, { id: prompt.id })
+															}
+														>
+															<div className="flex items-center gap-2 w-full">
+																<span className="flex-1">{prompt.name}</span>
+															</div>
+														</ContextMenuItem>
+													))}
+												</ScrollArea>
+											) : (
+												<ContextMenuItem disabled>
+													No hay prompts disponibles
+												</ContextMenuItem>
+											)}
+										</>
+									)}
+								</ContextMenuSubContent>
+							</ContextMenuSub>
+
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("notes", open)}
+							>
+								<ContextMenuSubTrigger>
+									<FileText className="mr-2 h-4 w-4" />
+									Notas
+								</ContextMenuSubTrigger>
+								<ContextMenuSubContent className="w-56">
+									{loadingStates.notes.loading ? (
+										<div className="flex justify-center items-center py-2">
+											<LoadingSpinner size={16} />
+											<span className="ml-2 text-sm">Cargando notas...</span>
+										</div>
+									) : (
+										<>
+											<ContextMenuItem
+												onClick={handleCreateNote}
+												className="text-primary"
+											>
+												<Plus className="mr-2 h-4 w-4" />
+												<span>Nueva nota</span>
+											</ContextMenuItem>
+
+											<ContextMenuSeparator />
+
+											{notes.length > 0 ? (
+												<ScrollArea
+													className={notes.length > 10 ? "h-[300px]" : ""}
+												>
+													{notes.map((note) => (
+														<ContextMenuItem
+															key={note.id}
+															onClick={() =>
+																onAction("note-add", file, { id: note.id })
+															}
+														>
+															<div className="flex items-center gap-2 w-full">
+																<span className="flex-1">{note.name}</span>
+															</div>
+														</ContextMenuItem>
+													))}
+												</ScrollArea>
+											) : (
+												<ContextMenuItem disabled>
+													No hay notas disponibles
+												</ContextMenuItem>
+											)}
+										</>
+									)}
+								</ContextMenuSubContent>
+							</ContextMenuSub>
+
+							<ContextMenuSub
+								onOpenChange={(open) => handleOpenChange("concepts", open)}
+							>
+								<ContextMenuSubTrigger>
+									<Lightbulb className="mr-2 h-4 w-4" />
+									Conceptos
+								</ContextMenuSubTrigger>
+								<ContextMenuSubContent className="w-56">
+									{loadingStates.concepts.loading ? (
+										<div className="flex justify-center items-center py-2">
+											<LoadingSpinner size={16} />
+											<span className="ml-2 text-sm">
+												Cargando conceptos...
+											</span>
+										</div>
+									) : (
+										<>
+											<ContextMenuItem
+												onClick={handleCreateConcept}
+												className="text-primary"
+											>
+												<Plus className="mr-2 h-4 w-4" />
+												<span>Nuevo concepto</span>
+											</ContextMenuItem>
+
+											<ContextMenuSeparator />
+
+											{concepts.length > 0 ? (
+												<ScrollArea
+													className={concepts.length > 10 ? "h-[300px]" : ""}
+												>
+													{concepts.map((concept) => (
+														<ContextMenuItem
+															key={concept.id}
+															onClick={() =>
+																onAction("concept-add", file, {
+																	id: concept.id,
+																})
+															}
+														>
+															<div className="flex items-center gap-2 w-full">
+																<span className="flex-1">{concept.name}</span>
+															</div>
+														</ContextMenuItem>
+													))}
+												</ScrollArea>
+											) : (
+												<ContextMenuItem disabled>
+													No hay conceptos disponibles
+												</ContextMenuItem>
 											)}
 										</>
 									)}
@@ -607,13 +979,13 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 							<ContextMenuSeparator />
 
-							<ContextMenuItem onClick={() => onAction('preview', file)}>
+							<ContextMenuItem onClick={() => handleActionWithToast("preview")}>
 								<ImageIcon className="mr-2 h-4 w-4" />
 								Ver imagen
 								<ContextMenuShortcut>⏎</ContextMenuShortcut>
 							</ContextMenuItem>
 
-							<ContextMenuItem onClick={() => onAction('open', file)}>
+							<ContextMenuItem onClick={() => handleActionWithToast("open")}>
 								<FolderOpen className="mr-2 h-4 w-4" />
 								Abrir ubicación
 								<ContextMenuShortcut>⌘O</ContextMenuShortcut>
@@ -621,21 +993,29 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 							<ContextMenuSeparator />
 
-							<ContextMenuItem onClick={() => onAction('download', file)}>
+							<ContextMenuItem
+								onClick={() => handleActionWithToast("download")}
+							>
 								<Download className="mr-2 h-4 w-4" />
 								Descargar
 								<ContextMenuShortcut>⌘D</ContextMenuShortcut>
 							</ContextMenuItem>
 
-							<ContextMenuItem onClick={() => onAction('copy', file)}>
+							<ContextMenuItem onClick={() => handleActionWithToast("copy")}>
 								<Copy className="mr-2 h-4 w-4" />
 								Copiar
 								<ContextMenuShortcut>⌘C</ContextMenuShortcut>
 							</ContextMenuItem>
 
-							<ContextMenuSeparator />
+							<ContextMenuItem
+								onClick={() => handleActionWithToast("copy-path")}
+							>
+								<Pencil className="mr-2 h-4 w-4" />
+								Copiar ruta
+								<ContextMenuShortcut>⌘⇧C</ContextMenuShortcut>
+							</ContextMenuItem>
 
-							<ContextMenuItem onClick={() => onAction('delete', file)} className="text-red-600">
+							<ContextMenuItem onClick={() => handleActionWithToast("delete")}>
 								<Trash2 className="mr-2 h-4 w-4" />
 								Eliminar
 								<ContextMenuShortcut>⌘⌫</ContextMenuShortcut>

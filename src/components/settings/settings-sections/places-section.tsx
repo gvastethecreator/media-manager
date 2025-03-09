@@ -1,35 +1,27 @@
-"use client";
+'use client';
 
-import { PlaceCard } from "@/components/features/entity-cards/cards/place-card";
+import { PlaceCard } from '@/components/features/entity-cards/cards/place-card';
 import {
 	type PlaceFormData,
 	formDataToPlace,
 	placeToFormData,
-} from "@/components/features/entity-cards/forms/entity-types";
-import { PlaceForm } from "@/components/features/entity-cards/forms/place-form";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatsCard, type StatsCardProps } from "@/components/ui/stats-card";
-import { useToast } from "@/components/ui/use-toast";
-import { logger } from "@/lib/logger";
-import { usePlacesStore } from "@/store/places.store";
-import { Loader2, MapPin } from "lucide-react";
-import { motion } from "motion/react";
-import * as React from "react";
+} from '@/components/features/entity-cards/forms/entity-types';
+import { PlaceForm } from '@/components/features/entity-cards/forms/place-form';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
+import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/lib/logger';
+import { usePlacesStore } from '@/store/places.store';
+import { Loader2, MapPin } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
-const placeLogger = logger.withContext("PlacesSection");
+const placeLogger = logger.withContext('PlacesSection');
 
 export function PlacesSection() {
-	const {
-		places,
-		isLoading,
-		error,
-		loadPlaces,
-		createPlace,
-		updatePlace,
-		deletePlace,
-	} = usePlacesStore();
+	const { places, isLoading, error, loadPlaces, createPlace, updatePlace, deletePlace } = usePlacesStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
@@ -46,21 +38,12 @@ export function PlacesSection() {
 			};
 		}
 
-		const totalImages = places.reduce(
-			(acc, place) => acc + (place._count?.images || 0),
-			0
-		);
-		const totalSize = places.reduce(
-			(acc, place) => acc + (place.totalSize || 0),
-			0
-		);
+		const totalImages = places.reduce((acc, place) => acc + (place._count?.images || 0), 0);
+		const totalSize = places.reduce((acc, place) => acc + (place.totalSize || 0), 0);
 
 		// Obtener lugares recientes
 		const recentPlaces = [...places]
-			.sort(
-				(a, b) =>
-					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-			)
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 			.slice(0, 5)
 			.map((place) => ({
 				id: place.id,
@@ -85,18 +68,18 @@ export function PlacesSection() {
 
 	const handleCreate = async (data: PlaceFormData) => {
 		try {
-			placeLogger.info("✨ Creando nuevo lugar:", data);
+			placeLogger.info('✨ Creando nuevo lugar:', data);
 			await createPlace(formDataToPlace(data));
 			toast({
-				title: "Éxito",
-				description: "Lugar creado correctamente",
+				title: 'Éxito',
+				description: 'Lugar creado correctamente',
 			});
 		} catch (error) {
-			placeLogger.error("❌ Error al crear lugar:", error);
+			placeLogger.error('❌ Error al crear lugar:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo crear el lugar",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo crear el lugar',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -106,40 +89,40 @@ export function PlacesSection() {
 			return;
 		}
 		try {
-			placeLogger.info("💾 Actualizando lugar:", data);
+			placeLogger.info('💾 Actualizando lugar:', data);
 			await updatePlace(formDataToPlace(data));
 			setEditingId(null);
 			toast({
-				title: "Éxito",
-				description: "Lugar actualizado correctamente",
+				title: 'Éxito',
+				description: 'Lugar actualizado correctamente',
 			});
 		} catch (error) {
-			placeLogger.error("❌ Error al actualizar lugar:", error);
+			placeLogger.error('❌ Error al actualizar lugar:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo actualizar el lugar",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo actualizar el lugar',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("¿Estás seguro de eliminar este lugar?")) {
+		if (!confirm('¿Estás seguro de eliminar este lugar?')) {
 			return;
 		}
 		try {
-			placeLogger.info("🗑️ Eliminando lugar:", { id });
+			placeLogger.info('🗑️ Eliminando lugar:', { id });
 			await deletePlace(id);
 			toast({
-				title: "Éxito",
-				description: "Lugar eliminado correctamente",
+				title: 'Éxito',
+				description: 'Lugar eliminado correctamente',
 			});
 		} catch (error) {
-			placeLogger.error("❌ Error al eliminar lugar:", error);
+			placeLogger.error('❌ Error al eliminar lugar:', error);
 			toast({
-				title: "Error",
-				description: "No se pudo eliminar el lugar",
-				variant: "destructive",
+				title: 'Error',
+				description: 'No se pudo eliminar el lugar',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -163,7 +146,7 @@ export function PlacesSection() {
 					title="Estadísticas"
 					icon={<MapPin className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats as StatsCardProps["stats"]}
+					stats={stats as StatsCardProps['stats']}
 				/>
 			</div>
 
@@ -174,17 +157,8 @@ export function PlacesSection() {
 							<MapPin className="h-5 w-5" />
 							Lugares
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => loadPlaces()}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Recargar"
-							)}
+						<Button variant="outline" size="sm" onClick={() => loadPlaces()} disabled={isLoading}>
+							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -195,9 +169,7 @@ export function PlacesSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">
-								{error.message}
-							</p>
+							<p className="text-sm text-muted-foreground text-center">{error.message}</p>
 							<Button variant="outline" size="sm" onClick={() => loadPlaces()}>
 								Reintentar
 							</Button>
@@ -205,9 +177,7 @@ export function PlacesSection() {
 					) : places.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<MapPin className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">
-								No hay lugares creados
-							</p>
+							<p className="text-sm text-muted-foreground text-center">No hay lugares creados</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -231,11 +201,7 @@ export function PlacesSection() {
 											</CardContent>
 										</Card>
 									) : (
-										<PlaceCard
-											place={place}
-											onEdit={() => setEditingId(place.id)}
-											onDelete={handleDelete}
-										/>
+										<PlaceCard place={place} onEdit={() => setEditingId(place.id)} onDelete={handleDelete} />
 									)}
 								</motion.div>
 							))}

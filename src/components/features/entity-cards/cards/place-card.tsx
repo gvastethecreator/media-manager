@@ -1,5 +1,7 @@
 'use client';
 
+import type { PlaceFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils';
@@ -24,14 +26,20 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
+import { useEffect, useRef } from 'react';
+
+type CardData =
+	| (Place & {
+			_count?: { images: number };
+			totalSize?: number;
+			featuredImage?: string | null;
+			recentImages?: (string | null)[];
+	  })
+	| PlaceFormData;
 
 interface PlaceCardProps {
-	place: Place & {
-		_count?: { images: number };
-		totalSize?: number;
-		featuredImage?: string | null;
-		recentImages?: (string | null)[];
-	};
+	data: CardData;
+	isPreview?: boolean;
 	onEdit?: (place: Place) => void;
 	onDelete?: (id: string) => void;
 	onClick?: () => void;
@@ -57,337 +65,290 @@ const getTypeIcon = (type: string) => {
 	switch (type.toLowerCase()) {
 		case 'ciudad':
 			return <Building2 className="h-4 w-4" />;
-		case 'castillo':
+		case 'fortaleza':
 			return <Shield className="h-4 w-4" />;
 		case 'ruinas':
-			return <Mountain className="h-4 w-4" />;
+			return <Scroll className="h-4 w-4" />;
 		case 'mazmorra':
-			return <Sword className="h-4 w-4" />;
+			return <Skull className="h-4 w-4" />;
 		default:
 			return <MapPin className="h-4 w-4" />;
 	}
 };
 
-export function PlaceCard({ place, onEdit, onDelete, onClick, className }: PlaceCardProps) {
+function getRandomGradient() {
+	const gradients = [
+		'from-green-500/20 to-emerald-500/20',
+		'from-blue-500/20 to-cyan-500/20',
+		'from-yellow-500/20 to-amber-500/20',
+		'from-indigo-500/20 to-violet-500/20',
+		'from-red-500/20 to-pink-500/20',
+	];
+	return gradients[Math.floor(Math.random() * gradients.length)];
+}
+
+export function PlaceCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: PlaceCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-	const cardRef = React.useRef<HTMLDivElement>(null);
+	const gradient = getRandomGradient();
 
-	// Manejar el movimiento del mouse para efectos de iluminación
-	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!cardRef.current) {
+	// Para modo preview, detectar cambios
+	const prevDataRef = useRef<CardData | null>(null);
+
+	// Para modo preview, animar cambios
+	useEffect(() => {
+		if (!isPreview) {
 			return;
 		}
-		const rect = cardRef.current.getBoundingClientRect();
+
+		if (!prevDataRef.current) {
+			prevDataRef.current = { ...data };
+			return;
+		}
+
+		prevDataRef.current = { ...data };
+	}, [data, isPreview]);
+
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		const rect = e.currentTarget.getBoundingClientRect();
 		const x = ((e.clientX - rect.left) / rect.width) * 100;
 		const y = ((e.clientY - rect.top) / rect.height) * 100;
 		setMousePosition({ x, y });
 	};
 
-	// Parsear los peligros y recursos
-	const dangers = React.useMemo(() => {
-		try {
-			return JSON.parse(place.dangers);
-		} catch {
-			return [];
-		}
-	}, [place.dangers]);
+	// Renderizar versión para preview en diálogos
+	if (isPreview) {
+		return (
+			<motion.div
+				className={cn(
+					'group relative flex h-52 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary',
+					isHovered && 'shadow-lg',
+					className
+				)}
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				onMouseMove={handleMouseMove}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
+				{/* Gradiente de fondo */}
+				<div
+					className={cn(
+						'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
+						gradient,
+						isHovered && 'opacity-80'
+					)}
+					style={{
+						backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+					}}
+				/>
 
-	const resources = React.useMemo(() => {
-		try {
-			return JSON.parse(place.resources);
-		} catch {
-			return [];
-		}
-	}, [place.resources]);
+				{/* Contenido */}
+				<div className="z-10 flex flex-1 flex-col">
+					<div className="flex items-center space-x-2">
+						<div
+							className="flex h-10 w-10 items-center justify-center rounded-full"
+							style={{ backgroundColor: data.color }}
+						>
+							<MapPin className="h-5 w-5 text-white" />
+						</div>
+						<div>
+							<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
+							{'category' in data && data.category && <p className="text-sm text-muted-foreground">{data.category}</p>}
+						</div>
+						{'climate' in data && data.climate && (
+							<Badge variant="outline" className="ml-auto">
+								{data.climate}
+							</Badge>
+						)}
+					</div>
 
-	const typeIcon = React.useMemo(() => getTypeIcon(place.type), [place.type]);
-	const climateIcon = React.useMemo(() => getClimateIcon(place.climate), [place.climate]);
+					{/* Descripción */}
+					{data.description && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
+
+					{/* Atributos */}
+					<div className="mt-4 grid grid-cols-2 gap-2">
+						{'climate' in data && data.climate && (
+							<div className="flex items-center space-x-2">
+								<span className="text-xs font-medium text-muted-foreground">Clima:</span>
+								<span className="text-xs">{data.climate}</span>
+							</div>
+						)}
+						{'government' in data && data.government && (
+							<div className="flex items-center space-x-2">
+								<span className="text-xs font-medium text-muted-foreground">Gobierno:</span>
+								<span className="text-xs line-clamp-1">{data.government}</span>
+							</div>
+						)}
+					</div>
+
+					{/* Detalles */}
+					<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+						<div className="flex items-center space-x-2">
+							<span className="inline-flex items-center rounded-full border px-2 py-0.5">{data.emoji || '🗺️'}</span>
+						</div>
+						<div className="flex items-center space-x-2">
+							<span className="flex items-center">Lugar</span>
+						</div>
+					</div>
+				</div>
+			</motion.div>
+		);
+	}
 
 	return (
 		<motion.div
-			ref={cardRef}
 			className={cn(
-				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden',
-				'bg-linear-to-br from-zinc-950 to-stone-900',
-				'shadow-lg hover:shadow-xl transition-all duration-300',
-				'cursor-pointer perspective-1000',
+				'group h-[420px] rounded-lg overflow-hidden relative shadow-md hover:shadow-lg',
+				'transition-shadow duration-300',
 				className
 			)}
-			onHoverStart={() => setIsHovered(true)}
-			onHoverEnd={() => setIsHovered(false)}
-			onMouseMove={handleMouseMove}
-			whileHover={{ scale: 1.02 }}
-			transition={{ duration: 0.2 }}
 			onClick={onClick}
-			style={
-				{
-					'--x': `${mousePosition.x}%`,
-					'--y': `${mousePosition.y}%`,
-				} as React.CSSProperties
-			}
+			whileHover={{ y: -5 }}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
 		>
-			{/* Imagen destacada con efecto de mapa antiguo */}
-			{place.featuredImage && (
-				<div className="absolute inset-0 z-0">
-					<div
-						className="absolute inset-0 bg-cover bg-center"
-						style={{
-							backgroundImage: `url(${place.featuredImage})`,
-							opacity: 0.15,
-							filter: 'sepia(1) brightness(0.8) contrast(1.2)',
-							mixBlendMode: 'overlay',
-						}}
-					/>
-					<div className="absolute inset-x-0 top-20 bottom-40 px-4">
-						<div className="relative w-full h-full rounded-lg overflow-hidden">
-							<img
-								src={place.featuredImage}
-								alt={place.name}
-								className="object-cover w-full h-full sepia brightness-90 contrast-110"
-							/>
-							<div
-								className="absolute inset-0"
-								style={{
-									background: `linear-gradient(to bottom,
-										transparent 0%,
-										${place.color}22 50%,
-										${place.color}44 100%
-									)`,
-									mixBlendMode: 'overlay',
-								}}
-							/>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Textura de papel antiguo */}
+			{/* Fondo con gradiente */}
 			<div
-				className="absolute inset-0 opacity-20 mix-blend-overlay"
+				className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/40"
 				style={{
-					backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E")`,
-					filter: 'sepia(1) invert(1)',
+					backgroundSize: '400% 400%',
+					animation: isHovered ? 'gradient 8s ease infinite' : 'none',
 				}}
 			/>
 
-			{/* Patrón de coordenadas */}
+			{/* Patrones de decoración */}
 			<div
 				className="absolute inset-0 opacity-5"
 				style={{
-					backgroundImage: `linear-gradient(0deg, ${place.color}22 1px, transparent 1px),
-						linear-gradient(90deg, ${place.color}22 1px, transparent 1px)`,
-					backgroundSize: '20px 20px',
-					mixBlendMode: 'overlay',
+					backgroundImage: `
+            radial-gradient(
+              circle at 10% 10%,
+              ${data.color || '#22c55e'}22,
+              transparent 40%
+            ),
+            radial-gradient(
+              circle at 90% 90%,
+              ${data.color || '#22c55e'}22,
+              transparent 40%
+            )
+          `,
 				}}
 			/>
 
-			{/* Marco decorativo con brújula */}
-			<div
-				className="absolute inset-[2px] rounded-lg border-2"
-				style={{
-					borderImage: `linear-gradient(
-						to bottom right,
-						${place.color}88,
-						transparent,
-						${place.color}88
-					) 1`,
-					boxShadow: `inset 0 0 20px ${place.color}11`,
-				}}
-			>
-				{/* Brújula */}
-				<div
-					className="absolute -top-1 -right-1 h-12 w-12 opacity-20"
-					style={{
-						backgroundImage: `url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='24' cy='24' r='20' stroke='${encodeURIComponent(
-							place.color
-						)}' stroke-width='2'/%3E%3Cpath d='M24 4L26 22L44 24L26 26L24 44L22 26L4 24L22 22L24 4Z' fill='${encodeURIComponent(
-							place.color
-						)}'/%3E%3C/svg%3E")`,
-						backgroundSize: 'contain',
-						transform: 'rotate(45deg)',
-						filter: 'sepia(1) invert(1)',
-					}}
-				/>
-			</div>
-
-			{/* Grid de imágenes recientes */}
-			{place.recentImages && place.recentImages.length > 0 && (
-				<div className="absolute inset-x-0 bottom-20 h-32 px-4 z-0">
-					<div className="grid grid-cols-3 gap-2 h-full">
-						{place.recentImages.slice(0, 3).map((src, i) => (
-							<div
-								key={`${place.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
-								className="relative rounded-md overflow-hidden aspect-square"
-							>
-								{src ? (
-									<img
-										src={src}
-										alt={`Imagen ${i + 1}`}
-										className="object-cover w-full h-full sepia brightness-90 contrast-110"
-									/>
-								) : (
-									<div
-										className={cn(
-											'w-full h-full flex items-center justify-center',
-											'bg-linear-to-br from-zinc-900 to-stone-800'
-										)}
-									>
-										<ImageIcon className="w-4 h-4 text-white/80" />
-									</div>
-								)}
-							</div>
-						))}
-					</div>
-				</div>
-			)}
-
-			{/* Contenido de la carta */}
-			<div className="relative h-full p-4 flex flex-col">
-				{/* Encabezado */}
-				<div className="flex items-center gap-3 mb-4">
+			<div className="relative h-full p-5 flex flex-col">
+				{/* Cabecera */}
+				<div className="flex items-center mb-3">
 					<div
-						className={cn(
-							'h-12 w-12 rounded-lg flex items-center justify-center',
-							'bg-linear-to-br shadow-inner',
-							'from-zinc-900 to-stone-800'
-						)}
+						className="h-12 w-12 rounded-lg flex items-center justify-center"
 						style={{
-							border: `2px solid ${place.color}88`,
-							boxShadow: `inset 0 2px 4px ${place.color}22`,
+							backgroundColor: data.color || '#22c55e',
+							boxShadow: `0 0 10px ${data.color || '#22c55e'}44`,
 						}}
 					>
-						<span className="text-2xl filter drop-shadow-sm">{place.emoji}</span>
+						<span className="text-2xl text-white">{data.emoji}</span>
 					</div>
-					<div className="flex-1 min-w-0">
-						<h3 className="font-bold text-lg leading-tight truncate text-zinc-100">{place.name}</h3>
-						<div className="flex items-center gap-2 text-sm text-zinc-400">
-							<div className="flex items-center gap-1">
-								{React.cloneElement(typeIcon, {
-									className: 'h-3 w-3',
-									style: { color: place.color },
-								})}
-								<span className="text-xs">{place.type}</span>
+					<div className="ml-3 flex-1">
+						<h3 className="text-xl font-bold">{data.name}</h3>
+						{'category' in data && data.category && (
+							<div className="flex items-center text-sm text-muted-foreground">
+								<MapPin className="h-3.5 w-3.5 mr-1" />
+								<span>{data.category}</span>
 							</div>
-							<span className="mx-1">•</span>
-							<div className="flex items-center gap-1">
-								{React.cloneElement(climateIcon, {
-									className: 'h-3 w-3',
-									style: { color: place.color },
-								})}
-								<span className="text-xs">{place.climate}</span>
-							</div>
+						)}
+					</div>
+				</div>
+
+				{/* Características principales */}
+				<div className="grid grid-cols-2 gap-2 mb-4">
+					{'climate' in data && data.climate && (
+						<div
+							className="rounded-md p-2 flex items-center"
+							style={{ backgroundColor: `${data.color || '#22c55e'}11` }}
+						>
+							{getClimateIcon(data.climate)}
+							<span className="ml-2 text-sm">{data.climate}</span>
 						</div>
-					</div>
+					)}
+					{'type' in data && data.type && (
+						<div
+							className="rounded-md p-2 flex items-center"
+							style={{ backgroundColor: `${data.color || '#22c55e'}11` }}
+						>
+							{getTypeIcon(data.type)}
+							<span className="ml-2 text-sm">{data.type}</span>
+						</div>
+					)}
 				</div>
 
 				{/* Descripción */}
-				{place.description && (
-					<div className="mb-4">
-						<p className="text-sm text-zinc-400 line-clamp-2">{place.description}</p>
+				{data.description && (
+					<div className="mb-4 bg-background/60 backdrop-blur-sm rounded-md p-3">
+						<p className="text-sm line-clamp-3">{data.description}</p>
 					</div>
 				)}
 
-				{/* Población y gobierno */}
-				<div className="mb-4">
-					<div className="flex items-center gap-4 text-xs text-zinc-400">
-						<div className="flex items-center gap-1">
-							<Users className="h-3 w-3" style={{ color: place.color }} />
-							<span>Población: {place.population.toLocaleString()}</span>
-						</div>
-						{place.government && (
-							<div className="flex items-center gap-1">
-								<Shield className="h-3 w-3" style={{ color: place.color }} />
-								<span>{place.government}</span>
-							</div>
-						)}
+				{/* Gobierno y población (si existen) */}
+				{'government' in data && data.government && (
+					<div className="mb-3 flex items-center text-sm">
+						<Users className="h-4 w-4 mr-2 text-muted-foreground" />
+						<span>Gobierno: {data.government}</span>
 					</div>
-				</div>
+				)}
+				{'population' in data && data.population && data.population > 0 && (
+					<div className="mb-3 flex items-center text-sm">
+						<Users className="h-4 w-4 mr-2 text-muted-foreground" />
+						<span>Población: {data.population.toLocaleString()}</span>
+					</div>
+				)}
 
-				{/* Peligros y recursos en columnas */}
-				<div className="grid grid-cols-2 gap-4 mb-4">
-					{dangers.length > 0 && (
-						<div className="bg-zinc-900/50 rounded-lg p-2">
-							<div className="flex items-center gap-2 mb-1">
-								<Skull className="h-3 w-3" style={{ color: place.color }} />
-								<span className="text-xs font-medium text-zinc-300">Peligros</span>
+				{/* Estadísticas */}
+				<div className="mt-auto">
+					{'_count' in data && data._count && (
+						<div className="flex justify-between items-center text-sm text-muted-foreground mb-2">
+							<div className="flex items-center">
+								<ImageIcon className="h-4 w-4 mr-1" />
+								<span>{data._count.images} imágenes</span>
 							</div>
-							<ul className="text-xs text-zinc-400 space-y-1">
-								{dangers.slice(0, 3).map((danger: string, index: number) => (
-									<li
-										key={`${place.id}-danger-${index}-${danger.substring(0, 10)}`}
-										className="flex items-center gap-2"
-									>
-										<span className="w-1 h-1 rounded-full" style={{ backgroundColor: place.color }} />
-										{danger}
-									</li>
-								))}
-								{dangers.length > 3 && <li className="text-xs text-zinc-500">+{dangers.length - 3} más...</li>}
-							</ul>
+							{'totalSize' in data && data.totalSize && <span>{formatBytes(data.totalSize)}</span>}
 						</div>
 					)}
 
-					{resources.length > 0 && (
-						<div className="bg-zinc-900/50 rounded-lg p-2">
-							<div className="flex items-center gap-2 mb-1">
-								<TreePine className="h-3 w-3" style={{ color: place.color }} />
-								<span className="text-xs font-medium text-zinc-300">Recursos</span>
-							</div>
-							<ul className="text-xs text-zinc-400 space-y-1">
-								{resources.slice(0, 3).map((resource: string, index: number) => (
-									<li
-										key={`${place.id}-resource-${index}-${resource.substring(0, 10)}`}
-										className="flex items-center gap-2"
-									>
-										<span className="w-1 h-1 rounded-full" style={{ backgroundColor: place.color }} />
-										{resource}
-									</li>
-								))}
-								{resources.length > 3 && <li className="text-xs text-zinc-500">+{resources.length - 3} más...</li>}
-							</ul>
+					{/* Mosaico de imágenes recientes si existen */}
+					{'recentImages' in data && data.recentImages && data.recentImages.length > 0 && (
+						<div className="grid grid-cols-3 gap-1 mb-2">
+							{data.recentImages.slice(0, 3).map((img, i) => (
+								<div
+									key={`place-img-${data.id}-${i}-${Date.now()}`}
+									className="relative aspect-square rounded-md overflow-hidden bg-muted"
+								>
+									{img ? (
+										<img src={img} alt="" className="object-cover w-full h-full" />
+									) : (
+										<MapPin className="h-4 w-4 absolute inset-0 m-auto text-muted-foreground" />
+									)}
+								</div>
+							))}
 						</div>
 					)}
 				</div>
-
-				{/* Historia */}
-				{place.lore && (
-					<div className="mt-auto bg-zinc-900/50 rounded-lg p-2">
-						<div className="flex items-center gap-2 mb-1">
-							<Scroll className="h-3 w-3" style={{ color: place.color }} />
-							<span className="text-xs font-medium text-zinc-300">Historia</span>
-						</div>
-						<p className="text-xs text-zinc-400 line-clamp-3">{place.lore}</p>
-					</div>
-				)}
-
-				{/* Contador de imágenes */}
-				{place._count?.images !== undefined && (
-					<div className="mt-2 flex items-center gap-1 text-xs text-zinc-400">
-						<ImageIcon className="h-3 w-3" />
-						<span>
-							{place._count.images} {place._count.images === 1 ? 'imagen' : 'imágenes'}
-						</span>
-						{place.totalSize && (
-							<>
-								<span className="mx-1">•</span>
-								<span>{formatBytes(place.totalSize)}</span>
-							</>
-						)}
-					</div>
-				)}
 
 				{/* Acciones */}
-				<motion.div
-					className="absolute top-2 right-2 flex gap-1"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: isHovered ? 1 : 0 }}
+				<div
+					className={cn(
+						'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
+						isHovered && 'opacity-100'
+					)}
 				>
 					{onEdit && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80"
-							onClick={() => onEdit(place)}
+							className="h-8 w-8 bg-background/80 hover:bg-background"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit(data as Place);
+							}}
 						>
 							<PencilIcon className="h-4 w-4" />
 						</Button>
@@ -396,13 +357,16 @@ export function PlaceCard({ place, onEdit, onDelete, onClick, className }: Place
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-zinc-950/80 backdrop-blur-xs hover:bg-zinc-900/80 text-destructive"
-							onClick={() => onDelete(place.id)}
+							className="h-8 w-8 bg-background/80 hover:bg-background hover:text-destructive"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDelete(data.id);
+							}}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					)}
-				</motion.div>
+				</div>
 			</div>
 		</motion.div>
 	);
