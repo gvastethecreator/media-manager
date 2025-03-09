@@ -1,5 +1,5 @@
 import { getCollections } from '@/app/actions/collection.actions';
-import { getFolders } from '@/app/actions/folder.actions';
+import { getFolders } from '@/app/actions/folders/folder.actions';
 import { getTagImages } from '@/app/actions/tag.actions';
 import { getTags } from '@/app/actions/tag.actions';
 import { logger } from '@/lib/logger';

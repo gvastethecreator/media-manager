@@ -5,7 +5,7 @@ import {
 	getFolders as getFoldersAction,
 	indexFolder as indexFolderAction,
 	reindexFolder as reindexFolderAction,
-} from '@/app/actions/folder.actions';
+} from '@/app/actions/folders/folder.actions';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger';
 import { emit } from '@/lib/server/events.server';

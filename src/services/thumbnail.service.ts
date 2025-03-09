@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 import fs from 'node:fs/promises';
-import { getThumbnail } from '@/app/actions/thumbnails.actions';
+import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';

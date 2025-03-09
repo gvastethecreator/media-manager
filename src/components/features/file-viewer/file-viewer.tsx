@@ -1,18 +1,26 @@
-'use client';
+"use client";
 
-import { getImageUrl } from '@/app/actions/image.actions';
-import { getThumbnail } from '@/app/actions/thumbnails.actions';
-import { Button } from '@/components/ui/button';
-import { ImageFallback } from '@/components/ui/image-fallback';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/use-toast';
-import { ThumbnailQuality } from '@/config/thumbnail.config';
-import { cn } from '@/lib/utils';
-import { useImageResources } from '@/store/image-resources.store';
-import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { getImageUrl } from "@/app/actions/images/image.actions";
+import { getThumbnail } from "@/app/actions/thumbnails/thumbnails.actions";
+import { Button } from "@/components/ui/button";
+import { ImageFallback } from "@/components/ui/image-fallback";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
+import { ThumbnailQuality } from "@/lib/config/thumbnail.config";
+import { cn } from "@/lib/utils";
+import { useImageResources } from "@/store/image-resources.store";
+import {
+	Copy,
+	Download,
+	Image as ImageIcon,
+	RotateCcw,
+	X,
+	ZoomIn,
+	ZoomOut,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface ImageItem {
 	id: string;
@@ -45,11 +53,11 @@ interface FileViewerProps {
 	onClose: () => void;
 }
 
-const _isLocalFile = (url: string) => url.startsWith('file://');
+const _isLocalFile = (url: string) => url.startsWith("file://");
 
 // Configuración de animaciones del visor
 const VIEWER_CONFIG = {
-	type: 'spring' as const,
+	type: "spring" as const,
 	stiffness: 200,
 	damping: 25,
 	mass: 0.8,
@@ -69,7 +77,7 @@ const THUMBNAIL_SIZES = {
 
 // Configuración de animaciones mejorada y suavizada para thumbnails
 const THUMBNAIL_ANIMATION = {
-	type: 'spring' as const,
+	type: "spring" as const,
 	stiffness: 300,
 	damping: 30,
 	mass: 0.8,
@@ -140,7 +148,7 @@ const _createDebounce = <T,>(wait: number) => {
 
 // Validación de src mejorada
 const isValidSrc = (src: string | undefined | null): src is string => {
-	return typeof src === 'string' && src.trim() !== '';
+	return typeof src === "string" && src.trim() !== "";
 };
 
 // Componente para thumbnail individual optimizado
@@ -204,8 +212,8 @@ function ThumbnailItem({
 				}, 100);
 			} catch (error) {
 				if (mounted) {
-					console.error('Error loading thumbnail:', error);
-					setError('Error al cargar miniatura');
+					console.error("Error loading thumbnail:", error);
+					setError("Error al cargar miniatura");
 				}
 			} finally {
 				if (mounted) {
@@ -229,9 +237,12 @@ function ThumbnailItem({
 		if (isActive && image?.id && images?.length) {
 			const preloadAdjacentThumbnails = async () => {
 				const currentIndex = images.findIndex((img) => img.id === image.id);
-				const adjacentIndexes = [currentIndex - 2, currentIndex - 1, currentIndex + 1, currentIndex + 2].filter(
-					(i) => i >= 0 && i < images.length
-				);
+				const adjacentIndexes = [
+					currentIndex - 2,
+					currentIndex - 1,
+					currentIndex + 1,
+					currentIndex + 2,
+				].filter((i) => i >= 0 && i < images.length);
 
 				for (const index of adjacentIndexes) {
 					const adjacentImage = images[index];
@@ -242,7 +253,7 @@ function ThumbnailItem({
 								setThumbnailInCache(adjacentImage.id, url);
 							}
 						} catch (error) {
-							console.warn('Error preloading thumbnail:', error);
+							console.warn("Error preloading thumbnail:", error);
 						}
 					}
 				}
@@ -253,8 +264,9 @@ function ThumbnailItem({
 	}, [isActive, image?.id, imageResources, images]);
 
 	const baseClassName = cn(
-		'relative mx-1 overflow-hidden rounded-md transition-shadow duration-200',
-		isActive && 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg'
+		"relative mx-1 overflow-hidden rounded-md transition-shadow duration-200",
+		isActive &&
+			"ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
 	);
 
 	if (isLoading) {
@@ -262,8 +274,12 @@ function ThumbnailItem({
 			<motion.div
 				className={baseClassName}
 				animate={{
-					width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
-					height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
+					width: isActive
+						? THUMBNAIL_SIZES.active.width
+						: THUMBNAIL_SIZES.normal.width,
+					height: isActive
+						? THUMBNAIL_SIZES.active.height
+						: THUMBNAIL_SIZES.normal.height,
 				}}
 				transition={THUMBNAIL_ANIMATION}
 			>
@@ -277,8 +293,12 @@ function ThumbnailItem({
 			<motion.div
 				className={baseClassName}
 				animate={{
-					width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
-					height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
+					width: isActive
+						? THUMBNAIL_SIZES.active.width
+						: THUMBNAIL_SIZES.normal.width,
+					height: isActive
+						? THUMBNAIL_SIZES.active.height
+						: THUMBNAIL_SIZES.normal.height,
 				}}
 				transition={THUMBNAIL_ANIMATION}
 			>
@@ -293,8 +313,12 @@ function ThumbnailItem({
 		<motion.div
 			className={baseClassName}
 			animate={{
-				width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
-				height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
+				width: isActive
+					? THUMBNAIL_SIZES.active.width
+					: THUMBNAIL_SIZES.normal.width,
+				height: isActive
+					? THUMBNAIL_SIZES.active.height
+					: THUMBNAIL_SIZES.normal.height,
 				opacity: isActive ? 1 : 0.8,
 			}}
 			transition={THUMBNAIL_ANIMATION}
@@ -307,7 +331,12 @@ function ThumbnailItem({
 		>
 			<div className="w-full h-full">
 				{isValidSrc(thumbnail) ? (
-					<img src={thumbnail} alt={image.name} className="w-full h-full object-cover" loading="lazy" />
+					<img
+						src={thumbnail}
+						alt={image.name}
+						className="w-full h-full object-cover"
+						loading="lazy"
+					/>
 				) : (
 					<div className="w-full h-full flex items-center justify-center bg-muted">
 						<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
@@ -326,7 +355,12 @@ function ThumbnailItem({
 	);
 }
 
-export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileViewerProps) {
+export function FileViewer({
+	images,
+	initialIndex = 0,
+	isOpen,
+	onClose,
+}: FileViewerProps) {
 	const { toast } = useToast();
 	const [index, setIndex] = useState(initialIndex);
 	const [scale, setScale] = useState(1);
@@ -335,7 +369,9 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 	const [error, setError] = useState<string | null>(null);
 	const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 	const [originalUrls, setOriginalUrls] = useState<Record<string, string>>({});
-	const [_loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
+	const [_loadingStates, _setLoadingStates] = useState<Record<string, boolean>>(
+		{}
+	);
 	const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 	const containerRef = useRef<HTMLDivElement>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
@@ -356,7 +392,7 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 	// Validate images and index
 	useEffect(() => {
 		if (!images || !images.length) {
-			setError('No hay imágenes disponibles');
+			setError("No hay imágenes disponibles");
 			return;
 		}
 		if (index < 0 || index >= images.length) {
@@ -389,14 +425,17 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 							urls[img.id] = url;
 							console.info(`URL inicial cargada para ${img.name}:`, url);
 						} catch (error) {
-							console.error(`Error cargando URL inicial para ${img.name}:`, error);
+							console.error(
+								`Error cargando URL inicial para ${img.name}:`,
+								error
+							);
 						}
 					})
 				);
 				setOriginalUrls((prev) => ({ ...prev, ...urls }));
 			} catch (error) {
-				console.error('Error cargando URLs iniciales:', error);
-				setError('Error cargando imágenes iniciales');
+				console.error("Error cargando URLs iniciales:", error);
+				setError("Error cargando imágenes iniciales");
 			}
 		};
 
@@ -412,7 +451,9 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 		const preloadAdjacentImages = async () => {
 			const nextIndex = (index + 1) % images.length;
 			const prevIndex = index > 0 ? index - 1 : images.length - 1;
-			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter((img) => img && !originalUrls[img.id]);
+			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter(
+				(img) => img && !originalUrls[img.id]
+			);
 
 			if (!imagesToPreload.length) {
 				return;
@@ -436,7 +477,7 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				);
 				setOriginalUrls((prev) => ({ ...prev, ...urls }));
 			} catch (error) {
-				console.warn('Error en precarga de URLs:', error);
+				console.warn("Error en precarga de URLs:", error);
 			}
 		};
 
@@ -451,28 +492,28 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 		}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
+			if (e.key === "Escape") {
 				onClose();
 			}
-			if (e.key === 'ArrowLeft') {
+			if (e.key === "ArrowLeft") {
 				setIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
 			}
-			if (e.key === 'ArrowRight') {
+			if (e.key === "ArrowRight") {
 				setIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
 			}
-			if (e.key === '0' || e.key === 'r') {
+			if (e.key === "0" || e.key === "r") {
 				resetView();
 			}
-			if (e.key === '+') {
+			if (e.key === "+") {
 				handleZoom(1.2);
 			}
-			if (e.key === '-') {
+			if (e.key === "-") {
 				handleZoom(0.8);
 			}
 		};
 
-		window.addEventListener('keydown', handleKeyDown);
-		return () => window.removeEventListener('keydown', handleKeyDown);
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [isOpen, images.length, onClose]);
 
 	// Preload adjacent images with original URLs
@@ -520,7 +561,10 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 	const handleWheel = (e: React.WheelEvent) => {
 		e.preventDefault();
 		const zoomFactor = 0.1;
-		const newScale = Math.min(Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
+		const newScale = Math.min(
+			Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
+			8
+		);
 		setScale(newScale);
 	};
 
@@ -542,13 +586,13 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 
 	const getImageAlt = (image?: ImageItem) => {
 		if (!image) {
-			return 'Image';
+			return "Image";
 		}
-		return image.alt || image.name || 'Image';
+		return image.alt || image.name || "Image";
 	};
 
 	const handleImageError = () => {
-		setError('No se pudo cargar la imagen');
+		setError("No se pudo cargar la imagen");
 		setIsLoading(false);
 	};
 
@@ -559,7 +603,7 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 			}
 			const imageUrl = getImageSource(currentImage);
 			if (!imageUrl) {
-				throw new Error('No se pudo obtener la URL de la imagen');
+				throw new Error("No se pudo obtener la URL de la imagen");
 			}
 
 			const response = await fetch(imageUrl);
@@ -570,14 +614,14 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				}),
 			]);
 			toast({
-				title: 'Imagen copiada',
-				description: 'La imagen ha sido copiada al portapapeles',
+				title: "Imagen copiada",
+				description: "La imagen ha sido copiada al portapapeles",
 			});
 		} catch (_error) {
 			toast({
-				title: 'Error',
-				description: 'No se pudo copiar la imagen',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo copiar la imagen",
+				variant: "destructive",
 			});
 		}
 	};
@@ -589,13 +633,13 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 			}
 			const imageUrl = getImageSource(currentImage);
 			if (!imageUrl) {
-				throw new Error('No se pudo obtener la URL de la imagen');
+				throw new Error("No se pudo obtener la URL de la imagen");
 			}
 
 			const response = await fetch(imageUrl);
 			const blob = await response.blob();
 			const url = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
+			const a = document.createElement("a");
 			a.href = url;
 			a.download = currentImage.name;
 			document.body.appendChild(a);
@@ -603,14 +647,14 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 			document.body.removeChild(a);
 			window.URL.revokeObjectURL(url);
 			toast({
-				title: 'Descarga iniciada',
-				description: 'La imagen se está descargando',
+				title: "Descarga iniciada",
+				description: "La imagen se está descargando",
 			});
 		} catch (_error) {
 			toast({
-				title: 'Error',
-				description: 'No se pudo descargar la imagen',
-				variant: 'destructive',
+				title: "Error",
+				description: "No se pudo descargar la imagen",
+				variant: "destructive",
 			});
 		}
 	};
@@ -625,7 +669,13 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 		if (!image) {
 			return undefined;
 		}
-		return thumbnails[image.id] || image.thumbnail || image.src || image.url || undefined;
+		return (
+			thumbnails[image.id] ||
+			image.thumbnail ||
+			image.src ||
+			image.url ||
+			undefined
+		);
 	};
 
 	// Función para calcular dimensiones
@@ -647,10 +697,10 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 	const loadThumbnail = useCallback(async (imageId: string) => {
 		try {
 			const data = await getThumbnail(imageId, ThumbnailQuality.MEDIUM);
-			const thumbnailUrl = `data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`;
+			const thumbnailUrl = `data:${data.mimeType || "image/webp"};base64,${data.thumbnail}`;
 			setThumbnails((prev) => ({ ...prev, [imageId]: thumbnailUrl }));
 		} catch (error) {
-			console.error('Error loading thumbnail:', error);
+			console.error("Error loading thumbnail:", error);
 		}
 	}, []);
 
@@ -683,8 +733,8 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 	return (
 		<dialog
 			className={cn(
-				'fixed inset-0 z-50 flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0',
-				isOpen ? 'flex' : 'hidden'
+				"fixed inset-0 z-50 flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0",
+				isOpen ? "flex" : "hidden"
 			)}
 			open={isOpen}
 			onClick={(e) => {
@@ -693,7 +743,7 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				}
 			}}
 			onKeyDown={(e) => {
-				if (e.key === 'Escape') {
+				if (e.key === "Escape") {
 					onClose();
 				}
 			}}
@@ -707,7 +757,7 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				onDoubleClick={resetView}
 				onKeyDown={(e) => {
 					e.stopPropagation();
-					if (e.key === 'Enter' || e.key === ' ') {
+					if (e.key === "Enter" || e.key === " ") {
 						resetView();
 					}
 				}}
@@ -716,24 +766,54 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				{/* Toolbar */}
 				<div className="fixed top-4 inset-x-4 flex items-center justify-between z-20">
 					<div className="flex space-x-2">
-						<Button variant="outline" size="icon" onClick={() => handleZoom(1.2)} title="Acercar">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={() => handleZoom(1.2)}
+							title="Acercar"
+						>
 							<ZoomIn className="h-4 w-4" />
 						</Button>
-						<Button variant="outline" size="icon" onClick={() => handleZoom(0.8)} title="Alejar">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={() => handleZoom(0.8)}
+							title="Alejar"
+						>
 							<ZoomOut className="h-4 w-4" />
 						</Button>
-						<Button variant="outline" size="icon" onClick={resetView} title="Restablecer vista">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={resetView}
+							title="Restablecer vista"
+						>
 							<RotateCcw className="h-4 w-4" />
 						</Button>
-						<Button variant="outline" size="icon" onClick={handleCopy} title="Copiar">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleCopy}
+							title="Copiar"
+						>
 							<Copy className="h-4 w-4" />
 						</Button>
-						<Button variant="outline" size="icon" onClick={handleDownload} title="Descargar">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleDownload}
+							title="Descargar"
+						>
 							<Download className="h-4 w-4" />
 						</Button>
 					</div>
 
-					<Button variant="outline" size="icon" onClick={onClose} title="Cerrar">
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={onClose}
+						title="Cerrar"
+					>
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
@@ -760,9 +840,9 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 									{thumbnails[currentImage.id] ? (
 										<motion.div
 											className="absolute inset-0 flex items-center justify-center"
-											initial={{ opacity: 0, filter: 'blur(10px)' }}
-											animate={{ opacity: 1, filter: 'blur(3px)' }}
-											exit={{ opacity: 0, filter: 'blur(0px)' }}
+											initial={{ opacity: 0, filter: "blur(10px)" }}
+											animate={{ opacity: 1, filter: "blur(3px)" }}
+											exit={{ opacity: 0, filter: "blur(0px)" }}
 											transition={{
 												duration: 0.8,
 												opacity: { duration: 0.5 },
@@ -797,12 +877,12 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 								alt={getImageAlt(currentImage)}
 								onError={handleImageError}
 								className={cn(
-									'object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none',
-									isLoading ? 'opacity-0' : 'opacity-100'
+									"object-contain max-w-[90vw] max-h-[80vh] shadow-2xl rounded-lg select-none",
+									isLoading ? "opacity-0" : "opacity-100"
 								)}
 								style={{
-									cursor: 'grab',
-									touchAction: 'none',
+									cursor: "grab",
+									touchAction: "none",
 								}}
 								initial={{ opacity: 0, scale: 0.95 }}
 								animate={{
@@ -821,12 +901,12 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 								dragConstraints={containerRef}
 								onDragStart={() => {
 									if (imageRef.current) {
-										imageRef.current.style.cursor = 'grabbing';
+										imageRef.current.style.cursor = "grabbing";
 									}
 								}}
 								onDragEnd={() => {
 									if (imageRef.current) {
-										imageRef.current.style.cursor = 'grab';
+										imageRef.current.style.cursor = "grab";
 									}
 								}}
 								onLoad={() => {
@@ -843,15 +923,17 @@ export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileVi
 				{/* Thumbnails */}
 				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
 					<div className="flex items-center bg-background/5 backdrop-blur-xs px-2 py-1 rounded-lg">
-						{images.slice(Math.max(0, index - 3), Math.min(images.length, index + 4)).map((image, i) => (
-							<ThumbnailItem
-								key={image.id}
-								image={image}
-								images={images}
-								isActive={i + Math.max(0, index - 3) === index}
-								onClick={() => setIndex(i + Math.max(0, index - 3))}
-							/>
-						))}
+						{images
+							.slice(Math.max(0, index - 3), Math.min(images.length, index + 4))
+							.map((image, i) => (
+								<ThumbnailItem
+									key={image.id}
+									image={image}
+									images={images}
+									isActive={i + Math.max(0, index - 3) === index}
+									onClick={() => setIndex(i + Math.max(0, index - 3))}
+								/>
+							))}
 					</div>
 				</div>
 

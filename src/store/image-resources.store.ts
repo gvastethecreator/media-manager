@@ -1,6 +1,6 @@
-import { getImageUrl } from '@/app/actions/image.actions';
-import { getThumbnail } from '@/app/actions/thumbnails.actions';
-import { ThumbnailQuality } from '@/config/thumbnail.config';
+import { getImageUrl } from '@/app/actions/images/image.actions';
+import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
+import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
 import { create } from 'zustand';
 

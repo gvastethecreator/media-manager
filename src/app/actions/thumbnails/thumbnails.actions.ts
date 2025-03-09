@@ -1,6 +1,6 @@
 'use server';
 
-import { ThumbnailQuality } from '@/config/thumbnail.config';
+import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
