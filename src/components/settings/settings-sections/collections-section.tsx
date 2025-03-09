@@ -1,28 +1,35 @@
-'use client';
+"use client";
 
-import { CollectionCard } from '@/components/features/entity-cards/cards/collection-card';
-import { CollectionForm } from '@/components/features/entity-cards/forms/collection-form';
+import { CollectionCard } from "@/components/features/entity-cards/cards/collection-card";
+import { CollectionForm } from "@/components/features/entity-cards/forms/collection-form";
 import {
 	type CollectionFormData,
 	collectionToFormData,
 	formDataToCollection,
-} from '@/components/features/entity-cards/forms/entity-types';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
-import { useCollectionsStore } from '@/store/collections.store';
-import { Grid2X2 as CollectionIcon, Loader2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
+} from "@/components/features/entity-cards/forms/entity-types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCard, type StatsCardProps } from "@/components/ui/stats-card";
+import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
+import { useCollectionsStore } from "@/store/entities/collections.store";
+import { Grid2X2 as CollectionIcon, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
 
-const collectionLogger = logger.withContext('CollectionsSection');
+const collectionLogger = logger.withContext("CollectionsSection");
 
 export function CollectionsSection() {
-	const { collections, isLoading, error, loadCollections, createCollection, updateCollection, deleteCollection } =
-		useCollectionsStore();
+	const {
+		collections,
+		isLoading,
+		error,
+		loadCollections,
+		createCollection,
+		updateCollection,
+		deleteCollection,
+	} = useCollectionsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
@@ -39,12 +46,21 @@ export function CollectionsSection() {
 			};
 		}
 
-		const totalImages = collections.reduce((acc, col) => acc + (col._count?.images || 0), 0);
-		const totalSize = collections.reduce((acc, col) => acc + (col.totalSize || 0), 0);
+		const totalImages = collections.reduce(
+			(acc, col) => acc + (col._count?.images || 0),
+			0
+		);
+		const totalSize = collections.reduce(
+			(acc, col) => acc + (col.totalSize || 0),
+			0
+		);
 
 		// Obtener colecciones recientes
 		const recentCollections = [...collections]
-			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.sort(
+				(a, b) =>
+					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+			)
 			.slice(0, 5)
 			.map((col) => ({
 				id: col.id,
@@ -69,18 +85,18 @@ export function CollectionsSection() {
 
 	const handleCreate = async (data: CollectionFormData) => {
 		try {
-			collectionLogger.info('📝 Creando nueva colección:', data);
+			collectionLogger.info("📝 Creando nueva colección:", data);
 			await createCollection(formDataToCollection(data));
 			toast({
-				title: 'Colección creada',
-				description: 'La colección se ha creado correctamente.',
+				title: "Colección creada",
+				description: "La colección se ha creado correctamente.",
 			});
 		} catch (error) {
-			collectionLogger.error('❌ Error al crear colección:', error);
+			collectionLogger.error("❌ Error al crear colección:", error);
 			toast({
-				title: 'Error al crear colección',
-				description: 'No se pudo crear la colección.',
-				variant: 'destructive',
+				title: "Error al crear colección",
+				description: "No se pudo crear la colección.",
+				variant: "destructive",
 			});
 		}
 	};
@@ -90,37 +106,37 @@ export function CollectionsSection() {
 			return;
 		}
 		try {
-			collectionLogger.info('💾 Actualizando colección:', data);
+			collectionLogger.info("💾 Actualizando colección:", data);
 			await updateCollection(formDataToCollection(data));
 			toast({
-				title: 'Colección actualizada',
-				description: 'La colección se ha actualizado correctamente.',
+				title: "Colección actualizada",
+				description: "La colección se ha actualizado correctamente.",
 			});
 			setEditingId(null);
 		} catch (error) {
-			collectionLogger.error('❌ Error al actualizar colección:', error);
+			collectionLogger.error("❌ Error al actualizar colección:", error);
 			toast({
-				title: 'Error al actualizar colección',
-				description: 'No se pudo actualizar la colección.',
-				variant: 'destructive',
+				title: "Error al actualizar colección",
+				description: "No se pudo actualizar la colección.",
+				variant: "destructive",
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
-			collectionLogger.info('🗑️ Eliminando colección:', id);
+			collectionLogger.info("🗑️ Eliminando colección:", id);
 			await deleteCollection(id);
 			toast({
-				title: 'Colección eliminada',
-				description: 'La colección se ha eliminado correctamente.',
+				title: "Colección eliminada",
+				description: "La colección se ha eliminado correctamente.",
 			});
 		} catch (error) {
-			collectionLogger.error('❌ Error al eliminar colección:', error);
+			collectionLogger.error("❌ Error al eliminar colección:", error);
 			toast({
-				title: 'Error al eliminar colección',
-				description: 'No se pudo eliminar la colección.',
-				variant: 'destructive',
+				title: "Error al eliminar colección",
+				description: "No se pudo eliminar la colección.",
+				variant: "destructive",
 			});
 		}
 	};
@@ -144,7 +160,7 @@ export function CollectionsSection() {
 					title="Estadísticas"
 					icon={<CollectionIcon className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats as StatsCardProps['stats']}
+					stats={stats as StatsCardProps["stats"]}
 				/>
 			</div>
 
@@ -155,8 +171,17 @@ export function CollectionsSection() {
 							<CollectionIcon className="h-5 w-5" />
 							Colecciones
 						</div>
-						<Button variant="outline" size="sm" onClick={() => loadCollections()} disabled={isLoading}>
-							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => loadCollections()}
+							disabled={isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Recargar"
+							)}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -167,15 +192,23 @@ export function CollectionsSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">{error.message}</p>
-							<Button variant="outline" size="sm" onClick={() => loadCollections()}>
+							<p className="text-sm text-muted-foreground text-center">
+								{error.message}
+							</p>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => loadCollections()}
+							>
 								Reintentar
 							</Button>
 						</div>
 					) : collections.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<CollectionIcon className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">No hay colecciones creadas</p>
+							<p className="text-sm text-muted-foreground text-center">
+								No hay colecciones creadas
+							</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

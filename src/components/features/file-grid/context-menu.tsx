@@ -16,16 +16,16 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logger } from "@/lib/logger";
 import { toastService } from "@/lib/toast";
-import { useAlbumsStore } from "@/store/albums.store";
-import { useCharactersStore } from "@/store/characters.store";
-import { useCollectionsStore } from "@/store/collections.store";
-import { useConceptStore } from "@/store/concept.store";
+import { useAlbumsStore } from "@/store/entities/albums.store";
+import { useCharactersStore } from "@/store/entities/characters.store";
+import { useCollectionsStore } from "@/store/entities/collections.store";
+import { useConceptStore } from "@/store/entities/concept.store";
+import { useNoteStore } from "@/store/entities/note.store";
+import { useTagsStore } from "@/store/entities/tags.store";
 import { useFavoritesStore } from "@/store/favorites.store";
-import { useNoteStore } from "@/store/note.store";
 import { useObjectsStore } from "@/store/objects.store";
 import { usePlacesStore } from "@/store/places.store";
 import { usePromptStore } from "@/store/prompt.store";
-import { useTagsStore } from "@/store/tags.store";
 import type { FileItem } from "@/types/file-item";
 import type {
 	Album,

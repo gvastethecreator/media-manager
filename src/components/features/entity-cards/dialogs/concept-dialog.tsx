@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { ConceptCard } from '@/components/features/entity-cards/cards/concept-card';
-import { EntityCreationDialog } from '@/components/features/entity-cards/dialogs/entity-creation-dialog';
-import { ConceptForm } from '@/components/features/entity-cards/forms/concept-form';
-import type { ConceptFormData } from '@/components/features/entity-cards/forms/entity-types';
-import { Separator } from '@/components/ui/separator';
-import { logger } from '@/lib/logger';
-import { useConceptStore } from '@/store/concept.store';
-import * as React from 'react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { ConceptCard } from "@/components/features/entity-cards/cards/concept-card";
+import { EntityCreationDialog } from "@/components/features/entity-cards/dialogs/entity-creation-dialog";
+import { ConceptForm } from "@/components/features/entity-cards/forms/concept-form";
+import type { ConceptFormData } from "@/components/features/entity-cards/forms/entity-types";
+import { Separator } from "@/components/ui/separator";
+import { logger } from "@/lib/logger";
+import { useConceptStore } from "@/store/entities/concept.store";
+import * as React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 
-const conceptDialogLogger = logger.withContext('ConceptDialog');
+const conceptDialogLogger = logger.withContext("ConceptDialog");
 
 export function ConceptDialog() {
 	// Store de conceptos
@@ -19,12 +19,12 @@ export function ConceptDialog() {
 
 	// Estado para el formulario
 	const [formData, setFormData] = useState<ConceptFormData>({
-		name: '',
-		emoji: '💡',
-		color: '#3b82f6', // Azul predeterminado
-		description: '',
-		content: '',
-		category: 'general',
+		name: "",
+		emoji: "💡",
+		color: "#3b82f6", // Azul predeterminado
+		description: "",
+		content: "",
+		category: "general",
 		tags: [],
 		featuredImage: null,
 		isFavorite: false,
@@ -42,29 +42,31 @@ export function ConceptDialog() {
 	// Función para manejar el guardado del concepto
 	const handleSave = async (imageId: string | null) => {
 		try {
-			conceptDialogLogger.info('📥 Guardando concepto', { formData });
+			conceptDialogLogger.info("📥 Guardando concepto", { formData });
 
 			// Crear el concepto
 			const savedConcept = await createConcept(formData);
 
-			conceptDialogLogger.info('✅ Concepto guardado', savedConcept);
+			conceptDialogLogger.info("✅ Concepto guardado", savedConcept);
 
 			// Si se proporcionó un ID de imagen, asociar el concepto con esa imagen
 			if (imageId && savedConcept) {
-				conceptDialogLogger.info('🔗 Asociando imagen a concepto', {
+				conceptDialogLogger.info("🔗 Asociando imagen a concepto", {
 					imageId,
 					conceptId: savedConcept.id,
 				});
 
 				await addConceptToImage(imageId, savedConcept.id);
 
-				toast.success(`Se ha añadido la imagen al concepto "${savedConcept.name}"`);
+				toast.success(
+					`Se ha añadido la imagen al concepto "${savedConcept.name}"`
+				);
 			}
 
 			return savedConcept;
 		} catch (error) {
-			conceptDialogLogger.error('❌ Error al guardar el concepto', error);
-			toast.error('Error al crear el concepto');
+			conceptDialogLogger.error("❌ Error al guardar el concepto", error);
+			toast.error("Error al crear el concepto");
 			throw error;
 		}
 	};
@@ -73,12 +75,12 @@ export function ConceptDialog() {
 	const handleCancel = () => {
 		// Restablecer el formulario
 		setFormData({
-			name: '',
-			emoji: '💡',
-			color: '#3b82f6',
-			description: '',
-			content: '',
-			category: 'general',
+			name: "",
+			emoji: "💡",
+			color: "#3b82f6",
+			description: "",
+			content: "",
+			category: "general",
 			tags: [],
 			featuredImage: null,
 			isFavorite: false,
@@ -102,13 +104,16 @@ export function ConceptDialog() {
 
 				{/* Previsualización */}
 				<div className="flex flex-col space-y-4">
-					<h3 className="text-sm font-semibold text-muted-foreground">Vista previa</h3>
+					<h3 className="text-sm font-semibold text-muted-foreground">
+						Vista previa
+					</h3>
 					<Separator />
 					<div className="flex-1 rounded-lg border p-4">
 						<ConceptCard data={formData} isPreview={true} />
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Esta es una previsualización del concepto. Los campos opcionales se mostrarán solo si contienen información.
+						Esta es una previsualización del concepto. Los campos opcionales se
+						mostrarán solo si contienen información.
 					</p>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-import defaultSettings from '@/config/settings.json';
+import defaultSettings from '@/lib/config/settings.json';
 import { type AppSettings, DEFAULT_SETTINGS } from '@/types/settings';
 import { merge } from 'lodash';
 

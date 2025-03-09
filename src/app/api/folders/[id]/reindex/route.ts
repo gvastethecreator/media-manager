@@ -1,4 +1,4 @@
-import { reindexFolder } from '@/app/actions/folder.actions';
+import { reindexFolder } from '@/app/actions/folders/folder.actions';
 import { logger } from '@/lib/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
