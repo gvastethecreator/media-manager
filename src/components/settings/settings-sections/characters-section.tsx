@@ -1,36 +1,30 @@
-"use client";
+'use client';
 
-import { CharacterCard } from "@/components/features/entity-cards/cards/character-card";
-import { CharacterForm } from "@/components/features/entity-cards/forms/character-form";
+import { CharacterCard } from '@/components/features/entity-cards/cards/character-card';
+import { CharacterForm } from '@/components/features/entity-cards/forms/character-form';
 import {
 	type CharacterFormData,
 	characterToFormData,
 	formDataToCharacter,
-} from "@/components/features/entity-cards/forms/entity-types";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatsCard, type StatsCardProps } from "@/components/ui/stats-card";
-import { useToast } from "@/components/ui/use-toast";
-import { logger } from "@/lib/logger";
-import { useCharactersStore } from "@/store/characters.store";
-import type { Character } from "@prisma/client";
-import { Loader2, Users } from "lucide-react";
-import { motion } from "motion/react";
-import * as React from "react";
+} from '@/components/features/entity-cards/forms/entity-types';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
+import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/lib/logger';
+import { useCharactersStore } from '@/store/characters.store';
+import type { Character } from '@prisma/client';
+import { Loader2, Users } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
 
-const characterLogger = logger.withContext("CharactersSection");
+const characterLogger = logger.withContext('CharactersSection');
 
 export function CharactersSection() {
 	const { toast } = useToast();
-	const {
-		characters,
-		isLoading,
-		loadCharacters,
-		createCharacter,
-		updateCharacter,
-		deleteCharacter,
-	} = useCharactersStore();
+	const { characters, isLoading, loadCharacters, createCharacter, updateCharacter, deleteCharacter } =
+		useCharactersStore();
 
 	// Cargar personajes al montar el componente
 	React.useEffect(() => {
@@ -56,14 +50,8 @@ export function CharactersSection() {
 
 		return {
 			totalItems: characters.length,
-			totalImages: characters.reduce(
-				(acc, char) => acc + (char._count?.images || 0),
-				0
-			),
-			totalSize: characters.reduce(
-				(acc, char) => acc + (char.totalSize || 0),
-				0
-			),
+			totalImages: characters.reduce((acc, char) => acc + (char._count?.images || 0), 0),
+			totalSize: characters.reduce((acc, char) => acc + (char.totalSize || 0), 0),
 			lastUpdated,
 			recentItems: characters
 				.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
@@ -94,63 +82,54 @@ export function CharactersSection() {
 	// Manejadores de eventos
 	const handleCreate = async (data: CharacterFormData) => {
 		try {
-			characterLogger.info("📝 Creando personaje:", data);
+			characterLogger.info('📝 Creando personaje:', data);
 			await createCharacter(formDataToCharacter(data));
 			toast({
-				title: "✅ Personaje creado",
+				title: '✅ Personaje creado',
 				description: `Se ha creado el personaje "${data.name}" correctamente.`,
 			});
 		} catch (error) {
-			characterLogger.error("❌ Error al crear personaje:", error);
+			characterLogger.error('❌ Error al crear personaje:', error);
 			toast({
-				title: "❌ Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al crear el personaje",
-				variant: "destructive",
+				title: '❌ Error',
+				description: error instanceof Error ? error.message : 'Error al crear el personaje',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const handleUpdate = async (character: Character) => {
 		try {
-			characterLogger.info("📝 Actualizando personaje:", character);
+			characterLogger.info('📝 Actualizando personaje:', character);
 			await updateCharacter(character.id, character);
 			toast({
-				title: "✅ Personaje actualizado",
+				title: '✅ Personaje actualizado',
 				description: `Se ha actualizado el personaje "${character.name}" correctamente.`,
 			});
 		} catch (error) {
-			characterLogger.error("❌ Error al actualizar personaje:", error);
+			characterLogger.error('❌ Error al actualizar personaje:', error);
 			toast({
-				title: "❌ Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al actualizar el personaje",
-				variant: "destructive",
+				title: '❌ Error',
+				description: error instanceof Error ? error.message : 'Error al actualizar el personaje',
+				variant: 'destructive',
 			});
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
-			characterLogger.info("🗑️ Eliminando personaje:", id);
+			characterLogger.info('🗑️ Eliminando personaje:', id);
 			await deleteCharacter(id);
 			toast({
-				title: "✅ Personaje eliminado",
-				description: "Se ha eliminado el personaje correctamente.",
+				title: '✅ Personaje eliminado',
+				description: 'Se ha eliminado el personaje correctamente.',
 			});
 		} catch (error) {
-			characterLogger.error("❌ Error al eliminar personaje:", error);
+			characterLogger.error('❌ Error al eliminar personaje:', error);
 			toast({
-				title: "❌ Error",
-				description:
-					error instanceof Error
-						? error.message
-						: "Error al eliminar el personaje",
-				variant: "destructive",
+				title: '❌ Error',
+				description: error instanceof Error ? error.message : 'Error al eliminar el personaje',
+				variant: 'destructive',
 			});
 		}
 	};
@@ -174,7 +153,7 @@ export function CharactersSection() {
 					title="Estadísticas"
 					icon={<Users className="h-5 w-5" />}
 					isLoading={isLoading}
-					stats={stats as StatsCardProps["stats"]}
+					stats={stats as StatsCardProps['stats']}
 				/>
 			</div>
 
@@ -185,17 +164,8 @@ export function CharactersSection() {
 							<Users className="h-5 w-5" />
 							Personajes
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => loadCharacters()}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Recargar"
-							)}
+						<Button variant="outline" size="sm" onClick={() => loadCharacters()} disabled={isLoading}>
+							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -208,9 +178,7 @@ export function CharactersSection() {
 						<div className="flex flex-col items-center justify-center p-8 text-center">
 							<Users className="h-8 w-8 text-muted-foreground mb-4" />
 							<p className="text-lg font-medium">No hay personajes</p>
-							<p className="text-sm text-muted-foreground">
-								Crea un nuevo personaje para empezar.
-							</p>
+							<p className="text-sm text-muted-foreground">Crea un nuevo personaje para empezar.</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -221,11 +189,7 @@ export function CharactersSection() {
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.3 }}
 								>
-									<CharacterCard
-										character={character}
-										onEdit={handleUpdate}
-										onDelete={handleDelete}
-									/>
+									<CharacterCard character={character} onEdit={handleUpdate} onDelete={handleDelete} />
 								</motion.div>
 							))}
 						</div>

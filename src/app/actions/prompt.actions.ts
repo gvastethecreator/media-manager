@@ -6,7 +6,7 @@ import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Image, Prompt } from '@prisma/client';
+import type { Prompt as PrismaPrompt } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const promptLogger = logger.withContext('PromptActions');
@@ -30,29 +30,15 @@ class PromptError extends Error {
 	}
 }
 
-export interface PromptWithStats extends Omit<Prompt, 'featuredImage'> {
-	_count: {
-		images: number;
-	};
-	totalSize: number;
-	lastUpdated: Date;
-	distribution?: Array<{
-		name: string;
-		count: number;
-	}>;
-	featuredImage: string | null;
-	recentImages: string[];
-}
-
 export interface PromptCreate {
 	name: string;
-	emoji: string;
-	color: string;
+	emoji?: string;
 	description?: string | null;
-	content: string;
-	category: string;
-	parameters: string;
-	tags: string;
+	color?: string;
+	content?: string;
+	category?: string;
+	parameters?: string;
+	tags?: string;
 	featuredImage?: string | null;
 }
 
@@ -60,38 +46,83 @@ export interface PromptUpdate extends Partial<PromptCreate> {
 	id: string;
 }
 
-export interface PromptWithImages extends Prompt {
+export interface Prompt extends PrismaPrompt {
+	count?: number;
+}
+
+export interface PromptWithStats extends PrismaPrompt {
+	_count: {
+		concepts: number;
+		notes: number;
+		characters: number;
+		places: number;
+		objects: number;
+	};
+	lastUpdated: Date;
+}
+
+export interface PromptWithImages extends PrismaPrompt {
 	images: FileItem[];
 }
 
-export interface ExtendedPrompt extends Prompt {
-	images: Image[];
+export interface ExtendedPrompt extends PrismaPrompt {
+	images: PrismaPrompt[];
 }
 
-export async function getPrompts() {
+export async function getPrompts(): Promise<PromptWithStats[]> {
 	try {
-		promptLogger.info('📚 Obteniendo lista de prompts');
+		promptLogger.info('🎯 Obteniendo prompts con estadísticas');
+
+		// Obtener prompts con conteos y estadísticas
 		const prompts = await prisma.prompt.findMany({
 			include: {
-				_count: true,
+				_count: {
+					select: {
+						concepts: true,
+						notes: true,
+						characters: true,
+						places: true,
+						objects: true,
+					},
+				},
 			},
+			orderBy: [
+				{
+					name: 'asc',
+				},
+			],
 		});
 
-		promptLogger.info(`✅ ${prompts.length} prompts obtenidos`);
-		return prompts;
+		// Mapear prompts a formato con estadísticas
+		const promptsWithStats = prompts.map((prompt) => ({
+			...prompt,
+			_count: prompt._count,
+			lastUpdated: prompt.updatedAt,
+		}));
+
+		promptLogger.info('✅ Prompts obtenidos', { count: prompts.length });
+		return promptsWithStats;
 	} catch (error) {
-		promptLogger.error('❌ Error al obtener prompts:', error);
-		throw new PromptError('No se pudieron obtener los prompts', error);
+		promptLogger.error('❌ Error al obtener prompts', error);
+		throw new PromptError('No se pudieron obtener los prompts');
 	}
 }
 
-export async function getPromptById(id: string) {
+export async function getPrompt(id: string): Promise<Prompt> {
 	try {
-		promptLogger.info('🔍 Buscando prompt:', id);
+		promptLogger.info('🔍 Obteniendo prompt:', id);
 		const prompt = await prisma.prompt.findUnique({
 			where: { id },
 			include: {
-				_count: true,
+				_count: {
+					select: {
+						concepts: true,
+						notes: true,
+						characters: true,
+						places: true,
+						objects: true,
+					},
+				},
 			},
 		});
 
@@ -99,33 +130,43 @@ export async function getPromptById(id: string) {
 			throw new PromptError('Prompt no encontrado');
 		}
 
-		promptLogger.info('✅ Prompt encontrado:', prompt.name);
-		return prompt;
+		promptLogger.info('✅ Prompt obtenido:', prompt.name);
+		return {
+			...prompt,
+			count: Object.values(prompt._count).reduce((acc, count) => acc + count, 0),
+		};
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
+		if (error instanceof PromptError) {
+			throw error;
+		}
 		throw new PromptError('No se pudo obtener el prompt', error);
 	}
 }
 
-export async function createPrompt(data: PromptCreate) {
+export async function createPrompt(data: PromptCreate): Promise<Prompt> {
 	try {
 		promptLogger.info('📝 Creando prompt:', data.name);
 		const prompt = await prisma.prompt.create({
 			data: {
-				...data,
-				tags: data.tags || '[]',
-				parameters: data.parameters || '{}',
+				name: data.name,
+				emoji: data.emoji || '🎯',
+				description: data.description || null,
+				color: data.color || '#3b82f6',
 				content: data.content || '',
+				category: data.category || 'general',
+				parameters: data.parameters || '{}',
+				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
 			},
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'prompts:modified',
-			data: { action: 'create', entity: prompt },
+			data: { action: 'create', prompt },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt creado:', prompt.name);
 		revalidateAllPaths();
@@ -136,7 +177,7 @@ export async function createPrompt(data: PromptCreate) {
 	}
 }
 
-export async function updatePrompt(id: string, data: PromptUpdate) {
+export async function updatePrompt(id: string, data: PromptUpdate): Promise<Prompt> {
 	try {
 		promptLogger.info('📝 Actualizando prompt:', id);
 		const prompt = await prisma.prompt.update({
@@ -144,13 +185,13 @@ export async function updatePrompt(id: string, data: PromptUpdate) {
 			data,
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'prompts:modified',
 			id,
-			data: { action: 'update', entity: prompt },
+			data: { action: 'update', prompt },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt actualizado:', prompt.name);
 		revalidateAllPaths();
@@ -161,20 +202,20 @@ export async function updatePrompt(id: string, data: PromptUpdate) {
 	}
 }
 
-export async function deletePrompt(id: string) {
+export async function deletePrompt(id: string): Promise<void> {
 	try {
 		promptLogger.info('🗑️ Eliminando prompt:', id);
 		await prisma.prompt.delete({
 			where: { id },
 		});
 
-		// Emitir eventos con el nuevo sistema
+		// Emitir eventos
 		await emit({
 			type: 'prompts:modified',
 			id,
-			data: { action: 'delete' },
+			data: { action: 'delete', id },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt eliminado');
 		revalidateAllPaths();

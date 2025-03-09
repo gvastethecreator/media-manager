@@ -1,24 +1,21 @@
-"use client";
+'use client';
 
-import {
-	type CollectionWithStats,
-	getCollections,
-} from "@/app/actions/collection.actions";
-import { EmptyState } from "@/components/core/data-display";
-import { LoadingScreen } from "@/components/core/feedback";
-import { CollectionCard } from "@/components/features/entity-cards/cards/collection-card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import { LibraryBig } from "lucide-react";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { ViewProps } from "../types";
+import { type CollectionWithStats, getCollections } from '@/app/actions/collection.actions';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { CollectionCard } from '@/components/features/entity-cards/cards/collection-card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { LibraryBig } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("CollectionsView");
+const viewLogger = logger.withContext('CollectionsView');
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -29,20 +26,18 @@ export function CollectionsView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCollections, _addEvent] =
-		clientEvents.useEvents<CollectionWithStats[]>(collections);
+	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithStats[]>(collections);
 
 	const fetchCollections = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando colecciones...");
+			viewLogger.info('🔄 Cargando colecciones...');
 			const data = await getCollections();
 			setCollections(data);
 			viewLogger.info(`✅ ${data.length} colecciones cargadas`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando colecciones:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando colecciones:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -56,8 +51,8 @@ export function CollectionsView(_props: ViewProps) {
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithStats) => {
-			viewLogger.info("🖱️ Click en colección:", collection.name);
-			setCurrentView("collection-content");
+			viewLogger.info('🖱️ Click en colección:', collection.name);
+			setCurrentView('collection-content');
 			setCurrentCollection(collection.id);
 		},
 		[setCurrentView, setCurrentCollection]
@@ -65,8 +60,8 @@ export function CollectionsView(_props: ViewProps) {
 
 	const handleEdit = useCallback(
 		(collection: { id: string; name: string }) => {
-			viewLogger.info("⚙️ Editando colección:", collection.name);
-			router.push("/settings/collections");
+			viewLogger.info('⚙️ Editando colección:', collection.name);
+			router.push('/settings/collections');
 		},
 		[router]
 	);
@@ -105,7 +100,7 @@ export function CollectionsView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 						>
 							<CollectionCard
-								collection={collection}
+								data={collection}
 								onClick={() => handleCollectionClick(collection)}
 								onEdit={() => handleEdit(collection)}
 							/>

@@ -43,5 +43,7 @@ next-env.d.ts
 # project
 .image-cache
 .thumbnail-cache
-/prisma/dev.db
-/prisma/migrations/
+
+prisma/dev.db
+prisma/migrations/
+

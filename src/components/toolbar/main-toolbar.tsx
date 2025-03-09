@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -7,9 +8,11 @@ import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
 import type { ViewType } from '@/types/file-item';
 import {
+	Archive,
 	BookImage,
 	Box,
 	Camera,
+	Copy,
 	Download,
 	Edit,
 	FolderIcon,
@@ -27,8 +30,10 @@ import {
 	TagIcon,
 	Trash2,
 	User2,
+	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useCallback } from 'react';
 import { ViewBreadcrumbs } from './breadcrumbs';
 
 export function ViewToolbar() {
@@ -43,7 +48,62 @@ export function ViewToolbar() {
 		currentObject,
 		viewMode,
 		setViewMode,
+		selectedItems,
+		clearSelection,
 	} = useFileManager();
+
+	// Acciones para archivos marcados
+	const handleDeleteSelected = useCallback(() => {
+		if (selectedItems.length === 0) {
+			return;
+		}
+
+		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedItems.length} archivo(s)?`)) {
+			// Enviar cada archivo a la papelera
+			for (const item of selectedItems) {
+				if (item.path) {
+					window.electron?.deleteFile(item.path);
+				}
+			}
+			// Limpiar selección
+			clearSelection();
+		}
+	}, [selectedItems, clearSelection]);
+
+	const handleDownloadSelected = useCallback(() => {
+		if (selectedItems.length === 0) {
+			return;
+		}
+
+		for (const item of selectedItems) {
+			if (item.path) {
+				window.electron?.downloadFile(item.path);
+			}
+		}
+	}, [selectedItems]);
+
+	const handleCompressSelected = useCallback(() => {
+		if (selectedItems.length === 0) {
+			return;
+		}
+
+		const paths = selectedItems.map((item) => item.path).filter(Boolean) as string[];
+		if (paths.length > 0) {
+			window.electron?.compressFiles(paths);
+		}
+	}, [selectedItems]);
+
+	const handleCopySelected = useCallback(() => {
+		if (selectedItems.length === 0) {
+			return;
+		}
+
+		// Solo copiamos el primer archivo al portapapeles
+		// La API no permite copiar múltiples archivos
+		if (selectedItems[0]?.path) {
+			window.electron?.copyFileToClipboard(selectedItems[0].path);
+		}
+	}, [selectedItems]);
 
 	const getCurrentItem = () => {
 		switch (currentView) {
@@ -136,6 +196,109 @@ export function ViewToolbar() {
 	};
 
 	const renderActions = () => {
+		// Render acciones para elementos marcados
+		if (selectedItems.length > 0) {
+			return (
+				<div className="flex items-center gap-2">
+					<Badge variant="secondary" className="gap-1">
+						<span>{selectedItems.length}</span>
+						<span>seleccionado{selectedItems.length !== 1 ? 's' : ''}</span>
+					</Badge>
+
+					<Separator orientation="vertical" className="h-7 w-px bg-border" />
+
+					<div className="flex items-center gap-1">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							title="Eliminar archivos seleccionados"
+							onClick={handleDeleteSelected}
+						>
+							<Trash2 className="h-3.5 w-3.5 text-red-500" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							title="Descargar archivos seleccionados"
+							onClick={handleDownloadSelected}
+						>
+							<Download className="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							title="Comprimir archivos seleccionados"
+							onClick={handleCompressSelected}
+						>
+							<Archive className="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							title="Copiar archivo seleccionado"
+							onClick={handleCopySelected}
+							disabled={selectedItems.length !== 1}
+						>
+							<Copy className="h-3.5 w-3.5" />
+						</Button>
+						<Button variant="ghost" size="icon" className="h-7 w-7" title="Limpiar selección" onClick={clearSelection}>
+							<X className="h-3.5 w-3.5" />
+						</Button>
+					</div>
+
+					<Separator orientation="vertical" className="h-7 w-px bg-border" />
+
+					<div className="flex items-center gap-1 bg-black/50 rounded-md p-1">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={() => setViewMode('grid')}
+							title="Vista de cuadrícula"
+							data-active={viewMode === 'grid'}
+						>
+							<Grid className="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={() => setViewMode('masonry')}
+							title="Vista de mosaico"
+							data-active={viewMode === 'masonry'}
+						>
+							<LayoutGrid className="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={() => setViewMode('cards')}
+							title="Vista de tarjetas"
+							data-active={viewMode === 'cards'}
+						>
+							<GalleryHorizontal className="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7"
+							onClick={() => setViewMode('list')}
+							title="Vista de lista"
+							data-active={viewMode === 'list'}
+						>
+							<List className="h-3.5 w-3.5" />
+						</Button>
+					</div>
+				</div>
+			);
+		}
+
+		// Resto del código existente
 		const commonActions = (
 			<>
 				<Separator orientation="vertical" className="h-7 w-px bg-border" />
