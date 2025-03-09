@@ -3,7 +3,7 @@
 import type { NavigationData } from "@/app/actions/nav.actions";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSettingsContext } from "@/context/settings-context";
+import { useProfileContext } from "@/lib/contexts";
 import { cn } from "@/lib/utils";
 import { useFileManager } from "@/store/file-manager.store";
 import { useNavigationStore } from "@/store/navigation.store";
@@ -112,8 +112,7 @@ interface NavPanelProps {
 }
 
 export function NavPanel({ initialData }: NavPanelProps) {
-	const { settings } = useSettingsContext();
-	const { profiles, activeProfile } = settings;
+	const { profiles, activeProfile } = useProfileContext();
 	const activeProfileData = profiles.find((p) => p.id === activeProfile);
 
 	// Desestructurar initialData con valores por defecto
@@ -747,21 +746,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 					<div className="mt-1">
 						{categories.map(({ id, icon: Icon, label, color }) => (
 							<div key={id} className="mt-1">
-								<Button
-									variant="ghost"
-									className={cn(
-										"w-full justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm bg-white/5 mt-2",
-										currentView === id &&
-											"bg-linear-to-r from-white/10 to-white/15",
-										"cursor-pointer"
-									)}
-									onClick={() => handleCategoryClick(id)}
-								>
+								<div className="flex items-center w-full h-8 bg-white/5 rounded-sm mt-2 group">
 									{/* Botón específico para colapsar/expandir */}
-									<Button
-										variant="ghost"
-										size="icon"
-										className="flex items-center justify-center h-5 w-5 p-0 cursor-pointer hover:bg-white/10 rounded-sm transition-colors"
+									<button
+										type="button"
+										className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-gray-100/10 border-0 bg-transparent p-0"
 										onClick={(e) => {
 											e.stopPropagation();
 											handleCollapseToggle(id, e);
@@ -777,42 +766,54 @@ export function NavPanel({ initialData }: NavPanelProps) {
 										) : (
 											<ChevronDown className="h-3 w-3 text-white/60" />
 										)}
+									</button>
+
+									{/* Botón de categoría */}
+									<Button
+										variant="ghost"
+										className={cn(
+											"flex-1 justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm cursor-pointer",
+											currentView === id &&
+												"bg-linear-to-r from-white/10 to-white/15"
+										)}
+										onClick={() => handleCategoryClick(id)}
+									>
+										<Icon className="h-4 w-4" style={{ color }} />
+										<span className="flex-1 text-left truncate">{label}</span>
+										<div className="flex items-center space-x-2">
+											<div className="flex items-center space-x-1 text-white/70 text-[10px]">
+												{id === "folders" ? (
+													<FolderIcon className="h-3 w-3" />
+												) : id === "collections" ? (
+													<BookImage className="h-3 w-3" />
+												) : id === "tags" ? (
+													<TagIcon className="h-3 w-3" />
+												) : id === "albums" ? (
+													<Camera className="h-3 w-3" />
+												) : id === "characters" ? (
+													<User2 className="h-3 w-3" />
+												) : id === "places" ? (
+													<MapPin className="h-3 w-3" />
+												) : id === "objects" ? (
+													<Box className="h-3 w-3" />
+												) : id === "concepts" ? (
+													<Lightbulb className="h-3 w-3" />
+												) : id === "prompts" ? (
+													<Terminal className="h-3 w-3" />
+												) : id === "notes" ? (
+													<StickyNote className="h-3 w-3" />
+												) : (
+													<Hash className="h-3 w-3" />
+												)}
+												<span>{getCategoryItemCount(id)}</span>
+											</div>
+											<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+												<ImageIcon className="h-3 w-3" />
+												<span>{getImagesForCategory(id)}</span>
+											</div>
+										</div>
 									</Button>
-									<Icon className="h-4 w-4" style={{ color }} />
-									<span className="flex-1 text-left truncate">{label}</span>
-									<div className="flex items-center space-x-2">
-										<div className="flex items-center space-x-1 text-white/70 text-[10px]">
-											{id === "folders" ? (
-												<FolderIcon className="h-3 w-3" />
-											) : id === "collections" ? (
-												<BookImage className="h-3 w-3" />
-											) : id === "tags" ? (
-												<TagIcon className="h-3 w-3" />
-											) : id === "albums" ? (
-												<Camera className="h-3 w-3" />
-											) : id === "characters" ? (
-												<User2 className="h-3 w-3" />
-											) : id === "places" ? (
-												<MapPin className="h-3 w-3" />
-											) : id === "objects" ? (
-												<Box className="h-3 w-3" />
-											) : id === "concepts" ? (
-												<Lightbulb className="h-3 w-3" />
-											) : id === "prompts" ? (
-												<Terminal className="h-3 w-3" />
-											) : id === "notes" ? (
-												<StickyNote className="h-3 w-3" />
-											) : (
-												<Hash className="h-3 w-3" />
-											)}
-											<span>{getCategoryItemCount(id)}</span>
-										</div>
-										<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-											<ImageIcon className="h-3 w-3" />
-											<span>{getImagesForCategory(id)}</span>
-										</div>
-									</div>
-								</Button>
+								</div>
 
 								<div className="mt-1 flex flex-col gap-1">
 									{renderCategoryItems(id)}

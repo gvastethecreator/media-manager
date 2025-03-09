@@ -1,7 +1,7 @@
 import { getAlbumImages } from '@/app/actions/album.actions';
 import { getCharacterImages } from '@/app/actions/character.actions';
 import { getCollectionImages } from '@/app/actions/collection.actions';
-import { getFolderImages } from '@/app/actions/folder.actions';
+import { getFolderImages } from '@/app/actions/folders/folder.actions';
 import { getObjectImages } from '@/app/actions/object.actions';
 import { getPlaceImages } from '@/app/actions/place.actions';
 import { getStats } from '@/app/actions/stats.actions';

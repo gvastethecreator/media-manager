@@ -1,4 +1,4 @@
-import { verifySignedToken } from '@/app/actions/thumbnails.actions';
+import { verifySignedToken } from '@/app/actions/thumbnails/thumbnails.actions';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_request: NextRequest, context: { params: { token: string } }) {

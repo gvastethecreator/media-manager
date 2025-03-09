@@ -1,8 +1,8 @@
 import { promises as fs } from 'fs';
 import { createHash } from 'node:crypto';
 import { extractMetadata } from '@/app/actions/metadata.actions';
-import { imageConfig } from '@/config';
 import { thumbnailCache } from '@/lib/cache';
+import { imageConfig } from '@/lib/config';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { ThumbnailQuality } from '@/types/thumbnails';

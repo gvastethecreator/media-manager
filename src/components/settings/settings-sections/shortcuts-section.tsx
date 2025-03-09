@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { useSettingsContext } from '@/context/settings-context';
-import type { Settings } from '@/context/settings-context';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useSettings } from "@/lib/contexts";
+import type { Settings } from "@/lib/types";
 import {
 	Bookmark,
 	Command,
@@ -20,46 +20,48 @@ import {
 	Settings2,
 	Tag,
 	Trash2,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
+} from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
 
 const shortcutCategories = [
 	{
-		name: 'General',
+		name: "General",
 		icon: Command,
 		shortcuts: [
-			{ action: 'Abrir configuración', keys: 'Ctrl + ,', Icon: Settings2 },
-			{ action: 'Buscar', keys: 'Ctrl + F', Icon: Search },
-			{ action: 'Recargar vista', keys: 'F5', Icon: Command },
+			{ action: "Abrir configuración", keys: "Ctrl + ,", Icon: Settings2 },
+			{ action: "Buscar", keys: "Ctrl + F", Icon: Search },
+			{ action: "Recargar vista", keys: "F5", Icon: Command },
 		],
 	},
 	{
-		name: 'Navegación',
+		name: "Navegación",
 		icon: Home,
 		shortcuts: [
-			{ action: 'Ir a Dashboard', keys: 'Alt + H', Icon: Home },
-			{ action: 'Ir a Carpetas', keys: 'Alt + F', Icon: Folder },
-			{ action: 'Ir a Colecciones', keys: 'Alt + C', Icon: Bookmark },
-			{ action: 'Ir a Galería', keys: 'Alt + G', Icon: Image },
-			{ action: 'Ir a Etiquetas', keys: 'Alt + T', Icon: Tag },
+			{ action: "Ir a Dashboard", keys: "Alt + H", Icon: Home },
+			{ action: "Ir a Carpetas", keys: "Alt + F", Icon: Folder },
+			{ action: "Ir a Colecciones", keys: "Alt + C", Icon: Bookmark },
+			{ action: "Ir a Galería", keys: "Alt + G", Icon: Image },
+			{ action: "Ir a Etiquetas", keys: "Alt + T", Icon: Tag },
 		],
 	},
 	{
-		name: 'Archivos',
+		name: "Archivos",
 		icon: FileUp,
 		shortcuts: [
-			{ action: 'Seleccionar todo', keys: 'Ctrl + A', Icon: Command },
-			{ action: 'Copiar', keys: 'Ctrl + C', Icon: Copy },
-			{ action: 'Pegar', keys: 'Ctrl + V', Icon: FileUp },
-			{ action: 'Eliminar', keys: 'Delete', Icon: Trash2 },
+			{ action: "Seleccionar todo", keys: "Ctrl + A", Icon: Command },
+			{ action: "Copiar", keys: "Ctrl + C", Icon: Copy },
+			{ action: "Pegar", keys: "Ctrl + V", Icon: FileUp },
+			{ action: "Eliminar", keys: "Delete", Icon: Trash2 },
 		],
 	},
 ];
 
 export function ShortcutsSection() {
-	const { settings, updateSettings } = useSettingsContext();
-	const [editingShortcut, setEditingShortcut] = React.useState<string | null>(null);
+	const { settings, updateSettings } = useSettings();
+	const [editingShortcut, setEditingShortcut] = React.useState<string | null>(
+		null
+	);
 	const [listeningForKeys, setListeningForKeys] = React.useState(false);
 
 	const handleStartEditing = (action: string) => {
@@ -75,17 +77,17 @@ export function ShortcutsSection() {
 		e.preventDefault();
 		const keys = [];
 		if (e.ctrlKey) {
-			keys.push('Ctrl');
+			keys.push("Ctrl");
 		}
 		if (e.altKey) {
-			keys.push('Alt');
+			keys.push("Alt");
 		}
 		if (e.shiftKey) {
-			keys.push('Shift');
+			keys.push("Shift");
 		}
 
 		const key = e.key.toUpperCase();
-		if (!['CONTROL', 'ALT', 'SHIFT'].includes(key)) {
+		if (!["CONTROL", "ALT", "SHIFT"].includes(key)) {
 			keys.push(key);
 		}
 
@@ -93,7 +95,7 @@ export function ShortcutsSection() {
 			const updatedSettings: Partial<Settings> = {
 				shortcuts: {
 					...settings.shortcuts,
-					[action]: keys.join(' + '),
+					[action]: keys.join(" + "),
 				},
 			};
 			updateSettings(updatedSettings);
@@ -127,7 +129,9 @@ export function ShortcutsSection() {
 								<CardHeader className="p-4 pb-3">
 									<div className="flex items-center gap-2">
 										<category.icon className="h-4 w-4" />
-										<CardTitle className="text-sm font-medium">{category.name}</CardTitle>
+										<CardTitle className="text-sm font-medium">
+											{category.name}
+										</CardTitle>
 									</div>
 								</CardHeader>
 								<CardContent className="p-2">
@@ -145,7 +149,9 @@ export function ShortcutsSection() {
 												<div className="p-1 rounded-md bg-muted">
 													<shortcut.Icon className="h-3.5 w-3.5 text-muted-foreground" />
 												</div>
-												<span className="text-xs font-medium">{shortcut.action}</span>
+												<span className="text-xs font-medium">
+													{shortcut.action}
+												</span>
 											</div>
 											<div className="flex items-center gap-1">
 												{editingShortcut === shortcut.action ? (
@@ -157,11 +163,18 @@ export function ShortcutsSection() {
 														autoFocus
 													/>
 												) : (
-													<Badge variant="outline" className="px-1.5 py-0.5 text-[10px] font-mono">
-														{settings.shortcuts?.[shortcut.action] || shortcut.keys}
+													<Badge
+														variant="outline"
+														className="px-1.5 py-0.5 text-[10px] font-mono"
+													>
+														{settings.shortcuts?.[shortcut.action] ||
+															shortcut.keys}
 													</Badge>
 												)}
-												<motion.div initial={{ opacity: 0, x: 20 }} whileHover={{ opacity: 1, x: 0 }}>
+												<motion.div
+													initial={{ opacity: 0, x: 20 }}
+													whileHover={{ opacity: 1, x: 0 }}
+												>
 													<Button
 														variant="ghost"
 														size="icon"
