@@ -1,4 +1,4 @@
-import type { BaseEntity } from '@/app/actions/base/base.actions';
+import type { BaseEntity } from '@/types/store.types';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type Language = 'es' | 'en';
