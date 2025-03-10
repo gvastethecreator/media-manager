@@ -438,12 +438,11 @@ class FolderServiceClass {
 						status: 'Reindexación completada',
 						progress: 100,
 						folderId: id,
-						phase: 'complete',
+						phase: 'metadata',
 						filesProcessed: result.totalFiles || 0,
 						totalFiles: result.totalFiles || 0,
 						startTime: this.startTimes.get(id) || 0,
 						endTime: Date.now(),
-						duration: Date.now() - (this.startTimes.get(id) || Date.now()),
 					};
 
 					this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
