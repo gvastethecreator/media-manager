@@ -10,12 +10,17 @@ const statusLogger = logger.withContext('FolderStatusAPI');
 const lastProcessStatus: Record<string, ProcessStatus> = {};
 const folderCompletionStatus: Record<string, boolean> = {};
 const processFinishTime: Record<string, number> = {};
+const rawToNormalizedIds: Record<string, string> = {}; // Mapeo entre IDs originales y normalizados
 
 // Mantener un registro de los últimos estados procesados
 folderService.onProgress((status: ProcessStatus) => {
 	if (status?.folderId) {
 		// Normalizar ID para evitar inconsistencias
-		const folderId = normalizeId(status.folderId);
+		const originalId = status.folderId;
+		const folderId = normalizeId(originalId);
+
+		// Guardar mapeo de IDs para diagnóstico
+		rawToNormalizedIds[originalId] = folderId;
 
 		// Checar si el proceso está finalizado
 		const isComplete =
@@ -38,7 +43,7 @@ folderService.onProgress((status: ProcessStatus) => {
 			progress: status.progress,
 			phase: status.phase,
 			isComplete,
-			originalId: status.folderId,
+			originalId,
 			normalizedId: folderId,
 		});
 
@@ -68,7 +73,11 @@ folderService.onProgress((status: ProcessStatus) => {
 folderService.on(FOLDER_EVENTS.COMPLETE, (data: FolderResponse) => {
 	if (data?.id) {
 		// Normalizar ID para evitar inconsistencias
-		const folderId = normalizeId(data.id);
+		const originalId = data.id;
+		const folderId = normalizeId(originalId);
+
+		// Guardar mapeo de IDs para diagnóstico
+		rawToNormalizedIds[originalId] = folderId;
 
 		// Marcar como completado
 		folderCompletionStatus[folderId] = true;
@@ -86,7 +95,7 @@ folderService.on(FOLDER_EVENTS.COMPLETE, (data: FolderResponse) => {
 		};
 
 		statusLogger.info(`✅ Evento COMPLETE recibido para carpeta ${folderId}`, {
-			originalId: data.id,
+			originalId,
 			normalizedId: folderId,
 		});
 
@@ -97,19 +106,19 @@ folderService.on(FOLDER_EVENTS.COMPLETE, (data: FolderResponse) => {
 
 // Función para programar limpieza de estado
 function scheduleStatusCleanup(folderId: string) {
-	// Eliminar después de 10 segundos solo si no hay un temporizador ya en curso
+	// Aumentar el tiempo a 30 segundos para dar más margen al cliente para verificar
 	setTimeout(() => {
-		// Solo limpiar si ha pasado al menos 10 segundos desde la finalización
+		// Solo limpiar si ha pasado al menos 30 segundos desde la finalización
 		const finishTime = processFinishTime[folderId] || 0;
 		const elapsed = Date.now() - finishTime;
 
-		if (elapsed >= 10000) {
+		if (elapsed >= 30000) {
 			delete lastProcessStatus[folderId];
 			delete folderCompletionStatus[folderId];
 			delete processFinishTime[folderId];
 			statusLogger.info(`🧹 Limpiando estado de carpeta ${folderId} después de ${elapsed}ms`);
 		}
-	}, 10000);
+	}, 30000);
 }
 
 export async function GET(request: NextRequest) {
@@ -121,25 +130,32 @@ export async function GET(request: NextRequest) {
 			// Normalizar ID para garantizar consistencia
 			const folderId = normalizeId(rawFolderId);
 
-			// Log más detallado para debugging
-			statusLogger.info(`GET /api/folders/status?folderId=${rawFolderId}`, {
-				hasStatus: !!lastProcessStatus[folderId],
-				isComplete: folderCompletionStatus[folderId] || false,
-				timeElapsed: processFinishTime[folderId] ? Date.now() - processFinishTime[folderId] : null,
-				originalId: rawFolderId,
-				normalizedId: folderId,
-				currentStatus: lastProcessStatus[folderId]
-					? {
-							progress: lastProcessStatus[folderId].progress,
-							phase: lastProcessStatus[folderId].phase,
-						}
-					: null,
-			});
+			// Buscar si existe algún mapeo conocido para este ID
+			const knownMappings = Object.entries(rawToNormalizedIds)
+				.filter(([original, normalized]) => normalized === folderId || original === rawFolderId)
+				.map(([original, normalized]) => ({ original, normalized }));
 
 			// Verificar si hay información disponible usando el ID normalizado o el original
 			const status = lastProcessStatus[folderId];
 			const isComplete = folderCompletionStatus[folderId] || false;
 			const finishedAt = processFinishTime[folderId] || null;
+
+			// Log más detallado para debugging
+			statusLogger.info(`GET /api/folders/status?folderId=${rawFolderId}`, {
+				hasStatus: !!status,
+				isComplete,
+				timeElapsed: finishedAt ? Date.now() - finishedAt : null,
+				originalId: rawFolderId,
+				normalizedId: folderId,
+				knownMappings: knownMappings.length > 0 ? knownMappings : 'ninguno',
+				allKnownIds: Object.keys(lastProcessStatus),
+				currentStatus: status
+					? {
+							progress: status.progress,
+							phase: status.phase,
+						}
+					: null,
+			});
 
 			// Devolver estado específico de una carpeta
 			return NextResponse.json(
@@ -151,6 +167,8 @@ export async function GET(request: NextRequest) {
 					// Incluir información útil para depuración
 					originalId: rawFolderId,
 					normalizedId: folderId,
+					allActiveIds: Object.keys(lastProcessStatus),
+					knownMappings: knownMappings.length > 0 ? knownMappings : null,
 				},
 				{
 					headers: {
@@ -163,6 +181,9 @@ export async function GET(request: NextRequest) {
 		// Devolver todos los estados activos
 		return NextResponse.json({
 			statuses: lastProcessStatus,
+			completionStatus: folderCompletionStatus,
+			finishTimes: processFinishTime,
+			idMappings: rawToNormalizedIds,
 			timestamp: Date.now(),
 		});
 	} catch (error) {
