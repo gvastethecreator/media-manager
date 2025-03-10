@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { BaseEntity } from './store.types';
+import type { BaseEntity } from '@/types/store.types';
 
 export type DataTableProps<T extends BaseEntity> = {
 	data: T[];

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { useAlbumsStore } from "@/store/entities/albums.store";
-import { useCharactersStore } from "@/store/entities/characters.store";
-import { useCollectionsStore } from "@/store/entities/collections.store";
-import { useConceptStore } from "@/store/entities/concept.store";
-import { useNoteStore } from "@/store/entities/note.store";
-import { useTagsStore } from "@/store/entities/tags.store";
-import { useObjectsStore } from "@/store/objects.store";
-import { usePlacesStore } from "@/store/places.store";
-import { usePromptStore } from "@/store/prompt.store";
-import type { FileItem } from "@/types/file-item";
+import { Badge } from '@/components/ui/badge';
+import { useAlbumsStore } from '@/store/entities/albums.store';
+import { useCharactersStore } from '@/store/entities/characters.store';
+import { useCollectionsStore } from '@/store/entities/collections.store';
+import { useConceptStore } from '@/store/entities/concept.store';
+import { useNoteStore } from '@/store/entities/note.store';
+import { useTagsStore } from '@/store/entities/tags.store';
+import { useObjectsStore } from '@/store/objects.store';
+import { usePlacesStore } from '@/store/places.store';
+import { usePromptStore } from '@/store/prompt.store';
+import type { FileItem } from '@/types/file-item';
 import {
 	BookmarkPlus,
 	Box,
@@ -22,28 +22,20 @@ import {
 	Palette,
 	Tag as TagIcon,
 	User,
-} from "lucide-react";
-import type { ContextMenuAction, LoadingStates } from "../types";
-import { EntitySubMenu } from "./entity-submenu";
+} from 'lucide-react';
+import type { ContextMenuAction, LoadingStates } from '../types';
+import { EntitySubMenu } from './entity-submenu';
 
 interface SubmenuProps {
 	file: FileItem;
-	onAction: (
-		action: ContextMenuAction,
-		file: FileItem,
-		data?: Record<string, unknown>
-	) => void;
+	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 	loadingStates: LoadingStates;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	onOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
 
 // Componente para el submenú de colecciones
-export function CollectionsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-}: SubmenuProps) {
+export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	const { collections } = useCollectionsStore();
 
 	return (
@@ -53,16 +45,11 @@ export function CollectionsSubmenu({
 			entityName="colección"
 			entities={collections}
 			isLoading={loadingStates.collections.loading}
-			onSelect={(collection) =>
-				onAction("collection-add", file, { id: collection.id })
-			}
-			onCreate={() => onAction("collection-create", file)}
+			onSelect={(collection) => onAction('collection-add', file, { id: collection.id })}
+			onCreate={() => onAction('collection-create', file)}
 			renderItem={(collection) => (
 				<div className="flex items-center gap-2 w-full">
-					<div
-						className="w-3 h-3 rounded"
-						style={{ backgroundColor: collection.color || "#888" }}
-					/>
+					<div className="w-3 h-3 rounded" style={{ backgroundColor: collection.color || '#888' }} />
 					<span className="flex-1">{collection.name}</span>
 				</div>
 			)}
@@ -81,14 +68,11 @@ export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="etiqueta"
 			entities={tags}
 			isLoading={loadingStates.tags.loading}
-			onSelect={(tag) => onAction("tag-add", file, { id: tag.id })}
-			onCreate={() => onAction("tag-create", file)}
+			onSelect={(tag) => onAction('tag-add', file, { id: tag.id })}
+			onCreate={() => onAction('tag-create', file)}
 			renderItem={(tag) => (
 				<div className="flex items-center gap-2 w-full">
-					<div
-						className="w-3 h-3 rounded"
-						style={{ backgroundColor: tag.color }}
-					/>
+					<div className="w-3 h-3 rounded" style={{ backgroundColor: tag.color }} />
 					<span className="flex-1">{tag.name}</span>
 					{tag.shortcut && (
 						<Badge variant="outline" className="text-[10px] h-4 px-1">
@@ -112,11 +96,11 @@ export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="álbum"
 			entities={albums}
 			isLoading={loadingStates.albums.loading}
-			onSelect={(album) => onAction("album-add", file, { id: album.id })}
-			onCreate={() => onAction("album-create", file)}
+			onSelect={(album) => onAction('album-add', file, { id: album.id })}
+			onCreate={() => onAction('album-create', file)}
 			renderItem={(album) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{album.emoji || "📷"}</span>
+					<span>{album.emoji || '📷'}</span>
 					<span className="flex-1">{album.name}</span>
 				</div>
 			)}
@@ -125,11 +109,7 @@ export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 }
 
 // Componente para el submenú de personajes
-export function CharactersSubmenu({
-	file,
-	onAction,
-	loadingStates,
-}: SubmenuProps) {
+export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	const { characters } = useCharactersStore();
 
 	return (
@@ -139,13 +119,11 @@ export function CharactersSubmenu({
 			entityName="personaje"
 			entities={characters}
 			isLoading={loadingStates.characters.loading}
-			onSelect={(character) =>
-				onAction("character-add", file, { id: character.id })
-			}
-			onCreate={() => onAction("character-create", file)}
+			onSelect={(character) => onAction('character-add', file, { id: character.id })}
+			onCreate={() => onAction('character-create', file)}
 			renderItem={(character) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{character.emoji || "👤"}</span>
+					<span>{character.emoji || '👤'}</span>
 					<span className="flex-1">{character.name}</span>
 				</div>
 			)}
@@ -164,11 +142,11 @@ export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="lugar"
 			entities={places}
 			isLoading={loadingStates.places.loading}
-			onSelect={(place) => onAction("place-add", file, { id: place.id })}
-			onCreate={() => onAction("place-create", file)}
+			onSelect={(place) => onAction('place-add', file, { id: place.id })}
+			onCreate={() => onAction('place-create', file)}
 			renderItem={(place) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{place.emoji || "📍"}</span>
+					<span>{place.emoji || '📍'}</span>
 					<span className="flex-1">{place.name}</span>
 				</div>
 			)}
@@ -177,11 +155,7 @@ export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 }
 
 // Componente para el submenú de objetos
-export function ObjectsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-}: SubmenuProps) {
+export function ObjectsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	const { objects } = useObjectsStore();
 
 	return (
@@ -191,11 +165,11 @@ export function ObjectsSubmenu({
 			entityName="objeto"
 			entities={objects}
 			isLoading={loadingStates.objects.loading}
-			onSelect={(object) => onAction("object-add", file, { id: object.id })}
-			onCreate={() => onAction("object-create", file)}
+			onSelect={(object) => onAction('object-add', file, { id: object.id })}
+			onCreate={() => onAction('object-create', file)}
 			renderItem={(object) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{object.emoji || "📦"}</span>
+					<span>{object.emoji || '📦'}</span>
 					<span className="flex-1">{object.name}</span>
 				</div>
 			)}
@@ -204,11 +178,7 @@ export function ObjectsSubmenu({
 }
 
 // Componente para el submenú de prompts
-export function PromptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-}: SubmenuProps) {
+export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	const { prompts } = usePromptStore();
 
 	return (
@@ -218,11 +188,11 @@ export function PromptsSubmenu({
 			entityName="prompt"
 			entities={prompts}
 			isLoading={loadingStates.prompts.loading}
-			onSelect={(prompt) => onAction("prompt-add", file, { id: prompt.id })}
-			onCreate={() => onAction("prompt-create", file)}
+			onSelect={(prompt) => onAction('prompt-add', file, { id: prompt.id })}
+			onCreate={() => onAction('prompt-create', file)}
 			renderItem={(prompt) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{prompt.emoji || "💬"}</span>
+					<span>{prompt.emoji || '💬'}</span>
 					<span className="flex-1">{prompt.name}</span>
 				</div>
 			)}
@@ -241,8 +211,8 @@ export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="nota"
 			entities={notes}
 			isLoading={loadingStates.notes.loading}
-			onSelect={(note) => onAction("note-add", file, { id: note.id })}
-			onCreate={() => onAction("note-create", file)}
+			onSelect={(note) => onAction('note-add', file, { id: note.id })}
+			onCreate={() => onAction('note-create', file)}
 			renderItem={(note) => (
 				<div className="flex items-center gap-2 w-full">
 					<span className="flex-1">{note.title}</span>
@@ -253,11 +223,7 @@ export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 }
 
 // Componente para el submenú de conceptos
-export function ConceptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-}: SubmenuProps) {
+export function ConceptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	const { concepts } = useConceptStore();
 
 	return (
@@ -267,11 +233,11 @@ export function ConceptsSubmenu({
 			entityName="concepto"
 			entities={concepts}
 			isLoading={loadingStates.concepts.loading}
-			onSelect={(concept) => onAction("concept-add", file, { id: concept.id })}
-			onCreate={() => onAction("concept-create", file)}
+			onSelect={(concept) => onAction('concept-add', file, { id: concept.id })}
+			onCreate={() => onAction('concept-create', file)}
 			renderItem={(concept) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{concept.emoji || "💡"}</span>
+					<span>{concept.emoji || '💡'}</span>
 					<span className="flex-1">{concept.name}</span>
 				</div>
 			)}

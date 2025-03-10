@@ -23,7 +23,7 @@ async function main() {
   await prisma.prompt.deleteMany()
   await prisma.note.deleteMany()
   await prisma.attribute.deleteMany()
-  await prisma.systemImage.deleteMany()
+  await prisma.uploadedImage.deleteMany()
   await prisma.universalFavorite.deleteMany()
 
   // Crear perfil por defecto
@@ -1036,9 +1036,9 @@ async function main() {
     ],
   })
 
-  // Crear imágenes del sistema por defecto
-  seedLogger.info('🖼️ Creando imágenes del sistema por defecto...')
-  const defaultSystemImages = await prisma.systemImage.createMany({
+  // Crear imágenes subidas por defecto
+  seedLogger.info('🖼️ Creando imágenes subidas por defecto...')
+  const defaultUploadedImages = await prisma.uploadedImage.createMany({
     data: [
       {
         name: 'Default Avatar',

@@ -1,3 +1,4 @@
+import type { BaseEntity } from '@/types/store.types';
 import type {
 	Album as PrismaAlbum,
 	Attribute as PrismaAttribute,
@@ -10,7 +11,6 @@ import type {
 	Prompt as PrismaPrompt,
 	Tag as PrismaTag,
 } from '@prisma/client';
-import type { BaseEntity } from './store.types';
 
 export interface BaseEntityCreate {
 	name: string;
@@ -102,7 +102,7 @@ export interface AttributeCreate extends BaseEntityCreate {
 	metadata: string;
 }
 
-export interface SystemImageCreate {
+export interface UploadedImageCreate {
 	name: string;
 	path: string;
 	type: string;
@@ -139,7 +139,7 @@ export type EntityType =
 	| 'prompt'
 	| 'note'
 	| 'attribute'
-	| 'systemImage';
+	| 'uploadedImage';
 
 export type RelationType =
 	| 'character_character'
@@ -179,7 +179,7 @@ export type AttributeType = 'text' | 'number' | 'boolean' | 'date' | 'color' | '
 
 export type AttributeCategory = 'general' | 'character' | 'place' | 'object' | 'concept' | 'prompt' | 'note' | 'system';
 
-export type SystemImageType =
+export type UploadedImageType =
 	| 'icon'
 	| 'avatar'
 	| 'background'

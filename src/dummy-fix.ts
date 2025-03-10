@@ -1,1 +1,3 @@
-export function fixUnusedVariable() { /* This is a dummy fix function */ }
+export function fixUnusedVariable() {
+	/* This is a dummy fix function */
+}

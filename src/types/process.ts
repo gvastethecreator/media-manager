@@ -1,4 +1,13 @@
-export type ProcessPhase = 'scanning' | 'indexing' | 'thumbnails' | 'metadata' | 'error' | 'starting';
+export type ProcessPhase =
+	| 'scanning'
+	| 'indexing'
+	| 'thumbnails'
+	| 'metadata'
+	| 'error'
+	| 'starting'
+	| 'processing'
+	| 'verifying'
+	| 'complete';
 
 export interface ProcessStatus {
 	status?: string;
@@ -12,9 +21,10 @@ export interface ProcessStatus {
 	filesProcessed?: number;
 	totalFiles?: number;
 	fileDetails?: {
-		name: string;
-		size: number;
-		type: string;
+		name?: string;
+		path?: string;
+		size?: number;
+		type?: string;
 		dimensions?: {
 			width: number;
 			height: number;
@@ -22,15 +32,15 @@ export interface ProcessStatus {
 	};
 	extendedStats?: {
 		fileTypes: { [key: string]: number };
-		averageSize: number;
-		processingSpeed: number;
+		averageSize?: number;
+		processingSpeed?: number;
 		errorsByType: { [key: string]: number };
-		healthScore: number;
+		healthScore?: number;
 	};
 	errors?: Array<{
 		file: string;
 		error: string;
-		timestamp: number;
+		timestamp?: number;
 	}>;
 	globalProgress?: {
 		current: number;
