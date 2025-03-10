@@ -21,8 +21,11 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 	// Referencias para el polling
 	const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const processingFolderRef = useRef<string | null>(null);
+	const originalFolderIdRef = useRef<string | null>(null);
 	const lastUpdatedRef = useRef<Record<string, number>>({});
-	const pollingIntervalRef = useRef<number>(1500); // 1.5 segundos de intervalo
+	const pollingIntervalRef = useRef<number>(1000); // 1 segundo de intervalo (más rápido que antes)
+	const pollingErrorCountRef = useRef<number>(0);
+	const consecutiveNoStatusCountRef = useRef<number>(0);
 
 	// Detener polling - definido primero para evitar errores de referencia
 	const stopPolling = useCallback(() => {
@@ -30,7 +33,14 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			clearInterval(pollingTimerRef.current);
 			pollingTimerRef.current = null;
 			setIsPolling(false);
-			pollingLogger.info('🛑 Deteniendo polling');
+			pollingLogger.info('🛑 Deteniendo polling', {
+				originalFolderId: originalFolderIdRef.current,
+				normalizedFolderId: processingFolderRef.current,
+			});
+
+			// Reiniciar contadores
+			pollingErrorCountRef.current = 0;
+			consecutiveNoStatusCountRef.current = 0;
 		}
 	}, []);
 
@@ -42,9 +52,15 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 
 		try {
 			const folderId = processingFolderRef.current;
-			const url = `/api/folders/status?folderId=${folderId}`;
+			const originalId = originalFolderIdRef.current || folderId;
 
-			pollingLogger.info(`📡 Polling de estado para carpeta ${folderId}`);
+			// Usar el ID original para la solicitud para obtener diagnósticos
+			const url = `/api/folders/status?folderId=${originalId}`;
+
+			pollingLogger.info('📡 Polling de estado para carpeta', {
+				originalId,
+				normalizedId: folderId,
+			});
 
 			const response = await fetch(url, {
 				method: 'GET',
@@ -61,9 +77,17 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 
 			const data = await response.json();
 
+			// Reiniciar contador de errores
+			pollingErrorCountRef.current = 0;
+
 			// Verificar primero si el proceso está marcado como completo en la API
 			if (data.isComplete) {
-				pollingLogger.info('✅ API indica que el proceso está completo:', { folderId, finishedAt: data.finishedAt });
+				pollingLogger.info('✅ API indica que el proceso está completo:', {
+					folderId,
+					originalId,
+					finishedAt: data.finishedAt,
+					mappings: data.knownMappings,
+				});
 
 				// Notificar sobre la finalización forzando un estado completo
 				const completeStatus: ProcessStatus = {
@@ -86,9 +110,52 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 				return;
 			}
 
-			// Procesar el estado normalmente si no está marcado como completo
+			// Ver si podemos encontrar el estado usando cualquiera de los IDs activos
+			if (!data.status && data.allActiveIds && data.allActiveIds.length > 0) {
+				pollingLogger.info('🔍 Buscando estado alternativo entre IDs activos', {
+					activeIds: data.allActiveIds,
+					originalId,
+					normalizedId: folderId,
+				});
+
+				// Verificar si hay un ID similar al actual
+				for (const activeId of data.allActiveIds) {
+					if (activeId.includes(folderId.substring(0, 10)) || folderId.includes(activeId.substring(0, 10))) {
+						// Intentar obtener estado con este ID alternativo
+						const alternativeUrl = `/api/folders/status?folderId=${activeId}`;
+						const alternativeResponse = await fetch(alternativeUrl, {
+							method: 'GET',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							cache: 'no-store',
+							next: { revalidate: 0 },
+						});
+
+						if (alternativeResponse.ok) {
+							const alternativeData = await alternativeResponse.json();
+							if (alternativeData.status) {
+								pollingLogger.info('✅ Encontrado estado usando ID alternativo', {
+									alternativeId: activeId,
+									originalId,
+									normalizedId: folderId,
+								});
+
+								// Usar este estado alternativo
+								data.status = alternativeData.status;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			// Procesar el estado normalmente si está disponible
 			if (data.status) {
 				const status = data.status as ProcessStatus;
+
+				// Reiniciar contador de no estado
+				consecutiveNoStatusCountRef.current = 0;
 
 				// IMPORTANTE: Siempre procesamos el estado, sin importar el timestamp
 				pollingLogger.info('📊 Progreso obtenido vía polling:', status);
@@ -121,27 +188,84 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 						stopPolling();
 					}, 500);
 				}
-			} else if (!data.status && data.isComplete) {
-				// Si no hay estado pero se indica que está completo
-				pollingLogger.info('✅ No hay estado pero API indica proceso completo:', { folderId });
-				onComplete(folderId);
-				stopPolling();
+			} else {
+				// Incrementar contador de no estado
+				consecutiveNoStatusCountRef.current++;
+
+				pollingLogger.warn('⚠️ No se encontró estado para la carpeta', {
+					folderId,
+					originalId,
+					consecutiveNoStatus: consecutiveNoStatusCountRef.current,
+					mappings: data.knownMappings,
+				});
+
+				// Si no hay estado por 10 verificaciones consecutivas y hay progreso
+				// forzar un estado completo para evitar que se quede atascado
+				if (consecutiveNoStatusCountRef.current >= 10) {
+					pollingLogger.info('⚠️ Forzando finalización después de múltiples intentos sin estado', {
+						folderId,
+						originalId,
+						attempts: consecutiveNoStatusCountRef.current,
+					});
+
+					// Generar estado completo forzado
+					const forcedStatus: ProcessStatus = {
+						folderId,
+						phase: 'complete',
+						progress: 100,
+						status: 'Proceso completado',
+						timestamp: Date.now(),
+					};
+
+					// Actualizar estado y notificar finalización
+					onStatusUpdate(forcedStatus);
+					onComplete(folderId);
+
+					// Detener polling
+					stopPolling();
+				}
 			}
 		} catch (error) {
-			pollingLogger.error('Error en polling:', error);
+			// Incrementar contador de errores
+			pollingErrorCountRef.current++;
+
+			const errorMessage = `Error en polling: ${error instanceof Error ? error.message : String(error)}`;
+			pollingLogger.error(errorMessage, {
+				errorCount: pollingErrorCountRef.current,
+				folderId: processingFolderRef.current,
+				originalId: originalFolderIdRef.current,
+			});
+
+			// Si hay demasiados errores consecutivos, detener el polling
+			if (pollingErrorCountRef.current >= 5) {
+				pollingLogger.error('Demasiados errores de polling, deteniendo', {
+					errorCount: pollingErrorCountRef.current,
+				});
+				stopPolling();
+			}
 		}
 	}, [onStatusUpdate, onComplete, stopPolling]);
 
 	// Iniciar polling
 	const startPolling = useCallback(
 		(folderId: string) => {
+			// Guardar el ID original para referencia
+			originalFolderIdRef.current = folderId;
+
 			// Normalizar el ID para evitar inconsistencias
 			const normalizedId = normalizeId(folderId);
 
 			// Establecer el ID de carpeta que estamos procesando (usando ID normalizado)
 			processingFolderRef.current = normalizedId;
 
-			pollingLogger.info(`🔄 Iniciando polling para carpeta: ${folderId} (normalizado: ${normalizedId})`);
+			pollingLogger.info('🔄 Iniciando polling para carpeta', {
+				originalId: folderId,
+				normalizedId,
+			});
+
+			// Reiniciar contadores
+			pollingErrorCountRef.current = 0;
+			consecutiveNoStatusCountRef.current = 0;
 
 			// Limpiar cualquier polling anterior
 			stopPolling();

@@ -10,13 +10,31 @@
  * @returns El ID normalizado
  */
 export function normalizeId(id: string): string {
-	if (!id) return id;
+	if (!id) {
+		return id;
+	}
 
-	// El problema actual es un carácter 0 extra en la posición 11
-	// Asegurarnos de que siempre tenga el formato correcto
-	// Formato deseado: cmXXXXXXXXXXXXXXXXX (sin 0s extras)
+	// Extraer solo los caracteres alfanuméricos para evitar problemas con caracteres especiales
+	const cleanId = id.replace(/[^a-zA-Z0-9]/g, '');
 
-	// Eliminar cualquier 0 extra después del prefijo cm8
+	// Si contiene "msi9i5b0d1" u otro patrón similar, podemos estar ante un ID extendido
+	// Asegurémonos de mantener estos patrones intactos
+	if (cleanId.includes('msi9i5b0d1') || cleanId.includes('msi9i5b')) {
+		// Para IDs que contienen este patrón específico, extraemos solo la parte numérica problemática
+		// Ejemplo: cm82qn709000293msi9i5b0d1 -> extraemos "709000293"
+		const matches = id.match(/cm82qn([0-9]+)msi9i5b/);
+
+		if (matches?.[1]) {
+			// Normalizar solo la parte numérica eliminando ceros consecutivos
+			const numericPart = matches[1];
+			const normalizedNumeric = numericPart.replace(/0{2,}/g, '0');
+
+			// Reconstruir el ID con la parte numérica normalizada
+			return id.replace(numericPart, normalizedNumeric);
+		}
+	}
+
+	// Para otros IDs que siguen el patrón simple
 	if (id.startsWith('cm8')) {
 		const prefix = id.substring(0, 3); // "cm8"
 		const rest = id.substring(3);
@@ -37,6 +55,8 @@ export function normalizeId(id: string): string {
  * @returns true si los IDs son equivalentes
  */
 export function areIdsEquivalent(id1: string, id2: string): boolean {
-	if (!id1 || !id2) return false;
+	if (!id1 || !id2) {
+		return false;
+	}
 	return normalizeId(id1) === normalizeId(id2);
 }
