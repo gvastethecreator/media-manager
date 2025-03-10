@@ -187,6 +187,9 @@ export async function indexFolder(id: string): Promise<FolderResponse> {
  * Reindexar una carpeta existente
  */
 export async function reindexFolder(id: string): Promise<FolderResponse> {
+	// Capturar el tiempo de inicio del proceso
+	const processStartTime = Date.now();
+
 	try {
 		folderLogger.info('🔄 Reindexando carpeta:', { id });
 
@@ -196,11 +199,11 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 			progress: 0,
 			folderId: id,
 			phase: 'starting',
-			startTime: Date.now(),
+			startTime: processStartTime,
 			currentFile: '',
 			filesProcessed: 0,
 			totalFiles: 0,
-			timestamp: Date.now(),
+			timestamp: processStartTime,
 		});
 
 		const folder = await prisma.folder.findUnique({
@@ -332,18 +335,47 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 			deletedFiles: deletedFiles.size,
 		});
 
+		// Obtener tiempo actual para usarlo consistentemente en todos los eventos
+		const endTime = Date.now();
+		const processDuration = endTime - processStartTime;
+
 		// Emitir un evento de progreso final
 		emitProgress({
 			status: 'Reindexación completada',
 			progress: 100,
 			folderId: id,
-			phase: 'indexing',
+			phase: 'complete', // Para que se detecte correctamente como finalizado
 			filesProcessed: total,
 			totalFiles: total,
 			currentFile: folder.path,
-			endTime: Date.now(),
-			startTime: Date.now() - 1000, // Asegurarse de que hay un tiempo de inicio válido
-			timestamp: Date.now(),
+			endTime: endTime,
+			startTime: processStartTime,
+			timestamp: endTime,
+		});
+
+		// Emitir también un evento de tipo 'folder:complete'
+		emit({
+			type: 'folder:complete',
+			data: {
+				id: updatedFolder.id,
+				name: updatedFolder.name,
+				path: updatedFolder.path,
+				totalFiles: updatedFolder.totalFiles,
+				totalSize: updatedFolder.totalSize,
+				stats: {
+					total: total,
+					totalSize: totalSize,
+				},
+				success: true,
+				timestamp: endTime, // Añadir el timestamp para consistencia
+				endTime: endTime,
+				startTime: processStartTime,
+			},
+		});
+
+		folderLogger.info(`✅ Carpeta reindexada en ${Math.round(processDuration / 1000)}s`, {
+			id: updatedFolder.id,
+			totalFiles: updatedFolder.totalFiles,
 		});
 
 		return {

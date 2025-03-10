@@ -3,11 +3,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { formatBytes } from "@/lib/format-utils";
+import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import type { ExtendedProcessStatus, ProcessPhase } from "@/types/process";
 import { Code, File, FileWarning, Folder, HelpCircle } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+// Crear una instancia de logger para este componente
+const componentLogger = logger.withContext("FolderProgressDetails");
 
 interface FolderProgressDetailsProps {
 	status: ExtendedProcessStatus;
@@ -22,23 +26,82 @@ export function FolderProgressDetails({
 }: FolderProgressDetailsProps) {
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 	const [isStale, setIsStale] = useState<boolean>(false);
+	const [isComplete, setIsComplete] = useState<boolean>(false);
+	const staleTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const initialLoadRef = useRef<boolean>(true);
 
-	// Verificar si el estado está estancado (sin actualizaciones por más de 10 segundos)
+	// Verificar si el estado está estancado (sin actualizaciones por más de 15 segundos)
 	useEffect(() => {
-		if (isProcessing && status.status) {
-			setLastUpdateTime(Date.now());
+		// Si es la carga inicial o hay un cambio en isProcessing, resetear el estado
+		if (initialLoadRef.current || status.timestamp) {
+			initialLoadRef.current = false;
+			setLastUpdateTime(status.timestamp || Date.now());
 			setIsStale(false);
+
+			// Limpiar cualquier temporizador existente
+			if (staleTimerRef.current) {
+				clearTimeout(staleTimerRef.current);
+				staleTimerRef.current = null;
+			}
 		}
 
-		// Configurar un temporizador para verificar si el estado se ha quedado estancado
-		const timer = setInterval(() => {
-			if (isProcessing && Date.now() - lastUpdateTime > 10000) {
-				setIsStale(true);
-			}
-		}, 5000);
+		// Si cambia la fase a 'complete', marcar como completado
+		if (status.phase === "complete") {
+			componentLogger.info("Proceso completado detectado", status);
+			setIsComplete(true);
+			setIsStale(false);
 
-		return () => clearInterval(timer);
-	}, [isProcessing, status, lastUpdateTime]);
+			// Limpiar cualquier temporizador existente
+			if (staleTimerRef.current) {
+				clearTimeout(staleTimerRef.current);
+				staleTimerRef.current = null;
+			}
+			return;
+		}
+
+		// Si el proceso está en curso pero no está completo, iniciar temporizador para detectar estancamiento
+		if (isProcessing && !isComplete) {
+			// Usar un temporizador único con un tiempo más largo (15 segundos)
+			if (!staleTimerRef.current) {
+				staleTimerRef.current = setTimeout(() => {
+					const now = Date.now();
+					const timeSinceLastUpdate = now - lastUpdateTime;
+
+					// Solo marcar como estancado si han pasado más de 15 segundos
+					if (timeSinceLastUpdate > 15000) {
+						setIsStale(true);
+						componentLogger.warn("Estado del proceso estancado:", {
+							lastUpdate: new Date(lastUpdateTime).toISOString(),
+							currentTime: new Date(now).toISOString(),
+							timeSinceLastUpdate: `${Math.round(timeSinceLastUpdate / 1000)}s`,
+							status: status.status,
+							phase: status.phase,
+						});
+					}
+
+					// Limpiar la referencia del temporizador
+					staleTimerRef.current = null;
+				}, 15000);
+			}
+		} else {
+			// Si no está procesando, asegurarse de que no esté marcado como estancado
+			setIsStale(false);
+
+			// Limpiar cualquier temporizador existente
+			if (staleTimerRef.current) {
+				clearTimeout(staleTimerRef.current);
+				staleTimerRef.current = null;
+			}
+		}
+
+		// Limpiar temporizador al desmontar
+		return () => {
+			if (staleTimerRef.current) {
+				clearTimeout(staleTimerRef.current);
+				staleTimerRef.current = null;
+			}
+		};
+	}, [isProcessing, status, lastUpdateTime, isComplete]);
 
 	// Función para renderizar el icono según la fase actual
 	const getPhaseIcon = useCallback(() => {
@@ -54,17 +117,28 @@ export function FolderProgressDetails({
 				return <Code className="h-3.5 w-3.5 text-yellow-500" />;
 			case "error":
 				return <FileWarning className="h-3.5 w-3.5 text-red-500" />;
+			case "complete":
+				return <File className="h-3.5 w-3.5 text-emerald-500" />;
 			default:
 				return <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />;
 		}
 	}, [status.phase]);
+
+	// Determinar el mensaje de estado a mostrar
+	const getStatusMessage = useCallback(() => {
+		if (isComplete) {
+			return "Proceso completado";
+		}
+
+		return status.status || "Procesando...";
+	}, [isComplete, status.status]);
 
 	// Obtener el progreso actual
 	const progress = status.progress || 0;
 
 	// Averiguar si se debe mostrar el contador de archivos
 	const showFileCounter =
-		isProcessing &&
+		(isProcessing || isComplete) &&
 		typeof status.filesProcessed === "number" &&
 		typeof status.totalFiles === "number";
 
@@ -108,29 +182,36 @@ export function FolderProgressDetails({
 				<div className="flex items-center justify-between mb-1">
 					<div className="flex items-center gap-1.5">
 						{getPhaseIcon()}
-						<span className="text-xs font-medium">
-							{status.status || "Procesando..."}
-						</span>
+						<span className="text-xs font-medium">{getStatusMessage()}</span>
 
-						{isStale && (
+						{isStale && !isComplete && (
 							<Badge
 								variant="outline"
 								className="text-[9px] h-3.5 px-1 py-0 text-yellow-500 border-yellow-200 bg-yellow-50"
 							>
-								Esperando actualizaciones...
+								Actualizando...
+							</Badge>
+						)}
+
+						{isComplete && (
+							<Badge
+								variant="outline"
+								className="text-[9px] h-3.5 px-1 py-0 text-emerald-500 border-emerald-200 bg-emerald-50"
+							>
+								Completado
 							</Badge>
 						)}
 					</div>
 
 					<div className="text-xs text-muted-foreground">
 						{getProcessingTime()}
-						{status.extendedStats?.processingSpeed
+						{status.extendedStats?.processingSpeed && !isComplete
 							? ` ⋅ ${getProcessingSpeed()}`
 							: ""}
 					</div>
 				</div>
 
-				<Progress value={progress} className="h-1.5" />
+				<Progress value={isComplete ? 100 : progress} className="h-1.5" />
 
 				{/* Información detallada del progreso */}
 				<div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
@@ -143,7 +224,7 @@ export function FolderProgressDetails({
 						</div>
 					)}
 
-					{status.currentFile && (
+					{status.currentFile && !isComplete && (
 						<div className="text-[10px] text-muted-foreground truncate max-w-[200px]">
 							<span>Archivo: </span>
 							<span className="font-mono">
@@ -159,7 +240,7 @@ export function FolderProgressDetails({
 						</div>
 					)}
 
-					{status.estimatedTimeRemaining && (
+					{status.estimatedTimeRemaining && !isComplete && (
 						<div className="text-[10px] text-muted-foreground">
 							<span>Tiempo restante: ~</span>
 							<span>

@@ -17,7 +17,7 @@ import type { ExtendedProcessStatus, ProcessPhase } from "@/types/process";
 import { Folder, RefreshCw, Trash2 } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
 	FolderIndexStatusBadge,
 	type IndexStatus,
@@ -50,17 +50,62 @@ export function FolderCard({
 }: FolderCardProps) {
 	// Determinar si esta carpeta está siendo procesada actualmente
 	const isReindexing = isProcessing && processStatus?.folderId === folder.id;
+	const isComplete =
+		processStatus?.phase === "complete" &&
+		processStatus?.folderId === folder.id;
 	const indexStatus = getFolderIndexStatus(folder);
 
-	// Agregar un estado para hacer seguimiento del último progreso recibido
+	// Estado local para tracking
 	const [lastProgress, setLastProgress] = useState<number>(0);
+	const [showCompleteAnimation, setShowCompleteAnimation] =
+		useState<boolean>(false);
 
 	// Actualizar el progreso cuando cambie el estado
 	useEffect(() => {
-		if (isReindexing && processStatus?.progress) {
+		const isActiveProcess =
+			isReindexing && processStatus?.folderId === folder.id;
+
+		if (isActiveProcess && typeof processStatus?.progress === "number") {
 			setLastProgress(processStatus.progress);
+		} else if (isComplete) {
+			setLastProgress(100);
+			setShowCompleteAnimation(true);
+
+			// Ocultar la animación después de un tiempo
+			const timer = setTimeout(() => {
+				setShowCompleteAnimation(false);
+			}, 3000);
+
+			return () => clearTimeout(timer);
 		}
-	}, [isReindexing, processStatus]);
+	}, [isReindexing, isComplete, processStatus, folder.id]);
+
+	// Obtener mensaje de estado
+	const getStatusMessage = useCallback(() => {
+		if (!isReindexing && !showCompleteAnimation) {
+			return null;
+		}
+
+		if (showCompleteAnimation) {
+			return (
+				<Badge
+					variant="outline"
+					className="ml-1 text-[9px] h-3.5 px-1 py-0 text-emerald-500 border-emerald-200 bg-emerald-50"
+				>
+					Completado
+				</Badge>
+			);
+		}
+
+		return (
+			<Badge
+				variant="outline"
+				className="ml-1 text-[9px] h-3.5 px-1 py-0 text-blue-500 border-blue-200 bg-blue-50 animate-pulse"
+			>
+				Procesando...
+			</Badge>
+		);
+	}, [isReindexing, showCompleteAnimation]);
 
 	return (
 		<motion.div
@@ -76,14 +121,25 @@ export function FolderCard({
 			<Card
 				className={cn(
 					"overflow-hidden transition-all",
-					isReindexing && "ring-1 ring-primary/20"
+					isReindexing && "ring-1 ring-primary/20",
+					showCompleteAnimation && "ring-1 ring-emerald-400/20"
 				)}
 			>
 				{/* Agregar indicador visual de procesamiento */}
-				{isReindexing && (
-					<div className="absolute inset-x-0 top-0 h-0.5 bg-primary/50 overflow-hidden">
+				{(isReindexing || showCompleteAnimation) && (
+					<div
+						className={cn(
+							"absolute inset-x-0 top-0 h-0.5 overflow-hidden",
+							showCompleteAnimation ? "bg-emerald-400/50" : "bg-primary/50"
+						)}
+					>
 						<div
-							className="h-full bg-primary animate-pulse"
+							className={cn(
+								"h-full",
+								showCompleteAnimation
+									? "bg-emerald-400"
+									: "bg-primary animate-pulse"
+							)}
 							style={{ width: `${lastProgress}%` }}
 						/>
 					</div>
@@ -94,14 +150,7 @@ export function FolderCard({
 						<Folder className="h-4 w-4 text-blue-500" />
 						<div className="flex items-center gap-1">
 							<span className="font-medium">{folder.name}</span>
-							{isReindexing && (
-								<Badge
-									variant="outline"
-									className="ml-1 text-[9px] h-3.5 px-1 py-0 text-blue-500 border-blue-200 bg-blue-50 animate-pulse"
-								>
-									Procesando...
-								</Badge>
-							)}
+							{getStatusMessage()}
 						</div>
 					</div>
 				</CardHeader>
@@ -231,7 +280,7 @@ export function FolderCard({
 						</motion.div>
 					)}
 
-					{isReindexing && processStatus && (
+					{(isReindexing || showCompleteAnimation) && processStatus && (
 						<div className="px-3 pb-2">
 							<FolderProgressDetails
 								status={processStatus}
