@@ -1,4 +1,4 @@
-export type ProcessPhase = 'scanning' | 'indexing' | 'thumbnails' | 'metadata';
+export type ProcessPhase = 'scanning' | 'indexing' | 'thumbnails' | 'metadata' | 'error' | 'starting';
 
 export interface ProcessStatus {
 	status?: string;
@@ -11,19 +11,6 @@ export interface ProcessStatus {
 	phase?: ProcessPhase;
 	filesProcessed?: number;
 	totalFiles?: number;
-	errors?: Array<{
-		file: string;
-		error: string;
-		timestamp: number;
-	}>;
-	startTime?: number;
-	estimatedTimeRemaining?: number;
-	processingSpeed?: number;
-	globalProgress?: {
-		current: number;
-		total: number;
-		progress: number;
-	};
 	fileDetails?: {
 		name: string;
 		size: number;
@@ -40,6 +27,22 @@ export interface ProcessStatus {
 		errorsByType: { [key: string]: number };
 		healthScore: number;
 	};
+	errors?: Array<{
+		file: string;
+		error: string;
+		timestamp: number;
+	}>;
+	globalProgress?: {
+		current: number;
+		total: number;
+		progress: number;
+		processed?: number;
+	};
+	startTime?: number;
+	endTime?: number;
+	processingSpeed?: number;
+	estimatedTimeRemaining?: number;
+	message?: string;
 }
 
 export interface ExtendedProcessStatus extends ProcessStatus {
@@ -47,6 +50,7 @@ export interface ExtendedProcessStatus extends ProcessStatus {
 		current: number;
 		total: number;
 		progress: number;
+		processed?: number;
 	};
 }
 
@@ -69,6 +73,8 @@ export interface ReindexAllProgressData {
 	currentFolder?: string;
 	phase?: ProcessPhase;
 	status?: string;
+	processedFolders: number;
+	errors?: Array<{ folderId: string; error: string }>;
 }
 
 export interface ReindexAllCompleteData {
@@ -77,4 +83,13 @@ export interface ReindexAllCompleteData {
 	errors: Array<{ folderId: string; error: string }>;
 	status?: string;
 	progress?: number;
+}
+
+export interface ErrorResponse {
+	message: string;
+	details?: string;
+	folderId?: string;
+	phase?: string;
+	timestamp: number;
+	type?: string;
 }

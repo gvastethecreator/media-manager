@@ -19,12 +19,12 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
+import { FoldersSection } from './folders/folders-section';
 import { AlbumsSection } from './settings-sections/albums-section';
 import { AttributesSection } from './settings-sections/attributes-section';
 import { CharactersSection } from './settings-sections/characters-section';
 import { CollectionsSection } from './settings-sections/collections-section';
 import { ConceptsSection } from './settings-sections/concepts-section';
-import { FoldersSection } from './settings-sections/folders-section';
 import { NotesSection } from './settings-sections/notes-section';
 import { ObjectsSection } from './settings-sections/objects-section';
 import { PlacesSection } from './settings-sections/places-section';
@@ -93,9 +93,9 @@ export function SettingsView() {
 
 					<TabsContent value="system" className="gap-2 px-2">
 						<div className="grid grid-cols-2 gap-2 w-full">
+							<ProfilesSection />
 							<FoldersSection />
 							<ThumbnailsSection />
-							<ProfilesSection />
 							<SystemSection />
 						</div>
 					</TabsContent>

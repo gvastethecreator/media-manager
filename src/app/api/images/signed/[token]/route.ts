@@ -3,7 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_request: NextRequest, context: { params: { token: string } }) {
 	try {
-		const { token } = context.params;
+		// Esperar a que los parámetros estén disponibles
+		const params = await context.params;
+		const token = params.token;
 
 		// Verificar token y obtener imagen
 		const { buffer, mimeType } = await verifySignedToken(token);

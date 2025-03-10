@@ -24,7 +24,7 @@ export function FavoritesView() {
 			viewLogger.info('🔄 Cargando favoritos...');
 			setIsLoading(true);
 			const favorites = await getFavorites();
-			setItems(favorites.map((f) => f.image));
+			setItems(favorites.map((f) => f.image as unknown as FileItem));
 			viewLogger.info('✅ Favoritos cargados');
 		} catch (error) {
 			viewLogger.error('❌ Error cargando favoritos:', error);

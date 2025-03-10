@@ -15,7 +15,7 @@ const collectionLogger = logger.withContext('CollectionActions');
 
 const REVALIDATE_PATHS = ['/settings', '/collections', '/collections/[id]', '/images/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -298,7 +298,7 @@ export async function createCollection(data: CollectionCreate): Promise<Collecti
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		collectionLogger.info('✅ Colección creada:', collection);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return collection;
 	} catch (error) {
 		collectionLogger.error('❌ Error al crear colección:', error);
@@ -323,7 +323,7 @@ export async function updateCollection(id: string, data: CollectionUpdate): Prom
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		collectionLogger.info('✅ Colección actualizada:', collection);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return collection;
 	} catch (error) {
 		collectionLogger.error('❌ Error al actualizar colección:', error);
@@ -347,7 +347,7 @@ export async function deleteCollection(id: string): Promise<void> {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		collectionLogger.info('✅ Colección eliminada');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al eliminar colección:', error);
 		throw new CollectionError('No se pudo eliminar la colección', error);
@@ -407,7 +407,7 @@ export async function addImageToCollection(collectionId: string, imageId: string
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		collectionLogger.info('✅ Imagen agregada a colección');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al agregar imagen a colección:', error);
 		throw new CollectionError('No se pudo agregar la imagen a la colección', error);
@@ -436,7 +436,7 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		collectionLogger.info('✅ Imagen removida de colección');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al remover imagen de colección:', error);
 		throw new CollectionError('No se pudo remover la imagen de la colección', error);

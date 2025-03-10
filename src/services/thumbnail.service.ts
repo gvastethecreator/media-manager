@@ -2,11 +2,11 @@ import { createHash, createHmac } from 'node:crypto';
 import fs from 'node:fs/promises';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { clientEvents } from '@/lib/client/events.client';
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { optimizeThumbnail } from '@/lib/thumbnails';
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/types/thumbnails';
 
 const thumbLogger = logger.withContext('ThumbnailService');
 

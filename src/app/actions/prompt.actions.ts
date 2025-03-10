@@ -13,7 +13,7 @@ const promptLogger = logger.withContext('PromptActions');
 
 const REVALIDATE_PATHS = ['/settings', '/prompts', '/prompts/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -169,7 +169,7 @@ export async function createPrompt(data: PromptCreate): Promise<Prompt> {
 		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt creado:', prompt.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return prompt;
 	} catch (error) {
 		promptLogger.error('❌ Error al crear prompt:', error);
@@ -194,7 +194,7 @@ export async function updatePrompt(id: string, data: PromptUpdate): Promise<Prom
 		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt actualizado:', prompt.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return prompt;
 	} catch (error) {
 		promptLogger.error('❌ Error al actualizar prompt:', error);
@@ -218,7 +218,7 @@ export async function deletePrompt(id: string): Promise<void> {
 		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
 		promptLogger.info('✅ Prompt eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		promptLogger.error('❌ Error al eliminar prompt:', error);
 		throw new PromptError('No se pudo eliminar el prompt', error);

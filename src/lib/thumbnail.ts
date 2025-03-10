@@ -2,8 +2,8 @@ import { existsSync } from 'fs';
 import { promises as fs } from 'fs';
 import { createHash } from 'node:crypto';
 import { extname, join } from 'node:path';
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/types/thumbnails';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils';
@@ -182,24 +182,28 @@ export async function generateThumbnail(
 		// Obtener metadata
 		const metadata = await image.metadata();
 		if (!metadata.width || !metadata.height) {
+			thumbLogger.error('No se pudieron obtener las dimensiones de la imagen', { filePath });
 			throw new Error('No se pudieron obtener las dimensiones de la imagen');
 		}
 
-		// Calcular dimensiones
-		const aspectRatio = metadata.width / metadata.height;
-		let width = config.width;
-		let height = config.height;
+		// Calcular dimensiones con valores seguros
+		const width = metadata.width || 100; // valor por defecto si falta
+		const height = metadata.height || 100; // valor por defecto si falta
+		const aspectRatio = width / height;
+
+		let targetWidth = config.width;
+		let targetHeight = config.height;
 
 		if (aspectRatio > 1) {
 			// Imagen horizontal
-			height = Math.round(width / aspectRatio);
+			targetHeight = Math.round(targetWidth / aspectRatio);
 		} else {
 			// Imagen vertical o cuadrada
-			width = Math.round(height * aspectRatio);
+			targetWidth = Math.round(targetHeight * aspectRatio);
 		}
 
 		// Validar dimensiones finales
-		const validDimensions = validateDimensions(width, height);
+		const validDimensions = validateDimensions(targetWidth, targetHeight);
 
 		// Configurar el pipeline de procesamiento
 		let processor = image.resize(validDimensions.width, validDimensions.height, {

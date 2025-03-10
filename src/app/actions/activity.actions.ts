@@ -10,7 +10,7 @@ const activityLogger = logger.withContext('ActivityActions');
 
 const REVALIDATE_PATHS = ['/settings', '/activities'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -57,7 +57,7 @@ export async function logActivity(data: ActivityCreate) {
 			type: 'files:modified',
 			data: { action: 'log', entity: activity },
 		});
-		revalidateAllPaths();
+		await revalidateAllPaths();
 
 		return activity;
 	} catch (error) {

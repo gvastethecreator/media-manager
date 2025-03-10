@@ -13,7 +13,7 @@ const noteLogger = logger.withContext('NoteActions');
 
 const REVALIDATE_PATHS = ['/settings', '/notes', '/notes/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -172,7 +172,7 @@ export async function createNote(data: NoteCreate): Promise<Note> {
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota creada:', note.title);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return note;
 	} catch (error) {
 		noteLogger.error('❌ Error al crear nota:', error);
@@ -197,7 +197,7 @@ export async function updateNote(id: string, data: NoteUpdate): Promise<Note> {
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota actualizada:', note.title);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return note;
 	} catch (error) {
 		noteLogger.error('❌ Error al actualizar nota:', error);
@@ -221,7 +221,7 @@ export async function deleteNote(id: string): Promise<void> {
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
 		noteLogger.info('✅ Nota eliminada');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		noteLogger.error('❌ Error al eliminar nota:', error);
 		throw new NoteError('No se pudo eliminar la nota', error);

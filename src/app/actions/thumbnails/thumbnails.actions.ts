@@ -1,5 +1,6 @@
 'use server';
 
+import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
@@ -25,11 +26,24 @@ export async function getThumbnail(
 	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<ThumbnailResponse> {
 	try {
-		thumbLogger.info('🔄 Obteniendo thumbnail:', { id, quality });
-
-		if (!id) {
-			throw new Error('ID no proporcionado');
+		// Validar que la calidad sea una de las opciones válidas
+		let validQuality = quality;
+		if (!Object.values(ThumbnailQuality).includes(quality as ThumbnailQuality)) {
+			thumbLogger.warn('⚠️ Calidad inválida, usando MEDIUM por defecto:', quality);
+			validQuality = ThumbnailQuality.MEDIUM;
 		}
+
+		// Validar el ID de forma estricta
+		if (!id || typeof id !== 'string' || id.trim() === '') {
+			const error = 'ID no proporcionado o inválido';
+			thumbLogger.error(`❌ ${error}`);
+			return {
+				thumbnail: '',
+				error,
+			};
+		}
+
+		thumbLogger.info('🔄 Obteniendo thumbnail:', { id, quality: validQuality });
 
 		const image = await prisma.image.findUnique({
 			where: { id },
@@ -45,7 +59,12 @@ export async function getThumbnail(
 		});
 
 		if (!image) {
-			throw new Error(`Imagen no encontrada: ${id}`);
+			const error = `Imagen no encontrada: ${id}`;
+			thumbLogger.error(`❌ ${error}`);
+			return {
+				thumbnail: '',
+				error,
+			};
 		}
 
 		// Si hay un error previo, intentar regenerar
@@ -76,11 +95,28 @@ export async function getThumbnail(
 			};
 		}
 
+		// Validar que la ruta del archivo exista
+		if (!image.path || !existsSync(image.path)) {
+			const error = `Archivo no encontrado en ruta: ${image.path}`;
+			// Registrar el error en la base de datos
+			await prisma.image.update({
+				where: { id },
+				data: {
+					thumbnailError: error,
+				},
+			});
+			thumbLogger.error(`❌ ${error}`);
+			return {
+				thumbnail: '',
+				error,
+			};
+		}
+
 		// Si no tiene thumbnail, generarlo
 		thumbLogger.info('🔄 Generando nuevo thumbnail:', { id, path: image.path });
 
 		try {
-			const thumbnail = await generateThumbnail(image.path, { quality });
+			const thumbnail = await generateThumbnail(image.path, { quality: validQuality });
 
 			if (!thumbnail || !thumbnail.buffer) {
 				throw new Error('No se pudo generar el thumbnail');
@@ -115,25 +151,28 @@ export async function getThumbnail(
 				size: thumbnail.buffer.length,
 				mimeType: 'image/webp',
 			};
-		} catch (error) {
-			const genError = error as Error;
-			// Registrar el error en la base de datos
+		} catch (genError) {
+			// Registrar el error en la imagen
+			const errorMessage = genError instanceof Error ? genError.message : 'Error desconocido';
 			await prisma.image.update({
 				where: { id },
 				data: {
-					thumbnailError: genError.message,
+					thumbnailError: errorMessage,
 				},
 			});
 
-			throw genError;
+			thumbLogger.error('❌ Error generando thumbnail:', genError);
+			return {
+				thumbnail: '',
+				error: errorMessage,
+			};
 		}
 	} catch (error) {
-		const err = error as Error;
-		thumbLogger.error('❌ Error obteniendo thumbnail:', { id, error: err });
-
+		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+		thumbLogger.error('❌ Error obteniendo thumbnail:', { error: errorMessage, id });
 		return {
 			thumbnail: '',
-			error: err.message || 'Error desconocido generando thumbnail',
+			error: errorMessage,
 		};
 	}
 }

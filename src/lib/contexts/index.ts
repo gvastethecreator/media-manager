@@ -5,17 +5,17 @@
 
 // Exportaciones del contexto de archivos
 export {
-  FileProvider,
-  useFiles,
-  type FileItem
+	FileProvider,
+	useFiles,
+	type FileItem,
 } from './file-context';
 
 // Exportaciones del contexto de configuración
 export {
-  SettingsProvider,
-  useSettings,
-  useTheme,
-  useCollectionTagContext,
-  useProfileContext,
-  type Settings
+	SettingsProvider,
+	useSettings,
+	useTheme,
+	useCollectionTagContext,
+	useProfileContext,
+	type Settings,
 } from './settings-context';

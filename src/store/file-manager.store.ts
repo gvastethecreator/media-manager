@@ -1,11 +1,14 @@
 import { getAlbumImages } from '@/app/actions/album.actions';
 import { getCharacterImages } from '@/app/actions/character.actions';
-import { getCollectionImages } from '@/app/actions/collection.actions';
-import { getFolderImages } from '@/app/actions/folders/folder.actions';
+import { getCollectionImages } from '@/app/actions/collections/collection.actions';
+import { getConceptImages } from '@/app/actions/concept.actions';
+import { getFolderImages } from '@/app/actions/folders';
+import { getNoteImages } from '@/app/actions/note.actions';
 import { getObjectImages } from '@/app/actions/object.actions';
 import { getPlaceImages } from '@/app/actions/place.actions';
+import { getPromptImages } from '@/app/actions/prompt.actions';
 import { getStats } from '@/app/actions/stats.actions';
-import { getTagImages } from '@/app/actions/tag.actions';
+import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { logger } from '@/lib/logger';
 import type { FileItem } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
@@ -535,38 +538,40 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 	// Navegación
 	setCurrentFolder: async (id: string) => {
 		try {
-			fileManagerLogger.info('📂 Cambiando a carpeta:', id);
+			fileManagerLogger.info('📁 Cambiando a carpeta:', id);
 			const state = get();
 			const folder = state.folders.find((f) => f.id === id) || null;
 			state.clearSelection();
 
 			set({
-				currentFolderId: id,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: folder,
-				currentCollection: null,
+				currentFolderId: id,
 				currentTag: null,
+				currentTagId: null,
+				currentCollection: null,
+				currentCollectionId: null,
 				currentAlbum: null,
+				currentAlbumId: null,
 				currentCharacter: null,
+				currentCharacterId: null,
 				currentPlace: null,
+				currentPlaceId: null,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getFolderImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Obtener imágenes ya transformadas por transformImageToFileItem
+			const images = await getFolderImages(id);
+
+			// No es necesario aplicar transformToFileItem nuevamente
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -590,31 +595,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: id,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: id,
 				currentCollection: collection,
 				currentTag: null,
+				currentTagId: null,
 				currentAlbum: null,
+				currentAlbumId: null,
 				currentCharacter: null,
+				currentCharacterId: null,
 				currentPlace: null,
+				currentPlaceId: null,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getCollectionImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas por convertServerImageToFileItem
+			const images = await getCollectionImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -631,38 +637,39 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentTag: async (id: string) => {
 		try {
-			fileManagerLogger.info('🏷️ Cambiando a etiqueta:', id);
+			fileManagerLogger.info('🏷️ Cambiando a tag:', id);
 			const state = get();
 			const tag = state.tags.find((t) => t.id === id) || null;
 			state.clearSelection();
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: id,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: id,
 				currentTag: tag,
 				currentAlbum: null,
+				currentAlbumId: null,
 				currentCharacter: null,
+				currentCharacterId: null,
 				currentPlace: null,
+				currentPlaceId: null,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getTagImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getTagImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -670,47 +677,48 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				lastUpdate: Date.now(),
 			});
 
-			fileManagerLogger.info(`✅ Etiqueta cargada con ${images.length} imágenes`);
+			fileManagerLogger.info(`✅ Tag cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar etiqueta:', error);
+			fileManagerLogger.error('❌ Error al cargar tag:', error);
 			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
 		}
 	},
 
 	setCurrentAlbum: async (id: string) => {
 		try {
-			fileManagerLogger.info('📸 Cambiando a álbum:', id);
+			fileManagerLogger.info('📁 Cambiando a álbum:', id);
 			const state = get();
 			const album = state.albums.find((a) => a.id === id) || null;
 			state.clearSelection();
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: id,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: id,
 				currentAlbum: album,
 				currentCharacter: null,
+				currentCharacterId: null,
 				currentPlace: null,
+				currentPlaceId: null,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getAlbumImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getAlbumImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -734,31 +742,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: id,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: id,
 				currentCharacter: character,
 				currentPlace: null,
+				currentPlaceId: null,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getCharacterImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getCharacterImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -775,38 +784,39 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentPlace: async (id: string) => {
 		try {
-			fileManagerLogger.info('📍 Cambiando a lugar:', id);
+			fileManagerLogger.info('🏙️ Cambiando a lugar:', id);
 			const state = get();
 			const place = state.places.find((p) => p.id === id) || null;
 			state.clearSelection();
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: id,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: null,
 				currentCharacter: null,
+				currentPlaceId: id,
 				currentPlace: place,
 				currentObject: null,
+				currentObjectId: null,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getPlaceImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getPlaceImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -823,38 +833,39 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentObject: async (id: string) => {
 		try {
-			fileManagerLogger.info('📦 Cambiando a objeto:', id);
+			fileManagerLogger.info('🧸 Cambiando a objeto:', id);
 			const state = get();
 			const object = state.objects.find((o) => o.id === id) || null;
 			state.clearSelection();
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: id,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: null,
 				currentCharacter: null,
+				currentPlaceId: null,
 				currentPlace: null,
+				currentObjectId: id,
 				currentObject: object,
 				currentConcept: null,
+				currentConceptId: null,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getObjectImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getObjectImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -878,31 +889,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: id,
-				currentPromptId: null,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: null,
 				currentCharacter: null,
+				currentPlaceId: null,
 				currentPlace: null,
+				currentObjectId: null,
 				currentObject: null,
+				currentConceptId: id,
 				currentConcept: concept,
 				currentPrompt: null,
+				currentPromptId: null,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getTagImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getConceptImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -926,31 +938,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: id,
-				currentNoteId: null,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: null,
 				currentCharacter: null,
+				currentPlaceId: null,
 				currentPlace: null,
+				currentObjectId: null,
 				currentObject: null,
+				currentConceptId: null,
 				currentConcept: null,
+				currentPromptId: id,
 				currentPrompt: prompt,
 				currentNote: null,
+				currentNoteId: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getTagImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getPromptImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -974,31 +987,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			set({
 				currentFolderId: null,
-				currentCollectionId: null,
-				currentTagId: null,
-				currentAlbumId: null,
-				currentCharacterId: null,
-				currentPlaceId: null,
-				currentObjectId: null,
-				currentConceptId: null,
-				currentPromptId: null,
-				currentNoteId: id,
 				currentFolder: null,
+				currentCollectionId: null,
 				currentCollection: null,
+				currentTagId: null,
 				currentTag: null,
+				currentAlbumId: null,
 				currentAlbum: null,
+				currentCharacterId: null,
 				currentCharacter: null,
+				currentPlaceId: null,
 				currentPlace: null,
+				currentObjectId: null,
 				currentObject: null,
+				currentConceptId: null,
 				currentConcept: null,
+				currentPromptId: null,
 				currentPrompt: null,
+				currentNoteId: id,
 				currentNote: note,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			const rawImages = await getTagImages(id);
-			const images = rawImages.map(transformToFileItem);
+			// Las imágenes ya vienen transformadas
+			const images = await getNoteImages(id);
+
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
