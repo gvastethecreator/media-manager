@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	AlbumIcon,
 	BlocksIcon,
@@ -17,37 +17,32 @@ import {
 	TagIcon,
 	UploadCloud,
 	UserIcon,
-} from "lucide-react";
-import * as React from "react";
+} from 'lucide-react';
+import * as React from 'react';
 
-import { FoldersSection } from "./folders/folders-section";
-import { AlbumsSection } from "./settings-sections/albums-section";
-import { AttributesSection } from "./settings-sections/attributes-section";
-import { CharactersSection } from "./settings-sections/characters-section";
-import { CollectionsSection } from "./settings-sections/collections-section";
-import { ConceptsSection } from "./settings-sections/concepts-section";
-import { NotesSection } from "./settings-sections/notes-section";
-import { ObjectsSection } from "./settings-sections/objects-section";
-import { PlacesSection } from "./settings-sections/places-section";
-import { ProfilesSection } from "./settings-sections/profiles-section";
-import { PromptsSection } from "./settings-sections/prompts-section";
-import { ShortcutsSection } from "./settings-sections/shortcuts-section";
-import { SystemSection } from "./settings-sections/system-section";
-import { TagsSection } from "./settings-sections/tags-section";
-import { ThumbnailsSection } from "./settings-sections/thumbnails-section";
-import { UploadedImagesSection } from "./settings-sections/uploaded-images-section";
+import { FoldersSection } from './folders/folders-section';
+import { AlbumsSection } from './settings-sections/albums-section';
+import { AttributesSection } from './settings-sections/attributes-section';
+import { CharactersSection } from './settings-sections/characters-section';
+import { CollectionsSection } from './settings-sections/collections-section';
+import { ConceptsSection } from './settings-sections/concepts-section';
+import { NotesSection } from './settings-sections/notes-section';
+import { ObjectsSection } from './settings-sections/objects-section';
+import { PlacesSection } from './settings-sections/places-section';
+import { ProfilesSection } from './settings-sections/profiles-section';
+import { PromptsSection } from './settings-sections/prompts-section';
+import { ShortcutsSection } from './settings-sections/shortcuts-section';
+import { SystemSection } from './settings-sections/system-section';
+import { TagsSection } from './settings-sections/tags-section';
+import { ThumbnailsSection } from './settings-sections/thumbnails-section';
+import { UploadedImagesSection } from './settings-sections/uploaded-images-section';
 
 export function SettingsView() {
-	const [activeTab, setActiveTab] = React.useState("system");
+	const [activeTab, setActiveTab] = React.useState('system');
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none">
 			<ScrollArea className="h-full">
-				<Tabs
-					value={activeTab}
-					onValueChange={setActiveTab}
-					className="w-full rounded-none"
-					defaultValue="folders"
-				>
+				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none" defaultValue="folders">
 					<TabsList className="grid w-full flex justify-between rounded-none">
 						<TabsTrigger value="system" className="text-[9px]">
 							<SettingsIcon className="h-3 w-3 mr-1" /> Sistema

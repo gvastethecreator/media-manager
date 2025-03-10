@@ -134,38 +134,55 @@ class FolderServiceClass {
 
 	// Método para emitir eventos - reemplaza this.emit de EventEmitter
 	private async emitEvent(event: string, ...args: unknown[]): Promise<void> {
-		const callbacks = this.eventCallbacks.get(event);
-		if (callbacks) {
-			for (const callback of callbacks) {
-				callback(...args);
+		try {
+			// Obtener los callbacks para este evento
+			const callbacks = this.eventCallbacks.get(event);
+			if (!callbacks || callbacks.size === 0) {
+				return;
 			}
-		}
 
-		// Emitir eventos al sistema general según corresponda
-		if (event === FOLDER_EVENTS.PROGRESS) {
-			await emit({
-				type: 'folder:progress',
-				data: args[0],
-			});
-		} else if (event === FOLDER_EVENTS.ERROR) {
-			await emit({
-				type: 'folder:error',
-				data: args[0],
-			});
-		} else if (event === FOLDER_EVENTS.COMPLETE) {
-			await emit({
-				type: 'folder:complete',
-				data: args[0],
-			});
-		} else if (
-			event === FOLDER_EVENTS.FOLDER_ADDED ||
-			event === FOLDER_EVENTS.FOLDER_DELETED ||
-			event === FOLDER_EVENTS.FOLDER_MODIFIED
-		) {
-			await emit({
-				type: 'folders:modified',
-				data: { action: event, entity: args[0] },
-			});
+			// Invocar cada callback
+			for (const callback of callbacks) {
+				try {
+					if (typeof callback === 'function') {
+						await callback(...args);
+					}
+				} catch (error) {
+					console.error(`Error en callback de evento ${event}:`, error);
+				}
+			}
+
+			// Emitir también al sistema de eventos del servidor
+			if (event === FOLDER_EVENTS.PROGRESS) {
+				try {
+					await emit({
+						type: 'folder:progress',
+						data: args[0],
+					});
+				} catch (error) {
+					console.error('Error emitiendo evento de progreso al servidor:', error);
+				}
+			} else if (event === FOLDER_EVENTS.ERROR) {
+				try {
+					await emit({
+						type: 'folder:error',
+						data: args[0],
+					});
+				} catch (error) {
+					console.error('Error emitiendo evento de error al servidor:', error);
+				}
+			} else if (event === FOLDER_EVENTS.COMPLETE) {
+				try {
+					await emit({
+						type: 'folder:complete',
+						data: args[0],
+					});
+				} catch (error) {
+					console.error('Error emitiendo evento de finalización al servidor:', error);
+				}
+			}
+		} catch (error) {
+			console.error(`Error emitiendo evento ${event}:`, error);
 		}
 	}
 
@@ -239,28 +256,27 @@ class FolderServiceClass {
 	}
 
 	private updateProgress(folderId: string, status: Partial<ProcessStatus>) {
-		const currentProgress = this.globalProgress.get(folderId) || {};
-		const startTime = this.startTimes.get(folderId) || Date.now();
+		try {
+			// Obtener estado actual
+			const currentStatus = this.globalProgress.get(folderId) || {};
 
-		const updatedStatus: ProcessStatus = {
-			...currentProgress,
-			...status,
-			timestamp: Date.now(),
-			startTime,
-		};
+			// Actualizar estado
+			const updatedStatus: ProcessStatus = {
+				...currentStatus,
+				...status,
+				folderId,
+				timestamp: Date.now(),
+			};
 
-		// Calcular métricas adicionales
-		if (updatedStatus.filesProcessed && updatedStatus.totalFiles) {
-			const elapsedTime = (Date.now() - startTime) / 1000; // en segundos
-			updatedStatus.processingSpeed = updatedStatus.filesProcessed / elapsedTime;
+			// Guardar en la memoria
+			this.globalProgress.set(folderId, updatedStatus);
 
-			const remainingFiles = updatedStatus.totalFiles - updatedStatus.filesProcessed;
-			updatedStatus.estimatedTimeRemaining = remainingFiles / updatedStatus.processingSpeed;
+			// Emitir evento
+			console.log(`Emitiendo progreso para carpeta ${folderId}:`, updatedStatus);
+			this.emitEvent(FOLDER_EVENTS.PROGRESS, updatedStatus);
+		} catch (error) {
+			console.error('Error actualizando progreso:', error);
 		}
-
-		this.globalProgress.set(folderId, updatedStatus);
-		// Usar el nuevo sistema para emitir eventos de progreso
-		this.emitEvent(FOLDER_EVENTS.PROGRESS, updatedStatus);
 	}
 
 	private clearProgress(folderId: string) {
@@ -445,6 +461,7 @@ class FolderServiceClass {
 						endTime: Date.now(),
 					};
 
+					console.log('Emitiendo evento de finalización:', finalStatus);
 					this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
 					this.emitEvent(FOLDER_EVENTS.COMPLETE, folderResponse);
 

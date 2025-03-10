@@ -50,6 +50,46 @@ export function useFolders() {
 	// Check if any process is running
 	const isGloballyProcessing = isProcessing || globalReindexStatus.isProcessing;
 
+	// Función para manejar la finalización de un proceso
+	const handleProcessComplete = useCallback(
+		(folderId: string) => {
+			folderLogger.info('✅ Proceso completado:', { folderId });
+
+			// Limpiar estados INMEDIATAMENTE
+			setIsProcessing(false);
+			setProcessProgress(0);
+
+			// Actualizar UI para mostrar completado por un momento
+			setProcessStatus((prev) => ({
+				...prev,
+				phase: 'complete',
+				status: 'Proceso completado',
+				progress: 100,
+				folderId: folderId,
+			}));
+
+			// Recargar datos inmediatamente
+			loadFolders().catch((error) => folderLogger.error('Error recargando carpetas:', error));
+
+			// Limpiar estado después de mostrar completado
+			setTimeout(() => {
+				setProcessStatus((prev) => {
+					// Solo limpiar si el folderId aún coincide (evita limpiar un proceso diferente)
+					if (prev.folderId === folderId) {
+						folderLogger.info('🧹 Limpiando estado de proceso para carpeta:', folderId);
+						return {};
+					}
+					return prev;
+				});
+
+				// Asegurarse una vez más que se ha limpiado el estado de procesamiento
+				setIsProcessing(false);
+				setProcessProgress(0);
+			}, 3000);
+		},
+		[loadFolders]
+	);
+
 	// Función para manejar los errores de procesamiento
 	const handleProcessError = useCallback(
 		(errorData: ErrorResponse) => {
@@ -78,53 +118,66 @@ export function useFolders() {
 	);
 
 	// Función para manejar las actualizaciones de progreso
-	const handleStatusUpdate = useCallback((status: ProcessStatus) => {
-		// Actualizar progreso general
-		if (typeof status.progress === 'number') {
-			setProcessProgress(status.progress);
-		}
+	const handleStatusUpdate = useCallback(
+		(status: ProcessStatus) => {
+			// Añadir log detallado con el estado completo para diagnóstico
+			folderLogger.info('📊 Actualización de estado recibida (detallada):', JSON.stringify(status));
 
-		// Actualizar estado del proceso
-		setProcessStatus((prevStatus) => ({
-			...prevStatus,
-			...status,
-			timestamp: status.timestamp || Date.now(),
-		}));
+			// Si no hay fase o ID, ignorar la actualización
+			if (!status.folderId) {
+				folderLogger.warn('⚠️ Actualización de estado sin folderId, ignorando');
+				return;
+			}
 
-		// Verificar si es una fase de finalización
-		if (status.phase === 'complete') {
-			folderLogger.info('✅ Proceso completado detectado:', status);
-		}
-	}, []);
+			// Actualizar progreso general
+			if (typeof status.progress === 'number') {
+				setProcessProgress(status.progress);
+			}
 
-	// Función para manejar la finalización de un proceso
-	const handleProcessComplete = useCallback(
-		(folderId: string) => {
-			folderLogger.info('✅ Proceso completado:', { folderId });
+			// Actualizar estado del proceso
+			setProcessStatus((prevStatus) => {
+				const updatedStatus = {
+					...prevStatus,
+					...status,
+					timestamp: status.timestamp || Date.now(),
+				};
+				folderLogger.info('🔄 Estado actualizado:', {
+					folderId: updatedStatus.folderId,
+					progress: updatedStatus.progress,
+					phase: updatedStatus.phase,
+				});
+				return updatedStatus;
+			});
 
-			// Limpiar estados
-			setIsProcessing(false);
-			setProcessProgress(0);
+			// Verificar si hay un folderId y actualizar el estado de carpeta específica
+			if (status.folderId) {
+				// Marcar como procesando si no está en fase de finalización
+				if (status.phase !== 'complete' && status.progress !== 100) {
+					setIsProcessing(true);
+				}
+			}
 
-			// Actualizar UI para mostrar completado por un momento
-			setProcessStatus((prev) => ({
-				...prev,
-				phase: 'complete',
-				status: 'Proceso completado',
-				progress: 100,
-			}));
+			// Verificar si es una fase de finalización
+			const isComplete =
+				status.phase === 'complete' ||
+				(status.progress === 100 && status.phase === 'metadata') ||
+				(status.progress === 100 &&
+					typeof status.filesProcessed === 'number' &&
+					typeof status.totalFiles === 'number' &&
+					status.filesProcessed > 0 &&
+					status.totalFiles > 0 &&
+					status.filesProcessed >= status.totalFiles);
 
-			// Recargar datos
-			setTimeout(() => {
-				loadFolders().catch((error) => folderLogger.error('Error recargando carpetas:', error));
-			}, 500);
+			if (isComplete) {
+				folderLogger.info('✅ Proceso completado detectado:', status);
 
-			// Limpiar estado después de mostrar completado
-			setTimeout(() => {
-				setProcessStatus({});
-			}, 3000);
+				// Si tenemos el ID de la carpeta, marcarla como completada
+				if (status.folderId) {
+					handleProcessComplete(status.folderId);
+				}
+			}
 		},
-		[loadFolders]
+		[handleProcessComplete]
 	);
 
 	// Iniciar un proceso
@@ -141,7 +194,7 @@ export function useFolders() {
 		setProcessProgress(0);
 	}, []);
 
-	// Sistema de polling
+	// Sistema de polling - AHORA ES SEGURO USARLO PORQUE LAS FUNCIONES YA ESTÁN DEFINIDAS
 	const { startPolling, stopPolling } = useFoldersPolling({
 		onStatusUpdate: handleStatusUpdate,
 		onComplete: handleProcessComplete,
@@ -152,18 +205,24 @@ export function useFolders() {
 		onProgress: handleStatusUpdate,
 		onError: handleProcessError,
 		onComplete: (data: FolderResponse) => {
+			folderLogger.info('✅ Evento de finalización recibido:', data);
+
 			// Actualizar carpetas con resultado
 			if (data?.id) {
-				updateFolder(data.id, {
+				// Convertir fechas string a objetos Date
+				const folderUpdate: Partial<ExtendedFolder> = {
 					...data,
 					_count: {
 						images: data.stats?.total || 0,
 					},
 					totalSize: data.stats?.totalSize || 0,
 					lastIndexed: new Date(),
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				});
+					// Convertir strings a Date donde sea necesario
+					createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+					updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
+				};
+
+				updateFolder(data.id, folderUpdate);
 
 				// Actualizar estadísticas globales si hay datos
 				if (data.stats) {
@@ -173,10 +232,14 @@ export function useFolders() {
 						lastIndexed: new Date(),
 					});
 				}
+
+				// Marcar proceso como completado
+				handleProcessComplete(data.id);
 			}
 		},
 		onStats: updateStats,
 		onReindexAllStart: (data: { totalFolders: number }) => {
+			folderLogger.info('🔄 Evento de inicio de reindexación global recibido:', data);
 			setGlobalReindexStatus({
 				isProcessing: true,
 				progress: 0,
@@ -189,10 +252,11 @@ export function useFolders() {
 			});
 		},
 		onReindexAllProgress: (data: ReindexAllProgressData) => {
+			folderLogger.info('🔄 Evento de progreso de reindexación global recibido:', data);
 			setGlobalReindexStatus((prev) => ({
 				...prev,
 				processedFolders: data.processedFolders,
-				progress: (data.processedFolders / prev.totalFolders) * 100,
+				progress: data.processedFolders > 0 ? (data.processedFolders / prev.totalFolders) * 100 : prev.progress,
 				currentFolder: data.currentFolder,
 				phase: data.phase || prev.phase,
 				status: data.status || prev.status,
@@ -205,7 +269,8 @@ export function useFolders() {
 				lastUpdate: Date.now(),
 			}));
 		},
-		onReindexAllComplete: () => {
+		onReindexAllComplete: (data: ReindexAllCompleteData) => {
+			folderLogger.info('✅ Evento de finalización de reindexación global recibido:', data);
 			const endTime = Date.now();
 			const duration = endTime - (globalReindexStatus.startTime || endTime);
 
@@ -213,7 +278,7 @@ export function useFolders() {
 				...prev,
 				isProcessing: false,
 				progress: 100,
-				processedFolders: prev.totalFolders,
+				processedFolders: data.processedFolders || prev.totalFolders,
 				phase: 'complete',
 				status: 'Proceso completado',
 				endTime,
@@ -222,6 +287,9 @@ export function useFolders() {
 
 			// Recargar estadísticas
 			loadStats();
+
+			// Recargar carpetas después de completar
+			loadFolders().catch((error) => folderLogger.error('Error recargando carpetas:', error));
 		},
 	});
 
