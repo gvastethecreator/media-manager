@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import * as pathUtils from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 
 // Esta función debe ser llamada solo en el servidor
@@ -104,20 +105,7 @@ export const fsService = {
 	},
 
 	normalizePath(folderPath: string): string {
-		try {
-			// Normalizar la ruta para Windows
-			let normalized = path.normalize(folderPath);
-
-			// Asegurarnos de que use backslashes en Windows
-			if (process.platform === 'win32') {
-				normalized = normalized.replace(/\//g, '\\');
-			}
-
-			return normalized;
-		} catch (error) {
-			console.error('❌ Error normalizing path:', error);
-			return folderPath;
-		}
+		return pathUtils.normalizePath(folderPath);
 	},
 };
 

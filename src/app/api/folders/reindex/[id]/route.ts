@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { readdir, stat } from 'node:fs/promises';
 import { extname, join } from 'node:path';
-import { extractMetadata } from '@/app/actions/metadata.actions';
+import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';

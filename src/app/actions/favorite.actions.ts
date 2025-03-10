@@ -18,9 +18,14 @@ interface ImageWithRelations extends Image {
 	updatedAt: Date;
 }
 
+// Interfaces internas
+interface FavoriteWithImage extends Favorite {
+	image: FileItem;
+}
+
 const REVALIDATE_PATHS = ['/settings', '/favorites', '/images/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -37,7 +42,7 @@ class FavoriteError extends Error {
 	}
 }
 
-function transformImageToFileItem(image: ImageWithRelations): FileItem {
+async function transformImageToFileItem(image: ImageWithRelations): Promise<FileItem> {
 	return {
 		id: image.id,
 		name: image.name,
@@ -77,10 +82,6 @@ function transformImageToFileItem(image: ImageWithRelations): FileItem {
 	};
 }
 
-export interface FavoriteWithImage extends Favorite {
-	image: FileItem;
-}
-
 export async function addToFavorites(imageId: string): Promise<FavoriteWithImage> {
 	try {
 		favoriteLogger.info('⭐ Agregando imagen a favoritos:', imageId);
@@ -112,11 +113,11 @@ export async function addToFavorites(imageId: string): Promise<FavoriteWithImage
 			data: { action: 'add' },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 
 		return {
 			...favorite,
-			image: transformImageToFileItem(favorite.image as ImageWithRelations),
+			image: await transformImageToFileItem(favorite.image as ImageWithRelations),
 		};
 	} catch (error) {
 		favoriteLogger.error('❌ Error al agregar a favoritos:', error);
@@ -144,7 +145,7 @@ export async function removeFromFavorites(imageId: string): Promise<void> {
 			data: { action: 'remove' },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		favoriteLogger.error('❌ Error al eliminar de favoritos:', error);
 		throw new FavoriteError('No se pudo eliminar de favoritos', error);
@@ -168,10 +169,12 @@ export async function getFavorites(): Promise<FavoriteWithImage[]> {
 			},
 		});
 
-		const transformedFavorites = favorites.map((favorite) => ({
-			...favorite,
-			image: transformImageToFileItem(favorite.image),
-		}));
+		const transformedFavorites = await Promise.all(
+			favorites.map(async (favorite) => ({
+				...favorite,
+				image: await transformImageToFileItem(favorite.image),
+			}))
+		);
 
 		favoriteLogger.info('✅ Favoritos obtenidos:', { count: favorites.length });
 		return transformedFavorites;
@@ -229,10 +232,12 @@ export async function getRecentFavorites(limit = 10): Promise<FavoriteWithImage[
 			},
 		});
 
-		const transformedFavorites = favorites.map((favorite) => ({
-			...favorite,
-			image: transformImageToFileItem(favorite.image),
-		}));
+		const transformedFavorites = await Promise.all(
+			favorites.map(async (favorite) => ({
+				...favorite,
+				image: await transformImageToFileItem(favorite.image),
+			}))
+		);
 
 		favoriteLogger.info('✅ Favoritos recientes obtenidos:', { count: favorites.length });
 		return transformedFavorites;

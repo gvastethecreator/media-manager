@@ -10,6 +10,8 @@ import { revalidatePath } from 'next/cache';
 
 const tagLogger = logger.withContext('TagActions');
 
+const REVALIDATE_PATHS = ['/settings', '/tags', '/tags/[id]'] as const;
+
 export interface TagCreate {
 	name: string;
 	color?: string;
@@ -49,9 +51,7 @@ export interface TagWithImages extends Tag {
 	images: FileItem[];
 }
 
-const REVALIDATE_PATHS = ['/settings', '/tags', '/tags/[id]'] as const;
-
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -233,7 +233,7 @@ export async function createTag(data: TagCreate) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 
 		tagLogger.info('✅ Etiqueta creada:', tag.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al crear etiqueta:', error);
@@ -257,7 +257,7 @@ export async function updateTag(id: string, data: TagUpdate) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 
 		tagLogger.info('✅ Etiqueta actualizada:', tag.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al actualizar etiqueta:', error);
@@ -280,7 +280,7 @@ export async function deleteTag(id: string) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 
 		tagLogger.info('✅ Etiqueta eliminada:', tag.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar etiqueta:', error);
@@ -343,7 +343,7 @@ export async function addImageToTag(tagId: string, imageId: string) {
 			},
 		});
 		tagLogger.info('✅ Imagen agregada a la etiqueta');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al agregar imagen a la etiqueta:', error);
 		throw new TagError('No se pudo agregar la imagen a la etiqueta', error);
@@ -364,7 +364,7 @@ export async function removeImageFromTag(tagId: string, imageId: string) {
 			},
 		});
 		tagLogger.info('✅ Imagen removida de la etiqueta');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar imagen de la etiqueta:', error);
 		throw new TagError('No se pudo eliminar la imagen de la etiqueta', error);
@@ -386,7 +386,7 @@ export async function addTagToImage(tagId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al agregar etiqueta a la imagen:', error);
 		throw new TagError('No se pudo agregar la etiqueta a la imagen', error);
@@ -408,7 +408,7 @@ export async function removeTagFromImage(tagId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar etiqueta de la imagen:', error);
 		throw new TagError('No se pudo eliminar la etiqueta de la imagen', error);

@@ -1,6 +1,6 @@
 'use client';
 
-import { type CollectionWithStats, getCollections } from '@/app/actions/collection.actions';
+import { type CollectionWithStats, getCollections } from '@/app/actions/collections/collection.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { CollectionCard } from '@/components/features/entity-cards/cards/collection-card';

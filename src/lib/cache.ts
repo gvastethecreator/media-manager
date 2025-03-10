@@ -28,21 +28,63 @@ export class CacheManager<T> {
 		this.allowStale = options.allowStale || false;
 	}
 
+	// Función para normalizar las claves para evitar discrepancias
+	private normalizeKey(key: string): string {
+		if (!key) {
+			return '';
+		}
+
+		// Almacenar la clave original para logging
+		const originalKey = key;
+
+		// 1. Normalizar separadores y eliminar duplicados
+		let normalizedKey = key
+			.replace(/\\/g, '/') // Reemplazar todas las barras invertidas por barras normales
+			.replace(/([a-z]):\/+/i, '$1:/') // Normalizar el formato de unidad Windows (C:/ o C:\)
+			.replace(/\/+/g, '/'); // Eliminar barras duplicadas
+
+		// 2. Convertir a minúsculas para comparación consistente
+		normalizedKey = normalizedKey.toLowerCase();
+
+		// 3. Corregir variaciones específicas observadas
+		normalizedKey = normalizedKey
+			.replace(/outpu+ts/gi, 'outputs') // Corregir cualquier variación de 'outputs' con múltiples 'u'
+			.replace(/outp+uts/gi, 'outputs') // Corregir variaciones con múltiples 'p'
+			.replace(/s+dmatrix/gi, 'sdmatrix'); // Corregir cualquier variación de 'sdmatrix'
+
+		// 4. Asegurar estructura consistente para #outputs
+		if (normalizedKey.includes('#outputs') && !normalizedKey.includes('/#outputs/')) {
+			normalizedKey = normalizedKey.replace(/(.*)\/?#outputs\/?(.*)/, '$1/#outputs/$2');
+		}
+
+		if (originalKey !== normalizedKey) {
+			cacheLogger.debug(`🔑 Cache ${this.name}: Normalizando clave:`, {
+				original: originalKey,
+				normalized: normalizedKey,
+			});
+		}
+
+		return normalizedKey;
+	}
+
 	async set(key: string, value: T, _customTtl?: number): Promise<void> {
+		const normalizedKey = this.normalizeKey(key);
+
 		if (this.cache.size >= this.maxSize) {
 			this.evictOldest();
 		}
 
-		this.cache.set(key, {
+		this.cache.set(normalizedKey, {
 			value,
 			timestamp: Date.now(),
 		});
 
-		cacheLogger.debug(`✨ Cache ${this.name}: Elemento agregado`, { key });
+		cacheLogger.debug(`✨ Cache ${this.name}: Elemento agregado`, { key: normalizedKey });
 	}
 
 	async get(key: string): Promise<T | undefined> {
-		const item = this.cache.get(key);
+		const normalizedKey = this.normalizeKey(key);
+		const item = this.cache.get(normalizedKey);
 
 		if (!item) {
 			return undefined;
@@ -52,8 +94,8 @@ export class CacheManager<T> {
 		const isExpired = now - item.timestamp > this.ttl;
 
 		if (isExpired && !this.allowStale) {
-			this.cache.delete(key);
-			cacheLogger.debug(`🕒 Cache ${this.name}: Elemento expirado`, { key });
+			this.cache.delete(normalizedKey);
+			cacheLogger.debug(`🕒 Cache ${this.name}: Elemento expirado`, { key: normalizedKey });
 			return undefined;
 		}
 
@@ -65,8 +107,9 @@ export class CacheManager<T> {
 	}
 
 	async delete(key: string): Promise<void> {
-		this.cache.delete(key);
-		cacheLogger.debug(`🗑️ Cache ${this.name}: Elemento eliminado`, { key });
+		const normalizedKey = this.normalizeKey(key);
+		this.cache.delete(normalizedKey);
+		cacheLogger.debug(`🗑️ Cache ${this.name}: Elemento eliminado`, { key: normalizedKey });
 	}
 
 	async clear(): Promise<void> {
@@ -85,6 +128,16 @@ export class CacheManager<T> {
 		cacheLogger.debug(`♻️ Cache ${this.name}: Elemento más antiguo eliminado`, {
 			key: oldest[0],
 		});
+	}
+
+	// Método para depuración y diagnóstico del caché
+	async diagnose(): Promise<{ total: number; keys: string[] }> {
+		const keys = Array.from(this.cache.keys());
+		cacheLogger.info(`📊 Cache ${this.name}: Diagnóstico - ${keys.length} elementos`);
+		return {
+			total: keys.length,
+			keys,
+		};
 	}
 }
 
