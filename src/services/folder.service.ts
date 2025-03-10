@@ -370,6 +370,26 @@ class FolderServiceClass {
 				this.updateProgress(id, initialStatus);
 				callbacks?.onProgress?.(initialStatus);
 
+				// Nos suscribimos a eventos de progreso para esta operación específica
+				const progressHandler = (status: ProcessStatus) => {
+					if (status.folderId === id) {
+						folderLogger.debug('📊 Progreso de reindexación:', {
+							folderId: id,
+							progress: status.progress,
+							status: status.status,
+							phase: status.phase,
+						});
+
+						// Retransmitir el evento
+						this.emitEvent(FOLDER_EVENTS.PROGRESS, status);
+						this.updateProgress(id, status);
+						callbacks?.onProgress?.(status);
+					}
+				};
+
+				// Registramos el manejador de progreso específico para esta operación
+				clientEvents.on('folder:progress', progressHandler);
+
 				const reindexFolderAction = await import('@/app/actions/folders/folder-indexing.actions').then(
 					(mod) => mod.reindexFolder
 				);
@@ -387,6 +407,9 @@ class FolderServiceClass {
 						success: false,
 						error: actionError instanceof Error ? actionError.message : 'Error desconocido',
 					} as FolderResponse;
+				} finally {
+					// Siempre limpiamos el manejador de eventos
+					clientEvents.off('folder:progress', progressHandler);
 				}
 
 				// Solo emitir eventos si la operación fue exitosa
@@ -410,7 +433,22 @@ class FolderServiceClass {
 						},
 					};
 
+					// Emitir evento de finalización
+					const finalStatus: ProcessStatus = {
+						status: 'Reindexación completada',
+						progress: 100,
+						folderId: id,
+						phase: 'complete',
+						filesProcessed: result.totalFiles || 0,
+						totalFiles: result.totalFiles || 0,
+						startTime: this.startTimes.get(id) || 0,
+						endTime: Date.now(),
+						duration: Date.now() - (this.startTimes.get(id) || Date.now()),
+					};
+
+					this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
 					this.emitEvent(FOLDER_EVENTS.COMPLETE, folderResponse);
+
 					await emit({
 						type: 'files:modified',
 						data: { action: 'reindex', folderId: id },
@@ -448,28 +486,17 @@ class FolderServiceClass {
 				};
 				folderLogger.error('❌ Error reindexing folder:', errorResponse);
 
-				// Ejecutar esto de forma sincrónica para garantizar que se emita antes de limpiar el progreso
+				// Emitir evento de error
 				this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
 				callbacks?.onError?.(errorResponse);
 
-				// Añadir un evento de finalización con error para que la UI pueda actualizar el estado
-				const finalStatus: ProcessStatus = {
-					status: `Error: ${errorResponse.message}`,
-					progress: 100, // Marcar como completo
-					current: 0,
-					total: 0,
-					folderId: id,
-					phase: 'error',
-					startTime: this.startTimes.get(id) || Date.now(),
-					endTime: Date.now(),
-				};
-
-				this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
-				callbacks?.onProgress?.(finalStatus);
-
-				// Limpiar estado
+				// Limpiar progreso
 				this.clearProgress(id);
-				throw errorResponse;
+
+				throw error;
+			} finally {
+				// Limpiar tiempo de inicio
+				this.startTimes.delete(id);
 			}
 		});
 	}

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
 	ContextMenuItem,
@@ -6,11 +6,11 @@ import {
 	ContextMenuSub,
 	ContextMenuSubContent,
 	ContextMenuSubTrigger,
-} from "@/components/ui/context-menu";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus } from "lucide-react";
-import type { SubMenuProps } from "../types";
+} from '@/components/ui/context-menu';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Plus } from 'lucide-react';
+import type { SubMenuProps } from '../types';
 
 // Tipo para entidades con id
 interface EntityWithId {
@@ -50,13 +50,11 @@ export function EntitySubMenu<T>({
 						<ContextMenuSeparator />
 
 						{entities && entities.length > 0 ? (
-							<ScrollArea className={entities.length > 10 ? "h-[300px]" : ""}>
+							<ScrollArea className={entities.length > 10 ? 'h-[300px]' : ''}>
 								{entities.map((entity, index) => (
 									<ContextMenuItem
 										key={`entity-${
-											entity && typeof entity === "object" && "id" in entity
-												? (entity as EntityWithId).id
-												: index
+											entity && typeof entity === 'object' && 'id' in entity ? (entity as EntityWithId).id : index
 										}`}
 										onClick={() => onSelect(entity)}
 									>
@@ -66,9 +64,7 @@ export function EntitySubMenu<T>({
 							</ScrollArea>
 						) : (
 							<ContextMenuItem disabled>
-								<span className="text-muted-foreground">
-									No hay {entityName}s disponibles
-								</span>
+								<span className="text-muted-foreground">No hay {entityName}s disponibles</span>
 							</ContextMenuItem>
 						)}
 					</>

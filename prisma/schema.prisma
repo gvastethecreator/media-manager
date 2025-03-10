@@ -424,7 +424,7 @@ model UniversalFavorite {
 }
 
 // Sistema de Imágenes del Sistema
-model SystemImage {
+model UploadedImage {
   id        String   @id @default(cuid())
   name      String
   path      String   @unique

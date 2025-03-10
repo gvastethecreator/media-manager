@@ -27,6 +27,10 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'folder:error': ['/folders'],
 	'folder:complete': ['/folders'],
 	'folder:stats': ['/folders'],
+	'uploaded-image:created': ['/uploads', '/images'],
+	'uploaded-image:updated': ['/uploads', '/images'],
+	'uploaded-image:deleted': ['/uploads', '/images'],
+	'uploaded-images:changed': ['/uploads', '/images'],
 };
 
 export type EventType =
@@ -48,7 +52,11 @@ export type EventType =
 	| 'folder:progress'
 	| 'folder:error'
 	| 'folder:complete'
-	| 'folder:stats';
+	| 'folder:stats'
+	| 'uploaded-image:created'
+	| 'uploaded-image:updated'
+	| 'uploaded-image:deleted'
+	| 'uploaded-images:changed';
 
 export interface EventData<T = unknown> {
 	type: EventType;
@@ -77,8 +85,18 @@ export async function emit(event: EventData) {
  * Emite un evento de progreso
  */
 export async function emitProgress(status: ProcessStatus) {
+	// Asegurarse de que timestamp esté presente
+	const statusWithTimestamp = {
+		...status,
+		timestamp: status.timestamp || Date.now(),
+	};
+
+	// Emitir el evento
 	await emit({
 		type: 'folder:progress',
-		data: status,
+		data: statusWithTimestamp,
 	});
+
+	// Para debugging
+	console.log(`Progreso emitido: ${status.status} - ${status.progress}% - Fase: ${status.phase}`);
 }
