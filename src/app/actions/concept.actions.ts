@@ -13,7 +13,7 @@ const conceptLogger = logger.withContext('ConceptActions');
 
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -175,7 +175,7 @@ export async function createConcept(data: ConceptCreate): Promise<Concept> {
 		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto creado:', concept.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al crear concepto:', error);
@@ -200,7 +200,7 @@ export async function updateConcept(id: string, data: ConceptUpdate): Promise<Co
 		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto actualizado:', concept.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al actualizar concepto:', error);
@@ -224,7 +224,7 @@ export async function deleteConcept(id: string): Promise<void> {
 		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		conceptLogger.error('❌ Error al eliminar concepto:', error);
 		throw new ConceptError('No se pudo eliminar el concepto', error);

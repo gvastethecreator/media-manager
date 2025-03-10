@@ -12,6 +12,7 @@ export interface ProfileCreate {
 	syncSettings?: boolean;
 	notifications?: boolean;
 	settings?: Record<string, string | number | boolean | string[] | null | undefined>;
+	isActive?: boolean;
 }
 
 export interface ProfileUpdate extends Partial<ProfileCreate> {
@@ -24,7 +25,6 @@ export interface ProfileWithStats extends Profile, BaseEntity {
 		images: number;
 	};
 	totalSize?: number;
-	isActive: boolean;
 }
 
 export const profileService = {

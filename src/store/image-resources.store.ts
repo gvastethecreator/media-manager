@@ -1,4 +1,4 @@
-import { getImageUrl } from '@/app/actions/images/image.actions';
+import { getImageUrl } from '@/app/actions/images';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { logger } from '@/lib/logger';
@@ -118,6 +118,13 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 		getThumbnail: async (id: string) => {
 			const state = get();
+
+			// Validar que el ID sea válido antes de proceder
+			if (!id || typeof id !== 'string' || id.trim() === '') {
+				resourceLogger.error('Intento de cargar thumbnail con ID inválido:', { id });
+				return undefined;
+			}
+
 			const resource = state.resources.get(id);
 
 			// Si ya tenemos el thumbnail y no está expirado, retornarlo
@@ -142,7 +149,11 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			try {
 				state.loadingQueue.add(id);
-				const data = await getThumbnail(id, ThumbnailQuality.MEDIUM);
+				resourceLogger.debug('Solicitando thumbnail:', { id, quality: ThumbnailQuality.MEDIUM });
+
+				// Asegurarse de que se use un valor válido de ThumbnailQuality
+				const quality = ThumbnailQuality.MEDIUM;
+				const data = await getThumbnail(id, quality);
 
 				if (data?.thumbnail) {
 					const thumbnailUrl = `data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`;
@@ -161,18 +172,35 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					state.resources.set(id, newResource);
 					return thumbnailUrl;
 				}
+
+				// Si llegamos aquí, no hay thumbnail pero podría haber un error
+				if (data?.error) {
+					resourceLogger.error('Error desde el servidor al cargar thumbnail:', { id, error: data.error });
+					const errorResource: ImageResource = {
+						id,
+						isLoading: false,
+						error: data.error,
+						lastUpdate: Date.now(),
+					};
+					state.resources.set(id, errorResource);
+				}
 			} catch (error) {
-				resourceLogger.error('Error loading thumbnail:', { id, error });
+				resourceLogger.error('Error al cargar thumbnail:', {
+					id,
+					error: error instanceof Error ? error.message : 'Error desconocido',
+				});
 				const errorResource: ImageResource = {
 					id,
 					isLoading: false,
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: error instanceof Error ? error.message : 'Error desconocido',
 					lastUpdate: Date.now(),
 				};
 				state.resources.set(id, errorResource);
 			} finally {
 				state.loadingQueue.delete(id);
 			}
+
+			return undefined;
 		},
 
 		getOriginalUrl: async (id: string) => {
@@ -222,10 +250,13 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				return;
 			}
 
-			// Filtrar IDs que ya están cargados o en cola
-			const newIds = ids.filter((id) => {
+			// Filtrar IDs vacíos o invalidos
+			const validIds = ids.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+
+			// Filtrar IDs que ya están en caché y son recientes
+			const newIds = validIds.filter((id) => {
 				const resource = state.resources.get(id);
-				return !resource?.thumbnail && !state.loadingQueue.has(id);
+				return !resource?.thumbnail || Date.now() - resource.lastUpdate > CACHE_CONFIG.maxAge;
 			});
 
 			if (newIds.length === 0) {
@@ -246,7 +277,13 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				}
 
 				const id = currentState.preloadQueue[0];
-				await currentState.getThumbnail(id);
+
+				// Verificar que el ID sea válido antes de procesarlo
+				if (id && typeof id === 'string' && id.trim() !== '') {
+					await currentState.getThumbnail(id);
+				} else {
+					resourceLogger.warn('ID inválido en cola de precarga, omitiendo:', { id });
+				}
 
 				set((state) => ({
 					preloadQueue: state.preloadQueue.slice(1),

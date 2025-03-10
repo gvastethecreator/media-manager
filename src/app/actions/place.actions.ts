@@ -13,7 +13,7 @@ const placeLogger = logger.withContext('PlaceActions');
 
 const REVALIDATE_PATHS = ['/settings', '/places', '/places/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -158,7 +158,7 @@ export async function createPlace(data: PlaceCreate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		placeLogger.info('✅ Lugar creado:', place.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return place;
 	} catch (error) {
 		placeLogger.error('❌ Error al crear lugar:', error);
@@ -183,7 +183,7 @@ export async function updatePlace(id: string, data: PlaceUpdate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		placeLogger.info('✅ Lugar actualizado:', place.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return place;
 	} catch (error) {
 		placeLogger.error('❌ Error al actualizar lugar:', error);
@@ -207,7 +207,7 @@ export async function deletePlace(id: string) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		placeLogger.info('✅ Lugar eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		placeLogger.error('❌ Error al eliminar lugar:', error);
 		throw new PlaceError('No se pudo eliminar el lugar', error);
@@ -266,7 +266,7 @@ export async function addImageToPlace(placeId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
 		placeLogger.info('✅ Imagen agregada al lugar');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		placeLogger.error('❌ Error al agregar imagen al lugar:', error);
 		throw new PlaceError('No se pudo agregar la imagen al lugar', error);
@@ -296,7 +296,7 @@ export async function removeImageFromPlace(placeId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
 		placeLogger.info('✅ Imagen removida del lugar');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		placeLogger.error('❌ Error al remover imagen del lugar:', error);
 		throw new PlaceError('No se pudo remover la imagen del lugar', error);

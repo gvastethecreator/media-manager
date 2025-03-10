@@ -12,10 +12,13 @@ const apiLogger = logger.withContext('ImageAPI');
 
 export async function GET(_request: Request, context: { params: { id: string } }) {
 	const headers = new Headers();
+	// Esperar a que los parámetros estén disponibles
+	const params = await context.params;
+	const id = params.id;
 
 	try {
 		const image = await prisma.image.findUnique({
-			where: { id: context.params.id },
+			where: { id },
 			select: {
 				id: true,
 				path: true,
@@ -24,7 +27,7 @@ export async function GET(_request: Request, context: { params: { id: string } }
 		});
 
 		if (!image) {
-			apiLogger.warn('Image not found:', context.params.id);
+			apiLogger.warn('Image not found:', id);
 			return new Response('Image not found', { status: 404 });
 		}
 

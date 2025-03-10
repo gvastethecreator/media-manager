@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger';
 import { getFolders } from '@/services/folder.service';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
-import type { Folder } from '@/types/folders';
+import type { Folder } from '@/types/entities/folders';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -32,7 +32,7 @@ export function FoldersView(_props: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await getFolders();
-			const transformedData = data.map((folder) => ({
+			const transformedData = data.map((folder: Folder) => ({
 				...folder,
 				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
 				createdAt: new Date(folder.createdAt),

@@ -1,14 +1,8 @@
-"use client";
+'use client';
 
-import { clientEvents } from "@/lib/client/events.client";
-import { ActivityService } from "@/services/activity.service";
-import {
-	type ReactNode,
-	createContext,
-	useCallback,
-	useContext,
-	useState,
-} from "react";
+import { clientEvents } from '@/lib/client/events.client';
+import { ActivityService } from '@/services/activity.service';
+import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
 
 export interface FileItem {
 	id: string;
@@ -39,10 +33,10 @@ interface FileContextType {
 	currentItems: FileItem[];
 	selectedItems: FileItem[];
 	isLoading: boolean;
-	sortBy: "name" | "date" | "size";
-	sortOrder: "asc" | "desc";
-	viewMode: "grid" | "list";
-	thumbnailSize: "small" | "medium" | "large";
+	sortBy: 'name' | 'date' | 'size';
+	sortOrder: 'asc' | 'desc';
+	viewMode: 'grid' | 'list';
+	thumbnailSize: 'small' | 'medium' | 'large';
 	loading: boolean;
 	error: string | null;
 
@@ -55,10 +49,10 @@ interface FileContextType {
 	clearSelection: () => void;
 	handleSelectItem: (item: FileItem) => void;
 	toggleItemSelection: (item: FileItem, multiSelect?: boolean) => void;
-	setSortBy: (sortBy: "name" | "date" | "size") => void;
-	setSortOrder: (order: "asc" | "desc") => void;
-	setViewMode: (mode: "grid" | "list") => void;
-	setThumbnailSize: (size: "small" | "medium" | "large") => void;
+	setSortBy: (sortBy: 'name' | 'date' | 'size') => void;
+	setSortOrder: (order: 'asc' | 'desc') => void;
+	setViewMode: (mode: 'grid' | 'list') => void;
+	setThumbnailSize: (size: 'small' | 'medium' | 'large') => void;
 	toggleFavorite: (fileId: string) => void;
 	addToCollection: (fileIds: string[], collectionId: string) => void;
 	removeFromCollection: (fileIds: string[], collectionId: string) => void;
@@ -77,12 +71,10 @@ const FileContext = createContext<FileContextType | undefined>(undefined);
 export function FileProvider({ children }: { children: ReactNode }) {
 	const [files, setFiles] = useState<FileItem[]>([]);
 	const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-	const [sortBy, setSortBy] = useState<"name" | "date" | "size">("date");
-	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-	const [thumbnailSize, setThumbnailSize] = useState<
-		"small" | "medium" | "large"
-	>("medium");
+	const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+	const [thumbnailSize, setThumbnailSize] = useState<'small' | 'medium' | 'large'>('medium');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -119,7 +111,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 			// Registrar actividad de vista
 			await ActivityService.logActivity({
-				type: "view",
+				type: 'view',
 				description: `Vista de ${item.name}`,
 				imageId: item.id,
 			});
@@ -150,22 +142,22 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 			// Emitir evento de actualización si es necesario
 			if (item.collections?.length) {
-				addEvent({ type: "collections:modified", data: { item } });
+				addEvent({ type: 'collections:modified', data: { item } });
 			}
 			if (item.tags?.length) {
-				addEvent({ type: "tags:modified", data: { item } });
+				addEvent({ type: 'tags:modified', data: { item } });
 			}
 			if (item.characters?.length) {
-				addEvent({ type: "characters:modified", data: { item } });
+				addEvent({ type: 'characters:modified', data: { item } });
 			}
 			if (item.places?.length) {
-				addEvent({ type: "places:modified", data: { item } });
+				addEvent({ type: 'places:modified', data: { item } });
 			}
 			if (item.objects?.length) {
-				addEvent({ type: "objects:modified", data: { item } });
+				addEvent({ type: 'objects:modified', data: { item } });
 			}
 			if (item.isFavorite || item.favorite) {
-				addEvent({ type: "favorites:modified", data: { item } });
+				addEvent({ type: 'favorites:modified', data: { item } });
 			}
 		},
 		[selectedFiles, selectFiles, deselectFiles, addEvent]
@@ -182,7 +174,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 							favorite: !file.favorite,
 							isFavorite: !file.isFavorite,
 						};
-						addEvent({ type: "favorites:modified", data: { item: newFile } });
+						addEvent({ type: 'favorites:modified', data: { item: newFile } });
 						return newFile;
 					}
 					return file;
@@ -201,7 +193,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 							...file,
 							collections: [...(file.collections || []), collectionId],
 						};
-						addEvent({ type: "collections:modified", data: { item: newFile } });
+						addEvent({ type: 'collections:modified', data: { item: newFile } });
 						return newFile;
 					}
 					return file;
@@ -218,11 +210,9 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					if (fileIds.includes(file.id)) {
 						const newFile = {
 							...file,
-							collections: file.collections?.filter(
-								(id) => id !== collectionId
-							),
+							collections: file.collections?.filter((id) => id !== collectionId),
 						};
-						addEvent({ type: "collections:modified", data: { item: newFile } });
+						addEvent({ type: 'collections:modified', data: { item: newFile } });
 						return newFile;
 					}
 					return file;
@@ -241,7 +231,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 							...file,
 							tags: [...new Set([...(file.tags || []), ...tags])],
 						};
-						addEvent({ type: "tags:modified", data: { item: newFile } });
+						addEvent({ type: 'tags:modified', data: { item: newFile } });
 						return newFile;
 					}
 					return file;
@@ -260,7 +250,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 							...file,
 							tags: file.tags?.filter((tag) => !tags.includes(tag)),
 						};
-						addEvent({ type: "tags:modified", data: { item: newFile } });
+						addEvent({ type: 'tags:modified', data: { item: newFile } });
 						return newFile;
 					}
 					return file;
@@ -271,27 +261,20 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	);
 
 	// Resto de funciones del contexto original
-	const moveFiles = useCallback(
-		async (fileIds: string[], targetPath: string) => {
-			try {
-				setLoading(true);
-				// Implementar lógica de movimiento de archivos
-				setFiles((prev) =>
-					prev.map((file) =>
-						fileIds.includes(file.id)
-							? { ...file, path: `${targetPath}/${file.name}` }
-							: file
-					)
-				);
-			} catch (err) {
-				setError("Error moving files");
-				console.error(err);
-			} finally {
-				setLoading(false);
-			}
-		},
-		[]
-	);
+	const moveFiles = useCallback(async (fileIds: string[], targetPath: string) => {
+		try {
+			setLoading(true);
+			// Implementar lógica de movimiento de archivos
+			setFiles((prev) =>
+				prev.map((file) => (fileIds.includes(file.id) ? { ...file, path: `${targetPath}/${file.name}` } : file))
+			);
+		} catch (err) {
+			setError('Error moving files');
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
 	const copyFiles = useCallback(
 		async (fileIds: string[], targetPath: string) => {
@@ -306,7 +289,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				}));
 				addFiles(copiedFiles);
 			} catch (err) {
-				setError("Error copying files");
+				setError('Error copying files');
 				console.error(err);
 			} finally {
 				setLoading(false);
@@ -355,7 +338,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				);
 				addFiles(newFiles);
 			} catch (err) {
-				setError("Error uploading files");
+				setError('Error uploading files');
 				console.error(err);
 			} finally {
 				setLoading(false);
@@ -368,20 +351,18 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		async (fileIds: string[]) => {
 			try {
 				setLoading(true);
-				const filesToDownload = files.filter((file) =>
-					fileIds.includes(file.id)
-				);
+				const filesToDownload = files.filter((file) => fileIds.includes(file.id));
 				// Implementar lógica de descarga de archivos
 				for (const file of filesToDownload) {
-					const link = document.createElement("a");
-					link.href = file.thumbnail || "";
+					const link = document.createElement('a');
+					link.href = file.thumbnail || '';
 					link.download = file.name;
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
 				}
 			} catch (err) {
-				setError("Error downloading files");
+				setError('Error downloading files');
 				console.error(err);
 			} finally {
 				setLoading(false);
@@ -395,19 +376,19 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		return [...files].sort((a, b) => {
 			let comparison = 0;
 			switch (sortBy) {
-				case "name":
+				case 'name':
 					comparison = a.name.localeCompare(b.name);
 					break;
-				case "date":
+				case 'date':
 					comparison = a.modified.getTime() - b.modified.getTime();
 					break;
-				case "size":
+				case 'size':
 					comparison = a.size - b.size;
 					break;
 				default:
 					comparison = 0;
 			}
-			return sortOrder === "asc" ? comparison : -comparison;
+			return sortOrder === 'asc' ? comparison : -comparison;
 		});
 	}, [files, sortBy, sortOrder]);
 
@@ -459,7 +440,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 export function useFiles() {
 	const context = useContext(FileContext);
 	if (context === undefined) {
-		throw new Error("useFiles must be used within a FileProvider");
+		throw new Error('useFiles must be used within a FileProvider');
 	}
 	return context;
 }

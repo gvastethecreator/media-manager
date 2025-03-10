@@ -1,7 +1,7 @@
-import { getCollections } from '@/app/actions/collection.actions';
-import { getFolders } from '@/app/actions/folders/folder.actions';
-import { getTagImages } from '@/app/actions/tag.actions';
-import { getTags } from '@/app/actions/tag.actions';
+import { getCollections } from '@/app/actions/collections/collection.actions';
+import { getFolders } from '@/app/actions/folders';
+import { getTagImages } from '@/app/actions/tags/tag.actions';
+import { getTags } from '@/app/actions/tags/tag.actions';
 import { logger } from '@/lib/logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
 import type { TagWithStats } from '@/types/tag';

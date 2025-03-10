@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { FileItem } from '@/types/file-item';
-import { ImageIcon, Star } from 'lucide-react';
-import type * as React from 'react';
-import { memo } from 'react';
-import { FileContextMenu } from '../context-menu';
-import type { ContextMenuAction } from '../context-menu';
-import { ImageRenderer } from '../image-renderer';
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { FileItem } from "@/types/file-item";
+import { ImageIcon, Star } from "lucide-react";
+import type * as React from "react";
+import { memo } from "react";
+import { FileContextMenu } from "../context-menu/context-menu";
+import type { ContextMenuAction } from "../context-menu/context-menu";
+import { ImageRenderer } from "../image-renderer";
 
 interface GridViewProps {
 	item: FileItem;
@@ -19,7 +19,11 @@ interface GridViewProps {
 	thumbnail?: string | null;
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextAction?: (
+		action: ContextMenuAction,
+		item: FileItem,
+		data?: Record<string, unknown>
+	) => void;
 	style?: React.CSSProperties;
 }
 
@@ -36,7 +40,7 @@ export const GridView = memo(function GridView({
 	style,
 }: GridViewProps) {
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			onClick?.(item);
 		}
@@ -47,9 +51,9 @@ export const GridView = memo(function GridView({
 			<button
 				type="button"
 				className={cn(
-					'relative w-full h-full overflow-hidden group text-left',
-					isSelected && 'ring-2 ring-primary ring-offset-2',
-					isScrolling && 'opacity-50'
+					"relative w-full h-full overflow-hidden group text-left",
+					isSelected && "ring-2 ring-primary ring-offset-2",
+					isScrolling && "opacity-50"
 				)}
 				style={style}
 				onClick={(e) => {
@@ -78,7 +82,10 @@ export const GridView = memo(function GridView({
 								src={thumbnail}
 								alt={item.name}
 								objectFit="contain"
-								className={cn('h-full w-full rounded-sm transition-transform duration-200', 'group-hover:scale-105')}
+								className={cn(
+									"h-full w-full rounded-sm transition-transform duration-200",
+									"group-hover:scale-105"
+								)}
 							/>
 						</div>
 					) : (

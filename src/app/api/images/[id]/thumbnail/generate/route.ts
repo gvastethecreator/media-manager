@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import { createReadStream } from 'fs';
 import { pipeline } from 'node:stream/promises';
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality, normalizeQuality } from '@/lib/config/thumbnail.config';
 import { prisma } from '@/lib/prisma';
-import { THUMBNAIL_QUALITY_CONFIG, type ThumbnailQuality } from '@/services/thumbnail.service';
 import { type NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 
@@ -10,11 +10,18 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
 	try {
-		const { quality = 'medium', force = false } = await request.json();
+		// Esperar a que los parámetros estén disponibles
+		const dynParams = await params;
+		const id = dynParams.id;
+
+		const { quality: requestedQuality = 'medium', force = false } = await request.json();
+
+		// Usar la función normalizeQuality para validar la calidad
+		const quality = normalizeQuality(requestedQuality);
 
 		// Verificar si la imagen existe
 		const image = await prisma.image.findUnique({
-			where: { id: params.id },
+			where: { id },
 		});
 
 		if (!image) {
@@ -24,7 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 		// Verificar que el archivo existe
 		if (!existsSync(image.path)) {
 			await prisma.image.update({
-				where: { id: params.id },
+				where: { id },
 				data: {
 					thumbnailError: 'Original file not found',
 					thumbnailErrorAt: new Date(),
@@ -47,15 +54,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 			// Procesar imagen en streaming
 			const transformer = sharp()
-				.resize(
-					THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].width,
-					THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].height,
-					{
-						fit: 'inside',
-						withoutEnlargement: true,
-					}
-				)
-				.webp({ quality: THUMBNAIL_QUALITY_CONFIG[quality as ThumbnailQuality].quality });
+				.resize(THUMBNAIL_QUALITY_CONFIG[quality].width, THUMBNAIL_QUALITY_CONFIG[quality].height, {
+					fit: 'inside',
+					withoutEnlargement: true,
+				})
+				.webp({ quality: THUMBNAIL_QUALITY_CONFIG[quality].quality });
 
 			const chunks: Buffer[] = [];
 			transformer.on('data', (chunk) => chunks.push(chunk));
@@ -66,10 +69,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 			// Actualizar en base de datos
 			await prisma.image.update({
-				where: { id: params.id },
+				where: { id },
 				data: {
 					thumbnail: thumbnailBuffer,
 					thumbnailSize: thumbnailBuffer.length,
+					thumbnailWidth: metadata.width ? Math.min(metadata.width, THUMBNAIL_QUALITY_CONFIG[quality].width) : null,
+					thumbnailHeight: metadata.height ? Math.min(metadata.height, THUMBNAIL_QUALITY_CONFIG[quality].height) : null,
 					thumbnailError: null,
 					thumbnailErrorAt: null,
 					updatedAt: new Date(),
@@ -86,7 +91,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 			// Actualizar error en base de datos
 			await prisma.image.update({
-				where: { id: params.id },
+				where: { id },
 				data: {
 					thumbnailError: error instanceof Error ? error.message : 'Unknown error',
 					thumbnailErrorAt: new Date(),

@@ -7,7 +7,7 @@ import {
 	deleteTag as deleteTagAction,
 	getTags,
 	updateTag as updateTagAction,
-} from '@/app/actions/tag.actions';
+} from '@/app/actions/tags/tag.actions';
 import { logger } from '@/lib/logger';
 import { Tag } from '@prisma/client';
 import { create } from 'zustand';

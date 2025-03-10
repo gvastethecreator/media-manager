@@ -4,15 +4,15 @@ import { logger } from '@/lib/logger';
 import { revalidatePath } from 'next/cache';
 import { getAlbums } from './album.actions';
 import { getCharacters } from './character.actions';
-import { getCollections } from './collection.actions';
+import { getCollections } from './collections/collection.actions';
 import { getConcepts } from './concept.actions';
-import { getFolders } from './folders/folder.actions';
+import { getFolders } from './folders';
 import { getNotes } from './note.actions';
 import { getObjects } from './object.actions';
 import { getPlaces } from './place.actions';
 import { getPrompts } from './prompt.actions';
 import { getSystemStats } from './stats.actions';
-import { getTags } from './tag.actions';
+import { getTags } from './tags/tag.actions';
 
 const navLogger = logger.withContext('NavActions');
 

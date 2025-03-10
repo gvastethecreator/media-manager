@@ -22,6 +22,7 @@ export interface Folder {
 		images: number;
 	};
 	recentImages?: (string | null)[];
+	autoReindex?: boolean;
 }
 
 export type { ProcessStatus, ExtendedProcessStatus };

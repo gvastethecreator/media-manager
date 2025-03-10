@@ -1,13 +1,13 @@
 'use client';
 
-import { CircleCheckBig, CircleDashed, TimerReset } from 'lucide-react';
+import { AlertCircle, CircleAlert, CircleCheckBig, CircleDashed, TimerReset } from 'lucide-react';
 import * as React from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-export type IndexStatus = 'indexed' | 'outdated' | 'pending';
+export type IndexStatus = 'indexed' | 'outdated' | 'pending' | 'not_found' | 'error';
 
 interface FolderIndexStatusBadgeProps {
 	status: IndexStatus;
@@ -24,6 +24,10 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 				return <TimerReset className="h-3 w-3 text-amber-500" />;
 			case 'pending':
 				return <CircleDashed className="h-3 w-3 text-muted-foreground" />;
+			case 'not_found':
+				return <CircleAlert className="h-3 w-3 text-destructive" />;
+			case 'error':
+				return <AlertCircle className="h-3 w-3 text-destructive" />;
 		}
 	};
 
@@ -35,6 +39,10 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 				return 'Desactualizado';
 			case 'pending':
 				return 'Pendiente';
+			case 'not_found':
+				return 'No encontrado';
+			case 'error':
+				return 'Error';
 		}
 	};
 
@@ -58,9 +66,14 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 		return date.toLocaleDateString();
 	};
 
-	const tooltipContent = lastIndexed
-		? `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`
-		: 'Nunca indexado';
+	const tooltipContent =
+		status === 'not_found'
+			? 'Carpeta no encontrada en el sistema'
+			: status === 'error'
+				? 'Error en la carpeta'
+				: lastIndexed
+					? `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`
+					: 'Nunca indexado';
 
 	return (
 		<TooltipProvider>
@@ -73,6 +86,8 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 							status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
 							status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
 							status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
+							(status === 'not_found' || status === 'error') &&
+								'border-destructive/30 bg-destructive/10 text-destructive',
 							className
 						)}
 					>
