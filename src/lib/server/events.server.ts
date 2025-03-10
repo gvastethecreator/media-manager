@@ -96,7 +96,4 @@ export async function emitProgress(status: ProcessStatus) {
 		type: 'folder:progress',
 		data: statusWithTimestamp,
 	});
-
-	// Para debugging
-	console.log(`Progreso emitido: ${status.status} - ${status.progress}% - Fase: ${status.phase}`);
 }

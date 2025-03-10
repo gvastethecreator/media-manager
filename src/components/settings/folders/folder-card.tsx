@@ -50,24 +50,50 @@ export function FolderCard({
 }: FolderCardProps) {
 	// Determinar si esta carpeta está siendo procesada actualmente
 	const isReindexing = isProcessing && processStatus?.folderId === folder.id;
+
+	// Verificar explícitamente si el proceso está completado
 	const isComplete =
-		processStatus?.phase === "complete" &&
-		processStatus?.folderId === folder.id;
+		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.phase === 'complete') ||
+		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.progress === 100) ||
+		(processStatus?.phase === 'complete' && processStatus?.folderId === folder.id) ||
+		(processStatus?.progress === 100 && processStatus?.phase === 'metadata' && processStatus?.folderId === folder.id);
+
 	const indexStatus = getFolderIndexStatus(folder);
 
 	// Estado local para tracking
 	const [lastProgress, setLastProgress] = useState<number>(0);
-	const [showCompleteAnimation, setShowCompleteAnimation] =
-		useState<boolean>(false);
+	const [showCompleteAnimation, setShowCompleteAnimation] = useState<boolean>(false);
 
 	// Actualizar el progreso cuando cambie el estado
 	useEffect(() => {
-		const isActiveProcess =
-			isReindexing && processStatus?.folderId === folder.id;
+		console.log(`Estado de carpeta ${folder.id}:`, {
+			isReindexing,
+			isComplete,
+			progress: processStatus?.progress,
+			isProcessing,
+			folderIsSelected: processStatus?.folderId === folder.id,
+			phase: processStatus?.phase
+		});
 
-		if (isActiveProcess && typeof processStatus?.progress === "number") {
+		const isActiveProcess = isReindexing && processStatus?.folderId === folder.id;
+
+		if (isActiveProcess && typeof processStatus?.progress === 'number') {
 			setLastProgress(processStatus.progress);
+
+			// Si el progreso alcanza el 100%, mostrar animación de completado
+			if (processStatus.progress >= 100) {
+				console.log(`Carpeta ${folder.id} ha alcanzado progreso 100%`);
+				setShowCompleteAnimation(true);
+
+				// Ocultar la animación después de un tiempo
+				const timer = setTimeout(() => {
+					setShowCompleteAnimation(false);
+				}, 3000);
+
+				return () => clearTimeout(timer);
+			}
 		} else if (isComplete) {
+			console.log(`Carpeta ${folder.id} marcada como completada`);
 			setLastProgress(100);
 			setShowCompleteAnimation(true);
 
@@ -78,7 +104,12 @@ export function FolderCard({
 
 			return () => clearTimeout(timer);
 		}
-	}, [isReindexing, isComplete, processStatus, folder.id]);
+
+		// Si no está procesando ni completo, asegurarse de que no mostramos animación
+		if (!isReindexing && !isComplete) {
+			setShowCompleteAnimation(false);
+		}
+	}, [isReindexing, isComplete, processStatus, folder.id, isProcessing]);
 
 	// Obtener mensaje de estado
 	const getStatusMessage = useCallback(() => {
@@ -86,7 +117,7 @@ export function FolderCard({
 			return null;
 		}
 
-		if (showCompleteAnimation) {
+		if (!isProcessing && showCompleteAnimation) {
 			return (
 				<Badge
 					variant="outline"
@@ -105,7 +136,7 @@ export function FolderCard({
 				Procesando...
 			</Badge>
 		);
-	}, [isReindexing, showCompleteAnimation]);
+	}, [isReindexing, showCompleteAnimation, isProcessing]);
 
 	return (
 		<motion.div

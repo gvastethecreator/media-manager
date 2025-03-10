@@ -38,9 +38,15 @@ export function useFoldersEvents({
 				return;
 			}
 
-			// Este método ahora solo actúa como respaldo, ya que el polling es la fuente principal
-			eventsLogger.info('📊 Progreso del proceso vía eventos (respaldo):', status);
-			onProgress(status);
+			// Este método ahora sólo actúa como respaldo, ya que el polling es la fuente principal
+			eventsLogger.info('📊 Progreso del proceso vía eventos:', status);
+
+			try {
+				// Asegurarnos de que el evento llegue al manejador principal
+				onProgress(status);
+			} catch (error) {
+				eventsLogger.error('Error procesando evento de progreso:', error);
+			}
 		},
 		[onProgress]
 	);
@@ -49,7 +55,12 @@ export function useFoldersEvents({
 	const handleError = useCallback(
 		(error: ErrorResponse) => {
 			eventsLogger.error('❌ Error procesando carpeta:', error);
-			onError(error);
+
+			try {
+				onError(error);
+			} catch (err) {
+				eventsLogger.error('Error al manejar el evento de error:', err);
+			}
 		},
 		[onError]
 	);
@@ -61,12 +72,16 @@ export function useFoldersEvents({
 				return;
 			}
 
-			eventsLogger.info('✅ Proceso completado vía evento complete (respaldo):', {
+			eventsLogger.info('✅ Proceso completado vía evento complete:', {
 				folderId: data.id,
 				stats: data.stats,
 			});
 
-			onComplete(data);
+			try {
+				onComplete(data);
+			} catch (error) {
+				eventsLogger.error('Error al manejar el evento de finalización:', error);
+			}
 		},
 		[onComplete]
 	);
@@ -109,7 +124,9 @@ export function useFoldersEvents({
 
 	// Subscribirse a los eventos del servicio
 	useEffect(() => {
-		// Suscribirse a eventos
+		// Suscribirse a eventos con logging detallado
+		eventsLogger.info('🎯 Suscribiéndose a eventos del servidor');
+
 		folderService.onProgress(handleProgress);
 		folderService.onError(handleError);
 		folderService.onComplete(handleComplete);
@@ -142,4 +159,16 @@ export function useFoldersEvents({
 		handleReindexAllProgress,
 		handleReindexAllComplete,
 	]);
+
+	// También devolvemos funciones útiles para depuración
+	return {
+		emitManualProgress: (status: ProcessStatus) => {
+			eventsLogger.info('🧪 Emitiendo evento de progreso manual:', status);
+			handleProgress(status);
+		},
+		emitManualComplete: (data: FolderResponse) => {
+			eventsLogger.info('🧪 Emitiendo evento de finalización manual:', data);
+			handleComplete(data);
+		},
+	};
 }
