@@ -1,4 +1,4 @@
-import type { FileItem } from './file-item';
+import type { FileItem } from '@/types/file-item';
 
 // Tipo base para Tag
 export interface Tag {

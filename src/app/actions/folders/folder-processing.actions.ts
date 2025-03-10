@@ -4,6 +4,7 @@ import { existsSync } from 'fs';
 import { statSync } from 'fs';
 import { readdir, stat } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import * as path from 'node:path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { logger } from '@/lib/logger';
@@ -379,27 +380,32 @@ export const processDirectoryForReindex = async (
 		// Contar archivos primero
 		for (const file of files) {
 			const filePath = join(verifiedPath, file);
-			const stats = await stat(filePath);
+			try {
+				const stats = await stat(filePath);
 
-			if (stats.isDirectory()) {
-				const subDirStats = await processDirectoryForReindex(filePath, folderId, existingImages);
-				total += subDirStats.total;
-				totalSize += subDirStats.totalSize;
+				if (stats.isDirectory()) {
+					const subDirStats = await processDirectoryForReindex(filePath, folderId, existingImages);
+					total += subDirStats.total;
+					totalSize += subDirStats.totalSize;
 
-				// Agregar archivos eliminados de subdirectorios
-				for (const deletedFile of subDirStats.deletedFiles) {
-					deletedFiles.add(deletedFile);
+					// Agregar archivos eliminados de subdirectorios
+					for (const deletedFile of subDirStats.deletedFiles) {
+						deletedFiles.add(deletedFile);
+					}
+
+					continue;
 				}
 
-				continue;
-			}
-
-			const ext = extname(file).toLowerCase();
-			if (SUPPORTED_FORMATS.includes(ext)) {
-				total++;
-				totalSize += stats.size;
-				fileTypes[ext] = (fileTypes[ext] || 0) + 1;
-				filesInThisDirectory.add(filePath);
+				const ext = extname(file).toLowerCase();
+				if (SUPPORTED_FORMATS.includes(ext)) {
+					total++;
+					totalSize += stats.size;
+					fileTypes[ext] = (fileTypes[ext] || 0) + 1;
+					filesInThisDirectory.add(filePath);
+				}
+			} catch (err) {
+				folderLogger.error(`Error accediendo al archivo ${filePath}:`, err);
+				// Continuar con el siguiente archivo
 			}
 		}
 
@@ -407,8 +413,12 @@ export const processDirectoryForReindex = async (
 		emitProgress({
 			status: 'Escaneando archivos...',
 			phase: 'scanning',
-			current: 0,
-			total,
+			progress: 0,
+			folderId,
+			filesProcessed: 0,
+			totalFiles: total,
+			currentFile: dirPath,
+			timestamp: Date.now(),
 		});
 
 		// Procesar archivos
@@ -420,6 +430,37 @@ export const processDirectoryForReindex = async (
 				if (stats.isDirectory()) {
 					const subDirStats = await processDirectoryForReindex(filePath, folderId, existingImages);
 					processed += subDirStats.processed;
+
+					// Después de procesar un subdirectorio
+					const progress = Math.min(Math.round((processed / total) * 100), 100);
+					const elapsedTime = (Date.now() - startTime) / 1000;
+					const filesPerSecond = elapsedTime > 0 ? processedFiles / elapsedTime : 0;
+					const estimatedTimeRemaining = Math.round((total - processed) / (filesPerSecond || 0.001));
+
+					emitProgress({
+						status: `Procesando archivos (${processed}/${total})...`,
+						phase: 'indexing',
+						progress,
+						folderId,
+						filesProcessed: processed,
+						totalFiles: total,
+						currentFile: filePath,
+						fileDetails: {
+							name: path.basename(filePath),
+							type: 'directory',
+							size: 0,
+						},
+						extendedStats: {
+							fileTypes,
+							errorsByType,
+							processingSpeed: filesPerSecond,
+							healthScore: calculateHealthScore(errorsByType, processed),
+							averageSize: processed > 0 ? totalSize / processed : 0,
+						},
+						estimatedTimeRemaining,
+						timestamp: Date.now(),
+					});
+
 					continue;
 				}
 
@@ -432,6 +473,18 @@ export const processDirectoryForReindex = async (
 
 				// Marcar este archivo como procesado
 				processedPaths.add(filePath);
+
+				// Emitir progreso para mostrar el archivo que se está procesando
+				emitProgress({
+					status: `Procesando ${file}...`,
+					phase: 'indexing',
+					progress: Math.min(Math.round((processed / total) * 100), 100),
+					folderId,
+					filesProcessed: processed,
+					totalFiles: total,
+					currentFile: filePath,
+					timestamp: Date.now(),
+				});
 
 				// Si el archivo existe, verificar si necesita actualización
 				if (existingFile) {
@@ -447,6 +500,20 @@ export const processDirectoryForReindex = async (
 						// pero no hacemos nada con él
 						processed++;
 						processedFiles++;
+
+						// Para archivos no modificados
+						const progress = Math.min(Math.round((processed / total) * 100), 100);
+						emitProgress({
+							status: `Verificando archivos (${processed}/${total})...`,
+							phase: 'scanning',
+							progress,
+							folderId,
+							filesProcessed: processed,
+							totalFiles: total,
+							currentFile: filePath,
+							timestamp: Date.now(),
+						});
+
 						continue;
 					}
 				}
@@ -459,23 +526,24 @@ export const processDirectoryForReindex = async (
 				emitProgress({
 					status: `Procesando ${file}...`,
 					phase: 'indexing',
-					current: processed,
-					total,
-					progress: (processed / total) * 100,
-					processingSpeed: filesPerSecond,
-					estimatedTimeRemaining,
+					progress: Math.min(Math.round((processed / total) * 100), 100),
+					folderId,
+					filesProcessed: processed,
+					totalFiles: total,
+					currentFile: filePath,
 					fileDetails: {
 						name: file,
-						size: stats.size,
 						type: ext,
+						size: existingFile?.size || 0,
 					},
 					extendedStats: {
-						fileTypes: fileTypes,
-						errorsByType: errorsByType,
-						averageSize: totalSize / (total || 1),
+						fileTypes,
+						errorsByType,
 						processingSpeed: filesPerSecond,
-						healthScore: calculateHealthScore(errorsByType, total),
+						healthScore: calculateHealthScore(errorsByType, processed),
+						averageSize: processed > 0 ? totalSize / processed : 0,
 					},
+					estimatedTimeRemaining,
 					timestamp: Date.now(),
 				});
 
@@ -590,37 +658,63 @@ export const processDirectoryForReindex = async (
 					});
 				}
 
-				// Emitir progreso después de cada archivo
-				const currentElapsedTime = (Date.now() - startTime) / 1000;
-				const currentFilesPerSecond = currentElapsedTime > 0 ? processedFiles / currentElapsedTime : 0;
-				const currentEstimatedTimeRemaining = Math.round((total - processed) / (currentFilesPerSecond || 0.001));
-
+				// Emitir progreso después de procesar un archivo
 				emitProgress({
 					status: `Procesados ${processed} de ${total} archivos...`,
 					phase: 'indexing',
-					current: processed,
-					total,
-					progress: (processed / total) * 100,
-					processingSpeed: currentFilesPerSecond,
-					estimatedTimeRemaining: currentEstimatedTimeRemaining,
+					progress: Math.min(Math.round((processed / total) * 100), 100),
+					folderId,
+					filesProcessed: processed,
+					totalFiles: total,
+					currentFile: filePath,
 					timestamp: Date.now(),
-					extendedStats: {
-						fileTypes: fileTypes,
-						errorsByType: errorsByType,
-						averageSize: totalSize / (total || 1),
-						processingSpeed: currentFilesPerSecond,
-						healthScore: calculateHealthScore(errorsByType, total),
-					},
 				});
-			} catch (fileError) {
-				folderLogger.error('Error procesando archivo:', {
-					file,
-					path: dirPath,
-					error: fileError instanceof Error ? fileError.message : 'Error desconocido',
+			} catch (err) {
+				// Manejar el error, pero continuar con el siguiente archivo
+				folderLogger.error(`Error procesando archivo ${file}:`, err);
+				errorsByType[extname(file).toLowerCase()] = (errorsByType[extname(file).toLowerCase()] || 0) + 1;
+
+				// En caso de error
+				emitProgress({
+					status: `Error con ${file}, continuando...`,
+					phase: 'error',
+					progress: Math.min(Math.round((processed / total) * 100), 100),
+					folderId,
+					filesProcessed: processed,
+					totalFiles: total,
+					currentFile: join(verifiedPath, file),
+					errors: [
+						{
+							file: join(verifiedPath, file),
+							error: err instanceof Error ? err.message : String(err),
+							timestamp: Date.now(),
+						},
+					],
+					timestamp: Date.now(),
 				});
 			}
 		}
 
+		// Emitir progreso final para este directorio
+		emitProgress({
+			status: `Completado directorio ${dirPath}`,
+			phase: 'indexing',
+			progress: 100,
+			folderId,
+			filesProcessed: processed,
+			totalFiles: total,
+			currentFile: dirPath,
+			extendedStats: {
+				fileTypes,
+				errorsByType,
+				processingSpeed: Date.now() - startTime > 0 ? processed / ((Date.now() - startTime) / 1000) : 0,
+				healthScore: calculateHealthScore(errorsByType, processed),
+				averageSize: processed > 0 ? totalSize / processed : 0,
+			},
+			timestamp: Date.now(),
+		});
+
+		// Detectar archivos eliminados
 		// Encontrar archivos que existían en la base de datos pero ya no existen en el directorio
 		// Recorrer todos los archivos que existen en la base de datos para esta carpeta
 		for (const [imagePath, imageInfo] of existingImages.entries()) {
@@ -635,32 +729,9 @@ export const processDirectoryForReindex = async (
 			}
 		}
 
-		// Emitir evento final con resumen
-		emitProgress({
-			status: `Reindexación completada: ${processed} archivos procesados, ${deletedFiles.size} archivos eliminados`,
-			phase: 'indexing',
-			current: processed,
-			total,
-			progress: 100,
-			processingSpeed: Date.now() - startTime > 0 ? processed / ((Date.now() - startTime) / 1000) : 0,
-			endTime: Date.now(),
-			startTime,
-			timestamp: Date.now(),
-			extendedStats: {
-				fileTypes,
-				errorsByType,
-				averageSize: totalSize / (total || 1),
-				processingSpeed: Date.now() - startTime > 0 ? processed / ((Date.now() - startTime) / 1000) : 0,
-				healthScore: calculateHealthScore(errorsByType, total),
-			},
-		});
-
 		return { processed, total, totalSize, deletedFiles };
-	} catch (dirError) {
-		folderLogger.error('Error procesando directorio:', {
-			path: dirPath,
-			error: dirError instanceof Error ? dirError.message : 'Error desconocido',
-		});
-		return { processed: 0, total: 0, totalSize: 0, deletedFiles: new Set<string>() };
+	} catch (error) {
+		folderLogger.error('Error procesando directorio:', error);
+		throw error;
 	}
 };

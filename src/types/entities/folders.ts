@@ -1,4 +1,4 @@
-import type { ExtendedProcessStatus, ProcessStatus } from './process';
+import type { ExtendedProcessStatus, ProcessStatus } from "@/types/process";
 
 export interface FolderStats {
 	totalFolders: number;

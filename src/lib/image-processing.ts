@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { SystemImageMetadata, SystemImageProcessingOptions } from '@/types/system-images';
+import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,8 +7,8 @@ const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 
 export async function processImage(
 	sourcePath: string,
-	options: SystemImageProcessingOptions
-): Promise<{ path: string; metadata: SystemImageMetadata }> {
+	options: UploadedImageProcessingOptions
+): Promise<{ path: string; metadata: UploadedImageMetadata }> {
 	try {
 		const {
 			width,
@@ -66,7 +66,7 @@ export async function processImage(
 		const _processedMetadata = await sharp(outputPath).metadata();
 
 		// Preparar metadata
-		const metadata: SystemImageMetadata = {
+		const metadata: UploadedImageMetadata = {
 			mimeType: `image/${format}`,
 			format,
 			quality,
@@ -113,7 +113,7 @@ export async function getImageDimensions(imagePath: string): Promise<{ width: nu
 	}
 }
 
-export async function getImageMetadata(imagePath: string): Promise<SystemImageMetadata> {
+export async function getImageMetadata(imagePath: string): Promise<UploadedImageMetadata> {
 	try {
 		const metadata = await sharp(imagePath).metadata();
 		return {

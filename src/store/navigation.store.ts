@@ -27,7 +27,9 @@ export type ViewType =
 	| 'prompts'
 	| 'prompt-content'
 	| 'notes'
-	| 'note-content';
+	| 'note-content'
+	| 'uploaded-images'
+	| 'uploaded-image-content';
 
 interface NavigationState {
 	currentView: ViewType;

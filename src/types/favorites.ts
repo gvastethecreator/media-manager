@@ -1,4 +1,4 @@
-import type { EntityType } from './entities';
+import type { EntityType } from '@/types/entities/entities';
 
 export interface FavoriteEntity {
 	id: string;

@@ -4,7 +4,7 @@ import { existsSync } from 'fs';
 import { logger } from '@/lib/logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
+import { emit, emitProgress } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { ReindexAllCompleteData, ReindexAllProgressData } from '@/types/process';
 import { processDirectory, processDirectoryForReindex } from './folder-processing.actions';
@@ -190,6 +190,19 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 	try {
 		folderLogger.info('🔄 Reindexando carpeta:', { id });
 
+		// Emitir un evento de progreso inicial para informar inmediatamente al cliente
+		emitProgress({
+			status: 'Iniciando reindexación...',
+			progress: 0,
+			folderId: id,
+			phase: 'starting',
+			startTime: Date.now(),
+			currentFile: '',
+			filesProcessed: 0,
+			totalFiles: 0,
+			timestamp: Date.now(),
+		});
+
 		const folder = await prisma.folder.findUnique({
 			where: { id },
 			select: {
@@ -319,6 +332,20 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 			deletedFiles: deletedFiles.size,
 		});
 
+		// Emitir un evento de progreso final
+		emitProgress({
+			status: 'Reindexación completada',
+			progress: 100,
+			folderId: id,
+			phase: 'indexing',
+			filesProcessed: total,
+			totalFiles: total,
+			currentFile: folder.path,
+			endTime: Date.now(),
+			startTime: Date.now() - 1000, // Asegurarse de que hay un tiempo de inicio válido
+			timestamp: Date.now(),
+		});
+
 		return {
 			id: updatedFolder.id,
 			name: updatedFolder.name,
@@ -329,13 +356,18 @@ export async function reindexFolder(id: string): Promise<FolderResponse> {
 		};
 	} catch (error) {
 		folderLogger.error('Error reindexando carpeta:', { error });
-		return {
-			id,
-			success: false,
-			name: 'Error',
-			path: '',
-			error: error instanceof FolderError ? error.message : 'Error desconocido durante la reindexación',
-		};
+
+		// Emitir un evento de error
+		emitProgress({
+			status: `Error: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			progress: 100,
+			folderId: id,
+			phase: 'error',
+			currentFile: '',
+			timestamp: Date.now(),
+		});
+
+		throw error;
 	}
 }
 
