@@ -53,16 +53,24 @@ export function FolderCard({
 
 	// Verificar explícitamente si el proceso está completado
 	const isComplete =
-		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.phase === 'complete') ||
-		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.progress === 100) ||
-		(processStatus?.phase === 'complete' && processStatus?.folderId === folder.id) ||
-		(processStatus?.progress === 100 && processStatus?.phase === 'metadata' && processStatus?.folderId === folder.id);
+		(!isProcessing &&
+			processStatus?.folderId === folder.id &&
+			processStatus?.phase === "complete") ||
+		(!isProcessing &&
+			processStatus?.folderId === folder.id &&
+			processStatus?.progress === 100) ||
+		(processStatus?.phase === "complete" &&
+			processStatus?.folderId === folder.id) ||
+		(processStatus?.progress === 100 &&
+			processStatus?.phase === "metadata" &&
+			processStatus?.folderId === folder.id);
 
 	const indexStatus = getFolderIndexStatus(folder);
 
 	// Estado local para tracking
 	const [lastProgress, setLastProgress] = useState<number>(0);
-	const [showCompleteAnimation, setShowCompleteAnimation] = useState<boolean>(false);
+	const [showCompleteAnimation, setShowCompleteAnimation] =
+		useState<boolean>(false);
 
 	// Actualizar el progreso cuando cambie el estado
 	useEffect(() => {
@@ -72,12 +80,13 @@ export function FolderCard({
 			progress: processStatus?.progress,
 			isProcessing,
 			folderIsSelected: processStatus?.folderId === folder.id,
-			phase: processStatus?.phase
+			phase: processStatus?.phase,
 		});
 
-		const isActiveProcess = isReindexing && processStatus?.folderId === folder.id;
+		const isActiveProcess =
+			isReindexing && processStatus?.folderId === folder.id;
 
-		if (isActiveProcess && typeof processStatus?.progress === 'number') {
+		if (isActiveProcess && typeof processStatus?.progress === "number") {
 			setLastProgress(processStatus.progress);
 
 			// Si el progreso alcanza el 100%, mostrar animación de completado
