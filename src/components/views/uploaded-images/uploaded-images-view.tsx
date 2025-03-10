@@ -1,41 +1,40 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { deleteUploadedImage, getUploadedImages, uploadImages } from '@/app/actions/uploaded-images.actions';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { BaseContentView, ContentViewProvider } from "@/components/views/base";
-import type { BaseContentProps } from "@/components/views/base";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
-import type {
-	UploadedImageFilters,
-	UploadedImageResult,
-	UploadedImageType,
-} from "@/types/uploaded-images";
-import {
-	Filter,
-	ImageIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	UploadCloud,
-	Trash2,
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
-import type * as React from "react";
-import { deleteUploadedImage, getUploadedImages, uploadImages } from '@/app/actions/uploaded-images.actions';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import type { BaseContentProps } from '@/components/views/base';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
+import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
+import type { UploadedImageType } from '@/types/entities/entities';
+import { Filter, ImageIcon, Plus, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import type * as React from 'react';
 
-const viewLogger = logger.withContext("UploadedImagesView");
+const viewLogger = logger.withContext('UploadedImagesView');
 
 export function UploadedImagesView() {
 	const { toast } = useToast();
@@ -57,7 +56,7 @@ export function UploadedImagesView() {
 			const response = await getUploadedImages({
 				...filters,
 				page: currentPage,
-				pageSize: 20
+				pageSize: 20,
 			});
 
 			if (response.success) {
@@ -89,77 +88,83 @@ export function UploadedImagesView() {
 	}, [loadImages]);
 
 	// Función para manejar la subida de archivos
-	const handleFileUpload = useCallback(async (files: FileList) => {
-		try {
-			setIsUploading(true);
+	const handleFileUpload = useCallback(
+		async (files: FileList) => {
+			try {
+				setIsUploading(true);
 
-			// Crear FormData para la carga
-			const formData = new FormData();
-			for (const file of Array.from(files)) {
-				formData.append('files', file);
-			}
+				// Crear FormData para la carga
+				const formData = new FormData();
+				for (const file of Array.from(files)) {
+					formData.append('files', file);
+				}
 
-			// Añadir tipo y categoría si se han seleccionado en los filtros
-			if (filters.type) {
-				formData.append('type', filters.type);
-			}
+				// Añadir tipo y categoría si se han seleccionado en los filtros
+				if (filters.type) {
+					formData.append('type', filters.type);
+				}
 
-			// Llamar a la server action
-			const result = await uploadImages(formData);
+				// Llamar a la server action
+				const result = await uploadImages(formData);
 
-			if (result.success) {
-				toast({
-					title: 'Imágenes subidas',
-					description: `Se ${result.items.length === 1 ? 'ha subido' : 'han subido'} ${result.items.length} ${result.items.length === 1 ? 'imagen' : 'imágenes'} correctamente.`,
-				});
-				loadImages(); // Recargamos la lista de imágenes
-			} else {
+				if (result.success) {
+					toast({
+						title: 'Imágenes subidas',
+						description: `Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`,
+					});
+					loadImages(); // Recargamos la lista de imágenes
+				} else {
+					toast({
+						title: 'Error al subir imágenes',
+						description: result.error || 'No se pudieron subir las imágenes.',
+						variant: 'destructive',
+					});
+				}
+				setIsUploading(false);
+			} catch (error) {
+				viewLogger.error('Error al subir imágenes:', error);
 				toast({
 					title: 'Error al subir imágenes',
-					description: result.error || 'No se pudieron subir las imágenes.',
+					description: 'No se pudieron subir las imágenes.',
 					variant: 'destructive',
 				});
+				setIsUploading(false);
 			}
-			setIsUploading(false);
-		} catch (error) {
-			viewLogger.error('Error al subir imágenes:', error);
-			toast({
-				title: 'Error al subir imágenes',
-				description: 'No se pudieron subir las imágenes.',
-				variant: 'destructive',
-			});
-			setIsUploading(false);
-		}
-	}, [loadImages, toast, filters.type]);
+		},
+		[loadImages, toast, filters.type]
+	);
 
 	// Función para eliminar una imagen
-	const handleDeleteImage = useCallback(async (id: string) => {
-		try {
-			const result = await deleteUploadedImage(id);
+	const handleDeleteImage = useCallback(
+		async (id: string) => {
+			try {
+				const result = await deleteUploadedImage(id);
 
-			if (result.success) {
-				toast({
-					title: 'Imagen eliminada',
-					description: 'La imagen se ha eliminado correctamente.'
-				});
-				setSelectedImage(null);
-				loadImages();
-			} else {
+				if (result.success) {
+					toast({
+						title: 'Imagen eliminada',
+						description: 'La imagen se ha eliminado correctamente.',
+					});
+					setSelectedImage(null);
+					loadImages();
+				} else {
+					toast({
+						title: 'Error',
+						description: result.error || 'No se pudo eliminar la imagen.',
+						variant: 'destructive',
+					});
+				}
+			} catch (error) {
+				viewLogger.error('Error al eliminar imagen:', error);
 				toast({
 					title: 'Error',
-					description: result.error || 'No se pudo eliminar la imagen.',
+					description: 'No se pudo eliminar la imagen.',
 					variant: 'destructive',
 				});
 			}
-		} catch (error) {
-			viewLogger.error('Error al eliminar imagen:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo eliminar la imagen.',
-				variant: 'destructive',
-			});
-		}
-	}, [loadImages, toast]);
+		},
+		[loadImages, toast]
+	);
 
 	// Manejador para el evento de arrastrar y soltar
 	const handleDrop = useCallback(
@@ -183,16 +188,22 @@ export function UploadedImagesView() {
 	);
 
 	// Manejador para seleccionar una imagen
-	const handleSelectItem = useCallback((item: any) => {
-		setSelectedImage(selectedImage === item.id ? null : item.id);
-	}, [selectedImage]);
+	const handleSelectItem = useCallback(
+		(item: UploadedImageResult) => {
+			setSelectedImage(selectedImage === item.id ? null : item.id);
+		},
+		[selectedImage]
+	);
 
 	// Manejar cambio de página
-	const handlePageChange = useCallback((newPage: number) => {
-		if (newPage > 0 && newPage <= totalPages) {
-			setCurrentPage(newPage);
-		}
-	}, [totalPages]);
+	const handlePageChange = useCallback(
+		(newPage: number) => {
+			if (newPage > 0 && newPage <= totalPages) {
+				setCurrentPage(newPage);
+			}
+		},
+		[totalPages]
+	);
 
 	// Usar eventos optimistas del cliente
 	const [optimisticItems, addOptimisticEvent] = clientEvents.useEvents<UploadedImageResult[]>(items);
@@ -202,12 +213,12 @@ export function UploadedImagesView() {
 		if (selectedImage) {
 			const handleKeyDown = (e: KeyboardEvent) => {
 				if (e.key === 'Delete') {
-					const selectedItem = items.find(item => item.id === selectedImage);
+					const selectedItem = items.find((item) => item.id === selectedImage);
 					if (selectedItem) {
 						// Optimistic update
 						addOptimisticEvent({
 							type: 'delete',
-							data: optimisticItems.filter(item => item.id !== selectedImage)
+							data: optimisticItems.filter((item) => item.id !== selectedImage),
 						});
 
 						// Actual delete
@@ -235,11 +246,7 @@ export function UploadedImagesView() {
 	};
 
 	return (
-		<div
-			className="w-full h-full flex flex-col"
-			onDragOver={(e) => e.preventDefault()}
-			onDrop={handleDrop}
-		>
+		<div className="w-full h-full flex flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
 			{/* Barra de herramientas */}
 			<div className="flex items-center justify-between p-2 border-b">
 				<div className="flex items-center gap-2">
@@ -253,23 +260,14 @@ export function UploadedImagesView() {
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						className="h-8 gap-1"
-						onClick={() => setShowFilters(!showFilters)}
-					>
+					<Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setShowFilters(!showFilters)}>
 						<Filter className="h-3.5 w-3.5" />
 						<span className="text-xs">Filtros</span>
 					</Button>
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button
-								variant="outline"
-								size="icon"
-								className="h-8 w-8"
-							>
+							<Button variant="outline" size="icon" className="h-8 w-8">
 								<SlidersHorizontal className="h-3.5 w-3.5" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -279,32 +277,33 @@ export function UploadedImagesView() {
 							</DropdownMenuItem>
 
 							{selectedImage && (
-								<>
-									<AlertDialog>
-										<AlertDialogTrigger asChild>
-											<DropdownMenuItem className="text-xs cursor-pointer text-destructive" onSelect={(e) => e.preventDefault()}>
-												<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar
-											</DropdownMenuItem>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-												<AlertDialogDescription>
-													Esta acción eliminará permanentemente la imagen seleccionada.
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel>Cancelar</AlertDialogCancel>
-												<AlertDialogAction
-													onClick={() => handleDeleteImage(selectedImage)}
-													className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-												>
-													Eliminar
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-								</>
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<DropdownMenuItem
+											className="text-xs cursor-pointer text-destructive"
+											onSelect={(e) => e.preventDefault()}
+										>
+											<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar
+										</DropdownMenuItem>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+											<AlertDialogDescription>
+												Esta acción eliminará permanentemente la imagen seleccionada.
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>Cancelar</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={() => handleDeleteImage(selectedImage)}
+												className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+											>
+												Eliminar
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
 							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -321,10 +320,7 @@ export function UploadedImagesView() {
 						<Button
 							variant="default"
 							size="sm"
-							className={cn(
-								"h-8 gap-1.5",
-								isUploading && "opacity-70 cursor-not-allowed"
-							)}
+							className={cn('h-8 gap-1.5', isUploading && 'opacity-70 cursor-not-allowed')}
 							onClick={() => document.getElementById('file-upload')?.click()}
 							disabled={isUploading}
 						>
@@ -350,7 +346,9 @@ export function UploadedImagesView() {
 					<Card className="border-0 rounded-none shadow-none">
 						<CardContent className="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
 							<div className="space-y-1">
-								<label htmlFor="search" className="text-xs font-medium">Buscar</label>
+								<label htmlFor="search" className="text-xs font-medium">
+									Buscar
+								</label>
 								<Input
 									id="search"
 									placeholder="Buscar por nombre..."
@@ -360,7 +358,9 @@ export function UploadedImagesView() {
 								/>
 							</div>
 							<div className="space-y-1">
-								<label htmlFor="type" className="text-xs font-medium">Tipo</label>
+								<label htmlFor="type" className="text-xs font-medium">
+									Tipo
+								</label>
 								<select
 									id="type"
 									className="h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"

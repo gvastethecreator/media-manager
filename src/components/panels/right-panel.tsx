@@ -3,7 +3,6 @@
 import { DetailsPanel } from '@/components/panels/details/details-panel';
 import { useFileManager } from '@/store/file-manager.store';
 import { AnimatePresence, motion } from 'motion/react';
-import { Meteors } from '../ui/meteors';
 
 export function RightPanel() {
 	const { selectedItems } = useFileManager();
@@ -23,7 +22,7 @@ export function RightPanel() {
 						transition={{ type: 'spring', damping: 25, stiffness: 200 }}
 					>
 						<div className="flex-1 w-full h-full relative">
-							<Meteors />
+							
 						</div>
 					</motion.div>
 				)}
