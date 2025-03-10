@@ -11,7 +11,7 @@ const characterLogger = logger.withContext('CharacterActions');
 
 const REVALIDATE_PATHS = ['/settings', '/characters', '/characters/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -192,7 +192,7 @@ export async function createCharacter(data: CharacterCreate) {
 		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
 
 		characterLogger.info('✅ Personaje creado:', character.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return character;
 	} catch (error) {
 		characterLogger.error('❌ Error al crear personaje:', error);
@@ -220,7 +220,7 @@ export async function updateCharacter(id: string, data: CharacterUpdate) {
 		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
 
 		characterLogger.info('✅ Personaje actualizado:', character.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return character;
 	} catch (error) {
 		characterLogger.error('❌ Error al actualizar personaje:', error);
@@ -243,7 +243,7 @@ export async function deleteCharacter(id: string) {
 		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
 
 		characterLogger.info('✅ Personaje eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar personaje:', error);
 		throw new CharacterError('No se pudo eliminar el personaje', error);
@@ -314,7 +314,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 		});
 
 		characterLogger.info('✅ Imagen agregada al personaje');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al agregar imagen al personaje:', error);
 		throw new CharacterError('No se pudo agregar la imagen al personaje', error);
@@ -342,7 +342,7 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		});
 
 		characterLogger.info('✅ Imagen eliminada del personaje');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar imagen del personaje:', error);
 		throw new CharacterError('No se pudo eliminar la imagen del personaje', error);

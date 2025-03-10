@@ -14,7 +14,7 @@ const attributeLogger = logger.withContext('AttributeActions');
 
 const REVALIDATE_PATHS = ['/settings', '/attributes', '/attributes/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -177,7 +177,7 @@ export async function createAttribute(data: AttributeCreate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		attributeLogger.info('✅ Atributo creado:', attribute.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return attribute;
 	} catch (error) {
 		attributeLogger.error('❌ Error al crear atributo:', error);
@@ -202,7 +202,7 @@ export async function updateAttribute(id: string, data: AttributeUpdate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		attributeLogger.info('✅ Atributo actualizado:', attribute.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return attribute;
 	} catch (error) {
 		attributeLogger.error('❌ Error al actualizar atributo:', error);
@@ -226,7 +226,7 @@ export async function deleteAttribute(id: string) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		attributeLogger.info('✅ Atributo eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		attributeLogger.error('❌ Error al eliminar atributo:', error);
 		throw new AttributeError('No se pudo eliminar el atributo', error);

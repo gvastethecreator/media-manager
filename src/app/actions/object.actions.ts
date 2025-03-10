@@ -13,7 +13,7 @@ const objectLogger = logger.withContext('ObjectActions');
 
 const REVALIDATE_PATHS = ['/settings', '/objects', '/objects/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -146,7 +146,7 @@ export async function createObject(data: ObjectCreate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		objectLogger.info('✅ Objeto creado:', object.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return object;
 	} catch (error) {
 		objectLogger.error('❌ Error al crear objeto:', error);
@@ -171,7 +171,7 @@ export async function updateObject(id: string, data: ObjectUpdate) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		objectLogger.info('✅ Objeto actualizado:', object.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return object;
 	} catch (error) {
 		objectLogger.error('❌ Error al actualizar objeto:', error);
@@ -195,7 +195,7 @@ export async function deleteObject(id: string) {
 		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
 
 		objectLogger.info('✅ Objeto eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		objectLogger.error('❌ Error al eliminar objeto:', error);
 		throw new ObjectError('No se pudo eliminar el objeto', error);
@@ -254,7 +254,7 @@ export async function addImageToObject(objectId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
 		objectLogger.info('✅ Imagen agregada al objeto');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		objectLogger.error('❌ Error al agregar imagen al objeto:', error);
 		throw new ObjectError('No se pudo agregar la imagen al objeto', error);
@@ -284,7 +284,7 @@ export async function removeImageFromObject(objectId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
 		objectLogger.info('✅ Imagen removida del objeto');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		objectLogger.error('❌ Error al remover imagen del objeto:', error);
 		throw new ObjectError('No se pudo remover la imagen del objeto', error);

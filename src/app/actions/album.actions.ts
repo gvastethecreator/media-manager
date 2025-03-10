@@ -46,7 +46,7 @@ export interface AlbumWithImages extends Album {
 
 const REVALIDATE_PATHS = ['/settings', '/albums', '/albums/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -218,7 +218,7 @@ export async function createAlbum(data: AlbumCreate): Promise<Album> {
 		statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
 
 		albumLogger.info('✅ Álbum creado:', album.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return album;
 	} catch (error) {
 		albumLogger.error('❌ Error al crear álbum:', error);
@@ -243,7 +243,7 @@ export async function updateAlbum(id: string, data: AlbumUpdate): Promise<Album>
 		statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
 
 		albumLogger.info('✅ Álbum actualizado:', album.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return album;
 	} catch (error) {
 		albumLogger.error('❌ Error al actualizar álbum:', error);
@@ -267,7 +267,7 @@ export async function deleteAlbum(id: string): Promise<void> {
 		statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
 
 		albumLogger.info('✅ Álbum eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		albumLogger.error('❌ Error al eliminar álbum:', error);
 		throw new AlbumError('No se pudo eliminar el álbum', error);
@@ -339,7 +339,7 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 		statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
 
 		albumLogger.info('✅ Imagen agregada al álbum');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		albumLogger.error('❌ Error al agregar imagen al álbum:', error);
 		throw new AlbumError('No se pudo agregar la imagen al álbum', error);
@@ -368,7 +368,7 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		statsEventEmitter.emit(STATS_EVENTS.ALBUM_CHANGE);
 
 		albumLogger.info('✅ Imagen removida del álbum');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		albumLogger.error('❌ Error al remover imagen del álbum:', error);
 		throw new AlbumError('No se pudo remover la imagen del álbum', error);

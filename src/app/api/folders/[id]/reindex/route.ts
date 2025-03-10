@@ -1,4 +1,4 @@
-import { reindexFolder } from '@/app/actions/folders/folder.actions';
+import { reindexFolder } from '@/app/actions/folders/folder-indexing.actions';
 import { logger } from '@/lib/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -11,6 +11,17 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
 		return NextResponse.json(result);
 	} catch (error) {
 		routeLogger.error('❌ Error en POST /api/folders/[id]/reindex:', error);
-		return NextResponse.json({ error: 'Error al reindexar la carpeta' }, { status: 500 });
+		return new NextResponse(
+			JSON.stringify({
+				error: 'Error reindexando carpeta',
+				message: error instanceof Error ? error.message : String(error),
+			}),
+			{
+				status: 500,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}
+		);
 	}
 }

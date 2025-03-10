@@ -7,7 +7,7 @@ import {
 	deleteCollection,
 	getCollections,
 	updateCollection,
-} from '@/app/actions/collection.actions';
+} from '@/app/actions/collections/collection.actions';
 import { logger } from '@/lib/logger';
 import type { Collection } from '@prisma/client';
 import { create } from 'zustand';

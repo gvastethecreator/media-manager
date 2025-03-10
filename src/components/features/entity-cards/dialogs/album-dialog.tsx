@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { AlbumCard } from "@/components/features/entity-cards/cards/album-card";
-import { EntityCreationDialog } from "@/components/features/entity-cards/dialogs/entity-creation-dialog";
-import { AlbumForm } from "@/components/features/entity-cards/forms/album-form";
-import type { AlbumFormData } from "@/components/features/entity-cards/forms/entity-types";
-import { Separator } from "@/components/ui/separator";
-import { logger } from "@/lib/logger";
-import { useAlbumsStore } from "@/store/entities/albums.store";
-import * as React from "react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { AlbumCard } from '@/components/features/entity-cards/cards/album-card';
+import { EntityCreationDialog } from '@/components/features/entity-cards/dialogs/entity-creation-dialog';
+import { AlbumForm } from '@/components/features/entity-cards/forms/album-form';
+import type { AlbumFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { Separator } from '@/components/ui/separator';
+import { logger } from '@/lib/logger';
+import { useAlbumsStore } from '@/store/entities/albums.store';
+import * as React from 'react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-const albumDialogLogger = logger.withContext("AlbumDialog");
+const albumDialogLogger = logger.withContext('AlbumDialog');
 
 export function AlbumDialog() {
 	// Store de álbumes
@@ -19,13 +19,13 @@ export function AlbumDialog() {
 
 	// Estado para el formulario
 	const [formData, setFormData] = useState<AlbumFormData>({
-		name: "",
-		emoji: "📷",
-		color: "#3b82f6", // Azul predeterminado
-		description: "",
-		shortcut: "",
-		sortBy: "name",
-		filters: "",
+		name: '',
+		emoji: '📷',
+		color: '#3b82f6', // Azul predeterminado
+		description: '',
+		shortcut: '',
+		sortBy: 'name',
+		filters: '',
 		isFavorite: false,
 	});
 
@@ -41,16 +41,16 @@ export function AlbumDialog() {
 	// Función para manejar el guardado del álbum
 	const handleSave = async (imageId: string | null) => {
 		try {
-			albumDialogLogger.info("📥 Guardando álbum", { formData });
+			albumDialogLogger.info('📥 Guardando álbum', { formData });
 
 			// Crear el álbum
 			const savedAlbum = await createAlbum(formData);
 
-			albumDialogLogger.info("✅ Álbum guardado", savedAlbum);
+			albumDialogLogger.info('✅ Álbum guardado', savedAlbum);
 
 			// Si se proporcionó un ID de imagen, asociar el álbum con esa imagen
 			if (imageId && savedAlbum) {
-				albumDialogLogger.info("🔗 Asociando imagen a álbum", {
+				albumDialogLogger.info('🔗 Asociando imagen a álbum', {
 					imageId,
 					albumId: savedAlbum.id,
 				});
@@ -62,8 +62,8 @@ export function AlbumDialog() {
 
 			return savedAlbum;
 		} catch (error) {
-			albumDialogLogger.error("❌ Error al guardar el álbum", error);
-			toast.error("Error al crear el álbum");
+			albumDialogLogger.error('❌ Error al guardar el álbum', error);
+			toast.error('Error al crear el álbum');
 			throw error;
 		}
 	};
@@ -72,13 +72,13 @@ export function AlbumDialog() {
 	const handleCancel = () => {
 		// Restablecer el formulario
 		setFormData({
-			name: "",
-			emoji: "📷",
-			color: "#3b82f6",
-			description: "",
-			shortcut: "",
-			sortBy: "name",
-			filters: "",
+			name: '',
+			emoji: '📷',
+			color: '#3b82f6',
+			description: '',
+			shortcut: '',
+			sortBy: 'name',
+			filters: '',
 			isFavorite: false,
 		});
 		setIsValid(false);
@@ -100,16 +100,13 @@ export function AlbumDialog() {
 
 				{/* Previsualización */}
 				<div className="flex flex-col space-y-4">
-					<h3 className="text-sm font-semibold text-muted-foreground">
-						Vista previa
-					</h3>
+					<h3 className="text-sm font-semibold text-muted-foreground">Vista previa</h3>
 					<Separator />
 					<div className="flex-1 rounded-lg border p-4">
 						<AlbumCard data={formData} isPreview={true} />
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Esta es una previsualización del álbum. Los campos opcionales se
-						mostrarán solo si contienen información.
+						Esta es una previsualización del álbum. Los campos opcionales se mostrarán solo si contienen información.
 					</p>
 				</div>
 			</div>

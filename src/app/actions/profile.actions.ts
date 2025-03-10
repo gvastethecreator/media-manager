@@ -10,7 +10,7 @@ const profileLogger = logger.withContext('ProfileActions');
 
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]'] as const;
 
-const revalidateAllPaths = () => {
+const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
@@ -45,6 +45,15 @@ export async function getProfiles() {
 	try {
 		profileLogger.info('👥 Obteniendo lista de perfiles');
 		const profiles = await prisma.profile.findMany();
+
+		// Si no hay ningún perfil activo, activar el primero por defecto
+		const activeProfile = profiles.find((p) => p.isActive);
+		if (!activeProfile && profiles.length > 0) {
+			await activateProfile(profiles[0].id);
+			// Volver a obtener los perfiles con el perfil activo
+			return prisma.profile.findMany();
+		}
+
 		profileLogger.info(`✅ ${profiles.length} perfiles obtenidos`);
 		return profiles;
 	} catch (error) {
@@ -78,11 +87,32 @@ export async function getProfile(id: string) {
 export async function createProfile(data: ProfileCreate) {
 	try {
 		profileLogger.info('📝 Creando nuevo perfil:', data.name);
+
+		// Si se está creando el primer perfil o se indica que debe estar activo
+		const shouldBeActive = data.isActive === true;
+
+		// Si este perfil será activo, primero desactivamos cualquier otro
+		if (shouldBeActive) {
+			await prisma.profile.updateMany({
+				where: {
+					isActive: true,
+				},
+				data: {
+					isActive: false,
+				},
+			});
+		}
+
+		// Luego creamos el perfil con isActive según corresponda
 		const profile = await prisma.profile.create({
-			data,
+			data: {
+				...data,
+				isActive: shouldBeActive,
+			},
 		});
+
 		profileLogger.info('✅ Perfil creado:', profile.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return profile;
 	} catch (error) {
 		profileLogger.error('❌ Error al crear perfil:', error);
@@ -98,7 +128,7 @@ export async function updateProfile(id: string, data: ProfileUpdate) {
 			data,
 		});
 		profileLogger.info('✅ Perfil actualizado:', profile.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return profile;
 	} catch (error) {
 		profileLogger.error('❌ Error al actualizar perfil:', error);
@@ -113,7 +143,7 @@ export async function deleteProfile(id: string) {
 			where: { id },
 		});
 		profileLogger.info('✅ Perfil eliminado');
-		revalidateAllPaths();
+		await revalidateAllPaths();
 	} catch (error) {
 		profileLogger.error('❌ Error al eliminar perfil:', error);
 		throw new ProfileError('No se pudo eliminar el perfil', error);
@@ -142,7 +172,7 @@ export async function activateProfile(id: string) {
 		});
 
 		profileLogger.info('✅ Perfil activado:', profile.name);
-		revalidateAllPaths();
+		await revalidateAllPaths();
 		return profile;
 	} catch (error) {
 		profileLogger.error('❌ Error al activar perfil:', error);

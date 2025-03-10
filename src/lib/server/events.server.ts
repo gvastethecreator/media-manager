@@ -1,6 +1,7 @@
 'use server';
 
 import { logger } from '@/lib/logger';
+import type { ProcessStatus } from '@/types/process';
 import { revalidatePath } from 'next/cache';
 
 const eventsLogger = logger.withContext('ServerEvents');
@@ -75,7 +76,7 @@ export async function emit(event: EventData) {
 /**
  * Emite un evento de progreso
  */
-export async function emitProgress(status: { current: number; total: number; message?: string }) {
+export async function emitProgress(status: ProcessStatus) {
 	await emit({
 		type: 'folder:progress',
 		data: status,
