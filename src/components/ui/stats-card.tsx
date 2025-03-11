@@ -1,24 +1,11 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils/utils";
-import {
-	Calendar,
-	ChevronRight,
-	Folder,
-	HardDrive,
-	Hash,
-	Image as ImageIcon,
-	Loader2,
-} from "lucide-react";
-import * as React from "react";
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils/utils';
+import { Calendar, ChevronRight, Folder, HardDrive, Hash, Image as ImageIcon, Loader2 } from 'lucide-react';
+import * as React from 'react';
 
 export interface StatsCardProps {
 	title: string;
@@ -52,21 +39,21 @@ export interface StatsCardProps {
 export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 	const formatSize = (bytes: number) => {
 		if (bytes === 0) {
-			return "0 B";
+			return '0 B';
 		}
 		const k = 1024;
-		const sizes = ["B", "KB", "MB", "GB"];
+		const sizes = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
 		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const formatDate = (date?: Date) => {
 		if (!date) {
-			return "N/A";
+			return 'N/A';
 		}
-		return new Intl.DateTimeFormat("es", {
-			dateStyle: "medium",
-			timeStyle: "short",
+		return new Intl.DateTimeFormat('es', {
+			dateStyle: 'medium',
+			timeStyle: 'short',
 		}).format(new Date(date));
 	};
 
@@ -109,9 +96,7 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 							</div>
 							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
 								<span className="text-2xl font-bold">{stats.archived}</span>
-								<span className="text-xs text-muted-foreground">
-									Archivados
-								</span>
+								<span className="text-xs text-muted-foreground">Archivados</span>
 							</div>
 						</div>
 
@@ -127,9 +112,7 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<Hash className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">
-														{stats.totalItems}
-													</p>
+													<p className="text-2xl font-bold">{stats.totalItems}</p>
 													<p className="text-xs text-muted-foreground">Total</p>
 												</div>
 											</TooltipTrigger>
@@ -144,12 +127,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<ImageIcon className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">
-														{stats.totalImages}
-													</p>
-													<p className="text-xs text-muted-foreground">
-														Imágenes
-													</p>
+													<p className="text-2xl font-bold">{stats.totalImages}</p>
+													<p className="text-xs text-muted-foreground">Imágenes</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -163,12 +142,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<HardDrive className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">
-														{formatSize(stats.totalSize)}
-													</p>
-													<p className="text-xs text-muted-foreground">
-														Tamaño
-													</p>
+													<p className="text-2xl font-bold">{formatSize(stats.totalSize)}</p>
+													<p className="text-xs text-muted-foreground">Tamaño</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -182,12 +157,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<Calendar className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-sm font-medium">
-														{formatDate(stats.lastUpdated)}
-													</p>
-													<p className="text-xs text-muted-foreground">
-														Actualizado
-													</p>
+													<p className="text-sm font-medium">{formatDate(stats.lastUpdated)}</p>
+													<p className="text-xs text-muted-foreground">Actualizado</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -218,10 +189,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 												<div className="flex items-center gap-2">
 													<div
 														className={cn(
-															"flex h-8 w-8 items-center justify-center rounded-md border",
-															item.color
-																? `bg-[${item.color}]/10 text-[${item.color}]`
-																: "bg-muted"
+															'flex h-8 w-8 items-center justify-center rounded-md border',
+															item.color ? `bg-[${item.color}]/10 text-[${item.color}]` : 'bg-muted'
 														)}
 													>
 														{item.emoji || <Hash className="h-4 w-4" />}
@@ -229,9 +198,7 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 													<div>
 														<p className="text-sm font-medium">{item.name}</p>
 														{item.count !== undefined && (
-															<p className="text-xs text-muted-foreground">
-																{item.count} imágenes
-															</p>
+															<p className="text-xs text-muted-foreground">{item.count} imágenes</p>
 														)}
 													</div>
 												</div>
@@ -260,14 +227,9 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 													<Folder className="h-4 w-4 text-muted-foreground" />
 													<span className="font-medium">{item.name}</span>
 												</div>
-												<span className="text-xs text-muted-foreground">
-													{item.count}
-												</span>
+												<span className="text-xs text-muted-foreground">{item.count}</span>
 											</div>
-											<Progress
-												value={(item.count / maxCount) * 100}
-												className="h-2"
-											/>
+											<Progress value={(item.count / maxCount) * 100} className="h-2" />
 										</div>
 									))}
 								</div>

@@ -125,8 +125,13 @@ export function CollectionCard({
 						data.recentImages &&
 						data.recentImages.length > 0 && (
 							<div className="absolute inset-0 flex flex-wrap opacity-40">
-								{data.recentImages.slice(0, 4).map((img, i) => (
-									<div key={i} className="w-1/2 h-1/2 relative overflow-hidden">
+								{data.recentImages.slice(0, 4).map((img) => (
+									<div
+										key={
+											img || `img-${Math.random().toString(36).substr(2, 9)}`
+										}
+										className="w-1/2 h-1/2 relative overflow-hidden"
+									>
 										{img && (
 											<Image src={img} alt="" fill className="object-cover" />
 										)}

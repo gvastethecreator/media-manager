@@ -22,7 +22,22 @@ import {
 	MapPin,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect } from "react";
+
+// Definimos una interfaz para el tipo de retorno de getCurrentItem
+interface EntityWithDynamicProperties {
+	id: string | null;
+	name: string;
+	itemType: string;
+	// Propiedades opcionales que pueden estar presentes
+	count?: number;
+	path?: string;
+	totalSize?: number;
+	lastIndexed?: Date;
+	description?: string;
+	createdAt?: Date;
+	color?: string;
+	emoji?: string;
+}
 
 /**
  * Componente que muestra información detallada sobre la entidad actual (carpeta, colección, etc.)
@@ -30,18 +45,19 @@ import { useEffect } from "react";
  */
 export function EntityDetails() {
 	const { currentView, getCurrentItem } = useNavigation();
-	const currentItem = getCurrentItem();
-
-	// Añadir logs para depuración
-	useEffect(() => {
-		console.log("EntityDetails - currentView:", currentView);
-		console.log("EntityDetails - currentItem:", currentItem);
-	}, [currentView, currentItem]);
+	const currentItem = getCurrentItem() as
+		| EntityWithDynamicProperties
+		| undefined;
 
 	// Si no hay elemento actual o no es una vista de contenido, no mostrar nada
 	if (!currentItem || !currentView.endsWith("-content")) {
 		return null;
 	}
+
+	// Verificamos que el currentItem tenga las propiedades necesarias
+	const hasProperty = <T extends keyof EntityWithDynamicProperties>(
+		key: T
+	): boolean => currentItem !== undefined && key in currentItem;
 
 	// Función para obtener un array de información específica según el tipo de entidad
 	const getEntityDetails = () => {
@@ -49,7 +65,7 @@ export function EntityDetails() {
 		const details = [];
 
 		// Información común - conteo de imágenes
-		if (currentItem.count !== undefined) {
+		if (hasProperty("count")) {
 			details.push({
 				icon: <ImageIcon className="h-3.5 w-3.5 text-muted-foreground mr-1" />,
 				label: "Imágenes",
@@ -61,7 +77,7 @@ export function EntityDetails() {
 		// Información específica por tipo
 		switch (baseView) {
 			case "folder":
-				if (currentItem.path) {
+				if (hasProperty("path")) {
 					details.push({
 						icon: (
 							<FolderIcon className="h-3.5 w-3.5 text-muted-foreground mr-1" />
@@ -72,26 +88,30 @@ export function EntityDetails() {
 					});
 				}
 
-				if (currentItem.totalSize !== undefined) {
+				if (hasProperty("totalSize")) {
 					details.push({
 						icon: (
 							<FileIcon className="h-3.5 w-3.5 text-muted-foreground mr-1" />
 						),
 						label: "Tamaño",
-						value: formatFileSize(currentItem.totalSize),
+						value: formatFileSize(currentItem.totalSize || 0),
 						tooltip: "Tamaño total de los archivos",
 					});
 				}
 
-				if (currentItem.lastIndexed) {
+				if (hasProperty("lastIndexed")) {
 					details.push({
 						icon: (
 							<Calendar className="h-3.5 w-3.5 text-muted-foreground mr-1" />
 						),
 						label: "Actualizado",
-						value: format(new Date(currentItem.lastIndexed), "dd/MM/yyyy", {
-							locale: es,
-						}),
+						value: format(
+							new Date(currentItem.lastIndexed || new Date()),
+							"dd/MM/yyyy",
+							{
+								locale: es,
+							}
+						),
 						tooltip: "Última vez que se indexó esta carpeta",
 					});
 				}
@@ -102,26 +122,30 @@ export function EntityDetails() {
 			case "character":
 			case "place":
 			case "world-item":
-				if (currentItem.description) {
+				if (hasProperty("description")) {
 					details.push({
 						icon: (
 							<FileText className="h-3.5 w-3.5 text-muted-foreground mr-1" />
 						),
 						label: "Descripción",
-						value: currentItem.description,
+						value: currentItem.description || "",
 						tooltip: `Descripción de ${currentItem.name}`,
 					});
 				}
 
-				if (currentItem.createdAt) {
+				if (hasProperty("createdAt")) {
 					details.push({
 						icon: (
 							<Calendar className="h-3.5 w-3.5 text-muted-foreground mr-1" />
 						),
 						label: "Creado",
-						value: format(new Date(currentItem.createdAt), "dd/MM/yyyy", {
-							locale: es,
-						}),
+						value: format(
+							new Date(currentItem.createdAt || new Date()),
+							"dd/MM/yyyy",
+							{
+								locale: es,
+							}
+						),
 						tooltip: "Fecha de creación",
 					});
 				}
