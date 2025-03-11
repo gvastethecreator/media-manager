@@ -29,10 +29,10 @@ import { NotesSection } from './notes/notes-section';
 import { PlacesSection } from './places/places-section';
 import { ProfilesSection } from './profiles/profiles-section';
 import { PromptsSection } from './prompts/prompts-section';
-import { TagsSection } from './settings-sections/tags-section';
-import { ThumbnailsSection } from './settings-sections/thumbnails-section';
-import { UploadedImagesSection } from './settings-sections/uploaded-images-section';
-import { WorldItemsSection } from './settings-sections/world-items-section';
+import { TagsSection } from './tags/tags-section';
+import { ThumbnailsSection } from './thumbnails/thumbnails-section';
+import { UploadedImagesSection } from './uploaded-images/uploaded-images-section';
+import { WorldItemsSection } from './world-items/world-items-section';
 import { ShortcutsSection } from './shortcuts/shortcuts-section';
 import { SystemSection } from './system/system-section';
 
