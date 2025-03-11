@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { DEFAULT_RETRY_CONFIG, type ImageFormat, type RetryConfig } from './metadata-types.actions';
 
 const metadataLogger = logger.withContext('MetadataUtils');

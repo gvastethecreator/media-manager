@@ -10,6 +10,45 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+// Modelo para el sistema de colas
+model QueueJob {
+  id          String    @id @default(cuid())
+  queue       String
+  data        String
+  status      String    @default("pending")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  error       String?
+  progress    Int       @default(0)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  priority    Int       @default(0)
+  metadata    String?
+  retryAt     DateTime?
+
+  @@index([queue, status])
+  @@index([status, createdAt])
+  @@index([priority, status, createdAt])
+  @@index([retryAt])
+}
+
+// Modelo para el perfil de usuario ( separar en otra db para el futuro)
+model Profile {
+  id          String   @id @default(cuid())
+  name        String
+  emoji       String   @default("👤")
+  color       String   @default("#3b82f6")
+  theme       String   @default("system")
+  language    String   @default("es")
+  description String?
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Modelo para las carpetas
 model Folder {
   id            String    @id @default(cuid())
   name          String
@@ -29,6 +68,7 @@ model Folder {
   @@index([createdAt])
 }
 
+// Modelo para las imágenes
 model Image {
   id                   String       @id @default(cuid())
   hash                 String
@@ -53,13 +93,12 @@ model Image {
   updatedAt            DateTime     @updatedAt
   collections          Collection[] @relation("ImageToCollection")
   tags                 Tag[]        @relation("ImageToTag")
-  favorites            Favorite[]
-  stats                ImageStats?
   activities           Activity[]
+  stats                ImageStats?
   albums               Album[]      @relation("ImageToAlbum")
   characters           Character[]  @relation("ImageToCharacter")
   places               Place[]      @relation("ImageToPlace")
-  objects              Object[]     @relation("ImageToObject")
+  worldItems           WorldItem[]  @relation("ImageToWorldItem")
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -68,6 +107,73 @@ model Image {
   @@index([updatedAt])
   @@index([isPublic])
   @@index([isFavorite])
+}
+
+// Modelo para las estadísticas de las imágenes
+model ImageStats {
+  id         String   @id @default(cuid())
+  imageId    String   @unique
+  image      Image    @relation(fields: [imageId], references: [id])
+  views      Int      @default(0)
+  downloads  Int      @default(0)
+  lastViewed DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([imageId])
+}
+
+// Modelo para las actividades de las imágenes
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  description String
+  imageId     String?
+  image       Image?   @relation(fields: [imageId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([imageId])
+}
+
+// Modelo para las imágenes subidas
+model UploadedImage {
+  id        String   @id @default(cuid())
+  name      String
+  path      String   @unique
+  type      String   @default("icon")
+  category  String   @default("system")
+  size      Int
+  width     Int
+  height    Int
+  metadata  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// Entidades generales
+
+// Modelo para los álbumes
+
+model Album {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  emoji       String   @default("📸")
+  description String?
+  color       String   @default("#3b82f6")
+  shortcut    String?
+  sortBy      String   @default("name")
+  filters     String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      Image[]  @relation("ImageToAlbum")
+
+  @@index([name])
+  @@index([createdAt])
 }
 
 model Tag {
@@ -112,58 +218,7 @@ model Collection {
   @@index([createdAt])
 }
 
-model Favorite {
-  id        String   @id @default(cuid())
-  imageId   String
-  image     Image    @relation(fields: [imageId], references: [id])
-  createdAt DateTime @default(now())
-
-  @@index([imageId])
-}
-
-model ImageStats {
-  id         String   @id @default(cuid())
-  imageId    String   @unique
-  image      Image    @relation(fields: [imageId], references: [id])
-  views      Int      @default(0)
-  downloads  Int      @default(0)
-  lastViewed DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([imageId])
-}
-
-model Profile {
-  id          String   @id @default(cuid())
-  name        String
-  emoji       String   @default("👤")
-  color       String   @default("#3b82f6")
-  theme       String   @default("system")
-  language    String   @default("es")
-  description String?
-  isActive    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Album {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  emoji       String   @default("📸")
-  description String?
-  color       String   @default("#3b82f6")
-  shortcut    String?
-  sortBy      String   @default("name")
-  filters     String   @default("[]")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      Image[]  @relation("ImageToAlbum")
-
-  @@index([name])
-  @@index([createdAt])
-}
-
+// Modelo para los personajes
 model Character {
   id                   String      @id @default(cuid())
   name                 String      @unique
@@ -196,7 +251,6 @@ model Character {
   notes                Note[]      @relation("CharacterToNote")
   concepts             Concept[]   @relation("CharacterToConcept")
   prompts              Prompt[]    @relation("CharacterToPrompt")
-  attributes           Attribute[] @relation("CharacterToAttribute")
 
   @@index([name])
   @@index([createdAt])
@@ -204,34 +258,34 @@ model Character {
   @@index([race])
 }
 
+// Modelo para los lugares
 model Place {
-  id            String      @id @default(cuid())
-  name          String      @unique
-  emoji         String      @default("📍")
-  color         String      @default("#3b82f6")
+  id            String    @id @default(cuid())
+  name          String    @unique
+  emoji         String    @default("📍")
+  color         String    @default("#3b82f6")
   description   String?
   shortcut      String?
-  region        String      @default("unknown")
-  type          String      @default("unknown")
-  climate       String      @default("temperate")
-  population    Int         @default(0)
-  government    String      @default("unknown")
-  dangers       String      @default("[]")
-  resources     String      @default("[]")
-  lore          String      @default("")
-  history       String      @default("")
-  stats         String      @default("{}")
-  sortBy        String      @default("name")
-  filters       String      @default("[]")
+  region        String    @default("unknown")
+  type          String    @default("unknown")
+  climate       String    @default("temperate")
+  population    Int       @default(0)
+  government    String    @default("unknown")
+  dangers       String    @default("[]")
+  resources     String    @default("[]")
+  lore          String    @default("")
+  history       String    @default("")
+  stats         String    @default("{}")
+  sortBy        String    @default("name")
+  filters       String    @default("[]")
   featuredImage String?
-  isFavorite    Boolean     @default(false)
-  notes         Note[]      @relation("PlaceToNote")
-  concepts      Concept[]   @relation("PlaceToConcept")
-  prompts       Prompt[]    @relation("PlaceToPrompt")
-  attributes    Attribute[] @relation("PlaceToAttribute")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  images        Image[]     @relation("ImageToPlace")
+  isFavorite    Boolean   @default(false)
+  notes         Note[]    @relation("PlaceToNote")
+  concepts      Concept[] @relation("PlaceToConcept")
+  prompts       Prompt[]  @relation("PlaceToPrompt")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  images        Image[]   @relation("ImageToPlace")
 
   @@index([name])
   @@index([createdAt])
@@ -240,30 +294,30 @@ model Place {
   @@index([region])
 }
 
-model Object {
-  id            String      @id @default(cuid())
-  name          String      @unique
-  emoji         String      @default("🎯")
-  color         String      @default("#3b82f6")
+// Modelo para los objetos del mundo
+model WorldItem {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  emoji         String    @default("🎯")
+  color         String    @default("#3b82f6")
   description   String?
   shortcut      String?
-  type          String      @default("misc")
-  rarity        String      @default("common")
-  properties    String      @default("[]")
-  requirements  String      @default("{}")
-  origin        String      @default("")
-  stats         String      @default("{}")
-  sortBy        String      @default("name")
-  filters       String      @default("[]")
+  type          String    @default("misc")
+  rarity        String    @default("common")
+  properties    String    @default("[]")
+  requirements  String    @default("{}")
+  origin        String    @default("")
+  stats         String    @default("{}")
+  sortBy        String    @default("name")
+  filters       String    @default("[]")
   featuredImage String?
-  isFavorite    Boolean     @default(false)
-  notes         Note[]      @relation("ObjectToNote")
-  concepts      Concept[]   @relation("ObjectToConcept")
-  prompts       Prompt[]    @relation("ObjectToPrompt")
-  attributes    Attribute[] @relation("ObjectToAttribute")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  images        Image[]     @relation("ImageToObject")
+  isFavorite    Boolean   @default(false)
+  notes         Note[]    @relation("WorldItemToNote")
+  concepts      Concept[] @relation("WorldItemToConcept")
+  prompts       Prompt[]  @relation("WorldItemToPrompt")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  images        Image[]   @relation("ImageToWorldItem")
 
   @@index([name])
   @@index([createdAt])
@@ -271,44 +325,7 @@ model Object {
   @@index([rarity])
 }
 
-// Modelo para el sistema de colas
-model QueueJob {
-  id          String    @id @default(cuid())
-  queue       String
-  data        String
-  status      String    @default("pending")
-  attempts    Int       @default(0)
-  maxAttempts Int       @default(3)
-  error       String?
-  progress    Int       @default(0)
-  startedAt   DateTime?
-  finishedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  priority    Int       @default(0)
-  metadata    String?
-  retryAt     DateTime?
-
-  @@index([queue, status])
-  @@index([status, createdAt])
-  @@index([priority, status, createdAt])
-  @@index([retryAt])
-}
-
-model Activity {
-  id          String   @id @default(cuid())
-  type        String
-  description String
-  imageId     String?
-  image       Image?   @relation(fields: [imageId], references: [id])
-  createdAt   DateTime @default(now())
-
-  @@index([createdAt])
-  @@index([imageId])
-}
-
-// Nuevos modelos
-
+// Modelo para los conceptos
 model Concept {
   id            String      @id @default(cuid())
   name          String      @unique
@@ -324,16 +341,16 @@ model Concept {
   updatedAt     DateTime    @updatedAt
   characters    Character[] @relation("CharacterToConcept")
   places        Place[]     @relation("PlaceToConcept")
-  objects       Object[]    @relation("ObjectToConcept")
+  worldItems    WorldItem[] @relation("WorldItemToConcept")
   notes         Note[]      @relation("ConceptToNote")
   prompts       Prompt[]    @relation("ConceptToPrompt")
-  attributes    Attribute[] @relation("ConceptToAttribute")
 
   @@index([name])
   @@index([category])
   @@index([createdAt])
 }
 
+// Modelo para los prompts
 model Prompt {
   id            String      @id @default(cuid())
   name          String      @unique
@@ -350,16 +367,16 @@ model Prompt {
   updatedAt     DateTime    @updatedAt
   characters    Character[] @relation("CharacterToPrompt")
   places        Place[]     @relation("PlaceToPrompt")
-  objects       Object[]    @relation("ObjectToPrompt")
+  worldItems    WorldItem[] @relation("WorldItemToPrompt")
   concepts      Concept[]   @relation("ConceptToPrompt")
   notes         Note[]      @relation("PromptToNote")
-  attributes    Attribute[] @relation("PromptToAttribute")
 
   @@index([name])
   @@index([category])
   @@index([createdAt])
 }
 
+// Modelo para las notas
 model Note {
   id            String      @id @default(cuid())
   title         String
@@ -374,70 +391,13 @@ model Note {
   updatedAt     DateTime    @updatedAt
   characters    Character[] @relation("CharacterToNote")
   places        Place[]     @relation("PlaceToNote")
-  objects       Object[]    @relation("ObjectToNote")
+  worldItems    WorldItem[] @relation("WorldItemToNote")
   concepts      Concept[]   @relation("ConceptToNote")
   prompts       Prompt[]    @relation("PromptToNote")
-  attributes    Attribute[] @relation("NoteToAttribute")
 
   @@index([title])
   @@index([category])
   @@index([priority])
   @@index([status])
-  @@index([createdAt])
-}
-
-model Attribute {
-  id            String      @id @default(cuid())
-  name          String      @unique
-  type          String      @default("text")
-  value         String      @default("")
-  category      String      @default("general")
-  description   String?
-  metadata      String      @default("{}")
-  featuredImage String?
-  isFavorite    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  characters    Character[] @relation("CharacterToAttribute")
-  places        Place[]     @relation("PlaceToAttribute")
-  objects       Object[]    @relation("ObjectToAttribute")
-  concepts      Concept[]   @relation("ConceptToAttribute")
-  prompts       Prompt[]    @relation("PromptToAttribute")
-  notes         Note[]      @relation("NoteToAttribute")
-
-  @@index([name])
-  @@index([type])
-  @@index([category])
-  @@index([createdAt])
-}
-
-// Sistema de Favoritos Universal
-model UniversalFavorite {
-  id         String   @id @default(cuid())
-  entityId   String
-  entityType String
-  createdAt  DateTime @default(now())
-
-  @@unique([entityId, entityType])
-  @@index([entityType])
-  @@index([createdAt])
-}
-
-// Sistema de Imágenes del Sistema
-model UploadedImage {
-  id        String   @id @default(cuid())
-  name      String
-  path      String   @unique
-  type      String   @default("icon")
-  category  String   @default("system")
-  size      Int
-  width     Int
-  height    Int
-  metadata  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([type])
-  @@index([category])
   @@index([createdAt])
 }

@@ -2,7 +2,7 @@ import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getFolders } from '@/app/actions/folders';
 import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { getTags } from '@/app/actions/tags/tag.actions';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
 import type { TagWithStats } from '@/types/tag';
 import type { Collection } from '@prisma/client';

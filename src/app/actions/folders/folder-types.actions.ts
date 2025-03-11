@@ -130,7 +130,7 @@ export interface ImageWithRelations {
 	albums?: ImageEntity[];
 	characters?: ImageEntity[];
 	places?: ImageEntity[];
-	objects?: ImageEntity[];
+	worldItems?: ImageEntity[];
 }
 
 // Constantes

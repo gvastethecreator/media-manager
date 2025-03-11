@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { ProcessStatus } from '@/types/process';
 import { revalidatePath } from 'next/cache';
 
@@ -16,9 +16,12 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'collections:modified': ['/collections'],
 	'tags:modified': ['/tags'],
 	'albums:modified': ['/albums'],
+	'prompts:modified': ['/prompts', '/prompts/[id]'],
+	'notes:modified': ['/notes', '/notes/[id]'],
 	'characters:modified': ['/characters'],
 	'places:modified': ['/places'],
 	'objects:modified': ['/objects'],
+	'world-items:modified': ['/world-items'],
 	'favorites:modified': ['/favorites'],
 	'images:modified': ['/images'],
 	'files:modified': ['/files'],
@@ -42,9 +45,12 @@ export type EventType =
 	| 'collections:modified'
 	| 'tags:modified'
 	| 'albums:modified'
+	| 'prompts:modified'
+	| 'notes:modified'
 	| 'characters:modified'
 	| 'places:modified'
 	| 'objects:modified'
+	| 'world-items:modified'
 	| 'favorites:modified'
 	| 'images:modified'
 	| 'files:modified'
@@ -62,6 +68,7 @@ export interface EventData<T = unknown> {
 	type: EventType;
 	id?: string;
 	objectId?: string;
+	worldItemId?: string;
 	imageId?: string;
 	data?: T;
 }

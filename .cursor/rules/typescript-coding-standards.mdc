@@ -1,6 +1,7 @@
 ---
-description: Concise TypeScript coding standards for code quality and type safety.
-globs: **/*.{ts,tsx}
+description: Concise TypeScript coding standards for code quality and type safety
+globs: *.ts,*.tsx
+alwaysApply: false
 ---
 - **Strict Mode in `tsconfig.json`:** Enable strict mode for enhanced type checking.
 - **Interfaces vs Types:** Use `interface` for object shapes, `type` for utility types and aliases.

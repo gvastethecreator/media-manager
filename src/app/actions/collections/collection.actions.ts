@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { COLLECTION_EVENTS, collectionEventsService } from '@/services/collection-events.service';

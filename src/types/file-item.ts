@@ -18,8 +18,8 @@ export type ViewType =
 	| 'character-content'
 	| 'places'
 	| 'place-content'
-	| 'objects'
-	| 'object-content'
+	| 'world-items'
+	| 'world-item-content'
 	| 'concepts'
 	| 'concept-content'
 	| 'prompts'
@@ -152,7 +152,7 @@ export interface FileItem {
 	albums: RelatedAlbum[];
 	characters: RelatedCharacter[];
 	places: RelatedPlace[];
-	objects: RelatedObject[];
+	worldItems: RelatedWorldItem[];
 }
 
 export interface RelatedCollection {
@@ -181,7 +181,7 @@ export interface RelatedPlace {
 	name: string;
 }
 
-export interface RelatedObject {
+export interface RelatedWorldItem {
 	id: string;
 	name: string;
 }

@@ -21,7 +21,7 @@ interface FileManagerState {
 	currentAlbumId: string | null;
 	currentCharacterId: string | null;
 	currentPlaceId: string | null;
-	currentObjectId: string | null;
+	currentWorldItemId: string | null;
 
 	// Objetos actuales
 	currentCollection: { id: string; name: string; count: number; color?: string; emoji?: string } | null;
@@ -30,7 +30,7 @@ interface FileManagerState {
 	currentAlbum: { id: string; name: string; count: number; emoji: string } | null;
 	currentCharacter: { id: string; name: string; count: number; emoji: string } | null;
 	currentPlace: { id: string; name: string; count: number; emoji: string } | null;
-	currentObject: { id: string; name: string; count: number; emoji: string } | null;
+	currentWorldItem: { id: string; name: string; count: number; emoji: string } | null;
 
 	// Metadatos
 	collections: { id: string; name: string; count: number; color?: string; emoji?: string }[];
@@ -39,7 +39,7 @@ interface FileManagerState {
 	albums: { id: string; name: string; count: number; emoji: string }[];
 	characters: { id: string; name: string; count: number; emoji: string }[];
 	places: { id: string; name: string; count: number; emoji: string }[];
-	objects: { id: string; name: string; count: number; emoji: string }[];
+	worldItems: { id: string; name: string; count: number; emoji: string }[];
 
 	// Estado de procesamiento
 	isProcessingThumbnails: boolean;
@@ -62,7 +62,7 @@ interface FileManagerState {
 	setCurrentAlbum: (id: string) => Promise<void>;
 	setCurrentCharacter: (id: string) => Promise<void>;
 	setCurrentPlace: (id: string) => Promise<void>;
-	setCurrentObject: (id: string) => Promise<void>;
+	setCurrentWorldItem: (id: string) => Promise<void>;
 }
 
 const ITEMS_PER_BATCH = 50;
@@ -128,14 +128,14 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 	currentAlbumId: null,
 	currentCharacterId: null,
 	currentPlaceId: null,
-	currentObjectId: null,
+	currentWorldItemId: null,
 	currentCollection: null,
 	currentFolder: null,
 	currentTag: null,
 	currentAlbum: null,
 	currentCharacter: null,
 	currentPlace: null,
-	currentObject: null,
+	currentWorldItem: null,
 	isLoading: false,
 	error: null,
 	collections: [],
@@ -144,7 +144,7 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 	albums: [],
 	characters: [],
 	places: [],
-	objects: [],
+	worldItems: [],
 	isProcessingThumbnails: false,
 	operationQueue: [],
 	isProcessingQueue: false,
@@ -165,7 +165,7 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				albums: stats.albums || [],
 				characters: stats.characters || [],
 				places: stats.places || [],
-				objects: stats.objects || [],
+				worldItems: stats.worldItems || [],
 			});
 		} catch (error) {
 			set({ error: error instanceof Error ? error.message : 'Error desconocido' });
@@ -309,13 +309,13 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: null,
 				currentPlaceId: null,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentCollection: null,
 				currentTag: null,
 				currentAlbum: null,
 				currentCharacter: null,
 				currentPlace: null,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 
 			state.clearSelection();
@@ -375,14 +375,14 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: null,
 				currentPlaceId: null,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentFolder: null,
 				currentCollection: collection,
 				currentTag: null,
 				currentAlbum: null,
 				currentCharacter: null,
 				currentPlace: null,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 			await state.loadItems(`/api/collections/${id}/images/all`);
 		});
@@ -400,14 +400,14 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: null,
 				currentPlaceId: null,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: id,
 				currentAlbum: null,
 				currentCharacter: null,
 				currentPlace: null,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 			await state.loadItems(`/api/tags/${id}/images/all`);
 		});
@@ -426,14 +426,14 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: id,
 				currentCharacterId: null,
 				currentPlaceId: null,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
 				currentAlbum: album,
 				currentCharacter: null,
 				currentPlace: null,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 			await state.loadItems(`/api/albums/${id}/images/all`);
 		});
@@ -452,14 +452,14 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: id,
 				currentPlaceId: null,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
 				currentAlbum: null,
 				currentCharacter: character,
 				currentPlace: null,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 			await state.loadItems(`/api/characters/${id}/images/all`);
 		});
@@ -478,25 +478,25 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: null,
 				currentPlaceId: id,
-				currentObjectId: null,
+				currentWorldItemId: null,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
 				currentAlbum: null,
 				currentCharacter: null,
 				currentPlace: place,
-				currentObject: null,
+				currentWorldItem: null,
 			});
 			await state.loadItems(`/api/places/${id}/images/all`);
 		});
 	},
 
-	setCurrentObject: async (id: string) => {
+	setCurrentWorldItem: async (id: string) => {
 		const state = get();
 		state.clearSelection();
 
 		await operationQueue.add(async () => {
-			const object = state.objects.find((o) => o.id === id) || null;
+			const worldItem = state.worldItems.find((o) => o.id === id) || null;
 			set({
 				currentFolderId: null,
 				currentCollectionId: null,
@@ -504,16 +504,16 @@ export const useUnifiedFileManager = create<FileManagerState>((set, get) => ({
 				currentAlbumId: null,
 				currentCharacterId: null,
 				currentPlaceId: null,
-				currentObjectId: id,
+				currentWorldItemId: id,
 				currentFolder: null,
 				currentCollection: null,
 				currentTag: null,
 				currentAlbum: null,
 				currentCharacter: null,
 				currentPlace: null,
-				currentObject: object,
+				currentWorldItem: worldItem,
 			});
-			await state.loadItems(`/api/objects/${id}/images/all`);
+			await state.loadItems(`/api/world-items/${id}/images/all`);
 		});
 	},
 }));
