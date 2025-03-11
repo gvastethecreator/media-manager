@@ -1,4 +1,5 @@
 import {
+	type Tag,
 	type TagCreate,
 	type TagUpdate,
 	type TagWithStats,
@@ -9,7 +10,6 @@ import {
 	updateTag as updateTagAction,
 } from '@/app/actions/tags/tag.actions';
 import { logger } from '@/lib/logger/logger';
-import { Tag } from '@prisma/client';
 import { create } from 'zustand';
 
 const tagsLogger = logger.withContext('TagsStore');
@@ -19,10 +19,10 @@ interface TagsStore {
 	isLoading: boolean;
 	error: string | null;
 	loadTags: () => Promise<void>;
-	createTag: (tag: TagCreate) => Promise<void>;
+	createTag: (tag: TagCreate) => Promise<Tag | null>;
 	updateTag: (id: string, tag: TagUpdate) => Promise<void>;
 	deleteTag: (id: string) => Promise<void>;
-	addTagToImage: (tagId: string, imageId: string) => Promise<void>;
+	addTagToImage: (imageId: string, tagId: string) => Promise<void>;
 }
 
 export const useTagsStore = create<TagsStore>((set, _get) => ({
@@ -46,14 +46,16 @@ export const useTagsStore = create<TagsStore>((set, _get) => ({
 		try {
 			set({ isLoading: true, error: null });
 			tagsLogger.info('✨ Creando etiqueta:', tag);
-			await createTagAction(tag);
+			const createdTag = await createTagAction(tag);
 			const tags = await getTags();
 			set({ tags, isLoading: false });
-			tagsLogger.info('✅ Etiqueta creada');
+			tagsLogger.info('✅ Etiqueta creada', createdTag);
+			return createdTag;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear etiqueta';
 			tagsLogger.error('❌ Error al crear etiqueta:', error);
 			set({ error: message, isLoading: false });
+			return null;
 		}
 	},
 	updateTag: async (id, tag) => {
@@ -84,7 +86,7 @@ export const useTagsStore = create<TagsStore>((set, _get) => ({
 			set({ error: message, isLoading: false });
 		}
 	},
-	addTagToImage: async (tagId, imageId) => {
+	addTagToImage: async (imageId, tagId) => {
 		try {
 			set({ isLoading: true, error: null });
 			tagsLogger.info('➕ Agregando etiqueta a imagen:', { tagId, imageId });

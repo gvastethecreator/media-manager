@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { TagCard } from '@/components/features/entity-cards/cards/tag-card';
+import { TagCard } from '@/components/features/entity-cards/tag/tag-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

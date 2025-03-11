@@ -3,7 +3,7 @@
 import { type CollectionWithStats, getCollections } from '@/app/actions/collections/collection.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { CollectionCard } from '@/components/features/entity-cards/cards/collection-card';
+import { CollectionCard } from '@/components/features/entity-cards/collection/collection-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

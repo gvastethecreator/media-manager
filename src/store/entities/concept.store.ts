@@ -9,7 +9,7 @@ import {
 	updateConcept as updateConceptAction,
 } from '@/app/actions/concepts/concept.actions';
 import { logger } from '@/lib/logger/logger';
-import { Concept } from '@prisma/client';
+import type { Concept } from '@prisma/client';
 import { create } from 'zustand';
 
 const conceptLogger = logger.withContext('ConceptStore');
@@ -25,17 +25,21 @@ interface ConceptStore {
 	concepts: ConceptWithStats[];
 	isLoading: boolean;
 	error: string | null;
+	selectedItem: Concept | null;
 	loadConcepts: () => Promise<void>;
-	createConcept: (concept: ConceptCreate) => Promise<void>;
-	updateConcept: (id: string, concept: ConceptUpdate) => Promise<void>;
+	createConcept: (concept: ConceptCreate) => Promise<Concept>;
+	updateConcept: (id: string, concept: ConceptUpdate) => Promise<Concept>;
 	deleteConcept: (id: string) => Promise<void>;
-	addConceptToImage: (conceptId: string, imageId: string) => Promise<void>;
+	addConceptToImage: (imageId: string, conceptId: string) => Promise<void>;
+	selectItem: (concept: Concept) => void;
 }
 
-export const useConceptStore = create<ConceptStore>((set, _get) => ({
+export const useConceptStore = create<ConceptStore>((set, get) => ({
 	concepts: [],
 	isLoading: false,
 	error: null,
+	selectedItem: null,
+
 	loadConcepts: async () => {
 		try {
 			set({ isLoading: true, error: null });
@@ -50,64 +54,78 @@ export const useConceptStore = create<ConceptStore>((set, _get) => ({
 			set({ error: message, isLoading: false });
 		}
 	},
+
+	selectItem: (concept) => {
+		set({ selectedItem: concept });
+	},
+
 	createConcept: async (concept) => {
 		try {
 			set({ isLoading: true, error: null });
 			conceptLogger.info('✨ Creando concepto:', concept);
-			await createConceptAction(concept);
-			const rawConcepts = await getConcepts();
-			const concepts = rawConcepts.map(mapToConceptWithStats);
-			set({ concepts, isLoading: false });
+			const newConcept = await createConceptAction(concept);
+			await get().loadConcepts();
 			conceptLogger.info('✅ Concepto creado');
+			return newConcept;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear concepto';
 			conceptLogger.error('❌ Error al crear concepto:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
+
 	updateConcept: async (id, concept) => {
 		try {
 			set({ isLoading: true, error: null });
 			conceptLogger.info('💾 Actualizando concepto:', concept);
-			await updateConceptAction(id, { ...concept, id });
-			const rawConcepts = await getConcepts();
-			const concepts = rawConcepts.map(mapToConceptWithStats);
-			set({ concepts, isLoading: false });
+			const updatedConcept = await updateConceptAction(id, { ...concept, id });
+			await get().loadConcepts();
 			conceptLogger.info('✅ Concepto actualizado');
+			return updatedConcept;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al actualizar concepto';
 			conceptLogger.error('❌ Error al actualizar concepto:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
+
 	deleteConcept: async (id) => {
 		try {
 			set({ isLoading: true, error: null });
 			conceptLogger.info('🗑️ Eliminando concepto:', id);
 			await deleteConceptAction(id);
-			const rawConcepts = await getConcepts();
-			const concepts = rawConcepts.map(mapToConceptWithStats);
-			set({ concepts, isLoading: false });
+			await get().loadConcepts();
 			conceptLogger.info('✅ Concepto eliminado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar concepto';
 			conceptLogger.error('❌ Error al eliminar concepto:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
-	addConceptToImage: async (conceptId, imageId) => {
+
+	addConceptToImage: async (imageId, conceptId) => {
 		try {
 			set({ isLoading: true, error: null });
 			conceptLogger.info('➕ Añadiendo concepto a imagen:', { conceptId, imageId });
 			await addConceptToImage(conceptId, imageId);
-			const rawConcepts = await getConcepts();
-			const concepts = rawConcepts.map(mapToConceptWithStats);
-			set({ concepts, isLoading: false });
+			await get().loadConcepts();
 			conceptLogger.info('✅ Concepto añadido a imagen');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al añadir concepto a imagen';
 			conceptLogger.error('❌ Error al añadir concepto a imagen:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 }));

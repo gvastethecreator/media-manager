@@ -9,37 +9,36 @@ import {
 	updatePrompt as updatePromptAction,
 } from '@/app/actions/prompts/prompt.actions';
 import { logger } from '@/lib/logger/logger';
-import { Prompt } from '@prisma/client';
+import type { Prompt } from '@prisma/client';
 import { create } from 'zustand';
 
 const promptLogger = logger.withContext('PromptStore');
 
 const mapToPromptWithStats = (prompt: Awaited<ReturnType<typeof getPrompts>>[0]): PromptWithStats => ({
 	...prompt,
-	totalSize: 0,
+	_count: prompt._count,
 	lastUpdated: new Date(),
-	recentImages: [],
-	_count: {
-		...prompt._count,
-		images: 0,
-	},
 });
 
 interface PromptStore {
 	prompts: PromptWithStats[];
 	isLoading: boolean;
 	error: string | null;
+	selectedItem: Prompt | null;
 	loadPrompts: () => Promise<void>;
-	createPrompt: (prompt: PromptCreate) => Promise<void>;
-	updatePrompt: (id: string, prompt: PromptUpdate) => Promise<void>;
+	createPrompt: (prompt: PromptCreate) => Promise<Prompt>;
+	updatePrompt: (id: string, prompt: PromptUpdate) => Promise<Prompt>;
 	deletePrompt: (id: string) => Promise<void>;
-	addPromptToImage: (promptId: string, imageId: string) => Promise<void>;
+	addPromptToImage: (imageId: string, promptId: string) => Promise<void>;
+	selectItem: (prompt: Prompt) => void;
 }
 
-export const usePromptStore = create<PromptStore>((set, _get) => ({
+export const usePromptStore = create<PromptStore>((set, get) => ({
 	prompts: [],
 	isLoading: false,
 	error: null,
+	selectedItem: null,
+
 	loadPrompts: async () => {
 		try {
 			set({ isLoading: true, error: null });
@@ -54,64 +53,78 @@ export const usePromptStore = create<PromptStore>((set, _get) => ({
 			set({ error: message, isLoading: false });
 		}
 	},
+
+	selectItem: (prompt) => {
+		set({ selectedItem: prompt });
+	},
+
 	createPrompt: async (prompt) => {
 		try {
 			set({ isLoading: true, error: null });
 			promptLogger.info('✨ Creando prompt:', prompt);
-			await createPromptAction(prompt);
-			const rawPrompts = await getPrompts();
-			const prompts = rawPrompts.map(mapToPromptWithStats);
-			set({ prompts, isLoading: false });
+			const newPrompt = await createPromptAction(prompt);
+			await get().loadPrompts();
 			promptLogger.info('✅ Prompt creado');
+			return newPrompt;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear prompt';
 			promptLogger.error('❌ Error al crear prompt:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
+
 	updatePrompt: async (id, prompt) => {
 		try {
 			set({ isLoading: true, error: null });
 			promptLogger.info('💾 Actualizando prompt:', prompt);
-			await updatePromptAction(id, { ...prompt, id });
-			const rawPrompts = await getPrompts();
-			const prompts = rawPrompts.map(mapToPromptWithStats);
-			set({ prompts, isLoading: false });
+			const updatedPrompt = await updatePromptAction(id, { ...prompt, id });
+			await get().loadPrompts();
 			promptLogger.info('✅ Prompt actualizado');
+			return updatedPrompt;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al actualizar prompt';
 			promptLogger.error('❌ Error al actualizar prompt:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
+
 	deletePrompt: async (id) => {
 		try {
 			set({ isLoading: true, error: null });
 			promptLogger.info('🗑️ Eliminando prompt:', id);
 			await deletePromptAction(id);
-			const rawPrompts = await getPrompts();
-			const prompts = rawPrompts.map(mapToPromptWithStats);
-			set({ prompts, isLoading: false });
+			await get().loadPrompts();
 			promptLogger.info('✅ Prompt eliminado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar prompt';
 			promptLogger.error('❌ Error al eliminar prompt:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
-	addPromptToImage: async (promptId, imageId) => {
+
+	addPromptToImage: async (imageId, promptId) => {
 		try {
 			set({ isLoading: true, error: null });
 			promptLogger.info('➕ Añadiendo prompt a imagen:', { promptId, imageId });
 			await addPromptToImage(promptId, imageId);
-			const rawPrompts = await getPrompts();
-			const prompts = rawPrompts.map(mapToPromptWithStats);
-			set({ prompts, isLoading: false });
+			await get().loadPrompts();
 			promptLogger.info('✅ Prompt añadido a imagen');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al añadir prompt a imagen';
 			promptLogger.error('❌ Error al añadir prompt a imagen:', error);
 			set({ error: message, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 }));

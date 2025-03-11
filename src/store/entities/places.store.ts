@@ -9,6 +9,7 @@ import {
 	updatePlace,
 } from '@/app/actions/places/place.actions';
 import { logger } from '@/lib/logger/logger';
+import type { Place } from '@prisma/client';
 import { create } from 'zustand';
 
 const mapToPlaceWithStats = (place: Awaited<ReturnType<typeof getPlaces>>[0]): PlaceWithStats => ({
@@ -21,12 +22,12 @@ const mapToPlaceWithStats = (place: Awaited<ReturnType<typeof getPlaces>>[0]): P
 interface PlacesStore {
 	places: PlaceWithStats[];
 	isLoading: boolean;
-	error: Error | null;
+	error: string | null;
 	loadPlaces: () => Promise<void>;
-	createPlace: (data: PlaceCreate) => Promise<void>;
+	createPlace: (data: PlaceCreate) => Promise<Place | null>;
 	updatePlace: (data: PlaceUpdate) => Promise<void>;
 	deletePlace: (id: string) => Promise<void>;
-	addImageToPlace: (placeId: string, imageId: string) => Promise<void>;
+	addImageToPlace: (imageId: string, placeId: string) => Promise<void>;
 }
 
 const placesLogger = logger.withContext('PlacesStore');
@@ -46,7 +47,8 @@ export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 			placesLogger.info('✅ Lugares cargados');
 		} catch (error) {
 			placesLogger.error('❌ Error al cargar lugares:', error);
-			set({ error: error as Error, isLoading: false });
+			const message = error instanceof Error ? error.message : 'Error al cargar lugares';
+			set({ error: message, isLoading: false });
 		}
 	},
 
@@ -54,14 +56,17 @@ export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 		try {
 			set({ isLoading: true, error: null });
 			placesLogger.info('📝 Creando lugar:', data.name);
-			await createPlace(data);
+			const createdPlace = await createPlace(data);
 			const rawPlaces = await getPlaces();
 			const places = rawPlaces.map(mapToPlaceWithStats);
 			set({ places, isLoading: false });
-			placesLogger.info('✅ Lugar creado');
+			placesLogger.info('✅ Lugar creado', createdPlace);
+			return createdPlace;
 		} catch (error) {
 			placesLogger.error('❌ Error al crear lugar:', error);
-			set({ error: error as Error, isLoading: false });
+			const message = error instanceof Error ? error.message : 'Error al crear lugar';
+			set({ error: message, isLoading: false });
+			return null;
 		}
 	},
 
@@ -76,7 +81,8 @@ export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 			placesLogger.info('✅ Lugar actualizado');
 		} catch (error) {
 			placesLogger.error('❌ Error al actualizar lugar:', error);
-			set({ error: error as Error, isLoading: false });
+			const message = error instanceof Error ? error.message : 'Error al actualizar lugar';
+			set({ error: message, isLoading: false });
 		}
 	},
 
@@ -91,11 +97,12 @@ export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 			placesLogger.info('✅ Lugar eliminado');
 		} catch (error) {
 			placesLogger.error('❌ Error al eliminar lugar:', error);
-			set({ error: error as Error, isLoading: false });
+			const message = error instanceof Error ? error.message : 'Error al eliminar lugar';
+			set({ error: message, isLoading: false });
 		}
 	},
 
-	addImageToPlace: async (placeId, imageId) => {
+	addImageToPlace: async (imageId, placeId) => {
 		try {
 			set({ isLoading: true, error: null });
 			placesLogger.info('➕ Agregando imagen a lugar:', { placeId, imageId });
@@ -106,7 +113,8 @@ export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 			placesLogger.info('✅ Imagen agregada al lugar');
 		} catch (error) {
 			placesLogger.error('❌ Error al agregar imagen al lugar:', error);
-			set({ error: error as Error, isLoading: false });
+			const message = error instanceof Error ? error.message : 'Error al agregar imagen al lugar';
+			set({ error: message, isLoading: false });
 		}
 	},
 }));

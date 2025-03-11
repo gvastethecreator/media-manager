@@ -9,7 +9,10 @@ import type {
 	RelatedAlbum,
 	RelatedCharacter,
 	RelatedCollection,
+	RelatedConcept,
+	RelatedNote,
 	RelatedPlace,
+	RelatedPrompt,
 	RelatedTag,
 	RelatedWorldItem,
 } from '@/types/file-item';
@@ -28,6 +31,8 @@ export async function revalidateAllPaths() {
 }
 
 // Interfaz extendida para añadir compatibilidad sin usar 'any'
+// Esta interfaz extiende FileItem para incluir la propiedad 'src' que es necesaria
+// para la visualización de imágenes en la interfaz de usuario
 interface FileItemWithSrc extends FileItem {
 	src: string;
 }
@@ -37,41 +42,19 @@ interface FileItemWithSrc extends FileItem {
  */
 export async function transformImageToFileItem(image: ImageWithRelations): Promise<FileItemWithSrc> {
 	try {
-		if (!image || typeof image !== 'object') {
-			throw new Error('Invalid image object');
-		}
+		logger.debug('🏞️ Transformando imagen a FileItem:', image.id);
 
-		// Asegurar que el ID de la carpeta esté presente, es un campo requerido
-		if (!image.folderId) {
-			folderLogger.warn('⚠️ Imagen sin folderId, usando valor por defecto:', image.id);
-		}
-
-		// Preparar los metadatos como string JSON
-		let metadataString: string | null = null;
+		// Parsear metadata si existe
+		let metadataString = '';
 		if (image.metadata) {
 			try {
-				if (typeof image.metadata === 'string') {
-					// Verificar que es un JSON válido
-					JSON.parse(image.metadata);
-					metadataString = image.metadata;
-				} else {
-					// Convertir el objeto a string JSON
-					metadataString = JSON.stringify({
-						dimensions: {
-							width: Number(image.width) || 0,
-							height: Number(image.height) || 0,
-						},
-						...image.metadata,
-					});
-				}
-			} catch (err) {
-				folderLogger.warn('⚠️ Error al procesar metadata, ignorando:', err);
-				metadataString = JSON.stringify({
-					dimensions: {
-						width: Number(image.width) || 0,
-						height: Number(image.height) || 0,
-					},
-				});
+				// Intentar validar que sea JSON válido
+				metadataString = JSON.stringify(image.metadata);
+				JSON.parse(metadataString);
+			} catch (error) {
+				logger.error('⚠️ Error parseando metadata:', error);
+				// Si no es JSON válido, lo guardamos como string
+				metadataString = JSON.stringify(image.metadata);
 			}
 		}
 
@@ -88,7 +71,7 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 			? image.tags.map((t) => ({
 					id: t?.id || '',
 					name: t?.name || '',
-					color: '#94a3b8', // Color por defecto para tags
+					color: '#94a3b8', // Color predeterminado
 				}))
 			: [];
 
@@ -116,48 +99,68 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 				}))
 			: [];
 
-		// Transformar objetos del mundo (worldItems)
+		// Transformar objetos del mundo
 		const worldItems: RelatedWorldItem[] = Array.isArray(image.worldItems)
-			? image.worldItems.map((wi) => ({
-					id: wi?.id || '',
-					name: wi?.name || '',
+			? image.worldItems.map((w) => ({
+					id: w?.id || '',
+					name: w?.name || '',
 				}))
 			: [];
 
-		// Crear un objeto FileItem que cumpla con la interfaz definida en types/file-item.ts
+		// Transformar conceptos (si existen)
+		const concepts: RelatedConcept[] = [];
+
+		// Transformar prompts (si existen)
+		const prompts: RelatedPrompt[] = [];
+
+		// Transformar notas (si existen)
+		const notes: RelatedNote[] = [];
+
+		// Transformar stats (si existen)
+		const stats = null;
+
 		const fileItem: FileItemWithSrc = {
 			id: image.id || '',
+			hash: '',
 			name: image.name || '',
 			path: image.path || '',
 			type: 'image',
-			size: Number(image.size) || 0,
-			width: image.width ? Number(image.width) : null,
-			height: image.height ? Number(image.height) : null,
+			size: image.size ? Number(image.size) : 0,
+			width: image.width ? Number(image.width) : 0,
+			height: image.height ? Number(image.height) : 0,
 			metadata: metadataString,
-			thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
+			thumbnail: '',
 			thumbnailSize: image.thumbnailSize ? Number(image.thumbnailSize) : null,
 			thumbnailWidth: image.thumbnailWidth ? Number(image.thumbnailWidth) : null,
 			thumbnailHeight: image.thumbnailHeight ? Number(image.thumbnailHeight) : null,
+			thumbnailError: null,
+			thumbnailErrorAt: null,
+			thumbnailOptimizedAt: null,
 			isPublic: Boolean(image.isPublic),
 			isFavorite: Boolean(image.isFavorite),
 			folderId: image.folderId || 'default', // Asegurar que siempre haya un folderId
-			createdAt: image.createdAt instanceof Date ? image.createdAt : new Date(image.createdAt || Date.now()),
-			updatedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
-			modifiedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
-			accessedAt: image.updatedAt instanceof Date ? image.updatedAt : new Date(image.updatedAt || Date.now()),
+			createdAt: image.createdAt ? new Date(image.createdAt) : new Date(),
+			updatedAt: image.updatedAt ? new Date(image.updatedAt) : new Date(),
 			collections,
 			tags,
 			albums,
 			characters,
 			places,
 			worldItems,
-			src: image.path || '',
+			concepts,
+			prompts,
+			notes,
+			stats,
+			src: '', // Se llenará después
 		};
+
+		// Generar URL para la imagen
+		fileItem.src = `/api/images/${fileItem.id}`;
 
 		return fileItem;
 	} catch (error) {
-		folderLogger.error('❌ Error transformando imagen:', error);
-		throw new Error(`Error transformando imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		logger.error('❌ Error transformando imagen a FileItem:', error);
+		throw error;
 	}
 }
 

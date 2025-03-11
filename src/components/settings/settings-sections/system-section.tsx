@@ -1,5 +1,6 @@
 'use client';
 
+import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system/system.actions';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,12 +17,134 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { useSettings } from '@/lib/contexts';
+import { useToast } from '@/components/ui/use-toast';
 import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+
+// Tipo para estadísticas del sistema
+interface SystemData {
+	cpuUsage: number;
+	memoryUsage: number;
+	cacheSize: number;
+	dbSize: number;
+	totalEntities: number;
+	uptime: number;
+	nodeVersion: string;
+	hostname: string;
+}
 
 export function SystemSection() {
-	const { settings } = useSettings();
+	const { toast } = useToast();
+	const [systemData, setSystemData] = useState<SystemData>({
+		cpuUsage: 0,
+		memoryUsage: 0,
+		cacheSize: 0,
+		dbSize: 0,
+		totalEntities: 0,
+		uptime: 0,
+		nodeVersion: '',
+		hostname: '',
+	});
+	const [isLoading, setIsLoading] = useState(true);
+	const [isRepairing, setIsRepairing] = useState(false);
+	const [isResetting, setIsResetting] = useState(false);
+
+	// Función para cargar estadísticas del sistema
+	const loadSystemStats = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			const stats = await getSystemStats();
+			setSystemData(stats);
+		} catch (error) {
+			console.error('Error al cargar estadísticas del sistema:', error);
+			toast({
+				title: 'Error',
+				description: 'No se pudieron cargar las estadísticas del sistema',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [toast]);
+
+	// Cargar datos inicialmente
+	useEffect(() => {
+		loadSystemStats();
+
+		// Actualizar estadísticas cada minuto
+		const intervalId = setInterval(() => {
+			loadSystemStats();
+		}, 60000);
+
+		return () => clearInterval(intervalId);
+	}, [loadSystemStats]);
+
+	// Manejar reparación del sistema
+	const handleRepair = async () => {
+		try {
+			setIsRepairing(true);
+			const result = await repairSystem();
+
+			if (result.success) {
+				toast({
+					title: 'Sistema reparado',
+					description: result.message,
+				});
+
+				// Recargar estadísticas tras la reparación
+				loadSystemStats();
+			} else {
+				toast({
+					title: 'Error',
+					description: result.message,
+					variant: 'destructive',
+				});
+			}
+		} catch (error) {
+			console.error('Error al reparar el sistema:', error);
+			toast({
+				title: 'Error',
+				description: 'No se pudo completar la reparación del sistema',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsRepairing(false);
+		}
+	};
+
+	// Manejar reseteo de la base de datos
+	const handleReset = async () => {
+		try {
+			setIsResetting(true);
+			const result = await resetDatabase();
+
+			if (result.success) {
+				toast({
+					title: 'Base de datos reseteada',
+					description: result.message,
+				});
+
+				// Recargar estadísticas tras el reseteo
+				loadSystemStats();
+			} else {
+				toast({
+					title: 'Error',
+					description: result.message,
+					variant: 'destructive',
+				});
+			}
+		} catch (error) {
+			console.error('Error al resetear la base de datos:', error);
+			toast({
+				title: 'Error',
+				description: 'No se pudo completar el reseteo de la base de datos',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsResetting(false);
+		}
+	};
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
@@ -30,6 +153,10 @@ export function SystemSection() {
 					<span className="flex items-center gap-2 h-7">
 						<Activity className="h-5 w-5" /> Estado del Sistema
 					</span>
+					<Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={loadSystemStats} disabled={isLoading}>
+						<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+						<span className="sr-only">Actualizar</span>
+					</Button>
 				</CardTitle>
 			</CardHeader>
 			<Separator className="my-0" />
@@ -49,10 +176,10 @@ export function SystemSection() {
 									<span className="text-xs">CPU</span>
 								</div>
 								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
-									{settings.system.cpuUsage || '0'}%
+									{systemData.cpuUsage}%
 								</Badge>
 							</div>
-							<Progress value={settings.system.cpuUsage || 0} className="h-1" />
+							<Progress value={systemData.cpuUsage} className="h-1" />
 						</div>
 
 						<div className="space-y-1.5">
@@ -62,10 +189,10 @@ export function SystemSection() {
 									<span className="text-xs">Memoria</span>
 								</div>
 								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
-									{settings.system.memoryUsage || '0'}%
+									{systemData.memoryUsage}%
 								</Badge>
 							</div>
-							<Progress value={settings.system.memoryUsage || 0} className="h-1" />
+							<Progress value={systemData.memoryUsage} className="h-1" />
 						</div>
 
 						<div className="space-y-1.5">
@@ -75,10 +202,34 @@ export function SystemSection() {
 									<span className="text-xs">Caché</span>
 								</div>
 								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
-									{settings.system.cacheSize || '0'}MB
+									{systemData.cacheSize}MB
 								</Badge>
 							</div>
-							<Progress value={(settings.system.cacheSize || 0) / 10} className="h-1" />
+							<Progress value={(systemData.cacheSize / 1000) * 100} max={100} className="h-1" />
+						</div>
+
+						{/* Información adicional */}
+						<div className="mt-2 text-xs text-muted-foreground space-y-1 p-2 bg-background/50 rounded-md">
+							<div className="flex justify-between">
+								<span>Entidades:</span>
+								<span className="font-medium">{systemData.totalEntities}</span>
+							</div>
+							<div className="flex justify-between">
+								<span>Tamaño DB:</span>
+								<span className="font-medium">{systemData.dbSize.toFixed(2)} MB</span>
+							</div>
+							<div className="flex justify-between">
+								<span>Uptime:</span>
+								<span className="font-medium">{systemData.uptime} horas</span>
+							</div>
+							<div className="flex justify-between">
+								<span>Versión Node:</span>
+								<span className="font-medium">{systemData.nodeVersion}</span>
+							</div>
+							<div className="flex justify-between">
+								<span>Hostname:</span>
+								<span className="font-medium">{systemData.hostname}</span>
+							</div>
 						</div>
 					</motion.div>
 
@@ -99,8 +250,15 @@ export function SystemSection() {
 									<p className="text-[10px] text-muted-foreground">Corrige problemas comunes</p>
 								</div>
 							</div>
-							<Button variant="outline" size="sm" className="h-7 text-xs">
-								Reparar
+							<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleRepair} disabled={isRepairing}>
+								{isRepairing ? (
+									<>
+										<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+										Reparando...
+									</>
+								) : (
+									'Reparar'
+								)}
 							</Button>
 						</div>
 
@@ -134,8 +292,19 @@ export function SystemSection() {
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel className="h-8 text-xs">Cancelar</AlertDialogCancel>
-									<AlertDialogAction className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
-										Eliminar
+									<AlertDialogAction
+										className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										onClick={handleReset}
+										disabled={isResetting}
+									>
+										{isResetting ? (
+											<>
+												<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+												Eliminando...
+											</>
+										) : (
+											'Eliminar'
+										)}
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>

@@ -1,13 +1,9 @@
 'use client';
 
-import { AlbumCard } from '@/components/features/entity-cards/cards/album-card';
-import { AlbumForm } from '@/components/features/entity-cards/forms/album-form';
-import { EntityForm } from '@/components/features/entity-cards/forms/entity-form';
-import {
-	type AlbumFormData,
-	albumToFormData,
-	formDataToAlbum,
-} from '@/components/features/entity-cards/forms/entity-types';
+import { AlbumCard } from '@/components/features/entity-cards/album/album-card';
+import { AlbumForm } from '@/components/features/entity-cards/album/album-form';
+import { EntityForm } from '@/components/features/entity-cards/entity-form';
+import { type AlbumFormData, albumToFormData, formDataToAlbum } from '@/components/features/entity-cards/entity-types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,7 +50,10 @@ export function AlbumsSection() {
 		}
 		try {
 			albumLogger.info('💾 Actualizando álbum:', data);
-			await updateAlbum(data.id, formDataToAlbum(data));
+			await updateAlbum(data.id, {
+				...formDataToAlbum(data),
+				id: data.id,
+			});
 			setEditingId(null);
 			toast({
 				title: 'Éxito',

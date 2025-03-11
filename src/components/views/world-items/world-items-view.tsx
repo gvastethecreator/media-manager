@@ -4,7 +4,7 @@ import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { WorldItemCard } from '@/components/features/entity-cards/cards/world-item-card';
+import { WorldItemCard } from '@/components/features/entity-cards/world-item/world-item-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

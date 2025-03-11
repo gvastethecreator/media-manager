@@ -1,6 +1,6 @@
 'use client';
 
-import { ReindexConfirmationDialog } from '@/components/settings/reindex-confirmation-dialog';
+import { ReindexConfirmationDialog } from '@/components/settings/folders/reindex-confirmation-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {

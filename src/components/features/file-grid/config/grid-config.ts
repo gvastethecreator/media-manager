@@ -96,5 +96,5 @@ export const GRID_CONFIG: GridConfig = {
 		height: 80,
 		padding: 4,
 	},
-	overscan: 30,
+	overscan: 80,
 };

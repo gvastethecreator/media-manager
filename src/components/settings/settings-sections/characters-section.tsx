@@ -1,12 +1,12 @@
 'use client';
 
-import { CharacterCard } from '@/components/features/entity-cards/cards/character-card';
-import { CharacterForm } from '@/components/features/entity-cards/forms/character-form';
+import { CharacterCard } from '@/components/features/entity-cards/character/character-card';
+import { CharacterForm } from '@/components/features/entity-cards/character/character-form';
 import {
 	type CharacterFormData,
 	characterToFormData,
 	formDataToCharacter,
-} from '@/components/features/entity-cards/forms/entity-types';
+} from '@/components/features/entity-cards/entity-types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -189,7 +189,7 @@ export function CharactersSection() {
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.3 }}
 								>
-									<CharacterCard character={character} onEdit={handleUpdate} onDelete={handleDelete} />
+									<CharacterCard data={character} onEdit={handleUpdate} onDelete={handleDelete} />
 								</motion.div>
 							))}
 						</div>
