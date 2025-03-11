@@ -104,10 +104,10 @@ export function NavCategoryChildren({
 									variant="ghost"
 									size="sm"
 									className={cn(
-										"group relative w-full justify-start rounded-none text-xs font-normal transition-all cursor-pointer",
-										"h-7 px-1 py-0 hover:bg-gray-100/10",
-										isSelected && "bg-gray-100/5 font-medium text-foreground",
-										"nav-item-button"
+										'group relative w-full justify-start rounded-none text-xs font-normal transition-all cursor-pointer',
+										'h-7 px-1 py-0 hover:bg-gray-100/10',
+										isSelected && 'bg-gray-100/5 font-medium text-foreground',
+										'nav-item-button'
 									)}
 									onClick={() => onItemClick(item.id)}
 								>
@@ -116,11 +116,7 @@ export function NavCategoryChildren({
 										{/* Lado izquierdo: icono, emoji y nombre */}
 										<div className="flex items-center min-w-0 overflow-hidden">
 											<CornerDownRight className="h-2 w-2 text-muted mr-1 shrink-0" />
-											{item.emoji && (
-												<span className="text-xs shrink-0 mr-1">
-													{item.emoji}
-												</span>
-											)}
+											{item.emoji && <span className="text-xs shrink-0 mr-1">{item.emoji}</span>}
 											<span className="truncate">{item.name}</span>
 
 											{/* Información adicional (descripción) que se muestra solo si hay espacio */}
@@ -138,8 +134,8 @@ export function NavCategoryChildren({
 											{/* Contador de imágenes - siempre visible */}
 											<div
 												className={cn(
-													"inline-flex items-center space-x-0.5 px-1 rounded-sm text-muted-foreground text-[9px] bg-secondary/30 nav-count-badge",
-													imageCount > 0 ? "opacity-100" : "opacity-60"
+													'inline-flex items-center space-x-0.5 px-1 rounded-sm text-muted-foreground text-[9px] bg-secondary/30 nav-count-badge',
+													imageCount > 0 ? 'opacity-100' : 'opacity-60'
 												)}
 											>
 												<span>{imageCount}</span>
@@ -148,15 +144,8 @@ export function NavCategoryChildren({
 									</div>
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent
-								side="right"
-								className="text-xs tooltip-with-info"
-							>
-								{item.path && (
-									<p className="text-muted-foreground text-[10px]">
-										{item.path}
-									</p>
-								)}
+							<TooltipContent side="right" className="text-xs tooltip-with-info">
+								{item.path && <p className="text-muted-foreground text-[10px]">{item.path}</p>}
 								{item.description && <p>{item.description}</p>}
 								<p>{imageCount} imágenes</p>
 							</TooltipContent>

@@ -125,7 +125,7 @@ export function FolderCard({
 				opacity: [0, 1],
 				y: [20, 0],
 			}}
-			className={cn('bg-muted/30 group rounded-sm', selectedFolder === folder.id && 'ring-1 ring-primary')}
+			className={cn('group rounded-sm', selectedFolder === folder.id && 'ring-1 ring-primary')}
 		>
 			<Card
 				className={cn(
