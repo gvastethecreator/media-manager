@@ -139,8 +139,6 @@
     "zod": "^3.24.2"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": [
-      "@biomejs/biome"
-    ]
+    "ignoredBuiltDependencies": ["@biomejs/biome"]
   }
 }

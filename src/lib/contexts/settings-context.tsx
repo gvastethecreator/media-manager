@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
 	type CollectionCreate,
@@ -7,49 +7,38 @@ import {
 	deleteCollection as deleteCollectionAction,
 	getCollections,
 	updateCollection as updateCollectionAction,
-} from "@/app/actions/collections/collection.actions";
+} from '@/app/actions/collections/collection.actions';
 import {
 	createTag,
 	deleteTag as deleteTagAction,
 	getTags,
 	updateTag as updateTagAction,
-} from "@/app/actions/tags/tag.actions";
-import type {
-	TagCreate,
-	TagUpdate,
-	TagWithStats,
-} from "@/app/actions/tags/tag.actions";
-import { toastService } from "@/lib/services/toast.service";
-import { formatBytes } from "@/lib/utils";
+} from '@/app/actions/tags/tag.actions';
+import type { TagCreate, TagUpdate, TagWithStats } from '@/app/actions/tags/tag.actions';
+import { toastService } from '@/lib/services/toast.service';
+import { formatBytes } from '@/lib/utils';
 import {
 	type ProfileCreate,
 	type ProfileUpdate,
 	type ProfileWithStats,
 	profileService,
-} from "@/services/profile.service";
-import type { ThumbnailQuality } from "@/types/thumbnails";
-import type { Collection, Profile } from "@prisma/client";
-import {
-	type ReactNode,
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+} from '@/services/profile.service';
+import type { ThumbnailQuality } from '@/types/thumbnails';
+import type { Collection, Profile } from '@prisma/client';
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface Settings {
 	// Configuraciones básicas
-	theme: "light" | "dark" | "system";
-	language: "es" | "en";
+	theme: 'light' | 'dark' | 'system';
+	language: 'es' | 'en';
 	notifications: boolean;
-	thumbnailQuality: "low" | "medium" | "high" | ThumbnailQuality;
+	thumbnailQuality: 'low' | 'medium' | 'high' | ThumbnailQuality;
 	autoBackup: boolean;
 	compressUploads: boolean;
-	defaultView: "grid" | "list";
-	defaultSort: "name" | "date" | "size";
-	defaultSortOrder: "asc" | "desc";
-	defaultThumbnailSize: "small" | "medium" | "large";
+	defaultView: 'grid' | 'list';
+	defaultSort: 'name' | 'date' | 'size';
+	defaultSortOrder: 'asc' | 'desc';
+	defaultThumbnailSize: 'small' | 'medium' | 'large';
 
 	// Configuraciones avanzadas
 	videoThumbnailAnimation?: boolean;
@@ -83,15 +72,9 @@ interface SettingsContextType {
 	error: string | null;
 
 	// Funciones para colecciones, etiquetas y perfiles
-	updateCollection: (
-		id: string | null,
-		data: CollectionCreate | CollectionUpdate
-	) => Promise<void>;
+	updateCollection: (id: string | null, data: CollectionCreate | CollectionUpdate) => Promise<void>;
 	updateTag: (id: string | null, data: TagCreate | TagUpdate) => Promise<void>;
-	updateProfile: (
-		id: string | null,
-		data: ProfileCreate | ProfileUpdate
-	) => Promise<void>;
+	updateProfile: (id: string | null, data: ProfileCreate | ProfileUpdate) => Promise<void>;
 	setActiveProfile: (id: string) => Promise<void>;
 	deleteCollection: (id: string) => Promise<void>;
 	deleteTag: (id: string) => Promise<void>;
@@ -99,16 +82,16 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-	theme: "system",
-	language: "es",
+	theme: 'system',
+	language: 'es',
 	notifications: true,
-	thumbnailQuality: "medium",
+	thumbnailQuality: 'medium',
 	autoBackup: false,
 	compressUploads: true,
-	defaultView: "grid",
-	defaultSort: "date",
-	defaultSortOrder: "desc",
-	defaultThumbnailSize: "medium",
+	defaultView: 'grid',
+	defaultSort: 'date',
+	defaultSortOrder: 'desc',
+	defaultThumbnailSize: 'medium',
 	videoThumbnailAnimation: true,
 	collections: [],
 	tags: [],
@@ -122,9 +105,7 @@ const defaultSettings: Settings = {
 	},
 };
 
-const SettingsContext = createContext<SettingsContextType | undefined>(
-	undefined
-);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
 	const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -136,7 +117,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			setIsLoading(true);
 			// Cargar configuración desde localStorage
-			const savedSettings = localStorage.getItem("appSettings");
+			const savedSettings = localStorage.getItem('appSettings');
 			if (savedSettings) {
 				setSettings((prev) => ({
 					...prev,
@@ -144,9 +125,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				}));
 			}
 		} catch (err) {
-			setError("Error loading settings");
-			console.error("Failed to load settings:", err);
-			toastService.error("No se pudo cargar la configuración");
+			setError('Error loading settings');
+			console.error('Failed to load settings:', err);
+			toastService.error('No se pudo cargar la configuración');
 		} finally {
 			setIsLoading(false);
 		}
@@ -163,8 +144,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}));
 			setSettings((prev) => ({ ...prev, collections: mappedCollections }));
 		} catch (error) {
-			console.error("Error cargando colecciones:", error);
-			toastService.error("No se pudieron cargar las colecciones");
+			console.error('Error cargando colecciones:', error);
+			toastService.error('No se pudieron cargar las colecciones');
 		}
 	}, []);
 
@@ -179,8 +160,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}));
 			setSettings((prev) => ({ ...prev, tags: mappedTags }));
 		} catch (error) {
-			console.error("Error cargando etiquetas:", error);
-			toastService.error("No se pudieron cargar las etiquetas");
+			console.error('Error cargando etiquetas:', error);
+			toastService.error('No se pudieron cargar las etiquetas');
 		}
 	}, []);
 
@@ -192,9 +173,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			// Si no hay perfiles, crear uno por defecto
 			if (profiles.length === 0) {
 				const _defaultProfile = await profileService.createProfile({
-					name: "Default",
-					emoji: "🐸",
-					color: "#10b981", // esmeralda
+					name: 'Default',
+					emoji: '🐸',
+					color: '#10b981', // esmeralda
 					isActive: true,
 				});
 
@@ -234,8 +215,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				activeProfile: activeProfile?.id || null,
 			}));
 		} catch (error) {
-			console.error("Error cargando perfiles:", error);
-			toastService.error("No se pudieron cargar los perfiles");
+			console.error('Error cargando perfiles:', error);
+			toastService.error('No se pudieron cargar los perfiles');
 		}
 	}, []);
 
@@ -265,9 +246,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 					videoThumbnailAnimation: settings.videoThumbnailAnimation,
 					shortcuts: settings.shortcuts,
 				};
-				localStorage.setItem("appSettings", JSON.stringify(settingsToSave));
+				localStorage.setItem('appSettings', JSON.stringify(settingsToSave));
 			} catch (err) {
-				console.error("Failed to save settings:", err);
+				console.error('Failed to save settings:', err);
 			}
 		}
 	}, [settings, isLoading]);
@@ -278,8 +259,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			setSettings((prev) => ({ ...prev, ...newSettings }));
 			return Promise.resolve();
 		} catch (error) {
-			console.error("Error updating settings:", error);
-			toastService.error("No se pudieron actualizar las configuraciones");
+			console.error('Error updating settings:', error);
+			toastService.error('No se pudieron actualizar las configuraciones');
 			return Promise.reject(error);
 		}
 	};
@@ -290,10 +271,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	};
 
 	// Actualizar colección
-	const updateCollection = async (
-		id: string | null,
-		data: CollectionCreate | CollectionUpdate
-	) => {
+	const updateCollection = async (id: string | null, data: CollectionCreate | CollectionUpdate) => {
 		try {
 			if (!id) {
 				// Crear nueva colección
@@ -304,18 +282,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}
 
 			await loadCollections();
-			toastService.success(
-				id
-					? "Colección actualizada correctamente"
-					: "Colección creada correctamente"
-			);
+			toastService.success(id ? 'Colección actualizada correctamente' : 'Colección creada correctamente');
 		} catch (error) {
-			console.error("Error updating collection:", error);
-			toastService.error(
-				id
-					? "No se pudo actualizar la colección"
-					: "No se pudo crear la colección"
-			);
+			console.error('Error updating collection:', error);
+			toastService.error(id ? 'No se pudo actualizar la colección' : 'No se pudo crear la colección');
 			throw error;
 		}
 	};
@@ -331,36 +301,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				await updateTagAction(id, data as TagUpdate);
 			}
 			await loadTags();
-			toastService.success(
-				id
-					? "Etiqueta actualizada correctamente"
-					: "Etiqueta creada correctamente"
-			);
+			toastService.success(id ? 'Etiqueta actualizada correctamente' : 'Etiqueta creada correctamente');
 		} catch (error) {
-			console.error("Error updating tag:", error);
-			toastService.error(
-				id
-					? "No se pudo actualizar la etiqueta"
-					: "No se pudo crear la etiqueta"
-			);
+			console.error('Error updating tag:', error);
+			toastService.error(id ? 'No se pudo actualizar la etiqueta' : 'No se pudo crear la etiqueta');
 			throw error;
 		}
 	};
 
 	// Actualizar perfil (o crear uno nuevo si id es null)
-	const updateProfile = async (
-		id: string | null,
-		data: ProfileCreate | ProfileUpdate
-	) => {
+	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
 		try {
 			let _profile: Profile | null = null;
 
 			if (id) {
 				// Actualizar perfil existente
-				_profile = await profileService.updateProfile(
-					id,
-					data as ProfileUpdate
-				);
+				_profile = await profileService.updateProfile(id, data as ProfileUpdate);
 			} else {
 				// Crear nuevo perfil
 				_profile = await profileService.createProfile(data as ProfileCreate);
@@ -369,14 +325,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
 
-			toastService.success(
-				id ? "Perfil actualizado correctamente" : "Perfil creado correctamente"
-			);
+			toastService.success(id ? 'Perfil actualizado correctamente' : 'Perfil creado correctamente');
 		} catch (error) {
-			console.error("Error updating profile:", error);
-			toastService.error(
-				id ? "No se pudo actualizar el perfil" : "No se pudo crear el perfil"
-			);
+			console.error('Error updating profile:', error);
+			toastService.error(id ? 'No se pudo actualizar el perfil' : 'No se pudo crear el perfil');
 			throw error;
 		}
 	};
@@ -386,10 +338,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await profileService.setActiveProfile(id);
 			await loadProfiles();
-			toastService.success("Perfil activo actualizado correctamente");
+			toastService.success('Perfil activo actualizado correctamente');
 		} catch (error) {
-			console.error("Error setting active profile:", error);
-			toastService.error("No se pudo establecer el perfil activo");
+			console.error('Error setting active profile:', error);
+			toastService.error('No se pudo establecer el perfil activo');
 			throw error;
 		}
 	};
@@ -399,10 +351,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await deleteCollectionAction(id);
 			await loadCollections();
-			toastService.success("Colección eliminada correctamente");
+			toastService.success('Colección eliminada correctamente');
 		} catch (error) {
-			console.error("Error deleting collection:", error);
-			toastService.error("No se pudo eliminar la colección");
+			console.error('Error deleting collection:', error);
+			toastService.error('No se pudo eliminar la colección');
 			throw error;
 		}
 	};
@@ -412,10 +364,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await deleteTagAction(id);
 			await loadTags();
-			toastService.success("Etiqueta eliminada correctamente");
+			toastService.success('Etiqueta eliminada correctamente');
 		} catch (error) {
-			console.error("Error deleting tag:", error);
-			toastService.error("No se pudo eliminar la etiqueta");
+			console.error('Error deleting tag:', error);
+			toastService.error('No se pudo eliminar la etiqueta');
 			throw error;
 		}
 	};
@@ -425,10 +377,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await profileService.deleteProfile(id);
 			await loadProfiles();
-			toastService.success("Perfil eliminado correctamente");
+			toastService.success('Perfil eliminado correctamente');
 		} catch (error) {
-			console.error("Error deleting profile:", error);
-			toastService.error("No se pudo eliminar el perfil");
+			console.error('Error deleting profile:', error);
+			toastService.error('No se pudo eliminar el perfil');
 			throw error;
 		}
 	};
@@ -448,17 +400,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		deleteProfile,
 	};
 
-	return (
-		<SettingsContext.Provider value={value}>
-			{children}
-		</SettingsContext.Provider>
-	);
+	return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }
 
 export function useSettings() {
 	const context = useContext(SettingsContext);
 	if (context === undefined) {
-		throw new Error("useSettings must be used within a SettingsProvider");
+		throw new Error('useSettings must be used within a SettingsProvider');
 	}
 	return context;
 }
@@ -469,26 +417,22 @@ export function useTheme() {
 
 	useEffect(() => {
 		const root = window.document.documentElement;
-		const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-			.matches
-			? "dark"
-			: "light";
-		const theme = settings.theme === "system" ? systemTheme : settings.theme;
+		const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		const theme = settings.theme === 'system' ? systemTheme : settings.theme;
 
-		root.classList.remove("light", "dark");
+		root.classList.remove('light', 'dark');
 		root.classList.add(theme);
 	}, [settings.theme]);
 
 	return {
 		theme: settings.theme,
-		setTheme: (theme: "light" | "dark" | "system") => updateSettings({ theme }),
+		setTheme: (theme: 'light' | 'dark' | 'system') => updateSettings({ theme }),
 	};
 }
 
 // Helper hook para colecciones y etiquetas
 export function useCollectionTagContext() {
-	const { settings, updateCollection, updateTag, deleteCollection, deleteTag } =
-		useSettings();
+	const { settings, updateCollection, updateTag, deleteCollection, deleteTag } = useSettings();
 
 	return {
 		collections: settings.collections || [],
@@ -502,8 +446,7 @@ export function useCollectionTagContext() {
 
 // Helper hook para perfiles
 export function useProfileContext() {
-	const { settings, updateProfile, deleteProfile, setActiveProfile } =
-		useSettings();
+	const { settings, updateProfile, deleteProfile, setActiveProfile } = useSettings();
 
 	return {
 		settings: {

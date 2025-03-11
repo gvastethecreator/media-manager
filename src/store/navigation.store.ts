@@ -1,5 +1,5 @@
-import type { ViewType } from "@/components/views/types";
-import { create } from "zustand";
+import type { ViewType } from '@/components/views/types';
+import { create } from 'zustand';
 
 interface NavigationState {
 	currentView: ViewType;
