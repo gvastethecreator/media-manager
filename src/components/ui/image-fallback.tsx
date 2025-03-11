@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils/utils";
-import { ImageIcon } from "lucide-react";
-import * as React from "react";
+import { cn } from '@/lib/utils/utils';
+import { ImageIcon } from 'lucide-react';
+import * as React from 'react';
 
 // Propiedades básicas para el componente
 type ImageFallbackProps = {
@@ -48,35 +48,28 @@ export function ImageFallback({
 
 	// Estilos para el contenedor
 	const containerStyle: React.CSSProperties = {
-		width: width || "auto",
-		height: height || "auto",
-		position: "relative",
+		width: width || 'auto',
+		height: height || 'auto',
+		position: 'relative',
 	};
 
 	// Si hay error, mostrar un placeholder
 	if (hasError) {
 		return (
 			<div
-				className={cn(
-					"flex items-center justify-center bg-muted/50 rounded-md",
-					className,
-					fallbackClassName
-				)}
+				className={cn('flex items-center justify-center bg-muted/50 rounded-md', className, fallbackClassName)}
 				style={containerStyle}
 				role="img"
 				aria-label={alt}
 			>
-				<ImageIcon
-					className="w-8 h-8 text-muted-foreground/40"
-					aria-hidden="true"
-				/>
+				<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
 			</div>
 		);
 	}
 
 	// Renderizar la imagen con su placeholder
 	return (
-		<div className={cn("relative", className)} style={containerStyle}>
+		<div className={cn('relative', className)} style={containerStyle}>
 			<img
 				ref={imgRef}
 				src={src}
@@ -89,16 +82,10 @@ export function ImageFallback({
 
 			{!isLoaded && (
 				<div
-					className={cn(
-						"absolute inset-0 flex items-center justify-center bg-muted/50",
-						fallbackClassName
-					)}
+					className={cn('absolute inset-0 flex items-center justify-center bg-muted/50', fallbackClassName)}
 					aria-hidden="true"
 				>
-					<ImageIcon
-						className="w-8 h-8 text-muted-foreground/40"
-						aria-hidden="true"
-					/>
+					<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
 				</div>
 			)}
 		</div>
@@ -106,4 +93,4 @@ export function ImageFallback({
 }
 
 // Nombre para DevTools
-ImageFallback.displayName = "ImageFallback";
+ImageFallback.displayName = 'ImageFallback';
