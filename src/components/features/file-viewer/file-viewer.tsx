@@ -1,24 +1,16 @@
-"use client";
+'use client';
 
-import { getImageUrl } from "@/app/actions/images";
-import { Button } from "@/components/ui/button";
-import { ImageFallback } from "@/components/ui/image-fallback";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toastService } from "@/lib/services/toast.service";
-import { cn } from "@/lib/utils";
-import { useImageResources } from "@/store/image-resources.store";
-import {
-	Copy,
-	Download,
-	Image as ImageIcon,
-	RotateCcw,
-	X,
-	ZoomIn,
-	ZoomOut,
-} from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { getImageUrl } from '@/app/actions/images';
+import { Button } from '@/components/ui/button';
+import { ImageFallback } from '@/components/ui/image-fallback';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toastService } from '@/lib/services/toast.service';
+import { cn } from '@/lib/utils';
+import { useImageResources } from '@/store/image-resources.store';
+import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface ImageItem {
 	id: string;
@@ -65,7 +57,7 @@ const THUMBNAIL_SIZES = {
 
 // Configuración de animaciones mejorada y suavizada para thumbnails
 const THUMBNAIL_ANIMATION = {
-	type: "spring" as const,
+	type: 'spring' as const,
 	stiffness: 300,
 	damping: 30,
 	mass: 0.8,
@@ -101,7 +93,7 @@ const setThumbnailInCache = (id: string, url: string) => {
 
 // Validación de src mejorada
 const isValidSrc = (src: string | undefined | null): src is string => {
-	return Boolean(src) && typeof src === "string" && src.length > 0;
+	return Boolean(src) && typeof src === 'string' && src.length > 0;
 };
 
 // Componente para thumbnail individual optimizado
@@ -165,8 +157,8 @@ function ThumbnailItem({
 				}, 100);
 			} catch (error) {
 				if (mounted) {
-					console.error("Error loading thumbnail:", error);
-					setError("Error al cargar miniatura");
+					console.error('Error loading thumbnail:', error);
+					setError('Error al cargar miniatura');
 				}
 			} finally {
 				if (mounted) {
@@ -190,12 +182,9 @@ function ThumbnailItem({
 		if (isActive && image?.id && images?.length) {
 			const preloadAdjacentThumbnails = async () => {
 				const currentIndex = images.findIndex((img) => img.id === image.id);
-				const adjacentIndexes = [
-					currentIndex - 2,
-					currentIndex - 1,
-					currentIndex + 1,
-					currentIndex + 2,
-				].filter((i) => i >= 0 && i < images.length);
+				const adjacentIndexes = [currentIndex - 2, currentIndex - 1, currentIndex + 1, currentIndex + 2].filter(
+					(i) => i >= 0 && i < images.length
+				);
 
 				for (const index of adjacentIndexes) {
 					const adjacentImage = images[index];
@@ -206,7 +195,7 @@ function ThumbnailItem({
 								setThumbnailInCache(adjacentImage.id, url);
 							}
 						} catch (error) {
-							console.warn("Error preloading thumbnail:", error);
+							console.warn('Error preloading thumbnail:', error);
 						}
 					}
 				}
@@ -217,9 +206,8 @@ function ThumbnailItem({
 	}, [isActive, image?.id, imageResources, images]);
 
 	const baseClassName = cn(
-		"relative mx-1 overflow-hidden rounded-md transition-shadow duration-200",
-		isActive &&
-			"ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
+		'relative mx-1 overflow-hidden rounded-md transition-shadow duration-200',
+		isActive && 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg'
 	);
 
 	if (isLoading) {
@@ -227,12 +215,8 @@ function ThumbnailItem({
 			<motion.div
 				className={baseClassName}
 				animate={{
-					width: isActive
-						? THUMBNAIL_SIZES.active.width
-						: THUMBNAIL_SIZES.normal.width,
-					height: isActive
-						? THUMBNAIL_SIZES.active.height
-						: THUMBNAIL_SIZES.normal.height,
+					width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
+					height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
 				}}
 				transition={THUMBNAIL_ANIMATION}
 			>
@@ -246,12 +230,8 @@ function ThumbnailItem({
 			<motion.div
 				className={baseClassName}
 				animate={{
-					width: isActive
-						? THUMBNAIL_SIZES.active.width
-						: THUMBNAIL_SIZES.normal.width,
-					height: isActive
-						? THUMBNAIL_SIZES.active.height
-						: THUMBNAIL_SIZES.normal.height,
+					width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
+					height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
 				}}
 				transition={THUMBNAIL_ANIMATION}
 			>
@@ -266,12 +246,8 @@ function ThumbnailItem({
 		<motion.div
 			className={baseClassName}
 			animate={{
-				width: isActive
-					? THUMBNAIL_SIZES.active.width
-					: THUMBNAIL_SIZES.normal.width,
-				height: isActive
-					? THUMBNAIL_SIZES.active.height
-					: THUMBNAIL_SIZES.normal.height,
+				width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
+				height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
 				opacity: isActive ? 1 : 0.8,
 			}}
 			transition={THUMBNAIL_ANIMATION}
@@ -284,12 +260,7 @@ function ThumbnailItem({
 		>
 			<div className="w-full h-full">
 				{isValidSrc(thumbnail) ? (
-					<img
-						src={thumbnail}
-						alt={image.name}
-						className="w-full h-full object-cover"
-						loading="lazy"
-					/>
+					<img src={thumbnail} alt={image.name} className="w-full h-full object-cover" loading="lazy" />
 				) : (
 					<div className="w-full h-full flex items-center justify-center bg-muted">
 						<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
@@ -308,18 +279,13 @@ function ThumbnailItem({
 	);
 }
 
-export function FileViewer({
-	images,
-	initialIndex = 0,
-	isOpen,
-	onClose,
-}: FileViewerProps) {
+export function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileViewerProps) {
 	const [currentIndex, setCurrentIndex] = useState(initialIndex);
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
 	const [scale, setScale] = useState(1);
-	const [position, setPosition] = useState({ x: 0, y: 0 });
+	const [_position, setPosition] = useState({ x: 0, y: 0 });
 
 	const currentImage = images[currentIndex];
 
@@ -352,8 +318,7 @@ export function FileViewer({
 		const loadInitialUrls = async () => {
 			const currentImage = images[currentIndex];
 			const nextImage = images[(currentIndex + 1) % images.length];
-			const prevImage =
-				images[currentIndex > 0 ? currentIndex - 1 : images.length - 1];
+			const prevImage = images[currentIndex > 0 ? currentIndex - 1 : images.length - 1];
 
 			const imagesToLoad = [currentImage, nextImage, prevImage];
 			const urls: Record<string, string> = {};
@@ -369,16 +334,13 @@ export function FileViewer({
 							urls[img.id] = url;
 							console.info(`URL inicial cargada para ${img.name}:`, url);
 						} catch (error) {
-							console.error(
-								`Error cargando URL inicial para ${img.name}:`,
-								error
-							);
+							console.error(`Error cargando URL inicial para ${img.name}:`, error);
 						}
 					})
 				);
 				setUrls((prev) => ({ ...prev, ...urls }));
 			} catch (error) {
-				console.error("Error cargando URLs iniciales:", error);
+				console.error('Error cargando URLs iniciales:', error);
 				setIsLoading(false);
 			}
 		};
@@ -395,9 +357,7 @@ export function FileViewer({
 		const preloadAdjacentImages = async () => {
 			const nextIndex = (currentIndex + 1) % images.length;
 			const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter(
-				(img) => img && !urls[img.id]
-			);
+			const imagesToPreload = [images[nextIndex], images[prevIndex]].filter((img) => img && !urls[img.id]);
 
 			if (!imagesToPreload.length) {
 				return;
@@ -421,7 +381,7 @@ export function FileViewer({
 				);
 				setUrls((prev) => ({ ...prev, ...urls }));
 			} catch (error) {
-				console.warn("Error en precarga de URLs:", error);
+				console.warn('Error en precarga de URLs:', error);
 			}
 		};
 
@@ -436,28 +396,28 @@ export function FileViewer({
 		}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
+			if (e.key === 'Escape') {
 				onClose();
 			}
-			if (e.key === "ArrowLeft") {
+			if (e.key === 'ArrowLeft') {
 				setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
 			}
-			if (e.key === "ArrowRight") {
+			if (e.key === 'ArrowRight') {
 				setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
 			}
-			if (e.key === "0" || e.key === "r") {
+			if (e.key === '0' || e.key === 'r') {
 				resetView();
 			}
-			if (e.key === "+") {
+			if (e.key === '+') {
 				handleZoom(0.2);
 			}
-			if (e.key === "-") {
+			if (e.key === '-') {
 				handleZoom(-0.2);
 			}
 		};
 
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
 	}, [isOpen, images.length, onClose]);
 
 	// Preload adjacent images with original URLs
@@ -505,10 +465,7 @@ export function FileViewer({
 	const handleWheel = (e: React.WheelEvent) => {
 		e.preventDefault();
 		const zoomFactor = 0.1;
-		const newScale = Math.min(
-			Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)),
-			8
-		);
+		const newScale = Math.min(Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
 		setScale(newScale);
 	};
 
@@ -535,11 +492,11 @@ export function FileViewer({
 			// Copiamos la URL al portapapeles
 			if (url) {
 				await navigator.clipboard.writeText(url);
-				toastService.success("URL copiada al portapapeles");
+				toastService.success('URL copiada al portapapeles');
 			}
 		} catch (error) {
-			console.error("Error al copiar URL:", error);
-			toastService.error("No se pudo copiar la URL");
+			console.error('Error al copiar URL:', error);
+			toastService.error('No se pudo copiar la URL');
 		}
 	};
 
@@ -560,17 +517,17 @@ export function FileViewer({
 
 			// Creamos un enlace para la descarga
 			if (url) {
-				const link = document.createElement("a");
+				const link = document.createElement('a');
 				link.href = url;
-				link.download = currentImage.name || "imagen";
+				link.download = currentImage.name || 'imagen';
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
-				toastService.success("Descarga iniciada");
+				toastService.success('Descarga iniciada');
 			}
 		} catch (error) {
-			console.error("Error al descargar imagen:", error);
-			toastService.error("No se pudo descargar la imagen");
+			console.error('Error al descargar imagen:', error);
+			toastService.error('No se pudo descargar la imagen');
 		}
 	};
 
@@ -590,8 +547,8 @@ export function FileViewer({
 	return (
 		<dialog
 			className={cn(
-				"fixed inset-0 z-50 flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0",
-				isOpen ? "flex" : "hidden"
+				'fixed inset-0 z-50 flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0',
+				isOpen ? 'flex' : 'hidden'
 			)}
 			open={isOpen}
 			onClick={(e) => {
@@ -600,7 +557,7 @@ export function FileViewer({
 				}
 			}}
 			onKeyDown={(e) => {
-				if (e.key === "Escape") {
+				if (e.key === 'Escape') {
 					onClose();
 				}
 			}}
@@ -614,7 +571,7 @@ export function FileViewer({
 				onDoubleClick={resetView}
 				onKeyDown={(e) => {
 					e.stopPropagation();
-					if (e.key === "Enter" || e.key === " ") {
+					if (e.key === 'Enter' || e.key === ' ') {
 						resetView();
 					}
 				}}
@@ -623,54 +580,24 @@ export function FileViewer({
 				{/* Toolbar */}
 				<div className="fixed top-4 inset-x-4 flex items-center justify-between z-20">
 					<div className="flex space-x-2">
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() => handleZoom(0.2)}
-							title="Acercar"
-						>
+						<Button variant="outline" size="icon" onClick={() => handleZoom(0.2)} title="Acercar">
 							<ZoomIn className="h-4 w-4" />
 						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() => handleZoom(-0.2)}
-							title="Alejar"
-						>
+						<Button variant="outline" size="icon" onClick={() => handleZoom(-0.2)} title="Alejar">
 							<ZoomOut className="h-4 w-4" />
 						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={resetView}
-							title="Restablecer vista"
-						>
+						<Button variant="outline" size="icon" onClick={resetView} title="Restablecer vista">
 							<RotateCcw className="h-4 w-4" />
 						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={handleCopy}
-							title="Copiar"
-						>
+						<Button variant="outline" size="icon" onClick={handleCopy} title="Copiar">
 							<Copy className="h-4 w-4" />
 						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={handleDownload}
-							title="Descargar"
-						>
+						<Button variant="outline" size="icon" onClick={handleDownload} title="Descargar">
 							<Download className="h-4 w-4" />
 						</Button>
 					</div>
 
-					<Button
-						variant="outline"
-						size="icon"
-						onClick={onClose}
-						title="Cerrar"
-					>
+					<Button variant="outline" size="icon" onClick={onClose} title="Cerrar">
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
@@ -697,9 +624,9 @@ export function FileViewer({
 									{urls[currentImage.id] ? (
 										<motion.div
 											className="absolute inset-0 flex items-center justify-center"
-											initial={{ opacity: 0, filter: "blur(10px)" }}
-											animate={{ opacity: 1, filter: "blur(3px)" }}
-											exit={{ opacity: 0, filter: "blur(0px)" }}
+											initial={{ opacity: 0, filter: 'blur(10px)' }}
+											animate={{ opacity: 1, filter: 'blur(3px)' }}
+											exit={{ opacity: 0, filter: 'blur(0px)' }}
 											transition={{
 												duration: 0.8,
 												opacity: { duration: 0.5 },
@@ -734,22 +661,15 @@ export function FileViewer({
 				{/* Thumbnails */}
 				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
 					<div className="flex items-center bg-background/5 backdrop-blur-xs px-2 py-1 rounded-lg">
-						{images
-							.slice(
-								Math.max(0, currentIndex - 3),
-								Math.min(images.length, currentIndex + 4)
-							)
-							.map((image, i) => (
-								<ThumbnailItem
-									key={image.id}
-									image={image}
-									images={images}
-									isActive={i + Math.max(0, currentIndex - 3) === currentIndex}
-									onClick={() =>
-										setCurrentIndex(i + Math.max(0, currentIndex - 3))
-									}
-								/>
-							))}
+						{images.slice(Math.max(0, currentIndex - 3), Math.min(images.length, currentIndex + 4)).map((image, i) => (
+							<ThumbnailItem
+								key={image.id}
+								image={image}
+								images={images}
+								isActive={i + Math.max(0, currentIndex - 3) === currentIndex}
+								onClick={() => setCurrentIndex(i + Math.max(0, currentIndex - 3))}
+							/>
+						))}
 					</div>
 				</div>
 
