@@ -423,13 +423,114 @@ export async function reindexAllFolders(): Promise<void> {
 
 		// Emitir evento de inicio
 		await emit({
-			type: 'folder:progress',
+			type: 'folder:reindexAll:start',
 			data: {
 				totalFolders: folders.length,
 			},
 		});
 
-		// ... existing code ...
+		// Procesar cada carpeta secuencialmente
+		let processedFolders = 0;
+		const errors: Array<{ folderId: string; error: string }> = [];
+
+		for (const folder of folders) {
+			try {
+				folderLogger.info(`Reindexando carpeta ${processedFolders + 1}/${folders.length}: ${folder.name}`, {
+					folderId: folder.id,
+					folderPath: folder.path,
+				});
+
+				// Emitir evento de progreso
+				await emit({
+					type: 'folder:reindexAll:progress',
+					data: {
+						processedFolders,
+						totalFolders: folders.length,
+						currentFolder: folder.name,
+						phase: 'processing',
+						status: `Procesando carpeta ${folder.name} (${processedFolders + 1}/${folders.length})`,
+					} as ReindexAllProgressData,
+				});
+
+				// Reindexar la carpeta
+				const result = await indexFolder(folder.id);
+
+				// Verificar resultado
+				if (!result.success) {
+					folderLogger.error(`Error reindexando carpeta ${folder.name}:`, {
+						folderId: folder.id,
+						error: result.error,
+					});
+
+					errors.push({
+						folderId: folder.id,
+						error: result.error || 'Error desconocido',
+					});
+				}
+
+				// Incrementar contador
+				processedFolders++;
+
+				// Emitir evento de progreso actualizado
+				await emit({
+					type: 'folder:reindexAll:progress',
+					data: {
+						processedFolders,
+						totalFolders: folders.length,
+						currentFolder: '',
+						phase: 'processing',
+						status: `Completado ${processedFolders}/${folders.length} carpetas`,
+						errors,
+					} as ReindexAllProgressData,
+				});
+			} catch (error) {
+				folderLogger.error(`Error procesando carpeta ${folder.name}:`, {
+					folderId: folder.id,
+					error,
+				});
+
+				errors.push({
+					folderId: folder.id,
+					error: error instanceof Error ? error.message : 'Error desconocido',
+				});
+
+				// Incrementar contador incluso en caso de error
+				processedFolders++;
+
+				// Emitir evento de progreso con error
+				await emit({
+					type: 'folder:reindexAll:progress',
+					data: {
+						processedFolders,
+						totalFolders: folders.length,
+						currentFolder: '',
+						phase: 'processing',
+						status: `Error en carpeta ${folder.name}. Continuando...`,
+						errors,
+					} as ReindexAllProgressData,
+				});
+			}
+		}
+
+		// Emitir evento de finalización
+		await emit({
+			type: 'folder:reindexAll:complete',
+			data: {
+				processedFolders,
+				totalFolders: folders.length,
+				errors,
+				success: errors.length === 0,
+			} as ReindexAllCompleteData,
+		});
+
+		// Revalidar rutas
+		await revalidateAllPaths();
+
+		folderLogger.info('✅ Reindexación global completada', {
+			processedFolders,
+			totalFolders: folders.length,
+			errors: errors.length,
+		});
 	} catch (error) {
 		folderLogger.error('Error en reindexación:', error);
 		if (error instanceof FolderError) {

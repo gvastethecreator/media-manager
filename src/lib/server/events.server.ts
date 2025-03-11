@@ -30,6 +30,9 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'folder:error': ['/folders'],
 	'folder:complete': ['/folders'],
 	'folder:stats': ['/folders'],
+	'folder:reindexAll:start': ['/folders'],
+	'folder:reindexAll:progress': ['/folders'],
+	'folder:reindexAll:complete': ['/folders'],
 	'uploaded-image:created': ['/uploads', '/images'],
 	'uploaded-image:updated': ['/uploads', '/images'],
 	'uploaded-image:deleted': ['/uploads', '/images'],
@@ -59,6 +62,9 @@ export type EventType =
 	| 'folder:error'
 	| 'folder:complete'
 	| 'folder:stats'
+	| 'folder:reindexAll:start'
+	| 'folder:reindexAll:progress'
+	| 'folder:reindexAll:complete'
 	| 'uploaded-image:created'
 	| 'uploaded-image:updated'
 	| 'uploaded-image:deleted'
