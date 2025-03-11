@@ -6,7 +6,7 @@ import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbna
 import { logger } from '@/lib/logger/logger';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
-import { formatBytes } from './utils';
+import { formatBytes } from './utils/utils';
 
 const thumbLogger = logger.withContext('Thumbnail');
 
