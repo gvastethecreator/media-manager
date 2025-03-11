@@ -11,7 +11,7 @@ import { revalidatePath } from 'next/cache';
 
 const favoriteLogger = logger.withContext('FavoriteActions');
 
-// Definir interfaces para los tipos relacionados
+// Definir interfaces para los  tipos relacionados
 interface ImageWithRelations extends Image {
 	collections?: Array<{ id: string; name: string; emoji?: string; color?: string }>;
 	tags?: Array<{ id: string; name: string; color?: string }>;
@@ -47,6 +47,61 @@ class FavoriteError extends Error {
 }
 
 async function transformImageToFileItem(image: ImageWithRelations): Promise<FileItem> {
+	// Crear un objeto de metadata compatible con FileItem
+	const metadataObj: FileItem['metadata'] = {
+		dimensions: {
+			width: image.width || 0,
+			height: image.height || 0,
+		},
+	};
+
+	// Si la metadata existe, intentamos procesar información adicional
+	if (image.metadata) {
+		// Si es string, intentamos parsearlo
+		let parsedData: Record<string, unknown> | null = null;
+
+		if (typeof image.metadata === 'string') {
+			try {
+				parsedData = JSON.parse(image.metadata);
+			} catch (error) {
+				console.error('Error parsing metadata JSON:', error);
+			}
+		} else {
+			parsedData = image.metadata as Record<string, unknown>;
+		}
+
+		// Si tenemos datos parseados, procesamos campos específicos
+		if (parsedData) {
+			// Procesar exif data
+			if (parsedData.exif && typeof parsedData.exif === 'object') {
+				const exifData = parsedData.exif as Record<string, unknown>;
+				metadataObj.exif = {
+					make: exifData.make as string,
+					model: exifData.model as string,
+					dateTime: exifData.dateTime as string,
+					// Convertir exposureTime a número si es string
+					exposureTime:
+						typeof exifData.exposureTime === 'string'
+							? Number.parseFloat(exifData.exposureTime)
+							: (exifData.exposureTime as number),
+					fNumber: exifData.fNumber as number,
+					iso: exifData.iso as number,
+					focalLength: exifData.focalLength as number,
+				};
+
+				// Añadir GPS si existe
+				if (exifData.gps && typeof exifData.gps === 'object') {
+					const gpsData = exifData.gps as Record<string, unknown>;
+					metadataObj.exif.gps = {
+						latitude: gpsData.latitude as number,
+						longitude: gpsData.longitude as number,
+						altitude: gpsData.altitude as number,
+					};
+				}
+			}
+		}
+	}
+
 	return {
 		id: image.id,
 		name: image.name,
@@ -55,7 +110,7 @@ async function transformImageToFileItem(image: ImageWithRelations): Promise<File
 		size: image.size,
 		width: image.width || 0,
 		height: image.height || 0,
-		metadata: image.metadata as unknown as ImageMetadata,
+		metadata: metadataObj,
 		thumbnail: '',
 		thumbnailSize: image.thumbnailSize || 0,
 		thumbnailWidth: image.thumbnailWidth || 0,

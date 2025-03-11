@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { logger } from "@/lib/logger/logger";
-import { cn } from "@/lib/utils";
-import { useFileManager } from "@/store/file-manager.store";
-import { useImageResources } from "@/store/image-resources.store";
-import type { FileItem } from "@/types/file-item";
-import type * as React from "react";
-import { useCallback, useEffect, useRef } from "react";
-import { GRID_CONFIG } from "./config/grid-config";
-import { handleContextAction } from "./context-menu/context-action-handler";
-import type { ContextMenuAction } from "./context-menu/context-menu";
-import { useGridView } from "./hooks/use-grid-view";
-import { useGridVirtualizer } from "./hooks/use-grid-virtualizer";
-import { useThumbnailLoader } from "./hooks/use-thumbnail-loader";
-import { CardsView } from "./views/cards-view";
-import { GridView } from "./views/grid-view";
-import { ListView } from "./views/list-view";
-import { MasonryView } from "./views/masonry-view";
+import { logger } from '@/lib/logger/logger';
+import { cn } from '@/lib/utils';
+import { useFileManager } from '@/store/file-manager.store';
+import { useImageResources } from '@/store/image-resources.store';
+import type { FileItem } from '@/types/file-item';
+import type * as React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { GRID_CONFIG } from './config/grid-config';
+import { handleContextAction } from './context-menu/context-action-handler';
+import type { ContextMenuAction } from './context-menu/context-menu';
+import { useGridView } from './hooks/use-grid-view';
+import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
+import { useThumbnailLoader } from './hooks/use-thumbnail-loader';
+import { CardsView } from './views/cards-view';
+import { GridView } from './views/grid-view';
+import { ListView } from './views/list-view';
+import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const gridLogger = logger.withContext("FileGrid");
+const gridLogger = logger.withContext('FileGrid');
 
 export interface FileGridProps {
 	items: FileItem[];
@@ -30,13 +30,7 @@ export interface FileGridProps {
 	loadMoreItems?: () => void;
 }
 
-export function FileGrid({
-	items,
-	isResizing,
-	onItemClick,
-	onItemDoubleClick,
-	loadMoreItems,
-}: FileGridProps) {
+export function FileGrid({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileGridProps) {
 	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
 	const imageResources = useImageResources();
 
@@ -44,18 +38,12 @@ export function FileGrid({
 	const gridParentRef = useRef<HTMLDivElement>(null);
 
 	// Usar los hooks para separar la lógica
-	const {
-		parentRef,
-		loadMoreRef,
-		containerWidth,
-		isTransitioning,
-		handleScroll,
-		debouncedLoadThumbnails,
-	} = useGridView({
-		viewMode,
-		isResizing,
-		loadMoreItems,
-	});
+	const { parentRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails } =
+		useGridView({
+			viewMode,
+			isResizing,
+			loadMoreItems,
+		});
 
 	// Hook para virtualización - usamos un cast de tipo para resolver el problema de incompatibilidad
 	const { itemSize, virtualizer, calculateMasonryHeight } = useGridVirtualizer({
@@ -67,26 +55,13 @@ export function FileGrid({
 
 	// Manejador de acciones contextuales
 	const handleContextMenuAction = useCallback(
-		(
-			action: ContextMenuAction,
-			item: FileItem,
-			data?: Record<string, unknown>
-		) => {
+		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
 			// Crear una función wrapper para toggleItemSelection que proporcione un valor por defecto
-			const toggleItemSelectionWrapper = (
-				fileItem: FileItem,
-				isMultiSelect = false
-			) => {
+			const toggleItemSelectionWrapper = (fileItem: FileItem, isMultiSelect = false) => {
 				toggleItemSelection(fileItem, isMultiSelect);
 			};
 
-			handleContextAction(
-				action,
-				item,
-				data,
-				onItemDoubleClick,
-				toggleItemSelectionWrapper
-			);
+			handleContextAction(action, item, data, onItemDoubleClick, toggleItemSelectionWrapper);
 		},
 		[onItemDoubleClick, toggleItemSelection]
 	);
@@ -116,26 +91,26 @@ export function FileGrid({
 		<div
 			ref={gridParentRef}
 			className={cn(
-				"h-full w-full overflow-auto relative",
-				viewMode === "list" && "px-2 py-1",
-				isTransitioning && "opacity-0 transition-opacity duration-50"
+				'h-full w-full overflow-auto relative',
+				viewMode === 'list' && 'px-2 py-1',
+				isTransitioning && 'opacity-0 transition-opacity duration-50'
 			)}
 			onScroll={handleScroll}
 			style={{
-				height: "100%",
-				width: "100%",
-				position: "relative",
-				contain: "strict",
-				willChange: "transform",
+				height: '100%',
+				width: '100%',
+				position: 'relative',
+				contain: 'strict',
+				willChange: 'transform',
 				padding: GRID_CONFIG[viewMode].padding,
 			}}
 		>
 			<div
 				style={{
 					height: virtualizer.getTotalSize(),
-					width: "100%",
-					position: "relative",
-					contain: "strict",
+					width: '100%',
+					position: 'relative',
+					contain: 'strict',
 				}}
 			>
 				{!isTransitioning &&
@@ -153,83 +128,56 @@ export function FileGrid({
 						if (
 							item &&
 							// ReactPromise tiene 'value', 'status', etc.
-							((typeof item === "object" &&
-								"value" in item &&
-								"status" in item) ||
+							((typeof item === 'object' && 'value' in item && 'status' in item) ||
 								// Promise regular
 								item instanceof Promise ||
 								// Promesas serializadas como objetos
-								(typeof item === "object" &&
-									item !== null &&
-									"then" in item &&
-									typeof item.then === "function"))
+								(typeof item === 'object' && item !== null && 'then' in item && typeof item.then === 'function'))
 						) {
 							try {
 								// eslint-disable-next-line @typescript-eslint/no-unused-vars
-								gridLogger.warn(
-									"Detectado ReactPromise como item, intentando extraer el valor:",
-									item
-								);
+								gridLogger.warn('Detectado ReactPromise como item, intentando extraer el valor:', item);
 
 								// Para ReactPromise podemos intentar obtener el valor directamente
-								if ("value" in item && typeof item.value === "string") {
+								if ('value' in item && typeof item.value === 'string') {
 									try {
 										// Intentar parsear el valor como JSON
 										const parsedItem = JSON.parse(item.value);
-										if (
-											parsedItem &&
-											typeof parsedItem === "object" &&
-											"id" in parsedItem
-										) {
+										if (parsedItem && typeof parsedItem === 'object' && 'id' in parsedItem) {
 											processedItem = parsedItem;
 										}
 									} catch (parseError) {
 										// eslint-disable-next-line @typescript-eslint/no-unused-vars
-										gridLogger.error(
-											"Error al parsear el valor del ReactPromise:",
-											parseError
-										);
+										gridLogger.error('Error al parsear el valor del ReactPromise:', parseError);
 									}
 								}
 							} catch (promiseError) {
 								// eslint-disable-next-line @typescript-eslint/no-unused-vars
-								gridLogger.error(
-									"Error al procesar Promise/ReactPromise:",
-									promiseError
-								);
+								gridLogger.error('Error al procesar Promise/ReactPromise:', promiseError);
 							}
 						}
 
 						// Verificar que el item (ahora posiblemente extraído de una promesa) tenga un ID válido
-						if (
-							!processedItem.id ||
-							typeof processedItem.id !== "string" ||
-							processedItem.id.trim() === ""
-						) {
+						if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
 							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-							gridLogger.warn(
-								"Intentando renderizar item con ID inválido:",
-								processedItem
-							);
+							gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
 							return null;
 						}
 
 						const style: React.CSSProperties = {
-							position: "absolute",
+							position: 'absolute',
 							top: 0,
 							left: 0,
 							transform: `translate3d(${
-								viewMode === "list"
-									? 0
-									: virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
+								viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
 							}px, ${virtualItem.start}px, 0)`,
-							width: viewMode === "list" ? "100%" : itemSize,
+							width: viewMode === 'list' ? '100%' : itemSize,
 							height:
-								viewMode === "masonry"
+								viewMode === 'masonry'
 									? calculateMasonryHeight(processedItem, itemSize)
 									: virtualItem.size - GRID_CONFIG.gap[viewMode],
 							padding: 0,
-							willChange: "transform",
+							willChange: 'transform',
 						};
 
 						const ViewComponent = {
@@ -247,7 +195,7 @@ export function FileGrid({
 							<div
 								key={`${viewMode}-${virtualItem.key}`}
 								data-index={virtualItem.index}
-								className={cn("absolute")}
+								className={cn('absolute')}
 								style={style}
 							>
 								<ViewComponent
@@ -256,14 +204,12 @@ export function FileGrid({
 									onDoubleClick={onItemDoubleClick}
 									onContextAction={handleContextMenuAction}
 									shouldLoad={true}
-									isSelected={selectedItems.some(
-										(selected) => selected.id === processedItem.id
-									)}
+									isSelected={selectedItems.some((selected) => selected.id === processedItem.id)}
 									itemSize={itemSize}
 									thumbnail={thumbnail}
 									style={{
-										width: "100%",
-										height: "100%",
+										width: '100%',
+										height: '100%',
 									}}
 								/>
 							</div>

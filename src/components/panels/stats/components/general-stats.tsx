@@ -1,8 +1,8 @@
-import { getSystemStats } from "@/app/actions/stats/stats.actions";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatBytes } from "@/lib/utils";
-import { BarChart } from "lucide-react";
-import { StatCard } from "./stat-card";
+import { getSystemStats } from '@/app/actions/stats/stats.actions';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatBytes } from '@/lib/utils';
+import { BarChart } from 'lucide-react';
+import { StatCard } from './stat-card';
 
 export async function GeneralStats() {
 	const stats = await getSystemStats();
@@ -10,86 +10,86 @@ export async function GeneralStats() {
 	// Estadísticas principales
 	const mainStats = [
 		{
-			title: "Imágenes",
+			title: 'Imágenes',
 			value: stats.totalImages,
-			icon: "Image",
-			color: "text-primary",
+			icon: 'Image',
+			color: 'text-primary',
 		},
 		{
-			title: "Carpetas",
+			title: 'Carpetas',
 			value: stats.totalFolders,
-			icon: "Folder",
-			color: "text-orange-500",
+			icon: 'Folder',
+			color: 'text-orange-500',
 		},
 		{
-			title: "Colecciones",
+			title: 'Colecciones',
 			value: stats.totalCollections,
-			icon: "Bookmark",
-			color: "text-blue-500",
+			icon: 'Bookmark',
+			color: 'text-blue-500',
 		},
 		{
-			title: "Etiquetas",
+			title: 'Etiquetas',
 			value: stats.totalTags,
-			icon: "Tag",
-			color: "text-green-500",
+			icon: 'Tag',
+			color: 'text-green-500',
 		},
 		{
-			title: "Álbumes",
+			title: 'Álbumes',
 			value: stats.totalAlbums,
-			icon: "Album",
-			color: "text-purple-500",
+			icon: 'Album',
+			color: 'text-purple-500',
 		},
 		{
-			title: "Personajes",
+			title: 'Personajes',
 			value: stats.totalCharacters,
-			icon: "Users",
-			color: "text-pink-500",
+			icon: 'Users',
+			color: 'text-pink-500',
 		},
 		{
-			title: "Lugares",
+			title: 'Lugares',
 			value: stats.totalPlaces,
-			icon: "MapPin",
-			color: "text-red-500",
+			icon: 'MapPin',
+			color: 'text-red-500',
 		},
 		{
-			title: "Objetos",
+			title: 'Objetos',
 			value: stats.totalObjects,
-			icon: "Box",
-			color: "text-amber-500",
+			icon: 'Box',
+			color: 'text-amber-500',
 		},
 	] as const;
 
 	// Estadísticas adicionales
 	const additionalStats = [
 		{
-			title: "Favoritos",
+			title: 'Favoritos',
 			value: stats.totalFavorites,
-			icon: "Star",
-			color: "text-yellow-500",
+			icon: 'Star',
+			color: 'text-yellow-500',
 		},
 		{
-			title: "Vistas",
+			title: 'Vistas',
 			value: stats.totalViews,
-			icon: "Eye",
-			color: "text-cyan-500",
+			icon: 'Eye',
+			color: 'text-cyan-500',
 		},
 		{
-			title: "Descargas",
+			title: 'Descargas',
 			value: stats.totalDownloads,
-			icon: "Download",
-			color: "text-indigo-500",
+			icon: 'Download',
+			color: 'text-indigo-500',
 		},
 		{
-			title: "Espacio Usado",
+			title: 'Espacio Usado',
 			value: formatBytes(stats.totalSize),
-			icon: "HardDrive",
-			color: "text-rose-500",
+			icon: 'HardDrive',
+			color: 'text-rose-500',
 		},
 		{
-			title: "Actividades",
+			title: 'Actividades',
 			value: stats.totalActivities,
-			icon: "Activity",
-			color: "text-violet-500",
+			icon: 'Activity',
+			color: 'text-violet-500',
 		},
 	] as const;
 

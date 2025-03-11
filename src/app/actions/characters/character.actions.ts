@@ -7,27 +7,30 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { Character } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
+// Configuración y utilidades
 const characterLogger = logger.withContext('CharacterActions');
-
 const REVALIDATE_PATHS = ['/settings', '/characters', '/characters/[id]'] as const;
 
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-	}
-	characterLogger.info('🔄 Rutas revalidadas');
-};
-
-class CharacterError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'CharacterError';
-	}
+// Códigos de error
+enum CharacterErrorCode {
+	NOT_FOUND = 'NOT_FOUND',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	OPERATION_FAILED = 'OPERATION_FAILED',
 }
 
+// Función creadora de errores (enfoque funcional)
+const createCharacterError = (
+	message: string,
+	code: CharacterErrorCode = CharacterErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
+	const error = new Error(message);
+	error.name = 'CharacterError';
+	Object.assign(error, { code, cause });
+	return error;
+};
+
+// Interfaces
 export interface CharacterWithStats extends Character {
 	_count: {
 		images: number;
@@ -64,6 +67,24 @@ export interface CharacterUpdate extends Partial<CharacterCreate> {
 	id: string;
 }
 
+// Funciones utilitarias
+const revalidateAllPaths = async () => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	characterLogger.info('🔄 Rutas revalidadas');
+};
+
+const notifyCharacterChange = async (action: 'create' | 'update' | 'delete', character: Character | { id: string }) => {
+	// Emitir eventos usando el nuevo sistema de servidor
+	await emit({
+		type: 'characters:modified',
+		data: { action, character },
+	});
+	statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+};
+
+// Acciones del servidor
 export async function getCharacters(): Promise<CharacterWithStats[]> {
 	try {
 		characterLogger.info('👤 Obteniendo personajes');
@@ -122,7 +143,7 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 		return charactersWithStats;
 	} catch (error) {
 		characterLogger.error('❌ Error al obtener personajes', error);
-		throw new CharacterError('No se pudieron obtener los personajes', { cause: error });
+		throw createCharacterError('No se pudieron obtener los personajes', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -141,7 +162,7 @@ export async function getCharacter(id: string) {
 		});
 
 		if (!character) {
-			throw new CharacterError('Personaje no encontrado');
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = await prisma.image.aggregate({
@@ -166,16 +187,23 @@ export async function getCharacter(id: string) {
 		return result;
 	} catch (error) {
 		characterLogger.error('❌ Error al obtener personaje:', error);
-		if (error instanceof CharacterError) {
+		// Preservar el error si ya es un CharacterError
+		if (error instanceof Error && error.name === 'CharacterError') {
 			throw error;
 		}
-		throw new CharacterError('No se pudo obtener el personaje', error);
+		throw createCharacterError('No se pudo obtener el personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 export async function createCharacter(data: CharacterCreate) {
 	try {
 		characterLogger.info('📝 Creando nuevo personaje:', data.name);
+
+		// Validación de entrada
+		if (!data.name?.trim()) {
+			throw createCharacterError('El nombre del personaje es requerido', CharacterErrorCode.VALIDATION_ERROR);
+		}
+
 		const character = await prisma.character.create({
 			data: {
 				...data,
@@ -184,25 +212,30 @@ export async function createCharacter(data: CharacterCreate) {
 			},
 		});
 
-		// Emitir eventos usando el nuevo sistema de servidor
-		await emit({
-			type: 'characters:modified',
-			data: { action: 'create', character },
-		});
-		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+		await notifyCharacterChange('create', character);
 
 		characterLogger.info('✅ Personaje creado:', character.name);
 		await revalidateAllPaths();
 		return character;
 	} catch (error) {
 		characterLogger.error('❌ Error al crear personaje:', error);
-		throw new CharacterError('No se pudo crear el personaje', error);
+		// Preservar el error si ya es un CharacterError
+		if (error instanceof Error && error.name === 'CharacterError') {
+			throw error;
+		}
+		throw createCharacterError('No se pudo crear el personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 export async function updateCharacter(id: string, data: CharacterUpdate) {
 	try {
 		characterLogger.info('📝 Actualizando personaje:', id);
+
+		// Validación de entrada
+		if (data.name === '') {
+			throw createCharacterError('El nombre del personaje no puede estar vacío', CharacterErrorCode.VALIDATION_ERROR);
+		}
+
 		const character = await prisma.character.update({
 			where: { id },
 			data: {
@@ -212,19 +245,18 @@ export async function updateCharacter(id: string, data: CharacterUpdate) {
 			},
 		});
 
-		// Emitir eventos usando el nuevo sistema de servidor
-		await emit({
-			type: 'characters:modified',
-			data: { action: 'update', character },
-		});
-		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+		await notifyCharacterChange('update', character);
 
 		characterLogger.info('✅ Personaje actualizado:', character.name);
 		await revalidateAllPaths();
 		return character;
 	} catch (error) {
 		characterLogger.error('❌ Error al actualizar personaje:', error);
-		throw new CharacterError('No se pudo actualizar el personaje', error);
+		// Preservar el error si ya es un CharacterError
+		if (error instanceof Error && error.name === 'CharacterError') {
+			throw error;
+		}
+		throw createCharacterError('No se pudo actualizar el personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -235,18 +267,13 @@ export async function deleteCharacter(id: string) {
 			where: { id },
 		});
 
-		// Emitir eventos usando el nuevo sistema de servidor
-		await emit({
-			type: 'characters:modified',
-			data: { action: 'delete', id },
-		});
-		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+		await notifyCharacterChange('delete', { id });
 
 		characterLogger.info('✅ Personaje eliminado');
 		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar personaje:', error);
-		throw new CharacterError('No se pudo eliminar el personaje', error);
+		throw createCharacterError('No se pudo eliminar el personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -289,7 +316,11 @@ export async function getCharacterImages(id: string) {
 		}));
 	} catch (error) {
 		characterLogger.error('❌ Error al obtener imágenes del personaje:', error);
-		throw new CharacterError('No se pudieron obtener las imágenes del personaje', error);
+		throw createCharacterError(
+			'No se pudieron obtener las imágenes del personaje',
+			CharacterErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -317,7 +348,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al agregar imagen al personaje:', error);
-		throw new CharacterError('No se pudo agregar la imagen al personaje', error);
+		throw createCharacterError('No se pudo agregar la imagen al personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -345,6 +376,10 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		await revalidateAllPaths();
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar imagen del personaje:', error);
-		throw new CharacterError('No se pudo eliminar la imagen del personaje', error);
+		throw createCharacterError(
+			'No se pudo eliminar la imagen del personaje',
+			CharacterErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
