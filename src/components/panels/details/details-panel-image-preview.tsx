@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { getImageUrl } from '@/app/actions/images';
-import { cn } from '@/lib/utils';
-import { useImageViewer } from '@/store/image-viewer.store';
-import { Loader2, XCircle } from 'lucide-react';
-import Image from 'next/image';
-import * as React from 'react';
-import type { ItemComponentProps } from './details-panel-types';
+import { getImageUrl } from "@/app/actions/images";
+import { cn } from "@/lib/utils/utils";
+import { useImageViewer } from "@/store/image-viewer.store";
+import { Loader2, XCircle } from "lucide-react";
+import Image from "next/image";
+import * as React from "react";
+import type { ItemComponentProps } from "./details-panel-types";
 
 /**
  * Componente para la vista previa de imagen con carga optimizada
@@ -35,8 +35,13 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 				// Si excedimos los intentos, no seguimos intentando
 				if (currentAttempt > MAX_ATTEMPTS) {
-					console.error(`❌ Máximo de intentos alcanzado (${MAX_ATTEMPTS}) para imagen:`, item.id);
-					setError(`No se pudo cargar la imagen después de ${MAX_ATTEMPTS} intentos`);
+					console.error(
+						`❌ Máximo de intentos alcanzado (${MAX_ATTEMPTS}) para imagen:`,
+						item.id
+					);
+					setError(
+						`No se pudo cargar la imagen después de ${MAX_ATTEMPTS} intentos`
+					);
 					setIsLoading(false);
 					return;
 				}
@@ -46,7 +51,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 					getImageUrl(item.id),
 					new Promise<null>((_, reject) => {
 						setTimeout(() => {
-							reject(new Error('Timeout al cargar la imagen'));
+							reject(new Error("Timeout al cargar la imagen"));
 						}, 5000);
 					}),
 				]);
@@ -59,15 +64,19 @@ export function ImagePreview({ item }: ItemComponentProps) {
 					setImageUrl(url);
 					setIsLoading(false);
 				} else {
-					throw new Error('No se pudo obtener la URL de la imagen');
+					throw new Error("No se pudo obtener la URL de la imagen");
 				}
 			} catch (error) {
 				if (!mounted) {
 					return;
 				}
 
-				const errorMessage = error instanceof Error ? error.message : 'Error al cargar la imagen';
-				console.error(`❌ Error cargando imagen (intento ${loadAttemptRef.current}/${MAX_ATTEMPTS}):`, errorMessage);
+				const errorMessage =
+					error instanceof Error ? error.message : "Error al cargar la imagen";
+				console.error(
+					`❌ Error cargando imagen (intento ${loadAttemptRef.current}/${MAX_ATTEMPTS}):`,
+					errorMessage
+				);
 
 				setError(errorMessage);
 				setIsLoading(false);
@@ -104,7 +113,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 			try {
 				cleanupFn = await loadImage(1);
 			} catch (err) {
-				console.error('Error iniciando carga de imagen:', err);
+				console.error("Error iniciando carga de imagen:", err);
 			}
 		};
 
@@ -136,7 +145,9 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				<div className="absolute inset-0 flex items-center justify-center bg-muted/80">
 					<div className="text-center p-4 max-w-xs">
 						<XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-						<p className="text-sm text-destructive font-medium mb-1">Error al cargar la imagen</p>
+						<p className="text-sm text-destructive font-medium mb-1">
+							Error al cargar la imagen
+						</p>
 						<p className="text-xs text-muted-foreground">{error}</p>
 					</div>
 				</div>
@@ -145,12 +156,12 @@ export function ImagePreview({ item }: ItemComponentProps) {
 			{imageUrl && (
 				<Image
 					src={imageUrl}
-					alt={item.name || 'Vista previa de imagen'}
+					alt={item.name || "Vista previa de imagen"}
 					fill
 					className={cn(
-						'object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]',
-						isLoading && 'opacity-0',
-						!isLoading && 'opacity-100'
+						"object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]",
+						isLoading && "opacity-0",
+						!isLoading && "opacity-100"
 					)}
 					onClick={handleClick}
 					sizes="(max-width: 640px) 100vw, 640px"
@@ -158,7 +169,9 @@ export function ImagePreview({ item }: ItemComponentProps) {
 					onLoad={() => setIsLoading(false)}
 					onError={() => {
 						setIsLoading(false);
-						setError('Error al mostrar la imagen. Formato no soportado por el navegador.');
+						setError(
+							"Error al mostrar la imagen. Formato no soportado por el navegador."
+						);
 					}}
 				/>
 			)}

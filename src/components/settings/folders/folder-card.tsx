@@ -1,21 +1,29 @@
-'use client';
+"use client";
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn, formatBytes } from '@/lib/utils';
-import type { ExtendedProcessStatus, ProcessPhase } from '@/types/process';
-import { Folder, RefreshCw, Trash2 } from 'lucide-react';
-import { AlertCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
-import { FolderProgressDetails } from './folder-progress-details';
-import type { ExtendedFolder } from './folder-types';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn, formatBytes } from "@/lib/utils/utils";
+import type { ExtendedProcessStatus, ProcessPhase } from "@/types/process";
+import { Folder, RefreshCw, Trash2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
+import {
+	FolderIndexStatusBadge,
+	type IndexStatus,
+} from "./folder-index-status-badge";
+import { FolderProgressDetails } from "./folder-progress-details";
+import type { ExtendedFolder } from "./folder-types";
 
 interface FolderCardProps {
 	folder: ExtendedFolder;
@@ -45,22 +53,31 @@ export function FolderCard({
 
 	// Verificar explícitamente si el proceso está completado
 	const isComplete =
-		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.phase === 'complete') ||
-		(!isProcessing && processStatus?.folderId === folder.id && processStatus?.progress === 100) ||
-		(processStatus?.phase === 'complete' && processStatus?.folderId === folder.id) ||
-		(processStatus?.progress === 100 && processStatus?.phase === 'metadata' && processStatus?.folderId === folder.id);
+		(!isProcessing &&
+			processStatus?.folderId === folder.id &&
+			processStatus?.phase === "complete") ||
+		(!isProcessing &&
+			processStatus?.folderId === folder.id &&
+			processStatus?.progress === 100) ||
+		(processStatus?.phase === "complete" &&
+			processStatus?.folderId === folder.id) ||
+		(processStatus?.progress === 100 &&
+			processStatus?.phase === "metadata" &&
+			processStatus?.folderId === folder.id);
 
 	const indexStatus = getFolderIndexStatus(folder);
 
 	// Estado local para tracking
 	const [lastProgress, setLastProgress] = useState<number>(0);
-	const [showCompleteAnimation, setShowCompleteAnimation] = useState<boolean>(false);
+	const [showCompleteAnimation, setShowCompleteAnimation] =
+		useState<boolean>(false);
 
 	// Actualizar el progreso cuando cambie el estado
 	useEffect(() => {
-		const isActiveProcess = isReindexing && processStatus?.folderId === folder.id;
+		const isActiveProcess =
+			isReindexing && processStatus?.folderId === folder.id;
 
-		if (isActiveProcess && typeof processStatus?.progress === 'number') {
+		if (isActiveProcess && typeof processStatus?.progress === "number") {
 			setLastProgress(processStatus.progress);
 
 			// Si el progreso alcanza el 100%, mostrar animación de completado
@@ -125,25 +142,33 @@ export function FolderCard({
 				opacity: [0, 1],
 				y: [20, 0],
 			}}
-			className={cn('bg-muted/30 group rounded-sm', selectedFolder === folder.id && 'ring-1 ring-primary')}
+			className={cn(
+				"bg-muted/30 group rounded-sm",
+				selectedFolder === folder.id && "ring-1 ring-primary"
+			)}
 		>
 			<Card
 				className={cn(
-					'overflow-hidden transition-all',
-					isReindexing && 'ring-1 ring-primary/20',
-					showCompleteAnimation && 'ring-1 ring-emerald-400/20'
+					"overflow-hidden transition-all",
+					isReindexing && "ring-1 ring-primary/20",
+					showCompleteAnimation && "ring-1 ring-emerald-400/20"
 				)}
 			>
 				{/* Agregar indicador visual de procesamiento */}
 				{(isReindexing || showCompleteAnimation) && (
 					<div
 						className={cn(
-							'absolute inset-x-0 top-0 h-0.5 overflow-hidden',
-							showCompleteAnimation ? 'bg-emerald-400/50' : 'bg-primary/50'
+							"absolute inset-x-0 top-0 h-0.5 overflow-hidden",
+							showCompleteAnimation ? "bg-emerald-400/50" : "bg-primary/50"
 						)}
 					>
 						<div
-							className={cn('h-full', showCompleteAnimation ? 'bg-emerald-400' : 'bg-primary animate-pulse')}
+							className={cn(
+								"h-full",
+								showCompleteAnimation
+									? "bg-emerald-400"
+									: "bg-primary animate-pulse"
+							)}
 							style={{ width: `${lastProgress}%` }}
 						/>
 					</div>
@@ -174,7 +199,10 @@ export function FolderCard({
 									<Badge variant="secondary" className="text-[10px] px-1 h-4">
 										{formatBytes(Number(folder.totalSize || 0))}
 									</Badge>
-									<FolderIndexStatusBadge status={indexStatus} lastIndexed={folder.lastIndexed} />
+									<FolderIndexStatusBadge
+										status={indexStatus}
+										lastIndexed={folder.lastIndexed}
+									/>
 								</div>
 							</div>
 						</div>
@@ -185,15 +213,21 @@ export function FolderCard({
 										<div className="flex items-center gap-1.5 p-1">
 											<Switch
 												checked={folder.autoReindex}
-												onCheckedChange={(checked) => onToggleAutoReindex(folder.id, checked)}
+												onCheckedChange={(checked) =>
+													onToggleAutoReindex(folder.id, checked)
+												}
 												disabled={isGloballyProcessing}
 												className="scale-75"
 											/>
-											<span className="text-[10px] text-muted-foreground mr-1">Auto</span>
+											<span className="text-[10px] text-muted-foreground mr-1">
+												Auto
+											</span>
 										</div>
 									</TooltipTrigger>
 									<TooltipContent className="text-xs">
-										{folder.autoReindex ? 'Desactivar reindexado automático' : 'Activar reindexado automático'}
+										{folder.autoReindex
+											? "Desactivar reindexado automático"
+											: "Activar reindexado automático"}
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
@@ -210,13 +244,17 @@ export function FolderCard({
 										>
 											<RefreshCw
 												className={cn(
-													'h-3.5 w-3.5',
-													isProcessing && processStatus.folderId === folder.id && 'animate-spin'
+													"h-3.5 w-3.5",
+													isProcessing &&
+														processStatus.folderId === folder.id &&
+														"animate-spin"
 												)}
 											/>
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent className="text-xs">Reindexar carpeta</TooltipContent>
+									<TooltipContent className="text-xs">
+										Reindexar carpeta
+									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
 
@@ -227,22 +265,27 @@ export function FolderCard({
 											size="icon"
 											variant="ghost"
 											className={cn(
-												'h-6 w-6',
-												selectedFolder === folder.id && 'bg-destructive hover:bg-destructive/90'
+												"h-6 w-6",
+												selectedFolder === folder.id &&
+													"bg-destructive hover:bg-destructive/90"
 											)}
 											onClick={() => onFolderClick(folder.id)}
 											disabled={isGloballyProcessing}
 										>
 											<Trash2
 												className={cn(
-													'h-3.5 w-3.5',
-													selectedFolder === folder.id ? 'text-background' : 'text-muted-foreground'
+													"h-3.5 w-3.5",
+													selectedFolder === folder.id
+														? "text-background"
+														: "text-muted-foreground"
 												)}
 											/>
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent className="text-xs">
-										{selectedFolder === folder.id ? 'Confirmar eliminar' : 'Eliminar carpeta'}
+										{selectedFolder === folder.id
+											? "Confirmar eliminar"
+											: "Eliminar carpeta"}
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
@@ -252,21 +295,27 @@ export function FolderCard({
 					{folder.error && (
 						<motion.div
 							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: 'auto' }}
+							animate={{ opacity: 1, height: "auto" }}
 							exit={{ opacity: 0, height: 0 }}
 							className="mt-3"
 						>
 							<Alert variant="destructive" className="p-2">
 								<AlertCircle className="h-3.5 w-3.5 mr-1" />
 								<AlertTitle className="text-xs">Error en carpeta</AlertTitle>
-								<AlertDescription className="text-xs mt-1">{folder.error}</AlertDescription>
+								<AlertDescription className="text-xs mt-1">
+									{folder.error}
+								</AlertDescription>
 							</Alert>
 						</motion.div>
 					)}
 
 					{(isReindexing || showCompleteAnimation) && processStatus && (
 						<div className="px-3 pb-2">
-							<FolderProgressDetails status={processStatus} isProcessing={isReindexing} className="mt-2" />
+							<FolderProgressDetails
+								status={processStatus}
+								isProcessing={isReindexing}
+								className="mt-2"
+							/>
 						</div>
 					)}
 				</CardContent>

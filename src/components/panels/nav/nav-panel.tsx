@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import type { NavigationData } from '@/app/actions/navigation/nav.actions';
-import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProfileContext } from '@/lib/contexts';
-import { cn } from '@/lib/utils';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import { useStatsBaseStore } from '@/store/stats.store';
-import { useUIStore } from '@/store/ui.store';
-import type { ViewType } from '@/types/file-item';
+import type { NavigationData } from "@/app/actions/navigation/nav.actions";
+import type { WorldItemWithStats } from "@/app/actions/world-items/world-item.actions";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useProfileContext } from "@/lib/contexts";
+import { cn } from "@/lib/utils/utils";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useStatsBaseStore } from "@/store/stats.store";
+import { useUIStore } from "@/store/ui.store";
+import type { ViewType } from "@/types/file-item";
 import {
 	BookImage,
 	Box,
@@ -35,82 +35,77 @@ import {
 	Terminal,
 	UploadCloud,
 	User2,
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
-import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
-
-const navigationItems = [
-	{ id: 'all-images' as ViewType, label: 'Galería', icon: ImageIcon },
-	{
-		id: 'uploaded-images' as ViewType,
-		label: 'Imágenes Subidas',
-		icon: UploadCloud,
-	},
-	{ id: 'favorites' as ViewType, label: 'Favoritos', icon: Star },
-	{ id: 'search' as ViewType, label: 'Buscar', icon: Search },
-];
+} from "lucide-react";
+import type React from "react";
+import { useCallback, useMemo, useState } from "react";
+import {
+	type CategoryChild,
+	NavCategoryChildren,
+} from "./nav-category-children";
+import { NavCategoryItem } from "./nav-category-item";
+import { NavMainNavigation } from "./nav-main-navigation";
+import { NavPanelHeader } from "./nav-panel-header";
 
 const categories = [
 	{
-		id: 'folders' as ViewType,
+		id: "folders" as ViewType,
 		icon: FolderIcon,
-		label: 'Carpetas',
-		color: '#22c55e',
+		label: "Carpetas",
+		color: "#22c55e",
 	},
 	{
-		id: 'collections' as ViewType,
+		id: "collections" as ViewType,
 		icon: BookImage,
-		label: 'Colecciones',
-		color: '#ef4444',
+		label: "Colecciones",
+		color: "#ef4444",
 	},
 	{
-		id: 'albums' as ViewType,
+		id: "albums" as ViewType,
 		icon: Camera,
-		label: 'Álbumes',
-		color: '#8b5cf6',
+		label: "Álbumes",
+		color: "#8b5cf6",
 	},
 	{
-		id: 'characters' as ViewType,
+		id: "characters" as ViewType,
 		icon: User2,
-		label: 'Personajes',
-		color: '#ec4899',
+		label: "Personajes",
+		color: "#ec4899",
 	},
 	{
-		id: 'places' as ViewType,
+		id: "places" as ViewType,
 		icon: MapPin,
-		label: 'Lugares',
-		color: '#14b8a6',
+		label: "Lugares",
+		color: "#14b8a6",
 	},
 	{
-		id: 'world-items' as ViewType,
+		id: "world-items" as ViewType,
 		icon: Box,
-		label: 'Objetos',
-		color: '#f59e0b',
+		label: "Objetos",
+		color: "#f59e0b",
 	},
 	{
-		id: 'concepts' as ViewType,
+		id: "concepts" as ViewType,
 		icon: Lightbulb,
-		label: 'Conceptos',
-		color: '#3b82f6',
+		label: "Conceptos",
+		color: "#3b82f6",
 	},
 	{
-		id: 'prompts' as ViewType,
+		id: "prompts" as ViewType,
 		icon: Terminal,
-		label: 'Prompts',
-		color: '#10b981',
+		label: "Prompts",
+		color: "#10b981",
 	},
 	{
-		id: 'notes' as ViewType,
+		id: "notes" as ViewType,
 		icon: StickyNote,
-		label: 'Notas',
-		color: '#a855f7',
+		label: "Notas",
+		color: "#a855f7",
 	},
 	{
-		id: 'tags' as ViewType,
+		id: "tags" as ViewType,
 		icon: TagIcon,
-		label: 'Etiquetas',
-		color: '#f59e0b',
+		label: "Etiquetas",
+		color: "#f59e0b",
 	},
 ];
 
@@ -119,14 +114,7 @@ interface NavPanelProps {
 }
 
 export function NavPanel({ initialData }: NavPanelProps) {
-	const { settings } = useProfileContext();
-	const { profiles = [], activeProfile } = settings;
-	const activeProfileData = profiles.find((p) => p.id === activeProfile) ||
-		profiles[0] || {
-			name: 'Default',
-			emoji: '👤',
-			color: '#3b82f6',
-		};
+	// Eliminada la variable settings no utilizada
 
 	// Desestructurar initialData con valores por defecto
 	const {
@@ -158,7 +146,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	} = initialData || {};
 
 	// Estado para controlar el colapso de categorías
-	const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+	const [collapsedCategories, setCollapsedCategories] = useState<
+		Record<string, boolean>
+	>({});
 
 	// Datos simulados para las nuevas entidades
 	const concepts = useMemo(() => [], []);
@@ -187,7 +177,6 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	} = useFileManager();
 
 	const { toggleSettings } = useUIStore();
-	const { theme, setTheme } = useTheme();
 
 	// Función para verificar si una categoría está colapsada
 	const isCategoryCollapsed = useCallback(
@@ -199,26 +188,26 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const _hasCategoryChildSelected = useCallback(
 		(categoryId: ViewType): boolean => {
 			switch (categoryId) {
-				case 'collections':
-					return currentView === 'collection-content';
-				case 'folders':
-					return currentView === 'folder-content';
-				case 'tags':
-					return currentView === 'tag-content';
-				case 'albums':
-					return currentView === 'album-content';
-				case 'characters':
-					return currentView === 'character-content';
-				case 'places':
-					return currentView === 'place-content';
-				case 'world-items':
-					return currentView === 'world-item-content';
-				case 'concepts':
-					return currentView === 'concept-content';
-				case 'prompts':
-					return currentView === 'prompt-content';
-				case 'notes':
-					return currentView === 'note-content';
+				case "collections":
+					return currentView === "collection-content";
+				case "folders":
+					return currentView === "folder-content";
+				case "tags":
+					return currentView === "tag-content";
+				case "albums":
+					return currentView === "album-content";
+				case "characters":
+					return currentView === "character-content";
+				case "places":
+					return currentView === "place-content";
+				case "world-items":
+					return currentView === "world-item-content";
+				case "concepts":
+					return currentView === "concept-content";
+				case "prompts":
+					return currentView === "prompt-content";
+				case "notes":
+					return currentView === "note-content";
 				default:
 					return false;
 			}
@@ -230,25 +219,25 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getSelectedChildId = useCallback(
 		(categoryId: ViewType): string | null => {
 			switch (categoryId) {
-				case 'collections':
+				case "collections":
 					return currentCollectionId;
-				case 'folders':
+				case "folders":
 					return currentFolderId;
-				case 'tags':
+				case "tags":
 					return currentTagId;
-				case 'albums':
+				case "albums":
 					return currentAlbumId;
-				case 'characters':
+				case "characters":
 					return currentCharacterId;
-				case 'places':
+				case "places":
 					return currentPlaceId;
-				case 'world-items':
+				case "world-items":
 					return currentWorldItemId;
-				case 'concepts':
+				case "concepts":
 					return currentConceptId;
-				case 'prompts':
+				case "prompts":
 					return currentPromptId;
-				case 'notes':
+				case "notes":
 					return currentNoteId;
 				default:
 					return null;
@@ -268,62 +257,132 @@ export function NavPanel({ initialData }: NavPanelProps) {
 		]
 	);
 
-	// Función para manejar el clic en una categoría
+	// Función para manejar el clic en una categoría - actualizada para mejorar la integración con breadcrumbs
 	const handleCategoryClick = useCallback(
+		(id: ViewType) => {
+			// Limpiar selecciones anteriores para evitar estados huérfanos
+			if (id !== "collection-content") {
+				setCurrentCollection("");
+			}
+			if (id !== "folder-content") {
+				setCurrentFolder("");
+			}
+			if (id !== "tag-content") {
+				setCurrentTag("");
+			}
+			if (id !== "album-content") {
+				setCurrentAlbum("");
+			}
+			if (id !== "character-content") {
+				setCurrentCharacter("");
+			}
+			if (id !== "place-content") {
+				setCurrentPlace("");
+			}
+			if (id !== "world-item-content") {
+				setCurrentWorldItem("");
+			}
+
+			// Actualizar la vista actual
+			setCurrentView(id);
+		},
+		[
+			setCurrentView,
+			setCurrentCollection,
+			setCurrentFolder,
+			setCurrentTag,
+			setCurrentAlbum,
+			setCurrentCharacter,
+			setCurrentPlace,
+			setCurrentWorldItem,
+		]
+	);
+
+	// Agregar una nueva función para manejar el colapso/expansión
+	const handleCollapseToggle = useCallback(
+		(id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
+			event.stopPropagation();
+			setCollapsedCategories((prev) => ({
+				...prev,
+				[id]: !prev[id],
+			}));
+		},
+		[]
+	);
+
+	const handleOpenSettings = useCallback(() => {
+		setCurrentView("settings");
+		toggleSettings();
+	}, [toggleSettings, setCurrentView]);
+
+	const handleOpenDevelopment = useCallback(() => {
+		setCurrentView("development");
+	}, [setCurrentView]);
+
+	const handleMainNavigate = useCallback(
 		(id: ViewType) => {
 			setCurrentView(id);
 		},
 		[setCurrentView]
 	);
 
-	// Agregar una nueva función para manejar el colapso/expansión
-	const handleCollapseToggle = useCallback((id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
-		event.stopPropagation();
-		setCollapsedCategories((prev) => ({
-			...prev,
-			[id]: !prev[id],
-		}));
-	}, []);
-
-	const handleThemeToggle = useCallback(() => {
-		setTheme(theme === 'light' ? 'dark' : 'light');
-	}, [theme, setTheme]);
-
-	const handleOpenSettings = useCallback(() => {
-		setCurrentView('settings');
-		toggleSettings();
-	}, [toggleSettings, setCurrentView]);
-
-	const handleOpenDevelopment = useCallback(() => {
-		setCurrentView('development');
-	}, [setCurrentView]);
-
-	const handleItemClick = useCallback(
-		(id: ViewType) => {
-			setCurrentView(id as ViewType);
-		},
-		[setCurrentView]
-	);
-
+	// Función para manejar el clic en una colección
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
-			setCurrentView('collection-content');
+			// Limpiar otras selecciones
+			setCurrentFolder("");
+			setCurrentTag("");
+			setCurrentAlbum("");
+			setCurrentCharacter("");
+			setCurrentPlace("");
+			setCurrentWorldItem("");
+
+			// Establecer vista y colección actual
+			setCurrentView("collection-content");
 			setCurrentCollection(collectionId);
 		},
-		[setCurrentView, setCurrentCollection]
+		[
+			setCurrentView,
+			setCurrentCollection,
+			setCurrentFolder,
+			setCurrentTag,
+			setCurrentAlbum,
+			setCurrentCharacter,
+			setCurrentPlace,
+			setCurrentWorldItem,
+		]
 	);
 
+	// Función para manejar el clic en una carpeta
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
-			setCurrentView('folder-content');
+			// Limpiar otras selecciones
+			setCurrentCollection("");
+			setCurrentTag("");
+			setCurrentAlbum("");
+			setCurrentCharacter("");
+			setCurrentPlace("");
+			setCurrentWorldItem("");
+
+			// Establecer vista y carpeta actual
+			setCurrentView("folder-content");
 			setCurrentFolder(folderId);
 		},
-		[setCurrentView, setCurrentFolder]
+		[
+			setCurrentView,
+			setCurrentCollection,
+			setCurrentFolder,
+			setCurrentTag,
+			setCurrentAlbum,
+			setCurrentCharacter,
+			setCurrentPlace,
+			setCurrentWorldItem,
+		]
 	);
 
 	const handleTagClick = useCallback(
 		(tagName: string) => {
-			setCurrentView('tag-content');
+			setCurrentView("tag-content");
 			setCurrentTag(tagName);
 		},
 		[setCurrentView, setCurrentTag]
@@ -331,7 +390,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
-			setCurrentView('album-content');
+			setCurrentView("album-content");
 			setCurrentAlbum(albumId);
 		},
 		[setCurrentView, setCurrentAlbum]
@@ -339,7 +398,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
-			setCurrentView('character-content');
+			setCurrentView("character-content");
 			setCurrentCharacter(characterId);
 		},
 		[setCurrentView, setCurrentCharacter]
@@ -347,15 +406,15 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
-			setCurrentView('place-content');
+			setCurrentView("place-content");
 			setCurrentPlace(placeId);
 		},
 		[setCurrentView, setCurrentPlace]
 	);
 
-	const _handleWorldItemClick = useCallback(
+	const handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
-			setCurrentView('world-item-content');
+			setCurrentView("world-item-content");
 			setCurrentWorldItem(worldItemId);
 		},
 		[setCurrentView, setCurrentWorldItem]
@@ -365,25 +424,25 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getCategoryItemCount = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
-				case 'collections':
+				case "collections":
 					return stats?.totalCollections || 0;
-				case 'folders':
+				case "folders":
 					return stats?.totalFolders || 0;
-				case 'tags':
+				case "tags":
 					return stats?.totalTags || 0;
-				case 'albums':
+				case "albums":
 					return stats?.totalAlbums || 0;
-				case 'characters':
+				case "characters":
 					return stats?.totalCharacters || 0;
-				case 'places':
+				case "places":
 					return stats?.totalPlaces || 0;
-				case 'world-items':
+				case "world-items":
 					return stats?.totalObjects || 0;
-				case 'concepts':
+				case "concepts":
 					return concepts.length;
-				case 'prompts':
+				case "prompts":
 					return prompts.length;
-				case 'notes':
+				case "notes":
 					return notes.length;
 				default:
 					return 0;
@@ -393,418 +452,173 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	);
 
 	// Calcula y devuelve el número de imágenes para una categoría
-	const getImagesForCategory = (categoryId: ViewType): number => {
-		switch (categoryId) {
-			case 'collections':
-				return collections.reduce(
-					(sum: number, collection: { _count?: { images: number } }) => sum + (collection._count?.images || 0),
-					0
-				);
-			case 'folders':
-				return folders.reduce(
-					(sum: number, folder: { _count?: { images: number } }) => sum + (folder._count?.images || 0),
-					0
-				);
-			case 'tags':
-				return tags.reduce((sum: number, tag: { _count?: { images: number } }) => sum + (tag._count?.images || 0), 0);
-			case 'albums':
-				return albums.reduce(
-					(sum: number, album: { _count?: { images: number } }) => sum + (album._count?.images || 0),
-					0
-				);
-			case 'characters':
-				return characters.reduce(
-					(sum: number, character: { _count?: { images: number } }) => sum + (character._count?.images || 0),
-					0
-				);
-			case 'places':
-				return places.reduce(
-					(sum: number, place: { _count?: { images: number } }) => sum + (place._count?.images || 0),
-					0
-				);
-			case 'world-items':
-				return worldItems.reduce((sum: number, worldItem) => sum + (worldItem._count?.images || 0), 0);
-			default:
-				return 0;
-		}
-	};
-
-	// Renderizar elementos hijos de una categoría
-	const renderCategoryChildren = useCallback(
-		(categoryId: ViewType, isCollapsed: boolean, selectedChildId: string | null) => {
-			// Si no hay elementos, mostrar mensaje
-			if (
-				(categoryId === 'collections' && collections.length === 0) ||
-				(categoryId === 'folders' && folders.length === 0) ||
-				(categoryId === 'tags' && tags.length === 0) ||
-				(categoryId === 'albums' && albums.length === 0) ||
-				(categoryId === 'characters' && characters.length === 0) ||
-				(categoryId === 'places' && places.length === 0) ||
-				(categoryId === 'world-items' && worldItems.length === 0)
-			) {
-				return <div className="px-2 py-1 text-xs text-muted-foreground italic">No hay elementos</div>;
-			}
-
+	const getImagesForCategory = useCallback(
+		(categoryId: ViewType): number => {
 			switch (categoryId) {
-				case 'collections':
-					return collections?.map(
-						(collection: {
-							id: string;
-							emoji: string;
-							name: string;
-							_count?: { images: number };
-						}) => {
-							// Si la categoría está colapsada, solo mostrar el ítem seleccionado
-							if (isCollapsed && collection.id !== selectedChildId) {
-								return null;
-							}
-							return (
-								<Button
-									key={collection.id}
-									variant="ghost"
-									className={cn(
-										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-										currentView === 'collection-content' &&
-											currentCollectionId === collection.id &&
-											'bg-linear-to-r from-white/10 to-white/15',
-										'cursor-pointer'
-									)}
-									onClick={() => handleCollectionClick(collection.id)}
-								>
-									<CornerDownRight className="h-2 w-2 text-white/20" />
-									<span className="text-base">{collection.emoji}</span>
-									<span className="flex-1 text-left truncate">{collection.name}</span>
-									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-										<BookImage className="h-3 w-3" />
-										<span>{collection._count?.images || 0}</span>
-									</div>
-								</Button>
-							);
-						}
+				case "collections":
+					return collections.reduce(
+						(sum: number, collection: { _count?: { images: number } }) =>
+							sum + (collection._count?.images || 0),
+						0
 					);
-				case 'folders':
-					return folders?.map(
-						(folder: {
-							id: string;
-							name: string;
-							_count?: { images: number };
-						}) => {
-							if (isCollapsed && folder.id !== selectedChildId) {
-								return null;
-							}
-							return (
-								<Button
-									key={folder.id}
-									variant="ghost"
-									className={cn(
-										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-										currentView === 'folder-content' &&
-											currentFolderId === folder.id &&
-											'bg-linear-to-r from-white/10 to-white/15',
-										'cursor-pointer'
-									)}
-									onClick={() => handleFolderClick(folder.id)}
-								>
-									<CornerDownRight className="h-2 w-2 text-white/20" />
-									<FolderIcon className="h-3 w-3 text-white/50" />
-									<span className="flex-1 text-left truncate">{folder.name}</span>
-									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-										<BookImage className="h-3 w-3" />
-										<span>{folder._count?.images || 0}</span>
-									</div>
-								</Button>
-							);
-						}
+				case "folders":
+					return folders.reduce(
+						(sum: number, folder: { _count?: { images: number } }) =>
+							sum + (folder._count?.images || 0),
+						0
 					);
-				case 'albums':
-					return albums?.map(
-						(album: {
-							id: string;
-							emoji: string;
-							name: string;
-							_count?: { images: number };
-						}) => {
-							if (isCollapsed && album.id !== selectedChildId) {
-								return null;
-							}
-							return (
-								<Button
-									key={album.id}
-									variant="ghost"
-									className={cn(
-										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-										currentView === 'album-content' &&
-											currentAlbumId === album.id &&
-											'bg-linear-to-r from-white/10 to-white/15',
-										'cursor-pointer'
-									)}
-									onClick={() => handleAlbumClick(album.id)}
-								>
-									<CornerDownRight className="h-2 w-2 text-white/20" />
-									<span className="text-base">{album.emoji}</span>
-									<span className="flex-1 text-left truncate">{album.name}</span>
-									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-										<BookImage className="h-3 w-3" />
-										<span>{album._count?.images || 0}</span>
-									</div>
-								</Button>
-							);
-						}
+				case "tags":
+					return tags.reduce(
+						(sum: number, tag: { _count?: { images: number } }) =>
+							sum + (tag._count?.images || 0),
+						0
 					);
-				case 'characters':
-					return characters?.map(
-						(character: {
-							id: string;
-							emoji: string;
-							name: string;
-							_count?: { images: number };
-						}) => {
-							if (isCollapsed && character.id !== selectedChildId) {
-								return null;
-							}
-							return (
-								<Button
-									key={character.id}
-									variant="ghost"
-									className={cn(
-										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-										currentView === 'character-content' &&
-											currentCharacterId === character.id &&
-											'bg-linear-to-r from-white/10 to-white/15',
-										'cursor-pointer'
-									)}
-									onClick={() => handleCharacterClick(character.id)}
-								>
-									<CornerDownRight className="h-2 w-2 text-white/20" />
-									<span className="text-base">{character.emoji}</span>
-									<span className="flex-1 text-left truncate">{character.name}</span>
-									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-										<BookImage className="h-3 w-3" />
-										<span>{character._count?.images || 0}</span>
-									</div>
-								</Button>
-							);
-						}
+				case "albums":
+					return albums.reduce(
+						(sum: number, album: { _count?: { images: number } }) =>
+							sum + (album._count?.images || 0),
+						0
 					);
-				case 'places':
-					return places?.map(
-						(place: {
-							id: string;
-							emoji: string;
-							name: string;
-							_count?: { images: number };
-						}) => {
-							if (isCollapsed && place.id !== selectedChildId) {
-								return null;
-							}
-							return (
-								<Button
-									key={place.id}
-									variant="ghost"
-									className={cn(
-										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-										currentView === 'place-content' &&
-											currentPlaceId === place.id &&
-											'bg-linear-to-r from-white/10 to-white/15',
-										'cursor-pointer'
-									)}
-									onClick={() => handlePlaceClick(place.id)}
-								>
-									<CornerDownRight className="h-2 w-2 text-white/20" />
-									<span className="text-base">{place.emoji}</span>
-									<span className="flex-1 text-left truncate">{place.name}</span>
-									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-										<BookImage className="h-3 w-3" />
-										<span>{place._count?.images || 0}</span>
-									</div>
-								</Button>
-							);
-						}
+				case "characters":
+					return characters.reduce(
+						(sum: number, character: { _count?: { images: number } }) =>
+							sum + (character._count?.images || 0),
+						0
 					);
-				case 'tags':
-					if (isCollapsed) {
-						return null; // Las etiquetas son especiales, no mostramos ninguna si está colapsado
-					}
-					return (
-						<div className="flex w-full flex-wrap gap-2 mt-1">
-							{tags?.map(
-								(tag: {
-									id: string;
-									name: string;
-									color: string;
-									_count?: { images: number };
-								}) => (
-									<Button
-										variant="ghost"
-										key={tag.id}
-										style={{ backgroundColor: tag.color }}
-										className={cn(
-											'justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold',
-											currentView === 'tag-content' &&
-												currentTagId === tag.name &&
-												'bg-linear-to-r from-black/30 to-black/35',
-											'cursor-pointer'
-										)}
-										onClick={() => handleTagClick(tag.name)}
-									>
-										{tag.name}
-									</Button>
-								)
-							)}
-						</div>
+				case "places":
+					return places.reduce(
+						(sum: number, place: { _count?: { images: number } }) =>
+							sum + (place._count?.images || 0),
+						0
 					);
-				// Para las nuevas categorías, de momento no mostramos nada
+				case "world-items":
+					return worldItems.reduce(
+						(sum: number, worldItem) => sum + (worldItem._count?.images || 0),
+						0
+					);
 				default:
-					return null;
+					return 0;
+			}
+		},
+		[albums, characters, collections, folders, places, tags, worldItems]
+	);
+
+	// Función para obtener el manejador de clic adecuado para cada tipo de categoría
+	const getItemClickHandler = useCallback(
+		(categoryId: ViewType) => {
+			switch (categoryId) {
+				case "collections":
+					return handleCollectionClick;
+				case "folders":
+					return handleFolderClick;
+				case "tags":
+					return handleTagClick;
+				case "albums":
+					return handleAlbumClick;
+				case "characters":
+					return handleCharacterClick;
+				case "places":
+					return handlePlaceClick;
+				case "world-items":
+					return handleWorldItemClick;
+				default:
+					return () => {};
 			}
 		},
 		[
-			albums,
-			characters,
-			collections,
-			currentAlbumId,
-			currentCharacterId,
-			currentCollectionId,
-			currentFolderId,
-			currentPlaceId,
-			currentTagId,
-			currentView,
-			folders,
 			handleAlbumClick,
 			handleCharacterClick,
 			handleCollectionClick,
 			handleFolderClick,
 			handlePlaceClick,
 			handleTagClick,
+			handleWorldItemClick,
+		]
+	);
+
+	// Función para obtener los elementos hijos de cada categoría con corrección de tipos
+	const getCategoryItems = useCallback(
+		(categoryId: ViewType) => {
+			switch (categoryId) {
+				case "collections":
+					return collections as unknown as CategoryChild[];
+				case "folders":
+					return folders as unknown as CategoryChild[];
+				case "tags":
+					return tags as unknown as CategoryChild[];
+				case "albums":
+					return albums as unknown as CategoryChild[];
+				case "characters":
+					return characters as unknown as CategoryChild[];
+				case "places":
+					return places as unknown as CategoryChild[];
+				case "world-items":
+					return worldItems as unknown as CategoryChild[];
+				case "concepts":
+					return concepts as unknown as CategoryChild[];
+				case "prompts":
+					return prompts as unknown as CategoryChild[];
+				case "notes":
+					return notes as unknown as CategoryChild[];
+				default:
+					return [] as CategoryChild[];
+			}
+		},
+		[
+			albums,
+			characters,
+			collections,
+			concepts,
+			folders,
+			notes,
 			places,
+			prompts,
 			tags,
 			worldItems,
 		]
 	);
 
 	return (
-		<div className="flex flex-col h-full">
-			<div className="flex flex-col bg-primary/10 py-2">
-				<div className="flex items-center justify-between gap-2">
-					<div className="flex gap-2 items-center px-2">
-						<div
-							className="flex items-center justify-center h-8 w-8 rounded-sm"
-							style={{ backgroundColor: activeProfileData?.color }}
-						>
-							<span className="text-xs font-medium">{activeProfileData?.emoji}</span>
-						</div>
-						<div className="flex flex-col">
-							<span className="text-xs font-medium truncate">{activeProfileData?.name}</span>
-							<span className="text-[9px] text-muted-foreground">{stats?.totalImages || 0} imágenes</span>
-						</div>
-					</div>
-					<div className="gap-8 pr-2">
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleOpenDevelopment}>
-							<Bug className="h-4 w-4" />
-						</Button>
+		<div className="flex flex-col h-full bg-background">
+			<NavPanelHeader
+				totalImages={stats.totalImages}
+				onOpenSettings={handleOpenSettings}
+				onOpenDevelopment={handleOpenDevelopment}
+			/>
 
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleThemeToggle}>
-							{theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-						</Button>
-
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleOpenSettings}>
-							<Settings2 className="h-4 w-4" />
-						</Button>
-					</div>
-				</div>
-			</div>
 			<ScrollArea className="flex-1">
-				<div className="p-2">
+				<div className="p-1 space-y-0">
 					{/* Navegación Principal */}
-					<div className="flex justify-between gap-1">
-						{navigationItems.map(({ id, icon: Icon, label }) => (
-							<Button
-								key={id}
-								variant="outline"
-								className={cn(
-									'gap-2 h-7 px-3 transition-colors rounded-sm flex-1 text-center',
-									currentView === id && 'bg-linear-to-r from-white/10 to-white/15'
-								)}
-								onClick={() => handleItemClick(id)}
-							>
-								<span className="truncate flex items-center justify-center">
-									<Icon className="h-4 w-4 mr-1 mb-0.5" /> {label}
-								</span>
-							</Button>
-						))}
-					</div>
+					<NavMainNavigation
+						currentView={currentView}
+						onNavigate={handleMainNavigate}
+					/>
 
 					{/* Categorías con Listas */}
-					<div className="mt-1">
-						{categories.map(({ id, icon: Icon, label, color }) => (
-							<div key={id} className="mt-1">
-								<div className="flex items-center w-full h-8 bg-white/5 rounded-sm mt-2 group">
-									{/* Botón específico para colapsar/expandir */}
-									<button
-										type="button"
-										className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-gray-100/10 border-0 bg-transparent p-0"
-										onClick={(e) => {
-											e.stopPropagation();
-											handleCollapseToggle(id, e);
-										}}
-										aria-label={isCategoryCollapsed(id) ? 'Expandir categoría' : 'Colapsar categoría'}
-									>
-										{isCategoryCollapsed(id) ? (
-											<ChevronRight className="h-3 w-3 text-white/60" />
-										) : (
-											<ChevronDown className="h-3 w-3 text-white/60" />
-										)}
-									</button>
+					<div className="mt-0 space-y-0.5">
+						{categories.map(({ id, icon, label, color }) => (
+							<div key={id}>
+								<NavCategoryItem
+									id={id}
+									label={label}
+									color={color}
+									icon={icon}
+									isCollapsed={isCategoryCollapsed(id)}
+									isCurrent={currentView === id}
+									itemCount={getCategoryItemCount(id)}
+									imageCount={getImagesForCategory(id)}
+									onClick={() => handleCategoryClick(id)}
+									onToggleCollapse={(e) => handleCollapseToggle(id, e)}
+								/>
 
-									{/* Botón de categoría */}
-									<Button
-										variant="ghost"
-										className={cn(
-											'flex-1 justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm cursor-pointer',
-											currentView === id && 'bg-linear-to-r from-white/10 to-white/15'
-										)}
-										onClick={() => handleCategoryClick(id)}
-									>
-										<Icon className="h-4 w-4" style={{ color }} />
-										<span className="flex-1 text-left truncate">{label}</span>
-										<div className="flex items-center space-x-2">
-											<div className="flex items-center space-x-1 text-white/70 text-[10px]">
-												{id === 'folders' ? (
-													<FolderIcon className="h-3 w-3" />
-												) : id === 'collections' ? (
-													<BookImage className="h-3 w-3" />
-												) : id === 'tags' ? (
-													<TagIcon className="h-3 w-3" />
-												) : id === 'albums' ? (
-													<Camera className="h-3 w-3" />
-												) : id === 'characters' ? (
-													<User2 className="h-3 w-3" />
-												) : id === 'places' ? (
-													<MapPin className="h-3 w-3" />
-												) : id === 'world-items' ? (
-													<Box className="h-3 w-3" />
-												) : id === 'concepts' ? (
-													<Lightbulb className="h-3 w-3" />
-												) : id === 'prompts' ? (
-													<Terminal className="h-3 w-3" />
-												) : id === 'notes' ? (
-													<StickyNote className="h-3 w-3" />
-												) : (
-													<Hash className="h-3 w-3" />
-												)}
-												<span>{getCategoryItemCount(id)}</span>
-											</div>
-											<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-												<ImageIcon className="h-3 w-3" />
-												<span>{getImagesForCategory(id)}</span>
-											</div>
-										</div>
-									</Button>
-								</div>
-
-								<div className="mt-1 flex flex-col gap-1">
-									{renderCategoryChildren(id, isCategoryCollapsed(id), getSelectedChildId(id))}
-								</div>
+								<NavCategoryChildren
+									categoryId={id}
+									isCollapsed={isCategoryCollapsed(id)}
+									selectedChildId={getSelectedChildId(id)}
+									currentView={currentView}
+									items={getCategoryItems(id)}
+									onItemClick={getItemClickHandler(id)}
+								/>
 							</div>
 						))}
 					</div>
