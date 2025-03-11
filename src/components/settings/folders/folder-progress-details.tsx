@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { formatBytes } from "@/lib/format-utils";
-import { logger } from "@/lib/logger/logger";
-import { cn } from "@/lib/utils";
-import type { ExtendedProcessStatus, ProcessPhase } from "@/types/process";
-import { Code, File, FileWarning, Folder, HelpCircle } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { formatBytes } from '@/lib/format-utils';
+import { logger } from '@/lib/logger/logger';
+import { cn } from '@/lib/utils';
+import type { ExtendedProcessStatus, ProcessPhase } from '@/types/process';
+import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Crear una instancia de logger para este componente
-const componentLogger = logger.withContext("FolderProgressDetails");
+const componentLogger = logger.withContext('FolderProgressDetails');
 
 interface FolderProgressDetailsProps {
 	status: ExtendedProcessStatus;
@@ -19,11 +19,7 @@ interface FolderProgressDetailsProps {
 	className?: string;
 }
 
-export function FolderProgressDetails({
-	status,
-	isProcessing,
-	className,
-}: FolderProgressDetailsProps) {
+export function FolderProgressDetails({ status, isProcessing, className }: FolderProgressDetailsProps) {
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 	const [isStale, setIsStale] = useState<boolean>(false);
 	const [isComplete, setIsComplete] = useState<boolean>(false);
@@ -46,8 +42,8 @@ export function FolderProgressDetails({
 		}
 
 		// Si cambia la fase a 'complete', marcar como completado
-		if (status.phase === "complete") {
-			componentLogger.info("Proceso completado detectado", status);
+		if (status.phase === 'complete') {
+			componentLogger.info('Proceso completado detectado', status);
 			setIsComplete(true);
 			setIsStale(false);
 
@@ -70,7 +66,7 @@ export function FolderProgressDetails({
 					// Solo marcar como estancado si han pasado más de 15 segundos
 					if (timeSinceLastUpdate > 15000) {
 						setIsStale(true);
-						componentLogger.warn("Estado del proceso estancado:", {
+						componentLogger.warn('Estado del proceso estancado:', {
 							lastUpdate: new Date(lastUpdateTime).toISOString(),
 							currentTime: new Date(now).toISOString(),
 							timeSinceLastUpdate: `${Math.round(timeSinceLastUpdate / 1000)}s`,
@@ -107,17 +103,17 @@ export function FolderProgressDetails({
 	const getPhaseIcon = useCallback(() => {
 		const phase = status.phase as ProcessPhase;
 		switch (phase) {
-			case "scanning":
+			case 'scanning':
 				return <Folder className="h-3.5 w-3.5 text-blue-500" />;
-			case "indexing":
+			case 'indexing':
 				return <File className="h-3.5 w-3.5 text-green-500" />;
-			case "thumbnails":
+			case 'thumbnails':
 				return <File className="h-3.5 w-3.5 text-purple-500" />;
-			case "metadata":
+			case 'metadata':
 				return <Code className="h-3.5 w-3.5 text-yellow-500" />;
-			case "error":
+			case 'error':
 				return <FileWarning className="h-3.5 w-3.5 text-red-500" />;
-			case "complete":
+			case 'complete':
 				return <File className="h-3.5 w-3.5 text-emerald-500" />;
 			default:
 				return <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />;
@@ -127,10 +123,10 @@ export function FolderProgressDetails({
 	// Determinar el mensaje de estado a mostrar
 	const getStatusMessage = useCallback(() => {
 		if (isComplete) {
-			return "Proceso completado";
+			return 'Proceso completado';
 		}
 
-		return status.status || "Procesando...";
+		return status.status || 'Procesando...';
 	}, [isComplete, status.status]);
 
 	// Obtener el progreso actual
@@ -138,14 +134,12 @@ export function FolderProgressDetails({
 
 	// Averiguar si se debe mostrar el contador de archivos
 	const showFileCounter =
-		(isProcessing || isComplete) &&
-		typeof status.filesProcessed === "number" &&
-		typeof status.totalFiles === "number";
+		(isProcessing || isComplete) && typeof status.filesProcessed === 'number' && typeof status.totalFiles === 'number';
 
 	// Formatear el tiempo de procesamiento
 	const getProcessingTime = useCallback(() => {
 		if (!status.startTime) {
-			return "";
+			return '';
 		}
 
 		const endTime = status.endTime || Date.now();
@@ -165,18 +159,18 @@ export function FolderProgressDetails({
 	// Velocidad de procesamiento
 	const getProcessingSpeed = useCallback(() => {
 		if (!status.extendedStats?.processingSpeed) {
-			return "";
+			return '';
 		}
 
 		const speed = status.extendedStats.processingSpeed;
 		if (speed < 0.1) {
-			return "<0.1 archivos/s";
+			return '<0.1 archivos/s';
 		}
 		return `${speed.toFixed(1)} archivos/s`;
 	}, [status.extendedStats?.processingSpeed]);
 
 	return (
-		<div className={cn("space-y-2 animate-in fade-in", className)}>
+		<div className={cn('space-y-2 animate-in fade-in', className)}>
 			{/* Barra de progreso con animación */}
 			<div className="space-y-1">
 				<div className="flex items-center justify-between mb-1">
@@ -205,9 +199,7 @@ export function FolderProgressDetails({
 
 					<div className="text-xs text-muted-foreground">
 						{getProcessingTime()}
-						{status.extendedStats?.processingSpeed && !isComplete
-							? ` ⋅ ${getProcessingSpeed()}`
-							: ""}
+						{status.extendedStats?.processingSpeed && !isComplete ? ` ⋅ ${getProcessingSpeed()}` : ''}
 					</div>
 				</div>
 
@@ -227,9 +219,7 @@ export function FolderProgressDetails({
 					{status.currentFile && !isComplete && (
 						<div className="text-[10px] text-muted-foreground truncate max-w-[200px]">
 							<span>Archivo: </span>
-							<span className="font-mono">
-								{status.currentFile.split("/").pop()}
-							</span>
+							<span className="font-mono">{status.currentFile.split('/').pop()}</span>
 						</div>
 					)}
 
@@ -258,19 +248,17 @@ export function FolderProgressDetails({
 				{status.errors && status.errors.length > 0 && (
 					<motion.div
 						initial={{ opacity: 0, height: 0 }}
-						animate={{ opacity: 1, height: "auto" }}
+						animate={{ opacity: 1, height: 'auto' }}
 						exit={{ opacity: 0, height: 0 }}
 						className="text-[10px] text-destructive border border-destructive/20 rounded p-1 bg-destructive/5 mt-1"
 					>
 						<div className="font-medium">Errores encontrados:</div>
 						{status.errors.slice(0, 3).map((error, index) => (
 							<div key={`error-${index}-${error.file}`} className="truncate">
-								• {error.file.split("/").pop()}: {error.error}
+								• {error.file.split('/').pop()}: {error.error}
 							</div>
 						))}
-						{status.errors.length > 3 && (
-							<div>Y {status.errors.length - 3} más...</div>
-						)}
+						{status.errors.length > 3 && <div>Y {status.errors.length - 3} más...</div>}
 					</motion.div>
 				)}
 			</AnimatePresence>

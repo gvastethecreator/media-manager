@@ -347,7 +347,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Actualizar perfil (o crear uno nuevo si id es null)
 	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
 		try {
-			let _profile;
+			let _profile: Profile | null = null;
 
 			if (id) {
 				// Actualizar perfil existente

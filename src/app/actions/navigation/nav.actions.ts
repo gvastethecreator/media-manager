@@ -142,7 +142,26 @@ export async function getNavigationData(): Promise<NavigationData> {
 			concepts: concepts.status === 'fulfilled' ? concepts.value : [],
 			prompts: prompts.status === 'fulfilled' ? prompts.value : [],
 			notes: notes.status === 'fulfilled' ? notes.value : [],
-			stats: stats.status === 'fulfilled' ? stats.value : defaultStats,
+			stats:
+				stats.status === 'fulfilled' && stats.value
+					? {
+							totalImages: stats.value.totalImages,
+							totalFolders: stats.value.totalFolders,
+							totalCollections: stats.value.totalCollections,
+							totalTags: stats.value.totalTags,
+							totalAlbums: stats.value.totalAlbums,
+							totalCharacters: stats.value.totalCharacters,
+							totalPlaces: stats.value.totalPlaces,
+							totalObjects: stats.value.totalWorldItems,
+							totalFavorites: stats.value.totalFavorites,
+							totalActivities: stats.value.totalActivities,
+							totalSize: stats.value.totalSize,
+							totalViews: stats.value.totalViews,
+							totalDownloads: stats.value.totalDownloads,
+							topTags: stats.value.topTags,
+							recentActivity: stats.value.recentActivity,
+						}
+					: defaultStats,
 		};
 	} catch (error) {
 		navLogger.error('❌ Error obteniendo datos de navegación:', error);

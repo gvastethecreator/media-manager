@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { NoteCard } from "@/components/features/entity-cards/cards/note-card";
-import { EntityCreationDialog } from "@/components/features/entity-cards/dialogs/entity-creation-dialog";
-import type { NoteFormData } from "@/components/features/entity-cards/forms/entity-types";
-import { NoteForm } from "@/components/features/entity-cards/forms/note-form";
-import { Separator } from "@/components/ui/separator";
-import { logger } from "@/lib/logger/logger";
-import { useNoteStore } from "@/store/entities/note.store";
-import * as React from "react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { NoteCard } from '@/components/features/entity-cards/cards/note-card';
+import { EntityCreationDialog } from '@/components/features/entity-cards/dialogs/entity-creation-dialog';
+import type { NoteFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { NoteForm } from '@/components/features/entity-cards/forms/note-form';
+import { Separator } from '@/components/ui/separator';
+import { logger } from '@/lib/logger/logger';
+import { useNoteStore } from '@/store/entities/note.store';
+import * as React from 'react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-const noteDialogLogger = logger.withContext("NoteDialog");
+const noteDialogLogger = logger.withContext('NoteDialog');
 
 export function NoteDialog() {
 	// Store de notas
@@ -19,15 +19,15 @@ export function NoteDialog() {
 
 	// Estado para el formulario
 	const [formData, setFormData] = useState<NoteFormData>({
-		name: "",
-		emoji: "📝",
-		color: "#3b82f6", // Azul predeterminado
-		description: "",
-		title: "",
-		content: "",
-		category: "personal",
+		name: '',
+		emoji: '📝',
+		color: '#3b82f6', // Azul predeterminado
+		description: '',
+		title: '',
+		content: '',
+		category: 'personal',
 		priority: 0,
-		status: "draft",
+		status: 'draft',
 		tags: [],
 		featuredImage: null,
 		isFavorite: false,
@@ -45,16 +45,16 @@ export function NoteDialog() {
 	// Función para manejar el guardado de la nota
 	const handleSave = async (imageId: string | null) => {
 		try {
-			noteDialogLogger.info("📥 Guardando nota", { formData });
+			noteDialogLogger.info('📥 Guardando nota', { formData });
 
 			// Crear la nota
 			const savedNote = await createNote(formData);
 
-			noteDialogLogger.info("✅ Nota guardada", savedNote);
+			noteDialogLogger.info('✅ Nota guardada', savedNote);
 
 			// Si se proporcionó un ID de imagen, asociar la nota con esa imagen
 			if (imageId && savedNote) {
-				noteDialogLogger.info("🔗 Asociando imagen a nota", {
+				noteDialogLogger.info('🔗 Asociando imagen a nota', {
 					imageId,
 					noteId: savedNote.id,
 				});
@@ -66,8 +66,8 @@ export function NoteDialog() {
 
 			return savedNote;
 		} catch (error) {
-			noteDialogLogger.error("❌ Error al guardar la nota", error);
-			toast.error("Error al crear la nota");
+			noteDialogLogger.error('❌ Error al guardar la nota', error);
+			toast.error('Error al crear la nota');
 			throw error;
 		}
 	};
@@ -76,15 +76,15 @@ export function NoteDialog() {
 	const handleCancel = () => {
 		// Restablecer el formulario
 		setFormData({
-			name: "",
-			emoji: "📝",
-			color: "#3b82f6",
-			description: "",
-			title: "",
-			content: "",
-			category: "personal",
+			name: '',
+			emoji: '📝',
+			color: '#3b82f6',
+			description: '',
+			title: '',
+			content: '',
+			category: 'personal',
 			priority: 0,
-			status: "draft",
+			status: 'draft',
 			tags: [],
 			featuredImage: null,
 			isFavorite: false,
@@ -108,16 +108,13 @@ export function NoteDialog() {
 
 				{/* Previsualización */}
 				<div className="flex flex-col space-y-4">
-					<h3 className="text-sm font-semibold text-muted-foreground">
-						Vista previa
-					</h3>
+					<h3 className="text-sm font-semibold text-muted-foreground">Vista previa</h3>
 					<Separator />
 					<div className="flex-1 rounded-lg border p-4">
 						<NoteCard data={formData} isPreview={true} />
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Esta es una previsualización de la nota. Los campos opcionales se
-						mostrarán solo si contienen información.
+						Esta es una previsualización de la nota. Los campos opcionales se mostrarán solo si contienen información.
 					</p>
 				</div>
 			</div>

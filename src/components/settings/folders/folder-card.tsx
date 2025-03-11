@@ -90,7 +90,7 @@ export function FolderCard({
 		if (!isReindexing && !isComplete) {
 			setShowCompleteAnimation(false);
 		}
-	}, [isReindexing, isComplete, processStatus, folder.id, isProcessing]);
+	}, [isReindexing, isComplete, processStatus, folder.id]);
 
 	// Obtener mensaje de estado
 	const getStatusMessage = useCallback(() => {

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import type { PlaceFormData } from "@/components/features/entity-cards/forms/entity-types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { formatBytes } from "@/lib/utils";
-import type { Place } from "@prisma/client";
+import type { PlaceFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils';
+import type { Place } from '@prisma/client';
 import {
 	Building2,
 	Clock,
@@ -23,10 +23,10 @@ import {
 	Trash2,
 	TreePine,
 	Users,
-} from "lucide-react";
-import { motion } from "motion/react";
-import * as React from "react";
-import { useEffect, useRef } from "react";
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
+import { useEffect, useRef } from 'react';
 
 type CardData =
 	| (Place & {
@@ -48,13 +48,13 @@ interface PlaceCardProps {
 
 const getClimateIcon = (climate: string) => {
 	switch (climate.toLowerCase()) {
-		case "tropical":
+		case 'tropical':
 			return <TreePine className="h-4 w-4" />;
-		case "árido":
+		case 'árido':
 			return <Mountain className="h-4 w-4" />;
-		case "templado":
+		case 'templado':
 			return <Cloud className="h-4 w-4" />;
-		case "polar":
+		case 'polar':
 			return <Compass className="h-4 w-4" />;
 		default:
 			return <Globe className="h-4 w-4" />;
@@ -63,13 +63,13 @@ const getClimateIcon = (climate: string) => {
 
 const getTypeIcon = (type: string) => {
 	switch (type.toLowerCase()) {
-		case "ciudad":
+		case 'ciudad':
 			return <Building2 className="h-4 w-4" />;
-		case "fortaleza":
+		case 'fortaleza':
 			return <Shield className="h-4 w-4" />;
-		case "ruinas":
+		case 'ruinas':
 			return <Scroll className="h-4 w-4" />;
-		case "mazmorra":
+		case 'mazmorra':
 			return <Skull className="h-4 w-4" />;
 		default:
 			return <MapPin className="h-4 w-4" />;
@@ -78,23 +78,16 @@ const getTypeIcon = (type: string) => {
 
 function getRandomGradient() {
 	const gradients = [
-		"from-green-500/20 to-emerald-500/20",
-		"from-blue-500/20 to-cyan-500/20",
-		"from-yellow-500/20 to-amber-500/20",
-		"from-indigo-500/20 to-violet-500/20",
-		"from-red-500/20 to-pink-500/20",
+		'from-green-500/20 to-emerald-500/20',
+		'from-blue-500/20 to-cyan-500/20',
+		'from-yellow-500/20 to-amber-500/20',
+		'from-indigo-500/20 to-violet-500/20',
+		'from-red-500/20 to-pink-500/20',
 	];
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-export function PlaceCard({
-	data,
-	isPreview = false,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-}: PlaceCardProps) {
+export function PlaceCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: PlaceCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const gradient = getRandomGradient();
@@ -128,8 +121,8 @@ export function PlaceCard({
 		return (
 			<motion.div
 				className={cn(
-					"group relative flex h-52 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary",
-					isHovered && "shadow-lg",
+					'group relative flex h-52 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary',
+					isHovered && 'shadow-lg',
 					className
 				)}
 				initial={{ opacity: 0, y: 10 }}
@@ -141,9 +134,9 @@ export function PlaceCard({
 				{/* Gradiente de fondo */}
 				<div
 					className={cn(
-						"absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300",
+						'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
 						gradient,
-						isHovered && "opacity-80"
+						isHovered && 'opacity-80'
 					)}
 					style={{
 						backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
@@ -160,14 +153,12 @@ export function PlaceCard({
 							<MapPin className="h-5 w-5 text-white" />
 						</div>
 						<div>
-							<h3 className="text-xl font-semibold line-clamp-1">
-								{data.name || "Sin nombre"}
-							</h3>
-							{data && "category" in data && data.category && (
+							<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
+							{data && 'category' in data && data.category && (
 								<p className="text-sm text-muted-foreground">{data.category}</p>
 							)}
 						</div>
-						{data && "climate" in data && data.climate && (
+						{data && 'climate' in data && data.climate && (
 							<Badge variant="outline" className="ml-auto">
 								{data.climate}
 							</Badge>
@@ -175,27 +166,19 @@ export function PlaceCard({
 					</div>
 
 					{/* Descripción */}
-					{data.description && (
-						<p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-							{data.description}
-						</p>
-					)}
+					{data.description && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
 
 					{/* Atributos */}
 					<div className="mt-4 grid grid-cols-2 gap-2">
-						{data && "climate" in data && data.climate && (
+						{data && 'climate' in data && data.climate && (
 							<div className="flex items-center space-x-2">
-								<span className="text-xs font-medium text-muted-foreground">
-									Clima:
-								</span>
+								<span className="text-xs font-medium text-muted-foreground">Clima:</span>
 								<span className="text-xs">{data.climate}</span>
 							</div>
 						)}
-						{data && "government" in data && data.government && (
+						{data && 'government' in data && data.government && (
 							<div className="flex items-center space-x-2">
-								<span className="text-xs font-medium text-muted-foreground">
-									Gobierno:
-								</span>
+								<span className="text-xs font-medium text-muted-foreground">Gobierno:</span>
 								<span className="text-xs line-clamp-1">{data.government}</span>
 							</div>
 						)}
@@ -204,9 +187,7 @@ export function PlaceCard({
 					{/* Detalles */}
 					<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
 						<div className="flex items-center space-x-2">
-							<span className="inline-flex items-center rounded-full border px-2 py-0.5">
-								{data.emoji || "🗺️"}
-							</span>
+							<span className="inline-flex items-center rounded-full border px-2 py-0.5">{data.emoji || '🗺️'}</span>
 						</div>
 						<div className="flex items-center space-x-2">
 							<span className="flex items-center">Lugar</span>
@@ -220,8 +201,8 @@ export function PlaceCard({
 	return (
 		<motion.div
 			className={cn(
-				"group h-[420px] rounded-lg overflow-hidden relative shadow-md hover:shadow-lg",
-				"transition-shadow duration-300",
+				'group h-[420px] rounded-lg overflow-hidden relative shadow-md hover:shadow-lg',
+				'transition-shadow duration-300',
 				className
 			)}
 			onClick={onClick}
@@ -233,8 +214,8 @@ export function PlaceCard({
 			<div
 				className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/40"
 				style={{
-					backgroundSize: "400% 400%",
-					animation: isHovered ? "gradient 8s ease infinite" : "none",
+					backgroundSize: '400% 400%',
+					animation: isHovered ? 'gradient 8s ease infinite' : 'none',
 				}}
 			/>
 
@@ -245,12 +226,12 @@ export function PlaceCard({
 					backgroundImage: `
             radial-gradient(
               circle at 10% 10%,
-              ${data?.color || "#22c55e"}22,
+              ${data?.color || '#22c55e'}22,
               transparent 40%
             ),
             radial-gradient(
               circle at 90% 90%,
-              ${data?.color || "#22c55e"}22,
+              ${data?.color || '#22c55e'}22,
               transparent 40%
             )
           `,
@@ -263,15 +244,15 @@ export function PlaceCard({
 					<div
 						className="h-12 w-12 rounded-lg flex items-center justify-center"
 						style={{
-							backgroundColor: data?.color || "#22c55e",
-							boxShadow: `0 0 10px ${data?.color || "#22c55e"}44`,
+							backgroundColor: data?.color || '#22c55e',
+							boxShadow: `0 0 10px ${data?.color || '#22c55e'}44`,
 						}}
 					>
-						<span className="text-2xl text-white">{data?.emoji || "🗺️"}</span>
+						<span className="text-2xl text-white">{data?.emoji || '🗺️'}</span>
 					</div>
 					<div className="ml-3 flex-1">
-						<h3 className="text-xl font-bold">{data?.name || "Sin nombre"}</h3>
-						{data && "category" in data && data.category && (
+						<h3 className="text-xl font-bold">{data?.name || 'Sin nombre'}</h3>
+						{data && 'category' in data && data.category && (
 							<div className="flex items-center text-sm text-muted-foreground">
 								<MapPin className="h-3.5 w-3.5 mr-1" />
 								<span>{data.category}</span>
@@ -282,13 +263,13 @@ export function PlaceCard({
 
 				{/* Características principales */}
 				<div className="grid grid-cols-2 gap-2 mb-4">
-					{data && "climate" in data && data.climate && (
+					{data && 'climate' in data && data.climate && (
 						<div className="flex items-center space-x-1 text-sm">
 							{getClimateIcon(data.climate)}
 							<span className="text-muted-foreground">{data.climate}</span>
 						</div>
 					)}
-					{data && "type" in data && data.type && (
+					{data && 'type' in data && data.type && (
 						<div className="flex items-center space-x-1 text-sm ml-4">
 							{getTypeIcon(data.type)}
 							<span className="text-muted-foreground">{data.type}</span>
@@ -304,13 +285,13 @@ export function PlaceCard({
 				)}
 
 				{/* Gobierno y población (si existen) */}
-				{data && "government" in data && data.government && (
+				{data && 'government' in data && data.government && (
 					<div className="mb-3 flex items-center text-sm">
 						<Users className="h-4 w-4 mr-2 text-muted-foreground" />
 						<span>Gobierno: {data.government}</span>
 					</div>
 				)}
-				{data && "population" in data && data.population && data.population > 0 && (
+				{data && 'population' in data && data.population && data.population > 0 && (
 					<div className="mb-3 flex items-center text-sm">
 						<Users className="h-4 w-4 mr-2 text-muted-foreground" />
 						<span>Población: {data.population.toLocaleString()}</span>
@@ -319,19 +300,19 @@ export function PlaceCard({
 
 				{/* Estadísticas */}
 				<div className="mt-auto">
-					{data && "_count" in data && data._count && (
+					{data && '_count' in data && data._count && (
 						<div className="text-xs text-muted-foreground mt-1">
 							<Badge variant="outline">{`${data._count.images || 0} imágenes`}</Badge>
 						</div>
 					)}
 
-					{data && "totalSize" in data && data.totalSize && (
+					{data && 'totalSize' in data && data.totalSize && (
 						<div className="text-xs text-muted-foreground mt-1">
 							<Badge variant="outline">{`${formatBytes(data.totalSize)}`}</Badge>
 						</div>
 					)}
 
-					{data && "recentImages" in data && data.recentImages && data.recentImages.length > 0 && (
+					{data && 'recentImages' in data && data.recentImages && data.recentImages.length > 0 && (
 						<div className="grid grid-cols-3 gap-1 mb-2">
 							{data.recentImages.slice(0, 3).map((img, i) => (
 								<div
@@ -339,11 +320,7 @@ export function PlaceCard({
 									className="relative aspect-square rounded-md overflow-hidden bg-muted"
 								>
 									{img ? (
-										<img
-											src={img}
-											alt=""
-											className="object-cover w-full h-full"
-										/>
+										<img src={img} alt="" className="object-cover w-full h-full" />
 									) : (
 										<MapPin className="h-4 w-4 absolute inset-0 m-auto text-muted-foreground" />
 									)}
@@ -356,8 +333,8 @@ export function PlaceCard({
 				{/* Acciones */}
 				<div
 					className={cn(
-						"absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200",
-						isHovered && "opacity-100"
+						'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
+						isHovered && 'opacity-100'
 					)}
 				>
 					{onEdit && (
