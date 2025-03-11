@@ -249,8 +249,11 @@ export function useNavigation() {
 					? {
 							id: currentCollectionId,
 							name: currentCollection.name,
-							// Propiedades básicas comunes
+							// Propiedades que espera BreadcrumbsProps
 							itemType: 'collection',
+							// Añadir propiedades opcionales que puedan ser útiles
+							color: currentCollection.color,
+							emoji: currentCollection.emoji,
 						}
 					: undefined;
 			case 'folder-content':
@@ -258,7 +261,7 @@ export function useNavigation() {
 					? {
 							id: currentFolderId,
 							name: currentFolder.name,
-							// Propiedades básicas comunes
+							// Propiedades que espera BreadcrumbsProps
 							itemType: 'folder',
 						}
 					: undefined;

@@ -362,7 +362,7 @@ export function useFolders() {
 			// Mostrar error
 			setError(error instanceof Error ? error.message : 'Error en la reindexación global');
 		}
-	}, [setReindexAllDialogOpen, setShowReindexDialog, setGlobalReindexStatus, setError]);
+	}, [setError]);
 
 	// Cargar datos iniciales
 	useEffect(() => {

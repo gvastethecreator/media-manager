@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils/utils";
-import type * as React from "react";
+import { cn } from '@/lib/utils/utils';
+import type * as React from 'react';
 
 type TColorProp = string | string[];
 
@@ -30,39 +30,36 @@ export function ShineBorder({
 	children,
 	borderWidth = 1,
 	borderRadius = 8,
-	color = "#ffffff",
+	color = '#ffffff',
 }: ShineBorderProps) {
 	return (
 		<div
 			style={
 				{
-					"--border-width": `${borderWidth}px`,
-					"--border-radius": `${borderRadius}px`,
+					'--border-width': `${borderWidth}px`,
+					'--border-radius': `${borderRadius}px`,
 				} as React.CSSProperties
 			}
 			className={cn(
-				"relative w-full rounded-(--border-radius) p-(--border-width) transition-all",
-				"border border-transparent",
+				'relative w-full rounded-(--border-radius) p-(--border-width) transition-all',
+				'border border-transparent',
 				className
 			)}
 		>
 			<div
 				style={
 					{
-						"--mask-width": `${borderWidth}px`,
-						"--mask-image": "linear-gradient(black, black)",
-						"--mask-compound": "exclude",
-						"--mask-linear-gradient":
-							"linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-						"--background-radial-gradient": `radial-gradient(transparent,transparent, ${Array.isArray(color) ? color.join(",") : color},transparent,transparent)`,
+						'--mask-width': `${borderWidth}px`,
+						'--mask-image': 'linear-gradient(black, black)',
+						'--mask-compound': 'exclude',
+						'--mask-linear-gradient': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+						'--background-radial-gradient': `radial-gradient(transparent,transparent, ${Array.isArray(color) ? color.join(',') : color},transparent,transparent)`,
 					} as React.CSSProperties
 				}
 				className="relative h-full w-full rounded-(--border-radius) overflow-hidden pointer-events-none before:bg-shine-size before:absolute before:inset-0 before:size-full before:rounded-(--border-radius) before:p-(--border-width) before:will-change-[background-position] before:content-[''] before:[-webkit-mask-composite:xor]! before:[mask-composite:exclude]! before:[background-image:var(--background-radial-gradient)] before:[background-size:300%_300%] before:[mask:var(--mask-linear-gradient)] motion-safe:before:animate-shine"
 			/>
 			<div className="absolute inset-0 rounded-(--border-radius) p-(--border-width)">
-				<div className="h-full w-full rounded-(--border-radius)">
-					{children}
-				</div>
+				<div className="h-full w-full rounded-(--border-radius)">{children}</div>
 			</div>
 		</div>
 	);

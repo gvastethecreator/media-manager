@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import type { NavigationData } from "@/app/actions/navigation/nav.actions";
-import type { WorldItemWithStats } from "@/app/actions/world-items/world-item.actions";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useProfileContext } from "@/lib/contexts";
-import { cn } from "@/lib/utils/utils";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import { useStatsBaseStore } from "@/store/stats.store";
-import { useUIStore } from "@/store/ui.store";
-import type { ViewType } from "@/types/file-item";
+import type { NavigationData } from '@/app/actions/navigation/nav.actions';
+import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useProfileContext } from '@/lib/contexts';
+import { cn } from '@/lib/utils/utils';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { useStatsBaseStore } from '@/store/stats.store';
+import { useUIStore } from '@/store/ui.store';
+import type { ViewType } from '@/types/file-item';
 import {
 	BookImage,
 	Box,
@@ -35,77 +35,74 @@ import {
 	Terminal,
 	UploadCloud,
 	User2,
-} from "lucide-react";
-import type React from "react";
-import { useCallback, useMemo, useState } from "react";
-import {
-	type CategoryChild,
-	NavCategoryChildren,
-} from "./nav-category-children";
-import { NavCategoryItem } from "./nav-category-item";
-import { NavMainNavigation } from "./nav-main-navigation";
-import { NavPanelHeader } from "./nav-panel-header";
+} from 'lucide-react';
+import type React from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { type CategoryChild, NavCategoryChildren } from './nav-category-children';
+import { NavCategoryItem } from './nav-category-item';
+import { NavMainNavigation } from './nav-main-navigation';
+import { NavPanelHeader } from './nav-panel-header';
 
 const categories = [
 	{
-		id: "folders" as ViewType,
+		id: 'folders' as ViewType,
 		icon: FolderIcon,
-		label: "Carpetas",
-		color: "#22c55e",
+		label: 'Carpetas',
+		color: '#22c55e',
 	},
 	{
-		id: "collections" as ViewType,
+		id: 'collections' as ViewType,
 		icon: BookImage,
-		label: "Colecciones",
-		color: "#ef4444",
+		label: 'Colecciones',
+		color: '#ef4444',
 	},
 	{
-		id: "albums" as ViewType,
+		id: 'albums' as ViewType,
 		icon: Camera,
-		label: "Álbumes",
-		color: "#8b5cf6",
+		label: 'Álbumes',
+		color: '#8b5cf6',
 	},
 	{
-		id: "characters" as ViewType,
+		id: 'characters' as ViewType,
 		icon: User2,
-		label: "Personajes",
-		color: "#ec4899",
+		label: 'Personajes',
+		color: '#ec4899',
 	},
 	{
-		id: "places" as ViewType,
+		id: 'places' as ViewType,
 		icon: MapPin,
-		label: "Lugares",
-		color: "#14b8a6",
+		label: 'Lugares',
+		color: '#14b8a6',
 	},
 	{
-		id: "world-items" as ViewType,
+		id: 'world-items' as ViewType,
 		icon: Box,
-		label: "Objetos",
-		color: "#f59e0b",
+		label: 'Objetos',
+		color: '#f59e0b',
 	},
 	{
-		id: "concepts" as ViewType,
+		id: 'concepts' as ViewType,
 		icon: Lightbulb,
-		label: "Conceptos",
-		color: "#3b82f6",
+		label: 'Conceptos',
+		color: '#3b82f6',
 	},
 	{
-		id: "prompts" as ViewType,
+		id: 'prompts' as ViewType,
 		icon: Terminal,
-		label: "Prompts",
-		color: "#10b981",
+		label: 'Prompts',
+		color: '#10b981',
 	},
 	{
-		id: "notes" as ViewType,
+		id: 'notes' as ViewType,
 		icon: StickyNote,
-		label: "Notas",
-		color: "#a855f7",
+		label: 'Notas',
+		color: '#a855f7',
 	},
 	{
-		id: "tags" as ViewType,
+		id: 'tags' as ViewType,
 		icon: TagIcon,
-		label: "Etiquetas",
-		color: "#f59e0b",
+		label: 'Etiquetas',
+		color: '#f59e0b',
 	},
 ];
 
@@ -146,9 +143,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	} = initialData || {};
 
 	// Estado para controlar el colapso de categorías
-	const [collapsedCategories, setCollapsedCategories] = useState<
-		Record<string, boolean>
-	>({});
+	const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
 	// Datos simulados para las nuevas entidades
 	const concepts = useMemo(() => [], []);
@@ -188,26 +183,26 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const _hasCategoryChildSelected = useCallback(
 		(categoryId: ViewType): boolean => {
 			switch (categoryId) {
-				case "collections":
-					return currentView === "collection-content";
-				case "folders":
-					return currentView === "folder-content";
-				case "tags":
-					return currentView === "tag-content";
-				case "albums":
-					return currentView === "album-content";
-				case "characters":
-					return currentView === "character-content";
-				case "places":
-					return currentView === "place-content";
-				case "world-items":
-					return currentView === "world-item-content";
-				case "concepts":
-					return currentView === "concept-content";
-				case "prompts":
-					return currentView === "prompt-content";
-				case "notes":
-					return currentView === "note-content";
+				case 'collections':
+					return currentView === 'collection-content';
+				case 'folders':
+					return currentView === 'folder-content';
+				case 'tags':
+					return currentView === 'tag-content';
+				case 'albums':
+					return currentView === 'album-content';
+				case 'characters':
+					return currentView === 'character-content';
+				case 'places':
+					return currentView === 'place-content';
+				case 'world-items':
+					return currentView === 'world-item-content';
+				case 'concepts':
+					return currentView === 'concept-content';
+				case 'prompts':
+					return currentView === 'prompt-content';
+				case 'notes':
+					return currentView === 'note-content';
 				default:
 					return false;
 			}
@@ -219,25 +214,25 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getSelectedChildId = useCallback(
 		(categoryId: ViewType): string | null => {
 			switch (categoryId) {
-				case "collections":
+				case 'collections':
 					return currentCollectionId;
-				case "folders":
+				case 'folders':
 					return currentFolderId;
-				case "tags":
+				case 'tags':
 					return currentTagId;
-				case "albums":
+				case 'albums':
 					return currentAlbumId;
-				case "characters":
+				case 'characters':
 					return currentCharacterId;
-				case "places":
+				case 'places':
 					return currentPlaceId;
-				case "world-items":
+				case 'world-items':
 					return currentWorldItemId;
-				case "concepts":
+				case 'concepts':
 					return currentConceptId;
-				case "prompts":
+				case 'prompts':
 					return currentPromptId;
-				case "notes":
+				case 'notes':
 					return currentNoteId;
 				default:
 					return null;
@@ -261,26 +256,26 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const handleCategoryClick = useCallback(
 		(id: ViewType) => {
 			// Limpiar selecciones anteriores para evitar estados huérfanos
-			if (id !== "collection-content") {
-				setCurrentCollection("");
+			if (id !== 'collection-content') {
+				setCurrentCollection('');
 			}
-			if (id !== "folder-content") {
-				setCurrentFolder("");
+			if (id !== 'folder-content') {
+				setCurrentFolder('');
 			}
-			if (id !== "tag-content") {
-				setCurrentTag("");
+			if (id !== 'tag-content') {
+				setCurrentTag('');
 			}
-			if (id !== "album-content") {
-				setCurrentAlbum("");
+			if (id !== 'album-content') {
+				setCurrentAlbum('');
 			}
-			if (id !== "character-content") {
-				setCurrentCharacter("");
+			if (id !== 'character-content') {
+				setCurrentCharacter('');
 			}
-			if (id !== "place-content") {
-				setCurrentPlace("");
+			if (id !== 'place-content') {
+				setCurrentPlace('');
 			}
-			if (id !== "world-item-content") {
-				setCurrentWorldItem("");
+			if (id !== 'world-item-content') {
+				setCurrentWorldItem('');
 			}
 
 			// Actualizar la vista actual
@@ -299,24 +294,21 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	);
 
 	// Agregar una nueva función para manejar el colapso/expansión
-	const handleCollapseToggle = useCallback(
-		(id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
-			event.stopPropagation();
-			setCollapsedCategories((prev) => ({
-				...prev,
-				[id]: !prev[id],
-			}));
-		},
-		[]
-	);
+	const handleCollapseToggle = useCallback((id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
+		event.stopPropagation();
+		setCollapsedCategories((prev) => ({
+			...prev,
+			[id]: !prev[id],
+		}));
+	}, []);
 
 	const handleOpenSettings = useCallback(() => {
-		setCurrentView("settings");
+		setCurrentView('settings');
 		toggleSettings();
 	}, [toggleSettings, setCurrentView]);
 
 	const handleOpenDevelopment = useCallback(() => {
-		setCurrentView("development");
+		setCurrentView('development');
 	}, [setCurrentView]);
 
 	const handleMainNavigate = useCallback(
@@ -330,15 +322,15 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
 			// Limpiar otras selecciones
-			setCurrentFolder("");
-			setCurrentTag("");
-			setCurrentAlbum("");
-			setCurrentCharacter("");
-			setCurrentPlace("");
-			setCurrentWorldItem("");
+			setCurrentFolder('');
+			setCurrentTag('');
+			setCurrentAlbum('');
+			setCurrentCharacter('');
+			setCurrentPlace('');
+			setCurrentWorldItem('');
 
 			// Establecer vista y colección actual
-			setCurrentView("collection-content");
+			setCurrentView('collection-content');
 			setCurrentCollection(collectionId);
 		},
 		[
@@ -357,15 +349,15 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
 			// Limpiar otras selecciones
-			setCurrentCollection("");
-			setCurrentTag("");
-			setCurrentAlbum("");
-			setCurrentCharacter("");
-			setCurrentPlace("");
-			setCurrentWorldItem("");
+			setCurrentCollection('');
+			setCurrentTag('');
+			setCurrentAlbum('');
+			setCurrentCharacter('');
+			setCurrentPlace('');
+			setCurrentWorldItem('');
 
 			// Establecer vista y carpeta actual
-			setCurrentView("folder-content");
+			setCurrentView('folder-content');
 			setCurrentFolder(folderId);
 		},
 		[
@@ -382,7 +374,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleTagClick = useCallback(
 		(tagName: string) => {
-			setCurrentView("tag-content");
+			setCurrentView('tag-content');
 			setCurrentTag(tagName);
 		},
 		[setCurrentView, setCurrentTag]
@@ -390,7 +382,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
-			setCurrentView("album-content");
+			setCurrentView('album-content');
 			setCurrentAlbum(albumId);
 		},
 		[setCurrentView, setCurrentAlbum]
@@ -398,7 +390,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
-			setCurrentView("character-content");
+			setCurrentView('character-content');
 			setCurrentCharacter(characterId);
 		},
 		[setCurrentView, setCurrentCharacter]
@@ -406,7 +398,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
-			setCurrentView("place-content");
+			setCurrentView('place-content');
 			setCurrentPlace(placeId);
 		},
 		[setCurrentView, setCurrentPlace]
@@ -414,7 +406,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
-			setCurrentView("world-item-content");
+			setCurrentView('world-item-content');
 			setCurrentWorldItem(worldItemId);
 		},
 		[setCurrentView, setCurrentWorldItem]
@@ -424,25 +416,25 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getCategoryItemCount = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
-				case "collections":
+				case 'collections':
 					return stats?.totalCollections || 0;
-				case "folders":
+				case 'folders':
 					return stats?.totalFolders || 0;
-				case "tags":
+				case 'tags':
 					return stats?.totalTags || 0;
-				case "albums":
+				case 'albums':
 					return stats?.totalAlbums || 0;
-				case "characters":
+				case 'characters':
 					return stats?.totalCharacters || 0;
-				case "places":
+				case 'places':
 					return stats?.totalPlaces || 0;
-				case "world-items":
+				case 'world-items':
 					return stats?.totalObjects || 0;
-				case "concepts":
+				case 'concepts':
 					return concepts.length;
-				case "prompts":
+				case 'prompts':
 					return prompts.length;
-				case "notes":
+				case 'notes':
 					return notes.length;
 				default:
 					return 0;
@@ -455,47 +447,35 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getImagesForCategory = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
-				case "collections":
+				case 'collections':
 					return collections.reduce(
-						(sum: number, collection: { _count?: { images: number } }) =>
-							sum + (collection._count?.images || 0),
+						(sum: number, collection: { _count?: { images: number } }) => sum + (collection._count?.images || 0),
 						0
 					);
-				case "folders":
+				case 'folders':
 					return folders.reduce(
-						(sum: number, folder: { _count?: { images: number } }) =>
-							sum + (folder._count?.images || 0),
+						(sum: number, folder: { _count?: { images: number } }) => sum + (folder._count?.images || 0),
 						0
 					);
-				case "tags":
-					return tags.reduce(
-						(sum: number, tag: { _count?: { images: number } }) =>
-							sum + (tag._count?.images || 0),
-						0
-					);
-				case "albums":
+				case 'tags':
+					return tags.reduce((sum: number, tag: { _count?: { images: number } }) => sum + (tag._count?.images || 0), 0);
+				case 'albums':
 					return albums.reduce(
-						(sum: number, album: { _count?: { images: number } }) =>
-							sum + (album._count?.images || 0),
+						(sum: number, album: { _count?: { images: number } }) => sum + (album._count?.images || 0),
 						0
 					);
-				case "characters":
+				case 'characters':
 					return characters.reduce(
-						(sum: number, character: { _count?: { images: number } }) =>
-							sum + (character._count?.images || 0),
+						(sum: number, character: { _count?: { images: number } }) => sum + (character._count?.images || 0),
 						0
 					);
-				case "places":
+				case 'places':
 					return places.reduce(
-						(sum: number, place: { _count?: { images: number } }) =>
-							sum + (place._count?.images || 0),
+						(sum: number, place: { _count?: { images: number } }) => sum + (place._count?.images || 0),
 						0
 					);
-				case "world-items":
-					return worldItems.reduce(
-						(sum: number, worldItem) => sum + (worldItem._count?.images || 0),
-						0
-					);
+				case 'world-items':
+					return worldItems.reduce((sum: number, worldItem) => sum + (worldItem._count?.images || 0), 0);
 				default:
 					return 0;
 			}
@@ -507,19 +487,19 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getItemClickHandler = useCallback(
 		(categoryId: ViewType) => {
 			switch (categoryId) {
-				case "collections":
+				case 'collections':
 					return handleCollectionClick;
-				case "folders":
+				case 'folders':
 					return handleFolderClick;
-				case "tags":
+				case 'tags':
 					return handleTagClick;
-				case "albums":
+				case 'albums':
 					return handleAlbumClick;
-				case "characters":
+				case 'characters':
 					return handleCharacterClick;
-				case "places":
+				case 'places':
 					return handlePlaceClick;
-				case "world-items":
+				case 'world-items':
 					return handleWorldItemClick;
 				default:
 					return () => {};
@@ -540,42 +520,31 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getCategoryItems = useCallback(
 		(categoryId: ViewType) => {
 			switch (categoryId) {
-				case "collections":
+				case 'collections':
 					return collections as unknown as CategoryChild[];
-				case "folders":
+				case 'folders':
 					return folders as unknown as CategoryChild[];
-				case "tags":
+				case 'tags':
 					return tags as unknown as CategoryChild[];
-				case "albums":
+				case 'albums':
 					return albums as unknown as CategoryChild[];
-				case "characters":
+				case 'characters':
 					return characters as unknown as CategoryChild[];
-				case "places":
+				case 'places':
 					return places as unknown as CategoryChild[];
-				case "world-items":
+				case 'world-items':
 					return worldItems as unknown as CategoryChild[];
-				case "concepts":
+				case 'concepts':
 					return concepts as unknown as CategoryChild[];
-				case "prompts":
+				case 'prompts':
 					return prompts as unknown as CategoryChild[];
-				case "notes":
+				case 'notes':
 					return notes as unknown as CategoryChild[];
 				default:
 					return [] as CategoryChild[];
 			}
 		},
-		[
-			albums,
-			characters,
-			collections,
-			concepts,
-			folders,
-			notes,
-			places,
-			prompts,
-			tags,
-			worldItems,
-		]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems]
 	);
 
 	return (
@@ -589,10 +558,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			<ScrollArea className="flex-1">
 				<div className="p-1 space-y-0">
 					{/* Navegación Principal */}
-					<NavMainNavigation
-						currentView={currentView}
-						onNavigate={handleMainNavigate}
-					/>
+					<NavMainNavigation currentView={currentView} onNavigate={handleMainNavigate} />
 
 					{/* Categorías con Listas */}
 					<div className="mt-0 space-y-0.5">

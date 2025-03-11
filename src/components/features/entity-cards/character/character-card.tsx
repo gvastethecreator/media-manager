@@ -112,6 +112,19 @@ export function CharacterCard({
 		}
 	};
 
+	// Versiones compatibles con el componente Button
+	const handleEditButton = () => {
+		// Simulamos un evento para mantener la lógica existente
+		const syntheticEvent = { stopPropagation: () => {} } as React.MouseEvent;
+		handleEdit(syntheticEvent);
+	};
+
+	const handleDeleteButton = () => {
+		// Simulamos un evento para mantener la lógica existente
+		const syntheticEvent = { stopPropagation: () => {} } as React.MouseEvent;
+		handleDelete(syntheticEvent);
+	};
+
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (onClick) {
 			onClick(e);
@@ -255,11 +268,15 @@ export function CharacterCard({
 								{data.stats
 									.split(",")
 									.slice(0, 6)
-									.map((stat, index) => {
+									.map((stat) => {
 										const [name, value] = stat.split(":");
+										// Usamos el nombre como clave única, si está vacío usamos un ID generado con Math.random
 										return (
 											<div
-												key={`${name}-${index}`}
+												key={
+													name ||
+													`stat-${Math.random().toString(36).substr(2, 9)}`
+												}
 												className="flex flex-col items-center"
 											>
 												<span className="text-gray-500">{name}</span>
@@ -291,7 +308,7 @@ export function CharacterCard({
 									variant="ghost"
 									size="icon"
 									className="h-8 w-8 bg-background/80 hover:bg-background"
-									onClick={(e: React.MouseEvent) => handleEdit(e)}
+									onClick={handleEditButton}
 								>
 									<PencilIcon className="h-4 w-4" />
 								</Button>
@@ -301,7 +318,7 @@ export function CharacterCard({
 									variant="ghost"
 									size="icon"
 									className="h-8 w-8 bg-background/80 hover:bg-background hover:text-destructive"
-									onClick={(e: React.MouseEvent) => handleDelete(e)}
+									onClick={handleDeleteButton}
 								>
 									<Trash2 className="h-4 w-4" />
 								</Button>

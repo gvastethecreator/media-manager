@@ -14,8 +14,20 @@ import {
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils/utils";
-import { AlertCircle, EraserIcon, FolderIcon, RefreshCw } from "lucide-react";
+import {
+	AlertCircle,
+	EraserIcon,
+	FolderIcon,
+	Info,
+	RefreshCw,
+} from "lucide-react";
 import { Folder } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -58,11 +70,11 @@ export function FoldersSection() {
 
 	if (displayError) {
 		return (
-			<Card className="p-4">
-				<div className="flex flex-col gap-2">
+			<Card className="bg-muted/30 rounded-sm">
+				<div className="p-3 flex flex-col gap-2">
 					<div className="flex items-center gap-2 text-destructive">
-						<AlertCircle className="h-3.5 w-3.5" />
-						<p className="text-xs">{displayError}</p>
+						<AlertCircle className="h-4 w-4" />
+						<p className="text-sm">{displayError}</p>
 					</div>
 					<Button
 						variant="outline"
@@ -72,7 +84,7 @@ export function FoldersSection() {
 							setError(null);
 							loadStats();
 						}}
-						className="w-full text-xs"
+						className="mt-1 w-full text-xs"
 					>
 						Reintentar
 					</Button>
@@ -82,13 +94,26 @@ export function FoldersSection() {
 	}
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
-			<CardHeader className="p-2 pb-0 bg-transparent">
-				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-					<span className="flex items-center gap-2 h-7">
-						<FolderIcon className="h-5 w-5" /> Carpetas
-					</span>
+		<Card className="bg-muted/30 rounded-sm">
+			<CardHeader className="p-3 pb-2">
+				<CardTitle className="text-base text-muted-foreground font-medium flex items-center justify-between">
 					<div className="flex items-center gap-2">
+						<FolderIcon className="h-4 w-4 text-primary" />
+						<span>Carpetas</span>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
+								</TooltipTrigger>
+								<TooltipContent side="top" className="text-xs max-w-xs">
+									Administra las carpetas donde se almacenan tus imágenes.
+									Agrega nuevas carpetas y mantén actualizado tu índice.
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+
+					<div className="flex items-center gap-1.5">
 						<Button
 							variant="outline"
 							size="sm"
@@ -99,6 +124,7 @@ export function FoldersSection() {
 							<EraserIcon className="h-3.5 w-3.5 mr-1" />
 							Limpiar caché
 						</Button>
+
 						<Button
 							variant="outline"
 							size="sm"
@@ -108,67 +134,71 @@ export function FoldersSection() {
 						>
 							<RefreshCw
 								className={cn(
-									"h-3.5 w-3.5",
+									"h-3.5 w-3.5 mr-1",
 									(isLoading || globalReindexStatus.isProcessing) &&
 										"animate-spin"
 								)}
 							/>
 							{globalReindexStatus.isProcessing
-								? `Reindexando (${Math.round(globalReindexStatus.progress)}%)`
+								? `${Math.round(globalReindexStatus.progress)}%`
 								: "Reindexar todo"}
 						</Button>
 					</div>
 				</CardTitle>
 			</CardHeader>
+
 			<Separator className="my-0" />
-			<CardContent className="p-2">
+
+			<CardContent className="p-3">
 				<div className="space-y-3">
-					<div className="space-y-3">
-						<FolderForm
-							isProcessing={isProcessing}
-							isLoading={isLoading}
-							onAddFolder={handleAddFolder}
-						/>
+					{/* Formulario para agregar carpetas */}
+					<FolderForm
+						isProcessing={isProcessing}
+						isLoading={isLoading}
+						onAddFolder={handleAddFolder}
+					/>
 
-						<div className="grid grid-cols-1 gap-2">
-							{folders.map((folder) => (
-								<FolderCard
-									key={folder.id}
-									folder={folder}
-									selectedFolder={selectedFolder}
-									isProcessing={isProcessing}
-									processStatus={processStatus}
-									isGloballyProcessing={isGloballyProcessing}
-									onReindex={handleReindexFolder}
-									onToggleAutoReindex={handleAutoReindexToggle}
-									onFolderClick={handleFolderClick}
-									getFolderIndexStatus={getFolderIndexStatus}
-								/>
-							))}
+					{/* Lista de carpetas */}
+					<div className="grid grid-cols-1 gap-2">
+						{folders.map((folder) => (
+							<FolderCard
+								key={folder.id}
+								folder={folder}
+								selectedFolder={selectedFolder}
+								isProcessing={isProcessing}
+								processStatus={processStatus}
+								isGloballyProcessing={isGloballyProcessing}
+								onReindex={handleReindexFolder}
+								onToggleAutoReindex={handleAutoReindexToggle}
+								onFolderClick={handleFolderClick}
+								getFolderIndexStatus={getFolderIndexStatus}
+							/>
+						))}
 
-							{folders.length === 0 && (
-								<motion.div
-									animate={{
-										opacity: [0, 1],
-										y: [20, 0],
-									}}
-									className="py-4 text-center col-span-2"
-								>
-									<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-									<p className="text-xs text-muted-foreground">
-										No hay carpetas indexadas
-									</p>
-									<p className="text-[10px] mt-1 text-muted-foreground/75">
-										Agrega una carpeta para comenzar a indexar imágenes
-									</p>
-								</motion.div>
-							)}
-						</div>
+						{folders.length === 0 && (
+							<motion.div
+								animate={{
+									opacity: [0, 1],
+									y: [20, 0],
+								}}
+								className="py-4 text-center"
+							>
+								<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
+								<p className="text-xs text-muted-foreground">
+									No hay carpetas indexadas
+								</p>
+								<p className="text-[10px] mt-1 text-muted-foreground/75">
+									Agrega una carpeta para comenzar a indexar imágenes
+								</p>
+							</motion.div>
+						)}
 					</div>
 
+					{/* Estadísticas */}
 					<FoldersStats stats={stats} />
 				</div>
 			</CardContent>
+
 			<ReindexConfirmationDialog
 				open={showReindexDialog}
 				onOpenChange={setShowReindexDialog}
@@ -176,6 +206,7 @@ export function FoldersSection() {
 				isProcessing={globalReindexStatus.isProcessing}
 				progress={globalReindexStatus.progress}
 			/>
+
 			<Dialog
 				open={reindexAllDialogOpen}
 				onOpenChange={setReindexAllDialogOpen}

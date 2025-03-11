@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils/utils";
-import { useMemo, useState } from "react";
-import * as React from "react";
-import { Button } from "./button";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils/utils';
+import { useMemo, useState } from 'react';
+import * as React from 'react';
+import { Button } from './button';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 export function PickerExample() {
-	const [background, setBackground] = useState("#B4D455");
+	const [background, setBackground] = useState('#B4D455');
 
 	return (
 		<div
@@ -27,44 +27,35 @@ export function GradientPicker({
 	background: string;
 	setBackground: (background: string) => void;
 }) {
-	const solids = [
-		"#E2E2E2",
-		"#ff75c3",
-		"#ffa647",
-		"#ffe83f",
-		"#9fff5b",
-		"#70e2ff",
-		"#cd93ff",
-		"#09203f",
-	];
+	const solids = ['#E2E2E2', '#ff75c3', '#ffa647', '#ffe83f', '#9fff5b', '#70e2ff', '#cd93ff', '#09203f'];
 
 	const gradients = [
-		"linear-gradient(to top left,#accbee,#e7f0fd)",
-		"linear-gradient(to top left,#d5d4d0,#d5d4d0,#eeeeec)",
-		"linear-gradient(to top left,#000000,#434343)",
-		"linear-gradient(to top left,#09203f,#537895)",
-		"linear-gradient(to top left,#AC32E4,#7918F2,#4801FF)",
-		"linear-gradient(to top left,#f953c6,#b91d73)",
-		"linear-gradient(to top left,#ee0979,#ff6a00)",
-		"linear-gradient(to top left,#F00000,#DC281E)",
-		"linear-gradient(to top left,#00c6ff,#0072ff)",
-		"linear-gradient(to top left,#4facfe,#00f2fe)",
-		"linear-gradient(to top left,#0ba360,#3cba92)",
-		"linear-gradient(to top left,#FDFC47,#24FE41)",
-		"linear-gradient(to top left,#8a2be2,#0000cd,#228b22,#ccff00)",
-		"linear-gradient(to top left,#40E0D0,#FF8C00,#FF0080)",
-		"linear-gradient(to top left,#fcc5e4,#fda34b,#ff7882,#c8699e,#7046aa,#0c1db8,#020f75)",
-		"linear-gradient(to top left,#ff75c3,#ffa647,#ffe83f,#9fff5b,#70e2ff,#cd93ff)",
+		'linear-gradient(to top left,#accbee,#e7f0fd)',
+		'linear-gradient(to top left,#d5d4d0,#d5d4d0,#eeeeec)',
+		'linear-gradient(to top left,#000000,#434343)',
+		'linear-gradient(to top left,#09203f,#537895)',
+		'linear-gradient(to top left,#AC32E4,#7918F2,#4801FF)',
+		'linear-gradient(to top left,#f953c6,#b91d73)',
+		'linear-gradient(to top left,#ee0979,#ff6a00)',
+		'linear-gradient(to top left,#F00000,#DC281E)',
+		'linear-gradient(to top left,#00c6ff,#0072ff)',
+		'linear-gradient(to top left,#4facfe,#00f2fe)',
+		'linear-gradient(to top left,#0ba360,#3cba92)',
+		'linear-gradient(to top left,#FDFC47,#24FE41)',
+		'linear-gradient(to top left,#8a2be2,#0000cd,#228b22,#ccff00)',
+		'linear-gradient(to top left,#40E0D0,#FF8C00,#FF0080)',
+		'linear-gradient(to top left,#fcc5e4,#fda34b,#ff7882,#c8699e,#7046aa,#0c1db8,#020f75)',
+		'linear-gradient(to top left,#ff75c3,#ffa647,#ffe83f,#9fff5b,#70e2ff,#cd93ff)',
 	];
 
 	const defaultTab = useMemo(() => {
-		if (background.includes("url")) {
-			return "image";
+		if (background.includes('url')) {
+			return 'image';
 		}
-		if (background.includes("gradient")) {
-			return "gradient";
+		if (background.includes('gradient')) {
+			return 'gradient';
 		}
-		return "solid";
+		return 'solid';
 	}, [background]);
 
 	return (
@@ -87,7 +78,7 @@ export function GradientPicker({
 							className="rounded-md h-6 w-6 cursor-pointer active:scale-105"
 							onClick={() => setBackground(s)}
 							onKeyDown={(e) => {
-								if (e.key === "Enter" || e.key === " ") {
+								if (e.key === 'Enter' || e.key === ' ') {
 									setBackground(s);
 								}
 							}}
@@ -107,7 +98,7 @@ export function GradientPicker({
 								className="rounded-md h-6 w-6 cursor-pointer active:scale-105"
 								onClick={() => setBackground(s)}
 								onKeyDown={(e) => {
-									if (e.key === "Enter" || e.key === " ") {
+									if (e.key === 'Enter' || e.key === ' ') {
 										setBackground(s);
 									}
 								}}
@@ -131,13 +122,8 @@ const _GradientButton = ({
 	children: React.ReactNode;
 }) => {
 	return (
-		<div
-			className="p-0.5 rounded-md relative bg-cover! bg-center! transition-all"
-			style={{ background }}
-		>
-			<div className="bg-popover/80 rounded-md p-1 text-xs text-center">
-				{children}
-			</div>
+		<div className="p-0.5 rounded-md relative bg-cover! bg-center! transition-all" style={{ background }}>
+			<div className="bg-popover/80 rounded-md p-1 text-xs text-center">{children}</div>
 		</div>
 	);
 };
@@ -150,31 +136,26 @@ interface ColorPickerProps {
 }
 
 const COLORS = [
-	"#ef4444",
-	"#f97316",
-	"#f59e0b",
-	"#eab308",
-	"#84cc16",
-	"#22c55e",
-	"#10b981",
-	"#14b8a6",
-	"#06b6d4",
-	"#0ea5e9",
-	"#3b82f6",
-	"#6366f1",
-	"#8b5cf6",
-	"#a855f7",
-	"#d946ef",
-	"#ec4899",
-	"#f43f5e",
+	'#ef4444',
+	'#f97316',
+	'#f59e0b',
+	'#eab308',
+	'#84cc16',
+	'#22c55e',
+	'#10b981',
+	'#14b8a6',
+	'#06b6d4',
+	'#0ea5e9',
+	'#3b82f6',
+	'#6366f1',
+	'#8b5cf6',
+	'#a855f7',
+	'#d946ef',
+	'#ec4899',
+	'#f43f5e',
 ];
 
-export function ColorPicker({
-	name,
-	defaultValue = "#3b82f6",
-	onChange,
-	className,
-}: ColorPickerProps) {
+export function ColorPicker({ name, defaultValue = '#3b82f6', onChange, className }: ColorPickerProps) {
 	const [color, setColor] = React.useState(defaultValue);
 
 	const handleChange = (newColor: string) => {
@@ -185,11 +166,7 @@ export function ColorPicker({
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button
-					variant="outline"
-					className={cn("w-[60px] p-0", className)}
-					style={{ backgroundColor: color }}
-				>
+				<Button variant="outline" className={cn('w-[60px] p-0', className)} style={{ backgroundColor: color }}>
 					<span className="sr-only">Elegir color</span>
 				</Button>
 			</PopoverTrigger>
