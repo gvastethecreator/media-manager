@@ -1,7 +1,7 @@
 'use client';
 
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
 import type { FolderStats } from '@/types/entities/folders';
 import type { ErrorResponse, ProcessStatus, ReindexAllCompleteData, ReindexAllProgressData } from '@/types/process';

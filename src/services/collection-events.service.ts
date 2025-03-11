@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { emit } from '@/lib/server/events.server';
 import type { Collection } from '@prisma/client';
 

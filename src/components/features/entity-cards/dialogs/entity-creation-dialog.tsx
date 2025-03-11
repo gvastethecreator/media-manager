@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import type { BaseEntityFormData } from '@/components/features/entity-cards/forms/entity-form';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { logger } from '@/lib/logger';
-import { toastService } from '@/lib/toast';
-import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import type { BaseEntityFormData } from "@/components/features/entity-cards/forms/entity-form";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { logger } from "@/lib/logger/logger";
+import { toastService } from "@/lib/toast";
+import type * as React from "react";
+import { useEffect, useState } from "react";
 
-const entityDialogLogger = logger.withContext('EntityDialog');
+const entityDialogLogger = logger.withContext("EntityDialog");
 
 // Props para el componente DialogWrapper
 interface EntityCreationDialogProps {
@@ -31,7 +37,7 @@ export function EntityCreationDialog({
 	isFormValid = true,
 	onSave,
 	onCancel,
-	entityType = 'entidad',
+	entityType = "entidad",
 }: EntityCreationDialogProps) {
 	// Estado para controlar si el diálogo está abierto
 	const [isOpen, setIsOpen] = useState(false);
@@ -88,14 +94,18 @@ export function EntityCreationDialog({
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-auto">
 					{/* Columna del formulario */}
 					<div className="space-y-4">
-						<h3 className="text-sm font-medium text-muted-foreground">Información de {entityType}</h3>
+						<h3 className="text-sm font-medium text-muted-foreground">
+							Información de {entityType}
+						</h3>
 						<div className="space-y-4">{children}</div>
 					</div>
 
 					{/* Columna de previsualización */}
 					{preview && (
 						<div className="space-y-4">
-							<h3 className="text-sm font-medium text-muted-foreground">Vista previa</h3>
+							<h3 className="text-sm font-medium text-muted-foreground">
+								Vista previa
+							</h3>
 							<div className="border rounded-lg p-4 h-[300px] flex items-center justify-center bg-background/50">
 								{preview}
 							</div>

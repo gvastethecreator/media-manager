@@ -7,8 +7,8 @@ import {
 	deleteCharacter as deleteCharacterAction,
 	getCharacters,
 	updateCharacter as updateCharacterAction,
-} from '@/app/actions/character.actions';
-import { logger } from '@/lib/logger';
+} from '@/app/actions/characters/character.actions';
+import { logger } from '@/lib/logger/logger';
 import type { Character } from '@prisma/client';
 import { create } from 'zustand';
 

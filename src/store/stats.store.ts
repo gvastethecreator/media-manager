@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { create } from 'zustand';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
@@ -47,7 +47,7 @@ interface PlaceStat {
 	count: number;
 }
 
-interface ObjectStat {
+interface WorldItemStat {
 	id: string;
 	name: string;
 	emoji: string;
@@ -75,7 +75,7 @@ interface StatsData extends BaseEntity {
 	totalAlbums: number;
 	totalCharacters: number;
 	totalPlaces: number;
-	totalObjects: number;
+	totalWorldItems: number;
 	totalActivities: number;
 
 	// Listas detalladas
@@ -85,7 +85,7 @@ interface StatsData extends BaseEntity {
 	albums: AlbumStat[];
 	characters: CharacterStat[];
 	places: PlaceStat[];
-	objects: ObjectStat[];
+	worldItems: WorldItemStat[];
 	topTags: TagStat[];
 	recentActivity: Activity[];
 

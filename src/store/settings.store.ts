@@ -12,7 +12,7 @@ import {
 } from '@/types/settings';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { logger } from '../lib/logger';
+import { logger } from '../lib/logger/logger';
 
 // Estado base para settings
 interface SettingsState extends AppSettings {

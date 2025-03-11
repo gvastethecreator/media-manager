@@ -1,5 +1,5 @@
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { ThumbnailError, ThumbnailProcessStatus, ThumbnailStats } from '@/types/thumbnails';
 import { create } from 'zustand';
 

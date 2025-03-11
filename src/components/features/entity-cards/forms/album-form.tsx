@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import * as React from 'react';
-import { EntityForm } from './entity-form';
-import type { AlbumFormData } from './entity-types';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import * as React from "react";
+import { useState } from "react";
+import { EntityForm } from "./entity-form";
+import type { AlbumFormData } from "./entity-types";
 
 interface AlbumFormProps {
 	initialData?: AlbumFormData;
@@ -14,9 +15,33 @@ interface AlbumFormProps {
 	isLoading?: boolean;
 }
 
-export function AlbumForm({ initialData, onSubmit, onCancel, isLoading }: AlbumFormProps) {
+export function AlbumForm({
+	initialData,
+	onSubmit,
+	onCancel,
+	isLoading,
+}: AlbumFormProps) {
+	const [formData, setFormData] = useState<Partial<AlbumFormData>>({
+		sortBy: initialData?.sortBy || "name",
+		filters: initialData?.filters || "[]",
+	});
+
 	const handleSubmit = async (data: AlbumFormData) => {
-		await onSubmit(data);
+		const completeData = {
+			...data,
+			...formData,
+		};
+		await onSubmit(completeData as AlbumFormData);
+	};
+
+	const handleChange = <T extends keyof AlbumFormData>(
+		field: T,
+		value: AlbumFormData[T]
+	) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
 	};
 
 	return (
@@ -25,31 +50,33 @@ export function AlbumForm({ initialData, onSubmit, onCancel, isLoading }: AlbumF
 			onSubmit={handleSubmit}
 			onCancel={onCancel}
 			isLoading={isLoading}
-			title={initialData ? 'Editar Álbum' : 'Nuevo Álbum'}
-			submitLabel={initialData ? 'Guardar Cambios' : 'Crear Álbum'}
+			title={initialData ? "Editar Álbum" : "Nuevo Álbum"}
+			submitLabel={initialData ? "Guardar Cambios" : "Crear Álbum"}
 			extraFields={
 				<div className="space-y-4">
 					<div className="space-y-2">
-						<label htmlFor="sortBy" className="text-sm font-medium">
+						<Label htmlFor="sortBy" className="text-sm font-medium">
 							Ordenar Por
-						</label>
+						</Label>
 						<Input
 							id="sortBy"
 							name="sortBy"
-							value={initialData?.sortBy || 'name'}
+							value={formData.sortBy || ""}
+							onChange={(e) => handleChange("sortBy", e.target.value)}
 							placeholder="Campo de ordenamiento"
 						/>
 					</div>
 
 					<div className="space-y-2">
-						<label htmlFor="filters" className="text-sm font-medium">
+						<Label htmlFor="filters" className="text-sm font-medium">
 							Filtros (JSON)
-						</label>
+						</Label>
 						<Textarea
 							id="filters"
 							name="filters"
+							value={formData.filters || "[]"}
+							onChange={(e) => handleChange("filters", e.target.value)}
 							placeholder="[]"
-							defaultValue={initialData?.filters}
 							className="font-mono text-sm"
 						/>
 					</div>

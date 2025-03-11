@@ -10,7 +10,7 @@
 
 import fs from 'node:fs/promises';
 import { thumbnailCache } from '@/lib/cache';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
 import { ThumbnailQuality } from '@/types/thumbnails';

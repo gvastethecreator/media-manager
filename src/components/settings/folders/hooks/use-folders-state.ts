@@ -1,6 +1,6 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { getFolders } from '@/services/folder.service';
 import type { Folder, FolderStats } from '@/types/entities/folders';
 import { useCallback, useState } from 'react';

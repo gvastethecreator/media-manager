@@ -1,5 +1,5 @@
 import type { FileMetadata } from '@/types/metadata';
-import { logger } from './logger';
+import { logger } from './logger/logger';
 
 const cacheLogger = logger.withContext('Cache');
 
@@ -211,8 +211,8 @@ export const placesCache = new CacheManager<EntityData[]>({
 	allowStale: true,
 });
 
-export const objectsCache = new CacheManager<EntityData[]>({
-	name: 'objects',
+export const worldItemsCache = new CacheManager<EntityData[]>({
+	name: 'world-items',
 	ttl: 15 * 60 * 1000, // 15 minutos
 	maxSize: 200,
 	updateAgeOnGet: true,

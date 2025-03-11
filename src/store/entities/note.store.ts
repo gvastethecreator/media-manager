@@ -2,12 +2,13 @@ import {
 	type NoteCreate,
 	type NoteUpdate,
 	type NoteWithStats,
+	addNoteToImage,
 	createNote as createNoteAction,
 	deleteNote as deleteNoteAction,
 	getNotes,
 	updateNote as updateNoteAction,
-} from '@/app/actions/note.actions';
-import { logger } from '@/lib/logger';
+} from '@/app/actions/notes/note.actions';
+import { logger } from '@/lib/logger/logger';
 import { Note } from '@prisma/client';
 import { create } from 'zustand';
 
@@ -28,6 +29,7 @@ interface NoteStore {
 	createNote: (note: NoteCreate) => Promise<void>;
 	updateNote: (id: string, note: NoteUpdate) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
+	addNoteToImage: (noteId: string, imageId: string) => Promise<void>;
 }
 
 export const useNoteStore = create<NoteStore>((set, _get) => ({
@@ -90,6 +92,21 @@ export const useNoteStore = create<NoteStore>((set, _get) => ({
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar nota';
 			noteLogger.error('❌ Error al eliminar nota:', error);
+			set({ error: message, isLoading: false });
+		}
+	},
+	addNoteToImage: async (noteId, imageId) => {
+		try {
+			set({ isLoading: true, error: null });
+			noteLogger.info('➕ Añadiendo nota a imagen:', { noteId, imageId });
+			await addNoteToImage(noteId, imageId);
+			const rawNotes = await getNotes();
+			const notes = rawNotes.map(mapToNoteWithStats);
+			set({ notes, isLoading: false });
+			noteLogger.info('✅ Nota añadida a imagen');
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Error al añadir nota a imagen';
+			noteLogger.error('❌ Error al añadir nota a imagen:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

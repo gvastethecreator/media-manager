@@ -2,7 +2,7 @@
 
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
 import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { FolderStats } from '@/types/entities/folders';
 import type {
 	ErrorResponse,

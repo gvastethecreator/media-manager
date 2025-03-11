@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { FileItem } from '@/types/file-item';
 import { create } from 'zustand';
 

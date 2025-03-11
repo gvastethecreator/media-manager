@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail.service';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import { EventSourcePolyfill } from 'event-source-polyfill';

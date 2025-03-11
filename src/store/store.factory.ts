@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { logger } from '../lib/logger';
+import { logger } from '../lib/logger/logger';
 import type { BaseEntity, BaseStore, ExtendedStore, StoreHook } from './types';
 
 export interface StoreOptions<T extends BaseEntity> {

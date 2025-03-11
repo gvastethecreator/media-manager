@@ -1,5 +1,5 @@
 import { indexFolder } from '@/app/actions/folders';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const routeLogger = logger.withContext('FolderIndexRoute');

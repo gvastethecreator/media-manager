@@ -11,12 +11,14 @@ export type ContextMenuAction =
 	| 'character-add'
 	| 'place-add'
 	| 'object-add'
+	| 'world-item-add'
 	| 'collection-create'
 	| 'tag-create'
 	| 'album-create'
 	| 'character-create'
 	| 'place-create'
 	| 'object-create'
+	| 'world-item-create'
 	| 'prompt-add'
 	| 'note-add'
 	| 'concept-add'
@@ -52,6 +54,7 @@ export type LoadingStates = {
 	characters: EntityLoadingState;
 	places: EntityLoadingState;
 	objects: EntityLoadingState;
+	worldItems: EntityLoadingState;
 	prompts: EntityLoadingState;
 	notes: EntityLoadingState;
 	concepts: EntityLoadingState;

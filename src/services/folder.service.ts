@@ -7,7 +7,7 @@ import {
 	reindexFolder as reindexFolderAction,
 } from '@/app/actions/folders';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FolderStats } from '@/types/entities/folders';
@@ -270,9 +270,6 @@ class FolderServiceClass {
 
 			// Guardar en la memoria
 			this.globalProgress.set(folderId, updatedStatus);
-
-			// Emitir evento
-			console.log(`Emitiendo progreso para carpeta ${folderId}:`, updatedStatus);
 			this.emitEvent(FOLDER_EVENTS.PROGRESS, updatedStatus);
 		} catch (error) {
 			console.error('Error actualizando progreso:', error);
@@ -460,8 +457,6 @@ class FolderServiceClass {
 						startTime: this.startTimes.get(id) || 0,
 						endTime: Date.now(),
 					};
-
-					console.log('Emitiendo evento de finalización:', finalStatus);
 					this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
 					this.emitEvent(FOLDER_EVENTS.COMPLETE, folderResponse);
 

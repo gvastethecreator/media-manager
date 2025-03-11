@@ -1,5 +1,5 @@
-import type { GeneralStats } from '@/app/actions/stats.actions';
-import { logger } from '@/lib/logger';
+import type { GeneralStats } from '@/app/actions/stats/stats.actions';
+import { logger } from '@/lib/logger/logger';
 import { statsService } from '@/services/stats.service';
 import type { ImageStats } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

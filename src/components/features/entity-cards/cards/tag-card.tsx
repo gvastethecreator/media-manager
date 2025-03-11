@@ -1,15 +1,23 @@
-'use client';
+"use client";
 
-import type { TagFormData } from '@/components/features/entity-cards/forms/entity-types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { formatBytes, formatDate } from '@/lib/utils';
-import type { Tag } from '@prisma/client';
-import { Clock, Hash, Image as ImageIcon, PencilIcon, Sparkles, Tag as TagIcon, Trash2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import type { TagFormData } from "@/components/features/entity-cards/forms/entity-types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { formatBytes, formatDate } from "@/lib/utils";
+import type { Tag } from "@prisma/client";
+import {
+	Clock,
+	Hash,
+	Image as ImageIcon,
+	PencilIcon,
+	Sparkles,
+	Tag as TagIcon,
+	Trash2,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CardData =
 	| (Tag & {
@@ -19,17 +27,26 @@ type CardData =
 	| TagFormData;
 
 interface TagCardProps {
-	data: CardData;
+	data?: CardData;
+	tag?: CardData;
 	isPreview?: boolean;
 	onEdit?: (tag: Tag) => void;
 	onDelete?: (id: string) => void;
 	className?: string;
 }
 
-export function TagCard({ data, isPreview = false, onEdit, onDelete, className }: TagCardProps) {
+export function TagCard({
+	data: propData,
+	tag: propTag,
+	isPreview = false,
+	onEdit,
+	onDelete,
+	className,
+}: TagCardProps) {
+	const data = propData || propTag;
+
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-
 	// Para componente preview, detectar cambios y animar
 	const [animateUpdate, setAnimateUpdate] = useState(false);
 	const prevDataRef = useRef<CardData | null>(null);
@@ -49,7 +66,9 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 		const hasChanged =
 			prevData.name !== data.name ||
 			prevData.color !== data.color ||
-			('shortcut' in prevData && 'shortcut' in data && prevData.shortcut !== data.shortcut);
+			("shortcut" in prevData &&
+				"shortcut" in data &&
+				prevData.shortcut !== data.shortcut);
 
 		if (hasChanged) {
 			setAnimateUpdate(true);
@@ -67,31 +86,36 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 		setMousePosition({ x, y });
 	};
 
+	if (!data) {
+		console.error("TagCard: No se proporcionó 'data' ni 'tag'");
+		return null;
+	}
+
 	// Renderizar versión para preview en diálogos
 	if (isPreview) {
 		return (
 			<AnimatePresence mode="wait">
 				<motion.div
-					key={`${data.name}-${data.color}-${animateUpdate ? Date.now() : 'static'}`}
+					key={`${data.name}-${data.color}-${animateUpdate ? Date.now() : "static"}`}
 					className={cn(
-						'group relative flex flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 w-full h-full',
-						animateUpdate ? 'ring-2 ring-primary' : 'hover:border-primary',
+						"group relative flex flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 w-full h-full",
+						animateUpdate ? "ring-2 ring-primary" : "hover:border-primary",
 						className
 					)}
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{
 						opacity: 1,
 						scale: 1,
-						transition: { type: 'spring', stiffness: 500, damping: 30 },
+						transition: { type: "spring", stiffness: 500, damping: 30 },
 					}}
 					exit={{ opacity: 0, scale: 0.9 }}
 				>
 					<div className="flex items-center space-x-2">
 						<motion.div
 							className="flex h-10 w-10 items-center justify-center rounded-full"
-							style={{ backgroundColor: data.color || '#10b981' }}
+							style={{ backgroundColor: data.color || "#10b981" }}
 							animate={{
-								backgroundColor: data.color || '#10b981',
+								backgroundColor: data.color || "#10b981",
 								transition: { duration: 0.5 },
 							}}
 						>
@@ -105,10 +129,10 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 								transition: { duration: 0.3 },
 							}}
 						>
-							{data.name || 'Sin nombre'}
+							{data.name || "Sin nombre"}
 						</motion.h3>
 
-						{'shortcut' in data && data.shortcut && (
+						{"shortcut" in data && data.shortcut && (
 							<Badge variant="outline" className="ml-auto">
 								{data.shortcut}
 							</Badge>
@@ -119,9 +143,9 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 						<span>Etiqueta para categorizar imágenes</span>
 						<motion.div
 							className="h-4 w-4 rounded-full"
-							style={{ backgroundColor: data.color || '#10b981' }}
+							style={{ backgroundColor: data.color || "#10b981" }}
 							animate={{
-								backgroundColor: data.color || '#10b981',
+								backgroundColor: data.color || "#10b981",
 								scale: [1, 1.2, 1],
 								transition: { duration: 0.5 },
 							}}
@@ -135,10 +159,10 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 	return (
 		<motion.div
 			className={cn(
-				'relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group',
-				'bg-linear-to-br from-background/50 to-muted/50',
-				'shadow-lg hover:shadow-xl transition-all duration-300',
-				'cursor-pointer perspective-1000',
+				"relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden group",
+				"bg-linear-to-br from-background/50 to-muted/50",
+				"shadow-lg hover:shadow-xl transition-all duration-300",
+				"cursor-pointer perspective-1000",
 				className
 			)}
 			onHoverStart={() => setIsHovered(true)}
@@ -148,19 +172,21 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 			transition={{ duration: 0.2 }}
 			style={
 				{
-					'--x': `${mousePosition.x}%`,
-					'--y': `${mousePosition.y}%`,
+					"--x": `${mousePosition.x}%`,
+					"--y": `${mousePosition.y}%`,
 				} as React.CSSProperties
 			}
 		>
 			{/* Fondo iridiscente */}
 			<div
 				className={cn(
-					'absolute inset-0 z-10',
-					'before:absolute before:inset-0 before:opacity-70',
-					'before:bg-[radial-gradient(circle_at_var(--x)_var(--y),var(--tag-color)_0%,transparent_60%)]'
+					"absolute inset-0 z-10",
+					"before:absolute before:inset-0 before:opacity-70",
+					"before:bg-[radial-gradient(circle_at_var(--x)_var(--y),var(--tag-color)_0%,transparent_60%)]"
 				)}
-				style={{ '--tag-color': data.color } as React.CSSProperties}
+				style={
+					{ "--tag-color": data?.color || "#3b82f6" } as React.CSSProperties
+				}
 			/>
 
 			{/* Elementos decorativos */}
@@ -174,14 +200,14 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 					className="absolute top-1/3 left-1/4 h-20 w-20 rounded-full opacity-60"
 					style={{
 						background: `radial-gradient(circle at center, ${data.color}, transparent 70%)`,
-						filter: 'blur(10px)',
+						filter: "blur(10px)",
 					}}
 				/>
 				<div
 					className="absolute bottom-1/3 right-1/4 h-24 w-24 rounded-full opacity-60"
 					style={{
 						background: `radial-gradient(circle at center, ${data.color}, transparent 70%)`,
-						filter: 'blur(15px)',
+						filter: "blur(15px)",
 					}}
 				/>
 			</motion.div>
@@ -194,7 +220,7 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 			>
 				{Array.from({ length: 12 }).map((_, i) => (
 					<motion.div
-						key={`particle-${i}-${data.id || 'preview'}-${data.name}-${Date.now()}`}
+						key={`particle-${i}-${data.id || "preview"}-${data.name}-${Date.now()}`}
 						className="absolute h-1 w-1 rounded-full bg-white"
 						animate={{
 							opacity: [0.4, 1, 0.4],
@@ -205,7 +231,7 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 						transition={{
 							duration: Math.random() * 3 + 2,
 							repeat: Number.POSITIVE_INFINITY,
-							repeatType: 'reverse',
+							repeatType: "reverse",
 							delay: Math.random() * 2,
 						}}
 						style={{
@@ -226,8 +252,10 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 						<TagIcon className="h-5 w-5 text-white drop-shadow" />
 					</div>
 					<div>
-						<h3 className="text-lg font-bold text-white drop-shadow-lg">{data.name}</h3>
-						{'shortcut' in data && data.shortcut && (
+						<h3 className="text-lg font-bold text-white drop-shadow-lg">
+							{data.name}
+						</h3>
+						{"shortcut" in data && data.shortcut && (
 							<div className="mt-1 inline-flex items-center rounded-full border border-white/30 bg-white/20 px-2 py-0.5 text-xs text-white backdrop-blur-sm">
 								{data.shortcut}
 							</div>
@@ -237,11 +265,13 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 
 				{/* Estadísticas centrales */}
 				<div className="mt-auto space-y-3">
-					{'_count' in data && data._count && (
+					{"_count" in data && data._count && (
 						<div className="flex items-center gap-6 rounded-lg bg-white/10 p-3 backdrop-blur-sm">
 							<div className="flex items-center gap-2">
 								<ImageIcon className="h-4 w-4 text-white/80" />
-								<span className="text-sm font-medium text-white">{data._count?.images || 0}</span>
+								<span className="text-sm font-medium text-white">
+									{data._count?.images || 0}
+								</span>
 							</div>
 							<div className="flex items-center gap-2">
 								<TagIcon className="h-4 w-4 text-white/80" />
@@ -256,11 +286,14 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 								<Sparkles className="h-3.5 w-3.5 text-white/70" />
 								<span className="text-xs text-white/70">Categorización</span>
 							</div>
-							<div className="h-3 w-3 rounded-full" style={{ backgroundColor: data.color }} />
+							<div
+								className="h-3 w-3 rounded-full"
+								style={{ backgroundColor: data.color }}
+							/>
 						</div>
 					</div>
 
-					{'createdAt' in data && (
+					{"createdAt" in data && (
 						<div className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-white/60">
 							<Clock className="h-3 w-3" />
 							<span>Creada {formatDate(data.createdAt)}</span>
@@ -278,9 +311,8 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm"
-							onClick={(e) => {
-								e.stopPropagation();
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs"
+							onClick={() => {
 								onEdit(data as Tag);
 							}}
 						>
@@ -291,10 +323,11 @@ export function TagCard({ data, isPreview = false, onEdit, onDelete, className }
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-black/20 hover:bg-black/40 backdrop-blur-sm text-red-400"
-							onClick={(e) => {
-								e.stopPropagation();
-								onDelete(data.id);
+							className="h-8 w-8 bg-background/80 backdrop-blur-xs text-destructive"
+							onClick={() => {
+								if (data.id) {
+									onDelete(data.id);
+								}
 							}}
 						>
 							<Trash2 className="h-4 w-4" />

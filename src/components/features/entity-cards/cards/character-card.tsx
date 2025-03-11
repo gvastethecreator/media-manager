@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import type { CharacterFormData } from '@/components/features/entity-cards/forms/entity-types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import type { Character } from '@prisma/client';
+import type { CharacterFormData } from "@/components/features/entity-cards/forms/entity-types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { formatBytes } from "@/lib/utils";
+import type { Character } from "@prisma/client";
 import {
 	Crown,
 	Heart,
@@ -17,10 +18,10 @@ import {
 	Trash2,
 	User2,
 	Users,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import { useEffect, useRef } from 'react';
+} from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
+import { useEffect, useRef } from "react";
 
 type CardData =
 	| (Character & {
@@ -41,38 +42,47 @@ interface CharacterCardProps {
 
 const getClassGradient = (characterClass: string) => {
 	const gradients = {
-		Guerrero: 'from-red-500/20 via-orange-500/20 to-red-500/20',
-		Mago: 'from-blue-500/20 via-purple-500/20 to-blue-500/20',
-		Clérigo: 'from-yellow-500/20 via-white/20 to-yellow-500/20',
-		Pícaro: 'from-green-500/20 via-emerald-500/20 to-green-500/20',
-		default: 'from-slate-500/20 via-gray-500/20 to-slate-500/20',
+		Guerrero: "from-red-500/20 via-orange-500/20 to-red-500/20",
+		Mago: "from-blue-500/20 via-purple-500/20 to-blue-500/20",
+		Clérigo: "from-yellow-500/20 via-white/20 to-yellow-500/20",
+		Pícaro: "from-green-500/20 via-emerald-500/20 to-green-500/20",
+		default: "from-slate-500/20 via-gray-500/20 to-slate-500/20",
 	};
-	return gradients[characterClass as keyof typeof gradients] || gradients.default;
+	return (
+		gradients[characterClass as keyof typeof gradients] || gradients.default
+	);
 };
 
 const getClassSymbol = (characterClass: string) => {
 	const symbols = {
-		Guerrero: '⚔️',
-		Mago: '🔮',
-		Clérigo: '✨',
-		Pícaro: '🗡️',
-		default: '⭐',
+		Guerrero: "⚔️",
+		Mago: "🔮",
+		Clérigo: "✨",
+		Pícaro: "🗡️",
+		default: "⭐",
 	};
 	return symbols[characterClass as keyof typeof symbols] || symbols.default;
 };
 
 function getRandomGradient() {
 	const gradients = [
-		'from-pink-500/20 to-purple-500/20',
-		'from-indigo-500/20 to-blue-500/20',
-		'from-orange-500/20 to-red-500/20',
-		'from-green-500/20 to-teal-500/20',
-		'from-amber-500/20 to-yellow-500/20',
+		"from-pink-500/20 to-purple-500/20",
+		"from-indigo-500/20 to-blue-500/20",
+		"from-orange-500/20 to-red-500/20",
+		"from-green-500/20 to-teal-500/20",
+		"from-amber-500/20 to-yellow-500/20",
 	];
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
-export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: CharacterCardProps) {
+export function CharacterCard({
+	data,
+	isPreview = false,
+	onEdit,
+	onDelete,
+	onClick,
+	className,
+}: CharacterCardProps) {
 	const [isHovered, setIsHovered] = React.useState(false);
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const gradient = getRandomGradient();
@@ -107,8 +117,8 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 		return (
 			<motion.div
 				className={cn(
-					'group relative flex h-64 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary',
-					isHovered && 'shadow-lg',
+					"group relative flex h-64 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200 hover:border-primary",
+					isHovered && "shadow-lg",
 					className
 				)}
 				initial={{ opacity: 0, y: 10 }}
@@ -120,9 +130,9 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 				{/* Gradiente de fondo */}
 				<div
 					className={cn(
-						'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
+						"absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300",
 						gradient,
-						isHovered && 'opacity-80'
+						isHovered && "opacity-80"
 					)}
 					style={{
 						backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
@@ -134,15 +144,19 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 					<div className="flex items-center space-x-2">
 						<div
 							className="flex h-10 w-10 items-center justify-center rounded-full"
-							style={{ backgroundColor: data.color }}
+							style={{ backgroundColor: data?.color }}
 						>
 							<User2 className="h-5 w-5 text-white" />
 						</div>
 						<div>
-							<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
-							{'class' in data && data.class && <p className="text-sm text-muted-foreground">{data.class}</p>}
+							<h3 className="text-xl font-semibold line-clamp-1">
+								{data.name || "Sin nombre"}
+							</h3>
+							{data && "class" in data && data.class && (
+								<p className="text-sm text-muted-foreground">{data.class}</p>
+							)}
 						</div>
-						{'race' in data && data.race && (
+						{data && "race" in data && data.race && (
 							<Badge variant="outline" className="ml-auto">
 								{data.race}
 							</Badge>
@@ -150,19 +164,27 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 					</div>
 
 					{/* Descripción */}
-					{data.description && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
+					{data?.description && (
+						<p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+							{data.description}
+						</p>
+					)}
 
 					{/* Atributos */}
 					<div className="mt-4 grid grid-cols-2 gap-2">
-						{'alignment' in data && data.alignment && (
+						{data && "alignment" in data && data.alignment && (
 							<div className="flex items-center space-x-2">
-								<span className="text-xs font-medium text-muted-foreground">Alineamiento:</span>
+								<span className="text-xs font-medium text-muted-foreground">
+									Alineamiento:
+								</span>
 								<span className="text-xs">{data.alignment}</span>
 							</div>
 						)}
-						{'personality' in data && data.personality && (
+						{data && "personality" in data && data.personality && (
 							<div className="flex items-center space-x-2">
-								<span className="text-xs font-medium text-muted-foreground">Personalidad:</span>
+								<span className="text-xs font-medium text-muted-foreground">
+									Personalidad:
+								</span>
 								<span className="text-xs line-clamp-1">{data.personality}</span>
 							</div>
 						)}
@@ -171,7 +193,9 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 					{/* Detalles */}
 					<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
 						<div className="flex items-center space-x-2">
-							<span className="inline-flex items-center rounded-full border px-2 py-0.5">{data.emoji || '👤'}</span>
+							<span className="inline-flex items-center rounded-full border px-2 py-0.5">
+								{data.emoji || "👤"}
+							</span>
 						</div>
 						<div className="flex items-center space-x-2">
 							<span className="flex items-center">Personaje</span>
@@ -184,16 +208,18 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 
 	// Para la versión completa, necesitamos acceder a propiedades específicas
 	const classGradient =
-		'class' in data ? getClassGradient(data.class) : 'from-slate-500/20 via-gray-500/20 to-slate-500/20';
-	const classSymbol = 'class' in data ? getClassSymbol(data.class) : '⭐';
+		data && "class" in data
+			? getClassGradient(data.class)
+			: "from-slate-500/20 via-gray-500/20 to-slate-500/20";
+	const classSymbol = data && "class" in data ? getClassSymbol(data.class) : "⭐";
 
 	return (
 		<motion.div
 			className={cn(
-				'relative w-full aspect-[2/3] rounded-lg overflow-hidden group',
-				'bg-linear-to-br from-background/50 to-muted/50',
-				'shadow-lg hover:shadow-xl transition-all duration-300',
-				'cursor-pointer',
+				"relative w-full aspect-[2/3] rounded-lg overflow-hidden group",
+				"bg-linear-to-br from-background/50 to-muted/50",
+				"shadow-lg hover:shadow-xl transition-all duration-300",
+				"cursor-pointer",
 				className
 			)}
 			whileHover={{ y: -5 }}
@@ -202,13 +228,18 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			{/* Fondo con gradiente */}
-			<div className={cn('absolute inset-0 bg-gradient-to-b opacity-80', classGradient)} />
+			<div
+				className={cn(
+					"absolute inset-0 bg-gradient-to-b opacity-80",
+					classGradient
+				)}
+			/>
 
 			{/* Overlay de hover */}
 			<div
 				className={cn(
-					'absolute inset-0 bg-gradient-to-t from-black/80 to-transparent',
-					'opacity-60 group-hover:opacity-80 transition-opacity duration-300'
+					"absolute inset-0 bg-gradient-to-t from-black/80 to-transparent",
+					"opacity-60 group-hover:opacity-80 transition-opacity duration-300"
 				)}
 			/>
 
@@ -219,14 +250,16 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 					<div
 						className="h-12 w-12 rounded-full flex items-center justify-center shadow-lg"
 						style={{
-							background: `linear-gradient(135deg, ${data.color}, ${data.color}80)`,
+							background: `linear-gradient(135deg, ${data?.color || "#6366f1"}, ${data?.color || "#6366f1"}80)`,
 						}}
 					>
-						<span className="text-2xl filter drop-shadow-lg">{data.emoji}</span>
+						<span className="text-2xl filter drop-shadow-lg">{data?.emoji || "👤"}</span>
 					</div>
 					<div className="flex-1 min-w-0">
-						<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{data.name}</h3>
-						{'class' in data && data.class && (
+						<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">
+							{data?.name || "Sin nombre"}
+						</h3>
+						{data && "class" in data && data.class && (
 							<div className="flex items-center gap-1.5">
 								<span className="text-sm text-white/80">{data.class}</span>
 								<span>{classSymbol}</span>
@@ -237,16 +270,20 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 
 				{/* Información del personaje */}
 				<div className="mt-4 space-y-3">
-					{data.description && <p className="text-sm text-white/80 line-clamp-3">{data.description}</p>}
+					{data?.description && (
+						<p className="text-sm text-white/80 line-clamp-3">
+							{data.description}
+						</p>
+					)}
 
-					{'race' in data && data.race && (
+					{data && "race" in data && data.race && (
 						<div className="flex items-center gap-2 text-sm">
 							<span className="text-white/60">Raza:</span>
 							<span className="text-white">{data.race}</span>
 						</div>
 					)}
 
-					{'alignment' in data && data.alignment && (
+					{data && "alignment" in data && data.alignment && (
 						<div className="flex items-center gap-2 text-sm">
 							<span className="text-white/60">Alineamiento:</span>
 							<span className="text-white">{data.alignment}</span>
@@ -256,13 +293,15 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 
 				{/* Estadísticas */}
 				<div className="mt-auto">
-					{'_count' in data && data._count && (
+					{data && "_count" in data && data._count && (
 						<div className="flex items-center justify-between text-xs text-white/60 mb-2">
 							<div className="flex items-center gap-2">
 								<ImageIcon className="h-3.5 w-3.5" />
 								<span>{data._count.images || 0} imágenes</span>
 							</div>
-							{'totalSize' in data && data.totalSize && <span>{data.totalSize} KB</span>}
+							{data && "totalSize" in data && data.totalSize && (
+								<span>{formatBytes(data.totalSize)}</span>
+							)}
 						</div>
 					)}
 
@@ -292,32 +331,26 @@ export function CharacterCard({ data, isPreview = false, onEdit, onDelete, onCli
 				{/* Acciones */}
 				<div
 					className={cn(
-						'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
-						isHovered && 'opacity-100'
+						"absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200",
+						isHovered && "opacity-100"
 					)}
 				>
-					{onEdit && (
+					{onEdit && data?.id && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 hover:bg-background"
-							onClick={(e) => {
-								e.stopPropagation();
-								onEdit(data as Character);
-							}}
+							className="rounded-full h-8 w-8"
+							onClick={() => onEdit(data as Character)}
 						>
 							<PencilIcon className="h-4 w-4" />
 						</Button>
 					)}
-					{onDelete && (
+					{onDelete && data?.id && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 bg-background/80 hover:bg-background hover:text-destructive"
-							onClick={(e) => {
-								e.stopPropagation();
-								onDelete(data.id);
-							}}
+							className="rounded-full h-8 w-8 text-destructive hover:text-destructive"
+							onClick={() => onDelete(data.id)}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { statsEventEmitter } from '@/services/stats.service';
 import { useEffect } from 'react';
 

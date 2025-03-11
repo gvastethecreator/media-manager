@@ -1,33 +1,40 @@
-'use client';
+"use client";
 
-import { getFavorites } from '@/app/actions/favorite.actions';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import type { BaseContentProps } from '@/components/views/base';
-import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { useFileManager } from '@/store/file-manager.store';
-import type { FileItem } from '@/types/file-item';
-import { Star } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getFavorites } from "@/app/actions/favorites/favorite.actions";
+import { BaseContentView, ContentViewProvider } from "@/components/views/base";
+import type { BaseContentProps } from "@/components/views/base";
+import { clientEvents } from "@/lib/client/events.client";
+import { logger } from "@/lib/logger/logger";
+import { STATS_EVENTS, statsEventEmitter } from "@/services/stats.service";
+import { useFileManager } from "@/store/file-manager.store";
+import type { FileItem } from "@/types/file-item";
+import { Star } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-const viewLogger = logger.withContext('FavoritesView');
+const viewLogger = logger.withContext("FavoritesView");
 
 export function FavoritesView() {
-	const { currentItems: items, toggleItemSelection, setItems, isLoading, setIsLoading } = useFileManager();
+	const {
+		currentItems: items,
+		toggleItemSelection,
+		setItems,
+		isLoading,
+		setIsLoading,
+	} = useFileManager();
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
+	const [optimisticItems, _addEvent] =
+		clientEvents.useEvents<FileItem[]>(items);
 
 	const loadFavorites = useCallback(async () => {
 		try {
-			viewLogger.info('🔄 Cargando favoritos...');
+			viewLogger.info("🔄 Cargando favoritos...");
 			setIsLoading(true);
 			const favorites = await getFavorites();
 			setItems(favorites.map((f) => f.image as unknown as FileItem));
-			viewLogger.info('✅ Favoritos cargados');
+			viewLogger.info("✅ Favoritos cargados");
 		} catch (error) {
-			viewLogger.error('❌ Error cargando favoritos:', error);
+			viewLogger.error("❌ Error cargando favoritos:", error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -37,7 +44,7 @@ export function FavoritesView() {
 		loadFavorites();
 
 		const handleFavoriteChange = () => {
-			viewLogger.info('📢 Evento de cambio en favoritos recibido');
+			viewLogger.info("📢 Evento de cambio en favoritos recibido");
 			loadFavorites();
 		};
 
@@ -50,7 +57,7 @@ export function FavoritesView() {
 
 	const favoriteItems = useMemo(() => {
 		const filtered = optimisticItems.filter((item) => item.isFavorite);
-		viewLogger.debug('🔍 Filtrando favoritos:', { total: filtered.length });
+		viewLogger.debug("🔍 Filtrando favoritos:", { total: filtered.length });
 		return filtered;
 	}, [optimisticItems]);
 
@@ -60,9 +67,9 @@ export function FavoritesView() {
 		toggleItemSelection,
 		emptyState: {
 			icon: Star,
-			title: 'No hay favoritos',
+			title: "No hay favoritos",
 			description:
-				'No se encontraron imágenes favoritas. Marca tus imágenes favoritas haciendo clic en el ícono de estrella.',
+				"No se encontraron imágenes favoritas. Marca tus imágenes favoritas haciendo clic en el ícono de estrella.",
 		},
 	};
 

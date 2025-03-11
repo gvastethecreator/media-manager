@@ -1,6 +1,7 @@
 ---
 description: Concise best practices for secure, performant, and organized Next.js 15 API Routes.
-globs: app/api/**/*.ts
+globs: api/**/*.ts
+alwaysApply: false
 ---
 - **Organized API Route Structure:** Structure API routes with descriptive folders and filenames within `app/api/`.
 - **HTTP Method Handling:** Implement handlers for relevant HTTP methods (GET, POST, PUT, DELETE).

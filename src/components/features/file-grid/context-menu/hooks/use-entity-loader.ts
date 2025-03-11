@@ -1,15 +1,16 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { useAlbumsStore } from '@/store/entities/albums.store';
 import { useCharactersStore } from '@/store/entities/characters.store';
 import { useCollectionsStore } from '@/store/entities/collections.store';
 import { useConceptStore } from '@/store/entities/concept.store';
 import { useNoteStore } from '@/store/entities/note.store';
+// import { useObjectsStore } from '@/store/objects.store'; // Eliminado - Legacy
+import { usePlacesStore } from '@/store/entities/places.store';
+import { usePromptStore } from '@/store/entities/prompt.store';
 import { useTagsStore } from '@/store/entities/tags.store';
-import { useObjectsStore } from '@/store/objects.store';
-import { usePlacesStore } from '@/store/places.store';
-import { usePromptStore } from '@/store/prompt.store';
+import { useWorldItemsStore } from '@/store/entities/world-items.store';
 import { useCallback, useState } from 'react';
 import type { LoadingStates } from '../types';
 
@@ -23,6 +24,7 @@ const initialLoadingStates: LoadingStates = {
 	characters: { loading: false, open: false, loaded: false },
 	places: { loading: false, open: false, loaded: false },
 	objects: { loading: false, open: false, loaded: false },
+	worldItems: { loading: false, open: false, loaded: false },
 	prompts: { loading: false, open: false, loaded: false },
 	notes: { loading: false, open: false, loaded: false },
 	concepts: { loading: false, open: false, loaded: false },
@@ -38,7 +40,7 @@ export function useEntityLoader() {
 	const { loadAlbums } = useAlbumsStore();
 	const { loadCharacters } = useCharactersStore();
 	const { loadPlaces } = usePlacesStore();
-	const { loadObjects } = useObjectsStore();
+	const { loadWorldItems } = useWorldItemsStore();
 	const { loadPrompts } = usePromptStore();
 	const { loadNotes } = useNoteStore();
 	const { loadConcepts } = useConceptStore();
@@ -89,8 +91,8 @@ export function useEntityLoader() {
 					case 'places':
 						await loadPlaces();
 						break;
-					case 'objects':
-						await loadObjects();
+					case 'worldItems':
+						await loadWorldItems();
 						break;
 					case 'prompts':
 						await loadPrompts();
@@ -125,7 +127,7 @@ export function useEntityLoader() {
 			loadAlbums,
 			loadCharacters,
 			loadPlaces,
-			loadObjects,
+			loadWorldItems,
 			loadPrompts,
 			loadNotes,
 			loadConcepts,

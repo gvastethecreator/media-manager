@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { Image } from '@prisma/client';

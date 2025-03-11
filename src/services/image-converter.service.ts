@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { Dimensions, FileItem } from '@/types/file-item';
 
 const converterLogger = logger.withContext('ImageConverter');
@@ -43,7 +43,7 @@ interface RelatedPlace {
 	climate?: string;
 }
 
-interface RelatedObject {
+interface RelatedWorldItem {
 	id: string;
 	name: string;
 	emoji: string;
@@ -74,7 +74,7 @@ export interface ServerImage {
 	albums?: RelatedAlbum[];
 	characters?: RelatedCharacter[];
 	places?: RelatedPlace[];
-	objects?: RelatedObject[];
+	worldItems?: RelatedWorldItem[];
 }
 
 export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
@@ -106,7 +106,7 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 			albums: image.albums ?? [],
 			characters: image.characters ?? [],
 			places: image.places ?? [],
-			objects: image.objects ?? [],
+			worldItems: image.worldItems ?? [],
 		};
 	} catch (error) {
 		converterLogger.error('❌ Error al convertir imagen del servidor:', { error, image });

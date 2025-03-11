@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 

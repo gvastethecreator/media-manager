@@ -9,6 +9,7 @@ import type {
 	Place,
 	Prompt,
 	Tag,
+	WorldItem as WorldItemEntity,
 } from '@prisma/client';
 import type { BaseEntityFormData } from './entity-form';
 
@@ -58,6 +59,20 @@ export interface CharacterFormData extends BaseEntityFormData {
 
 export interface ObjectFormData extends BaseEntityFormData {
 	type: string;
+	rarity: string;
+	properties: string;
+	requirements: string;
+	origin: string;
+	stats: string;
+	sortBy: string;
+	filters: string;
+	shortcut?: string;
+	featuredImage?: string | null;
+	isFavorite: boolean;
+}
+
+export interface WorldItemFormData extends BaseEntityFormData {
+	category: string;
 	rarity: string;
 	properties: string;
 	requirements: string;
@@ -279,6 +294,27 @@ export function objectToFormData(object: ObjectEntity): ObjectFormData {
 	};
 }
 
+export function worldItemToFormData(worldItem: WorldItemEntity): WorldItemFormData {
+	return {
+		id: worldItem.id,
+		name: worldItem.name,
+		emoji: worldItem.emoji,
+		color: worldItem.color,
+		description: worldItem.description || '',
+		category: worldItem.type,
+		rarity: worldItem.rarity,
+		properties: worldItem.properties,
+		requirements: worldItem.requirements,
+		origin: worldItem.origin,
+		stats: worldItem.stats,
+		sortBy: worldItem.sortBy,
+		filters: worldItem.filters,
+		shortcut: worldItem.shortcut || undefined,
+		featuredImage: worldItem.featuredImage || undefined,
+		isFavorite: worldItem.isFavorite,
+	};
+}
+
 export function formDataToObject(data: ObjectFormData): Omit<ObjectEntity, 'id' | 'createdAt' | 'updatedAt'> {
 	return {
 		name: data.name,
@@ -286,6 +322,26 @@ export function formDataToObject(data: ObjectFormData): Omit<ObjectEntity, 'id' 
 		color: data.color,
 		description: data.description || null,
 		type: data.type,
+		rarity: data.rarity,
+		properties: data.properties,
+		requirements: data.requirements,
+		origin: data.origin,
+		stats: data.stats,
+		sortBy: data.sortBy,
+		filters: data.filters,
+		shortcut: data.shortcut || null,
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
+	};
+}
+
+export function formDataToWorldItem(data: WorldItemFormData): Omit<WorldItemEntity, 'id' | 'createdAt' | 'updatedAt'> {
+	return {
+		name: data.name,
+		emoji: data.emoji,
+		color: data.color,
+		description: data.description || null,
+		type: data.category,
 		rarity: data.rarity,
 		properties: data.properties,
 		requirements: data.requirements,

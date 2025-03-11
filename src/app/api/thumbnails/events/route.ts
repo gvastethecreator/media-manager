@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { thumbnailService } from '@/services/thumbnail.service';
 import type { NextRequest } from 'next/server';
 

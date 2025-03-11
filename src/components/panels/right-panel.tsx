@@ -21,9 +21,7 @@ export function RightPanel() {
 						className="flex-1"
 						transition={{ type: 'spring', damping: 25, stiffness: 200 }}
 					>
-						<div className="flex-1 w-full h-full relative">
-							
-						</div>
+						<div className="flex-1 w-full h-full relative"></div>
 					</motion.div>
 				)}
 			</AnimatePresence>

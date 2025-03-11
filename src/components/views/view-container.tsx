@@ -16,8 +16,6 @@ import { DevelopmentView } from './development/development-view';
 import { FavoritesView } from './favorites/favorites-view';
 import { FolderContentView } from './folders/folder-content-view';
 import { FoldersView } from './folders/folders-view';
-import { ObjectContentView } from './objects/object-content-view';
-import { ObjectsView } from './objects/objects-view';
 import { PlaceContentView } from './places/place-content-view';
 import { PlacesView } from './places/places-view';
 import { SearchView } from './search/search-view';
@@ -25,6 +23,8 @@ import { TagContentView } from './tags/tag-content-view';
 import { TagsView } from './tags/tags-view';
 import type { ViewContainerProps } from './types';
 import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
+import { WorldItemContentView } from './world-items/world-item-content-view';
+import { WorldItemsView } from './world-items/world-items-view';
 
 const variants = {
 	enter: (direction: number) => ({
@@ -85,10 +85,10 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				return <PlacesView />;
 			case 'place-content':
 				return <PlaceContentView />;
-			case 'objects':
-				return <ObjectsView />;
-			case 'object-content':
-				return <ObjectContentView />;
+			case 'world-items':
+				return <WorldItemsView />;
+			case 'world-item-content':
+				return <WorldItemContentView />;
 			default:
 				return <DevelopmentView />;
 		}

@@ -2,16 +2,16 @@
 
 import { existsSync } from 'fs';
 import { join, normalize, sep } from 'node:path';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { checkPathExists, generatePathVariants, normalizePath } from '@/lib/path-utils';
 import type {
 	FileItem,
 	RelatedAlbum,
 	RelatedCharacter,
 	RelatedCollection,
-	RelatedObject,
 	RelatedPlace,
 	RelatedTag,
+	RelatedWorldItem,
 } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 import type { ImageWithRelations } from './folder-types.actions';
@@ -116,11 +116,11 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 				}))
 			: [];
 
-		// Transformar objetos
-		const objects: RelatedObject[] = Array.isArray(image.objects)
-			? image.objects.map((o) => ({
-					id: o?.id || '',
-					name: o?.name || '',
+		// Transformar objetos del mundo (worldItems)
+		const worldItems: RelatedWorldItem[] = Array.isArray(image.worldItems)
+			? image.worldItems.map((wi) => ({
+					id: wi?.id || '',
+					name: wi?.name || '',
 				}))
 			: [];
 
@@ -150,7 +150,7 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 			albums,
 			characters,
 			places,
-			objects,
+			worldItems,
 			src: image.path || '',
 		};
 
