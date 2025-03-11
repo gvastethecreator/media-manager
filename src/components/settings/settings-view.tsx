@@ -20,21 +20,21 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
+import { AlbumsSection } from './albums/albums-section';
+import { CharactersSection } from './characters/characters-section';
+import { CollectionsSection } from './collections/collections-section';
+import { ConceptsSection } from './concepts/concepts-section';
 import { FoldersSection } from './folders/folders-section';
-import { AlbumsSection } from './settings-sections/albums-section';
-import { CharactersSection } from './settings-sections/characters-section';
-import { CollectionsSection } from './settings-sections/collections-section';
-import { ConceptsSection } from './settings-sections/concepts-section';
-import { NotesSection } from './settings-sections/notes-section';
-import { PlacesSection } from './settings-sections/places-section';
-import { ProfilesSection } from './settings-sections/profiles-section';
-import { PromptsSection } from './settings-sections/prompts-section';
-import { ShortcutsSection } from './settings-sections/shortcuts-section';
-import { SystemSection } from './settings-sections/system-section';
+import { NotesSection } from './notes/notes-section';
+import { PlacesSection } from './places/places-section';
+import { ProfilesSection } from './profiles/profiles-section';
+import { PromptsSection } from './prompts/prompts-section';
 import { TagsSection } from './settings-sections/tags-section';
 import { ThumbnailsSection } from './settings-sections/thumbnails-section';
 import { UploadedImagesSection } from './settings-sections/uploaded-images-section';
 import { WorldItemsSection } from './settings-sections/world-items-section';
+import { ShortcutsSection } from './shortcuts/shortcuts-section';
+import { SystemSection } from './system/system-section';
 
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState('system');

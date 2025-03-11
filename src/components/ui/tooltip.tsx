@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import * as React from "react";
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import * as React from 'react';
 
-import { cn } from "@/lib/utils/utils";
+import { cn } from '@/lib/utils/utils';
 
 const TooltipProvider = TooltipPrimitive.Provider;
 
@@ -21,14 +21,14 @@ const TooltipContent = React.forwardRef<
 			sideOffset={sideOffset}
 			className={cn(
 				// Base styles
-				"z-50 overflow-hidden rounded-md border-3 px-3 border-zinc-800/70 bg-zinc-950/95 text-xs text-zinc-600 shadow-md backdrop-blur-sm",
+				'z-50 overflow-hidden rounded-md border-3 px-3 border-zinc-800/70 bg-zinc-950/95 text-xs text-zinc-600 shadow-md backdrop-blur-sm',
 				// Padding and positioning
-				"px-4 py-2 relative",
+				'px-4 py-2 relative',
 				// Animation
-				"animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-				"data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+				'animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+				'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
 				// Additional styling
-				"[&>p:first-child]:mt-0 [&>p]:leading-relaxed [&>p+p]:mt-1",
+				'[&>p:first-child]:mt-0 [&>p]:leading-relaxed [&>p+p]:mt-1',
 				className
 			)}
 			{...props}
