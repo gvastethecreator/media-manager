@@ -1,8 +1,7 @@
 'use client';
 
-import { BookImage, Cloud, Database, Folder, ImageIcon, Server, Settings, Zap } from 'lucide-react';
-import { createElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { BookImage, Cloud, Database, Folder, ImageIcon, type LucideIcon, Server, Settings, Zap } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
 import type { ServiceStatus } from '../cards/service-card';
@@ -37,18 +36,6 @@ export function useFeaturesIssues() {
 		[]
 	);
 
-	// Función para convertir un componente de icono en un ReactNode
-	const createIconComponent = useCallback(
-		(iconName: string): ReactNode => {
-			const IconComponent = iconMap[iconName as keyof typeof iconMap] || iconMap.default;
-			return createElement(IconComponent, {
-				size: 16,
-				className: 'text-foreground',
-			});
-		},
-		[iconMap]
-	);
-
 	// Función para obtener datos, optimizada para React 19
 	const fetchData = useCallback(
 		async (showLoadingIndicator = true) => {
@@ -60,11 +47,17 @@ export function useFeaturesIssues() {
 				// Uso de Promise.all para paralelizar peticiones
 				const [featuresData, issuesData, servicesData] = await Promise.all([getFeatures(), getIssues(), getServices()]);
 
-				// Mapeo optimizado con creación de iconos
-				const servicesWithIcons = servicesData.map((service) => ({
-					...service,
-					icon: createIconComponent(service.name),
-				}));
+				// Mapeo optimizado con asignación directa de componentes de icono
+				const servicesWithIcons = servicesData.map((service) => {
+					// Obtener el componente de icono desde el mapa
+					const iconComponent = iconMap[service.name as keyof typeof iconMap] || iconMap.default;
+
+					// Devolver el servicio con el componente como icon
+					return {
+						...service,
+						icon: iconComponent,
+					} as ServiceStatus;
+				});
 
 				// Actualización de estado con retardo mínimo para transiciones suaves
 				setTimeout(() => {
@@ -89,7 +82,7 @@ export function useFeaturesIssues() {
 				}
 			}
 		},
-		[createIconComponent, isInitialLoading]
+		[iconMap, isInitialLoading]
 	);
 
 	// Efecto para carga inicial y actualizaciones periódicas

@@ -1,5 +1,6 @@
 'use server';
 
+import type { LucideIcon } from 'lucide-react';
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
 import type { ServiceStatus } from '../cards/service-card';
