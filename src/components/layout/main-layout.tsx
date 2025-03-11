@@ -1,26 +1,57 @@
-'use client';
+"use client";
 
-import { getNavigationData } from '@/app/actions/navigation/nav.actions';
-import { FileViewer } from '@/components/features/file-viewer/file-viewer';
-import { NavPanel } from '@/components/panels/nav/nav-panel';
-import { NavPanelSkeleton } from '@/components/panels/nav/nav-panel-skeleton';
-import { RightPanel } from '@/components/panels/right-panel';
-import { ViewToolbar } from '@/components/toolbar/main-toolbar';
-import { ResizablePanel, ResizablePanelGroup, ResizablePanelHandle } from '@/components/ui/resizable';
-import { ViewContainer } from '@/components/views/view-container';
-import { useImageViewer } from '@/store/image-viewer.store';
-import { ImageItem } from '@/types/file-item';
-import type * as React from 'react';
-import { Suspense, useEffect, useState } from 'react';
+import { getNavigationData } from "@/app/actions/navigation/nav.actions";
+import { FileViewer } from "@/components/features/file-viewer/file-viewer";
+import { NavPanel } from "@/components/panels/nav/nav-panel";
+import { NavPanelSkeleton } from "@/components/panels/nav/nav-panel-skeleton";
+import { RightPanel } from "@/components/panels/right-panel";
+import { ViewToolbar } from "@/components/toolbar/main-toolbar";
+import {
+	ResizablePanel,
+	ResizablePanelGroup,
+	ResizablePanelHandle,
+} from "@/components/ui/resizable";
+import { ViewContainer } from "@/components/views/view-container";
+import { useImageViewer } from "@/store/image-viewer.store";
+import { ImageItem } from "@/types/file-item";
+import type * as React from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 interface MainLayoutProps {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
 	const [isResizing, setIsResizing] = useState(false);
+	const resizingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
-	const [navData, setNavData] = useState<Awaited<ReturnType<typeof getNavigationData>> | null>(null);
+	const [navData, setNavData] = useState<Awaited<
+		ReturnType<typeof getNavigationData>
+	> | null>(null);
+
+	// Manejar inicio de arrastre
+	const handleDragStart = useCallback(() => {
+		if (resizingTimeoutRef.current) {
+			clearTimeout(resizingTimeoutRef.current);
+		}
+		setIsResizing(true);
+	}, []);
+
+	// Manejar fin de arrastre con pequeño retraso
+	const handleDragEnd = useCallback(() => {
+		resizingTimeoutRef.current = setTimeout(() => {
+			setIsResizing(false);
+		}, 100);
+	}, []);
+
+	// Limpiar timeout al desmontar
+	useEffect(() => {
+		return () => {
+			if (resizingTimeoutRef.current) {
+				clearTimeout(resizingTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	// Cargar datos de navegación
 	useEffect(() => {
@@ -28,16 +59,23 @@ export function MainLayout({ children }: MainLayoutProps) {
 	}, []);
 
 	return (
-		<main className="flex h-screen">
+		<div className="flex h-screen w-full">
 			<ResizablePanelGroup
 				direction="horizontal"
-				className="h-full"
-				onDragStart={() => setIsResizing(true)}
-				onDragEnd={() => setIsResizing(false)}
+				className="h-full w-full"
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
 			>
 				{/* Panel Izquierdo - Default 20% */}
-				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background/95">
-					<Suspense fallback={<NavPanelSkeleton />}>{navData && <NavPanel initialData={navData} />}</Suspense>
+				<ResizablePanel
+					defaultSize={20}
+					minSize={15}
+					maxSize={30}
+					className="bg-background/95"
+				>
+					<Suspense fallback={<NavPanelSkeleton />}>
+						{navData && <NavPanel initialData={navData} />}
+					</Suspense>
 				</ResizablePanel>
 
 				<ResizablePanelHandle withHandle />
@@ -46,19 +84,37 @@ export function MainLayout({ children }: MainLayoutProps) {
 				<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
 					<div className="flex flex-col h-full">
 						<ViewToolbar />
-						<ViewContainer isResizing={isResizing} />
-						<div className="flex-1 overflow-auto">{children}</div>
+
+						{/* Área del ViewContainer - Ocupa todo el espacio disponible */}
+						<div className="flex-1 min-h-0">
+							{isResizing ? (
+								// Placeholder durante el redimensionamiento
+								<div className="w-full h-full bg-background/20" />
+							) : (
+								// ViewContainer normal cuando no está redimensionando
+								<ViewContainer />
+							)}
+						</div>
+
+						{/* Área para contenido adicional si existe */}
+						{children && <div className="flex-none">{children}</div>}
 					</div>
 				</ResizablePanel>
 
 				<ResizablePanelHandle withHandle />
 
 				{/* Panel Derecho - Default 20% */}
-				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background/95">
+				<ResizablePanel
+					defaultSize={20}
+					minSize={15}
+					maxSize={30}
+					className="bg-background/95"
+				>
 					<RightPanel />
 				</ResizablePanel>
 			</ResizablePanelGroup>
 
+			{/* Visor de imágenes */}
 			<FileViewer
 				images={images.map((img) => ({
 					...img,
@@ -68,6 +124,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 				isOpen={isOpen}
 				onClose={closeViewer}
 			/>
-		</main>
+		</div>
 	);
 }
