@@ -322,9 +322,33 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		// Después de procesar todos los metadatos, buscar específicamente información de generación por IA
 		// si aún no se ha encontrado
 		if (!metadata.generation && Object.keys(metadata).length > 0) {
-			const aiGenerationInfo = await getAIGenerationInfo(metadata);
+			const aiGenerationInfo = await getAIGenerationInfo(metadata as Record<string, unknown>);
 			if (aiGenerationInfo) {
-				metadata.generation = aiGenerationInfo;
+				// Transformar el resultado para que sea compatible con AIMetadata
+				const { extra_params, ...restInfo } = aiGenerationInfo;
+
+				// Procesar extra_params para eliminar arrays
+				const processedExtraParams: Record<string, string | number | boolean | null | undefined> = {};
+				if (extra_params) {
+					for (const [key, value] of Object.entries(extra_params)) {
+						if (Array.isArray(value)) {
+							processedExtraParams[key] = value.join(', ');
+						} else {
+							processedExtraParams[key] = value;
+						}
+					}
+				}
+
+				metadata.generation = {
+					...restInfo,
+					type: aiGenerationInfo.type as 'stable-diffusion' | 'comfyui' | 'invoke-ai' | 'novel-ai',
+					seed:
+						typeof aiGenerationInfo.seed === 'string'
+							? Number.parseInt(aiGenerationInfo.seed, 10) || undefined
+							: aiGenerationInfo.seed,
+					extra_params: extra_params ? processedExtraParams : undefined,
+				};
+
 				extractorLogger.debug('Encontrada información de generación por IA', {
 					type: aiGenerationInfo.type,
 				});

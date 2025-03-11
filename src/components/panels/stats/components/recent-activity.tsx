@@ -1,7 +1,7 @@
-import { getSystemStats } from "@/app/actions/stats/stats.actions";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock } from "lucide-react";
-import { Activity } from "./activity";
+import { getSystemStats } from '@/app/actions/stats/stats.actions';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock } from 'lucide-react';
+import { Activity } from './activity';
 
 export async function RecentActivity() {
 	const stats = await getSystemStats();

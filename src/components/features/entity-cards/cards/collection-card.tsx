@@ -1,20 +1,14 @@
-"use client";
+'use client';
 
-import type { CollectionFormData } from "@/components/features/entity-cards/forms/entity-types";
-import { Button } from "@/components/ui/button";
-import { cn, formatBytes } from "@/lib/utils";
-import type { Collection } from "@prisma/client";
-import {
-	FolderIcon,
-	ImageIcon,
-	PencilIcon,
-	TagIcon,
-	Trash2,
-} from "lucide-react";
-import { motion } from "motion/react";
-import { AnimatePresence } from "motion/react";
-import Image from "next/image";
-import * as React from "react";
+import type { CollectionFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { Button } from '@/components/ui/button';
+import { cn, formatBytes } from '@/lib/utils';
+import type { Collection } from '@prisma/client';
+import { FolderIcon, ImageIcon, PencilIcon, TagIcon, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
+import Image from 'next/image';
+import * as React from 'react';
 
 type CardData =
 	| (Collection & {
@@ -36,32 +30,25 @@ interface CollectionCardProps {
 
 function getRandomGradient() {
 	const gradients = [
-		"from-rose-500/20 to-indigo-500/20",
-		"from-emerald-500/20 to-sky-500/20",
-		"from-amber-500/20 to-pink-500/20",
-		"from-violet-500/20 to-orange-500/20",
-		"from-cyan-500/20 to-yellow-500/20",
-		"from-fuchsia-500/20 to-lime-500/20",
-		"from-purple-500/20 to-teal-500/20",
-		"from-blue-500/20 to-red-500/20",
-		"from-green-500/20 to-purple-500/20",
+		'from-rose-500/20 to-indigo-500/20',
+		'from-emerald-500/20 to-sky-500/20',
+		'from-amber-500/20 to-pink-500/20',
+		'from-violet-500/20 to-orange-500/20',
+		'from-cyan-500/20 to-yellow-500/20',
+		'from-fuchsia-500/20 to-lime-500/20',
+		'from-purple-500/20 to-teal-500/20',
+		'from-blue-500/20 to-red-500/20',
+		'from-green-500/20 to-purple-500/20',
 	];
 	return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
 // Función auxiliar para verificar si estamos en modo preview
 function isFormData(data: CardData): data is CollectionFormData {
-	return data !== undefined && "editions" in data;
+	return data !== undefined && 'editions' in data;
 }
 
-export function CollectionCard({
-	data,
-	isPreview = false,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-}: CollectionCardProps) {
+export function CollectionCard({ data, isPreview = false, onEdit, onDelete, onClick, className }: CollectionCardProps) {
 	// Definir todos los estados al inicio
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 	const [isHovered, setIsHovered] = React.useState(false);
@@ -133,12 +120,8 @@ export function CollectionCard({
 
 	// Early return si data es undefined
 	if (!data) {
-		console.error("CollectionCard: data is undefined");
-		return (
-			<div className="p-4 text-sm text-red-500">
-				Error: Datos de colección no disponibles
-			</div>
-		);
+		console.error('CollectionCard: data is undefined');
+		return <div className="p-4 text-sm text-red-500">Error: Datos de colección no disponibles</div>;
 	}
 
 	// Renderizar versión para preview en diálogos
@@ -146,17 +129,17 @@ export function CollectionCard({
 		return (
 			<AnimatePresence mode="wait">
 				<motion.div
-					key={`${data.name}-${data.emoji}-${animateUpdate ? Date.now() : "static"}`}
+					key={`${data.name}-${data.emoji}-${animateUpdate ? Date.now() : 'static'}`}
 					className={cn(
-						"group relative flex h-48 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200",
-						animateUpdate ? "ring-2 ring-primary" : "hover:border-primary",
+						'group relative flex h-48 flex-col overflow-hidden rounded-lg border bg-card p-4 transition-all duration-200',
+						animateUpdate ? 'ring-2 ring-primary' : 'hover:border-primary',
 						className
 					)}
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{
 						opacity: 1,
 						scale: 1,
-						transition: { type: "spring", stiffness: 500, damping: 30 },
+						transition: { type: 'spring', stiffness: 500, damping: 30 },
 					}}
 					exit={{ opacity: 0, scale: 0.9 }}
 					onMouseMove={handleMouseMove}
@@ -166,9 +149,9 @@ export function CollectionCard({
 					{/* Gradiente de fondo */}
 					<div
 						className={cn(
-							"absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300",
+							'absolute inset-0 z-0 bg-gradient-to-br opacity-50 transition-opacity duration-300',
 							gradient,
-							isHovered && "opacity-80"
+							isHovered && 'opacity-80'
 						)}
 						style={{
 							backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
@@ -178,18 +161,12 @@ export function CollectionCard({
 					{/* Contenido */}
 					<div className="z-10 flex flex-1 flex-col">
 						<div className="flex items-center space-x-2">
-							<span className="text-2xl">{data.emoji || "📁"}</span>
-							<h3 className="text-xl font-semibold line-clamp-1">
-								{data.name || "Sin nombre"}
-							</h3>
+							<span className="text-2xl">{data.emoji || '📁'}</span>
+							<h3 className="text-xl font-semibold line-clamp-1">{data.name || 'Sin nombre'}</h3>
 						</div>
 
 						{/* Descripción */}
-						{data.description && (
-							<p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-								{data.description}
-							</p>
-						)}
+						{data.description && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{data.description}</p>}
 
 						{/* Detalles */}
 						<div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
@@ -197,7 +174,7 @@ export function CollectionCard({
 								<span className="flex items-center">
 									<span
 										className="mr-1.5 h-2.5 w-2.5 rounded-full"
-										style={{ backgroundColor: data.color || "#3b82f6" }}
+										style={{ backgroundColor: data.color || '#3b82f6' }}
 									/>
 									Vista previa
 								</span>
@@ -216,7 +193,7 @@ export function CollectionCard({
 	return (
 		<motion.div
 			className={cn(
-				"group relative overflow-hidden rounded-xl h-60 bg-background shadow-md transition-all duration-300 hover:shadow-lg",
+				'group relative overflow-hidden rounded-xl h-60 bg-background shadow-md transition-all duration-300 hover:shadow-lg',
 				className
 			)}
 			whileHover={{ y: -5 }}
@@ -228,9 +205,7 @@ export function CollectionCard({
 		>
 			{/* Fondo con gradiente  */}
 			<div
-				className={cn(
-					"absolute inset-0 bg-gradient-to-b from-primary/5 to-background"
-				)}
+				className={cn('absolute inset-0 bg-gradient-to-b from-primary/5 to-background')}
 				style={{
 					backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
 				}}
@@ -239,8 +214,8 @@ export function CollectionCard({
 			{/* Overlay de hover */}
 			<div
 				className={cn(
-					"absolute inset-0 bg-gradient-to-b from-transparent to-background/80 transition-opacity duration-300",
-					isHovered ? "opacity-100" : "opacity-0"
+					'absolute inset-0 bg-gradient-to-b from-transparent to-background/80 transition-opacity duration-300',
+					isHovered ? 'opacity-100' : 'opacity-0'
 				)}
 			/>
 
@@ -254,19 +229,11 @@ export function CollectionCard({
 								background: `linear-gradient(135deg, ${data.color}, ${data.color}80)`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-lg">
-								{data.emoji}
-							</span>
+							<span className="text-2xl filter drop-shadow-lg">{data.emoji}</span>
 						</div>
 						<div className="flex-1 min-w-0">
-							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">
-								{data.name}
-							</h3>
-							{data.description && (
-								<p className="text-sm text-white/80 truncate">
-									{data.description}
-								</p>
-							)}
+							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{data.name}</h3>
+							{data.description && <p className="text-sm text-white/80 truncate">{data.description}</p>}
 						</div>
 					</div>
 					<div className="mt-auto">
@@ -287,19 +254,11 @@ export function CollectionCard({
 								background: `linear-gradient(135deg, ${data.color}, ${data.color}80)`,
 							}}
 						>
-							<span className="text-2xl filter drop-shadow-lg">
-								{data.emoji}
-							</span>
+							<span className="text-2xl filter drop-shadow-lg">{data.emoji}</span>
 						</div>
 						<div className="flex-1 min-w-0">
-							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">
-								{data.name}
-							</h3>
-							{data.description && (
-								<p className="text-sm text-white/80 truncate">
-									{data.description}
-								</p>
-							)}
+							<h3 className="text-lg font-bold truncate text-white drop-shadow-lg">{data.name}</h3>
+							{data.description && <p className="text-sm text-white/80 truncate">{data.description}</p>}
 						</div>
 					</div>
 
@@ -309,7 +268,7 @@ export function CollectionCard({
 							{data.recentImages && data.recentImages.length > 0
 								? data.recentImages.map((src, i) => (
 										<div
-											key={`${data.id}-image-${i}-${src?.substring(0, 10) || "empty"}`}
+											key={`${data.id}-image-${i}-${src?.substring(0, 10) || 'empty'}`}
 											className="relative rounded-md overflow-hidden aspect-square"
 										>
 											{src ? (
@@ -323,11 +282,7 @@ export function CollectionCard({
 												</div>
 											) : (
 												<div
-													className={cn(
-														"w-full h-full flex items-center justify-center",
-														"bg-linear-to-br",
-														gradient
-													)}
+													className={cn('w-full h-full flex items-center justify-center', 'bg-linear-to-br', gradient)}
 												>
 													<ImageIcon className="w-4 h-4 text-white/80" />
 												</div>
@@ -338,9 +293,9 @@ export function CollectionCard({
 										<div
 											key={`${data.id}-placeholder-${i}`}
 											className={cn(
-												"relative rounded-md overflow-hidden aspect-square",
-												"flex items-center justify-center",
-												"bg-linear-to-br",
+												'relative rounded-md overflow-hidden aspect-square',
+												'flex items-center justify-center',
+												'bg-linear-to-br',
 												gradient
 											)}
 										>
@@ -352,16 +307,14 @@ export function CollectionCard({
 						{/* Overlay con hover */}
 						<div
 							className={cn(
-								"absolute inset-0 bg-linear-to-t from-background/80 to-transparent",
-								"opacity-0 group-hover:opacity-100 transition-opacity",
-								"rounded-lg flex items-end justify-center p-4"
+								'absolute inset-0 bg-linear-to-t from-background/80 to-transparent',
+								'opacity-0 group-hover:opacity-100 transition-opacity',
+								'rounded-lg flex items-end justify-center p-4'
 							)}
 						>
 							<Button variant="secondary" size="sm" className="gap-2">
 								<ImageIcon className="w-4 h-4" />
-								{data.recentImages && data.recentImages.length > 0
-									? "Ver todas las imágenes"
-									: "Colección vacía"}
+								{data.recentImages && data.recentImages.length > 0 ? 'Ver todas las imágenes' : 'Colección vacía'}
 							</Button>
 						</div>
 					</div>
@@ -378,16 +331,14 @@ export function CollectionCard({
 								{data.topTags?.length || 0} etiquetas
 							</span>
 						</div>
-						<span className="text-xs">
-							{data.totalSize ? formatBytes(data.totalSize) : "0 B"}
-						</span>
+						<span className="text-xs">{data.totalSize ? formatBytes(data.totalSize) : '0 B'}</span>
 					</div>
 
 					{/* Acciones */}
 					<div
 						className={cn(
-							"absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200",
-							isHovered && "opacity-100"
+							'absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200',
+							isHovered && 'opacity-100'
 						)}
 					>
 						{onEdit && (

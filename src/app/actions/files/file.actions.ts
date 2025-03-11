@@ -154,7 +154,7 @@ export async function deleteFile(filePath: string): Promise<{ success: true }> {
 
 		// Emitir evento
 		await emit({
-			type: 'file:deleted',
+			type: 'files:modified',
 			data: { path: normalizedPath },
 		});
 
