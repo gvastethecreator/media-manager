@@ -1,9 +1,9 @@
 'use client';
 
 import type { TagWithStats } from '@/app/actions/tags/tag.actions';
-import { TagCard } from '@/components/features/entity-cards/cards/tag-card';
-import type { TagFormData } from '@/components/features/entity-cards/forms/entity-types';
-import { TagForm } from '@/components/features/entity-cards/forms/tag-form';
+import type { TagFormData } from '@/components/features/entity-cards/entity-types';
+import { TagCard } from '@/components/features/entity-cards/tag/tag-card';
+import { TagForm } from '@/components/features/entity-cards/tag/tag-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger/logger';
 import { useTagsStore } from '@/store/entities/tags.store';
+import type { Tag } from '@prisma/client';
 import { Loader2, Palette } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
@@ -25,7 +26,6 @@ function tagToFormData(tag: TagWithStats): TagFormData {
 		emoji: tag.emoji || '🏷️',
 		color: tag.color || '#3b82f6',
 		shortcut: tag.shortcut || undefined,
-		tags: [],
 		featuredImage: null,
 		isFavorite: false,
 	};
@@ -252,7 +252,16 @@ export function TagsSection() {
 												</CardContent>
 											</Card>
 										) : (
-											<TagCard tag={tag} onEdit={() => setEditingId(tag.id)} onDelete={handleDelete} />
+											<TagCard
+												tag={
+													tag as unknown as Tag & {
+														_count?: { images: number };
+														totalSize?: number;
+													}
+												}
+												onEdit={() => setEditingId(tag.id)}
+												onDelete={handleDelete}
+											/>
 										)}
 									</motion.div>
 								))}

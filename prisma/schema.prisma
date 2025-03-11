@@ -171,6 +171,7 @@ model Album {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   images      Image[]  @relation("ImageToAlbum")
+  category    String?
 
   @@index([name])
   @@index([createdAt])
@@ -188,6 +189,7 @@ model Tag {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   images        Image[]  @relation("ImageToTag")
+  category    String?
 
   @@index([name])
   @@index([createdAt])
@@ -213,7 +215,7 @@ model Collection {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   images         Image[]  @relation("ImageToCollection")
-
+  category    String?
   @@index([name])
   @@index([createdAt])
 }
@@ -251,7 +253,7 @@ model Character {
   notes                Note[]      @relation("CharacterToNote")
   concepts             Concept[]   @relation("CharacterToConcept")
   prompts              Prompt[]    @relation("CharacterToPrompt")
-
+  category    String?
   @@index([name])
   @@index([createdAt])
   @@index([class])
@@ -286,6 +288,7 @@ model Place {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToPlace")
+  category    String?
 
   @@index([name])
   @@index([createdAt])
@@ -318,6 +321,7 @@ model WorldItem {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToWorldItem")
+  category    String?
 
   @@index([name])
   @@index([createdAt])

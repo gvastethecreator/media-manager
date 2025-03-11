@@ -129,30 +129,46 @@ export interface FileMetadata {
 
 export interface FileItem {
 	id: string;
+	hash: string;
 	name: string;
 	path: string;
 	type: 'file' | 'folder' | 'image';
 	size: number;
-	width: number | null;
-	height: number | null;
+	width: number;
+	height: number;
 	metadata: string | null;
 	thumbnail: string | null;
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
 	isPublic: boolean;
 	isFavorite: boolean;
 	folderId: string;
 	createdAt: Date;
 	updatedAt: Date;
-	modifiedAt: Date;
-	accessedAt: Date;
 	collections: RelatedCollection[];
 	tags: RelatedTag[];
 	albums: RelatedAlbum[];
 	characters: RelatedCharacter[];
 	places: RelatedPlace[];
 	worldItems: RelatedWorldItem[];
+	concepts: RelatedConcept[];
+	prompts: RelatedPrompt[];
+	notes: RelatedNote[];
+	stats?: ImageStats | null;
+}
+
+export interface ImageStats {
+	id: string;
+	imageId: string;
+	views: number;
+	downloads: number;
+	lastViewed: Date;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface RelatedCollection {
@@ -198,7 +214,7 @@ export interface RelatedPrompt {
 
 export interface RelatedNote {
 	id: string;
-	name: string;
+	title: string;
 }
 
 export interface ImageItem extends FileItem {

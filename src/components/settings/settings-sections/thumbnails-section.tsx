@@ -16,6 +16,7 @@ import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { useThumbnailEvents } from '@/lib/hooks/use-thumbnail-events';
 import { cn, formatBytes } from '@/lib/utils';
+import type { ProcessOptions } from '@/services/thumbnail.service';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import type {
 	CleanResult,
@@ -249,12 +250,23 @@ export function ThumbnailsSection() {
 		}
 	};
 
-	const handleOptimizeThumbnails = () => handleThumbnailProcess(thumbnailActions.optimizeThumbnails, 'Optimización');
+	const handleOptimizeThumbnails = () =>
+		handleThumbnailProcess(
+			(callbacks) => thumbnailActions.optimizeThumbnails(callbacks as unknown as ProcessOptions),
+			'Optimización'
+		);
 
 	const handleReprocessThumbnails = () =>
-		handleThumbnailProcess(thumbnailActions.reprocessThumbnails, 'Reprocesamiento');
+		handleThumbnailProcess(
+			(callbacks) => thumbnailActions.reprocessThumbnails(callbacks as unknown as ProcessOptions),
+			'Reprocesamiento'
+		);
 
-	const handleCleanThumbnails = () => handleThumbnailProcess(thumbnailActions.cleanThumbnails, 'Limpieza');
+	const handleCleanThumbnails = () =>
+		handleThumbnailProcess(
+			(callbacks) => thumbnailActions.cleanThumbnails(callbacks as unknown as ProcessOptions),
+			'Limpieza'
+		);
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">

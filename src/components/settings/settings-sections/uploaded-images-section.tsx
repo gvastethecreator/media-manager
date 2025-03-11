@@ -66,7 +66,7 @@ export function UploadedImagesSection() {
 			const response = await getUploadedImageStats();
 
 			if (response.success) {
-				setStats(response.stats);
+				setStats(response.stats as UploadedImageStats);
 			} else {
 				toast({
 					title: 'Error',
@@ -117,7 +117,7 @@ export function UploadedImagesSection() {
 				// Usar Server Action para subir las imágenes
 				const result = await uploadImages(formData);
 
-				if (result.success) {
+				if (result.success && result.items) {
 					toast({
 						title: 'Imágenes subidas',
 						description: `Se ${result.items.length === 1 ? 'ha subido' : 'han subido'} ${result.items.length} ${result.items.length === 1 ? 'imagen' : 'imágenes'} correctamente.`,

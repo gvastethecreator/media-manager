@@ -18,10 +18,10 @@ interface CollectionsStore {
 	error: Error | null;
 	selectedItem: Collection | null;
 	loadCollections: () => Promise<void>;
-	createCollection: (data: CollectionCreate) => Promise<void>;
-	updateCollection: (data: CollectionUpdate) => Promise<void>;
+	createCollection: (data: CollectionCreate) => Promise<Collection>;
+	updateCollection: (data: CollectionUpdate) => Promise<Collection>;
 	deleteCollection: (id: string) => Promise<void>;
-	addImageToCollection: (collectionId: string, imageId: string) => Promise<void>;
+	addImageToCollection: (imageId: string, collectionId: string) => Promise<void>;
 	selectItem: (collection: Collection) => void;
 }
 
@@ -54,12 +54,16 @@ export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
 		try {
 			set({ isLoading: true, error: null });
 			collectionsLogger.info('📝 Creando colección:', data.name);
-			await createCollection(data);
+			const collection = await createCollection(data);
 			await get().loadCollections();
 			collectionsLogger.info('✅ Colección creada');
+			return collection;
 		} catch (error) {
 			collectionsLogger.error('❌ Error al crear colección:', error);
 			set({ error: error as Error, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 
@@ -67,12 +71,16 @@ export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
 		try {
 			set({ isLoading: true, error: null });
 			collectionsLogger.info('📝 Actualizando colección:', data.id);
-			await updateCollection(data.id, data);
+			const collection = await updateCollection(data.id, data);
 			await get().loadCollections();
 			collectionsLogger.info('✅ Colección actualizada');
+			return collection;
 		} catch (error) {
 			collectionsLogger.error('❌ Error al actualizar colección:', error);
 			set({ error: error as Error, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 
@@ -86,10 +94,13 @@ export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
 		} catch (error) {
 			collectionsLogger.error('❌ Error al eliminar colección:', error);
 			set({ error: error as Error, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 
-	addImageToCollection: async (collectionId, imageId) => {
+	addImageToCollection: async (imageId, collectionId) => {
 		try {
 			set({ isLoading: true, error: null });
 			collectionsLogger.info('➕ Agregando imagen a colección:', { collectionId, imageId });
@@ -99,6 +110,9 @@ export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
 		} catch (error) {
 			collectionsLogger.error('❌ Error al agregar imagen a la colección:', error);
 			set({ error: error as Error, isLoading: false });
+			throw error;
+		} finally {
+			set({ isLoading: false });
 		}
 	},
 }));
