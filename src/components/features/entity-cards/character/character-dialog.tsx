@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { CharacterCard } from '@/components/features/entity-cards/character/character-card';
-import { CharacterForm } from '@/components/features/entity-cards/character/character-form';
-import { EntityCreationDialog } from '@/components/features/entity-cards/entity-creation-dialog';
-import type { CharacterFormData } from '@/components/features/entity-cards/entity-types';
-import { formDataToCharacter } from '@/components/features/entity-cards/entity-types';
-import { Separator } from '@/components/ui/separator';
-import { logger } from '@/lib/logger/logger';
-import { useCharactersStore } from '@/store/entities/characters.store';
-import * as React from 'react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { CharacterCard } from "@/components/features/entity-cards/character/character-card";
+import { CharacterForm } from "@/components/features/entity-cards/character/character-form";
+import { EntityCreationDialog } from "@/components/features/entity-cards/entity-creation-dialog";
+import type { CharacterFormData } from "@/components/features/entity-cards/entity-types";
+import { formDataToCharacter } from "@/components/features/entity-cards/entity-types";
+import { Separator } from "@/components/ui/separator";
+import { logger } from "@/lib/logger/logger";
+import { toastService } from "@/lib/services/toast.service";
+import { useCharactersStore } from "@/store/entities/characters.store";
+import * as React from "react";
+import { useState } from "react";
 
-const characterDialogLogger = logger.withContext('CharacterDialog');
+const characterDialogLogger = logger.withContext("CharacterDialog");
 
 export function CharacterDialog() {
 	// Store de personajes
@@ -20,25 +20,25 @@ export function CharacterDialog() {
 
 	// Estado para el formulario
 	const [formData, setFormData] = useState<CharacterFormData>({
-		name: '',
-		emoji: '👤',
-		color: '#ec4899', // Rosa predeterminado
-		description: '',
+		name: "",
+		emoji: "👤",
+		color: "#ec4899", // Rosa predeterminado
+		description: "",
 		level: 1,
-		class: '',
-		race: '',
-		alignment: '',
-		backstory: '',
-		stats: '',
-		sortBy: 'name',
-		filters: '',
-		psychologicalProfile: '',
-		socialProfile: '',
-		relationships: '',
-		goals: '',
-		fears: '',
-		beliefs: '',
-		personality: '',
+		class: "",
+		race: "",
+		alignment: "",
+		backstory: "",
+		stats: "",
+		sortBy: "name",
+		filters: "",
+		psychologicalProfile: "",
+		socialProfile: "",
+		relationships: "",
+		goals: "",
+		fears: "",
+		beliefs: "",
+		personality: "",
 		isFavorite: false,
 	});
 
@@ -69,31 +69,35 @@ export function CharacterDialog() {
 
 		try {
 			setIsLoading(true);
-			characterDialogLogger.info('📥 Guardando personaje', { formData });
+			characterDialogLogger.info("📥 Guardando personaje", { formData });
 
 			// Crear el personaje
-			const savedCharacter = await createCharacter(formDataToCharacter(formData));
+			const savedCharacter = await createCharacter(
+				formDataToCharacter(formData)
+			);
 
-			characterDialogLogger.info('✅ Personaje guardado', savedCharacter);
+			characterDialogLogger.info("✅ Personaje guardado", savedCharacter);
 
 			// Si se proporcionó un ID de imagen, asociar el personaje con esa imagen
 			if (imageId && savedCharacter) {
-				characterDialogLogger.info('🔗 Asociando imagen a personaje', {
+				characterDialogLogger.info("🔗 Asociando imagen a personaje", {
 					imageId,
 					characterId: savedCharacter.id,
 				});
 
 				await addImageToCharacter(imageId, savedCharacter.id);
 
-				toast.success(`Se ha añadido la imagen al personaje "${savedCharacter.name}"`);
+				toastService.success(
+					`Se ha añadido la imagen al personaje "${savedCharacter.name}"`
+				);
 			}
 
 			// Reset form
 			handleCancel();
 			return savedCharacter;
 		} catch (error) {
-			characterDialogLogger.error('❌ Error al guardar el personaje', error);
-			toast.error('Error al crear el personaje');
+			characterDialogLogger.error("❌ Error al guardar el personaje", error);
+			toastService.error("Error al crear el personaje");
 			throw error;
 		} finally {
 			setIsLoading(false);
@@ -104,25 +108,25 @@ export function CharacterDialog() {
 	const handleCancel = () => {
 		// Restablecer el formulario
 		setFormData({
-			name: '',
-			emoji: '👤',
-			color: '#ec4899',
-			description: '',
+			name: "",
+			emoji: "👤",
+			color: "#ec4899",
+			description: "",
 			level: 1,
-			class: '',
-			race: '',
-			alignment: '',
-			backstory: '',
-			stats: '',
-			sortBy: 'name',
-			filters: '',
-			psychologicalProfile: '',
-			socialProfile: '',
-			relationships: '',
-			goals: '',
-			fears: '',
-			beliefs: '',
-			personality: '',
+			class: "",
+			race: "",
+			alignment: "",
+			backstory: "",
+			stats: "",
+			sortBy: "name",
+			filters: "",
+			psychologicalProfile: "",
+			socialProfile: "",
+			relationships: "",
+			goals: "",
+			fears: "",
+			beliefs: "",
+			personality: "",
 			isFavorite: false,
 		});
 		setIsValid(false);
@@ -149,14 +153,16 @@ export function CharacterDialog() {
 
 				{/* Previsualización */}
 				<div className="flex flex-col space-y-4">
-					<h3 className="text-sm font-semibold text-muted-foreground">Vista previa</h3>
+					<h3 className="text-sm font-semibold text-muted-foreground">
+						Vista previa
+					</h3>
 					<Separator />
 					<div className="flex-1 rounded-lg border p-4">
 						<CharacterCard data={formData} isPreview={true} />
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Esta es una previsualización del personaje. Los campos opcionales se mostrarán solo si contienen
-						información.
+						Esta es una previsualización del personaje. Los campos opcionales se
+						mostrarán solo si contienen información.
 					</p>
 				</div>
 			</div>

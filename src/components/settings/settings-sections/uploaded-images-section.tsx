@@ -1,6 +1,9 @@
-'use client';
+"use client";
 
-import { getUploadedImageStats, uploadImages } from '@/app/actions/uploaded-images/uploaded-images.actions';
+import {
+	getUploadedImageStats,
+	uploadImages,
+} from "@/app/actions/uploaded-images/uploaded-images.actions";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,26 +14,26 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger/logger';
-import { cn } from '@/lib/utils';
-import type { UploadedImageType } from '@/types/entities/entities';
-import type { UploadedImageStats } from '@/types/uploaded-images';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { logger } from "@/lib/logger/logger";
+import { toastService } from "@/lib/services/toast.service";
+import { cn } from "@/lib/utils";
+import type { UploadedImageType } from "@/types/entities/entities";
+import type { UploadedImageStats } from "@/types/uploaded-images";
 import {
 	FileSpreadsheet,
 	Filter,
@@ -44,16 +47,15 @@ import {
 	Trash2,
 	UploadCloud,
 	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-import type * as React from 'react';
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
+import type * as React from "react";
 
-const sectionLogger = logger.withContext('UploadedImagesSection');
+const sectionLogger = logger.withContext("UploadedImagesSection");
 
 export function UploadedImagesSection() {
-	const { toast } = useToast();
-	const [activeTab, setActiveTab] = useState('general');
+	const [activeTab, setActiveTab] = useState("general");
 	const [stats, setStats] = useState<UploadedImageStats | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isUploading, setIsUploading] = useState(false);
@@ -68,23 +70,20 @@ export function UploadedImagesSection() {
 			if (response.success) {
 				setStats(response.stats as UploadedImageStats);
 			} else {
-				toast({
-					title: 'Error',
-					description: response.error || 'No se pudieron cargar las estadísticas de imágenes subidas.',
-					variant: 'destructive',
-				});
+				toastService.error(
+					response.error ||
+						"No se pudieron cargar las estadísticas de imágenes subidas."
+				);
 			}
 			setIsLoading(false);
 		} catch (error) {
-			sectionLogger.error('Error al cargar estadísticas:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudieron cargar las estadísticas de imágenes subidas.',
-				variant: 'destructive',
-			});
+			sectionLogger.error("Error al cargar estadísticas:", error);
+			toastService.error(
+				"No se pudieron cargar las estadísticas de imágenes subidas."
+			);
 			setIsLoading(false);
 		}
-	}, [toast]);
+	}, []);
 
 	useEffect(() => {
 		loadStats();
@@ -99,49 +98,46 @@ export function UploadedImagesSection() {
 				// Crear FormData para la carga
 				const formData = new FormData();
 				for (const file of Array.from(files)) {
-					formData.append('files', file);
+					formData.append("files", file);
 				}
 
 				// Asignar tipo según el formulario
-				const typeSelect = document.getElementById('import-type') as HTMLSelectElement;
+				const typeSelect = document.getElementById(
+					"import-type"
+				) as HTMLSelectElement;
 				if (typeSelect?.value) {
-					formData.append('type', typeSelect.value);
+					formData.append("type", typeSelect.value);
 				}
 
 				// Asignar categoría según el formulario
-				const categorySelect = document.getElementById('import-category') as HTMLSelectElement;
+				const categorySelect = document.getElementById(
+					"import-category"
+				) as HTMLSelectElement;
 				if (categorySelect?.value) {
-					formData.append('category', categorySelect.value);
+					formData.append("category", categorySelect.value);
 				}
 
 				// Usar Server Action para subir las imágenes
 				const result = await uploadImages(formData);
 
 				if (result.success && result.items) {
-					toast({
-						title: 'Imágenes subidas',
-						description: `Se ${result.items.length === 1 ? 'ha subido' : 'han subido'} ${result.items.length} ${result.items.length === 1 ? 'imagen' : 'imágenes'} correctamente.`,
-					});
+					toastService.success(
+						`Se ${result.items.length === 1 ? "ha subido" : "han subido"} ${result.items.length} ${result.items.length === 1 ? "imagen" : "imágenes"} correctamente.`
+					);
 					loadStats(); // Recargamos las estadísticas
 				} else {
-					toast({
-						title: 'Error',
-						description: result.error || 'No se pudieron subir las imágenes.',
-						variant: 'destructive',
-					});
+					toastService.error(
+						result.error || "No se pudieron subir las imágenes."
+					);
 				}
 				setIsUploading(false);
 			} catch (error) {
-				sectionLogger.error('Error al subir imágenes:', error);
-				toast({
-					title: 'Error',
-					description: 'No se pudieron subir las imágenes.',
-					variant: 'destructive',
-				});
+				sectionLogger.error("Error al subir imágenes:", error);
+				toastService.error("No se pudieron subir las imágenes.");
 				setIsUploading(false);
 			}
 		},
-		[loadStats, toast]
+		[loadStats]
 	);
 
 	// Manejador para la entrada de archivos
@@ -179,8 +175,12 @@ export function UploadedImagesSection() {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-56">
-								<DropdownMenuItem onClick={loadStats} className="text-xs cursor-pointer">
-									<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar estadísticas
+								<DropdownMenuItem
+									onClick={loadStats}
+									className="text-xs cursor-pointer"
+								>
+									<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar
+									estadísticas
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -189,10 +189,14 @@ export function UploadedImagesSection() {
 							variant="outline"
 							size="sm"
 							className="h-7 w-7 p-0"
-							onClick={() => document.getElementById('image-upload')?.click()}
+							onClick={() => document.getElementById("image-upload")?.click()}
 							disabled={isUploading}
 						>
-							{isUploading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+							{isUploading ? (
+								<RefreshCw className="h-3.5 w-3.5 animate-spin" />
+							) : (
+								<ImagePlus className="h-3.5 w-3.5" />
+							)}
 						</Button>
 						<Input
 							id="image-upload"
@@ -210,7 +214,7 @@ export function UploadedImagesSection() {
 			{showFilters && (
 				<motion.div
 					initial={{ height: 0, opacity: 0 }}
-					animate={{ height: 'auto', opacity: 1 }}
+					animate={{ height: "auto", opacity: 1 }}
 					exit={{ height: 0, opacity: 0 }}
 					className="overflow-hidden px-2 pb-2"
 				>
@@ -221,7 +225,11 @@ export function UploadedImagesSection() {
 									<Label htmlFor="search-images" className="text-xs">
 										Buscar
 									</Label>
-									<Input id="search-images" placeholder="Nombre de imagen..." className="h-8 text-xs" />
+									<Input
+										id="search-images"
+										placeholder="Nombre de imagen..."
+										className="h-8 text-xs"
+									/>
 								</div>
 								<div className="space-y-1">
 									<Label htmlFor="type-filter" className="text-xs">
@@ -255,15 +263,37 @@ export function UploadedImagesSection() {
 			)}
 
 			<CardContent className="p-2">
-				<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2">
+				<Tabs
+					value={activeTab}
+					onValueChange={setActiveTab}
+					className="space-y-2"
+				>
 					<TabsList className="bg-muted h-8 p-0.5">
-						<TabsTrigger value="general" className={cn('text-xs h-7', activeTab === 'general' && 'text-primary')}>
+						<TabsTrigger
+							value="general"
+							className={cn(
+								"text-xs h-7",
+								activeTab === "general" && "text-primary"
+							)}
+						>
 							General
 						</TabsTrigger>
-						<TabsTrigger value="categories" className={cn('text-xs h-7', activeTab === 'categories' && 'text-primary')}>
+						<TabsTrigger
+							value="categories"
+							className={cn(
+								"text-xs h-7",
+								activeTab === "categories" && "text-primary"
+							)}
+						>
 							Categorías
 						</TabsTrigger>
-						<TabsTrigger value="import" className={cn('text-xs h-7', activeTab === 'import' && 'text-primary')}>
+						<TabsTrigger
+							value="import"
+							className={cn(
+								"text-xs h-7",
+								activeTab === "import" && "text-primary"
+							)}
+						>
 							Importar
 						</TabsTrigger>
 					</TabsList>
@@ -272,13 +302,21 @@ export function UploadedImagesSection() {
 						{/* Estadísticas generales */}
 						<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
 							<div className="bg-card rounded-md p-3 shadow-sm">
-								<div className="text-xs text-muted-foreground">Total de Imágenes</div>
+								<div className="text-xs text-muted-foreground">
+									Total de Imágenes
+								</div>
 								<div className="text-lg font-semibold">
-									{isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : stats?.total || 0}
+									{isLoading ? (
+										<RefreshCw className="h-4 w-4 animate-spin" />
+									) : (
+										stats?.total || 0
+									)}
 								</div>
 							</div>
 							<div className="bg-card rounded-md p-3 shadow-sm">
-								<div className="text-xs text-muted-foreground">Tamaño Total</div>
+								<div className="text-xs text-muted-foreground">
+									Tamaño Total
+								</div>
 								<div className="text-lg font-semibold">
 									{isLoading ? (
 										<RefreshCw className="h-4 w-4 animate-spin" />
@@ -288,7 +326,9 @@ export function UploadedImagesSection() {
 								</div>
 							</div>
 							<div className="bg-card rounded-md p-3 shadow-sm">
-								<div className="text-xs text-muted-foreground">Tamaño Promedio</div>
+								<div className="text-xs text-muted-foreground">
+									Tamaño Promedio
+								</div>
 								<div className="text-lg font-semibold">
 									{isLoading ? (
 										<RefreshCw className="h-4 w-4 animate-spin" />
@@ -312,27 +352,41 @@ export function UploadedImagesSection() {
 						{/* Acciones y configuración */}
 						<Card className="overflow-hidden">
 							<CardHeader className="bg-muted/50 p-2">
-								<CardTitle className="text-sm font-semibold">Opciones de Almacenamiento</CardTitle>
+								<CardTitle className="text-sm font-semibold">
+									Opciones de Almacenamiento
+								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-3 space-y-3">
 								<div className="flex items-center justify-between">
 									<div>
-										<Label className="text-sm font-medium">Optimización automática</Label>
-										<p className="text-xs text-muted-foreground">Optimiza automáticamente las imágenes al subirlas</p>
+										<Label className="text-sm font-medium">
+											Optimización automática
+										</Label>
+										<p className="text-xs text-muted-foreground">
+											Optimiza automáticamente las imágenes al subirlas
+										</p>
 									</div>
 									<Switch />
 								</div>
 								<div className="flex items-center justify-between">
 									<div>
-										<Label className="text-sm font-medium">Conservar metadatos</Label>
-										<p className="text-xs text-muted-foreground">Conserva los metadatos EXIF de las imágenes</p>
+										<Label className="text-sm font-medium">
+											Conservar metadatos
+										</Label>
+										<p className="text-xs text-muted-foreground">
+											Conserva los metadatos EXIF de las imágenes
+										</p>
 									</div>
 									<Switch defaultChecked />
 								</div>
 								<div className="flex items-center justify-between">
 									<div>
-										<Label className="text-sm font-medium">Formato de conversión</Label>
-										<p className="text-xs text-muted-foreground">Formato al que se convertirán las imágenes</p>
+										<Label className="text-sm font-medium">
+											Formato de conversión
+										</Label>
+										<p className="text-xs text-muted-foreground">
+											Formato al que se convertirán las imágenes
+										</p>
 									</div>
 									<select className="w-24 h-8 rounded-md border text-xs">
 										<option value="webp">WebP</option>
@@ -344,15 +398,21 @@ export function UploadedImagesSection() {
 								<Separator />
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
-										<Button variant="destructive" size="sm" className="w-full h-8 text-xs">
-											<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar todas las imágenes
+										<Button
+											variant="destructive"
+											size="sm"
+											className="w-full h-8 text-xs"
+										>
+											<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar todas las
+											imágenes
 										</Button>
 									</AlertDialogTrigger>
 									<AlertDialogContent>
 										<AlertDialogHeader>
 											<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
 											<AlertDialogDescription>
-												Esta acción eliminará todas las imágenes subidas y no se puede deshacer.
+												Esta acción eliminará todas las imágenes subidas y no se
+												puede deshacer.
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
@@ -360,10 +420,9 @@ export function UploadedImagesSection() {
 											<AlertDialogAction
 												className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 												onClick={() => {
-													toast({
-														title: 'Imágenes eliminadas',
-														description: 'Se han eliminado todas las imágenes subidas.',
-													});
+													toastService.success(
+														"Se han eliminado todas las imágenes subidas."
+													);
 													loadStats();
 												}}
 											>
@@ -381,7 +440,11 @@ export function UploadedImagesSection() {
 							<CardHeader className="bg-muted/50 p-2">
 								<CardTitle className="text-sm font-semibold flex items-center justify-between">
 									<span>Tipos de Imágenes</span>
-									<Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="h-7 gap-1 text-xs"
+									>
 										<Plus className="h-3.5 w-3.5" /> Añadir tipo
 									</Button>
 								</CardTitle>
@@ -398,10 +461,15 @@ export function UploadedImagesSection() {
 											className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50 transition-colors"
 										>
 											<div className="flex items-center gap-2">
-												<Badge variant="outline" className="h-6 text-xs px-2 py-0.5">
+												<Badge
+													variant="outline"
+													className="h-6 text-xs px-2 py-0.5"
+												>
 													{type}
 												</Badge>
-												<span className="text-xs text-muted-foreground">{count} imágenes</span>
+												<span className="text-xs text-muted-foreground">
+													{count} imágenes
+												</span>
 											</div>
 											<Button
 												variant="ghost"
@@ -417,7 +485,9 @@ export function UploadedImagesSection() {
 									))
 								) : (
 									<div className="text-center py-4">
-										<p className="text-sm text-muted-foreground">No hay tipos de imágenes definidos</p>
+										<p className="text-sm text-muted-foreground">
+											No hay tipos de imágenes definidos
+										</p>
 									</div>
 								)}
 							</CardContent>
@@ -427,14 +497,20 @@ export function UploadedImagesSection() {
 							<CardHeader className="bg-muted/50 p-2">
 								<CardTitle className="text-sm font-semibold flex items-center justify-between">
 									<span>Categorías Personalizadas</span>
-									<Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="h-7 gap-1 text-xs"
+									>
 										<Plus className="h-3.5 w-3.5" /> Añadir categoría
 									</Button>
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-3">
 								<div className="text-center py-4">
-									<p className="text-sm text-muted-foreground">No hay categorías personalizadas</p>
+									<p className="text-sm text-muted-foreground">
+										No hay categorías personalizadas
+									</p>
 								</div>
 							</CardContent>
 						</Card>
@@ -443,17 +519,25 @@ export function UploadedImagesSection() {
 					<TabsContent value="import" className="space-y-3 mt-2">
 						<Card className="overflow-hidden">
 							<CardHeader className="bg-muted/50 p-2">
-								<CardTitle className="text-sm font-semibold">Importar Imágenes</CardTitle>
+								<CardTitle className="text-sm font-semibold">
+									Importar Imágenes
+								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-3 space-y-3">
 								<Button
 									variant="ghost"
 									className="w-full h-auto p-6 border-2 border-dashed rounded-md hover:bg-muted/50 transition-colors flex flex-col items-center justify-center"
-									onClick={() => document.getElementById('bulk-image-upload')?.click()}
+									onClick={() =>
+										document.getElementById("bulk-image-upload")?.click()
+									}
 								>
 									<UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
-									<p className="text-sm font-medium">Arrastra y suelta imágenes aquí</p>
-									<p className="text-xs text-muted-foreground mt-1">O haz clic para seleccionar archivos</p>
+									<p className="text-sm font-medium">
+										Arrastra y suelta imágenes aquí
+									</p>
+									<p className="text-xs text-muted-foreground mt-1">
+										O haz clic para seleccionar archivos
+									</p>
 									<Input
 										id="bulk-image-upload"
 										type="file"
@@ -465,10 +549,18 @@ export function UploadedImagesSection() {
 								</Button>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-									<Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+									<Button
+										variant="outline"
+										size="sm"
+										className="h-9 gap-2 text-xs"
+									>
 										<FolderUp className="h-4 w-4" /> Importar desde carpeta
 									</Button>
-									<Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+									<Button
+										variant="outline"
+										size="sm"
+										className="h-9 gap-2 text-xs"
+									>
 										<ImportIcon className="h-4 w-4" /> Importar desde URL
 									</Button>
 								</div>
@@ -476,13 +568,18 @@ export function UploadedImagesSection() {
 								<Separator />
 
 								<div className="space-y-2">
-									<Label className="text-sm font-medium">Ajustes de importación</Label>
+									<Label className="text-sm font-medium">
+										Ajustes de importación
+									</Label>
 									<div className="grid grid-cols-2 gap-2">
 										<div className="space-y-1">
 											<Label htmlFor="import-type" className="text-xs">
 												Tipo predeterminado
 											</Label>
-											<select id="import-type" className="w-full h-8 rounded-md border text-xs">
+											<select
+												id="import-type"
+												className="w-full h-8 rounded-md border text-xs"
+											>
 												<option value="thumbnail">Miniatura</option>
 												<option value="avatar">Avatar</option>
 												<option value="icon">Icono</option>
@@ -493,7 +590,10 @@ export function UploadedImagesSection() {
 											<Label htmlFor="import-category" className="text-xs">
 												Categoría predeterminada
 											</Label>
-											<select id="import-category" className="w-full h-8 rounded-md border text-xs">
+											<select
+												id="import-category"
+												className="w-full h-8 rounded-md border text-xs"
+											>
 												<option value="user">Usuario</option>
 												<option value="system">Sistema</option>
 												<option value="ui">Interfaz</option>
@@ -512,13 +612,24 @@ export function UploadedImagesSection() {
 
 						<Card className="overflow-hidden">
 							<CardHeader className="bg-muted/50 p-2">
-								<CardTitle className="text-sm font-semibold">Exportar Imágenes</CardTitle>
+								<CardTitle className="text-sm font-semibold">
+									Exportar Imágenes
+								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-3 space-y-3">
-								<Button variant="outline" size="sm" className="w-full h-9 gap-2 text-xs">
-									<FileSpreadsheet className="h-4 w-4" /> Exportar inventario a CSV
+								<Button
+									variant="outline"
+									size="sm"
+									className="w-full h-9 gap-2 text-xs"
+								>
+									<FileSpreadsheet className="h-4 w-4" /> Exportar inventario a
+									CSV
 								</Button>
-								<Button variant="outline" size="sm" className="w-full h-9 gap-2 text-xs">
+								<Button
+									variant="outline"
+									size="sm"
+									className="w-full h-9 gap-2 text-xs"
+								>
 									<Grid3X3 className="h-4 w-4" /> Exportar galería de imágenes
 								</Button>
 							</CardContent>
