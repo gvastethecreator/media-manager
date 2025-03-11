@@ -1,0 +1,69 @@
+'use client';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils/utils';
+import type { ReactNode } from 'react';
+
+export interface SystemMetric {
+	name: string;
+	value: number | string;
+	unit: string;
+	icon: ReactNode;
+	change?: {
+		value: number;
+		type: 'increase' | 'decrease';
+	};
+	chart?: {
+		data: number[];
+		labels: string[];
+	};
+}
+
+export function MetricCard({ metric }: { metric: SystemMetric }) {
+	const Icon = metric.icon;
+
+	return (
+		<Card className="h-full border-2 border-primary/10">
+			<CardContent className="p-3">
+				<div className="flex items-center gap-4">
+					<div className="p-2 rounded-md bg-primary/10 border-2 border-primary/10">
+						<Icon className="h-7 w-7" />
+					</div>
+					<div className="flex-1">
+						<p className="text-sm text-muted-foreground">{metric.name}</p>
+						<div className="flex items-end gap-2">
+							<p className="text-xl font-semibold">
+								{metric.value}
+								<span className="text-sm text-muted-foreground ml-1">{metric.unit}</span>
+							</p>
+							{metric.change && (
+								<div
+									className={cn(
+										'text-xs font-medium flex items-center gap-1',
+										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
+									)}
+								>
+									{metric.change.type === 'increase' ? '+' : '-'}
+									{metric.change.value}%
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+				{metric.chart && (
+					<div className="mt-2 h-[50px]">
+						{metric.chart.data.map((value, index) => (
+							<div
+								key={`chart-bar-${metric.name}-${index}`}
+								className="inline-block w-[6px] mx-[2px] bg-primary/20 rounded-sm"
+								style={{
+									height: metric.chart.data.length > 0 ? `${(value / Math.max(...metric.chart.data)) * 100}%` : '0%',
+								}}
+							/>
+						))}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
