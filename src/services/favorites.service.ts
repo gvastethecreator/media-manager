@@ -492,7 +492,9 @@ export const FavoritesService = {
 
 	// Función auxiliar para obtener el estado de favorito de una entidad
 	getEntityFavoriteStatus(entity: unknown): boolean {
-		if (!entity || typeof entity !== 'object') return false;
+		if (!entity || typeof entity !== 'object') {
+			return false;
+		}
 		return 'isFavorite' in entity ? !!(entity as { isFavorite: boolean }).isFavorite : false;
 	},
 

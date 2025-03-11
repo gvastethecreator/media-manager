@@ -5,7 +5,7 @@ const metadataLogger = {
 	info: (message: string, data?: unknown) => console.info(`[MetadataParser] ${message}`, data),
 	warn: (message: string, data?: unknown) => console.warn(`[MetadataParser] ${message}`, data),
 	error: (message: string, data?: unknown) => console.error(`[MetadataParser] ${message}`, data),
-	debug: (message: string, data?: unknown) => console.debug(`[MetadataParser] ${message}`, data)
+	debug: (message: string, data?: unknown) => console.debug(`[MetadataParser] ${message}`, data),
 };
 
 /**
@@ -22,9 +22,12 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 		type: typeof metadata,
 		isString: typeof metadata === 'string',
 		isObject: typeof metadata === 'object',
-		previewValue: typeof metadata === 'string'
-			? (metadata.length > 100 ? `${metadata.substring(0, 100)}...` : metadata)
-			: 'Es un objeto'
+		previewValue:
+			typeof metadata === 'string'
+				? metadata.length > 100
+					? `${metadata.substring(0, 100)}...`
+					: metadata
+				: 'Es un objeto',
 	});
 
 	try {
@@ -64,47 +67,47 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 					result.generation = metadata.ai as FileMetadata['generation'];
 				}
 
-                // Si hay datos de generación, asegurarse de que tengan la estructura correcta
-                if (result.generation) {
-                	metadataLogger.debug('Datos de generation encontrados:', result.generation);
+				// Si hay datos de generación, asegurarse de que tengan la estructura correcta
+				if (result.generation) {
+					metadataLogger.debug('Datos de generation encontrados:', result.generation);
 
-                    // Asegurar que type sea una string válida
-                    if (!result.generation.type || typeof result.generation.type !== 'string') {
-                    	metadataLogger.warn('Tipo de generación inválido o no especificado, usando "unknown"');
-                        result.generation.type = 'unknown';
-                    }
+					// Asegurar que type sea una string válida
+					if (!result.generation.type || typeof result.generation.type !== 'string') {
+						metadataLogger.warn('Tipo de generación inválido o no especificado, usando "unknown"');
+						result.generation.type = 'unknown';
+					}
 
-                    // Convertir parámetros numéricos si vienen como string
-                    if (result.generation.steps && typeof result.generation.steps === 'string') {
-                    	metadataLogger.debug('Convirtiendo steps de string a número', result.generation.steps);
-                        result.generation.steps = Number.parseInt(result.generation.steps, 10);
-                    }
+					// Convertir parámetros numéricos si vienen como string
+					if (result.generation.steps && typeof result.generation.steps === 'string') {
+						metadataLogger.debug('Convirtiendo steps de string a número', result.generation.steps);
+						result.generation.steps = Number.parseInt(result.generation.steps, 10);
+					}
 
-                    if (result.generation.cfg_scale && typeof result.generation.cfg_scale === 'string') {
-                    	metadataLogger.debug('Convirtiendo cfg_scale de string a número', result.generation.cfg_scale);
-                        result.generation.cfg_scale = Number.parseFloat(result.generation.cfg_scale);
-                    }
+					if (result.generation.cfg_scale && typeof result.generation.cfg_scale === 'string') {
+						metadataLogger.debug('Convirtiendo cfg_scale de string a número', result.generation.cfg_scale);
+						result.generation.cfg_scale = Number.parseFloat(result.generation.cfg_scale);
+					}
 
-                    if (result.generation.cfg && typeof result.generation.cfg === 'string') {
-                    	metadataLogger.debug('Convirtiendo cfg de string a número', result.generation.cfg);
-                        result.generation.cfg = Number.parseFloat(result.generation.cfg);
-                    }
+					if (result.generation.cfg && typeof result.generation.cfg === 'string') {
+						metadataLogger.debug('Convirtiendo cfg de string a número', result.generation.cfg);
+						result.generation.cfg = Number.parseFloat(result.generation.cfg);
+					}
 
-                    if (result.generation.clip_skip && typeof result.generation.clip_skip === 'string') {
-                    	metadataLogger.debug('Convirtiendo clip_skip de string a número', result.generation.clip_skip);
-                        result.generation.clip_skip = Number.parseInt(result.generation.clip_skip, 10);
-                    }
-                } else {
-                	metadataLogger.warn('No se encontraron datos de generación en el objeto');
-                }
+					if (result.generation.clip_skip && typeof result.generation.clip_skip === 'string') {
+						metadataLogger.debug('Convirtiendo clip_skip de string a número', result.generation.clip_skip);
+						result.generation.clip_skip = Number.parseInt(result.generation.clip_skip, 10);
+					}
+				} else {
+					metadataLogger.warn('No se encontraron datos de generación en el objeto');
+				}
 
-                metadataLogger.info('Metadata procesada correctamente', {
-                	hasGeneration: !!result.generation,
-                	generationType: result.generation?.type,
-                	hasExif: !!result.exif,
-                	hasXmp: !!result.xmp,
-                	hasIptc: !!result.iptc
-                });
+				metadataLogger.info('Metadata procesada correctamente', {
+					hasGeneration: !!result.generation,
+					generationType: result.generation?.type,
+					hasExif: !!result.exif,
+					hasXmp: !!result.xmp,
+					hasIptc: !!result.iptc,
+				});
 
 				return result;
 			}
@@ -114,7 +117,8 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 		}
 
 		// Si es un string, intentamos parsearlo
-		metadataLogger.debug('Intentando parsear string JSON',
+		metadataLogger.debug(
+			'Intentando parsear string JSON',
 			typeof metadata === 'string' ? (metadata.length > 100 ? `${metadata.substring(0, 100)}...` : metadata) : '{}'
 		);
 
@@ -149,59 +153,59 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 			'generation' in parsedData ||
 			'ai' in parsedData
 		) {
-            // Normalizar los datos
-            const result = { ...parsedData } as FileMetadata;
+			// Normalizar los datos
+			const result = { ...parsedData } as FileMetadata;
 
-            // Normalizar datos de generación AI
-            // Algunos sistemas pueden usar 'ai' en lugar de 'generation'
-            if ('ai' in parsedData && !('generation' in parsedData)) {
-            	metadataLogger.info('Normalizando "ai" a "generation" en objeto parseado', parsedData.ai);
-                result.generation = parsedData.ai as FileMetadata['generation'];
-            }
+			// Normalizar datos de generación AI
+			// Algunos sistemas pueden usar 'ai' en lugar de 'generation'
+			if ('ai' in parsedData && !('generation' in parsedData)) {
+				metadataLogger.info('Normalizando "ai" a "generation" en objeto parseado', parsedData.ai);
+				result.generation = parsedData.ai as FileMetadata['generation'];
+			}
 
-            // Si hay datos de generación, asegurarse de que tengan la estructura correcta
-            if (result.generation) {
-            	metadataLogger.debug('Datos de generation encontrados en objeto parseado:', result.generation);
+			// Si hay datos de generación, asegurarse de que tengan la estructura correcta
+			if (result.generation) {
+				metadataLogger.debug('Datos de generation encontrados en objeto parseado:', result.generation);
 
-                // Asegurar que type sea una string válida
-                if (!result.generation.type || typeof result.generation.type !== 'string') {
-                	metadataLogger.warn('Tipo de generación inválido o no especificado, usando "unknown"');
-                    result.generation.type = 'unknown';
-                }
+				// Asegurar que type sea una string válida
+				if (!result.generation.type || typeof result.generation.type !== 'string') {
+					metadataLogger.warn('Tipo de generación inválido o no especificado, usando "unknown"');
+					result.generation.type = 'unknown';
+				}
 
-                // Convertir parámetros numéricos si vienen como string
-                if (result.generation.steps && typeof result.generation.steps === 'string') {
-                	metadataLogger.debug('Convirtiendo steps de string a número', result.generation.steps);
-                    result.generation.steps = Number.parseInt(result.generation.steps, 10);
-                }
+				// Convertir parámetros numéricos si vienen como string
+				if (result.generation.steps && typeof result.generation.steps === 'string') {
+					metadataLogger.debug('Convirtiendo steps de string a número', result.generation.steps);
+					result.generation.steps = Number.parseInt(result.generation.steps, 10);
+				}
 
-                if (result.generation.cfg_scale && typeof result.generation.cfg_scale === 'string') {
-                	metadataLogger.debug('Convirtiendo cfg_scale de string a número', result.generation.cfg_scale);
-                    result.generation.cfg_scale = Number.parseFloat(result.generation.cfg_scale);
-                }
+				if (result.generation.cfg_scale && typeof result.generation.cfg_scale === 'string') {
+					metadataLogger.debug('Convirtiendo cfg_scale de string a número', result.generation.cfg_scale);
+					result.generation.cfg_scale = Number.parseFloat(result.generation.cfg_scale);
+				}
 
-                if (result.generation.cfg && typeof result.generation.cfg === 'string') {
-                	metadataLogger.debug('Convirtiendo cfg de string a número', result.generation.cfg);
-                    result.generation.cfg = Number.parseFloat(result.generation.cfg);
-                }
+				if (result.generation.cfg && typeof result.generation.cfg === 'string') {
+					metadataLogger.debug('Convirtiendo cfg de string a número', result.generation.cfg);
+					result.generation.cfg = Number.parseFloat(result.generation.cfg);
+				}
 
-                if (result.generation.clip_skip && typeof result.generation.clip_skip === 'string') {
-                	metadataLogger.debug('Convirtiendo clip_skip de string a número', result.generation.clip_skip);
-                    result.generation.clip_skip = Number.parseInt(result.generation.clip_skip, 10);
-                }
-            } else {
-            	metadataLogger.warn('No se encontraron datos de generación en objeto parseado');
-            }
+				if (result.generation.clip_skip && typeof result.generation.clip_skip === 'string') {
+					metadataLogger.debug('Convirtiendo clip_skip de string a número', result.generation.clip_skip);
+					result.generation.clip_skip = Number.parseInt(result.generation.clip_skip, 10);
+				}
+			} else {
+				metadataLogger.warn('No se encontraron datos de generación en objeto parseado');
+			}
 
-            metadataLogger.info('Metadata parseada correctamente', {
-            	hasGeneration: !!result.generation,
-            	generationType: result.generation?.type,
-            	hasExif: !!result.exif,
-            	hasXmp: !!result.xmp,
-            	hasIptc: !!result.iptc
-            });
+			metadataLogger.info('Metadata parseada correctamente', {
+				hasGeneration: !!result.generation,
+				generationType: result.generation?.type,
+				hasExif: !!result.exif,
+				hasXmp: !!result.xmp,
+				hasIptc: !!result.iptc,
+			});
 
-            return result;
+			return result;
 		}
 
 		metadataLogger.warn('Objeto de metadata parseado sin propiedades esperadas');

@@ -414,7 +414,31 @@ async function parseJsonString(text: string): Promise<FileMetadata | null> {
 			// Extraer información de generación por IA usando nuestra nueva funcionalidad
 			const generationInfo = await extractAIGenerationInfo(parsed);
 			if (generationInfo) {
-				result.generation = generationInfo;
+				// Transformamos el objeto para hacerlo compatible con AIMetadata
+				const { extra_params, ...restGenInfo } = generationInfo;
+
+				// Procesamos extra_params para eliminar arrays de string
+				const processedExtraParams: Record<string, string | number | boolean | null | undefined> = {};
+				if (extra_params) {
+					for (const [key, value] of Object.entries(extra_params)) {
+						if (Array.isArray(value)) {
+							processedExtraParams[key] = value.join(', ');
+						} else {
+							processedExtraParams[key] = value;
+						}
+					}
+				}
+
+				result.generation = {
+					...restGenInfo,
+					type: generationInfo.type as 'stable-diffusion' | 'comfyui' | 'invoke-ai' | 'novel-ai',
+					seed:
+						typeof generationInfo.seed === 'string'
+							? Number.parseInt(generationInfo.seed, 10) || undefined
+							: generationInfo.seed,
+					extra_params: extra_params ? processedExtraParams : undefined,
+				};
+
 				parserLogger.debug('Extraída información de generación AI', {
 					type: generationInfo.type,
 				});

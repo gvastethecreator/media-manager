@@ -4,34 +4,36 @@ import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { COLLECTION_EVENTS, collectionEventsService } from '@/services/collection-events.service';
-import { type EventType, eventsService } from '@/services/events.service';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
 import type { Collection } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
+// Configuración y utilidades
 const collectionLogger = logger.withContext('CollectionActions');
-
 const REVALIDATE_PATHS = ['/settings', '/collections', '/collections/[id]', '/images/[id]'] as const;
 
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-	}
-	collectionLogger.info('🔄 Rutas revalidadas');
-};
-
-class CollectionError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'CollectionError';
-	}
+// Códigos de error
+enum CollectionErrorCode {
+	NOT_FOUND = 'NOT_FOUND',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	OPERATION_FAILED = 'OPERATION_FAILED',
 }
 
+// Función creadora de errores (enfoque funcional)
+const createCollectionError = (
+	message: string,
+	code: CollectionErrorCode = CollectionErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
+	const error = new Error(message);
+	error.name = 'CollectionError';
+	Object.assign(error, { code, cause });
+	return error;
+};
+
+// Interfaces
 export interface CollectionStats {
 	count: number;
 	size: number;
@@ -78,6 +80,67 @@ export interface CollectionUpdate extends Partial<CollectionCreate> {
 	id: string;
 }
 
+// Funciones utilitarias
+const revalidateAllPaths = async () => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	collectionLogger.info('🔄 Rutas revalidadas');
+};
+
+const notifyCollectionChange = async (
+	action: 'create' | 'update' | 'delete' | 'addImage' | 'removeImage',
+	collectionId: string,
+	collection?: Collection,
+	imageId?: string
+) => {
+	// Emitir eventos generales
+	if (action === 'create' || action === 'update' || action === 'delete') {
+		await emit({
+			type: 'collections:modified',
+			data: { action, ...(collection ? { collection } : { id: collectionId }) },
+		});
+
+		// Emitir eventos específicos del servicio
+		if (collection) {
+			if (action === 'create') {
+				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, {
+					collectionId,
+					collection,
+				});
+			} else if (action === 'update') {
+				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_UPDATED, {
+					collectionId,
+					collection,
+				});
+			} else if (action === 'delete') {
+				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_DELETED, {
+					collectionId,
+					collection,
+				});
+			}
+		}
+	}
+
+	// Para acciones de imágenes
+	if (imageId) {
+		await emit({
+			type: 'collections:modified',
+			data: { action, collectionId, imageId },
+		});
+
+		if (action === 'addImage') {
+			collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
+		} else if (action === 'removeImage') {
+			collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
+		}
+	}
+
+	// Actualizar estadísticas
+	statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+};
+
+// Acciones del servidor
 export async function getCollections(): Promise<CollectionWithStats[]> {
 	try {
 		collectionLogger.info('🎯 Obteniendo colecciones');
@@ -175,7 +238,7 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
 		return collectionsWithStats;
 	} catch (error) {
 		collectionLogger.error('❌ Error al obtener colecciones', error);
-		throw new CollectionError('No se pudieron obtener las colecciones', { cause: error });
+		throw createCollectionError('No se pudieron obtener las colecciones', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -212,7 +275,7 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 		});
 
 		if (!collection) {
-			throw new CollectionError('Colección no encontrada');
+			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = await prisma.image.aggregate({
@@ -274,60 +337,73 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 		return result;
 	} catch (error) {
 		collectionLogger.error('❌ Error al obtener colección:', error);
-		if (error instanceof CollectionError) {
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw new CollectionError('No se pudo obtener la colección', error);
+		throw createCollectionError('No se pudo obtener la colección', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 export async function createCollection(data: CollectionCreate): Promise<Collection> {
 	try {
 		collectionLogger.info('📝 Creando colección:', data);
+
+		// Validación de entrada
+		if (!data.name?.trim()) {
+			throw createCollectionError('El nombre de la colección es requerido', CollectionErrorCode.VALIDATION_ERROR);
+		}
+
 		const collection = await prisma.collection.create({
 			data: {
 				...data,
 			},
 		});
 
-		await emit({
-			type: 'collections:modified',
-			data: { action: 'create', collection },
-		});
-		collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, collection);
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		await notifyCollectionChange('create', collection.id, collection);
 
-		collectionLogger.info('✅ Colección creada:', collection);
+		collectionLogger.info('✅ Colección creada:', collection.name);
 		await revalidateAllPaths();
 		return collection;
 	} catch (error) {
 		collectionLogger.error('❌ Error al crear colección:', error);
-		throw new CollectionError('No se pudo crear la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError('No se pudo crear la colección', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 export async function updateCollection(id: string, data: CollectionUpdate): Promise<Collection> {
 	try {
 		collectionLogger.info('📝 Actualizando colección:', { id, data });
+
+		// Validación de entrada
+		if (data.name === '') {
+			throw createCollectionError(
+				'El nombre de la colección no puede estar vacío',
+				CollectionErrorCode.VALIDATION_ERROR
+			);
+		}
+
 		const collection = await prisma.collection.update({
 			where: { id },
 			data,
 		});
 
-		await emit({
-			type: 'collections:modified',
-			id,
-			data: { action: 'update', collection },
-		});
-		collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_UPDATED, collection);
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		await notifyCollectionChange('update', collection.id, collection);
 
-		collectionLogger.info('✅ Colección actualizada:', collection);
+		collectionLogger.info('✅ Colección actualizada:', collection.name);
 		await revalidateAllPaths();
 		return collection;
 	} catch (error) {
 		collectionLogger.error('❌ Error al actualizar colección:', error);
-		throw new CollectionError('No se pudo actualizar la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError('No se pudo actualizar la colección', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -338,19 +414,17 @@ export async function deleteCollection(id: string): Promise<void> {
 			where: { id },
 		});
 
-		await emit({
-			type: 'collections:modified',
-			id,
-			data: { action: 'delete' },
-		});
-		collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_DELETED, collection);
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		await notifyCollectionChange('delete', id, collection);
 
 		collectionLogger.info('✅ Colección eliminada');
 		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al eliminar colección:', error);
-		throw new CollectionError('No se pudo eliminar la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError('No se pudo eliminar la colección', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -372,7 +446,7 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 		});
 
 		if (!collection) {
-			throw new CollectionError('Colección no encontrada');
+			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
 		const images = collection.images.map((img) => convertServerImageToFileItem(img as ServerImage));
@@ -381,7 +455,15 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 		return images;
 	} catch (error) {
 		collectionLogger.error('❌ Error al obtener imágenes de la colección:', error);
-		throw new CollectionError('No se pudieron obtener las imágenes de la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError(
+			'No se pudieron obtener las imágenes de la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -397,20 +479,21 @@ export async function addImageToCollection(collectionId: string, imageId: string
 			},
 		});
 
-		await emit({
-			type: 'collections:modified',
-			id: collectionId,
-			imageId,
-			data: { action: 'addImage' },
-		});
-		collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		await notifyCollectionChange('addImage', collectionId, undefined, imageId);
 
 		collectionLogger.info('✅ Imagen agregada a colección');
 		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al agregar imagen a colección:', error);
-		throw new CollectionError('No se pudo agregar la imagen a la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError(
+			'No se pudo agregar la imagen a la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -426,20 +509,21 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
 			},
 		});
 
-		await emit({
-			type: 'collections:modified',
-			id: collectionId,
-			imageId,
-			data: { action: 'removeImage' },
-		});
-		collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
-		statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+		await notifyCollectionChange('removeImage', collectionId, undefined, imageId);
 
 		collectionLogger.info('✅ Imagen removida de colección');
 		await revalidateAllPaths();
 	} catch (error) {
 		collectionLogger.error('❌ Error al remover imagen de colección:', error);
-		throw new CollectionError('No se pudo remover la imagen de la colección', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError(
+			'No se pudo remover la imagen de la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -459,7 +543,7 @@ export async function getCollectionStats(id: string): Promise<CollectionStats> {
 		});
 
 		if (!collection) {
-			throw new CollectionError('Colección no encontrada');
+			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
@@ -473,7 +557,11 @@ export async function getCollectionStats(id: string): Promise<CollectionStats> {
 		return stats;
 	} catch (error) {
 		collectionLogger.error('❌ Error al obtener estadísticas:', error);
-		throw new CollectionError('No se pudieron obtener las estadísticas', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError('No se pudieron obtener las estadísticas', CollectionErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -493,7 +581,7 @@ export async function updateCollectionStats(id: string, stats: Partial<Collectio
 		});
 
 		if (!collection) {
-			throw new CollectionError('Colección no encontrada');
+			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
@@ -508,6 +596,14 @@ export async function updateCollectionStats(id: string, stats: Partial<Collectio
 		return updatedStats;
 	} catch (error) {
 		collectionLogger.error('❌ Error al actualizar estadísticas:', error);
-		throw new CollectionError('No se pudieron actualizar las estadísticas', error);
+		// Preservar el error si ya es un CollectionError
+		if (error instanceof Error && error.name === 'CollectionError') {
+			throw error;
+		}
+		throw createCollectionError(
+			'No se pudieron actualizar las estadísticas',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

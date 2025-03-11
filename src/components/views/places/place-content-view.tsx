@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { getPlaceImages } from "@/app/actions/places/place.actions";
-import { EmptyState } from "@/components/core/data-display/empty-state/empty-state";
-import { useFileManager } from "@/store/file-manager.store";
-import type { FileItem } from "@/types/file-item";
-import { MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
-import { BaseContentView } from "../base/base-content-view";
-import { ContentViewProvider } from "../base/content-view-provider";
+import { getPlaceImages } from '@/app/actions/places/place.actions';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { useFileManager } from '@/store/file-manager.store';
+import type { FileItem } from '@/types/file-item';
+import { MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BaseContentView } from '../base/base-content-view';
+import { ContentViewProvider } from '../base/content-view-provider';
 
 export function PlaceContentView() {
 	const { currentPlaceId } = useFileManager();
@@ -26,7 +26,7 @@ export function PlaceContentView() {
 				const images = await getPlaceImages(currentPlaceId);
 				setItems(images as unknown as FileItem[]);
 			} catch (err) {
-				setError(err instanceof Error ? err.message : "Error desconocido");
+				setError(err instanceof Error ? err.message : 'Error desconocido');
 			} finally {
 				setIsLoading(false);
 			}
@@ -54,8 +54,8 @@ export function PlaceContentView() {
 			containerName="lugar"
 			emptyState={{
 				icon: MapPin,
-				title: "No hay imágenes en este lugar",
-				description: "Este lugar no tiene imágenes asociadas",
+				title: 'No hay imágenes en este lugar',
+				description: 'Este lugar no tiene imágenes asociadas',
 			}}
 		>
 			<BaseContentView />

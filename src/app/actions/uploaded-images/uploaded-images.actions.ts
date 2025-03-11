@@ -4,7 +4,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { logger } from '@/lib/logger/logger';
 import { uploadedImagesService } from '@/services/uploaded-images.service';
-import type { UploadedImageFilters, UploadedImageType } from '@/types/uploaded-images';
+import type { UploadedImageType } from '@/types/entities/entities';
+import type { UploadedImageFilters } from '@/types/uploaded-images';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 

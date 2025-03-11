@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import {
 	deleteUploadedImage,
 	getUploadedImages,
 	uploadImages,
-} from "@/app/actions/uploaded-images/uploaded-images.actions";
+} from '@/app/actions/uploaded-images/uploaded-images.actions';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -15,41 +15,30 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { BaseContentView, ContentViewProvider } from "@/components/views/base";
-import type { BaseContentProps } from "@/components/views/base";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger/logger";
-import { cn } from "@/lib/utils";
-import type { UploadedImageType } from "@/types/entities/entities";
-import type {
-	UploadedImageFilters,
-	UploadedImageResult,
-} from "@/types/uploaded-images";
-import {
-	Filter,
-	ImageIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	Trash2,
-	UploadCloud,
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
-import type * as React from "react";
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import type { BaseContentProps } from '@/components/views/base';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger/logger';
+import { cn } from '@/lib/utils';
+import type { UploadedImageType } from '@/types/entities/entities';
+import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
+import { Filter, ImageIcon, Plus, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import type * as React from 'react';
 
-const viewLogger = logger.withContext("UploadedImagesView");
+const viewLogger = logger.withContext('UploadedImagesView');
 
 export function UploadedImagesView() {
 	const { toast } = useToast();
@@ -77,24 +66,21 @@ export function UploadedImagesView() {
 			if (response.success) {
 				setItems(response.items || []);
 				setTotalItems(response.total || 0);
-				setTotalPages(
-					Math.ceil((response.total || 0) / (response.pageSize || 20))
-				);
+				setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
 			} else {
 				toast({
-					title: "Error",
-					description:
-						response.error || "No se pudieron cargar las imágenes subidas.",
-					variant: "destructive",
+					title: 'Error',
+					description: response.error || 'No se pudieron cargar las imágenes subidas.',
+					variant: 'destructive',
 				});
 			}
 			setIsLoading(false);
 		} catch (error) {
-			viewLogger.error("Error al cargar imágenes:", error);
+			viewLogger.error('Error al cargar imágenes:', error);
 			toast({
-				title: "Error al cargar imágenes",
-				description: "No se pudieron cargar las imágenes subidas.",
-				variant: "destructive",
+				title: 'Error al cargar imágenes',
+				description: 'No se pudieron cargar las imágenes subidas.',
+				variant: 'destructive',
 			});
 			setIsLoading(false);
 		}
@@ -114,12 +100,12 @@ export function UploadedImagesView() {
 				// Crear FormData para la carga
 				const formData = new FormData();
 				for (const file of Array.from(files)) {
-					formData.append("files", file);
+					formData.append('files', file);
 				}
 
 				// Añadir tipo y categoría si se han seleccionado en los filtros
 				if (filters.type) {
-					formData.append("type", filters.type);
+					formData.append('type', filters.type);
 				}
 
 				// Llamar a la server action
@@ -127,24 +113,24 @@ export function UploadedImagesView() {
 
 				if (result.success) {
 					toast({
-						title: "Imágenes subidas",
-						description: `Se ${result.items?.length === 1 ? "ha subido" : "han subido"} ${result.items?.length} ${result.items?.length === 1 ? "imagen" : "imágenes"} correctamente.`,
+						title: 'Imágenes subidas',
+						description: `Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`,
 					});
 					loadImages(); // Recargamos la lista de imágenes
 				} else {
 					toast({
-						title: "Error al subir imágenes",
-						description: result.error || "No se pudieron subir las imágenes.",
-						variant: "destructive",
+						title: 'Error al subir imágenes',
+						description: result.error || 'No se pudieron subir las imágenes.',
+						variant: 'destructive',
 					});
 				}
 				setIsUploading(false);
 			} catch (error) {
-				viewLogger.error("Error al subir imágenes:", error);
+				viewLogger.error('Error al subir imágenes:', error);
 				toast({
-					title: "Error al subir imágenes",
-					description: "No se pudieron subir las imágenes.",
-					variant: "destructive",
+					title: 'Error al subir imágenes',
+					description: 'No se pudieron subir las imágenes.',
+					variant: 'destructive',
 				});
 				setIsUploading(false);
 			}
@@ -160,24 +146,24 @@ export function UploadedImagesView() {
 
 				if (result.success) {
 					toast({
-						title: "Imagen eliminada",
-						description: "La imagen se ha eliminado correctamente.",
+						title: 'Imagen eliminada',
+						description: 'La imagen se ha eliminado correctamente.',
 					});
 					setSelectedImage(null);
 					loadImages();
 				} else {
 					toast({
-						title: "Error",
-						description: result.error || "No se pudo eliminar la imagen.",
-						variant: "destructive",
+						title: 'Error',
+						description: result.error || 'No se pudo eliminar la imagen.',
+						variant: 'destructive',
 					});
 				}
 			} catch (error) {
-				viewLogger.error("Error al eliminar imagen:", error);
+				viewLogger.error('Error al eliminar imagen:', error);
 				toast({
-					title: "Error",
-					description: "No se pudo eliminar la imagen.",
-					variant: "destructive",
+					title: 'Error',
+					description: 'No se pudo eliminar la imagen.',
+					variant: 'destructive',
 				});
 			}
 		},
@@ -224,19 +210,18 @@ export function UploadedImagesView() {
 	);
 
 	// Usar eventos optimistas del cliente
-	const [optimisticItems, addOptimisticEvent] =
-		clientEvents.useEvents<UploadedImageResult[]>(items);
+	const [optimisticItems, addOptimisticEvent] = clientEvents.useEvents<UploadedImageResult[]>(items);
 
 	// Efecto para manejar el optimistic UI
 	useEffect(() => {
 		if (selectedImage) {
 			const handleKeyDown = (e: KeyboardEvent) => {
-				if (e.key === "Delete") {
+				if (e.key === 'Delete') {
 					const selectedItem = items.find((item) => item.id === selectedImage);
 					if (selectedItem) {
 						// Optimistic update
 						addOptimisticEvent({
-							type: "delete",
+							type: 'delete',
 							data: optimisticItems.filter((item) => item.id !== selectedImage),
 						});
 
@@ -246,16 +231,10 @@ export function UploadedImagesView() {
 				}
 			};
 
-			window.addEventListener("keydown", handleKeyDown);
-			return () => window.removeEventListener("keydown", handleKeyDown);
+			window.addEventListener('keydown', handleKeyDown);
+			return () => window.removeEventListener('keydown', handleKeyDown);
 		}
-	}, [
-		selectedImage,
-		items,
-		handleDeleteImage,
-		addOptimisticEvent,
-		optimisticItems,
-	]);
+	}, [selectedImage, items, handleDeleteImage, addOptimisticEvent, optimisticItems]);
 
 	// Props compartidos con el componente base
 	const contentProps: BaseContentProps = {
@@ -264,39 +243,28 @@ export function UploadedImagesView() {
 		toggleItemSelection: handleSelectItem,
 		emptyState: {
 			icon: ImageIcon,
-			title: "No hay imágenes subidas",
+			title: 'No hay imágenes subidas',
 			description:
-				"No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta archivos aquí.",
+				'No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta archivos aquí.',
 		},
 	};
 
 	return (
-		<div
-			className="w-full h-full flex flex-col"
-			onDragOver={(e) => e.preventDefault()}
-			onDrop={handleDrop}
-		>
+		<div className="w-full h-full flex flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
 			{/* Barra de herramientas */}
 			<div className="flex items-center justify-between p-2 border-b">
 				<div className="flex items-center gap-2">
 					<h2 className="text-sm font-medium">Imágenes Subidas</h2>
-					{isLoading && (
-						<RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-					)}
+					{isLoading && <RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
 					{!isLoading && (
 						<span className="text-xs text-muted-foreground">
-							{totalItems} {totalItems === 1 ? "imagen" : "imágenes"}
+							{totalItems} {totalItems === 1 ? 'imagen' : 'imágenes'}
 						</span>
 					)}
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						className="h-8 gap-1"
-						onClick={() => setShowFilters(!showFilters)}
-					>
+					<Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setShowFilters(!showFilters)}>
 						<Filter className="h-3.5 w-3.5" />
 						<span className="text-xs">Filtros</span>
 					</Button>
@@ -308,10 +276,7 @@ export function UploadedImagesView() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="w-40">
-							<DropdownMenuItem
-								className="text-xs cursor-pointer"
-								onClick={loadImages}
-							>
+							<DropdownMenuItem className="text-xs cursor-pointer" onClick={loadImages}>
 								<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar
 							</DropdownMenuItem>
 
@@ -329,8 +294,7 @@ export function UploadedImagesView() {
 										<AlertDialogHeader>
 											<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
 											<AlertDialogDescription>
-												Esta acción eliminará permanentemente la imagen
-												seleccionada.
+												Esta acción eliminará permanentemente la imagen seleccionada.
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
@@ -360,11 +324,8 @@ export function UploadedImagesView() {
 						<Button
 							variant="default"
 							size="sm"
-							className={cn(
-								"h-8 gap-1.5",
-								isUploading && "opacity-70 cursor-not-allowed"
-							)}
-							onClick={() => document.getElementById("file-upload")?.click()}
+							className={cn('h-8 gap-1.5', isUploading && 'opacity-70 cursor-not-allowed')}
+							onClick={() => document.getElementById('file-upload')?.click()}
 							disabled={isUploading}
 						>
 							{isUploading ? (
@@ -382,7 +343,7 @@ export function UploadedImagesView() {
 			{showFilters && (
 				<motion.div
 					initial={{ height: 0, opacity: 0 }}
-					animate={{ height: "auto", opacity: 1 }}
+					animate={{ height: 'auto', opacity: 1 }}
 					exit={{ height: 0, opacity: 0 }}
 					className="border-b overflow-hidden"
 				>
@@ -396,10 +357,8 @@ export function UploadedImagesView() {
 									id="search"
 									placeholder="Buscar por nombre..."
 									className="h-8 text-xs"
-									value={filters.search || ""}
-									onChange={(e) =>
-										setFilters({ ...filters, search: e.target.value })
-									}
+									value={filters.search || ''}
+									onChange={(e) => setFilters({ ...filters, search: e.target.value })}
 								/>
 							</div>
 							<div className="space-y-1">
@@ -409,7 +368,7 @@ export function UploadedImagesView() {
 								<select
 									id="type"
 									className="h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-									value={filters.type || ""}
+									value={filters.type || ''}
 									onChange={(e) =>
 										setFilters({
 											...filters,
