@@ -1,30 +1,31 @@
-'use client';
+"use client";
 
-import { SettingsView } from '@/components/settings/settings-view';
-import { cn } from '@/lib/utils';
-import { useNavigationStore } from '@/store/navigation.store';
-import { AnimatePresence, motion } from 'motion/react';
-import { DotPattern } from '../ui/dot-pattern';
-import { AlbumContentView } from './albums/album-content-view';
-import { AlbumsView } from './albums/albums-view';
-import { AllImagesView } from './all-images/all-images-view';
-import { CharacterContentView } from './characters/character-content-view';
-import { CharactersView } from './characters/characters-view';
-import { CollectionContentView } from './collections/collection-content-view';
-import { CollectionsView } from './collections/collections-view';
-import { DevelopmentView } from './development/development-view';
-import { FavoritesView } from './favorites/favorites-view';
-import { FolderContentView } from './folders/folder-content-view';
-import { FoldersView } from './folders/folders-view';
-import { PlaceContentView } from './places/place-content-view';
-import { PlacesView } from './places/places-view';
-import { SearchView } from './search/search-view';
-import { TagContentView } from './tags/tag-content-view';
-import { TagsView } from './tags/tags-view';
-import type { ViewContainerProps } from './types';
-import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
-import { WorldItemContentView } from './world-items/world-item-content-view';
-import { WorldItemsView } from './world-items/world-items-view';
+import { SettingsView } from "@/components/settings/settings-view";
+import { cn } from "@/lib/utils";
+import { useNavigationStore } from "@/store/navigation.store";
+import { AnimatePresence, motion } from "motion/react";
+import { memo } from "react";
+import { DotPattern } from "../ui/dot-pattern";
+import { AlbumContentView } from "./albums/album-content-view";
+import { AlbumsView } from "./albums/albums-view";
+import { AllImagesView } from "./all-images/all-images-view";
+import { CharacterContentView } from "./characters/character-content-view";
+import { CharactersView } from "./characters/characters-view";
+import { CollectionContentView } from "./collections/collection-content-view";
+import { CollectionsView } from "./collections/collections-view";
+import { DevelopmentView } from "./development/development-view";
+import { FavoritesView } from "./favorites/favorites-view";
+import { FolderContentView } from "./folders/folder-content-view";
+import { FoldersView } from "./folders/folders-view";
+import { PlaceContentView } from "./places/place-content-view";
+import { PlacesView } from "./places/places-view";
+import { SearchView } from "./search/search-view";
+import { TagContentView } from "./tags/tag-content-view";
+import { TagsView } from "./tags/tags-view";
+import type { ViewType } from "./types";
+import { UploadedImagesView } from "./uploaded-images/uploaded-images-view";
+import { WorldItemContentView } from "./world-items/world-item-content-view";
+import { WorldItemsView } from "./world-items/world-items-view";
 
 const variants = {
 	enter: (direction: number) => ({
@@ -46,66 +47,65 @@ const variants = {
 	}),
 };
 
-export function ViewContainer({ isResizing }: ViewContainerProps) {
+// Componente de vista con memorización para evitar renders innecesarios
+const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
+	switch (view) {
+		case "settings":
+			return <SettingsView />;
+		case "all-images":
+			return <AllImagesView />;
+		case "files":
+			return <UploadedImagesView />;
+		case "favorites":
+			return <FavoritesView />;
+		case "search":
+			return <SearchView />;
+		case "collections":
+			return <CollectionsView />;
+		case "collection-content":
+			return <CollectionContentView />;
+		case "folders":
+			return <FoldersView />;
+		case "folder-content":
+			return <FolderContentView />;
+		case "tags":
+			return <TagsView />;
+		case "tag-content":
+			return <TagContentView />;
+		case "albums":
+			return <AlbumsView />;
+		case "album-content":
+			return <AlbumContentView />;
+		case "characters":
+			return <CharactersView />;
+		case "character-content":
+			return <CharacterContentView />;
+		case "places":
+			return <PlacesView />;
+		case "place-content":
+			return <PlaceContentView />;
+		case "world-items":
+			return <WorldItemsView />;
+		case "world-item-content":
+			return <WorldItemContentView />;
+		default:
+			return <DevelopmentView />;
+	}
+});
+
+MemoizedViewContent.displayName = "MemoizedViewContent";
+
+export function ViewContainer() {
 	const { currentView, navigationDirection } = useNavigationStore();
 
-	const renderView = () => {
-		switch (currentView) {
-			case 'settings':
-				return <SettingsView />;
-			case 'all-images':
-				return <AllImagesView />;
-			case 'uploaded-images':
-				return <UploadedImagesView />;
-			case 'favorites':
-				return <FavoritesView />;
-			case 'search':
-				return <SearchView />;
-			case 'collections':
-				return <CollectionsView />;
-			case 'collection-content':
-				return <CollectionContentView />;
-			case 'folders':
-				return <FoldersView />;
-			case 'folder-content':
-				return <FolderContentView />;
-			case 'tags':
-				return <TagsView />;
-			case 'tag-content':
-				return <TagContentView />;
-			case 'albums':
-				return <AlbumsView />;
-			case 'album-content':
-				return <AlbumContentView />;
-			case 'characters':
-				return <CharactersView />;
-			case 'character-content':
-				return <CharacterContentView />;
-			case 'places':
-				return <PlacesView />;
-			case 'place-content':
-				return <PlaceContentView />;
-			case 'world-items':
-				return <WorldItemsView />;
-			case 'world-item-content':
-				return <WorldItemContentView />;
-			default:
-				return <DevelopmentView />;
-		}
-	};
-
 	return (
-		<div className="relative w-full h-full overflow-hidden">
+		<div className="relative w-full h-full overflow-auto">
 			<DotPattern
 				x={6}
 				y={6}
 				width={8}
 				height={8}
-				className={cn(
-					'opacity-10',
-					'[mask-image:radial-gradient(750px_circle_at_center,white,transparent)]',
-					isResizing && 'opacity-20 transition-opacity duration-150'
-				)}
+				className="opacity-10 [mask-image:radial-gradient(750px_circle_at_center,white,transparent)]"
 			/>
 			<AnimatePresence initial={false} custom={navigationDirection}>
 				<motion.div
@@ -116,18 +116,13 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 					animate="center"
 					exit="exit"
 					transition={{
-						x: { type: 'spring', stiffness: 400, damping: 35 },
+						x: { type: "spring", stiffness: 400, damping: 35 },
 						opacity: { duration: 0.15 },
 						scale: { duration: 0.2 },
 					}}
-					style={{
-						opacity: isResizing ? 0 : 1,
-						filter: isResizing ? 'blur(1px)' : 'none',
-						transition: 'all 0.12s ease-out',
-					}}
-					className="absolute w-full h-full"
+					className="absolute inset-0 w-full h-full"
 				>
-					{renderView()}
+					<MemoizedViewContent view={currentView} />
 				</motion.div>
 			</AnimatePresence>
 		</div>
