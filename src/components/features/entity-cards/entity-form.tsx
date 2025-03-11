@@ -1,17 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { EmojiPicker } from "@/components/ui/emoji-picker";
-import { Input } from "@/components/ui/input";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils/utils";
-import * as React from "react";
-import { CompactPicker } from "react-color";
+import { Button } from '@/components/ui/button';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils/utils';
+import * as React from 'react';
+import { CompactPicker } from 'react-color';
 
 // Tipos base para las entidades
 export interface BaseEntityFormData {
@@ -42,17 +38,17 @@ export function EntityForm<T extends BaseEntityFormData>({
 	onSubmit,
 	onCancel,
 	isLoading = false,
-	submitLabel = "Guardar",
+	submitLabel = 'Guardar',
 	className,
 	extraFields,
 }: EntityFormProps<T>) {
 	const [formData, setFormData] = React.useState<T>(
 		initialData ||
 			({
-				name: "",
-				emoji: "🌟",
-				color: "#3b82f6",
-				description: "",
+				name: '',
+				emoji: '🌟',
+				color: '#3b82f6',
+				description: '',
 				featuredImage: null,
 				isFavorite: false,
 			} as T)
@@ -66,7 +62,7 @@ export function EntityForm<T extends BaseEntityFormData>({
 		try {
 			await onSubmit(formData);
 		} catch (error) {
-			console.error("Error al enviar el formulario:", error);
+			console.error('Error al enviar el formulario:', error);
 		}
 	};
 
@@ -75,7 +71,7 @@ export function EntityForm<T extends BaseEntityFormData>({
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
+		<form onSubmit={handleSubmit} className={cn('space-y-4', className)}>
 			<div className="flex items-center gap-2">
 				<div
 					className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
@@ -88,17 +84,10 @@ export function EntityForm<T extends BaseEntityFormData>({
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className="w-full p-0" align="start">
-							<EmojiPicker
-								onEmojiSelect={(emoji: string) =>
-									setFormData((prev) => ({ ...prev, emoji }))
-								}
-							/>
+							<EmojiPicker onEmojiSelect={(emoji: string) => setFormData((prev) => ({ ...prev, emoji }))} />
 							<Separator className="my-2" />
 							<div className="p-2">
-								<CompactPicker
-									color={formData.color}
-									onChange={handleColorChange}
-								/>
+								<CompactPicker color={formData.color} onChange={handleColorChange} />
 							</div>
 						</PopoverContent>
 					</Popover>
@@ -107,14 +96,12 @@ export function EntityForm<T extends BaseEntityFormData>({
 				<div className="flex-1 min-w-0">
 					<Input
 						value={formData.name}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, name: e.target.value }))
-						}
+						onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
 						className="h-8 text-base"
 						placeholder="Nombre"
 					/>
 					<Input
-						value={formData.description || ""}
+						value={formData.description || ''}
 						onChange={(e) =>
 							setFormData((prev) => ({
 								...prev,
@@ -131,17 +118,12 @@ export function EntityForm<T extends BaseEntityFormData>({
 
 			<div className="flex justify-end gap-2">
 				{onCancel && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={onCancel}
-						disabled={isLoading}
-					>
+					<Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
 						Cancelar
 					</Button>
 				)}
 				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ? "Guardando..." : submitLabel}
+					{isLoading ? 'Guardando...' : submitLabel}
 				</Button>
 			</div>
 		</form>

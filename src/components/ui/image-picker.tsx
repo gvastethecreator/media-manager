@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils/utils";
-import { Image, X } from "lucide-react";
-import * as React from "react";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils/utils';
+import { Image, X } from 'lucide-react';
+import * as React from 'react';
 
 export interface ImagePickerProps {
 	value?: string | null;
@@ -20,16 +14,8 @@ export interface ImagePickerProps {
 	disabled?: boolean;
 }
 
-export function ImagePicker({
-	value,
-	defaultValue = null,
-	onChange,
-	className,
-	disabled = false,
-}: ImagePickerProps) {
-	const [selectedImage, setSelectedImage] = React.useState<string | null>(
-		value || defaultValue
-	);
+export function ImagePicker({ value, defaultValue = null, onChange, className, disabled = false }: ImagePickerProps) {
+	const [selectedImage, setSelectedImage] = React.useState<string | null>(value || defaultValue);
 	const [isOpen, setIsOpen] = React.useState(false);
 
 	React.useEffect(() => {
@@ -50,21 +36,12 @@ export function ImagePicker({
 	};
 
 	return (
-		<div className={cn("space-y-2", className)}>
+		<div className={cn('space-y-2', className)}>
 			{selectedImage ? (
 				<div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-					<img
-						src={selectedImage}
-						alt="Selected"
-						className="w-full h-full object-cover"
-					/>
+					<img src={selectedImage} alt="Selected" className="w-full h-full object-cover" />
 					{!disabled && (
-						<Button
-							variant="destructive"
-							size="icon"
-							className="absolute top-2 right-2"
-							onClick={handleRemoveImage}
-						>
+						<Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={handleRemoveImage}>
 							<X className="h-4 w-4" />
 						</Button>
 					)}
@@ -72,11 +49,7 @@ export function ImagePicker({
 			) : (
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
-						<Button
-							variant="outline"
-							className="w-full h-32 border-dashed"
-							disabled={disabled}
-						>
+						<Button variant="outline" className="w-full h-32 border-dashed" disabled={disabled}>
 							<Image className="h-8 w-8 opacity-50" />
 						</Button>
 					</DialogTrigger>
@@ -86,9 +59,7 @@ export function ImagePicker({
 						</DialogHeader>
 						<div className="grid grid-cols-3 gap-4 py-4">
 							{/* Aquí irá la galería de imágenes */}
-							<div className="text-center text-sm text-muted-foreground">
-								Galería en desarrollo...
-							</div>
+							<div className="text-center text-sm text-muted-foreground">Galería en desarrollo...</div>
 						</div>
 					</DialogContent>
 				</Dialog>
