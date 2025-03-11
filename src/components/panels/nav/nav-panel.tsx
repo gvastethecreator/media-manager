@@ -1,6 +1,6 @@
 'use client';
 
-import type { NavigationData } from '@/app/actions/nav.actions';
+import type { NavigationData } from '@/app/actions/navigation/nav.actions';
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -196,7 +196,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	);
 
 	// Determinar si un hijo de una categoría está seleccionado
-	const hasCategoryChildSelected = useCallback(
+	const _hasCategoryChildSelected = useCallback(
 		(categoryId: ViewType): boolean => {
 			switch (categoryId) {
 				case 'collections':
@@ -353,7 +353,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 		[setCurrentView, setCurrentPlace]
 	);
 
-	const handleWorldItemClick = useCallback(
+	const _handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
 			setCurrentView('world-item-content');
 			setCurrentWorldItem(worldItemId);
@@ -396,236 +396,261 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getImagesForCategory = (categoryId: ViewType): number => {
 		switch (categoryId) {
 			case 'collections':
-				return collections.reduce((sum, collection) => sum + (collection._count?.images || 0), 0);
-			case 'folders':
-				return folders.reduce((sum, folder) => sum + (folder._count?.images || 0), 0);
-			case 'tags':
-				return tags.reduce((sum, tag) => sum + (tag._count?.images || 0), 0);
-			case 'albums':
-				return albums.reduce((sum, album) => sum + (album._count?.images || 0), 0);
-			case 'characters':
-				return characters.reduce((sum, character) => sum + (character._count?.images || 0), 0);
-			case 'places':
-				return places.reduce((sum, place) => sum + (place._count?.images || 0), 0);
-			case 'world-items':
-				return worldItems.reduce(
-					(sum: number, worldItem: WorldItemWithStats) => sum + (worldItem._count?.images || 0),
+				return collections.reduce(
+					(sum: number, collection: { _count?: { images: number } }) => sum + (collection._count?.images || 0),
 					0
 				);
+			case 'folders':
+				return folders.reduce(
+					(sum: number, folder: { _count?: { images: number } }) => sum + (folder._count?.images || 0),
+					0
+				);
+			case 'tags':
+				return tags.reduce((sum: number, tag: { _count?: { images: number } }) => sum + (tag._count?.images || 0), 0);
+			case 'albums':
+				return albums.reduce(
+					(sum: number, album: { _count?: { images: number } }) => sum + (album._count?.images || 0),
+					0
+				);
+			case 'characters':
+				return characters.reduce(
+					(sum: number, character: { _count?: { images: number } }) => sum + (character._count?.images || 0),
+					0
+				);
+			case 'places':
+				return places.reduce(
+					(sum: number, place: { _count?: { images: number } }) => sum + (place._count?.images || 0),
+					0
+				);
+			case 'world-items':
+				return worldItems.reduce((sum: number, worldItem) => sum + (worldItem._count?.images || 0), 0);
 			default:
 				return 0;
 		}
 	};
 
 	// Renderizar elementos hijos de una categoría
-	const renderCategoryItems = useCallback(
-		(categoryId: ViewType) => {
-			// Si la categoría está colapsada y no tiene un hijo seleccionado, no mostrar nada
-			const isCollapsed = isCategoryCollapsed(categoryId);
-			const childSelected = hasCategoryChildSelected(categoryId);
-			const selectedChildId = getSelectedChildId(categoryId);
-
-			if (isCollapsed && !childSelected) {
-				return null;
+	const renderCategoryChildren = useCallback(
+		(categoryId: ViewType, isCollapsed: boolean, selectedChildId: string | null) => {
+			// Si no hay elementos, mostrar mensaje
+			if (
+				(categoryId === 'collections' && collections.length === 0) ||
+				(categoryId === 'folders' && folders.length === 0) ||
+				(categoryId === 'tags' && tags.length === 0) ||
+				(categoryId === 'albums' && albums.length === 0) ||
+				(categoryId === 'characters' && characters.length === 0) ||
+				(categoryId === 'places' && places.length === 0) ||
+				(categoryId === 'world-items' && worldItems.length === 0)
+			) {
+				return <div className="px-2 py-1 text-xs text-muted-foreground italic">No hay elementos</div>;
 			}
 
 			switch (categoryId) {
 				case 'collections':
-					return collections?.map((collection) => {
-						// Si la categoría está colapsada, solo mostrar el ítem seleccionado
-						if (isCollapsed && collection.id !== selectedChildId) {
-							return null;
+					return collections?.map(
+						(collection: {
+							id: string;
+							emoji: string;
+							name: string;
+							_count?: { images: number };
+						}) => {
+							// Si la categoría está colapsada, solo mostrar el ítem seleccionado
+							if (isCollapsed && collection.id !== selectedChildId) {
+								return null;
+							}
+							return (
+								<Button
+									key={collection.id}
+									variant="ghost"
+									className={cn(
+										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
+										currentView === 'collection-content' &&
+											currentCollectionId === collection.id &&
+											'bg-linear-to-r from-white/10 to-white/15',
+										'cursor-pointer'
+									)}
+									onClick={() => handleCollectionClick(collection.id)}
+								>
+									<CornerDownRight className="h-2 w-2 text-white/20" />
+									<span className="text-base">{collection.emoji}</span>
+									<span className="flex-1 text-left truncate">{collection.name}</span>
+									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+										<BookImage className="h-3 w-3" />
+										<span>{collection._count?.images || 0}</span>
+									</div>
+								</Button>
+							);
 						}
-						return (
-							<Button
-								key={collection.id}
-								variant="ghost"
-								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'collection-content' &&
-										currentCollectionId === collection.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handleCollectionClick(collection.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{collection.emoji}</span>
-								<span className="flex-1 text-left truncate">{collection.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<BookImage className="h-3 w-3" />
-									<span>{collection._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
+					);
 				case 'folders':
-					return folders?.map((folder) => {
-						if (isCollapsed && folder.id !== selectedChildId) {
-							return null;
+					return folders?.map(
+						(folder: {
+							id: string;
+							name: string;
+							_count?: { images: number };
+						}) => {
+							if (isCollapsed && folder.id !== selectedChildId) {
+								return null;
+							}
+							return (
+								<Button
+									key={folder.id}
+									variant="ghost"
+									className={cn(
+										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
+										currentView === 'folder-content' &&
+											currentFolderId === folder.id &&
+											'bg-linear-to-r from-white/10 to-white/15',
+										'cursor-pointer'
+									)}
+									onClick={() => handleFolderClick(folder.id)}
+								>
+									<CornerDownRight className="h-2 w-2 text-white/20" />
+									<FolderIcon className="h-3 w-3 text-white/50" />
+									<span className="flex-1 text-left truncate">{folder.name}</span>
+									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+										<BookImage className="h-3 w-3" />
+										<span>{folder._count?.images || 0}</span>
+									</div>
+								</Button>
+							);
 						}
-						return (
-							<Button
-								key={folder.id}
-								variant="ghost"
-								className={cn(
-									'w-full justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs',
-									currentView === 'folder-content' &&
-										currentFolderId === folder.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handleFolderClick(folder.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<FolderIcon className="h-4 w-4" />
-								<span className="flex-1 text-left truncate">{folder.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<ImageIcon className="h-3 w-3" />
-									<span>{folder._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
+					);
 				case 'albums':
-					return albums?.map((album) => {
-						if (isCollapsed && album.id !== selectedChildId) {
-							return null;
+					return albums?.map(
+						(album: {
+							id: string;
+							emoji: string;
+							name: string;
+							_count?: { images: number };
+						}) => {
+							if (isCollapsed && album.id !== selectedChildId) {
+								return null;
+							}
+							return (
+								<Button
+									key={album.id}
+									variant="ghost"
+									className={cn(
+										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
+										currentView === 'album-content' &&
+											currentAlbumId === album.id &&
+											'bg-linear-to-r from-white/10 to-white/15',
+										'cursor-pointer'
+									)}
+									onClick={() => handleAlbumClick(album.id)}
+								>
+									<CornerDownRight className="h-2 w-2 text-white/20" />
+									<span className="text-base">{album.emoji}</span>
+									<span className="flex-1 text-left truncate">{album.name}</span>
+									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+										<BookImage className="h-3 w-3" />
+										<span>{album._count?.images || 0}</span>
+									</div>
+								</Button>
+							);
 						}
-						return (
-							<Button
-								key={album.id}
-								variant="ghost"
-								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'album-content' &&
-										currentAlbumId === album.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handleAlbumClick(album.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{album.emoji}</span>
-								<span className="flex-1 text-left truncate">{album.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<Camera className="h-3 w-3" />
-									<span>{album._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
+					);
 				case 'characters':
-					return characters?.map((character) => {
-						if (isCollapsed && character.id !== selectedChildId) {
-							return null;
+					return characters?.map(
+						(character: {
+							id: string;
+							emoji: string;
+							name: string;
+							_count?: { images: number };
+						}) => {
+							if (isCollapsed && character.id !== selectedChildId) {
+								return null;
+							}
+							return (
+								<Button
+									key={character.id}
+									variant="ghost"
+									className={cn(
+										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
+										currentView === 'character-content' &&
+											currentCharacterId === character.id &&
+											'bg-linear-to-r from-white/10 to-white/15',
+										'cursor-pointer'
+									)}
+									onClick={() => handleCharacterClick(character.id)}
+								>
+									<CornerDownRight className="h-2 w-2 text-white/20" />
+									<span className="text-base">{character.emoji}</span>
+									<span className="flex-1 text-left truncate">{character.name}</span>
+									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+										<BookImage className="h-3 w-3" />
+										<span>{character._count?.images || 0}</span>
+									</div>
+								</Button>
+							);
 						}
-						return (
-							<Button
-								key={character.id}
-								variant="ghost"
-								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'character-content' &&
-										currentCharacterId === character.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handleCharacterClick(character.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{character.emoji}</span>
-								<span className="flex-1 text-left truncate">{character.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<User2 className="h-3 w-3" />
-									<span>{character._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
+					);
 				case 'places':
-					return places?.map((place) => {
-						if (isCollapsed && place.id !== selectedChildId) {
-							return null;
+					return places?.map(
+						(place: {
+							id: string;
+							emoji: string;
+							name: string;
+							_count?: { images: number };
+						}) => {
+							if (isCollapsed && place.id !== selectedChildId) {
+								return null;
+							}
+							return (
+								<Button
+									key={place.id}
+									variant="ghost"
+									className={cn(
+										'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
+										currentView === 'place-content' &&
+											currentPlaceId === place.id &&
+											'bg-linear-to-r from-white/10 to-white/15',
+										'cursor-pointer'
+									)}
+									onClick={() => handlePlaceClick(place.id)}
+								>
+									<CornerDownRight className="h-2 w-2 text-white/20" />
+									<span className="text-base">{place.emoji}</span>
+									<span className="flex-1 text-left truncate">{place.name}</span>
+									<div className="flex items-center space-x-1 text-white/50 text-[10px]">
+										<BookImage className="h-3 w-3" />
+										<span>{place._count?.images || 0}</span>
+									</div>
+								</Button>
+							);
 						}
-						return (
-							<Button
-								key={place.id}
-								variant="ghost"
-								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'place-content' &&
-										currentPlaceId === place.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handlePlaceClick(place.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{place.emoji}</span>
-								<span className="flex-1 text-left truncate">{place.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<MapPin className="h-3 w-3" />
-									<span>{place._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
-				case 'world-items':
-					return worldItems?.map((worldItem: WorldItemWithStats) => {
-						if (isCollapsed && worldItem.id !== selectedChildId) {
-							return null;
-						}
-						return (
-							<Button
-								key={worldItem.id}
-								variant="ghost"
-								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'world-item-content' &&
-										currentWorldItemId === worldItem.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
-								)}
-								onClick={() => handleWorldItemClick(worldItem.id)}
-							>
-								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{worldItem.emoji}</span>
-								<span className="flex-1 text-left truncate">{worldItem.name}</span>
-								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
-									<Box className="h-3 w-3" />
-									<span>{worldItem._count?.images || 0}</span>
-								</div>
-							</Button>
-						);
-					});
+					);
 				case 'tags':
 					if (isCollapsed) {
 						return null; // Las etiquetas son especiales, no mostramos ninguna si está colapsado
 					}
 					return (
 						<div className="flex w-full flex-wrap gap-2 mt-1">
-							{tags?.map((tag) => (
-								<Button
-									variant="ghost"
-									key={tag.id}
-									style={{ backgroundColor: tag.color }}
-									className={cn(
-										'justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold',
-										currentView === 'tag-content' &&
-											currentTagId === tag.name &&
-											'bg-linear-to-r from-black/30 to-black/35',
-										'cursor-pointer'
-									)}
-									onClick={() => handleTagClick(tag.name)}
-								>
-									<span className="flex-1 text-left text-[10px] truncate shadow-xs">{tag.name}</span>
-									<div className="flex items-center space-x-1 text-black/70 text-[10px]">
-										<TagIcon className="h-3 w-3" />
-										<span>{tag._count?.images || 0}</span>
-									</div>
-								</Button>
-							))}
+							{tags?.map(
+								(tag: {
+									id: string;
+									name: string;
+									color: string;
+									_count?: { images: number };
+								}) => (
+									<Button
+										variant="ghost"
+										key={tag.id}
+										style={{ backgroundColor: tag.color }}
+										className={cn(
+											'justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold',
+											currentView === 'tag-content' &&
+												currentTagId === tag.name &&
+												'bg-linear-to-r from-black/30 to-black/35',
+											'cursor-pointer'
+										)}
+										onClick={() => handleTagClick(tag.name)}
+									>
+										{tag.name}
+									</Button>
+								)
+							)}
 						</div>
 					);
 				// Para las nuevas categorías, de momento no mostramos nada
@@ -644,18 +669,13 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			currentPlaceId,
 			currentTagId,
 			currentView,
-			currentWorldItemId,
 			folders,
-			getSelectedChildId,
 			handleAlbumClick,
 			handleCharacterClick,
 			handleCollectionClick,
 			handleFolderClick,
 			handlePlaceClick,
 			handleTagClick,
-			handleWorldItemClick,
-			hasCategoryChildSelected,
-			isCategoryCollapsed,
 			places,
 			tags,
 			worldItems,
@@ -782,7 +802,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 									</Button>
 								</div>
 
-								<div className="mt-1 flex flex-col gap-1">{renderCategoryItems(id)}</div>
+								<div className="mt-1 flex flex-col gap-1">
+									{renderCategoryChildren(id, isCategoryCollapsed(id), getSelectedChildId(id))}
+								</div>
 							</div>
 						))}
 					</div>

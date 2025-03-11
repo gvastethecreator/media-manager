@@ -1,18 +1,34 @@
 'use client';
 
-import { NoteCard } from '@/components/features/entity-cards/cards/note-card';
-import { NoteForm } from '@/components/features/entity-cards/forms/note-form';
+import { NoteCard } from '@/components/features/entity-cards/note/note-card';
+import { NoteForm } from '@/components/features/entity-cards/note/note-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/use-toast';
-import { calculateStats } from '@/lib/entity.utils';
 import { logger } from '@/lib/logger/logger';
-import { type NoteFormData, useNoteStore } from '@/store/entities/note.store';
+import { useNoteStore } from '@/store/entities/note.store';
 import { Loader2, StickyNote } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
+
+// Definición local del tipo NoteFormData para evitar problemas de incompatibilidad
+interface NoteFormData {
+	id?: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number;
+	status: string;
+	tags: string[];
+	featuredImage?: string | null;
+	isFavorite: boolean;
+}
 
 const noteLogger = logger.withContext('NotesSection');
 
@@ -28,7 +44,15 @@ export function NotesSection() {
 	const handleCreate = async (data: NoteFormData) => {
 		try {
 			noteLogger.info('✨ Creando nueva nota:', data);
-			await createNote(data);
+			await createNote({
+				title: data.title,
+				content: data.content,
+				category: data.category,
+				priority: data.priority,
+				status: data.status,
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			toast({
 				title: 'Éxito',
 				description: 'Nota creada correctamente',
@@ -49,7 +73,16 @@ export function NotesSection() {
 		}
 		try {
 			noteLogger.info('💾 Actualizando nota:', data);
-			await updateNote(editingId, data);
+			await updateNote(editingId, {
+				id: editingId,
+				title: data.title,
+				content: data.content,
+				category: data.category,
+				priority: data.priority,
+				status: data.status,
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			setEditingId(null);
 			toast({
 				title: 'Éxito',
@@ -87,7 +120,67 @@ export function NotesSection() {
 	};
 
 	// Calcular estadísticas
-	const stats = React.useMemo(() => calculateStats(notes), [notes]);
+	const stats = React.useMemo(() => {
+		if (!notes.length) {
+			return {
+				totalItems: 0,
+				totalImages: 0,
+				totalSize: 0,
+				distribution: [],
+				recentItems: [],
+				lastUpdated: undefined,
+				// Base stats
+				total: 0,
+				active: 0,
+				favorite: 0,
+				archived: 0,
+			};
+		}
+
+		const totalImages = notes.reduce((acc, note) => {
+			// Suma todas las referencias a otras entidades
+			const count = note._count
+				? note._count.concepts +
+					note._count.prompts +
+					note._count.characters +
+					note._count.places +
+					note._count.worldItems
+				: 0;
+			return acc + count;
+		}, 0);
+
+		// Para totalSize, usar solo notas con propiedad calculada
+		const totalSize = notes.reduce((acc, note) => {
+			// Se asume que totalSize no es una propiedad estándar
+			const noteWithSize = note as typeof note & { totalSize?: number };
+			return acc + (noteWithSize.totalSize || 0);
+		}, 0);
+
+		// Obtener notas recientes
+		const recentNotes = [...notes]
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.slice(0, 5)
+			.map((note) => ({
+				id: note.id,
+				name: note.title,
+				emoji: '📝',
+				count: 0, // Para mantener la compatibilidad
+			}));
+
+		return {
+			totalItems: notes.length,
+			totalImages,
+			totalSize,
+			distribution: [],
+			recentItems: recentNotes,
+			lastUpdated: new Date(),
+			// Base stats
+			total: notes.length,
+			active: notes.length,
+			favorite: notes.filter((note) => note.isFavorite).length,
+			archived: 0,
+		};
+	}, [notes]);
 
 	return (
 		<div className="space-y-6">
@@ -100,7 +193,12 @@ export function NotesSection() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<NoteForm onSubmit={handleCreate} isLoading={isLoading} />
+						<NoteForm
+							onSubmit={(data) => {
+								void handleCreate(data);
+							}}
+							isLoading={isLoading}
+						/>
 					</CardContent>
 				</Card>
 
@@ -157,20 +255,47 @@ export function NotesSection() {
 												<CardContent className="p-4">
 													<NoteForm
 														initialData={{
-															name: note.name,
-															description: note.description || undefined,
+															name: note.title, // Usar title como name
+															description: '',
+															emoji: '📝', // Emoji por defecto
+															color: '#3b82f6', // Color por defecto
+															title: note.title,
 															content: note.content,
-															type: note.type,
-															tags: note.tags,
+															category: note.category || '',
+															priority: note.priority,
+															status: note.status,
+															tags: note.tags ? note.tags.split(',').filter(Boolean) : [],
+															featuredImage: note.featuredImage,
+															isFavorite: note.isFavorite,
 														}}
-														onSubmit={handleUpdate}
+														onSubmit={(data) => {
+															void handleUpdate(data);
+														}}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}
 													/>
 												</CardContent>
 											</Card>
 										) : (
-											<NoteCard note={note} onEdit={() => setEditingId(note.id)} onDelete={handleDelete} />
+											<NoteCard
+												data={{
+													id: note.id,
+													name: note.title,
+													emoji: '📝',
+													color: '#3b82f6',
+													description: '',
+													title: note.title,
+													content: note.content,
+													category: note.category || '',
+													priority: note.priority,
+													status: note.status,
+													tags: note.tags ? note.tags.split(',').filter(Boolean) : [],
+													featuredImage: note.featuredImage,
+													isFavorite: note.isFavorite,
+												}}
+												onEdit={() => setEditingId(note.id)}
+												onDelete={handleDelete}
+											/>
 										)}
 									</motion.div>
 								))}

@@ -1,12 +1,12 @@
 'use client';
 
-import { CollectionCard } from '@/components/features/entity-cards/cards/collection-card';
-import { CollectionForm } from '@/components/features/entity-cards/forms/collection-form';
+import { CollectionCard } from '@/components/features/entity-cards/collection/collection-card';
+import { CollectionForm } from '@/components/features/entity-cards/collection/collection-form';
 import {
 	type CollectionFormData,
 	collectionToFormData,
 	formDataToCollection,
-} from '@/components/features/entity-cards/forms/entity-types';
+} from '@/components/features/entity-cards/entity-types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,7 +91,10 @@ export function CollectionsSection() {
 		}
 		try {
 			collectionLogger.info('💾 Actualizando colección:', data);
-			await updateCollection(formDataToCollection(data));
+			await updateCollection({
+				...formDataToCollection(data),
+				id: data.id,
+			});
 			toast({
 				title: 'Colección actualizada',
 				description: 'La colección se ha actualizado correctamente.',

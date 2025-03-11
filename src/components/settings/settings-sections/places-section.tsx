@@ -1,12 +1,8 @@
 'use client';
 
-import { PlaceCard } from '@/components/features/entity-cards/cards/place-card';
-import {
-	type PlaceFormData,
-	formDataToPlace,
-	placeToFormData,
-} from '@/components/features/entity-cards/forms/entity-types';
-import { PlaceForm } from '@/components/features/entity-cards/forms/place-form';
+import { type PlaceFormData, formDataToPlace, placeToFormData } from '@/components/features/entity-cards/entity-types';
+import { PlaceCard } from '@/components/features/entity-cards/place/place-card';
+import { PlaceForm } from '@/components/features/entity-cards/place/place-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,7 +86,11 @@ export function PlacesSection() {
 		}
 		try {
 			placeLogger.info('💾 Actualizando lugar:', data);
-			await updatePlace(formDataToPlace(data));
+			const updateData = {
+				...formDataToPlace(data),
+				id: data.id,
+			};
+			await updatePlace(updateData);
 			setEditingId(null);
 			toast({
 				title: 'Éxito',
@@ -169,7 +169,7 @@ export function PlacesSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">{error.message}</p>
+							<p className="text-sm text-muted-foreground text-center">{error}</p>
 							<Button variant="outline" size="sm" onClick={() => loadPlaces()}>
 								Reintentar
 							</Button>
@@ -201,7 +201,7 @@ export function PlacesSection() {
 											</CardContent>
 										</Card>
 									) : (
-										<PlaceCard place={place} onEdit={() => setEditingId(place.id)} onDelete={handleDelete} />
+										<PlaceCard data={place} onEdit={() => setEditingId(place.id)} onDelete={handleDelete} />
 									)}
 								</motion.div>
 							))}
