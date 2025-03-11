@@ -1,5 +1,5 @@
 import { reindexFolder } from '@/app/actions/folders/folder-indexing.actions';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const routeLogger = logger.withContext('FolderReindexRoute');

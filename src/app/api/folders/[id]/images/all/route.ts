@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem, RelatedCollection, RelatedTag } from '@/types/file-item';
 import { type NextRequest, NextResponse } from 'next/server';

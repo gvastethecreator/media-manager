@@ -1,15 +1,16 @@
-'use client';
+"use client";
 
-import type { NavigationData } from '@/app/actions/nav.actions';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProfileContext } from '@/lib/contexts';
-import { cn } from '@/lib/utils';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import { useStatsBaseStore } from '@/store/stats.store';
-import { useUIStore } from '@/store/ui.store';
-import type { ViewType } from '@/types/file-item';
+import type { NavigationData } from "@/app/actions/nav.actions";
+import type { WorldItemWithStats } from "@/app/actions/world-items/world-item.actions";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useProfileContext } from "@/lib/contexts";
+import { cn } from "@/lib/utils";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import { useStatsBaseStore } from "@/store/stats.store";
+import { useUIStore } from "@/store/ui.store";
+import type { ViewType } from "@/types/file-item";
 import {
 	BookImage,
 	Box,
@@ -34,82 +35,82 @@ import {
 	Terminal,
 	UploadCloud,
 	User2,
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
-import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import type React from "react";
+import { useCallback, useMemo, useState } from "react";
 
 const navigationItems = [
-	{ id: 'all-images' as ViewType, label: 'Galería', icon: ImageIcon },
+	{ id: "all-images" as ViewType, label: "Galería", icon: ImageIcon },
 	{
-		id: 'uploaded-images' as ViewType,
-		label: 'Imágenes Subidas',
+		id: "uploaded-images" as ViewType,
+		label: "Imágenes Subidas",
 		icon: UploadCloud,
 	},
-	{ id: 'favorites' as ViewType, label: 'Favoritos', icon: Star },
-	{ id: 'search' as ViewType, label: 'Buscar', icon: Search },
+	{ id: "favorites" as ViewType, label: "Favoritos", icon: Star },
+	{ id: "search" as ViewType, label: "Buscar", icon: Search },
 ];
 
 const categories = [
 	{
-		id: 'folders' as ViewType,
+		id: "folders" as ViewType,
 		icon: FolderIcon,
-		label: 'Carpetas',
-		color: '#22c55e',
+		label: "Carpetas",
+		color: "#22c55e",
 	},
 	{
-		id: 'collections' as ViewType,
+		id: "collections" as ViewType,
 		icon: BookImage,
-		label: 'Colecciones',
-		color: '#ef4444',
+		label: "Colecciones",
+		color: "#ef4444",
 	},
 	{
-		id: 'albums' as ViewType,
+		id: "albums" as ViewType,
 		icon: Camera,
-		label: 'Álbumes',
-		color: '#8b5cf6',
+		label: "Álbumes",
+		color: "#8b5cf6",
 	},
 	{
-		id: 'characters' as ViewType,
+		id: "characters" as ViewType,
 		icon: User2,
-		label: 'Personajes',
-		color: '#ec4899',
+		label: "Personajes",
+		color: "#ec4899",
 	},
 	{
-		id: 'places' as ViewType,
+		id: "places" as ViewType,
 		icon: MapPin,
-		label: 'Lugares',
-		color: '#14b8a6',
+		label: "Lugares",
+		color: "#14b8a6",
 	},
 	{
-		id: 'objects' as ViewType,
+		id: "world-items" as ViewType,
 		icon: Box,
-		label: 'Objetos',
-		color: '#f59e0b',
+		label: "Objetos",
+		color: "#f59e0b",
 	},
 	{
-		id: 'concepts' as ViewType,
+		id: "concepts" as ViewType,
 		icon: Lightbulb,
-		label: 'Conceptos',
-		color: '#3b82f6',
+		label: "Conceptos",
+		color: "#3b82f6",
 	},
 	{
-		id: 'prompts' as ViewType,
+		id: "prompts" as ViewType,
 		icon: Terminal,
-		label: 'Prompts',
-		color: '#10b981',
+		label: "Prompts",
+		color: "#10b981",
 	},
 	{
-		id: 'notes' as ViewType,
+		id: "notes" as ViewType,
 		icon: StickyNote,
-		label: 'Notas',
-		color: '#a855f7',
+		label: "Notas",
+		color: "#a855f7",
 	},
 	{
-		id: 'tags' as ViewType,
+		id: "tags" as ViewType,
 		icon: TagIcon,
-		label: 'Etiquetas',
-		color: '#f59e0b',
+		label: "Etiquetas",
+		color: "#f59e0b",
 	},
 ];
 
@@ -122,9 +123,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const { profiles = [], activeProfile } = settings;
 	const activeProfileData = profiles.find((p) => p.id === activeProfile) ||
 		profiles[0] || {
-			name: 'Default',
-			emoji: '👤',
-			color: '#3b82f6',
+			name: "Default",
+			emoji: "👤",
+			color: "#3b82f6",
 		};
 
 	// Desestructurar initialData con valores por defecto
@@ -153,11 +154,13 @@ export function NavPanel({ initialData }: NavPanelProps) {
 		albums = [],
 		characters = [],
 		places = [],
-		objects = [],
+		worldItems = [],
 	} = initialData || {};
 
 	// Estado para controlar el colapso de categorías
-	const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+	const [collapsedCategories, setCollapsedCategories] = useState<
+		Record<string, boolean>
+	>({});
 
 	// Datos simulados para las nuevas entidades
 	const concepts = useMemo(() => [], []);
@@ -172,14 +175,17 @@ export function NavPanel({ initialData }: NavPanelProps) {
 		setCurrentAlbum,
 		setCurrentCharacter,
 		setCurrentPlace,
-		setCurrentObject,
+		setCurrentWorldItem,
 		currentCollectionId,
 		currentFolderId,
 		currentTagId,
 		currentAlbumId,
 		currentCharacterId,
 		currentPlaceId,
-		currentObjectId,
+		currentWorldItemId,
+		currentConceptId,
+		currentPromptId,
+		currentNoteId,
 	} = useFileManager();
 
 	const { toggleSettings } = useUIStore();
@@ -195,26 +201,26 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const hasCategoryChildSelected = useCallback(
 		(categoryId: ViewType): boolean => {
 			switch (categoryId) {
-				case 'collections':
-					return currentView === 'collection-content';
-				case 'folders':
-					return currentView === 'folder-content';
-				case 'tags':
-					return currentView === 'tag-content';
-				case 'albums':
-					return currentView === 'album-content';
-				case 'characters':
-					return currentView === 'character-content';
-				case 'places':
-					return currentView === 'place-content';
-				case 'objects':
-					return currentView === 'object-content';
-				case 'concepts':
-					return currentView === 'concept-content';
-				case 'prompts':
-					return currentView === 'prompt-content';
-				case 'notes':
-					return currentView === 'note-content';
+				case "collections":
+					return currentView === "collection-content";
+				case "folders":
+					return currentView === "folder-content";
+				case "tags":
+					return currentView === "tag-content";
+				case "albums":
+					return currentView === "album-content";
+				case "characters":
+					return currentView === "character-content";
+				case "places":
+					return currentView === "place-content";
+				case "world-items":
+					return currentView === "world-item-content";
+				case "concepts":
+					return currentView === "concept-content";
+				case "prompts":
+					return currentView === "prompt-content";
+				case "notes":
+					return currentView === "note-content";
 				default:
 					return false;
 			}
@@ -226,21 +232,26 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	const getSelectedChildId = useCallback(
 		(categoryId: ViewType): string | null => {
 			switch (categoryId) {
-				case 'collections':
+				case "collections":
 					return currentCollectionId;
-				case 'folders':
+				case "folders":
 					return currentFolderId;
-				case 'tags':
+				case "tags":
 					return currentTagId;
-				case 'albums':
+				case "albums":
 					return currentAlbumId;
-				case 'characters':
+				case "characters":
 					return currentCharacterId;
-				case 'places':
+				case "places":
 					return currentPlaceId;
-				case 'objects':
-					return currentObjectId;
-				// Las nuevas categorías no tienen IDs seleccionados aún
+				case "world-items":
+					return currentWorldItemId;
+				case "concepts":
+					return currentConceptId;
+				case "prompts":
+					return currentPromptId;
+				case "notes":
+					return currentNoteId;
 				default:
 					return null;
 			}
@@ -250,9 +261,12 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			currentCharacterId,
 			currentCollectionId,
 			currentFolderId,
-			currentObjectId,
 			currentPlaceId,
 			currentTagId,
+			currentWorldItemId,
+			currentConceptId,
+			currentPromptId,
+			currentNoteId,
 		]
 	);
 
@@ -265,25 +279,28 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	);
 
 	// Agregar una nueva función para manejar el colapso/expansión
-	const handleCollapseToggle = useCallback((id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
-		event.stopPropagation();
-		setCollapsedCategories((prev) => ({
-			...prev,
-			[id]: !prev[id],
-		}));
-	}, []);
+	const handleCollapseToggle = useCallback(
+		(id: ViewType, event: React.MouseEvent | React.KeyboardEvent) => {
+			event.stopPropagation();
+			setCollapsedCategories((prev) => ({
+				...prev,
+				[id]: !prev[id],
+			}));
+		},
+		[]
+	);
 
 	const handleThemeToggle = useCallback(() => {
-		setTheme(theme === 'light' ? 'dark' : 'light');
+		setTheme(theme === "light" ? "dark" : "light");
 	}, [theme, setTheme]);
 
 	const handleOpenSettings = useCallback(() => {
-		setCurrentView('settings');
+		setCurrentView("settings");
 		toggleSettings();
 	}, [toggleSettings, setCurrentView]);
 
 	const handleOpenDevelopment = useCallback(() => {
-		setCurrentView('development');
+		setCurrentView("development");
 	}, [setCurrentView]);
 
 	const handleItemClick = useCallback(
@@ -295,7 +312,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
-			setCurrentView('collection-content');
+			setCurrentView("collection-content");
 			setCurrentCollection(collectionId);
 		},
 		[setCurrentView, setCurrentCollection]
@@ -303,7 +320,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
-			setCurrentView('folder-content');
+			setCurrentView("folder-content");
 			setCurrentFolder(folderId);
 		},
 		[setCurrentView, setCurrentFolder]
@@ -311,7 +328,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleTagClick = useCallback(
 		(tagName: string) => {
-			setCurrentView('tag-content');
+			setCurrentView("tag-content");
 			setCurrentTag(tagName);
 		},
 		[setCurrentView, setCurrentTag]
@@ -319,7 +336,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
-			setCurrentView('album-content');
+			setCurrentView("album-content");
 			setCurrentAlbum(albumId);
 		},
 		[setCurrentView, setCurrentAlbum]
@@ -327,7 +344,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
-			setCurrentView('character-content');
+			setCurrentView("character-content");
 			setCurrentCharacter(characterId);
 		},
 		[setCurrentView, setCurrentCharacter]
@@ -335,43 +352,43 @@ export function NavPanel({ initialData }: NavPanelProps) {
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
-			setCurrentView('place-content');
+			setCurrentView("place-content");
 			setCurrentPlace(placeId);
 		},
 		[setCurrentView, setCurrentPlace]
 	);
 
-	const handleObjectClick = useCallback(
-		(objectId: string) => {
-			setCurrentView('object-content');
-			setCurrentObject(objectId);
+	const handleWorldItemClick = useCallback(
+		(worldItemId: string) => {
+			setCurrentView("world-item-content");
+			setCurrentWorldItem(worldItemId);
 		},
-		[setCurrentView, setCurrentObject]
+		[setCurrentView, setCurrentWorldItem]
 	);
 
 	// Función auxiliar para obtener la cantidad de ítems para cada categoría
 	const getCategoryItemCount = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
-				case 'collections':
+				case "collections":
 					return stats?.totalCollections || 0;
-				case 'folders':
+				case "folders":
 					return stats?.totalFolders || 0;
-				case 'tags':
+				case "tags":
 					return stats?.totalTags || 0;
-				case 'albums':
+				case "albums":
 					return stats?.totalAlbums || 0;
-				case 'characters':
+				case "characters":
 					return stats?.totalCharacters || 0;
-				case 'places':
+				case "places":
 					return stats?.totalPlaces || 0;
-				case 'objects':
+				case "world-items":
 					return stats?.totalObjects || 0;
-				case 'concepts':
+				case "concepts":
 					return concepts.length;
-				case 'prompts':
+				case "prompts":
 					return prompts.length;
-				case 'notes':
+				case "notes":
 					return notes.length;
 				default:
 					return 0;
@@ -383,20 +400,39 @@ export function NavPanel({ initialData }: NavPanelProps) {
 	// Calcula y devuelve el número de imágenes para una categoría
 	const getImagesForCategory = (categoryId: ViewType): number => {
 		switch (categoryId) {
-			case 'collections':
-				return collections.reduce((sum, collection) => sum + (collection._count?.images || 0), 0);
-			case 'folders':
-				return folders.reduce((sum, folder) => sum + (folder._count?.images || 0), 0);
-			case 'tags':
+			case "collections":
+				return collections.reduce(
+					(sum, collection) => sum + (collection._count?.images || 0),
+					0
+				);
+			case "folders":
+				return folders.reduce(
+					(sum, folder) => sum + (folder._count?.images || 0),
+					0
+				);
+			case "tags":
 				return tags.reduce((sum, tag) => sum + (tag._count?.images || 0), 0);
-			case 'albums':
-				return albums.reduce((sum, album) => sum + (album._count?.images || 0), 0);
-			case 'characters':
-				return characters.reduce((sum, character) => sum + (character._count?.images || 0), 0);
-			case 'places':
-				return places.reduce((sum, place) => sum + (place._count?.images || 0), 0);
-			case 'objects':
-				return objects.reduce((sum, object) => sum + (object._count?.images || 0), 0);
+			case "albums":
+				return albums.reduce(
+					(sum, album) => sum + (album._count?.images || 0),
+					0
+				);
+			case "characters":
+				return characters.reduce(
+					(sum, character) => sum + (character._count?.images || 0),
+					0
+				);
+			case "places":
+				return places.reduce(
+					(sum, place) => sum + (place._count?.images || 0),
+					0
+				);
+			case "world-items":
+				return worldItems.reduce(
+					(sum: number, worldItem: WorldItemWithStats) =>
+						sum + (worldItem._count?.images || 0),
+					0
+				);
 			default:
 				return 0;
 		}
@@ -415,7 +451,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			}
 
 			switch (categoryId) {
-				case 'collections':
+				case "collections":
 					return collections?.map((collection) => {
 						// Si la categoría está colapsada, solo mostrar el ítem seleccionado
 						if (isCollapsed && collection.id !== selectedChildId) {
@@ -426,17 +462,19 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={collection.id}
 								variant="ghost"
 								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'collection-content' &&
+									"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+									currentView === "collection-content" &&
 										currentCollectionId === collection.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
 								onClick={() => handleCollectionClick(collection.id)}
 							>
 								<CornerDownRight className="h-2 w-2 text-white/20" />
 								<span className="text-base">{collection.emoji}</span>
-								<span className="flex-1 text-left truncate">{collection.name}</span>
+								<span className="flex-1 text-left truncate">
+									{collection.name}
+								</span>
 								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
 									<BookImage className="h-3 w-3" />
 									<span>{collection._count?.images || 0}</span>
@@ -444,7 +482,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							</Button>
 						);
 					});
-				case 'folders':
+				case "folders":
 					return folders?.map((folder) => {
 						if (isCollapsed && folder.id !== selectedChildId) {
 							return null;
@@ -454,11 +492,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={folder.id}
 								variant="ghost"
 								className={cn(
-									'w-full justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs',
-									currentView === 'folder-content' &&
+									"w-full justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs",
+									currentView === "folder-content" &&
 										currentFolderId === folder.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
 								onClick={() => handleFolderClick(folder.id)}
 							>
@@ -472,7 +510,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							</Button>
 						);
 					});
-				case 'albums':
+				case "albums":
 					return albums?.map((album) => {
 						if (isCollapsed && album.id !== selectedChildId) {
 							return null;
@@ -482,11 +520,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={album.id}
 								variant="ghost"
 								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'album-content' &&
+									"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+									currentView === "album-content" &&
 										currentAlbumId === album.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
 								onClick={() => handleAlbumClick(album.id)}
 							>
@@ -500,7 +538,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							</Button>
 						);
 					});
-				case 'characters':
+				case "characters":
 					return characters?.map((character) => {
 						if (isCollapsed && character.id !== selectedChildId) {
 							return null;
@@ -510,17 +548,19 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={character.id}
 								variant="ghost"
 								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'character-content' &&
+									"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+									currentView === "character-content" &&
 										currentCharacterId === character.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
 								onClick={() => handleCharacterClick(character.id)}
 							>
 								<CornerDownRight className="h-2 w-2 text-white/20" />
 								<span className="text-base">{character.emoji}</span>
-								<span className="flex-1 text-left truncate">{character.name}</span>
+								<span className="flex-1 text-left truncate">
+									{character.name}
+								</span>
 								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
 									<User2 className="h-3 w-3" />
 									<span>{character._count?.images || 0}</span>
@@ -528,7 +568,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							</Button>
 						);
 					});
-				case 'places':
+				case "places":
 					return places?.map((place) => {
 						if (isCollapsed && place.id !== selectedChildId) {
 							return null;
@@ -538,11 +578,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={place.id}
 								variant="ghost"
 								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'place-content' &&
+									"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+									currentView === "place-content" &&
 										currentPlaceId === place.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
 								onClick={() => handlePlaceClick(place.id)}
 							>
@@ -556,35 +596,37 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							</Button>
 						);
 					});
-				case 'objects':
-					return objects?.map((object) => {
-						if (isCollapsed && object.id !== selectedChildId) {
+				case "world-items":
+					return worldItems?.map((worldItem: WorldItemWithStats) => {
+						if (isCollapsed && worldItem.id !== selectedChildId) {
 							return null;
 						}
 						return (
 							<Button
-								key={object.id}
+								key={worldItem.id}
 								variant="ghost"
 								className={cn(
-									'justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left',
-									currentView === 'object-content' &&
-										currentObjectId === object.id &&
-										'bg-linear-to-r from-white/10 to-white/15',
-									'cursor-pointer'
+									"justify-start gap-2 h-6 px-2 text-sm transition-colors text-xs rounded-sm text-left",
+									currentView === "world-item-content" &&
+										currentWorldItemId === worldItem.id &&
+										"bg-linear-to-r from-white/10 to-white/15",
+									"cursor-pointer"
 								)}
-								onClick={() => handleObjectClick(object.id)}
+								onClick={() => handleWorldItemClick(worldItem.id)}
 							>
 								<CornerDownRight className="h-2 w-2 text-white/20" />
-								<span className="text-base">{object.emoji}</span>
-								<span className="flex-1 text-left truncate">{object.name}</span>
+								<span className="text-base">{worldItem.emoji}</span>
+								<span className="flex-1 text-left truncate">
+									{worldItem.name}
+								</span>
 								<div className="flex items-center space-x-1 text-white/50 text-[10px]">
 									<Box className="h-3 w-3" />
-									<span>{object._count?.images || 0}</span>
+									<span>{worldItem._count?.images || 0}</span>
 								</div>
 							</Button>
 						);
 					});
-				case 'tags':
+				case "tags":
 					if (isCollapsed) {
 						return null; // Las etiquetas son especiales, no mostramos ninguna si está colapsado
 					}
@@ -596,15 +638,17 @@ export function NavPanel({ initialData }: NavPanelProps) {
 									key={tag.id}
 									style={{ backgroundColor: tag.color }}
 									className={cn(
-										'justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold',
-										currentView === 'tag-content' &&
+										"justify-start gap-2 h-5 px-3 text-[10px] transition-colors rounded-xl text-black/90 font-bold",
+										currentView === "tag-content" &&
 											currentTagId === tag.name &&
-											'bg-linear-to-r from-black/30 to-black/35',
-										'cursor-pointer'
+											"bg-linear-to-r from-black/30 to-black/35",
+										"cursor-pointer"
 									)}
 									onClick={() => handleTagClick(tag.name)}
 								>
-									<span className="flex-1 text-left text-[10px] truncate shadow-xs">{tag.name}</span>
+									<span className="flex-1 text-left text-[10px] truncate shadow-xs">
+										{tag.name}
+									</span>
 									<div className="flex items-center space-x-1 text-black/70 text-[10px]">
 										<TagIcon className="h-3 w-3" />
 										<span>{tag._count?.images || 0}</span>
@@ -626,24 +670,24 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			currentCharacterId,
 			currentCollectionId,
 			currentFolderId,
-			currentObjectId,
 			currentPlaceId,
 			currentTagId,
 			currentView,
+			currentWorldItemId,
 			folders,
 			getSelectedChildId,
 			handleAlbumClick,
 			handleCharacterClick,
 			handleCollectionClick,
 			handleFolderClick,
-			handleObjectClick,
 			handlePlaceClick,
 			handleTagClick,
+			handleWorldItemClick,
 			hasCategoryChildSelected,
 			isCategoryCollapsed,
-			objects,
 			places,
 			tags,
+			worldItems,
 		]
 	);
 
@@ -656,23 +700,48 @@ export function NavPanel({ initialData }: NavPanelProps) {
 							className="flex items-center justify-center h-8 w-8 rounded-sm"
 							style={{ backgroundColor: activeProfileData?.color }}
 						>
-							<span className="text-xs font-medium">{activeProfileData?.emoji}</span>
+							<span className="text-xs font-medium">
+								{activeProfileData?.emoji}
+							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-xs font-medium truncate">{activeProfileData?.name}</span>
-							<span className="text-[9px] text-muted-foreground">{stats?.totalImages || 0} imágenes</span>
+							<span className="text-xs font-medium truncate">
+								{activeProfileData?.name}
+							</span>
+							<span className="text-[9px] text-muted-foreground">
+								{stats?.totalImages || 0} imágenes
+							</span>
 						</div>
 					</div>
 					<div className="gap-8 pr-2">
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleOpenDevelopment}>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleOpenDevelopment}
+						>
 							<Bug className="h-4 w-4" />
 						</Button>
 
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleThemeToggle}>
-							{theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleThemeToggle}
+						>
+							{theme === "light" ? (
+								<Moon className="h-4 w-4" />
+							) : (
+								<Sun className="h-4 w-4" />
+							)}
 						</Button>
 
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleOpenSettings}>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleOpenSettings}
+						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
 					</div>
@@ -687,8 +756,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 								key={id}
 								variant="outline"
 								className={cn(
-									'gap-2 h-7 px-3 transition-colors rounded-sm flex-1 text-center',
-									currentView === id && 'bg-linear-to-r from-white/10 to-white/15'
+									"gap-2 h-7 px-3 transition-colors rounded-sm flex-1 text-center",
+									currentView === id &&
+										"bg-linear-to-r from-white/10 to-white/15"
 								)}
 								onClick={() => handleItemClick(id)}
 							>
@@ -712,7 +782,11 @@ export function NavPanel({ initialData }: NavPanelProps) {
 											e.stopPropagation();
 											handleCollapseToggle(id, e);
 										}}
-										aria-label={isCategoryCollapsed(id) ? 'Expandir categoría' : 'Colapsar categoría'}
+										aria-label={
+											isCategoryCollapsed(id)
+												? "Expandir categoría"
+												: "Colapsar categoría"
+										}
 									>
 										{isCategoryCollapsed(id) ? (
 											<ChevronRight className="h-3 w-3 text-white/60" />
@@ -725,8 +799,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 									<Button
 										variant="ghost"
 										className={cn(
-											'flex-1 justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm cursor-pointer',
-											currentView === id && 'bg-linear-to-r from-white/10 to-white/15'
+											"flex-1 justify-start gap-2 h-8 px-2 text-sm transition-colors text-xs rounded-sm cursor-pointer",
+											currentView === id &&
+												"bg-linear-to-r from-white/10 to-white/15"
 										)}
 										onClick={() => handleCategoryClick(id)}
 									>
@@ -734,25 +809,25 @@ export function NavPanel({ initialData }: NavPanelProps) {
 										<span className="flex-1 text-left truncate">{label}</span>
 										<div className="flex items-center space-x-2">
 											<div className="flex items-center space-x-1 text-white/70 text-[10px]">
-												{id === 'folders' ? (
+												{id === "folders" ? (
 													<FolderIcon className="h-3 w-3" />
-												) : id === 'collections' ? (
+												) : id === "collections" ? (
 													<BookImage className="h-3 w-3" />
-												) : id === 'tags' ? (
+												) : id === "tags" ? (
 													<TagIcon className="h-3 w-3" />
-												) : id === 'albums' ? (
+												) : id === "albums" ? (
 													<Camera className="h-3 w-3" />
-												) : id === 'characters' ? (
+												) : id === "characters" ? (
 													<User2 className="h-3 w-3" />
-												) : id === 'places' ? (
+												) : id === "places" ? (
 													<MapPin className="h-3 w-3" />
-												) : id === 'objects' ? (
+												) : id === "world-items" ? (
 													<Box className="h-3 w-3" />
-												) : id === 'concepts' ? (
+												) : id === "concepts" ? (
 													<Lightbulb className="h-3 w-3" />
-												) : id === 'prompts' ? (
+												) : id === "prompts" ? (
 													<Terminal className="h-3 w-3" />
-												) : id === 'notes' ? (
+												) : id === "notes" ? (
 													<StickyNote className="h-3 w-3" />
 												) : (
 													<Hash className="h-3 w-3" />
@@ -767,7 +842,9 @@ export function NavPanel({ initialData }: NavPanelProps) {
 									</Button>
 								</div>
 
-								<div className="mt-1 flex flex-col gap-1">{renderCategoryItems(id)}</div>
+								<div className="mt-1 flex flex-col gap-1">
+									{renderCategoryItems(id)}
+								</div>
 							</div>
 						))}
 					</div>

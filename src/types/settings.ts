@@ -39,7 +39,7 @@ export interface Collection extends Omit<BaseEntityWithStats, 'filters'> {
 	count: number;
 }
 
-export interface Object extends BaseEntityWithStats {
+export interface WorldItem extends BaseEntityWithStats {
 	type: string;
 	rarity: string;
 	properties: string;

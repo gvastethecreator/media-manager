@@ -6,10 +6,10 @@ import { CharacterDialog } from './character-dialog';
 import { CollectionDialog } from './collection-dialog';
 import { ConceptDialog } from './concept-dialog';
 import { NoteDialog } from './note-dialog';
-import { ObjectDialog } from './object-dialog';
 import { PlaceDialog } from './place-dialog';
 import { PromptDialog } from './prompt-dialog';
 import { TagDialog } from './tag-dialog';
+import { WorldItemDialog } from './world-item-dialog';
 // Importaremos más diálogos a medida que los creemos
 
 /**
@@ -38,8 +38,11 @@ export function EntityDialogsProvider() {
 			{/* Diálogo para crear lugares */}
 			<PlaceDialog />
 
-			{/* Diálogo para crear objetos */}
-			<ObjectDialog />
+			{/* Diálogo para crear objetos (legacy - ya no se utiliza) */}
+			{/* <ObjectDialog /> */}
+
+			{/* Diálogo para crear objetos del mundo (reemplazo de Object) */}
+			<WorldItemDialog />
 
 			{/* Diálogo para crear notas */}
 			<NoteDialog />

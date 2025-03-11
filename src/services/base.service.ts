@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem } from '@/types/file-item';
 import type { PrismaClient } from '@prisma/client';

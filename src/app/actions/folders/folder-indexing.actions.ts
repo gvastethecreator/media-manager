@@ -1,7 +1,7 @@
 'use server';
 
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit, emitProgress } from '@/lib/server/events.server';

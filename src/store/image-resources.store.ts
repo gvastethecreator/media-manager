@@ -1,7 +1,7 @@
 import { getImageUrl } from '@/app/actions/images';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { create } from 'zustand';
 
 const resourceLogger = logger.withContext('ImageResources');

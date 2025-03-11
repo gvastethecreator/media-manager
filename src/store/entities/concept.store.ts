@@ -2,12 +2,13 @@ import {
 	type ConceptCreate,
 	type ConceptUpdate,
 	type ConceptWithStats,
+	addConceptToImage,
 	createConcept as createConceptAction,
 	deleteConcept as deleteConceptAction,
 	getConcepts,
 	updateConcept as updateConceptAction,
-} from '@/app/actions/concept.actions';
-import { logger } from '@/lib/logger';
+} from '@/app/actions/concepts/concept.actions';
+import { logger } from '@/lib/logger/logger';
 import { Concept } from '@prisma/client';
 import { create } from 'zustand';
 
@@ -28,6 +29,7 @@ interface ConceptStore {
 	createConcept: (concept: ConceptCreate) => Promise<void>;
 	updateConcept: (id: string, concept: ConceptUpdate) => Promise<void>;
 	deleteConcept: (id: string) => Promise<void>;
+	addConceptToImage: (conceptId: string, imageId: string) => Promise<void>;
 }
 
 export const useConceptStore = create<ConceptStore>((set, _get) => ({
@@ -90,6 +92,21 @@ export const useConceptStore = create<ConceptStore>((set, _get) => ({
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar concepto';
 			conceptLogger.error('❌ Error al eliminar concepto:', error);
+			set({ error: message, isLoading: false });
+		}
+	},
+	addConceptToImage: async (conceptId, imageId) => {
+		try {
+			set({ isLoading: true, error: null });
+			conceptLogger.info('➕ Añadiendo concepto a imagen:', { conceptId, imageId });
+			await addConceptToImage(conceptId, imageId);
+			const rawConcepts = await getConcepts();
+			const concepts = rawConcepts.map(mapToConceptWithStats);
+			set({ concepts, isLoading: false });
+			conceptLogger.info('✅ Concepto añadido a imagen');
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Error al añadir concepto a imagen';
+			conceptLogger.error('❌ Error al añadir concepto a imagen:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

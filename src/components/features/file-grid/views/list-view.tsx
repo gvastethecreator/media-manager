@@ -228,10 +228,10 @@ export const ListView = memo(function ListView({
 									<span>{item.places.length}</span>
 								</Badge>
 							)}
-							{item.objects?.length > 0 && (
+							{item.worldItems?.length > 0 && (
 								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
 									<Box className="h-2.5 w-2.5" />
-									<span>{item.objects.length}</span>
+									<span>{item.worldItems.length}</span>
 								</Badge>
 							)}
 						</div>

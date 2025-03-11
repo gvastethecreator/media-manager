@@ -5,8 +5,8 @@ import {
 	incrementImageDownload,
 	incrementImageView,
 	invalidateStats,
-} from '@/app/actions/stats.actions';
-import { logger } from '@/lib/logger';
+} from '@/app/actions/stats/stats.actions';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 
@@ -25,7 +25,7 @@ export const STATS_EVENTS = {
 	ALBUM_CHANGE: 'album_change',
 	CHARACTER_CHANGE: 'character_change',
 	PLACE_CHANGE: 'place_change',
-	OBJECT_CHANGE: 'object_change',
+	WORLD_ITEM_CHANGE: 'world_item_change',
 	FILES_CHANGE: 'files_change',
 	CONCEPT_CHANGE: 'concept_change',
 	PROMPT_CHANGE: 'prompt_change',
@@ -41,7 +41,7 @@ export type StatsUpdateEvent =
 	| 'album_change'
 	| 'character_change'
 	| 'place_change'
-	| 'object_change'
+	| 'world_item_change'
 	| 'files_change'
 	| 'concept_change'
 	| 'prompt_change'

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { extractMetadata } from '@/app/actions/metadata';
 import { thumbnailCache } from '@/lib/cache';
 import { imageConfig } from '@/lib/config';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import type { Image } from '@prisma/client';

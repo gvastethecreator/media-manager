@@ -1,6 +1,6 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { useImageResources } from '@/store/image-resources.store';
 import type * as React from 'react';
 import { useCallback, useRef } from 'react';

@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { IndexStatus } from './folder-index-status-badge';
 import type { ExtendedFolder } from './folder-types';
 

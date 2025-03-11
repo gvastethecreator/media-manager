@@ -1,4 +1,4 @@
-import { createProfile, getProfiles } from '@/app/actions/profile.actions';
+import { createProfile, getProfiles } from '@/app/actions/profiles/profile.actions';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

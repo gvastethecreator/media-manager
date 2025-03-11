@@ -1,15 +1,15 @@
-import { getAlbumImages } from '@/app/actions/album.actions';
-import { getCharacterImages } from '@/app/actions/character.actions';
+import { getAlbumImages } from '@/app/actions/albums/album.actions';
+import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import { getCollectionImages } from '@/app/actions/collections/collection.actions';
-import { getConceptImages } from '@/app/actions/concept.actions';
+import { getConceptImages } from '@/app/actions/concepts/concept.actions';
 import { getFolderImages } from '@/app/actions/folders';
-import { getNoteImages } from '@/app/actions/note.actions';
-import { getObjectImages } from '@/app/actions/object.actions';
-import { getPlaceImages } from '@/app/actions/place.actions';
-import { getPromptImages } from '@/app/actions/prompt.actions';
-import { getStats } from '@/app/actions/stats.actions';
+import { getNoteImages } from '@/app/actions/notes/note.actions';
+import { getPlaceImages } from '@/app/actions/places/place.actions';
+import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
+import { getStats } from '@/app/actions/stats/stats.actions';
 import { getTagImages } from '@/app/actions/tags/tag.actions';
-import { logger } from '@/lib/logger';
+import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
+import { logger } from '@/lib/logger/logger';
 import type { FileItem } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import type { RelatedTag } from '@/types/tag';
@@ -61,7 +61,7 @@ interface APIImageResponse {
 	albums?: Array<{ id: string; name?: string }> | string[];
 	characters?: Array<{ id: string; name?: string }> | string[];
 	places?: Array<{ id: string; name?: string }> | string[];
-	objects?: Array<{ id: string; name?: string }> | string[];
+	worldItems?: Array<{ id: string; name?: string }> | string[];
 	hash?: string;
 	stats?: {
 		id: string;
@@ -96,7 +96,7 @@ interface FileManagerState {
 	currentAlbumId: string | null;
 	currentCharacterId: string | null;
 	currentPlaceId: string | null;
-	currentObjectId: string | null;
+	currentWorldItemId: string | null;
 	currentConceptId: string | null;
 	currentPromptId: string | null;
 	currentNoteId: string | null;
@@ -108,7 +108,7 @@ interface FileManagerState {
 	currentAlbum: EntityWithEmoji | null;
 	currentCharacter: EntityWithEmoji | null;
 	currentPlace: EntityWithEmoji | null;
-	currentObject: EntityWithEmoji | null;
+	currentWorldItem: EntityWithEmoji | null;
 	currentConcept: EntityWithEmoji | null;
 	currentPrompt: EntityWithEmoji | null;
 	currentNote: BaseEntity | null;
@@ -120,7 +120,7 @@ interface FileManagerState {
 	albums: EntityWithEmoji[];
 	characters: EntityWithEmoji[];
 	places: EntityWithEmoji[];
-	objects: EntityWithEmoji[];
+	worldItems: EntityWithEmoji[];
 	concepts: EntityWithEmoji[];
 	prompts: EntityWithEmoji[];
 	notes: BaseEntity[];
@@ -142,7 +142,7 @@ interface FileManagerState {
 	setCurrentAlbum: (id: string) => Promise<void>;
 	setCurrentCharacter: (id: string) => Promise<void>;
 	setCurrentPlace: (id: string) => Promise<void>;
-	setCurrentObject: (id: string) => Promise<void>;
+	setCurrentWorldItem: (id: string) => Promise<void>;
 	setCurrentConcept: (id: string) => Promise<void>;
 	setCurrentPrompt: (id: string) => Promise<void>;
 	setCurrentNote: (id: string) => Promise<void>;
@@ -173,7 +173,7 @@ const initialState: FileManagerState = {
 	currentAlbumId: null,
 	currentCharacterId: null,
 	currentPlaceId: null,
-	currentObjectId: null,
+	currentWorldItemId: null,
 	currentConceptId: null,
 	currentPromptId: null,
 	currentNoteId: null,
@@ -183,7 +183,7 @@ const initialState: FileManagerState = {
 	currentAlbum: null,
 	currentCharacter: null,
 	currentPlace: null,
-	currentObject: null,
+	currentWorldItem: null,
 	currentConcept: null,
 	currentPrompt: null,
 	currentNote: null,
@@ -195,7 +195,7 @@ const initialState: FileManagerState = {
 	albums: [],
 	characters: [],
 	places: [],
-	objects: [],
+	worldItems: [],
 	concepts: [],
 	prompts: [],
 	notes: [],
@@ -216,7 +216,7 @@ const initialState: FileManagerState = {
 	setCurrentAlbum: async () => {},
 	setCurrentCharacter: async () => {},
 	setCurrentPlace: async () => {},
-	setCurrentObject: async () => {},
+	setCurrentWorldItem: async () => {},
 	setCurrentConcept: async () => {},
 	setCurrentPrompt: async () => {},
 	setCurrentNote: async () => {},
@@ -239,7 +239,7 @@ type PartialFileItem = Partial<FileItem> & {
 	albums?: Array<{ id: string; name?: string }> | string[];
 	characters?: Array<{ id: string; name?: string }> | string[];
 	places?: Array<{ id: string; name?: string }> | string[];
-	objects?: Array<{ id: string; name?: string }> | string[];
+	worldItems?: Array<{ id: string; name?: string }> | string[];
 };
 
 // Función auxiliar para validar tipos de datos
@@ -298,7 +298,7 @@ const validateDataTypes = (item: PartialFileItem): void => {
 	validateArray(item.albums, 'albums');
 	validateArray(item.characters, 'characters');
 	validateArray(item.places, 'places');
-	validateArray(item.objects, 'objects');
+	validateArray(item.worldItems, 'worldItems');
 };
 
 // Función auxiliar para validar datos requeridos
@@ -346,7 +346,7 @@ const transformToFileItem = (rawItem: PartialFileItem): FileItem => {
 			albums: rawItem.albums,
 			characters: rawItem.characters,
 			places: rawItem.places,
-			objects: rawItem.objects,
+			worldItems: rawItem.worldItems,
 			hash: rawItem.hash,
 			stats: rawItem.stats,
 		};
@@ -394,8 +394,8 @@ const transformToFileItem = (rawItem: PartialFileItem): FileItem => {
 			places: Array.isArray(item.places)
 				? item.places.map((p) => (typeof p === 'string' ? { id: p, name: p } : { id: p.id, name: p.name || p.id }))
 				: [],
-			objects: Array.isArray(item.objects)
-				? item.objects.map((o) => (typeof o === 'string' ? { id: o, name: o } : { id: o.id, name: o.name || o.id }))
+			worldItems: Array.isArray(item.worldItems)
+				? item.worldItems.map((w) => (typeof w === 'string' ? { id: w, name: w } : { id: w.id, name: w.name || w.id }))
 				: [],
 		};
 
@@ -424,7 +424,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				albums: stats.albums || [],
 				characters: stats.characters || [],
 				places: stats.places || [],
-				objects: stats.objects || [],
+				worldItems: stats.worldItems || [],
 				concepts: stats.concepts || [],
 				prompts: stats.prompts || [],
 				notes: stats.notes || [],
@@ -556,8 +556,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlace: null,
 				currentPlaceId: null,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -606,8 +606,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlace: null,
 				currentPlaceId: null,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -655,8 +655,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlace: null,
 				currentPlaceId: null,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -704,8 +704,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacterId: null,
 				currentPlace: null,
 				currentPlaceId: null,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -753,8 +753,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: character,
 				currentPlace: null,
 				currentPlaceId: null,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -802,8 +802,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlaceId: id,
 				currentPlace: place,
-				currentObject: null,
-				currentObjectId: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -831,11 +831,11 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 		}
 	},
 
-	setCurrentObject: async (id: string) => {
+	setCurrentWorldItem: async (id: string) => {
 		try {
-			fileManagerLogger.info('🧸 Cambiando a objeto:', id);
+			fileManagerLogger.info('�� Cambiando a objeto:', id);
 			const state = get();
-			const object = state.objects.find((o) => o.id === id) || null;
+			const worldItem = state.worldItems.find((w) => w.id === id) || null;
 			state.clearSelection();
 
 			set({
@@ -851,8 +851,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlaceId: null,
 				currentPlace: null,
-				currentObjectId: id,
-				currentObject: object,
+				currentWorldItemId: id,
+				currentWorldItem: worldItem,
 				currentConcept: null,
 				currentConceptId: null,
 				currentPrompt: null,
@@ -864,7 +864,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 			});
 
 			// Las imágenes ya vienen transformadas
-			const images = await getObjectImages(id);
+			const images = await getWorldItemImages(id);
 
 			set({
 				currentItems: images,
@@ -900,8 +900,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlaceId: null,
 				currentPlace: null,
-				currentObjectId: null,
-				currentObject: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConceptId: id,
 				currentConcept: concept,
 				currentPrompt: null,
@@ -949,8 +949,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlaceId: null,
 				currentPlace: null,
-				currentObjectId: null,
-				currentObject: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConceptId: null,
 				currentConcept: null,
 				currentPromptId: id,
@@ -998,8 +998,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentCharacter: null,
 				currentPlaceId: null,
 				currentPlace: null,
-				currentObjectId: null,
-				currentObject: null,
+				currentWorldItem: null,
+				currentWorldItemId: null,
 				currentConceptId: null,
 				currentConcept: null,
 				currentPromptId: null,

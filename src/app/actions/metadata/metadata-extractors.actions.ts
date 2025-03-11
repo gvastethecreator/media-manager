@@ -3,11 +3,16 @@
 import { type Stats, statSync } from 'fs';
 import * as fs from 'node:fs/promises';
 import { CacheManager } from '@/lib/cache';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
-import { parseExifData, parseMetadataString, parseSharpMetadata } from './metadata-parsers.actions';
+import {
+	getAIGenerationInfo,
+	parseExifData,
+	parseMetadataString,
+	parseSharpMetadata,
+} from './metadata-parsers.actions';
 import {
 	type ExtendedFileMetadata,
 	type ImageFormat,
@@ -312,6 +317,18 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 				width: 800,
 				height: 600,
 			};
+		}
+
+		// Después de procesar todos los metadatos, buscar específicamente información de generación por IA
+		// si aún no se ha encontrado
+		if (!metadata.generation && Object.keys(metadata).length > 0) {
+			const aiGenerationInfo = await getAIGenerationInfo(metadata);
+			if (aiGenerationInfo) {
+				metadata.generation = aiGenerationInfo;
+				extractorLogger.debug('Encontrada información de generación por IA', {
+					type: aiGenerationInfo.type,
+				});
+			}
 		}
 
 		// Guardar en caché usando la ruta normalizada

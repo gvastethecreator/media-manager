@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-import { logger } from './logger';
+import { logger } from './logger/logger';
 
 const thumbLogger = logger.withContext('Thumbnails');
 

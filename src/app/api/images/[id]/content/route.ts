@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import type { FileMetadata } from '@/types/file-item';
 import { headers } from 'next/headers';

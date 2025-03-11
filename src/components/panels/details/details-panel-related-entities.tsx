@@ -48,11 +48,11 @@ export function RelatedEntities({ item }: ItemComponentProps) {
 						value={`${item.places.length} ${item.places.length === 1 ? 'lugar' : 'lugares'}`}
 					/>
 				)}
-				{item.objects?.length > 0 && (
+				{item.worldItems?.length > 0 && (
 					<InfoItem
 						icon={<HardDrive className="h-3.5 w-3.5 text-indigo-400" />}
 						label="Objetos"
-						value={`${item.objects.length} ${item.objects.length === 1 ? 'objeto' : 'objetos'}`}
+						value={`${item.worldItems.length} ${item.worldItems.length === 1 ? 'objeto' : 'objetos'}`}
 					/>
 				)}
 			</div>

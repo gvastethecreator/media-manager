@@ -7,8 +7,8 @@ import {
 	getActiveProfile,
 	getProfiles,
 	updateProfile as updateProfileAction,
-} from '../app/actions/profile.actions';
-import { logger } from '../lib/logger';
+} from '../app/actions/profiles/profile.actions';
+import { logger } from '../lib/logger/logger';
 import type { ProfileCreate, ProfileUpdate, ProfileWithStats } from '../services/profile.service';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity, BaseStore, ExtendedStore } from './types';

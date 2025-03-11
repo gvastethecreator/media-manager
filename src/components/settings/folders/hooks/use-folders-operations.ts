@@ -3,7 +3,7 @@
 import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
 import { useToast } from '@/components/ui/use-toast';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { useCallback } from 'react';
 
 const operationsLogger = logger.withContext('FoldersOperations');

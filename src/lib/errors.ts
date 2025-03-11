@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { logger } from './logger';
+import { logger } from './logger/logger';
 
 const _errorLogger = logger.withContext('ErrorHandler');
 

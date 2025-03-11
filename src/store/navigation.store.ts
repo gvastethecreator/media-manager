@@ -1,35 +1,5 @@
+import type { ViewType } from '@/types/file-item';
 import { create } from 'zustand';
-
-export type ViewType =
-	| 'all-images'
-	| 'favorites'
-	| 'collections'
-	| 'collection-content'
-	| 'folders'
-	| 'folder-content'
-	| 'tags'
-	| 'tag-content'
-	| 'search'
-	| 'files'
-	| 'settings'
-	| 'development'
-	| 'loading'
-	| 'albums'
-	| 'album-content'
-	| 'characters'
-	| 'character-content'
-	| 'places'
-	| 'place-content'
-	| 'objects'
-	| 'object-content'
-	| 'concepts'
-	| 'concept-content'
-	| 'prompts'
-	| 'prompt-content'
-	| 'notes'
-	| 'note-content'
-	| 'uploaded-images'
-	| 'uploaded-image-content';
 
 interface NavigationState {
 	currentView: ViewType;

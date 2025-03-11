@@ -1,6 +1,7 @@
 ---
 description: Concise general web accessibility best practices, complementing Radix UI rules.
-globs: **/*.{ts,tsx,js,jsx}
+globs: *.{ts,tsx,js,jsx}
+alwaysApply: false
 ---
 - **Semantic HTML:** Use semantic HTML elements correctly for content structure.
 - **ARIA Attributes:** Utilize ARIA attributes appropriately for accessibility.

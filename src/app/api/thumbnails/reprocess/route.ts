@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import { ThumbnailQuality } from '@/types/thumbnails';

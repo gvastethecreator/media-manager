@@ -22,12 +22,10 @@ import * as React from 'react';
 
 import { FoldersSection } from './folders/folders-section';
 import { AlbumsSection } from './settings-sections/albums-section';
-import { AttributesSection } from './settings-sections/attributes-section';
 import { CharactersSection } from './settings-sections/characters-section';
 import { CollectionsSection } from './settings-sections/collections-section';
 import { ConceptsSection } from './settings-sections/concepts-section';
 import { NotesSection } from './settings-sections/notes-section';
-import { ObjectsSection } from './settings-sections/objects-section';
 import { PlacesSection } from './settings-sections/places-section';
 import { ProfilesSection } from './settings-sections/profiles-section';
 import { PromptsSection } from './settings-sections/prompts-section';
@@ -36,6 +34,7 @@ import { SystemSection } from './settings-sections/system-section';
 import { TagsSection } from './settings-sections/tags-section';
 import { ThumbnailsSection } from './settings-sections/thumbnails-section';
 import { UploadedImagesSection } from './settings-sections/uploaded-images-section';
+import { WorldItemsSection } from './settings-sections/world-items-section';
 
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState('system');
@@ -64,7 +63,7 @@ export function SettingsView() {
 							<UserIcon className="h-3 w-3 mr-1" /> Personas
 						</TabsTrigger>
 
-						<TabsTrigger value="objects" className="text-[9px]">
+						<TabsTrigger value="world-items" className="text-[9px]">
 							<BoxIcon className="h-3 w-3 mr-1" /> Objetos
 						</TabsTrigger>
 
@@ -82,10 +81,6 @@ export function SettingsView() {
 
 						<TabsTrigger value="notes" className="text-[9px]">
 							<StickyNoteIcon className="h-3 w-3 mr-1" /> Notas
-						</TabsTrigger>
-
-						<TabsTrigger value="attributes" className="text-[9px]">
-							<ListIcon className="h-3 w-3 mr-1" /> Atributos
 						</TabsTrigger>
 
 						<TabsTrigger value="thumbnails" className="text-[9px]">
@@ -126,8 +121,8 @@ export function SettingsView() {
 						<CharactersSection />
 					</TabsContent>
 
-					<TabsContent value="objects" className="px-2">
-						<ObjectsSection />
+					<TabsContent value="world-items" className="px-2">
+						<WorldItemsSection />
 					</TabsContent>
 
 					<TabsContent value="places" className="px-2">
@@ -146,10 +141,6 @@ export function SettingsView() {
 						<NotesSection />
 					</TabsContent>
 
-					<TabsContent value="attributes" className="px-2">
-						<AttributesSection />
-					</TabsContent>
-
 					<TabsContent value="thumbnails" className="space-y-4 px-1 pt-1">
 						<ThumbnailsSection />
 					</TabsContent>
@@ -160,6 +151,12 @@ export function SettingsView() {
 
 					<TabsContent value="shortcuts" className="space-y-4 px-1 pt-1">
 						<ShortcutsSection />
+					</TabsContent>
+
+					<TabsContent value="objects" className="px-2">
+						<div className="text-sm text-muted-foreground text-center py-4">
+							Esta sección ha sido migrada a "Objetos". Por favor, utilice la nueva sección.
+						</div>
 					</TabsContent>
 				</Tabs>
 			</ScrollArea>

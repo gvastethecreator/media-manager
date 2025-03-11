@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { revalidatePath } from 'next/cache';
 import { useOptimistic } from 'react';
 
@@ -16,6 +16,7 @@ export type EventType =
 	| 'characters:modified'
 	| 'places:modified'
 	| 'objects:modified'
+	| 'world-items:modified'
 	| 'favorites:modified'
 	| 'images:modified'
 	| 'files:modified'
@@ -29,6 +30,7 @@ export interface EventData<T = unknown> {
 	type: EventType;
 	id?: string;
 	objectId?: string;
+	worldItemId?: string;
 	imageId?: string;
 	data?: T;
 }
@@ -46,6 +48,7 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'characters:modified': ['/characters'],
 	'places:modified': ['/places'],
 	'objects:modified': ['/objects'],
+	'world-items:modified': ['/world-items'],
 	'favorites:modified': ['/favorites'],
 	'images:modified': ['/images'],
 	'files:modified': ['/files'],

@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { normalize, sep } from 'node:path';
-import { logger } from './logger';
+import { logger } from './logger/logger';
 
 const pathUtilsLogger = logger.withContext('PathUtils');
 

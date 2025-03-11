@@ -1,5 +1,5 @@
 import { processImage } from '@/lib/image-processing';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { UploadedImageType } from '@/types/entities/entities';
