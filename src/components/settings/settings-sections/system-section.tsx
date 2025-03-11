@@ -1,6 +1,10 @@
-'use client';
+"use client";
 
-import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system/system.actions';
+import {
+	getSystemStats,
+	repairSystem,
+	resetDatabase,
+} from "@/app/actions/system/system.actions";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,16 +15,23 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/components/ui/use-toast';
-import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { toastService } from "@/lib/services/toast.service";
+import {
+	Activity,
+	AlertCircle,
+	Database,
+	HardDrive,
+	RefreshCw,
+	Trash2,
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
 
 // Tipo para estadísticas del sistema
 interface SystemData {
@@ -35,7 +46,6 @@ interface SystemData {
 }
 
 export function SystemSection() {
-	const { toast } = useToast();
 	const [systemData, setSystemData] = useState<SystemData>({
 		cpuUsage: 0,
 		memoryUsage: 0,
@@ -43,8 +53,8 @@ export function SystemSection() {
 		dbSize: 0,
 		totalEntities: 0,
 		uptime: 0,
-		nodeVersion: '',
-		hostname: '',
+		nodeVersion: "",
+		hostname: "",
 	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [isRepairing, setIsRepairing] = useState(false);
@@ -57,16 +67,12 @@ export function SystemSection() {
 			const stats = await getSystemStats();
 			setSystemData(stats);
 		} catch (error) {
-			console.error('Error al cargar estadísticas del sistema:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudieron cargar las estadísticas del sistema',
-				variant: 'destructive',
-			});
+			console.error("Error al cargar estadísticas del sistema:", error);
+			toastService.error("No se pudieron cargar las estadísticas del sistema");
 		} finally {
 			setIsLoading(false);
 		}
-	}, [toast]);
+	}, []);
 
 	// Cargar datos inicialmente
 	useEffect(() => {
@@ -87,27 +93,16 @@ export function SystemSection() {
 			const result = await repairSystem();
 
 			if (result.success) {
-				toast({
-					title: 'Sistema reparado',
-					description: result.message,
-				});
+				toastService.success(result.message);
 
 				// Recargar estadísticas tras la reparación
 				loadSystemStats();
 			} else {
-				toast({
-					title: 'Error',
-					description: result.message,
-					variant: 'destructive',
-				});
+				toastService.error(result.message);
 			}
 		} catch (error) {
-			console.error('Error al reparar el sistema:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo completar la reparación del sistema',
-				variant: 'destructive',
-			});
+			console.error("Error al reparar el sistema:", error);
+			toastService.error("No se pudo completar la reparación del sistema");
 		} finally {
 			setIsRepairing(false);
 		}
@@ -120,27 +115,16 @@ export function SystemSection() {
 			const result = await resetDatabase();
 
 			if (result.success) {
-				toast({
-					title: 'Base de datos reseteada',
-					description: result.message,
-				});
+				toastService.success(result.message);
 
 				// Recargar estadísticas tras el reseteo
 				loadSystemStats();
 			} else {
-				toast({
-					title: 'Error',
-					description: result.message,
-					variant: 'destructive',
-				});
+				toastService.error(result.message);
 			}
 		} catch (error) {
-			console.error('Error al resetear la base de datos:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo completar el reseteo de la base de datos',
-				variant: 'destructive',
-			});
+			console.error("Error al resetear la base de datos:", error);
+			toastService.error("No se pudo completar el reseteo de la base de datos");
 		} finally {
 			setIsResetting(false);
 		}
@@ -153,8 +137,16 @@ export function SystemSection() {
 					<span className="flex items-center gap-2 h-7">
 						<Activity className="h-5 w-5" /> Estado del Sistema
 					</span>
-					<Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={loadSystemStats} disabled={isLoading}>
-						<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+					<Button
+						variant="ghost"
+						size="sm"
+						className="h-7 w-7 p-0"
+						onClick={loadSystemStats}
+						disabled={isLoading}
+					>
+						<RefreshCw
+							className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+						/>
 						<span className="sr-only">Actualizar</span>
 					</Button>
 				</CardTitle>
@@ -175,7 +167,10 @@ export function SystemSection() {
 									<Activity className="h-3.5 w-3.5 text-muted-foreground" />
 									<span className="text-xs">CPU</span>
 								</div>
-								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] font-mono h-4 px-1"
+								>
 									{systemData.cpuUsage}%
 								</Badge>
 							</div>
@@ -188,7 +183,10 @@ export function SystemSection() {
 									<HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
 									<span className="text-xs">Memoria</span>
 								</div>
-								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] font-mono h-4 px-1"
+								>
 									{systemData.memoryUsage}%
 								</Badge>
 							</div>
@@ -201,11 +199,18 @@ export function SystemSection() {
 									<Database className="h-3.5 w-3.5 text-muted-foreground" />
 									<span className="text-xs">Caché</span>
 								</div>
-								<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] font-mono h-4 px-1"
+								>
 									{systemData.cacheSize}MB
 								</Badge>
 							</div>
-							<Progress value={(systemData.cacheSize / 1000) * 100} max={100} className="h-1" />
+							<Progress
+								value={(systemData.cacheSize / 1000) * 100}
+								max={100}
+								className="h-1"
+							/>
 						</div>
 
 						{/* Información adicional */}
@@ -216,7 +221,9 @@ export function SystemSection() {
 							</div>
 							<div className="flex justify-between">
 								<span>Tamaño DB:</span>
-								<span className="font-medium">{systemData.dbSize.toFixed(2)} MB</span>
+								<span className="font-medium">
+									{systemData.dbSize.toFixed(2)} MB
+								</span>
 							</div>
 							<div className="flex justify-between">
 								<span>Uptime:</span>
@@ -247,17 +254,25 @@ export function SystemSection() {
 								<RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
 								<div>
 									<span className="text-xs font-medium">Reparar sistema</span>
-									<p className="text-[10px] text-muted-foreground">Corrige problemas comunes</p>
+									<p className="text-[10px] text-muted-foreground">
+										Corrige problemas comunes
+									</p>
 								</div>
 							</div>
-							<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleRepair} disabled={isRepairing}>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={handleRepair}
+								disabled={isRepairing}
+							>
 								{isRepairing ? (
 									<>
 										<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
 										Reparando...
 									</>
 								) : (
-									'Reparar'
+									"Reparar"
 								)}
 							</Button>
 						</div>
@@ -271,11 +286,19 @@ export function SystemSection() {
 									<div className="flex items-center gap-2">
 										<Trash2 className="h-3.5 w-3.5 text-destructive" />
 										<div>
-											<span className="text-xs font-medium">Resetear base de datos</span>
-											<p className="text-[10px] text-muted-foreground">Elimina todos los datos</p>
+											<span className="text-xs font-medium">
+												Resetear base de datos
+											</span>
+											<p className="text-[10px] text-muted-foreground">
+												Elimina todos los datos
+											</p>
 										</div>
 									</div>
-									<Button variant="destructive" size="sm" className="h-7 text-xs">
+									<Button
+										variant="destructive"
+										size="sm"
+										className="h-7 text-xs"
+									>
 										Resetear
 									</Button>
 								</motion.div>
@@ -287,11 +310,14 @@ export function SystemSection() {
 										¿Estás seguro?
 									</AlertDialogTitle>
 									<AlertDialogDescription className="text-xs">
-										Esta acción no se puede deshacer. Se eliminarán permanentemente todos los datos de la base de datos.
+										Esta acción no se puede deshacer. Se eliminarán
+										permanentemente todos los datos de la base de datos.
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
-									<AlertDialogCancel className="h-8 text-xs">Cancelar</AlertDialogCancel>
+									<AlertDialogCancel className="h-8 text-xs">
+										Cancelar
+									</AlertDialogCancel>
 									<AlertDialogAction
 										className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
 										onClick={handleReset}
@@ -303,7 +329,7 @@ export function SystemSection() {
 												Eliminando...
 											</>
 										) : (
-											'Eliminar'
+											"Eliminar"
 										)}
 									</AlertDialogAction>
 								</AlertDialogFooter>

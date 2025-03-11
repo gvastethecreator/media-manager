@@ -1,9 +1,17 @@
 'use client';
 
-import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
+import {
+	createFolder,
+	deleteFolder,
+	reindexAllFolders,
+	reindexFolder,
+	updateFolderAutoReindex,
+} from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { useToast } from '@/components/ui/use-toast';
+import { clearMetadataCache } from '@/app/actions/metadata';
 import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
+import { folderService } from '@/services/folder.service';
 import { useCallback } from 'react';
 
 const operationsLogger = logger.withContext('FoldersOperations');
@@ -24,8 +32,6 @@ export function useFoldersOperations({
 	onError,
 	onReindexAllStart,
 }: UseOperationsOptions) {
-	const { toast } = useToast();
-
 	// Añadir una nueva carpeta
 	const handleAddFolder = useCallback(
 		async (folderPath: string) => {
@@ -41,23 +47,16 @@ export function useFoldersOperations({
 				operationsLogger.info('✅ Carpeta agregada correctamente:', result);
 				await onLoadData(); // Recargar datos
 
-				toast({
-					title: 'Carpeta agregada',
-					description: `La carpeta ${result.name} se ha agregado correctamente`,
-				});
+				toastService.success(`La carpeta ${result.name} se ha agregado correctamente`);
 			} catch (error) {
 				operationsLogger.error('❌ Error al agregar carpeta:', error);
 
 				onError(error instanceof Error ? error.message : 'Error desconocido');
 
-				toast({
-					title: 'Error al agregar carpeta',
-					description: error instanceof Error ? error.message : 'Error desconocido',
-					variant: 'destructive',
-				});
+				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[toast, onStartProcessing, onLoadData, onError]
+		[onStartProcessing, onLoadData, onError]
 	);
 
 	// Reindexar una carpeta
@@ -78,14 +77,10 @@ export function useFoldersOperations({
 
 				onError(error instanceof Error ? error.message : 'Error desconocido');
 
-				toast({
-					title: 'Error al reindexar carpeta',
-					description: error instanceof Error ? error.message : 'Error desconocido',
-					variant: 'destructive',
-				});
+				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[toast, onStartProcessing, onError]
+		[onStartProcessing, onError]
 	);
 
 	// Eliminar una carpeta
@@ -100,23 +95,16 @@ export function useFoldersOperations({
 				// Recargar datos
 				await onLoadData();
 
-				toast({
-					title: 'Carpeta eliminada',
-					description: 'La carpeta ha sido eliminada correctamente',
-				});
+				toastService.success('La carpeta ha sido eliminada correctamente');
 			} catch (error) {
 				operationsLogger.error('❌ Error al eliminar carpeta:', error);
 
 				onError(error instanceof Error ? error.message : 'Error desconocido');
 
-				toast({
-					title: 'Error al eliminar carpeta',
-					description: error instanceof Error ? error.message : 'Error desconocido',
-					variant: 'destructive',
-				});
+				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[toast, onLoadData, onError]
+		[onLoadData, onError]
 	);
 
 	// Actualizar configuración de autoreindexado
@@ -131,23 +119,16 @@ export function useFoldersOperations({
 				// Recargar datos
 				await onLoadData();
 
-				toast({
-					title: 'Configuración actualizada',
-					description: `Auto-reindexado ${value ? 'activado' : 'desactivado'}`,
-				});
+				toastService.success(`Auto-reindexado ${value ? 'activado' : 'desactivado'}`);
 			} catch (error) {
 				operationsLogger.error('❌ Error al actualizar auto-reindexado:', error);
 
 				onError(error instanceof Error ? error.message : 'Error desconocido');
 
-				toast({
-					title: 'Error al actualizar configuración',
-					description: error instanceof Error ? error.message : 'Error desconocido',
-					variant: 'destructive',
-				});
+				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[toast, onLoadData, onError]
+		[onLoadData, onError]
 	);
 
 	// Reindexar todas las carpetas
@@ -158,43 +139,36 @@ export function useFoldersOperations({
 			// Notificar inicio del proceso global
 			onReindexAllStart();
 
-			// Nota: La acción real se ejecutará en handleConfirmReindexAll
-			// Esta función solo prepara la UI
+			// La acción real se ejecutará en handleConfirmReindexAll en useFolders
 		} catch (error) {
 			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
 
 			onError(error instanceof Error ? error.message : 'Error desconocido');
 
-			toast({
-				title: 'Error al iniciar reindexación',
-				description: error instanceof Error ? error.message : 'Error desconocido',
-				variant: 'destructive',
-			});
+			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 		}
-	}, [toast, onReindexAllStart, onError]);
+	}, [onReindexAllStart, onError]);
 
 	// Limpiar caché
 	const handleClearCache = useCallback(async () => {
 		try {
 			operationsLogger.info('🧹 Limpiando caché de metadatos');
 
-			// Esta función sería implementada según necesidades específicas
-			toast({
-				title: 'Cache limpiada',
-				description: 'El caché de metadatos ha sido limpiado correctamente',
-			});
+			// Llamar a la acción del servidor para limpiar la caché
+			await clearMetadataCache();
+
+			// Recargar datos después de limpiar la caché
+			await onLoadData();
+
+			toastService.success('El caché de metadatos ha sido limpiado correctamente');
 		} catch (error) {
 			operationsLogger.error('❌ Error al limpiar caché:', error);
 
 			onError(error instanceof Error ? error.message : 'Error desconocido');
 
-			toast({
-				title: 'Error al limpiar caché',
-				description: error instanceof Error ? error.message : 'Error desconocido',
-				variant: 'destructive',
-			});
+			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 		}
-	}, [toast, onError]);
+	}, [onError, onLoadData]);
 
 	return {
 		handleAddFolder,

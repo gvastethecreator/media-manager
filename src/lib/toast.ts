@@ -1,3 +1,18 @@
+/**
+ * @deprecated Utiliza el nuevo servicio de notificaciones en src/lib/services/toast.service.ts
+ * Este archivo se mantiene por compatibilidad con el código existente
+ */
+
+import { toastService as newToastService } from '@/lib/services/toast.service';
+
+// Re-exportamos el servicio para mantener compatibilidad
+export { newToastService as toastService };
+
+// Exportamos el servicio por defecto para mantener compatibilidad
+export default newToastService;
+
+// El código antiguo se mantiene comentado para referencia
+/*
 import { toast } from '@/components/ui/use-toast';
 
 const TOAST_TYPES = {
@@ -164,3 +179,4 @@ export const toastService = {
 			}),
 	},
 };
+*/

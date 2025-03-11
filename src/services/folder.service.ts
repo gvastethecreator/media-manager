@@ -27,9 +27,9 @@ export enum FOLDER_EVENTS {
 	INDEXING_FILE = 'folder:indexing:file',
 	INDEXING_ERROR = 'folder:indexing:error',
 	INDEXING_COMPLETE = 'folder:indexing:complete',
-	REINDEX_ALL_START = 'folder:reindex:all:start',
-	REINDEX_ALL_PROGRESS = 'folder:reindex:all:progress',
-	REINDEX_ALL_COMPLETE = 'folder:reindex:all:complete',
+	REINDEX_ALL_START = 'folder:reindexAll:start',
+	REINDEX_ALL_PROGRESS = 'folder:reindexAll:progress',
+	REINDEX_ALL_COMPLETE = 'folder:reindexAll:complete',
 }
 
 // Debounce function para promesas con tipos específicos

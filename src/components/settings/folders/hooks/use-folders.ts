@@ -1,8 +1,9 @@
 'use client';
 
+import { reindexAllFolders } from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { useToast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
 import type { FolderStats } from '@/types/entities/folders';
 import type {
 	ErrorResponse,
@@ -113,6 +114,9 @@ export function useFolders() {
 					setProcessProgress(0);
 				}
 			}
+
+			// Mostrar notificación de error
+			toastService.error(errorData.message || 'Error desconocido al procesar la carpeta');
 		},
 		[updateFolder, processStatus.folderId]
 	);
@@ -174,6 +178,7 @@ export function useFolders() {
 				// Si tenemos el ID de la carpeta, marcarla como completada
 				if (status.folderId) {
 					handleProcessComplete(status.folderId);
+					toastService.success('Proceso completado correctamente');
 				}
 			}
 		},
@@ -323,10 +328,41 @@ export function useFolders() {
 
 	// Manejador para confirmar reindexación global
 	const handleConfirmReindexAll = useCallback(async () => {
-		// Esta función sería implementada según necesidades específicas
-		setReindexAllDialogOpen(false);
-		setShowReindexDialog(false);
-	}, []);
+		try {
+			folderLogger.info('🔄 Confirmando reindexación global');
+
+			// Cerrar diálogos
+			setReindexAllDialogOpen(false);
+			setShowReindexDialog(false);
+
+			// Establecer estado de procesamiento global
+			setGlobalReindexStatus({
+				...initialGlobalReindexStatus,
+				isProcessing: true,
+				progress: 0,
+				phase: 'preparing',
+				status: 'Preparando reindexación global...',
+				startTime: Date.now(),
+			});
+
+			// Llamar a la acción del servidor para reindexar todas las carpetas
+			await reindexAllFolders();
+
+			// Nota: Los eventos del servidor actualizarán el estado y mostrarán el progreso
+		} catch (error) {
+			folderLogger.error('❌ Error en reindexación global:', error);
+
+			// Actualizar estado global
+			setGlobalReindexStatus({
+				...initialGlobalReindexStatus,
+				isProcessing: false,
+				errors: [{ error: error instanceof Error ? error.message : 'Error desconocido' }],
+			});
+
+			// Mostrar error
+			setError(error instanceof Error ? error.message : 'Error en la reindexación global');
+		}
+	}, [setReindexAllDialogOpen, setShowReindexDialog, setGlobalReindexStatus, setError]);
 
 	// Cargar datos iniciales
 	useEffect(() => {
