@@ -37,26 +37,29 @@ const useBaseProfileStore = createStoreFactory<ProfileWithStats, ProfileState, P
 			lastSelectedItem: null,
 		},
 		actions: {
-			beforeCreate: async (data) => {
+			beforeCreate: async <C>(data: C) => {
 				// Validar datos antes de crear
-				if (!data.name?.trim()) {
+				const profileData = data as unknown as ProfileCreate;
+				if (!profileData.name?.trim()) {
 					throw new Error('El nombre es requerido');
 				}
+
 				return {
 					...data,
-					emoji: data.emoji || '👤',
-					color: data.color || '#3b82f6',
-					theme: data.theme || 'system',
-					language: data.language || 'es',
+					emoji: profileData.emoji || '👤',
+					color: profileData.color || '#3b82f6',
+					theme: profileData.theme || 'system',
+					language: profileData.language || 'es',
 					isActive: false,
-				};
+				} as C;
 			},
 			afterCreate: async (profile) => {
 				profileLogger.info('Perfil creado exitosamente', { profile });
 			},
-			beforeUpdate: async (_id, data) => {
+			beforeUpdate: async <U>(_id: string, data: U) => {
 				// Validar datos antes de actualizar
-				if (data.name !== undefined && !data.name.trim()) {
+				const profileData = data as unknown as ProfileUpdate;
+				if (profileData.name !== undefined && !profileData.name.trim()) {
 					throw new Error('El nombre no puede estar vacío');
 				}
 				return data;

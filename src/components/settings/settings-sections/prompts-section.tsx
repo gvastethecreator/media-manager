@@ -1,18 +1,32 @@
 'use client';
 
-import { PromptCard } from '@/components/features/entity-cards/cards/prompt-card';
-import { PromptForm } from '@/components/features/entity-cards/forms/prompt-form';
+import { PromptCard } from '@/components/features/entity-cards/prompt/prompt-card';
+import { PromptForm } from '@/components/features/entity-cards/prompt/prompt-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/use-toast';
-import { calculateStats } from '@/lib/entity.utils';
 import { logger } from '@/lib/logger/logger';
-import { type PromptFormData, usePromptStore } from '@/store/entities/prompt.store';
+import { usePromptStore } from '@/store/entities/prompt.store';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
+
+// Definición local del tipo PromptFormData para evitar problemas de incompatibilidad
+interface PromptFormData {
+	id?: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string;
+	content: string;
+	category: string;
+	parameters: Record<string, unknown>;
+	tags: string[];
+	featuredImage?: string | null;
+	isFavorite: boolean;
+}
 
 const promptLogger = logger.withContext('PromptsSection');
 
@@ -28,7 +42,17 @@ export function PromptsSection() {
 	const handleCreate = async (data: PromptFormData) => {
 		try {
 			promptLogger.info('✨ Creando nuevo prompt:', data);
-			await createPrompt(data);
+			await createPrompt({
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description || null,
+				content: data.content,
+				category: data.category,
+				parameters: JSON.stringify(data.parameters || {}),
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			toast({
 				title: 'Éxito',
 				description: 'Prompt creado correctamente',
@@ -49,7 +73,18 @@ export function PromptsSection() {
 		}
 		try {
 			promptLogger.info('💾 Actualizando prompt:', data);
-			await updatePrompt(editingId, data);
+			await updatePrompt(editingId, {
+				id: editingId,
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description || null,
+				content: data.content,
+				category: data.category,
+				parameters: JSON.stringify(data.parameters || {}),
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			setEditingId(null);
 			toast({
 				title: 'Éxito',
@@ -87,7 +122,64 @@ export function PromptsSection() {
 	};
 
 	// Calcular estadísticas
-	const stats = React.useMemo(() => calculateStats(prompts), [prompts]);
+	const stats = React.useMemo(() => {
+		// Versión simplificada de estadísticas para evitar problemas de tipo
+		if (!prompts.length) {
+			return {
+				totalItems: 0,
+				totalImages: 0,
+				totalSize: 0,
+				distribution: [],
+				recentItems: [],
+				lastUpdated: undefined,
+				// Base stats
+				total: 0,
+				active: 0,
+				favorite: 0,
+				archived: 0,
+			};
+		}
+
+		const totalImages = prompts.reduce((acc, prompt) => {
+			// Suma todas las referencias a otras entidades
+			const count = prompt._count
+				? prompt._count.concepts + prompt._count.notes + prompt._count.characters + prompt._count.places
+				: 0;
+			return acc + count;
+		}, 0);
+
+		// Para totalSize, usar solo prompts con propiedad calculada
+		const totalSize = prompts.reduce((acc, prompt) => {
+			// Se asume que totalSize no es una propiedad estándar
+			const promptWithSize = prompt as typeof prompt & { totalSize?: number };
+			return acc + (promptWithSize.totalSize || 0);
+		}, 0);
+
+		// Obtener prompts recientes
+		const recentPrompts = [...prompts]
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.slice(0, 5)
+			.map((prompt) => ({
+				id: prompt.id,
+				name: prompt.name,
+				emoji: prompt.emoji,
+				count: 0, // Para mantener la compatibilidad
+			}));
+
+		return {
+			totalItems: prompts.length,
+			totalImages,
+			totalSize,
+			distribution: [],
+			recentItems: recentPrompts,
+			lastUpdated: new Date(),
+			// Base stats
+			total: prompts.length,
+			active: prompts.length,
+			favorite: prompts.filter((prompt) => prompt.isFavorite).length,
+			archived: 0,
+		};
+	}, [prompts]);
 
 	return (
 		<div className="space-y-6">
@@ -100,7 +192,12 @@ export function PromptsSection() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<PromptForm onSubmit={handleCreate} isLoading={isLoading} />
+						<PromptForm
+							onSubmit={(data) => {
+								void handleCreate(data as PromptFormData);
+							}}
+							isLoading={isLoading}
+						/>
 					</CardContent>
 				</Card>
 
@@ -131,7 +228,9 @@ export function PromptsSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">{error.message}</p>
+							<p className="text-sm text-muted-foreground text-center">
+								{typeof error === 'string' ? error : (error as Error).message}
+							</p>
 							<Button variant="outline" size="sm" onClick={() => loadPrompts()}>
 								Reintentar
 							</Button>
@@ -162,21 +261,40 @@ export function PromptsSection() {
 												<CardContent className="p-4">
 													<PromptForm
 														initialData={{
-															id: prompt.id,
 															name: prompt.name,
-															description: prompt.description || undefined,
+															description: prompt.description || '',
+															emoji: prompt.emoji,
+															color: prompt.color,
 															content: prompt.content,
-															type: prompt.type,
-															tags: prompt.tags,
+															category: prompt.category || '',
+															parameters: prompt.parameters ? JSON.parse(prompt.parameters) : {},
+															tags: prompt.tags ? prompt.tags.split(',').filter(Boolean) : [],
+															featuredImage: prompt.featuredImage,
+															isFavorite: prompt.isFavorite,
 														}}
-														onSubmit={handleUpdate}
+														onSubmit={(data) => {
+															void handleUpdate({
+																...data,
+																id: prompt.id,
+															} as PromptFormData);
+														}}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}
 													/>
 												</CardContent>
 											</Card>
 										) : (
-											<PromptCard prompt={prompt} onEdit={() => setEditingId(prompt.id)} onDelete={handleDelete} />
+											<PromptCard
+												data={{
+													...prompt,
+													// Asegurarse de que se adapta a lo que espera el PromptCard
+													tags: prompt.tags || '',
+													content: prompt.content || '',
+													category: prompt.category || '',
+												}}
+												onEdit={() => setEditingId(prompt.id)}
+												onDelete={handleDelete}
+											/>
 										)}
 									</motion.div>
 								))}

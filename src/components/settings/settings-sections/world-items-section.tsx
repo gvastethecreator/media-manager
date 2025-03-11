@@ -1,12 +1,13 @@
 'use client';
 
-import { WorldItemCard } from '@/components/features/entity-cards/cards/world-item-card';
+import type { WorldItemCreate, WorldItemUpdate } from '@/app/actions/world-items/world-item.actions';
 import {
 	type WorldItemFormData,
-	formDataToWorldItem,
+	formDataToWorldItem as importedFormDataToWorldItem,
 	worldItemToFormData,
-} from '@/components/features/entity-cards/forms/entity-types';
-import { WorldItemForm } from '@/components/features/entity-cards/forms/world-item-form';
+} from '@/components/features/entity-cards/entity-types';
+import { WorldItemCard } from '@/components/features/entity-cards/world-item/world-item-card';
+import { WorldItemForm } from '@/components/features/entity-cards/world-item/world-item-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,24 @@ import { motion } from 'motion/react';
 import * as React from 'react';
 
 const worldItemLogger = logger.withContext('WorldItemsSection');
+
+// Versión corregida de formDataToWorldItem para la sección
+const formDataToWorldItem = (data: WorldItemFormData): WorldItemCreate => {
+	return {
+		name: data.name,
+		emoji: data.emoji,
+		color: data.color,
+		description: data.description || null,
+		category: data.category || undefined,
+		type: data.type || null,
+		rarity: data.rarity || null,
+		properties: data.properties,
+		requirements: data.requirements,
+		origin: data.origin || null,
+		stats: data.stats,
+		featuredImage: data.featuredImage || null,
+	};
+};
 
 export function WorldItemsSection() {
 	const { worldItems, isLoading, error, loadWorldItems, createWorldItem, updateWorldItem, deleteWorldItem } =
@@ -45,7 +64,8 @@ export function WorldItemsSection() {
 		// Calcular distribución por categoría
 		const categoryDistribution = worldItems.reduce(
 			(acc, item) => {
-				const category = item.category || 'Sin categoría';
+				// Verificar si 'category' existe, aunque TypeScript no lo reconozca
+				const category = (item as { category?: string }).category || 'Sin categoría';
 				acc[category] = (acc[category] || 0) + 1;
 				return acc;
 			},
@@ -101,11 +121,34 @@ export function WorldItemsSection() {
 
 	const handleUpdate = async (data: WorldItemFormData) => {
 		if (!data.id) {
+			worldItemLogger.error('❌ Error actualizando objeto del mundo: ID no proporcionado');
+			toast({
+				title: 'Error al actualizar objeto del mundo',
+				description: 'ID no proporcionado',
+				variant: 'destructive',
+			});
 			return;
 		}
+
 		try {
-			worldItemLogger.info('🎯 Actualizando objeto del mundo:', data.name);
-			await updateWorldItem(data.id, formDataToWorldItem(data));
+			worldItemLogger.info('🎯 Actualizando objeto del mundo:', data);
+			const baseData = formDataToWorldItem(data);
+			const updateData: WorldItemUpdate = {
+				id: data.id,
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: baseData.description || undefined,
+				category: baseData.category || undefined,
+				type: baseData.type || undefined,
+				rarity: data.rarity || undefined,
+				properties: data.properties,
+				requirements: data.requirements,
+				origin: baseData.origin || undefined,
+				stats: data.stats,
+				featuredImage: baseData.featuredImage || undefined,
+			};
+			await updateWorldItem(data.id, updateData);
 			toast({
 				title: 'Objeto del mundo actualizado',
 				description: 'El objeto del mundo se ha actualizado correctamente.',

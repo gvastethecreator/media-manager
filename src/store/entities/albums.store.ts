@@ -9,7 +9,7 @@ import {
 	updateAlbum as updateAlbumAction,
 } from '@/app/actions/albums/album.actions';
 import { logger } from '@/lib/logger/logger';
-import { Album } from '@prisma/client';
+import type { Album } from '@prisma/client';
 import { create } from 'zustand';
 
 const albumsLogger = logger.withContext('AlbumsStore');
@@ -21,10 +21,10 @@ interface AlbumsStore {
 	isLoading: boolean;
 	error: string | null;
 	loadAlbums: () => Promise<void>;
-	createAlbum: (album: AlbumCreate) => Promise<void>;
+	createAlbum: (album: AlbumCreate) => Promise<Album | null>;
 	updateAlbum: (id: string, album: AlbumUpdate) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
-	addImageToAlbum: (albumId: string, imageId: string) => Promise<void>;
+	addImageToAlbum: (imageId: string, albumId: string) => Promise<void>;
 }
 
 export const useAlbumsStore = create<AlbumsStore>((set) => ({
@@ -48,14 +48,16 @@ export const useAlbumsStore = create<AlbumsStore>((set) => ({
 		try {
 			set({ isLoading: true, error: null });
 			albumsLogger.info('✨ Creando álbum:', album);
-			await createAlbumAction(album);
+			const createdAlbum = await createAlbumAction(album);
 			const albums = await getAlbums();
 			set({ albums, isLoading: false });
-			albumsLogger.info('✅ Álbum creado');
+			albumsLogger.info('✅ Álbum creado', createdAlbum);
+			return createdAlbum;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear álbum';
 			albumsLogger.error('❌ Error al crear álbum:', error);
 			set({ error: message, isLoading: false });
+			return null;
 		}
 	},
 	updateAlbum: async (id, album) => {
@@ -86,7 +88,7 @@ export const useAlbumsStore = create<AlbumsStore>((set) => ({
 			set({ error: message, isLoading: false });
 		}
 	},
-	addImageToAlbum: async (albumId, imageId) => {
+	addImageToAlbum: async (imageId, albumId) => {
 		try {
 			set({ isLoading: true, error: null });
 			albumsLogger.info('➕ Agregando imagen a álbum:', { albumId, imageId });

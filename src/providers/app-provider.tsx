@@ -1,6 +1,6 @@
 'use client';
 
-import { EntityDialogsProvider } from '@/components/features/entity-cards/dialogs/entity-dialogs-provider';
+import { EntityDialogsProvider } from '@/components/features/entity-cards/entity-dialogs-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { FileProvider, SettingsProvider } from '@/lib/contexts';
 import { CacheProvider } from '@/providers/cache-provider';

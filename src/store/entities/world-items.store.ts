@@ -9,7 +9,7 @@ import {
 	updateWorldItem as updateWorldItemAction,
 } from '@/app/actions/world-items/world-item.actions';
 import { logger } from '@/lib/logger/logger';
-import type { WorldItem as PrismaWorldItem } from '@prisma/client';
+import type { WorldItem } from '@prisma/client';
 import { create } from 'zustand';
 
 const worldItemsLogger = logger.withContext('WorldItemsStore');
@@ -26,10 +26,10 @@ interface WorldItemsStore {
 	isLoading: boolean;
 	error: string | null;
 	loadWorldItems: () => Promise<void>;
-	createWorldItem: (worldItem: WorldItemCreate) => Promise<void>;
+	createWorldItem: (worldItem: WorldItemCreate) => Promise<WorldItem | null>;
 	updateWorldItem: (id: string, worldItem: WorldItemUpdate) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
-	addImageToWorldItem: (worldItemId: string, imageId: string) => Promise<void>;
+	addImageToWorldItem: (imageId: string, worldItemId: string) => Promise<void>;
 }
 
 export const useWorldItemsStore = create<WorldItemsStore>((set) => ({
@@ -54,15 +54,17 @@ export const useWorldItemsStore = create<WorldItemsStore>((set) => ({
 		try {
 			set({ isLoading: true, error: null });
 			worldItemsLogger.info('✨ Creando objeto del mundo:', worldItem);
-			await createWorldItemAction(worldItem);
+			const createdWorldItem = await createWorldItemAction(worldItem);
 			const rawWorldItems = await getWorldItems();
 			const worldItems = rawWorldItems.map(mapToWorldItemWithStats);
 			set({ worldItems, isLoading: false });
-			worldItemsLogger.info('✅ Objeto del mundo creado');
+			worldItemsLogger.info('✅ Objeto del mundo creado', createdWorldItem);
+			return createdWorldItem;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear objeto del mundo';
 			worldItemsLogger.error('❌ Error al crear objeto del mundo:', error);
 			set({ error: message, isLoading: false });
+			return null;
 		}
 	},
 	updateWorldItem: async (id, worldItem) => {
@@ -95,7 +97,7 @@ export const useWorldItemsStore = create<WorldItemsStore>((set) => ({
 			set({ error: message, isLoading: false });
 		}
 	},
-	addImageToWorldItem: async (worldItemId, imageId) => {
+	addImageToWorldItem: async (imageId, worldItemId) => {
 		try {
 			set({ isLoading: true, error: null });
 			worldItemsLogger.info('➕ Agregando imagen a objeto del mundo:', { worldItemId, imageId });

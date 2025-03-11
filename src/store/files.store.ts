@@ -4,40 +4,55 @@ import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { getTags } from '@/app/actions/tags/tag.actions';
 import { logger } from '@/lib/logger/logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
-import type { TagWithStats } from '@/types/tag';
 import type { Collection } from '@prisma/client';
 import { create } from 'zustand';
 
 const ITEMS_PER_BATCH = 50;
 const filesLogger = logger.withContext('FilesStore');
 
-interface CollectionWithCount extends Collection {
-	_count: {
-		images: number;
-	};
+interface CollectionWithCount {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	count?: number;
 }
 
 interface FolderWithCount {
 	id: string;
 	name: string;
-	_count: {
-		images: number;
-	};
+	count?: number;
 }
 
 interface TagWithCount {
 	id: string;
 	name: string;
 	color: string;
-	_count: {
-		images: number;
-	};
+	count?: number;
 }
 
 interface TagMapping {
 	id: string;
 	name: string;
 	color?: string;
+}
+
+// Interfaces para datos recibidos del servidor
+interface ServerCollection extends Collection {
+	_count?: { images: number };
+}
+
+interface ServerFolder {
+	id: string;
+	name: string;
+	_count?: { images: number };
+}
+
+interface ServerTag {
+	id: string;
+	name: string;
+	color: string;
+	_count?: { images: number };
 }
 
 export interface FilesState {
@@ -81,22 +96,22 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 			set({ isLoading: true });
 			const [folders, collections, tags] = await Promise.all([getFolders(), getCollections(), getTags()]);
 			set({
-				collections: collections.map((c: CollectionWithCount) => ({
+				collections: collections.map((c: ServerCollection) => ({
 					id: c.id,
 					name: c.name,
-					count: c._count.images,
+					count: c._count?.images || 0,
 					emoji: c.emoji,
 					color: c.color,
 				})),
-				folders: folders.map((f: FolderWithCount) => ({
+				folders: folders.map((f: ServerFolder) => ({
 					id: f.id,
 					name: f.name,
-					count: f._count.images,
+					count: f._count?.images || 0,
 				})),
-				tags: tags.map((t: TagWithCount) => ({
+				tags: tags.map((t: ServerTag) => ({
 					id: t.id,
 					name: t.name,
-					count: t._count.images,
+					count: t._count?.images || 0,
 					color: t.color,
 				})),
 			});
@@ -210,8 +225,11 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		try {
 			set({ isLoading: true, currentTagId: id });
 			const rawItems = await getTagImages(id);
+
 			const items = rawItems.map((item) => {
-				const tags: RelatedTag[] = (item.tags as TagMapping[]).map((t) => ({
+				const itemTags = Array.isArray(item.tags) ? item.tags : [];
+
+				const tags: RelatedTag[] = itemTags.map((t: TagMapping) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#94a3b8',
@@ -223,8 +241,8 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 					modifiedAt: new Date(item.updatedAt),
 					accessedAt: new Date(item.updatedAt),
 					tags,
-				};
-			}) as FileItem[];
+				} as FileItem;
+			});
 
 			set({ currentItems: items, displayedItems: items.slice(0, ITEMS_PER_BATCH), isLoading: false });
 		} catch (error) {

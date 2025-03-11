@@ -1,18 +1,31 @@
 'use client';
 
-import { ConceptCard } from '@/components/features/entity-cards/cards/concept-card';
-import { ConceptForm } from '@/components/features/entity-cards/forms/concept-form';
+import { ConceptCard } from '@/components/features/entity-cards/concept/concept-card';
+import { ConceptForm } from '@/components/features/entity-cards/concept/concept-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/use-toast';
-import { calculateStats } from '@/lib/entity.utils';
 import { logger } from '@/lib/logger/logger';
-import { type ConceptFormData, useConceptStore } from '@/store/entities/concept.store';
+import { useConceptStore } from '@/store/entities/concept.store';
 import { Lightbulb, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
+
+// Definición local del tipo ConceptFormData para evitar problemas de incompatibilidad
+interface ConceptFormData {
+	id?: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string;
+	content: string;
+	category: string;
+	tags: string[];
+	featuredImage?: string | null;
+	isFavorite: boolean;
+}
 
 const conceptLogger = logger.withContext('ConceptsSection');
 
@@ -28,7 +41,16 @@ export function ConceptsSection() {
 	const handleCreate = async (data: ConceptFormData) => {
 		try {
 			conceptLogger.info('✨ Creando nuevo concepto:', data);
-			await createConcept(data);
+			await createConcept({
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description || null,
+				content: data.content,
+				category: data.category,
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			toast({
 				title: 'Éxito',
 				description: 'Concepto creado correctamente',
@@ -49,7 +71,17 @@ export function ConceptsSection() {
 		}
 		try {
 			conceptLogger.info('💾 Actualizando concepto:', data);
-			await updateConcept(editingId, data);
+			await updateConcept(editingId, {
+				id: editingId,
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description || null,
+				content: data.content,
+				category: data.category,
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				featuredImage: data.featuredImage || null,
+			});
 			setEditingId(null);
 			toast({
 				title: 'Éxito',
@@ -87,7 +119,69 @@ export function ConceptsSection() {
 	};
 
 	// Calcular estadísticas
-	const stats = React.useMemo(() => calculateStats(concepts), [concepts]);
+	const stats = React.useMemo(() => {
+		if (!concepts.length) {
+			return {
+				totalItems: 0,
+				totalImages: 0,
+				totalSize: 0,
+				distribution: [],
+				recentItems: [],
+				lastUpdated: undefined,
+				// Base stats
+				total: 0,
+				active: 0,
+				favorite: 0,
+				archived: 0,
+			};
+		}
+
+		const totalImages = concepts.reduce((acc, concept) => {
+			// Suma todas las referencias a otras entidades
+			const count = concept._count
+				? concept._count.prompts +
+					concept._count.notes +
+					concept._count.characters +
+					concept._count.places +
+					concept._count.worldItems
+				: 0;
+			return acc + count;
+		}, 0);
+
+		// Para totalSize, usar solo conceptos con propiedad calculada
+		const totalSize = concepts.reduce((acc, concept) => {
+			// Se asume que totalSize no es una propiedad estándar
+			const conceptWithSize = concept as typeof concept & {
+				totalSize?: number;
+			};
+			return acc + (conceptWithSize.totalSize || 0);
+		}, 0);
+
+		// Obtener conceptos recientes
+		const recentConcepts = [...concepts]
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.slice(0, 5)
+			.map((concept) => ({
+				id: concept.id,
+				name: concept.name,
+				emoji: concept.emoji,
+				count: 0, // Para mantener la compatibilidad
+			}));
+
+		return {
+			totalItems: concepts.length,
+			totalImages,
+			totalSize,
+			distribution: [],
+			recentItems: recentConcepts,
+			lastUpdated: new Date(),
+			// Base stats
+			total: concepts.length,
+			active: concepts.length,
+			favorite: concepts.filter((concept) => concept.isFavorite).length,
+			archived: 0,
+		};
+	}, [concepts]);
 
 	return (
 		<div className="space-y-6">
@@ -100,7 +194,12 @@ export function ConceptsSection() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<ConceptForm onSubmit={handleCreate} isLoading={isLoading} />
+						<ConceptForm
+							onSubmit={async (data) => {
+								await handleCreate(data as ConceptFormData);
+							}}
+							isLoading={isLoading}
+						/>
 					</CardContent>
 				</Card>
 
@@ -158,19 +257,40 @@ export function ConceptsSection() {
 													<ConceptForm
 														initialData={{
 															name: concept.name,
-															description: concept.description || undefined,
+															description: concept.description || '',
+															emoji: concept.emoji,
+															color: concept.color,
 															content: concept.content,
-															type: concept.type,
-															tags: concept.tags,
+															category: concept.category || '',
+															tags: concept.tags ? concept.tags.split(',').filter(Boolean) : [],
+															featuredImage: concept.featuredImage,
+															isFavorite: concept.isFavorite,
 														}}
-														onSubmit={handleUpdate}
+														onSubmit={async (data) => {
+															await handleUpdate(data as ConceptFormData);
+														}}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}
 													/>
 												</CardContent>
 											</Card>
 										) : (
-											<ConceptCard concept={concept} onEdit={() => setEditingId(concept.id)} onDelete={handleDelete} />
+											<ConceptCard
+												data={{
+													id: concept.id,
+													name: concept.name,
+													description: concept.description || '',
+													emoji: concept.emoji,
+													color: concept.color,
+													content: concept.content,
+													category: concept.category || '',
+													tags: concept.tags ? concept.tags.split(',').filter(Boolean) : [],
+													featuredImage: concept.featuredImage,
+													isFavorite: concept.isFavorite,
+												}}
+												onEdit={() => setEditingId(concept.id)}
+												onDelete={handleDelete}
+											/>
 										)}
 									</motion.div>
 								))}

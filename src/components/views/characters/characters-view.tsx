@@ -4,7 +4,7 @@ import type { CharacterWithStats } from '@/app/actions/characters/character.acti
 import { getCharacters } from '@/app/actions/characters/character.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { CharacterCard } from '@/components/features/entity-cards/cards/character-card';
+import { CharacterCard } from '@/components/features/entity-cards/character/character-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
