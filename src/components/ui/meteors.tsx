@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
-import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import { cn } from "@/lib/utils/utils";
+import type * as React from "react";
+import { useEffect, useState } from "react";
 
 interface MeteorsProps {
 	number?: number;
@@ -29,7 +29,7 @@ export const Meteors = ({ number = 20 }: MeteorsProps) => {
 				<span
 					key={`meteor-${Math.random().toString(36).substring(2, 9)}`}
 					className={cn(
-						'pointer-events-none absolute left-1/2 top-1/2 size-0.5 rotate-[215deg] animate-meteor rounded-full bg-slate-500 shadow-[0_0_0_1px_#ffffff10]'
+						"pointer-events-none absolute left-1/2 top-1/2 size-0.5 rotate-[215deg] animate-meteor rounded-full bg-slate-500 shadow-[0_0_0_1px_#ffffff10]"
 					)}
 					style={style}
 				>

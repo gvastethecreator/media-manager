@@ -1,30 +1,40 @@
-import { cn } from '@/lib/utils';
-import { Slot } from '@radix-ui/react-slot';
-import { ChevronRight } from 'lucide-react';
-import * as React from 'react';
+import { cn } from "@/lib/utils/utils";
+import { Slot } from "@radix-ui/react-slot";
+import { ChevronRight } from "lucide-react";
+import * as React from "react";
 
-const Breadcrumb = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(({ ...props }, ref) => (
-	<nav ref={ref} aria-label="breadcrumb" {...props} />
+const Breadcrumb = React.forwardRef<
+	HTMLElement,
+	React.HTMLAttributes<HTMLElement>
+>(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />);
+Breadcrumb.displayName = "Breadcrumb";
+
+const BreadcrumbList = React.forwardRef<
+	HTMLOListElement,
+	React.OlHTMLAttributes<HTMLOListElement>
+>(({ className, ...props }, ref) => (
+	<ol
+		ref={ref}
+		className={cn(
+			"flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground",
+			className
+		)}
+		{...props}
+	/>
 ));
-Breadcrumb.displayName = 'Breadcrumb';
+BreadcrumbList.displayName = "BreadcrumbList";
 
-const BreadcrumbList = React.forwardRef<HTMLOListElement, React.OlHTMLAttributes<HTMLOListElement>>(
-	({ className, ...props }, ref) => (
-		<ol
-			ref={ref}
-			className={cn('flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground', className)}
-			{...props}
-		/>
-	)
-);
-BreadcrumbList.displayName = 'BreadcrumbList';
-
-const BreadcrumbItem = React.forwardRef<HTMLLIElement, React.LiHTMLAttributes<HTMLLIElement>>(
-	({ className, ...props }, ref) => (
-		<li ref={ref} className={cn('inline-flex items-center gap-1.5', className)} {...props} />
-	)
-);
-BreadcrumbItem.displayName = 'BreadcrumbItem';
+const BreadcrumbItem = React.forwardRef<
+	HTMLLIElement,
+	React.LiHTMLAttributes<HTMLLIElement>
+>(({ className, ...props }, ref) => (
+	<li
+		ref={ref}
+		className={cn("inline-flex items-center gap-1.5", className)}
+		{...props}
+	/>
+));
+BreadcrumbItem.displayName = "BreadcrumbItem";
 
 const BreadcrumbLink = React.forwardRef<
 	HTMLAnchorElement,
@@ -32,33 +42,54 @@ const BreadcrumbLink = React.forwardRef<
 		asChild?: boolean;
 	}
 >(({ asChild, className, ...props }, ref) => {
-	const Comp = asChild ? Slot : 'a';
-	return <Comp ref={ref} className={cn('transition-colors hover:text-foreground', className)} {...props} />;
-});
-BreadcrumbLink.displayName = 'BreadcrumbLink';
-
-const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-	({ className, ...props }, ref) => (
-		<span
+	const Comp = asChild ? Slot : "a";
+	return (
+		<Comp
 			ref={ref}
-			role="link"
-			aria-disabled="true"
-			aria-current="page"
-			tabIndex={0}
-			className={cn('font-normal text-foreground', className)}
+			className={cn("transition-colors hover:text-foreground", className)}
 			{...props}
 		/>
-	)
-);
-BreadcrumbPage.displayName = 'BreadcrumbPage';
+	);
+});
+BreadcrumbLink.displayName = "BreadcrumbLink";
 
-const BreadcrumbSeparator = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
-	({ className, ...props }, ref) => (
-		<span ref={ref} role="presentation" aria-hidden="true" className={cn('opacity-50', className)} {...props}>
-			<ChevronRight className="h-4 w-4" />
-		</span>
-	)
-);
-BreadcrumbSeparator.displayName = 'BreadcrumbSeparator';
+const BreadcrumbPage = React.forwardRef<
+	HTMLSpanElement,
+	React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => (
+	<span
+		ref={ref}
+		role="link"
+		aria-disabled="true"
+		aria-current="page"
+		tabIndex={0}
+		className={cn("font-normal text-foreground", className)}
+		{...props}
+	/>
+));
+BreadcrumbPage.displayName = "BreadcrumbPage";
 
-export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator };
+const BreadcrumbSeparator = React.forwardRef<
+	HTMLSpanElement,
+	React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => (
+	<span
+		ref={ref}
+		role="presentation"
+		aria-hidden="true"
+		className={cn("opacity-50", className)}
+		{...props}
+	>
+		<ChevronRight className="h-4 w-4" />
+	</span>
+));
+BreadcrumbSeparator.displayName = "BreadcrumbSeparator";
+
+export {
+	Breadcrumb,
+	BreadcrumbList,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+};

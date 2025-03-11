@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { FileItem } from '@/types/file-item';
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils/utils";
+import type { FileItem } from "@/types/file-item";
 import {
 	BookImage,
 	Box,
@@ -17,12 +17,12 @@ import {
 	Share2,
 	User2,
 	Wand2,
-} from 'lucide-react';
-import type * as React from 'react';
-import { memo } from 'react';
-import { FileContextMenu } from '../context-menu/context-menu';
-import type { ContextMenuAction } from '../context-menu/context-menu';
-import { ImageRenderer } from '../image-renderer';
+} from "lucide-react";
+import type * as React from "react";
+import { memo } from "react";
+import { FileContextMenu } from "../context-menu/context-menu";
+import type { ContextMenuAction } from "../context-menu/context-menu";
+import { ImageRenderer } from "../image-renderer";
 
 interface ListViewProps {
 	item: FileItem;
@@ -32,7 +32,11 @@ interface ListViewProps {
 	thumbnail?: string | null;
 	onClick?: (item: FileItem) => void;
 	onDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextAction?: (
+		action: ContextMenuAction,
+		item: FileItem,
+		data?: Record<string, unknown>
+	) => void;
 	style?: React.CSSProperties;
 }
 
@@ -49,10 +53,10 @@ const getMetadata = (metadata: string | null) => {
 
 function formatBytes(bytes: number): string {
 	if (bytes === 0) {
-		return '0 B';
+		return "0 B";
 	}
 	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const sizes = ["B", "KB", "MB", "GB", "TB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
@@ -71,7 +75,7 @@ export const ListView = memo(function ListView({
 	const metadata = getMetadata(item.metadata);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			onClick?.(item);
 		}
@@ -82,9 +86,9 @@ export const ListView = memo(function ListView({
 			<button
 				type="button"
 				className={cn(
-					'flex items-center gap-4 w-full hover:bg-accent/50 rounded-sm group px-2 text-left',
-					isSelected && 'bg-accent',
-					isScrolling && 'opacity-50'
+					"flex items-center gap-4 w-full hover:bg-accent/50 rounded-sm group px-2 text-left",
+					isSelected && "bg-accent",
+					isScrolling && "opacity-50"
 				)}
 				style={style}
 				onClick={(e) => {
@@ -114,7 +118,10 @@ export const ListView = memo(function ListView({
 								alt={item.name}
 								width={72}
 								height={72}
-								className={cn('h-full w-full object-cover transition-all duration-200', 'group-hover:scale-[1.02]')}
+								className={cn(
+									"h-full w-full object-cover transition-all duration-200",
+									"group-hover:scale-[1.02]"
+								)}
 								quality={75}
 							/>
 						</div>
@@ -125,12 +132,18 @@ export const ListView = memo(function ListView({
 					)}
 					<div className="absolute top-0.5 right-0.5 flex gap-0.5">
 						{item.isFavorite && (
-							<Badge variant="secondary" className="bg-red-500/20 text-red-500 h-3 w-3 p-0.5">
+							<Badge
+								variant="secondary"
+								className="bg-red-500/20 text-red-500 h-3 w-3 p-0.5"
+							>
 								<Heart className="h-2 w-2 fill-current" />
 							</Badge>
 						)}
 						{item.isPublic && (
-							<Badge variant="secondary" className="bg-green-500/20 text-green-500 h-3 w-3 p-0.5">
+							<Badge
+								variant="secondary"
+								className="bg-green-500/20 text-green-500 h-3 w-3 p-0.5"
+							>
 								<Share2 className="h-2 w-2" />
 							</Badge>
 						)}
@@ -144,20 +157,23 @@ export const ListView = memo(function ListView({
 							<Badge
 								variant="outline"
 								className={cn(
-									'text-[10px] h-4 px-1 flex items-center gap-1 shrink-0',
-									metadata.generation.type === 'stable-diffusion' && 'bg-blue-500/10 text-blue-500',
-									metadata.generation.type === 'comfyui' && 'bg-green-500/10 text-green-500',
-									metadata.generation.type === 'midjourney' && 'bg-purple-500/10 text-purple-500'
+									"text-[10px] h-4 px-1 flex items-center gap-1 shrink-0",
+									metadata.generation.type === "stable-diffusion" &&
+										"bg-blue-500/10 text-blue-500",
+									metadata.generation.type === "comfyui" &&
+										"bg-green-500/10 text-green-500",
+									metadata.generation.type === "midjourney" &&
+										"bg-purple-500/10 text-purple-500"
 								)}
 							>
 								<Wand2 className="h-2.5 w-2.5" />
 								<span className="truncate">
-									{metadata.generation.type === 'stable-diffusion'
-										? 'SD'
-										: metadata.generation.type === 'comfyui'
-											? 'ComfyUI'
-											: metadata.generation.type === 'midjourney'
-												? 'MJ'
+									{metadata.generation.type === "stable-diffusion"
+										? "SD"
+										: metadata.generation.type === "comfyui"
+											? "ComfyUI"
+											: metadata.generation.type === "midjourney"
+												? "MJ"
 												: metadata.generation.type}
 								</span>
 							</Badge>
@@ -192,7 +208,11 @@ export const ListView = memo(function ListView({
 					<div className="flex items-center gap-2">
 						<div className="flex flex-wrap gap-1 max-w-[50%]">
 							{item.tags?.slice(0, 2).map((tag) => (
-								<Badge key={tag.id} variant="secondary" className="text-[10px] h-4 px-1">
+								<Badge
+									key={tag.id}
+									variant="secondary"
+									className="text-[10px] h-4 px-1"
+								>
 									{tag.name}
 								</Badge>
 							))}
@@ -205,31 +225,46 @@ export const ListView = memo(function ListView({
 
 						<div className="flex items-center gap-1 ml-auto">
 							{item.collections?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] h-4 px-1 flex items-center gap-1"
+								>
 									<BookImage className="h-2.5 w-2.5" />
 									<span>{item.collections.length}</span>
 								</Badge>
 							)}
 							{item.albums?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] h-4 px-1 flex items-center gap-1"
+								>
 									<Camera className="h-2.5 w-2.5" />
 									<span>{item.albums.length}</span>
 								</Badge>
 							)}
 							{item.characters?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] h-4 px-1 flex items-center gap-1"
+								>
 									<User2 className="h-2.5 w-2.5" />
 									<span>{item.characters.length}</span>
 								</Badge>
 							)}
 							{item.places?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] h-4 px-1 flex items-center gap-1"
+								>
 									<MapPin className="h-2.5 w-2.5" />
 									<span>{item.places.length}</span>
 								</Badge>
 							)}
 							{item.worldItems?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
+								<Badge
+									variant="outline"
+									className="text-[10px] h-4 px-1 flex items-center gap-1"
+								>
 									<Box className="h-2.5 w-2.5" />
 									<span>{item.worldItems.length}</span>
 								</Badge>

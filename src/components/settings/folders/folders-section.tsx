@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ReindexConfirmationDialog } from '@/components/settings/folders/reindex-confirmation-dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ReindexConfirmationDialog } from "@/components/settings/folders/reindex-confirmation-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
@@ -10,20 +10,20 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
-import { AlertCircle, EraserIcon, FolderIcon, RefreshCw } from 'lucide-react';
-import { Folder } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useState } from 'react';
-import { FolderCard } from './folder-card';
-import { FolderForm } from './folder-form';
-import { getFolderIndexStatus } from './folder-utils';
-import { FoldersStats } from './folders-stats';
-import { useFolders } from './hooks/use-folders';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils/utils";
+import { AlertCircle, EraserIcon, FolderIcon, RefreshCw } from "lucide-react";
+import { Folder } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
+import { FolderCard } from "./folder-card";
+import { FolderForm } from "./folder-form";
+import { getFolderIndexStatus } from "./folder-utils";
+import { FoldersStats } from "./folders-stats";
+import { useFolders } from "./hooks/use-folders";
 
 export function FoldersSection() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -107,11 +107,15 @@ export function FoldersSection() {
 							disabled={isLoading || isGloballyProcessing}
 						>
 							<RefreshCw
-								className={cn('h-3.5 w-3.5', (isLoading || globalReindexStatus.isProcessing) && 'animate-spin')}
+								className={cn(
+									"h-3.5 w-3.5",
+									(isLoading || globalReindexStatus.isProcessing) &&
+										"animate-spin"
+								)}
 							/>
 							{globalReindexStatus.isProcessing
 								? `Reindexando (${Math.round(globalReindexStatus.progress)}%)`
-								: 'Reindexar todo'}
+								: "Reindexar todo"}
 						</Button>
 					</div>
 				</CardTitle>
@@ -120,7 +124,11 @@ export function FoldersSection() {
 			<CardContent className="p-2">
 				<div className="space-y-3">
 					<div className="space-y-3">
-						<FolderForm isProcessing={isProcessing} isLoading={isLoading} onAddFolder={handleAddFolder} />
+						<FolderForm
+							isProcessing={isProcessing}
+							isLoading={isLoading}
+							onAddFolder={handleAddFolder}
+						/>
 
 						<div className="grid grid-cols-1 gap-2">
 							{folders.map((folder) => (
@@ -147,7 +155,9 @@ export function FoldersSection() {
 									className="py-4 text-center col-span-2"
 								>
 									<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-									<p className="text-xs text-muted-foreground">No hay carpetas indexadas</p>
+									<p className="text-xs text-muted-foreground">
+										No hay carpetas indexadas
+									</p>
 									<p className="text-[10px] mt-1 text-muted-foreground/75">
 										Agrega una carpeta para comenzar a indexar imágenes
 									</p>
@@ -166,26 +176,45 @@ export function FoldersSection() {
 				isProcessing={globalReindexStatus.isProcessing}
 				progress={globalReindexStatus.progress}
 			/>
-			<Dialog open={reindexAllDialogOpen} onOpenChange={setReindexAllDialogOpen}>
+			<Dialog
+				open={reindexAllDialogOpen}
+				onOpenChange={setReindexAllDialogOpen}
+			>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
 						<DialogTitle>Reindexar todas las carpetas</DialogTitle>
 						<DialogDescription>
-							Este proceso analizará todas las carpetas y actualizará la base de datos con nuevos archivos. Podría tomar
-							varios minutos dependiendo de la cantidad de archivos.
+							Este proceso analizará todas las carpetas y actualizará la base de
+							datos con nuevos archivos. Podría tomar varios minutos dependiendo
+							de la cantidad de archivos.
 						</DialogDescription>
 					</DialogHeader>
 					<div className="flex items-center space-x-2 py-4">
-						<Switch id="clear-cache" checked={false} onCheckedChange={() => {}} />
-						<Label htmlFor="clear-cache" className="text-sm font-normal cursor-pointer">
+						<Switch
+							id="clear-cache"
+							checked={false}
+							onCheckedChange={() => {}}
+						/>
+						<Label
+							htmlFor="clear-cache"
+							className="text-sm font-normal cursor-pointer"
+						>
 							Limpiar caché de metadatos (recomendado si hay problemas)
 						</Label>
 					</div>
 					<DialogFooter className="flex flex-row justify-between sm:justify-between gap-2">
-						<Button type="button" variant="outline" onClick={() => setReindexAllDialogOpen(false)}>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setReindexAllDialogOpen(false)}
+						>
 							Cancelar
 						</Button>
-						<Button type="button" onClick={handleConfirmReindexAll} disabled={isLoading}>
+						<Button
+							type="button"
+							onClick={handleConfirmReindexAll}
+							disabled={isLoading}
+						>
 							Reindexar todas
 						</Button>
 					</DialogFooter>
