@@ -45,7 +45,7 @@ export function ViewToolbar() {
 		currentAlbum,
 		currentCharacter,
 		currentPlace,
-		currentObject,
+		currentWorldItem,
 		viewMode,
 		setViewMode,
 		selectedItems,
@@ -149,11 +149,11 @@ export function ViewToolbar() {
 							path: `/places/${currentPlace.id}`,
 						}
 					: undefined;
-			case 'object-content':
-				return currentObject
+			case 'world-item-content':
+				return currentWorldItem
 					? {
-							name: currentObject.name,
-							path: `/objects/${currentObject.id}`,
+							name: currentWorldItem.name,
+							path: `/world-items/${currentWorldItem.id}`,
 						}
 					: undefined;
 			default:
@@ -187,8 +187,8 @@ export function ViewToolbar() {
 			case 'places':
 			case 'place-content':
 				return <MapPin className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'objects':
-			case 'object-content':
+			case 'world-items':
+			case 'world-item-content':
 				return <Box className="h-3.5 w-3.5 text-muted-foreground" />;
 			default:
 				return null;
@@ -368,7 +368,7 @@ export function ViewToolbar() {
 			case 'albums':
 			case 'characters':
 			case 'places':
-			case 'objects':
+			case 'world-items':
 				return (
 					<div className="flex items-center gap-1">
 						<Button variant="ghost" size="sm" className="h-7 text-xs">
@@ -384,7 +384,7 @@ export function ViewToolbar() {
 			case 'album-content':
 			case 'character-content':
 			case 'place-content':
-			case 'object-content':
+			case 'world-item-content':
 				return (
 					<div className="flex items-center gap-1">
 						<Button variant="ghost" size="icon" className="h-7 w-7">

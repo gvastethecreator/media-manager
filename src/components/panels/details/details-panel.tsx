@@ -1,65 +1,215 @@
-'use client';
+"use client";
 
-import { updateImageStats } from '@/app/actions/images';
-import { parseMetadata } from '@/app/actions/metadata';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
-import type { FileItem, FileMetadata } from '@/types/file-item';
-import { Loader2 } from 'lucide-react';
-import * as React from 'react';
+import { updateImageStats } from "@/app/actions/images";
+import { parseMetadata } from "@/app/actions/metadata";
+import { getAIGenerationInfo } from "@/app/actions/metadata/metadata-parsers.actions";
+import type { AIGenerationMetadata } from "@/app/actions/metadata/parsers/base-parser";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
+import type { FileItem, FileMetadata } from "@/types/file-item";
+import { Bug, Loader2 } from "lucide-react";
+import * as React from "react";
 
-import { AIGenerationInfo } from './details-panel-ai-generation-info';
-import { BasicInfo } from './details-panel-basic-info';
+import { AIGenerationInfo } from "./details-panel-ai-generation-info";
+import { BasicInfo } from "./details-panel-basic-info";
 // Componentes y utilidades internas
-import { ImagePreview } from './details-panel-image-preview';
-import { ExifInfo, GPSInfo, IPTCInfo, TechnicalInfo, XMPInfo } from './details-panel-metadata-sections';
-import { RelatedEntities } from './details-panel-related-entities';
-import type { DetailsPanelProps } from './details-panel-types';
-import { getMetadata } from './details-panel-utils';
+import { ImagePreview } from "./details-panel-image-preview";
+import {
+	ExifInfo,
+	GPSInfo,
+	IPTCInfo,
+	TechnicalInfo,
+	XMPInfo,
+} from "./details-panel-metadata-sections";
+import { RelatedEntities } from "./details-panel-related-entities";
+import type { DetailsPanelProps } from "./details-panel-types";
+import { getMetadata } from "./details-panel-utils";
+
+// Logger para el panel de detalles
+const detailsLogger = {
+	info: (message: string, data?: unknown) =>
+		console.info(`[DetailsPanel] ${message}`, data || ""),
+	warn: (message: string, data?: unknown) =>
+		console.warn(`[DetailsPanel] ${message}`, data || ""),
+	error: (message: string, data?: unknown) =>
+		console.error(`[DetailsPanel] ${message}`, data || ""),
+};
+
+/**
+ * Analiza un objeto de metadatos para extraer información útil
+ */
+async function parseMetadataDirectly(
+	rawMetadata: string | null
+): Promise<FileMetadata | null> {
+	if (!rawMetadata) {
+		return null;
+	}
+
+	try {
+		// Intentar parsear el JSON
+		const parsed = JSON.parse(rawMetadata);
+
+		console.log("📑 Estructura de metadata parseada:", parsed);
+
+		// Construir objeto resultado
+		const result: FileMetadata = {};
+
+		// Copiar propiedades básicas
+		if (parsed.dimensions) {
+			result.dimensions = parsed.dimensions;
+		}
+		if (parsed.fileSystem) {
+			result.fileSystem = parsed.fileSystem;
+		}
+		if (parsed.mimeType) {
+			result.mimeType = parsed.mimeType;
+		}
+		if (parsed.colorSpace) {
+			result.colorSpace = parsed.colorSpace;
+		}
+		if (parsed.hasAlpha !== undefined) {
+			result.hasAlpha = parsed.hasAlpha;
+		}
+		if (parsed.isAnimated !== undefined) {
+			result.isAnimated = parsed.isAnimated;
+		}
+
+		// Copiar EXIF
+		if (parsed.exif) {
+			result.exif = parsed.exif;
+		}
+
+		// Copiar XMP
+		if (parsed.xmp) {
+			result.xmp = parsed.xmp;
+		}
+
+		// Copiar IPTC
+		if (parsed.iptc) {
+			result.iptc = parsed.iptc;
+		}
+
+		// Usar la función del servidor para extraer información de generación por IA
+		const aiGenerationInfo = await getAIGenerationInfo(parsed);
+
+		if (aiGenerationInfo) {
+			console.log(
+				"🤖 Encontrados datos de generación mediante parsers:",
+				aiGenerationInfo
+			);
+			result.generation = aiGenerationInfo;
+		} else {
+			console.log("❓ No se encontraron datos de generación por IA", {
+				keysEncontradas: Object.keys(parsed),
+			});
+		}
+
+		// Si no hay propiedades, retornar null
+		return Object.keys(result).length > 0 ? result : null;
+	} catch (error) {
+		console.error("Error en parseMetadataDirectly:", error);
+		return null;
+	}
+}
 
 /**
  * Panel de detalles para mostrar información de imágenes seleccionadas
  */
 export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// Solo mostramos información de un ítem a la vez
-	const item = selectedItems[0];
+	const item = selectedItems?.[0] || null;
 	const [metadata, setMetadata] = React.useState<FileMetadata | null>(null);
 	const [isProcessing, setIsProcessing] = React.useState(false);
 	const { toast } = useToast();
 
+	// Callback para depuración - muestra información detallada en consola
+	const handleDebug = () => {
+		console.group("🔍 Depuración de Metadata");
+		console.log("Item seleccionado:", item);
+		console.log("Metadata procesada:", metadata);
+		toast({
+			title: "Depuración",
+			description: "Información impresa en la consola del navegador (F12)",
+		});
+		console.groupEnd();
+	};
+
 	// Efecto para cargar metadata cuando cambia el ítem seleccionado
 	React.useEffect(() => {
 		if (!item) {
+			setMetadata(null);
 			return;
 		}
 
 		let mounted = true;
 		setIsProcessing(true);
 
-		const loadMetadata = async () => {
+		// Función asíncrona para cargar metadatos
+		const fetchMetadata = async () => {
 			try {
-				setIsProcessing(true);
+				detailsLogger.info(`Cargando metadata para item: ${item.id}`, {
+					name: item.name,
+					hasMetadata: !!item.metadata,
+					metadataPreview: item.metadata
+						? `${item.metadata.substring(0, 100)}...`
+						: "null",
+				});
 
 				// Si ya tenemos metadata en el ítem, primero intentamos usarla directamente
 				if (item.metadata) {
 					try {
+						// Primer intento: usar getMetadata normal
 						const parsedMetadata = getMetadata(item.metadata);
 						if (parsedMetadata) {
-							setMetadata(parsedMetadata);
-							setIsProcessing(false);
+							detailsLogger.info(
+								"Metadata parseada correctamente desde el item",
+								{
+									hasGeneration: !!parsedMetadata.generation,
+									generationType: parsedMetadata.generation?.type,
+								}
+							);
+
+							if (mounted) {
+								setMetadata(parsedMetadata);
+								setIsProcessing(false);
+							}
 
 							// Actualizamos estadísticas de vistas en segundo plano
-							updateImageStats(item.id, 'view').catch((err: Error) =>
-								console.error('Error actualizando estadísticas:', err)
+							updateImageStats(item.id, "view").catch((err: Error) =>
+								detailsLogger.error("Error actualizando estadísticas:", err)
 							);
 							return;
 						}
-						console.warn('❌ No se pudo obtener metadata del objeto item, intentando desde API');
-					} catch (parseError) {
-						console.error('❌ Error parseando metadata del item:', parseError);
-						// Continuamos para intentar obtener desde el servidor
+
+						// Segundo intento: usar método alternativo de parseo
+						detailsLogger.info(
+							"Intentando método alternativo de parseo con parsers de IA"
+						);
+						const alternativeMetadata = await parseMetadataDirectly(
+							item.metadata
+						);
+						if (alternativeMetadata && mounted) {
+							detailsLogger.info(
+								"Metadata parseada correctamente con método alternativo",
+								{
+									hasGeneration: !!alternativeMetadata.generation,
+									generationType: alternativeMetadata.generation?.type,
+								}
+							);
+
+							setMetadata(alternativeMetadata);
+							setIsProcessing(false);
+
+							// Actualizamos estadísticas de vistas en segundo plano
+							updateImageStats(item.id, "view").catch((err: Error) =>
+								detailsLogger.error("Error actualizando estadísticas:", err)
+							);
+							return;
+						}
+					} catch (error) {
+						detailsLogger.error("Error parseando metadata local:", error);
 					}
 				}
 
@@ -67,7 +217,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				const metadataPromise = parseMetadata(item.id);
 				const timeoutPromise = new Promise<null>((_, reject) => {
 					setTimeout(() => {
-						reject(new Error('Timeout al obtener metadata'));
+						reject(new Error("Timeout al obtener metadata"));
 					}, 10000); // 10 segundos de timeout
 				});
 
@@ -76,48 +226,47 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 				if (mounted) {
 					if (result) {
+						detailsLogger.info("Metadata obtenida correctamente desde API", {
+							hasGeneration: !!result.generation,
+							generationType: result.generation?.type,
+						});
 						setMetadata(result);
 
 						// Actualizamos estadísticas de vistas en segundo plano
-						updateImageStats(item.id, 'view').catch((err: Error) =>
-							console.error('Error actualizando estadísticas:', err)
+						updateImageStats(item.id, "view").catch((err: Error) =>
+							detailsLogger.error("Error actualizando estadísticas:", err)
 						);
 					} else {
-						console.warn('⚠️ La API devolvió metadata nula para:', item.id);
+						detailsLogger.warn("No se encontró metadata para el ítem");
 						setMetadata(null);
-						toast({
-							title: 'Advertencia',
-							description: 'No se encontró información de metadatos para esta imagen',
-							variant: 'default',
-						});
 					}
+					setIsProcessing(false);
 				}
 			} catch (error) {
 				if (mounted) {
-					console.error('❌ Error cargando metadata:', error);
+					detailsLogger.error("Error cargando metadata:", error);
 					setMetadata(null);
-					toast({
-						title: 'Error',
-						description: 'No se pudo cargar la información de la imagen',
-						variant: 'destructive',
-					});
-				}
-			} finally {
-				if (mounted) {
 					setIsProcessing(false);
 				}
 			}
 		};
 
-		loadMetadata();
+		// Ejecutar la función asíncrona
+		fetchMetadata();
 
+		// Limpieza cuando el componente se desmonta o el ítem cambia
 		return () => {
 			mounted = false;
 		};
-	}, [item, toast]);
+	}, [item]);
 
+	// Si no hay ítem seleccionado, mostrar mensaje
 	if (!item) {
-		return null;
+		return (
+			<div className="p-4 text-center text-muted-foreground text-sm">
+				<p>Selecciona una imagen para ver sus detalles</p>
+			</div>
+		);
 	}
 
 	return (
@@ -129,6 +278,17 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						<ImagePreview item={item} />
 					</div>
 				</Card>
+
+				{/* Botón de depuración */}
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-full text-xs bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-700"
+					onClick={handleDebug}
+				>
+					<Bug className="h-4 w-4 mr-2" />
+					Depurar datos en consola (F12)
+				</Button>
 
 				{/* Sección de información básica */}
 				<Card>
@@ -145,6 +305,15 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 									<GPSInfo metadata={metadata} />
 									<TechnicalInfo metadata={metadata} />
 								</>
+							)}
+							{!metadata && !isProcessing && (
+								<div className="p-3 border border-dashed border-amber-500/50 rounded-md">
+									<p className="text-xs text-muted-foreground">
+										No se encontró información de metadatos para esta imagen.
+										Intenta hacer clic en el botón de depuración para ver más
+										detalles.
+									</p>
+								</div>
 							)}
 							{isProcessing && (
 								<div className="flex justify-center py-2">

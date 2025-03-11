@@ -2,7 +2,7 @@
 
 import { existsSync } from 'fs';
 import fs from 'node:fs/promises';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
 import type { ImageProcessingOptions } from './image-types.actions';

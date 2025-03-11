@@ -1,6 +1,6 @@
 'use client';
 
-import { getNavigationData } from '@/app/actions/nav.actions';
+import { getNavigationData } from '@/app/actions/navigation/nav.actions';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/panels/nav/nav-panel';
 import { NavPanelSkeleton } from '@/components/panels/nav/nav-panel-skeleton';

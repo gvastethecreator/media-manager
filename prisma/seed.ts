@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { logger } from '../src/lib/logger'
+import { logger } from '../src/lib/logger/logger'
 
 const prisma = new PrismaClient({
   log: ['error', 'warn'],
@@ -16,15 +16,13 @@ async function main() {
   await prisma.collection.deleteMany()
   await prisma.tag.deleteMany()
   await prisma.album.deleteMany()
-  await prisma.object.deleteMany()
+  await prisma.worldItem.deleteMany()
   await prisma.place.deleteMany()
   await prisma.character.deleteMany()
   await prisma.concept.deleteMany()
   await prisma.prompt.deleteMany()
   await prisma.note.deleteMany()
-  await prisma.attribute.deleteMany()
   await prisma.uploadedImage.deleteMany()
-  await prisma.universalFavorite.deleteMany()
 
   // Crear perfil por defecto
   seedLogger.info('👤 Creando perfil default...')
@@ -276,28 +274,20 @@ async function main() {
 
 
   // Crear objetos por defecto
-  seedLogger.info('🎭 Creando objetos por defecto...')
-  const defaultObjects = await prisma.object.createMany({
+  seedLogger.info('🎮 Creando objetos del mundo por defecto...')
+  const defaultWorldItems = await prisma.worldItem.createMany({
     data: [
       {
-        name: 'Espada del Crepúsculo',
-        emoji: '⚔️',
-        color: '#8b5cf6',
-        description: 'Una espada legendaria forjada con metales celestiales',
-        shortcut: 'esp',
+        name: 'Espada de Fuego',
+        emoji: '🔥',
+        color: '#ff4500',
+        description: 'Espada legendaria que puede controlar el fuego',
         type: 'weapon',
         rarity: 'legendary',
-        properties: JSON.stringify([
-          'Daño celestial',
-          'Absorción de luz',
-          'Invocación de espíritus'
-        ]),
-        requirements: JSON.stringify({
-          level: 10,
-          class: ['Paladin', 'Fighter'],
-          alignment: 'good'
-        }),
-        origin: 'Forjada por los herreros celestiales en la Era del Amanecer'
+        properties: JSON.stringify(['fire', 'melee']),
+        requirements: JSON.stringify({ strength: 50, agility: 30 }),
+        origin: 'Forjada en el Monte del Dragón',
+        isFavorite: false,
       },
       {
         name: 'Grimorio de los Secretos Perdidos',
@@ -986,56 +976,6 @@ async function main() {
     ],
   })
 
-  // Crear atributos por defecto
-  seedLogger.info('🏷️ Creando atributos por defecto...')
-  const defaultAttributes = await prisma.attribute.createMany({
-    data: [
-      {
-        name: 'Nivel de Poder',
-        type: 'number',
-        value: '0',
-        category: 'stats',
-        description: 'Nivel de poder general del personaje',
-        metadata: JSON.stringify({
-          min: 0,
-          max: 100,
-          step: 1,
-        }),
-      },
-      {
-        name: 'Alineamiento Moral',
-        type: 'select',
-        value: 'neutral',
-        category: 'personality',
-        description: 'Orientación moral del personaje',
-        metadata: JSON.stringify({
-          options: [
-            'lawful_good',
-            'neutral_good',
-            'chaotic_good',
-            'lawful_neutral',
-            'true_neutral',
-            'chaotic_neutral',
-            'lawful_evil',
-            'neutral_evil',
-            'chaotic_evil',
-          ],
-        }),
-      },
-      {
-        name: 'Habilidades Especiales',
-        type: 'array',
-        value: '[]',
-        category: 'abilities',
-        description: 'Lista de habilidades especiales',
-        metadata: JSON.stringify({
-          itemType: 'string',
-          maxItems: 10,
-        }),
-      },
-    ],
-  })
-
   // Crear imágenes subidas por defecto
   seedLogger.info('🖼️ Creando imágenes subidas por defecto...')
   const defaultUploadedImages = await prisma.uploadedImage.createMany({
@@ -1070,26 +1010,28 @@ async function main() {
     ],
   })
 
-  // Crear algunos favoritos universales de ejemplo
-  seedLogger.info('⭐ Creando favoritos universales de ejemplo...')
-  const defaultUniversalFavorites = await prisma.universalFavorite.createMany({
-    data: [
-      {
-        entityId: (await prisma.character.findFirst())?.id || '',
-        entityType: 'character',
-      },
-      {
-        entityId: (await prisma.place.findFirst())?.id || '',
-        entityType: 'place',
-      },
-      {
-        entityId: (await prisma.object.findFirst())?.id || '',
-        entityType: 'object',
-      },
-    ],
-  })
+  // Marcar entidades como favoritas directamente
+  seedLogger.info('⭐ Marcando entidades por defecto como favoritas...')
 
-  seedLogger.info('✅ Proceso de seed completado')
+  // Marcar el primer WorldItem como favorito
+  const firstWorldItem = await prisma.worldItem.findFirst();
+  if (firstWorldItem) {
+    await prisma.worldItem.update({
+      where: { id: firstWorldItem.id },
+      data: { isFavorite: true }
+    });
+  }
+
+  // Marcar el primer Place como favorito
+  const firstPlace = await prisma.place.findFirst();
+  if (firstPlace) {
+    await prisma.place.update({
+      where: { id: firstPlace.id },
+      data: { isFavorite: true }
+    });
+  }
+
+  seedLogger.info('✅ Proceso de seed completado exitosamente')
 }
 
 main()

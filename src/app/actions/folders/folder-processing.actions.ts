@@ -7,7 +7,7 @@ import { extname, join } from 'node:path';
 import * as path from 'node:path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emitProgress } from '@/lib/server/events.server';

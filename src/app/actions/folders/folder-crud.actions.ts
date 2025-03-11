@@ -1,7 +1,7 @@
 'use server';
 
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -249,7 +249,7 @@ export async function getFolderImages(id: string) {
 						places: {
 							select: { id: true, name: true },
 						},
-						objects: {
+						worldItems: {
 							select: { id: true, name: true },
 						},
 					},

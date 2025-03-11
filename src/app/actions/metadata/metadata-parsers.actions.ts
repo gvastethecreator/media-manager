@@ -1,8 +1,9 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import type { FileMetadata } from '@/types/metadata';
 import ExifReader, { type ExpandedTags, type Tags } from 'exifreader';
+import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import type {
 	ExifTags,
@@ -12,6 +13,7 @@ import type {
 	SharpColourspaceEnum,
 } from './metadata-types.actions';
 import { withRetry } from './metadata-utils.actions';
+import { extractAIGenerationInfo } from './parsers';
 
 const parserLogger = logger.withContext('MetadataParsers');
 
@@ -372,6 +374,74 @@ async function parseJsonString(text: string): Promise<FileMetadata | null> {
 		return null;
 	}
 
-	// Intentar parsear el JSON
-	return JSON.parse(text) as FileMetadata;
+	try {
+		// Intentar parsear el JSON
+		const parsed = JSON.parse(text);
+
+		// Si es un objeto, construir el objeto FileMetadata
+		if (typeof parsed === 'object' && parsed !== null) {
+			const result: FileMetadata = {};
+
+			// Copiar propiedades conocidas
+			if (parsed.dimensions) {
+				result.dimensions = parsed.dimensions;
+			}
+			if (parsed.fileSystem) {
+				result.fileSystem = parsed.fileSystem;
+			}
+			if (parsed.mimeType) {
+				result.mimeType = parsed.mimeType;
+			}
+			if (parsed.colorSpace) {
+				result.colorSpace = parsed.colorSpace;
+			}
+			if (parsed.hasAlpha !== undefined) {
+				result.hasAlpha = parsed.hasAlpha;
+			}
+			if (parsed.isAnimated !== undefined) {
+				result.isAnimated = parsed.isAnimated;
+			}
+			if (parsed.exif) {
+				result.exif = parsed.exif;
+			}
+			if (parsed.xmp) {
+				result.xmp = parsed.xmp;
+			}
+			if (parsed.iptc) {
+				result.iptc = parsed.iptc;
+			}
+
+			// Extraer información de generación por IA usando nuestra nueva funcionalidad
+			const generationInfo = await extractAIGenerationInfo(parsed);
+			if (generationInfo) {
+				result.generation = generationInfo;
+				parserLogger.debug('Extraída información de generación AI', {
+					type: generationInfo.type,
+				});
+			}
+
+			parserLogger.debug('Metadata parseada correctamente', {
+				hasGeneration: !!result.generation,
+				hasExif: !!result.exif,
+				hasXmp: !!result.xmp,
+			});
+
+			return result;
+		}
+
+		return null;
+	} catch (error) {
+		parserLogger.error('Error parseando JSON:', error);
+		return null;
+	}
+}
+
+// Importar y exportar directamente la función de parsers
+export { extractAIGenerationInfo };
+
+// Función wrapper para compatibilidad con legacy code
+export async function getAIGenerationInfo(
+	metadata: Record<string, unknown> | null
+): Promise<import('./parsers').AIGenerationMetadata | null> {
+	return extractAIGenerationInfo(metadata);
 }

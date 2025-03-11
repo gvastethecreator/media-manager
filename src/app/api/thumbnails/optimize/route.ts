@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { optimizeThumbnail } from '@/lib/thumbnails';
 import type { NextRequest } from 'next/server';

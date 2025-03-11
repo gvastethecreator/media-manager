@@ -1,15 +1,14 @@
 import type { BaseEntity } from '@/types/store.types';
 import type {
 	Album as PrismaAlbum,
-	Attribute as PrismaAttribute,
 	Character as PrismaCharacter,
 	Collection as PrismaCollection,
 	Concept as PrismaConcept,
 	Note as PrismaNote,
-	Object as PrismaObject,
 	Place as PrismaPlace,
 	Prompt as PrismaPrompt,
 	Tag as PrismaTag,
+	WorldItem as PrismaWorldItem,
 } from '@prisma/client';
 
 export interface BaseEntityCreate {
@@ -95,13 +94,6 @@ export interface NoteCreate extends BaseEntityCreate {
 	tags: string;
 }
 
-export interface AttributeCreate extends BaseEntityCreate {
-	type: string;
-	value: string;
-	category: string;
-	metadata: string;
-}
-
 export interface UploadedImageCreate {
 	name: string;
 	path: string;
@@ -113,6 +105,11 @@ export interface UploadedImageCreate {
 	metadata?: string | null;
 }
 
+/**
+ * @deprecated Use isFavorite field directly on entities instead.
+ * Este tipo solo se mantiene por compatibilidad con código existente,
+ * pero será eliminado en futuras versiones.
+ */
 export interface UniversalFavoriteCreate {
 	entityId: string;
 	entityType: string;
@@ -132,32 +129,28 @@ export interface CollectionCreate extends BaseEntityCreate {
 export type EntityType =
 	| 'character'
 	| 'place'
-	| 'object'
+	| 'world-item'
 	| 'album'
 	| 'collection'
 	| 'concept'
 	| 'prompt'
 	| 'note'
-	| 'attribute'
 	| 'uploadedImage';
 
 export type RelationType =
 	| 'character_character'
 	| 'character_place'
-	| 'character_object'
-	| 'place_object'
+	| 'character_world-item'
+	| 'place_world-item'
 	| 'concept_character'
 	| 'concept_place'
-	| 'concept_object'
+	| 'concept_world-item'
 	| 'prompt_character'
 	| 'prompt_place'
-	| 'prompt_object'
+	| 'prompt_world-item'
 	| 'note_character'
 	| 'note_place'
-	| 'note_object'
-	| 'attribute_character'
-	| 'attribute_place'
-	| 'attribute_object';
+	| 'note_world-item';
 
 export type CategoryType =
 	| 'general'
@@ -166,7 +159,7 @@ export type CategoryType =
 	| 'society'
 	| 'character'
 	| 'place'
-	| 'object'
+	| 'world-item'
 	| 'system'
 	| 'adventure'
 	| 'stats'
@@ -174,10 +167,6 @@ export type CategoryType =
 	| 'abilities';
 
 export type StatusType = 'active' | 'pending' | 'completed' | 'archived' | 'deleted';
-
-export type AttributeType = 'text' | 'number' | 'boolean' | 'date' | 'color' | 'range' | 'select' | 'multiselect';
-
-export type AttributeCategory = 'general' | 'character' | 'place' | 'object' | 'concept' | 'prompt' | 'note' | 'system';
 
 export type UploadedImageType =
 	| 'icon'
@@ -192,11 +181,23 @@ export type UploadedImageType =
 
 export type Character = PrismaCharacter;
 export type Place = PrismaPlace;
-export type Object = PrismaObject;
+export type WorldItem = PrismaWorldItem;
 export type Collection = PrismaCollection;
 export type Album = PrismaAlbum;
 export type Tag = PrismaTag;
 export type Note = PrismaNote;
 export type Concept = PrismaConcept;
 export type Prompt = PrismaPrompt;
-export type Attribute = PrismaAttribute;
+
+export interface WorldItemCreate extends BaseEntityCreate {
+	type: string;
+	rarity: string;
+	properties: string;
+	requirements: string;
+	origin: string;
+	stats: string;
+	sortBy: string;
+	filters: string;
+}
+
+export type { WorldItemCreate as ObjectCreate };

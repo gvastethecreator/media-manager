@@ -1,17 +1,41 @@
 'use server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
+import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Tag as PrismaTag } from '@prisma/client';
+import type { Image, Tag as PrismaTag } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
+// Utilidades y logging
 const tagLogger = logger.withContext('TagActions');
 
 const REVALIDATE_PATHS = ['/settings', '/tags', '/tags/[id]'] as const;
 
+const revalidateAllPaths = async () => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	tagLogger.info('🔄 Rutas revalidadas');
+};
+
+// Manejo de errores - enfoque funcional
+enum TagErrorCode {
+	NOT_FOUND = 'NOT_FOUND',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	OPERATION_FAILED = 'OPERATION_FAILED',
+}
+
+const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERATION_FAILED, cause?: unknown) => {
+	const error = new Error(message);
+	error.name = 'TagError';
+	Object.assign(error, { code, cause });
+	return error;
+};
+
+// Tipos e interfaces
 export interface TagCreate {
 	name: string;
 	color?: string;
@@ -51,23 +75,26 @@ export interface TagWithImages extends Tag {
 	images: FileItem[];
 }
 
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-	}
-	tagLogger.info('🔄 Rutas revalidadas');
-};
-
-class TagError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'TagError';
-	}
+// Interfaces auxiliares para tipado
+interface FolderDistribution {
+	name: string;
+	_count: {
+		images: number;
+	};
 }
 
+// Funciones auxiliares
+function formatBytes(bytes: number): string {
+	if (bytes === 0) {
+		return '0 B';
+	}
+	const k = 1024;
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+}
+
+// Funciones exportadas
 export async function getTags(): Promise<TagWithStats[]> {
 	try {
 		tagLogger.info('🏷️ Obteniendo etiquetas con estadísticas');
@@ -119,7 +146,7 @@ export async function getTags(): Promise<TagWithStats[]> {
 				});
 
 				// Obtener distribución por carpetas
-				const distribution = await prisma.folder.findMany({
+				const distribution = (await prisma.folder.findMany({
 					where: {
 						images: {
 							some: {
@@ -145,14 +172,14 @@ export async function getTags(): Promise<TagWithStats[]> {
 							_count: 'desc',
 						},
 					},
-				});
+				})) as FolderDistribution[];
 
 				return {
 					...tag,
 					_count: tag._count,
 					totalSize: totalSize._sum.size || 0,
 					lastUpdated: tag.images[0]?.updatedAt || tag.updatedAt,
-					distribution: distribution.map((d) => ({
+					distribution: distribution.map((d: FolderDistribution) => ({
 						name: d.name,
 						count: d._count.images,
 					})),
@@ -164,21 +191,11 @@ export async function getTags(): Promise<TagWithStats[]> {
 		return tagsWithStats;
 	} catch (error) {
 		tagLogger.error('❌ Error al obtener etiquetas', error);
-		throw new Error('No se pudieron obtener las etiquetas');
+		throw createTagError('No se pudieron obtener las etiquetas', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-function formatBytes(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}
-
-export async function getTag(id: string) {
+export async function getTag(id: string): Promise<Tag> {
 	try {
 		tagLogger.info('🔍 Obteniendo etiqueta:', id);
 		const tag = await prisma.tag.findUnique({
@@ -196,7 +213,7 @@ export async function getTag(id: string) {
 		});
 
 		if (!tag) {
-			throw new TagError('Etiqueta no encontrada');
+			throw createTagError('Etiqueta no encontrada', TagErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = tag.images.reduce((acc, img) => acc + img.size, 0);
@@ -211,14 +228,14 @@ export async function getTag(id: string) {
 		return result;
 	} catch (error) {
 		tagLogger.error('❌ Error al obtener etiqueta:', error);
-		if (error instanceof TagError) {
+		if (error instanceof Error && error.name === 'TagError') {
 			throw error;
 		}
-		throw new TagError('No se pudo obtener la etiqueta', error);
+		throw createTagError('No se pudo obtener la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function createTag(data: TagCreate) {
+export async function createTag(data: TagCreate): Promise<Tag> {
 	try {
 		tagLogger.info('📝 Creando nueva etiqueta:', data.name);
 		const tag = await prisma.tag.create({
@@ -237,11 +254,11 @@ export async function createTag(data: TagCreate) {
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al crear etiqueta:', error);
-		throw new TagError('No se pudo crear la etiqueta', error);
+		throw createTagError('No se pudo crear la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function updateTag(id: string, data: TagUpdate) {
+export async function updateTag(id: string, data: TagUpdate): Promise<Tag> {
 	try {
 		tagLogger.info('📝 Actualizando etiqueta:', id);
 		const tag = await prisma.tag.update({
@@ -261,11 +278,11 @@ export async function updateTag(id: string, data: TagUpdate) {
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al actualizar etiqueta:', error);
-		throw new TagError('No se pudo actualizar la etiqueta', error);
+		throw createTagError('No se pudo actualizar la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function deleteTag(id: string) {
+export async function deleteTag(id: string): Promise<Tag> {
 	try {
 		tagLogger.info('🗑️ Eliminando etiqueta:', id);
 		const tag = await prisma.tag.delete({
@@ -284,52 +301,46 @@ export async function deleteTag(id: string) {
 		return tag;
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar etiqueta:', error);
-		throw new TagError('No se pudo eliminar la etiqueta', error);
+		throw createTagError('No se pudo eliminar la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getTagImages(id: string) {
+export async function getTagImages(id: string): Promise<FileItem[]> {
 	try {
 		tagLogger.info('🖼️ Obteniendo imágenes de la etiqueta:', id);
-		const images = await prisma.image.findMany({
-			where: {
-				tags: {
-					some: {
-						id,
-					},
-				},
-			},
-			include: {
-				tags: true,
-				collections: true,
-				albums: true,
-				characters: true,
-				places: true,
-				objects: true,
-				stats: true,
-			},
-		});
+
+		// Usamos una consulta directa para obtener las imágenes
+		const images = (await prisma.$queryRaw`
+			SELECT i.*
+			FROM Image i
+			JOIN _ImageToTag it ON it.A = i.id
+			WHERE it.B = ${id}
+		`) as ServerImage[];
+
+		// También podríamos usar el ORM nativo pero con un include más selectivo:
+		// const images = await prisma.image.findMany({
+		//   where: {
+		//     tags: {
+		//       some: {
+		//         id,
+		//       },
+		//     },
+		//   },
+		// });
 
 		tagLogger.info(`✅ ${images.length} imágenes obtenidas`);
-		return images.map((image) => ({
-			...image,
-			type: 'image',
-			metadata: image.metadata,
-			tags: image.tags.map((t) => ({ id: t.id, name: t.name })),
-			collections: image.collections.map((c) => ({ id: c.id, name: c.name })),
-			albums: image.albums.map((a) => ({ id: a.id, name: a.name })),
-			characters: image.characters.map((c) => ({ id: c.id, name: c.name })),
-			places: image.places.map((p) => ({ id: p.id, name: p.name })),
-			objects: image.objects.map((o) => ({ id: o.id, name: o.name })),
-			thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
-		}));
+
+		// Convertir a FileItems
+		const fileItems = images.map((image) => convertServerImageToFileItem(image));
+
+		return fileItems;
 	} catch (error) {
 		tagLogger.error('❌ Error al obtener imágenes de la etiqueta:', error);
-		throw new TagError('No se pudieron obtener las imágenes de la etiqueta', error);
+		throw createTagError('No se pudieron obtener las imágenes de la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function addImageToTag(tagId: string, imageId: string) {
+export async function addImageToTag(tagId: string, imageId: string): Promise<void> {
 	try {
 		tagLogger.info('➕ Agregando imagen a etiqueta:', { tagId, imageId });
 		await prisma.tag.update({
@@ -346,11 +357,11 @@ export async function addImageToTag(tagId: string, imageId: string) {
 		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al agregar imagen a la etiqueta:', error);
-		throw new TagError('No se pudo agregar la imagen a la etiqueta', error);
+		throw createTagError('No se pudo agregar la imagen a la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function removeImageFromTag(tagId: string, imageId: string) {
+export async function removeImageFromTag(tagId: string, imageId: string): Promise<void> {
 	try {
 		tagLogger.info('➖ Removiendo imagen de etiqueta:', { tagId, imageId });
 		await prisma.tag.update({
@@ -367,12 +378,13 @@ export async function removeImageFromTag(tagId: string, imageId: string) {
 		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar imagen de la etiqueta:', error);
-		throw new TagError('No se pudo eliminar la imagen de la etiqueta', error);
+		throw createTagError('No se pudo eliminar la imagen de la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function addTagToImage(tagId: string, imageId: string) {
+export async function addTagToImage(tagId: string, imageId: string): Promise<void> {
 	try {
+		tagLogger.info('➕ Agregando etiqueta a imagen:', { tagId, imageId });
 		await prisma.image.update({
 			where: { id: imageId },
 			data: {
@@ -386,15 +398,17 @@ export async function addTagToImage(tagId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
+		tagLogger.info('✅ Etiqueta agregada a la imagen');
 		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al agregar etiqueta a la imagen:', error);
-		throw new TagError('No se pudo agregar la etiqueta a la imagen', error);
+		throw createTagError('No se pudo agregar la etiqueta a la imagen', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function removeTagFromImage(tagId: string, imageId: string) {
+export async function removeTagFromImage(tagId: string, imageId: string): Promise<void> {
 	try {
+		tagLogger.info('➖ Eliminando etiqueta de imagen:', { tagId, imageId });
 		await prisma.image.update({
 			where: { id: imageId },
 			data: {
@@ -408,9 +422,10 @@ export async function removeTagFromImage(tagId: string, imageId: string) {
 		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
+		tagLogger.info('✅ Etiqueta eliminada de la imagen');
 		await revalidateAllPaths();
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar etiqueta de la imagen:', error);
-		throw new TagError('No se pudo eliminar la etiqueta de la imagen', error);
+		throw createTagError('No se pudo eliminar la etiqueta de la imagen', TagErrorCode.OPERATION_FAILED, error);
 	}
 }

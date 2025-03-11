@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { PromptCreate } from '@/types/entities';

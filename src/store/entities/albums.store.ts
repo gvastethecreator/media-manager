@@ -7,8 +7,8 @@ import {
 	deleteAlbum as deleteAlbumAction,
 	getAlbums,
 	updateAlbum as updateAlbumAction,
-} from '@/app/actions/album.actions';
-import { logger } from '@/lib/logger';
+} from '@/app/actions/albums/album.actions';
+import { logger } from '@/lib/logger/logger';
 import { Album } from '@prisma/client';
 import { create } from 'zustand';
 

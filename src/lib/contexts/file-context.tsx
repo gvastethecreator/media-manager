@@ -21,7 +21,7 @@ export interface FileItem {
 	collections?: string[];
 	characters?: string[];
 	places?: string[];
-	objects?: string[];
+	worldItems?: string[];
 	favorite?: boolean;
 	isFavorite?: boolean;
 	thumbnail?: string;
@@ -153,8 +153,8 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			if (item.places?.length) {
 				addEvent({ type: 'places:modified', data: { item } });
 			}
-			if (item.objects?.length) {
-				addEvent({ type: 'objects:modified', data: { item } });
+			if (item.worldItems?.length) {
+				addEvent({ type: 'world-items:modified', data: { item } });
 			}
 			if (item.isFavorite || item.favorite) {
 				addEvent({ type: 'favorites:modified', data: { item } });

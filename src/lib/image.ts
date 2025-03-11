@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import sharp from 'sharp';
-import { logger } from './logger';
+import { logger } from './logger/logger';
 import { formatBytes } from './utils';
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png';
