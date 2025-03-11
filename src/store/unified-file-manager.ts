@@ -1,4 +1,4 @@
-import { debounce } from '@/lib/utils';
+import { debounce } from '@/lib/utils/utils';
 import type { FileItem } from '@/types/file-item';
 import { create } from 'zustand';
 

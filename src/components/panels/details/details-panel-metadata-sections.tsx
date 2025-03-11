@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils/utils";
 import {
 	AlignLeft,
 	Calendar,
@@ -19,10 +19,10 @@ import {
 	Target,
 	User2,
 	Variable,
-} from 'lucide-react';
-import * as React from 'react';
-import { InfoItem } from './details-panel-info-item';
-import type { MetadataComponentProps } from './details-panel-types';
+} from "lucide-react";
+import * as React from "react";
+import { InfoItem } from "./details-panel-info-item";
+import type { MetadataComponentProps } from "./details-panel-types";
 
 /**
  * Componente para metadata XMP
@@ -34,7 +34,9 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información XMP</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información XMP
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.xmp.title && (
 					<InfoItem
@@ -61,7 +63,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 					<InfoItem
 						icon={<Tag className="h-3.5 w-3.5 text-purple-400" />}
 						label="Temas"
-						value={metadata.xmp.subject.join(', ')}
+						value={metadata.xmp.subject.join(", ")}
 					/>
 				)}
 				{metadata.xmp.rating !== undefined && (
@@ -86,7 +88,9 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información IPTC</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información IPTC
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.iptc.headline && (
 					<InfoItem
@@ -106,7 +110,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 					<InfoItem
 						icon={<FileDigit className="h-3.5 w-3.5 text-purple-400" />}
 						label="Palabras clave"
-						value={metadata.iptc.keywords.join(', ')}
+						value={metadata.iptc.keywords.join(", ")}
 					/>
 				)}
 				{metadata.iptc.copyright && (
@@ -138,7 +142,9 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información EXIF</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información EXIF
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.exif.make && (
 					<InfoItem
@@ -197,7 +203,11 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 					/>
 				)}
 				{metadata.exif.lens && (
-					<InfoItem icon={<Camera className="h-3.5 w-3.5 text-teal-400" />} label="Lente" value={metadata.exif.lens} />
+					<InfoItem
+						icon={<Camera className="h-3.5 w-3.5 text-teal-400" />}
+						label="Lente"
+						value={metadata.exif.lens}
+					/>
 				)}
 				{metadata.exif.copyright && (
 					<InfoItem
@@ -238,9 +248,15 @@ export function GPSInfo({ metadata }: MetadataComponentProps) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información GPS</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información GPS
+			</h3>
 			<div className="flex flex-col gap-1.5">
-				<InfoItem icon={<MapPin className="h-3.5 w-3.5 text-red-400" />} label="Latitud" value={latitude.toFixed(6)} />
+				<InfoItem
+					icon={<MapPin className="h-3.5 w-3.5 text-red-400" />}
+					label="Latitud"
+					value={latitude.toFixed(6)}
+				/>
 				<InfoItem
 					icon={<MapPin className="h-3.5 w-3.5 text-blue-400" />}
 					label="Longitud"
@@ -253,7 +269,12 @@ export function GPSInfo({ metadata }: MetadataComponentProps) {
 						value={`${altitude.toFixed(1)}m`}
 					/>
 				)}
-				<Button variant="ghost" size="sm" className="mt-1" onClick={() => window.open(mapsUrl, '_blank')}>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="mt-1"
+					onClick={() => window.open(mapsUrl, "_blank")}
+				>
 					<MapIcon className="h-3.5 w-3.5 mr-2" />
 					Ver en Google Maps
 				</Button>
@@ -272,13 +293,15 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<h3 className="text-xs font-medium text-muted-foreground">Información Técnica</h3>
+			<h3 className="text-xs font-medium text-muted-foreground">
+				Información Técnica
+			</h3>
 			<div className="flex flex-col gap-1.5">
 				{metadata.mimeType && (
 					<InfoItem
 						icon={<FileType className="h-3.5 w-3.5 text-blue-400" />}
 						label="Formato"
-						value={metadata.mimeType.split('/')[1].toUpperCase()}
+						value={metadata.mimeType.split("/")[1].toUpperCase()}
 					/>
 				)}
 				{metadata.dimensions && (

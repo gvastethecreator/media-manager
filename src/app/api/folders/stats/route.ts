@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { formatBytes } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/utils';
 import { NextResponse } from 'next/server';
 
 // Definir interfaces para los tipos utilizados

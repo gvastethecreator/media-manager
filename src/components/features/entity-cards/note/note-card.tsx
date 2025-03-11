@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import type { NoteFormData } from '@/components/features/entity-cards/entity-types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import type { Note } from '@prisma/client';
-import { Pencil, StickyNote, Trash2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import type * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import type { NoteFormData } from "@/components/features/entity-cards/entity-types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils/utils";
+import type { Note } from "@prisma/client";
+import { Pencil, StickyNote, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import type * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CardData = Note | NoteFormData;
 
@@ -21,7 +21,13 @@ interface NoteCardProps {
 	className?: string;
 }
 
-export function NoteCard({ data, isPreview = false, onEdit, onDelete, className }: NoteCardProps) {
+export function NoteCard({
+	data,
+	isPreview = false,
+	onEdit,
+	onDelete,
+	className,
+}: NoteCardProps) {
 	// Para componente preview, detectar cambios
 	const prevDataRef = useRef<CardData | null>(null);
 	const [isHovered, setIsHovered] = useState(false);
@@ -31,7 +37,8 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 	// Efecto para destacar cambios en modo preview
 	useEffect(() => {
 		if (isPreview && prevDataRef.current) {
-			const hasChanged = JSON.stringify(prevDataRef.current) !== JSON.stringify(data);
+			const hasChanged =
+				JSON.stringify(prevDataRef.current) !== JSON.stringify(data);
 			if (hasChanged) {
 				setIsHighlighted(true);
 				const timer = setTimeout(() => {
@@ -46,14 +53,14 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 	// Handlers
 	const handleEdit = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (onEdit && 'id' in data) {
+		if (onEdit && "id" in data) {
 			onEdit(data as Note);
 		}
 	};
 
 	const handleDelete = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (onDelete && 'id' in data && data.id) {
+		if (onDelete && "id" in data && data.id) {
 			onDelete(data.id);
 		}
 	};
@@ -64,24 +71,28 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 	const getPriorityColor = (priority: number) => {
 		switch (priority) {
 			case 1: // Baja
-				return 'bg-blue-100 border-blue-300 text-blue-700';
+				return "bg-blue-100 border-blue-300 text-blue-700";
 			case 2: // Media
-				return 'bg-amber-100 border-amber-300 text-amber-700';
+				return "bg-amber-100 border-amber-300 text-amber-700";
 			case 3: // Alta
-				return 'bg-rose-100 border-rose-300 text-rose-700';
+				return "bg-rose-100 border-rose-300 text-rose-700";
 			default:
-				return 'bg-gray-100 border-gray-300 text-gray-700';
+				return "bg-gray-100 border-gray-300 text-gray-700";
 		}
 	};
 
 	// Obtener categoría para el marco
 	const categoryColor = {
-		personal: 'border-purple-400 shadow-purple-300/20',
-		trabajo: 'border-blue-400 shadow-blue-300/20',
-		ideas: 'border-emerald-400 shadow-emerald-300/20',
-		general: 'border-amber-400 shadow-amber-300/20',
-		default: 'border-slate-400 shadow-slate-300/20',
-	}['category' in data && typeof data.category === 'string' ? data.category : 'default'];
+		personal: "border-purple-400 shadow-purple-300/20",
+		trabajo: "border-blue-400 shadow-blue-300/20",
+		ideas: "border-emerald-400 shadow-emerald-300/20",
+		general: "border-amber-400 shadow-amber-300/20",
+		default: "border-slate-400 shadow-slate-300/20",
+	}[
+		"category" in data && typeof data.category === "string"
+			? data.category
+			: "default"
+	];
 
 	return (
 		<AnimatePresence>
@@ -91,31 +102,33 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 					opacity: 1,
 					y: 0,
 					scale: isHighlighted ? 1.02 : 1,
-					boxShadow: isHighlighted ? '0 0 12px rgba(249, 115, 22, 0.8)' : '0 4px 6px rgba(0, 0, 0, 0.1)',
+					boxShadow: isHighlighted
+						? "0 0 12px rgba(249, 115, 22, 0.8)"
+						: "0 4px 6px rgba(0, 0, 0, 0.1)",
 				}}
 				exit={{ opacity: 0, y: -10 }}
 				transition={{ duration: 0.2 }}
-				className={cn('relative w-full group', className)}
+				className={cn("relative w-full group", className)}
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => setIsHovered(false)}
 			>
 				<Card
 					className={cn(
-						'overflow-hidden transition-all duration-300',
-						'border-2 rounded-lg',
+						"overflow-hidden transition-all duration-300",
+						"border-2 rounded-lg",
 						categoryColor,
-						'hover:shadow-lg hover:transform hover:-translate-y-1',
-						isHighlighted && 'ring-2 ring-orange-400'
+						"hover:shadow-lg hover:transform hover:-translate-y-1",
+						isHighlighted && "ring-2 ring-orange-400"
 					)}
 				>
 					{/* Barra superior de prioridad */}
 					<div
 						className={cn(
-							'h-2',
-							getPriorityColor('priority' in data ? data.priority : 0)
-								.replace('bg-', '')
-								.replace('border-', '')
-								.replace('text-', '')
+							"h-2",
+							getPriorityColor("priority" in data ? data.priority : 0)
+								.replace("bg-", "")
+								.replace("border-", "")
+								.replace("text-", "")
 						)}
 					/>
 
@@ -123,23 +136,33 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 						<div className="flex-1">
 							<CardTitle className="text-xl font-semibold flex items-center gap-2">
 								<span className="bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">
-									{'title' in data ? data.title : 'name' in data ? data.name : ''}
+									{"title" in data
+										? data.title
+										: "name" in data
+											? data.name
+											: ""}
 								</span>
 							</CardTitle>
 
 							<div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-								{'status' in data && data.status && (
-									<span className="px-2 py-0.5 bg-primary/10 rounded-full">{data.status}</span>
+								{"status" in data && data.status && (
+									<span className="px-2 py-0.5 bg-primary/10 rounded-full">
+										{data.status}
+									</span>
 								)}
-								{'priority' in data && data.priority !== undefined && (
+								{"priority" in data && data.priority !== undefined && (
 									<span
-										className={cn('px-2 py-0.5 rounded-full', {
-											'bg-blue-100 text-blue-700': data.priority === 1,
-											'bg-amber-100 text-amber-700': data.priority === 2,
-											'bg-rose-100 text-rose-700': data.priority === 3,
+										className={cn("px-2 py-0.5 rounded-full", {
+											"bg-blue-100 text-blue-700": data.priority === 1,
+											"bg-amber-100 text-amber-700": data.priority === 2,
+											"bg-rose-100 text-rose-700": data.priority === 3,
 										})}
 									>
-										{data.priority === 1 ? 'Baja' : data.priority === 2 ? 'Media' : 'Alta'}
+										{data.priority === 1
+											? "Baja"
+											: data.priority === 2
+												? "Media"
+												: "Alta"}
 									</span>
 								)}
 							</div>
@@ -149,35 +172,47 @@ export function NoteCard({ data, isPreview = false, onEdit, onDelete, className 
 
 					<CardContent className="px-4 pt-3 pb-4">
 						{/* Contenido */}
-						{'content' in data && data.content && (
-							<div className={cn('mt-1 text-sm text-slate-600', !showContent && 'line-clamp-3')}>
+						{"content" in data && data.content && (
+							<div
+								className={cn(
+									"mt-1 text-sm text-slate-600",
+									!showContent && "line-clamp-3"
+								)}
+							>
 								{data.content}
 								{data.content.length > 150 && (
-									<Button variant="link" className="p-0 h-auto text-xs text-primary" onClick={toggleContent}>
-										{showContent ? 'Ver menos' : 'Ver más'}
+									<Button
+										variant="link"
+										className="p-0 h-auto text-xs text-primary"
+										onClick={toggleContent}
+									>
+										{showContent ? "Ver menos" : "Ver más"}
 									</Button>
 								)}
 							</div>
 						)}
 
 						{/* Tags */}
-						{'tags' in data && data.tags && Array.isArray(data.tags) && data.tags.length > 0 && (
-							<div className="flex flex-wrap gap-2 mt-4">
-								{data.tags.map((tag: string) => (
-									<Badge key={tag} variant="secondary" className="text-xs">
-										{tag}
-									</Badge>
-								))}
-							</div>
-						)}
+						{"tags" in data &&
+							data.tags &&
+							Array.isArray(data.tags) &&
+							data.tags.length > 0 && (
+								<div className="flex flex-wrap gap-2 mt-4">
+									{data.tags.map((tag: string) => (
+										<Badge key={tag} variant="secondary" className="text-xs">
+											{tag}
+										</Badge>
+									))}
+								</div>
+							)}
 
 						{/* Controles */}
 						{!isPreview && (
 							<div
 								className={cn(
-									'absolute right-2 top-8 flex flex-col gap-2',
-									!isHovered && 'opacity-0',
-									'transition-opacity duration-200'
+									"absolute right-2 top-8 flex flex-col gap-2",
+									!isHovered && "opacity-0",
+									"transition-opacity duration-200"
 								)}
 							>
 								{onEdit && (
