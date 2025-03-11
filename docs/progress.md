@@ -115,6 +115,16 @@
 - Verificado que no quedan errores de tipo o sintaxis
 - Validada compatibilidad con las nuevas características de React 19 y Next.js 15
 
+### 17/03/2024
+- Corregido error crítico de renderizado de iconos:
+  - Modificado el tipo `ServiceStatus` para usar `LucideIcon` directamente en lugar de `ReactNode`
+  - Ajustado el componente `ServiceCard` para desestructurar correctamente el icono del servicio
+  - Modificado el hook `useFeaturesIssues` para pasar los componentes de Lucide directamente
+  - Eliminada la función `createElement` que generaba elementos React en lugar de componentes
+  - Actualizada la tipificación en todos los archivos relevantes para mantener la coherencia
+  - Adaptado el sistema al enfoque recomendado para React 19 con la administración de componentes
+- Revisada la documentación actualizada para garantizar que refleja el enfoque actual
+
 ## Mejoras realizadas
 
 ### Estructura y organización
@@ -148,6 +158,7 @@
 - Verificada la compatibilidad con la versión actual de Lucide React
 - Implementada solución utilizando iconos alternativos disponibles
 - Corregido problema de sintaxis JSX en archivos TypeScript mediante createElement
+- Solucionado error crítico de renderizado de iconos en ServiceCard
 - Mejorada la seguridad de tipos con interfaces específicas para componentes React
 - Documentado el proceso para futuras referencias
 
@@ -165,6 +176,7 @@
 - Utilizada inicialización con función para estados iniciales
 - Optimizada la estructura del código para aprovechar las mejoras de rendimiento
 - Implementada memoización exhaustiva para evitar recreaciones innecesarias
+- Adaptado el manejo de iconos para ser compatible con el sistema de componentes de React 19
 - Adaptados los tipos para garantizar la seguridad de tipos completa
 
 ### Futuras mejoras
