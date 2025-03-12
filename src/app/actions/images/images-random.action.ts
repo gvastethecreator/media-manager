@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export interface RandomImage {
@@ -9,6 +10,15 @@ export interface RandomImage {
 	thumbnail?: string | null;
 	width?: number;
 	height?: number;
+}
+
+// Tipo para los datos que vienen directamente de Prisma
+interface ImageData {
+	id: string;
+	path: string;
+	thumbnail: Uint8Array | null;
+	width: number | null;
+	height: number | null;
 }
 
 /**
@@ -21,7 +31,7 @@ export async function getRandomImagesForEntity(
 	count = 6
 ): Promise<{ success: boolean; data?: RandomImage[]; message?: string }> {
 	try {
-		let images: RandomImage[] = [];
+		let imagesData: ImageData[] = [];
 
 		// Obtener imágenes según el tipo de entidad
 		switch (entityType) {
@@ -34,7 +44,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomAlbum) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { albums: { some: { id: randomAlbum.id } } },
 						select: {
 							id: true,
@@ -45,7 +55,7 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
@@ -59,7 +69,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomCollection) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { collections: { some: { id: randomCollection.id } } },
 						select: {
 							id: true,
@@ -70,7 +80,7 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
@@ -84,7 +94,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomTag) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { tags: { some: { id: randomTag.id } } },
 						select: {
 							id: true,
@@ -95,7 +105,7 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
@@ -109,7 +119,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomCharacter) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { characters: { some: { id: randomCharacter.id } } },
 						select: {
 							id: true,
@@ -120,7 +130,7 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
@@ -134,7 +144,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomPlace) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { places: { some: { id: randomPlace.id } } },
 						select: {
 							id: true,
@@ -145,7 +155,7 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
@@ -159,7 +169,7 @@ export async function getRandomImagesForEntity(
 				});
 
 				if (randomWorldItem) {
-					images = await prisma.image.findMany({
+					imagesData = (await prisma.image.findMany({
 						where: { worldItems: { some: { id: randomWorldItem.id } } },
 						select: {
 							id: true,
@@ -170,14 +180,14 @@ export async function getRandomImagesForEntity(
 						},
 						take: count,
 						orderBy: { updatedAt: 'desc' },
-					});
+					})) as unknown as ImageData[];
 				}
 				break;
 			}
 
 			default: {
 				// Si no hay un tipo específico, obtener imágenes aleatorias
-				images = await prisma.image.findMany({
+				imagesData = (await prisma.image.findMany({
 					select: {
 						id: true,
 						path: true,
@@ -187,14 +197,14 @@ export async function getRandomImagesForEntity(
 					},
 					take: count,
 					orderBy: { updatedAt: 'desc' },
-				});
+				})) as unknown as ImageData[];
 				break;
 			}
 		}
 
 		// Si no se encontraron imágenes, buscar cualquier imagen
-		if (images.length === 0) {
-			images = await prisma.image.findMany({
+		if (imagesData.length === 0) {
+			imagesData = (await prisma.image.findMany({
 				select: {
 					id: true,
 					path: true,
@@ -204,8 +214,20 @@ export async function getRandomImagesForEntity(
 				},
 				take: count,
 				orderBy: { updatedAt: 'desc' },
-			});
+			})) as unknown as ImageData[];
 		}
+
+		// Transformar los datos para asegurar la compatibilidad con el tipo RandomImage
+		// En este caso necesitamos convertir el thumbnail de Uint8Array a string o null
+		const images: RandomImage[] = imagesData.map((image) => ({
+			id: image.id,
+			path: image.path,
+			// No necesitamos incluir el thumbnail ya que se accede vía API
+			// El componente EntityCardPreview usa /api/thumbnails/{path}
+			thumbnail: null,
+			width: image.width || undefined,
+			height: image.height || undefined,
+		}));
 
 		return {
 			success: true,

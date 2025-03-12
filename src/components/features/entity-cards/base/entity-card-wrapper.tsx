@@ -1,13 +1,22 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils/utils';
-import type * as React from 'react';
-import { useMemo } from 'react';
-import { DEFAULT_SETTINGS_OPTIONS } from '../settings/card-config-defaults';
-import type { CardOptions as SettingsCardOptions } from '../settings/card-settings-types';
-import { BaseCard } from './base-card';
-import type { CardOptions as BaseCardOptions, CardDesignPreset, RarityConfig, TextureConfig } from './base-card-types';
-import { adaptOptionsForLayout, adaptSettingsToBaseOptions, isSettingsCardOptions } from './card-adapter';
+import { cn } from "@/lib/utils/utils";
+import type * as React from "react";
+import { useMemo } from "react";
+import { DEFAULT_SETTINGS_OPTIONS } from "../settings/card-config-defaults";
+import type { CardOptions as SettingsCardOptions } from "../settings/card-settings-types";
+import { BaseCard } from "./base-card";
+import type {
+	CardOptions as BaseCardOptions,
+	CardDesignPreset,
+	RarityConfig,
+	TextureConfig,
+} from "./base-card-types";
+import {
+	adaptOptionsForLayout,
+	adaptSettingsToBaseOptions,
+	isSettingsCardOptions,
+} from "./card-adapter";
 
 export interface EntityCardWrapperProps {
 	// Propiedades comunes
@@ -79,29 +88,39 @@ export function EntityCardWrapper({
 		return options as Partial<BaseCardOptions>;
 	}, [options]);
 
-	// Adaptar las opciones para el tipo específico de layout
-	const adaptedOptions = useMemo(() => {
-		return adaptOptionsForLayout(baseOptions, entityType);
-	}, [baseOptions, entityType]);
-
 	// Configurar la rareza con valores predeterminados si es necesario
 	const defaultRarity: RarityConfig = rarity || {
-		name: 'common',
-		color: '#3b82f6',
-		borderWidth: '1px',
+		name: "common",
+		color: "#3b82f6",
+		borderWidth: "1px",
+		borderEffect: "static",
 	};
+
+	// Adaptar las opciones para el tipo específico de layout
+	const adaptedOptions = useMemo(() => {
+		const options = adaptOptionsForLayout(baseOptions, entityType);
+		// Asegurar que las opciones de rareza están correctamente configuradas
+		if (
+			rarity &&
+			options.raritySystem !== undefined &&
+			options.raritySystem?.enabled !== false
+		) {
+			options.raritySystem = { enabled: true };
+		}
+		return options;
+	}, [baseOptions, entityType, rarity]);
 
 	return (
 		<BaseCard
 			className={cn(
-				'w-full',
+				"w-full",
 				{
 					// Aplicar aspecto según el preset configurado
-					'aspect-[3/4]': adaptedOptions.designSystem?.aspectRatio === '3/4',
-					'aspect-[4/5]': adaptedOptions.designSystem?.aspectRatio === '4/5',
-					'aspect-[7/10]': adaptedOptions.designSystem?.aspectRatio === '7/10',
-					'aspect-square': adaptedOptions.designSystem?.aspectRatio === '1/1',
-					'aspect-video': adaptedOptions.designSystem?.aspectRatio === '16/9',
+					"aspect-[3/4]": adaptedOptions.designSystem?.aspectRatio === "3/4",
+					"aspect-[4/5]": adaptedOptions.designSystem?.aspectRatio === "4/5",
+					"aspect-[7/10]": adaptedOptions.designSystem?.aspectRatio === "7/10",
+					"aspect-square": adaptedOptions.designSystem?.aspectRatio === "1/1",
+					"aspect-video": adaptedOptions.designSystem?.aspectRatio === "16/9",
 				},
 				className
 			)}

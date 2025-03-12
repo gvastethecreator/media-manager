@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { FolderCard } from '@/components/features/entity-cards/layouts/folder-card-layout';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
-import { getFolders } from '@/services/folder.service';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import type { Folder } from '@/types/entities/folders';
-import { FolderIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-import type { ViewProps } from '../types';
+import { EmptyState } from "@/components/core/data-display";
+import { LoadingScreen } from "@/components/core/feedback";
+import { FolderCard } from "@/components/features/entity-cards/layouts/folder-card-layout";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { clientEvents } from "@/lib/client/events.client";
+import { logger } from "@/lib/logger/logger";
+import { getFolders } from "@/services/folder.service";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import type { Folder } from "@/types/entities/folders";
+import { FolderIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
+import type { ViewProps } from "../types";
 
-const viewLogger = logger.withContext('FoldersView');
+const viewLogger = logger.withContext("FoldersView");
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -25,24 +25,37 @@ export function FoldersView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el nuevo hook de eventos optimistas del cliente
-	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
+	const [optimisticFolders, _addEvent] =
+		clientEvents.useEvents<Folder[]>(folders);
 
 	const loadFolders = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info('🔄 Cargando carpetas...');
+			viewLogger.info("🔄 Cargando carpetas...");
 			const data = await getFolders();
-			const transformedData = data.map((folder: Folder) => ({
-				...folder,
-				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
-				createdAt: new Date(folder.createdAt),
-				updatedAt: new Date(folder.updatedAt),
-			}));
+			const transformedData = data.map((folderData) => {
+				// Filtrar valores nulos en recentImages
+				const recentImages = folderData.recentImages
+					? folderData.recentImages.filter((img): img is string => img !== null)
+					: [];
+
+				return {
+					...folderData,
+					recentImages,
+					lastIndexed: folderData.lastIndexed
+						? new Date(folderData.lastIndexed)
+						: null,
+					createdAt: new Date(folderData.createdAt),
+					updatedAt: new Date(folderData.updatedAt),
+				} as Folder;
+			});
+
 			setFolders(transformedData);
 			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando carpetas:', error);
+			const errorMessage =
+				error instanceof Error ? error.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando carpetas:", error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -55,8 +68,8 @@ export function FoldersView(_props: ViewProps) {
 
 	const handleFolderClick = useCallback(
 		(folder: Folder) => {
-			viewLogger.info('🖱️ Click en carpeta:', folder.name);
-			setCurrentView('folder-content');
+			viewLogger.info("🖱️ Click en carpeta:", folder.name);
+			setCurrentView("folder-content");
 			setCurrentFolder(folder.id);
 		},
 		[setCurrentView, setCurrentFolder]
@@ -95,7 +108,11 @@ export function FoldersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<FolderCard folder={folder} onClick={() => handleFolderClick(folder)} enableExplode={true} />
+							<FolderCard
+								folder={folder}
+								onClick={() => handleFolderClick(folder)}
+								enableExplode={true}
+							/>
 						</motion.div>
 					))}
 				</div>

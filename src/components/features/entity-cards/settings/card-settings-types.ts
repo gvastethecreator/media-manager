@@ -1,4 +1,4 @@
-import type { RaritySystem, TextureSystem } from '@/app/actions/entities-cards/entities-cards.actions';
+import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
 import type {
 	BorderOptions,
 	GlowEffectOptions,
@@ -7,7 +7,8 @@ import type {
 	RarityConfig,
 	ScanlinesOptions,
 	TextureConfig,
-} from '@/components/features/entity-cards/types/card-types';
+	TextureSystem,
+} from '@/components/features/entity-cards/base/base-card-types';
 import type { ReactNode } from 'react';
 
 // Tipo para la configuración del grid de imágenes

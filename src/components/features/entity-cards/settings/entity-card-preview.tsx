@@ -1,6 +1,6 @@
 'use client';
 
-import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/entities-cards/random-images.action';
+import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/base/base-card-types';
 import type { CardOptions } from '@/components/features/entity-cards/settings/card-settings-types';

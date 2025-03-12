@@ -1,54 +1,64 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import type { CharacterFormData } from '@/types/character-form-data';
-import * as React from 'react';
-import { CompactPicker } from 'react-color';
+import type { CharacterFormData } from "@/components/features/entity-cards/forms/entity-types";
+import { Button } from "@/components/ui/button";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import * as React from "react";
+import { CompactPicker } from "react-color";
 
 const CHARACTER_CLASSES = [
-	'Guerrero',
-	'Mago',
-	'Clérigo',
-	'Pícaro',
-	'Paladín',
-	'Druida',
-	'Bárbaro',
-	'Bardo',
-	'Monje',
-	'Hechicero',
-	'Brujo',
-	'Explorador',
+	"Guerrero",
+	"Mago",
+	"Clérigo",
+	"Pícaro",
+	"Paladín",
+	"Druida",
+	"Bárbaro",
+	"Bardo",
+	"Monje",
+	"Hechicero",
+	"Brujo",
+	"Explorador",
 ];
 
 const CHARACTER_RACES = [
-	'Humano',
-	'Elfo',
-	'Enano',
-	'Mediano',
-	'Gnomo',
-	'Semielfo',
-	'Semiorco',
-	'Dracónido',
-	'Tiefling',
+	"Humano",
+	"Elfo",
+	"Enano",
+	"Mediano",
+	"Gnomo",
+	"Semielfo",
+	"Semiorco",
+	"Dracónido",
+	"Tiefling",
 ];
 
 const CHARACTER_ALIGNMENTS = [
-	'Legal Bueno',
-	'Neutral Bueno',
-	'Caótico Bueno',
-	'Legal Neutral',
-	'Neutral',
-	'Caótico Neutral',
-	'Legal Malvado',
-	'Neutral Malvado',
-	'Caótico Malvado',
+	"Legal Bueno",
+	"Neutral Bueno",
+	"Caótico Bueno",
+	"Legal Neutral",
+	"Neutral",
+	"Caótico Neutral",
+	"Legal Malvado",
+	"Neutral Malvado",
+	"Caótico Malvado",
 ];
 
 interface CharacterFormProps {
@@ -58,28 +68,33 @@ interface CharacterFormProps {
 	isLoading?: boolean;
 }
 
-export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: CharacterFormProps) {
+export function CharacterForm({
+	initialData,
+	onSubmit,
+	onCancel,
+	isLoading,
+}: CharacterFormProps) {
 	const [formData, setFormData] = React.useState<CharacterFormData>(
 		initialData || {
-			name: '',
-			emoji: '👤',
-			color: '#3b82f6',
-			description: '',
+			name: "",
+			emoji: "👤",
+			color: "#3b82f6",
+			description: "",
 			level: 1,
-			class: 'Guerrero',
-			race: 'Humano',
-			alignment: 'Neutral',
-			backstory: '',
-			stats: '{}',
-			sortBy: 'name',
-			filters: '[]',
-			psychologicalProfile: '',
-			socialProfile: '',
-			relationships: '[]',
-			goals: '[]',
-			fears: '[]',
-			beliefs: '[]',
-			personality: '[]',
+			class: "Guerrero",
+			race: "Humano",
+			alignment: "Neutral",
+			backstory: "",
+			stats: "{}",
+			sortBy: "name",
+			filters: "[]",
+			psychologicalProfile: "",
+			socialProfile: "",
+			relationships: "[]",
+			goals: "[]",
+			fears: "[]",
+			beliefs: "[]",
+			personality: "[]",
 			featuredImage: null,
 			isFavorite: false,
 		}
@@ -93,8 +108,11 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 		await onSubmit(formData);
 	};
 
-	const handleChange = <T extends keyof CharacterFormData>(field: T, value: CharacterFormData[T]) => {
-		setFormData((prev) => ({
+	const handleChange = <T extends keyof CharacterFormData>(
+		field: T,
+		value: CharacterFormData[T]
+	) => {
+		setFormData((prev: CharacterFormData) => ({
 			...prev,
 			[field]: value,
 		}));
@@ -114,10 +132,15 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className="w-full p-0" align="start">
-							<EmojiPicker onEmojiSelect={(emoji: string) => handleChange('emoji', emoji)} />
+							<EmojiPicker
+								onEmojiSelect={(emoji: string) => handleChange("emoji", emoji)}
+							/>
 							<Separator className="my-2" />
 							<div className="p-2">
-								<CompactPicker color={formData.color} onChange={(color) => handleChange('color', color.hex)} />
+								<CompactPicker
+									color={formData.color}
+									onChange={(color) => handleChange("color", color.hex)}
+								/>
 							</div>
 						</PopoverContent>
 					</Popover>
@@ -126,13 +149,13 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 				<div className="flex-1 min-w-0">
 					<Input
 						value={formData.name}
-						onChange={(e) => handleChange('name', e.target.value)}
+						onChange={(e) => handleChange("name", e.target.value)}
 						className="h-8 text-base"
 						placeholder="Nombre"
 					/>
 					<Input
-						value={formData.description || ''}
-						onChange={(e) => handleChange('description', e.target.value)}
+						value={formData.description || ""}
+						onChange={(e) => handleChange("description", e.target.value)}
 						className="h-6 text-xs mt-1"
 						placeholder="Descripción (opcional)"
 					/>
@@ -147,14 +170,19 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 						min={1}
 						max={20}
 						value={formData.level}
-						onChange={(e) => handleChange('level', Number.parseInt(e.target.value) || 1)}
+						onChange={(e) =>
+							handleChange("level", Number.parseInt(e.target.value) || 1)
+						}
 						className="h-8"
 						placeholder="Nivel"
 					/>
 				</div>
 				<div className="space-y-2">
 					<Label>Clase</Label>
-					<Select value={formData.class} onValueChange={(value) => handleChange('class', value)}>
+					<Select
+						value={formData.class}
+						onValueChange={(value) => handleChange("class", value)}
+					>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona una clase" />
 						</SelectTrigger>
@@ -172,7 +200,10 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-2">
 					<Label>Raza</Label>
-					<Select value={formData.race} onValueChange={(value) => handleChange('race', value)}>
+					<Select
+						value={formData.race}
+						onValueChange={(value) => handleChange("race", value)}
+					>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona una raza" />
 						</SelectTrigger>
@@ -187,7 +218,10 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 				</div>
 				<div className="space-y-2">
 					<Label>Alineamiento</Label>
-					<Select value={formData.alignment} onValueChange={(value) => handleChange('alignment', value)}>
+					<Select
+						value={formData.alignment}
+						onValueChange={(value) => handleChange("alignment", value)}
+					>
 						<SelectTrigger className="h-8">
 							<SelectValue placeholder="Selecciona alineamiento" />
 						</SelectTrigger>
@@ -206,7 +240,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 				<Label>Historia del Personaje</Label>
 				<Textarea
 					value={formData.backstory}
-					onChange={(e) => handleChange('backstory', e.target.value)}
+					onChange={(e) => handleChange("backstory", e.target.value)}
 					className="min-h-[100px]"
 					placeholder="Escribe la historia del personaje..."
 				/>
@@ -216,7 +250,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 				<Label>Perfil Psicológico</Label>
 				<Textarea
 					value={formData.psychologicalProfile}
-					onChange={(e) => handleChange('psychologicalProfile', e.target.value)}
+					onChange={(e) => handleChange("psychologicalProfile", e.target.value)}
 					className="min-h-[100px]"
 					placeholder="Describe el perfil psicológico del personaje..."
 				/>
@@ -226,7 +260,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 				<Label>Perfil Social</Label>
 				<Textarea
 					value={formData.socialProfile}
-					onChange={(e) => handleChange('socialProfile', e.target.value)}
+					onChange={(e) => handleChange("socialProfile", e.target.value)}
 					className="min-h-[100px]"
 					placeholder="Describe el perfil social del personaje..."
 				/>
@@ -239,7 +273,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 					onChange={(e) => {
 						try {
 							JSON.parse(e.target.value);
-							handleChange('relationships', e.target.value);
+							handleChange("relationships", e.target.value);
 						} catch {
 							// Si no es JSON válido, mantener el valor anterior
 						}
@@ -257,7 +291,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 						onChange={(e) => {
 							try {
 								JSON.parse(e.target.value);
-								handleChange('goals', e.target.value);
+								handleChange("goals", e.target.value);
 							} catch {
 								// Si no es JSON válido, mantener el valor anterior
 							}
@@ -273,7 +307,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 						onChange={(e) => {
 							try {
 								JSON.parse(e.target.value);
-								handleChange('fears', e.target.value);
+								handleChange("fears", e.target.value);
 							} catch {
 								// Si no es JSON válido, mantener el valor anterior
 							}
@@ -292,7 +326,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 						onChange={(e) => {
 							try {
 								JSON.parse(e.target.value);
-								handleChange('beliefs', e.target.value);
+								handleChange("beliefs", e.target.value);
 							} catch {
 								// Si no es JSON válido, mantener el valor anterior
 							}
@@ -308,7 +342,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 						onChange={(e) => {
 							try {
 								JSON.parse(e.target.value);
-								handleChange('personality', e.target.value);
+								handleChange("personality", e.target.value);
 							} catch {
 								// Si no es JSON válido, mantener el valor anterior
 							}
@@ -326,7 +360,7 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 					onChange={(e) => {
 						try {
 							JSON.parse(e.target.value);
-							handleChange('stats', e.target.value);
+							handleChange("stats", e.target.value);
 						} catch {
 							// Si no es JSON válido, mantener el valor anterior
 						}
@@ -338,12 +372,17 @@ export function CharacterForm({ initialData, onSubmit, onCancel, isLoading }: Ch
 
 			<div className="flex justify-end gap-2">
 				{onCancel && (
-					<Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
+					<Button
+						type="button"
+						variant="ghost"
+						onClick={onCancel}
+						disabled={isLoading}
+					>
 						Cancelar
 					</Button>
 				)}
 				<Button type="submit" disabled={isLoading || !formData.name.trim()}>
-					{isLoading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
+					{isLoading ? "Guardando..." : initialData ? "Actualizar" : "Crear"}
 				</Button>
 			</div>
 		</form>
