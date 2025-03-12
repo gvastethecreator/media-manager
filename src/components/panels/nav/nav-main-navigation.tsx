@@ -54,13 +54,13 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 			transition={{ duration: 0.3 }}
 			className="px-2 pb-2 pt-1"
 		>
-			<div className="bg-background/50 backdrop-blur-sm rounded-md p-1 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
+			<div className="rounded-md p-1 shadow-sm">
 				<div className="flex justify-between gap-1">
 					{navigationItems.map(({ id, icon: Icon, label, description }, index) => {
 						const isActive = currentView === id;
 
 						return (
-							<TooltipProvider key={id} delayDuration={300}>
+							<TooltipProvider key={id} delayDuration={1000}>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<motion.div
@@ -76,9 +76,9 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 											className="flex-1"
 										>
 											<Button
-												variant="ghost"
+												variant="outline"
 												className={cn(
-													'relative w-full h-6 px-0 transition-all duration-200 rounded-sm',
+													'relative w-full h-8 p-2 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
 													'flex items-center justify-center',
 													isActive
 														? 'bg-secondary/70 text-foreground'
@@ -106,7 +106,7 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 														className="absolute -bottom-[0.5px] left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
-														transition={{ delay: 0.1 }}
+														transition={{ delay: 0.05 }}
 													/>
 												)}
 

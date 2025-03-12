@@ -35,7 +35,7 @@ export function MainLayout() {
 	}, []);
 
 	return (
-		<div className="flex h-screen w-full">
+		<div className="flex h-screen w-full bg-background">
 			<ResizablePanelGroup direction="horizontal" className="h-full w-full">
 				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background-primary">
 					{navData && <NavPanel initialData={navData} />}
@@ -50,7 +50,7 @@ export function MainLayout() {
 				<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
 					<div className="flex flex-col h-full">
 						<ViewToolbar />
-						<div ref={contentWrapperRef} className="flex-1 relative resize-container">
+						<div ref={contentWrapperRef} className="flex-1 relative resize-container ">
 							<div
 								className="absolute inset-0 w-full h-full view-container-transition"
 								style={{
@@ -63,7 +63,7 @@ export function MainLayout() {
 
 							{isResizing && (
 								<div
-									className="absolute inset-0 w-full h-full bg-background-secondary/50"
+									className="absolute inset-0 w-full h-full"
 									style={{
 										backdropFilter: 'blur(2px)',
 										WebkitBackdropFilter: 'blur(2px)',

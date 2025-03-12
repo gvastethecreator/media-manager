@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { logger } from '../src/lib/logger/logger'
+import { seedCardConfigurations } from './seeds/card-configurations.seed'
 
 const prisma = new PrismaClient({
   log: ['error', 'warn'],
@@ -23,6 +24,9 @@ async function main() {
   await prisma.prompt.deleteMany()
   await prisma.note.deleteMany()
   await prisma.uploadedImage.deleteMany()
+  await prisma.cardConfiguration.deleteMany()
+  await prisma.rarity.deleteMany()
+  await prisma.texture.deleteMany()
 
   // Crear perfil por defecto
   seedLogger.info('👤 Creando perfil default...')
@@ -272,6 +276,276 @@ async function main() {
     ],
   })
 
+  // Crear configuraciones de tarjetas por defecto
+  seedLogger.info('🎴 Creando configuraciones de tarjetas de entidades...')
+
+  const entityTypes = ['album', 'tag', 'collection', 'character', 'place', 'worldItem', 'concept', 'prompt', 'note'];
+
+  for (const entityType of entityTypes) {
+    await prisma.cardConfiguration.upsert({
+      where: { entityType },
+      update: {},
+      create: {
+        entityType,
+        enable3DEffect: true,
+        enableHolographicEffect: true,
+        enableScanlines: true,
+        enableLightHalo: true,
+        enableAnimatedBorder: true,
+        enableGlowEffect: true,
+        enableGrainEffect: true,
+        hoverLiftHeight: 10,
+        maxRotation: 15,
+        primaryColor: entityType === 'album' ? '#3b82f6' :
+                       entityType === 'tag' ? '#10b981' :
+                       entityType === 'collection' ? '#8b5cf6' :
+                       entityType === 'character' ? '#ef4444' :
+                       entityType === 'place' ? '#f59e0b' :
+                       entityType === 'worldItem' ? '#6366f1' :
+                       entityType === 'concept' ? '#ec4899' :
+                       entityType === 'prompt' ? '#f97316' : '#64748b',
+        secondaryColor: entityType === 'album' ? '#8b5cf6' :
+                         entityType === 'tag' ? '#14b8a6' :
+                         entityType === 'collection' ? '#a855f7' :
+                         entityType === 'character' ? '#f43f5e' :
+                         entityType === 'place' ? '#fb923c' :
+                         entityType === 'worldItem' ? '#818cf8' :
+                         entityType === 'concept' ? '#f472b6' :
+                         entityType === 'prompt' ? '#fb923c' : '#94a3b8',
+        raritySystem: entityType === 'album' || entityType === 'tag' || entityType === 'collection',
+        categorySystem: true,
+        textureSystem: entityType === 'album' || entityType === 'tag' || entityType === 'collection',
+      }
+    });
+  }
+
+  // Crear rarezas predeterminadas
+  seedLogger.info('✨ Creando rarezas predeterminadas...')
+
+  // Rarezas para álbumes
+  const albumRarities = [
+    { name: 'Común', color: '#9ca3af', position: 0, chance: 50 },
+    { name: 'Poco común', color: '#10b981', position: 1, chance: 30 },
+    { name: 'Raro', color: '#3b82f6', position: 2, chance: 15 },
+    { name: 'Épico', color: '#8b5cf6', position: 3, chance: 4 },
+    { name: 'Legendario', color: '#f59e0b', borderEffect: 'animated', glowColor: '#f97316', position: 4, chance: 1 }
+  ];
+
+  for (const rarity of albumRarities) {
+    await prisma.rarity.upsert({
+      where: {
+        entityType_name: {
+          entityType: 'album',
+          name: rarity.name
+        }
+      },
+      update: {
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+      },
+      create: {
+        entityType: 'album',
+        name: rarity.name,
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+        description: `Rareza ${rarity.name} para álbumes`,
+      }
+    });
+  }
+
+  // Rarezas para etiquetas
+  const tagRarities = [
+    { name: 'Común', color: '#9ca3af', position: 0, chance: 60 },
+    { name: 'Raro', color: '#3b82f6', position: 1, chance: 30 },
+    { name: 'Épico', color: '#8b5cf6', position: 2, chance: 8 },
+    { name: 'Legendario', color: '#f59e0b', borderEffect: 'animated', glowColor: '#f97316', position: 3, chance: 2 }
+  ];
+
+  for (const rarity of tagRarities) {
+    await prisma.rarity.upsert({
+      where: {
+        entityType_name: {
+          entityType: 'tag',
+          name: rarity.name
+        }
+      },
+      update: {
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+      },
+      create: {
+        entityType: 'tag',
+        name: rarity.name,
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+        description: `Rareza ${rarity.name} para etiquetas`,
+      }
+    });
+  }
+
+  // Rarezas para colecciones
+  const collectionRarities = [
+    { name: 'Común', color: '#9ca3af', position: 0, chance: 45 },
+    { name: 'Poco común', color: '#10b981', position: 1, chance: 25 },
+    { name: 'Raro', color: '#3b82f6', position: 2, chance: 15 },
+    { name: 'Épico', color: '#8b5cf6', position: 3, chance: 10 },
+    { name: 'Mítico', color: '#ec4899', position: 4, chance: 4 },
+    { name: 'Legendario', color: '#f59e0b', borderEffect: 'animated', glowColor: '#f97316', position: 5, chance: 1 }
+  ];
+
+  for (const rarity of collectionRarities) {
+    await prisma.rarity.upsert({
+      where: {
+        entityType_name: {
+          entityType: 'collection',
+          name: rarity.name
+        }
+      },
+      update: {
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+      },
+      create: {
+        entityType: 'collection',
+        name: rarity.name,
+        color: rarity.color,
+        borderEffect: rarity.borderEffect,
+        glowColor: rarity.glowColor,
+        position: rarity.position,
+        chance: rarity.chance,
+        description: `Rareza ${rarity.name} para colecciones`,
+      }
+    });
+  }
+
+  // Crear texturas predeterminadas
+  seedLogger.info('🎨 Creando texturas predeterminadas...')
+
+  // Definir patrones de texturas básicos
+  const texturePatterns = [
+    {
+      name: 'Metálico',
+      patternType: 'linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%, rgba(0,0,0,0.1))',
+      color: '#b6b6b6',
+      opacity: 0.6
+    },
+    {
+      name: 'Holográfico',
+      patternType: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)',
+      color: '#8a2be2',
+      opacity: 0.7
+    },
+    {
+      name: 'Madera',
+      patternType: 'repeating-linear-gradient(90deg, rgba(101, 67, 33, 0.5) 0px, rgba(67, 32, 0, 0.5) 5px, rgba(101, 67, 33, 0.5) 10px)',
+      color: '#8B4513',
+      opacity: 0.5
+    },
+    {
+      name: 'Piedra',
+      patternType: 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 100%)',
+      color: '#808080',
+      opacity: 0.4
+    },
+    {
+      name: 'Acuarela',
+      patternType: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%)',
+      color: '#87CEEB',
+      opacity: 0.5
+    }
+  ];
+
+  // Crear texturas para cada tipo de entidad
+  for (const entityType of ['album', 'tag', 'collection']) {
+    for (const texture of texturePatterns) {
+      await prisma.texture.upsert({
+        where: {
+          entityType_name: {
+            entityType,
+            name: texture.name
+          }
+        },
+        update: {},
+        create: {
+          entityType,
+          name: texture.name,
+          patternType: texture.patternType,
+          color: texture.color,
+          opacity: texture.opacity,
+          description: `Textura ${texture.name} para ${entityType}`,
+        }
+      });
+    }
+  }
+
+  // Establecer rarezas y texturas para entidades existentes
+  seedLogger.info('🔄 Actualizando entidades con rarezas y texturas aleatorias...')
+
+  // Actualizar álbumes con rarezas aleatorias
+  const albums = await prisma.album.findMany();
+  const albumRarityNames = albumRarities.map(r => r.name);
+
+  for (const album of albums) {
+    const randomRarity = albumRarityNames[Math.floor(Math.random() * albumRarityNames.length)];
+    const randomTexture = texturePatterns[Math.floor(Math.random() * texturePatterns.length)].name;
+
+    await prisma.album.update({
+      where: { id: album.id },
+      data: {
+        rarity: randomRarity,
+        texture: Math.random() > 0.5 ? randomTexture : null
+      }
+    });
+  }
+
+  // Actualizar etiquetas con rarezas aleatorias
+  const tags = await prisma.tag.findMany();
+  const tagRarityNames = tagRarities.map(r => r.name);
+
+  for (const tag of tags) {
+    const randomRarity = tagRarityNames[Math.floor(Math.random() * tagRarityNames.length)];
+    const randomTexture = texturePatterns[Math.floor(Math.random() * texturePatterns.length)].name;
+
+    await prisma.tag.update({
+      where: { id: tag.id },
+      data: {
+        rarity: randomRarity,
+        texture: Math.random() > 0.5 ? randomTexture : null
+      }
+    });
+  }
+
+  // Actualizar colecciones con rarezas aleatorias
+  const collections = await prisma.collection.findMany();
+  const collectionRarityNames = collectionRarities.map(r => r.name);
+
+  for (const collection of collections) {
+    const randomRarity = collectionRarityNames[Math.floor(Math.random() * collectionRarityNames.length)];
+    const randomTexture = texturePatterns[Math.floor(Math.random() * texturePatterns.length)].name;
+
+    await prisma.collection.update({
+      where: { id: collection.id },
+      data: {
+        rarity: randomRarity,
+        texture: Math.random() > 0.5 ? randomTexture : null
+      }
+    });
+  }
 
   // Crear objetos por defecto
   seedLogger.info('🎮 Creando objetos del mundo por defecto...')
@@ -1031,7 +1305,11 @@ async function main() {
     });
   }
 
-  seedLogger.info('✅ Proceso de seed completado exitosamente')
+  // Sembrar configuraciones de tarjetas
+  seedLogger.info('🎴 Sembrando configuraciones de tarjetas...')
+  await seedCardConfigurations(prisma)
+
+  seedLogger.info('✅ Proceso de seed completado con éxito')
 }
 
 main()

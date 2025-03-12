@@ -99,7 +99,7 @@ export function ViewContainer() {
 	const { currentView, navigationDirection } = useNavigationStore();
 
 	return (
-		<div className="relative w-full h-full overflow-auto">
+		<div className="relative w-full h-full overflow-auto bg-background">
 			<AnimatePresence initial={false} custom={navigationDirection}>
 				<motion.div
 					key={currentView}
@@ -113,7 +113,7 @@ export function ViewContainer() {
 						opacity: { duration: 0.15 },
 						scale: { duration: 0.2 },
 					}}
-					className="absolute inset-0 w-full h-full"
+					className="absolute inset-0 w-full h-full bg-background"
 				>
 					<MemoizedViewContent view={currentView} />
 				</motion.div>
