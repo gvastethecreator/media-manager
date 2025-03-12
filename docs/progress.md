@@ -110,3 +110,33 @@ El uso de memoización en las funciones de utilidad internas mejora significativ
 - ⬜ Añadir más presets con combinaciones interesantes de efectos
 - ⬜ Mejorar la visualización responsive para dispositivos móviles
 - ⬜ Implementar la exportación/importación de configuraciones personalizadas
+
+## Mejoras en el Sistema de Texturas
+
+### Refactorización y Estandarización ✅
+
+- ✅ Unificadas las interfaces `TextureConfig` y `TextureSystem` en un solo lugar (`base-card-types.ts`)
+- ✅ Actualizado el componente `TexturePreview` para usar las interfaces estandarizadas
+- ✅ Actualizado el componente `TextureEditor` con soporte para todos los campos requeridos
+- ✅ Corregidos errores de tipado en los archivos de configuración predeterminada
+
+### Mejoras en la API y Consistencia ✅
+
+- ✅ Estandarizado el campo `color` como propiedad obligatoria para todas las texturas
+- ✅ Reemplazados campos redundantes (`pattern`, `primaryColor`, `secondaryColor`) con propiedades estandarizadas
+- ✅ Actualizado el archivo `entities-cards.actions.ts` para usar la nueva estructura de texturas
+- ✅ Añadidos valores predeterminados adecuados para propiedades opcionales
+
+### Nuevas Propiedades de Textura ✅
+
+- ✅ Implementado soporte para modo de fusión (blendMode) en texturas
+- ✅ Añadido soporte para tipos de ruido (noiseType) con diferentes variantes
+- ✅ Implementada funcionalidad de animación para texturas con velocidad configurable
+- ✅ Añadidas propiedades de densidad y contraste para control fino del aspecto
+
+### Próximos Pasos 🚧
+
+- ⬜ Implementar interfaz visual para configurar todos los nuevos parámetros de textura
+- ⬜ Añadir biblioteca de texturas predefinidas con diferentes estilos
+- ⬜ Implementar sistema de capas para combinar múltiples texturas
+- ⬜ Mejorar el rendimiento de renderizado para texturas animadas

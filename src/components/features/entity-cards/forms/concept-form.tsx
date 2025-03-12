@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import type { ConceptFormData } from '@/types/concept-form-data';
+import type { ConceptFormData } from './entity-types';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';
 

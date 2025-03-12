@@ -135,42 +135,39 @@ const notifyWorldItemChange = async (
  * Obtiene todos los objetos del mundo
  */
 export async function getWorldItems() {
-	try {
-		// Verificar si existe en caché
-		const cached = await worldItemsCache.get('all');
-		if (cached) {
-			worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
-			// Convertimos explícitamente a tipo unknown primero para evitar errores de tipo
-			return cached as unknown as Array<PrismaWorldItem & { _count: { images: number } }>;
-		}
+	const transformWorldItem = (worldItem: PrismaWorldItem & { _count: { images: number } }): WorldItemWithStats => ({
+		...worldItem,
+		totalSize: 0, // Valor por defecto, reemplazar si es necesario
+		lastUpdated: new Date(worldItem.updatedAt || worldItem.createdAt), // Usamos updatedAt si existe
+		recentImages: [], // Valor por defecto
+	});
 
-		const worldItems = await prisma.worldItem.findMany({
-			orderBy: {
-				createdAt: 'desc',
-			},
-			include: {
-				_count: {
-					select: {
-						images: true,
-					},
+	const cached = await worldItemsCache.get('all');
+	if (cached) {
+		worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
+		// Se asume que cached ya es un arreglo de objetos planos
+		const items = cached as Array<PrismaWorldItem & { _count: { images: number } }>;
+		return items.map(transformWorldItem);
+	}
+
+	const worldItems = await prisma.worldItem.findMany({
+		orderBy: {
+			createdAt: 'desc',
+		},
+		include: {
+			_count: {
+				select: {
+					images: true,
 				},
 			},
-		});
+		},
+	});
 
-		// Almacenar en caché - usar tipo correcto para evitar errores
-		// Nota: como la estructura de la caché puede ser diferente,
-		// hacemos la conversión de tipos de manera segura
-		await worldItemsCache.set('all', JSON.parse(JSON.stringify(worldItems)));
+	// Convertir a objeto plano para almacenar en caché
+	const dataToCache = JSON.parse(JSON.stringify(worldItems)) as Array<PrismaWorldItem & { _count: { images: number } }>;
+	await worldItemsCache.set('all', dataToCache);
 
-		return worldItems;
-	} catch (error) {
-		worldItemLogger.error('❌ Error al obtener objetos del mundo:', error);
-		throw createWorldItemError(
-			'No se pudieron obtener los objetos del mundo',
-			WorldItemErrorCode.OPERATION_FAILED,
-			error
-		);
-	}
+	return worldItems.map(transformWorldItem);
 }
 
 export async function getWorldItemById(id: string) {

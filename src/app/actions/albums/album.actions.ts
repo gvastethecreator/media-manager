@@ -377,6 +377,9 @@ export async function getAlbumImages(id: string): Promise<FileItem[]> {
 			places: image.places?.map((p) => ({ id: p.id, name: p.name })) || [],
 			worldItems: image.worldItems?.map((o) => ({ id: o.id, name: o.name })) || [],
 			thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
+			concepts: [],
+			prompts: [],
+			notes: [],
 		}));
 	} catch (error) {
 		albumLogger.error('❌ Error al obtener imágenes del álbum:', error);

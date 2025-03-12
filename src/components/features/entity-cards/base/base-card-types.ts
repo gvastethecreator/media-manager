@@ -253,8 +253,34 @@ export interface TextureConfig {
 	name: string;
 	patternType?: string;
 	imageUrl?: string;
-	color?: string;
-	opacity?: number;
+	color: string;
+	opacity: number;
+	scale?: number;
+	blend?: string;
+}
+
+// Sistema de texturas
+export interface TextureSystem {
+	enabled: boolean;
+	textures: Array<{
+		id: string;
+		name: string;
+		imageUrl?: string;
+		patternType?: string;
+		color: string;
+		opacity: number;
+		description?: string;
+		blendMode?: string;
+		noiseType?: string;
+		animated?: boolean;
+		animationSpeed?: number;
+		density?: number;
+		contrast?: number;
+		visibleOnHover?: boolean;
+		layerOrder?: number;
+		scale?: number;
+	}>;
+	entityType?: string;
 }
 
 // Capa para el modo de visualización "explosión"
@@ -327,28 +353,83 @@ export interface CardDesignData {
 	};
 }
 
-// Todas las propiedades del BaseCard
+// Funciones para cambios en la vista explosionada
+export type ExplodeLayerTransformFunction = (layerIndex: number) => React.CSSProperties;
+
+// Estados para las tarjetas
+export interface CardStates {
+	enableHover?: boolean;
+	enableFocus?: boolean;
+	enableActive?: boolean;
+	enableSelected?: boolean;
+	stateEffect?: string;
+	stateIntensity?: number;
+	stateDuration?: number;
+	loading?: {
+		skeleton?: boolean;
+		spinner?: boolean;
+		blur?: boolean;
+	};
+	error?: {
+		style?: string;
+		color?: string;
+	};
+	selected?: {
+		style?: string;
+		color?: string;
+	};
+	disabled?: {
+		style?: string;
+		opacity?: number;
+	};
+}
+
+// Interactividad para tarjetas
+export interface CardInteractivity {
+	enableHoverEffects?: boolean;
+	enableClickEffects?: boolean;
+	enableDragInteraction?: boolean;
+	enableContextMenu?: boolean;
+	hover?: {
+		scale?: number;
+		rotate?: boolean;
+		lift?: boolean;
+		glow?: boolean;
+	};
+	click?: {
+		feedback?: string;
+		sound?: boolean;
+		haptic?: boolean;
+	};
+	gestures?: {
+		swipe?: boolean;
+		pinch?: boolean;
+		rotate?: boolean;
+	};
+}
+
+// Props para el componente BaseCard
 export interface BaseCardProps {
 	children: React.ReactNode;
 	className?: string;
 	options?: Partial<CardOptions>;
 	rarity?: RarityConfig;
 	texture?: TextureConfig;
+	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	onHoverStart?: () => void;
 	onHoverEnd?: () => void;
-	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	showVisualizationConfig?: boolean;
 	onVisualizationConfigClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 	enableExplode?: boolean;
-	explodeLayers?: ExplodeLayer[];
+	explodeLayers?: {
+		id: string;
+		label: string;
+		icon: React.ReactNode;
+	}[];
 	isExploded?: boolean;
 	activeLayer?: string | null;
 	onExplodedChange?: (isExploded: boolean) => void;
 	onActiveLayerChange?: (layerId: string | null) => void;
-
-	// Nuevas propiedades
-	designData?: CardDesignData;
-	preset?: CardDesignPreset;
 }
 
 // Estado interno del BaseCard
@@ -359,55 +440,4 @@ export interface BaseCardState {
 	rotateY: number;
 	isExploded: boolean;
 	activeLayer: string | null;
-}
-
-// Función para transformar capas en modo explodado
-export type ExplodeLayerTransformFunction = (layerIndex: number) => React.CSSProperties;
-
-export interface CardStates {
-	loading?: {
-		skeleton?: boolean;
-		spinner?: boolean;
-		blur?: boolean;
-	};
-	error?: {
-		style?: 'border' | 'overlay' | 'badge';
-		color?: string;
-	};
-	selected?: {
-		style?: 'border' | 'overlay' | 'badge';
-		color?: string;
-	};
-	disabled?: {
-		style?: 'grayscale' | 'opacity' | 'blur';
-		opacity?: number;
-	};
-	enableLoadingState?: boolean;
-	enableErrorState?: boolean;
-	enableSelectedState?: boolean;
-	enableDisabledState?: boolean;
-}
-
-export interface CardInteractivity {
-	hover?: {
-		scale?: number;
-		rotate?: boolean;
-		lift?: boolean;
-		glow?: boolean;
-		transform?: string;
-	};
-	click?: {
-		feedback?: 'none' | 'scale' | 'rotate' | 'shake';
-		sound?: boolean;
-		haptic?: boolean;
-	};
-	gestures?: {
-		swipe?: boolean;
-		pinch?: boolean;
-		rotate?: boolean;
-	};
-	enableHoverEffects?: boolean;
-	enableClickEffects?: boolean;
-	enableDragInteraction?: boolean;
-	enableContextMenu?: boolean;
 }

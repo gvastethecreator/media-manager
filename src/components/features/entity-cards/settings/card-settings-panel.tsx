@@ -1,32 +1,45 @@
-'use client';
+"use client";
 
-import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import type { TextureConfig } from '../types/card-types';
-import type { RarityConfig } from '../types/card-types';
-import { AdvancedEffectsSettings } from './advanced-effects-settings';
-import type { CardOptions, CardPresetOption, CardSettingsProps, SystemSettingsProps } from './card-settings-types';
-import { DesignSettings } from './design-settings';
-import { ImageGridSettings } from './image-grid-settings';
-import { PerformanceSettings } from './performance-settings';
-import { PresetsPanel } from './presets-panel';
-import { PreviewPanel } from './preview-panel';
-import { StatesSettings } from './states-settings';
-import { SystemsSettings } from './systems-settings';
-import { VisualEffectsSettings } from './visual-effects-settings';
+import { toastService } from "@/lib/services/toast.service";
+import { cn } from "@/lib/utils/utils";
+import { motion } from "motion/react";
+import * as React from "react";
+import type { TextureConfig } from "../base/base-card-types";
+import type { RarityConfig } from "../base/base-card-types";
+import { AdvancedEffectsSettings } from "./advanced-effects-settings";
+import type {
+	CardOptions,
+	CardPresetOption,
+	CardSettingsProps,
+	SystemSettingsProps,
+} from "./card-settings-types";
+import { DesignSettings } from "./design-settings";
+import { ImageGridSettings } from "./image-grid-settings";
+import { PerformanceSettings } from "./performance-settings";
+import { PresetsPanel } from "./presets-panel";
+import { PreviewPanel } from "./preview-panel";
+import { StatesSettings } from "./states-settings";
+import { SystemsSettings } from "./systems-settings";
+import { VisualEffectsSettings } from "./visual-effects-settings";
 
 // Colores para cada sección
 const sectionColors = {
-	presets: 'from-blue-50 to-blue-100/10 dark:from-blue-950/10 dark:to-blue-900/5',
-	visual: 'from-indigo-50 to-indigo-100/10 dark:from-indigo-950/10 dark:to-indigo-900/5',
-	system: 'from-violet-50 to-violet-100/10 dark:from-violet-950/10 dark:to-violet-900/5',
-	images: 'from-pink-50 to-pink-100/10 dark:from-pink-950/10 dark:to-pink-900/5',
-	advanced: 'from-cyan-50 to-cyan-100/10 dark:from-cyan-950/10 dark:to-cyan-900/5',
-	design: 'from-emerald-50 to-emerald-100/10 dark:from-emerald-950/10 dark:to-emerald-900/5',
-	performance: 'from-amber-50 to-amber-100/10 dark:from-amber-950/10 dark:to-amber-900/5',
-	states: 'from-orange-50 to-orange-100/10 dark:from-orange-950/10 dark:to-orange-900/5',
+	presets:
+		"from-blue-50 to-blue-100/10 dark:from-blue-950/10 dark:to-blue-900/5",
+	visual:
+		"from-indigo-50 to-indigo-100/10 dark:from-indigo-950/10 dark:to-indigo-900/5",
+	system:
+		"from-violet-50 to-violet-100/10 dark:from-violet-950/10 dark:to-violet-900/5",
+	images:
+		"from-pink-50 to-pink-100/10 dark:from-pink-950/10 dark:to-pink-900/5",
+	advanced:
+		"from-cyan-50 to-cyan-100/10 dark:from-cyan-950/10 dark:to-cyan-900/5",
+	design:
+		"from-emerald-50 to-emerald-100/10 dark:from-emerald-950/10 dark:to-emerald-900/5",
+	performance:
+		"from-amber-50 to-amber-100/10 dark:from-amber-950/10 dark:to-amber-900/5",
+	states:
+		"from-orange-50 to-orange-100/10 dark:from-orange-950/10 dark:to-orange-900/5",
 };
 
 // Componente para una sección con color de fondo
@@ -41,7 +54,7 @@ const SettingsSection = ({
 		<motion.div
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			className={cn('rounded-md bg-gradient-to-br p-0.5', colorClass)}
+			className={cn("rounded-md bg-gradient-to-br p-0.5", colorClass)}
 		>
 			{children}
 		</motion.div>
@@ -51,7 +64,7 @@ const SettingsSection = ({
 export function CardSettingsPanel({
 	cardOptions,
 	onCardOptionsChange,
-	entityType = 'album',
+	entityType = "album",
 	onRarityChange,
 	onTextureChange,
 	raritySystem,
@@ -83,11 +96,18 @@ export function CardSettingsPanel({
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					{/* Fila 1: Presets y Visual */}
 					<SettingsSection colorClass={sectionColors.presets}>
-						<PresetsPanel activePreset={activePreset} onPresetSelect={handlePresetSelect} entityType={entityType} />
+						<PresetsPanel
+							activePreset={activePreset}
+							onPresetSelect={handlePresetSelect}
+							entityType={entityType}
+						/>
 					</SettingsSection>
 
 					<SettingsSection colorClass={sectionColors.visual}>
-						<VisualEffectsSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<VisualEffectsSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 
 					{/* Fila 2: Sistema y Configuración de Imágenes */}
@@ -104,25 +124,40 @@ export function CardSettingsPanel({
 					</SettingsSection>
 
 					<SettingsSection colorClass={sectionColors.images}>
-						<ImageGridSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<ImageGridSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 
 					{/* Fila 3: Efectos Avanzados y Diseño */}
 					<SettingsSection colorClass={sectionColors.advanced}>
-						<AdvancedEffectsSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<AdvancedEffectsSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 
 					<SettingsSection colorClass={sectionColors.design}>
-						<DesignSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<DesignSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 
 					{/* Fila 4: Rendimiento y Estados */}
 					<SettingsSection colorClass={sectionColors.performance}>
-						<PerformanceSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<PerformanceSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 
 					<SettingsSection colorClass={sectionColors.states}>
-						<StatesSettings cardOptions={cardOptions} onCardOptionsChange={handleOptionsChange} />
+						<StatesSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={handleOptionsChange}
+						/>
 					</SettingsSection>
 				</div>
 			</div>
@@ -132,8 +167,16 @@ export function CardSettingsPanel({
 				<PreviewPanel
 					cardOptions={cardOptions}
 					entityType={entityType}
-					rarity={cardOptions.raritySystem && raritySystem ? (raritySystem.rarities[0] as RarityConfig) : null}
-					texture={cardOptions.textureSystem && textureSystem ? (textureSystem.textures[0] as TextureConfig) : null}
+					rarity={
+						cardOptions.raritySystem && raritySystem
+							? (raritySystem.rarities[0] as RarityConfig)
+							: null
+					}
+					texture={
+						cardOptions.textureSystem && textureSystem
+							? (textureSystem.textures[0] as TextureConfig)
+							: null
+					}
 					showInfo
 				/>
 			</div>
