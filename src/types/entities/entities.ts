@@ -199,5 +199,3 @@ export interface WorldItemCreate extends BaseEntityCreate {
 	sortBy: string;
 	filters: string;
 }
-
-export type { WorldItemCreate as ObjectCreate };

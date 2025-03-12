@@ -74,7 +74,7 @@ export function ImageRenderer({
 
 	return (
 		<div className={cn('relative overflow-hidden', className)}>
-			{isLoading && <div className="absolute inset-0 bg-muted animate-pulse" />}
+			{isLoading && <div className="absolute inset-0 bg-muted animate-shiny-text" />}
 
 			<Image
 				src={src}

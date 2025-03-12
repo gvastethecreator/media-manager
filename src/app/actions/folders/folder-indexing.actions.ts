@@ -449,7 +449,10 @@ export async function reindexAllFolders(): Promise<void> {
 						currentFolder: folder.name,
 						phase: 'processing',
 						status: `Procesando carpeta ${folder.name} (${processedFolders + 1}/${folders.length})`,
-					} as ReindexAllProgressData,
+						current: processedFolders,
+						total: folders.length,
+						progress: (processedFolders / folders.length) * 100,
+					} as unknown as ReindexAllProgressData,
 				});
 
 				// Reindexar la carpeta
@@ -481,7 +484,7 @@ export async function reindexAllFolders(): Promise<void> {
 						phase: 'processing',
 						status: `Completado ${processedFolders}/${folders.length} carpetas`,
 						errors,
-					} as ReindexAllProgressData,
+					} as unknown as ReindexAllProgressData,
 				});
 			} catch (error) {
 				folderLogger.error(`Error procesando carpeta ${folder.name}:`, {
@@ -507,7 +510,7 @@ export async function reindexAllFolders(): Promise<void> {
 						phase: 'processing',
 						status: `Error en carpeta ${folder.name}. Continuando...`,
 						errors,
-					} as ReindexAllProgressData,
+					} as unknown as ReindexAllProgressData,
 				});
 			}
 		}
@@ -520,7 +523,7 @@ export async function reindexAllFolders(): Promise<void> {
 				totalFolders: folders.length,
 				errors,
 				success: errors.length === 0,
-			} as ReindexAllCompleteData,
+			} as unknown as ReindexAllCompleteData,
 		});
 
 		// Revalidar rutas

@@ -17,7 +17,7 @@ import { useConceptStore } from '@/store/entities/concept.store';
 import { useNoteStore } from '@/store/entities/note.store';
 import { useTagsStore } from '@/store/entities/tags.store';
 
-import type { ContextMenuAction, ContextMenuActionData } from '@/types/context-menu-action';
+import type { ContextMenuAction, ContextMenuActionData } from '@/types/context-menu-actions';
 import type { FileItem } from '@/types/file-item';
 
 const actionLogger = logger.withContext('ContextActionHandler');
