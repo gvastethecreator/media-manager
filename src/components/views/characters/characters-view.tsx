@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import type { CharacterWithStats } from '@/app/actions/characters/character.actions';
-import { getCharacters } from '@/app/actions/characters/character.actions';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { CharacterCard } from '@/components/features/entity-cards/layouts/character-card-layout';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import { Users } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-import type { ViewProps } from '../types';
+import type { CharacterWithStats } from "@/app/actions/characters/character.actions";
+import { getCharacters } from "@/app/actions/characters/character.actions";
+import { EmptyState } from "@/components/core/data-display";
+import { LoadingScreen } from "@/components/core/feedback";
+import { CharacterCard } from "@/components/features/entity-cards/layouts/character-card-layout";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { clientEvents } from "@/lib/client/events.client";
+import { logger } from "@/lib/logger/logger";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import { Users } from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
+import type { ViewProps } from "../types";
 
-const viewLogger = logger.withContext('CharactersView');
+const viewLogger = logger.withContext("CharactersView");
 
 export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -25,18 +25,20 @@ export function CharactersView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
+	const [optimisticCharacters, _addEvent] =
+		clientEvents.useEvents<CharacterWithStats[]>(characters);
 
 	const fetchCharacters = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info('🔄 Cargando personajes...');
+			viewLogger.info("🔄 Cargando personajes...");
 			const data = await getCharacters();
 			setCharacters(data);
 			viewLogger.info(`✅ ${data.length} personajes cargados`);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando personajes:', err);
+			const errorMessage =
+				err instanceof Error ? err.message : "Error desconocido";
+			viewLogger.error("❌ Error cargando personajes:", err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -50,8 +52,8 @@ export function CharactersView(_props: ViewProps) {
 
 	const handleCharacterClick = useCallback(
 		(character: CharacterWithStats) => {
-			viewLogger.info('🖱️ Click en personaje:', character.name);
-			setCurrentView('character-content');
+			viewLogger.info("🖱️ Click en personaje:", character.name);
+			setCurrentView("character-content");
 			setCurrentCharacter(character.id);
 		},
 		[setCurrentView, setCurrentCharacter]
@@ -92,10 +94,29 @@ export function CharactersView(_props: ViewProps) {
 						>
 							<CharacterCard
 								character={{
-									...character,
-									featuredImage: character.recentImages?.[0] || null,
+									id: character.id,
+									name: character.name,
+									description: character.description || "",
+									featuredImage: character.recentImages?.[0] || undefined,
+									// Convertir datos específicos del personaje al formato de CardDesignData
+									characterInfo: {
+										level: character._count?.images || 0,
+										class: character.category || "",
+										stats: {
+											strength: 10,
+											dexterity: 10,
+											intelligence: 10,
+											charisma: 10,
+										},
+									},
+									stats: {
+										images: character._count?.images || 0,
+										size: character.totalSize || 0,
+									},
 								}}
 								onClick={() => handleCharacterClick(character)}
+								enableExplode={true}
+								showVisualizationConfig={false}
 							/>
 						</motion.div>
 					))}

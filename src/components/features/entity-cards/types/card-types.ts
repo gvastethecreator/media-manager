@@ -77,6 +77,7 @@ export interface TextureConfig {
 	id: string;
 	name: string;
 	pattern: string;
+	color: string;
 	opacity?: number;
 	scale?: number;
 	blend?: string;
