@@ -98,7 +98,7 @@ El sistema utiliza variables de entorno para su configuración. Copia el archivo
 ### Convenciones
 
 - Utiliza TypeScript para todo el código
-- Sigue las guías de estilo de ESLint
+- Sigue las guías de estilo de Biome
 - Documenta los componentes y funciones principales
 - Usa commits semánticos
 

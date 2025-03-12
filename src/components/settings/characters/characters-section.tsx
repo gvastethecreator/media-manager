@@ -1,12 +1,12 @@
 'use client';
 
-import { CharacterCard } from '@/components/features/entity-cards/character/character-card';
-import { CharacterForm } from '@/components/features/entity-cards/character/character-form';
+import { CharacterForm } from '@/components/features/entity-cards/forms/character-form';
 import {
 	type CharacterFormData,
 	characterToFormData,
 	formDataToCharacter,
-} from '@/components/features/entity-cards/entity-types';
+} from '@/components/features/entity-cards/forms/entity-types';
+import { CharacterCard } from '@/components/features/entity-cards/layouts/character-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';

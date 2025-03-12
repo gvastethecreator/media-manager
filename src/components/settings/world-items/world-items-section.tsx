@@ -5,9 +5,9 @@ import {
 	type WorldItemFormData,
 	formDataToWorldItem as importedFormDataToWorldItem,
 	worldItemToFormData,
-} from '@/components/features/entity-cards/entity-types';
-import { WorldItemCard } from '@/components/features/entity-cards/world-item/world-item-card';
-import { WorldItemForm } from '@/components/features/entity-cards/world-item/world-item-form';
+} from '@/components/features/entity-cards/forms/entity-types';
+import { WorldItemForm } from '@/components/features/entity-cards/forms/world-item-form';
+import { WorldItemCard } from '@/components/features/entity-cards/layouts/world-item-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';

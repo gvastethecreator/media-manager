@@ -1,5 +1,6 @@
 'use server';
 
+import type { CardConfigurationDto } from '@/components/features/entity-cards/types/card-types';
 import { prisma } from '@/lib/prisma';
 import type { Rarity as PrismaRarity, Texture as PrismaTexture } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
@@ -174,43 +175,43 @@ export async function getEntityCardConfig(entityType: string): Promise<ActionRes
 /**
  * Guarda la configuración de tarjeta para una entidad específica
  */
-export async function saveEntityCardConfig(entityType: string, config: CardOptions): Promise<ActionResponse> {
+export async function saveEntityCardConfig(entityType: string, options: CardConfigurationDto): Promise<ActionResponse> {
 	try {
 		// Guardar la configuración en la base de datos usando upsert
 		await prisma.cardConfiguration.upsert({
 			where: { entityType },
 			update: {
-				enable3DEffect: config.enable3DEffect,
-				enableHolographicEffect: config.enableHolographicEffect,
-				enableScanlines: config.enableScanlines,
-				enableLightHalo: config.enableLightHalo,
-				enableAnimatedBorder: config.enableAnimatedBorder,
-				enableGlowEffect: config.enableGlowEffect,
-				enableGrainEffect: config.enableGrainEffect,
-				hoverLiftHeight: config.hoverLiftHeight,
-				maxRotation: config.maxRotation,
-				primaryColor: config.primaryColor,
-				secondaryColor: config.secondaryColor,
-				raritySystem: config.raritySystem,
-				categorySystem: config.categorySystem,
-				textureSystem: config.textureSystem,
+				enable3DEffect: options.enable3DEffect,
+				enableHolographicEffect: options.enableHolographicEffect,
+				enableScanlines: options.enableScanlines,
+				enableLightHalo: options.enableLightHalo,
+				enableAnimatedBorder: options.enableAnimatedBorder,
+				enableGlowEffect: options.enableGlowEffect,
+				enableGrainEffect: options.enableGrainEffect,
+				hoverLiftHeight: options.hoverLiftHeight,
+				maxRotation: options.maxRotation,
+				primaryColor: options.primaryColor,
+				secondaryColor: options.secondaryColor,
+				raritySystem: options.raritySystem,
+				categorySystem: options.categorySystem,
+				textureSystem: options.textureSystem,
 			},
 			create: {
 				entityType,
-				enable3DEffect: config.enable3DEffect,
-				enableHolographicEffect: config.enableHolographicEffect,
-				enableScanlines: config.enableScanlines,
-				enableLightHalo: config.enableLightHalo,
-				enableAnimatedBorder: config.enableAnimatedBorder,
-				enableGlowEffect: config.enableGlowEffect,
-				enableGrainEffect: config.enableGrainEffect,
-				hoverLiftHeight: config.hoverLiftHeight,
-				maxRotation: config.maxRotation,
-				primaryColor: config.primaryColor,
-				secondaryColor: config.secondaryColor,
-				raritySystem: config.raritySystem,
-				categorySystem: config.categorySystem,
-				textureSystem: config.textureSystem,
+				enable3DEffect: options.enable3DEffect,
+				enableHolographicEffect: options.enableHolographicEffect,
+				enableScanlines: options.enableScanlines,
+				enableLightHalo: options.enableLightHalo,
+				enableAnimatedBorder: options.enableAnimatedBorder,
+				enableGlowEffect: options.enableGlowEffect,
+				enableGrainEffect: options.enableGrainEffect,
+				hoverLiftHeight: options.hoverLiftHeight,
+				maxRotation: options.maxRotation,
+				primaryColor: options.primaryColor,
+				secondaryColor: options.secondaryColor,
+				raritySystem: options.raritySystem,
+				categorySystem: options.categorySystem,
+				textureSystem: options.textureSystem,
 			},
 		});
 

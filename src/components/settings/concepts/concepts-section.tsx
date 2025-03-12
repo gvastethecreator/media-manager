@@ -1,7 +1,7 @@
 'use client';
 
-import { ConceptCard } from '@/components/features/entity-cards/concept/concept-card';
-import { ConceptForm } from '@/components/features/entity-cards/concept/concept-form';
+import { ConceptForm } from '@/components/features/entity-cards/forms/concept-form';
+import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';

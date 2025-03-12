@@ -33,42 +33,32 @@ export function NavPanelHeader({ totalImages, onOpenSettings, onOpenDevelopment 
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.1, ease: "easeOut" }}
+			transition={{ duration: 0.1, ease: 'easeOut' }}
 			className="relative bg-gradient-to-b from-background/90 to-transparent py-1 border-b border-border/20 shadow-sm"
 		>
 			<div className="flex items-center justify-between px-3">
 				{/* Perfil y estadísticas */}
 				<div className="flex items-center gap-2">
-					<motion.div
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						className="relative group"
-					>
+					<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
 						<div
 							className="h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 overflow-hidden group-hover:brightness-110 cursor-pointer "
 							style={{
 								backgroundColor: activeProfileData?.color,
-								boxShadow:
-									"0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)",
+								boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
 							}}
 						>
-							<span className="text-sm font-large">
-								{activeProfileData?.emoji}
-							</span>
+							<span className="text-sm font-large">{activeProfileData?.emoji}</span>
 						</div>
 					</motion.div>
 
 					<div className="flex flex-col">
-
 						<motion.div
 							initial={{ opacity: 0, width: 0 }}
-							animate={{ opacity: 1, width: "auto" }}
+							animate={{ opacity: 1, width: 'auto' }}
 							transition={{ delay: 0.2 }}
 							className="flex items-center"
 						>
-							<span className="text-xs leading-tight text-foreground/60">
-								{activeProfileData?.name}
-							</span>
+							<span className="text-xs leading-tight text-foreground/60">{activeProfileData?.name}</span>
 							<span className="inline-flex items-center gap-1 text-[10px] ml-2 text-muted-foreground">
 								{totalImages.toLocaleString()} imagenes
 							</span>
@@ -93,9 +83,7 @@ export function NavPanelHeader({ totalImages, onOpenSettings, onOpenDevelopment 
 							<TooltipContent side="bottom" className="text-xs">
 								<p className="font-medium text-amber-400">Modo Desarrollador</p>
 								<p>Accede a herramientas de desarrollo y depuración</p>
-								<p className="text-[10px] text-zinc-400 mt-1.5">
-									Solo para administradores
-								</p>
+								<p className="text-[10px] text-zinc-400 mt-1.5">Solo para administradores</p>
 							</TooltipContent>
 						</Tooltip>
 
@@ -109,29 +97,22 @@ export function NavPanelHeader({ totalImages, onOpenSettings, onOpenDevelopment 
 								>
 									<motion.div
 										initial={false}
-										animate={{ rotate: theme === "light" ? 0 : 180 }}
+										animate={{ rotate: theme === 'light' ? 0 : 180 }}
 										transition={{
 											duration: 0.3,
-											type: "spring",
+											type: 'spring',
 											stiffness: 200,
 										}}
 									>
-										{theme === "light" ? (
-											<Moon className="h-3.5 w-3.5" />
-										) : (
-											<Sun className="h-3.5 w-3.5" />
-										)}
+										{theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
 									</motion.div>
 								</Button>
 							</TooltipTrigger>
 							<TooltipContent side="bottom" className="text-xs">
 								<p className="font-medium text-amber-400">Cambiar Tema</p>
-								<p>Modo {theme === "light" ? "oscuro" : "claro"}</p>
+								<p>Modo {theme === 'light' ? 'oscuro' : 'claro'}</p>
 								<p className="text-[10px] text-zinc-400 mt-1.5">
-									Acceso rápido con{" "}
-									<span className="px-1 py-0.5 bg-zinc-800 rounded text-[9px]">
-										Ctrl+T
-									</span>
+									Acceso rápido con <span className="px-1 py-0.5 bg-zinc-800 rounded text-[9px]">Ctrl+T</span>
 								</p>
 							</TooltipContent>
 						</Tooltip>
