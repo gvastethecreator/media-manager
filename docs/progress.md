@@ -185,3 +185,24 @@
 - Mejorar visualizaciones con más filtros y opciones de personalización
 - Añadir exportación de datos a formatos CSV/JSON
 - Implementar notificaciones en tiempo real para problemas críticos
+
+### 12/07/2024
+- Implementado sistema de configuración de tarjetas para entidades:
+  - Creados modelos en Prisma para `CardConfiguration`, `Rarity` y `Texture`
+  - Desarrollados componentes UI para gestionar la configuración visual de las tarjetas
+  - Implementado sistema de rarezas que permite:
+    - Definir múltiples niveles de rareza con nombres, colores y probabilidades
+    - Distribución automática de probabilidades basada en la posición en la lista
+    - Visualización previa del estilo de rareza
+  - Implementado sistema de texturas que permite:
+    - Definir texturas con patrones CSS personalizados y colores
+    - Presets predefinidos para texturas comunes (metálico, holográfico, madera, etc.)
+    - Vista previa en tiempo real de las texturas aplicadas
+  - Creadas server actions para cargar y guardar configuraciones
+  - Integrado el sistema con la interfaz de configuración existente
+  - Implementada vista previa en tiempo real de los cambios
+  - Diseñada una interfaz intuitiva con pestañas para distintas secciones
+- Añadida la capacidad de activar/desactivar sistemas independientemente
+- Optimizado el rendimiento con carga asíncrona de configuraciones
+- Documentado el sistema para facilitar futuras expansiones
+- Diseñada la arquitectura para permitir fácil adición de nuevas características

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	AlbumIcon,
 	BlocksIcon,
@@ -17,82 +17,225 @@ import {
 	TagIcon,
 	UploadCloud,
 	UserIcon,
-} from 'lucide-react';
-import * as React from 'react';
+} from "lucide-react";
+import * as React from "react";
 
-import { AlbumsSection } from './albums/albums-section';
-import { CharactersSection } from './characters/characters-section';
-import { CollectionsSection } from './collections/collections-section';
-import { ConceptsSection } from './concepts/concepts-section';
-import { FoldersSection } from './folders/folders-section';
-import { NotesSection } from './notes/notes-section';
-import { PlacesSection } from './places/places-section';
-import { ProfilesSection } from './profiles/profiles-section';
-import { PromptsSection } from './prompts/prompts-section';
-import { TagsSection } from './tags/tags-section';
-import { ThumbnailsSection } from './thumbnails/thumbnails-section';
-import { UploadedImagesSection } from './uploaded-images/uploaded-images-section';
-import { WorldItemsSection } from './world-items/world-items-section';
-import { ShortcutsSection } from './shortcuts/shortcuts-section';
-import { SystemSection } from './system/system-section';
+import { AlbumsSection } from "./albums/albums-section";
+import { CharactersSection } from "./characters/characters-section";
+import { CollectionsSection } from "./collections/collections-section";
+import { ConceptsSection } from "./concepts/concepts-section";
+import { EntitiesCardsSection } from "./entities-cards/entities-cards-section";
+import { FoldersSection } from "./folders/folders-section";
+import { NotesSection } from "./notes/notes-section";
+import { PlacesSection } from "./places/places-section";
+import { ProfilesSection } from "./profiles/profiles-section";
+import { PromptsSection } from "./prompts/prompts-section";
+import { ShortcutsSection } from "./shortcuts/shortcuts-section";
+import { SystemSection } from "./system/system-section";
+import { TagsSection } from "./tags/tags-section";
+import { ThumbnailsSection } from "./thumbnails/thumbnails-section";
+import { UploadedImagesSection } from "./uploaded-images/uploaded-images-section";
+import { WorldItemsSection } from "./world-items/world-items-section";
+
+const tabColors = {
+	system: "#64748b", // Slate
+	albums: "#8b5cf6", // Violet
+	collections: "#ef4444", // Red
+	tags: "#f59e0b", // Amber
+	characters: "#ec4899", // Pink
+	"world-items": "#f59e0b", // Amber
+	places: "#14b8a6", // Teal
+	concepts: "#3b82f6", // Blue
+	prompts: "#10b981", // Emerald
+	notes: "#a855f7", // Purple
+	thumbnails: "#0ea5e9", // Sky
+	"uploaded-images": "#22c55e", // Green
+	shortcuts: "#475569", // Slate
+	"entities-cards": "#6366f1", // Indigo
+};
 
 export function SettingsView() {
-	const [activeTab, setActiveTab] = React.useState('system');
+	const [activeTab, setActiveTab] = React.useState("system");
+
+
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none">
 			<ScrollArea className="h-full">
-				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none" defaultValue="folders">
-					<TabsList className="grid w-full flex justify-between rounded-none">
-						<TabsTrigger value="system" className="text-[9px]">
-							<SettingsIcon className="h-3 w-3 mr-1" /> Sistema
+				<Tabs
+					value={activeTab}
+					onValueChange={setActiveTab}
+					className="w-full rounded-none"
+					defaultValue="folders"
+				>
+					<TabsList className="flex w-full rounded-none p-0 border-b border-border bg-background justify-start">
+						<TabsTrigger
+							value="system"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium
+							border-b-2 cursor-pointer rounded-none
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<SettingsIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.system }}
+							/>
+							Sistema
 						</TabsTrigger>
 
-						<TabsTrigger value="albums" className="text-[9px]">
-							<AlbumIcon className="h-3 w-3 mr-1" /> Albums
+						<TabsTrigger
+							value="albums"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium
+							border-b-2 cursor-pointer rounded-none
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<AlbumIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.albums }}
+							/>
+							Albums
 						</TabsTrigger>
 
-						<TabsTrigger value="collections" className="text-[9px]">
-							<Grid2X2Icon className="h-3 w-3 mr-1" /> Colecciones
+						<TabsTrigger
+							value="collections"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<Grid2X2Icon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.collections }}
+							/>
+							Colecciones
 						</TabsTrigger>
 
-						<TabsTrigger value="tags" className="text-[9px]">
-							<TagIcon className="h-3 w-3 mr-1" /> Etiquetas
+						<TabsTrigger
+							value="tags"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<TagIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.tags }}
+							/>
+							Etiquetas
 						</TabsTrigger>
 
-						<TabsTrigger value="characters" className="text-[9px]">
-							<UserIcon className="h-3 w-3 mr-1" /> Personas
+						<TabsTrigger
+							value="characters"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<UserIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.characters }}
+							/>
+							Personas
 						</TabsTrigger>
 
-						<TabsTrigger value="world-items" className="text-[9px]">
-							<BoxIcon className="h-3 w-3 mr-1" /> Objetos
+						<TabsTrigger
+							value="world-items"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<BoxIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors["world-items"] }}
+							/>
+							Objetos
 						</TabsTrigger>
 
-						<TabsTrigger value="places" className="text-[9px]">
-							<MapPinIcon className="h-3 w-3 mr-1" /> Lugares
+						<TabsTrigger
+							value="places"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<MapPinIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.places }}
+							/>
+							Lugares
 						</TabsTrigger>
 
-						<TabsTrigger value="concepts" className="text-[9px]">
-							<BookIcon className="h-3 w-3 mr-1" /> Conceptos
+						<TabsTrigger
+							value="concepts"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<BookIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.concepts }}
+							/>
+							Conceptos
 						</TabsTrigger>
 
-						<TabsTrigger value="prompts" className="text-[9px]">
-							<MessageSquareIcon className="h-3 w-3 mr-1" /> Prompts
+						<TabsTrigger
+							value="prompts"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<MessageSquareIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.prompts }}
+							/>
+							Prompts
 						</TabsTrigger>
 
-						<TabsTrigger value="notes" className="text-[9px]">
-							<StickyNoteIcon className="h-3 w-3 mr-1" /> Notas
+						<TabsTrigger
+							value="notes"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<StickyNoteIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.notes }}
+							/>
+							Notas
 						</TabsTrigger>
 
-						<TabsTrigger value="thumbnails" className="text-[9px]">
-							<Grid2X2Icon className="h-3 w-3 mr-1" /> Miniaturas
+						<TabsTrigger
+							value="thumbnails"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<Grid2X2Icon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.thumbnails }}
+							/>
+							Miniaturas
 						</TabsTrigger>
 
-						<TabsTrigger value="uploaded-images" className="text-[9px]">
-							<UploadCloud className="h-3 w-3 mr-1" /> Imágenes Subidas
+						<TabsTrigger
+							value="uploaded-images"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<UploadCloud
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors["uploaded-images"] }}
+							/>
+							Imágenes Subidas
 						</TabsTrigger>
 
-						<TabsTrigger value="shortcuts" className="text-[9px]">
-							<KeyboardIcon className="h-3 w-3 mr-1" /> Atajos
+						<TabsTrigger
+							value="shortcuts"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<KeyboardIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors.shortcuts }}
+							/>
+							Atajos
+						</TabsTrigger>
+
+						<TabsTrigger
+							value="entities-cards"
+							className="flex items-center gap-1 px-3 h-9 text-[10px] data-[state=active]:font-medium border-b-2 rounded-none cursor-pointer
+							hover:bg-secondary/20 data-[state=active]:bg-secondary/30"
+						>
+							<ListIcon
+								className="h-3 w-3 transition-transform duration-150 group-hover:rotate-12"
+								style={{ color: tabColors["entities-cards"] }}
+							/>
+							Tarjetas
 						</TabsTrigger>
 					</TabsList>
 
@@ -153,9 +296,14 @@ export function SettingsView() {
 						<ShortcutsSection />
 					</TabsContent>
 
+					<TabsContent value="entities-cards" className="space-y-4 px-1 pt-1">
+						<EntitiesCardsSection />
+					</TabsContent>
+
 					<TabsContent value="objects" className="px-2">
 						<div className="text-sm text-muted-foreground text-center py-4">
-							Esta sección ha sido migrada a "Objetos". Por favor, utilice la nueva sección.
+							Esta sección ha sido migrada a "Objetos". Por favor, utilice la
+							nueva sección.
 						</div>
 					</TabsContent>
 				</Tabs>

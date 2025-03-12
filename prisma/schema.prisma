@@ -172,9 +172,13 @@ model Album {
   updatedAt   DateTime @updatedAt
   images      Image[]  @relation("ImageToAlbum")
   category    String?
+  rarity      String?  @default("common")
+  texture     String?
 
   @@index([name])
   @@index([createdAt])
+  @@index([rarity])
+  @@index([category])
 }
 
 model Tag {
@@ -189,10 +193,14 @@ model Tag {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   images        Image[]  @relation("ImageToTag")
-  category    String?
+  category      String?
+  rarity        String?  @default("common")
+  texture       String?
 
   @@index([name])
   @@index([createdAt])
+  @@index([rarity])
+  @@index([category])
 }
 
 model Collection {
@@ -215,9 +223,14 @@ model Collection {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   images         Image[]  @relation("ImageToCollection")
-  category    String?
+  category       String?
+  rarity         String?  @default("common")
+  texture        String?
+
   @@index([name])
   @@index([createdAt])
+  @@index([rarity])
+  @@index([category])
 }
 
 // Modelo para los personajes
@@ -253,7 +266,8 @@ model Character {
   notes                Note[]      @relation("CharacterToNote")
   concepts             Concept[]   @relation("CharacterToConcept")
   prompts              Prompt[]    @relation("CharacterToPrompt")
-  category    String?
+  category             String?
+
   @@index([name])
   @@index([createdAt])
   @@index([class])
@@ -288,7 +302,7 @@ model Place {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToPlace")
-  category    String?
+  category      String?
 
   @@index([name])
   @@index([createdAt])
@@ -321,7 +335,7 @@ model WorldItem {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToWorldItem")
-  category    String?
+  category      String?
 
   @@index([name])
   @@index([createdAt])
@@ -404,4 +418,89 @@ model Note {
   @@index([priority])
   @@index([status])
   @@index([createdAt])
+}
+
+// Modelo para configuración de tarjetas de entidades
+model CardConfiguration {
+  id                      String  @id @default(cuid())
+  entityType              String  @unique
+  enable3DEffect          Boolean @default(true)
+  enableHolographicEffect Boolean @default(true)
+  enableScanlines         Boolean @default(true)
+  enableLightHalo         Boolean @default(true)
+  enableAnimatedBorder    Boolean @default(true)
+  enableGlowEffect        Boolean @default(true)
+  enableGrainEffect       Boolean @default(true)
+  hoverLiftHeight         Int     @default(10)
+  maxRotation             Int     @default(15)
+  primaryColor            String  @default("#3b82f6")
+  secondaryColor          String  @default("#8b5cf6")
+  raritySystem            Boolean @default(false)
+  categorySystem          Boolean @default(true)
+  textureSystem           Boolean @default(false)
+
+  // Nuevos campos para configuraciones extendidas
+  holographicOptions String? @default("{\"intensity\":1,\"animationSpeed\":1,\"patternType\":\"rainbow\",\"visibleOnHover\":true}")
+  scanlinesOptions   String? @default("{\"opacity\":0.2,\"spacing\":4,\"direction\":\"horizontal\",\"animate\":false,\"visibleOnHover\":false}")
+  glowOptions        String? @default("{\"intensity\":1,\"size\":100,\"blurAmount\":30,\"animationType\":\"follow-mouse\",\"pulseSpeed\":1.5,\"visibleOnHover\":true}")
+  borderOptions      String? @default("{\"width\":2,\"pattern\":\"solid\",\"animationType\":\"flow\",\"animationSpeed\":1,\"animationDuration\":6,\"glowIntensity\":5,\"glowOnHover\":true}")
+  grainOptions       String? @default("{\"intensity\":0.15,\"density\":0.6,\"contrast\":1.2,\"noise\":\"light\",\"animated\":false,\"animationSpeed\":1,\"visibleOnHover\":true}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entityType])
+}
+
+// Modelo para rarezas
+model Rarity {
+  id              String   @id @default(cuid())
+  entityType      String
+  name            String
+  color           String   @default("#3b82f6")
+  borderEffect    String?
+  borderWidth     Float?   @default(2)
+  borderPattern   String?  @default("solid")
+  borderAnimation String?  @default("none")
+  glowColor       String?
+  glowIntensity   Float?   @default(5)
+  glowSize        Float?   @default(100)
+  glowAnimation   String?  @default("none")
+  badgeClass      String?
+  barClass        String?
+  description     String?
+  position        Int      @default(0) // Para el orden de rarezas
+  chance          Float    @default(0) // Porcentaje de probabilidad (0-100)
+  unlockCondition String? // Condición para desbloquear esta rareza
+  specialEffects  String?  @default("{}") // JSON para efectos especiales adicionales
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, name])
+  @@index([entityType])
+}
+
+// Modelo para texturas
+model Texture {
+  id             String   @id @default(cuid())
+  entityType     String
+  name           String
+  imageUrl       String?
+  patternType    String?
+  color          String   @default("#3b82f6")
+  opacity        Float    @default(0.5)
+  description    String?
+  blendMode      String?  @default("overlay")
+  noiseType      String?  @default("light")
+  animated       Boolean  @default(false)
+  animationSpeed Float?   @default(1)
+  density        Float?   @default(0.6)
+  contrast       Float?   @default(1.2)
+  visibleOnHover Boolean  @default(false)
+  layerOrder     Int      @default(6)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([entityType, name])
+  @@index([entityType])
 }
