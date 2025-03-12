@@ -2,7 +2,6 @@
 
 /* Animaciones para bordes */
 @keyframes border-pulse {
-
 	0%,
 	100% {
 		opacity: 0.6;
@@ -37,7 +36,6 @@
 
 /* Animaciones para efectos de brillo */
 @keyframes glow-pulse {
-
 	0%,
 	100% {
 		transform: scale(0.9);
@@ -52,7 +50,6 @@
 
 /* Animaciones para efecto de grano */
 @keyframes grain-animation {
-
 	0%,
 	100% {
 		transform: translate(0, 0);
@@ -242,4 +239,255 @@
 .card-3d-container {
 	transform-style: preserve-3d;
 	transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Estilos base para animaciones de tarjetas */
+.card-wrapper {
+	--hover-transition-duration: 300ms;
+	--rotation-transition-duration: 200ms;
+	--lift-transition-duration: 400ms;
+	--hover-transition-easing: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+
+	/* Variables para tipografía */
+	--card-title-font: var(--font-sans);
+	--card-body-font: var(--font-sans);
+	--card-meta-font: var(--font-mono);
+	--card-title-size: 1rem;
+	--card-body-size: 0.875rem;
+	--card-meta-size: 0.75rem;
+	--card-title-weight: 600;
+	--card-body-weight: 400;
+	--card-meta-weight: 500;
+	--card-title-color: hsl(var(--foreground));
+	--card-body-color: hsl(var(--foreground));
+	--card-meta-color: hsl(var(--muted-foreground));
+	--card-title-transform: none;
+	--card-title-spacing: normal;
+	--card-line-height: 1.5;
+}
+
+/* Aplicar tipografía a los elementos dentro de la tarjeta */
+.card-wrapper h1,
+.card-wrapper h2,
+.card-wrapper h3,
+.card-wrapper h4,
+.card-wrapper .card-title {
+	font-family: var(--card-title-font);
+	font-size: var(--card-title-size);
+	font-weight: var(--card-title-weight);
+	color: var(--card-title-color);
+	text-transform: var(--card-title-transform);
+	letter-spacing: var(--card-title-spacing);
+	line-height: var(--card-line-height);
+}
+
+.card-wrapper p,
+.card-wrapper div,
+.card-wrapper .card-body {
+	font-family: var(--card-body-font);
+	font-size: var(--card-body-size);
+	font-weight: var(--card-body-weight);
+	color: var(--card-body-color);
+	line-height: var(--card-line-height);
+}
+
+.card-wrapper .card-meta,
+.card-wrapper small,
+.card-wrapper .meta-text {
+	font-family: var(--card-meta-font);
+	font-size: var(--card-meta-size);
+	font-weight: var(--card-meta-weight);
+	color: var(--card-meta-color);
+}
+
+/* Transiciones suaves */
+#card-container {
+	transition: transform var(--hover-transition-duration) var(--hover-transition-easing), box-shadow
+		var(--hover-transition-duration) var(--hover-transition-easing), border-color var(--hover-transition-duration)
+		var(--hover-transition-easing), filter var(--hover-transition-duration) var(--hover-transition-easing);
+}
+
+/* Efectos de hover suaves para capas */
+.holographic-layer,
+.scanlines-layer,
+.grain-effect-layer,
+.glow-effect-layer,
+.animated-border-layer {
+	transition: opacity var(--hover-transition-duration) var(--hover-transition-easing), transform
+		var(--hover-transition-duration) var(--hover-transition-easing);
+}
+
+/* Animaciones para diferentes modos de diseño */
+
+/* Diseño de álbum */
+.card-design-album .layer-content {
+	display: flex;
+	flex-direction: column;
+}
+
+.card-design-album h3 {
+	font-weight: 700;
+}
+
+/* Diseño de etiqueta */
+.card-design-tag .layer-content {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Diseño de personaje */
+.card-design-character .layer-content {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+}
+
+/* Diseño de lugar */
+.card-design-place .layer-content {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Diseño de objeto del mundo */
+.card-design-worldItem .layer-content {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	position: relative;
+}
+
+/* Diseño de concepto */
+.card-design-concept .layer-content {
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+}
+
+/* Diseño de prompt */
+.card-design-prompt .layer-content {
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+	background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--secondary-rgb), 0.1) 100%);
+}
+
+/* Diseño de nota */
+.card-design-note .layer-content {
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+	background-color: rgba(var(--muted-rgb), 0.1);
+}
+
+/* Layouts de contenido */
+.content-layout-default {
+	display: flex;
+	flex-direction: column;
+}
+
+.content-layout-metadata-heavy {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	grid-gap: 0.5rem;
+}
+
+.content-layout-image-focus {
+	display: flex;
+	flex-direction: column;
+}
+
+.content-layout-image-focus img,
+.content-layout-image-focus .image-container {
+	flex: 1;
+	object-fit: cover;
+}
+
+.content-layout-stats-focus {
+	display: grid;
+	grid-template-rows: auto auto 1fr auto;
+}
+
+.content-layout-minimal {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
+/* Modo explotado */
+.exploded-card-wrapper {
+	perspective: 1000px;
+}
+
+.exploded-layer {
+	transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Efectos de glow al pasar el mouse */
+#card-container:hover .glow-effect-layer {
+	opacity: 1;
+}
+
+/* Clases de animación para bordes */
+@keyframes flowBorder {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+@keyframes pulseBorder {
+	0% {
+		opacity: 0.6;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.6;
+	}
+}
+
+.border-animation-flow {
+	background-size: 200% 200%;
+	animation: flowBorder 6s ease infinite;
+}
+
+.border-animation-pulse {
+	animation: pulseBorder 2s ease infinite;
+}
+
+/* Mejoras para las tipografías específicas */
+[data-typography="modern"] .card-title {
+	letter-spacing: -0.01em;
+}
+
+[data-typography="classic"] .card-title {
+	font-family: serif;
+}
+
+[data-typography="elegant"] .card-title {
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+[data-typography="playful"] .card-title {
+	font-family: cursive;
+}
+
+[data-typography="tech"] .card-title,
+[data-typography="tech"] .card-meta {
+	font-family: monospace;
+}
+
+[data-typography="retro"] .card-title,
+[data-typography="retro"] .card-body,
+[data-typography="retro"] .card-meta {
+	font-family: monospace;
+	letter-spacing: 0.05em;
 }

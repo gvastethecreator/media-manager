@@ -1,8 +1,12 @@
 'use client';
 
-import { type PlaceFormData, formDataToPlace, placeToFormData } from '@/components/features/entity-cards/entity-types';
-import { PlaceCard } from '@/components/features/entity-cards/place/place-card';
-import { PlaceForm } from '@/components/features/entity-cards/place/place-form';
+import {
+	type PlaceFormData,
+	formDataToPlace,
+	placeToFormData,
+} from '@/components/features/entity-cards/forms/entity-types';
+import { PlaceForm } from '@/components/features/entity-cards/forms/place-form';
+import { PlaceCard } from '@/components/features/entity-cards/layouts/place-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';

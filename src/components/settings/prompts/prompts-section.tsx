@@ -1,7 +1,7 @@
 'use client';
 
-import { PromptCard } from '@/components/features/entity-cards/prompt/prompt-card';
-import { PromptForm } from '@/components/features/entity-cards/prompt/prompt-form';
+import { PromptForm } from '@/components/features/entity-cards/forms/prompt-form';
+import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -172,7 +172,7 @@ export function PromptsSection() {
 					<CardContent>
 						<PromptForm
 							onSubmit={(data) => {
-								void handleCreate(data as PromptFormData);
+								void handleCreate(data as unknown as PromptFormData);
 							}}
 							isLoading={isLoading}
 						/>
@@ -254,7 +254,7 @@ export function PromptsSection() {
 															void handleUpdate({
 																...data,
 																id: prompt.id,
-															} as PromptFormData);
+															} as unknown as PromptFormData);
 														}}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}

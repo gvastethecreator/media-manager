@@ -3,7 +3,7 @@
 import { type PlaceWithStats, getPlaces } from '@/app/actions/places/place.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { PlaceCard } from '@/components/features/entity-cards/place/place-card';
+import { PlaceCard } from '@/components/features/entity-cards/layouts/place-card-layout';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

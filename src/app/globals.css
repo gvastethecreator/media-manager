@@ -95,7 +95,6 @@
 	}
 
 	@keyframes shiny-text {
-
 		0%,
 		90%,
 		100% {
@@ -128,7 +127,6 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-
 	*,
 	::after,
 	::before,
@@ -158,9 +156,11 @@
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
-		background: radial-gradient(var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
-				var(--glow-color),
-				transparent 50%);
+		background: radial-gradient(
+			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
+			var(--glow-color),
+			transparent 50%
+		);
 		opacity: 0;
 		transition: opacity 0.2s ease;
 		z-index: -1;
@@ -172,9 +172,11 @@
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
-		background: radial-gradient(var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
-				var(--glow-color),
-				transparent 50%);
+		background: radial-gradient(
+			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
+			var(--glow-color),
+			transparent 50%
+		);
 		opacity: 0;
 		transition: opacity 0.2s ease;
 		z-index: -1;
@@ -234,7 +236,6 @@
 }
 
 @utility dark {
-
 	/* Variante para tema oscuro */
 	& .card-glow::before {
 		--glow-color: rgba(64, 156, 255, 0.35);
@@ -348,7 +349,6 @@
 
 /* Estilos para la explosión 3D de tarjetas */
 @layer card-exploder {
-
 	/* Variables de transformación */
 	:root {
 		--power: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -372,7 +372,7 @@
 	}
 
 	/* Cuando la tarjeta NO está explotada */
-	[data-exploded='false'] .explodable-card {
+	[data-exploded="false"] .explodable-card {
 		transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateX(0deg);
 		transition: transform 1s 0.5s var(--power);
 
@@ -396,8 +396,9 @@
 	}
 
 	/* Cuando la tarjeta ESTÁ explotada */
-	[data-exploded='true'] .explodable-card {
-		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg)) rotateY(calc(var(--y1, 35) * 1deg)) rotateX(calc(var(--x2, 30) * 1deg));
+	[data-exploded="true"] .explodable-card {
+		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg)) rotateY(calc(var(--y1, 35) * 1deg))
+			rotateX(calc(var(--x2, 30) * 1deg));
 		transition: transform 1s var(--power);
 
 		.shadow-layer {
@@ -420,19 +421,18 @@
 		}
 
 		.exploded-layer {
-			translate:
-				calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem) calc(var(--step, 3) * 1rem);
+			translate: calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem) calc(var(--step, 3) * 1rem);
 			transition: translate 1s 0.5s var(--power);
 		}
 	}
 
 	/* Cuando una capa específica está activa */
-	[data-exploded='true'] .explodable-card {
+	[data-exploded="true"] .explodable-card {
 		[data-layer-active="true"] {
 			z-index: 10;
 
 			&::after {
-				content: '';
+				content: "";
 				position: absolute;
 				inset: -1px;
 				border: 2px solid hsl(var(--primary));

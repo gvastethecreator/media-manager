@@ -426,11 +426,11 @@ model CardConfiguration {
   entityType              String  @unique
   enable3DEffect          Boolean @default(true)
   enableHolographicEffect Boolean @default(true)
-  enableScanlines         Boolean @default(true)
-  enableLightHalo         Boolean @default(true)
-  enableAnimatedBorder    Boolean @default(true)
+  enableScanlines         Boolean @default(false)
+  enableLightHalo         Boolean @default(false)
+  enableAnimatedBorder    Boolean @default(false)
   enableGlowEffect        Boolean @default(true)
-  enableGrainEffect       Boolean @default(true)
+  enableGrainEffect       Boolean @default(false)
   hoverLiftHeight         Int     @default(10)
   maxRotation             Int     @default(15)
   primaryColor            String  @default("#3b82f6")
@@ -439,17 +439,56 @@ model CardConfiguration {
   categorySystem          Boolean @default(true)
   textureSystem           Boolean @default(false)
 
-  // Nuevos campos para configuraciones extendidas
-  holographicOptions String? @default("{\"intensity\":1,\"animationSpeed\":1,\"patternType\":\"rainbow\",\"visibleOnHover\":true}")
-  scanlinesOptions   String? @default("{\"opacity\":0.2,\"spacing\":4,\"direction\":\"horizontal\",\"animate\":false,\"visibleOnHover\":false}")
-  glowOptions        String? @default("{\"intensity\":1,\"size\":100,\"blurAmount\":30,\"animationType\":\"follow-mouse\",\"pulseSpeed\":1.5,\"visibleOnHover\":true}")
-  borderOptions      String? @default("{\"width\":2,\"pattern\":\"solid\",\"animationType\":\"flow\",\"animationSpeed\":1,\"animationDuration\":6,\"glowIntensity\":5,\"glowOnHover\":true}")
-  grainOptions       String? @default("{\"intensity\":0.15,\"density\":0.6,\"contrast\":1.2,\"noise\":\"light\",\"animated\":false,\"animationSpeed\":1,\"visibleOnHover\":true}")
+  // Grid de imágenes
+  imageGridLayout      String?  @default("single") // 'single', 'dual', 'quad', 'six'
+  imageGridGap         Int?     @default(4)
+  imageGridStyle       String?  @default("standard") // 'standard', 'masonry', 'carousel'
+  imageGridAspectRatio String?  @default("16/9")
+  showImageCount       Boolean? @default(true)
 
+  // Opciones visuales
+  showTitle       Boolean? @default(true)
+  showType        Boolean? @default(true)
+  showDescription Boolean? @default(true)
+  showRarity      Boolean? @default(true)
+  showTexture     Boolean? @default(true)
+  showInfo        Boolean? @default(true)
+
+  // Sistema
+  enableShadow    Boolean? @default(true)
+  cardShadowSize  String?  @default("md") // 'sm', 'md', 'lg', 'xl', '2xl'
+  cardShadowColor String?  @default("rgba(0,0,0,0.2)")
+  cardRoundedSize String?  @default("md") // 'none', 'sm', 'md', 'lg', 'xl', '2xl', 'full'
+  cardBorderSize  String?  @default("sm") // 'none', 'sm', 'md', 'lg'
+
+  // Rendimiento
+  enableLazyLoading Boolean? @default(true)
+  enablePrefetch    Boolean? @default(false)
+  enableSkeleton    Boolean? @default(true)
+
+  // Estados
+  enableHover    Boolean? @default(true)
+  enableActive   Boolean? @default(true)
+  enableFocus    Boolean? @default(true)
+  enableDisabled Boolean? @default(false)
+
+  // Avanzado
+  enableHoverAnimation Boolean? @default(true)
+  enableParallaxEffect Boolean? @default(false)
+  enableBlurEffect     Boolean? @default(false)
+
+  // Opciones avanzadas serializadas como JSON
+  holographicOptions String? // JSON stringified
+  scanlinesOptions   String? // JSON stringified
+  glowOptions        String? // JSON stringified
+  borderOptions      String? // JSON stringified
+  grainOptions       String? // JSON stringified
+
+  // Campos de auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([entityType])
+  @@map("card_configurations")
 }
 
 // Modelo para rarezas

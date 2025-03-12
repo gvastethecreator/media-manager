@@ -1,20 +1,15 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import {
-	Card,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils/utils";
-import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
-import { StatusBadge } from "./status-badge";
+import { Badge } from '@/components/ui/badge';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils/utils';
+import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { StatusBadge } from './status-badge';
 
 export interface ServiceStatus {
 	name: string;
-	status: "online" | "offline" | "warning";
+	status: 'online' | 'offline' | 'warning';
 	description: string;
 	icon: LucideIcon;
 }
@@ -29,19 +24,17 @@ export function ServiceCard({ service }: { service: ServiceStatus }) {
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								"p-2 rounded-md border-2 border-primary/10",
-								service.status === "online" && "bg-green-500/20",
-								service.status === "warning" && "bg-yellow-500/20",
-								service.status === "offline" && "bg-red-500/20"
+								'p-2 rounded-md border-2 border-primary/10',
+								service.status === 'online' && 'bg-green-500/20',
+								service.status === 'warning' && 'bg-yellow-500/20',
+								service.status === 'offline' && 'bg-red-500/20'
 							)}
 						>
 							<Icon className="h-4 w-4" />
 						</div>
 						<div>
 							<CardTitle className="text-sm">{service.name}</CardTitle>
-							<CardDescription className="text-[10px] truncate">
-								{service.description}
-							</CardDescription>
+							<CardDescription className="text-[10px] truncate">{service.description}</CardDescription>
 						</div>
 					</div>
 					<StatusBadge status={service.status} />

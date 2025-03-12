@@ -9,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils/utils';
 import type { ProfileUpdate } from '@/services/profile.service';
-import type { EmojiClickData } from 'emoji-picker-react';
 import { Check, Smile, UserCog, UserPlus, UserX, Users } from 'lucide-react';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';

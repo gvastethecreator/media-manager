@@ -1,9 +1,9 @@
 'use client';
 
 import type { TagWithStats } from '@/app/actions/tags/tag.actions';
-import type { TagFormData } from '@/components/features/entity-cards/entity-types';
-import { TagCard } from '@/components/features/entity-cards/tag/tag-card';
-import { TagForm } from '@/components/features/entity-cards/tag/tag-form';
+import type { TagFormData } from '@/components/features/entity-cards/forms/entity-types';
+import { TagForm } from '@/components/features/entity-cards/forms/tag-form';
+import { TagCard } from '@/components/features/entity-cards/layouts/tag-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,10 +34,10 @@ function tagToFormData(tag: TagWithStats): TagFormData {
 function createTagData(data: TagFormData) {
 	return {
 		name: data.name,
-		description: data.description || null,
+		description: data.description || undefined,
 		emoji: data.emoji,
 		color: data.color,
-		shortcut: data.shortcut || null,
+		shortcut: data.shortcut || undefined,
 	};
 }
 
@@ -45,10 +45,10 @@ function updateTagData(data: TagFormData, id: string) {
 	return {
 		id,
 		name: data.name,
-		description: data.description || null,
+		description: data.description || undefined,
 		emoji: data.emoji,
 		color: data.color,
-		shortcut: data.shortcut || null,
+		shortcut: data.shortcut || undefined,
 	};
 }
 

@@ -98,8 +98,6 @@
   "workbench.editor.preferHistoryBasedLanguageDetection": true,
   "explorer.incrementalNaming": "smart",
   "problems.showCurrentInStatus": true,
-  "eslint.format.enable": true,
-  "eslint.lintTask.enable": true,
   "biome_lsp.trace.server": "verbose",
   "git.confirmSync": false,
   "typescript.tsdk": "node_modules/typescript/lib",

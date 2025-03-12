@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils/utils";
-import { ChevronRight, Layers, X } from "lucide-react";
-import { motion } from "motion/react";
-import type React from "react";
-import { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { cn } from '@/lib/utils/utils';
+import { ChevronRight, Layers, X } from 'lucide-react';
+import { motion } from 'motion/react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 
 interface ExploderProps {
 	/** Controlar si está en modo explotado */
@@ -32,35 +32,33 @@ interface ExploderProps {
 		ty: number;
 	};
 	/** Función para actualizar valores de transformación */
-	onTransformChange?: (
-		values: Partial<ExploderProps["transformValues"]>
-	) => void;
+	onTransformChange?: (values: Partial<ExploderProps['transformValues']>) => void;
 }
 
 const DEFAULT_LAYERS = [
 	{
-		id: "content",
-		label: "Contenido",
+		id: 'content',
+		label: 'Contenido',
 		icon: <div className="w-3 h-3 bg-primary rounded-sm" />,
 	},
 	{
-		id: "border",
-		label: "Borde",
+		id: 'border',
+		label: 'Borde',
 		icon: <div className="w-3 h-3 border border-primary rounded-sm" />,
 	},
 	{
-		id: "grain",
-		label: "Textura",
+		id: 'grain',
+		label: 'Textura',
 		icon: <div className="w-3 h-3 bg-slate-400 opacity-50 rounded-sm" />,
 	},
 	{
-		id: "halo",
-		label: "Halo",
+		id: 'halo',
+		label: 'Halo',
 		icon: <div className="w-3 h-3 bg-blue-300 rounded-full opacity-60" />,
 	},
 	{
-		id: "scanlines",
-		label: "Líneas",
+		id: 'scanlines',
+		label: 'Líneas',
 		icon: (
 			<div className="w-3 h-3 bg-slate-200 flex flex-col justify-between">
 				<div className="h-[1px] bg-slate-400" />
@@ -69,11 +67,9 @@ const DEFAULT_LAYERS = [
 		),
 	},
 	{
-		id: "holographic",
-		label: "Holo",
-		icon: (
-			<div className="w-3 h-3 bg-gradient-to-tr from-purple-400 to-blue-300 opacity-60" />
-		),
+		id: 'holographic',
+		label: 'Holo',
+		icon: <div className="w-3 h-3 bg-gradient-to-tr from-purple-400 to-blue-300 opacity-60" />,
 	},
 ];
 
@@ -103,38 +99,20 @@ export function Exploder({
 	// Aplicar clase CSS al body cuando está en modo explotado
 	useEffect(() => {
 		if (isExploded) {
-			document.documentElement.style.setProperty(
-				"--x1",
-				`${transformValues.x1}`
-			);
-			document.documentElement.style.setProperty(
-				"--y1",
-				`${transformValues.y1}`
-			);
-			document.documentElement.style.setProperty(
-				"--x2",
-				`${transformValues.x2}`
-			);
-			document.documentElement.style.setProperty(
-				"--step",
-				`${transformValues.step}`
-			);
-			document.documentElement.style.setProperty(
-				"--tx",
-				`${transformValues.tx}`
-			);
-			document.documentElement.style.setProperty(
-				"--ty",
-				`${transformValues.ty}`
-			);
-			document.documentElement.dataset.exploded = "true";
+			document.documentElement.style.setProperty('--x1', `${transformValues.x1}`);
+			document.documentElement.style.setProperty('--y1', `${transformValues.y1}`);
+			document.documentElement.style.setProperty('--x2', `${transformValues.x2}`);
+			document.documentElement.style.setProperty('--step', `${transformValues.step}`);
+			document.documentElement.style.setProperty('--tx', `${transformValues.tx}`);
+			document.documentElement.style.setProperty('--ty', `${transformValues.ty}`);
+			document.documentElement.dataset.exploded = 'true';
 		} else {
-			document.documentElement.dataset.exploded = "false";
+			document.documentElement.dataset.exploded = 'false';
 		}
 
 		return () => {
 			// Limpiar al desmontar
-			document.documentElement.dataset.exploded = "false";
+			document.documentElement.dataset.exploded = 'false';
 		};
 	}, [isExploded, transformValues]);
 
@@ -152,24 +130,24 @@ export function Exploder({
 					}
 				}}
 				className={cn(
-					"absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center z-60 border transition-colors",
+					'absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center z-60 border transition-colors',
 					isExploded
-						? "bg-primary text-primary-foreground border-primary"
-						: "bg-background/80 backdrop-blur-sm border-border/30 text-foreground/70 hover:text-primary hover:bg-background hover:border-primary"
+						? 'bg-primary text-primary-foreground border-primary'
+						: 'bg-background/80 backdrop-blur-sm border-border/30 text-foreground/70 hover:text-primary hover:bg-background hover:border-primary'
 				)}
 				style={{
-					transformStyle: "preserve-3d",
-					transform: "translateZ(50px)",
-					boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+					transformStyle: 'preserve-3d',
+					transform: 'translateZ(50px)',
+					boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
 				}}
-				title={isExploded ? "Vista normal" : "Vista explosionada"}
+				title={isExploded ? 'Vista normal' : 'Vista explosionada'}
 			>
 				{isExploded ? <X size={14} /> : <Layers size={14} />}
 			</button>
 
 			{/* Panel de control que aparece cuando está en modo explosión */}
 			{isExploded &&
-				typeof document !== "undefined" &&
+				typeof document !== 'undefined' &&
 				ReactDOM.createPortal(
 					<motion.div
 						className="fixed right-4 top-4 z-[1000] bg-card rounded-lg border shadow-lg overflow-hidden w-72"
@@ -191,13 +169,7 @@ export function Exploder({
 								onClick={() => setIsPanelOpen(!isPanelOpen)}
 								className="p-1 rounded-md hover:bg-muted"
 							>
-								<ChevronRight
-									size={16}
-									className={cn(
-										"transition-transform",
-										isPanelOpen ? "rotate-90" : ""
-									)}
-								/>
+								<ChevronRight size={16} className={cn('transition-transform', isPanelOpen ? 'rotate-90' : '')} />
 							</button>
 						</div>
 
@@ -205,27 +177,25 @@ export function Exploder({
 							<div className="p-3 space-y-4">
 								{/* Vistas preestablecidas */}
 								<div className="space-y-1">
-									<p className="text-xs text-muted-foreground mb-2">
-										Vistas predefinidas
-									</p>
+									<p className="text-xs text-muted-foreground mb-2">Vistas predefinidas</p>
 									<div className="grid grid-cols-3 gap-2">
 										<button
 											type="button"
-											onClick={() => applyPreset("isometric")}
+											onClick={() => applyPreset('isometric')}
 											className="text-xs py-1.5 px-2 rounded bg-primary/10 hover:bg-primary/20 transition-colors"
 										>
 											Isométrica
 										</button>
 										<button
 											type="button"
-											onClick={() => applyPreset("side")}
+											onClick={() => applyPreset('side')}
 											className="text-xs py-1.5 px-2 rounded bg-primary/10 hover:bg-primary/20 transition-colors"
 										>
 											Lateral
 										</button>
 										<button
 											type="button"
-											onClick={() => applyPreset("flat")}
+											onClick={() => applyPreset('flat')}
 											className="text-xs py-1.5 px-2 rounded bg-muted hover:bg-muted/70 transition-colors"
 										>
 											Restablecer
@@ -238,16 +208,13 @@ export function Exploder({
 									<div className="flex items-center justify-between">
 										<p className="text-xs text-muted-foreground">Rotación 3D</p>
 										<span className="text-xs text-muted-foreground">
-											X1: {transformValues.x1}° | Y: {transformValues.y1}° | X2:{" "}
-											{transformValues.x2}°
+											X1: {transformValues.x1}° | Y: {transformValues.y1}° | X2: {transformValues.x2}°
 										</span>
 									</div>
 									<div className="grid gap-3 text-xs">
 										<div className="space-y-1">
 											<div className="flex justify-between">
-												<span className="block text-muted-foreground">
-													X1 (Inclinación)
-												</span>
+												<span className="block text-muted-foreground">X1 (Inclinación)</span>
 												<span>{transformValues.x1}°</span>
 											</div>
 											<input
@@ -265,9 +232,7 @@ export function Exploder({
 										</div>
 										<div className="space-y-1">
 											<div className="flex justify-between">
-												<span className="block text-muted-foreground">
-													Y1 (Rotación)
-												</span>
+												<span className="block text-muted-foreground">Y1 (Rotación)</span>
 												<span>{transformValues.y1}°</span>
 											</div>
 											<input
@@ -285,9 +250,7 @@ export function Exploder({
 										</div>
 										<div className="space-y-1">
 											<div className="flex justify-between">
-												<span className="block text-muted-foreground">
-													X2 (Perspectiva)
-												</span>
+												<span className="block text-muted-foreground">X2 (Perspectiva)</span>
 												<span>{transformValues.x2}°</span>
 											</div>
 											<input
@@ -309,20 +272,15 @@ export function Exploder({
 								{/* Controles de separación y posición */}
 								<div className="space-y-2">
 									<div className="flex items-center justify-between">
-										<p className="text-xs text-muted-foreground">
-											Separación y posición
-										</p>
+										<p className="text-xs text-muted-foreground">Separación y posición</p>
 										<span className="text-xs text-muted-foreground">
-											Z: {transformValues.step} | X: {transformValues.tx} | Y:{" "}
-											{transformValues.ty}
+											Z: {transformValues.step} | X: {transformValues.tx} | Y: {transformValues.ty}
 										</span>
 									</div>
 									<div className="grid gap-3 text-xs">
 										<div className="space-y-1">
 											<div className="flex justify-between">
-												<span className="block text-muted-foreground">
-													Separación (Z)
-												</span>
+												<span className="block text-muted-foreground">Separación (Z)</span>
 												<span>{transformValues.step}</span>
 											</div>
 											<input
@@ -342,9 +300,7 @@ export function Exploder({
 										<div className="grid grid-cols-2 gap-4">
 											<div className="space-y-1">
 												<div className="flex justify-between">
-													<span className="block text-muted-foreground">
-														Posición X
-													</span>
+													<span className="block text-muted-foreground">Posición X</span>
 													<span>{transformValues.tx}</span>
 												</div>
 												<input
@@ -363,9 +319,7 @@ export function Exploder({
 											</div>
 											<div className="space-y-1">
 												<div className="flex justify-between">
-													<span className="block text-muted-foreground">
-														Posición Y
-													</span>
+													<span className="block text-muted-foreground">Posición Y</span>
 													<span>{transformValues.ty}</span>
 												</div>
 												<input
@@ -388,25 +342,19 @@ export function Exploder({
 
 								{/* Lista de capas activas */}
 								<div className="space-y-2">
-									<p className="text-xs text-muted-foreground">
-										Capas disponibles
-									</p>
+									<p className="text-xs text-muted-foreground">Capas disponibles</p>
 									<div className="space-y-1 max-h-40 overflow-y-auto pr-1">
 										{layers.map((layer) => (
 											<div
 												key={layer.id}
 												className={cn(
-													"flex items-center gap-2 py-1.5 px-2 rounded-md text-xs transition-colors cursor-pointer",
-													layer.id === activeLayer
-														? "bg-primary/20 text-primary"
-														: "hover:bg-muted"
+													'flex items-center gap-2 py-1.5 px-2 rounded-md text-xs transition-colors cursor-pointer',
+													layer.id === activeLayer ? 'bg-primary/20 text-primary' : 'hover:bg-muted'
 												)}
 												onMouseEnter={() => onLayerHover?.(layer.id)}
 												onMouseLeave={() => onLayerHover?.(null)}
 											>
-												{layer.icon ?? (
-													<div className="w-3 h-3 rounded-full bg-primary" />
-												)}
+												{layer.icon ?? <div className="w-3 h-3 rounded-full bg-primary" />}
 												<span>{layer.label}</span>
 											</div>
 										))}
