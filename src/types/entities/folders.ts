@@ -23,6 +23,8 @@ export interface Folder {
 	};
 	recentImages?: (string | null)[];
 	autoReindex?: boolean;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }
 
 export type { ProcessStatus, ExtendedProcessStatus };
