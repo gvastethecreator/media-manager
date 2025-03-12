@@ -556,7 +556,7 @@ export function NavPanel({ initialData }: NavPanelProps) {
 			/>
 
 			<ScrollArea className="flex-1">
-				<div className="p-1 space-y-0">
+				<div className="p-1 pr-3 space-y-0">
 					{/* Navegación Principal */}
 					<NavMainNavigation currentView={currentView} onNavigate={handleMainNavigate} />
 

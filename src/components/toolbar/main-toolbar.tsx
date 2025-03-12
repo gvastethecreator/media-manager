@@ -154,7 +154,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							title="Eliminar archivos seleccionados"
 							onClick={handleDeleteSelected}
 						>
@@ -163,7 +163,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							title="Descargar archivos seleccionados"
 							onClick={handleDownloadSelected}
 						>
@@ -172,7 +172,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							title="Comprimir archivos seleccionados"
 							onClick={handleCompressFiles}
 						>
@@ -181,25 +181,25 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							title="Copiar archivo seleccionado"
 							onClick={handleCopySelected}
 							disabled={selectedItems.length !== 1}
 						>
 							<Copy className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-7 w-7" title="Limpiar selección" onClick={clearSelection}>
+						<Button variant="ghost" size="icon" className="h-5 w-5" title="Limpiar selección" onClick={clearSelection}>
 							<X className="h-3.5 w-3.5" />
 						</Button>
 					</div>
 
-					<Separator orientation="vertical" className="h-7 w-px bg-border" />
+					<Separator orientation="vertical" className="h-5 w-px bg-border" />
 
 					<div className="flex items-center gap-1 bg-black/50 rounded-md p-1">
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							onClick={() => setViewMode('grid')}
 							title="Vista de cuadrícula"
 							data-active={viewMode === 'grid'}
@@ -209,7 +209,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							onClick={() => setViewMode('masonry')}
 							title="Vista de mosaico"
 							data-active={viewMode === 'masonry'}
@@ -219,7 +219,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							onClick={() => setViewMode('cards')}
 							title="Vista de tarjetas"
 							data-active={viewMode === 'cards'}
@@ -229,7 +229,7 @@ export function ViewToolbar() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7"
+							className="h-5 w-5"
 							onClick={() => setViewMode('list')}
 							title="Vista de lista"
 							data-active={viewMode === 'list'}
@@ -244,12 +244,12 @@ export function ViewToolbar() {
 		// Resto del código existente
 		const commonActions = (
 			<>
-				<Separator orientation="vertical" className="h-7 w-px bg-border" />
+				<Separator orientation="vertical" className="h-5 w-px bg-border" />
 				<div className="flex items-center gap-1 bg-black/50 rounded-md p-1">
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-7 w-7"
+						className="h-5 w-5"
 						onClick={() => setViewMode('grid')}
 						title="Vista de cuadrícula"
 						data-active={viewMode === 'grid'}
@@ -259,7 +259,7 @@ export function ViewToolbar() {
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-7 w-7"
+						className="h-5 w-5"
 						onClick={() => setViewMode('masonry')}
 						title="Vista de mosaico"
 						data-active={viewMode === 'masonry'}
@@ -269,7 +269,7 @@ export function ViewToolbar() {
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-7 w-7"
+						className="h-5 w-5"
 						onClick={() => setViewMode('cards')}
 						title="Vista de tarjetas"
 						data-active={viewMode === 'cards'}
@@ -279,7 +279,7 @@ export function ViewToolbar() {
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-7 w-7"
+						className="h-5 w-5"
 						onClick={() => setViewMode('list')}
 						title="Vista de lista"
 						data-active={viewMode === 'list'}
@@ -296,10 +296,10 @@ export function ViewToolbar() {
 			case 'search':
 				return (
 					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="icon" className="h-7 w-7">
+						<Button variant="ghost" size="icon" className="h-5 w-5">
 							<Download className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-7 w-7">
+						<Button variant="ghost" size="icon" className="h-5 w-5">
 							<Share2 className="h-3.5 w-3.5" />
 						</Button>
 						{commonActions}
@@ -314,7 +314,7 @@ export function ViewToolbar() {
 			case 'world-items':
 				return (
 					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="sm" className="h-7 text-xs">
+						<Button variant="ghost" size="sm" className="h-5 text-xs">
 							<Plus className="h-3.5 w-3.5 mr-1" />
 							Nuevo
 						</Button>
@@ -330,10 +330,10 @@ export function ViewToolbar() {
 			case 'world-item-content':
 				return (
 					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="icon" className="h-7 w-7">
+						<Button variant="ghost" size="icon" className="h-5 w-5">
 							<Edit className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-7 w-7">
+						<Button variant="ghost" size="icon" className="h-5 w-5">
 							<Trash2 className="h-3.5 w-3.5" />
 						</Button>
 						{commonActions}
@@ -348,10 +348,10 @@ export function ViewToolbar() {
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
-			className={cn('flex flex-col bg-primary/5 py-0', 'border-b')}
+			className={cn('flex flex-col bg-background py-0', 'border-b border-border')}
 		>
 			<div className="flex w-full items-center justify-between gap-2 p-2">
-				<div className="flex items-center gap-4 w-full">
+				<div className="flex items-center gap-2 w-full">
 					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">{renderIcon()}</div>
 					<div className="flex items-center">
 						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem()} />

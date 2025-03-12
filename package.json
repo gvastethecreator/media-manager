@@ -83,7 +83,7 @@
     "mime-types": "^2.1.35",
     "motion": "^12.5.0",
     "next": "15.2.2",
-    "next-themes": "^0.4.5",
+    "next-themes": "^0.4.6",
     "prettier": "^3.5.3",
     "promises": "^0.2.5",
     "react": "^19.0.0",
