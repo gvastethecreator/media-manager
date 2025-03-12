@@ -1,208 +1,112 @@
-# Plan de Acción para Mejora de Vista de Desarrollo
+# Progreso de Implementación del Sistema de Tarjetas
 
-## Objetivos
-- Reemplazar datos mockup con datos reales del sistema
-- Mejorar el diseño para hacerlo más compacto
-- Implementar funcionalidades faltantes
-- Dividir el código en archivos más pequeños para mejorar mantenibilidad
+## Estado Actual (Actualización)
 
-## Análisis inicial
-- El componente actual usa datos estáticos (mockup)
-- El diseño puede optimizarse para mostrar más información en menos espacio
-- Hay funcionalidades pendientes por implementar
-- El archivo es grande y podría beneficiarse de ser dividido
+Este documento registra el progreso de implementación del sistema de tarjetas para las diferentes entidades del gestor de imágenes.
 
-## Plan de trabajo
+### Implementación de EntityCardWrapper ✅
 
-### Fase 1: Análisis y reestructuración
-- [x] Revisar estructura actual del código
-- [x] Identificar componentes que pueden extraerse a archivos separados
-- [x] Crear estructura de carpetas para organizar los componentes
+Se ha implementado un nuevo componente `EntityCardWrapper` que sirve como puente entre `BaseCard` y los layouts específicos, estandarizando la integración y solucionando problemas de tipo. Las mejoras incluyen:
 
-### Fase 2: Implementación de datos reales
-- [x] Crear servicios para obtener datos reales del sistema
-- [x] Implementar hooks para obtener métricas de sistema (CPU, memoria, etc.)
-- [x] Conectar con la base de datos para obtener estadísticas de archivos y carpetas
+- Corrección de errores de tipo y linter
+- Adaptación automática de opciones según el tipo de entidad
+- Soporte para configuraciones de rareza y textura
+- API consistente para todos los componentes de tarjeta
+- Mejor manejo de estados de hover y efectos visuales
 
-### Fase 3: Mejora del diseño
-- [x] Optimizar el layout para mostrar más información en menos espacio
-- [x] Mejorar las tarjetas para hacerlas más compactas
-- [x] Implementar diseño responsive mejorado
-- [x] Añadir más animaciones para mejorar UX
+### Layouts Implementados y Actualizados ✅
 
-### Fase 4: Implementación de funcionalidades faltantes
-- [x] Añadir funcionalidad de actualización en tiempo real
-- [x] Implementar carga de documentación desde archivos MD
-- [x] Crear sistema para gestionar issues y features
-- [x] Añadir métricas adicionales relevantes
+- [x] **TagCard** - Actualizado para usar EntityCardWrapper con todas las correcciones
+- [x] **CharacterCard** - Actualizado para usar EntityCardWrapper con correcciones de tipos y formato
+- [x] **FolderCard** - Tarjeta para carpetas, estilo moderno con sistema de rareza basado en cantidad de imágenes
+- [x] **WorldItemCard** - Tarjeta para objetos del mundo, estilo inspirado en objetos/artefactos de Magic: The Gathering
+- [x] **PlaceCard** - Tarjeta para lugares, con sistema de clima y visualización geográfica
+- [x] **ConceptCard** - Inspirado en cartas de artefacto de MTG - Implementación completada
+- [x] **NoteCard** - Inspirado en cartas de conocimiento/pergamino de MTG - Implementación completada
 
-### Fase 5: Pruebas y optimización
-- [x] Probar todas las funcionalidades
-- [x] Optimizar rendimiento
-- [x] Documentar cambios
-- [x] Corrección de errores encontrados
+### Layouts Pendientes de Actualizar 🚧
 
-## Progreso
+Estos layouts deben actualizarse para usar el nuevo EntityCardWrapper:
 
-### 11/03/2024
-- Iniciado análisis de la vista actual
-- Creado plan de acción
-- Identificadas las siguientes áreas para mejorar:
-  - Componentes a extraer: ServiceCard, MetricCard, ProcessingMetricCard, FeatureCard, IssueCard
-  - Funcionalidades a implementar: Carga real de documentación MD, actualización en tiempo real de métricas
-  - Puntos de mejora de diseño: Cards más compactas, mejor uso del espacio en pantallas pequeñas
-- Creada estructura de carpetas:
-  - src/components/views/development/cards
-  - src/components/views/development/charts
-  - src/components/views/development/hooks
-  - src/components/views/development/services
-- Extraídos componentes comunes
-- Implementados servicios y hooks para datos reales
-- Mejorado diseño responsivo
-- Implementada funcionalidad de actualización
-- Optimizado rendimiento visual
+- [ ] **FolderCard** - Pendiente de actualizar a EntityCardWrapper
+- [ ] **WorldItemCard** - Pendiente de actualizar a EntityCardWrapper
+- [ ] **PlaceCard** - Pendiente de actualizar a EntityCardWrapper
+- [ ] **ConceptCard** - Pendiente de actualizar a EntityCardWrapper
+- [ ] **NoteCard** - Pendiente de actualizar a EntityCardWrapper
 
-### 12/03/2024
-- Añadidas métricas técnicas avanzadas con datos en tiempo real
-- Creado nuevo servicio `tech-metrics.ts` para obtención de datos técnicos
-- Implementado hook personalizado `use-tech-metrics.ts` para gestionar el estado
-- Desarrollado componente `SystemMetricsPanel` con visualizaciones detalladas
-- Añadidas gráficas de rendimiento para CPU, memoria y sistema de archivos
-- Mejorada la experiencia de usuario con indicadores de carga
-- Implementado historial de datos para visualización de tendencias temporales
-- Agregada nueva pestaña "Métricas Técnicas" en el panel principal
+### Layouts Pendientes de Implementar 🚧
 
-### 13/03/2024
-- Corregido error de importación de icono `CloudSync` en el archivo `use-features-issues.ts`
-- Reemplazado por el icono `Cloud` disponible en la biblioteca Lucide
-- Verificado que no existen otras referencias al icono no disponible
-- Documentado el proceso de detección y corrección de errores
-- Creado archivo README para documentar la estructura y uso del panel de desarrollo
+- [ ] **CollectionCard** - Inspirado en cartas especiales de colección MTG
+- [ ] **AlbumCard** - Inspirado en cartas de energía de Pokémon
+- [ ] **PromptCard** - Inspirado en cartas de conjuro/hechizo de MTG
 
-### 14/03/2024
-- Optimizadas transiciones entre actualizaciones de datos mediante:
-  - Implementación de `AnimatePresence` y `motion` de framer-motion para animaciones suaves
-  - Añadido retardo mínimo (50ms) en actualizaciones de estado para permitir transiciones fluidas
-  - Implementada memoización de componentes con `useMemo` para prevenir re-renders innecesarios
-  - Separado estado `isInitialLoading` para mostrar feedback visual sólo en la carga inicial
-  - Agregado `updateTimestamp` para controlar adecuadamente las animaciones entre actualizaciones
-  - Configuradas opciones de animación con física de resorte para transiciones más naturales
-  - Implementado sistema de contenedores animados con efecto de escalonamiento para elementos hijos
-- Mejorada distinción entre carga inicial y actualizaciones periódicas
-- Optimizados cálculos de métricas derivadas mediante `useMemo`
-- Implementada estructura de animación jerárquica para mejorar la percepción de rendimiento
+### Correcciones Realizadas en el Sistema Base ✅
 
-### 15/03/2024
-- Corregido error de sintaxis JSX en archivo `.ts` en lugar de `.tsx`
-- Implementada solución utilizando `createElement` para generar componentes React sin JSX
-- Añadidos tipos específicos para los componentes de Lucide para evitar el uso de `any`
-- Implementado un enfoque que garantiza la seguridad de tipos al utilizar componentes de iconos
-- Verificado que no haya más problemas de tipado en el código
-- Optimizada la forma en que se asignan los iconos a los servicios para una mayor eficiencia
+1. **Correcciones de Tipos y Linter**:
+   - [x] Corregida la propiedad `maxRotation` marcada como posiblemente undefined
+   - [x] Agregada propiedad `raritySystem` con el tipo correcto en CardOptions
+   - [x] Agregada propiedad `enableScanlines` en CardOptions
+   - [x] Agregada propiedad `enableAnimatedBorder` en CardOptions
+   - [x] Corregida propiedad `animationType` en BorderOptions
+   - [x] Implementada función auxiliar `generateRarityConfig` para crear configuraciones de rareza consistentes
 
-### 16/03/2024
-- Adaptado el código para Next.js 15 y React 19:
-  - Incorporada directiva `'use server'` en servicios para aprovechar las Server Components
-  - Refactorizado hook `useFeaturesIssues` con optimizaciones para React 19:
-    - Inicialización de estado con funciones de inicialización
-    - Memoización completa del objeto retornado por el hook para evitar re-renders innecesarios
-    - Simplificación del manejo de iconos con un mapa memoizado
-    - Optimizado el procesamiento de datos con una sola transformación
-  - Mejorada la tipificación con `Omit` para tipos parciales
-  - Implementada estructura de datos más coherente en servicios
-  - Añadido JSDoc para documentar funcionalidades
-  - Optimizada la agrupación de actualizaciones de estado para minimizar renders
-- Verificado que no quedan errores de tipo o sintaxis
-- Validada compatibilidad con las nuevas características de React 19 y Next.js 15
+2. **Nuevas Características**:
+   - [x] Creado componente `EntityCardWrapper` como facilitador para layouts específicos
+   - [x] Implementada adaptación automática de opciones según tipo de entidad
+   - [x] Mejorado soporte para explosión de capas de tarjeta
+   - [x] Documentación detallada del sistema en `docs/entity-cards-integration.md`
 
-### 17/03/2024
-- Corregido error crítico de renderizado de iconos:
-  - Modificado el tipo `ServiceStatus` para usar `LucideIcon` directamente en lugar de `ReactNode`
-  - Ajustado el componente `ServiceCard` para desestructurar correctamente el icono del servicio
-  - Modificado el hook `useFeaturesIssues` para pasar los componentes de Lucide directamente
-  - Eliminada la función `createElement` que generaba elementos React en lugar de componentes
-  - Actualizada la tipificación en todos los archivos relevantes para mantener la coherencia
-  - Adaptado el sistema al enfoque recomendado para React 19 con la administración de componentes
-- Revisada la documentación actualizada para garantizar que refleja el enfoque actual
+### Próximos pasos 📋
 
-## Mejoras realizadas
+1. Actualizar los layouts restantes para usar EntityCardWrapper
+2. Implementar los layouts pendientes (CollectionCard, AlbumCard, PromptCard)
+3. Implementar pruebas unitarias para los componentes base
+4. Crear una biblioteca de efectos visuales reutilizable
 
-### Estructura y organización
-- Dividido el archivo en componentes más pequeños y manejables
-- Extraídos interfaces a archivos de componentes específicos
-- Creada estructura modular para facilitar mantenimiento
+### Notas sobre rendimiento ⚡
 
-### Funcionalidades
-- Implementado sistema de obtención de datos reales desde base de datos
-- Añadida actualización en tiempo real de métricas (cada 15-30 segundos)
-- Creado sistema de carga de documentación desde archivos MD
-- Añadido estado de carga para mejorar UX
-- Implementado panel de métricas técnicas avanzadas con datos detallados
+El uso de memoización en las funciones de utilidad internas mejora significativamente el rendimiento, especialmente para tarjetas con muchos efectos visuales activados.
 
-### Diseño
-- Reducido tamaño de tarjetas para mostrar más información
-- Implementado diseño más compacto en todas las secciones
-- Mejorado sistema de gráficos para visualización de datos
-- Optimizado rendimiento de animaciones
-- Añadidas visualizaciones interactivas con tooltips informativos
+## Mejoras en el Sistema de Tarjetas de Entidades (Entity Cards)
 
-### Técnicas y componentes
-- Implementado sistema de historial de datos para gráficos en tiempo real
-- Creados formateadores para números y tiempos
-- Añadidas gráficas de barras, líneas y áreas con Recharts
-- Configurados tooltips personalizados para mejor experiencia
-- Añadida visualización por pestañas para agrupar información relacionada
+### Implementación del Grid de Imágenes
 
-### Corrección de errores
-- Identificado y corregido error de importación de iconos
-- Verificada la compatibilidad con la versión actual de Lucide React
-- Implementada solución utilizando iconos alternativos disponibles
-- Corregido problema de sintaxis JSX en archivos TypeScript mediante createElement
-- Solucionado error crítico de renderizado de iconos en ServiceCard
-- Mejorada la seguridad de tipos con interfaces específicas para componentes React
-- Documentado el proceso para futuras referencias
+- ✅ Añadido soporte para múltiples layouts de imágenes (single, dual, quad, six)
+- ✅ Implementado ajuste de separación (gap) entre imágenes
+- ✅ Añadida opción para mostrar el contador de imágenes
 
-### Optimización de renderizado
-- Implementada memoización para evitar recálculos y re-renders innecesarios
-- Agregadas transiciones suaves entre actualizaciones con framer-motion
-- Optimizada la actualización de datos para minimizar el impacto visual
-- Mejorado el feedback visual durante cargas y actualizaciones
-- Implementado sistema de estatus derivados pre-calculados para mejor rendimiento
+### Visualización Avanzada con Imágenes Reales
 
-### Adaptación a Next.js 15 y React 19
-- Aprovechada la directiva `'use server'` para funciones de servidor
-- Implementadas optimizaciones específicas para React 19
-- Mejorada la gestión de estado con las últimas prácticas recomendadas
-- Utilizada inicialización con función para estados iniciales
-- Optimizada la estructura del código para aprovechar las mejoras de rendimiento
-- Implementada memoización exhaustiva para evitar recreaciones innecesarias
-- Adaptado el manejo de iconos para ser compatible con el sistema de componentes de React 19
-- Adaptados los tipos para garantizar la seguridad de tipos completa
+- ✅ Implementada la carga de imágenes aleatorias desde la base de datos según tipo de entidad
+- ✅ Añadido botón de recarga para refrescar las imágenes mostradas
+- ✅ Mejora del componente EntityCardPreview para mostrar imágenes reales
 
-### Futuras mejoras
-- Implementar monitoreo de sistema en tiempo real con WebSockets
-- Implementar funcionalidades de administración para issues y features
-- Mejorar visualizaciones con más filtros y opciones de personalización
-- Añadir exportación de datos a formatos CSV/JSON
-- Implementar notificaciones en tiempo real para problemas críticos
+### Mejoras en la Interfaz de Configuración
 
-### 12/07/2024
-- Implementado sistema de configuración de tarjetas para entidades:
-  - Creados modelos en Prisma para `CardConfiguration`, `Rarity` y `Texture`
-  - Desarrollados componentes UI para gestionar la configuración visual de las tarjetas
-  - Implementado sistema de rarezas que permite:
-    - Definir múltiples niveles de rareza con nombres, colores y probabilidades
-    - Distribución automática de probabilidades basada en la posición en la lista
-    - Visualización previa del estilo de rareza
-  - Implementado sistema de texturas que permite:
-    - Definir texturas con patrones CSS personalizados y colores
-    - Presets predefinidos para texturas comunes (metálico, holográfico, madera, etc.)
-    - Vista previa en tiempo real de las texturas aplicadas
-  - Creadas server actions para cargar y guardar configuraciones
-  - Integrado el sistema con la interfaz de configuración existente
-  - Implementada vista previa en tiempo real de los cambios
-  - Diseñada una interfaz intuitiva con pestañas para distintas secciones
-- Añadida la capacidad de activar/desactivar sistemas independientemente
-- Optimizado el rendimiento con carga asíncrona de configuraciones
-- Documentado el sistema para facilitar futuras expansiones
-- Diseñada la arquitectura para permitir fácil adición de nuevas características
+- ✅ Reorganización del CardSettingsPanel para visualización en dos columnas
+- ✅ Implementación de colores para diferenciar claramente secciones
+- ✅ Añadido sistema de presets con visualización en miniatura
+- ✅ Configuración avanzada para efectos visuales con controles detallados
+
+### Configuración Avanzada de Efectos
+
+- ✅ Implementadas opciones avanzadas para el efecto de líneas de escaneo
+  - Control de opacidad, espaciado, dirección y animación
+- ✅ Implementadas opciones avanzadas para el efecto de grano
+  - Control de intensidad, densidad, tipo de ruido y animación
+- ✅ Implementadas opciones avanzadas para el borde animado
+  - Control de ancho, patrón y tipo de animación
+
+### Sistema de Presets
+
+- ✅ Creados presets predefinidos para diferentes estilos de tarjetas
+- ✅ Visualización en miniatura con previews a escala
+- ✅ Indicadores visuales para los efectos activos en cada preset
+- ✅ Implementado sistema de selección con persistencia del preset activo
+
+### Próximos Pasos
+
+- ⬜ Implementar persistencia de la configuración personalizada en la base de datos
+- ⬜ Añadir más presets con combinaciones interesantes de efectos
+- ⬜ Mejorar la visualización responsive para dispositivos móviles
+- ⬜ Implementar la exportación/importación de configuraciones personalizadas

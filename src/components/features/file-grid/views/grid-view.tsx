@@ -3,11 +3,11 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils/utils';
 import type { FileItem } from '@/types/file-item';
-import { ImageIcon, Star } from 'lucide-react';
+import { ImageIcon, Meh, Star } from 'lucide-react';
 import type * as React from 'react';
-import { memo } from 'react';
-import { FileContextMenu } from '../context-menu/context-menu';
+import { memo, useState } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
+import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
 
 interface GridViewProps {
@@ -35,11 +35,25 @@ export const GridView = memo(function GridView({
 	onContextAction,
 	style,
 }: GridViewProps) {
+	const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			onClick?.(item);
 		}
+	};
+
+	const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+		const { currentTarget } = e;
+		const rect = currentTarget.getBoundingClientRect();
+		const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+		const y = ((e.clientY - rect.top) / rect.height - 0.5) * -20;
+		setMousePosition({ x, y });
+	};
+
+	const handleMouseLeave = () => {
+		setMousePosition({ x: 0, y: 0 });
 	};
 
 	return (
@@ -63,9 +77,11 @@ export const GridView = memo(function GridView({
 					onDoubleClick?.(item);
 				}}
 				onKeyDown={handleKeyDown}
+				onMouseMove={handleMouseMove}
+				onMouseLeave={handleMouseLeave}
 				aria-pressed={isSelected}
 			>
-				<div className="w-full h-full bg-muted/30 rounded-sm">
+				<div className="w-full h-full bg-muted/30 cursor-pointer">
 					{shouldLoad && thumbnail ? (
 						<div className="relative w-full h-full p-2">
 							<div
@@ -74,16 +90,18 @@ export const GridView = memo(function GridView({
 									backgroundImage: `url(${thumbnail})`,
 								}}
 							/>
-							<ImageRenderer
-								src={thumbnail}
-								alt={item.name}
-								objectFit="contain"
-								className={cn('h-full w-full rounded-sm transition-transform duration-200', 'group-hover:scale-105')}
-							/>
+							<div className="absolute inset-0 scale-80 w-auto h-auto group-hover:scale-90 transition-all duration-100 ease-out">
+								<ImageRenderer
+									src={thumbnail}
+									alt={item.name}
+									objectFit="contain"
+									className={cn('h-full w-full rounded-sm transition-all duration-200 ease-out')}
+								/>
+							</div>
 						</div>
 					) : (
 						<div className="flex items-center justify-center h-full">
-							<ImageIcon className="h-8 w-8 text-muted-foreground/50 animate-pulse" />
+							<Meh className="h-12 w-12 text-muted-foreground/50 animate-spin" />
 						</div>
 					)}
 				</div>

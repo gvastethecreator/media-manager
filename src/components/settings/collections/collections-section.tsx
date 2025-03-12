@@ -1,12 +1,12 @@
 'use client';
 
-import { CollectionCard } from '@/components/features/entity-cards/collection/collection-card';
-import { CollectionForm } from '@/components/features/entity-cards/collection/collection-form';
+import { CollectionForm } from '@/components/features/entity-cards/forms/collection-form';
 import {
 	type CollectionFormData,
 	collectionToFormData,
 	formDataToCollection,
-} from '@/components/features/entity-cards/entity-types';
+} from '@/components/features/entity-cards/forms/entity-types';
+import { CollectionCard } from '@/components/features/entity-cards/layouts/collection-card-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';

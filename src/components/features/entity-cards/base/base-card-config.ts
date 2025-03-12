@@ -1,12 +1,12 @@
 import type * as React from 'react';
+import type { CardOptions } from '../settings/card-settings-types';
 import type {
 	BorderOptions,
-	CardOptions,
 	GlowEffectOptions,
 	GrainEffectOptions,
 	HolographicEffectOptions,
 	ScanlinesOptions,
-} from './base-card-types';
+} from '../types/card-types';
 
 // Sistema de rarezas para categorizar entidades
 export interface RarityLevel {
@@ -144,12 +144,18 @@ const DEFAULT_BORDER_OPTIONS: BorderOptions = {
 	width: 2,
 	pattern: 'solid',
 	animationType: 'flow',
-	animationSpeed: 1,
-	animationDuration: 6,
 	glowColor: 'rgba(0, 153, 255, 0.7)',
 	glowIntensity: 5,
 	glowOnHover: true,
 	layerIndex: 5,
+	gradientColors: ['rgba(0, 153, 255, 1)', 'rgba(128, 0, 255, 1)'],
+	gradientAngle: 45,
+	animation: {
+		type: 'flow',
+		duration: 6,
+		timing: 'linear',
+		iteration: 'infinite',
+	},
 };
 
 const DEFAULT_GRAIN_OPTIONS: GrainEffectOptions = {
@@ -165,27 +171,116 @@ const DEFAULT_GRAIN_OPTIONS: GrainEffectOptions = {
 
 // Opciones visuales predeterminadas para todas las tarjetas
 export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
+	// Opciones visuales básicas
 	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false, // Desactivado por defecto para evitar ruido visual
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
+	enableHolographicEffect: false,
+	enableScanlinesEffect: false,
 	enableGlowEffect: true,
-	enableGrainEffect: false, // Desactivado por defecto para evitar ruido visual
-	hoverLiftHeight: 10, // Reducido para un efecto más sutil
-	maxRotation: 12, // Reducido para un efecto más sutil
-	primaryColor: '0, 153, 255', // Azul claro
-	secondaryColor: '128, 0, 255', // Púrpura
-	raritySystem: true,
-	textureSystem: true,
-	categorySystem: true,
+	enableBorderEffect: true,
+	enableGrainEffect: false,
 
-	// Opciones expandidas para cada efecto
+	// Configuraciones específicas de efectos
 	holographicOptions: DEFAULT_HOLOGRAPHIC_OPTIONS,
 	scanlinesOptions: DEFAULT_SCANLINES_OPTIONS,
 	glowOptions: DEFAULT_GLOW_OPTIONS,
 	borderOptions: DEFAULT_BORDER_OPTIONS,
 	grainOptions: DEFAULT_GRAIN_OPTIONS,
+
+	// Sistema de diseño
+	designSystem: {
+		preset: 'default',
+		variant: 'default',
+		aspectRatio: '1/1',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 2,
+		shadowStyle: 'soft',
+	},
+
+	// Sistema de capas
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'overlay'],
+		blendMode: 'normal',
+		spacing: 4,
+		explodeView: false,
+		explodeDistance: 20,
+	},
+
+	// Estados
+	states: {
+		enableHover: true,
+		enableFocus: true,
+		enableActive: true,
+		enableSelected: true,
+		stateEffect: 'glow',
+		stateIntensity: 1,
+		stateDuration: 2,
+		error: {
+			style: 'border',
+			color: 'red',
+		},
+		selected: {
+			style: 'border',
+			color: 'blue',
+		},
+		disabled: {
+			style: 'opacity',
+			opacity: 0.5,
+		},
+	},
+
+	// Interactividad
+	interactivity: {
+		enableHoverEffects: true,
+		enableClickEffects: true,
+		enableDragInteraction: false,
+		enableContextMenu: false,
+		hover: {
+			scale: 1.05,
+			rotate: true,
+			lift: true,
+			glow: true,
+		},
+		click: {
+			feedback: 'scale',
+			sound: false,
+			haptic: false,
+		},
+		gestures: {
+			swipe: false,
+			pinch: false,
+			rotate: false,
+		},
+	},
+
+	// Rendimiento
+	performance: {
+		lazyLoad: true,
+		virtualScroll: true,
+		imageOptimization: true,
+		animationOptimization: true,
+		renderQuality: 'high',
+	},
+
+	// Disposición del contenido
+	contentLayout: 'default',
+	contentPadding: '1rem',
+	contentSpacing: 8,
+	contentAlignment: 'center',
+
+	// Estilo de imagen
+	imageStyle: 'cover',
+
+	// Superposición de imagen
+	imageOverlay: false,
+	imageOverlayOpacity: 0.3,
+	imageOverlayGradient: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))',
+
+	// Configuraciones de movimiento
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+	primaryColor: '#3b82f6',
+	secondaryColor: '#1d4ed8',
 };
 
 // Función para calcular el nivel de rareza basado en un valor
