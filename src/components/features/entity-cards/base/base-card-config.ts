@@ -6,7 +6,7 @@ import type {
 	GrainEffectOptions,
 	HolographicEffectOptions,
 	ScanlinesOptions,
-} from '../types/card-types';
+} from './base-card-types';
 
 // Sistema de rarezas para categorizar entidades
 export interface RarityLevel {
@@ -174,9 +174,9 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 	// Opciones visuales básicas
 	enable3DEffect: true,
 	enableHolographicEffect: false,
-	enableScanlinesEffect: false,
-	enableGlowEffect: true,
-	enableBorderEffect: true,
+	enableScanlines: false,
+	enableGlow: true,
+	enableBlurEffect: true,
 	enableGrainEffect: false,
 
 	// Configuraciones específicas de efectos
@@ -197,15 +197,6 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 		shadowStyle: 'soft',
 	},
 
-	// Sistema de capas
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'overlay'],
-		blendMode: 'normal',
-		spacing: 4,
-		explodeView: false,
-		explodeDistance: 20,
-	},
-
 	// Estados
 	states: {
 		enableHover: true,
@@ -215,57 +206,19 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 		stateEffect: 'glow',
 		stateIntensity: 1,
 		stateDuration: 2,
-		error: {
-			style: 'border',
-			color: 'red',
-		},
-		selected: {
-			style: 'border',
-			color: 'blue',
-		},
-		disabled: {
-			style: 'opacity',
-			opacity: 0.5,
-		},
-	},
-
-	// Interactividad
-	interactivity: {
-		enableHoverEffects: true,
-		enableClickEffects: true,
-		enableDragInteraction: false,
-		enableContextMenu: false,
-		hover: {
-			scale: 1.05,
-			rotate: true,
-			lift: true,
-			glow: true,
-		},
-		click: {
-			feedback: 'scale',
-			sound: false,
-			haptic: false,
-		},
-		gestures: {
-			swipe: false,
-			pinch: false,
-			rotate: false,
-		},
 	},
 
 	// Rendimiento
-	performance: {
-		lazyLoad: true,
-		virtualScroll: true,
-		imageOptimization: true,
-		animationOptimization: true,
-		renderQuality: 'high',
-	},
+	enableImageOptimization: true,
+	enableVirtualization: true,
+	enableCaching: true,
+	hoverTransitionDuration: 300,
+	hoverTransitionEasing: 'ease-out',
+	rotationTransitionDuration: 300,
+	liftTransitionDuration: 300,
 
 	// Disposición del contenido
 	contentLayout: 'default',
-	contentPadding: '1rem',
-	contentSpacing: 8,
 	contentAlignment: 'center',
 
 	// Estilo de imagen
@@ -274,13 +227,43 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 	// Superposición de imagen
 	imageOverlay: false,
 	imageOverlayOpacity: 0.3,
-	imageOverlayGradient: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))',
 
 	// Configuraciones de movimiento
 	hoverLiftHeight: 10,
 	maxRotation: 15,
 	primaryColor: '#3b82f6',
 	secondaryColor: '#1d4ed8',
+
+	// Propiedades obligatorias según CardOptions
+	imageGridLayout: 'single',
+	imageGridGap: 8,
+	imageGridStyle: 'standard',
+	showImageCount: true,
+	raritySystem: true,
+	textureSystem: true,
+	categorySystem: true,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableLazyLoading: true,
+	showTitle: true,
+	showType: true,
+	showDescription: true,
+	showRarity: true,
+	showTexture: true,
+	showInfo: true,
+	enableShadow: true,
+	cardShadowSize: 'md',
+	cardShadowColor: 'rgba(0,0,0,0.2)',
+	cardRoundedSize: 'md',
+	enableHoverAnimation: true,
+	cardBorderSize: 'none',
+	enableParallaxEffect: false,
+	enableSkeleton: true,
+	enablePrefetch: false,
+	enableHover: true,
+	enableActive: true,
+	enableFocus: true,
+	enableDisabled: false,
 };
 
 // Función para calcular el nivel de rareza basado en un valor

@@ -1,6 +1,7 @@
 import type {
 	BorderOptions,
 	CardOptions,
+	CardStates,
 	GlowEffectOptions,
 	GrainEffectOptions,
 	HolographicEffectOptions,
@@ -89,6 +90,34 @@ export const DEFAULT_GRAIN_OPTIONS: GrainEffectOptions = {
 	layerIndex: 6,
 };
 
+// Estados predeterminados para las tarjetas
+export const DEFAULT_CARD_STATES: CardStates = {
+	enableHover: true,
+	enableFocus: true,
+	enableActive: true,
+	enableSelected: true,
+	stateEffect: 'glow',
+	stateIntensity: 1,
+	stateDuration: 2,
+	loading: {
+		skeleton: true,
+		spinner: false,
+		blur: false,
+	},
+	error: {
+		style: 'border',
+		color: 'red',
+	},
+	selected: {
+		style: 'border',
+		color: 'blue',
+	},
+	disabled: {
+		style: 'opacity',
+		opacity: 0.5,
+	},
+};
+
 /**
  * Opciones visuales predeterminadas para tarjetas base de entidades
  */
@@ -136,6 +165,9 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 		explodeView: false,
 		explodeDistance: 20,
 	},
+
+	// Estados
+	states: DEFAULT_CARD_STATES,
 
 	// Configuraciones de movimiento
 	hoverLiftHeight: 10,
@@ -282,50 +314,60 @@ export const DEFAULT_TEXTURES: Record<string, TextureConfig> = {
 		name: 'Ninguna',
 		patternType: 'none',
 		opacity: 0,
+		color: '#ffffff',
 	},
 	normal: {
 		name: 'Normal',
 		patternType: 'noise',
 		opacity: 0.05,
+		color: '#f0f0f0',
 	},
 	paper: {
 		name: 'Papel',
 		patternType: 'paper',
 		opacity: 0.1,
+		color: '#f5f5f5',
 	},
 	metal: {
 		name: 'Metal',
 		patternType: 'metal',
 		opacity: 0.2,
+		color: '#b6b6b6',
 	},
 	carbon: {
 		name: 'Carbono',
 		patternType: 'carbon',
 		opacity: 0.15,
+		color: '#2c2c2c',
 	},
 	wood: {
 		name: 'Madera',
 		patternType: 'wood',
 		opacity: 0.2,
+		color: '#8B4513',
 	},
 	holographic: {
 		name: 'Holográfico',
 		patternType: 'diagonal',
 		opacity: 0.5,
+		color: '#8a2be2',
 	},
 	metallic: {
 		name: 'Metálico',
 		patternType: 'lines',
 		opacity: 0.4,
+		color: '#c0c0c0',
 	},
 	prismatic: {
 		name: 'Prismático',
 		patternType: 'grid',
 		opacity: 0.6,
+		color: '#6f42c1',
 	},
 	rainbow: {
 		name: 'Arcoíris',
 		patternType: 'waves',
 		opacity: 0.5,
+		color: '#ff6b6b',
 	},
 };

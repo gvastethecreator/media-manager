@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
+import { toastService } from '@/lib/services/toast.service';
 import { logger } from '@/lib/logger/logger';
 import { useCollectionsStore } from '@/store/entities/collections.store';
 import { Grid2X2 as CollectionIcon, Loader2 } from 'lucide-react';
@@ -24,7 +24,6 @@ export function CollectionsSection() {
 	const { collections, isLoading, error, loadCollections, createCollection, updateCollection, deleteCollection } =
 		useCollectionsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const { toast } = useToast();
 
 	// Calcular estadísticas
 	const stats = React.useMemo(() => {
@@ -71,17 +70,10 @@ export function CollectionsSection() {
 		try {
 			collectionLogger.info('📝 Creando nueva colección:', data);
 			await createCollection(formDataToCollection(data));
-			toast({
-				title: 'Colección creada',
-				description: 'La colección se ha creado correctamente.',
-			});
+			toastService.success('La colección se ha creado correctamente.');
 		} catch (error) {
 			collectionLogger.error('❌ Error al crear colección:', error);
-			toast({
-				title: 'Error al crear colección',
-				description: 'No se pudo crear la colección.',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo crear la colección.');
 		}
 	};
 
@@ -95,18 +87,11 @@ export function CollectionsSection() {
 				...formDataToCollection(data),
 				id: data.id,
 			});
-			toast({
-				title: 'Colección actualizada',
-				description: 'La colección se ha actualizado correctamente.',
-			});
+			toastService.success('La colección se ha actualizado correctamente.');
 			setEditingId(null);
 		} catch (error) {
 			collectionLogger.error('❌ Error al actualizar colección:', error);
-			toast({
-				title: 'Error al actualizar colección',
-				description: 'No se pudo actualizar la colección.',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo actualizar la colección.');
 		}
 	};
 
@@ -114,17 +99,10 @@ export function CollectionsSection() {
 		try {
 			collectionLogger.info('🗑️ Eliminando colección:', id);
 			await deleteCollection(id);
-			toast({
-				title: 'Colección eliminada',
-				description: 'La colección se ha eliminado correctamente.',
-			});
+			toastService.success('La colección se ha eliminado correctamente.');
 		} catch (error) {
 			collectionLogger.error('❌ Error al eliminar colección:', error);
-			toast({
-				title: 'Error al eliminar colección',
-				description: 'No se pudo eliminar la colección.',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo eliminar la colección.');
 		}
 	};
 

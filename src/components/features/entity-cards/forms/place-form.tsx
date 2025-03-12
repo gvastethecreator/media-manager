@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import type { PlaceFormData } from '@/types/place-form-data';
+import type { PlaceFormData } from '@/components/features/entity-cards/forms/entity-types';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';
 

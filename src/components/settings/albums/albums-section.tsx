@@ -11,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
 import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
 import { useAlbumsStore } from '@/store/entities/albums.store';
 import { Album as AlbumIcon, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -23,7 +23,6 @@ const albumLogger = logger.withContext('AlbumsSection');
 export function AlbumsSection() {
 	const { albums, isLoading, error, loadAlbums, createAlbum, updateAlbum, deleteAlbum } = useAlbumsStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
-	const { toast } = useToast();
 
 	React.useEffect(() => {
 		loadAlbums();
@@ -33,17 +32,10 @@ export function AlbumsSection() {
 		try {
 			albumLogger.info('✨ Creando nuevo álbum:', data);
 			await createAlbum(formDataToAlbum(data));
-			toast({
-				title: 'Éxito',
-				description: 'Álbum creado correctamente',
-			});
+			toastService.success('El álbum se ha creado correctamente.');
 		} catch (error) {
 			albumLogger.error('❌ Error al crear álbum:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo crear el álbum',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo crear el álbum.');
 		}
 	};
 
@@ -58,17 +50,10 @@ export function AlbumsSection() {
 				id: data.id,
 			});
 			setEditingId(null);
-			toast({
-				title: 'Éxito',
-				description: 'Álbum actualizado correctamente',
-			});
+			toastService.success('El álbum se ha actualizado correctamente.');
 		} catch (error) {
 			albumLogger.error('❌ Error al actualizar álbum:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo actualizar el álbum',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo actualizar el álbum.');
 		}
 	};
 
@@ -79,17 +64,10 @@ export function AlbumsSection() {
 		try {
 			albumLogger.info('🗑️ Eliminando álbum:', { id });
 			await deleteAlbum(id);
-			toast({
-				title: 'Éxito',
-				description: 'Álbum eliminado correctamente',
-			});
+			toastService.success('El álbum se ha eliminado correctamente.');
 		} catch (error) {
 			albumLogger.error('❌ Error al eliminar álbum:', error);
-			toast({
-				title: 'Error',
-				description: 'No se pudo eliminar el álbum',
-				variant: 'destructive',
-			});
+			toastService.error('No se pudo eliminar el álbum.');
 		}
 	};
 

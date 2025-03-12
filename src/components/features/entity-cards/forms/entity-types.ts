@@ -1,4 +1,3 @@
-import type { BaseEntityFormData } from '@/types/base-entity-form-data';
 import type {
 	Album as PrismaAlbum,
 	Character as PrismaCharacter,
@@ -10,6 +9,7 @@ import type {
 	Tag as PrismaTag,
 	WorldItem as PrismaWorldItem,
 } from '@prisma/client';
+import type { BaseEntityFormData } from './entity-form';
 
 // Definir los tipos extendidos basados en los tipos de Prisma
 export type Album = PrismaAlbum & {
@@ -181,7 +181,7 @@ export function characterToFormData(character: Character): CharacterFormData {
 		fears: character.fears,
 		beliefs: character.beliefs,
 		personality: character.personality,
-		featuredImage: character.featuredImage || undefined,
+		featuredImage: character.featuredImage || null,
 		isFavorite: character.isFavorite,
 		category: character.category || null,
 	};
@@ -192,8 +192,8 @@ export function formDataToCharacter(data: CharacterFormData): Omit<Character, 'i
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
-		shortcut: data.shortcut || undefined,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
 		level: data.level,
 		class: data.class,
 		race: data.race,
@@ -236,11 +236,13 @@ export function formDataToAlbum(data: AlbumFormData): Omit<PrismaAlbum, 'id' | '
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
-		shortcut: data.shortcut || undefined,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
 		sortBy: data.sortBy,
 		filters: data.filters,
 		category: data.category || null,
+		rarity: null,
+		texture: null,
 	};
 }
 
@@ -271,19 +273,21 @@ export function formDataToCollection(data: CollectionFormData): Omit<Collection,
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
-		shortcut: data.shortcut || undefined,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
 		sortBy: data.sortBy,
 		filters: data.filters,
-		url: data.url || undefined,
-		alternativeUrl: data.alternativeUrl || undefined,
-		sourceImage: data.sourceImage || undefined,
-		platform: data.platform || undefined,
-		price: data.price || undefined,
+		url: data.url || null,
+		alternativeUrl: data.alternativeUrl || null,
+		sourceImage: data.sourceImage || null,
+		platform: data.platform || null,
+		price: data.price || null,
 		editions: data.editions,
-		featuredImage: data.featuredImage || undefined,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 		category: data.category || null,
+		rarity: null,
+		texture: null,
 	};
 }
 
@@ -302,8 +306,8 @@ export function worldItemToFormData(worldItem: WorldItem): WorldItemFormData {
 		stats: worldItem.stats,
 		sortBy: worldItem.sortBy,
 		filters: worldItem.filters,
-		shortcut: worldItem.shortcut || undefined,
-		featuredImage: worldItem.featuredImage || undefined,
+		shortcut: worldItem.shortcut || null,
+		featuredImage: worldItem.featuredImage || null,
 		isFavorite: worldItem.isFavorite,
 		category: worldItem.category || null,
 	};
@@ -314,7 +318,7 @@ export function formDataToWorldItem(data: WorldItemFormData): Omit<WorldItem, 'i
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
+		description: data.description || null,
 		type: data.type,
 		rarity: data.rarity,
 		properties: data.properties,
@@ -323,8 +327,8 @@ export function formDataToWorldItem(data: WorldItemFormData): Omit<WorldItem, 'i
 		stats: data.stats,
 		sortBy: data.sortBy,
 		filters: data.filters,
-		shortcut: data.shortcut || undefined,
-		featuredImage: data.featuredImage || undefined,
+		shortcut: data.shortcut || null,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 		category: data.category || null,
 	};
@@ -361,7 +365,7 @@ export function formDataToPlace(data: PlaceFormData): Omit<Place, 'id' | 'create
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
+		description: data.description || null,
 		region: data.region,
 		type: data.type,
 		climate: data.climate,
@@ -372,10 +376,10 @@ export function formDataToPlace(data: PlaceFormData): Omit<Place, 'id' | 'create
 		lore: data.lore,
 		history: data.history,
 		stats: data.stats,
-		shortcut: data.shortcut || undefined,
+		shortcut: data.shortcut || null,
 		sortBy: data.sortBy,
 		filters: data.filters,
-		featuredImage: data.featuredImage || undefined,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 		category: data.category || null,
 	};
@@ -400,11 +404,13 @@ export function formDataToTag(data: TagFormData): Omit<Tag, 'id' | 'createdAt' |
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
-		shortcut: data.shortcut || undefined,
-		featuredImage: data.featuredImage || undefined,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 		category: data.category || null,
+		rarity: null,
+		texture: null,
 	};
 }
 
@@ -434,7 +440,7 @@ export function formDataToNote(data: NoteFormData): Omit<Note, 'id' | 'createdAt
 		priority: data.priority,
 		status: data.status,
 		tags: JSON.stringify(data.tags),
-		featuredImage: data.featuredImage || undefined,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 	};
 }
@@ -459,11 +465,11 @@ export function formDataToConcept(data: ConceptFormData): Omit<Concept, 'id' | '
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
+		description: data.description || null,
 		content: data.content,
 		category: data.category,
 		tags: JSON.stringify(data.tags),
-		featuredImage: data.featuredImage || undefined,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 	};
 }
@@ -489,12 +495,12 @@ export function formDataToPrompt(data: PromptFormData): Omit<Prompt, 'id' | 'cre
 		name: data.name,
 		emoji: data.emoji,
 		color: data.color,
-		description: data.description || undefined,
+		description: data.description || null,
 		content: data.content,
 		category: data.category,
 		parameters: data.parameters,
 		tags: JSON.stringify(data.tags),
-		featuredImage: data.featuredImage || undefined,
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 	};
 }

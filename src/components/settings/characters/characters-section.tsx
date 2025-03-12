@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { useToast } from '@/components/ui/use-toast';
+import { toastService } from '@/lib/services/toast.service';
 import { logger } from '@/lib/logger/logger';
 import { useCharactersStore } from '@/store/entities/characters.store';
 import type { Character } from '@prisma/client';
@@ -22,9 +22,9 @@ import * as React from 'react';
 const characterLogger = logger.withContext('CharactersSection');
 
 export function CharactersSection() {
-	const { toast } = useToast();
-	const { characters, isLoading, loadCharacters, createCharacter, updateCharacter, deleteCharacter } =
+	const { characters, isLoading, error, loadCharacters, createCharacter, updateCharacter, deleteCharacter } =
 		useCharactersStore();
+	const [editingId, setEditingId] = React.useState<string | null>(null);
 
 	// Cargar personajes al montar el componente
 	React.useEffect(() => {
@@ -84,53 +84,42 @@ export function CharactersSection() {
 		try {
 			characterLogger.info('📝 Creando personaje:', data);
 			await createCharacter(formDataToCharacter(data));
-			toast({
-				title: '✅ Personaje creado',
-				description: `Se ha creado el personaje "${data.name}" correctamente.`,
-			});
+			toastService.success(`Se ha creado el personaje "${data.name}" correctamente.`);
 		} catch (error) {
 			characterLogger.error('❌ Error al crear personaje:', error);
-			toast({
-				title: '❌ Error',
-				description: error instanceof Error ? error.message : 'Error al crear el personaje',
-				variant: 'destructive',
-			});
+			toastService.error(error instanceof Error ? error.message : 'Error al crear el personaje');
 		}
 	};
 
-	const handleUpdate = async (character: Character) => {
+	const handleUpdate = async (data: CharacterFormData) => {
+		if (!data.id) {
+			return;
+		}
 		try {
-			characterLogger.info('📝 Actualizando personaje:', character);
-			await updateCharacter(character.id, character);
-			toast({
-				title: '✅ Personaje actualizado',
-				description: `Se ha actualizado el personaje "${character.name}" correctamente.`,
+			characterLogger.info('📝 Actualizando personaje:', data);
+			await updateCharacter(data.id, {
+				...formDataToCharacter(data),
+				id: data.id,
 			});
+			setEditingId(null);
+			toastService.success(`Se ha actualizado el personaje "${data.name}" correctamente.`);
 		} catch (error) {
 			characterLogger.error('❌ Error al actualizar personaje:', error);
-			toast({
-				title: '❌ Error',
-				description: error instanceof Error ? error.message : 'Error al actualizar el personaje',
-				variant: 'destructive',
-			});
+			toastService.error(error instanceof Error ? error.message : 'Error al actualizar el personaje');
 		}
 	};
 
 	const handleDelete = async (id: string) => {
+		if (!confirm('¿Estás seguro de eliminar este personaje?')) {
+			return;
+		}
 		try {
 			characterLogger.info('🗑️ Eliminando personaje:', id);
 			await deleteCharacter(id);
-			toast({
-				title: '✅ Personaje eliminado',
-				description: 'Se ha eliminado el personaje correctamente.',
-			});
+			toastService.success('Se ha eliminado el personaje correctamente.');
 		} catch (error) {
 			characterLogger.error('❌ Error al eliminar personaje:', error);
-			toast({
-				title: '❌ Error',
-				description: error instanceof Error ? error.message : 'Error al eliminar el personaje',
-				variant: 'destructive',
-			});
+			toastService.error(error instanceof Error ? error.message : 'Error al eliminar el personaje');
 		}
 	};
 
@@ -174,6 +163,13 @@ export function CharactersSection() {
 						<div className="flex items-center justify-center p-8">
 							<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
 						</div>
+					) : error ? (
+						<div className="flex flex-col items-center justify-center gap-2 p-8">
+							<p className="text-sm text-muted-foreground text-center">{error}</p>
+							<Button variant="outline" size="sm" onClick={() => loadCharacters()}>
+								Reintentar
+							</Button>
+						</div>
 					) : characters.length === 0 ? (
 						<div className="flex flex-col items-center justify-center p-8 text-center">
 							<Users className="h-8 w-8 text-muted-foreground mb-4" />
@@ -185,11 +181,29 @@ export function CharactersSection() {
 							{characters.map((character) => (
 								<motion.div
 									key={character.id}
+									layout
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.3 }}
 								>
-									<CharacterCard data={character} onEdit={handleUpdate} onDelete={handleDelete} />
+									{editingId === character.id ? (
+										<Card className="relative">
+											<CardContent className="p-4">
+												<CharacterForm
+													initialData={characterToFormData(character)}
+													onSubmit={handleUpdate}
+													onCancel={() => setEditingId(null)}
+													isLoading={isLoading}
+												/>
+											</CardContent>
+										</Card>
+									) : (
+										<CharacterCard 
+											character={character} 
+											onEdit={() => setEditingId(character.id)} 
+											onDelete={handleDelete} 
+										/>
+									)}
 								</motion.div>
 							))}
 						</div>

@@ -27,13 +27,28 @@ export function adaptSettingsToBaseOptions(options: SettingsCardOptions): Partia
 		borderOptions: options.borderOptions
 			? {
 					width: options.borderOptions.width || 2,
-					pattern: (options.borderOptions.pattern || 'solid') as 'solid',
-					animationType: options.borderOptions.animationType || 'none',
+					pattern: (options.borderOptions.pattern || 'solid') as 'solid' | 'dashed' | 'dotted' | 'double' | 'gradient',
+					animationType: (options.borderOptions.animationType || 'none') as
+						| 'none'
+						| 'flow'
+						| 'pulse'
+						| 'rainbow'
+						| 'shimmer',
 					animation: {
-						type: options.borderOptions.animation?.type || options.borderOptions.animationType || 'none',
+						type: (options.borderOptions.animation?.type || options.borderOptions.animationType || 'none') as
+							| 'none'
+							| 'flow'
+							| 'pulse'
+							| 'rainbow'
+							| 'shimmer',
 						duration: options.borderOptions.animation?.duration || 3000,
 						timing: options.borderOptions.animation?.timing || 'linear',
-						iteration: options.borderOptions.animation?.iteration || 'infinite',
+						iteration:
+							options.borderOptions.animation?.iteration === 'infinite'
+								? 'infinite'
+								: typeof options.borderOptions.animation?.iteration === 'number'
+									? options.borderOptions.animation?.iteration
+									: ('infinite' as const),
 					},
 					// Otras propiedades opcionales
 					color: options.borderOptions.color,

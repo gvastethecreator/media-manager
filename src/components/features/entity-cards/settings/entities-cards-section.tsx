@@ -1,26 +1,46 @@
-'use client';
+"use client";
 
-import type { RaritySystem, TextureSystem } from '@/app/actions/entities-cards/entities-cards.actions';
-import { getEntityCardConfig, saveEntityCardConfig } from '@/app/actions/entities-cards/entities-cards.actions';
+import type {
+	RaritySystem,
+	TextureSystem,
+} from "@/app/actions/entities-cards/entities-cards.actions";
+import {
+	getEntityCardConfig,
+	saveEntityCardConfig,
+} from "@/app/actions/entities-cards/entities-cards.actions";
 
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import type { CardOptions as BaseCardOptions } from '@/components/features/entity-cards/base/base-card-types';
-import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/base/base-card-types';
-import { Alert, AlertDescription } from '@/components/ui/alert-enhanced';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { TypographyH3, TypographyP } from '@/components/ui/typography';
-import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
+import { BaseCard } from "@/components/features/entity-cards/base/base-card";
+import type { CardOptions as BaseCardOptions } from "@/components/features/entity-cards/base/base-card-types";
+import type {
+	RarityConfig,
+	TextureConfig,
+} from "@/components/features/entity-cards/base/base-card-types";
+import { Alert, AlertDescription } from "@/components/ui/alert-enhanced";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TypographyH3, TypographyP } from "@/components/ui/typography";
+import { toastService } from "@/lib/services/toast.service";
+import { cn } from "@/lib/utils/utils";
 import {
 	AlertCircle,
 	Box,
@@ -44,17 +64,17 @@ import {
 	StickyNote,
 	Tag as TagIcon,
 	Users,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
-import { useCallback, useEffect, useState } from 'react';
-import { adaptBaseToSettingsOptions } from '../base/card-adapter';
-import { DEFAULT_SETTINGS_OPTIONS } from './card-config-defaults';
-import { CardSettingsPanel } from './card-settings-panel';
-import type { CardOptions } from './card-settings-types';
-import { EntityCardPreview } from './entity-card-preview';
-import { RarityManager } from './rarity-manager';
-import { TextureManager } from './texture-manager';
+} from "lucide-react";
+import { motion } from "motion/react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { adaptBaseToSettingsOptions } from "../base/card-adapter";
+import { TextureManager } from "../tools/texture-manager";
+import { DEFAULT_SETTINGS_OPTIONS } from "./card-config-defaults";
+import { CardSettingsPanel } from "./card-settings-panel";
+import type { CardOptions } from "./card-settings-types";
+import { EntityCardPreview } from "./entity-card-preview";
+import { RarityManager } from "./rarity-manager";
 
 // Interfaz para la transferencia de datos a la API
 interface CardConfigurationDto {
@@ -90,11 +110,16 @@ interface CardConfigurationDto {
 }
 
 // Función para adaptar opciones entre diferentes estructuras de tipo
-const adaptOptions = (options: Partial<BaseCardOptions> | Record<string, unknown>): CardOptions => {
+const adaptOptions = (
+	options: Partial<BaseCardOptions> | Record<string, unknown>
+): CardOptions => {
 	// Convertir imageStyle de objeto a string si es necesario
 	const adaptedOptions = { ...options } as Record<string, unknown>;
-	if (adaptedOptions.imageStyle && typeof adaptedOptions.imageStyle === 'object') {
-		adaptedOptions.imageStyle = 'cover'; // Valor predeterminado compatible
+	if (
+		adaptedOptions.imageStyle &&
+		typeof adaptedOptions.imageStyle === "object"
+	) {
+		adaptedOptions.imageStyle = "cover"; // Valor predeterminado compatible
 	}
 
 	return adaptBaseToSettingsOptions(adaptedOptions as Partial<BaseCardOptions>);
@@ -114,9 +139,9 @@ interface EntityTypeOptions {
 // Lista de tipos de entidades disponibles
 const entityTypes: EntityTypeOptions[] = [
 	{
-		entityType: 'album',
-		title: 'Álbumes',
-		description: 'Configuración de tarjetas para álbumes',
+		entityType: "album",
+		title: "Álbumes",
+		description: "Configuración de tarjetas para álbumes",
 		icon: <Images className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -127,9 +152,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'collection',
-		title: 'Colecciones',
-		description: 'Configuración de tarjetas para colecciones',
+		entityType: "collection",
+		title: "Colecciones",
+		description: "Configuración de tarjetas para colecciones",
 		icon: <LibrarySquare className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -140,9 +165,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'tag',
-		title: 'Etiquetas',
-		description: 'Configuración de tarjetas para etiquetas',
+		entityType: "tag",
+		title: "Etiquetas",
+		description: "Configuración de tarjetas para etiquetas",
 		icon: <TagIcon className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -153,9 +178,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'character',
-		title: 'Personas',
-		description: 'Configuración de tarjetas para personas',
+		entityType: "character",
+		title: "Personas",
+		description: "Configuración de tarjetas para personas",
 		icon: <Users className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -166,9 +191,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'world-item',
-		title: 'Objetos',
-		description: 'Configuración de tarjetas para objetos',
+		entityType: "world-item",
+		title: "Objetos",
+		description: "Configuración de tarjetas para objetos",
 		icon: <Package className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -179,9 +204,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'place',
-		title: 'Lugares',
-		description: 'Configuración de tarjetas para lugares',
+		entityType: "place",
+		title: "Lugares",
+		description: "Configuración de tarjetas para lugares",
 		icon: <MapPin className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -192,9 +217,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'concept',
-		title: 'Conceptos',
-		description: 'Configuración de tarjetas para conceptos',
+		entityType: "concept",
+		title: "Conceptos",
+		description: "Configuración de tarjetas para conceptos",
 		icon: <Lightbulb className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -205,9 +230,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'prompt',
-		title: 'Prompts',
-		description: 'Configuración de tarjetas para prompts',
+		entityType: "prompt",
+		title: "Prompts",
+		description: "Configuración de tarjetas para prompts",
 		icon: <MessageSquare className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -218,9 +243,9 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: 'note',
-		title: 'Notas',
-		description: 'Configuración de tarjetas para notas',
+		entityType: "note",
+		title: "Notas",
+		description: "Configuración de tarjetas para notas",
 		icon: <StickyNote className="h-4 w-4" />,
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
@@ -234,7 +259,7 @@ const entityTypes: EntityTypeOptions[] = [
 
 export function EntitiesCardsSection() {
 	// Estado para el tipo de entidad activo
-	const [activeEntityType, setActiveEntityType] = useState<string>('album');
+	const [activeEntityType, setActiveEntityType] = useState<string>("album");
 
 	// Estado para las opciones de la tarjeta activa
 	const [cardOptions, setCardOptions] = useState<CardOptions>(
@@ -242,12 +267,20 @@ export function EntitiesCardsSection() {
 	);
 
 	// Estados para sistemas
-	const [raritySystem, _setRaritySystem] = useState<RaritySystem | undefined>(undefined);
-	const [textureSystem, _setTextureSystem] = useState<TextureSystem | undefined>(undefined);
+	const [raritySystem, _setRaritySystem] = useState<RaritySystem | undefined>(
+		undefined
+	);
+	const [textureSystem, _setTextureSystem] = useState<
+		TextureSystem | undefined
+	>(undefined);
 
 	// Estados para rareza y textura seleccionadas para vista previa
-	const [_selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(null);
-	const [_selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(null);
+	const [_selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(
+		null
+	);
+	const [_selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(
+		null
+	);
 
 	// Estado para indicar si está guardando
 	const [isSaving, setIsSaving] = useState(false);
@@ -279,13 +312,15 @@ export function EntitiesCardsSection() {
 				// Si no hay opciones guardadas, usar las predeterminadas del tipo de entidad
 				const defaultOptions =
 					entityTypes.find((e) => e.entityType === activeEntityType)?.options ||
-					adaptOptions(DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>);
+					adaptOptions(
+						DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>
+					);
 				setCardOptions(defaultOptions);
 			}
 		} catch (error) {
-			console.error('Error al cargar opciones de tarjeta:', error);
-			setError('No se pudieron cargar las opciones de tarjeta');
-			toastService.error('No se pudieron cargar las opciones de tarjeta');
+			console.error("Error al cargar opciones de tarjeta:", error);
+			setError("No se pudieron cargar las opciones de tarjeta");
+			toastService.error("No se pudieron cargar las opciones de tarjeta");
 		}
 	}, [activeEntityType]);
 
@@ -301,7 +336,7 @@ export function EntitiesCardsSection() {
 			setError(null);
 
 			if (!activeEntityType) {
-				toastService.error('No se ha seleccionado un tipo de entidad');
+				toastService.error("No se ha seleccionado un tipo de entidad");
 				return;
 			}
 
@@ -317,8 +352,8 @@ export function EntitiesCardsSection() {
 				enableGrainEffect: !!cardOptions.enableGrainEffect,
 				hoverLiftHeight: cardOptions.hoverLiftHeight || 10,
 				maxRotation: cardOptions.maxRotation || 15,
-				primaryColor: cardOptions.primaryColor || '0, 153, 255',
-				secondaryColor: cardOptions.secondaryColor || '128, 0, 255',
+				primaryColor: cardOptions.primaryColor || "0, 153, 255",
+				secondaryColor: cardOptions.secondaryColor || "128, 0, 255",
 				raritySystem: !!cardOptions.raritySystem,
 				categorySystem: !!cardOptions.categorySystem,
 				textureSystem: !!cardOptions.textureSystem,
@@ -329,11 +364,21 @@ export function EntitiesCardsSection() {
 				showImageCount: !!cardOptions.showImageCount,
 				imageGridAspectRatio: cardOptions.imageGridAspectRatio,
 				// Convertir objetos a JSON para almacenamiento
-				holographicOptions: cardOptions.holographicOptions ? JSON.stringify(cardOptions.holographicOptions) : undefined,
-				scanlinesOptions: cardOptions.scanlinesOptions ? JSON.stringify(cardOptions.scanlinesOptions) : undefined,
-				glowOptions: cardOptions.glowOptions ? JSON.stringify(cardOptions.glowOptions) : undefined,
-				borderOptions: cardOptions.borderOptions ? JSON.stringify(cardOptions.borderOptions) : undefined,
-				grainOptions: cardOptions.grainOptions ? JSON.stringify(cardOptions.grainOptions) : undefined,
+				holographicOptions: cardOptions.holographicOptions
+					? JSON.stringify(cardOptions.holographicOptions)
+					: undefined,
+				scanlinesOptions: cardOptions.scanlinesOptions
+					? JSON.stringify(cardOptions.scanlinesOptions)
+					: undefined,
+				glowOptions: cardOptions.glowOptions
+					? JSON.stringify(cardOptions.glowOptions)
+					: undefined,
+				borderOptions: cardOptions.borderOptions
+					? JSON.stringify(cardOptions.borderOptions)
+					: undefined,
+				grainOptions: cardOptions.grainOptions
+					? JSON.stringify(cardOptions.grainOptions)
+					: undefined,
 			};
 
 			// @ts-ignore - Necesario debido a incompatibilidades entre las interfaces
@@ -346,9 +391,9 @@ export function EntitiesCardsSection() {
 				toastService.error(response.message);
 			}
 		} catch (error) {
-			console.error('Error al guardar opciones:', error);
-			setError('No se pudieron guardar las opciones');
-			toastService.error('No se pudieron guardar las opciones');
+			console.error("Error al guardar opciones:", error);
+			setError("No se pudieron guardar las opciones");
+			toastService.error("No se pudieron guardar las opciones");
 		} finally {
 			setIsSaving(false);
 		}
@@ -370,7 +415,9 @@ export function EntitiesCardsSection() {
 	};
 
 	// Encontrar la entidad activa
-	const activeEntity = entityTypes.find((e) => e.entityType === activeEntityType);
+	const activeEntity = entityTypes.find(
+		(e) => e.entityType === activeEntityType
+	);
 
 	if (error) {
 		return (
@@ -409,17 +456,25 @@ export function EntitiesCardsSection() {
 									<Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
 								</TooltipTrigger>
 								<TooltipContent side="top" className="text-xs max-w-xs">
-									Personaliza la apariencia de las tarjetas para cada tipo de entidad. Configura rarezas, texturas y
-									efectos visuales para mejorar la visualización.
+									Personaliza la apariencia de las tarjetas para cada tipo de
+									entidad. Configura rarezas, texturas y efectos visuales para
+									mejorar la visualización.
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
 					</div>
 
 					<div className="flex items-center gap-1.5">
-						<Button onClick={handleSaveOptions} disabled={isSaving} size="sm" className="h-7 text-xs">
-							<Save className={cn('h-3.5 w-3.5 mr-1', isSaving && 'animate-spin')} />
-							{isSaving ? 'Guardando...' : 'Guardar'}
+						<Button
+							onClick={handleSaveOptions}
+							disabled={isSaving}
+							size="sm"
+							className="h-7 text-xs"
+						>
+							<Save
+								className={cn("h-3.5 w-3.5 mr-1", isSaving && "animate-spin")}
+							/>
+							{isSaving ? "Guardando..." : "Guardar"}
 						</Button>
 					</div>
 				</CardTitle>
@@ -436,8 +491,9 @@ export function EntitiesCardsSection() {
 								value={entityType.entityType}
 								onClick={() => setActiveEntityType(entityType.entityType)}
 								className={cn(
-									'min-w-[100px] gap-1.5 text-xs py-1.5',
-									activeEntityType === entityType.entityType && 'bg-background text-foreground'
+									"min-w-[100px] gap-1.5 text-xs py-1.5",
+									activeEntityType === entityType.entityType &&
+										"bg-background text-foreground"
 								)}
 							>
 								{entityType.icon}

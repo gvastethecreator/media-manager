@@ -1,5 +1,6 @@
 'use server';
 
+import type { TextureConfig, TextureSystem } from '@/components/features/entity-cards/base/base-card-types';
 import type { CardConfigurationDto } from '@/components/features/entity-cards/types/card-types';
 import { prisma } from '@/lib/prisma';
 import type { Rarity as PrismaRarity, Texture as PrismaTexture } from '@prisma/client';
@@ -106,13 +107,6 @@ export interface TextureItem {
 	entityType?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
-}
-
-// Tipo para el sistema de texturas
-export interface TextureSystem {
-	enabled: boolean;
-	textures: TextureItem[];
-	entityType?: string;
 }
 
 // Tipo para respuestas de las acciones
@@ -405,62 +399,75 @@ export async function getEntityTextureSystem(entityType: string): Promise<Action
 		});
 
 		// Mapear las texturas al formato esperado por la UI
-		const mappedTextures: TextureItem[] = textures.map((texture: PrismaTexture) => ({
+		const mappedTextures = textures.map((texture: PrismaTexture) => ({
 			id: texture.id,
 			name: texture.name,
 			imageUrl: texture.imageUrl || undefined,
 			patternType: texture.patternType || undefined,
-			pattern: texture.patternType || undefined, // Cambiado: Aseguramos que no sea null
 			color: texture.color,
-			primaryColor: texture.color, // Para compatibilidad con la UI
-			secondaryColor: '#ffffff', // Valor por defecto
 			opacity: texture.opacity,
 			description: texture.description || undefined,
-			order: 0, // Se ordenará por ID por defecto
-			entityType: texture.entityType,
-			createdAt: texture.createdAt,
-			updatedAt: texture.updatedAt,
+			blendMode: 'normal', // Valor por defecto
+			noiseType: 'light', // Valor por defecto
+			animated: false, // Valor por defecto
+			animationSpeed: 1, // Valor por defecto
+			density: 0.6, // Valor por defecto
+			contrast: 1.2, // Valor por defecto
+			visibleOnHover: false, // Valor por defecto
+			layerOrder: 1, // Valor por defecto
+			scale: 1, // Valor por defecto
 		}));
 
 		// Si no hay texturas definidas, devolver texturas predeterminadas
 		if (mappedTextures.length === 0) {
-			const defaultTextures: TextureItem[] = [
+			const defaultTextures = [
 				{
 					id: 'metallic',
 					name: 'Metálico',
-					pattern:
-						'linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%, rgba(0,0,0,0.1))',
-					patternType:
-						'linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%, rgba(0,0,0,0.1))',
+					patternType: 'lines',
 					color: '#b6b6b6',
-					primaryColor: '#b6b6b6',
-					secondaryColor: '#d8d8d8',
 					opacity: 0.6,
-					order: 0,
+					blendMode: 'normal',
+					noiseType: 'light',
+					animated: false,
+					animationSpeed: 1,
+					density: 0.6,
+					contrast: 1.2,
+					visibleOnHover: false,
+					layerOrder: 1,
+					scale: 1,
 				},
 				{
 					id: 'holographic',
 					name: 'Holográfico',
-					pattern: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)',
-					patternType: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)',
+					patternType: 'diagonal',
 					color: '#8a2be2',
-					primaryColor: '#8a2be2',
-					secondaryColor: '#e6a8d7',
 					opacity: 0.7,
-					order: 1,
+					blendMode: 'screen',
+					noiseType: 'light',
+					animated: true,
+					animationSpeed: 0.8,
+					density: 0.6,
+					contrast: 1.2,
+					visibleOnHover: true,
+					layerOrder: 2,
+					scale: 1,
 				},
 				{
 					id: 'wood',
 					name: 'Madera',
-					pattern:
-						'repeating-linear-gradient(90deg, rgba(101, 67, 33, 0.5) 0px, rgba(67, 32, 0, 0.5) 5px, rgba(101, 67, 33, 0.5) 10px)',
-					patternType:
-						'repeating-linear-gradient(90deg, rgba(101, 67, 33, 0.5) 0px, rgba(67, 32, 0, 0.5) 5px, rgba(101, 67, 33, 0.5) 10px)',
+					patternType: 'grid',
 					color: '#8B4513',
-					primaryColor: '#8B4513',
-					secondaryColor: '#A0522D',
 					opacity: 0.5,
-					order: 2,
+					blendMode: 'multiply',
+					noiseType: 'medium',
+					animated: false,
+					animationSpeed: 1,
+					density: 0.7,
+					contrast: 1.4,
+					visibleOnHover: false,
+					layerOrder: 1,
+					scale: 1.2,
 				},
 			];
 
@@ -542,8 +549,8 @@ export async function saveEntityTextureSystem(
 							entityType,
 							name: texture.name,
 							imageUrl: texture.imageUrl,
-							patternType: texture.patternType || texture.pattern,
-							color: texture.color || texture.primaryColor || '#3b82f6',
+							patternType: texture.patternType,
+							color: texture.color || '#3b82f6',
 							opacity: texture.opacity,
 							description: texture.description,
 						},
