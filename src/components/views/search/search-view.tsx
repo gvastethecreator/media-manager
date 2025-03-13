@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileGrid } from '@/components/features/file-grid/file-grid';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -111,7 +111,7 @@ export function SearchView(_props: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen />
 				) : items && items.length > 0 ? (
-					<FileGrid items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
+					<FileBrowser items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
 				) : filters.query ? (
 					<EmptyState
 						icon={Search}

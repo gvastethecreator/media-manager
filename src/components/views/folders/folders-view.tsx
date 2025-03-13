@@ -2,10 +2,12 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FolderCard } from '@/components/features/entity-cards/layouts/folder-card-layout';
+import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { getFolders } from '@/services/folder.service';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
@@ -13,9 +15,30 @@ import type { Folder } from '@/types/entities/folders';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
+import { FolderCard } from '../../features/entity-cards/layouts/folder-card-layout';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('FoldersView');
+
+// Configuración visual predeterminada para carpetas
+const DEFAULT_FOLDER_OPTIONS = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	designSystem: {
+		preset: "folder" as const,
+		variant: "default",
+		aspectRatio: "7/10",
+		cornerStyle: "rounded",
+		cornerRadius: 12,
+		elevation: 2,
+		shadowStyle: "soft",
+	},
+};
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -23,6 +46,7 @@ export function FoldersView(_props: ViewProps) {
 	const [folders, setFolders] = useState<Folder[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions | null>(null);
 
 	// Usar el nuevo hook de eventos optimistas del cliente
 	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
@@ -33,14 +57,8 @@ export function FoldersView(_props: ViewProps) {
 			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await getFolders();
 			const transformedData = data.map((folderData) => {
-				// Filtrar valores nulos en recentImages
-				const recentImages = folderData.recentImages
-					? folderData.recentImages.filter((img): img is string => img !== null)
-					: [];
-
 				return {
 					...folderData,
-					recentImages,
 					lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
 					createdAt: new Date(folderData.createdAt),
 					updatedAt: new Date(folderData.updatedAt),
@@ -61,6 +79,21 @@ export function FoldersView(_props: ViewProps) {
 	useEffect(() => {
 		loadFolders();
 	}, [loadFolders]);
+
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const response = await fetch('/api/entities/folders/visual-config');
+				if (!response.ok) throw new Error('Error al cargar la configuración visual');
+				const config = await response.json();
+				setVisualConfig(config);
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+			}
+		};
+
+		loadVisualConfig();
+	}, []);
 
 	const handleFolderClick = useCallback(
 		(folder: Folder) => {
@@ -119,7 +152,13 @@ export function FoldersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<FolderCard folder={folder} onClick={() => handleFolderClick(folder)} enableExplode={true} />
+							<FolderCard
+								folder={folder}
+								onClick={() => handleFolderClick(folder)}
+								showVisualConfig={true}
+								enableExplode={true}
+								visualOptions={visualConfig || {}}
+							/>
 						</motion.div>
 					))}
 				</div>

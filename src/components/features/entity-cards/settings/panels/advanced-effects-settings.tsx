@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { HolographicRainbow, Paintbrush, Sand, ScanLine, Wallpaper, Wand2 } from 'lucide-react';
+import { Rainbow, Paintbrush, ArrowUpRight, ScanLine, Wallpaper, Wand2 } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 import type { CardOptions } from '../types';
 import { SliderOption, ToggleOption, createNestedOptionChangeHandler, panelColors } from './shared/panel-helpers';
@@ -273,7 +273,7 @@ export function AdvancedEffectsSettings({
 						{/* Efectos Holográficos */}
 						<div className="space-y-3">
 							<div className="flex items-center gap-1.5">
-								<HolographicRainbow className="h-3.5 w-3.5 text-muted-foreground" />
+								<Rainbow className="h-3.5 w-3.5 text-muted-foreground" />
 								<h3 className="text-xs font-medium">Efectos Holográficos</h3>
 							</div>
 							<div className="space-y-3 pl-5">
@@ -452,7 +452,7 @@ export function AdvancedEffectsSettings({
 						{/* Rendimiento */}
 						<div className="space-y-3">
 							<div className="flex items-center gap-1.5">
-								<Sand className="h-3.5 w-3.5 text-muted-foreground" />
+								<ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
 								<h3 className="text-xs font-medium">Rendimiento</h3>
 							</div>
 							<div className="pl-5">

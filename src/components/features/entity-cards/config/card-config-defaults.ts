@@ -418,6 +418,32 @@ export const DEFAULT_SETTINGS_OPTIONS: SettingsCardOptions = {
 	enableAnimatedBorder: false,
 	enableLightHalo: false,
 
+	// Efectos de distorsión
+	effects: {
+		enabled: false,
+		visibleOnHover: false,
+		intensity: 1,
+		glitchEffect: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			frequency: 0.1,
+			duration: 0.2,
+		},
+		chromaticAberration: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			offset: 0.1,
+		},
+		pixelate: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			blockSize: 4,
+		},
+	},
+
 	// Opciones de efectos
 	scanlinesOptions: {
 		enabled: false,

@@ -33,6 +33,9 @@
 - input dissolution https://codepen.io/jh3y/details/raNYLXQ
 - dither gradient https://codepen.io/DavidJAldred/pen/pVbQBJ
 - color http://codepen.io/sturobson/pen/QwLNpgv
-- 
+- paleta de colores https://codepen.io/suganuma/pen/eYXYjVq
+-
 https://tympanus.net/Tutorials/R3FImageReveal/
 
+Opciones de personalización :
+- cursor customizado

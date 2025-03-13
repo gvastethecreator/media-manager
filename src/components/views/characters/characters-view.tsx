@@ -1,6 +1,5 @@
 'use client';
 
-import type { CharacterWithStats } from '@/app/actions/characters/character.actions';
 import { getCharacters } from '@/app/actions/characters/character.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -17,26 +16,56 @@ import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('CharactersView');
 
+// Extender el tipo Character para incluir los campos adicionales
+interface CharacterWithDetails {
+	id: string;
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	class?: string | null;
+	_count?: { images: number };
+	recentImages?: string[];
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCharacter } = useFileManager();
-	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
+	const [characters, setCharacters] = useState<CharacterWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
+	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithDetails[]>(characters);
 
-	const fetchCharacters = useCallback(async () => {
+	const loadCharacters = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando personajes...');
 			const data = await getCharacters();
-			setCharacters(data);
+			const transformedData = data.map((characterData) => {
+				// Filtrar valores nulos en recentImages
+				const recentImages = characterData.recentImages
+					? characterData.recentImages.filter((img): img is string => img !== null)
+					: [];
+
+				return {
+					...characterData,
+					recentImages,
+					_count: characterData._count || { images: 0 },
+					createdAt: new Date(characterData.createdAt),
+					updatedAt: new Date(characterData.updatedAt),
+				} as CharacterWithDetails;
+			});
+
+			setCharacters(transformedData);
 			viewLogger.info(`✅ ${data.length} personajes cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando personajes:', err);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando personajes:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -44,15 +73,29 @@ export function CharactersView(_props: ViewProps) {
 	}, []);
 
 	useEffect(() => {
-		// Cargar personajes inicialmente
-		fetchCharacters();
-	}, [fetchCharacters]);
+		loadCharacters();
+	}, [loadCharacters]);
 
 	const handleCharacterClick = useCallback(
-		(character: CharacterWithStats) => {
+		(character: CharacterWithDetails) => {
 			viewLogger.info('🖱️ Click en personaje:', character.name);
 			setCurrentView('character-content');
 			setCurrentCharacter(character.id);
+			// Actualizar la información completa del personaje en el store
+			useFileManager.setState({
+				currentCharacter: {
+					id: character.id,
+					name: character.name,
+					description: character.description,
+					emoji: character.emoji,
+					color: character.color,
+					category: character.category,
+					class: character.class,
+					_count: character._count,
+					createdAt: character.createdAt,
+					updatedAt: character.updatedAt,
+				},
+			});
 		},
 		[setCurrentView, setCurrentCharacter]
 	);
@@ -73,8 +116,8 @@ export function CharactersView(_props: ViewProps) {
 		return (
 			<EmptyState
 				icon={Users}
-				title="No hay personajes"
-				description="Los personajes te ayudan a organizar tus imágenes. Crea un nuevo personaje desde el panel de configuración."
+				title="No hay personajes creados"
+				description="Crea personajes para organizar tus imágenes por personaje."
 			/>
 		);
 	}
@@ -91,32 +134,16 @@ export function CharactersView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 						>
 							<CharacterCard
-								character={{
-									id: character.id,
-									name: character.name,
-									description: character.description || undefined,
-									featuredImage: character.recentImages?.[0] || undefined,
-									color: character.color || '#94a3b8',
-									emoji: character.emoji || '🎭',
-									characterInfo: {
-										class: character.category || 'Desconocido',
-										level: character._count?.images || 0,
-										stats: {
-											strength: 10,
-											dexterity: 10,
-											intelligence: 10,
-											charisma: 10,
-											vitality: 10,
-										},
-										race: 'Desconocido',
-										alignment: character.class || undefined,
-									},
-								}}
+								data={character}
 								onClick={() => handleCharacterClick(character)}
-								showStats={true}
-								showMetadata={true}
-								enableExplode={true}
-								showVisualizationConfig={false}
+								options={{
+									useImageGrid: true,
+									imageGridLayout: 'quad',
+									imageGridGap: 4,
+									imageGridStyle: 'standard',
+									enableGlow: true,
+									enableBorderEffect: true,
+								}}
 							/>
 						</motion.div>
 					))}
