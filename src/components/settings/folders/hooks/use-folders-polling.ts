@@ -1,7 +1,7 @@
 'use client';
 
-import { normalizeId } from '@/lib/id-utils';
 import { logger } from '@/lib/logger/logger';
+import { normalizeId } from '@/lib/utils/id.utils';
 import type { ProcessStatus } from '@/types/process';
 import { useCallback, useRef, useState } from 'react';
 
