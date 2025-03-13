@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
 		unoptimized: process.env.NODE_ENV === 'development',
 	},
 	experimental: {
-		optimizePackageImports: ['@/components'],
+		optimizePackageImports: ['@/components', 'lucide-react'],
 	},
 	async headers() {
 		return [

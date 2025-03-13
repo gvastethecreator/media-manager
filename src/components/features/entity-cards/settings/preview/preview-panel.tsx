@@ -25,13 +25,7 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
 	return (
 		<Card className={cn('border border-border/40 shadow-sm overflow-hidden', previewColors.border)}>
-			<CardHeader className={cn('p-2 pb-1.5 bg-muted/10', previewColors.bg)}>
-				<CardTitle className="text-xs font-medium flex items-center gap-1.5 justify-center">
-					<Eye className={cn('h-3.5 w-3.5', previewColors.text)} />
-					Vista Previa
-				</CardTitle>
-			</CardHeader>
-			<Separator />
+
 			<CardContent className="p-2 flex items-center justify-center">
 				<motion.div
 					initial={{ opacity: 0, scale: 0.95 }}

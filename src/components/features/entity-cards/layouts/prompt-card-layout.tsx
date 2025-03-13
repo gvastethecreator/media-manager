@@ -22,6 +22,7 @@ import { EntityCardWrapper } from '../base/entity-card-wrapper';
 import { VisualizationConfig } from '../config/visualization-config';
 import type { PromptFormData } from '../forms/entity-types';
 import type { CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
+import { ImageGrid } from './image-grid';
 
 type CardData =
 	| (Prompt & {
@@ -302,6 +303,26 @@ export function PromptCard({
 							{'content' in data && data.content}
 						</p>
 					</div>
+
+					{/* Imagen destacada (si existe) */}
+					{'featuredImage' in data && data.featuredImage && (
+						<div className="mb-3 rounded overflow-hidden border border-white/10 h-32">
+							{cardOptions.useImageGrid ? (
+								<ImageGrid
+									layout={cardOptions.imageGridLayout || 'single'}
+									gap={cardOptions.imageGridGap || 2}
+									style={{ height: '100%' }}
+									images={[{ src: data.featuredImage, alt: 'content' in data ? data.content : 'Prompt image' }]}
+								/>
+							) : (
+								<img
+									src={data.featuredImage}
+									alt={'content' in data ? data.content : 'Prompt image'}
+									className="w-full h-full object-cover"
+								/>
+							)}
+						</div>
+					)}
 
 					{/* Información adicional */}
 					<div className="mt-auto">

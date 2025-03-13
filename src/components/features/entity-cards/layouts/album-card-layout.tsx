@@ -4,6 +4,7 @@ import type { AlbumWithStats } from "@/app/actions/albums/album.actions";
 import { generateRarityConfig } from "@/components/features/entity-cards/base/card-adapter";
 import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
 import type { AlbumFormData } from "@/components/features/entity-cards/forms/entity-types";
+import { ImageGrid } from "@/components/features/entity-cards/layouts/image-grid";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/utils/format.utils";
@@ -49,13 +50,6 @@ interface AlbumCardProps {
 	options?: Partial<CardOptions>;
 	rarity?: RarityConfig | null;
 	texture?: TextureConfig | null;
-}
-
-// Funciones de ayuda seguras para trabajar con los tipos
-
-// Verificar si es un AlbumWithStats
-function isAlbumWithStats(data: CardData): data is AlbumWithStats {
-	return "_count" in data && typeof data._count === "object";
 }
 
 const DEFAULT_ALBUM_OPTIONS: Partial<CardOptions> = {
@@ -388,24 +382,55 @@ export function AlbumCard({
 
 					{/* Imagen principal */}
 					<div className="relative flex-1 overflow-hidden mb-3 rounded-md bg-black/20">
-						{"coverImage" in data && data.coverImage ? (
-							<Image
-								src={data.coverImage}
-								alt={"name" in data ? data.name || "Álbum" : "Álbum"}
-								className="object-cover h-full w-full transition-transform duration-700"
-								width={300}
-								height={400}
-								style={{
-									objectFit: "cover",
-									transform: isHovered ? "scale(1.05)" : "scale(1)",
-								}}
+						{cardOptions.useImageGrid ? (
+							<ImageGrid
+								layout={cardOptions.imageGridLayout || "single"}
+								gap={cardOptions.imageGridGap || 4}
+								style={cardOptions.imageGridStyle || "standard"}
+								images={
+									"recentImages" in data && data.recentImages
+										? data.recentImages.map((path, index) => ({
+												id: `image-${index}`,
+												path,
+												thumbnail: path,
+											}))
+										: [
+												{
+													id: "cover",
+													path:
+														"coverImage" in data && data.coverImage
+															? data.coverImage
+															: "",
+													thumbnail:
+														"coverImage" in data && data.coverImage
+															? data.coverImage
+															: "",
+												},
+											]
+								}
 							/>
 						) : (
-							<div className="flex items-center justify-center h-full bg-black/10">
-								<ImageIcon
-									className={`h-12 w-12 ${colors.symbolColor} opacity-50`}
-								/>
-							</div>
+							<>
+								{"coverImage" in data && data.coverImage ? (
+									<Image
+										src={data.coverImage}
+										alt={"name" in data ? data.name || "Álbum" : "Álbum"}
+										className="object-cover h-full w-full transition-transform duration-700"
+										width={300}
+										height={400}
+										style={{
+											objectFit: "cover",
+											transform: isHovered ? "scale(1.05)" : "scale(1)",
+										}}
+									/>
+								) : (
+									<div className="flex items-center justify-center h-full bg-black/10">
+										<ImageIcon
+											className={`h-12 w-12 ${colors.symbolColor} opacity-50`}
+										/>
+									</div>
+								)}
+							</>
 						)}
 
 						{/* Símbolo de energía superpuesto */}

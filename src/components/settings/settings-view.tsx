@@ -22,21 +22,21 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings/entities-cards-settings';
-import { AlbumsSection } from './albums/albums-section';
-import { CharactersSection } from './characters/characters-section';
-import { CollectionsSection } from './collections/collections-section';
-import { ConceptsSection } from './concepts/concepts-section';
-import { FoldersSection } from './folders/folders-section';
-import { NotesSection } from './notes/notes-section';
-import { PlacesSection } from './places/places-section';
-import { ProfilesSection } from './profiles/profiles-settings';
-import { PromptsSection } from './prompts/prompts-section';
-import { ShortcutsSection } from './shortcuts/shortcuts-section';
-import { SystemSection } from './system/system-section';
-import { TagsSection } from './tags/tags-section';
-import { ThumbnailsSection } from './thumbnails/thumbnails-section';
-import { UploadedImagesSection } from './uploaded-images/uploaded-images-section';
-import { WorldItemsSection } from './world-items/world-items-section';
+import { AlbumsSettings } from './albums/albums-settings';
+import { CharactersSettings } from './characters/characters-settings';
+import { CollectionsSettings } from './collections/collections-settings';
+import { ConceptsSettings } from './concepts/concepts-settings';
+import { FoldersSettings } from './folders/folders-settings';
+import { NotesSettings } from './notes/notes-settings';
+import { PlacesSettings } from './places/places-settings';
+import { ProfilesSettings } from './profiles/profiles-settings';
+import { PromptsSettings } from './prompts/prompts-settings';
+import { ShortcutsSettings } from './shortcuts/shortcuts-settings';
+import { SystemSettings } from './system/system-settings';
+import { TagsSettings } from './tags/tags-settings';
+import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
+import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
+import { WorldItemsSettings } from './world-items/world-items-settings';
 
 // Definición de tipos para estructurar los tabs
 interface TabItem {
@@ -67,88 +67,116 @@ const tabColors = {
 // Definición de todos los tabs para evitar la duplicación de código
 const tabsData: TabItem[] = [
 	{
-		id: 'system',
-		label: 'Sistema',
-		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "system",
+		label: "Sistema",
+		icon: (
+			<SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.system,
 	},
 	{
-		id: 'albums',
-		label: 'Albums',
-		icon: <AlbumIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "entities-cards",
+		label: "Tarjetas",
+		icon: (
+			<ListIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
+		color: tabColors["entities-cards"],
+	},
+	{
+		id: "albums",
+		label: "Albums",
+		icon: (
+			<AlbumIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.albums,
 	},
 	{
-		id: 'collections',
-		label: 'Colecciones',
-		icon: <Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "collections",
+		label: "Colecciones",
+		icon: (
+			<Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.collections,
 	},
 	{
-		id: 'tags',
-		label: 'Etiquetas',
-		icon: <TagIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "tags",
+		label: "Etiquetas",
+		icon: (
+			<TagIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.tags,
 	},
 	{
-		id: 'characters',
-		label: 'Personas',
-		icon: <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "characters",
+		label: "Personas",
+		icon: (
+			<UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.characters,
 	},
 	{
-		id: 'world-items',
-		label: 'Objetos',
-		icon: <BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors['world-items'],
+		id: "world-items",
+		label: "Objetos",
+		icon: (
+			<BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
+		color: tabColors["world-items"],
 	},
 	{
-		id: 'places',
-		label: 'Lugares',
-		icon: <MapPinIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "places",
+		label: "Lugares",
+		icon: (
+			<MapPinIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.places,
 	},
 	{
-		id: 'concepts',
-		label: 'Conceptos',
-		icon: <BookIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "concepts",
+		label: "Conceptos",
+		icon: (
+			<BookIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.concepts,
 	},
 	{
-		id: 'prompts',
-		label: 'Prompts',
-		icon: <MessageSquareIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "prompts",
+		label: "Prompts",
+		icon: (
+			<MessageSquareIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.prompts,
 	},
 	{
-		id: 'notes',
-		label: 'Notas',
-		icon: <StickyNoteIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "notes",
+		label: "Notas",
+		icon: (
+			<StickyNoteIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.notes,
 	},
 	{
-		id: 'thumbnails',
-		label: 'Miniaturas',
-		icon: <Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors.thumbnails,
+		id: "uploaded-images",
+		label: "Imágenes Subidas",
+		icon: (
+			<UploadCloud className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
+		color: tabColors["uploaded-images"],
 	},
 	{
-		id: 'uploaded-images',
-		label: 'Imágenes Subidas',
-		icon: <UploadCloud className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors['uploaded-images'],
-	},
-	{
-		id: 'shortcuts',
-		label: 'Atajos',
-		icon: <KeyboardIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		id: "shortcuts",
+		label: "Atajos",
+		icon: (
+			<KeyboardIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
+		),
 		color: tabColors.shortcuts,
 	},
 	{
-		id: 'entities-cards',
-		label: 'Tarjetas',
-		icon: <ListIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors['entities-cards'],
+		id: "profiles",
+		label: "Perfiles",
+		icon: (
+			<UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:scale-105" />
+		),
+		color: tabColors.profiles,
 	},
 ];
 
@@ -167,13 +195,24 @@ export function SettingsView() {
 
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none flex flex-col">
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none flex flex-col flex-1">
+			<Tabs
+				value={activeTab}
+				onValueChange={setActiveTab}
+				className="w-full rounded-none flex flex-col flex-1"
+			>
 				{/* TabsList con posición sticky */}
 				<div className="sticky top-0 z-7 backdrop-blur-sm shadow-sm">
-					<TabsList className="flex w-full h-9 bg-transparent rounded-none justify-start border-b-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+					<TabsList className="flex w-full h-8 bg-transparent rounded-none justify-start border-b-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 						{tabsData.map((tab) => (
-							<TabsTrigger key={tab.id} value={tab.id} className={tabBaseStyles}>
-								<span style={{ color: tab.color }} className="flex items-center justify-center">
+							<TabsTrigger
+								key={tab.id}
+								value={tab.id}
+								className={tabBaseStyles}
+							>
+								<span
+									style={{ color: tab.color }}
+									className="flex items-center justify-center"
+								>
 									{tab.icon}
 								</span>
 								{tab.label}
@@ -184,71 +223,87 @@ export function SettingsView() {
 
 				{/* Contenido de los tabs */}
 				<div className="flex-1 overflow-hidden">
-					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">
+					<TabsContent
+						value="entities-cards"
+						className="px-1 h-full overflow-auto"
+					>
+						<EntitiesCardsSection />
+					</TabsContent>
+
+					<TabsContent
+						value="system"
+						className="gap-0 px-1 h-full overflow-auto"
+					>
 						<div className="grid grid-cols-2 gap-1 w-full">
-							<ProfilesSection />
-							<FoldersSection />
-							<ThumbnailsSection />
-							<SystemSection />
+							<FoldersSettings />
+							<ThumbnailsSettings />
+							<SystemSettings />
 						</div>
 					</TabsContent>
 
 					<TabsContent value="albums" className="px-1 h-full overflow-auto">
-						<AlbumsSection />
+						<AlbumsSettings />
 					</TabsContent>
 
-					<TabsContent value="collections" className="px-1 h-full overflow-auto">
-						<CollectionsSection />
+					<TabsContent
+						value="collections"
+						className="px-1 h-full overflow-auto"
+					>
+						<CollectionsSettings />
 					</TabsContent>
 
 					<TabsContent value="tags" className="px-1 h-full overflow-auto">
-						<TagsSection />
+						<TagsSettings />
 					</TabsContent>
 
 					<TabsContent value="characters" className="px-1 h-full overflow-auto">
-						<CharactersSection />
+						<CharactersSettings />
 					</TabsContent>
 
-					<TabsContent value="world-items" className="px-1 h-full overflow-auto">
-						<WorldItemsSection />
+					<TabsContent
+						value="world-items"
+						className="px-1 h-full overflow-auto"
+					>
+						<WorldItemsSettings />
 					</TabsContent>
 
 					<TabsContent value="places" className="px-1 h-full overflow-auto">
-						<PlacesSection />
+						<PlacesSettings />
 					</TabsContent>
 
 					<TabsContent value="concepts" className="px-1 h-full overflow-auto">
-						<ConceptsSection />
+						<ConceptsSettings />
 					</TabsContent>
 
 					<TabsContent value="prompts" className="px-1 h-full overflow-auto">
-						<PromptsSection />
+						<PromptsSettings />
 					</TabsContent>
 
 					<TabsContent value="notes" className="px-1 h-full overflow-auto">
-						<NotesSection />
+						<NotesSettings />
 					</TabsContent>
 
-					<TabsContent value="thumbnails" className="space-y-4 px-1 pt-1 h-full overflow-auto">
-						<ThumbnailsSection />
+
+
+					<TabsContent
+						value="uploaded-images"
+						className="px-1 h-full overflow-auto"
+					>
+						<UploadedImagesSettings />
 					</TabsContent>
 
-					<TabsContent value="uploaded-images" className="space-y-4 px-1 pt-1 h-full overflow-auto">
-						<UploadedImagesSection />
+					<TabsContent
+						value="shortcuts"
+						className="px-1 h-full overflow-auto"
+					>
+						<ShortcutsSettings />
 					</TabsContent>
 
-					<TabsContent value="shortcuts" className="space-y-4 px-1 pt-1 h-full overflow-auto">
-						<ShortcutsSection />
-					</TabsContent>
-
-					<TabsContent value="entities-cards" className="space-y-4 px-1 pt-1 h-full overflow-auto">
-						<EntitiesCardsSection />
-					</TabsContent>
-
-					<TabsContent value="objects" className="px-1 h-full overflow-auto">
-						<div className="text-sm text-muted-foreground text-center py-4">
-							Esta sección ha sido migrada a "Objetos". Por favor, utilice la nueva sección.
-						</div>
+					<TabsContent
+						value="profiles"
+						className="px-1 h-full overflow-auto"
+					>
+						<ProfilesSettings />
 					</TabsContent>
 				</div>
 			</Tabs>

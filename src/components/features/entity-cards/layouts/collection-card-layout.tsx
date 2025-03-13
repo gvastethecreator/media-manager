@@ -33,6 +33,7 @@ import type {
 	RarityConfig,
 	TextureConfig,
 } from "../types/base-card-types";
+import { ImageGrid } from "./image-grid";
 
 type CardData =
 	| (Collection & {
@@ -147,10 +148,6 @@ function determineCollectionRarity(
 		return "uncommon";
 	}
 	return "common";
-}
-
-function isFormData(data: CardData): data is CollectionFormData {
-	return !("id" in data) || !data.id;
 }
 
 interface CollectionCardProps {
@@ -450,24 +447,59 @@ export function CollectionCard({
 
 					{/* Imagen de portada */}
 					<div className="relative flex-1 overflow-hidden mb-4 rounded border border-white/20">
-						{"coverImage" in data && data.coverImage ? (
-							<Image
-								src={data.coverImage}
-								alt={"name" in data ? data.name || "Colección" : "Colección"}
-								className="object-cover h-full w-full transition-transform duration-700"
-								width={300}
-								height={400}
-								style={{
-									objectFit: "cover",
-									transform: isHovered ? "scale(1.05)" : "scale(1)",
-								}}
+						{cardOptions.useImageGrid ? (
+							<ImageGrid
+								layout={cardOptions.imageGridLayout || "single"}
+								gap={cardOptions.imageGridGap || 4}
+								style={cardOptions.imageGridStyle || "standard"}
+								images={
+									"recentImages" in data && data.recentImages
+										? data.recentImages.map((path, index) => ({
+												id: `image-${index}`,
+												path,
+												thumbnail: path,
+											}))
+										: [
+												{
+													id: "cover",
+													path:
+														"coverImage" in data && data.coverImage
+															? data.coverImage
+															: "",
+													thumbnail:
+														"coverImage" in data && data.coverImage
+															? data.coverImage
+															: "",
+												},
+											]
+								}
 							/>
 						) : (
-							<div className="flex items-center justify-center h-full bg-black/30 aspect-[3/4]">
-								<div className={cn("h-12 w-12", style.iconColor, "opacity-40")}>
-									{style.icon}
-								</div>
-							</div>
+							<>
+								{"coverImage" in data && data.coverImage ? (
+									<Image
+										src={data.coverImage}
+										alt={
+											"name" in data ? data.name || "Colección" : "Colección"
+										}
+										className="object-cover h-full w-full transition-transform duration-700"
+										width={300}
+										height={400}
+										style={{
+											objectFit: "cover",
+											transform: isHovered ? "scale(1.05)" : "scale(1)",
+										}}
+									/>
+								) : (
+									<div className="flex items-center justify-center h-full bg-black/30 aspect-[3/4]">
+										<div
+											className={cn("h-12 w-12", style.iconColor, "opacity-40")}
+										>
+											{style.icon}
+										</div>
+									</div>
+								)}
+							</>
 						)}
 
 						{/* Efecto de brillo en la esquina */}

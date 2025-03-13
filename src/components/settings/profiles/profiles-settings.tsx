@@ -13,7 +13,7 @@ import { Check, Smile, UserCog, UserPlus, UserX, Users } from 'lucide-react';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';
 
-export function ProfilesSection() {
+export function ProfilesSettings() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } = useProfileContext();
 	const { profiles = [], activeProfile } = settings;
 	const activeProfileData = profiles.find((p) => p.id === activeProfile) || profiles[0];
