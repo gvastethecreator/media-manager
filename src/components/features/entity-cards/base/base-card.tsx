@@ -1,6 +1,6 @@
 'use client';
 
-import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/settings/card-config-defaults';
+import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import { Button } from '@/components/ui/button';
 import type { ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils/utils';
@@ -18,22 +18,22 @@ import {
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { type MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { AnimatedBorderLayer } from '../layers/animated-border-layer';
+import { AnimatedBorderLayer } from '../layers/animated-border/animated-border-layer';
 import { CardContainer } from '../layers/card-container';
-import { GlowEffectLayer } from '../layers/glow-effect-layer';
-import { GrainEffectLayer } from '../layers/grain-effect-layer';
-import { HolographicLayer } from '../layers/holographic-layer';
-import { ScanlinesLayer } from '../layers/scanlines-layer';
-import type { CardOptions as SettingsCardOptions } from '../settings/card-settings-types';
+import { GlowEffectLayer } from '../layers/glow/glow-effect-layer';
+import { GrainEffectLayer } from '../layers/grain/grain-effect-layer';
+import { HolographicLayer } from '../layers/holographic/holographic-layer';
+import { ScanlinesLayer } from '../layers/scanlines/scanlines-layer';
+import { Exploder } from '../settings/preview/exploder';
 import type {
 	CardOptions as BaseCardOptions,
 	BaseCardProps,
 	ExplodeLayerTransformFunction,
 	RarityConfig,
 	TextureConfig,
-} from './base-card-types';
+} from '../types/base-card-types';
+import type { CardOptions as SettingsCardOptions } from '../types/card-settings-types';
 import { adaptSettingsToBaseOptions, isSettingsCardOptions } from './card-adapter';
-import { Exploder } from './exploder';
 
 // Importamos el archivo CSS de animaciones
 import './card-animations.css';

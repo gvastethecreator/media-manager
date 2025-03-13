@@ -10,6 +10,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
+import type { Concept } from '@prisma/client';
 import { LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -107,7 +108,7 @@ export function ConceptsView(_props: ViewProps) {
 							className="cursor-pointer"
 						>
 							<ConceptCard
-								concept={concept}
+								concept={concept as unknown as Concept}
 								onClick={() => handleConceptClick(concept)}
 								onEdit={() => handleEditConcept(concept)}
 								onDelete={() => handleDeleteConcept(concept.id)}

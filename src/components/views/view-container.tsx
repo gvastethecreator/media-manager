@@ -1,37 +1,37 @@
-"use client";
+'use client';
 
-import { SettingsView } from "@/components/settings/settings-view";
-import { cn } from "@/lib/utils/utils";
-import { useNavigationStore } from "@/store/navigation.store";
-import { AnimatePresence, motion } from "motion/react";
-import { memo } from "react";
-import { DotPattern } from "../ui/dot-pattern";
-import { AlbumContentView } from "./albums/album-content-view";
-import { AlbumsView } from "./albums/albums-view";
-import { AllImagesView } from "./all-images/all-images-view";
-import { CharacterContentView } from "./characters/character-content-view";
-import { CharactersView } from "./characters/characters-view";
-import { CollectionContentView } from "./collections/collection-content-view";
-import { CollectionsView } from "./collections/collections-view";
-import { ConceptContentView } from "./concepts/concept-content-view";
-import { ConceptsView } from "./concepts/concepts-view";
-import { DevelopmentView } from "./development/development-view";
-import { FavoritesView } from "./favorites/favorites-view";
-import { FolderContentView } from "./folders/folder-content-view";
-import { FoldersView } from "./folders/folders-view";
-import { NoteContentView } from "./notes/note-content-view";
-import { NotesView } from "./notes/notes-view";
-import { PlaceContentView } from "./places/place-content-view";
-import { PlacesView } from "./places/places-view";
-import { PromptContentView } from "./prompts/prompt-content-view";
-import { PromptsView } from "./prompts/prompts-view";
-import { SearchView } from "./search/search-view";
-import { TagContentView } from "./tags/tag-content-view";
-import { TagsView } from "./tags/tags-view";
-import type { ViewType } from "./types";
-import { UploadedImagesView } from "./uploaded-images/uploaded-images-view";
-import { WorldItemContentView } from "./world-items/world-item-content-view";
-import { WorldItemsView } from "./world-items/world-items-view";
+import { SettingsView } from '@/components/settings/settings-view';
+import { cn } from '@/lib/utils/utils';
+import { useNavigationStore } from '@/store/navigation.store';
+import { AnimatePresence, motion } from 'motion/react';
+import { memo } from 'react';
+import { DotPattern } from '../ui/dot-pattern';
+import { AlbumContentView } from './albums/album-content-view';
+import { AlbumsView } from './albums/albums-view';
+import { AllImagesView } from './all-images/all-images-view';
+import { CharacterContentView } from './characters/character-content-view';
+import { CharactersView } from './characters/characters-view';
+import { CollectionContentView } from './collections/collection-content-view';
+import { CollectionsView } from './collections/collections-view';
+import { ConceptContentView } from './concepts/concept-content-view';
+import { ConceptsView } from './concepts/concepts-view';
+import { DevelopmentView } from './development/development-view';
+import { FavoritesView } from './favorites/favorites-view';
+import { FolderContentView } from './folders/folder-content-view';
+import { FoldersView } from './folders/folders-view';
+import { NoteContentView } from './notes/note-content-view';
+import { NotesView } from './notes/notes-view';
+import { PlaceContentView } from './places/place-content-view';
+import { PlacesView } from './places/places-view';
+import { PromptContentView } from './prompts/prompt-content-view';
+import { PromptsView } from './prompts/prompts-view';
+import { SearchView } from './search/search-view';
+import { TagContentView } from './tags/tag-content-view';
+import { TagsView } from './tags/tags-view';
+import type { ViewType } from './types';
+import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
+import { WorldItemContentView } from './world-items/world-item-content-view';
+import { WorldItemsView } from './world-items/world-items-view';
 
 const variants = {
 	enter: (direction: number) => ({
@@ -56,62 +56,62 @@ const variants = {
 // Componente de vista con memorización para evitar renders innecesarios
 const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 	switch (view) {
-		case "settings":
+		case 'settings':
 			return <SettingsView />;
-		case "all-images":
+		case 'all-images':
 			return <AllImagesView />;
-		case "files":
+		case 'files':
 			return <UploadedImagesView />;
-		case "favorites":
+		case 'favorites':
 			return <FavoritesView />;
-		case "search":
+		case 'search':
 			return <SearchView />;
-		case "collections":
+		case 'collections':
 			return <CollectionsView />;
-		case "collection-content":
+		case 'collection-content':
 			return <CollectionContentView />;
-		case "folders":
+		case 'folders':
 			return <FoldersView />;
-		case "folder-content":
+		case 'folder-content':
 			return <FolderContentView />;
-		case "tags":
+		case 'tags':
 			return <TagsView />;
-		case "tag-content":
+		case 'tag-content':
 			return <TagContentView />;
-		case "albums":
+		case 'albums':
 			return <AlbumsView />;
-		case "album-content":
+		case 'album-content':
 			return <AlbumContentView />;
-		case "characters":
+		case 'characters':
 			return <CharactersView />;
-		case "character-content":
+		case 'character-content':
 			return <CharacterContentView />;
-		case "places":
+		case 'places':
 			return <PlacesView />;
-		case "place-content":
+		case 'place-content':
 			return <PlaceContentView />;
-		case "world-items":
+		case 'world-items':
 			return <WorldItemsView />;
-		case "world-item-content":
+		case 'world-item-content':
 			return <WorldItemContentView />;
-		case "concepts":
+		case 'concepts':
 			return <ConceptsView />;
-		case "concept-content":
+		case 'concept-content':
 			return <ConceptContentView />;
-		case "prompts":
+		case 'prompts':
 			return <PromptsView />;
-		case "prompt-content":
+		case 'prompt-content':
 			return <PromptContentView />;
-		case "notes":
+		case 'notes':
 			return <NotesView />;
-		case "note-content":
+		case 'note-content':
 			return <NoteContentView />;
 		default:
 			return <DevelopmentView />;
 	}
 });
 
-MemoizedViewContent.displayName = "MemoizedViewContent";
+MemoizedViewContent.displayName = 'MemoizedViewContent';
 
 export function ViewContainer() {
 	const { currentView, navigationDirection } = useNavigationStore();
@@ -127,7 +127,7 @@ export function ViewContainer() {
 					animate="center"
 					exit="exit"
 					transition={{
-						x: { type: "spring", stiffness: 400, damping: 35 },
+						x: { type: 'spring', stiffness: 400, damping: 35 },
 						opacity: { duration: 0.15 },
 						scale: { duration: 0.2 },
 					}}

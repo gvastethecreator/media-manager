@@ -13,7 +13,7 @@ export function safeStr(value: unknown): string {
 	if (typeof value === 'object') {
 		try {
 			return JSON.stringify(value);
-		} catch (error) {
+		} catch (_error) {
 			return String(value);
 		}
 	}
@@ -24,10 +24,7 @@ export function safeStr(value: unknown): string {
 /**
  * Obtiene un parámetro extra de forma segura a partir de un objeto
  */
-export function getExtraParam(
-	params: Record<string, unknown>,
-	key: string
-): string | null {
+export function getExtraParam(params: Record<string, unknown>, key: string): string | null {
 	if (!params || typeof params !== 'object') {
 		return null;
 	}

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils/utils";
-import type { ComponentType } from "react";
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils/utils';
+import type { ComponentType } from 'react';
 
 export interface SystemMetric {
 	name: string;
@@ -11,7 +11,7 @@ export interface SystemMetric {
 	icon: ComponentType<{ className?: string }>;
 	change?: {
 		value: number;
-		type: "increase" | "decrease";
+		type: 'increase' | 'decrease';
 	};
 	chart?: {
 		data: number[];
@@ -38,20 +38,16 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 						<div className="flex items-end gap-2">
 							<p className="text-xl font-semibold">
 								{metric.value}
-								<span className="text-sm text-muted-foreground ml-1">
-									{metric.unit}
-								</span>
+								<span className="text-sm text-muted-foreground ml-1">{metric.unit}</span>
 							</p>
 							{metric.change && (
 								<div
 									className={cn(
-										"text-xs font-medium flex items-center gap-1",
-										metric.change.type === "increase"
-											? "text-green-500"
-											: "text-red-500"
+										'text-xs font-medium flex items-center gap-1',
+										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
 									)}
 								>
-									{metric.change.type === "increase" ? "+" : "-"}
+									{metric.change.type === 'increase' ? '+' : '-'}
 									{metric.change.value}%
 								</div>
 							)}

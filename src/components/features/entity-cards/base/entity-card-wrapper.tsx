@@ -3,10 +3,15 @@
 import { cn } from '@/lib/utils/utils';
 import type * as React from 'react';
 import { useMemo } from 'react';
-import { DEFAULT_SETTINGS_OPTIONS } from '../settings/card-config-defaults';
-import type { CardOptions as SettingsCardOptions } from '../settings/card-settings-types';
+import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
+import type {
+	CardOptions as BaseCardOptions,
+	CardDesignPreset,
+	RarityConfig,
+	TextureConfig,
+} from '../types/base-card-types';
+import type { CardOptions as SettingsCardOptions } from '../types/card-settings-types';
 import { BaseCard } from './base-card';
-import type { CardOptions as BaseCardOptions, CardDesignPreset, RarityConfig, TextureConfig } from './base-card-types';
 import { adaptOptionsForLayout, adaptSettingsToBaseOptions, isSettingsCardOptions } from './card-adapter';
 
 export interface EntityCardWrapperProps {

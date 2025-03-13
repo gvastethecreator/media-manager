@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { DetailsPanel } from "@/components/panels/details/details-panel";
-import { useFileManager } from "@/store/file-manager.store";
-import type { ImageItem } from "@/types/image-item";
-import { AnimatePresence, motion } from "motion/react";
+import { DetailsPanel } from '@/components/panels/details/details-panel';
+import { useFileManager } from '@/store/file-manager.store';
+import type { ImageItem } from '@/types/image-item';
+import { AnimatePresence, motion } from 'motion/react';
 
 export function RightPanel() {
 	const { selectedItems } = useFileManager();
@@ -35,7 +35,7 @@ export function RightPanel() {
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
 						className="flex-1"
-						transition={{ type: "spring", damping: 25, stiffness: 200 }}
+						transition={{ type: 'spring', damping: 25, stiffness: 200 }}
 					>
 						<div className="flex-1 w-full h-full relative" />
 					</motion.div>

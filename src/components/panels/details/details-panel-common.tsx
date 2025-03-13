@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { truncateText } from "@/lib/utils";
-import type { FileMetadata } from "@/types/metadata.types";
-import type { ReactNode } from "react";
+import { truncateText } from '@/lib/utils';
+import type { FileMetadata } from '@/types/metadata.types';
+import type { ReactNode } from 'react';
 
 /**
  * Propiedades para el componente InfoItem
@@ -17,21 +17,12 @@ interface InfoItemProps {
 /**
  * Componente reutilizable para mostrar un ítem de información con etiqueta y valor
  */
-export function InfoItem({
-	label,
-	value,
-	icon,
-	maxLength = 120,
-}: InfoItemProps) {
+export function InfoItem({ label, value, icon, maxLength = 120 }: InfoItemProps) {
 	// Convertir valores numéricos a cadena
-	const valueAsString =
-		typeof value === "number" ? value.toString() : value || "No disponible";
+	const valueAsString = typeof value === 'number' ? value.toString() : value || 'No disponible';
 
 	// Truncar valor si es demasiado largo
-	const displayValue =
-		valueAsString.length > maxLength
-			? truncateText(valueAsString, maxLength)
-			: valueAsString;
+	const displayValue = valueAsString.length > maxLength ? truncateText(valueAsString, maxLength) : valueAsString;
 
 	return (
 		<div className="flex flex-col">

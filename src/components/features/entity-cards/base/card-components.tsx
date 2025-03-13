@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/utils';
 import { CalendarClock, Clock, HardDrive, ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { type EntityStats, type RarityLevel, getRandomThumbnailPattern } from './base-card-config';
+import { type EntityStats, type RarityLevel, getRandomThumbnailPattern } from '../config/base-card-config';
 
 // Componente para mostrar el distintivo de rareza
 interface RarityBadgeProps {

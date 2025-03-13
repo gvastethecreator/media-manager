@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { getConceptImages } from "@/app/actions/concepts/concept.actions";
-import { BaseContentView, ContentViewProvider } from "@/components/views/base";
-import type { BaseContentProps } from "@/components/views/base";
-import { logger } from "@/lib/logger/logger";
-import { useFileManager } from "@/store/file-manager.store";
-import { Lightbulb } from "lucide-react";
-import { useCallback, useEffect } from "react";
-import { toast } from "sonner";
+import { getConceptImages } from '@/app/actions/concepts/concept.actions';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import type { BaseContentProps } from '@/components/views/base';
+import { logger } from '@/lib/logger/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { Lightbulb } from 'lucide-react';
+import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
 
-const viewLogger = logger.withContext("ConceptContentView");
+const viewLogger = logger.withContext('ConceptContentView');
 
 export function ConceptContentView() {
 	const {
@@ -30,14 +30,14 @@ export function ConceptContentView() {
 		}
 
 		try {
-			viewLogger.info("🔄 Cargando imágenes del concepto:", currentConceptId);
+			viewLogger.info('🔄 Cargando imágenes del concepto:', currentConceptId);
 			setIsLoading(true);
 			const images = await getConceptImages(currentConceptId);
 			setItems(images);
 			viewLogger.info(`✅ ${images.length} imágenes cargadas`);
 		} catch (error) {
-			viewLogger.error("❌ Error cargando imágenes:", error);
-			toast.error("Error al cargar las imágenes del concepto");
+			viewLogger.error('❌ Error cargando imágenes:', error);
+			toast.error('Error al cargar las imágenes del concepto');
 			setItems([]);
 		} finally {
 			setIsLoading(false);
@@ -57,9 +57,9 @@ export function ConceptContentView() {
 		setCurrentContainer: setCurrentConcept,
 		emptyState: {
 			icon: Lightbulb,
-			title: "Concepto vacío",
+			title: 'Concepto vacío',
 			description: `No se encontraron imágenes en ${
-				currentConcept?.name || "este concepto"
+				currentConcept?.name || 'este concepto'
 			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadConceptImages,
