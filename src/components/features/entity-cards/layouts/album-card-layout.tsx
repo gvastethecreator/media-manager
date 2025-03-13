@@ -1,8 +1,8 @@
 "use client";
 
 import type { AlbumWithStats } from "@/app/actions/albums/album.actions";
-import { generateRarityConfig } from "@/components/features/entity-cards/base/card-adapter";
-import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
+import { generateRarityConfig } from "@/components/features/entity-cards/entity-card-adapter";
+import { EntityCardWrapper } from "@/components/features/entity-cards/entity-base-card";
 import type { AlbumFormData } from "@/components/features/entity-cards/forms/entity-types";
 import { ImageGrid } from "@/components/features/entity-cards/layouts/image-grid";
 import { Button } from "@/components/ui/button";

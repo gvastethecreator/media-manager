@@ -1,8 +1,8 @@
 'use client';
 
 import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
+import { BaseCard } from '@/components/features/entity-cards/entity-card-base';
+import { EntityCardWrapper } from '@/components/features/entity-cards/entity-card-wrapper';
 import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
 import { ImageGrid } from '@/components/features/entity-cards/settings/preview/entity-card-preview';
 import { Button } from '@/components/ui/button';

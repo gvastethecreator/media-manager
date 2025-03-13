@@ -124,9 +124,9 @@ export function CharactersSettings() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-1">
 			<div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-				<Card className="rounded-sm bg-muted/30">
+				<Card className="rounded-sm bg-muted/30 border-none">
 					<CardHeader className="p-3">
 						<CardTitle className="flex items-center gap-2 text-sm">
 							<Users className="h-5 w-5" />
@@ -146,7 +146,7 @@ export function CharactersSettings() {
 				/>
 			</div>
 
-			<Card className="rounded-sm bg-muted/30">
+			<Card className="rounded-sm bg-muted/30 border-none">
 				<CardHeader className="p-3">
 					<CardTitle className="flex items-center justify-between text-sm">
 						<div className="flex items-center gap-2">
