@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import { optimizeThumbnail } from '@/lib/thumbnails';
+import { optimizeThumbnail } from '@/lib/thumbnail';
 import type { NextRequest } from 'next/server';
 
 const thumbLogger = logger.withContext('ThumbnailOptimize');
