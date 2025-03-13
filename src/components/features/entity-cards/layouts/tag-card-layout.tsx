@@ -1,43 +1,38 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils/utils";
-import { cva } from "class-variance-authority";
-import { ArrowUpRight, Edit, Star, Tag, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
-import type * as React from "react";
-import { useState } from "react";
-import { EntityCardWrapper } from "../base/entity-card-wrapper";
-import { DEFAULT_SETTINGS_OPTIONS } from "../config/card-config-defaults";
-import { VisualizationConfig } from "../config/visualization-config";
-import type {
-	CardDesignData,
-	CardDesignPreset,
-	CardOptions,
-	RarityConfig,
-} from "../types/base-card-types";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { cva } from 'class-variance-authority';
+import { ArrowUpRight, Edit, Star, Tag, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useState } from 'react';
+import { EntityCardWrapper } from '../base/entity-card-wrapper';
+import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
+import { VisualizationConfig } from '../config/visualization-config';
+import type { CardDesignData, CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
 
 // Variantes para la tarjeta de etiqueta inspirada en Yu-Gi-Oh
-const tagCardVariants = cva("", {
+const tagCardVariants = cva('', {
 	variants: {
 		type: {
-			trap: "bg-gradient-to-b from-[#7d2547] to-[#551a31]", // Púrpura/Violeta para trampas
-			spell: "bg-gradient-to-b from-[#1e7854] to-[#145235]", // Verde para hechizos
-			effect: "bg-gradient-to-b from-[#8B4513] to-[#654321]", // Marrón para efectos
-			ritual: "bg-gradient-to-b from-[#4169E1] to-[#0000CD]", // Azul para rituales
-			normal: "bg-gradient-to-b from-[#bebebe] to-[#8a8a8a]", // Gris para normales
+			trap: 'bg-gradient-to-b from-[#7d2547] to-[#551a31]', // Púrpura/Violeta para trampas
+			spell: 'bg-gradient-to-b from-[#1e7854] to-[#145235]', // Verde para hechizos
+			effect: 'bg-gradient-to-b from-[#8B4513] to-[#654321]', // Marrón para efectos
+			ritual: 'bg-gradient-to-b from-[#4169E1] to-[#0000CD]', // Azul para rituales
+			normal: 'bg-gradient-to-b from-[#bebebe] to-[#8a8a8a]', // Gris para normales
 		},
 		rarity: {
-			common: "text-gray-800",
-			uncommon: "text-indigo-700",
-			rare: "text-amber-500",
-			epic: "text-purple-600",
-			legendary: "text-red-600",
+			common: 'text-gray-800',
+			uncommon: 'text-indigo-700',
+			rare: 'text-amber-500',
+			epic: 'text-purple-600',
+			legendary: 'text-red-600',
 		},
 	},
 	defaultVariants: {
-		type: "normal",
-		rarity: "common",
+		type: 'normal',
+		rarity: 'common',
 	},
 });
 
@@ -52,24 +47,24 @@ const DEFAULT_TAG_OPTIONS: Partial<CardOptions> = {
 
 	// Sistema de diseño específico para etiquetas
 	designSystem: {
-		preset: "tag" as CardDesignPreset,
-		variant: "default",
-		aspectRatio: "3/4",
-		cornerStyle: "rounded",
+		preset: 'tag' as CardDesignPreset,
+		variant: 'default',
+		aspectRatio: '3/4',
+		cornerStyle: 'rounded',
 		cornerRadius: 8,
 		elevation: 2,
-		shadowStyle: "soft",
+		shadowStyle: 'soft',
 	},
 
 	// Configuración de movimiento
 	hoverLiftHeight: 6,
 	maxRotation: 10,
-	primaryColor: "64, 64, 64",
-	secondaryColor: "180, 180, 180",
+	primaryColor: '64, 64, 64',
+	secondaryColor: '180, 180, 180',
 
 	// Opciones de efectos
 	holographicOptions: {
-		patternType: "rainbow",
+		patternType: 'rainbow',
 		intensity: 0.6,
 		animationSpeed: 1.2,
 		visibleOnHover: true,
@@ -78,7 +73,7 @@ const DEFAULT_TAG_OPTIONS: Partial<CardOptions> = {
 	glowOptions: {
 		intensity: 0.8,
 		size: 15,
-		animationType: "follow-mouse",
+		animationType: 'follow-mouse',
 		visibleOnHover: true,
 	},
 
@@ -86,46 +81,46 @@ const DEFAULT_TAG_OPTIONS: Partial<CardOptions> = {
 		intensity: 0.1,
 		density: 0.4,
 		animated: false,
-		noise: "light",
+		noise: 'light',
 	},
 };
 
 // Sistema de rareza para etiquetas
 const TAG_RARITY_CONFIG = {
 	common: {
-		color: "#8a8a8a",
-		borderWidth: "1px",
-		borderEffect: "static",
+		color: '#8a8a8a',
+		borderWidth: '1px',
+		borderEffect: 'static',
 		glowColor: undefined,
-		label: "Común",
+		label: 'Común',
 	},
 	uncommon: {
-		color: "#1e90ff",
-		borderWidth: "1px",
-		borderEffect: "static",
+		color: '#1e90ff',
+		borderWidth: '1px',
+		borderEffect: 'static',
 		glowColor: undefined,
-		label: "Poco común",
+		label: 'Poco común',
 	},
 	rare: {
-		color: "#ffd700",
-		borderWidth: "1px",
-		borderEffect: "static",
-		glowColor: "#ffd700",
-		label: "Raro",
+		color: '#ffd700',
+		borderWidth: '1px',
+		borderEffect: 'static',
+		glowColor: '#ffd700',
+		label: 'Raro',
 	},
 	epic: {
-		color: "#9932cc",
-		borderWidth: "2px",
-		borderEffect: "static",
-		glowColor: "#9932cc",
-		label: "Épico",
+		color: '#9932cc',
+		borderWidth: '2px',
+		borderEffect: 'static',
+		glowColor: '#9932cc',
+		label: 'Épico',
 	},
 	legendary: {
-		color: "#ff4500",
-		borderWidth: "2px",
-		borderEffect: "animated",
-		glowColor: "#ff4500",
-		label: "Legendario",
+		color: '#ff4500',
+		borderWidth: '2px',
+		borderEffect: 'animated',
+		glowColor: '#ff4500',
+		label: 'Legendario',
 	},
 };
 
@@ -133,11 +128,11 @@ export interface TagCardProps {
 	tag: {
 		id: string;
 		name: string;
-		type?: "trap" | "spell" | "effect" | "ritual" | "normal";
+		type?: 'trap' | 'spell' | 'effect' | 'ritual' | 'normal';
 		description?: string;
 		count?: number;
 		color?: string;
-		rarity?: "common" | "uncommon" | "rare" | "epic" | "legendary";
+		rarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 		categories?: string[];
 		icon?: string;
 		attributes?: string[];
@@ -171,25 +166,21 @@ export function TagCard({
 
 	// Preparar la configuración de rareza basada en la rareza del tag
 	const rarityConfig: RarityConfig = {
-		name: tag.rarity || "common",
+		name: tag.rarity || 'common',
 		color:
-			tag.rarity &&
-			TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
+			tag.rarity && TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
 				? TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG].color
-				: tag.color || "#3b82f6",
-		borderWidth:
-			tag.rarity === "legendary" || tag.rarity === "epic" ? "2px" : "1px",
-		borderEffect: tag.rarity === "legendary" ? "animated" : "static",
+				: tag.color || '#3b82f6',
+		borderWidth: tag.rarity === 'legendary' || tag.rarity === 'epic' ? '2px' : '1px',
+		borderEffect: tag.rarity === 'legendary' ? 'animated' : 'static',
 		glowColor:
-			tag.rarity &&
-			TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
-				? TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
-						.glowColor
+			tag.rarity && TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
+				? TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG].glowColor
 				: undefined,
 	};
 
 	// Obtener la variante de color basada en el tipo
-	const typeVariant = tag.type || "normal";
+	const typeVariant = tag.type || 'normal';
 
 	return (
 		<>
@@ -207,10 +198,7 @@ export function TagCard({
 			)}
 
 			<EntityCardWrapper
-				className={cn(
-					tagCardVariants({ type: typeVariant, rarity: tag.rarity }),
-					className
-				)}
+				className={cn(tagCardVariants({ type: typeVariant, rarity: tag.rarity }), className)}
 				options={cardOptions}
 				entityType="tag"
 				rarity={rarityConfig}
@@ -227,8 +215,8 @@ export function TagCard({
 						<div className="flex items-center gap-2">
 							<div
 								className={cn(
-									"flex items-center justify-center w-7 h-7 rounded-full",
-									tag.color ? "bg-opacity-20" : "bg-primary/20"
+									'flex items-center justify-center w-7 h-7 rounded-full',
+									tag.color ? 'bg-opacity-20' : 'bg-primary/20'
 								)}
 								style={{ backgroundColor: tag.color || undefined }}
 							>
@@ -236,31 +224,26 @@ export function TagCard({
 									<span className="text-lg">{tag.emoji}</span>
 								) : (
 									<Tag
-										className={cn(
-											"h-4 w-4",
-											tag.color ? "text-opacity-90" : "text-primary"
-										)}
+										className={cn('h-4 w-4', tag.color ? 'text-opacity-90' : 'text-primary')}
 										style={{ color: tag.color || undefined }}
 									/>
 								)}
 							</div>
 							<div>
-								<h3 className="text-sm font-semibold leading-tight line-clamp-1 text-card-foreground">
-									{tag.name}
-								</h3>
+								<h3 className="text-sm font-semibold leading-tight line-clamp-1 text-card-foreground">{tag.name}</h3>
 								<div className="flex items-center text-xs text-muted-foreground space-x-1">
 									<span
 										className={cn(
-											"capitalize",
-											typeVariant === "trap"
-												? "text-purple-600"
-												: typeVariant === "spell"
-													? "text-green-600"
-													: typeVariant === "effect"
-														? "text-amber-600"
-														: typeVariant === "ritual"
-															? "text-blue-600"
-															: "text-gray-600"
+											'capitalize',
+											typeVariant === 'trap'
+												? 'text-purple-600'
+												: typeVariant === 'spell'
+													? 'text-green-600'
+													: typeVariant === 'effect'
+														? 'text-amber-600'
+														: typeVariant === 'ritual'
+															? 'text-blue-600'
+															: 'text-gray-600'
 										)}
 									>
 										{typeVariant}
@@ -269,7 +252,7 @@ export function TagCard({
 										<>
 											<span>•</span>
 											<span>
-												{tag.count} {tag.count === 1 ? "imagen" : "imágenes"}
+												{tag.count} {tag.count === 1 ? 'imagen' : 'imágenes'}
 											</span>
 										</>
 									)}
@@ -279,25 +262,20 @@ export function TagCard({
 
 						{/* Indicador de rareza */}
 						<div className="px-1.5 py-0.5 text-[10px] bg-white/10 backdrop-blur-sm rounded-full">
-							{TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]
-								?.label || "Común"}
+							{TAG_RARITY_CONFIG[tag.rarity as keyof typeof TAG_RARITY_CONFIG]?.label || 'Común'}
 						</div>
 					</div>
 
 					{/* Área de imagen o ilustración */}
 					<div className="flex-1 mb-2 rounded-md overflow-hidden bg-card-foreground/5 border border-border/40">
 						{tag.featuredImage ? (
-							<img
-								src={tag.featuredImage}
-								alt={tag.name}
-								className="w-full h-full object-cover"
-							/>
+							<img src={tag.featuredImage} alt={tag.name} className="w-full h-full object-cover" />
 						) : (
 							<div className="flex items-center justify-center w-full h-full p-4">
 								<div
 									className={cn(
-										"w-20 h-20 rounded-full flex items-center justify-center",
-										tag.color ? "bg-opacity-10" : "bg-primary/10"
+										'w-20 h-20 rounded-full flex items-center justify-center',
+										tag.color ? 'bg-opacity-10' : 'bg-primary/10'
 									)}
 									style={{ backgroundColor: tag.color || undefined }}
 								>
@@ -305,10 +283,7 @@ export function TagCard({
 										<span className="text-4xl">{tag.emoji}</span>
 									) : (
 										<Tag
-											className={cn(
-												"h-10 w-10",
-												tag.color ? "text-opacity-80" : "text-primary/80"
-											)}
+											className={cn('h-10 w-10', tag.color ? 'text-opacity-80' : 'text-primary/80')}
 											style={{ color: tag.color || undefined }}
 										/>
 									)}
@@ -319,11 +294,7 @@ export function TagCard({
 
 					{/* Descripción y atributos */}
 					<div className="mb-2">
-						{tag.description && (
-							<p className="text-xs text-card-foreground mb-2 line-clamp-3">
-								{tag.description}
-							</p>
-						)}
+						{tag.description && <p className="text-xs text-card-foreground mb-2 line-clamp-3">{tag.description}</p>}
 
 						{/* Atributos como pequeñas píldoras */}
 						{tag.attributes && tag.attributes.length > 0 && (
@@ -346,10 +317,7 @@ export function TagCard({
 							<p>Categorías relacionadas:</p>
 							<div className="flex flex-wrap gap-1 mt-1">
 								{tag.relatedCategories.map((category) => (
-									<span
-										key={`category-${category}`}
-										className="text-primary/80"
-									>
+									<span key={`category-${category}`} className="text-primary/80">
 										{category}
 									</span>
 								))}
@@ -409,7 +377,7 @@ export function TagCard({
 							onHoverStart={() => setIsHovered(true)}
 							onHoverEnd={() => setIsHovered(false)}
 							onClick={(e: React.MouseEvent) => {
-								if ((e.target as HTMLElement).closest("button")) {
+								if ((e.target as HTMLElement).closest('button')) {
 									e.stopPropagation();
 								}
 							}}

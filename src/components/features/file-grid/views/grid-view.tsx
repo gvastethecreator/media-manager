@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { FileItem } from '@/types/file-item';
 import { ImageIcon, Meh, Star } from 'lucide-react';
 import type * as React from 'react';

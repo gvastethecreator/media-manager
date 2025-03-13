@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import * as React from 'react';
 import type { ExplodeLayerTransformFunction, ScanlinesOptions } from '../../types/base-card-types';
 

@@ -14,13 +14,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Alert, AlertDescription } from '@/components/ui/alert-enhanced';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import {
 	AlertCircle,
+	ChevronRight,
 	Eye,
 	Grid2X2,
 	Images,
@@ -32,6 +37,7 @@ import {
 	Lightbulb,
 	MapPin,
 	MessageSquare,
+	MousePointer,
 	Package,
 	PaintBucket,
 	Palette,
@@ -53,14 +59,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { adaptBaseToSettingsOptions } from '../base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
 import type { CardOptions } from '../types/card-settings-types';
+import { FiltersSettings, PatternsSettings, ShadersSettings } from './panels';
 import { AdvancedEffectsSettings } from './panels/advanced-effects-settings';
 import { DesignSettings } from './panels/design-settings';
+import { DistortionEffectsSettings } from './panels/distortion-effects-settings';
 import { ImageGridSettings } from './panels/image-grid-settings';
+import { InteractionSettings } from './panels/interaction-settings';
 import { PerformanceSettings } from './panels/performance-settings';
+import { PresetsPanel } from './panels/presets-panel';
+import { PreviewSettings } from './panels/preview-settings';
 import { StatesSettings } from './panels/states-settings';
-import { SystemsSettings } from './panels/systems-settings';
+import { SystemSettings } from './panels/system-settings';
 import { VisualEffectsSettings } from './panels/visual-effects-settings';
-import { PresetsPanel } from './presets/presets-panel';
 import { EntityCardPreview } from './preview/entity-card-preview';
 import { PreviewPanel } from './preview/preview-panel';
 
@@ -87,49 +97,6 @@ interface EntityTypeOptions {
 	defaultRarity?: RarityConfig;
 	defaultTexture?: TextureConfig;
 }
-
-// Colores para cada sección de configuración
-const sectionColors = {
-	presets: 'from-blue-50 to-blue-100/10 dark:from-blue-950/10 dark:to-blue-900/5',
-	visual: 'from-indigo-50 to-indigo-100/10 dark:from-indigo-950/10 dark:to-indigo-900/5',
-	system: 'from-violet-50 to-violet-100/10 dark:from-violet-950/10 dark:to-violet-900/5',
-	images: 'from-pink-50 to-pink-100/10 dark:from-pink-950/10 dark:to-pink-900/5',
-	advanced: 'from-cyan-50 to-cyan-100/10 dark:from-cyan-950/10 dark:to-cyan-900/5',
-	design: 'from-emerald-50 to-emerald-100/10 dark:from-emerald-950/10 dark:to-emerald-900/5',
-	performance: 'from-amber-50 to-amber-100/10 dark:from-amber-950/10 dark:to-amber-900/5',
-	states: 'from-orange-50 to-orange-100/10 dark:from-orange-950/10 dark:to-orange-900/5',
-};
-
-// Componente para una sección con color de fondo
-const SettingsSection = ({
-	children,
-	colorClass,
-	title,
-	icon,
-}: {
-	children: React.ReactNode;
-	colorClass: string;
-	title?: string;
-	icon?: ReactNode;
-}) => {
-	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			className={cn('rounded-md bg-gradient-to-br p-0.5 mb-3', colorClass)}
-		>
-			<div className="bg-card rounded-md p-3">
-				{title && (
-					<div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-						{icon}
-						<h3 className="text-sm font-medium">{title}</h3>
-					</div>
-				)}
-				{children}
-			</div>
-		</motion.div>
-	);
-};
 
 // Lista de tipos de entidades disponibles con colores para los iconos
 const entityTypes: EntityTypeOptions[] = [
@@ -270,172 +237,233 @@ const convertEntityId = {
 	toUiFormat: (entityId: string): string => (entityId.startsWith('card-') ? entityId : `card-${entityId}`),
 };
 
-// Componente para la columna de configuraciones
-const ConfigurationPanel = ({
+// Definición de categorías con sus colores y estilos
+const categories = [
+	{
+		id: 'basic',
+		title: 'Configuración Básica',
+		icon: Settings2,
+		color: '#3b82f6',
+		panels: [
+			{
+				id: 'presets',
+				title: 'Presets y Plantillas',
+				icon: LayoutGrid,
+				color: '#3b82f6',
+			},
+			{
+				id: 'systems',
+				title: 'Sistemas y Atributos',
+				icon: PaintBucket,
+				color: '#8b5cf6',
+			},
+		],
+	},
+	{
+		id: 'appearance',
+		title: 'Apariencia',
+		icon: Palette,
+		color: '#10b981',
+		panels: [
+			{
+				id: 'design',
+				title: 'Diseño y Colores',
+				icon: Palette,
+				color: '#10b981',
+			},
+			{
+				id: 'visual',
+				title: 'Efectos Visuales',
+				icon: Sparkles,
+				color: '#f59e0b',
+			},
+			{
+				id: 'distortion',
+				title: 'Efectos de Distorsión',
+				icon: Sliders,
+				color: '#ef4444',
+			},
+			{
+				id: 'advanced',
+				title: 'Efectos Avanzados',
+				icon: Settings2,
+				color: '#8b5cf6',
+			},
+			{
+				id: 'filters',
+				title: 'Filtros',
+				icon: Sliders,
+				color: '#14b8a6',
+			},
+			{
+				id: 'patterns',
+				title: 'Patrones',
+				icon: Grid2X2,
+				color: '#ec4899',
+			},
+			{
+				id: 'shaders',
+				title: 'Shaders',
+				icon: Sparkles,
+				color: '#f59e0b',
+			},
+		],
+	},
+	{
+		id: 'content',
+		title: 'Contenido',
+		icon: Grid2X2,
+		color: '#ec4899',
+		panels: [
+			{
+				id: 'images',
+				title: 'Imágenes y Multimedia',
+				icon: Grid2X2,
+				color: '#ec4899',
+			},
+			{
+				id: 'states',
+				title: 'Estados Interactivos',
+				icon: Repeat,
+				color: '#f59e0b',
+			},
+			{
+				id: 'interaction',
+				title: 'Interacción',
+				icon: MousePointer,
+				color: '#10b981',
+			},
+			{
+				id: 'preview',
+				title: 'Vista Previa',
+				icon: Eye,
+				color: '#3b82f6',
+			},
+		],
+	},
+	{
+		id: 'technical',
+		title: 'Técnico',
+		icon: Laptop,
+		color: '#14b8a6',
+		panels: [
+			{
+				id: 'performance',
+				title: 'Rendimiento y Optimización',
+				icon: Laptop,
+				color: '#14b8a6',
+			},
+		],
+	},
+];
+
+// Componente para la navegación
+const NavigationPanel = ({
 	activeEntityType,
-	activePreset,
-	cardOptions,
-	onCardOptionsChange,
-	onPresetSelect,
-	onRarityChange,
-	onTextureChange,
-	activeEntity,
+	onEntityTypeChange,
+	activeCategory,
+	onCategoryChange,
+	activePanel,
+	onPanelChange,
 }: {
 	activeEntityType: string;
-	activePreset: string | null;
-	cardOptions: CardOptions;
-	onCardOptionsChange: (options: CardOptions) => void;
-	onPresetSelect: (preset: {
-		id: string;
-		name: string;
-		options: CardOptions;
-	}) => void;
-	onRarityChange: (config: RarityConfig | null) => void;
-	onTextureChange: (config: TextureConfig | null) => void;
-	activeEntity: EntityTypeOptions | undefined;
+	onEntityTypeChange: (type: string) => void;
+	activeCategory: string;
+	onCategoryChange: (category: string) => void;
+	activePanel: string;
+	onPanelChange: (panel: string) => void;
 }) => {
-	// Agrupamos las secciones por categorías para una mejor organización
-	const configSections = [
-		{
-			id: 'basic',
-			title: 'Configuración Básica',
-			panels: [
-				{
-					id: 'presets',
-					title: 'Presets y Plantillas',
-					icon: <LayoutGrid className="h-4 w-4 text-blue-500" />,
-					colorClass: sectionColors.presets,
-					component: (
-						<PresetsPanel
-							activePreset={activePreset}
-							onPresetSelect={onPresetSelect}
-							entityType={convertEntityId.toApiFormat(activeEntityType)}
-						/>
-					),
-				},
-				{
-					id: 'systems',
-					title: 'Sistemas y Atributos',
-					icon: <PaintBucket className="h-4 w-4 text-violet-500" />,
-					colorClass: sectionColors.system,
-					component: (
-						<SystemsSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={onCardOptionsChange}
-							entityType={convertEntityId.toApiFormat(activeEntityType)}
-							onRarityChange={onRarityChange}
-							onTextureChange={onTextureChange}
-						/>
-					),
-				},
-			],
-		},
-		{
-			id: 'appearance',
-			title: 'Apariencia',
-			panels: [
-				{
-					id: 'visual',
-					title: 'Efectos Visuales',
-					icon: <Sparkles className="h-4 w-4 text-indigo-500" />,
-					colorClass: sectionColors.visual,
-					component: <VisualEffectsSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-				{
-					id: 'design',
-					title: 'Diseño y Colores',
-					icon: <Palette className="h-4 w-4 text-emerald-500" />,
-					colorClass: sectionColors.design,
-					component: <DesignSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-				{
-					id: 'advanced',
-					title: 'Efectos Avanzados',
-					icon: <Settings2 className="h-4 w-4 text-cyan-500" />,
-					colorClass: sectionColors.advanced,
-					component: <AdvancedEffectsSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-			],
-		},
-		{
-			id: 'content',
-			title: 'Contenido',
-			panels: [
-				{
-					id: 'images',
-					title: 'Imágenes y Multimedia',
-					icon: <Grid2X2 className="h-4 w-4 text-pink-500" />,
-					colorClass: sectionColors.images,
-					component: <ImageGridSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-				{
-					id: 'states',
-					title: 'Estados Interactivos',
-					icon: <Repeat className="h-4 w-4 text-orange-500" />,
-					colorClass: sectionColors.states,
-					component: <StatesSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-			],
-		},
-		{
-			id: 'technical',
-			title: 'Técnico',
-			panels: [
-				{
-					id: 'performance',
-					title: 'Rendimiento y Optimización',
-					icon: <Laptop className="h-4 w-4 text-amber-500" />,
-					colorClass: sectionColors.performance,
-					component: <PerformanceSettings cardOptions={cardOptions} onCardOptionsChange={onCardOptionsChange} />,
-				},
-				{
-					id: 'preview',
-					title: 'Opciones de Vista Previa',
-					icon: <Eye className="h-4 w-4 text-blue-500" />,
-					colorClass: sectionColors.presets,
-					component: (
-						<PreviewPanel cardOptions={cardOptions} entityType={convertEntityId.toApiFormat(activeEntityType)} />
-					),
-				},
-			],
-		},
-	];
+	const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
-	if (!activeEntity) {
-		return null;
-	}
+	const handleCollapseToggle = (categoryId: string) => {
+		setCollapsedCategories((prev) => ({
+			...prev,
+			[categoryId]: !prev[categoryId],
+		}));
+	};
 
 	return (
-		<ScrollArea className="h-[calc(100vh-160px)] pr-2">
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.2 }}
-				key={`config-${activeEntityType}`}
-				className="py-2"
-			>
-				<div className="mb-4">
-					<h3 className="text-sm font-medium flex items-center gap-2" style={{ color: activeEntity.color }}>
-						<Settings className="h-4 w-4" />
-						Configuración para {activeEntity.title}
-					</h3>
-					<p className="text-xs text-muted-foreground mt-1">Personaliza todos los aspectos de las tarjetas</p>
-				</div>
-
-				{configSections.map((section) => (
-					<div key={section.id} className="mb-6">
-						<div className="mb-2 pb-1 border-b border-border">
-							<h4 className="text-sm font-medium text-muted-foreground">{section.title}</h4>
-						</div>
-						{section.panels.map((panel) => (
-							<SettingsSection key={panel.id} colorClass={panel.colorClass} title={panel.title} icon={panel.icon}>
-								{panel.component}
-							</SettingsSection>
+		<div className="flex flex-col h-full bg-background">
+			<ScrollArea className="flex-1">
+				<div className="p-1 pr-3 space-y-0">
+					{/* Tipos de Entidad */}
+					<div className="space-y-1">
+						{entityTypes.map((entityType) => (
+							<button
+								key={entityType.entityType}
+								onClick={() => onEntityTypeChange(entityType.entityType)}
+								className={cn(
+									'flex items-center w-full gap-2 px-3 py-2 text-[11px] font-medium rounded-md',
+									'hover:bg-secondary/20 transition-all duration-150',
+									activeEntityType === entityType.entityType ? 'bg-secondary/30 text-primary' : 'text-muted-foreground'
+								)}
+								type="button"
+							>
+								<span className="flex items-center justify-center" style={{ color: entityType.color }}>
+									{entityType.icon}
+								</span>
+								{entityType.title}
+							</button>
 						))}
 					</div>
-				))}
-			</motion.div>
-		</ScrollArea>
+
+					<Separator className="my-2" />
+
+					{/* Categorías y Paneles */}
+					<div className="space-y-1">
+						{categories.map((category) => (
+							<div key={category.id}>
+								<button
+									onClick={() => handleCollapseToggle(category.id)}
+									className={cn(
+										'flex items-center w-full gap-2 px-3 py-2 text-[11px] font-medium rounded-md',
+										'hover:bg-secondary/20 transition-all duration-150',
+										activeCategory === category.id ? 'bg-secondary/30 text-primary' : 'text-muted-foreground'
+									)}
+									type="button"
+								>
+									<span className="flex items-center justify-center" style={{ color: category.color }}>
+										<category.icon className="h-4 w-4" />
+									</span>
+									{category.title}
+									<ChevronRight
+										className={cn(
+											'h-4 w-4 ml-auto transition-transform',
+											collapsedCategories[category.id] ? 'rotate-90' : ''
+										)}
+									/>
+								</button>
+
+								{!collapsedCategories[category.id] && (
+									<div className="pl-7 space-y-1">
+										{category.panels.map((panel) => (
+											<button
+												key={panel.id}
+												onClick={() => {
+													onCategoryChange(category.id);
+													onPanelChange(panel.id);
+												}}
+												className={cn(
+													'flex items-center w-full gap-2 px-3 py-2 text-[11px] font-medium rounded-md',
+													'hover:bg-secondary/20 transition-all duration-150',
+													activePanel === panel.id ? 'bg-secondary/30 text-primary' : 'text-muted-foreground'
+												)}
+												type="button"
+											>
+												<span className="flex items-center justify-center" style={{ color: panel.color }}>
+													<panel.icon className="h-4 w-4" />
+												</span>
+												{panel.title}
+											</button>
+										))}
+									</div>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			</ScrollArea>
+		</div>
 	);
 };
 
@@ -460,6 +488,14 @@ export function EntitiesCardsSection() {
 
 	// Estado para errores
 	const [error, setError] = useState<string | null>(null);
+
+	// Estado para la categoría activa
+	const [activeCategory, setActiveCategory] = useState<string>('basic');
+	const [activePanel, setActivePanel] = useState<string>('presets');
+
+	// Estado para mostrar información
+	const [showInfo, setShowInfo] = useState(true);
+	const [showControls, setShowControls] = useState(true);
 
 	// Cargar opciones al cambiar el tipo de entidad
 	const loadEntityOptions = useCallback(async () => {
@@ -585,16 +621,6 @@ export function EntitiesCardsSection() {
 		toastService.success(`Preset "${preset.name}" aplicado correctamente`);
 	};
 
-	// Manejar selección de rareza para vista previa
-	const handleRaritySelect = (rarityConfig: RarityConfig | null) => {
-		setSelectedRarity(rarityConfig);
-	};
-
-	// Manejar selección de textura para vista previa
-	const handleTextureSelect = (textureConfig: TextureConfig | null) => {
-		setSelectedTexture(textureConfig);
-	};
-
 	// Encontrar la entidad activa
 	const activeEntity = entityTypes.find((e) => e.entityType === activeEntityType);
 
@@ -650,29 +676,14 @@ export function EntitiesCardsSection() {
 				<div className="grid grid-cols-1 md:grid-cols-12 gap-4 min-h-[600px]">
 					{/* COLUMNA 1: Navegación - Lado izquierdo (2 columnas) */}
 					<div className="md:col-span-2 border-r border-border pr-2">
-						<ScrollArea className="h-[calc(100vh-160px)]">
-							<div className="space-y-1 py-2">
-								{entityTypes.map((entityType) => (
-									<button
-										key={entityType.entityType}
-										onClick={() => setActiveEntityType(entityType.entityType)}
-										className={cn(
-											'flex items-center w-full gap-2 px-3 py-2 text-sm font-medium rounded-md',
-											'hover:bg-secondary/20 transition-all duration-150',
-											activeEntityType === entityType.entityType
-												? 'bg-secondary/30 text-primary'
-												: 'text-muted-foreground'
-										)}
-										type="button"
-									>
-										<span className="flex items-center justify-center" style={{ color: entityType.color }}>
-											{entityType.icon}
-										</span>
-										{entityType.title}
-									</button>
-								))}
-							</div>
-						</ScrollArea>
+						<NavigationPanel
+							activeEntityType={activeEntityType}
+							onEntityTypeChange={setActiveEntityType}
+							activeCategory={activeCategory}
+							onCategoryChange={setActiveCategory}
+							activePanel={activePanel}
+							onPanelChange={setActivePanel}
+						/>
 					</div>
 
 					{/* COLUMNA 2: Vista previa - Columna central (5 columnas) */}
@@ -686,25 +697,88 @@ export function EntitiesCardsSection() {
 								className="flex flex-col items-center"
 							>
 								<div className="mb-4 w-full">
-									<h3 className="text-sm font-medium flex items-center gap-2" style={{ color: activeEntity.color }}>
+									<h3 className="text-[11px] font-medium flex items-center gap-2" style={{ color: activeEntity.color }}>
 										{activeEntity.icon}
 										Vista previa de {activeEntity.title}
 									</h3>
-									<p className="text-xs text-muted-foreground mt-1">{activeEntity.description}</p>
+									<p className="text-[10px] text-muted-foreground mt-1">{activeEntity.description}</p>
 								</div>
 
-								<div className="flex-1 flex items-center justify-center w-full">
+								<div className="relative flex-1 flex items-center justify-center w-full">
+									<div className="absolute top-2 right-2 flex gap-2">
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="outline"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => setShowInfo(!showInfo)}
+													>
+														<Info className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side="left" className="text-[10px]">
+													{showInfo ? 'Ocultar información' : 'Mostrar información'}
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="outline"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => setShowControls(!showControls)}
+													>
+														<Settings2 className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side="left" className="text-[10px]">
+													{showControls ? 'Ocultar controles' : 'Mostrar controles'}
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</div>
+
 									<EntityCardPreview
 										cardOptions={cardOptions}
 										entityType={convertEntityId.toApiFormat(activeEntityType)}
 										rarity={selectedRarity}
 										texture={selectedTexture}
-										showInfo={true}
+										showInfo={showInfo}
+										showControls={showControls}
 									/>
+
+									{showControls && (
+										<div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-[11px]"
+												onClick={() => setSelectedRarity(null)}
+											>
+												Sin Rareza
+											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-[11px]"
+												onClick={() => setSelectedTexture(null)}
+											>
+												Sin Textura
+											</Button>
+										</div>
+									)}
 								</div>
 
-								{/* Botón de guardar debajo de la vista previa */}
-								<Button onClick={handleSaveOptions} disabled={isSaving} className="mt-6 w-fit self-center" size="lg">
+								<Button
+									onClick={handleSaveOptions}
+									disabled={isSaving}
+									className="mt-6 w-fit self-center text-[11px]"
+									size="lg"
+								>
 									<Save className={cn('h-4 w-4 mr-2', isSaving && 'animate-spin')} />
 									{isSaving ? 'Guardando cambios...' : 'Guardar configuración'}
 								</Button>
@@ -715,16 +789,65 @@ export function EntitiesCardsSection() {
 					{/* COLUMNA 3: Configuración - Lado derecho (5 columnas) */}
 					<div className="md:col-span-5 border-l border-border pl-2">
 						{activeEntity && (
-							<ConfigurationPanel
-								activeEntityType={activeEntityType}
-								activePreset={activePreset}
-								cardOptions={cardOptions}
-								onCardOptionsChange={handleCardOptionsChange}
-								onPresetSelect={handlePresetSelect}
-								onRarityChange={handleRaritySelect}
-								onTextureChange={handleTextureSelect}
-								activeEntity={activeEntity}
-							/>
+							<ScrollArea className="h-[calc(100vh-160px)]">
+								<div className="space-y-4">
+									{/* Renderizar el panel activo basado en activePanel */}
+									{activePanel === 'presets' && (
+										<PresetsPanel
+											activePreset={activePreset}
+											onPresetSelect={handlePresetSelect}
+											entityType={convertEntityId.toApiFormat(activeEntityType)}
+										/>
+									)}
+									{activePanel === 'systems' && (
+										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'design' && (
+										<DesignSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'visual' && (
+										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'distortion' && (
+										<DistortionEffectsSettings
+											options={cardOptions}
+											onChange={handleCardOptionsChange}
+											disabled={false}
+										/>
+									)}
+									{activePanel === 'advanced' && (
+										<AdvancedEffectsSettings
+											options={cardOptions}
+											onChange={handleCardOptionsChange}
+											disabled={false}
+										/>
+									)}
+									{activePanel === 'filters' && (
+										<FiltersSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'patterns' && (
+										<PatternsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'shaders' && (
+										<ShadersSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'images' && (
+										<ImageGridSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'states' && (
+										<StatesSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'interaction' && (
+										<InteractionSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'preview' && (
+										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'performance' && (
+										<PerformanceSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+								</div>
+							</ScrollArea>
 						)}
 					</div>
 				</div>

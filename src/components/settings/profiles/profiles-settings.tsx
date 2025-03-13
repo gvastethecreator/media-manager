@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { ProfileUpdate } from '@/services/profile.service';
 import { Check, Smile, UserCog, UserPlus, UserX, Users } from 'lucide-react';
 import * as React from 'react';
