@@ -33,7 +33,7 @@ export async function getImage(id: string): Promise<Image | null> {
 				places: {
 					select: { id: true, name: true, emoji: true },
 				},
-				objects: {
+				worldItems: {
 					select: { id: true, name: true, emoji: true },
 				},
 				stats: true,
@@ -258,7 +258,7 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 				places: {
 					select: { id: true, name: true, emoji: true },
 				},
-				objects: {
+				worldItems: {
 					select: { id: true, name: true, emoji: true },
 				},
 				stats: true,

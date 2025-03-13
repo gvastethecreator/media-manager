@@ -1,8 +1,7 @@
-import { EventEmitter } from 'node:events';
+import type { PromptCreate } from '@/app/actions/prompts/prompt.actions';
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
-import type { PromptCreate } from '@/types/entities';
+import { type EventType, emit } from '@/lib/server/events.server';
 import type { Prompt } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
@@ -14,6 +13,14 @@ const EVENTS = {
 	PROMPT_UPDATED: 'prompt:updated',
 	PROMPT_DELETED: 'prompt:deleted',
 	PROMPTS_CHANGED: 'prompts:changed',
+};
+
+// Mapeo de eventos a EventType
+const EVENT_TYPE_MAPPING: Record<string, EventType> = {
+	[EVENTS.PROMPT_CREATED]: 'prompts:modified',
+	[EVENTS.PROMPT_UPDATED]: 'prompts:modified',
+	[EVENTS.PROMPT_DELETED]: 'prompts:modified',
+	[EVENTS.PROMPTS_CHANGED]: 'prompts:modified',
 };
 
 interface PromptFilters {
@@ -53,12 +60,12 @@ export const PromptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPT_CREATED],
 				data: { action: 'create', entity: prompt, eventType: EVENTS.PROMPT_CREATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.PROMPTS_CHANGED },
 			});
 
@@ -78,12 +85,12 @@ export const PromptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPT_UPDATED],
 				data: { action: 'update', entity: prompt, eventType: EVENTS.PROMPT_UPDATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.PROMPTS_CHANGED },
 			});
 
@@ -102,12 +109,12 @@ export const PromptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'delete',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPT_DELETED],
 				data: { action: 'delete', entity: prompt, eventType: EVENTS.PROMPT_DELETED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.PROMPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.PROMPTS_CHANGED },
 			});
 		} catch (error) {
@@ -138,14 +145,16 @@ export const PromptService = {
 			}
 			if (search) {
 				where.OR = [
-					{ name: { contains: search, mode: 'insensitive' } },
-					{ content: { contains: search, mode: 'insensitive' } },
-					{ description: { contains: search, mode: 'insensitive' } },
+					{ name: { contains: search } },
+					{ content: { contains: search } },
+					{ description: { contains: search } },
 				];
 			}
 			if (tags && tags.length > 0) {
+				// Convertimos el array a un string JSON para compararlo con la columna tags
+				const tagsJson = JSON.stringify(tags);
 				where.tags = {
-					hasSome: tags,
+					contains: tagsJson.substring(1, tagsJson.length - 1), // Quitamos los corchetes
 				};
 			}
 

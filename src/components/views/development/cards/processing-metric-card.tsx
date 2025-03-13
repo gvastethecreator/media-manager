@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import type { ReactNode } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import type { ComponentType } from "react";
 
 export interface ProcessingMetric {
 	name: string;
 	value: number;
 	max: number;
-	icon: ReactNode;
+	icon: ComponentType<{ className?: string }>;
 }
 
 export function ProcessingMetricCard({ metric }: { metric: ProcessingMetric }) {

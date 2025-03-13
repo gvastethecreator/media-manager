@@ -356,7 +356,7 @@ export function useFolders() {
 			setGlobalReindexStatus({
 				...initialGlobalReindexStatus,
 				isProcessing: false,
-				errors: [{ error: error instanceof Error ? error.message : 'Error desconocido' }],
+				errors: [{ folderId: '', error: error instanceof Error ? error.message : 'Error desconocido' }],
 			});
 
 			// Mostrar error

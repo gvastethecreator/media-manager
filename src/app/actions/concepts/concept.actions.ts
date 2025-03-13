@@ -6,8 +6,10 @@ import { emit } from '@/lib/server/events.server';
 import type { EventType } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import type { Concept } from '@/types/entities/concepts';
 import type { FileItem } from '@/types/file-item';
 import type { Concept as PrismaConcept } from '@prisma/client';
+import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -49,17 +51,13 @@ export interface ConceptUpdate extends Partial<ConceptCreate> {
 	id: string;
 }
 
-export interface Concept extends PrismaConcept {
-	count?: number;
-}
-
-export interface ConceptWithStats extends PrismaConcept {
+export interface ConceptWithStats extends Concept {
 	_count: {
 		prompts: number;
 		notes: number;
 		characters: number;
 		places: number;
-		worldItems: number; // Corregido de 'objects' a 'worldItems'
+		worldItems: number;
 	};
 	lastUpdated: Date;
 }
@@ -68,17 +66,12 @@ export interface ConceptWithImages extends PrismaConcept {
 	images: FileItem[];
 }
 
-export interface ExtendedConcept extends PrismaConcept {
-	characters: {
-		images: PrismaConcept[];
-	}[];
-	places: {
-		images: PrismaConcept[];
-	}[];
-	worldItems: {
-		// Corregido de 'objects' a 'worldItems'
-		images: PrismaConcept[];
-	}[];
+export interface ExtendedConcept extends Omit<Concept, 'characters' | 'places' | 'worldItems' | 'notes' | 'prompts'> {
+	prompts?: { id: string; name: string }[];
+	notes?: { id: string; title: string }[];
+	characters?: { id: string; name: string }[];
+	places?: { id: string; name: string }[];
+	worldItems?: { id: string; name: string }[];
 }
 
 // Funciones utilitarias
@@ -122,9 +115,6 @@ const notifyConceptChange = async (
 // Acciones del servidor
 export async function getConcepts(): Promise<ConceptWithStats[]> {
 	try {
-		conceptLogger.info('💡 Obteniendo conceptos con estadísticas');
-
-		// Obtener conceptos con conteos y estadísticas
 		const concepts = await prisma.concept.findMany({
 			include: {
 				_count: {
@@ -133,29 +123,22 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 						notes: true,
 						characters: true,
 						places: true,
-						worldItems: true, // Corregido de 'objects' a 'worldItems'
+						worldItems: true,
 					},
 				},
 			},
-			orderBy: [
-				{
-					name: 'asc',
-				},
-			],
+			orderBy: {
+				updatedAt: 'desc',
+			},
 		});
 
-		// Mapear conceptos a formato con estadísticas
-		const conceptsWithStats = concepts.map((concept) => ({
+		return concepts.map((concept) => ({
 			...concept,
-			_count: concept._count,
 			lastUpdated: concept.updatedAt,
 		}));
-
-		conceptLogger.info('✅ Conceptos obtenidos', { count: concepts.length });
-		return conceptsWithStats;
 	} catch (error) {
-		conceptLogger.error('❌ Error al obtener conceptos', error);
-		throw createConceptError('No se pudieron obtener los conceptos', ConceptErrorCode.OPERATION_FAILED, error);
+		console.error('Error al obtener conceptos:', error);
+		throw new Error('Error al obtener conceptos');
 	}
 }
 
@@ -171,7 +154,7 @@ export async function getConcept(id: string): Promise<Concept> {
 						notes: true,
 						characters: true,
 						places: true,
-						worldItems: true, // Corregido de 'objects' a 'worldItems'
+						worldItems: true,
 					},
 				},
 			},
@@ -184,7 +167,7 @@ export async function getConcept(id: string): Promise<Concept> {
 		conceptLogger.info('✅ Concepto obtenido:', concept.name);
 		return {
 			...concept,
-			count: Object.values(concept._count).reduce((acc: number, count: number) => acc + count, 0),
+			_count: concept._count,
 		};
 	} catch (error) {
 		conceptLogger.error('❌ Error al obtener concepto:', error);
@@ -284,31 +267,28 @@ export async function deleteConcept(id: string): Promise<void> {
 	}
 }
 
-export async function getConceptImages(id: string) {
+export async function getConceptImages(conceptId: string): Promise<FileItem[]> {
 	try {
-		conceptLogger.info('🖼️ Obteniendo imágenes del concepto:', id);
+		conceptLogger.info('🔍 Obteniendo imágenes del concepto:', conceptId);
+
+		// Verificar que el concepto existe
 		const concept = await prisma.concept.findUnique({
-			where: { id },
+			where: { id: conceptId },
 		});
 
 		if (!concept) {
 			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
 		}
 
-		const images: FileItem[] = [];
-		conceptLogger.info(`✅ ${images.length} imágenes obtenidas`);
-		return images;
+		// Solución temporal hasta que se implementen las relaciones correctamente
+		conceptLogger.info('✅ Este concepto no tiene imágenes definidas aún en el esquema');
+		return [];
 	} catch (error) {
 		conceptLogger.error('❌ Error al obtener imágenes del concepto:', error);
-		// Preservar el error si ya es un ConceptError
 		if (error instanceof Error && error.name === 'ConceptError') {
 			throw error;
 		}
-		throw createConceptError(
-			'No se pudieron obtener las imágenes del concepto',
-			ConceptErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createConceptError('No se pudo obtener las imágenes del concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 

@@ -8,7 +8,7 @@ import {
 } from '@/app/actions/stats/stats.actions';
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
+import { type EventType, emit } from '@/lib/server/events.server';
 
 const statsLogger = logger.withContext('StatsService');
 
@@ -30,6 +30,27 @@ export const STATS_EVENTS = {
 	CONCEPT_CHANGE: 'concept_change',
 	PROMPT_CHANGE: 'prompt_change',
 	NOTE_CHANGE: 'note_change',
+} as const;
+
+// Mapeo de eventos internos a EventType compatible
+const EVENT_TYPE_MAPPING: Record<string, EventType> = {
+	// Eventos genéricos
+	error: 'folder:error',
+	// Mapeos específicos
+	[STATS_EVENTS.VIEW_INCREMENTED]: 'update',
+	[STATS_EVENTS.DOWNLOAD_INCREMENTED]: 'update',
+	[STATS_EVENTS.STATS_UPDATED]: 'update',
+	[STATS_EVENTS.COLLECTION_CHANGE]: 'collections:modified',
+	[STATS_EVENTS.TAG_CHANGE]: 'tags:modified',
+	[STATS_EVENTS.FAVORITE_CHANGE]: 'favorites:modified',
+	[STATS_EVENTS.FOLDER_CHANGE]: 'folders:modified',
+	[STATS_EVENTS.ALBUM_CHANGE]: 'albums:modified',
+	[STATS_EVENTS.CHARACTER_CHANGE]: 'characters:modified',
+	[STATS_EVENTS.PLACE_CHANGE]: 'places:modified',
+	[STATS_EVENTS.WORLD_ITEM_CHANGE]: 'world-items:modified',
+	[STATS_EVENTS.FILES_CHANGE]: 'files:modified',
+	[STATS_EVENTS.PROMPT_CHANGE]: 'prompts:modified',
+	[STATS_EVENTS.NOTE_CHANGE]: 'notes:modified',
 } as const;
 
 export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS];
@@ -63,7 +84,7 @@ export const statsEventEmitter = {
 	emit: (event: string, ...args: unknown[]) => {
 		// Usamos serverEvents.emit en el fondo
 		void emit({
-			type: event,
+			type: (EVENT_TYPE_MAPPING[event] || 'update') as EventType,
 			data: args.length === 1 ? args[0] : args,
 		});
 		return true;
@@ -94,7 +115,7 @@ export class StatsService {
 	private async emitEvent(event: string, data: unknown): Promise<void> {
 		// Emitir al sistema de eventos del servidor
 		await emit({
-			type: event,
+			type: (EVENT_TYPE_MAPPING[event] || 'update') as EventType,
 			data,
 		});
 	}
@@ -106,6 +127,9 @@ export class StatsService {
 	async getGeneralStats(): Promise<GeneralStats> {
 		try {
 			const stats = await getSystemStats();
+			if (!stats) {
+				throw new Error('No se pudieron obtener las estadísticas del sistema');
+			}
 			await this.emitEvent(STATS_EVENTS.STATS_UPDATED, stats);
 			return stats;
 		} catch (error) {

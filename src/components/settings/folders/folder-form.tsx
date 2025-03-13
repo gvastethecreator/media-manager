@@ -20,6 +20,10 @@ interface FolderFormProps {
 	onAddFolder: (path: string) => Promise<void>;
 }
 
+interface ShowDirectoryPickerWindow extends Window {
+	showDirectoryPicker?: () => Promise<DirectoryHandle>;
+}
+
 export function FolderForm({ isProcessing, isLoading, onAddFolder }: FolderFormProps) {
 	const [folderPath, setFolderPath] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,23 +45,18 @@ export function FolderForm({ isProcessing, isLoading, onAddFolder }: FolderFormP
 	// Función para abrir el diálogo de selección de carpetas nativo
 	const handleBrowse = async () => {
 		try {
-			// Usamos window.showDirectoryPicker() de la API de File System Access
-			// Esta API está disponible en navegadores modernos
-			const directoryHandle = await (
-				window as Window & {
-					showDirectoryPicker: () => Promise<DirectoryHandle>;
-				}
-			).showDirectoryPicker();
+			const win = window as unknown as ShowDirectoryPickerWindow;
+			if (!win.showDirectoryPicker) {
+				throw new Error('La API showDirectoryPicker no está disponible en este navegador');
+			}
 
+			const directoryHandle = await win.showDirectoryPicker();
 			if (directoryHandle) {
-				// Esta propiedad varía entre navegadores, así que intentamos varias opciones
 				const path = directoryHandle.path || directoryHandle.name || directoryHandle.fullPath;
-				// Si obtenemos un path completo, lo usamos; de lo contrario, usamos el nombre de la carpeta
 				setFolderPath(path || directoryHandle.name);
 			}
 		} catch (error) {
 			console.error('Error al seleccionar la carpeta:', error);
-			// Si hay un error o el usuario cancela, no hacemos nada
 		}
 	};
 

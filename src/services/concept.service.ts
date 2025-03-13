@@ -1,7 +1,7 @@
+import type { ConceptCreate } from '@/app/actions/concepts/concept.actions';
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
-import type { ConceptCreate } from '@/types/entities';
+import { type EventType, emit } from '@/lib/server/events.server';
 import type { Concept } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
@@ -13,6 +13,14 @@ const EVENTS = {
 	CONCEPT_UPDATED: 'concept:updated',
 	CONCEPT_DELETED: 'concept:deleted',
 	CONCEPTS_CHANGED: 'concepts:changed',
+};
+
+// Mapeo de eventos a EventType
+const EVENT_TYPE_MAPPING: Record<string, EventType> = {
+	[EVENTS.CONCEPT_CREATED]: 'update',
+	[EVENTS.CONCEPT_UPDATED]: 'update',
+	[EVENTS.CONCEPT_DELETED]: 'delete',
+	[EVENTS.CONCEPTS_CHANGED]: 'update',
 };
 
 interface ConceptFilters {
@@ -52,12 +60,12 @@ export const ConceptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPT_CREATED],
 				data: { action: 'create', entity: concept, eventType: EVENTS.CONCEPT_CREATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.CONCEPTS_CHANGED },
 			});
 
@@ -77,12 +85,12 @@ export const ConceptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPT_UPDATED],
 				data: { action: 'update', entity: concept, eventType: EVENTS.CONCEPT_UPDATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.CONCEPTS_CHANGED },
 			});
 
@@ -101,12 +109,12 @@ export const ConceptService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'delete',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPT_DELETED],
 				data: { action: 'delete', entity: concept, eventType: EVENTS.CONCEPT_DELETED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.CONCEPTS_CHANGED },
 			});
 		} catch (error) {
@@ -137,14 +145,16 @@ export const ConceptService = {
 			}
 			if (search) {
 				where.OR = [
-					{ name: { contains: search, mode: 'insensitive' } },
-					{ content: { contains: search, mode: 'insensitive' } },
-					{ description: { contains: search, mode: 'insensitive' } },
+					{ name: { contains: search } },
+					{ content: { contains: search } },
+					{ description: { contains: search } },
 				];
 			}
 			if (tags && tags.length > 0) {
+				// Convertimos el array a un string JSON para compararlo con la columna tags
+				const tagsJson = JSON.stringify(tags);
 				where.tags = {
-					hasSome: tags,
+					contains: tagsJson.substring(1, tagsJson.length - 1), // Quitamos los corchetes
 				};
 			}
 

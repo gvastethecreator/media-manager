@@ -294,13 +294,13 @@ export function NotesSection() {
 													title: note.title,
 													content: note.content,
 													category: note.category || "",
-													priority: note.priority,
-													status: note.status,
+													priority: note.priority || 0,
+													status: note.status || "",
 													tags: note.tags || "",
-													featuredImage: note.featuredImage,
-													isFavorite: note.isFavorite,
-													createdAt: note.createdAt,
-													updatedAt: note.updatedAt,
+													featuredImage: note.featuredImage || null,
+													isFavorite: note.isFavorite || false,
+													createdAt: new Date(note.createdAt),
+													updatedAt: new Date(note.updatedAt),
 												}}
 												onEdit={() => setEditingId(note.id)}
 												onDelete={handleDelete}
