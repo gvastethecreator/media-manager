@@ -1,5 +1,8 @@
 "use client";
 
+// Importación de los tipos faltantes
+import type { RaritySystem } from "@/app/actions/entities-cards/entities-cards.actions";
+import type { TextureSystem } from "@/components/features/entity-cards/base/base-card-types";
 import { toastService } from "@/lib/services/toast.service";
 import { cn } from "@/lib/utils/utils";
 import { motion } from "motion/react";
@@ -10,7 +13,6 @@ import { AdvancedEffectsSettings } from "./advanced-effects-settings";
 import type {
 	CardOptions,
 	CardPresetOption,
-	CardSettingsProps,
 	SystemSettingsProps,
 } from "./card-settings-types";
 import { DesignSettings } from "./design-settings";
@@ -46,17 +48,29 @@ const sectionColors = {
 const SettingsSection = ({
 	children,
 	colorClass,
+	title,
+	icon,
 }: {
 	children: React.ReactNode;
 	colorClass: string;
+	title?: string;
+	icon?: React.ReactNode;
 }) => {
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			className={cn("rounded-md bg-gradient-to-br p-0.5", colorClass)}
+			className={cn("rounded-md bg-gradient-to-br p-0.5 mb-3", colorClass)}
 		>
-			{children}
+			<div className="bg-card rounded-md">
+				{title && (
+					<div className="flex items-center gap-1.5 px-2.5 py-1.5 border-b border-border/40">
+						{icon}
+						<h3 className="text-[11px] font-medium">{title}</h3>
+					</div>
+				)}
+				{children}
+			</div>
 		</motion.div>
 	);
 };
@@ -69,6 +83,7 @@ export function CardSettingsPanel({
 	onTextureChange,
 	raritySystem,
 	textureSystem,
+	accordionMode = false,
 }: SystemSettingsProps) {
 	// Estado para el preset activo
 	const [activePreset, setActivePreset] = React.useState<string | null>(null);
@@ -89,81 +104,186 @@ export function CardSettingsPanel({
 		}
 	};
 
-	return (
-		<div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-			{/* Panel de configuración - 2 columnas en escritorio */}
-			<div className="xl:col-span-2">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Fila 1: Presets y Visual */}
-					<SettingsSection colorClass={sectionColors.presets}>
-						<PresetsPanel
-							activePreset={activePreset}
-							onPresetSelect={handlePresetSelect}
-							entityType={entityType}
-						/>
-					</SettingsSection>
+	// Si está en modo acordeón, usamos un diseño diferente
+	if (accordionMode) {
+		return (
+			<div className="flex flex-col gap-2 w-full">
+				{/* Presets Panel */}
+				<SettingsSection colorClass={sectionColors.presets}>
+					<PresetsPanel
+						activePreset={activePreset}
+						onPresetSelect={handlePresetSelect}
+						entityType={entityType}
+					/>
+				</SettingsSection>
 
-					<SettingsSection colorClass={sectionColors.visual}>
-						<VisualEffectsSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+					<div className="space-y-2">
+						{/* System Settings */}
+						<SettingsSection colorClass={sectionColors.system}>
+							<SystemsSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+								entityType={entityType}
+								onRarityChange={onRarityChange}
+								onTextureChange={onTextureChange}
+								raritySystem={raritySystem}
+								textureSystem={textureSystem}
+							/>
+						</SettingsSection>
 
-					{/* Fila 2: Sistema y Configuración de Imágenes */}
-					<SettingsSection colorClass={sectionColors.system}>
-						<SystemsSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-							entityType={entityType}
-							onRarityChange={onRarityChange}
-							onTextureChange={onTextureChange}
-							raritySystem={raritySystem}
-							textureSystem={textureSystem}
-						/>
-					</SettingsSection>
+						{/* Visual Effects */}
+						<SettingsSection colorClass={sectionColors.visual}>
+							<VisualEffectsSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
 
-					<SettingsSection colorClass={sectionColors.images}>
-						<ImageGridSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+						{/* Image Grid Settings */}
+						<SettingsSection colorClass={sectionColors.images}>
+							<ImageGridSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
+					</div>
 
-					{/* Fila 3: Efectos Avanzados y Diseño */}
-					<SettingsSection colorClass={sectionColors.advanced}>
-						<AdvancedEffectsSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+					<div className="space-y-2">
+						{/* Advanced Effects */}
+						<SettingsSection colorClass={sectionColors.advanced}>
+							<AdvancedEffectsSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
 
-					<SettingsSection colorClass={sectionColors.design}>
-						<DesignSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+						{/* Design Settings */}
+						<SettingsSection colorClass={sectionColors.design}>
+							<DesignSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
 
-					{/* Fila 4: Rendimiento y Estados */}
-					<SettingsSection colorClass={sectionColors.performance}>
-						<PerformanceSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+						{/* Performance */}
+						<SettingsSection colorClass={sectionColors.performance}>
+							<PerformanceSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
 
-					<SettingsSection colorClass={sectionColors.states}>
-						<StatesSettings
-							cardOptions={cardOptions}
-							onCardOptionsChange={handleOptionsChange}
-						/>
-					</SettingsSection>
+						{/* States */}
+						<SettingsSection colorClass={sectionColors.states}>
+							<StatesSettings
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleOptionsChange}
+							/>
+						</SettingsSection>
+					</div>
+				</div>
+
+				{/* Preview Panel como sección flotante al final */}
+				<div className="mt-3">
+					<PreviewPanel
+						cardOptions={cardOptions}
+						entityType={entityType}
+						rarity={
+							cardOptions.raritySystem && raritySystem
+								? (raritySystem.rarities[0] as RarityConfig)
+								: null
+						}
+						texture={
+							cardOptions.textureSystem && textureSystem
+								? (textureSystem.textures[0] as TextureConfig)
+								: null
+						}
+						showInfo
+					/>
 				</div>
 			</div>
+		);
+	}
 
-			{/* Panel de Preview - Siempre visible */}
-			<div className="xl:col-span-1 space-y-4">
+	// Diseño estándar (no acordeón)
+	return (
+		<div className="flex flex-col-reverse md:flex-row gap-3">
+			{/* Panel de configuración - ahora en una sola columna */}
+			<div className="md:w-1/2 lg:w-2/3 space-y-2">
+				{/* Presets Panel */}
+				<SettingsSection colorClass={sectionColors.presets}>
+					<PresetsPanel
+						activePreset={activePreset}
+						onPresetSelect={handlePresetSelect}
+						entityType={entityType}
+					/>
+				</SettingsSection>
+
+				{/* System Settings */}
+				<SettingsSection colorClass={sectionColors.system}>
+					<SystemsSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+						entityType={entityType}
+						onRarityChange={onRarityChange}
+						onTextureChange={onTextureChange}
+						raritySystem={raritySystem}
+						textureSystem={textureSystem}
+					/>
+				</SettingsSection>
+
+				{/* Visual Effects */}
+				<SettingsSection colorClass={sectionColors.visual}>
+					<VisualEffectsSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+
+				{/* Image Grid Settings */}
+				<SettingsSection colorClass={sectionColors.images}>
+					<ImageGridSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+
+				{/* Advanced Effects */}
+				<SettingsSection colorClass={sectionColors.advanced}>
+					<AdvancedEffectsSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+
+				{/* Design Settings */}
+				<SettingsSection colorClass={sectionColors.design}>
+					<DesignSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+
+				{/* Performance */}
+				<SettingsSection colorClass={sectionColors.performance}>
+					<PerformanceSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+
+				{/* States */}
+				<SettingsSection colorClass={sectionColors.states}>
+					<StatesSettings
+						cardOptions={cardOptions}
+						onCardOptionsChange={handleOptionsChange}
+					/>
+				</SettingsSection>
+			</div>
+
+			{/* Panel de Preview - Ahora a la derecha */}
+			<div className="md:w-1/2 lg:w-1/3">
 				<PreviewPanel
 					cardOptions={cardOptions}
 					entityType={entityType}

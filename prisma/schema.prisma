@@ -99,6 +99,9 @@ model Image {
   characters           Character[]  @relation("ImageToCharacter")
   places               Place[]      @relation("ImageToPlace")
   worldItems           WorldItem[]  @relation("ImageToWorldItem")
+  concepts             Concept[]    @relation("ImageToConcept")
+  prompts              Prompt[]     @relation("ImageToPrompt")
+  notes                Note[]       @relation("ImageToNote")
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -362,6 +365,7 @@ model Concept {
   worldItems    WorldItem[] @relation("WorldItemToConcept")
   notes         Note[]      @relation("ConceptToNote")
   prompts       Prompt[]    @relation("ConceptToPrompt")
+  images        Image[]     @relation("ImageToConcept")
 
   @@index([name])
   @@index([category])
@@ -388,6 +392,7 @@ model Prompt {
   worldItems    WorldItem[] @relation("WorldItemToPrompt")
   concepts      Concept[]   @relation("ConceptToPrompt")
   notes         Note[]      @relation("PromptToNote")
+  images        Image[]     @relation("ImageToPrompt")
 
   @@index([name])
   @@index([category])
@@ -412,6 +417,7 @@ model Note {
   worldItems    WorldItem[] @relation("WorldItemToNote")
   concepts      Concept[]   @relation("ConceptToNote")
   prompts       Prompt[]    @relation("PromptToNote")
+  images        Image[]     @relation("ImageToNote")
 
   @@index([title])
   @@index([category])
@@ -515,7 +521,7 @@ model Rarity {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@unique([entityType, name])
+  @@unique([entityType, name], name: "entityType_name")
   @@index([entityType])
 }
 
@@ -540,6 +546,6 @@ model Texture {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@unique([entityType, name])
+  @@unique([entityType, name], name: "entityType_name")
   @@index([entityType])
 }

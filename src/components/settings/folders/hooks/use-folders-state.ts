@@ -25,7 +25,7 @@ export function useFoldersState() {
 			const folders = await getFolders();
 
 			// Transformar datos de manera segura
-			const transformedFolders = folders.map((folder: Folder) => ({
+			const transformedFolders = folders.map((folder) => ({
 				...folder,
 				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
 				createdAt: new Date(folder.createdAt || new Date()),
@@ -35,6 +35,7 @@ export function useFoldersState() {
 				},
 				totalSize: Number(folder.totalSize || 0),
 				autoReindex: folder.autoReindex || false,
+				recentImages: folder.recentImages?.filter((img): img is string => img !== null) || [],
 			}));
 
 			stateLogger.info('✅ Carpetas cargadas:', {

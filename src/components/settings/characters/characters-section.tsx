@@ -11,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard, type StatsCardProps } from '@/components/ui/stats-card';
-import { toastService } from '@/lib/services/toast.service';
 import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
 import { useCharactersStore } from '@/store/entities/characters.store';
 import type { Character } from '@prisma/client';
 import { Loader2, Users } from 'lucide-react';
@@ -109,7 +109,7 @@ export function CharactersSection() {
 		}
 	};
 
-	const handleDelete = async (id: string) => {
+	const _handleDelete = async (id: string) => {
 		if (!confirm('¿Estás seguro de eliminar este personaje?')) {
 			return;
 		}
@@ -198,10 +198,28 @@ export function CharactersSection() {
 											</CardContent>
 										</Card>
 									) : (
-										<CharacterCard 
-											character={character} 
-											onEdit={() => setEditingId(character.id)} 
-											onDelete={handleDelete} 
+										<CharacterCard
+											character={{
+												id: character.id,
+												name: character.name,
+												description: character.description || undefined,
+												featuredImage: character.featuredImage || undefined,
+												color: character.color || '#94a3b8',
+												emoji: character.emoji || '🎭',
+												characterInfo: {
+													class: character.category || 'Desconocido',
+													level: character._count?.images || 0,
+													stats: {
+														strength: 10,
+														dexterity: 10,
+														intelligence: 10,
+														charisma: 10,
+													},
+												},
+											}}
+											onClick={() => setEditingId(character.id)}
+											showStats={true}
+											showMetadata={true}
 										/>
 									)}
 								</motion.div>

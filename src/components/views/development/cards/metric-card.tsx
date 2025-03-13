@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils/utils';
-import type { ReactNode } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils/utils";
+import type { ComponentType } from "react";
 
 export interface SystemMetric {
 	name: string;
 	value: number | string;
 	unit: string;
-	icon: ReactNode;
+	icon: ComponentType<{ className?: string }>;
 	change?: {
 		value: number;
-		type: 'increase' | 'decrease';
+		type: "increase" | "decrease";
 	};
 	chart?: {
 		data: number[];
@@ -21,6 +21,10 @@ export interface SystemMetric {
 
 export function MetricCard({ metric }: { metric: SystemMetric }) {
 	const Icon = metric.icon;
+
+	// Calcular valores para el gráfico si existe
+	const chartData = metric.chart?.data || [];
+	const maxChartValue = chartData.length > 0 ? Math.max(...chartData) : 1;
 
 	return (
 		<Card className="h-full border-2 border-primary/10">
@@ -34,16 +38,20 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 						<div className="flex items-end gap-2">
 							<p className="text-xl font-semibold">
 								{metric.value}
-								<span className="text-sm text-muted-foreground ml-1">{metric.unit}</span>
+								<span className="text-sm text-muted-foreground ml-1">
+									{metric.unit}
+								</span>
 							</p>
 							{metric.change && (
 								<div
 									className={cn(
-										'text-xs font-medium flex items-center gap-1',
-										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
+										"text-xs font-medium flex items-center gap-1",
+										metric.change.type === "increase"
+											? "text-green-500"
+											: "text-red-500"
 									)}
 								>
-									{metric.change.type === 'increase' ? '+' : '-'}
+									{metric.change.type === "increase" ? "+" : "-"}
 									{metric.change.value}%
 								</div>
 							)}
@@ -52,12 +60,12 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 				</div>
 				{metric.chart && (
 					<div className="mt-2 h-[50px]">
-						{metric.chart.data.map((value, index) => (
+						{chartData.map((value, index) => (
 							<div
 								key={`chart-bar-${metric.name}-${index}`}
 								className="inline-block w-[6px] mx-[2px] bg-primary/20 rounded-sm"
 								style={{
-									height: metric.chart.data.length > 0 ? `${(value / Math.max(...metric.chart.data)) * 100}%` : '0%',
+									height: `${(value / maxChartValue) * 100}%`,
 								}}
 							/>
 						))}

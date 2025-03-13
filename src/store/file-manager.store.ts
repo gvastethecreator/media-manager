@@ -33,6 +33,7 @@ const fileManagerLogger = logger.withContext('FileManagerStore');
 interface BaseEntity {
 	id: string;
 	name: string;
+	title?: string;
 	count: number;
 }
 

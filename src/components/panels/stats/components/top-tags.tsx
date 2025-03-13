@@ -1,10 +1,19 @@
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tag } from 'lucide-react';
+import { AlertCircle, Tag } from 'lucide-react';
 import { TagUsage } from './tag-usage';
 
 export async function TopTags() {
 	const stats = await getSystemStats();
+
+	if (!stats) {
+		return (
+			<div className="flex items-center justify-center p-4 text-destructive gap-2">
+				<AlertCircle className="h-4 w-4" />
+				<span>Error al cargar etiquetas más usadas</span>
+			</div>
+		);
+	}
 
 	return (
 		<>

@@ -10,6 +10,7 @@ import { clientEvents } from "@/lib/client/events.client";
 import { logger } from "@/lib/logger/logger";
 import { useFileManager } from "@/store/file-manager.store";
 import { useNavigationStore } from "@/store/navigation.store";
+import type { Note } from "@prisma/client";
 import { ScrollText } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,28 @@ import { useCallback, useEffect, useState } from "react";
 import type { ViewProps } from "../types";
 
 const viewLogger = logger.withContext("NotesView");
+
+// Función adaptadora para convertir NoteWithStats a Note
+const adaptNoteWithStats = (note: NoteWithStats): Note => {
+	// Extraemos solo las propiedades que coincidan con el tipo Note
+	const { _count, lastUpdated, ...noteData } = note;
+
+	// Aseguramos que todos los campos requeridos existan y
+	// que createdAt y updatedAt sean instancias de Date
+	return {
+		id: noteData.id,
+		title: noteData.title,
+		content: noteData.content || "",
+		category: noteData.category || "general",
+		priority: noteData.priority || 0,
+		status: noteData.status || "active",
+		tags: noteData.tags || "[]",
+		featuredImage: noteData.featuredImage ?? null,
+		isFavorite: noteData.isFavorite || false,
+		createdAt: new Date(noteData.createdAt),
+		updatedAt: new Date(noteData.updatedAt),
+	};
+};
 
 export function NotesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -109,7 +132,7 @@ export function NotesView(_props: ViewProps) {
 							className="cursor-pointer"
 						>
 							<NoteCard
-								note={note}
+								note={adaptNoteWithStats(note)}
 								onClick={() => handleNoteClick(note)}
 								onEdit={() => handleEditNote(note)}
 								onDelete={() => handleDeleteNote(note.id)}

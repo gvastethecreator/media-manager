@@ -16,9 +16,14 @@ const conceptLogger = logger.withContext('ConceptStore');
 
 const mapToConceptWithStats = (concept: Awaited<ReturnType<typeof getConcepts>>[0]): ConceptWithStats => ({
 	...concept,
-	totalSize: 0,
+	_count: concept._count || {
+		prompts: 0,
+		notes: 0,
+		characters: 0,
+		places: 0,
+		worldItems: 0,
+	},
 	lastUpdated: new Date(),
-	recentImages: [],
 });
 
 interface ConceptStore {
@@ -27,8 +32,8 @@ interface ConceptStore {
 	error: string | null;
 	selectedItem: Concept | null;
 	loadConcepts: () => Promise<void>;
-	createConcept: (concept: ConceptCreate) => Promise<Concept>;
-	updateConcept: (id: string, concept: ConceptUpdate) => Promise<Concept>;
+	createConcept: typeof createConceptAction;
+	updateConcept: typeof updateConceptAction;
 	deleteConcept: (id: string) => Promise<void>;
 	addConceptToImage: (imageId: string, conceptId: string) => Promise<void>;
 	selectItem: (concept: Concept) => void;

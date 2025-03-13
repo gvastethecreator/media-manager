@@ -1,12 +1,12 @@
 'use client';
 
+import type { TagFormData } from '@/components/features/entity-cards/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils/utils';
-import type { TagFormData } from '@/components/features/entity-cards/forms/entity-types';
 import { Palette } from 'lucide-react';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';
