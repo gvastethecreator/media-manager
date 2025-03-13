@@ -1,71 +1,84 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
-import { Wand2 } from 'lucide-react';
-import { Sliders } from 'lucide-react';
-import type { CardOptions } from '../../types/card-settings-types';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import { Wand2 } from "lucide-react";
+import { Sliders } from "lucide-react";
+import type { CardOptions } from "../../types/card-settings-types";
 
 interface DistortionEffectsSettingsProps {
 	cardOptions: CardOptions;
 	onCardOptionsChange: (options: CardOptions) => void;
 }
 
-export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: DistortionEffectsSettingsProps) {
+export function DistortionEffectsSettings({
+	cardOptions,
+	onCardOptionsChange,
+}: DistortionEffectsSettingsProps) {
+	// Inicializar efectos si no existen
+	const effects = cardOptions.effects || {
+		enabled: false,
+		visibleOnHover: false,
+		intensity: 1,
+		glitchEffect: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			frequency: 0.1,
+			duration: 0.2,
+		},
+		chromaticAberration: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			offset: 0.1,
+		},
+		pixelate: {
+			enabled: false,
+			visibleOnHover: false,
+			intensity: 0.5,
+			blockSize: 4,
+		},
+	};
+
 	// Manejadores para efectos de distorsión
 	const handleDistortionChange = (
-		effect: 'glitch' | 'chromatic' | 'pixelate',
+		effect: "glitch" | "chromatic" | "pixelate",
 		property: string,
 		value: number | boolean
 	) => {
 		const newOptions = { ...cardOptions };
-		if (!newOptions.effects) {
-			newOptions.effects = {
-				enabled: true,
-				visibleOnHover: false,
-				intensity: 1,
-			};
-		}
+		newOptions.effects = { ...effects };
 
 		switch (effect) {
-			case 'glitch':
-				if (!newOptions.effects.glitchEffect) {
-					newOptions.effects.glitchEffect = {
-						enabled: false,
-						visibleOnHover: false,
-						intensity: 0.5,
-						frequency: 0.1,
-						duration: 0.2,
-					};
-				}
-				newOptions.effects.glitchEffect[property as keyof typeof newOptions.effects.glitchEffect] = value;
+			case "glitch":
+				newOptions.effects.glitchEffect = {
+					...effects.glitchEffect,
+					[property]: value,
+				};
 				break;
-			case 'chromatic':
-				if (!newOptions.effects.chromaticAberration) {
-					newOptions.effects.chromaticAberration = {
-						enabled: false,
-						visibleOnHover: false,
-						intensity: 0.5,
-						offset: 0.1,
-					};
-				}
-				newOptions.effects.chromaticAberration[property as keyof typeof newOptions.effects.chromaticAberration] = value;
+			case "chromatic":
+				newOptions.effects.chromaticAberration = {
+					...effects.chromaticAberration,
+					[property]: value,
+				};
 				break;
-			case 'pixelate':
-				if (!newOptions.effects.pixelate) {
-					newOptions.effects.pixelate = {
-						enabled: false,
-						visibleOnHover: false,
-						intensity: 0.5,
-						blockSize: 4,
-					};
-				}
-				newOptions.effects.pixelate[property as keyof typeof newOptions.effects.pixelate] = value;
+			case "pixelate":
+				newOptions.effects.pixelate = {
+					...effects.pixelate,
+					[property]: value,
+				};
 				break;
 		}
 
@@ -88,17 +101,23 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 							<div className="flex items-center justify-between">
 								<Label className="text-sm font-medium">Efecto Glitch</Label>
 								<Switch
-									checked={cardOptions.effects?.glitchEffect?.enabled}
-									onCheckedChange={(checked) => handleDistortionChange('glitch', 'enabled', checked)}
+									checked={effects.glitchEffect?.enabled || false}
+									onCheckedChange={(checked) =>
+										handleDistortionChange("glitch", "enabled", checked)
+									}
 								/>
 							</div>
-							{cardOptions.effects?.glitchEffect?.enabled && (
+							{effects.glitchEffect?.enabled && (
 								<div className="space-y-4 pl-4">
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
+										<Label className="text-xs text-muted-foreground">
+											Intensidad
+										</Label>
 										<Slider
-											value={[cardOptions.effects.glitchEffect.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'intensity', value)}
+											value={[effects.glitchEffect.intensity || 0.5]}
+											onValueChange={([value]) =>
+												handleDistortionChange("glitch", "intensity", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -106,10 +125,14 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Frecuencia</Label>
+										<Label className="text-xs text-muted-foreground">
+											Frecuencia
+										</Label>
 										<Slider
-											value={[cardOptions.effects.glitchEffect.frequency || 0.1]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'frequency', value)}
+											value={[effects.glitchEffect.frequency || 0.1]}
+											onValueChange={([value]) =>
+												handleDistortionChange("glitch", "frequency", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -117,10 +140,14 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Duración</Label>
+										<Label className="text-xs text-muted-foreground">
+											Duración
+										</Label>
 										<Slider
-											value={[cardOptions.effects.glitchEffect.duration || 0.2]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'duration', value)}
+											value={[effects.glitchEffect.duration || 0.2]}
+											onValueChange={([value]) =>
+												handleDistortionChange("glitch", "duration", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -128,10 +155,18 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
+										<Label className="text-xs text-muted-foreground">
+											Visible al pasar el mouse
+										</Label>
 										<Switch
-											checked={cardOptions.effects.glitchEffect.visibleOnHover}
-											onCheckedChange={(checked) => handleDistortionChange('glitch', 'visibleOnHover', checked)}
+											checked={effects.glitchEffect.visibleOnHover || false}
+											onCheckedChange={(checked) =>
+												handleDistortionChange(
+													"glitch",
+													"visibleOnHover",
+													checked
+												)
+											}
 										/>
 									</div>
 								</div>
@@ -143,19 +178,27 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 						{/* Aberración Cromática */}
 						<div className="space-y-4">
 							<div className="flex items-center justify-between">
-								<Label className="text-sm font-medium">Aberración Cromática</Label>
+								<Label className="text-sm font-medium">
+									Aberración Cromática
+								</Label>
 								<Switch
-									checked={cardOptions.effects?.chromaticAberration?.enabled}
-									onCheckedChange={(checked) => handleDistortionChange('chromatic', 'enabled', checked)}
+									checked={effects.chromaticAberration?.enabled || false}
+									onCheckedChange={(checked) =>
+										handleDistortionChange("chromatic", "enabled", checked)
+									}
 								/>
 							</div>
-							{cardOptions.effects?.chromaticAberration?.enabled && (
+							{effects.chromaticAberration?.enabled && (
 								<div className="space-y-4 pl-4">
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
+										<Label className="text-xs text-muted-foreground">
+											Intensidad
+										</Label>
 										<Slider
-											value={[cardOptions.effects.chromaticAberration.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('chromatic', 'intensity', value)}
+											value={[effects.chromaticAberration.intensity || 0.5]}
+											onValueChange={([value]) =>
+												handleDistortionChange("chromatic", "intensity", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -163,10 +206,14 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Offset</Label>
+										<Label className="text-xs text-muted-foreground">
+											Offset
+										</Label>
 										<Slider
-											value={[cardOptions.effects.chromaticAberration.offset || 0.1]}
-											onValueChange={([value]) => handleDistortionChange('chromatic', 'offset', value)}
+											value={[effects.chromaticAberration.offset || 0.1]}
+											onValueChange={([value]) =>
+												handleDistortionChange("chromatic", "offset", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -174,10 +221,20 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
+										<Label className="text-xs text-muted-foreground">
+											Visible al pasar el mouse
+										</Label>
 										<Switch
-											checked={cardOptions.effects.chromaticAberration.visibleOnHover}
-											onCheckedChange={(checked) => handleDistortionChange('chromatic', 'visibleOnHover', checked)}
+											checked={
+												effects.chromaticAberration.visibleOnHover || false
+											}
+											onCheckedChange={(checked) =>
+												handleDistortionChange(
+													"chromatic",
+													"visibleOnHover",
+													checked
+												)
+											}
 										/>
 									</div>
 								</div>
@@ -191,17 +248,23 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 							<div className="flex items-center justify-between">
 								<Label className="text-sm font-medium">Pixelación</Label>
 								<Switch
-									checked={cardOptions.effects?.pixelate?.enabled}
-									onCheckedChange={(checked) => handleDistortionChange('pixelate', 'enabled', checked)}
+									checked={effects.pixelate?.enabled || false}
+									onCheckedChange={(checked) =>
+										handleDistortionChange("pixelate", "enabled", checked)
+									}
 								/>
 							</div>
-							{cardOptions.effects?.pixelate?.enabled && (
+							{effects.pixelate?.enabled && (
 								<div className="space-y-4 pl-4">
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
+										<Label className="text-xs text-muted-foreground">
+											Intensidad
+										</Label>
 										<Slider
-											value={[cardOptions.effects.pixelate.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('pixelate', 'intensity', value)}
+											value={[effects.pixelate.intensity || 0.5]}
+											onValueChange={([value]) =>
+												handleDistortionChange("pixelate", "intensity", value)
+											}
 											min={0}
 											max={1}
 											step={0.1}
@@ -209,10 +272,14 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Tamaño de bloque</Label>
+										<Label className="text-xs text-muted-foreground">
+											Tamaño de bloque
+										</Label>
 										<Slider
-											value={[cardOptions.effects.pixelate.blockSize || 4]}
-											onValueChange={([value]) => handleDistortionChange('pixelate', 'blockSize', value)}
+											value={[effects.pixelate.blockSize || 4]}
+											onValueChange={([value]) =>
+												handleDistortionChange("pixelate", "blockSize", value)
+											}
 											min={1}
 											max={20}
 											step={1}
@@ -220,10 +287,18 @@ export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: 
 										/>
 									</div>
 									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
+										<Label className="text-xs text-muted-foreground">
+											Visible al pasar el mouse
+										</Label>
 										<Switch
-											checked={cardOptions.effects.pixelate.visibleOnHover}
-											onCheckedChange={(checked) => handleDistortionChange('pixelate', 'visibleOnHover', checked)}
+											checked={effects.pixelate.visibleOnHover || false}
+											onCheckedChange={(checked) =>
+												handleDistortionChange(
+													"pixelate",
+													"visibleOnHover",
+													checked
+												)
+											}
 										/>
 									</div>
 								</div>

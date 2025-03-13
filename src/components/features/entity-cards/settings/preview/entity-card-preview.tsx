@@ -1,16 +1,35 @@
-'use client';
+"use client";
 
-import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
-import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils';
+import {
+	type RandomImage,
+	getRandomImagesForEntity,
+} from "@/app/actions/images/images-random.action";
+import * as thumbnailActions from "@/app/actions/thumbnails/thumbnails.actions";
+import { BaseCard } from "@/components/features/entity-cards/base/base-card";
+import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
+import { DEFAULT_SETTINGS_OPTIONS } from "@/components/features/entity-cards/config/card-config-defaults";
+import { AlbumCard } from "@/components/features/entity-cards/layouts/album-card-layout";
+import { CharacterCard } from "@/components/features/entity-cards/layouts/character-card-layout";
+import { CollectionCard } from "@/components/features/entity-cards/layouts/collection-card-layout";
+import { ConceptCard } from "@/components/features/entity-cards/layouts/concept-card-layout";
+import { FolderCard } from "@/components/features/entity-cards/layouts/folder-card-layout";
+import { ImageGrid } from "@/components/features/entity-cards/layouts/image-grid";
+import { NoteCard } from "@/components/features/entity-cards/layouts/note-card-layout";
+import { PlaceCard } from "@/components/features/entity-cards/layouts/place-card-layout";
+import { PromptCard } from "@/components/features/entity-cards/layouts/prompt-card-layout";
+import { TagCard } from "@/components/features/entity-cards/layouts/tag-card-layout";
+import { WorldItemCard } from "@/components/features/entity-cards/layouts/world-item-card-layout";
+import type {
+	RarityConfig,
+	TextureConfig,
+} from "@/components/features/entity-cards/types/base-card-types";
+import type { CardOptions } from "@/components/features/entity-cards/types/card-settings-types";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ThumbnailQuality } from "@/lib/config/thumbnail.config";
+import { toastService } from "@/lib/services/toast.service";
+import { cn } from "@/lib/utils";
 import {
 	BadgeCheck,
 	Info as BadgeInfo,
@@ -27,549 +46,204 @@ import {
 	Sparkles,
 	Star,
 	Tag as TagIcon,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import Image from 'next/image';
-import * as React from 'react';
-import { adaptSettingsToBaseOptions } from '../../base/card-adapter';
+} from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import * as React from "react";
+import { adaptSettingsToBaseOptions } from "../../base/card-adapter";
+
+// Mapeo de tipos de entidad a sus componentes de layout
+const ENTITY_LAYOUTS = {
+	"card-album": AlbumCard,
+	"card-collection": CollectionCard,
+	"card-tag": TagCard,
+	"card-character": CharacterCard,
+	"card-world-item": WorldItemCard,
+	"card-place": PlaceCard,
+	"card-concept": ConceptCard,
+	"card-prompt": PromptCard,
+	"card-note": NoteCard,
+	"card-folder": FolderCard,
+} as const;
+
+// Tipos de datos mock para preview
+const MOCK_DATA = {
+	"card-album": {
+		id: "preview",
+		name: "Álbum de Ejemplo",
+		description: "Un álbum para visualizar la configuración",
+		_count: { images: 42 },
+		createdAt: new Date(),
+	},
+	"card-collection": {
+		id: "preview",
+		name: "Colección de Ejemplo",
+		description: "Una colección para visualizar la configuración",
+		_count: { images: 120 },
+		totalSize: 1024 * 1024 * 100, // 100MB
+	},
+	"card-tag": {
+		id: "preview",
+		name: "Etiqueta de Ejemplo",
+		type: "effect",
+		description: "Una etiqueta para visualizar la configuración",
+		count: 75,
+		rarity: "rare",
+	},
+	"card-character": {
+		id: "preview",
+		name: "Personaje de Ejemplo",
+		description: "Un personaje para visualizar la configuración",
+		stats: {
+			strength: 80,
+			dexterity: 70,
+			intelligence: 90,
+		},
+	},
+	"card-world-item": {
+		id: "preview",
+		name: "Objeto de Ejemplo",
+		description: "Un objeto para visualizar la configuración",
+		type: "Artefacto",
+		rarity: "legendary",
+	},
+	"card-place": {
+		id: "preview",
+		name: "Lugar de Ejemplo",
+		description: "Un lugar para visualizar la configuración",
+		type: "Ciudad",
+		climate: "tropical",
+	},
+	"card-concept": {
+		id: "preview",
+		name: "Concepto de Ejemplo",
+		description: "Un concepto para visualizar la configuración",
+		category: "Filosofía",
+	},
+	"card-prompt": {
+		id: "preview",
+		name: "Prompt de Ejemplo",
+		content: "Un prompt para visualizar la configuración",
+		type: "text",
+	},
+	"card-note": {
+		id: "preview",
+		title: "Nota de Ejemplo",
+		content: "Una nota para visualizar la configuración",
+		priority: "high",
+	},
+	"card-folder": {
+		id: "preview",
+		name: "Carpeta de Ejemplo",
+		description: "Una carpeta para visualizar la configuración",
+		_count: { files: 25 },
+	},
+} as const;
+
+// Datos de prueba para ImageGrid
+const MOCK_IMAGES = [
+	{
+		id: "mock-image-1",
+		path: "/images/mock/image1.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/3b82f6/ffffff?text=1",
+	},
+	{
+		id: "mock-image-2",
+		path: "/images/mock/image2.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/10b981/ffffff?text=2",
+	},
+	{
+		id: "mock-image-3",
+		path: "/images/mock/image3.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/ef4444/ffffff?text=3",
+	},
+	{
+		id: "mock-image-4",
+		path: "/images/mock/image4.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/f59e0b/ffffff?text=4",
+	},
+	{
+		id: "mock-image-5",
+		path: "/images/mock/image5.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/8b5cf6/ffffff?text=5",
+	},
+	{
+		id: "mock-image-6",
+		path: "/images/mock/image6.jpg",
+		thumbnail: "https://via.placeholder.com/300x300/ec4899/ffffff?text=6",
+	},
+];
 
 interface EntityCardPreviewProps {
 	cardOptions: CardOptions;
 	rarity?: RarityConfig | null;
 	texture?: TextureConfig | null;
-	showInfo?: boolean;
+	entityType: keyof typeof ENTITY_LAYOUTS;
 	className?: string;
-	entityType?: string;
-}
-
-// Componente para grid de imágenes reales
-export function ImageGrid({
-	layout = 'single',
-	gap = 4,
-	images = [],
-	loading = false,
-	style = 'standard',
-}: {
-	layout?: string;
-	gap?: number;
-	images?: RandomImage[];
-	loading?: boolean;
-	style?: string;
-}) {
-	const [thumbnails, setThumbnails] = React.useState<{ [key: string]: string }>({});
-	const [loadingThumbnails, setLoadingThumbnails] = React.useState<{
-		[key: string]: boolean;
-	}>({});
-	const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
-
-	// Asegurar que tenemos suficientes imágenes para el layout y limitar a 6
-	const neededImages = React.useMemo(() => {
-		const count = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
-		return Math.min(count, 6); // Aseguramos que nunca exceda 6
-	}, [layout]);
-
-	// Preparar el array de imágenes necesarias
-	const paddedImages = React.useMemo(() => {
-		// Tomamos solo las primeras 6 imágenes como máximo
-		const limitedImages = images.slice(0, neededImages);
-		const images_array = [...limitedImages];
-
-		// Rellenamos con placeholders si es necesario
-		while (images_array.length < neededImages) {
-			images_array.push({ id: `placeholder-${images_array.length}`, path: '' });
-		}
-		return images_array;
-	}, [images, neededImages]);
-
-	// Cargar thumbnails para cada imagen de manera optimizada
-	React.useEffect(() => {
-		const abortController = new AbortController();
-		let isMounted = true;
-
-		const loadThumbnails = async () => {
-			// Filtrar solo las imágenes que necesitan cargar thumbnail
-			const imagesToLoad = paddedImages.filter((image) => {
-				if (!image.id || image.id.startsWith('placeholder-')) {
-					return false;
-				}
-				// Solo cargar si no tenemos el thumbnail y no está en el estado
-				return !thumbnails[image.id] && !image.thumbnail;
-			});
-
-			if (imagesToLoad.length === 0) {
-				return;
-			}
-
-			// Cargar todos los thumbnails en paralelo
-			const loadPromises = imagesToLoad.map(async (image) => {
-				setLoadingThumbnails((prev) => ({ ...prev, [image.id]: true }));
-				try {
-					const data = await thumbnailActions.getThumbnail(image.id, ThumbnailQuality.MEDIUM);
-					if (isMounted) {
-						setThumbnails((prev) => ({
-							...prev,
-							[image.id]: `data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`,
-						}));
-					}
-				} catch (err) {
-					if (isMounted) {
-						console.error('Error cargando thumbnail:', err);
-						setErrors((prev) => ({
-							...prev,
-							[image.id]: err instanceof Error ? err.message : 'Error desconocido',
-						}));
-					}
-				} finally {
-					if (isMounted) {
-						setLoadingThumbnails((prev) => ({ ...prev, [image.id]: false }));
-					}
-				}
-			});
-
-			await Promise.all(loadPromises);
-		};
-
-		loadThumbnails();
-
-		return () => {
-			isMounted = false;
-			abortController.abort();
-		};
-	}, [paddedImages, thumbnails]);
-
-	// Renderizar un placeholder para cuando no hay imagen
-	const renderImagePlaceholder = () => (
-		<div className="bg-muted/50 rounded-md aspect-square flex items-center justify-center">
-			<ImageIcon className="h-5 w-5 text-muted-foreground/50" />
-		</div>
-	);
-
-	// Renderizar una imagen real o un skeleton si está cargando
-	const renderImage = (image: RandomImage, index: number) => {
-		if (loading || loadingThumbnails[image.id]) {
-			return <Skeleton className="w-full h-full aspect-square rounded-md" />;
-		}
-
-		if (!image.path || errors[image.id]) {
-			return renderImagePlaceholder();
-		}
-
-		// Usar el thumbnail proporcionado o el cargado
-		const thumbnailUrl = image.thumbnail || thumbnails[image.id];
-
-		if (thumbnailUrl) {
-			return (
-				<div className="relative overflow-hidden rounded-md aspect-square">
-					<Image
-						src={thumbnailUrl}
-						alt={image.path}
-						fill
-						className="object-cover transition-transform group-hover:scale-105"
-					/>
-					<motion.div
-						initial={{ opacity: 0 }}
-						whileHover={{ opacity: 1 }}
-						className="absolute inset-0 bg-black/60 p-1.5"
-					>
-						<p className="text-[10px] text-white truncate">{image.path}</p>
-					</motion.div>
-				</div>
-			);
-		}
-
-		// Color de fondo aleatorio como fallback
-		const backgroundColor = [
-			'bg-blue-500',
-			'bg-red-500',
-			'bg-green-500',
-			'bg-yellow-500',
-			'bg-purple-500',
-			'bg-pink-500',
-			'bg-indigo-500',
-			'bg-teal-500',
-			'bg-orange-500',
-		];
-
-		return (
-			<div className="relative overflow-hidden rounded-md aspect-square">
-				<div
-					className={cn(
-						'absolute inset-0 flex items-center justify-center text-white font-bold',
-						backgroundColor[index % backgroundColor.length]
-					)}
-				>
-					<span className="text-lg">{index + 1}</span>
-				</div>
-			</div>
-		);
-	};
-
-	// Estilos para diferentes tipos de grid
-	const gridContainerClasses = cn(
-		'grid gap-[var(--grid-gap)]',
-		style === 'masonry' && 'grid-flow-dense',
-		style === 'carousel' && 'overflow-hidden relative'
-	);
-
-	return (
-		<div className={gridContainerClasses} style={{ '--grid-gap': `${gap}px` } as React.CSSProperties}>
-			{/* Para el modo carrusel, mostrar una superposición de navegación */}
-			{style === 'carousel' && (
-				<div className="absolute inset-0 flex items-center justify-between z-10 pointer-events-none">
-					<div className="h-full w-8 bg-gradient-to-r from-background/60 to-transparent" />
-					<div className="h-full w-8 bg-gradient-to-l from-background/60 to-transparent" />
-				</div>
-			)}
-
-			{/* Grid de una sola imagen */}
-			{layout === 'single' && <div className="aspect-square">{renderImage(paddedImages[0], 0)}</div>}
-
-			{/* Grid de dos imágenes */}
-			{layout === 'dual' && (
-				<div className={cn('grid grid-cols-2 gap-[var(--grid-gap)]', style === 'carousel' && 'animate-slider-dual')}>
-					{paddedImages.slice(0, 2).map((image, index) => (
-						<div key={image.id}>{renderImage(image, index)}</div>
-					))}
-				</div>
-			)}
-
-			{/* Grid de cuatro imágenes */}
-			{layout === 'quad' && (
-				<div
-					className={cn(
-						'grid grid-cols-2 grid-rows-2 gap-[var(--grid-gap)]',
-						style === 'carousel' && 'animate-slider-quad'
-					)}
-				>
-					{paddedImages.slice(0, 4).map((image, index) => (
-						<div key={image.id}>{renderImage(image, index)}</div>
-					))}
-				</div>
-			)}
-
-			{/* Grid de seis imágenes */}
-			{layout === 'six' && (
-				<div
-					className={cn(
-						'grid grid-cols-3 grid-rows-2 gap-[var(--grid-gap)]',
-						style === 'carousel' && 'animate-slider-six'
-					)}
-				>
-					{paddedImages.slice(0, 6).map((image, index) => (
-						<div key={image.id}>{renderImage(image, index)}</div>
-					))}
-				</div>
-			)}
-		</div>
-	);
 }
 
 export function EntityCardPreview({
 	cardOptions,
-	rarity: rarityConfig,
-	texture: textureConfig,
-	showInfo: showVisualConfig = true,
-	entityType = 'album',
+	rarity,
+	texture,
+	entityType,
+	className,
 }: EntityCardPreviewProps) {
-	// Estado para almacenar las imágenes cargadas
-	const [images, setImages] = React.useState<RandomImage[]>([]);
-	const [loading, setLoading] = React.useState(true);
+	// Obtener el componente de layout correspondiente
+	const LayoutComponent = ENTITY_LAYOUTS[entityType];
+	const mockData = MOCK_DATA[entityType];
 
-	// Cargar imágenes aleatorias cuando cambia el tipo de entidad o las opciones de grid
-	React.useEffect(() => {
-		async function loadImages() {
-			setLoading(true);
-			try {
-				// Determinar cuántas imágenes necesitamos basado en el layout
-				const layout = cardOptions.imageGridLayout || 'single';
-				const count = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
+	// Preparar imágenes para todos los tipos de tarjetas de manera consistente
+	const mockImages = MOCK_IMAGES.map(img => img.thumbnail);
 
-				// Forzamos la carga de imágenes, incluso si son placeholders para la vista previa
-				const result = await getRandomImagesForEntity(entityType, count);
-				if (result.success && result.data) {
-					setImages(result.data);
-				} else {
-					// Si no hay imágenes, crear placeholders
-					const placeholders: RandomImage[] = Array.from({ length: count }, (_, i) => ({
-						id: `placeholder-${i}`,
-						path: '',
-					}));
-					setImages(placeholders);
-					console.error('Error al cargar imágenes:', result.message);
-				}
-			} catch (error) {
-				console.error('Error al cargar imágenes:', error);
-				// Crear placeholders en caso de error
-				const layout = cardOptions.imageGridLayout || 'single';
-				const count = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
-				const placeholders: RandomImage[] = Array.from({ length: count }, (_, i) => ({
-					id: `placeholder-${i}`,
-					path: '',
-				}));
-				setImages(placeholders);
-			} finally {
-				setLoading(false);
-			}
+	// Añadir imágenes de prueba para la vista previa
+	if (mockData) {
+		// Asegurar que todos los tipos de entidad tengan recentImages para ImageGrid
+		(mockData as Record<string, unknown>).recentImages = mockImages;
+
+		// Añadir una imagen de portada también si el componente lo usa
+		if (!('coverImage' in mockData)) {
+			(mockData as Record<string, unknown>).coverImage = mockImages[0];
 		}
 
-		loadImages();
-	}, [entityType, cardOptions.imageGridLayout]);
-
-	// Función para recargar imágenes
-	const handleRefreshImages = async () => {
-		setLoading(true);
-		try {
-			const layout = cardOptions.imageGridLayout || 'single';
-			const count = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
-
-			const result = await getRandomImagesForEntity(entityType, count);
-			if (result.success && result.data) {
-				setImages(result.data);
-				toastService.success('Imágenes actualizadas');
-			} else {
-				// Si no hay imágenes, mantener los placeholders actuales
-				toastService.info('No se encontraron imágenes para este tipo de entidad');
-			}
-		} catch (error) {
-			console.error('Error al recargar imágenes:', error);
-			toastService.error('No se pudieron actualizar las imágenes');
-		} finally {
-			setLoading(false);
+		// Añadir un contador de imágenes para estadísticas
+		if (!('_count' in mockData)) {
+			(mockData as Record<string, unknown>)._count = { images: mockImages.length };
 		}
+	}
+
+	if (!LayoutComponent) {
+		return (
+			<div className="w-full aspect-[2/3] flex items-center justify-center border border-border rounded-lg">
+				<p className="text-sm text-muted-foreground">Layout no disponible</p>
+			</div>
+		);
+	}
+
+	// Asegurarse de que cardOptions tenga la configuración de ImageGrid
+	const enhancedOptions = {
+		...cardOptions,
+		// Si useImageGrid no está definido, establecerlo en true para la vista previa
+		useImageGrid: cardOptions.useImageGrid !== undefined ? cardOptions.useImageGrid : true,
+		// Asegurar que todas las opciones de ImageGrid estén disponibles
+		imageGridLayout: cardOptions.imageGridLayout || 'quad',
+		imageGridGap: cardOptions.imageGridGap || 4,
+		imageGridStyle: cardOptions.imageGridStyle || 'standard',
 	};
 
-	// Generar un SVG dataURL para la textura si es un patrón
-	const getTextureDataUrl = React.useCallback(() => {
-		if (!textureConfig || !textureConfig.patternType || textureConfig.patternType === 'none') {
-			return undefined;
-		}
-
-		// Esta es una implementación simple. En un entorno real,
-		// deberíamos buscar el patrón SVG en una colección o guardar el SVG completo
-		let svgContent = '';
-
-		// Patrones básicos predefinidos
-		switch (textureConfig.patternType) {
-			case 'dots':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<circle cx="5" cy="5" r="1.5" fill="${textureConfig.color || 'currentColor'}" />
-					<circle cx="15" cy="5" r="1.5" fill="${textureConfig.color || 'currentColor'}" />
-					<circle cx="5" cy="15" r="1.5" fill="${textureConfig.color || 'currentColor'}" />
-					<circle cx="15" cy="15" r="1.5" fill="${textureConfig.color || 'currentColor'}" />
-				</svg>`;
-				break;
-			case 'lines':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<line x1="0" y1="10" x2="20" y2="10" stroke="${textureConfig.color || 'currentColor'}" stroke-width="1" />
-				</svg>`;
-				break;
-			case 'grid':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<line x1="0" y1="10" x2="20" y2="10" stroke="${textureConfig.color || 'currentColor'}" stroke-width="0.5" />
-					<line x1="10" y1="0" x2="10" y2="20" stroke="${textureConfig.color || 'currentColor'}" stroke-width="0.5" />
-				</svg>`;
-				break;
-			case 'diagonal':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<line x1="0" y1="0" x2="20" y2="20" stroke="${textureConfig.color || 'currentColor'}" stroke-width="0.5" />
-					<line x1="20" y1="0" x2="0" y2="20" stroke="${textureConfig.color || 'currentColor'}" stroke-width="0.5" />
-				</svg>`;
-				break;
-			case 'waves':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0,10 Q5,5 10,10 T20,10" stroke="${textureConfig.color || 'currentColor'}" fill="none" stroke-width="0.5" />
-					<path d="M0,15 Q5,10 10,15 T20,15" stroke="${textureConfig.color || 'currentColor'}" fill="none" stroke-width="0.5" />
-					<path d="M0,5 Q5,0 10,5 T20,5" stroke="${textureConfig.color || 'currentColor'}" fill="none" stroke-width="0.5" />
-				</svg>`;
-				break;
-			case 'hexagons':
-				svgContent = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-					<polygon points="10,1 17,5 17,15 10,19 3,15 3,5" fill="none" stroke="${textureConfig.color || 'currentColor'}" stroke-width="0.5" />
-				</svg>`;
-				break;
-			default:
-				return undefined;
-		}
-
-		// Crear un data URL para el SVG
-		return `url('data:image/svg+xml;utf8,${encodeURIComponent(svgContent)}')`;
-	}, [textureConfig]);
-
-	// Construir el objeto de textura completo para la vista previa
-	const previewTexture = React.useMemo(() => {
-		if (!textureConfig) {
-			return undefined;
-		}
-
-		const textureUrl = getTextureDataUrl();
-
-		return {
-			...textureConfig,
-			imageUrl: textureConfig.imageUrl || undefined,
-			pattern: textureUrl,
-		};
-	}, [textureConfig, getTextureDataUrl]);
-
-	// Configuración del grid de imágenes
-	const imageGridLayout = cardOptions.imageGridLayout || 'single';
-	const imageGridGap = cardOptions.imageGridGap || 4;
-	const imageGridStyle = cardOptions.imageGridStyle || 'standard';
-	const showImageCount = cardOptions.showImageCount ?? true;
-
 	return (
-		<div className="relative w-full max-w-[100%] mx-auto">
-			<BaseCard
-				options={adaptSettingsToBaseOptions(cardOptions)}
-				rarity={rarityConfig || undefined}
-				texture={previewTexture}
-				className="w-full aspect-[2/3] border border-border shadow-md max-h-[550px]"
-			>
-				<div className="relative flex flex-col h-full">
-					{/* Header con botón de recarga */}
-					<div className="p-3 border-b border-border/30">
-						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-1.5">
-								<span className="text-base font-medium">Vista Previa</span>
-								{rarityConfig && (
-									<span
-										className="text-xs flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
-										style={{
-											backgroundColor: `${rarityConfig.color}20`,
-											color: rarityConfig.color,
-										}}
-									>
-										<Star className="h-3 w-3" strokeWidth={2.5} />
-										{rarityConfig.name}
-									</span>
-								)}
-							</div>
-							<div className="flex items-center gap-1">
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-7 w-7"
-									onClick={handleRefreshImages}
-									disabled={loading}
-								>
-									<RefreshCcw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
-								</Button>
-								{textureConfig && (
-									<span
-										className="text-xs px-1.5 py-0.5 rounded-md"
-										style={{
-											backgroundColor: `${textureConfig.color}15`,
-											color: textureConfig.color,
-										}}
-									>
-										{textureConfig.name}
-									</span>
-								)}
-							</div>
-						</div>
-					</div>
-
-					{/* Main content con grid de imágenes */}
-					<div className="flex-1 flex flex-col p-4 text-center gap-4">
-						<ImageGrid
-							layout={imageGridLayout as string}
-							gap={imageGridGap}
-							images={images}
-							loading={loading}
-							style={imageGridStyle as string}
-						/>
-
-						<div className="space-y-1.5">
-							<p className="text-base font-medium">Título de Entidad</p>
-							<p className="text-sm text-muted-foreground line-clamp-2">
-								{entityType === 'album'
-									? 'Álbum con imágenes'
-									: entityType === 'collection'
-										? 'Colección de fotografías'
-										: entityType === 'tag'
-											? 'Etiqueta temática'
-											: 'Entidad personalizada'}
-							</p>
-						</div>
-					</div>
-
-					{/* Footer con contador de imágenes */}
-					<div className="p-3 border-t border-border/30 flex justify-between items-center">
-						{showImageCount && (
-							<span className="text-sm text-muted-foreground flex items-center gap-1">
-								<ImageIcon className="h-3.5 w-3.5" />
-								{imageGridLayout === 'single'
-									? '1'
-									: imageGridLayout === 'dual'
-										? '2'
-										: imageGridLayout === 'quad'
-											? '4'
-											: '6'}
-								imágenes
-							</span>
-						)}
-						<span className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-md">
-							{entityType === 'album'
-								? 'Álbum'
-								: entityType === 'collection'
-									? 'Colección'
-									: entityType === 'tag'
-										? 'Etiqueta'
-										: entityType === 'character'
-											? 'Persona'
-											: entityType === 'place'
-												? 'Lugar'
-												: entityType === 'world-item'
-													? 'Objeto'
-													: entityType === 'concept'
-														? 'Concepto'
-														: entityType === 'prompt'
-															? 'Prompt'
-															: entityType === 'note'
-																? 'Nota'
-																: 'Entidad'}
-						</span>
-					</div>
-				</div>
-			</BaseCard>
-
-			{/* Info panel (opcional) - Rediseñado para que ocupe menos espacio */}
-			{showVisualConfig && (
-				<div className="mt-3 mb-2 text-xs text-muted-foreground">
-					<div className="flex items-center gap-1 mb-1">
-						<BadgeInfo className="h-3 w-3 shrink-0" />
-						<span className="font-medium">Configuración activa</span>
-					</div>
-					<div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1.5">
-						{cardOptions.enable3DEffect && <div>• Efecto 3D</div>}
-						{cardOptions.enableHolographicEffect && <div>• Holográfico</div>}
-						{cardOptions.enableGlowEffect && <div>• Brillo</div>}
-						{cardOptions.enableGrainEffect && <div>• Grano</div>}
-						{cardOptions.imageGridLayout && (
-							<div>
-								• Grid:{' '}
-								{cardOptions.imageGridLayout === 'single'
-									? '1'
-									: cardOptions.imageGridLayout === 'dual'
-										? '2'
-										: cardOptions.imageGridLayout === 'quad'
-											? '4'
-											: '6'}
-							</div>
-						)}
-						{cardOptions.imageGridStyle !== 'standard' && (
-							<div>• Estilo: {cardOptions.imageGridStyle === 'masonry' ? 'Mosaico' : 'Carrusel'}</div>
-						)}
-						{rarityConfig && <div>• Rareza: {rarityConfig.name}</div>}
-						{textureConfig && <div>• Textura: {textureConfig.name}</div>}
-						{!cardOptions.enable3DEffect &&
-							!cardOptions.enableHolographicEffect &&
-							!cardOptions.enableGlowEffect &&
-							!cardOptions.enableGrainEffect &&
-							!rarityConfig &&
-							!textureConfig && <div>• Configuración básica</div>}
-					</div>
-				</div>
-			)}
+		<div className={cn("relative w-full max-w-[100%]", className)}>
+			<LayoutComponent
+				data={mockData}
+				isPreview={true}
+				options={enhancedOptions}
+				rarity={rarity}
+				texture={texture}
+				className="w-full border border-border shadow-md max-h-[350px]"
+			/>
 		</div>
 	);
 }
+
+// Re-exportar ImageGrid para uso en otros componentes
+export { ImageGrid } from "@/components/features/entity-cards/layouts/image-grid";

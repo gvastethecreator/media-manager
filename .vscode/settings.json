@@ -14,7 +14,6 @@
   "editor.wordWrap": "on",
   "editor.mouseWheelZoom": true,
   "editor.cursorSmoothCaretAnimation": "on",
-  "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "editor.smoothScrolling": true,
@@ -26,7 +25,7 @@
   "[css]": {
     "editor.defaultFormatter": "vscode.css-language-features"
   },
-  "smoothtype.duration": 140,
+  "smoothtype.duration": 160,
   "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
@@ -41,9 +40,7 @@
   "files.associations": {
     "*.py": "python"
   },
-  "editor.formatOnType": true,
   "editor.suggest.localityBonus": true,
-  "editor.formatOnPaste": true,
   "editor.stickyScroll.enabled": true,
   "git.openRepositoryInParentFolders": "never",
   "explorer.confirmDelete": false,

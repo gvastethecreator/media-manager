@@ -18,7 +18,7 @@ export function adaptSettingsToBaseOptions(options: SettingsCardOptions): Partia
 		enable3DEffect: options.enable3DEffect,
 		enableHolographicEffect: options.enableHolographicEffect,
 		enableScanlines: options.enableScanlines,
-		enableGlowEffect: options.enableGlow || options.enableGlowEffect,
+		enableGlow: options.enableGlow,
 		enableAnimatedBorder: options.enableAnimatedBorder,
 		enableGrainEffect: options.enableGrainEffect,
 
@@ -124,7 +124,7 @@ export function adaptBaseToSettingsOptions(options: Partial<BaseCardOptions>): S
 	const adaptedOptions: Record<string, unknown> = {
 		...options,
 		raritySystem: !!options.raritySystem?.enabled,
-		enableGlow: options.enableGlowEffect,
+		enableGlow: options.enableGlow || options.enableGlowEffect,
 	};
 
 	return { ...defaultValues, ...adaptedOptions } as SettingsCardOptions;
@@ -146,7 +146,7 @@ export function adaptOptionsForLayout(options: Partial<BaseCardOptions>, layoutT
 			return {
 				...options,
 				enableHolographicEffect: options.enableHolographicEffect ?? true,
-				enableGlowEffect: options.enableGlowEffect ?? true,
+				enableGlow: options.enableGlow ?? true,
 			};
 		case 'tag':
 			return {
@@ -165,7 +165,7 @@ export function adaptOptionsForLayout(options: Partial<BaseCardOptions>, layoutT
 			return {
 				...options,
 				enable3DEffect: options.enable3DEffect ?? true,
-				enableGlowEffect: options.enableGlowEffect ?? true,
+				enableGlow: options.enableGlow ?? true,
 			};
 		case 'concept':
 		case 'prompt':
