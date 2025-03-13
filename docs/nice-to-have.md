@@ -9,5 +9,30 @@
 - busqueda espacial
 - export de tarjetas
 - editor de tarjetas
+- screensaver
+- editor de shaders
+- capas de shaders
+- capas de efectos
+
+- table inspect https://codepen.io/jh3y/pen/zxOXLab
+- svg filter reflejo https://codepen.io/jh3y/pen/OPJyVGb
+- 3d explode https://codepen.io/jh3y/pen/gbORRrg
+- colors https://codepen.io/jh3y/pen/mybQbMW
+- boton brillante https://codepen.io/jh3y/details/GgKdeZJ
+- https://codepen.io/jh3y/pen/KwPegGY comparison
+- pixel transition https://codepen.io/jh3y/pen/ogvZpBY
+- text shine https://codepen.io/jh3y/details/Exqbaem
+- otos negros https://codepen.io/marcobiedermann/pen/ExqKeoW
+- carta reactiva https://codepen.io/simeydotme/details/eYXPLEP
+- teclado https://codepen.io/simeydotme/details/eYXPLEP
+- boton de vidrio https://codepen.io/Petr-Knoll/pen/QwWLZdx
+- push button https://codepen.io/Petr-Knoll/pen/qEBWjRV
+- grid https://codepen.io/Petr-Knoll/pen/PogeGNw
+- balatro card https://codepen.io/twogrey/pen/qEWpoeX
+- naves https://codepen.io/atzedent/pen/NPKeGYJ
+- input dissolution https://codepen.io/jh3y/details/raNYLXQ
+- dither gradient https://codepen.io/DavidJAldred/pen/pVbQBJ
+- color http://codepen.io/sturobson/pen/QwLNpgv
+- 
 https://tympanus.net/Tutorials/R3FImageReveal/
 

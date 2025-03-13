@@ -428,37 +428,46 @@ model Note {
 
 // Modelo para configuración de tarjetas de entidades
 model CardConfiguration {
-  id                      String  @id @default(cuid())
-  entityType              String  @unique
-  enable3DEffect          Boolean @default(true)
-  enableHolographicEffect Boolean @default(true)
-  enableScanlines         Boolean @default(false)
-  enableLightHalo         Boolean @default(false)
-  enableAnimatedBorder    Boolean @default(false)
-  enableGlowEffect        Boolean @default(true)
-  enableGrainEffect       Boolean @default(false)
-  hoverLiftHeight         Int     @default(10)
-  maxRotation             Int     @default(15)
-  primaryColor            String  @default("#3b82f6")
-  secondaryColor          String  @default("#8b5cf6")
-  raritySystem            Boolean @default(false)
-  categorySystem          Boolean @default(true)
-  textureSystem           Boolean @default(false)
+  id         String @id @default(cuid())
+  entityType String @unique
 
-  // Grid de imágenes
-  imageGridLayout      String?  @default("single") // 'single', 'dual', 'quad', 'six'
-  imageGridGap         Int?     @default(4)
-  imageGridStyle       String?  @default("standard") // 'standard', 'masonry', 'carousel'
-  imageGridAspectRatio String?  @default("16/9")
-  showImageCount       Boolean? @default(true)
+  // Sistema de diseño
+  designSystemPreset       String? @default("default") // 'default', 'modern', 'classic', 'minimal', 'elegant'
+  designSystemVariant      String?
+  designSystemAspectRatio  String?
+  designSystemCornerStyle  String? @default("rounded") // 'rounded', 'sharp', 'beveled'
+  designSystemCornerRadius Int?    @default(12)
+  designSystemElevation    Int?    @default(2)
+  designSystemShadowStyle  String? @default("soft") // 'soft', 'hard', 'layered', 'none'
 
-  // Opciones visuales
+  // Visual
   showTitle       Boolean? @default(true)
   showType        Boolean? @default(true)
   showDescription Boolean? @default(true)
   showRarity      Boolean? @default(true)
   showTexture     Boolean? @default(true)
   showInfo        Boolean? @default(true)
+  showImageCount  Boolean? @default(true)
+
+  // Imagen
+  imageGridLayout      String? @default("single") // 'single', 'dual', 'quad', 'six'
+  imageGridGap         Int?    @default(4)
+  imageGridStyle       String? @default("standard") // 'standard', 'masonry', 'carousel'
+  imageGridAspectRatio String? @default("16/9")
+
+  // Efectos
+  enableGlow                Boolean @default(true)
+  enableScanlines           Boolean @default(false)
+  enableGrainEffect         Boolean @default(false)
+  enableLightHalo           Boolean @default(false)
+  enableAnimatedBorder      Boolean @default(false)
+  enable3DEffect            Boolean @default(true)
+  enableHolographicEffect   Boolean @default(true)
+  enableGlitchEffect        Boolean @default(false)
+  enableChromaticAberration Boolean @default(false)
+  enablePixelate            Boolean @default(false)
+  maxRotation               Int     @default(15)
+  hoverLiftHeight           Int     @default(10)
 
   // Sistema
   enableShadow    Boolean? @default(true)
@@ -466,6 +475,11 @@ model CardConfiguration {
   cardShadowColor String?  @default("rgba(0,0,0,0.2)")
   cardRoundedSize String?  @default("md") // 'none', 'sm', 'md', 'lg', 'xl', '2xl', 'full'
   cardBorderSize  String?  @default("sm") // 'none', 'sm', 'md', 'lg'
+
+  // Avanzado
+  enableHoverAnimation Boolean? @default(true)
+  enableParallaxEffect Boolean? @default(false)
+  enableBlurEffect     Boolean? @default(false)
 
   // Rendimiento
   enableLazyLoading Boolean? @default(true)
@@ -478,17 +492,36 @@ model CardConfiguration {
   enableFocus    Boolean? @default(true)
   enableDisabled Boolean? @default(false)
 
-  // Avanzado
-  enableHoverAnimation Boolean? @default(true)
-  enableParallaxEffect Boolean? @default(false)
-  enableBlurEffect     Boolean? @default(false)
+  // Sistemas
+  raritySystem   Boolean @default(false)
+  textureSystem  Boolean @default(false)
+  categorySystem Boolean @default(true)
+
+  // Colores
+  primaryColor   String @default("#3b82f6")
+  secondaryColor String @default("#8b5cf6")
 
   // Opciones avanzadas serializadas como JSON
-  holographicOptions String? // JSON stringified
-  scanlinesOptions   String? // JSON stringified
-  glowOptions        String? // JSON stringified
-  borderOptions      String? // JSON stringified
-  grainOptions       String? // JSON stringified
+  holographicOptions         String? // JSON stringified
+  scanlinesOptions           String? // JSON stringified
+  glowOptions                String? // JSON stringified
+  borderOptions              String? // JSON stringified
+  grainOptions               String? // JSON stringified
+  glitchOptions              String? // JSON stringified {enabled, intensity, frequency, duration}
+  chromaticAberrationOptions String? // JSON stringified {enabled, intensity, offset}
+  pixelateOptions            String? // JSON stringified {enabled, intensity, blockSize}
+
+  // Estados y Animaciones
+  statesConfig String? // JSON stringified {hover, focus, active, selected, scales, rotations, translations}
+
+  // Efectos Visuales
+  visualEffectsConfig String? // JSON stringified {brightness, contrast, saturate, hueRotate, etc}
+
+  // Rendimiento
+  performanceConfig String? // JSON stringified {lazyLoad, imageOptimization, etc}
+
+  // Efectos Avanzados
+  effectsConfig String? // JSON stringified {holographic, scanlines, glow, grain, glitch, chromaticAberration, pixelate}
 
   // Campos de auditoría
   createdAt DateTime @default(now())
@@ -499,27 +532,46 @@ model CardConfiguration {
 
 // Modelo para rarezas
 model Rarity {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   entityType      String
   name            String
-  color           String   @default("#3b82f6")
+  color           String  @default("#3b82f6")
   borderEffect    String?
-  borderWidth     Float?   @default(2)
-  borderPattern   String?  @default("solid")
-  borderAnimation String?  @default("none")
+  borderWidth     Float?  @default(2)
+  borderPattern   String? @default("solid")
+  borderAnimation String? @default("none")
   glowColor       String?
-  glowIntensity   Float?   @default(5)
-  glowSize        Float?   @default(100)
-  glowAnimation   String?  @default("none")
+  glowIntensity   Float?  @default(5)
+  glowSize        Float?  @default(100)
+  glowAnimation   String? @default("none")
   badgeClass      String?
   barClass        String?
   description     String?
-  position        Int      @default(0) // Para el orden de rarezas
-  chance          Float    @default(0) // Porcentaje de probabilidad (0-100)
-  unlockCondition String? // Condición para desbloquear esta rareza
-  specialEffects  String?  @default("{}") // JSON para efectos especiales adicionales
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  position        Int     @default(0)
+  chance          Float   @default(0)
+  unlockCondition String?
+
+  // Efectos de distorsión
+  enableGlitchEffect        Boolean @default(false)
+  glitchIntensity           Float?  @default(0.5)
+  glitchFrequency           Float?  @default(1)
+  glitchDuration            Float?  @default(0.2)
+  enableChromaticAberration Boolean @default(false)
+  chromaticIntensity        Float?  @default(0.5)
+  chromaticOffset           Float?  @default(0.1)
+  enablePixelate            Boolean @default(false)
+  pixelateIntensity         Float?  @default(0.5)
+  pixelateBlockSize         Int?    @default(4)
+  enableDistortion          Boolean @default(false)
+  distortionIntensity       Float?  @default(0.5)
+  distortionType            String? @default("wave") // 'wave', 'ripple', 'twist'
+  enableBlur                Boolean @default(false)
+  blurAmount                Float?  @default(0.5)
+  blurType                  String? @default("gaussian") // 'gaussian', 'motion', 'radial'
+
+  specialEffects String?  @default("{}") // JSON para efectos especiales adicionales
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@unique([entityType, name], name: "entityType_name")
   @@index([entityType])
@@ -527,24 +579,52 @@ model Rarity {
 
 // Modelo para texturas
 model Texture {
-  id             String   @id @default(cuid())
+  id             String  @id @default(cuid())
   entityType     String
   name           String
   imageUrl       String?
   patternType    String?
-  color          String   @default("#3b82f6")
-  opacity        Float    @default(0.5)
+  color          String  @default("#3b82f6")
+  opacity        Float   @default(0.5)
   description    String?
-  blendMode      String?  @default("overlay")
-  noiseType      String?  @default("light")
-  animated       Boolean  @default(false)
-  animationSpeed Float?   @default(1)
-  density        Float?   @default(0.6)
-  contrast       Float?   @default(1.2)
-  visibleOnHover Boolean  @default(false)
-  layerOrder     Int      @default(6)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  blendMode      String? @default("overlay")
+  noiseType      String? @default("light")
+  animated       Boolean @default(false)
+  animationSpeed Float?  @default(1)
+  density        Float?  @default(0.6)
+  contrast       Float?  @default(1.2)
+  visibleOnHover Boolean @default(false)
+  layerOrder     Int     @default(6)
+
+  // Efectos de distorsión avanzados
+  distortion            Float?   @default(0)
+  distortionType        String?  @default("wave") // 'wave', 'ripple', 'twist', 'noise'
+  distortionSpeed       Float?   @default(1)
+  distortionScale       Float?   @default(1)
+  blur                  Float?   @default(0)
+  blurType              String?  @default("gaussian") // 'gaussian', 'motion', 'radial'
+  blurAngle             Float?   @default(0)
+  blurRadius            Float?   @default(10)
+  octaves               Int?     @default(3)
+  persistence           Float?   @default(0.5)
+  lacunarity            Float?   @default(2)
+  baseFrequency         Float?   @default(1)
+  seed                  Int?     @default(0)
+  turbulence            Float?   @default(1)
+  fractalType           String?  @default("fbm") // 'fbm', 'ridged', 'cellular'
+  cellularType          String?  @default("euclidean") // 'euclidean', 'manhattan', 'chebyshev'
+  cellularDistance      String?  @default("euclidean") // 'euclidean', 'manhattan', 'chebyshev'
+  cellularJitter        Float?   @default(1)
+  cellularScale         Float?   @default(1)
+  cellularOctaves       Int?     @default(3)
+  cellularPersistence   Float?   @default(0.5)
+  cellularLacunarity    Float?   @default(2)
+  cellularBaseFrequency Float?   @default(1)
+  cellularSeed          Int?     @default(0)
+  cellularTurbulence    Float?   @default(1)
+  cellularFractalType   String?  @default("fbm") // 'fbm', 'ridged', 'cellular'
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@unique([entityType, name], name: "entityType_name")
   @@index([entityType])

@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Meteors } from '@/components/ui/meteors';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type React from 'react';
 
 interface StatsViewProps {

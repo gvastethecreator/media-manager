@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
+import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
 import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
 import type {
 	CardDesignData,
@@ -8,7 +8,7 @@ import type {
 	CardOptions,
 	RarityConfig,
 } from '@/components/features/entity-cards/types/base-card-types';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { Concept } from '@prisma/client';
 import { Book, Edit, LightbulbIcon, LinkIcon, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -203,19 +203,41 @@ export function ConceptCard({
 	return (
 		<>
 			{showConfig && (
-				<VisualizationConfig
-					options={cardOptions}
-					onOptionsChange={(newOptions) => {
-						setCardOptions({
-							...cardOptions,
-							...newOptions,
-						});
+				<dialog
+					className="visualization-modal fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+					onClick={() => setShowConfig(false)}
+					onKeyDown={(e) => {
+						if (e.key === 'Escape') {
+							setShowConfig(false);
+						}
 					}}
-					onClose={() => setShowConfig(false)}
-				/>
+					open
+				>
+					<div
+						className="visualization-config-wrapper max-h-[80vh] max-w-4xl overflow-auto rounded-lg border bg-card p-4 shadow-lg"
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => {
+							if (e.key === 'Escape') {
+								e.stopPropagation();
+								setShowConfig(false);
+							}
+						}}
+					>
+						<VisualizationConfig
+							options={cardOptions}
+							onOptionsChange={(newOptions) => {
+								setCardOptions({
+									...cardOptions,
+									...newOptions,
+								});
+							}}
+							onClose={() => setShowConfig(false)}
+						/>
+					</div>
+				</dialog>
 			)}
 
-			<BaseCard
+			<EntityCardWrapper
 				onClick={onClick}
 				className={cn(
 					'w-full',
@@ -227,6 +249,7 @@ export function ConceptCard({
 					className
 				)}
 				options={cardOptions}
+				entityType="concept"
 				rarity={rarityConfig}
 				onHoverStart={() => setIsHovered(true)}
 				onHoverEnd={() => setIsHovered(false)}
@@ -372,7 +395,7 @@ export function ConceptCard({
 						</div>
 					</div>
 				</div>
-			</BaseCard>
+			</EntityCardWrapper>
 		</>
 	);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { useMemo, useState } from 'react';
 import * as React from 'react';
 import { Button } from './button';

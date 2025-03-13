@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import type * as React from 'react';
 

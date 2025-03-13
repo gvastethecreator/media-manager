@@ -180,6 +180,10 @@ interface FileManagerState {
 
 	// Estado de vista
 	viewMode: ViewMode;
+	sortBy: string;
+	sortOrder: 'asc' | 'desc';
+	setSortBy: (field: string) => void;
+	setSortOrder: (order: 'asc' | 'desc') => void;
 }
 
 interface FileManagerActions {
@@ -231,6 +235,10 @@ const initialState: FileManagerState = {
 	isProcessingThumbnails: false,
 	lastUpdate: Date.now(),
 	viewMode: 'grid' as const,
+	sortBy: 'name',
+	sortOrder: 'asc',
+	setSortBy: () => {},
+	setSortOrder: () => {},
 	// Funciones stub que serán reemplazadas por las implementaciones reales
 	initialize: async () => {},
 	loadItems: async () => {},
@@ -1227,6 +1235,32 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 	// Estado de vista
 	viewMode: initialState.viewMode,
 	setViewMode: (mode: 'grid' | 'list' | 'masonry' | 'cards') => set({ viewMode: mode }),
+	sortBy: 'name',
+	sortOrder: 'asc',
+	setSortBy: (field: string) => {
+		set({ sortBy: field });
+		// Reordenar los items actuales
+		const { currentItems, sortOrder } = get();
+		const sortedItems = [...currentItems].sort((a, b) => {
+			const aValue = a[field as keyof typeof a];
+			const bValue = b[field as keyof typeof b];
+
+			return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
+		});
+		set({ currentItems: sortedItems });
+	},
+	setSortOrder: (order: 'asc' | 'desc') => {
+		set({ sortOrder: order });
+		// Reordenar los items actuales
+		const { currentItems, sortBy } = get();
+		const sortedItems = [...currentItems].sort((a, b) => {
+			const aValue = a[sortBy as keyof typeof a];
+			const bValue = b[sortBy as keyof typeof b];
+
+			return order === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
+		});
+		set({ currentItems: sortedItems });
+	},
 }));
 
 // Tipos exportados para uso en componentes

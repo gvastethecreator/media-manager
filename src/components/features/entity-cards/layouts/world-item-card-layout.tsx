@@ -1,10 +1,14 @@
 'use client';
 
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
+import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
 import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
-import type { CardDesignPreset, CardOptions } from '@/components/features/entity-cards/types/base-card-types';
+import type {
+	CardDesignPreset,
+	CardOptions,
+	RarityConfig,
+} from '@/components/features/entity-cards/types/base-card-types';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { WorldItem } from '@/types/entities/world-items';
 import { ArrowUpRight, Box, Gem, Globe, ImageIcon, PencilIcon, Star, Tag, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -251,7 +255,7 @@ export function WorldItemCard({
 
 	return (
 		<>
-			<BaseCard
+			<EntityCardWrapper
 				onClick={onClick}
 				className={cn(
 					'w-full',
@@ -264,6 +268,14 @@ export function WorldItemCard({
 					className
 				)}
 				options={cardOptions as unknown as Partial<CardOptions>}
+				entityType="world-item"
+				rarity={{
+					name: rarity.label.toLowerCase(),
+					color: rarity.badgeClass.split('from-')[1].split(' ')[0],
+					borderWidth: 2,
+					borderEffect: rarity.label === 'Legendario' ? 'animated' : 'static',
+					glowColor: rarity.label === 'Legendario' ? rarity.barClass.split('from-')[1].split(' ')[0] : undefined,
+				}}
 				onHoverStart={() => setIsHovered(true)}
 				onHoverEnd={() => setIsHovered(false)}
 				showVisualizationConfig={showVisualConfig}
@@ -480,22 +492,43 @@ export function WorldItemCard({
 						</motion.div>
 					)}
 				</div>
-			</BaseCard>
+			</EntityCardWrapper>
 
 			{/* Modal de configuración visual */}
 			{configOpen && (
-				<VisualizationConfig
-					options={cardOptions as unknown as Partial<CardOptions>}
-					onOptionsChange={(newOptions) => {
-						// Primero convertimos a unknown y luego al tipo esperado
-						const typedOptions = newOptions as unknown;
-						setCardOptions({
-							...cardOptions,
-							...(typedOptions as typeof cardOptions),
-						});
+				<dialog
+					className="visualization-modal fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+					onClick={() => setConfigOpen(false)}
+					onKeyDown={(e) => {
+						if (e.key === 'Escape') {
+							setConfigOpen(false);
+						}
 					}}
-					onClose={() => setConfigOpen(false)}
-				/>
+					open
+				>
+					<div
+						className="visualization-config-wrapper max-h-[80vh] max-w-4xl overflow-auto rounded-lg border bg-card p-4 shadow-lg"
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => {
+							if (e.key === 'Escape') {
+								e.stopPropagation();
+								setConfigOpen(false);
+							}
+						}}
+					>
+						<VisualizationConfig
+							options={cardOptions as unknown as Partial<CardOptions>}
+							onOptionsChange={(newOptions) => {
+								const typedOptions = newOptions as unknown;
+								setCardOptions({
+									...cardOptions,
+									...(typedOptions as typeof cardOptions),
+								});
+							}}
+							onClose={() => setConfigOpen(false)}
+						/>
+					</div>
+				</dialog>
 			)}
 		</>
 	);

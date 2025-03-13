@@ -1,10 +1,13 @@
 'use client';
 
+import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
+import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
 import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
+import { ImageGrid } from '@/components/features/entity-cards/settings/preview/entity-card-preview';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils/utils';
-import { formatBytes } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 import type { Folder } from '@/types/entities/folders';
 import {
 	ArrowUpRight,
@@ -22,6 +25,8 @@ import {
 import { motion } from 'motion/react';
 import * as React from 'react';
 import type { CardOptions as BaseCardOptions } from '../types/base-card-types';
+import type { CardDesignPreset, RarityConfig, TextureConfig } from '../types/base-card-types';
+
 // Opciones visuales optimizadas para un mejor rendimiento
 const DEFAULT_FOLDER_OPTIONS = {
 	enable3DEffect: true,
@@ -96,6 +101,13 @@ const DEFAULT_FOLDER_OPTIONS = {
 	imageOverlay: true,
 	imageOverlayOpacity: 0.3,
 	imageOverlayGradient: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))',
+
+	// Configuración del grid de imágenes
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	showImageCount: true,
+	imageGridAspectRatio: '1:1',
 };
 
 // Tipos de rareza basados en la cantidad de imágenes con colores ajustados para mayor legibilidad
@@ -142,6 +154,40 @@ const RARITY_TYPES = {
 	},
 };
 
+// Definimos los componentes para las capas en modo explodido
+const folderExplodeLayers = [
+	{
+		id: 'content',
+		label: 'Contenido',
+		icon: <FolderOpenIcon className="h-3 w-3" />,
+	},
+	{
+		id: 'scanlines',
+		label: 'Líneas',
+		icon: <Sparkles className="h-3 w-3" />,
+	},
+	{
+		id: 'holographic',
+		label: 'Holo',
+		icon: <Star className="h-3 w-3" />,
+	},
+	{
+		id: 'grain',
+		label: 'Grano',
+		icon: <HardDrive className="h-3 w-3" />,
+	},
+	{
+		id: 'glow',
+		label: 'Brillo',
+		icon: <Sparkles className="h-3 w-3" />,
+	},
+	{
+		id: 'border',
+		label: 'Borde',
+		icon: <Star className="h-3 w-3" />,
+	},
+];
+
 interface FolderCardProps {
 	folder: Folder;
 	onEdit?: (folder: Folder) => void;
@@ -154,6 +200,14 @@ interface FolderCardProps {
 	visualOptions?: typeof DEFAULT_FOLDER_OPTIONS;
 	/** Activa/desactiva la funcionalidad de vista explosionada */
 	enableExplode?: boolean;
+	/** Estado controlado para modo explodido */
+	isExploded?: boolean;
+	/** Capa activa en modo explodido */
+	activeLayer?: string | null;
+	/** Callback para cambios en el estado explodido */
+	onExplodedChange?: (isExploded: boolean) => void;
+	/** Callback para cambios en la capa activa */
+	onActiveLayerChange?: (layerId: string | null) => void;
 }
 
 // Función para obtener la rareza basada en el conteo de imágenes
@@ -186,6 +240,75 @@ function getFolderPower(folder: Folder) {
 	return Math.max(1, Math.min(12, basePower + sizeBonus));
 }
 
+/**
+ * Genera una configuración de rareza para la carpeta
+ */
+function generateFolderRarityConfig(folder: Folder): RarityConfig | null {
+	const rarityLevel = getFolderRarity(folder._count?.images || 0);
+
+	// Si no tiene rareza, retornar null
+	if (rarityLevel === RARITY_TYPES.common) {
+		return null;
+	}
+
+	// Configuraciones de color por rareza
+	const rarityColors = {
+		[RARITY_TYPES.mythic]: {
+			color: '#f97316',
+			glowColor: 'rgba(249, 115, 22, 0.6)',
+		},
+		[RARITY_TYPES.rare]: {
+			color: '#f59e0b',
+			glowColor: 'rgba(245, 158, 11, 0.6)',
+		},
+		[RARITY_TYPES.uncommon]: {
+			color: '#10b981',
+			glowColor: 'rgba(16, 185, 129, 0.6)',
+		},
+		[RARITY_TYPES.common]: {
+			color: '#3b82f6',
+			glowColor: 'rgba(59, 130, 246, 0.6)',
+		},
+		[RARITY_TYPES.empty]: {
+			color: '#64748b',
+			glowColor: 'rgba(100, 116, 139, 0.6)',
+		},
+	};
+
+	// Retornar la configuración de rareza
+	return {
+		level: rarityLevel.label,
+		color: rarityColors[rarityLevel].color,
+		glowColor: rarityColors[rarityLevel].glowColor,
+		borderWidth: 2,
+		borderEffect: 'animated',
+	};
+}
+
+/**
+ * Genera una configuración de textura para la carpeta
+ */
+function generateFolderTextureConfig(folder: Folder): TextureConfig | null {
+	// Solo aplicar textura a carpetas con suficientes imágenes
+	if ((folder._count?.images || 0) < 20) {
+		return null;
+	}
+
+	return {
+		id: `folder-texture-${folder.id}`,
+		name: 'Folder Texture',
+		type: 'custom',
+		color: '#1a7e77',
+		opacity: 0.15,
+		blendMode: 'overlay',
+		noiseType: 'perlin',
+		noiseIntensity: 0.3,
+		noiseScale: 1.2,
+		isAnimated: folder._count?.images && folder._count.images > 50,
+		animationSpeed: 0.2,
+	};
+}
+
 export function FolderCard({
 	folder,
 	onEdit,
@@ -195,267 +318,329 @@ export function FolderCard({
 	showVisualConfig = false,
 	visualOptions,
 	enableExplode = true,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
 }: FolderCardProps) {
-	// Estado para controlar si el modal de configuración está abierto
-	const [configOpen, setConfigOpen] = React.useState(false);
+	// Los estados locales para la tarjeta
+	const [isOpen, setIsOpen] = React.useState(false);
+	const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+	const [images, setImages] = React.useState<RandomImage[]>([]);
+	const [loading, setLoading] = React.useState(false);
 
-	// Estado y referencias
-	const [isHovered, setIsHovered] = React.useState(false);
+	// Preparar opciones visuales personalizadas
+	const mergedOptions = React.useMemo(
+		() => ({
+			...DEFAULT_FOLDER_OPTIONS,
+			...visualOptions,
+		}),
+		[visualOptions]
+	);
 
-	// Estado para las opciones visuales
-	const [cardOptions, setCardOptions] = React.useState({
-		...DEFAULT_FOLDER_OPTIONS,
-		...visualOptions,
-	});
+	// Generar configuración de rareza basada en la carpeta
+	const rarityConfig = React.useMemo(() => generateFolderRarityConfig(folder), [folder]);
 
-	// Valores memorizados
-	const rarity = React.useMemo(() => getFolderRarity(folder._count?.images || 0), [folder._count?.images]);
-	const power = React.useMemo(() => getFolderPower(folder), [folder]);
-	const folderAge = React.useMemo(() => {
-		if (!folder.createdAt) {
-			return 'Desconocido';
+	// Generar configuración de textura basada en la carpeta
+	const textureConfig = React.useMemo(() => generateFolderTextureConfig(folder), [folder]);
+
+	// Cargar imágenes recientes cuando cambie el folder o el layout
+	React.useEffect(() => {
+		const loadImages = async () => {
+			setLoading(true);
+			try {
+				// Determinar cuántas imágenes necesitamos según el layout
+				const neededImages =
+					mergedOptions.imageGridLayout === 'single'
+						? 1
+						: mergedOptions.imageGridLayout === 'dual'
+							? 2
+							: mergedOptions.imageGridLayout === 'quad'
+								? 4
+								: 6;
+
+				// Si tenemos imágenes recientes, usarlas
+				if (folder.recentImages && folder.recentImages.length > 0) {
+					const recentImages = folder.recentImages.slice(0, neededImages).map((thumbnail, index) => ({
+						id: `recent-${index}`,
+						path: `recent-${index}`,
+						// Usar directamente el thumbnail como base64
+						thumbnail: thumbnail.startsWith('data:') ? thumbnail : `data:image/webp;base64,${thumbnail}`,
+						width: 300,
+						height: 300,
+					}));
+					setImages(recentImages);
+				} else {
+					// Si no hay imágenes recientes, crear placeholders
+					const placeholders = Array(neededImages)
+						.fill(null)
+						.map((_, index) => ({
+							id: `placeholder-${index}`,
+							path: '',
+							thumbnail: null,
+							width: 300,
+							height: 300,
+						}));
+					setImages(placeholders);
+				}
+			} catch (error) {
+				console.error('Error al cargar imágenes:', error);
+				// En caso de error, crear placeholders
+				const placeholders = Array(6)
+					.fill(null)
+					.map((_, index) => ({
+						id: `placeholder-${index}`,
+						path: '',
+						thumbnail: null,
+						width: 300,
+						height: 300,
+					}));
+				setImages(placeholders);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadImages();
+	}, [folder.recentImages, mergedOptions.imageGridLayout]);
+
+	// Manejar clic en botón de edición
+	const handleEditClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		onEdit?.(folder);
+	};
+
+	// Manejar clic en botón de eliminación
+	const handleDeleteClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		onDelete?.(folder.id);
+	};
+
+	// Manejar clic en la tarjeta
+	const handleCardClick = (e?: React.MouseEvent<HTMLDivElement>) => {
+		if (e) {
+			e.stopPropagation();
 		}
-		const days = Math.floor((Date.now() - new Date(folder.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-		return days <= 0 ? 'Nuevo' : `${days}d`;
-	}, [folder.createdAt]);
+		onClick?.();
+	};
 
+	// Determinar la configuración de visualización
+	const handleVisualizationConfigClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		setIsSettingsOpen(!isSettingsOpen);
+	};
+
+	// Stats de la carpeta para mostrar
+	const folderStats = React.useMemo(() => {
+		return [
+			{
+				id: 'images',
+				label: 'Imágenes',
+				value: folder._count?.images ?? 0,
+				icon: <ImageIcon className="h-3 w-3" />,
+			},
+			{
+				id: 'updated',
+				label: 'Actualizada',
+				value: folder.updatedAt ? new Date(folder.updatedAt).toLocaleDateString() : 'N/A',
+				icon: <Clock className="h-3 w-3" />,
+			},
+			{
+				id: 'size',
+				label: 'Tamaño',
+				value: folder.size ? formatBytes(folder.size) : 'N/A',
+				icon: <HardDrive className="h-3 w-3" />,
+			},
+		];
+	}, [folder]);
+
+	// Renderizar la tarjeta de carpeta
 	return (
 		<>
-			<BaseCard
-				onClick={onClick}
+			<EntityCardWrapper
 				className={cn(
-					'w-full',
-					{
-						'aspect-[7/10]': cardOptions.designSystem?.aspectRatio === '7/10',
-						'aspect-square': cardOptions.designSystem?.aspectRatio === '1/1',
-						'aspect-video': cardOptions.designSystem?.aspectRatio === '16/9',
-					},
-					rarity.border,
+					'folder-card relative overflow-hidden text-card-foreground transition-colors',
+					isOpen ? 'folder-open' : 'folder-closed',
 					className
 				)}
-				options={cardOptions as unknown as Partial<BaseCardOptions>}
-				onHoverStart={() => setIsHovered(true)}
-				onHoverEnd={() => setIsHovered(false)}
+				options={mergedOptions}
+				entityType="folder"
+				rarity={rarityConfig}
+				texture={textureConfig}
+				onClick={handleCardClick}
 				showVisualizationConfig={showVisualConfig}
-				onVisualizationConfigClick={() => setConfigOpen(true)}
+				onVisualizationConfigClick={handleVisualizationConfigClick}
 				enableExplode={enableExplode}
-				explodeLayers={[
-					{
-						id: 'content',
-						label: 'Contenido',
-						icon: <div className="w-3 h-3 bg-primary rounded-sm" />,
-					},
-					{
-						id: 'holographic',
-						label: 'Efecto Holo',
-						icon: <div className="w-3 h-3 bg-gradient-to-tr from-purple-400 to-blue-300 opacity-60" />,
-					},
-					{
-						id: 'border',
-						label: 'Borde',
-						icon: <div className="w-3 h-3 border border-primary rounded-sm" />,
-					},
-					{
-						id: 'filter',
-						label: 'Filtro SVG',
-						icon: <div className="w-3 h-3 bg-blue-300 rounded-full opacity-60" />,
-					},
-				]}
+				explodeLayers={folderExplodeLayers}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
 			>
-				{/* Diseño inspirado en cartas coleccionables - contenedor con posicionamiento relativo */}
-				<div
-					className={cn(
-						'relative h-full flex flex-col',
-						cardOptions.contentLayout === 'stats-focus' && 'justify-between',
-						cardOptions.contentPadding && `p-${cardOptions.contentPadding}`,
-						cardOptions.contentSpacing && `gap-${cardOptions.contentSpacing}`
-					)}
-				>
-					{/* Medidor de número/rareza como círculo en esquina superior izquierda */}
-					<div className="absolute top-3 left-3 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-2 flex items-center justify-center z-10 shadow-lg overflow-hidden">
-						<div className={cn('absolute inset-0 opacity-70', rarity.badgeClass)} />
-						<span className="relative font-bold text-lg text-white drop-shadow-sm">{folder._count?.images || 0}</span>
-					</div>
-
-					{/* Nombre de la carpeta en franja superior */}
-					<div className="relative px-3 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b border-border z-10">
-						<div className="flex items-center gap-1.5">
-							{isHovered ? (
-								<FolderOpenIcon className="h-4 w-4 text-primary" />
+				{/* Sección de cabecera */}
+				<header className="relative flex items-center justify-between p-4 mb-1">
+					<div className="flex items-center gap-2">
+						<div className="folder-icon-wrapper relative">
+							{isOpen ? (
+								<FolderOpenIcon className="h-6 w-6 text-card-foreground/80" />
 							) : (
-								<FolderIcon className="h-4 w-4 text-primary" />
+								<FolderIcon className="h-6 w-6 text-card-foreground/80" />
 							)}
-							<h3 className="font-bold text-base leading-tight line-clamp-1">{folder.name}</h3>
-							{folder.isFavorite === true && <Star className="h-4 w-4 text-amber-400 ml-auto" />}
-						</div>
-						<div className="text-xs font-medium text-muted-foreground flex items-center mt-0.5">
-							<span>Carpeta • {rarity.label}</span>
-							{folder.autoReindex && <span className="ml-1">• Auto-Indexada</span>}
-						</div>
-					</div>
-
-					{/* Área de ilustración - Imágenes en grid o imagen destacada */}
-					<div className="flex-1 relative">
-						{folder.featuredImage ? (
-							<div className="absolute inset-0">
-								<img src={folder.featuredImage} alt={folder.name} className="w-full h-full object-cover" />
-								<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-							</div>
-						) : (
-							<div className="grid grid-cols-3 grid-rows-3 gap-1 p-2 h-full">
-								{folder.recentImages?.map((src: string | null, i: number) => (
-									<div
-										key={`folder-image-${folder.id || 'unknown'}-${i}-${src?.substring(0, 10) || 'empty'}`}
-										className="relative rounded overflow-hidden aspect-square"
-									>
-										{src ? (
-											<img src={src} alt={`Imagen ${i + 1}`} className="object-cover w-full h-full" />
-										) : (
-											<div className={cn('w-full h-full flex items-center justify-center', rarity.badgeClass)}>
-												<ImageIcon className="w-3 h-3 text-white/90" />
-											</div>
-										)}
-									</div>
-								))}
-							</div>
-						)}
-
-						{/* Fecha de escaneo como overlay */}
-						<div className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs flex items-center gap-1 z-10">
-							<Clock className="h-3 w-3" />
-							<span>{folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleDateString() : 'Nunca'}</span>
-						</div>
-					</div>
-
-					{/* Panel inferior con ruta */}
-					<div className="text-xs border-t border-b border-border bg-background/80 backdrop-blur-sm py-1.5 px-3">
-						<div className="font-semibold mb-0.5 flex items-center text-[10px] uppercase tracking-wider text-muted-foreground">
-							Ruta
-						</div>
-						<p className="font-mono text-[10px] truncate">{folder.path}</p>
-					</div>
-
-					{/* Área de estadísticas inferior */}
-					<div className="bg-background/90 backdrop-blur-md p-3 flex flex-col gap-2">
-						{/* Estadísticas principales en grid */}
-						<div className="grid grid-cols-3 gap-3">
-							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{folder._count?.images || 0}</div>
-								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-									<ImageIcon className="h-3 w-3" />
-									Imágenes
-								</div>
-							</div>
-							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{folderAge}</div>
-								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-									<CalendarClock className="h-3 w-3" />
-									Edad
-								</div>
-							</div>
-							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{formatBytes(Number(folder.totalSize || 0), 0)}</div>
-								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-									<HardDrive className="h-3 w-3" />
-									Tamaño
-								</div>
-							</div>
-						</div>
-
-						{/* Barra de poder */}
-						<div className="mt-1 flex items-center justify-between">
-							<div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-								<div
-									className={cn('h-full rounded-full', rarity.barClass)}
-									style={{ width: `${(power / 12) * 100}%` }}
-								/>
-							</div>
-							<div className="ml-2 text-xs font-semibold">{power}/12</div>
-						</div>
-					</div>
-
-					{/* Acciones - botones flotantes */}
-					{(onEdit || onDelete) && (
-						<motion.div
-							className="absolute bottom-2 right-2 flex gap-1 z-50"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: isHovered ? 1 : 0 }}
-							onHoverStart={() => setIsHovered(true)}
-							onHoverEnd={() => setIsHovered(false)}
-							onClick={(e: React.MouseEvent) => {
-								e.stopPropagation();
-							}}
-						>
-							{onEdit && (
-								<Button
-									variant="secondary"
-									size="icon"
-									className="h-8 w-8 shadow-md"
-									onClick={() => {
-										onEdit(folder);
-									}}
-								>
-									<PencilIcon className="h-4 w-4" />
-								</Button>
+							{(folder._count?.images ?? 0) > 0 && (
+								<span className="absolute -right-2 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+									{folder._count?.images ?? 0}
+								</span>
 							)}
-							{onDelete && (
-								<Button
-									variant="secondary"
-									size="icon"
-									className="h-8 w-8 shadow-md text-destructive"
-									onClick={() => {
-										if (folder.id) {
-											onDelete(folder.id);
-										}
-									}}
-								>
-									<Trash2 className="h-4 w-4" />
-								</Button>
-							)}
-						</motion.div>
+						</div>
+						<h3 className="text-sm font-medium leading-none text-card-foreground">{folder.name}</h3>
+					</div>
+
+					{/* Indicador de rareza */}
+					{rarityConfig && (
+						<div className="rarity-indicator h-3 w-3 rounded-full" style={{ backgroundColor: rarityConfig.color }} />
 					)}
+				</header>
 
-					{/* Botón de explorar en hover */}
-					{onClick && (
-						<motion.div
-							className="absolute inset-0 flex items-center justify-center z-40"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: isHovered ? 1 : 0 }}
-							onHoverStart={() => setIsHovered(true)}
-							onHoverEnd={() => setIsHovered(false)}
-							onClick={(e: React.MouseEvent) => {
-								if ((e.target as HTMLElement).closest('button')) {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<motion.div
-								className="bg-black/60 backdrop-blur-md rounded-full p-4 text-white shadow-lg"
-								initial={{ scale: 0.8 }}
-								animate={{ scale: 1 }}
-								transition={{ duration: 0.2 }}
-							>
-								<ArrowUpRight className="h-8 w-8" />
-							</motion.div>
-						</motion.div>
-					)}
+				{/* Grid de imágenes */}
+				<div className="px-4 mb-2">
+					<ImageGrid
+						layout={mergedOptions.imageGridLayout}
+						gap={mergedOptions.imageGridGap}
+						images={images}
+						loading={loading}
+						style={mergedOptions.imageGridStyle}
+					/>
 				</div>
-			</BaseCard>
 
-			{/* Modal de configuración visual */}
-			{configOpen && (
-				<VisualizationConfig
-					options={cardOptions as unknown as Partial<BaseCardOptions>}
-					onOptionsChange={(newOptions) => {
-						// Primero convertimos a unknown y luego al tipo esperado
-						const typedOptions = newOptions as unknown;
-						setCardOptions({
-							...cardOptions,
-							...(typedOptions as typeof cardOptions),
-						});
+				{/* Sección de poder */}
+				<div className="px-4 mb-2">
+					<div className="folder-power relative flex items-center justify-between rounded-md bg-card-foreground/5 p-2">
+						<span className="text-xs font-semibold text-card-foreground/70">Poder</span>
+						<div className="folder-power-value flex items-center gap-1">
+							<span className="text-xs font-bold text-card-foreground">{getFolderPower(folder)}</span>
+							<Sparkles className="h-3 w-3 text-yellow-400" />
+						</div>
+					</div>
+				</div>
+
+				{/* Sección de descripción */}
+				{folder.description && (
+					<div className="px-4 mb-3">
+						<p className="text-xs text-card-foreground/60 line-clamp-2">{folder.description}</p>
+					</div>
+				)}
+
+				{/* Lista de estadísticas */}
+				<div className="mt-auto">
+					<div className="folder-stats grid grid-cols-3 gap-1 px-2 mt-2">
+						{folderStats.map((stat) => (
+							<div
+								key={stat.id}
+								className="stat-item flex flex-col items-center justify-center rounded-sm p-2 text-center bg-card-foreground/5"
+							>
+								<div className="mb-1 rounded-full bg-card-foreground/10 p-1">{stat.icon}</div>
+								<span className="stat-value text-xs font-semibold text-card-foreground">{stat.value}</span>
+								<span className="stat-label text-[10px] text-card-foreground/50">{stat.label}</span>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* Sección inferior con botones de acción */}
+				<div className="folder-footer mt-3 flex items-center justify-between bg-card-foreground/5 px-4 py-2">
+					<Button
+						size="icon"
+						variant="ghost"
+						className="h-7 w-7 rounded-full"
+						onClick={(e) => {
+							e.stopPropagation();
+							setIsOpen(!isOpen);
+						}}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.stopPropagation();
+								setIsOpen(!isOpen);
+							}
+						}}
+						aria-label={isOpen ? 'Cerrar carpeta' : 'Abrir carpeta'}
+					>
+						{isOpen ? <FolderOpenIcon className="h-4 w-4" /> : <FolderIcon className="h-4 w-4" />}
+					</Button>
+
+					<div className="flex gap-1">
+						{onEdit && (
+							<Button
+								size="icon"
+								variant="ghost"
+								className="h-7 w-7 rounded-full"
+								onClick={handleEditClick}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.stopPropagation();
+										handleEditClick(e as unknown as React.MouseEvent);
+									}
+								}}
+								aria-label="Editar carpeta"
+							>
+								<PencilIcon className="h-3 w-3" />
+							</Button>
+						)}
+						{onDelete && (
+							<Button
+								size="icon"
+								variant="ghost"
+								className="h-7 w-7 rounded-full text-destructive hover:text-destructive"
+								onClick={handleDeleteClick}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.stopPropagation();
+										handleDeleteClick(e as unknown as React.MouseEvent);
+									}
+								}}
+								aria-label="Eliminar carpeta"
+							>
+								<Trash2 className="h-3 w-3" />
+							</Button>
+						)}
+					</div>
+				</div>
+			</EntityCardWrapper>
+
+			{/* Panel de configuración visual */}
+			{isSettingsOpen && (
+				<motion.div
+					initial={{ opacity: 0, scale: 0.95 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0.95 }}
+					transition={{ duration: 0.15 }}
+					className="visualization-modal fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+					onClick={() => setIsSettingsOpen(false)}
+					onKeyDown={(e) => {
+						if (e.key === 'Escape') {
+							setIsSettingsOpen(false);
+						}
 					}}
-					onClose={() => setConfigOpen(false)}
-				/>
+				>
+					<dialog
+						className="visualization-config-wrapper max-h-[80vh] max-w-4xl overflow-auto rounded-lg border bg-card p-4 shadow-lg"
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => {
+							if (e.key === 'Escape') {
+								e.stopPropagation();
+								setIsSettingsOpen(false);
+							}
+						}}
+						open
+					>
+						<VisualizationConfig
+							options={mergedOptions}
+							onChange={() => {
+								// Implementar lógica de cambio si es necesario
+							}}
+							onClose={() => setIsSettingsOpen(false)}
+						/>
+					</dialog>
+				</motion.div>
 			)}
 		</>
 	);
