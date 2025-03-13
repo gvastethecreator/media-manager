@@ -7,7 +7,11 @@ import { seedAlbums } from './seeds/album.seed'
 import { seedCollections } from './seeds/collection.seed'
 import { seedTags } from './seeds/tag.seed'
 import { seedWorldEntities } from './seeds/world-entities.seed'
-import { seedContentEntities } from './seeds/content-entities.seed'
+import { seedConcepts } from './seeds/concept.seed'
+import { seedPrompts } from './seeds/prompt.seed'
+import { seedNotes } from './seeds/note.seed'
+import { seedRarities } from './seeds/rarity.seed'
+import { seedTextures } from './seeds/texture.seed'
 import { safeDeleteMany, seedLogger } from './seeds/utils.seed'
 
 const prisma = new PrismaClient({
@@ -66,8 +70,20 @@ async function main() {
     // Sembrar entidades del mundo (worldItem, place, character)
     await seedWorldEntities(prisma)
 
-    // Sembrar entidades de contenido (concept, prompt, note)
-    await seedContentEntities(prisma)
+    // Sembrar conceptos
+    await seedConcepts(prisma)
+
+    // Sembrar prompts
+    await seedPrompts(prisma)
+
+    // Sembrar notas
+    await seedNotes(prisma)
+
+    // Sembrar rarezas
+    await seedRarities(prisma)
+
+    // Sembrar texturas
+    await seedTextures(prisma)
 
     seedLogger.info('✅ Proceso de seed completado con éxito')
   } catch (error) {

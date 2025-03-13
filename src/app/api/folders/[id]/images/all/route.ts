@@ -1,10 +1,47 @@
 import path from 'node:path';
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import type { FileItem, RelatedCollection, RelatedTag } from '@/types/file-item';
+import type {
+	FileItem,
+	RelatedAlbum,
+	RelatedCharacter,
+	RelatedCollection,
+	RelatedPlace,
+	RelatedTag,
+	RelatedWorldItem,
+} from '@/types/file-item';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const imagesLogger = logger.withContext('ImagesAPI');
+
+// Definir una interfaz que se adapte a lo que realmente estamos devolviendo
+interface ApiResponseFileItem {
+	id: string;
+	name: string;
+	path: string;
+	type: 'image';
+	size: number;
+	width: number;
+	height: number;
+	metadata: string;
+	thumbnail: string | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	folderId: string;
+	createdAt: Date;
+	updatedAt: Date;
+	modifiedAt: Date;
+	accessedAt: Date;
+	collections: RelatedCollection[];
+	tags: RelatedTag[];
+	albums: RelatedAlbum[];
+	characters: RelatedCharacter[];
+	places: RelatedPlace[];
+	objects: RelatedWorldItem[];
+}
 
 export async function GET(_request: NextRequest, context: { params: { id: string } }) {
 	try {
@@ -50,7 +87,7 @@ export async function GET(_request: NextRequest, context: { params: { id: string
 			imageCount: folder.images.length,
 		});
 
-		const files: FileItem[] = folder.images.map((image) => {
+		const files: ApiResponseFileItem[] = folder.images.map((image) => {
 			// Construir metadata
 			const metadata = {
 				mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
@@ -107,7 +144,7 @@ export async function GET(_request: NextRequest, context: { params: { id: string
 				characters: [],
 				places: [],
 				objects: [],
-			} as FileItem;
+			};
 		});
 
 		return NextResponse.json({

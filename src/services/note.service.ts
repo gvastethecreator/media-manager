@@ -1,7 +1,7 @@
+import type { NoteCreate } from '@/app/actions/notes/note.actions';
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
-import type { NoteCreate } from '@/types/entities';
+import { type EventType, emit } from '@/lib/server/events.server';
 import type { Note } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
@@ -13,6 +13,14 @@ const EVENTS = {
 	NOTE_UPDATED: 'note:updated',
 	NOTE_DELETED: 'note:deleted',
 	NOTES_CHANGED: 'notes:changed',
+};
+
+// Mapeo de eventos a EventType
+const EVENT_TYPE_MAPPING: Record<string, EventType> = {
+	[EVENTS.NOTE_CREATED]: 'notes:modified',
+	[EVENTS.NOTE_UPDATED]: 'notes:modified',
+	[EVENTS.NOTE_DELETED]: 'notes:modified',
+	[EVENTS.NOTES_CHANGED]: 'notes:modified',
 };
 
 interface NoteFilters {
@@ -56,12 +64,12 @@ export const NoteService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTE_CREATED],
 				data: { action: 'create', entity: note, eventType: EVENTS.NOTE_CREATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTES_CHANGED],
 				data: { action: 'change', eventType: EVENTS.NOTES_CHANGED },
 			});
 
@@ -81,12 +89,12 @@ export const NoteService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTE_UPDATED],
 				data: { action: 'update', entity: note, eventType: EVENTS.NOTE_UPDATED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTES_CHANGED],
 				data: { action: 'change', eventType: EVENTS.NOTES_CHANGED },
 			});
 
@@ -105,12 +113,12 @@ export const NoteService = {
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
-				type: 'delete',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTE_DELETED],
 				data: { action: 'delete', entity: note, eventType: EVENTS.NOTE_DELETED },
 			});
 
 			await emit({
-				type: 'update',
+				type: EVENT_TYPE_MAPPING[EVENTS.NOTES_CHANGED],
 				data: { action: 'change', eventType: EVENTS.NOTES_CHANGED },
 			});
 		} catch (error) {
@@ -156,14 +164,13 @@ export const NoteService = {
 				where.status = status;
 			}
 			if (search) {
-				where.OR = [
-					{ title: { contains: search, mode: 'insensitive' } },
-					{ content: { contains: search, mode: 'insensitive' } },
-				];
+				where.OR = [{ title: { contains: search } }, { content: { contains: search } }];
 			}
 			if (tags && tags.length > 0) {
+				// Convertimos el array a un string JSON para compararlo con la columna tags
+				const tagsJson = JSON.stringify(tags);
 				where.tags = {
-					hasSome: tags,
+					contains: tagsJson.substring(1, tagsJson.length - 1), // Quitamos los corchetes
 				};
 			}
 

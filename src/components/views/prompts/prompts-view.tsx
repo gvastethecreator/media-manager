@@ -10,6 +10,7 @@ import { clientEvents } from "@/lib/client/events.client";
 import { logger } from "@/lib/logger/logger";
 import { useFileManager } from "@/store/file-manager.store";
 import { useNavigationStore } from "@/store/navigation.store";
+import type { Prompt } from "@prisma/client";
 import { MessageSquare } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,13 @@ import { useCallback, useEffect, useState } from "react";
 import type { ViewProps } from "../types";
 
 const viewLogger = logger.withContext("PromptsView");
+
+// Función adaptadora para convertir PromptWithStats a CardData (Prompt)
+const adaptPromptWithStats = (prompt: PromptWithStats): Prompt => {
+	// Extraemos solo las propiedades que coincidan con el tipo Prompt
+	const { _count, lastUpdated, ...promptData } = prompt;
+	return promptData as Prompt;
+};
 
 export function PromptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -110,7 +118,7 @@ export function PromptsView(_props: ViewProps) {
 							onClick={() => handlePromptClick(prompt)}
 						>
 							<PromptCard
-								data={prompt}
+								data={adaptPromptWithStats(prompt)}
 								onEdit={() => handleEditPrompt(prompt.id)}
 								onDelete={() => handleDeletePrompt(prompt.id)}
 								className="h-full"

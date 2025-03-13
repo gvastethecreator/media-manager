@@ -1,5 +1,6 @@
 'use client';
 
+import type { WorldItemFormData } from '@/components/features/entity-cards/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import type { WorldItemFormData } from '@/components/features/entity-cards/forms/entity-types';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';
 

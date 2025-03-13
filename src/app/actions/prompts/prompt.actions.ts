@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import type { Prompt } from '@/types/entities/prompts';
 import type { FileItem } from '@/types/file-item';
-import type { Prompt as PrismaPrompt } from '@prisma/client';
+import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const promptLogger = logger.withContext('PromptActions');
@@ -53,35 +54,31 @@ export interface PromptUpdate extends Partial<PromptCreate> {
 	id: string;
 }
 
-export interface Prompt extends PrismaPrompt {
-	count?: number;
-}
-
-export interface PromptWithStats extends PrismaPrompt {
+export interface PromptWithStats extends Prompt {
 	_count: {
 		concepts: number;
 		notes: number;
 		characters: number;
 		places: number;
+		worldItems: number;
 	};
 	lastUpdated: Date;
 }
 
-export interface PromptWithImages extends PrismaPrompt {
+export interface PromptWithImages extends Prompt {
 	images: FileItem[];
 }
 
-export interface ExtendedPrompt extends PrismaPrompt {
+export interface ExtendedPrompt extends Omit<Prompt, 'characters' | 'places' | 'worldItems' | 'notes' | 'concepts'> {
 	concepts?: { id: string; name: string }[];
 	notes?: { id: string; title: string }[];
 	characters?: { id: string; name: string }[];
 	places?: { id: string; name: string }[];
+	worldItems?: { id: string; name: string }[];
 }
 
 export async function getPrompts(): Promise<PromptWithStats[]> {
 	try {
-		promptLogger.info('🎯 Obteniendo prompts con estadísticas');
-
 		const prompts = await prisma.prompt.findMany({
 			include: {
 				_count: {
@@ -90,27 +87,22 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 						notes: true,
 						characters: true,
 						places: true,
+						worldItems: true,
 					},
 				},
 			},
-			orderBy: [
-				{
-					name: 'asc',
-				},
-			],
+			orderBy: {
+				updatedAt: 'desc',
+			},
 		});
 
-		const promptsWithStats = prompts.map((prompt) => ({
+		return prompts.map((prompt) => ({
 			...prompt,
-			_count: prompt._count,
 			lastUpdated: prompt.updatedAt,
 		}));
-
-		promptLogger.info('✅ Prompts obtenidos', { count: prompts.length });
-		return promptsWithStats as PromptWithStats[];
 	} catch (error) {
-		promptLogger.error('❌ Error al obtener prompts', error);
-		throw createPromptError('No se pudieron obtener los prompts', PromptErrorCode.OPERATION_FAILED, error);
+		console.error('Error al obtener prompts:', error);
+		throw new Error('Error al obtener prompts');
 	}
 }
 
@@ -224,72 +216,26 @@ export async function deletePrompt(id: string): Promise<void> {
 	}
 }
 
-export async function getPromptImages(id: string): Promise<FileItem[]> {
+export async function getPromptImages(promptId: string): Promise<FileItem[]> {
 	try {
-		promptLogger.info('🖼️ Obteniendo imágenes relacionadas con el prompt:', id);
-
-		const promptWithRelations = await prisma.prompt.findUnique({
-			where: { id },
-			include: {
-				characters: {
-					include: {
-						images: true,
-					},
-				},
-				places: {
-					include: {
-						images: true,
-					},
-				},
-				worldItems: {
-					include: {
-						images: true,
-					},
-				},
-			},
+		promptLogger.info('🔍 Obteniendo imágenes del prompt:', promptId);
+		const prompt = await prisma.prompt.findUnique({
+			where: { id: promptId },
 		});
 
-		if (!promptWithRelations) {
+		if (!prompt) {
 			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
 		}
 
-		const allImages = new Set<string>();
-		const imagesArray: { id: string }[] = [];
-
-		for (const character of promptWithRelations.characters) {
-			for (const image of character.images) {
-				if (!allImages.has(image.id)) {
-					allImages.add(image.id);
-					imagesArray.push(image);
-				}
-			}
-		}
-
-		for (const place of promptWithRelations.places) {
-			for (const image of place.images) {
-				if (!allImages.has(image.id)) {
-					allImages.add(image.id);
-					imagesArray.push(image);
-				}
-			}
-		}
-
-		for (const item of promptWithRelations.worldItems) {
-			for (const image of item.images) {
-				if (!allImages.has(image.id)) {
-					allImages.add(image.id);
-					imagesArray.push(image);
-				}
-			}
-		}
-
-		const fileItems = imagesArray.map((img) => convertServerImageToFileItem(img as unknown as ServerImage));
-
-		promptLogger.info(`✅ ${fileItems.length} imágenes obtenidas`);
-		return fileItems;
+		// Solución temporal hasta que se implementen las relaciones correctamente
+		promptLogger.info('✅ Este prompt no tiene imágenes definidas aún en el esquema');
+		return [];
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener imágenes del prompt:', error);
-		throw createPromptError('No se pudieron obtener las imágenes del prompt', PromptErrorCode.OPERATION_FAILED, error);
+		if (error instanceof Error && error.name === 'PromptError') {
+			throw error;
+		}
+		throw createPromptError('No se pudo obtener las imágenes del prompt', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
 

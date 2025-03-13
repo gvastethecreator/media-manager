@@ -1,36 +1,23 @@
-"use client";
+'use client';
 
-import type {
-	RaritySystem,
-	TextureSystem,
-} from "@/app/actions/entities-cards/entities-cards.actions";
+import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
 import type {
 	RarityConfig,
 	TextureConfig,
-} from "@/components/features/entity-cards/base/base-card-types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Info, Settings2 } from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { TextureManager } from "../tools/texture-manager";
-import type { CardOptions, SystemSettingsProps } from "./card-settings-types";
-import { RarityManager } from "./rarity-manager";
+	TextureSystem,
+} from '@/components/features/entity-cards/base/base-card-types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info, Settings2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { TextureManager } from '../textures/texture-manager';
+import type { CardOptions, SystemSettingsProps } from './card-settings-types';
+import { RarityManager } from './rarity-manager';
 
-// Extendemos la interfaz para incluir las propiedades que faltan
-interface ExtendedSystemSettingsProps extends SystemSettingsProps {
-	onRaritySystemChange?: (raritySystem: RaritySystem) => void;
-	onTextureSystemChange?: (textureSystem: TextureSystem) => void;
-	raritySystem?: RaritySystem;
-	textureSystem?: TextureSystem;
-}
+// SystemSettingsProps ya incluye todas las propiedades necesarias
 
 export function SystemsSettings({
 	cardOptions,
@@ -38,18 +25,30 @@ export function SystemsSettings({
 	onCardOptionsChange,
 	onRarityChange,
 	onTextureChange,
-	onRaritySystemChange,
-	onTextureSystemChange,
 	raritySystem,
 	textureSystem,
-}: ExtendedSystemSettingsProps) {
+}: SystemSettingsProps) {
+	// Función para propagar cambios en el sistema de texturas
+	const handleTextureSystemsChange = (newTextureSystem: TextureSystem) => {
+		// Actualizar el estado local
+		setCurrentTextureSystem(newTextureSystem);
+
+		// Propagar el cambio al componente padre si hay textura seleccionada
+		if (newTextureSystem.textures && newTextureSystem.textures.length > 0 && onTextureChange) {
+			// Seleccionar la primera textura por defecto si hay texturas disponibles
+			onTextureChange(newTextureSystem.textures[0]);
+		}
+
+		// Actualizar la opción en cardOptions para reflejar el cambio
+		onCardOptionsChange({
+			...cardOptions,
+			textureSystem: newTextureSystem.enabled, // Asegurar que el sistema refleja el estado actual
+		});
+	};
+
 	// Estado para almacenar localmente la referencia a los sistemas
-	const [currentTextureSystem, setCurrentTextureSystem] = useState<
-		TextureSystem | undefined
-	>(textureSystem);
-	const [currentRaritySystem, setCurrentRaritySystem] = useState<
-		RaritySystem | undefined
-	>(raritySystem);
+	const [_currentTextureSystem, setCurrentTextureSystem] = useState<TextureSystem | undefined>(textureSystem);
+	const [_currentRaritySystem, setCurrentRaritySystem] = useState<RaritySystem | undefined>(raritySystem);
 
 	// Actualizar el estado local cuando cambian las props
 	useEffect(() => {
@@ -75,46 +74,47 @@ export function SystemsSettings({
 	// Manejador para cambios en el sistema de rarezas
 	const handleRaritySystemChange = (enabled: boolean) => {
 		// Actualizar la opción en cardOptions
-		handleOptionChange("raritySystem", enabled);
+		handleOptionChange('raritySystem', enabled);
 
-		// Si se proporcionó un manejador específico, llamarlo también
-		if (onRaritySystemChange) {
-			onRaritySystemChange({
-				enabled,
-				// Preservamos las rarezas existentes
-				rarities: currentRaritySystem?.rarities || [],
-			});
+		// Si se desactiva el sistema, notificar al componente padre que no hay rareza seleccionada
+		if (!enabled && onRarityChange) {
+			onRarityChange(null);
 		}
 	};
 
 	// Manejador para cambios en el sistema de texturas
 	const handleTextureSystemChange = (enabled: boolean) => {
 		// Actualizar la opción en cardOptions
-		handleOptionChange("textureSystem", enabled);
+		handleOptionChange('textureSystem', enabled);
 
-		// Si se proporcionó un manejador específico, llamarlo también
-		if (onTextureSystemChange) {
-			// Al desactivar, mantenemos las texturas existentes para no perderlas
-			onTextureSystemChange({
-				enabled,
-				// Si tenemos textureSystem previo, preservamos sus texturas
-				textures: currentTextureSystem?.textures || [],
-			});
+		// Si se desactiva el sistema, notificar al componente padre que no hay textura seleccionada
+		if (!enabled && onTextureChange) {
+			onTextureChange(null);
 		}
 	};
 
 	// Manejador para actualizar sistemas completos
-	const handleTextureSystemUpdate = (newTextureSystem: TextureSystem) => {
+	const _handleTextureSystemUpdate = (newTextureSystem: TextureSystem) => {
 		setCurrentTextureSystem(newTextureSystem);
-		if (onTextureSystemChange) {
-			onTextureSystemChange(newTextureSystem);
+		// Propagar el cambio al componente padre
+		if (onCardOptionsChange) {
+			// Actualizar la opción en cardOptions para reflejar el cambio
+			onCardOptionsChange({
+				...cardOptions,
+				textureSystem: true, // Asegurar que el sistema está habilitado
+			});
 		}
 	};
 
 	const handleRaritySystemUpdate = (newRaritySystem: RaritySystem) => {
 		setCurrentRaritySystem(newRaritySystem);
-		if (onRaritySystemChange) {
-			onRaritySystemChange(newRaritySystem);
+		// Propagar el cambio al componente padre
+		if (onCardOptionsChange) {
+			// Actualizar la opción en cardOptions para reflejar el cambio
+			onCardOptionsChange({
+				...cardOptions,
+				raritySystem: true, // Asegurar que el sistema está habilitado
+			});
 		}
 	};
 
@@ -130,10 +130,7 @@ export function SystemsSettings({
 				{/* Sistema de Rarezas */}
 				<div className="space-y-4">
 					<div className="flex items-center justify-between space-x-3">
-						<Label
-							htmlFor="raritySystem"
-							className="text-sm flex items-center cursor-pointer gap-2"
-						>
+						<Label htmlFor="raritySystem" className="text-sm flex items-center cursor-pointer gap-2">
 							Sistema de Rarezas
 							<TooltipProvider>
 								<Tooltip>
@@ -146,17 +143,13 @@ export function SystemsSettings({
 								</Tooltip>
 							</TooltipProvider>
 						</Label>
-						<Switch
-							id="raritySystem"
-							checked={cardOptions.raritySystem}
-							onCheckedChange={handleRaritySystemChange}
-						/>
+						<Switch id="raritySystem" checked={cardOptions.raritySystem} onCheckedChange={handleRaritySystemChange} />
 					</div>
 
 					{cardOptions.raritySystem && (
 						<motion.div
 							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: "auto" }}
+							animate={{ opacity: 1, height: 'auto' }}
 							exit={{ opacity: 0, height: 0 }}
 							transition={{ duration: 0.2 }}
 						>
@@ -180,10 +173,7 @@ export function SystemsSettings({
 				{/* Sistema de Texturas */}
 				<div className="space-y-4">
 					<div className="flex items-center justify-between space-x-3">
-						<Label
-							htmlFor="textureSystem"
-							className="text-sm flex items-center cursor-pointer gap-2"
-						>
+						<Label htmlFor="textureSystem" className="text-sm flex items-center cursor-pointer gap-2">
 							Sistema de Texturas
 							<TooltipProvider>
 								<Tooltip>
@@ -206,7 +196,7 @@ export function SystemsSettings({
 					{cardOptions.textureSystem && (
 						<motion.div
 							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: "auto" }}
+							animate={{ opacity: 1, height: 'auto' }}
 							exit={{ opacity: 0, height: 0 }}
 							transition={{ duration: 0.2 }}
 						>
@@ -219,7 +209,7 @@ export function SystemsSettings({
 												onTextureChange(texture as TextureConfig);
 											}
 										}}
-										onTexturesChange={handleTextureSystemUpdate}
+										onTexturesChange={handleTextureSystemsChange}
 									/>
 								</CardContent>
 							</Card>
@@ -228,30 +218,25 @@ export function SystemsSettings({
 				</div>
 
 				{/* Sistema de Categorías */}
-				<div className="flex items-center justify-between space-x-3">
-					<Label
-						htmlFor="categorySystem"
-						className="text-sm flex items-center cursor-pointer gap-2"
-					>
-						Sistema de Categorías
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Info className="h-3 w-3 text-muted-foreground" />
-								</TooltipTrigger>
-								<TooltipContent className="text-xs max-w-xs">
-									Organiza las tarjetas por categorías
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</Label>
-					<Switch
-						id="categorySystem"
-						checked={cardOptions.categorySystem}
-						onCheckedChange={(checked) =>
-							handleOptionChange("categorySystem", checked)
-						}
-					/>
+				<div className="space-y-4">
+					<div className="flex items-center justify-between space-x-3">
+						<Label htmlFor="categorySystem" className="text-sm flex items-center cursor-pointer gap-2">
+							Sistema de Categorías
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Info className="h-3 w-3 text-muted-foreground" />
+									</TooltipTrigger>
+									<TooltipContent className="text-xs max-w-xs">Organiza las tarjetas por categorías</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</Label>
+						<Switch
+							id="categorySystem"
+							checked={cardOptions.categorySystem}
+							onCheckedChange={(checked) => handleOptionChange('categorySystem', checked)}
+						/>
+					</div>
 				</div>
 			</CardContent>
 		</Card>

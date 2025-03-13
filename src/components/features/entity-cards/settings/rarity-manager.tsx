@@ -4,12 +4,11 @@ import {
 	type RarityItem,
 	type RaritySystem,
 	type TextureItem,
-	type TextureSystem,
 	getEntityRaritySystem,
 	getEntityTextureSystem,
 	saveEntityRaritySystem,
 } from '@/app/actions/entities-cards/entities-cards.actions';
-import type { RarityConfig } from '@/components/features/entity-cards/base/base-card-types';
+import type { RarityConfig, TextureSystem } from '@/components/features/entity-cards/base/base-card-types';
 import {
 	AlertDialog,
 	AlertDialogAction,

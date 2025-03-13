@@ -1,11 +1,20 @@
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/utils';
-import { BarChart } from 'lucide-react';
+import { AlertCircle, BarChart } from 'lucide-react';
 import { StatCard } from './stat-card';
 
 export async function GeneralStats() {
 	const stats = await getSystemStats();
+
+	if (!stats) {
+		return (
+			<div className="flex items-center justify-center p-4 text-destructive gap-2">
+				<AlertCircle className="h-4 w-4" />
+				<span>Error al cargar estadísticas</span>
+			</div>
+		);
+	}
 
 	// Estadísticas principales
 	const mainStats = [
@@ -53,7 +62,7 @@ export async function GeneralStats() {
 		},
 		{
 			title: 'Objetos',
-			value: stats.totalObjects,
+			value: stats.totalWorldItems,
 			icon: 'Box',
 			color: 'text-amber-500',
 		},

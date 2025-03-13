@@ -1,7 +1,6 @@
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem } from '@/types/file-item';
-import type { PrismaClient } from '@prisma/client';
 import { type ServerImage, imageConverterService } from './image-converter.service';
 
 const baseLogger = logger.withContext('BaseService');
@@ -13,24 +12,30 @@ export interface BaseStats {
 	totalSize: number;
 }
 
-// Tipo para modelos de Prisma
-type PrismaModel = ReturnType<PrismaClient[keyof PrismaClient]>;
-
 // Tipo para cláusulas where y orderBy de Prisma
 type PrismaFilter = Record<string, unknown>;
 
+// Tipo genérico para representar modelos de Prisma con operaciones básicas
+// Utilizamos unknown como tipo de retorno, pero será tipado correctamente en la implementación
+interface PrismaModelOperations {
+	findMany: (args: Record<string, unknown>) => Promise<unknown[]>;
+	findUnique: (args: Record<string, unknown>) => Promise<unknown | null>;
+	groupBy?: (args: Record<string, unknown>) => Promise<unknown[]>;
+	aggregate?: (args: Record<string, unknown>) => Promise<unknown>;
+}
+
 export class BaseService {
 	protected logger = baseLogger;
-	protected model: PrismaModel;
+	protected model: PrismaModelOperations;
 	protected modelName: string;
 
-	constructor(model: PrismaModel, modelName: string) {
+	constructor(model: PrismaModelOperations, modelName: string) {
 		this.model = model;
 		this.modelName = modelName;
 		this.logger = logger.withContext(`${modelName}Service`);
 	}
 
-	protected async getItemsWithStats<T>(
+	protected async getItemsWithStats<T extends { id: string }>(
 		where: PrismaFilter = {},
 		orderBy: PrismaFilter = { createdAt: 'desc' }
 	): Promise<(T & BaseStats)[]> {
@@ -38,7 +43,7 @@ export class BaseService {
 			this.logger.info(`🔍 Obteniendo lista de ${this.modelName}...`);
 
 			// 1. Obtener items con conteo de imágenes
-			const items = await this.model.findMany({
+			const items = (await this.model.findMany({
 				where,
 				include: {
 					_count: {
@@ -46,11 +51,11 @@ export class BaseService {
 					},
 				},
 				orderBy,
-			});
+			})) as (T & { _count: { images: number } })[];
 
 			// 2. Obtener tamaños en una sola consulta
-			const itemIds = items.map((item: T & { id: string }) => item.id);
-			const sizesByItem = await prisma.image.groupBy({
+			const itemIds = items.map((item) => item.id);
+			const sizesByItem = (await prisma.image.groupBy({
 				by: ['id'],
 				where: {
 					[this.modelName.toLowerCase()]: {
@@ -64,15 +69,15 @@ export class BaseService {
 				_sum: {
 					size: true,
 				},
-			});
+			})) as { id: string; _sum: { size: number | null } }[];
 
 			// 3. Mapear resultados
-			const itemsWithStats = items.map((item: T & { id: string }) => {
+			const itemsWithStats = items.map((item) => {
 				const stats = sizesByItem.find((s) => s.id === item.id);
 				return {
 					...item,
 					totalSize: stats?._sum?.size || 0,
-				};
+				} as T & BaseStats;
 			});
 
 			this.logger.info(`✅ ${items.length} ${this.modelName} obtenidos`);
@@ -83,11 +88,14 @@ export class BaseService {
 		}
 	}
 
-	protected async getItemWithStats<T>(id: string, include: PrismaFilter = {}): Promise<(T & BaseStats) | null> {
+	protected async getItemWithStats<T extends { id: string }>(
+		id: string,
+		include: PrismaFilter = {}
+	): Promise<(T & BaseStats) | null> {
 		try {
 			this.logger.info(`🔍 Obteniendo ${this.modelName}:`, id);
 
-			const item = await this.model.findUnique({
+			const item = (await this.model.findUnique({
 				where: { id },
 				include: {
 					_count: {
@@ -95,13 +103,13 @@ export class BaseService {
 					},
 					...include,
 				},
-			});
+			})) as (T & { _count: { images: number } }) | null;
 
 			if (!item) {
 				return null;
 			}
 
-			const totalSize = await prisma.image.aggregate({
+			const totalSize = (await prisma.image.aggregate({
 				where: {
 					[this.modelName.toLowerCase()]: {
 						some: { id },
@@ -110,7 +118,7 @@ export class BaseService {
 				_sum: {
 					size: true,
 				},
-			});
+			})) as { _sum: { size: number | null } };
 
 			return {
 				...item,
@@ -170,7 +178,7 @@ export class BaseService {
 							color: true,
 						},
 					},
-					objects: {
+					worldItems: {
 						select: {
 							id: true,
 							name: true,

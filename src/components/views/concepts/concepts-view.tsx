@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { getConcepts } from "@/app/actions/concepts/concept.actions";
-import type { ConceptWithStats } from "@/app/actions/concepts/concept.actions";
-import { EmptyState } from "@/components/core/data-display";
-import { LoadingScreen } from "@/components/core/feedback";
-import { ConceptCard } from "@/components/features/entity-cards/layouts/concept-card-layout";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger/logger";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import { LightbulbIcon } from "lucide-react";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { ViewProps } from "../types";
+import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card-layout';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { LightbulbIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("ConceptsView");
+const viewLogger = logger.withContext('ConceptsView');
 
 export function ConceptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -27,20 +27,18 @@ export function ConceptsView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticConcepts, _addEvent] =
-		clientEvents.useEvents<ConceptWithStats[]>(concepts);
+	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptWithStats[]>(concepts);
 
 	const fetchConcepts = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando conceptos...");
+			viewLogger.info('🔄 Cargando conceptos...');
 			const data = await getConcepts();
 			setConcepts(data);
 			viewLogger.info(`✅ ${data.length} conceptos cargados`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando conceptos:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando conceptos:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -54,8 +52,8 @@ export function ConceptsView(_props: ViewProps) {
 
 	const handleConceptClick = useCallback(
 		(concept: ConceptWithStats) => {
-			viewLogger.info("🖱️ Click en concepto:", concept.name);
-			setCurrentView("concept-content");
+			viewLogger.info('🖱️ Click en concepto:', concept.name);
+			setCurrentView('concept-content');
 			setCurrentConcept(concept.id);
 		},
 		[setCurrentView, setCurrentConcept]
@@ -63,14 +61,14 @@ export function ConceptsView(_props: ViewProps) {
 
 	const handleEditConcept = useCallback(
 		(concept: ConceptWithStats) => {
-			viewLogger.info("⚙️ Editando concepto:", concept.name);
+			viewLogger.info('⚙️ Editando concepto:', concept.name);
 			router.push(`/settings/concepts?id=${concept.id}`);
 		},
 		[router]
 	);
 
 	const handleDeleteConcept = useCallback((id: string) => {
-		viewLogger.info("🗑️ Eliminando concepto:", id);
+		viewLogger.info('🗑️ Eliminando concepto:', id);
 		// Implementar lógica de eliminación
 	}, []);
 

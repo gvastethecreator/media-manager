@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { PromptForm } from '@/components/features/entity-cards/forms/prompt-form';
-import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card-layout';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatsCard } from '@/components/ui/stats-card';
-import { logger } from '@/lib/logger/logger';
-import { toastService } from '@/lib/services/toast.service';
-import { usePromptStore } from '@/store/entities/prompt.store';
-import { Loader2, MessageSquare } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import * as React from 'react';
+import { PromptForm } from "@/components/features/entity-cards/forms/prompt-form";
+import { PromptCard } from "@/components/features/entity-cards/layouts/prompt-card-layout";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCard } from "@/components/ui/stats-card";
+import { logger } from "@/lib/logger/logger";
+import { toastService } from "@/lib/services/toast.service";
+import { usePromptStore } from "@/store/entities/prompt.store";
+import { Loader2, MessageSquare } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import * as React from "react";
 
 // Definición local del tipo PromptFormData para evitar problemas de incompatibilidad
 interface PromptFormData {
@@ -28,10 +28,18 @@ interface PromptFormData {
 	isFavorite: boolean;
 }
 
-const promptLogger = logger.withContext('PromptsSection');
+const promptLogger = logger.withContext("PromptsSection");
 
 export function PromptsSection() {
-	const { prompts, isLoading, error, loadPrompts, createPrompt, updatePrompt, deletePrompt } = usePromptStore();
+	const {
+		prompts,
+		isLoading,
+		error,
+		loadPrompts,
+		createPrompt,
+		updatePrompt,
+		deletePrompt,
+	} = usePromptStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -40,7 +48,7 @@ export function PromptsSection() {
 
 	const handleCreate = async (data: PromptFormData) => {
 		try {
-			promptLogger.info('✨ Creando nuevo prompt:', data);
+			promptLogger.info("✨ Creando nuevo prompt:", data);
 			await createPrompt({
 				name: data.name,
 				emoji: data.emoji,
@@ -49,13 +57,13 @@ export function PromptsSection() {
 				content: data.content,
 				category: data.category,
 				parameters: JSON.stringify(data.parameters || {}),
-				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				tags: Array.isArray(data.tags) ? data.tags.join(",") : "",
 				featuredImage: data.featuredImage || null,
 			});
-			toastService.success('Prompt creado correctamente');
+			toastService.success("Prompt creado correctamente");
 		} catch (error) {
-			promptLogger.error('❌ Error al crear prompt:', error);
-			toastService.error('No se pudo crear el prompt');
+			promptLogger.error("❌ Error al crear prompt:", error);
+			toastService.error("No se pudo crear el prompt");
 		}
 	};
 
@@ -64,7 +72,7 @@ export function PromptsSection() {
 			return;
 		}
 		try {
-			promptLogger.info('💾 Actualizando prompt:', data);
+			promptLogger.info("💾 Actualizando prompt:", data);
 			await updatePrompt(editingId, {
 				id: editingId,
 				name: data.name,
@@ -74,28 +82,28 @@ export function PromptsSection() {
 				content: data.content,
 				category: data.category,
 				parameters: JSON.stringify(data.parameters || {}),
-				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
+				tags: Array.isArray(data.tags) ? data.tags.join(",") : "",
 				featuredImage: data.featuredImage || null,
 			});
 			setEditingId(null);
-			toastService.success('Prompt actualizado correctamente');
+			toastService.success("Prompt actualizado correctamente");
 		} catch (error) {
-			promptLogger.error('❌ Error al actualizar prompt:', error);
-			toastService.error('No se pudo actualizar el prompt');
+			promptLogger.error("❌ Error al actualizar prompt:", error);
+			toastService.error("No se pudo actualizar el prompt");
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm('¿Estás seguro de eliminar este prompt?')) {
+		if (!confirm("¿Estás seguro de eliminar este prompt?")) {
 			return;
 		}
 		try {
-			promptLogger.info('🗑️ Eliminando prompt:', { id });
+			promptLogger.info("🗑️ Eliminando prompt:", { id });
 			await deletePrompt(id);
-			toastService.success('Prompt eliminado correctamente');
+			toastService.success("Prompt eliminado correctamente");
 		} catch (error) {
-			promptLogger.error('❌ Error al eliminar prompt:', error);
-			toastService.error('No se pudo eliminar el prompt');
+			promptLogger.error("❌ Error al eliminar prompt:", error);
+			toastService.error("No se pudo eliminar el prompt");
 		}
 	};
 
@@ -121,7 +129,10 @@ export function PromptsSection() {
 		const totalImages = prompts.reduce((acc, prompt) => {
 			// Suma todas las referencias a otras entidades
 			const count = prompt._count
-				? prompt._count.concepts + prompt._count.notes + prompt._count.characters + prompt._count.places
+				? prompt._count.concepts +
+					prompt._count.notes +
+					prompt._count.characters +
+					prompt._count.places
 				: 0;
 			return acc + count;
 		}, 0);
@@ -135,7 +146,10 @@ export function PromptsSection() {
 
 		// Obtener prompts recientes
 		const recentPrompts = [...prompts]
-			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+			.sort(
+				(a, b) =>
+					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+			)
 			.slice(0, 5)
 			.map((prompt) => ({
 				id: prompt.id,
@@ -194,8 +208,17 @@ export function PromptsSection() {
 							<MessageSquare className="h-5 w-5" />
 							Prompts
 						</div>
-						<Button variant="outline" size="sm" onClick={() => loadPrompts()} disabled={isLoading}>
-							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => loadPrompts()}
+							disabled={isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Recargar"
+							)}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -207,7 +230,7 @@ export function PromptsSection() {
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<p className="text-sm text-muted-foreground text-center">
-								{typeof error === 'string' ? error : (error as Error).message}
+								{typeof error === "string" ? error : (error as Error).message}
 							</p>
 							<Button variant="outline" size="sm" onClick={() => loadPrompts()}>
 								Reintentar
@@ -216,8 +239,12 @@ export function PromptsSection() {
 					) : prompts.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<MessageSquare className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">No hay prompts creados</p>
-							<p className="text-xs text-muted-foreground/75">Crea un prompt para empezar</p>
+							<p className="text-sm text-muted-foreground text-center">
+								No hay prompts creados
+							</p>
+							<p className="text-xs text-muted-foreground/75">
+								Crea un prompt para empezar
+							</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -231,7 +258,7 @@ export function PromptsSection() {
 										exit={{ opacity: 0, scale: 0.9 }}
 										transition={{
 											duration: 0.2,
-											ease: 'easeInOut',
+											ease: "easeInOut",
 										}}
 									>
 										{editingId === prompt.id ? (
@@ -240,13 +267,17 @@ export function PromptsSection() {
 													<PromptForm
 														initialData={{
 															name: prompt.name,
-															description: prompt.description || '',
+															description: prompt.description || "",
 															emoji: prompt.emoji,
 															color: prompt.color,
 															content: prompt.content,
-															category: prompt.category || '',
-															parameters: prompt.parameters ? JSON.parse(prompt.parameters) : {},
-															tags: prompt.tags ? prompt.tags.split(',').filter(Boolean) : [],
+															category: prompt.category || "",
+															parameters: prompt.parameters
+																? JSON.parse(prompt.parameters)
+																: {},
+															tags: prompt.tags
+																? prompt.tags.split(",").filter(Boolean)
+																: [],
 															featuredImage: prompt.featuredImage,
 															isFavorite: prompt.isFavorite,
 														}}
@@ -264,11 +295,19 @@ export function PromptsSection() {
 										) : (
 											<PromptCard
 												data={{
-													...prompt,
-													// Asegurarse de que se adapta a lo que espera el PromptCard
-													tags: prompt.tags || '',
-													content: prompt.content || '',
-													category: prompt.category || '',
+													id: prompt.id,
+													name: prompt.name,
+													emoji: prompt.emoji,
+													color: prompt.color,
+													description: prompt.description || "",
+													content: prompt.content || "",
+													category: prompt.category || "",
+													parameters: prompt.parameters || "{}",
+													tags: prompt.tags || "",
+													featuredImage: prompt.featuredImage || null,
+													isFavorite: prompt.isFavorite || false,
+													createdAt: new Date(prompt.createdAt),
+													updatedAt: new Date(prompt.updatedAt),
 												}}
 												onEdit={() => setEditingId(prompt.id)}
 												onDelete={handleDelete}
