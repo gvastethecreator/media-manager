@@ -1,6 +1,6 @@
-"use client";
 
-import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
+
+import { EntityCardWrapper } from "@/components/features/entity-cards/entity-base-card";
 import { VisualizationConfig } from "@/components/features/entity-cards/config/visualization-config";
 import type {
 	CardOptions,

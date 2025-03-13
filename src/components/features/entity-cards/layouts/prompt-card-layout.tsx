@@ -18,7 +18,7 @@ import {
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import type * as React from 'react';
-import { EntityCardWrapper } from '../base/entity-card-wrapper';
+import { EntityCardWrapper } from '../entity-base-card';
 import { VisualizationConfig } from '../config/visualization-config';
 import type { PromptFormData } from '../forms/entity-types';
 import type { CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';

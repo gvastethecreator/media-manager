@@ -17,7 +17,7 @@ import { ImageIcon, StarIcon, UsersIcon } from "lucide-react";
 import { motion } from "motion/react";
 import * as React from "react";
 import { useState } from "react";
-import { EntityCardWrapper } from "../base/entity-card-wrapper";
+import { EntityCardWrapper } from "../entity-base-card";
 import { ImageGrid } from "./image-grid";
 
 // Opciones visuales optimizadas para tarjetas de notas

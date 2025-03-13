@@ -19,8 +19,8 @@ import {
 import { ImageIcon, StarIcon, UsersIcon } from "lucide-react";
 import type * as React from "react";
 import { useMemo } from "react";
-import { generateRarityConfig } from "../base/card-adapter";
-import { EntityCardWrapper } from "../base/entity-card-wrapper";
+import { generateRarityConfig } from "../entity-card-adapter";
+import { EntityCardWrapper } from "../entity-base-card";
 import type {
 	CardDesignData,
 	CardDesignPreset,
