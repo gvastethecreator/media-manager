@@ -6,7 +6,7 @@ import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbna
 import { logger } from '@/lib/logger/logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { optimizeThumbnail } from '@/lib/thumbnails';
+import { optimizeThumbnail } from '@/lib/thumbnail';
 
 const thumbLogger = logger.withContext('ThumbnailService');
 

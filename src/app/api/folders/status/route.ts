@@ -1,5 +1,5 @@
-import { normalizeId } from '@/lib/id-utils';
 import { logger } from '@/lib/logger/logger';
+import { normalizeId } from '@/lib/utils/id.utils';
 import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
 import type { ProcessStatus } from '@/types/process';
 import { type NextRequest, NextResponse } from 'next/server';

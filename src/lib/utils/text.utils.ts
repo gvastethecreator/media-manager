@@ -1,21 +1,4 @@
-/**
- * Trunca un texto a una longitud específica, agregando puntos suspensivos
- * @param text Texto a truncar
- * @param maxLength Longitud máxima permitida (incluyendo los puntos suspensivos)
- * @returns El texto truncado con puntos suspensivos
- */
-export function truncateText(text: string, maxLength: number): string {
-	if (!text) {
-		return '';
-	}
-
-	if (text.length <= maxLength) {
-		return text;
-	}
-
-	// Reservamos 3 caracteres para los puntos suspensivos
-	return `${text.substring(0, maxLength - 3)}...`;
-}
+import { truncateText } from "./format.utils";
 
 /**
  * Trunca un texto para mostrarlo en la UI con un número limitado de líneas
