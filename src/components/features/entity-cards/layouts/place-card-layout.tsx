@@ -1,8 +1,8 @@
 'use client';
 
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import type { CardOptions } from '@/components/features/entity-cards/base/base-card-types';
-import { VisualizationConfig } from '@/components/features/entity-cards/base/visualization-config';
+import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
+import type { CardOptions } from '@/components/features/entity-cards/types/base-card-types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/utils';
 import type { Place } from '@/types/entities/places';

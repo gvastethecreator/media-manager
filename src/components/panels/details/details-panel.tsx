@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { updateImageStats } from "@/app/actions/images";
-import { parseMetadata } from "@/app/actions/metadata";
-import { getAIGenerationInfo } from "@/app/actions/metadata/metadata-parsers.actions";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils/utils";
-import type { ImageItem } from "@/types/image-item";
-import type { FileMetadata } from "@/types/metadata.types";
+import { updateImageStats } from '@/app/actions/images';
+import { parseMetadata } from '@/app/actions/metadata';
+import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils/utils';
+import type { ImageItem } from '@/types/image-item';
+import type { FileMetadata } from '@/types/metadata.types';
 import {
 	Bug,
 	Calendar,
@@ -26,29 +26,20 @@ import {
 	MapPin as MapIcon,
 	Settings2,
 	Sparkles,
-} from "lucide-react";
-import * as React from "react";
-import { useEffect, useState } from "react";
-import { AIGenerationInfo } from "./details-panel-ai-generation-info";
-import { BasicInfo } from "./details-panel-basic-info";
-import {
-	ExifInfo,
-	GPSInfo,
-	IPTCInfo,
-	TechnicalInfo,
-	XMPInfo,
-} from "./details-panel-metadata-sections";
-import type { DetailsPanelProps } from "./details-panel-types";
-import { getMetadata } from "./details-panel-utils";
+} from 'lucide-react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { AIGenerationInfo } from './details-panel-ai-generation-info';
+import { BasicInfo } from './details-panel-basic-info';
+import { ExifInfo, GPSInfo, IPTCInfo, TechnicalInfo, XMPInfo } from './details-panel-metadata-sections';
+import type { DetailsPanelProps } from './details-panel-types';
+import { getMetadata } from './details-panel-utils';
 
 // Logger para el panel de detalles
 const detailsLogger = {
-	info: (message: string, data?: unknown) =>
-		console.info(`[DetailsPanel] ${message}`, data || ""),
-	warn: (message: string, data?: unknown) =>
-		console.warn(`[DetailsPanel] ${message}`, data || ""),
-	error: (message: string, data?: unknown) =>
-		console.error(`[DetailsPanel] ${message}`, data || ""),
+	info: (message: string, data?: unknown) => console.info(`[DetailsPanel] ${message}`, data || ''),
+	warn: (message: string, data?: unknown) => console.warn(`[DetailsPanel] ${message}`, data || ''),
+	error: (message: string, data?: unknown) => console.error(`[DetailsPanel] ${message}`, data || ''),
 };
 
 // Componente para previsualización de imagen
@@ -56,11 +47,7 @@ function ImagePreview({ item }: { item: ImageItem }) {
 	return (
 		<div className="w-full h-full flex items-center justify-center bg-black/30">
 			{item.url ? (
-				<img
-					src={item.url}
-					alt={item.name}
-					className="max-h-full max-w-full object-contain"
-				/>
+				<img src={item.url} alt={item.name} className="max-h-full max-w-full object-contain" />
 			) : (
 				<FileImage className="h-12 w-12 text-muted" />
 			)}
@@ -72,9 +59,7 @@ function ImagePreview({ item }: { item: ImageItem }) {
 function RelatedEntities() {
 	return (
 		<div className="p-3 border border-dashed border-muted-foreground/30 rounded-md">
-			<p className="text-xs text-muted-foreground text-center">
-				Esta funcionalidad está en desarrollo.
-			</p>
+			<p className="text-xs text-muted-foreground text-center">Esta funcionalidad está en desarrollo.</p>
 		</div>
 	);
 }
@@ -82,9 +67,7 @@ function RelatedEntities() {
 /**
  * Analiza un objeto de metadatos para extraer información útil
  */
-async function parseMetadataDirectly(
-	rawMetadata: string | null
-): Promise<FileMetadata | null> {
+async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMetadata | null> {
 	if (!rawMetadata) {
 		return null;
 	}
@@ -130,25 +113,21 @@ async function parseMetadataDirectly(
 
 		// Usar la función del servidor para extraer información de generación por IA
 		try {
-			detailsLogger.info(
-				"Intentando extraer información de generación AI mediante parsers especializados"
-			);
+			detailsLogger.info('Intentando extraer información de generación AI mediante parsers especializados');
 			const aiGenerationInfo = await getAIGenerationInfo(parsed);
 
 			if (aiGenerationInfo) {
-				detailsLogger.info("Información de generación AI extraída con éxito", {
+				detailsLogger.info('Información de generación AI extraída con éxito', {
 					tipo: aiGenerationInfo.type,
 					modelo: aiGenerationInfo.model,
 				});
 				result.generation = aiGenerationInfo;
 			} else {
-				detailsLogger.warn(
-					"No se pudo extrair información de generación AI con parsers especializados"
-				);
+				detailsLogger.warn('No se pudo extrair información de generación AI con parsers especializados');
 			}
 		} catch (error) {
 			detailsLogger.error(
-				"Error al extraer información de generación AI:",
+				'Error al extraer información de generación AI:',
 				error instanceof Error ? error.message : String(error)
 			);
 		}
@@ -156,7 +135,7 @@ async function parseMetadataDirectly(
 		// Si no hay propiedades, retornar null
 		return Object.keys(result).length > 0 ? (result as FileMetadata) : null;
 	} catch (error) {
-		console.error("Error en parseMetadataDirectly:", error);
+		console.error('Error en parseMetadataDirectly:', error);
 		return null;
 	}
 }
@@ -169,26 +148,21 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	const item = selectedItems?.[0] || null;
 	const [metadata, setMetadata] = useState<FileMetadata | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [activeTab, setActiveTab] = useState("info");
+	const [activeTab, setActiveTab] = useState('info');
 	const { toast } = useToast();
 
 	// Callback para depuración - muestra información detallada en consola
 	const handleDebug = () => {
-		console.group("🔍 Depuración de Metadata");
-		console.log("Item seleccionado:", item);
-		console.log("Metadata procesada:", metadata);
+		console.group('🔍 Depuración de Metadata');
 		if (item?.metadata) {
 			try {
-				console.log("Metadata raw:", JSON.parse(item.metadata));
-			} catch (_error) {
-				console.log("Metadata raw (no es JSON válido):", item.metadata);
-			}
+			} catch (_error) {}
 		}
 		console.groupEnd();
 
 		toast({
-			title: "Depuración",
-			description: "Información impresa en la consola del navegador (F12)",
+			title: 'Depuración',
+			description: 'Información impresa en la consola del navegador (F12)',
 		});
 	};
 
@@ -196,35 +170,31 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	const getGeneratorType = React.useCallback((generation: unknown) => {
 		const gen = generation as Record<string, unknown>;
 		if (!gen || !gen.type) {
-			return "unknown";
+			return 'unknown';
 		}
 
 		const type = String(gen.type).toLowerCase();
 
-		if (
-			type.includes("stable-diffusion") ||
-			type === "sd" ||
-			type === "a1111"
-		) {
-			return "Stable Diffusion";
+		if (type.includes('stable-diffusion') || type === 'sd' || type === 'a1111') {
+			return 'Stable Diffusion';
 		}
-		if (type.includes("comfyui") || type === "comfy") {
-			return "ComfyUI";
+		if (type.includes('comfyui') || type === 'comfy') {
+			return 'ComfyUI';
 		}
-		if (type.includes("invoke") || type === "invoke-ai") {
-			return "InvokeAI";
+		if (type.includes('invoke') || type === 'invoke-ai') {
+			return 'InvokeAI';
 		}
-		if (type.includes("novel") || type === "novel-ai") {
-			return "NovelAI";
+		if (type.includes('novel') || type === 'novel-ai') {
+			return 'NovelAI';
 		}
-		if (type.includes("midjourney") || type === "mj") {
-			return "Midjourney";
+		if (type.includes('midjourney') || type === 'mj') {
+			return 'Midjourney';
 		}
-		if (type.includes("dalle") || type.includes("dall-e")) {
-			return "DALL-E";
+		if (type.includes('dalle') || type.includes('dall-e')) {
+			return 'DALL-E';
 		}
 
-		return String(gen.type) || "Desconocido";
+		return String(gen.type) || 'Desconocido';
 	}, []);
 
 	// Efecto para cargar metadata cuando cambia el ítem seleccionado
@@ -243,9 +213,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				detailsLogger.info(`Cargando metadata para item: ${item.id}`, {
 					name: item.name,
 					hasMetadata: !!item.metadata,
-					metadataPreview: item.metadata
-						? `${item.metadata.substring(0, 100)}...`
-						: "null",
+					metadataPreview: item.metadata ? `${item.metadata.substring(0, 100)}...` : 'null',
 				});
 
 				// Si ya tenemos metadata en el ítem, primero intentamos usarla directamente
@@ -254,13 +222,10 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						// Primer intento: usar getMetadata normal
 						const parsedMetadata = getMetadata(item.metadata);
 						if (parsedMetadata) {
-							detailsLogger.info(
-								"Metadata parseada correctamente desde el item",
-								{
-									hasGeneration: !!parsedMetadata.generation,
-									generationType: parsedMetadata.generation?.type,
-								}
-							);
+							detailsLogger.info('Metadata parseada correctamente desde el item', {
+								hasGeneration: !!parsedMetadata.generation,
+								generationType: parsedMetadata.generation?.type,
+							});
 
 							if (mounted) {
 								setMetadata(parsedMetadata);
@@ -268,44 +233,35 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							}
 
 							// Actualizamos estadísticas de vistas en segundo plano
-							updateImageStats(item.id, "view").catch((err: Error) =>
-								detailsLogger.error("Error actualizando estadísticas:", err)
+							updateImageStats(item.id, 'view').catch((err: Error) =>
+								detailsLogger.error('Error actualizando estadísticas:', err)
 							);
 							return;
 						}
 
 						// Segundo intento: usar método alternativo de parseo con parsers especializados
-						detailsLogger.info(
-							"Intentando método alternativo de parseo con parsers de IA"
-						);
-						const alternativeMetadata = await parseMetadataDirectly(
-							item.metadata
-						);
+						detailsLogger.info('Intentando método alternativo de parseo con parsers de IA');
+						const alternativeMetadata = await parseMetadataDirectly(item.metadata);
 						if (alternativeMetadata && mounted) {
-							detailsLogger.info(
-								"Metadata parseada correctamente con método alternativo",
-								{
-									hasGeneration: !!alternativeMetadata.generation,
-									generationType: alternativeMetadata.generation?.type,
-									generatorInfo: alternativeMetadata.generation
-										? getGeneratorType(
-												alternativeMetadata.generation as unknown
-											)
-										: "No detectado",
-								}
-							);
+							detailsLogger.info('Metadata parseada correctamente con método alternativo', {
+								hasGeneration: !!alternativeMetadata.generation,
+								generationType: alternativeMetadata.generation?.type,
+								generatorInfo: alternativeMetadata.generation
+									? getGeneratorType(alternativeMetadata.generation as unknown)
+									: 'No detectado',
+							});
 
 							setMetadata(alternativeMetadata);
 							setIsProcessing(false);
 
 							// Actualizamos estadísticas de vistas en segundo plano
-							updateImageStats(item.id, "view").catch((err: Error) =>
-								detailsLogger.error("Error actualizando estadísticas:", err)
+							updateImageStats(item.id, 'view').catch((err: Error) =>
+								detailsLogger.error('Error actualizando estadísticas:', err)
 							);
 							return;
 						}
 					} catch (error) {
-						detailsLogger.error("Error parseando metadata local:", error);
+						detailsLogger.error('Error parseando metadata local:', error);
 					}
 				}
 
@@ -313,7 +269,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				const metadataPromise = parseMetadata(item.id);
 				const timeoutPromise = new Promise<null>((_, reject) => {
 					setTimeout(() => {
-						reject(new Error("Timeout al obtener metadata"));
+						reject(new Error('Timeout al obtener metadata'));
 					}, 10000); // 10 segundos de timeout
 				});
 
@@ -322,28 +278,26 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 				if (mounted) {
 					if (result) {
-						detailsLogger.info("Metadata obtenida correctamente desde API", {
+						detailsLogger.info('Metadata obtenida correctamente desde API', {
 							hasGeneration: !!result.generation,
 							generationType: result.generation?.type,
-							generatorInfo: result.generation
-								? getGeneratorType(result.generation as unknown)
-								: "No detectado",
+							generatorInfo: result.generation ? getGeneratorType(result.generation as unknown) : 'No detectado',
 						});
 						setMetadata(result);
 
 						// Actualizamos estadísticas de vistas en segundo plano
-						updateImageStats(item.id, "view").catch((err: Error) =>
-							detailsLogger.error("Error actualizando estadísticas:", err)
+						updateImageStats(item.id, 'view').catch((err: Error) =>
+							detailsLogger.error('Error actualizando estadísticas:', err)
 						);
 					} else {
-						detailsLogger.warn("No se encontró metadata para el ítem");
+						detailsLogger.warn('No se encontró metadata para el ítem');
 						setMetadata(null);
 					}
 					setIsProcessing(false);
 				}
 			} catch (error) {
 				if (mounted) {
-					detailsLogger.error("Error cargando metadata:", error);
+					detailsLogger.error('Error cargando metadata:', error);
 					setMetadata(null);
 					setIsProcessing(false);
 				}
@@ -385,36 +339,24 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 					</div>
 					<CardContent className="p-2 bg-muted/30">
 						<h2 className="text-sm font-medium truncate">{item.name}</h2>
-						<p className="text-xs text-muted-foreground truncate">
-							{item.path || "Sin ruta especificada"}
-						</p>
+						<p className="text-xs text-muted-foreground truncate">{item.path || 'Sin ruta especificada'}</p>
 						{hasAIGeneration && metadata?.generation && (
 							<div className="mt-1">
 								<Badge
 									variant="outline"
 									className={cn(
-										"text-[10px] h-5 px-2 py-0 inline-flex items-center",
-										metadata.generation.type
-											?.toLowerCase()
-											.includes("stable") && "bg-blue-500/10 text-blue-500",
-										metadata.generation.type?.toLowerCase().includes("comfy") &&
-											"bg-green-500/10 text-green-500",
-										metadata.generation.type
-											?.toLowerCase()
-											.includes("invoke") && "bg-purple-500/10 text-purple-500",
-										metadata.generation.type?.toLowerCase().includes("novel") &&
-											"bg-pink-500/10 text-pink-500",
-										metadata.generation.type
-											?.toLowerCase()
-											.includes("midjourney") &&
-											"bg-indigo-500/10 text-indigo-500",
-										metadata.generation.type?.toLowerCase().includes("dall") &&
-											"bg-orange-500/10 text-orange-500"
+										'text-[10px] h-5 px-2 py-0 inline-flex items-center',
+										metadata.generation.type?.toLowerCase().includes('stable') && 'bg-blue-500/10 text-blue-500',
+										metadata.generation.type?.toLowerCase().includes('comfy') && 'bg-green-500/10 text-green-500',
+										metadata.generation.type?.toLowerCase().includes('invoke') && 'bg-purple-500/10 text-purple-500',
+										metadata.generation.type?.toLowerCase().includes('novel') && 'bg-pink-500/10 text-pink-500',
+										metadata.generation.type?.toLowerCase().includes('midjourney') &&
+											'bg-indigo-500/10 text-indigo-500',
+										metadata.generation.type?.toLowerCase().includes('dall') && 'bg-orange-500/10 text-orange-500'
 									)}
 								>
 									<Sparkles className="h-3 w-3 mr-1" />
-									Generada con{" "}
-									{getGeneratorType(metadata.generation as unknown)}
+									Generada con {getGeneratorType(metadata.generation as unknown)}
 								</Badge>
 							</div>
 						)}
@@ -432,10 +374,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						</TabsTrigger>
 						<TabsTrigger
 							value="ai"
-							className={cn(
-								"text-xs",
-								!hasAIGeneration && "text-muted-foreground/70"
-							)}
+							className={cn('text-xs', !hasAIGeneration && 'text-muted-foreground/70')}
 							disabled={!hasAIGeneration}
 						>
 							<Sparkles className="h-3.5 w-3.5 mr-1.5" />
@@ -447,7 +386,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 						</TabsTrigger>
 						<TabsTrigger
 							value="geo"
-							className={cn("text-xs", !hasGPS && "text-muted-foreground/70")}
+							className={cn('text-xs', !hasGPS && 'text-muted-foreground/70')}
 							disabled={!hasGPS}
 						>
 							<MapIcon className="h-3.5 w-3.5 mr-1.5" />
@@ -475,13 +414,11 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 				{isProcessing ? (
 					<div className="flex flex-col items-center justify-center py-8">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
-						<p className="text-sm text-muted-foreground">
-							Cargando información...
-						</p>
+						<p className="text-sm text-muted-foreground">Cargando información...</p>
 					</div>
 				) : (
 					<div className="space-y-4 pb-4">
-						{activeTab === "info" && (
+						{activeTab === 'info' && (
 							<div className="space-y-4">
 								<Card>
 									<CardHeader className="p-3 pb-1">
@@ -509,7 +446,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							</div>
 						)}
 
-						{activeTab === "ai" && (
+						{activeTab === 'ai' && (
 							<Card>
 								<CardHeader className="p-3 pb-1">
 									<CardTitle className="text-sm flex items-center">
@@ -523,8 +460,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 									) : (
 										<div className="p-3 border border-dashed border-amber-500/50 rounded-md">
 											<p className="text-xs text-muted-foreground">
-												No se encontró información de generación por IA para
-												esta imagen.
+												No se encontró información de generación por IA para esta imagen.
 											</p>
 										</div>
 									)}
@@ -532,7 +468,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							</Card>
 						)}
 
-						{activeTab === "tech" && (
+						{activeTab === 'tech' && (
 							<div className="space-y-4">
 								{metadata ? (
 									<>
@@ -600,7 +536,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							</div>
 						)}
 
-						{activeTab === "geo" && (
+						{activeTab === 'geo' && (
 							<Card>
 								<CardHeader className="p-3 pb-1">
 									<CardTitle className="text-sm flex items-center">
@@ -622,7 +558,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 							</Card>
 						)}
 
-						{!metadata && !isProcessing && activeTab !== "info" && (
+						{!metadata && !isProcessing && activeTab !== 'info' && (
 							<div className="p-4 border border-dashed border-amber-500/50 rounded-md">
 								<p className="text-sm text-muted-foreground text-center">
 									No se encontró información de metadatos para esta imagen.

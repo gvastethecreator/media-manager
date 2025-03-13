@@ -1,14 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { formatFileSize } from "@/lib/utils";
-import { formatDate } from "@/lib/utils/utils";
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatFileSize } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/utils';
 import {
 	AlignLeft,
 	Calendar,
@@ -26,12 +21,12 @@ import {
 	Target,
 	User2,
 	Variable,
-} from "lucide-react";
-import { Copy, CopyCheck, ImageIcon } from "lucide-react";
-import * as React from "react";
-import { useState } from "react";
-import { InfoItem } from "./details-panel-info-item";
-import type { MetadataComponentProps } from "./details-panel-types";
+} from 'lucide-react';
+import { Copy, CopyCheck, ImageIcon } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
+import { InfoItem } from './details-panel-info-item';
+import type { MetadataComponentProps } from './details-panel-types';
 
 /**
  * Componente para metadata XMP
@@ -40,11 +35,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 	const [copied, setCopied] = useState(false);
 
 	if (!metadata?.xmp) {
-		return (
-			<div className="text-xs text-muted-foreground">
-				No hay datos XMP disponibles
-			</div>
-		);
+		return <div className="text-xs text-muted-foreground">No hay datos XMP disponibles</div>;
 	}
 
 	const { xmp } = metadata;
@@ -60,43 +51,21 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 	return (
 		<div className="space-y-2">
 			{xmp.creator && (
-				<InfoItem
-					label="Creador"
-					value={xmp.creator}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Creador" value={xmp.creator} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
-			{xmp.title && (
-				<InfoItem
-					label="Título"
-					value={xmp.title}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
-			)}
+			{xmp.title && <InfoItem label="Título" value={xmp.title} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />}
 
 			{xmp.description && (
-				<InfoItem
-					label="Descripción"
-					value={xmp.description}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Descripción" value={xmp.description} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
 			{xmp.rights && (
-				<InfoItem
-					label="Derechos"
-					value={xmp.rights}
-					icon={<Copy className="h-3.5 w-3.5 text-red-500" />}
-				/>
+				<InfoItem label="Derechos" value={xmp.rights} icon={<Copy className="h-3.5 w-3.5 text-red-500" />} />
 			)}
 
 			{xmp.toolkit && (
-				<InfoItem
-					label="Toolkit"
-					value={xmp.toolkit}
-					icon={<Info className="h-3.5 w-3.5 text-purple-500" />}
-				/>
+				<InfoItem label="Toolkit" value={xmp.toolkit} icon={<Info className="h-3.5 w-3.5 text-purple-500" />} />
 			)}
 
 			{xmp.subject && xmp.subject.length > 0 && (
@@ -128,9 +97,8 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 					</div>
 					<div className="relative">
 						<div className="max-h-20 overflow-y-auto text-xs p-2 bg-muted/50 rounded-md font-mono whitespace-pre-wrap text-[10px]">
-							{typeof xmp.rawData === "string"
-								? xmp.rawData.substring(0, 500) +
-									(xmp.rawData.length > 500 ? "..." : "")
+							{typeof xmp.rawData === 'string'
+								? xmp.rawData.substring(0, 500) + (xmp.rawData.length > 500 ? '...' : '')
 								: JSON.stringify(xmp.rawData, null, 2)}
 						</div>
 						<TooltipProvider>
@@ -142,23 +110,15 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 										className="absolute top-1 right-1 h-6 w-6 p-0"
 										onClick={() =>
 											copyToClipboard(
-												typeof xmp.rawData === "string"
-													? xmp.rawData
-													: JSON.stringify(xmp.rawData, null, 2)
+												typeof xmp.rawData === 'string' ? xmp.rawData : JSON.stringify(xmp.rawData, null, 2)
 											)
 										}
 									>
-										{copied ? (
-											<CopyCheck className="h-3.5 w-3.5 text-green-500" />
-										) : (
-											<Copy className="h-3.5 w-3.5" />
-										)}
+										{copied ? <CopyCheck className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p className="text-xs">
-										{copied ? "Copiado!" : "Copiar al portapapeles"}
-									</p>
+									<p className="text-xs">{copied ? 'Copiado!' : 'Copiar al portapapeles'}</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -174,8 +134,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 				(!xmp.subject || xmp.subject.length === 0) &&
 				!xmp.rawData && (
 					<p className="text-xs text-muted-foreground italic">
-						Esta imagen contiene metadatos XMP pero no hay información detallada
-						disponible
+						Esta imagen contiene metadatos XMP pero no hay información detallada disponible
 					</p>
 				)}
 		</div>
@@ -187,11 +146,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
  */
 export function IPTCInfo({ metadata }: MetadataComponentProps) {
 	if (!metadata?.iptc) {
-		return (
-			<div className="text-xs text-muted-foreground">
-				No hay datos IPTC disponibles
-			</div>
-		);
+		return <div className="text-xs text-muted-foreground">No hay datos IPTC disponibles</div>;
 	}
 
 	const { iptc } = metadata;
@@ -201,41 +156,25 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 			{iptc.creator && iptc.creator.length > 0 && (
 				<InfoItem
 					label="Creador"
-					value={iptc.creator.join(", ")}
+					value={iptc.creator.join(', ')}
 					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
 				/>
 			)}
 
 			{iptc.headline && (
-				<InfoItem
-					label="Titular"
-					value={iptc.headline}
-					icon={<Info className="h-3.5 w-3.5 text-amber-500" />}
-				/>
+				<InfoItem label="Titular" value={iptc.headline} icon={<Info className="h-3.5 w-3.5 text-amber-500" />} />
 			)}
 
 			{iptc.caption && (
-				<InfoItem
-					label="Leyenda"
-					value={iptc.caption}
-					icon={<Info className="h-3.5 w-3.5 text-purple-500" />}
-				/>
+				<InfoItem label="Leyenda" value={iptc.caption} icon={<Info className="h-3.5 w-3.5 text-purple-500" />} />
 			)}
 
 			{iptc.copyright && (
-				<InfoItem
-					label="Copyright"
-					value={iptc.copyright}
-					icon={<Copy className="h-3.5 w-3.5 text-red-500" />}
-				/>
+				<InfoItem label="Copyright" value={iptc.copyright} icon={<Copy className="h-3.5 w-3.5 text-red-500" />} />
 			)}
 
 			{iptc.source && (
-				<InfoItem
-					label="Fuente"
-					value={iptc.source}
-					icon={<Info className="h-3.5 w-3.5 text-green-500" />}
-				/>
+				<InfoItem label="Fuente" value={iptc.source} icon={<Info className="h-3.5 w-3.5 text-green-500" />} />
 			)}
 
 			{iptc.keywords && iptc.keywords.length > 0 && (
@@ -246,10 +185,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 					</div>
 					<div className="flex flex-wrap gap-1">
 						{iptc.keywords.map((keyword) => (
-							<div
-								key={`keyword-${keyword}`}
-								className="text-xs rounded-full bg-muted px-2 py-0.5"
-							>
+							<div key={`keyword-${keyword}`} className="text-xs rounded-full bg-muted px-2 py-0.5">
 								{keyword}
 							</div>
 						))}
@@ -264,8 +200,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 				!iptc.source &&
 				(!iptc.keywords || iptc.keywords.length === 0) && (
 					<p className="text-xs text-muted-foreground italic">
-						Esta imagen contiene metadatos IPTC pero no hay información
-						detallada disponible
+						Esta imagen contiene metadatos IPTC pero no hay información detallada disponible
 					</p>
 				)}
 		</div>
@@ -277,11 +212,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
  */
 export function ExifInfo({ metadata }: MetadataComponentProps) {
 	if (!metadata?.exif) {
-		return (
-			<div className="text-xs text-muted-foreground">
-				No hay datos EXIF disponibles
-			</div>
-		);
+		return <div className="text-xs text-muted-foreground">No hay datos EXIF disponibles</div>;
 	}
 
 	const { exif } = metadata;
@@ -289,16 +220,16 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 	// Función para formatear la fecha EXIF en formato legible
 	const formatExifDate = (dateStr?: string | Date) => {
 		if (!dateStr) {
-			return "No disponible";
+			return 'No disponible';
 		}
 
 		try {
 			// Intentar parsear la fecha si es string o usar directamente si es Date
-			const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+			const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
 
 			if (Number.isNaN(date.getTime())) {
 				// Si la fecha no es válida, mostrar como string
-				return typeof dateStr === "string" ? dateStr : "Fecha inválida";
+				return typeof dateStr === 'string' ? dateStr : 'Fecha inválida';
 			}
 
 			// Formato de fecha: DD/MM/YYYY HH:MM:SS
@@ -311,27 +242,15 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 	return (
 		<div className="space-y-2">
 			{exif.make && (
-				<InfoItem
-					label="Fabricante"
-					value={exif.make}
-					icon={<Camera className="h-3.5 w-3.5 text-indigo-500" />}
-				/>
+				<InfoItem label="Fabricante" value={exif.make} icon={<Camera className="h-3.5 w-3.5 text-indigo-500" />} />
 			)}
 
 			{exif.model && (
-				<InfoItem
-					label="Modelo"
-					value={exif.model}
-					icon={<Camera className="h-3.5 w-3.5 text-indigo-500" />}
-				/>
+				<InfoItem label="Modelo" value={exif.model} icon={<Camera className="h-3.5 w-3.5 text-indigo-500" />} />
 			)}
 
 			{exif.software && (
-				<InfoItem
-					label="Software"
-					value={exif.software}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Software" value={exif.software} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
 			{exif.dateTime && (
@@ -359,11 +278,7 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 			)}
 
 			{exif.iso && (
-				<InfoItem
-					label="ISO"
-					value={exif.iso.toString()}
-					icon={<Camera className="h-3.5 w-3.5 text-purple-500" />}
-				/>
+				<InfoItem label="ISO" value={exif.iso.toString()} icon={<Camera className="h-3.5 w-3.5 text-purple-500" />} />
 			)}
 
 			{exif.focalLength && (
@@ -383,27 +298,15 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 			)}
 
 			{exif.copyright && (
-				<InfoItem
-					label="Copyright"
-					value={exif.copyright}
-					icon={<Copy className="h-3.5 w-3.5 text-red-500" />}
-				/>
+				<InfoItem label="Copyright" value={exif.copyright} icon={<Copy className="h-3.5 w-3.5 text-red-500" />} />
 			)}
 
 			{exif.artist && (
-				<InfoItem
-					label="Artista"
-					value={exif.artist}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Artista" value={exif.artist} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
 			{exif.description && (
-				<InfoItem
-					label="Descripción"
-					value={exif.description}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Descripción" value={exif.description} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
 			{!exif.make &&
@@ -419,8 +322,7 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 				!exif.artist &&
 				!exif.description && (
 					<p className="text-xs text-muted-foreground italic">
-						Esta imagen contiene metadatos EXIF pero no hay información
-						detallada disponible
+						Esta imagen contiene metadatos EXIF pero no hay información detallada disponible
 					</p>
 				)}
 		</div>
@@ -432,24 +334,14 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
  */
 export function GPSInfo({ metadata }: MetadataComponentProps) {
 	if (!metadata?.exif?.gps) {
-		return (
-			<div className="text-xs text-muted-foreground">
-				No hay datos GPS disponibles
-			</div>
-		);
+		return <div className="text-xs text-muted-foreground">No hay datos GPS disponibles</div>;
 	}
 
 	const { gps } = metadata.exif;
 
 	// Formatear coordenadas
 	const formatCoordinate = (value: number, isLatitude: boolean) => {
-		const direction = isLatitude
-			? value >= 0
-				? "N"
-				: "S"
-			: value >= 0
-				? "E"
-				: "O";
+		const direction = isLatitude ? (value >= 0 ? 'N' : 'S') : value >= 0 ? 'E' : 'O';
 
 		const absValue = Math.abs(value);
 		const degrees = Math.floor(absValue);
@@ -497,7 +389,7 @@ export function GPSInfo({ metadata }: MetadataComponentProps) {
 						variant="outline"
 						size="sm"
 						className="w-full text-xs"
-						onClick={() => window.open(googleMapsUrl, "_blank")}
+						onClick={() => window.open(googleMapsUrl, '_blank')}
 					>
 						<MapPin className="h-3.5 w-3.5 mr-1.5" />
 						Ver en Google Maps
@@ -505,13 +397,11 @@ export function GPSInfo({ metadata }: MetadataComponentProps) {
 				</div>
 			)}
 
-			{gps.latitude === undefined &&
-				gps.longitude === undefined &&
-				gps.altitude === undefined && (
-					<p className="text-xs text-muted-foreground italic">
-						Esta imagen contiene datos GPS pero no hay coordenadas disponibles
-					</p>
-				)}
+			{gps.latitude === undefined && gps.longitude === undefined && gps.altitude === undefined && (
+				<p className="text-xs text-muted-foreground italic">
+					Esta imagen contiene datos GPS pero no hay coordenadas disponibles
+				</p>
+			)}
 		</div>
 	);
 }
@@ -535,11 +425,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 			)}
 
 			{metadata.mimeType && (
-				<InfoItem
-					label="Tipo MIME"
-					value={metadata.mimeType}
-					icon={<Info className="h-3.5 w-3.5 text-blue-500" />}
-				/>
+				<InfoItem label="Tipo MIME" value={metadata.mimeType} icon={<Info className="h-3.5 w-3.5 text-blue-500" />} />
 			)}
 
 			{metadata.fileSize !== undefined && (
@@ -561,7 +447,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 			{metadata.hasAlpha !== undefined && (
 				<InfoItem
 					label="Canal alfa"
-					value={metadata.hasAlpha ? "Sí" : "No"}
+					value={metadata.hasAlpha ? 'Sí' : 'No'}
 					icon={<Info className="h-3.5 w-3.5 text-amber-500" />}
 				/>
 			)}
@@ -569,7 +455,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 			{metadata.isAnimated !== undefined && (
 				<InfoItem
 					label="Animada"
-					value={metadata.isAnimated ? "Sí" : "No"}
+					value={metadata.isAnimated ? 'Sí' : 'No'}
 					icon={<Info className="h-3.5 w-3.5 text-indigo-500" />}
 				/>
 			)}
@@ -580,9 +466,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 				!metadata.colorSpace &&
 				metadata.hasAlpha === undefined &&
 				metadata.isAnimated === undefined && (
-					<p className="text-xs text-muted-foreground italic">
-						No se encontró información técnica para esta imagen
-					</p>
+					<p className="text-xs text-muted-foreground italic">No se encontró información técnica para esta imagen</p>
 				)}
 		</div>
 	);
