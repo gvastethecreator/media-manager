@@ -24,7 +24,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import type * as React from "react";
 import { useState } from "react";
-import { EntityCardWrapper } from "../base/entity-card-wrapper";
+import { EntityCardWrapper } from "../entity-base-card";
 import { VisualizationConfig } from "../config/visualization-config";
 import type { CollectionFormData } from "../forms/entity-types";
 import type {

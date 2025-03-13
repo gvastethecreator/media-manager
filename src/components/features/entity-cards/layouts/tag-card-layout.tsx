@@ -7,7 +7,7 @@ import { ArrowUpRight, Edit, Star, Tag, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import type * as React from "react";
 import { useState } from "react";
-import { EntityCardWrapper } from "../base/entity-card-wrapper";
+import { EntityCardWrapper } from "../entity-base-card";
 import { DEFAULT_SETTINGS_OPTIONS } from "../config/card-config-defaults";
 import { VisualizationConfig } from "../config/visualization-config";
 import type {

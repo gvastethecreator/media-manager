@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import type * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type { CardOptions } from './types/card-settings-types';
 
@@ -11,7 +12,6 @@ interface BaseCardProps {
 	description: string;
 	onClick?: () => void;
 	showVisualConfig?: boolean;
-	enableExplode?: boolean;
 	visualOptions?: CardOptions;
 }
 
@@ -20,7 +20,6 @@ export function BaseCard({
 	description,
 	onClick,
 	showVisualConfig = false,
-	enableExplode = false,
 	visualOptions = {},
 }: BaseCardProps) {
 	const cardRef = useRef<HTMLDivElement>(null);
@@ -88,10 +87,14 @@ export function BaseCard({
 	} = visualOptions;
 
 	useEffect(() => {
-		if (!cardRef.current || !enable3DEffect || !showVisualConfig) return;
+		if (!cardRef.current || !enable3DEffect || !showVisualConfig) {
+			return;
+		}
 
 		const handleMouseMove = (e: MouseEvent) => {
-			if (!cardRef.current) return;
+			if (!cardRef.current) {
+				return;
+			}
 
 			const rect = cardRef.current.getBoundingClientRect();
 			const x = e.clientX - rect.left;
@@ -145,7 +148,7 @@ export function BaseCard({
 	);
 
 	const contentStyle = {
-		mixBlendMode: layerSystem.layerBlending as any,
+		mixBlendMode: layerSystem.layerBlending as React.CSSProperties['mixBlendMode'],
 		filter: enableHolographicEffect
 			? 'brightness(1.2) contrast(1.1) saturate(1.2)'
 			: undefined,
