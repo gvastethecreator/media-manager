@@ -9,6 +9,15 @@ import type {
 } from './base-card-types';
 
 /**
+ * Respuesta estándar para las acciones del servidor relacionadas con capas
+ */
+export interface LayerConfigResponse<T = unknown> {
+	success: boolean;
+	message: string;
+	data?: T;
+}
+
+/**
  * Props para el contenedor principal de la tarjeta
  */
 export interface CardContainerProps {

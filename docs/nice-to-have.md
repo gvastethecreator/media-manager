@@ -39,3 +39,13 @@ https://tympanus.net/Tutorials/R3FImageReveal/
 
 Opciones de personalización :
 - cursor customizado
+- otros theme
+- low performance mode
+- reordenar el nav panel
+- editor de imagenes
+- editor de metadata
+- editor de video
+- importar archivos 3d
+- importar audio
+- importar documentos
+- importar pdf

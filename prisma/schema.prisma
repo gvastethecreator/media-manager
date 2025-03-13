@@ -838,3 +838,127 @@ model LayerAnimatedBorderConfig {
   @@unique([entityType, entityId], name: "entityType_entityId")
   @@index([entityType])
 }
+
+// Modelo para la configuración de aberración cromática
+model LayerChromaticAberrationConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  offset          Float    @default(2)
+  intensity       Float    @default(0.5)
+  visibleOnHover  Boolean  @default(true)
+  redOffset       Float    @default(2)
+  greenOffset     Float    @default(0)
+  blueOffset      Float    @default(-2)
+  direction       String   @default("horizontal") // horizontal, vertical, radial, custom
+  blendMode       String   @default("screen")
+  animateOnHover  Boolean  @default(false)
+  animationSpeed  Float    @default(1)
+  animationType   String   @default("pulse") // pulse, wave, random
+  blurAmount      Float    @default(0.5)
+  quality         String   @default("medium") // low, medium, high
+  colorMode       String   @default("rgb") // rgb, cmyk, custom
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración del efecto glitch
+model LayerGlitchEffectConfig {
+  id            String   @id @default(cuid())
+  entityType    String
+  entityId      String   @default("default")
+  isDefault     Boolean  @default(false)
+
+  // Propiedades básicas
+  enabled       Boolean  @default(true)
+  intensity     Float    @default(0.1)
+  frequency     Float    @default(0.05)
+  duration      Float    @default(0.2)
+
+  // Comportamiento
+  visibleOnHover Boolean  @default(true)
+  triggerOnHover Boolean  @default(false)
+  randomTrigger  Boolean  @default(false)
+  randomFrequency Float   @default(0.1)
+  stopAfterSeconds Float? @default(2)
+  affectContent  Boolean  @default(true)
+
+  // Propiedades de efecto
+  sliceCount     Int     @default(10)
+  sliceOffset    Float   @default(5)
+  colorShiftAmount Float  @default(0.1)
+  noiseIntensity  Float  @default(0.2)
+  scanlineEffect  Boolean @default(true)
+  distortionType  String  @default("digital")
+  blendMode       String  @default("overlay")
+  rgbShiftEnabled Boolean @default(true)
+  brightnessNoise Float   @default(0.1)
+  staticNoise     Float   @default(0.05)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Índices y restricciones
+  @@unique([entityType, entityId])
+  @@index([entityType, isDefault])
+}
+
+// Modelo para la configuración de noise texture
+model LayerNoiseTextureConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  density         Float    @default(0.6)
+  opacity         Float    @default(0.1)
+  visibleOnHover  Boolean  @default(true)
+  pattern         String?  @default("fractalNoise")
+  scale           Float?   @default(1)
+  octaves         Int?     @default(3)
+  seed            Int?     @default(42)
+  animated        Boolean? @default(false)
+  animationSpeed  Float?   @default(1)
+  blendMode       String?  @default("overlay")
+  color           String?  @default("rgba(255, 255, 255, 0.5)")
+  intensity       Float?   @default(0.5)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración de filtros
+model LayerFilterConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  visibleOnHover  Boolean  @default(false)
+  opacity         Float    @default(1)
+  intensity       Float    @default(1)
+
+  // Configuración de Glow como JSON
+  glow            Json?    @default("{\"enabled\":false,\"color\":\"rgba(0, 0, 255, 0.3)\",\"radius\":10,\"intensity\":0.5}")
+
+  // Configuración de Shadow como JSON
+  shadow          Json?    @default("{\"enabled\":true,\"color\":\"rgba(0, 0, 0, 0.3)\",\"blur\":5,\"offsetX\":0,\"offsetY\":5,\"inset\":false}")
+
+  // Configuración de Distortion como JSON
+  distortion      Json?    @default("{\"enabled\":false,\"type\":\"wave\",\"amount\":5,\"speed\":1,\"animated\":false}")
+
+  layerIndex      Int      @default(5)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}

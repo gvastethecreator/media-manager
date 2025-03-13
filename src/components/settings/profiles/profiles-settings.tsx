@@ -41,7 +41,7 @@ export function ProfilesSettings() {
 
 	if (!profiles || profiles.length === 0) {
 		return (
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
+			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
 				<CardHeader className="p-2 pb-0 bg-transparent">
 					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
 						<span className="flex items-center gap-2 h-7">
@@ -62,7 +62,7 @@ export function ProfilesSettings() {
 	}
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm">
+		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
 			{/* Perfil Activo */}
 			<CardHeader className="p-2 pb-0 bg-transparent">
 				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">

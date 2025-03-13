@@ -59,7 +59,7 @@ export function FoldersSettings() {
 
 	if (displayError) {
 		return (
-			<Card className="bg-muted/30 rounded-sm">
+			<Card className="bg-muted/30 rounded-sm border-none">
 				<div className="p-3 flex flex-col gap-2">
 					<div className="flex items-center gap-2 text-destructive">
 						<AlertCircle className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function FoldersSettings() {
 	}
 
 	return (
-		<Card className="bg-muted/30 rounded-sm">
+		<Card className="bg-muted/30 rounded-sm border-none">
 			<CardHeader className="p-3 pb-2">
 				<CardTitle className="text-base text-muted-foreground font-medium flex items-center justify-between">
 					<div className="flex items-center gap-2">
