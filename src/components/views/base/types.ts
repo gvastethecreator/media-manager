@@ -53,6 +53,11 @@ export interface BaseContentProps {
 	 * Clase CSS adicional para el contenedor
 	 */
 	className?: string;
+
+	/**
+	 * Función para recargar los items de la vista
+	 */
+	onRefresh?: () => Promise<void>;
 }
 
 /**

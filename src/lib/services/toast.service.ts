@@ -4,31 +4,22 @@
  */
 
 import type * as React from 'react';
-import { type ToastT, toast } from 'sonner';
+import { type ExternalToast, type ToastT, toast } from 'sonner';
 
 // Tipos de notificaciones
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'default';
 
-// Opciones de notificación
-export interface ToastOptions {
-	id?: string;
-	duration?: number;
-	icon?: React.ReactNode;
+// Opciones de notificación adaptadas a la API de sonner
+export interface ToastOptions extends Omit<ExternalToast, 'description'> {
 	description?: React.ReactNode;
 	action?: {
 		label: string;
-		onClick: () => void;
+		onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	};
 	cancel?: {
 		label: string;
-		onClick?: () => void;
+		onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	};
-	onDismiss?: () => void;
-	onAutoClose?: () => void;
-	position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
-	className?: string;
-	dismissible?: boolean;
-	important?: boolean;
 }
 
 // Categorías de notificaciones
@@ -71,20 +62,31 @@ const TOAST_TYPES = {
  * @param type Tipo de notificación
  * @returns La instancia de la notificación
  */
-const showToast = (title: string, options?: ToastOptions, type: ToastType = 'default'): ToastT => {
+const showToast = (title: string, options?: ToastOptions, type: ToastType = 'default'): void => {
 	const { description, ...restOptions } = options || {};
+
+	// Convertir las opciones al formato que espera sonner
+	const toastOptions: ExternalToast = {
+		...restOptions,
+		description,
+	};
 
 	switch (type) {
 		case 'success':
-			return toast.success(title, { description, ...restOptions });
+			toast.success(title, toastOptions);
+			break;
 		case 'error':
-			return toast.error(title, { description, ...restOptions });
+			toast.error(title, toastOptions);
+			break;
 		case 'info':
-			return toast.info(title, { description, ...restOptions });
+			toast.info(title, toastOptions);
+			break;
 		case 'warning':
-			return toast.warning(title, { description, ...restOptions });
+			toast.warning(title, toastOptions);
+			break;
 		default:
-			return toast(title, { description, ...restOptions });
+			toast(title, toastOptions);
+			break;
 	}
 };
 

@@ -1,3 +1,5 @@
+'use client';
+
 import type { FileMetadata } from '@/types/file-item';
 
 // Logger dedicado para metadata
@@ -217,14 +219,13 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 };
 
 /**
- * Trunca un texto a una longitud máxima, añadiendo puntos suspensivos si es necesario
+ * Trunca un texto a una longitud determinada
  */
-export const truncateText = (text: string | undefined, maxLength = 150): string => {
-	if (!text) {
-		return '';
-	}
-	return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-};
+export function truncateText(text: string, maxLength = 150): string {
+	if (!text) return '';
+	if (text.length <= maxLength) return text;
+	return `${text.substring(0, maxLength)}...`;
+}
 
 // Configuración de carga de imágenes
 export const LOAD_CONFIG = {

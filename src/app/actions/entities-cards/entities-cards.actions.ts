@@ -88,7 +88,7 @@ export interface RarityItem {
 export interface RaritySystem {
 	enabled: boolean;
 	rarities: RarityItem[];
-	entityType?: string;
+	entityType: string;
 }
 
 // Tipo para un elemento de textura

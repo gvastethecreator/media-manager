@@ -33,6 +33,7 @@ export type ImageProcessingOptions = {
 	height?: number;
 	format?: 'webp' | 'jpeg' | 'png';
 	fit?: 'cover' | 'contain' | 'inside' | 'outside';
+	type?: string;
 };
 
 class ImageService {

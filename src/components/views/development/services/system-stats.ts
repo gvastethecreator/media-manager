@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import { formatBytes } from '@/lib/utils/utils';
 
 /**
@@ -8,7 +8,8 @@ import { formatBytes } from '@/lib/utils/utils';
  */
 export async function getIndexedFilesCount(): Promise<number> {
 	try {
-		const count = await db.file.count();
+		const prisma = await getPrismaClient();
+		const count = await prisma.image.count();
 		return count;
 	} catch (error) {
 		console.error('Error al obtener conteo de archivos:', error);
@@ -24,7 +25,8 @@ export async function getTotalSpaceUsed(): Promise<{
 	formatted: string;
 }> {
 	try {
-		const result = await db.file.aggregate({
+		const prisma = await getPrismaClient();
+		const result = await prisma.image.aggregate({
 			_sum: {
 				size: true,
 			},
@@ -50,7 +52,8 @@ export async function getTotalSpaceUsed(): Promise<{
  */
 export async function getMonitoredFoldersCount(): Promise<number> {
 	try {
-		const count = await db.folder.count();
+		const prisma = await getPrismaClient();
+		const count = await prisma.folder.count();
 		return count;
 	} catch (error) {
 		console.error('Error al obtener carpetas monitoreadas:', error);
@@ -63,7 +66,8 @@ export async function getMonitoredFoldersCount(): Promise<number> {
  */
 export async function getCollectionsCount(): Promise<number> {
 	try {
-		const count = await db.collection.count();
+		const prisma = await getPrismaClient();
+		const count = await prisma.collection.count();
 		return count;
 	} catch (error) {
 		console.error('Error al obtener colecciones:', error);
@@ -76,7 +80,8 @@ export async function getCollectionsCount(): Promise<number> {
  */
 export async function getTagsCount(): Promise<number> {
 	try {
-		const count = await db.tag.count();
+		const prisma = await getPrismaClient();
+		const count = await prisma.tag.count();
 		return count;
 	} catch (error) {
 		console.error('Error al obtener etiquetas:', error);
@@ -94,10 +99,11 @@ export async function getFilesHistoricalData(): Promise<
 	}>
 > {
 	try {
+		const prisma = await getPrismaClient();
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-		const files = await db.file.findMany({
+		const files = await prisma.image.findMany({
 			where: {
 				createdAt: {
 					gte: sevenDaysAgo,
@@ -109,14 +115,11 @@ export async function getFilesHistoricalData(): Promise<
 		});
 
 		// Agrupar por día
-		const groupedByDay = files.reduce(
-			(acc, file) => {
-				const date = file.createdAt.toISOString().split('T')[0];
-				acc[date] = (acc[date] || 0) + 1;
-				return acc;
-			},
-			{} as Record<string, number>
-		);
+		const groupedByDay = files.reduce<Record<string, number>>((acc, file) => {
+			const date = file.createdAt.toISOString().split('T')[0];
+			acc[date] = (acc[date] || 0) + 1;
+			return acc;
+		}, {});
 
 		// Crear array para los últimos 7 días
 		const result = [];
@@ -147,10 +150,11 @@ export async function getTagsHistoricalData(): Promise<
 	}>
 > {
 	try {
+		const prisma = await getPrismaClient();
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-		const tags = await db.tag.findMany({
+		const tags = await prisma.tag.findMany({
 			where: {
 				createdAt: {
 					gte: sevenDaysAgo,
@@ -162,14 +166,11 @@ export async function getTagsHistoricalData(): Promise<
 		});
 
 		// Agrupar por día
-		const groupedByDay = tags.reduce(
-			(acc, tag) => {
-				const date = tag.createdAt.toISOString().split('T')[0];
-				acc[date] = (acc[date] || 0) + 1;
-				return acc;
-			},
-			{} as Record<string, number>
-		);
+		const groupedByDay = tags.reduce<Record<string, number>>((acc, tag) => {
+			const date = tag.createdAt.toISOString().split('T')[0];
+			acc[date] = (acc[date] || 0) + 1;
+			return acc;
+		}, {});
 
 		// Crear array acumulativo para los últimos 7 días
 		const result = [];

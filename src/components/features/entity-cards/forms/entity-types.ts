@@ -1,3 +1,4 @@
+import type { BaseFormData } from '@/types/form.types';
 import type {
 	Album as PrismaAlbum,
 	Character as PrismaCharacter,
@@ -85,6 +86,7 @@ export interface ObjectFormData extends BaseEntityFormData {
 	shortcut?: string;
 	featuredImage?: string | null;
 	isFavorite: boolean;
+	category?: string | null;
 }
 
 export interface WorldItemFormData extends BaseEntityFormData {
@@ -231,7 +233,7 @@ export function albumToFormData(album: Album): AlbumFormData {
 	};
 }
 
-export function formDataToAlbum(data: AlbumFormData): Omit<PrismaAlbum, 'id' | 'createdAt' | 'updatedAt'> {
+export function formDataToAlbum(data: AlbumFormData): Omit<PrismaAlbum, 'id' | 'createdAt' | 'updatedAt' | 'images'> {
 	return {
 		name: data.name,
 		emoji: data.emoji,
@@ -428,7 +430,7 @@ export function noteToFormData(note: Note): NoteFormData {
 		status: note.status,
 		tags: JSON.parse(note.tags),
 		featuredImage: note.featuredImage || undefined,
-		isFavorite: note.isFavorite,
+		isFavorite: note.isFavorite || false,
 	};
 }
 
@@ -452,11 +454,11 @@ export function conceptToFormData(concept: Concept): ConceptFormData {
 		emoji: concept.emoji,
 		color: concept.color,
 		description: concept.description || '',
-		content: concept.content,
-		category: concept.category,
-		tags: JSON.parse(concept.tags),
-		featuredImage: concept.featuredImage || undefined,
-		isFavorite: concept.isFavorite,
+		content: concept.content || '',
+		category: concept.category || '',
+		tags: concept.tags ? concept.tags.split(',').filter(Boolean) : [],
+		featuredImage: concept.featuredImage,
+		isFavorite: concept.isFavorite || false,
 	};
 }
 

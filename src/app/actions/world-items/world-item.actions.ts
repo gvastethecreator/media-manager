@@ -145,8 +145,13 @@ export async function getWorldItems() {
 	const cached = await worldItemsCache.get('all');
 	if (cached) {
 		worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
-		// Se asume que cached ya es un arreglo de objetos planos
-		const items = cached as Array<PrismaWorldItem & { _count: { images: number } }>;
+		// Convertir los datos del caché al formato esperado
+		const items = cached.map((item) => ({
+			...item,
+			createdAt: new Date(item.createdAt as string),
+			updatedAt: new Date(item.updatedAt as string),
+			_count: { images: (item.imageCount as number) || 0 },
+		})) as Array<PrismaWorldItem & { _count: { images: number } }>;
 		return items.map(transformWorldItem);
 	}
 
@@ -163,8 +168,26 @@ export async function getWorldItems() {
 		},
 	});
 
-	// Convertir a objeto plano para almacenar en caché
-	const dataToCache = JSON.parse(JSON.stringify(worldItems)) as Array<PrismaWorldItem & { _count: { images: number } }>;
+	// Convertir a formato compatible con el caché
+	const dataToCache = worldItems.map((item) => ({
+		id: item.id,
+		name: item.name,
+		emoji: item.emoji,
+		color: item.color,
+		description: item.description,
+		type: item.type,
+		rarity: item.rarity,
+		properties: item.properties,
+		requirements: item.requirements,
+		origin: item.origin,
+		stats: item.stats,
+		category: item.category,
+		createdAt: item.createdAt.toISOString(),
+		updatedAt: item.updatedAt.toISOString(),
+		imageCount: item._count.images,
+		featuredImage: item.featuredImage,
+	}));
+
 	await worldItemsCache.set('all', dataToCache);
 
 	return worldItems.map(transformWorldItem);

@@ -96,22 +96,22 @@ class ThumbnailService {
 		// Emitir eventos al sistema general según corresponda
 		if (event === EVENTS.PROGRESS) {
 			await emit({
-				type: 'thumbnail:progress',
+				type: 'folder:progress',
 				data: args[0],
 			});
 		} else if (event === EVENTS.ERROR) {
 			await emit({
-				type: 'thumbnail:error',
+				type: 'folder:error',
 				data: args[0],
 			});
 		} else if (event === EVENTS.COMPLETE) {
 			await emit({
-				type: 'thumbnail:complete',
+				type: 'folder:complete',
 				data: args[0],
 			});
 		} else if (event === EVENTS.STATS) {
 			await emit({
-				type: 'thumbnail:stats',
+				type: 'folder:stats',
 				data: args[0],
 			});
 		}

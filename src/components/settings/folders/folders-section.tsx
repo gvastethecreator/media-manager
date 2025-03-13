@@ -148,7 +148,6 @@ export function FoldersSection() {
 								processStatus={processStatus}
 								isGloballyProcessing={isGloballyProcessing}
 								onReindex={handleReindexFolder}
-								enableExplode={true}
 								onToggleAutoReindex={handleAutoReindexToggle}
 								onFolderClick={handleFolderClick}
 								getFolderIndexStatus={getFolderIndexStatus}

@@ -16,9 +16,14 @@ const noteLogger = logger.withContext('NoteStore');
 
 const mapToNoteWithStats = (note: Awaited<ReturnType<typeof getNotes>>[0]): NoteWithStats => ({
 	...note,
-	totalSize: 0,
+	_count: note._count || {
+		concepts: 0,
+		prompts: 0,
+		characters: 0,
+		places: 0,
+		worldItems: 0,
+	},
 	lastUpdated: new Date(),
-	recentImages: [],
 });
 
 interface NoteStore {
@@ -27,8 +32,8 @@ interface NoteStore {
 	error: string | null;
 	selectedItem: Note | null;
 	loadNotes: () => Promise<void>;
-	createNote: (note: NoteCreate) => Promise<Note>;
-	updateNote: (id: string, note: NoteUpdate) => Promise<Note>;
+	createNote: typeof createNoteAction;
+	updateNote: typeof updateNoteAction;
 	deleteNote: (id: string) => Promise<void>;
 	addNoteToImage: (imageId: string, noteId: string) => Promise<void>;
 	selectItem: (note: Note) => void;

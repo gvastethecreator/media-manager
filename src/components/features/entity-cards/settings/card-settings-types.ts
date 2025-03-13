@@ -141,6 +141,7 @@ export interface SystemSettingsProps extends CardSettingsProps {
 	onTextureChange: (texture: TextureConfig | null) => void;
 	raritySystem?: RaritySystem;
 	textureSystem?: TextureSystem;
+	accordionMode?: boolean;
 }
 
 export interface PreviewPanelProps {

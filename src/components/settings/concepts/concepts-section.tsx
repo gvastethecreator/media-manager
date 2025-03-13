@@ -238,7 +238,20 @@ export function ConceptsSection() {
 											<Card className="relative">
 												<CardContent className="p-4">
 													<ConceptForm
-														initialData={conceptToFormData(concept)}
+														initialData={{
+															id: concept.id,
+															name: concept.name,
+															emoji: concept.emoji,
+															color: concept.color,
+															description: concept.description || "",
+															content: concept.content || "",
+															category: concept.category || "",
+															tags: concept.tags
+																? concept.tags.split(",").filter(Boolean)
+																: [],
+															featuredImage: concept.featuredImage || null,
+															isFavorite: concept.isFavorite || false,
+														}}
 														onSubmit={handleUpdate}
 														onCancel={() => setEditingId(null)}
 														isLoading={isLoading}
@@ -247,7 +260,20 @@ export function ConceptsSection() {
 											</Card>
 										) : (
 											<ConceptCard
-												concept={concept}
+												concept={{
+													id: concept.id,
+													name: concept.name,
+													emoji: concept.emoji,
+													color: concept.color,
+													description: concept.description || null,
+													content: concept.content || "",
+													category: concept.category || "",
+													tags: concept.tags || "",
+													featuredImage: concept.featuredImage || null,
+													isFavorite: concept.isFavorite || false,
+													createdAt: new Date(concept.createdAt),
+													updatedAt: new Date(concept.updatedAt),
+												}}
 												onEdit={() => setEditingId(concept.id)}
 												onDelete={() => handleDelete(concept.id)}
 											/>

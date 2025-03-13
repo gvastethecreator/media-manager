@@ -26,8 +26,8 @@ interface PromptStore {
 	error: string | null;
 	selectedItem: Prompt | null;
 	loadPrompts: () => Promise<void>;
-	createPrompt: (prompt: PromptCreate) => Promise<Prompt>;
-	updatePrompt: (id: string, prompt: PromptUpdate) => Promise<Prompt>;
+	createPrompt: typeof createPromptAction;
+	updatePrompt: typeof updatePromptAction;
 	deletePrompt: (id: string) => Promise<void>;
 	addPromptToImage: (imageId: string, promptId: string) => Promise<void>;
 	selectItem: (prompt: Prompt) => void;

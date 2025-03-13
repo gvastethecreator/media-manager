@@ -1,53 +1,49 @@
 "use client";
 
-import type {
-	RaritySystem,
-	TextureSystem,
-} from "@/app/actions/entities-cards/entities-cards.actions";
+import type { RaritySystem } from "@/app/actions/entities-cards/entities-cards.actions";
 import {
 	getEntityCardConfig,
 	saveEntityCardConfig,
 } from "@/app/actions/entities-cards/entities-cards.actions";
+import type { TextureSystem } from "@/components/features/entity-cards/base/base-card-types";
 
-import { BaseCard } from "@/components/features/entity-cards/base/base-card";
-import type { CardOptions as BaseCardOptions } from "@/components/features/entity-cards/base/base-card-types";
 import type {
 	RarityConfig,
 	TextureConfig,
 } from "@/components/features/entity-cards/base/base-card-types";
+import type {
+	CardConfigurationDto,
+	ImageGridLayout,
+	ImageGridStyle,
+} from "@/components/features/entity-cards/types/card-types";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Alert, AlertDescription } from "@/components/ui/alert-enhanced";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TypographyH3, TypographyP } from "@/components/ui/typography";
 import { toastService } from "@/lib/services/toast.service";
 import { cn } from "@/lib/utils/utils";
 import {
 	AlertCircle,
-	Box,
+	Eye,
 	Grid2X2,
 	Images,
 	Info,
+	Laptop,
 	Layers,
+	LayoutGrid,
 	LibrarySquare,
 	Lightbulb,
 	MapPin,
@@ -55,64 +51,37 @@ import {
 	Package,
 	PaintBucket,
 	Palette,
-	RotateCcw,
+	RefreshCw,
+	Repeat,
 	Save,
 	Settings,
 	Settings2,
 	Sliders,
 	Sparkles,
 	StickyNote,
-	Tag as TagIcon,
+	TagIcon,
 	Users,
 } from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import type * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { adaptBaseToSettingsOptions } from "../base/card-adapter";
-import { TextureManager } from "../tools/texture-manager";
+import { AdvancedEffectsSettings } from "./advanced-effects-settings";
 import { DEFAULT_SETTINGS_OPTIONS } from "./card-config-defaults";
-import { CardSettingsPanel } from "./card-settings-panel";
 import type { CardOptions } from "./card-settings-types";
+import { DesignSettings } from "./design-settings";
 import { EntityCardPreview } from "./entity-card-preview";
-import { RarityManager } from "./rarity-manager";
-
-// Interfaz para la transferencia de datos a la API
-interface CardConfigurationDto {
-	entityType: string;
-	enable3DEffect: boolean;
-	enableHolographicEffect: boolean;
-	enableScanlines: boolean;
-	enableLightHalo: boolean;
-	enableAnimatedBorder: boolean;
-	enableGlowEffect: boolean;
-	enableGrainEffect: boolean;
-	hoverLiftHeight: number;
-	maxRotation: number;
-	primaryColor: string;
-	secondaryColor: string;
-	raritySystem: boolean;
-	categorySystem: boolean;
-	textureSystem: boolean;
-
-	// Configuración de grid de imágenes
-	imageGridLayout?: string; // 'single', 'dual', 'quad', 'six'
-	imageGridGap?: number;
-	imageGridStyle?: string; // 'standard', 'masonry', 'carousel'
-	showImageCount?: boolean;
-	imageGridAspectRatio?: string;
-
-	// Opciones como JSON strings para almacenamiento en DB
-	holographicOptions?: string;
-	scanlinesOptions?: string;
-	glowOptions?: string;
-	borderOptions?: string;
-	grainOptions?: string;
-}
+import { ImageGridSettings } from "./image-grid-settings";
+import { PerformanceSettings } from "./performance-settings";
+import { PresetsPanel } from "./presets-panel";
+import { PreviewPanel } from "./preview-panel";
+import { StatesSettings } from "./states-settings";
+import { SystemsSettings } from "./systems-settings";
+import { VisualEffectsSettings } from "./visual-effects-settings";
 
 // Función para adaptar opciones entre diferentes estructuras de tipo
-const adaptOptions = (
-	options: Partial<BaseCardOptions> | Record<string, unknown>
-): CardOptions => {
+const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 	// Convertir imageStyle de objeto a string si es necesario
 	const adaptedOptions = { ...options } as Record<string, unknown>;
 	if (
@@ -122,7 +91,8 @@ const adaptOptions = (
 		adaptedOptions.imageStyle = "cover"; // Valor predeterminado compatible
 	}
 
-	return adaptBaseToSettingsOptions(adaptedOptions as Partial<BaseCardOptions>);
+	// Usamos unknown como intermediario para evitar errores de tipo
+	return adaptBaseToSettingsOptions(adaptedOptions as Record<string, unknown>);
 };
 
 // Interfaz para opciones predeterminadas de cada tipo de entidad
@@ -132,17 +102,70 @@ interface EntityTypeOptions {
 	title: string;
 	description: string;
 	icon: ReactNode;
+	color: string; // Añadimos color para los iconos
 	defaultRarity?: RarityConfig;
 	defaultTexture?: TextureConfig;
 }
 
-// Lista de tipos de entidades disponibles
+// Colores para cada sección de configuración
+const sectionColors = {
+	presets:
+		"from-blue-50 to-blue-100/10 dark:from-blue-950/10 dark:to-blue-900/5",
+	visual:
+		"from-indigo-50 to-indigo-100/10 dark:from-indigo-950/10 dark:to-indigo-900/5",
+	system:
+		"from-violet-50 to-violet-100/10 dark:from-violet-950/10 dark:to-violet-900/5",
+	images:
+		"from-pink-50 to-pink-100/10 dark:from-pink-950/10 dark:to-pink-900/5",
+	advanced:
+		"from-cyan-50 to-cyan-100/10 dark:from-cyan-950/10 dark:to-cyan-900/5",
+	design:
+		"from-emerald-50 to-emerald-100/10 dark:from-emerald-950/10 dark:to-emerald-900/5",
+	performance:
+		"from-amber-50 to-amber-100/10 dark:from-amber-950/10 dark:to-amber-900/5",
+	states:
+		"from-orange-50 to-orange-100/10 dark:from-orange-950/10 dark:to-orange-900/5",
+};
+
+// Componente para una sección con color de fondo
+const SettingsSection = ({
+	children,
+	colorClass,
+	title,
+	icon,
+}: {
+	children: React.ReactNode;
+	colorClass: string;
+	title?: string;
+	icon?: ReactNode;
+}) => {
+	return (
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			className={cn("rounded-md bg-gradient-to-br p-0.5 mb-3", colorClass)}
+		>
+			<div className="bg-card rounded-md p-3">
+				{title && (
+					<div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+						{icon}
+						<h3 className="text-sm font-medium">{title}</h3>
+					</div>
+				)}
+				{children}
+			</div>
+		</motion.div>
+	);
+};
+
+// Lista de tipos de entidades disponibles con colores para los iconos
 const entityTypes: EntityTypeOptions[] = [
 	{
-		entityType: "album",
+		entityType: "card-album",
 		title: "Álbumes",
 		description: "Configuración de tarjetas para álbumes",
 		icon: <Images className="h-4 w-4" />,
+		color: "#8b5cf6", // Color morado
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -152,10 +175,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "collection",
+		entityType: "card-collection",
 		title: "Colecciones",
 		description: "Configuración de tarjetas para colecciones",
 		icon: <LibrarySquare className="h-4 w-4" />,
+		color: "#ef4444", // Color rojo
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -165,10 +189,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "tag",
+		entityType: "card-tag",
 		title: "Etiquetas",
 		description: "Configuración de tarjetas para etiquetas",
 		icon: <TagIcon className="h-4 w-4" />,
+		color: "#f59e0b", // Color naranja
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -178,10 +203,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "character",
+		entityType: "card-character",
 		title: "Personas",
 		description: "Configuración de tarjetas para personas",
 		icon: <Users className="h-4 w-4" />,
+		color: "#ec4899", // Color rosa
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -191,10 +217,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "world-item",
+		entityType: "card-world-item",
 		title: "Objetos",
 		description: "Configuración de tarjetas para objetos",
 		icon: <Package className="h-4 w-4" />,
+		color: "#f59e0b", // Color ámbar
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -204,10 +231,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "place",
+		entityType: "card-place",
 		title: "Lugares",
 		description: "Configuración de tarjetas para lugares",
 		icon: <MapPin className="h-4 w-4" />,
+		color: "#14b8a6", // Color teal
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -217,10 +245,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "concept",
+		entityType: "card-concept",
 		title: "Conceptos",
 		description: "Configuración de tarjetas para conceptos",
 		icon: <Lightbulb className="h-4 w-4" />,
+		color: "#3b82f6", // Color azul
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -230,10 +259,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "prompt",
+		entityType: "card-prompt",
 		title: "Prompts",
 		description: "Configuración de tarjetas para prompts",
 		icon: <MessageSquare className="h-4 w-4" />,
+		color: "#10b981", // Color verde
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -243,10 +273,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "note",
+		entityType: "card-note",
 		title: "Notas",
 		description: "Configuración de tarjetas para notas",
 		icon: <StickyNote className="h-4 w-4" />,
+		color: "#a855f7", // Color púrpura
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -257,30 +288,250 @@ const entityTypes: EntityTypeOptions[] = [
 	},
 ];
 
+// Función para convertir entre ID con prefijo y sin prefijo
+const convertEntityId = {
+	// Convertir de ID con prefijo 'card-' a ID sin prefijo para API
+	toApiFormat: (entityId: string): string => entityId.replace("card-", ""),
+
+	// Convertir de ID sin prefijo a ID con prefijo 'card-' para la UI
+	toUiFormat: (entityId: string): string =>
+		entityId.startsWith("card-") ? entityId : `card-${entityId}`,
+};
+
+// Componente para la columna de configuraciones
+const ConfigurationPanel = ({
+	activeEntityType,
+	activePreset,
+	cardOptions,
+	onCardOptionsChange,
+	onPresetSelect,
+	onRarityChange,
+	onTextureChange,
+	activeEntity,
+}: {
+	activeEntityType: string;
+	activePreset: string | null;
+	cardOptions: CardOptions;
+	onCardOptionsChange: (options: CardOptions) => void;
+	onPresetSelect: (preset: {
+		id: string;
+		name: string;
+		options: CardOptions;
+	}) => void;
+	onRarityChange: (config: RarityConfig | null) => void;
+	onTextureChange: (config: TextureConfig | null) => void;
+	activeEntity: EntityTypeOptions | undefined;
+}) => {
+	// Agrupamos las secciones por categorías para una mejor organización
+	const configSections = [
+		{
+			id: "basic",
+			title: "Configuración Básica",
+			panels: [
+				{
+					id: "presets",
+					title: "Presets y Plantillas",
+					icon: <LayoutGrid className="h-4 w-4 text-blue-500" />,
+					colorClass: sectionColors.presets,
+					component: (
+						<PresetsPanel
+							activePreset={activePreset}
+							onPresetSelect={onPresetSelect}
+							entityType={convertEntityId.toApiFormat(activeEntityType)}
+						/>
+					),
+				},
+				{
+					id: "systems",
+					title: "Sistemas y Atributos",
+					icon: <PaintBucket className="h-4 w-4 text-violet-500" />,
+					colorClass: sectionColors.system,
+					component: (
+						<SystemsSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+							entityType={convertEntityId.toApiFormat(activeEntityType)}
+							onRarityChange={onRarityChange}
+							onTextureChange={onTextureChange}
+						/>
+					),
+				},
+			],
+		},
+		{
+			id: "appearance",
+			title: "Apariencia",
+			panels: [
+				{
+					id: "visual",
+					title: "Efectos Visuales",
+					icon: <Sparkles className="h-4 w-4 text-indigo-500" />,
+					colorClass: sectionColors.visual,
+					component: (
+						<VisualEffectsSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+				{
+					id: "design",
+					title: "Diseño y Colores",
+					icon: <Palette className="h-4 w-4 text-emerald-500" />,
+					colorClass: sectionColors.design,
+					component: (
+						<DesignSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+				{
+					id: "advanced",
+					title: "Efectos Avanzados",
+					icon: <Settings2 className="h-4 w-4 text-cyan-500" />,
+					colorClass: sectionColors.advanced,
+					component: (
+						<AdvancedEffectsSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+			],
+		},
+		{
+			id: "content",
+			title: "Contenido",
+			panels: [
+				{
+					id: "images",
+					title: "Imágenes y Multimedia",
+					icon: <Grid2X2 className="h-4 w-4 text-pink-500" />,
+					colorClass: sectionColors.images,
+					component: (
+						<ImageGridSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+				{
+					id: "states",
+					title: "Estados Interactivos",
+					icon: <Repeat className="h-4 w-4 text-orange-500" />,
+					colorClass: sectionColors.states,
+					component: (
+						<StatesSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+			],
+		},
+		{
+			id: "technical",
+			title: "Técnico",
+			panels: [
+				{
+					id: "performance",
+					title: "Rendimiento y Optimización",
+					icon: <Laptop className="h-4 w-4 text-amber-500" />,
+					colorClass: sectionColors.performance,
+					component: (
+						<PerformanceSettings
+							cardOptions={cardOptions}
+							onCardOptionsChange={onCardOptionsChange}
+						/>
+					),
+				},
+				{
+					id: "preview",
+					title: "Opciones de Vista Previa",
+					icon: <Eye className="h-4 w-4 text-blue-500" />,
+					colorClass: sectionColors.presets,
+					component: (
+						<PreviewPanel
+							cardOptions={cardOptions}
+							entityType={convertEntityId.toApiFormat(activeEntityType)}
+						/>
+					),
+				},
+			],
+		},
+	];
+
+	if (!activeEntity) {
+		return null;
+	}
+
+	return (
+		<ScrollArea className="h-[calc(100vh-160px)] pr-2">
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.2 }}
+				key={`config-${activeEntityType}`}
+				className="py-2"
+			>
+				<div className="mb-4">
+					<h3
+						className="text-sm font-medium flex items-center gap-2"
+						style={{ color: activeEntity.color }}
+					>
+						<Settings className="h-4 w-4" />
+						Configuración para {activeEntity.title}
+					</h3>
+					<p className="text-xs text-muted-foreground mt-1">
+						Personaliza todos los aspectos de las tarjetas
+					</p>
+				</div>
+
+				{configSections.map((section) => (
+					<div key={section.id} className="mb-6">
+						<div className="mb-2 pb-1 border-b border-border">
+							<h4 className="text-sm font-medium text-muted-foreground">
+								{section.title}
+							</h4>
+						</div>
+						{section.panels.map((panel) => (
+							<SettingsSection
+								key={panel.id}
+								colorClass={panel.colorClass}
+								title={panel.title}
+								icon={panel.icon}
+							>
+								{panel.component}
+							</SettingsSection>
+						))}
+					</div>
+				))}
+			</motion.div>
+		</ScrollArea>
+	);
+};
+
 export function EntitiesCardsSection() {
 	// Estado para el tipo de entidad activo
-	const [activeEntityType, setActiveEntityType] = useState<string>("album");
+	const [activeEntityType, setActiveEntityType] =
+		useState<string>("card-album");
 
 	// Estado para las opciones de la tarjeta activa
 	const [cardOptions, setCardOptions] = useState<CardOptions>(
 		adaptOptions(DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>)
 	);
 
-	// Estados para sistemas
-	const [raritySystem, _setRaritySystem] = useState<RaritySystem | undefined>(
-		undefined
-	);
-	const [textureSystem, _setTextureSystem] = useState<
-		TextureSystem | undefined
-	>(undefined);
-
 	// Estados para rareza y textura seleccionadas para vista previa
-	const [_selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(
+	const [selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(
 		null
 	);
-	const [_selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(
+	const [selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(
 		null
 	);
+
+	// Estado para el preset activo
+	const [activePreset, setActivePreset] = useState<string | null>(null);
 
 	// Estado para indicar si está guardando
 	const [isSaving, setIsSaving] = useState(false);
@@ -296,7 +547,9 @@ export function EntitiesCardsSection() {
 				return;
 			}
 
-			const response = await getEntityCardConfig(activeEntityType);
+			// Eliminar el prefijo 'card-' para las llamadas a la API
+			const apiEntityType = convertEntityId.toApiFormat(activeEntityType);
+			const response = await getEntityCardConfig(apiEntityType);
 
 			if (response.success && response.data) {
 				// Convertir las opciones del servidor al formato de la interfaz de usuario
@@ -340,9 +593,12 @@ export function EntitiesCardsSection() {
 				return;
 			}
 
+			// Eliminar el prefijo 'card-' para las llamadas a la API
+			const apiEntityType = convertEntityId.toApiFormat(activeEntityType);
+
 			// Extraemos solo las propiedades que necesitamos enviar al servidor
-			const _serverOptionsDto: CardConfigurationDto = {
-				entityType: activeEntityType,
+			const serverOptionsDto: CardConfigurationDto = {
+				entityType: apiEntityType,
 				enable3DEffect: !!cardOptions.enable3DEffect,
 				enableHolographicEffect: !!cardOptions.enableHolographicEffect,
 				enableScanlines: !!cardOptions.enableScanlines,
@@ -358,9 +614,9 @@ export function EntitiesCardsSection() {
 				categorySystem: !!cardOptions.categorySystem,
 				textureSystem: !!cardOptions.textureSystem,
 				// Grid de imágenes
-				imageGridLayout: cardOptions.imageGridLayout,
+				imageGridLayout: cardOptions.imageGridLayout as ImageGridLayout,
 				imageGridGap: cardOptions.imageGridGap,
-				imageGridStyle: cardOptions.imageGridStyle,
+				imageGridStyle: cardOptions.imageGridStyle as ImageGridStyle,
 				showImageCount: !!cardOptions.showImageCount,
 				imageGridAspectRatio: cardOptions.imageGridAspectRatio,
 				// Convertir objetos a JSON para almacenamiento
@@ -381,8 +637,11 @@ export function EntitiesCardsSection() {
 					: undefined,
 			};
 
-			// @ts-ignore - Necesario debido a incompatibilidades entre las interfaces
-			const response = await saveEntityCardConfig(activeEntityType);
+			// Guardar la configuración en el servidor
+			const response = await saveEntityCardConfig(
+				apiEntityType,
+				serverOptionsDto
+			);
 
 			if (response.success) {
 				toastService.success(response.message);
@@ -402,6 +661,21 @@ export function EntitiesCardsSection() {
 	// Manejar cambios en opciones de tarjeta
 	const handleCardOptionsChange = (newOptions: CardOptions) => {
 		setCardOptions(newOptions);
+		// Solo limpiamos el preset activo si se cambia alguna configuración
+		if (activePreset) {
+			setActivePreset(null);
+		}
+	};
+
+	// Manejador para cuando se selecciona un preset
+	const handlePresetSelect = (preset: {
+		id: string;
+		name: string;
+		options: CardOptions;
+	}) => {
+		setCardOptions(preset.options);
+		setActivePreset(preset.id);
+		toastService.success(`Preset "${preset.name}" aplicado correctamente`);
 	};
 
 	// Manejar selección de rareza para vista previa
@@ -463,67 +737,107 @@ export function EntitiesCardsSection() {
 							</Tooltip>
 						</TooltipProvider>
 					</div>
-
-					<div className="flex items-center gap-1.5">
-						<Button
-							onClick={handleSaveOptions}
-							disabled={isSaving}
-							size="sm"
-							className="h-7 text-xs"
-						>
-							<Save
-								className={cn("h-3.5 w-3.5 mr-1", isSaving && "animate-spin")}
-							/>
-							{isSaving ? "Guardando..." : "Guardar"}
-						</Button>
-					</div>
 				</CardTitle>
 			</CardHeader>
 
 			<Separator className="my-0" />
 
 			<CardContent className="p-3">
-				<div className="space-y-4">
-					<TabsList className="overflow-x-auto flex flex-wrap border rounded-lg p-1 bg-muted/50">
-						{entityTypes.map((entityType) => (
-							<TabsTrigger
-								key={entityType.entityType}
-								value={entityType.entityType}
-								onClick={() => setActiveEntityType(entityType.entityType)}
-								className={cn(
-									"min-w-[100px] gap-1.5 text-xs py-1.5",
-									activeEntityType === entityType.entityType &&
-										"bg-background text-foreground"
-								)}
-							>
-								{entityType.icon}
-								{entityType.title}
-							</TabsTrigger>
-						))}
-					</TabsList>
+				<div className="grid grid-cols-1 md:grid-cols-12 gap-4 min-h-[600px]">
+					{/* COLUMNA 1: Navegación - Lado izquierdo (2 columnas) */}
+					<div className="md:col-span-2 border-r border-border pr-2">
+						<ScrollArea className="h-[calc(100vh-160px)]">
+							<div className="space-y-1 py-2">
+								{entityTypes.map((entityType) => (
+									<button
+										key={entityType.entityType}
+										onClick={() => setActiveEntityType(entityType.entityType)}
+										className={cn(
+											"flex items-center w-full gap-2 px-3 py-2 text-sm font-medium rounded-md",
+											"hover:bg-secondary/20 transition-all duration-150",
+											activeEntityType === entityType.entityType
+												? "bg-secondary/30 text-primary"
+												: "text-muted-foreground"
+										)}
+										type="button"
+									>
+										<span
+											className="flex items-center justify-center"
+											style={{ color: entityType.color }}
+										>
+											{entityType.icon}
+										</span>
+										{entityType.title}
+									</button>
+								))}
+							</div>
+						</ScrollArea>
+					</div>
 
-					{activeEntity && (
-						<motion.div
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.2 }}
-							key={activeEntityType}
-						>
-							<Card>
-								<CardContent className="p-3 pt-4 space-y-6">
-									<CardSettingsPanel
+					{/* COLUMNA 2: Vista previa - Columna central (5 columnas) */}
+					<div className="md:col-span-5 flex flex-col">
+						{activeEntity && (
+							<motion.div
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.2 }}
+								key={`preview-${activeEntityType}`}
+								className="flex flex-col items-center"
+							>
+								<div className="mb-4 w-full">
+									<h3
+										className="text-sm font-medium flex items-center gap-2"
+										style={{ color: activeEntity.color }}
+									>
+										{activeEntity.icon}
+										Vista previa de {activeEntity.title}
+									</h3>
+									<p className="text-xs text-muted-foreground mt-1">
+										{activeEntity.description}
+									</p>
+								</div>
+
+								<div className="flex-1 flex items-center justify-center w-full">
+									<EntityCardPreview
 										cardOptions={cardOptions}
-										entityType={activeEntity.entityType}
-										onCardOptionsChange={handleCardOptionsChange}
-										onRarityChange={handleRaritySelect}
-										onTextureChange={handleTextureSelect}
-										raritySystem={raritySystem}
-										textureSystem={textureSystem}
+										entityType={convertEntityId.toApiFormat(activeEntityType)}
+										rarity={selectedRarity}
+										texture={selectedTexture}
+										showInfo={true}
 									/>
-								</CardContent>
-							</Card>
-						</motion.div>
-					)}
+								</div>
+
+								{/* Botón de guardar debajo de la vista previa */}
+								<Button
+									onClick={handleSaveOptions}
+									disabled={isSaving}
+									className="mt-6 w-fit self-center"
+									size="lg"
+								>
+									<Save
+										className={cn("h-4 w-4 mr-2", isSaving && "animate-spin")}
+									/>
+									{isSaving ? "Guardando cambios..." : "Guardar configuración"}
+								</Button>
+							</motion.div>
+						)}
+					</div>
+
+					{/* COLUMNA 3: Configuración - Lado derecho (5 columnas) */}
+					<div className="md:col-span-5 border-l border-border pl-2">
+						{activeEntity && (
+							<ConfigurationPanel
+								activeEntityType={activeEntityType}
+								activePreset={activePreset}
+								cardOptions={cardOptions}
+								onCardOptionsChange={handleCardOptionsChange}
+								onPresetSelect={handlePresetSelect}
+								onRarityChange={handleRaritySelect}
+								onTextureChange={handleTextureSelect}
+								activeEntity={activeEntity}
+							/>
+						)}
+					</div>
 				</div>
 			</CardContent>
 		</Card>

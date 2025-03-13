@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { toastService } from "@/lib/services/toast.service";
-import type React from "react";
-import { useCallback, useEffect, useState } from "react";
-import { PatternSelector } from "./pattern-selector";
-import { TextureAdvancedOptions } from "./texture-advanced-options";
-import { TexturePreview } from "./texture-preview";
+import { Button } from '@/components/ui/button';
+import { DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { toastService } from '@/lib/services/toast.service';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { PatternSelector } from './pattern-selector';
+import { TextureAdvancedOptions } from './texture-advanced-options';
+import { TexturePreview } from './texture-preview';
 
 interface TextureItem {
 	id: string;
@@ -45,16 +45,9 @@ interface TextureEditorProps {
 	onCancel: () => void;
 }
 
-export function TextureEditor({
-	texture,
-	svgPatterns,
-	onSave,
-	onCancel,
-}: TextureEditorProps) {
-	const [editedTexture, setEditedTexture] = useState<TextureItem | null>(
-		texture
-	);
-	const [previewSvg, setPreviewSvg] = useState<string>("");
+export function TextureEditor({ texture, svgPatterns, onSave, onCancel }: TextureEditorProps) {
+	const [editedTexture, setEditedTexture] = useState<TextureItem | null>(texture);
+	const [previewSvg, setPreviewSvg] = useState<string>('');
 
 	// Actualizar el estado local cuando cambia la prop texture
 	useEffect(() => {
@@ -65,23 +58,18 @@ export function TextureEditor({
 	const generatePatternPreview = useCallback(
 		(textureToPreview: TextureItem | null) => {
 			if (!textureToPreview || !textureToPreview.patternType) {
-				setPreviewSvg("");
+				setPreviewSvg('');
 				return;
 			}
 
-			const pattern = svgPatterns.find(
-				(p) => p.id === textureToPreview.patternType
-			);
+			const pattern = svgPatterns.find((p) => p.id === textureToPreview.patternType);
 			if (!pattern) {
-				setPreviewSvg("");
+				setPreviewSvg('');
 				return;
 			}
 
 			// Reemplazar currentColor con el color real
-			const coloredSvg = pattern.svg.replace(
-				/currentColor/g,
-				textureToPreview.color || "#000000"
-			);
+			const coloredSvg = pattern.svg.replace(/currentColor/g, textureToPreview.color || '#000000');
 			setPreviewSvg(coloredSvg);
 		},
 		[svgPatterns]
@@ -119,17 +107,12 @@ export function TextureEditor({
 		}
 
 		if (!editedTexture.name || !editedTexture.color) {
-			toastService.warning("El nombre y el color son obligatorios");
+			toastService.warning('El nombre y el color son obligatorios');
 			return;
 		}
 
 		// Validar valores
-		const opacity =
-			editedTexture.opacity < 0
-				? 0
-				: editedTexture.opacity > 1
-					? 1
-					: editedTexture.opacity;
+		const opacity = editedTexture.opacity < 0 ? 0 : editedTexture.opacity > 1 ? 1 : editedTexture.opacity;
 
 		const animationSpeed =
 			editedTexture.animationSpeed && editedTexture.animationSpeed < 0
@@ -141,11 +124,11 @@ export function TextureEditor({
 		// Actualizar textura con valores validados
 		const validatedTexture: TextureItem = {
 			...editedTexture,
-			patternType: editedTexture.patternType || "none",
+			patternType: editedTexture.patternType || 'none',
 			opacity: opacity || 0.5,
 			animationSpeed,
 			// Valores por defecto para campos nuevos si no existen
-			blendMode: editedTexture.blendMode || "normal",
+			blendMode: editedTexture.blendMode || 'normal',
 			visibleOnHover: editedTexture.visibleOnHover ?? false,
 			animated: editedTexture.animated ?? false,
 			layerOrder: editedTexture.layerOrder ?? 1,
@@ -165,10 +148,8 @@ export function TextureEditor({
 				<Label htmlFor="texture-name">Nombre</Label>
 				<Input
 					id="texture-name"
-					value={editedTexture.name || ""}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-						handleTextureChange({ name: e.target.value })
-					}
+					value={editedTexture.name || ''}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTextureChange({ name: e.target.value })}
 					placeholder="Nombre de la textura"
 				/>
 			</div>
@@ -191,16 +172,12 @@ export function TextureEditor({
 						id="texture-color"
 						type="color"
 						className="w-12"
-						value={editedTexture.color || "#000000"}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							handleTextureChange({ color: e.target.value })
-						}
+						value={editedTexture.color || '#000000'}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTextureChange({ color: e.target.value })}
 					/>
 					<Input
-						value={editedTexture.color || "#000000"}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-							handleTextureChange({ color: e.target.value })
-						}
+						value={editedTexture.color || '#000000'}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTextureChange({ color: e.target.value })}
 						placeholder="Color (hex)"
 					/>
 				</div>
@@ -208,9 +185,7 @@ export function TextureEditor({
 
 			<div className="space-y-2">
 				<div className="flex justify-between">
-					<Label htmlFor="texture-opacity">
-						Opacidad: {editedTexture.opacity?.toFixed(2) || "0.50"}
-					</Label>
+					<Label htmlFor="texture-opacity">Opacidad: {editedTexture.opacity?.toFixed(2) || '0.50'}</Label>
 				</div>
 				<Slider
 					id="texture-opacity"
@@ -218,37 +193,27 @@ export function TextureEditor({
 					max={1}
 					step={0.05}
 					value={[editedTexture.opacity || 0.5]}
-					onValueChange={(values: number[]) =>
-						handleTextureChange({ opacity: values[0] })
-					}
+					onValueChange={(values: number[]) => handleTextureChange({ opacity: values[0] })}
 				/>
 			</div>
 
 			{/* Opciones avanzadas */}
-			<TextureAdvancedOptions
-				texture={editedTexture}
-				onTextureChange={handleTextureChange}
-			/>
+			<TextureAdvancedOptions texture={editedTexture} onTextureChange={handleTextureChange} />
 
 			{/* Editor de código SVG */}
 			<details className="mt-2">
-				<summary className="cursor-pointer text-sm font-medium">
-					Editor SVG avanzado
-				</summary>
+				<summary className="cursor-pointer text-sm font-medium">Editor SVG avanzado</summary>
 				<div className="space-y-2 mt-2">
 					<Label htmlFor="custom-svg">Código SVG personalizado</Label>
 					<textarea
 						id="custom-svg"
 						className="w-full h-24 p-2 border rounded-md font-mono text-xs"
 						value={previewSvg}
-						onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-							setPreviewSvg(e.target.value)
-						}
+						onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPreviewSvg(e.target.value)}
 						placeholder="<svg>...</svg>"
 					/>
 					<p className="text-xs text-muted-foreground">
-						Edita el código SVG directamente. Ten en cuenta que esto es para
-						usuarios avanzados.
+						Edita el código SVG directamente. Ten en cuenta que esto es para usuarios avanzados.
 					</p>
 				</div>
 			</details>
@@ -257,10 +222,8 @@ export function TextureEditor({
 				<Label htmlFor="texture-description">Descripción (opcional)</Label>
 				<Input
 					id="texture-description"
-					value={editedTexture.description || ""}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-						handleTextureChange({ description: e.target.value })
-					}
+					value={editedTexture.description || ''}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTextureChange({ description: e.target.value })}
 					placeholder="Descripción breve..."
 				/>
 			</div>

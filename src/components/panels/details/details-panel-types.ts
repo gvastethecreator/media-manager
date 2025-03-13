@@ -1,4 +1,6 @@
-import type { FileItem, FileMetadata } from '@/types/file-item';
+import type { FileItem } from '@/types/file-item';
+import type { ImageItem } from '@/types/image-item';
+import type { FileMetadata } from '@/types/metadata.types';
 import type * as React from 'react';
 
 /**
@@ -14,8 +16,7 @@ export interface InfoItemProps {
  * Props para el componente DetailsPanel principal
  */
 export interface DetailsPanelProps {
-	selectedItems: FileItem[];
-	onClose?: () => void;
+	selectedItems: ImageItem[];
 }
 
 /**
@@ -38,4 +39,12 @@ export interface ItemWithMetadataProps {
  */
 export interface ItemComponentProps {
 	item: FileItem;
+}
+
+/**
+ * Propiedades para componentes que muestran información básica
+ */
+export interface BasicInfoProps {
+	item: ImageItem;
+	metadata: FileMetadata | null;
 }

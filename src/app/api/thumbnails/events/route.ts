@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger/logger';
-import { thumbnailService } from '@/services/thumbnail.service';
+import { type ProcessStatus, type ThumbnailError, thumbnailService } from '@/services/thumbnail.service';
 import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -28,42 +28,9 @@ const ERROR_HEADERS = {
 
 const eventLogger = logger.withContext('ThumbnailEventsAPI');
 
-// Definir las interfaces para los tipos
-interface ProcessStatus {
-	status?: string;
-	current?: number;
-	total?: number;
-	progress?: number;
-	currentFile?: string;
-	timestamp?: number;
-	folderId?: string;
-	phase?: string;
-	filesProcessed?: number;
-	totalFiles?: number;
-	fileDetails?: {
-		name: string;
-		size: number;
-		type: string;
-		dimensions?: {
-			width: number;
-			height: number;
-		};
-	};
-}
-
-interface CompleteData {
-	processed: number;
-	errors: number;
-	totalTime: number;
-}
-
-interface StatsData {
-	total: number;
-	withThumbnail: number;
-	withError: number;
-	optimized: number;
-	averageSize: number;
-}
+// Definir los tipos que necesitamos pero que no están exportados
+type CompleteData = Record<string, unknown>;
+type StatsData = Record<string, unknown>;
 
 export async function OPTIONS() {
 	return new Response(null, { headers: CORS_HEADERS });
@@ -95,14 +62,20 @@ export async function GET(req: NextRequest) {
 
 				// Manejadores de eventos
 				const progressHandler = (status: ProcessStatus) => {
-					send('progress', status);
+					send('progress', status as unknown as Record<string, unknown>);
 				};
 
-				const errorHandler = (error: Error | string | unknown) => {
-					send('error', {
-						message: error instanceof Error ? error.message : String(error),
-						stack: error instanceof Error ? error.stack : undefined,
-					});
+				const errorHandler = (error: ThumbnailError | Error | string | unknown) => {
+					if (error instanceof Error) {
+						send('error', {
+							message: error.message,
+							stack: error.stack,
+						});
+					} else if (typeof error === 'string') {
+						send('error', { message: error });
+					} else {
+						send('error', error as Record<string, unknown>);
+					}
 				};
 
 				const completeHandler = (data: CompleteData) => {
@@ -115,7 +88,7 @@ export async function GET(req: NextRequest) {
 
 				// Registrar manejadores
 				thumbnailService.onProgress(progressHandler);
-				thumbnailService.onError(errorHandler);
+				thumbnailService.onError(errorHandler as (error: ThumbnailError) => void);
 				thumbnailService.onComplete(completeHandler);
 				thumbnailService.onStats(statsHandler);
 
@@ -126,7 +99,7 @@ export async function GET(req: NextRequest) {
 						clearInterval(heartbeatInterval);
 					}
 					thumbnailService.offProgress(progressHandler);
-					thumbnailService.offError(errorHandler);
+					thumbnailService.offError(errorHandler as (error: ThumbnailError) => void);
 					thumbnailService.offComplete(completeHandler);
 					thumbnailService.offStats(statsHandler);
 					controller.close();

@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import React from "react";
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import React from 'react';
 
 interface TextureItem {
 	id: string;
@@ -36,10 +30,7 @@ interface TextureAdvancedOptionsProps {
 	onTextureChange: (updated: Partial<TextureItem>) => void;
 }
 
-export function TextureAdvancedOptions({
-	texture,
-	onTextureChange,
-}: TextureAdvancedOptionsProps) {
+export function TextureAdvancedOptions({ texture, onTextureChange }: TextureAdvancedOptionsProps) {
 	if (!texture) {
 		return null;
 	}
@@ -87,10 +78,7 @@ export function TextureAdvancedOptions({
 			{/* Modo de mezcla */}
 			<div className="space-y-2">
 				<Label htmlFor="blend-mode">Modo de mezcla</Label>
-				<Select
-					value={texture.blendMode || "normal"}
-					onValueChange={handleBlendModeChange}
-				>
+				<Select value={texture.blendMode || 'normal'} onValueChange={handleBlendModeChange}>
 					<SelectTrigger>
 						<SelectValue placeholder="Modo de mezcla" />
 					</SelectTrigger>
@@ -114,19 +102,14 @@ export function TextureAdvancedOptions({
 				<Label htmlFor="animated" className="text-sm cursor-pointer">
 					Textura animada
 				</Label>
-				<Switch
-					id="animated"
-					checked={texture.animated || false}
-					onCheckedChange={handleAnimatedChange}
-				/>
+				<Switch id="animated" checked={texture.animated || false} onCheckedChange={handleAnimatedChange} />
 			</div>
 
 			{texture.animated && (
 				<div className="space-y-2">
 					<div className="flex justify-between">
 						<Label htmlFor="animation-speed">
-							Velocidad de animación:{" "}
-							{texture.animationSpeed?.toFixed(1) || "1.0"}
+							Velocidad de animación: {texture.animationSpeed?.toFixed(1) || '1.0'}
 						</Label>
 					</div>
 					<Slider
@@ -151,14 +134,11 @@ export function TextureAdvancedOptions({
 				/>
 			</div>
 
-			{texture.patternType === "noise" && (
+			{texture.patternType === 'noise' && (
 				<>
 					<div className="space-y-2">
 						<Label htmlFor="noise-type">Tipo de ruido</Label>
-						<Select
-							value={texture.noiseType || "light"}
-							onValueChange={handleNoiseTypeChange}
-						>
+						<Select value={texture.noiseType || 'light'} onValueChange={handleNoiseTypeChange}>
 							<SelectTrigger>
 								<SelectValue placeholder="Tipo de ruido" />
 							</SelectTrigger>
@@ -174,9 +154,7 @@ export function TextureAdvancedOptions({
 
 					<div className="space-y-2">
 						<div className="flex justify-between">
-							<Label htmlFor="texture-density">
-								Densidad: {texture.density?.toFixed(1) || "0.6"}
-							</Label>
+							<Label htmlFor="texture-density">Densidad: {texture.density?.toFixed(1) || '0.6'}</Label>
 						</div>
 						<Slider
 							id="texture-density"
@@ -190,9 +168,7 @@ export function TextureAdvancedOptions({
 
 					<div className="space-y-2">
 						<div className="flex justify-between">
-							<Label htmlFor="texture-contrast">
-								Contraste: {texture.contrast?.toFixed(1) || "1.2"}
-							</Label>
+							<Label htmlFor="texture-contrast">Contraste: {texture.contrast?.toFixed(1) || '1.2'}</Label>
 						</div>
 						<Slider
 							id="texture-contrast"
@@ -208,9 +184,7 @@ export function TextureAdvancedOptions({
 
 			<div className="space-y-2">
 				<div className="flex justify-between">
-					<Label htmlFor="layer-order">
-						Orden de capa: {texture.layerOrder || 1}
-					</Label>
+					<Label htmlFor="layer-order">Orden de capa: {texture.layerOrder || 1}</Label>
 				</div>
 				<Slider
 					id="layer-order"
@@ -221,12 +195,11 @@ export function TextureAdvancedOptions({
 					onValueChange={handleLayerOrderChange}
 				/>
 				<p className="text-xs text-muted-foreground">
-					Define el orden de renderizado. Las capas con valores más altos
-					aparecen por encima.
+					Define el orden de renderizado. Las capas con valores más altos aparecen por encima.
 				</p>
 			</div>
 
-			{texture.patternType !== "none" && (
+			{texture.patternType !== 'none' && (
 				<div className="space-y-2">
 					<div className="flex justify-between">
 						<Label htmlFor="texture-scale">Escala: {texture.scale || 1}</Label>

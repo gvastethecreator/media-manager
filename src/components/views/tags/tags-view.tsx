@@ -1,52 +1,52 @@
-"use client";
+'use client';
 
-import { EmptyState } from "@/components/core/data-display";
-import { LoadingScreen } from "@/components/core/feedback";
-import { TagCard } from "@/components/features/entity-cards/layouts/tag-card-layout";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger/logger";
-import { useTagsStore } from "@/store/entities/tags.store";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import { TagIcon } from "lucide-react";
-import { motion } from "motion/react";
-import type * as React from "react";
-import { useCallback, useEffect } from "react";
-import type { ViewProps } from "../types";
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { TagCard } from '@/components/features/entity-cards/layouts/tag-card-layout';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger/logger';
+import { useTagsStore } from '@/store/entities/tags.store';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import { TagIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useEffect } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("TagsView");
+const viewLogger = logger.withContext('TagsView');
 
 // Definir los tipos de etiquetas permitidos
-type TagType = "normal" | "trap" | "spell" | "effect" | "ritual";
+type TagType = 'normal' | 'trap' | 'spell' | 'effect' | 'ritual';
 
 // Función para determinar el tipo de etiqueta basado en categoría o alguna propiedad
 const getTagType = (category?: string | null): TagType => {
 	if (!category) {
-		return "normal";
+		return 'normal';
 	}
 
 	// Mapeo simple de categorías a tipos
 	switch (category.toLowerCase()) {
-		case "trap":
-		case "trampa": {
-			return "trap";
+		case 'trap':
+		case 'trampa': {
+			return 'trap';
 		}
-		case "spell":
-		case "hechizo":
-		case "magic":
-		case "magia": {
-			return "spell";
+		case 'spell':
+		case 'hechizo':
+		case 'magic':
+		case 'magia': {
+			return 'spell';
 		}
-		case "effect":
-		case "efecto": {
-			return "effect";
+		case 'effect':
+		case 'efecto': {
+			return 'effect';
 		}
-		case "ritual": {
-			return "ritual";
+		case 'ritual': {
+			return 'ritual';
 		}
 		default: {
-			return "normal";
+			return 'normal';
 		}
 	}
 };
@@ -61,11 +61,11 @@ export function TagsView(_props: ViewProps) {
 
 	const fetchTags = useCallback(async () => {
 		try {
-			viewLogger.info("🔄 Cargando etiquetas...");
+			viewLogger.info('🔄 Cargando etiquetas...');
 			await loadTags();
 			viewLogger.info(`✅ ${tags.length} etiquetas cargadas`);
 		} catch (error) {
-			viewLogger.error("❌ Error al cargar etiquetas:", error);
+			viewLogger.error('❌ Error al cargar etiquetas:', error);
 		}
 	}, [loadTags, tags.length]);
 
@@ -75,8 +75,8 @@ export function TagsView(_props: ViewProps) {
 
 	const handleTagClick = useCallback(
 		(tagId: string) => {
-			viewLogger.info("🔍 Ver etiqueta:", tagId);
-			setCurrentView("tag-content");
+			viewLogger.info('🔍 Ver etiqueta:', tagId);
+			setCurrentView('tag-content');
 			setCurrentTag(tagId);
 		},
 		[setCurrentView, setCurrentTag]
@@ -121,7 +121,7 @@ export function TagsView(_props: ViewProps) {
 								tag={{
 									id: tag.id,
 									name: tag.name,
-									description: tag.description || "",
+									description: tag.description || '',
 									count: tag._count?.images || 0,
 									color: tag.color,
 									// Usar la función para determinar el tipo

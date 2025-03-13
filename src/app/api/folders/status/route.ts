@@ -1,8 +1,19 @@
 import { normalizeId } from '@/lib/id-utils';
 import { logger } from '@/lib/logger/logger';
 import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
-import type { FolderResponse, ProcessStatus } from '@/types/process';
+import type { ProcessStatus } from '@/types/process';
 import { type NextRequest, NextResponse } from 'next/server';
+
+// Definir el tipo FolderResponse ya que no está disponible en el módulo importado
+interface FolderResponse {
+	id: string;
+	name: string;
+	path?: string;
+	totalFiles?: number;
+	totalSize?: number;
+	success?: boolean;
+	error?: string;
+}
 
 const statusLogger = logger.withContext('FolderStatusAPI');
 
