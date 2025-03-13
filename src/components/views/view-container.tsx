@@ -1,7 +1,7 @@
 'use client';
 
 import { SettingsView } from '@/components/settings/settings-view';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { useNavigationStore } from '@/store/navigation.store';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';

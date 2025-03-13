@@ -4,7 +4,7 @@ import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/con
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { BookOpen, Grid, Info, Layers, LayoutTemplate, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';

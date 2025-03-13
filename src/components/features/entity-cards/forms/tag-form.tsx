@@ -6,7 +6,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { Palette } from 'lucide-react';
 import * as React from 'react';
 import { CompactPicker } from 'react-color';

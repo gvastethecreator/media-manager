@@ -433,9 +433,11 @@
 	0% {
 		background-position: 0% 50%;
 	}
+
 	50% {
 		background-position: 100% 50%;
 	}
+
 	100% {
 		background-position: 0% 50%;
 	}
@@ -445,9 +447,11 @@
 	0% {
 		opacity: 0.6;
 	}
+
 	50% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 0.6;
 	}
@@ -490,4 +494,30 @@
 [data-typography="retro"] .card-meta {
 	font-family: monospace;
 	letter-spacing: 0.05em;
+}
+
+@keyframes glitch {
+	0% {
+		transform: translate(0);
+	}
+
+	20% {
+		transform: translate(-2px, 2px);
+	}
+
+	40% {
+		transform: translate(-2px, -2px);
+	}
+
+	60% {
+		transform: translate(2px, 2px);
+	}
+
+	80% {
+		transform: translate(2px, -2px);
+	}
+
+	100% {
+		transform: translate(0);
+	}
 }

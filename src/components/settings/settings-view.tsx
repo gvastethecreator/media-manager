@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings/entities-cards-settings';
 import { AlbumsSection } from './albums/albums-section';
 import { CharactersSection } from './characters/characters-section';
@@ -29,7 +29,7 @@ import { ConceptsSection } from './concepts/concepts-section';
 import { FoldersSection } from './folders/folders-section';
 import { NotesSection } from './notes/notes-section';
 import { PlacesSection } from './places/places-section';
-import { ProfilesSection } from './profiles/profiles-section';
+import { ProfilesSection } from './profiles/profiles-settings';
 import { PromptsSection } from './prompts/prompts-section';
 import { ShortcutsSection } from './shortcuts/shortcuts-section';
 import { SystemSection } from './system/system-section';

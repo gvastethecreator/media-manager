@@ -1,7 +1,7 @@
 'use client';
 
 import { getImageUrl } from '@/app/actions/images';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { useImageViewer } from '@/store/image-viewer.store';
 import { Loader2, XCircle } from 'lucide-react';
 import Image from 'next/image';

@@ -4,7 +4,7 @@ import type { CardOptions } from '@/components/features/entity-cards/types/base-
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { EyeIcon, Palette, Save, Settings, Sliders, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 import { CardConfigManager } from '../settings/panels/card-config-manager';

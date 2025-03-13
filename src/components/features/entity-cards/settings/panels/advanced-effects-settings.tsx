@@ -1,443 +1,468 @@
 'use client';
 
-import type {
-	BorderOptions,
-	CardOptions,
-	GrainEffectOptions,
-	ScanlinesOptions,
-} from '@/components/features/entity-cards/types/base-card-types';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils/utils';
-import {
-	Box,
-	Fingerprint,
-	GanttChartSquare,
-	Brain as GrainIcon,
-	Info,
-	Layers,
-	LucideIcon,
-	MousePointerClick,
-	ScreenShare,
-	Sparkles,
-	ZoomIn,
-} from 'lucide-react';
-import type React from 'react';
-import type { CardSettingsProps } from '../../types/card-settings-types';
+import { cn } from '@/lib/utils';
+import { HolographicRainbow, Paintbrush, Sand, ScanLine, Wallpaper, Wand2 } from 'lucide-react';
+import type { ChangeEvent } from 'react';
+import type { CardOptions } from '../types';
+import { SliderOption, ToggleOption, createNestedOptionChangeHandler, panelColors } from './shared/panel-helpers';
 
-// Objeto con opciones de color para cada efecto avanzado
-const effectColors = {
-	scanlines: {
-		bg: 'bg-purple-500/5',
-		border: 'border-purple-500/20',
-		text: 'text-purple-600',
-		highlight: 'bg-purple-500/10',
-	},
-	grain: {
-		bg: 'bg-amber-500/5',
-		border: 'border-amber-500/20',
-		text: 'text-amber-600',
-		highlight: 'bg-amber-500/10',
-	},
-	halo: {
-		bg: 'bg-cyan-500/5',
-		border: 'border-cyan-500/20',
-		text: 'text-cyan-600',
-		highlight: 'bg-cyan-500/10',
-	},
-	border: {
-		bg: 'bg-emerald-500/5',
-		border: 'border-emerald-500/20',
-		text: 'text-emerald-600',
-		highlight: 'bg-emerald-500/10',
-	},
-};
-
-// Componente para una opción de configuración avanzada con animación
-const AnimatedOption = ({
-	label,
-	value,
+export function AdvancedEffectsSettings({
+	options,
 	onChange,
-	icon,
-	description,
-	colorScheme,
-	children,
+	disabled = false,
 }: {
-	label: string;
-	value: boolean;
-	onChange: (value: boolean) => void;
-	icon: React.ReactNode;
-	description?: string;
-	colorScheme: {
-		bg: string;
-		border: string;
-		text: string;
-		highlight: string;
+	options: CardOptions;
+	onChange: (options: CardOptions) => void;
+	disabled?: boolean;
+}) {
+	// Extraer opciones de efectos avanzados o inicializar un objeto vacío si no existe
+	const advancedEffects = options.advancedEffects || {};
+
+	// Handler para cambios en las opciones de efectos avanzados
+	const handleAdvancedEffectsChange = createNestedOptionChangeHandler(options, onChange, 'advancedEffects');
+
+	// Manejador genérico para cambios en valores booleanos
+	const handleToggleChange = (key: string) => (checked: boolean) => {
+		handleAdvancedEffectsChange(key, checked);
 	};
-	children?: React.ReactNode;
-}) => {
+
+	// Manejador genérico para cambios en valores numéricos
+	const handleSliderChange = (key: string) => (value: number) => {
+		handleAdvancedEffectsChange(key, value);
+	};
+
+	// Manejador para cambios en valores de color
+	const handleColorChange = (key: string) => (e: ChangeEvent<HTMLInputElement>) => {
+		handleAdvancedEffectsChange(key, e.target.value);
+	};
+
 	return (
-		<AccordionItem value={label} className={cn('border rounded-md my-2', colorScheme.border, value && 'shadow-sm')}>
-			<AccordionTrigger className={cn('px-3 py-2 hover:no-underline', value && colorScheme.bg)}>
-				<div className="flex items-center justify-between w-full">
-					<div className="flex items-center gap-2">
-						<span className={cn('p-1 rounded', colorScheme.text, value && colorScheme.highlight)}>{icon}</span>
-						<span className="text-sm font-medium">{label}</span>
-					</div>
-					<Switch
-						checked={value}
-						onCheckedChange={onChange}
-						onClick={(e) => e.stopPropagation()}
-						className="data-[state=checked]:bg-primary"
-					/>
+		<Card className={cn('w-full', panelColors.advanced.bg, panelColors.advanced.border)}>
+			<CardHeader className="pb-3">
+				<div className="flex items-center justify-between">
+					<CardTitle className="text-sm font-medium">Efectos Avanzados</CardTitle>
+					<Badge variant="outline" className={cn('text-[10px]', panelColors.advanced.text)}>
+						Premium
+					</Badge>
 				</div>
-			</AccordionTrigger>
-			<AccordionContent className="px-3 pb-3 pt-1">
-				{description && <p className="text-xs text-muted-foreground mb-3">{description}</p>}
-				{value && children}
-			</AccordionContent>
-		</AccordionItem>
-	);
-};
-
-export function AdvancedEffectsSettings({ cardOptions, onCardOptionsChange }: CardSettingsProps) {
-	// Manejador para cambios en opciones individuales
-	const handleOptionChange = (key: keyof CardOptions, value: unknown) => {
-		onCardOptionsChange({
-			...cardOptions,
-			[key]: value,
-		});
-	};
-
-	// Manejador para opciones de scanlines
-	const handleScanlinesOptionChange = (key: string, value: unknown) => {
-		const currentOptions = cardOptions.scanlinesOptions || {
-			opacity: 0.2,
-			spacing: 4,
-			direction: 'horizontal',
-			animate: true,
-		};
-
-		onCardOptionsChange({
-			...cardOptions,
-			scanlinesOptions: {
-				...currentOptions,
-				[key]: value,
-			},
-		});
-	};
-
-	// Manejador para opciones de grano
-	const handleGrainOptionChange = (key: string, value: unknown) => {
-		const currentOptions = cardOptions.grainOptions || {
-			intensity: 0.2,
-			density: 0.5,
-			noise: 'light',
-			animated: false,
-		};
-
-		onCardOptionsChange({
-			...cardOptions,
-			grainOptions: {
-				...currentOptions,
-				[key]: value,
-			},
-		});
-	};
-
-	// Manejador para opciones de borde
-	const handleBorderOptionChange = (key: string, value: unknown) => {
-		const currentOptions = cardOptions.borderOptions || {
-			width: 2,
-			pattern: 'solid',
-			animationType: 'pulse',
-			animation: {
-				type: 'pulse',
-				duration: 3000,
-				timing: 'linear',
-				iteration: 'infinite',
-			},
-		};
-
-		onCardOptionsChange({
-			...cardOptions,
-			borderOptions: {
-				...currentOptions,
-				[key]: value,
-			},
-		});
-	};
-
-	// Valores actuales para scanlines
-	const scanlinesOpacity =
-		cardOptions.scanlinesOptions?.opacity !== undefined ? cardOptions.scanlinesOptions.opacity * 100 : 20;
-	const scanlinesSpacing = cardOptions.scanlinesOptions?.spacing || 4;
-	const scanlinesDirection = cardOptions.scanlinesOptions?.direction || 'horizontal';
-	const scanlinesAnimate = cardOptions.scanlinesOptions?.animate || false;
-
-	// Valores actuales para grano
-	const grainIntensity =
-		cardOptions.grainOptions?.intensity !== undefined ? cardOptions.grainOptions.intensity * 100 : 15;
-	const grainDensity = cardOptions.grainOptions?.density !== undefined ? cardOptions.grainOptions.density * 100 : 60;
-	const grainNoise = cardOptions.grainOptions?.noise || 'light';
-	const grainAnimated = cardOptions.grainOptions?.animated || false;
-
-	// Valores actuales para borde animado
-	const borderWidth = cardOptions.borderOptions?.width || 2;
-	const borderPattern = cardOptions.borderOptions?.pattern || 'solid';
-	const borderAnimationType = cardOptions.borderOptions?.animationType || 'flow';
-
-	return (
-		<Card className="border shadow-sm">
-			<CardHeader className="p-2.5 pb-1.5">
-				<CardTitle className="text-xs font-medium flex items-center gap-1.5">
-					<Sparkles className="h-3.5 w-3.5 text-cyan-500" />
-					<span>Efectos Avanzados</span>
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Info className="h-3 w-3 text-muted-foreground cursor-pointer" />
-							</TooltipTrigger>
-							<TooltipContent side="top" className="text-[10px] max-w-[180px]">
-								Configura efectos visuales adicionales para personalizar la apariencia de las tarjetas.
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
-				</CardTitle>
+				<CardDescription className="text-xs text-muted-foreground">
+					Configura efectos visuales avanzados para tus tarjetas
+				</CardDescription>
 			</CardHeader>
-
-			<CardContent className="p-2.5 pt-1 space-y-1">
-				<Accordion type="multiple" className="w-full">
-					{/* Efecto de Scanlines */}
-					<AnimatedOption
-						label="Líneas de Escaneo"
-						value={cardOptions.enableScanlines || false}
-						onChange={(value) => handleOptionChange('enableScanlines', value)}
-						icon={<GanttChartSquare className="h-4 w-4" />}
-						description="Añade un efecto de líneas horizontales o verticales que simula una pantalla CRT."
-						colorScheme={effectColors.scanlines}
-					>
+			<CardContent className="p-4 pt-0">
+				<ScrollArea className="h-[300px] pr-4">
+					<div className="space-y-5">
+						{/* Efectos de Escaneo */}
 						<div className="space-y-3">
-							{/* Opacidad */}
-							<div className="grid gap-1.5">
-								<div className="flex items-center justify-between">
-									<Label className="text-xs">Opacidad</Label>
-									<span className="text-xs text-muted-foreground">{scanlinesOpacity.toFixed(0)}%</span>
-								</div>
-								<Slider
-									min={0}
-									max={100}
-									step={1}
-									value={[scanlinesOpacity]}
-									onValueChange={([value]) => handleScanlinesOptionChange('opacity', value / 100)}
-								/>
+							<div className="flex items-center gap-1.5">
+								<ScanLine className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Efectos de Escaneo</h3>
 							</div>
-
-							{/* Espaciado */}
-							<div className="grid gap-1.5">
-								<div className="flex items-center justify-between">
-									<Label className="text-xs">Espaciado</Label>
-									<span className="text-xs text-muted-foreground">{scanlinesSpacing}px</span>
-								</div>
-								<Slider
-									min={1}
-									max={20}
-									step={1}
-									value={[scanlinesSpacing]}
-									onValueChange={([value]) => handleScanlinesOptionChange('spacing', value)}
+							<div className="space-y-3 pl-5">
+								<ToggleOption
+									id="scanlines"
+									label="Líneas de Escaneo"
+									description="Añade un efecto de líneas de escaneo retro a la tarjeta"
+									checked={advancedEffects.scanlines ?? false}
+									onCheckedChange={handleToggleChange('scanlines')}
+									disabled={disabled}
 								/>
-							</div>
 
-							{/* Dirección */}
-							<div className="grid gap-1.5">
-								<Label className="text-xs">Dirección</Label>
-								<Select
-									value={scanlinesDirection}
-									onValueChange={(value) => handleScanlinesOptionChange('direction', value)}
-								>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Selecciona dirección" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="horizontal">Horizontal</SelectItem>
-										<SelectItem value="vertical">Vertical</SelectItem>
-										<SelectItem value="diagonal">Diagonal</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
+								{advancedEffects.scanlines && (
+									<>
+										<SliderOption
+											id="scanlinesDensity"
+											label="Densidad"
+											description="Controla la densidad de las líneas de escaneo"
+											value={advancedEffects.scanlinesDensity ?? 2}
+											onValueChange={handleSliderChange('scanlinesDensity')}
+											min={1}
+											max={10}
+											step={0.1}
+											disabled={disabled}
+										/>
 
-							{/* Animación */}
-							<div className="flex items-center justify-between">
-								<div className="flex items-center space-x-2">
-									<Label htmlFor="scanlinesAnimate" className="text-xs cursor-pointer">
-										Animar
-									</Label>
-								</div>
-								<Switch
-									id="scanlinesAnimate"
-									checked={scanlinesAnimate}
-									onCheckedChange={(checked) => handleScanlinesOptionChange('animate', checked)}
-								/>
+										<SliderOption
+											id="scanlinesOpacity"
+											label="Opacidad"
+											description="Controla la opacidad de las líneas de escaneo"
+											value={advancedEffects.scanlinesOpacity ?? 0.3}
+											onValueChange={handleSliderChange('scanlinesOpacity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
 							</div>
 						</div>
-					</AnimatedOption>
 
-					{/* Efecto de Grano */}
-					<AnimatedOption
-						label="Efecto de Grano"
-						value={cardOptions.enableGrainEffect || false}
-						onChange={(value) => handleOptionChange('enableGrainEffect', value)}
-						icon={<GrainIcon className="h-4 w-4" />}
-						description="Añade una textura de grano que da un aspecto más realista y analógico."
-						colorScheme={effectColors.grain}
-					>
+						<Separator />
+
+						{/* Efectos de Textura */}
 						<div className="space-y-3">
-							{/* Intensidad */}
-							<div className="grid gap-1.5">
-								<div className="flex items-center justify-between">
-									<Label className="text-xs">Intensidad</Label>
-									<span className="text-xs text-muted-foreground">{grainIntensity.toFixed(0)}%</span>
-								</div>
-								<Slider
-									min={0}
-									max={100}
-									step={1}
-									value={[grainIntensity]}
-									onValueChange={([value]) => handleGrainOptionChange('intensity', value / 100)}
-								/>
+							<div className="flex items-center gap-1.5">
+								<Wallpaper className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Efectos de Textura</h3>
 							</div>
-
-							{/* Densidad */}
-							<div className="grid gap-1.5">
-								<div className="flex items-center justify-between">
-									<Label className="text-xs">Densidad</Label>
-									<span className="text-xs text-muted-foreground">{grainDensity.toFixed(0)}%</span>
-								</div>
-								<Slider
-									min={10}
-									max={100}
-									step={1}
-									value={[grainDensity]}
-									onValueChange={([value]) => handleGrainOptionChange('density', value / 100)}
+							<div className="space-y-3 pl-5">
+								<ToggleOption
+									id="grain"
+									label="Grano"
+									description="Añade un efecto de grano de película a la tarjeta"
+									checked={advancedEffects.grain ?? false}
+									onCheckedChange={handleToggleChange('grain')}
+									disabled={disabled}
 								/>
-							</div>
 
-							{/* Tipo de ruido */}
-							<div className="grid gap-1.5">
-								<Label className="text-xs">Tipo de ruido</Label>
-								<Select value={grainNoise} onValueChange={(value) => handleGrainOptionChange('noise', value)}>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Selecciona tipo" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="light">Ligero</SelectItem>
-										<SelectItem value="digital">Digital</SelectItem>
-										<SelectItem value="film">Película</SelectItem>
-										<SelectItem value="heavy">Intenso</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
+								{advancedEffects.grain && (
+									<>
+										<SliderOption
+											id="grainDensity"
+											label="Densidad"
+											description="Controla la densidad del grano"
+											value={advancedEffects.grainDensity ?? 30}
+											onValueChange={handleSliderChange('grainDensity')}
+											min={1}
+											max={100}
+											disabled={disabled}
+										/>
 
-							{/* Animación */}
-							<div className="flex items-center justify-between">
-								<div className="flex items-center space-x-2">
-									<Label htmlFor="grainAnimated" className="text-xs cursor-pointer">
-										Animar
-									</Label>
-								</div>
-								<Switch
-									id="grainAnimated"
-									checked={grainAnimated}
-									onCheckedChange={(checked) => handleGrainOptionChange('animated', checked)}
+										<SliderOption
+											id="grainOpacity"
+											label="Opacidad"
+											description="Controla la opacidad del grano"
+											value={advancedEffects.grainOpacity ?? 0.2}
+											onValueChange={handleSliderChange('grainOpacity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
+
+								<ToggleOption
+									id="noiseTexture"
+									label="Textura de Ruido"
+									description="Añade una textura de ruido sutil a la tarjeta"
+									checked={advancedEffects.noiseTexture ?? false}
+									onCheckedChange={handleToggleChange('noiseTexture')}
+									disabled={disabled}
 								/>
+
+								{advancedEffects.noiseTexture && (
+									<>
+										<SliderOption
+											id="noiseTextureDensity"
+											label="Densidad"
+											description="Controla la densidad de la textura de ruido"
+											value={advancedEffects.noiseTextureDensity ?? 40}
+											onValueChange={handleSliderChange('noiseTextureDensity')}
+											min={1}
+											max={100}
+											disabled={disabled}
+										/>
+
+										<SliderOption
+											id="noiseTextureOpacity"
+											label="Opacidad"
+											description="Controla la opacidad de la textura de ruido"
+											value={advancedEffects.noiseTextureOpacity ?? 0.15}
+											onValueChange={handleSliderChange('noiseTextureOpacity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
 							</div>
 						</div>
-					</AnimatedOption>
 
-					{/* Efecto de Halo de Luz */}
-					<AnimatedOption
-						label="Halo de Luz"
-						value={cardOptions.enableLightHalo || false}
-						onChange={(value) => handleOptionChange('enableLightHalo', value)}
-						icon={<ZoomIn className="h-4 w-4" />}
-						description="Crea un efecto de halo luminoso que sigue el cursor o pulsa suavemente."
-						colorScheme={effectColors.halo}
-					>
-						<div className="p-3 rounded bg-muted/40">
-							<p className="text-xs text-center">Próximamente más opciones avanzadas</p>
-						</div>
-					</AnimatedOption>
+						<Separator />
 
-					{/* Borde Animado */}
-					<AnimatedOption
-						label="Borde Animado"
-						value={cardOptions.enableAnimatedBorder || false}
-						onChange={(value) => handleOptionChange('enableAnimatedBorder', value)}
-						icon={<MousePointerClick className="h-4 w-4" />}
-						description="Añade un borde con animaciones dinámicas y efectos visuales."
-						colorScheme={effectColors.border}
-					>
+						{/* Efectos de Borde */}
 						<div className="space-y-3">
-							{/* Ancho del borde */}
-							<div className="grid gap-1.5">
-								<div className="flex items-center justify-between">
-									<Label className="text-xs">Ancho del borde</Label>
-									<span className="text-xs text-muted-foreground">{borderWidth}px</span>
-								</div>
-								<Slider
-									min={1}
-									max={10}
-									step={1}
-									value={[borderWidth]}
-									onValueChange={([value]) => handleBorderOptionChange('width', value)}
+							<div className="flex items-center gap-1.5">
+								<Paintbrush className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Efectos de Borde</h3>
+							</div>
+							<div className="space-y-3 pl-5">
+								<ToggleOption
+									id="borderGlow"
+									label="Resplandor de Borde"
+									description="Añade un efecto de resplandor alrededor del borde de la tarjeta"
+									checked={advancedEffects.borderGlow ?? false}
+									onCheckedChange={handleToggleChange('borderGlow')}
+									disabled={disabled}
 								/>
-							</div>
 
-							{/* Patrón del borde */}
-							<div className="grid gap-1.5">
-								<Label className="text-xs">Patrón</Label>
-								<Select value={borderPattern} onValueChange={(value) => handleBorderOptionChange('pattern', value)}>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Selecciona patrón" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="solid">Sólido</SelectItem>
-										<SelectItem value="dashed">Discontinuo</SelectItem>
-										<SelectItem value="dotted">Punteado</SelectItem>
-										<SelectItem value="double">Doble</SelectItem>
-										<SelectItem value="gradient">Degradado</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
+								{advancedEffects.borderGlow && (
+									<>
+										<div className="flex items-center justify-between space-x-3">
+											<label htmlFor="borderGlowColor" className="text-[11px] flex items-center gap-1.5">
+												Color
+											</label>
+											<div className="flex items-center gap-2">
+												<div
+													className="h-4 w-4 rounded-full border"
+													style={{
+														backgroundColor: advancedEffects.borderGlowColor ?? '#3b82f6',
+													}}
+												/>
+												<input
+													id="borderGlowColor"
+													type="color"
+													value={advancedEffects.borderGlowColor ?? '#3b82f6'}
+													onChange={handleColorChange('borderGlowColor')}
+													className="h-6 w-6 cursor-pointer rounded-md p-0"
+													disabled={disabled}
+												/>
+											</div>
+										</div>
 
-							{/* Tipo de animación */}
-							<div className="grid gap-1.5">
-								<Label className="text-xs">Animación</Label>
-								<Select
-									value={borderAnimationType}
-									onValueChange={(value) => handleBorderOptionChange('animationType', value)}
-								>
-									<SelectTrigger className="h-8 text-xs">
-										<SelectValue placeholder="Tipo de animación" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="none">Ninguna</SelectItem>
-										<SelectItem value="flow">Flujo</SelectItem>
-										<SelectItem value="pulse">Pulso</SelectItem>
-										<SelectItem value="rainbow">Arcoíris</SelectItem>
-										<SelectItem value="shimmer">Destello</SelectItem>
-									</SelectContent>
-								</Select>
+										<SliderOption
+											id="borderGlowWidth"
+											label="Ancho"
+											description="Controla el ancho del resplandor del borde"
+											value={advancedEffects.borderGlowWidth ?? 2}
+											onValueChange={handleSliderChange('borderGlowWidth')}
+											min={1}
+											max={10}
+											step={0.5}
+											unit="px"
+											disabled={disabled}
+										/>
+
+										<SliderOption
+											id="borderGlowSpread"
+											label="Expansión"
+											description="Controla la expansión del resplandor del borde"
+											value={advancedEffects.borderGlowSpread ?? 10}
+											onValueChange={handleSliderChange('borderGlowSpread')}
+											min={0}
+											max={30}
+											unit="px"
+											disabled={disabled}
+										/>
+
+										<SliderOption
+											id="borderGlowIntensity"
+											label="Intensidad"
+											description="Controla la intensidad del resplandor del borde"
+											value={advancedEffects.borderGlowIntensity ?? 0.6}
+											onValueChange={handleSliderChange('borderGlowIntensity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
 							</div>
 						</div>
-					</AnimatedOption>
-				</Accordion>
+
+						<Separator />
+
+						{/* Efectos Holográficos */}
+						<div className="space-y-3">
+							<div className="flex items-center gap-1.5">
+								<HolographicRainbow className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Efectos Holográficos</h3>
+							</div>
+							<div className="space-y-3 pl-5">
+								<ToggleOption
+									id="holographicEffect"
+									label="Efecto Holográfico"
+									description="Añade un efecto holográfico que cambia con el movimiento"
+									checked={advancedEffects.holographicEffect ?? false}
+									onCheckedChange={handleToggleChange('holographicEffect')}
+									disabled={disabled}
+								/>
+
+								{advancedEffects.holographicEffect && (
+									<>
+										<ToggleOption
+											id="holographicRainbowMode"
+											label="Modo Arcoíris"
+											description="Activa el modo arcoíris para el efecto holográfico"
+											checked={advancedEffects.holographicRainbowMode ?? false}
+											onCheckedChange={handleToggleChange('holographicRainbowMode')}
+											disabled={disabled}
+										/>
+
+										{!advancedEffects.holographicRainbowMode && (
+											<div className="flex items-center justify-between space-x-3">
+												<label htmlFor="holographicEffectColor" className="text-[11px] flex items-center gap-1.5">
+													Color Base
+												</label>
+												<div className="flex items-center gap-2">
+													<div
+														className="h-4 w-4 rounded-full border"
+														style={{
+															backgroundColor: advancedEffects.holographicEffectColor ?? '#9333ea',
+														}}
+													/>
+													<input
+														id="holographicEffectColor"
+														type="color"
+														value={advancedEffects.holographicEffectColor ?? '#9333ea'}
+														onChange={handleColorChange('holographicEffectColor')}
+														className="h-6 w-6 cursor-pointer rounded-md p-0"
+														disabled={disabled}
+													/>
+												</div>
+											</div>
+										)}
+
+										<SliderOption
+											id="holographicEffectIntensity"
+											label="Intensidad"
+											description="Controla la intensidad del efecto holográfico"
+											value={advancedEffects.holographicEffectIntensity ?? 0.5}
+											onValueChange={handleSliderChange('holographicEffectIntensity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
+							</div>
+						</div>
+
+						<Separator />
+
+						{/* Efectos de Distorsión */}
+						<div className="space-y-3">
+							<div className="flex items-center gap-1.5">
+								<Wand2 className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Efectos de Distorsión</h3>
+							</div>
+							<div className="space-y-3 pl-5">
+								<ToggleOption
+									id="chromaticAberration"
+									label="Aberración Cromática"
+									description="Añade un efecto de aberración cromática a la tarjeta"
+									checked={advancedEffects.chromaticAberration ?? false}
+									onCheckedChange={handleToggleChange('chromaticAberration')}
+									disabled={disabled}
+								/>
+
+								{advancedEffects.chromaticAberration && (
+									<>
+										<SliderOption
+											id="chromaticAberrationOffset"
+											label="Desplazamiento"
+											description="Controla el desplazamiento de la aberración cromática"
+											value={advancedEffects.chromaticAberrationOffset ?? 2}
+											onValueChange={handleSliderChange('chromaticAberrationOffset')}
+											min={1}
+											max={10}
+											step={0.1}
+											unit="px"
+											disabled={disabled}
+										/>
+
+										<SliderOption
+											id="chromaticAberrationIntensity"
+											label="Intensidad"
+											description="Controla la intensidad de la aberración cromática"
+											value={advancedEffects.chromaticAberrationIntensity ?? 0.4}
+											onValueChange={handleSliderChange('chromaticAberrationIntensity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
+
+								<ToggleOption
+									id="glitchEffect"
+									label="Efecto Glitch"
+									description="Añade un efecto glitch digital aleatorio a la tarjeta"
+									checked={advancedEffects.glitchEffect ?? false}
+									onCheckedChange={handleToggleChange('glitchEffect')}
+									disabled={disabled}
+								/>
+
+								{advancedEffects.glitchEffect && (
+									<>
+										<SliderOption
+											id="glitchEffectIntensity"
+											label="Intensidad"
+											description="Controla la intensidad del efecto glitch"
+											value={advancedEffects.glitchEffectIntensity ?? 0.3}
+											onValueChange={handleSliderChange('glitchEffectIntensity')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+
+										<SliderOption
+											id="glitchEffectFrequency"
+											label="Frecuencia"
+											description="Controla la frecuencia del efecto glitch"
+											value={advancedEffects.glitchEffectFrequency ?? 0.2}
+											onValueChange={handleSliderChange('glitchEffectFrequency')}
+											min={0}
+											max={1}
+											step={0.01}
+											disabled={disabled}
+										/>
+									</>
+								)}
+
+								<ToggleOption
+									id="pixelate"
+									label="Pixelado"
+									description="Añade un efecto de pixelado a la tarjeta"
+									checked={advancedEffects.pixelate ?? false}
+									onCheckedChange={handleToggleChange('pixelate')}
+									disabled={disabled}
+								/>
+
+								{advancedEffects.pixelate && (
+									<SliderOption
+										id="pixelateSize"
+										label="Tamaño de Píxel"
+										description="Controla el tamaño de los píxeles"
+										value={advancedEffects.pixelateSize ?? 8}
+										onValueChange={handleSliderChange('pixelateSize')}
+										min={2}
+										max={20}
+										step={1}
+										unit="px"
+										disabled={disabled}
+									/>
+								)}
+							</div>
+						</div>
+
+						<Separator />
+
+						{/* Rendimiento */}
+						<div className="space-y-3">
+							<div className="flex items-center gap-1.5">
+								<Sand className="h-3.5 w-3.5 text-muted-foreground" />
+								<h3 className="text-xs font-medium">Rendimiento</h3>
+							</div>
+							<div className="pl-5">
+								<p className="text-[10px] text-muted-foreground mb-2">
+									Activar múltiples efectos avanzados puede afectar al rendimiento en dispositivos de gama baja.
+								</p>
+							</div>
+						</div>
+					</div>
+				</ScrollArea>
 			</CardContent>
 		</Card>
 	);

@@ -5,8 +5,9 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { FolderContentProps } from '@/components/views/base';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
 import { Folder } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 const viewLogger = logger.withContext('FolderContentView');
 
@@ -21,6 +22,46 @@ export function FolderContentView() {
 		setItems,
 		setIsLoading,
 	} = useFileManager();
+
+	const { setCurrentView } = useNavigationStore();
+
+	// Establecer la vista actual al montar el componente
+	useEffect(() => {
+		setCurrentView('folder-content');
+	}, [setCurrentView]);
+
+	// Cargar la información completa de la carpeta
+	useEffect(() => {
+		const loadFolderInfo = async () => {
+			if (!currentFolderId) {
+				viewLogger.error('❌ No se encontró una carpeta actual');
+				return;
+			}
+
+			try {
+				viewLogger.info('🔄 Cargando información de la carpeta:', currentFolderId);
+				const images = await getFolderImages(currentFolderId);
+
+				// Actualizar la información de la carpeta en el store
+				if (currentFolder) {
+					useFileManager.setState({
+						currentFolder: {
+							...currentFolder,
+							_count: { images: images.length },
+							lastIndexed: new Date(),
+						},
+					});
+				}
+
+				setItems(images);
+				viewLogger.info('✅ Información de la carpeta cargada');
+			} catch (error) {
+				viewLogger.error('❌ Error cargando información de la carpeta:', error);
+			}
+		};
+
+		loadFolderInfo();
+	}, [currentFolderId, setItems, currentFolder]);
 
 	const handleReindexFolder = useCallback(
 		async (id: string) => {

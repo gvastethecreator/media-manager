@@ -15,7 +15,8 @@ import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { useThumbnailEvents } from '@/lib/hooks/use-thumbnail-events';
 import { toastService } from '@/lib/services/toast.service';
-import { cn, formatBytes } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 import type { ProcessOptions } from '@/services/thumbnail.service';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import type {

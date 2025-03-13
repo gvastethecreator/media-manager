@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
 

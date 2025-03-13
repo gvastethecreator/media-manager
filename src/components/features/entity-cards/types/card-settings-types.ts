@@ -14,120 +14,161 @@ import type { ReactNode } from 'react';
 // Tipo para la configuración del grid de imágenes
 export type ImageGridLayout = 'single' | 'dual' | 'quad' | 'six';
 
+export interface ImageGrid {
+	layout?: 'single' | 'dual' | 'grid';
+	gap?: number;
+	style?: 'standard' | 'masonry' | 'carousel';
+	aspectRatio?: string;
+}
+
 // Extendemos las opciones base de la tarjeta
 export interface CardOptions {
-	// Sistema de Diseño
+	// Sistema de diseño
 	designSystem?: {
-		preset?: string;
+		preset?: 'default' | 'modern' | 'classic' | 'minimal' | 'elegant';
 		variant?: string;
 		aspectRatio?: string;
-		cornerStyle?: string;
+		cornerStyle?: 'rounded' | 'sharp' | 'beveled';
 		cornerRadius?: number;
 		elevation?: number;
-		shadowStyle?: string;
+		shadowStyle?: 'soft' | 'hard' | 'layered' | 'none';
 	};
-
-	// Configuración de Contenido
-	contentLayout?: string;
-	contentAlignment?: string;
-	imageStyle?: string;
-	imageOverlay?: boolean;
-	imageOverlayOpacity?: number;
-
-	// Configuración del grid de imágenes
-	imageGridLayout: ImageGridLayout;
-	imageGridGap: number;
-	imageGridAspectRatio?: string;
-	showImageCount: boolean;
-	imageGridStyle: string;
-
-	// Estados
-	states?: {
-		enableHover?: boolean;
-		enableFocus?: boolean;
-		enableActive?: boolean;
-		enableSelected?: boolean;
-		stateEffect?: string;
-		stateIntensity?: number;
-		stateDuration?: number;
-	};
-
-	// Sistemas
-	raritySystem: boolean;
-	textureSystem: boolean;
-	categorySystem: boolean;
-
-	// Efectos Visuales
-	enable3DEffect: boolean;
-	enableHolographicEffect: boolean;
-	enableGlowEffect?: boolean;
-	enableGrainEffect: boolean;
-	enableLightHalo: boolean;
-	enableAnimatedBorder: boolean;
-	enableGlow: boolean;
-	maxRotation: number;
-	hoverLiftHeight: number;
-
-	// Efectos Avanzados
-	enableScanlines: boolean;
-
-	// Rendimiento
-	enableLazyLoading: boolean;
-	enableImageOptimization?: boolean;
-	enableVirtualization?: boolean;
-	enableCaching?: boolean;
-	animationDuration?: number;
-	transitionDuration?: number;
-	throttleDelay?: number;
-	hoverTransitionDuration?: number;
-	hoverTransitionEasing?: string;
-	rotationTransitionDuration?: number;
-	liftTransitionDuration?: number;
 
 	// Visual
-	showTitle: boolean;
-	showType: boolean;
-	showDescription: boolean;
-	showRarity: boolean;
-	showTexture: boolean;
-	showInfo: boolean;
+	showTitle?: boolean;
+	showType?: boolean;
+	showDescription?: boolean;
+	showRarity?: boolean;
+	showTexture?: boolean;
+	showInfo?: boolean;
+	showImageCount?: boolean;
 
-	// Opciones específicas para scanlines
+	// Imagen
+	imageGrid?: ImageGrid;
+
+	// Efectos
+	enableGlow?: boolean;
+	enableScanlines?: boolean;
+	enableGrainEffect?: boolean;
+	enableLightHalo?: boolean;
+	enableAnimatedBorder?: boolean;
+	enable3DEffect?: boolean;
+	enableHolographicEffect?: boolean;
+	maxRotation?: number;
+	hoverLiftHeight?: number;
+
+	// Opciones específicas para efectos
 	scanlinesOptions?: ScanlinesOptions;
-	// Opciones específicas para efecto de grano
 	grainOptions?: GrainEffectOptions;
-	// Opciones específicas para borde animado
 	borderOptions?: BorderOptions;
-
-	// Sistema
-	enableShadow: boolean;
-	cardShadowSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-	cardShadowColor: string;
-	cardRoundedSize: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
-
-	// Avanzado
-	enableHoverAnimation: boolean;
-	cardBorderSize: 'none' | 'sm' | 'md' | 'lg';
-	enableParallaxEffect: boolean;
-	enableBlurEffect: boolean;
-
-	// Rendimiento
-	enableSkeleton: boolean;
-	enablePrefetch: boolean;
-
-	// Estados
-	enableHover: boolean;
-	enableActive: boolean;
-	enableFocus: boolean;
-	enableDisabled: boolean;
-
-	// Colores
-	primaryColor: string;
-	secondaryColor: string;
-
-	// Configuraciones específicas de efectos
 	holographicOptions?: HolographicEffectOptions;
 	glowOptions?: GlowEffectOptions;
+	effects?: DistortionEffects;
+
+	// Sistema
+	enableShadow?: boolean;
+	cardShadowSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+	cardShadowColor?: string;
+	cardRoundedSize?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+	cardBorderSize?: 'none' | 'sm' | 'md' | 'lg';
+
+	// Avanzado
+	enableHoverAnimation?: boolean;
+	enableParallaxEffect?: boolean;
+	enableBlurEffect?: boolean;
+
+	// Rendimiento
+	enableSkeleton?: boolean;
+	enablePrefetch?: boolean;
+	enableLazyLoading?: boolean;
+
+	// Estados
+	enableHover?: boolean;
+	enableActive?: boolean;
+	enableFocus?: boolean;
+	enableDisabled?: boolean;
+
+	// Sistemas
+	raritySystem?: boolean;
+	textureSystem?: boolean;
+	categorySystem?: boolean;
+
+	// Colores
+	primaryColor?: string;
+	secondaryColor?: string;
+
+	// Estados y Animaciones
+	states?: {
+		hover?: boolean;
+		focus?: boolean;
+		active?: boolean;
+		selected?: boolean;
+		hoverScale?: number;
+		hoverRotate?: number;
+		hoverTranslateY?: number;
+		focusScale?: number;
+		focusRotate?: number;
+		focusTranslateY?: number;
+		activeScale?: number;
+		activeRotate?: number;
+		activeTranslateY?: number;
+		selectedScale?: number;
+		selectedRotate?: number;
+		selectedTranslateY?: number;
+	};
+
+	// Efectos Visuales
+	visualEffects?: {
+		// Ajustes de imagen
+		brightness?: number;
+		contrast?: number;
+		saturate?: number;
+		hueRotate?: number;
+
+		// Filtros de estilo
+		grayscale?: number;
+		sepia?: number;
+		invert?: number;
+		opacity?: number;
+
+		// Efectos de desenfoque
+		blur?: number;
+		dropShadow?: boolean;
+
+		// Efectos de fondo
+		backdropBlur?: number;
+		backdropBrightness?: number;
+		backdropSaturate?: number;
+		backdropOpacity?: number;
+	};
+
+	// Rendimiento
+	performance?: {
+		// Optimización de carga
+		lazyLoad?: boolean;
+		imageOptimization?: boolean;
+		prefetchOnHover?: boolean;
+		placeholderImage?: boolean;
+		useSkeletonLoading?: boolean;
+
+		// Virtualización y Caché
+		virtualizeList?: boolean;
+		cacheStrategy?: 'none' | 'memory' | 'persistent';
+		enableHardwareAcceleration?: boolean;
+
+		// Animaciones y Transiciones
+		reducedMotion?: boolean;
+		animationDuration?: number;
+		animationMaxFPS?: number;
+		animationTimingFunction?: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
+
+		// Respuesta y Retrasos
+		debounceTime?: number;
+		transitionDelay?: number;
+	};
+
+	// Efectos Avanzados
+	effects: EffectsOptions;
 }
 
 export interface CardSettingsProps {
@@ -161,3 +202,151 @@ export interface CardPresetOption {
 
 // Renombrar para diferenciar de la interfaz base
 export type { BorderOptions as SettingsBorderOptions };
+
+export interface CardConfigFormData {
+	entityType: string;
+	cardOptions: CardOptions;
+}
+
+export interface RaritySystemOptions {
+	rarities: Record<string, RarityConfig>;
+	defaultRarity: string;
+	showRarityBadge: boolean;
+	showRarityName: boolean;
+	rarityPlacement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+}
+
+export interface TextureSystemOptions {
+	textures: Record<string, TextureConfig>;
+	defaultTexture: string;
+	enableTextures: boolean;
+	textureOpacity: number;
+}
+
+export interface CardPresetDto {
+	id: string;
+	name: string;
+	description?: string;
+	entityType: string;
+	isDefault?: boolean;
+	options: CardOptions;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+export interface ShaderOptions {
+	enabled: boolean;
+	visibleOnHover: boolean;
+	intensity: number;
+	frequency?: number;
+	amplitude?: number;
+	scanlineSpeed?: number;
+	scanlineDensity?: number;
+	color?: string;
+	particleCount?: number;
+	particleSize?: number;
+	speed?: number;
+}
+
+export interface PatternOptions {
+	enabled: boolean;
+	visibleOnHover: boolean;
+	opacity: number;
+	scale: number;
+	rotation: number;
+	dotSize?: number;
+	spacing?: number;
+	lineWidth?: number;
+	size?: number;
+	angle?: number;
+}
+
+export interface FilterOptions {
+	enabled: boolean;
+	visibleOnHover: boolean;
+	intensity: number;
+	frequency?: number;
+	amplitude?: number;
+	radius?: number;
+	color?: string;
+	blur?: number;
+	offsetX?: number;
+	offsetY?: number;
+}
+
+export interface EffectsOptions {
+	enabled: boolean;
+	visibleOnHover: boolean;
+	intensity: number;
+	// Efectos de distorsión
+	glitchEffect?: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		frequency: number;
+		duration: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	chromaticAberration?: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		offset: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	pixelate?: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		blockSize: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	// Shaders
+	shaders?: {
+		distortion?: ShaderOptions;
+		hologram?: ShaderOptions;
+		particles?: ShaderOptions;
+		wave?: ShaderOptions;
+	};
+	// Patrones
+	patterns?: {
+		dots?: PatternOptions;
+		grid?: PatternOptions;
+		hexagons?: PatternOptions;
+		lines?: PatternOptions;
+	};
+	// Filtros
+	filters?: {
+		distortion?: FilterOptions;
+		glow?: FilterOptions;
+		shadow?: FilterOptions;
+	};
+}
+
+export interface DistortionEffects {
+	enabled?: boolean;
+	visibleOnHover?: boolean;
+	intensity?: number;
+	glitchEffect?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		frequency?: number;
+		duration?: number;
+	};
+	chromaticAberration?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		offset?: number;
+	};
+	pixelate?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		blockSize?: number;
+	};
+}

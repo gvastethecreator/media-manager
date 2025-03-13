@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatFileSize } from '@/lib/utils';
-import { formatDate } from '@/lib/utils/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
+import { formatDate } from '@/lib/utils/format.utils';
 import {
 	AlignLeft,
 	Calendar,
@@ -431,7 +431,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 			{metadata.fileSize !== undefined && (
 				<InfoItem
 					label="Tamaño"
-					value={formatFileSize(metadata.fileSize)}
+					value={formatBytes(metadata.fileSize)}
 					icon={<Info className="h-3.5 w-3.5 text-green-500" />}
 				/>
 			)}

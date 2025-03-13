@@ -7,18 +7,22 @@ import type {
 	CardDesignPreset,
 	CardOptions,
 	RarityConfig,
+	TextureConfig,
 } from '@/components/features/entity-cards/types/base-card-types';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
+import { NoteWithStats } from '@/types/note';
 import type { Note } from '@prisma/client';
 import { Edit, ScrollText, StickyNote, Trash2 } from 'lucide-react';
+import { ImageIcon, StarIcon, UsersIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useState } from 'react';
+import { EntityCardWrapper } from '../base/entity-card-wrapper';
 
 // Opciones visuales optimizadas para tarjetas de notas
 const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
 	enable3DEffect: true,
-	enableHolographicEffect: false,
+	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
@@ -28,7 +32,7 @@ const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
 	designSystem: {
 		preset: 'note' as CardDesignPreset,
 		variant: 'default',
-		aspectRatio: '4/5',
+		aspectRatio: '4/3',
 		cornerStyle: 'rounded',
 		cornerRadius: 8,
 		elevation: 2,
@@ -38,13 +42,13 @@ const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
 	// Configuración de movimiento
 	hoverLiftHeight: 6,
 	maxRotation: 8,
-	primaryColor: '45, 212, 191', // Un tono turquesa
-	secondaryColor: '34, 211, 238', // Un tono cyan
+	primaryColor: '168, 85, 247', // Un tono púrpura
+	secondaryColor: '192, 132, 252', // Un tono púrpura claro
 
 	// Opciones de efectos
 	holographicOptions: {
 		patternType: 'linear',
-		intensity: 0.4,
+		intensity: 0.5,
 		animationSpeed: 1,
 		visibleOnHover: true,
 	},
@@ -116,22 +120,11 @@ interface NoteCardProps {
 	onDelete?: (id: string) => void;
 	onClick?: () => void;
 	className?: string;
-	showVisualConfig?: boolean;
 	visualOptions?: Partial<CardOptions>;
-	enableExplode?: boolean;
 }
 
 // Componente principal de tarjeta de nota
-export function NoteCard({
-	note,
-	onEdit,
-	onDelete,
-	onClick,
-	className,
-	showVisualConfig = false,
-	visualOptions,
-	enableExplode = false,
-}: NoteCardProps) {
+export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOptions }: NoteCardProps) {
 	// Estado local
 	const [showConfig, setShowConfig] = useState(false);
 	const [isHovered, setIsHovered] = useState(false);
@@ -161,6 +154,55 @@ export function NoteCard({
 					? PRIORITY_COLORS[1]
 					: PRIORITY_COLORS[0];
 
+	// Determinar rareza basada en el número de imágenes
+	const rarity = note._count?.images
+		? note._count.images > 10
+			? 'legendary'
+			: note._count.images > 5
+				? 'epic'
+				: 'rare'
+		: 'common';
+
+	// Determinar tipo de nota basado en palabras clave
+	const determineNoteType = (name: string, description: string) => {
+		const keywords = {
+			story: ['historia', 'cuento', 'relato', 'narrativa'],
+			concept: ['concepto', 'idea', 'teoría', 'propuesta'],
+			research: ['investigación', 'estudio', 'análisis', 'datos'],
+		};
+
+		const text = `${name} ${description}`.toLowerCase();
+		for (const [type, words] of Object.entries(keywords)) {
+			if (words.some((word) => text.includes(word))) {
+				return type as keyof typeof keywords;
+			}
+		}
+		return 'concept';
+	};
+
+	const noteType = determineNoteType(note.name, note.description || '');
+
+	// Estilos específicos por tipo de nota
+	const noteStyles = {
+		story: {
+			primaryColor: '168, 85, 247', // Púrpura
+			secondaryColor: '192, 132, 252', // Púrpura claro
+			texture: 'gold' as TextureConfig,
+		},
+		concept: {
+			primaryColor: '59, 130, 246', // Azul
+			secondaryColor: '96, 165, 250', // Azul claro
+			texture: 'silver' as TextureConfig,
+		},
+		research: {
+			primaryColor: '34, 197, 94', // Verde
+			secondaryColor: '74, 222, 128', // Verde claro
+			texture: 'bronze' as TextureConfig,
+		},
+	};
+
+	const style = noteStyles[noteType];
+
 	return (
 		<>
 			{showConfig && (
@@ -176,50 +218,33 @@ export function NoteCard({
 				/>
 			)}
 
-			<BaseCard
-				onClick={onClick}
-				className={cn(
-					'w-full',
-					{
-						'aspect-[4/5]': cardOptions.designSystem?.aspectRatio === '4/5',
-						'aspect-square': cardOptions.designSystem?.aspectRatio === '1/1',
-						'aspect-video': cardOptions.designSystem?.aspectRatio === '16/9',
-					},
-					className
-				)}
-				options={cardOptions}
-				rarity={{
-					name: 'custom',
-					color: priorityColor.borderColor,
-					glowColor: priorityColor.glowColor,
-					borderWidth: priorityLevel > 0 ? '2px' : '1px',
-					borderEffect: priorityLevel >= 2 ? 'animated' : 'static',
+			<EntityCardWrapper
+				className={cn('group relative overflow-hidden', className)}
+				options={{
+					...cardOptions,
+					primaryColor: style.primaryColor,
+					secondaryColor: style.secondaryColor,
 				}}
-				onHoverStart={() => setIsHovered(true)}
-				onHoverEnd={() => setIsHovered(false)}
-				showVisualizationConfig={showVisualConfig}
-				onVisualizationConfigClick={() => setShowConfig(true)}
-				enableExplode={enableExplode}
+				entityType="note"
+				rarity={rarity}
+				texture={style.texture}
+				onHover={() => setIsHovered(true)}
+				onClick={onClick}
+				enableExplode={true}
 				explodeLayers={[
 					{
-						id: 'content',
-						label: 'Contenido',
-						icon: <div className="w-3 h-3 bg-primary rounded-sm" />,
+						element: 'image',
+						scale: 1.1,
+						opacity: 0.8,
+						blur: 2,
+						zIndex: 1,
 					},
 					{
-						id: 'holographic',
-						label: 'Efecto Holo',
-						icon: <div className="w-3 h-3 bg-gradient-to-tr from-cyan-400 to-teal-300 opacity-60" />,
-					},
-					{
-						id: 'grain',
-						label: 'Textura',
-						icon: <div className="w-3 h-3 bg-neutral-300 rounded-sm opacity-60" />,
-					},
-					{
-						id: 'border',
-						label: 'Borde',
-						icon: <div className="w-3 h-3 border border-primary rounded-sm" />,
+						element: 'content',
+						scale: 1.05,
+						opacity: 0.9,
+						blur: 1,
+						zIndex: 2,
 					},
 				]}
 			>
@@ -348,7 +373,7 @@ export function NoteCard({
 						</div>
 					</div>
 				</div>
-			</BaseCard>
+			</EntityCardWrapper>
 		</>
 	);
 }

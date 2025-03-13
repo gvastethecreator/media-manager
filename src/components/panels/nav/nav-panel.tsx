@@ -5,7 +5,7 @@ import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.ac
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProfileContext } from '@/lib/contexts';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
 import { useStatsBaseStore } from '@/store/stats.store';

@@ -181,19 +181,33 @@ export function adaptOptionsForLayout(options: Partial<BaseCardOptions>, layoutT
 }
 
 /**
- * Verifica si las opciones son del tipo SettingsCardOptions
- * Utilizado para determinar si necesitamos adaptar las opciones antes de usarlas
- *
- * @param options Opciones a verificar
- * @returns Verdadero si las opciones son del tipo SettingsCardOptions
+ * Verifica si las opciones pasadas son del tipo SettingsCardOptions
+ * @param options - Opciones a verificar
+ * @returns True si las opciones son del tipo SettingsCardOptions
  */
-export function isSettingsCardOptions(options: unknown): options is SettingsCardOptions {
-	return (
-		typeof options === 'object' &&
-		options !== null &&
-		'raritySystem' in options &&
-		typeof (options as SettingsCardOptions).raritySystem === 'boolean'
-	);
+export function isSettingsCardOptions(options: unknown): boolean {
+	if (!options || typeof options !== 'object') {
+		return false;
+	}
+
+	// Verificar propiedades específicas del tipo SettingsCardOptions
+	const settingsOptionProps = [
+		'showTitle',
+		'showType',
+		'showDescription',
+		'imageGridLayout',
+		'imageGridGap',
+		'enableGlow',
+		'enableScanlines',
+	];
+
+	for (const prop of settingsOptionProps) {
+		if (prop in (options as Record<string, unknown>)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -252,4 +266,72 @@ export function generateRarityConfig(rarityName?: string, color?: string): Rarit
 		borderEffect: getBorderEffect(),
 		glowColor: rarityName ? glowColors[rarityName as keyof typeof glowColors] : undefined,
 	};
+}
+
+/**
+ * Serializa las opciones complejas para guardar en la base de datos
+ * @param options - Opciones a serializar
+ * @returns Opciones serializadas para almacenamiento
+ */
+export function serializeOptionsForStorage(options: SettingsCardOptions): Record<string, unknown> {
+	const serializedOptions: Record<string, unknown> = { ...options };
+
+	// Convertir objetos a JSON para almacenamiento en DB
+	if (options.holographicOptions) {
+		serializedOptions.holographicOptions = JSON.stringify(options.holographicOptions);
+	}
+
+	if (options.scanlinesOptions) {
+		serializedOptions.scanlinesOptions = JSON.stringify(options.scanlinesOptions);
+	}
+
+	if (options.glowOptions) {
+		serializedOptions.glowOptions = JSON.stringify(options.glowOptions);
+	}
+
+	if (options.borderOptions) {
+		serializedOptions.borderOptions = JSON.stringify(options.borderOptions);
+	}
+
+	if (options.grainOptions) {
+		serializedOptions.grainOptions = JSON.stringify(options.grainOptions);
+	}
+
+	return serializedOptions;
+}
+
+/**
+ * Deserializa las opciones desde la base de datos
+ * @param data - Datos serializados desde DB
+ * @returns Opciones deserializadas
+ */
+export function deserializeOptionsFromStorage(data: Record<string, unknown>): SettingsCardOptions {
+	const deserializedOptions: Record<string, unknown> = { ...data };
+
+	// Convertir cadenas JSON a objetos
+	try {
+		if (typeof data.holographicOptions === 'string') {
+			deserializedOptions.holographicOptions = JSON.parse(data.holographicOptions);
+		}
+
+		if (typeof data.scanlinesOptions === 'string') {
+			deserializedOptions.scanlinesOptions = JSON.parse(data.scanlinesOptions);
+		}
+
+		if (typeof data.glowOptions === 'string') {
+			deserializedOptions.glowOptions = JSON.parse(data.glowOptions);
+		}
+
+		if (typeof data.borderOptions === 'string') {
+			deserializedOptions.borderOptions = JSON.parse(data.borderOptions);
+		}
+
+		if (typeof data.grainOptions === 'string') {
+			deserializedOptions.grainOptions = JSON.parse(data.grainOptions);
+		}
+	} catch (error) {
+		console.error('Error al deserializar opciones:', error);
+	}
+
+	return deserializedOptions as SettingsCardOptions;
 }

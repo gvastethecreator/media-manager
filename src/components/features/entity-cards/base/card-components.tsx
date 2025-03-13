@@ -1,7 +1,7 @@
 'use client';
 
-import { formatBytes } from '@/lib/utils/utils';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { CalendarClock, Clock, HardDrive, ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';

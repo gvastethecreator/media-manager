@@ -1,84 +1,102 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import * as React from 'react';
-
-export interface CardContainerProps {
-	id?: string;
-	children: React.ReactNode;
-	isHovered: boolean;
-	isExploded: boolean;
-	transformStyle?: React.CSSProperties;
-	rarityBorderStyle?: React.CSSProperties;
-	filterId?: string;
-	enable3DEffect?: boolean;
-	className?: string;
-	onHoverStart?: () => void;
-	onHoverEnd?: () => void;
-	onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
-	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
-}
+import type { CardContainerProps } from '../types/card-layer-types';
 
 /**
- * CardContainer - El contenedor principal de la tarjeta de entidad.
- * Maneja la estructura principal y las transformaciones 3D.
+ * Contenedor principal para las tarjetas de entidades
+ * Gestiona aspectos básicos como bordes, sombras, y comportamientos de hover
  */
 export function CardContainer({
-	id,
 	children,
 	isHovered,
 	isExploded,
-	transformStyle,
-	rarityBorderStyle,
+	transformStyle = {},
+	rarityBorderStyle = {},
 	filterId,
 	enable3DEffect = true,
-	className,
 	onHoverStart,
 	onHoverEnd,
 	onMouseMove,
 	onClick,
+	id,
+	// Nuevas propiedades
+	disabled = false,
+	rounded = 'md',
+	borderSize = 'sm',
 }: CardContainerProps) {
+	// Mapa de tamaños de redondeo
+	const roundedSizeClasses = {
+		none: 'rounded-none',
+		sm: 'rounded-sm',
+		md: 'rounded-md',
+		lg: 'rounded-lg',
+		xl: 'rounded-xl',
+		'2xl': 'rounded-2xl',
+		full: 'rounded-full',
+	};
+
+	// Mapa de tamaños de borde
+	const borderSizeClasses = {
+		none: 'border-0',
+		sm: 'border',
+		md: 'border-2',
+		lg: 'border-4',
+	};
+
+	// Aplicar clases según las propiedades
+	const containerClasses = cn(
+		'relative overflow-hidden transition-all duration-200 card-base',
+		// Clases condicionales
+		isExploded ? 'exploded-container shadow-none' : '',
+		isHovered ? 'card-hovered z-10' : 'z-0',
+		disabled ? 'opacity-50 pointer-events-none' : 'opacity-100',
+		// Clases de estilo
+		roundedSizeClasses[rounded as keyof typeof roundedSizeClasses],
+		borderSizeClasses[borderSize as keyof typeof borderSizeClasses],
+		'bg-card border-border',
+		enable3DEffect ? 'preserve-3d' : ''
+	);
+
 	// Manejadores de eventos
 	const handleMouseEnter = React.useCallback(() => {
-		if (onHoverStart && !isExploded) {
-			onHoverStart();
-		}
-	}, [onHoverStart, isExploded]);
+		onHoverStart?.();
+	}, [onHoverStart]);
 
 	const handleMouseLeave = React.useCallback(() => {
-		if (onHoverEnd && !isExploded) {
-			onHoverEnd();
-		}
-	}, [onHoverEnd, isExploded]);
+		onHoverEnd?.();
+	}, [onHoverEnd]);
+
+	const handleMouseMove = React.useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			onMouseMove?.(e);
+		},
+		[onMouseMove]
+	);
 
 	const handleClick = React.useCallback(
 		(e?: React.MouseEvent<HTMLDivElement>) => {
-			if (onClick && !isExploded) {
-				onClick(e);
+			if (e) {
+				onClick?.(e);
 			}
 		},
-		[onClick, isExploded]
+		[onClick]
 	);
 
 	return (
 		<motion.div
 			id={id}
-			className={cn(
-				'relative card-container h-full w-full overflow-hidden rounded-lg border bg-card/90 shadow-sm backdrop-blur-sm transition-shadow',
-				isHovered ? 'shadow-lg' : 'shadow-md',
-				isExploded ? 'exploded-layer-container' : '',
-				enable3DEffect ? 'preserve-3d' : '',
-				className
-			)}
+			className={containerClasses}
 			onHoverStart={handleMouseEnter}
 			onHoverEnd={handleMouseLeave}
-			onMouseMove={onMouseMove}
+			onMouseMove={handleMouseMove}
 			onClick={handleClick}
 			style={{
 				...transformStyle,
 				...rarityBorderStyle,
-				filter: filterId ? `url(#${filterId})` : undefined,
+				filter: filterId ? `url(#${filterId})` : 'none',
 			}}
 		>
 			{children}

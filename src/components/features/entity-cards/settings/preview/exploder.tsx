@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { ChevronRight, Layers, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';

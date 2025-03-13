@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { ImageItem } from '@/types/image-item';
 import type { FileMetadata } from '@/types/metadata.types';
 import {

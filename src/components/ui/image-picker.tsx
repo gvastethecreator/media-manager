@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { Image, X } from 'lucide-react';
 import * as React from 'react';
 

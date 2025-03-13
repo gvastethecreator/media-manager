@@ -30,7 +30,7 @@ import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { UploadedImageType } from '@/types/entities/entities';
 import type { FileItem } from '@/types/file-item';
 import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';

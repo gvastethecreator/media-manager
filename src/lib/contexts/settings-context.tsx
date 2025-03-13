@@ -16,7 +16,7 @@ import {
 } from '@/app/actions/tags/tag.actions';
 import type { TagCreate, TagUpdate, TagWithStats } from '@/app/actions/tags/tag.actions';
 import { toastService } from '@/lib/services/toast.service';
-import { formatBytes } from '@/lib/utils/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 import {
 	type ProfileCreate,
 	type ProfileUpdate,
