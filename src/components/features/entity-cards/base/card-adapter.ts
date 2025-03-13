@@ -1,9 +1,9 @@
-import type { CardOptions as SettingsCardOptions } from '../settings/card-settings-types';
 import type {
 	BorderOptions as BaseBorderOptions,
 	CardOptions as BaseCardOptions,
 	RarityConfig,
-} from './base-card-types';
+} from '../types/base-card-types';
+import type { CardOptions as SettingsCardOptions } from '../types/card-settings-types';
 
 /**
  * Adapta las opciones de configuración al formato que espera BaseCard

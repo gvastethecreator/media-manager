@@ -34,7 +34,7 @@ function hasProperty<T, K extends string>(obj: T, key: K): obj is T & Record<K, 
 }
 
 // Obtener una propiedad como string con valor por defecto
-function getStringProp(obj: any, key: string, defaultValue = ''): string {
+function getStringProp(obj: CardData, key: string, defaultValue = ''): string {
 	if (hasProperty(obj, key) && typeof obj[key] === 'string') {
 		return obj[key] as string;
 	}
@@ -63,7 +63,6 @@ export function AlbumCard({
 	data,
 	isPreview = false,
 	onEdit,
-	onDelete,
 	className,
 	showVisualizationConfig = false,
 	onClick,

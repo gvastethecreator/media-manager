@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { getPrompts } from "@/app/actions/prompts/prompt.actions";
-import type { PromptWithStats } from "@/app/actions/prompts/prompt.actions";
-import { EmptyState } from "@/components/core/data-display";
-import { LoadingScreen } from "@/components/core/feedback";
-import { PromptCard } from "@/components/features/entity-cards/layouts/prompt-card-layout";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger/logger";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import type { Prompt } from "@prisma/client";
-import { MessageSquare } from "lucide-react";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { ViewProps } from "../types";
+import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import type { PromptWithStats } from '@/app/actions/prompts/prompt.actions';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card-layout';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import type { Prompt } from '@prisma/client';
+import { MessageSquare } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("PromptsView");
+const viewLogger = logger.withContext('PromptsView');
 
 // Función adaptadora para convertir PromptWithStats a CardData (Prompt)
 const adaptPromptWithStats = (prompt: PromptWithStats): Prompt => {
@@ -35,20 +35,18 @@ export function PromptsView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticPrompts, _addEvent] =
-		clientEvents.useEvents<PromptWithStats[]>(prompts);
+	const [optimisticPrompts, _addEvent] = clientEvents.useEvents<PromptWithStats[]>(prompts);
 
 	const fetchPrompts = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando prompts...");
+			viewLogger.info('🔄 Cargando prompts...');
 			const data = await getPrompts();
 			setPrompts(data);
 			viewLogger.info(`✅ ${data.length} prompts cargados`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando prompts:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando prompts:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -62,8 +60,8 @@ export function PromptsView(_props: ViewProps) {
 
 	const handlePromptClick = useCallback(
 		(prompt: PromptWithStats) => {
-			viewLogger.info("🖱️ Click en prompt:", prompt.name);
-			setCurrentView("prompt-content");
+			viewLogger.info('🖱️ Click en prompt:', prompt.name);
+			setCurrentView('prompt-content');
 			setCurrentPrompt(prompt.id);
 		},
 		[setCurrentView, setCurrentPrompt]
@@ -71,14 +69,14 @@ export function PromptsView(_props: ViewProps) {
 
 	const handleEditPrompt = useCallback(
 		(id: string) => {
-			viewLogger.info("⚙️ Editando prompt:", id);
+			viewLogger.info('⚙️ Editando prompt:', id);
 			router.push(`/settings/prompts?id=${id}`);
 		},
 		[router]
 	);
 
 	const handleDeletePrompt = useCallback((id: string) => {
-		viewLogger.info("🗑️ Eliminando prompt:", id);
+		viewLogger.info('🗑️ Eliminando prompt:', id);
 		// Implementar lógica de eliminación
 	}, []);
 

@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils/utils';
 import { ArrowUpRight, Award, Crown, FlameIcon, Heart, Shield, Sparkles, Sword, User, Zap } from 'lucide-react';
 import type * as React from 'react';
 import { useMemo } from 'react';
-import type { CardDesignData, CardOptions, RarityConfig, TextureConfig } from '../base/base-card-types';
 import { generateRarityConfig } from '../base/card-adapter';
 import { EntityCardWrapper } from '../base/entity-card-wrapper';
+import type { CardDesignData, CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
 
 interface CharacterCardProps {
 	character: CardDesignData;

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { getNotes } from "@/app/actions/notes/note.actions";
-import type { NoteWithStats } from "@/app/actions/notes/note.actions";
-import { EmptyState } from "@/components/core/data-display";
-import { LoadingScreen } from "@/components/core/feedback";
-import { NoteCard } from "@/components/features/entity-cards/layouts/note-card-layout";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { clientEvents } from "@/lib/client/events.client";
-import { logger } from "@/lib/logger/logger";
-import { useFileManager } from "@/store/file-manager.store";
-import { useNavigationStore } from "@/store/navigation.store";
-import type { Note } from "@prisma/client";
-import { ScrollText } from "lucide-react";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { ViewProps } from "../types";
+import { getNotes } from '@/app/actions/notes/note.actions';
+import type { NoteWithStats } from '@/app/actions/notes/note.actions';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { NoteCard } from '@/components/features/entity-cards/layouts/note-card-layout';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientEvents } from '@/lib/client/events.client';
+import { logger } from '@/lib/logger/logger';
+import { useFileManager } from '@/store/file-manager.store';
+import { useNavigationStore } from '@/store/navigation.store';
+import type { Note } from '@prisma/client';
+import { ScrollText } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext("NotesView");
+const viewLogger = logger.withContext('NotesView');
 
 // Función adaptadora para convertir NoteWithStats a Note
 const adaptNoteWithStats = (note: NoteWithStats): Note => {
@@ -29,11 +29,11 @@ const adaptNoteWithStats = (note: NoteWithStats): Note => {
 	return {
 		id: noteData.id,
 		title: noteData.title,
-		content: noteData.content || "",
-		category: noteData.category || "general",
+		content: noteData.content || '',
+		category: noteData.category || 'general',
 		priority: noteData.priority || 0,
-		status: noteData.status || "active",
-		tags: noteData.tags || "[]",
+		status: noteData.status || 'active',
+		tags: noteData.tags || '[]',
 		featuredImage: noteData.featuredImage ?? null,
 		isFavorite: noteData.isFavorite || false,
 		createdAt: new Date(noteData.createdAt),
@@ -50,20 +50,18 @@ export function NotesView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticNotes, _addEvent] =
-		clientEvents.useEvents<NoteWithStats[]>(notes);
+	const [optimisticNotes, _addEvent] = clientEvents.useEvents<NoteWithStats[]>(notes);
 
 	const fetchNotes = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info("🔄 Cargando notas...");
+			viewLogger.info('🔄 Cargando notas...');
 			const data = await getNotes();
 			setNotes(data);
 			viewLogger.info(`✅ ${data.length} notas cargadas`);
 		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Error desconocido";
-			viewLogger.error("❌ Error cargando notas:", err);
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando notas:', err);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -77,8 +75,8 @@ export function NotesView(_props: ViewProps) {
 
 	const handleNoteClick = useCallback(
 		(note: NoteWithStats) => {
-			viewLogger.info("🖱️ Click en nota:", note.title);
-			setCurrentView("note-content");
+			viewLogger.info('🖱️ Click en nota:', note.title);
+			setCurrentView('note-content');
 			setCurrentNote(note.id);
 		},
 		[setCurrentView, setCurrentNote]
@@ -86,14 +84,14 @@ export function NotesView(_props: ViewProps) {
 
 	const handleEditNote = useCallback(
 		(note: NoteWithStats) => {
-			viewLogger.info("⚙️ Editando nota:", note.title);
+			viewLogger.info('⚙️ Editando nota:', note.title);
 			router.push(`/settings/notes?id=${note.id}`);
 		},
 		[router]
 	);
 
 	const handleDeleteNote = useCallback((id: string) => {
-		viewLogger.info("🗑️ Eliminando nota:", id);
+		viewLogger.info('🗑️ Eliminando nota:', id);
 		// Implementar lógica de eliminación
 	}, []);
 
