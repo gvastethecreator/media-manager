@@ -6,7 +6,7 @@ import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbna
 import { logger } from '@/lib/logger/logger';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
-import { formatBytes } from './utils/utils';
+import { formatBytes } from './utils/format.utils';
 
 const thumbLogger = logger.withContext('Thumbnail');
 
@@ -28,6 +28,13 @@ export interface ThumbnailResult {
 	format: ImageFormat;
 	size: number;
 	originalSize?: number;
+}
+
+export interface OptimizeResult {
+	data: Buffer;
+	size: number;
+	width: number;
+	height: number;
 }
 
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif']);
@@ -123,6 +130,39 @@ function validateDimensions(originalWidth: number, originalHeight: number): { wi
 	}
 
 	return { width, height };
+}
+
+/**
+ * Optimiza una miniatura existente
+ * @param buffer Buffer de la miniatura a optimizar
+ * @returns Resultado de la optimización con el nuevo buffer y metadatos
+ */
+export async function optimizeThumbnail(buffer: Buffer): Promise<OptimizeResult> {
+	try {
+		// Procesar con sharp
+		const image = sharp(buffer);
+		const metadata = await image.metadata();
+
+		// Optimizar manteniendo calidad pero reduciendo tamaño
+		const optimized = await image
+			.webp({
+				quality: 80,
+				effort: 4,
+				nearLossless: true,
+				smartSubsample: true,
+			})
+			.toBuffer();
+
+		return {
+			data: Buffer.from(optimized),
+			size: optimized.length,
+			width: metadata.width || 0,
+			height: metadata.height || 0,
+		};
+	} catch (error) {
+		thumbLogger.error('Error optimizando thumbnail:', error);
+		throw error;
+	}
 }
 
 /**
@@ -286,7 +326,9 @@ export async function generateThumbnail(
 	}
 }
 
-// Función para limpiar la caché
+/**
+ * Limpia la caché de thumbnails
+ */
 export async function clearThumbnailCache(): Promise<void> {
 	try {
 		const files = await fs.readdir(CACHE_DIR);

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { useNavigation } from '@/lib/utils/navigation-utils';
-import { cn } from '@/lib/utils/utils';
-import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
-import type { ViewType } from '@/types/file-item';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useNavigation } from "@/lib/utils/navigation.utils";
+import { cn } from "@/lib/utils/utils";
+import { useFileManager } from "@/store/file-manager.store";
+import { useNavigationStore } from "@/store/navigation.store";
+import type { ViewType } from "@/types/file-item";
 import {
 	Archive,
 	BookImage,
@@ -32,15 +32,16 @@ import {
 	Trash2,
 	User2,
 	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback } from 'react';
-import { ViewBreadcrumbs } from './breadcrumbs';
-import { EntityDetails } from './entity-details';
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback } from "react";
+import { ViewBreadcrumbs } from "./breadcrumbs";
+import { EntityDetails } from "./entity-details";
 
 export function ViewToolbar() {
 	const { currentView } = useNavigationStore();
-	const { viewMode, setViewMode, selectedItems, clearSelection } = useFileManager();
+	const { viewMode, setViewMode, selectedItems, clearSelection } =
+		useFileManager();
 
 	// Usar el hook de navegación para obtener el elemento actual
 	const { getCurrentItem } = useNavigation();
@@ -51,7 +52,11 @@ export function ViewToolbar() {
 			return;
 		}
 
-		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedItems.length} archivo(s)?`)) {
+		if (
+			window.confirm(
+				`¿Estás seguro de que quieres eliminar ${selectedItems.length} archivo(s)?`
+			)
+		) {
 			// Enviar cada archivo a la papelera
 			for (const item of selectedItems) {
 				if (item.path) {
@@ -81,14 +86,20 @@ export function ViewToolbar() {
 			return;
 		}
 
-		const paths = selectedItems.map((item) => item.path).filter(Boolean) as string[];
+		const paths = selectedItems
+			.map((item) => item.path)
+			.filter(Boolean) as string[];
 		if (paths.length > 0) {
 			// El método compressFiles no existe en la interfaz window.electron
 			// Se comenta el código para evitar errores
 			// window.electron?.compressFiles(paths);
-			console.warn('La funcionalidad de compresión no está implementada en esta versión');
+			console.warn(
+				"La funcionalidad de compresión no está implementada en esta versión"
+			);
 			// Mostrar mensaje al usuario
-			alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
+			alert(
+				"La funcionalidad de compresión de archivos estará disponible en una próxima actualización."
+			);
 		}
 	}, [selectedItems]);
 
@@ -106,32 +117,32 @@ export function ViewToolbar() {
 
 	const renderIcon = () => {
 		switch (currentView) {
-			case 'all-images':
+			case "all-images":
 				return <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'favorites':
+			case "favorites":
 				return <Star className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'search':
+			case "search":
 				return <Search className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'collections':
-			case 'collection-content':
+			case "collections":
+			case "collection-content":
 				return <BookImage className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'folders':
-			case 'folder-content':
+			case "folders":
+			case "folder-content":
 				return <FolderIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'tags':
-			case 'tag-content':
+			case "tags":
+			case "tag-content":
 				return <TagIcon className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'albums':
-			case 'album-content':
+			case "albums":
+			case "album-content":
 				return <Camera className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'characters':
-			case 'character-content':
+			case "characters":
+			case "character-content":
 				return <User2 className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'places':
-			case 'place-content':
+			case "places":
+			case "place-content":
 				return <MapPin className="h-3.5 w-3.5 text-muted-foreground" />;
-			case 'world-items':
-			case 'world-item-content':
+			case "world-items":
+			case "world-item-content":
 				return <Box className="h-3.5 w-3.5 text-muted-foreground" />;
 			default:
 				return null;
@@ -145,7 +156,7 @@ export function ViewToolbar() {
 				<div className="flex items-center gap-2">
 					<Badge variant="secondary" className="gap-1">
 						<span>{selectedItems.length}</span>
-						<span>seleccionado{selectedItems.length !== 1 ? 's' : ''}</span>
+						<span>seleccionado{selectedItems.length !== 1 ? "s" : ""}</span>
 					</Badge>
 
 					<Separator orientation="vertical" className="h-7 w-px bg-border" />
@@ -188,7 +199,13 @@ export function ViewToolbar() {
 						>
 							<Copy className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-5 w-5" title="Limpiar selección" onClick={clearSelection}>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-5 w-5"
+							title="Limpiar selección"
+							onClick={clearSelection}
+						>
 							<X className="h-3.5 w-3.5" />
 						</Button>
 					</div>
@@ -200,9 +217,9 @@ export function ViewToolbar() {
 							variant="ghost"
 							size="icon"
 							className="h-5 w-5"
-							onClick={() => setViewMode('grid')}
+							onClick={() => setViewMode("grid")}
 							title="Vista de cuadrícula"
-							data-active={viewMode === 'grid'}
+							data-active={viewMode === "grid"}
 						>
 							<Grid className="h-3.5 w-3.5" />
 						</Button>
@@ -210,9 +227,9 @@ export function ViewToolbar() {
 							variant="ghost"
 							size="icon"
 							className="h-5 w-5"
-							onClick={() => setViewMode('masonry')}
+							onClick={() => setViewMode("masonry")}
 							title="Vista de mosaico"
-							data-active={viewMode === 'masonry'}
+							data-active={viewMode === "masonry"}
 						>
 							<LayoutGrid className="h-3.5 w-3.5" />
 						</Button>
@@ -220,9 +237,9 @@ export function ViewToolbar() {
 							variant="ghost"
 							size="icon"
 							className="h-5 w-5"
-							onClick={() => setViewMode('cards')}
+							onClick={() => setViewMode("cards")}
 							title="Vista de tarjetas"
-							data-active={viewMode === 'cards'}
+							data-active={viewMode === "cards"}
 						>
 							<GalleryHorizontal className="h-3.5 w-3.5" />
 						</Button>
@@ -230,9 +247,9 @@ export function ViewToolbar() {
 							variant="ghost"
 							size="icon"
 							className="h-5 w-5"
-							onClick={() => setViewMode('list')}
+							onClick={() => setViewMode("list")}
 							title="Vista de lista"
-							data-active={viewMode === 'list'}
+							data-active={viewMode === "list"}
 						>
 							<List className="h-3.5 w-3.5" />
 						</Button>
@@ -250,9 +267,9 @@ export function ViewToolbar() {
 						variant="ghost"
 						size="icon"
 						className="h-5 w-5"
-						onClick={() => setViewMode('grid')}
+						onClick={() => setViewMode("grid")}
 						title="Vista de cuadrícula"
-						data-active={viewMode === 'grid'}
+						data-active={viewMode === "grid"}
 					>
 						<Grid className="h-3.5 w-3.5" />
 					</Button>
@@ -260,9 +277,9 @@ export function ViewToolbar() {
 						variant="ghost"
 						size="icon"
 						className="h-5 w-5"
-						onClick={() => setViewMode('masonry')}
+						onClick={() => setViewMode("masonry")}
 						title="Vista de mosaico"
-						data-active={viewMode === 'masonry'}
+						data-active={viewMode === "masonry"}
 					>
 						<LayoutGrid className="h-3.5 w-3.5" />
 					</Button>
@@ -270,9 +287,9 @@ export function ViewToolbar() {
 						variant="ghost"
 						size="icon"
 						className="h-5 w-5"
-						onClick={() => setViewMode('cards')}
+						onClick={() => setViewMode("cards")}
 						title="Vista de tarjetas"
-						data-active={viewMode === 'cards'}
+						data-active={viewMode === "cards"}
 					>
 						<GalleryHorizontal className="h-3.5 w-3.5" />
 					</Button>
@@ -280,9 +297,9 @@ export function ViewToolbar() {
 						variant="ghost"
 						size="icon"
 						className="h-5 w-5"
-						onClick={() => setViewMode('list')}
+						onClick={() => setViewMode("list")}
 						title="Vista de lista"
-						data-active={viewMode === 'list'}
+						data-active={viewMode === "list"}
 					>
 						<List className="h-3.5 w-3.5" />
 					</Button>
@@ -291,9 +308,9 @@ export function ViewToolbar() {
 		);
 
 		switch (currentView) {
-			case 'all-images':
-			case 'favorites':
-			case 'search':
+			case "all-images":
+			case "favorites":
+			case "search":
 				return (
 					<div className="flex items-center gap-1">
 						<Button variant="ghost" size="icon" className="h-5 w-5">
@@ -305,13 +322,13 @@ export function ViewToolbar() {
 						{commonActions}
 					</div>
 				);
-			case 'collections':
-			case 'folders':
-			case 'tags':
-			case 'albums':
-			case 'characters':
-			case 'places':
-			case 'world-items':
+			case "collections":
+			case "folders":
+			case "tags":
+			case "albums":
+			case "characters":
+			case "places":
+			case "world-items":
 				return (
 					<div className="flex items-center gap-1">
 						<Button variant="ghost" size="sm" className="h-5 text-xs">
@@ -321,13 +338,13 @@ export function ViewToolbar() {
 						{commonActions}
 					</div>
 				);
-			case 'collection-content':
-			case 'folder-content':
-			case 'tag-content':
-			case 'album-content':
-			case 'character-content':
-			case 'place-content':
-			case 'world-item-content':
+			case "collection-content":
+			case "folder-content":
+			case "tag-content":
+			case "album-content":
+			case "character-content":
+			case "place-content":
+			case "world-item-content":
 				return (
 					<div className="flex items-center gap-1">
 						<Button variant="ghost" size="icon" className="h-5 w-5">
@@ -348,13 +365,21 @@ export function ViewToolbar() {
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
-			className={cn('flex flex-col bg-background py-0', 'border-b border-border')}
+			className={cn(
+				"flex flex-col bg-background py-0",
+				"border-b border-border"
+			)}
 		>
 			<div className="flex w-full items-center justify-between gap-2 p-2">
 				<div className="flex items-center gap-2 w-full">
-					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">{renderIcon()}</div>
+					<div className="flex items-center justify-center h-8 w-8 rounded-sm bg-muted">
+						{renderIcon()}
+					</div>
 					<div className="flex items-center">
-						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem()} />
+						<ViewBreadcrumbs
+							currentView={currentView as ViewType}
+							currentItem={getCurrentItem()}
+						/>
 						<EntityDetails />
 					</div>
 				</div>
