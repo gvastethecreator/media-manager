@@ -1,13 +1,13 @@
 'use client';
 
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
+import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
 import type {
 	CardDesignData,
 	CardDesignPreset,
 	CardOptions,
 	RarityConfig,
-} from '@/components/features/entity-cards/base/base-card-types';
-import { VisualizationConfig } from '@/components/features/entity-cards/settings/visualization-config';
+} from '@/components/features/entity-cards/types/base-card-types';
 import { cn } from '@/lib/utils/utils';
 import type { Note } from '@prisma/client';
 import { Edit, ScrollText, StickyNote, Trash2 } from 'lucide-react';
@@ -230,9 +230,9 @@ export function NoteCard({
 						<div className="flex items-center justify-between">
 							<h3 className="text-base font-medium truncate">{note.title}</h3>
 							<div className="flex items-center space-x-1">
-								{(note as any).emoji && (
+								{(note as unknown as { emoji: string }).emoji && (
 									<span className="text-lg" role="img" aria-label="emoji">
-										{(note as any).emoji}
+										{(note as unknown as { emoji: string }).emoji}
 									</span>
 								)}
 								{priorityLevel > 0 && (

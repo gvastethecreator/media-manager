@@ -1,7 +1,7 @@
 'use client';
 
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import { VisualizationConfig } from '@/components/features/entity-cards/base/visualization-config';
+import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/utils';
 import { formatBytes } from '@/lib/utils/utils';
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import type { CardOptions as BaseCardOptions } from '../base/base-card-types';
+import type { CardOptions as BaseCardOptions } from '../types/base-card-types';
 // Opciones visuales optimizadas para un mejor rendimiento
 const DEFAULT_FOLDER_OPTIONS = {
 	enable3DEffect: true,

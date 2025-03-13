@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
 interface InfoItemProps {
 	icon: React.ReactNode;
@@ -15,11 +15,7 @@ interface InfoItemProps {
 export function InfoItem({ icon, label, value, className }: InfoItemProps) {
 	// Convertir el valor a cadena si es un número o fecha
 	const displayValue =
-		typeof value === "number"
-			? value.toString()
-			: value instanceof Date
-				? value.toLocaleString()
-				: value;
+		typeof value === 'number' ? value.toString() : value instanceof Date ? value.toLocaleString() : value;
 
 	return (
 		<div className={`flex items-center justify-between gap-2 ${className}`}>
@@ -27,9 +23,7 @@ export function InfoItem({ icon, label, value, className }: InfoItemProps) {
 				{icon}
 				<span className="text-xs text-muted-foreground">{label}</span>
 			</div>
-			<span className="text-xs font-medium truncate max-w-[60%] text-right">
-				{displayValue}
-			</span>
+			<span className="text-xs font-medium truncate max-w-[60%] text-right">{displayValue}</span>
 		</div>
 	);
 }

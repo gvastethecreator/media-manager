@@ -222,8 +222,12 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
  * Trunca un texto a una longitud determinada
  */
 export function truncateText(text: string, maxLength = 150): string {
-	if (!text) return '';
-	if (text.length <= maxLength) return text;
+	if (!text) {
+		return '';
+	}
+	if (text.length <= maxLength) {
+		return text;
+	}
 	return `${text.substring(0, maxLength)}...`;
 }
 

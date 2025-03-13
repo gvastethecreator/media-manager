@@ -1,6 +1,6 @@
 'use server';
 
-import type { TextureConfig, TextureSystem } from '@/components/features/entity-cards/base/base-card-types';
+import type { TextureConfig, TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardConfigurationDto } from '@/components/features/entity-cards/types/card-types';
 import { prisma } from '@/lib/prisma';
 import type { Rarity as PrismaRarity, Texture as PrismaTexture } from '@prisma/client';

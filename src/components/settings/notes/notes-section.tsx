@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { NoteForm } from "@/components/features/entity-cards/forms/note-form";
-import { NoteCard } from "@/components/features/entity-cards/layouts/note-card-layout";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatsCard } from "@/components/ui/stats-card";
-import { logger } from "@/lib/logger/logger";
-import { toastService } from "@/lib/services/toast.service";
-import { useNoteStore } from "@/store/entities/note.store";
-import { Loader2, StickyNote } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import * as React from "react";
+import { NoteForm } from '@/components/features/entity-cards/forms/note-form';
+import { NoteCard } from '@/components/features/entity-cards/layouts/note-card-layout';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatsCard } from '@/components/ui/stats-card';
+import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
+import { useNoteStore } from '@/store/entities/note.store';
+import { Loader2, StickyNote } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import * as React from 'react';
 
 // Definición local del tipo NoteFormData para evitar problemas de incompatibilidad
 interface NoteFormData {
@@ -30,18 +30,10 @@ interface NoteFormData {
 	isFavorite: boolean;
 }
 
-const noteLogger = logger.withContext("NotesSection");
+const noteLogger = logger.withContext('NotesSection');
 
 export function NotesSection() {
-	const {
-		notes,
-		isLoading,
-		error,
-		loadNotes,
-		createNote,
-		updateNote,
-		deleteNote,
-	} = useNoteStore();
+	const { notes, isLoading, error, loadNotes, createNote, updateNote, deleteNote } = useNoteStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -50,20 +42,20 @@ export function NotesSection() {
 
 	const handleCreate = async (data: NoteFormData) => {
 		try {
-			noteLogger.info("✨ Creando nueva nota:", data);
+			noteLogger.info('✨ Creando nueva nota:', data);
 			await createNote({
 				title: data.title,
 				content: data.content,
 				category: data.category,
 				priority: data.priority,
 				status: data.status,
-				tags: Array.isArray(data.tags) ? data.tags.join(",") : "",
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
 				featuredImage: data.featuredImage || null,
 			});
-			toastService.success("Nota creada correctamente");
+			toastService.success('Nota creada correctamente');
 		} catch (error) {
-			noteLogger.error("❌ Error al crear nota:", error);
-			toastService.error("No se pudo crear la nota");
+			noteLogger.error('❌ Error al crear nota:', error);
+			toastService.error('No se pudo crear la nota');
 		}
 	};
 
@@ -72,7 +64,7 @@ export function NotesSection() {
 			return;
 		}
 		try {
-			noteLogger.info("💾 Actualizando nota:", data);
+			noteLogger.info('💾 Actualizando nota:', data);
 			await updateNote(editingId, {
 				id: editingId,
 				title: data.title,
@@ -80,28 +72,28 @@ export function NotesSection() {
 				category: data.category,
 				priority: data.priority,
 				status: data.status,
-				tags: Array.isArray(data.tags) ? data.tags.join(",") : "",
+				tags: Array.isArray(data.tags) ? data.tags.join(',') : '',
 				featuredImage: data.featuredImage || null,
 			});
 			setEditingId(null);
-			toastService.success("Nota actualizada correctamente");
+			toastService.success('Nota actualizada correctamente');
 		} catch (error) {
-			noteLogger.error("❌ Error al actualizar nota:", error);
-			toastService.error("No se pudo actualizar la nota");
+			noteLogger.error('❌ Error al actualizar nota:', error);
+			toastService.error('No se pudo actualizar la nota');
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("¿Estás seguro de eliminar esta nota?")) {
+		if (!confirm('¿Estás seguro de eliminar esta nota?')) {
 			return;
 		}
 		try {
-			noteLogger.info("🗑️ Eliminando nota:", { id });
+			noteLogger.info('🗑️ Eliminando nota:', { id });
 			await deleteNote(id);
-			toastService.success("Nota eliminada correctamente");
+			toastService.success('Nota eliminada correctamente');
 		} catch (error) {
-			noteLogger.error("❌ Error al eliminar nota:", error);
-			toastService.error("No se pudo eliminar la nota");
+			noteLogger.error('❌ Error al eliminar nota:', error);
+			toastService.error('No se pudo eliminar la nota');
 		}
 	};
 
@@ -144,15 +136,12 @@ export function NotesSection() {
 
 		// Obtener notas recientes
 		const recentNotes = [...notes]
-			.sort(
-				(a, b) =>
-					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-			)
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 			.slice(0, 5)
 			.map((note) => ({
 				id: note.id,
 				name: note.title,
-				emoji: "📝",
+				emoji: '📝',
 				count: 0, // Para mantener la compatibilidad
 			}));
 
@@ -191,12 +180,7 @@ export function NotesSection() {
 					</CardContent>
 				</Card>
 
-				<StatsCard
-					title="Estadísticas"
-					icon={<StickyNote className="h-5 w-5" />}
-					isLoading={isLoading}
-					stats={stats}
-				/>
+				<StatsCard title="Estadísticas" icon={<StickyNote className="h-5 w-5" />} isLoading={isLoading} stats={stats} />
 			</div>
 
 			<Card className="rounded-sm bg-muted/30">
@@ -206,17 +190,8 @@ export function NotesSection() {
 							<StickyNote className="h-5 w-5" />
 							Notas
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => loadNotes()}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Recargar"
-							)}
+						<Button variant="outline" size="sm" onClick={() => loadNotes()} disabled={isLoading}>
+							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -227,9 +202,7 @@ export function NotesSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">
-								{error}
-							</p>
+							<p className="text-sm text-muted-foreground text-center">{error}</p>
 							<Button variant="outline" size="sm" onClick={() => loadNotes()}>
 								Reintentar
 							</Button>
@@ -237,12 +210,8 @@ export function NotesSection() {
 					) : notes.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<StickyNote className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">
-								No hay notas creadas
-							</p>
-							<p className="text-xs text-muted-foreground/75">
-								Crea una nota para empezar
-							</p>
+							<p className="text-sm text-muted-foreground text-center">No hay notas creadas</p>
+							<p className="text-xs text-muted-foreground/75">Crea una nota para empezar</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -256,7 +225,7 @@ export function NotesSection() {
 										exit={{ opacity: 0, scale: 0.9 }}
 										transition={{
 											duration: 0.2,
-											ease: "easeInOut",
+											ease: 'easeInOut',
 										}}
 									>
 										{editingId === note.id ? (
@@ -265,17 +234,15 @@ export function NotesSection() {
 													<NoteForm
 														initialData={{
 															name: note.title, // Usar title como name
-															description: "",
-															emoji: "📝", // Emoji por defecto
-															color: "#3b82f6", // Color por defecto
+															description: '',
+															emoji: '📝', // Emoji por defecto
+															color: '#3b82f6', // Color por defecto
 															title: note.title,
 															content: note.content,
-															category: note.category || "",
+															category: note.category || '',
 															priority: note.priority,
 															status: note.status,
-															tags: note.tags
-																? note.tags.split(",").filter(Boolean)
-																: [],
+															tags: note.tags ? note.tags.split(',').filter(Boolean) : [],
 															featuredImage: note.featuredImage,
 															isFavorite: note.isFavorite,
 														}}
@@ -293,10 +260,10 @@ export function NotesSection() {
 													id: note.id,
 													title: note.title,
 													content: note.content,
-													category: note.category || "",
+													category: note.category || '',
 													priority: note.priority || 0,
-													status: note.status || "",
-													tags: note.tags || "",
+													status: note.status || '',
+													tags: note.tags || '',
 													featuredImage: note.featuredImage || null,
 													isFavorite: note.isFavorite || false,
 													createdAt: new Date(note.createdAt),

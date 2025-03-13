@@ -1,19 +1,11 @@
-"use client";
+'use client';
 
-import { formatDate, formatFileSize } from "@/lib/utils";
-import type { ImageItem } from "@/types/image-item";
-import {
-	Calendar,
-	FileImage,
-	FileText,
-	Folder,
-	HardDrive,
-	ImageIcon,
-	Layers,
-} from "lucide-react";
-import { InfoItem } from "./details-panel-info-item";
-import type { MetadataComponentProps } from "./details-panel-types";
-import type { BasicInfoProps } from "./details-panel-types";
+import { formatDate, formatFileSize } from '@/lib/utils';
+import type { ImageItem } from '@/types/image-item';
+import { Calendar, FileImage, FileText, Folder, HardDrive, ImageIcon, Layers } from 'lucide-react';
+import { InfoItem } from './details-panel-info-item';
+import type { MetadataComponentProps } from './details-panel-types';
+import type { BasicInfoProps } from './details-panel-types';
 
 /**
  * Componente que muestra información básica sobre la imagen
@@ -26,7 +18,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 	// Función para formatear fecha
 	const formatDate = (dateString: string | number | Date | undefined) => {
 		if (!dateString) {
-			return "No disponible";
+			return 'No disponible';
 		}
 
 		try {
@@ -35,20 +27,20 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 			// Verificar si la fecha es válida - usando Number.isNaN en lugar de isNaN
 			if (Number.isNaN(date.getTime())) {
-				return "Fecha desconocida";
+				return 'Fecha desconocida';
 			}
 
 			// Formatear fecha: DD/MM/YYYY HH:MM
 			return date.toLocaleString(undefined, {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric",
-				hour: "2-digit",
-				minute: "2-digit",
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
 			});
 		} catch (error) {
-			console.error("Error al formatear fecha:", error);
-			return "Fecha desconocida";
+			console.error('Error al formatear fecha:', error);
+			return 'Fecha desconocida';
 		}
 	};
 
@@ -56,11 +48,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 		<div className="space-y-2">
 			<div className="grid grid-cols-2 gap-2">
 				{item.path && (
-					<InfoItem
-						icon={<Folder className="h-4 w-4 text-blue-400" />}
-						label="Ubicación"
-						value={item.path}
-					/>
+					<InfoItem icon={<Folder className="h-4 w-4 text-blue-400" />} label="Ubicación" value={item.path} />
 				)}
 
 				{hasResolution && (
@@ -104,16 +92,13 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 				)}
 			</div>
 
-			{!hasResolution &&
-				!item.fileSize &&
-				!item.path &&
-				!metadata?.mimeType && (
-					<div className="p-3 border border-dashed border-muted-foreground/30 rounded-md">
-						<p className="text-xs text-muted-foreground text-center">
-							No se encontró información básica para esta imagen.
-						</p>
-					</div>
-				)}
+			{!hasResolution && !item.fileSize && !item.path && !metadata?.mimeType && (
+				<div className="p-3 border border-dashed border-muted-foreground/30 rounded-md">
+					<p className="text-xs text-muted-foreground text-center">
+						No se encontró información básica para esta imagen.
+					</p>
+				</div>
+			)}
 		</div>
 	);
 }

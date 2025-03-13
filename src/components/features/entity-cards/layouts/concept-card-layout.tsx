@@ -1,13 +1,13 @@
 'use client';
 
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
+import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
 import type {
 	CardDesignData,
 	CardDesignPreset,
 	CardOptions,
 	RarityConfig,
-} from '@/components/features/entity-cards/base/base-card-types';
-import { VisualizationConfig } from '@/components/features/entity-cards/settings/visualization-config';
+} from '@/components/features/entity-cards/types/base-card-types';
 import { cn } from '@/lib/utils/utils';
 import type { Concept } from '@prisma/client';
 import { Book, Edit, LightbulbIcon, LinkIcon, Trash2 } from 'lucide-react';
@@ -141,9 +141,15 @@ function getConceptRarity(concept: Concept): RarityConfig {
 	}
 
 	// Usar rareza explícita si está definida (accedemos con notación de índice para evitar error)
-	const conceptRarity = (concept as any).rarity;
+	const conceptRarity = (concept as unknown as { rarity: string }).rarity;
 	if (conceptRarity && conceptRarity in CONCEPT_RARITY_TYPES) {
 		rarityKey = conceptRarity as keyof typeof CONCEPT_RARITY_TYPES;
+	}
+
+	// Usar rareza explícita si está definida
+	// Usamos una verificación segura de tipo
+	if ('rarity' in concept && typeof concept.rarity === 'string' && concept.rarity in CONCEPT_RARITY_TYPES) {
+		rarityKey = concept.rarity as keyof typeof CONCEPT_RARITY_TYPES;
 	}
 
 	return {

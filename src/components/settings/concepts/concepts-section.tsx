@@ -1,35 +1,27 @@
-"use client";
+'use client';
 
-import { ConceptForm } from "@/components/features/entity-cards/forms/concept-form";
+import { ConceptForm } from '@/components/features/entity-cards/forms/concept-form';
 import {
 	type ConceptFormData,
 	conceptToFormData,
 	formDataToConcept,
-} from "@/components/features/entity-cards/forms/entity-types";
-import { ConceptCard } from "@/components/features/entity-cards/layouts/concept-card-layout";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatsCard } from "@/components/ui/stats-card";
-import { logger } from "@/lib/logger/logger";
-import { toastService } from "@/lib/services/toast.service";
-import { useConceptStore } from "@/store/entities/concept.store";
-import { Lightbulb, Loader2, MoreHorizontal, Trash } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import * as React from "react";
+} from '@/components/features/entity-cards/forms/entity-types';
+import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card-layout';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatsCard } from '@/components/ui/stats-card';
+import { logger } from '@/lib/logger/logger';
+import { toastService } from '@/lib/services/toast.service';
+import { useConceptStore } from '@/store/entities/concept.store';
+import { Lightbulb, Loader2, MoreHorizontal, Trash } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import * as React from 'react';
 
-const conceptLogger = logger.withContext("ConceptsSection");
+const conceptLogger = logger.withContext('ConceptsSection');
 
 export function ConceptsSection() {
-	const {
-		concepts,
-		isLoading,
-		error,
-		loadConcepts,
-		createConcept,
-		updateConcept,
-		deleteConcept,
-	} = useConceptStore();
+	const { concepts, isLoading, error, loadConcepts, createConcept, updateConcept, deleteConcept } = useConceptStore();
 	const [editingId, setEditingId] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
@@ -38,12 +30,12 @@ export function ConceptsSection() {
 
 	const handleCreate = async (data: ConceptFormData) => {
 		try {
-			conceptLogger.info("✨ Creando nuevo concepto:", data);
+			conceptLogger.info('✨ Creando nuevo concepto:', data);
 			await createConcept(formDataToConcept(data));
-			toastService.success("Concepto creado correctamente");
+			toastService.success('Concepto creado correctamente');
 		} catch (error) {
-			conceptLogger.error("❌ Error al crear concepto:", error);
-			toastService.error("No se pudo crear el concepto");
+			conceptLogger.error('❌ Error al crear concepto:', error);
+			toastService.error('No se pudo crear el concepto');
 		}
 	};
 
@@ -52,30 +44,30 @@ export function ConceptsSection() {
 			return;
 		}
 		try {
-			conceptLogger.info("💾 Actualizando concepto:", data);
+			conceptLogger.info('💾 Actualizando concepto:', data);
 			await updateConcept(data.id, {
 				...formDataToConcept(data),
 				id: data.id,
 			});
 			setEditingId(null);
-			toastService.success("Concepto actualizado correctamente");
+			toastService.success('Concepto actualizado correctamente');
 		} catch (error) {
-			conceptLogger.error("❌ Error al actualizar concepto:", error);
-			toastService.error("No se pudo actualizar el concepto");
+			conceptLogger.error('❌ Error al actualizar concepto:', error);
+			toastService.error('No se pudo actualizar el concepto');
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("¿Estás seguro de eliminar este concepto?")) {
+		if (!confirm('¿Estás seguro de eliminar este concepto?')) {
 			return;
 		}
 		try {
-			conceptLogger.info("🗑️ Eliminando concepto:", { id });
+			conceptLogger.info('🗑️ Eliminando concepto:', { id });
 			await deleteConcept(id);
-			toastService.success("Concepto eliminado correctamente");
+			toastService.success('Concepto eliminado correctamente');
 		} catch (error) {
-			conceptLogger.error("❌ Error al eliminar concepto:", error);
-			toastService.error("No se pudo eliminar el concepto");
+			conceptLogger.error('❌ Error al eliminar concepto:', error);
+			toastService.error('No se pudo eliminar el concepto');
 		}
 	};
 
@@ -120,10 +112,7 @@ export function ConceptsSection() {
 
 		// Obtener conceptos recientes
 		const recentConcepts = [...concepts]
-			.sort(
-				(a, b) =>
-					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-			)
+			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 			.slice(0, 5)
 			.map((concept) => ({
 				id: concept.id,
@@ -162,12 +151,7 @@ export function ConceptsSection() {
 					</CardContent>
 				</Card>
 
-				<StatsCard
-					title="Estadísticas"
-					icon={<Lightbulb className="h-5 w-5" />}
-					isLoading={isLoading}
-					stats={stats}
-				/>
+				<StatsCard title="Estadísticas" icon={<Lightbulb className="h-5 w-5" />} isLoading={isLoading} stats={stats} />
 			</div>
 
 			<Card className="rounded-sm bg-muted/30">
@@ -177,17 +161,8 @@ export function ConceptsSection() {
 							<Lightbulb className="h-5 w-5" />
 							Conceptos
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => loadConcepts()}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Recargar"
-							)}
+						<Button variant="outline" size="sm" onClick={() => loadConcepts()} disabled={isLoading}>
+							{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recargar'}
 						</Button>
 					</CardTitle>
 				</CardHeader>
@@ -198,26 +173,16 @@ export function ConceptsSection() {
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
-							<p className="text-sm text-muted-foreground text-center">
-								{error}
-							</p>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => loadConcepts()}
-							>
+							<p className="text-sm text-muted-foreground text-center">{error}</p>
+							<Button variant="outline" size="sm" onClick={() => loadConcepts()}>
 								Reintentar
 							</Button>
 						</div>
 					) : concepts.length === 0 ? (
 						<div className="flex flex-col items-center justify-center gap-2 p-8">
 							<Lightbulb className="h-8 w-8 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground text-center">
-								No hay conceptos creados
-							</p>
-							<p className="text-xs text-muted-foreground/75">
-								Crea un concepto para empezar
-							</p>
+							<p className="text-sm text-muted-foreground text-center">No hay conceptos creados</p>
+							<p className="text-xs text-muted-foreground/75">Crea un concepto para empezar</p>
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -231,7 +196,7 @@ export function ConceptsSection() {
 										exit={{ opacity: 0, scale: 0.9 }}
 										transition={{
 											duration: 0.2,
-											ease: "easeInOut",
+											ease: 'easeInOut',
 										}}
 									>
 										{editingId === concept.id ? (
@@ -243,12 +208,10 @@ export function ConceptsSection() {
 															name: concept.name,
 															emoji: concept.emoji,
 															color: concept.color,
-															description: concept.description || "",
-															content: concept.content || "",
-															category: concept.category || "",
-															tags: concept.tags
-																? concept.tags.split(",").filter(Boolean)
-																: [],
+															description: concept.description || '',
+															content: concept.content || '',
+															category: concept.category || '',
+															tags: concept.tags ? concept.tags.split(',').filter(Boolean) : [],
 															featuredImage: concept.featuredImage || null,
 															isFavorite: concept.isFavorite || false,
 														}}
@@ -266,9 +229,9 @@ export function ConceptsSection() {
 													emoji: concept.emoji,
 													color: concept.color,
 													description: concept.description || null,
-													content: concept.content || "",
-													category: concept.category || "",
-													tags: concept.tags || "",
+													content: concept.content || '',
+													category: concept.category || '',
+													tags: concept.tags || '',
 													featuredImage: concept.featuredImage || null,
 													isFavorite: concept.isFavorite || false,
 													createdAt: new Date(concept.createdAt),
