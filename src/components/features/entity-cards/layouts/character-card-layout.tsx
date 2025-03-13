@@ -1,13 +1,22 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
+import { CharacterWithStats } from '@/types/character';
+import { motion } from 'framer-motion';
 import { ArrowUpRight, Award, Crown, FlameIcon, Heart, Shield, Sparkles, Sword, User, Zap } from 'lucide-react';
+import { ImageIcon, StarIcon, UsersIcon } from 'lucide-react';
 import type * as React from 'react';
 import { useMemo } from 'react';
 import { generateRarityConfig } from '../base/card-adapter';
 import { EntityCardWrapper } from '../base/entity-card-wrapper';
-import type { CardDesignData, CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
+import type {
+	CardDesignData,
+	CardDesignPreset,
+	CardOptions,
+	RarityConfig,
+	TextureConfig,
+} from '../types/base-card-types';
 
 interface CharacterCardProps {
 	character: CardDesignData;
@@ -24,88 +33,70 @@ interface CharacterCardProps {
 	enableExplode?: boolean;
 }
 
-// Opciones por defecto específicas para tarjetas de personaje
+// Eliminar la función isFormData y agregar DEFAULT_CHARACTER_OPTIONS
 const DEFAULT_CHARACTER_OPTIONS: Partial<CardOptions> = {
 	enable3DEffect: true,
 	enableHolographicEffect: true,
-	enableScanlines: true,
-	enableAnimatedBorder: true,
-	enableGrainEffect: true,
+	enableScanlinesEffect: false,
 	enableGlowEffect: true,
+	enableBorderEffect: true,
+	enableGrainEffect: true,
 
-	// Sistema de rareza usando el formato correcto
-	raritySystem: {
-		enabled: true,
-		defaultRarity: 'common',
-	},
-
-	// Configuración de diseño específica para personajes
+	// Sistema de diseño específico para personajes
 	designSystem: {
-		preset: 'character',
+		preset: 'character' as CardDesignPreset,
 		variant: 'default',
-		aspectRatio: '7/10',
+		aspectRatio: '3/4',
 		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft', // Valor válido: 'none', 'soft', 'hard', 'layered'
+		cornerRadius: 8,
+		elevation: 2,
+		shadowStyle: 'soft',
 	},
 
-	// Sistema de capas optimizado para personajes
-	layerSystem: {
-		order: ['content', 'holographic', 'scanlines', 'grain', 'border', 'filter'],
-		blendMode: 'overlay', // Corregido: layerBlending -> blendMode
-		spacing: 4, // Valor numérico
+	// Configuración de movimiento
+	hoverLiftHeight: 6,
+	maxRotation: 8,
+	primaryColor: '236, 72, 153', // Un tono rosa
+	secondaryColor: '244, 114, 182', // Un tono rosa claro
+
+	// Opciones de efectos
+	holographicOptions: {
+		patternType: 'linear',
+		intensity: 0.5,
+		animationSpeed: 1,
+		visibleOnHover: true,
 	},
 
-	// Interactividad específica para personajes
-	interactivity: {
-		hover: {
-			scale: 1.03,
-			rotate: true,
-			lift: true,
-			glow: true,
+	glowOptions: {
+		intensity: 0.7,
+		size: 15,
+		blurAmount: 10,
+		animationType: 'pulse',
+		pulseSpeed: 1.5,
+		visibleOnHover: true,
+	},
+
+	borderOptions: {
+		width: 2,
+		pattern: 'solid',
+		animationType: 'pulse',
+		animation: {
+			type: 'flow',
+			duration: 3000,
+			timing: 'ease-in-out',
+			iteration: 'infinite',
 		},
-		click: {
-			feedback: 'scale',
-		},
+		glowIntensity: 0.6,
 	},
 
-	// Estados específicos para personajes
-	states: {
-		loading: {
-			skeleton: true,
-			blur: true,
-		},
-		selected: {
-			style: 'border',
-		},
+	grainOptions: {
+		intensity: 0.12,
+		density: 0.5,
+		contrast: 1.1,
+		noise: 'light',
+		animated: false,
+		visibleOnHover: true,
 	},
-
-	// Rendimiento optimizado
-	performance: {
-		lazyLoad: true,
-		imageOptimization: true,
-		animationOptimization: true,
-		renderQuality: 'high',
-	},
-
-	// Configuración visual básica
-	hoverLiftHeight: 10,
-	maxRotation: 10,
-
-	// Contenido y estructura - valores corregidos
-	contentLayout: 'default', // Valor válido: 'default', 'grid', 'masonry', 'carousel'
-	contentPadding: 16, // Número en lugar de string
-	contentSpacing: 8, // Número en lugar de string
-	contentAlignment: 'start',
-
-	// Imagen
-	imageStyle: {
-		fit: 'cover',
-		position: 'center',
-	},
-	imageOverlay: true,
-	imageOverlayOpacity: 0.4,
 };
 
 export function CharacterCard({
@@ -122,14 +113,11 @@ export function CharacterCard({
 	showVisualizationConfig = false,
 	enableExplode = false,
 }: CharacterCardProps) {
-	// Establecer opciones por defecto
-	const cardOptions = useMemo(
-		() => ({
-			...DEFAULT_CHARACTER_OPTIONS,
-			...options,
-		}),
-		[options]
-	);
+	// Inicializar opciones con valores por defecto
+	const cardOptions = {
+		...DEFAULT_CHARACTER_OPTIONS,
+		...options,
+	};
 
 	// Obtener estadísticas del personaje o valores por defecto
 	const stats = character.characterInfo?.stats || {
@@ -196,7 +184,11 @@ export function CharacterCard({
 	return (
 		<EntityCardWrapper
 			className={cn('w-full h-full overflow-hidden', className)}
-			options={cardOptions}
+			options={{
+				...cardOptions,
+				primaryColor: characterRarity.color,
+				secondaryColor: characterRarity.color,
+			}}
 			entityType="character"
 			rarity={characterRarity}
 			texture={texture}

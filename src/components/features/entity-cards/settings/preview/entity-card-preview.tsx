@@ -1,14 +1,16 @@
 'use client';
 
 import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
+import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { BaseCard } from '@/components/features/entity-cards/base/base-card';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import {
 	BadgeCheck,
 	Info as BadgeInfo,
@@ -26,6 +28,7 @@ import {
 	Star,
 	Tag as TagIcon,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import * as React from 'react';
 import { adaptSettingsToBaseOptions } from '../../base/card-adapter';
@@ -40,7 +43,7 @@ interface EntityCardPreviewProps {
 }
 
 // Componente para grid de imágenes reales
-function ImageGrid({
+export function ImageGrid({
 	layout = 'single',
 	gap = 4,
 	images = [],
@@ -53,14 +56,86 @@ function ImageGrid({
 	loading?: boolean;
 	style?: string;
 }) {
-	// Asegurar que tenemos suficientes imágenes para el layout
-	const neededImages = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
-	const paddedImages = [...images];
+	const [thumbnails, setThumbnails] = React.useState<{ [key: string]: string }>({});
+	const [loadingThumbnails, setLoadingThumbnails] = React.useState<{
+		[key: string]: boolean;
+	}>({});
+	const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
 
-	// Si hay menos imágenes que las necesarias, rellenamos con placeholders
-	while (paddedImages.length < neededImages) {
-		paddedImages.push({ id: `placeholder-${paddedImages.length}`, path: '' });
-	}
+	// Asegurar que tenemos suficientes imágenes para el layout y limitar a 6
+	const neededImages = React.useMemo(() => {
+		const count = layout === 'single' ? 1 : layout === 'dual' ? 2 : layout === 'quad' ? 4 : 6;
+		return Math.min(count, 6); // Aseguramos que nunca exceda 6
+	}, [layout]);
+
+	// Preparar el array de imágenes necesarias
+	const paddedImages = React.useMemo(() => {
+		// Tomamos solo las primeras 6 imágenes como máximo
+		const limitedImages = images.slice(0, neededImages);
+		const images_array = [...limitedImages];
+
+		// Rellenamos con placeholders si es necesario
+		while (images_array.length < neededImages) {
+			images_array.push({ id: `placeholder-${images_array.length}`, path: '' });
+		}
+		return images_array;
+	}, [images, neededImages]);
+
+	// Cargar thumbnails para cada imagen de manera optimizada
+	React.useEffect(() => {
+		const abortController = new AbortController();
+		let isMounted = true;
+
+		const loadThumbnails = async () => {
+			// Filtrar solo las imágenes que necesitan cargar thumbnail
+			const imagesToLoad = paddedImages.filter((image) => {
+				if (!image.id || image.id.startsWith('placeholder-')) {
+					return false;
+				}
+				// Solo cargar si no tenemos el thumbnail y no está en el estado
+				return !thumbnails[image.id] && !image.thumbnail;
+			});
+
+			if (imagesToLoad.length === 0) {
+				return;
+			}
+
+			// Cargar todos los thumbnails en paralelo
+			const loadPromises = imagesToLoad.map(async (image) => {
+				setLoadingThumbnails((prev) => ({ ...prev, [image.id]: true }));
+				try {
+					const data = await thumbnailActions.getThumbnail(image.id, ThumbnailQuality.MEDIUM);
+					if (isMounted) {
+						setThumbnails((prev) => ({
+							...prev,
+							[image.id]: `data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`,
+						}));
+					}
+				} catch (err) {
+					if (isMounted) {
+						console.error('Error cargando thumbnail:', err);
+						setErrors((prev) => ({
+							...prev,
+							[image.id]: err instanceof Error ? err.message : 'Error desconocido',
+						}));
+					}
+				} finally {
+					if (isMounted) {
+						setLoadingThumbnails((prev) => ({ ...prev, [image.id]: false }));
+					}
+				}
+			});
+
+			await Promise.all(loadPromises);
+		};
+
+		loadThumbnails();
+
+		return () => {
+			isMounted = false;
+			abortController.abort();
+		};
+	}, [paddedImages, thumbnails]);
 
 	// Renderizar un placeholder para cuando no hay imagen
 	const renderImagePlaceholder = () => (
@@ -71,15 +146,38 @@ function ImageGrid({
 
 	// Renderizar una imagen real o un skeleton si está cargando
 	const renderImage = (image: RandomImage, index: number) => {
-		if (loading) {
+		if (loading || loadingThumbnails[image.id]) {
 			return <Skeleton className="w-full h-full aspect-square rounded-md" />;
 		}
 
-		if (!image.path) {
+		if (!image.path || errors[image.id]) {
 			return renderImagePlaceholder();
 		}
 
-		// Usar un color de fondo aleatorio si no hay imágenes disponibles
+		// Usar el thumbnail proporcionado o el cargado
+		const thumbnailUrl = image.thumbnail || thumbnails[image.id];
+
+		if (thumbnailUrl) {
+			return (
+				<div className="relative overflow-hidden rounded-md aspect-square">
+					<Image
+						src={thumbnailUrl}
+						alt={image.path}
+						fill
+						className="object-cover transition-transform group-hover:scale-105"
+					/>
+					<motion.div
+						initial={{ opacity: 0 }}
+						whileHover={{ opacity: 1 }}
+						className="absolute inset-0 bg-black/60 p-1.5"
+					>
+						<p className="text-[10px] text-white truncate">{image.path}</p>
+					</motion.div>
+				</div>
+			);
+		}
+
+		// Color de fondo aleatorio como fallback
 		const backgroundColor = [
 			'bg-blue-500',
 			'bg-red-500',
@@ -92,11 +190,8 @@ function ImageGrid({
 			'bg-orange-500',
 		];
 
-		// Para la vista previa, siempre usar una imagen de muestra o un color
 		return (
 			<div className="relative overflow-hidden rounded-md aspect-square">
-				{/* En un entorno real, verificaríamos si image.path existe y está disponible */}
-				{/* Para fines de demostración, mostrar un placeholder coloreado o una imagen de muestra */}
 				<div
 					className={cn(
 						'absolute inset-0 flex items-center justify-center text-white font-bold',
@@ -408,7 +503,7 @@ export function EntityCardPreview({
 										? '2'
 										: imageGridLayout === 'quad'
 											? '4'
-											: '6'}{' '}
+											: '6'}
 								imágenes
 							</span>
 						)}

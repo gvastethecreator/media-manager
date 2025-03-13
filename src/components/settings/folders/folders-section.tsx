@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { AlertCircle, EraserIcon, FolderIcon, Info, RefreshCw } from 'lucide-react';
 import { Folder } from 'lucide-react';
 import { motion } from 'motion/react';

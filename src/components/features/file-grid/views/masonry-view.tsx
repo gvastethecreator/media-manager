@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { FileItem } from '@/types/file-item';
 import { HardDrive, Heart, ImageIcon, Palette, Share2, Wand2 } from 'lucide-react';
 import type * as React from 'react';

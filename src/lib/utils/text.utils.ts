@@ -1,4 +1,4 @@
-import { truncateText } from "./format.utils";
+import { truncateText } from './format.utils';
 
 /**
  * Trunca un texto para mostrarlo en la UI con un número limitado de líneas

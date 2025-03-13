@@ -118,6 +118,93 @@ export const DEFAULT_CARD_STATES: CardStates = {
 	},
 };
 
+// Configuraciones por defecto para efectos adicionales
+export const DEFAULT_GLITCH_EFFECT = {
+	enabled: false,
+	visibleOnHover: true,
+	intensity: 0.5,
+	frequency: 0.1,
+	duration: 0.2,
+	color: 'rgba(0, 153, 255, 0.5)',
+	layerIndex: 7,
+};
+
+export const DEFAULT_NOISE_TEXTURE = {
+	enabled: false,
+	visibleOnHover: true,
+	intensity: 0.3,
+	scale: 1,
+	color: 'rgba(255, 255, 255, 0.1)',
+	layerIndex: 8,
+};
+
+export const DEFAULT_CHROMATIC_ABERRATION = {
+	enabled: false,
+	visibleOnHover: true,
+	intensity: 0.5,
+	offset: 0.1,
+	color: 'rgba(0, 153, 255, 0.5)',
+	layerIndex: 8,
+};
+
+export const DEFAULT_PIXELATE = {
+	enabled: false,
+	visibleOnHover: true,
+	intensity: 0.5,
+	blockSize: 4,
+	color: 'rgba(0, 153, 255, 0.5)',
+	layerIndex: 9,
+};
+
+// Configuraciones de rendimiento optimizadas
+export const DEFAULT_PERFORMANCE_OPTIONS = {
+	// Optimizaciones generales
+	lazyLoad: true,
+	virtualScroll: false,
+	imageOptimization: true,
+	animationOptimization: true,
+	renderQuality: 'high' as const,
+
+	// Optimizaciones de capas
+	layerOptimization: {
+		// Límites de capas
+		maxLayers: 10,
+		maxActiveLayers: 3,
+
+		// Estrategias de renderizado
+		renderStrategy: 'smart' as const, // 'smart' | 'all' | 'active'
+
+		// Prioridades de capas
+		layerPriorities: {
+			content: 1,
+			patterns: 2,
+			textures: 3,
+			distortions: 4,
+			glows: 5,
+			borders: 6,
+			scanlines: 7,
+			holographic: 8,
+			shaders: 9,
+			filters: 10,
+		},
+
+		// Optimizaciones de memoria
+		memoryOptimization: {
+			maxTextureSize: 2048,
+			textureCompression: true,
+			textureFormat: 'webp' as const,
+		},
+
+		// Optimizaciones de animación
+		animationOptimization: {
+			maxFPS: 60,
+			reducedMotion: false,
+			animationDuration: 300,
+			animationTimingFunction: 'ease-out',
+		},
+	},
+};
+
 /**
  * Opciones visuales predeterminadas para tarjetas base de entidades
  */
@@ -174,99 +261,180 @@ export const DEFAULT_VISUAL_OPTIONS: CardOptions = {
 	maxRotation: 15,
 	primaryColor: '0, 153, 255',
 	secondaryColor: '128, 0, 255',
+
+	// Efectos adicionales
+	effects: {
+		glitchEffect: DEFAULT_GLITCH_EFFECT,
+		noiseTexture: DEFAULT_NOISE_TEXTURE,
+		chromaticAberration: DEFAULT_CHROMATIC_ABERRATION,
+		pixelate: DEFAULT_PIXELATE,
+		shaders: {
+			enabled: false,
+			distortion: {
+				visibleOnHover: true,
+				intensity: 0.5,
+				duration: 1000,
+			},
+			hologram: {
+				visibleOnHover: true,
+				intensity: 0.5,
+				duration: 1000,
+				primaryColor: [0, 153, 255],
+				secondaryColor: [128, 0, 255],
+			},
+			particles: {
+				visibleOnHover: true,
+				intensity: 0.5,
+				duration: 1000,
+				particleColor: [0, 153, 255],
+			},
+			waves: {
+				visibleOnHover: true,
+				intensity: 0.5,
+				duration: 1000,
+				waveColor: [0, 153, 255],
+			},
+		},
+		patterns: {
+			enabled: false,
+			dots: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				scale: 1,
+				rotation: 0,
+				color: 'rgba(0, 153, 255, 0.5)',
+				dotSize: 2,
+				spacing: 4,
+			},
+			grid: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				scale: 1,
+				rotation: 0,
+				color: 'rgba(0, 153, 255, 0.5)',
+				lineWidth: 1,
+				spacing: 4,
+			},
+			hexagons: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				scale: 1,
+				rotation: 0,
+				color: 'rgba(0, 153, 255, 0.5)',
+				size: 4,
+				spacing: 4,
+			},
+			lines: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				scale: 1,
+				rotation: 0,
+				color: 'rgba(0, 153, 255, 0.5)',
+				lineWidth: 1,
+				spacing: 4,
+				angle: 45,
+			},
+		},
+		filters: {
+			enabled: false,
+			distortion: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				intensity: 0.5,
+				color: 'rgba(0, 153, 255, 0.5)',
+				frequency: 0.1,
+				amplitude: 0.1,
+			},
+			glow: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				intensity: 0.5,
+				color: 'rgba(0, 153, 255, 0.5)',
+				radius: 10,
+				spread: 5,
+			},
+			shadow: {
+				visibleOnHover: true,
+				opacity: 0.5,
+				intensity: 0.5,
+				color: 'rgba(0, 0, 0, 0.5)',
+				offsetX: 0,
+				offsetY: 2,
+				blur: 4,
+			},
+		},
+	},
+
+	// Rendimiento
+	performance: DEFAULT_PERFORMANCE_OPTIONS,
 };
 
 /**
  * Configuración visual predeterminada para tarjetas de entidades en el panel de configuraciones
  */
 export const DEFAULT_SETTINGS_OPTIONS: SettingsCardOptions = {
-	// Visual
-	showTitle: true,
-	showType: true,
-	showDescription: true,
-	showRarity: true,
-	showTexture: true,
-	showInfo: true,
-	showImageCount: true,
-
-	// Imagen
-	imageGridLayout: 'single',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	imageGridAspectRatio: '1:1',
-
-	// Efectos
-	enableGlow: false,
-	enableScanlines: false,
-	enableGrainEffect: false,
-	enableLightHalo: false,
-	enableAnimatedBorder: false,
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	maxRotation: 15,
-	hoverLiftHeight: 10,
-
-	// Opciones específicas para scanlines
-	scanlinesOptions: {
-		opacity: 0.2,
-		spacing: 4,
-		direction: 'horizontal',
-		animate: true,
-	},
-
-	// Opciones específicas para efecto de grano
-	grainOptions: {
-		intensity: 0.2,
-		density: 0.5,
-		noise: 'light',
-		animated: false,
-	},
-
-	// Opciones específicas para borde animado
-	borderOptions: {
-		width: 2,
-		pattern: 'solid',
-		animationType: 'pulse',
-		animation: {
-			type: 'pulse',
-			duration: 3000,
-			timing: 'linear',
-			iteration: 'infinite',
-		},
-	},
-
-	// Sistema
-	enableShadow: true,
-	cardShadowSize: 'md',
-	cardShadowColor: 'rgba(0, 0, 0, 0.2)',
-	cardRoundedSize: 'md',
-
-	// Avanzado
-	enableHoverAnimation: true,
-	cardBorderSize: 'sm',
-	enableParallaxEffect: false,
-	enableBlurEffect: false,
-
-	// Rendimiento
-	enableSkeleton: true,
-	enablePrefetch: false,
-	enableLazyLoading: true,
-
-	// Estados
-	enableHover: true,
-	enableActive: true,
-	enableFocus: true,
-	enableDisabled: false,
-
 	// Sistemas
 	raritySystem: false,
 	textureSystem: false,
 	categorySystem: false,
 
-	// Colores
-	primaryColor: '0, 153, 255',
-	secondaryColor: '128, 0, 255',
-};
+	// Sistema de diseño
+	designSystem: {
+		preset: 'default',
+		variant: 'default',
+		aspectRatio: '1:1',
+		cornerStyle: 'rounded',
+		cornerRadius: 8,
+		elevation: 1,
+		shadowStyle: 'soft',
+	},
+
+	// Grid de imágenes
+	imageGrid: {
+		layout: 'grid',
+		gap: 4,
+		style: 'standard',
+		aspectRatio: '1:1',
+	},
+
+	// Rendimiento
+	performance: {
+		lazyLoad: true,
+		prefetch: false,
+		reducedMotion: false,
+		animationDuration: 300,
+		animationMaxFPS: 60,
+		animationTimingFunction: 'ease-out',
+	},
+
+	// Efectos básicos
+	enable3DEffect: false,
+	enableHolographicEffect: false,
+	enableScanlinesEffect: false,
+	enableGlowEffect: false,
+	enableBorderEffect: false,
+	enableGrainEffect: false,
+	enableScanlines: false,
+	enableAnimatedBorder: false,
+	enableLightHalo: false,
+
+	// Opciones de efectos
+	scanlinesOptions: {
+		enabled: false,
+		opacity: 0.2,
+		spacing: 4,
+		color: 'rgba(0,0,0,0.2)',
+		animate: false,
+		direction: 'horizontal',
+		visibleOnHover: false,
+	},
+
+	// Otros valores
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+	primaryColor: '0,0,0',
+	secondaryColor: '255,255,255',
+} as const;
 
 // Configuraciones predefinidas para rarezas
 export const DEFAULT_RARITIES: Record<string, RarityConfig> = {

@@ -67,6 +67,21 @@ export function FoldersView(_props: ViewProps) {
 			viewLogger.info('🖱️ Click en carpeta:', folder.name);
 			setCurrentView('folder-content');
 			setCurrentFolder(folder.id);
+			// Actualizar la información completa de la carpeta en el store
+			useFileManager.setState({
+				currentFolder: {
+					id: folder.id,
+					name: folder.name,
+					path: folder.path,
+					description: folder.description,
+					emoji: folder.emoji,
+					_count: folder._count,
+					totalSize: folder.totalSize,
+					lastIndexed: folder.lastIndexed,
+					createdAt: folder.createdAt,
+					updatedAt: folder.updatedAt,
+				},
+			});
 		},
 		[setCurrentView, setCurrentFolder]
 	);

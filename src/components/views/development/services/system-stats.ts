@@ -1,7 +1,7 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
-import { formatBytes } from '@/lib/utils/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 
 /**
  * Obtiene el total de archivos indexados en la base de datos

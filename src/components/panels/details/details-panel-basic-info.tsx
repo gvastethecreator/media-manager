@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate, formatFileSize } from '@/lib/utils';
+import { formatBytes, formatDate } from '@/lib/utils/format.utils';
 import type { ImageItem } from '@/types/image-item';
 import { Calendar, FileImage, FileText, Folder, HardDrive, ImageIcon, Layers } from 'lucide-react';
 import { InfoItem } from './details-panel-info-item';
@@ -63,7 +63,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 					<InfoItem
 						icon={<HardDrive className="h-4 w-4 text-amber-400" />}
 						label="Tamaño"
-						value={formatFileSize(item.fileSize)}
+						value={formatBytes(item.fileSize)}
 					/>
 				)}
 

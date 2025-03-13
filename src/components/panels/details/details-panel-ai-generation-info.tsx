@@ -8,7 +8,7 @@ import {
 	determineGeneratorType,
 	findGenerationInfo,
 } from '@/lib/parsers';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { Bug, Calendar, Code2, FileDigit, FileImage, HardDrive, Palette, Settings2 } from 'lucide-react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';

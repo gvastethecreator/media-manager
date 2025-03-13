@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { StatusBadge } from './status-badge';

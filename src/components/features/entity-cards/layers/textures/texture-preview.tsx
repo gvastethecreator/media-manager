@@ -1,106 +1,123 @@
 'use client';
 
 import { Label } from '@/components/ui/label';
-import type React from 'react';
-
-interface TextureItem {
-	id: string;
-	name: string;
-	imageUrl?: string;
-	patternType?: string;
-	color: string;
-	opacity: number;
-	description?: string;
-	blendMode?: string;
-	noiseType?: string;
-	animated?: boolean;
-	animationSpeed?: number;
-	density?: number;
-	contrast?: number;
-	visibleOnHover?: boolean;
-	layerOrder?: number;
-	scale?: number;
-}
+import { useId, useMemo } from 'react';
+import type { TextureConfig } from '../../types/base-card-types';
 
 interface TexturePreviewProps {
-	texture: TextureItem | null;
-	previewSvg: string;
+	texture: TextureConfig;
+	options?: {
+		scale?: number;
+		blendMode?: string;
+		noiseType?: string;
+		animated?: boolean;
+		animationSpeed?: number;
+		density?: number;
+		contrast?: number;
+	};
 }
 
-export function TexturePreview({ texture, previewSvg }: TexturePreviewProps) {
-	// Obtener el color con opacidad para la vista previa
-	const getColorWithOpacity = (color: string, opacity: number) => {
-		// Si el color es en formato hex (#RRGGBB), convertirlo a rgba
-		if (color.startsWith('#')) {
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
-			return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-		}
-		return color;
-	};
+export function TexturePreview({ texture, options = {} }: TexturePreviewProps) {
+	const { scale = 1, density = 0.5, contrast = 1 } = options;
 
-	// Obtener estilo del patrón para la vista previa
-	const getPatternStyle = (patternType?: string, color?: string, opacity = 0.5) => {
-		const colorWithOpacity = color ? getColorWithOpacity(color, opacity) : 'rgba(59, 130, 246, 0.5)';
+	const patternId = useId();
 
-		switch (patternType) {
+	const pattern = useMemo(() => {
+		switch (texture.patternType) {
 			case 'dots':
-				return {
-					backgroundImage: `radial-gradient(${colorWithOpacity} 1px, transparent 1px)`,
-					backgroundSize: '8px 8px',
-				};
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<circle cx="5" cy="5" r="1.5" fill={texture.color} />
+						<circle cx="15" cy="5" r="1.5" fill={texture.color} />
+						<circle cx="5" cy="15" r="1.5" fill={texture.color} />
+						<circle cx="15" cy="15" r="1.5" fill={texture.color} />
+					</pattern>
+				);
 			case 'lines':
-				return {
-					backgroundImage: `linear-gradient(0deg, transparent 9px, ${colorWithOpacity} 10px, transparent 11px)`,
-					backgroundSize: '10px 10px',
-				};
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<line x1="0" y1="10" x2="20" y2="10" stroke={texture.color} strokeWidth="1" />
+					</pattern>
+				);
 			case 'grid':
-				return {
-					backgroundImage: `linear-gradient(0deg, transparent 9px, ${colorWithOpacity} 10px, transparent 11px),
-                             linear-gradient(90deg, transparent 9px, ${colorWithOpacity} 10px, transparent 11px)`,
-					backgroundSize: '10px 10px',
-				};
-			case 'waves':
-				return {
-					background: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${colorWithOpacity} 6px, transparent 10px)`,
-				};
-			case 'noise':
-				return {
-					backgroundColor: colorWithOpacity,
-					backgroundImage:
-						"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
-					backgroundBlendMode: 'overlay',
-				};
-			case 'circles':
-				return {
-					backgroundImage: `radial-gradient(circle at 50% 50%, ${colorWithOpacity} 20%, transparent 25%)`,
-					backgroundSize: '20px 20px',
-				};
-			case 'squares':
-				return {
-					backgroundImage: `linear-gradient(0deg, transparent 4px, ${colorWithOpacity} 5px, ${colorWithOpacity} 6px, transparent 7px),
-                             linear-gradient(90deg, transparent 4px, ${colorWithOpacity} 5px, ${colorWithOpacity} 6px, transparent 7px)`,
-					backgroundSize: '15px 15px',
-				};
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<line x1="0" y1="10" x2="20" y2="10" stroke={texture.color} strokeWidth="0.5" />
+						<line x1="10" y1="0" x2="10" y2="20" stroke={texture.color} strokeWidth="0.5" />
+					</pattern>
+				);
 			case 'diagonal':
-				return {
-					backgroundImage: `repeating-linear-gradient(45deg, ${colorWithOpacity}, ${colorWithOpacity} 1px, transparent 1px, transparent 10px)`,
-				};
-			case 'chevron':
-				return {
-					backgroundImage: `
-            linear-gradient(135deg, ${colorWithOpacity} 25%, transparent 25%),
-            linear-gradient(225deg, ${colorWithOpacity} 25%, transparent 25%)
-          `,
-					backgroundSize: '20px 20px',
-				};
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<line x1="0" y1="0" x2="20" y2="20" stroke={texture.color} strokeWidth="0.5" />
+						<line x1="20" y1="0" x2="0" y2="20" stroke={texture.color} strokeWidth="0.5" />
+					</pattern>
+				);
+			case 'waves':
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<path d="M0,10 Q5,5 10,10 T20,10" stroke={texture.color} fill="none" strokeWidth="0.5" />
+						<path d="M0,15 Q5,10 10,15 T20,15" stroke={texture.color} fill="none" strokeWidth="0.5" />
+						<path d="M0,5 Q5,0 10,5 T20,5" stroke={texture.color} fill="none" strokeWidth="0.5" />
+					</pattern>
+				);
+			case 'hexagons':
+				return (
+					<pattern
+						id={patternId}
+						width="20"
+						height="20"
+						patternUnits="userSpaceOnUse"
+						patternTransform={`scale(${scale})`}
+					>
+						<polygon points="10,1 17,5 17,15 10,19 3,15 3,5" fill="none" stroke={texture.color} strokeWidth="0.5" />
+					</pattern>
+				);
+			case 'noise':
+				return (
+					<filter id={patternId}>
+						<feTurbulence type="fractalNoise" baseFrequency={density} numOctaves="3" result="noise" />
+						<feColorMatrix
+							type="matrix"
+							values={`${contrast} 0 0 0 0  0 ${contrast} 0 0 0  0 0 ${contrast} 0 0  0 0 0 1 0`}
+							in="noise"
+						/>
+					</filter>
+				);
 			default:
-				return {
-					backgroundColor: opacity > 0 ? colorWithOpacity : 'transparent',
-				};
+				return null;
 		}
-	};
+	}, [texture.patternType, texture.color, scale, density, contrast, patternId]);
 
 	return (
 		<div className="mt-2">
@@ -108,16 +125,13 @@ export function TexturePreview({ texture, previewSvg }: TexturePreviewProps) {
 			<div
 				className="w-full aspect-video rounded-md border mt-1 flex items-center justify-center"
 				style={{
-					backgroundColor: texture?.color || '#ffffff',
-					opacity: texture?.opacity || 1,
-					backgroundImage: previewSvg ? `url('data:image/svg+xml;utf8,${encodeURIComponent(previewSvg)}')` : undefined,
+					backgroundColor: texture.color,
+					opacity: 1,
+					backgroundImage: `url('data:image/svg+xml;utf8,${encodeURIComponent(patternId)}')`,
 					backgroundSize: '20px 20px',
-					...getPatternStyle(texture?.patternType, texture?.color, texture?.opacity),
 				}}
 			>
-				{!previewSvg && !texture?.patternType && (
-					<div className="text-sm text-muted-foreground">Selecciona un patrón</div>
-				)}
+				{!pattern && !texture.patternType && <div className="text-sm text-muted-foreground">Selecciona un patrón</div>}
 			</div>
 		</div>
 	);

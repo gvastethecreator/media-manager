@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
 import { BookImage, CornerDownRight, FolderIcon, ImageIcon, TagIcon } from 'lucide-react';
 import { hover, motion } from 'motion/react';

@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { useMemo } from 'react';
 import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';

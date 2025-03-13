@@ -73,16 +73,6 @@ export function MainLayout() {
 						</div>
 					</div>
 				</ResizablePanel>
-
-				<ResizablePanelHandle
-					withHandle
-					className="cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-					onDragging={handleDragging}
-				/>
-
-				<ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background-primary">
-					<RightPanel />
-				</ResizablePanel>
 			</ResizablePanelGroup>
 
 			<FileViewer

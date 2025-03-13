@@ -261,6 +261,14 @@ export function useNavigation() {
 					? {
 							id: currentFolderId,
 							name: currentFolder.name,
+							path: currentFolder.path,
+							description: currentFolder.description,
+							emoji: currentFolder.emoji,
+							_count: currentFolder._count,
+							totalSize: currentFolder.totalSize,
+							lastIndexed: currentFolder.lastIndexed,
+							createdAt: currentFolder.createdAt,
+							updatedAt: currentFolder.updatedAt,
 							// Propiedades que espera BreadcrumbsProps
 							itemType: 'folder',
 						}

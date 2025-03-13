@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 import { Eye, ZoomIn } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { PreviewPanelProps } from '../../types/card-settings-types';

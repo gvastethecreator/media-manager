@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils/utils';
+import { cn } from '@/lib/utils';
 
 export function StatusBadge({ status }: { status: string }) {
 	const getStatusColor = () => {

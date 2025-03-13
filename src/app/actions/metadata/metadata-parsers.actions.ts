@@ -303,6 +303,7 @@ function convertDMSToDecimal(dmsValue: string, ref?: string): number {
  */
 export async function parseMetadataString(data: Buffer | string | null): Promise<FileMetadata | null> {
 	if (!data) {
+		parserLogger.debug('Datos nulos o vacíos en parseMetadataString');
 		return null;
 	}
 
@@ -353,6 +354,7 @@ export async function parseMetadataString(data: Buffer | string | null): Promise
 		parserLogger.error('Error parseando string de metadatos:', {
 			error: errorMsg,
 			data: preview,
+			stack: error instanceof Error ? error.stack : undefined,
 		});
 		return null;
 	}
@@ -412,35 +414,43 @@ async function parseJsonString(text: string): Promise<FileMetadata | null> {
 			}
 
 			// Extraer información de generación por IA usando nuestra nueva funcionalidad
-			const generationInfo = await extractAIGenerationInfo(parsed);
-			if (generationInfo) {
-				// Transformamos el objeto para hacerlo compatible con AIMetadata
-				const { extra_params, ...restGenInfo } = generationInfo;
+			try {
+				const generationInfo = await extractAIGenerationInfo(parsed);
+				if (generationInfo) {
+					// Transformamos el objeto para hacerlo compatible con AIMetadata
+					const { extra_params, ...restGenInfo } = generationInfo;
 
-				// Procesamos extra_params para eliminar arrays de string
-				const processedExtraParams: Record<string, string | number | boolean | null | undefined> = {};
-				if (extra_params) {
-					for (const [key, value] of Object.entries(extra_params)) {
-						if (Array.isArray(value)) {
-							processedExtraParams[key] = value.join(', ');
-						} else {
-							processedExtraParams[key] = value;
+					// Procesamos extra_params para eliminar arrays de string
+					const processedExtraParams: Record<string, string | number | boolean | null | undefined> = {};
+					if (extra_params) {
+						for (const [key, value] of Object.entries(extra_params)) {
+							if (Array.isArray(value)) {
+								processedExtraParams[key] = value.join(', ');
+							} else {
+								processedExtraParams[key] = value;
+							}
 						}
 					}
+
+					result.generation = {
+						...restGenInfo,
+						type: generationInfo.type as 'stable-diffusion' | 'comfyui' | 'invoke-ai' | 'novel-ai',
+						seed:
+							typeof generationInfo.seed === 'string'
+								? Number.parseInt(generationInfo.seed, 10) || undefined
+								: generationInfo.seed,
+						extra_params: extra_params ? processedExtraParams : undefined,
+					};
+
+					parserLogger.debug('Extraída información de generación AI', {
+						type: generationInfo.type,
+						hasExtraParams: !!extra_params,
+					});
 				}
-
-				result.generation = {
-					...restGenInfo,
-					type: generationInfo.type as 'stable-diffusion' | 'comfyui' | 'invoke-ai' | 'novel-ai',
-					seed:
-						typeof generationInfo.seed === 'string'
-							? Number.parseInt(generationInfo.seed, 10) || undefined
-							: generationInfo.seed,
-					extra_params: extra_params ? processedExtraParams : undefined,
-				};
-
-				parserLogger.debug('Extraída información de generación AI', {
-					type: generationInfo.type,
+			} catch (genError) {
+				parserLogger.warn('Error al extraer información de generación AI:', {
+					error: genError instanceof Error ? genError.message : String(genError),
+					data: parsed,
 				});
 			}
 
@@ -448,6 +458,7 @@ async function parseJsonString(text: string): Promise<FileMetadata | null> {
 				hasGeneration: !!result.generation,
 				hasExif: !!result.exif,
 				hasXmp: !!result.xmp,
+				hasIptc: !!result.iptc,
 			});
 
 			return result;
@@ -455,7 +466,11 @@ async function parseJsonString(text: string): Promise<FileMetadata | null> {
 
 		return null;
 	} catch (error) {
-		parserLogger.error('Error parseando JSON:', error);
+		parserLogger.error('Error parseando JSON:', {
+			error: error instanceof Error ? error.message : String(error),
+			stack: error instanceof Error ? error.stack : undefined,
+			text: `${text.substring(0, 100)}...`,
+		});
 		return null;
 	}
 }

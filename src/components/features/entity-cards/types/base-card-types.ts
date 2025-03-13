@@ -70,6 +70,55 @@ export interface BorderConfig {
 // Tipo para metadatos genéricos
 export type MetadataValue = string | number | boolean | null | Record<string, string | number | boolean | null>;
 
+// Configuración de rendimiento
+export interface PerformanceOptions {
+	// Optimizaciones generales
+	lazyLoad?: boolean;
+	virtualScroll?: boolean;
+	imageOptimization?: boolean;
+	animationOptimization?: boolean;
+	renderQuality?: 'low' | 'medium' | 'high';
+
+	// Optimizaciones de capas
+	layerOptimization?: {
+		// Límites de capas
+		maxLayers?: number;
+		maxActiveLayers?: number;
+
+		// Estrategias de renderizado
+		renderStrategy?: 'smart' | 'all' | 'active';
+
+		// Prioridades de capas
+		layerPriorities?: {
+			content?: number;
+			patterns?: number;
+			textures?: number;
+			distortions?: number;
+			glows?: number;
+			borders?: number;
+			scanlines?: number;
+			holographic?: number;
+			shaders?: number;
+			filters?: number;
+		};
+
+		// Optimizaciones de memoria
+		memoryOptimization?: {
+			maxTextureSize?: number;
+			textureCompression?: boolean;
+			textureFormat?: 'webp' | 'png' | 'jpg';
+		};
+
+		// Optimizaciones de animación
+		animationOptimization?: {
+			maxFPS?: number;
+			reducedMotion?: boolean;
+			animationDuration?: number;
+			animationTimingFunction?: string;
+		};
+	};
+}
+
 // Opciones generales para el sistema de tarjetas
 export interface CardOptions {
 	// Opciones visuales básicas
@@ -123,13 +172,7 @@ export interface CardOptions {
 	interactivity?: CardInteractivity;
 
 	// Rendimiento
-	performance?: {
-		lazyLoad?: boolean;
-		virtualScroll?: boolean;
-		imageOptimization?: boolean;
-		animationOptimization?: boolean;
-		renderQuality?: 'low' | 'medium' | 'high';
-	};
+	performance?: PerformanceOptions;
 
 	// Disposición del contenido
 	contentLayout?: 'default' | 'grid' | 'masonry' | 'carousel';
@@ -154,6 +197,9 @@ export interface CardOptions {
 	maxRotation?: number;
 	primaryColor?: string;
 	secondaryColor?: string;
+
+	// Efectos adicionales
+	effects?: EffectsOptions;
 }
 
 // Opciones para el efecto holográfico
@@ -440,4 +486,148 @@ export interface BaseCardState {
 	rotateY: number;
 	isExploded: boolean;
 	activeLayer: string | null;
+}
+
+interface ShaderOptions {
+	enabled?: boolean;
+	distortion?: {
+		visibleOnHover?: boolean;
+		intensity?: number;
+		duration?: number;
+	};
+	hologram?: {
+		visibleOnHover?: boolean;
+		intensity?: number;
+		duration?: number;
+		primaryColor?: [number, number, number];
+		secondaryColor?: [number, number, number];
+	};
+	particles?: {
+		visibleOnHover?: boolean;
+		intensity?: number;
+		duration?: number;
+		particleColor?: [number, number, number];
+	};
+	waves?: {
+		visibleOnHover?: boolean;
+		intensity?: number;
+		duration?: number;
+		waveColor?: [number, number, number];
+	};
+}
+
+interface PatternOptions {
+	enabled?: boolean;
+	dots?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		scale?: number;
+		rotation?: number;
+		color?: string;
+		dotSize?: number;
+		spacing?: number;
+	};
+	grid?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		scale?: number;
+		rotation?: number;
+		color?: string;
+		lineWidth?: number;
+		spacing?: number;
+	};
+	hexagons?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		scale?: number;
+		rotation?: number;
+		color?: string;
+		size?: number;
+		spacing?: number;
+	};
+	lines?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		scale?: number;
+		rotation?: number;
+		color?: string;
+		lineWidth?: number;
+		spacing?: number;
+		angle?: number;
+	};
+}
+
+interface FilterOptions {
+	enabled?: boolean;
+	distortion?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		intensity?: number;
+		color?: string;
+		frequency?: number;
+		amplitude?: number;
+	};
+	glow?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		intensity?: number;
+		color?: string;
+		radius?: number;
+		spread?: number;
+	};
+	shadow?: {
+		visibleOnHover?: boolean;
+		opacity?: number;
+		intensity?: number;
+		color?: string;
+		offsetX?: number;
+		offsetY?: number;
+		blur?: number;
+	};
+}
+
+interface EffectsOptions {
+	// Efectos básicos
+	glitchEffect?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		frequency?: number;
+		duration?: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	noiseTexture?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		scale?: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	chromaticAberration?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		offset?: number;
+		color?: string;
+		layerIndex?: number;
+	};
+	pixelate?: {
+		enabled?: boolean;
+		visibleOnHover?: boolean;
+		intensity?: number;
+		blockSize?: number;
+		color?: string;
+		layerIndex?: number;
+	};
+
+	// Shaders
+	shaders?: ShaderOptions;
+
+	// Patrones
+	patterns?: PatternOptions;
+
+	// Filtros
+	filters?: FilterOptions;
 }
