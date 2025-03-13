@@ -131,7 +131,7 @@ export function ViewContainer() {
 						opacity: { duration: 0.15 },
 						scale: { duration: 0.2 },
 					}}
-					className="absolute inset-0 w-full h-full bg-background"
+					className="absolute inset-0 w-full h-full"
 				>
 					<MemoizedViewContent view={currentView} />
 				</motion.div>

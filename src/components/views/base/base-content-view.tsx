@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileGrid } from '@/components/features/file-grid/file-grid';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
 import { logger } from '@/lib/logger/logger';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -154,7 +154,7 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
 				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					<FileGrid items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
+					<FileBrowser items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
 				</BlurFade>
 			</div>
 		</div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { type CollectionWithStats, getCollections } from '@/app/actions/collections/collection.actions';
+import { getCollections } from '@/app/actions/collections/collection.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { CollectionCard } from '@/components/features/entity-cards/layouts/collection-card-layout';
@@ -9,35 +9,58 @@ import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
-import { LibraryBig } from 'lucide-react';
+import type { Collection } from '@prisma/client';
+import { BookMarked } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('CollectionsView');
 
+// Extender el tipo Collection para incluir los campos adicionales
+interface CollectionWithDetails extends Collection {
+	_count?: { images: number };
+	totalSize?: number;
+	recentImages?: string[];
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCollection } = useFileManager();
-	const router = useRouter();
-	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
+	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithStats[]>(collections);
+	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithDetails[]>(collections);
 
-	const fetchCollections = useCallback(async () => {
+	const loadCollections = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando colecciones...');
 			const data = await getCollections();
-			setCollections(data);
+			const transformedData = data.map((collectionData) => {
+				// Filtrar valores nulos en recentImages
+				const recentImages = collectionData.recentImages
+					? collectionData.recentImages.filter((img): img is string => img !== null)
+					: [];
+
+				return {
+					...collectionData,
+					recentImages,
+					_count: collectionData._count || { images: 0 },
+					createdAt: new Date(collectionData.createdAt),
+					updatedAt: new Date(collectionData.updatedAt),
+				} as CollectionWithDetails;
+			});
+
+			setCollections(transformedData);
 			viewLogger.info(`✅ ${data.length} colecciones cargadas`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando colecciones:', err);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando colecciones:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -45,25 +68,29 @@ export function CollectionsView(_props: ViewProps) {
 	}, []);
 
 	useEffect(() => {
-		// Cargar colecciones inicialmente
-		fetchCollections();
-	}, [fetchCollections]);
+		loadCollections();
+	}, [loadCollections]);
 
 	const handleCollectionClick = useCallback(
-		(collection: CollectionWithStats) => {
+		(collection: CollectionWithDetails) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
 			setCurrentView('collection-content');
 			setCurrentCollection(collection.id);
+			// Actualizar la información completa de la colección en el store
+			useFileManager.setState({
+				currentCollection: {
+					id: collection.id,
+					name: collection.name,
+					description: collection.description,
+					type: collection.type,
+					_count: collection._count,
+					totalSize: collection.totalSize,
+					createdAt: collection.createdAt,
+					updatedAt: collection.updatedAt,
+				},
+			});
 		},
 		[setCurrentView, setCurrentCollection]
-	);
-
-	const handleEdit = useCallback(
-		(collection: { id: string; name: string }) => {
-			viewLogger.info('⚙️ Editando colección:', collection.name);
-			router.push('/settings/collections');
-		},
-		[router]
 	);
 
 	if (error) {
@@ -81,9 +108,9 @@ export function CollectionsView(_props: ViewProps) {
 	if (!optimisticCollections || optimisticCollections.length === 0) {
 		return (
 			<EmptyState
-				icon={LibraryBig}
-				title="No hay colecciones"
-				description="Las colecciones te ayudan a organizar tus imágenes. Crea una nueva colección desde el panel de configuración."
+				icon={BookMarked}
+				title="No hay colecciones creadas"
+				description="Crea una colección para organizar tus imágenes de forma temática."
 			/>
 		);
 	}
@@ -102,7 +129,14 @@ export function CollectionsView(_props: ViewProps) {
 							<CollectionCard
 								data={collection}
 								onClick={() => handleCollectionClick(collection)}
-								onEdit={() => handleEdit(collection)}
+								options={{
+									useImageGrid: true,
+									imageGridLayout: 'quad',
+									imageGridGap: 4,
+									imageGridStyle: 'standard',
+									enableGlow: true,
+									enableBorderEffect: true,
+								}}
 							/>
 						</motion.div>
 					))}

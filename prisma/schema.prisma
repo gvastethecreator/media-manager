@@ -50,58 +50,88 @@ model Profile {
 
 // Modelo para las carpetas
 model Folder {
-  id            String    @id @default(cuid())
-  name          String
-  path          String    @unique
-  totalFiles    Int       @default(0)
-  totalSize     Int       @default(0)
-  lastIndexed   DateTime? @default(now())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  autoReindex   Boolean   @default(false)
-  images        Image[]
-  featuredImage String?
-  isFavorite    Boolean   @default(false)
+  id                String              @id @default(cuid())
+  name              String
+  description       String?
+  path              String              @unique
+  parentId          String?
+  parent            Folder?             @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
+  children          Folder[]            @relation("FolderToFolder")
+  images            Image[]
+  videos            Video[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  visualConfigId    String?             @unique
+  visualConfig      FolderVisualConfig? @relation(fields: [visualConfigId], references: [id])
+  totalFiles        Int                 @default(0)
+  totalSize         Int                 @default(0)
+  lastIndexed       DateTime?           @default(now())
+  autoReindex       Boolean             @default(false)
+  featuredImage     String?
+  isFavorite        Boolean             @default(false)
+  emoji             String?             @default("📁")
+  color             String?             @default("#3b82f6")
 
   @@index([path])
   @@index([lastIndexed])
   @@index([createdAt])
 }
 
+// Modelo para la configuración visual de carpetas
+model FolderVisualConfig {
+  id                    String    @id @default(cuid())
+  folder               Folder?
+  enable3DEffect        Boolean   @default(true)
+  designSystem         Json?     @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  enableHolographicEffect Boolean @default(true)
+  enableGlowEffect     Boolean   @default(true)
+  enableAnimatedBorder Boolean   @default(true)
+  enableLightHalo      Boolean   @default(true)
+  layerSystem         Json?     @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
+  effects             Json?     @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
+  performance         Json?     @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
+  states              Json?     @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
 // Modelo para las imágenes
 model Image {
-  id                   String       @id @default(cuid())
-  hash                 String
-  name                 String
-  path                 String
-  size                 Int
-  width                Int
-  height               Int
-  metadata             String?
-  thumbnail            Bytes?
-  thumbnailSize        Int?
-  thumbnailWidth       Int?
-  thumbnailHeight      Int?
-  thumbnailError       String?
-  thumbnailErrorAt     DateTime?
+  id                String              @id @default(cuid())
+  name              String
+  description       String?
+  path              String              @unique
+  folderId          String
+  folder            Folder             @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  visualConfigId    String?             @unique
+  visualConfig      ImageVisualConfig?  @relation(fields: [visualConfigId], references: [id])
+  hash              String
+  size              Int
+  width             Int
+  height            Int
+  metadata          String?
+  thumbnail         Bytes?
+  thumbnailSize     Int?
+  thumbnailWidth    Int?
+  thumbnailHeight   Int?
+  thumbnailError    String?
+  thumbnailErrorAt  DateTime?
   thumbnailOptimizedAt DateTime?
-  isPublic             Boolean      @default(false)
-  isFavorite           Boolean      @default(false)
-  folderId             String
-  folder               Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  collections          Collection[] @relation("ImageToCollection")
-  tags                 Tag[]        @relation("ImageToTag")
-  activities           Activity[]
-  stats                ImageStats?
-  albums               Album[]      @relation("ImageToAlbum")
-  characters           Character[]  @relation("ImageToCharacter")
-  places               Place[]      @relation("ImageToPlace")
-  worldItems           WorldItem[]  @relation("ImageToWorldItem")
-  concepts             Concept[]    @relation("ImageToConcept")
-  prompts              Prompt[]     @relation("ImageToPrompt")
-  notes                Note[]       @relation("ImageToNote")
+  isPublic          Boolean             @default(false)
+  isFavorite        Boolean             @default(false)
+  collections       Collection[]        @relation("ImageToCollection")
+  tags              Tag[]               @relation("ImageToTag")
+  activities        Activity[]
+  stats             ImageStats?
+  albums            Album[]             @relation("ImageToAlbum")
+  characters        Character[]         @relation("ImageToCharacter")
+  places            Place[]             @relation("ImageToPlace")
+  worldItems        WorldItem[]         @relation("ImageToWorldItem")
+  concepts          Concept[]           @relation("ImageToConcept")
+  prompts           Prompt[]            @relation("ImageToPrompt")
+  notes             Note[]              @relation("ImageToNote")
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -627,5 +657,184 @@ model Texture {
   updatedAt             DateTime @updatedAt
 
   @@unique([entityType, name], name: "entityType_name")
+  @@index([entityType])
+}
+
+model ImageVisualConfig {
+  id                    String    @id @default(cuid())
+  image                Image?
+  enable3DEffect        Boolean   @default(true)
+  designSystem         Json?     @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  enableHolographicEffect Boolean @default(true)
+  enableGlowEffect     Boolean   @default(true)
+  enableAnimatedBorder Boolean   @default(true)
+  enableLightHalo      Boolean   @default(true)
+  layerSystem         Json?     @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
+  effects             Json?     @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
+  performance         Json?     @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
+  states              Json?     @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Video {
+  id                String              @id @default(cuid())
+  name              String
+  description       String?
+  path              String              @unique
+  folderId          String
+  folder            Folder             @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  visualConfigId    String?             @unique
+  visualConfig      VideoVisualConfig?  @relation(fields: [visualConfigId], references: [id])
+}
+
+model VideoVisualConfig {
+  id                    String    @id @default(cuid())
+  video                Video?
+  enable3DEffect        Boolean   @default(true)
+  designSystem         Json?     @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  enableHolographicEffect Boolean @default(true)
+  enableGlowEffect     Boolean   @default(true)
+  enableAnimatedBorder Boolean   @default(true)
+  enableLightHalo      Boolean   @default(true)
+  layerSystem         Json?     @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
+  effects             Json?     @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
+  performance         Json?     @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
+  states              Json?     @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// Modelo para la configuración de scanlines
+model LayerScanlinesConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  opacity         Float    @default(0.3)
+  color          String   @default("#000000")
+  spacing        Float    @default(2)
+  thickness      Float    @default(0.5)
+  angle          Float    @default(0)
+  animated       Boolean  @default(false)
+  animationSpeed Float?   @default(1)
+  blend          String?  @default("overlay")
+  direction      String   @default("vertical")
+  pattern        String   @default("linear")
+  distortion     Float    @default(0)
+  noise          Float    @default(0)
+  scanlineHeight Float    @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración holográfica
+model LayerHolographicConfig {
+  id                String   @id @default(cuid())
+  entityType        String
+  entityId          String?
+  isDefault         Boolean  @default(false)
+  enabled           Boolean  @default(true)
+  intensity         Float    @default(0.5)
+  pattern           String   @default("rainbow")
+  colors            String   @default("[]") // JSON array de colores
+  speed             Float?   @default(1)
+  angle             Float?   @default(45)
+  scale             Float?   @default(1)
+  blend             String?  @default("overlay")
+  animated          Boolean  @default(true)
+  interactiveMode   String?  @default("tilt")
+  depth             Float    @default(0.5)
+  refraction        Float    @default(0.5)
+  dispersion        Float    @default(0.3)
+  specularHighlights Boolean @default(true)
+  iridescence       Float    @default(0.5)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración de grain
+model LayerGrainConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  intensity       Float    @default(0.3)
+  size            Float    @default(1)
+  animated        Boolean  @default(true)
+  speed           Float?   @default(1)
+  colorMode       String?  @default("monochrome")
+  opacity         Float?   @default(0.2)
+  blend           String?  @default("overlay")
+  seed            Int?     @default(12345)
+  pattern         String   @default("perlin")
+  fractalNoise    Boolean  @default(false)
+  roughness       Float    @default(0.5)
+  distribution    String   @default("gaussian")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración de bordes
+model LayerBorderConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  width           Float    @default(2)
+  style           String   @default("solid")
+  color           String   @default("#ffffff")
+  radius          Float?   @default(8)
+  animated        Boolean  @default(false)
+  animationType   String?  @default("none")
+  animationSpeed  Float?   @default(1)
+  glowAmount      Float?   @default(0)
+  opacity         Float?   @default(1)
+  gradient        String?  @default("[]") // JSON array de colores para gradiente
+  dashPattern     String?  @default("[]") // JSON array para patrón de líneas
+  cornerStyle     String   @default("round")
+  borderImage     String?  // URL de imagen para borde
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
+  @@index([entityType])
+}
+
+// Modelo para la configuración de bordes animados
+model LayerAnimatedBorderConfig {
+  id              String   @id @default(cuid())
+  entityType      String
+  entityId        String?
+  isDefault       Boolean  @default(false)
+  enabled         Boolean  @default(true)
+  width           Float    @default(2)
+  color           String   @default("#ffffff")
+  secondaryColor  String   @default("#00ffff")
+  animationSpeed  Float    @default(1)
+  animationType   String   @default("flow")
+  glowAmount      Float    @default(5)
+  dashArray       String?
+  opacity         Float    @default(0.8)
+  glowColor       String   @default("rgba(255, 255, 255, 0.5)")
+  borderRadius    Float    @default(4)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([entityType, entityId], name: "entityType_entityId")
   @@index([entityType])
 }

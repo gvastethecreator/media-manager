@@ -23,15 +23,74 @@ export interface ImageGrid {
 
 // Extendemos las opciones base de la tarjeta
 export interface CardOptions {
-	// Sistema de diseño
+	// Diseño
+	enable3DEffect?: boolean;
 	designSystem?: {
-		preset?: 'default' | 'modern' | 'classic' | 'minimal' | 'elegant';
+		preset?: string;
 		variant?: string;
 		aspectRatio?: string;
-		cornerStyle?: 'rounded' | 'sharp' | 'beveled';
-		cornerRadius?: number;
+		cornerStyle?: 'rounded' | 'sharp';
 		elevation?: number;
-		shadowStyle?: 'soft' | 'hard' | 'layered' | 'none';
+	};
+
+	// Efectos Básicos
+	enableHolographicEffect?: boolean;
+	enableGlowEffect?: boolean;
+	enableAnimatedBorder?: boolean;
+	enableLightHalo?: boolean;
+
+	// Sistema de Capas
+	layerSystem?: {
+		order?: string[];
+		layerBlending?: 'normal' | 'multiply' | 'screen' | 'overlay';
+		layerSpacing?: number;
+	};
+
+	// Efectos
+	effects?: {
+		shadow?: {
+			enabled?: boolean;
+			color?: string;
+			blur?: number;
+			spread?: number;
+		};
+		reflection?: {
+			enabled?: boolean;
+			opacity?: number;
+			blur?: number;
+		};
+		parallax?: {
+			enabled?: boolean;
+			intensity?: number;
+			perspective?: number;
+		};
+	};
+
+	// Rendimiento
+	performance?: {
+		enableHardwareAcceleration?: boolean;
+		useRAF?: boolean;
+		batchUpdates?: boolean;
+		throttleMs?: number;
+	};
+
+	// Estados
+	states?: {
+		hover?: {
+			scale?: number;
+			rotate?: boolean;
+			lift?: boolean;
+			duration?: number;
+			easing?: string;
+		};
+		active?: {
+			scale?: number;
+			brightness?: number;
+		};
+		disabled?: {
+			opacity?: number;
+			grayscale?: boolean;
+		};
 	};
 
 	// Visual
@@ -47,15 +106,8 @@ export interface CardOptions {
 	imageGrid?: ImageGrid;
 
 	// Efectos
-	enableGlow?: boolean;
 	enableScanlines?: boolean;
 	enableGrainEffect?: boolean;
-	enableLightHalo?: boolean;
-	enableAnimatedBorder?: boolean;
-	enable3DEffect?: boolean;
-	enableHolographicEffect?: boolean;
-	maxRotation?: number;
-	hoverLiftHeight?: number;
 
 	// Opciones específicas para efectos
 	scanlinesOptions?: ScanlinesOptions;
@@ -81,12 +133,6 @@ export interface CardOptions {
 	enableSkeleton?: boolean;
 	enablePrefetch?: boolean;
 	enableLazyLoading?: boolean;
-
-	// Estados
-	enableHover?: boolean;
-	enableActive?: boolean;
-	enableFocus?: boolean;
-	enableDisabled?: boolean;
 
 	// Sistemas
 	raritySystem?: boolean;

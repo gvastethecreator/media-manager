@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
-import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
-import type { CardOptions, RarityConfig } from '@/components/features/entity-cards/types/base-card-types';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import type { Place } from '@/types/entities/places';
+import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
+import { VisualizationConfig } from "@/components/features/entity-cards/config/visualization-config";
+import type {
+	CardOptions,
+	RarityConfig,
+} from "@/components/features/entity-cards/types/base-card-types";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Place } from "@/types/entities/places";
 import {
 	ArrowUpRight,
 	Cloud,
@@ -17,9 +20,10 @@ import {
 	Thermometer,
 	Trash2,
 	Users,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
+} from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
+import { ImageGrid } from "./image-grid";
 
 // Opciones visuales optimizadas para lugares
 const DEFAULT_PLACE_OPTIONS = {
@@ -32,19 +36,19 @@ const DEFAULT_PLACE_OPTIONS = {
 
 	// Configuración de diseño específica para lugares
 	designSystem: {
-		preset: 'place',
-		variant: 'default',
-		aspectRatio: '7/10',
-		cornerStyle: 'rounded',
+		preset: "place",
+		variant: "default",
+		aspectRatio: "7/10",
+		cornerStyle: "rounded",
 		cornerRadius: 12,
 		elevation: 2,
-		shadowStyle: 'soft',
+		shadowStyle: "soft",
 	},
 
 	// Sistema de capas optimizado para lugares
 	layerSystem: {
-		order: ['content', 'holographic', 'border', 'filter'],
-		layerBlending: 'normal',
+		order: ["content", "holographic", "border", "filter"],
+		layerBlending: "normal",
 	},
 
 	// Interactividad específica para lugares
@@ -56,7 +60,7 @@ const DEFAULT_PLACE_OPTIONS = {
 			glow: true,
 		},
 		click: {
-			feedback: 'scale',
+			feedback: "scale",
 		},
 	},
 
@@ -67,7 +71,7 @@ const DEFAULT_PLACE_OPTIONS = {
 			blur: true,
 		},
 		selected: {
-			style: 'border',
+			style: "border",
 		},
 	},
 
@@ -76,86 +80,86 @@ const DEFAULT_PLACE_OPTIONS = {
 		lazyLoad: true,
 		imageOptimization: true,
 		animationOptimization: true,
-		renderQuality: 'high',
+		renderQuality: "high",
 	},
 
 	// Configuración visual básica
 	hoverLiftHeight: 10,
 	maxRotation: 12,
-	primaryColor: '56, 189, 248',
-	secondaryColor: '236, 72, 153',
+	primaryColor: "56, 189, 248",
+	secondaryColor: "236, 72, 153",
 
 	// Contenido y estructura
-	contentLayout: 'stats-focus',
-	contentPadding: '1rem',
-	contentSpacing: '0.5rem',
-	contentAlignment: 'start',
+	contentLayout: "stats-focus",
+	contentPadding: "1rem",
+	contentSpacing: "0.5rem",
+	contentAlignment: "start",
 };
 
 // Tipos de clima con colores personalizados
 const CLIMATE_TYPES = {
 	arctic: {
-		color: 'from-blue-600/20 to-sky-600/20',
-		border: 'border-blue-500/70',
-		label: 'Ártico',
-		badgeClass: 'bg-gradient-to-r from-blue-500 to-sky-500',
-		barClass: 'bg-gradient-to-r from-blue-500 to-sky-500',
+		color: "from-blue-600/20 to-sky-600/20",
+		border: "border-blue-500/70",
+		label: "Ártico",
+		badgeClass: "bg-gradient-to-r from-blue-500 to-sky-500",
+		barClass: "bg-gradient-to-r from-blue-500 to-sky-500",
 		icon: <Cloud className="h-4 w-4" />,
 	},
 	cold: {
-		color: 'from-cyan-600/20 to-teal-600/20',
-		border: 'border-cyan-500/70',
-		label: 'Frío',
-		badgeClass: 'bg-gradient-to-r from-cyan-500 to-teal-500',
-		barClass: 'bg-gradient-to-r from-cyan-500 to-teal-500',
+		color: "from-cyan-600/20 to-teal-600/20",
+		border: "border-cyan-500/70",
+		label: "Frío",
+		badgeClass: "bg-gradient-to-r from-cyan-500 to-teal-500",
+		barClass: "bg-gradient-to-r from-cyan-500 to-teal-500",
 		icon: <Cloud className="h-4 w-4" />,
 	},
 	temperate: {
-		color: 'from-emerald-600/20 to-green-600/20',
-		border: 'border-emerald-500/70',
-		label: 'Templado',
-		badgeClass: 'bg-gradient-to-r from-emerald-500 to-green-500',
-		barClass: 'bg-gradient-to-r from-emerald-500 to-green-500',
+		color: "from-emerald-600/20 to-green-600/20",
+		border: "border-emerald-500/70",
+		label: "Templado",
+		badgeClass: "bg-gradient-to-r from-emerald-500 to-green-500",
+		barClass: "bg-gradient-to-r from-emerald-500 to-green-500",
 		icon: <Thermometer className="h-4 w-4" />,
 	},
 	warm: {
-		color: 'from-yellow-600/20 to-amber-600/20',
-		border: 'border-yellow-500/70',
-		label: 'Cálido',
-		badgeClass: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-		barClass: 'bg-gradient-to-r from-yellow-500 to-amber-500',
+		color: "from-yellow-600/20 to-amber-600/20",
+		border: "border-yellow-500/70",
+		label: "Cálido",
+		badgeClass: "bg-gradient-to-r from-yellow-500 to-amber-500",
+		barClass: "bg-gradient-to-r from-yellow-500 to-amber-500",
 		icon: <Thermometer className="h-4 w-4" />,
 	},
 	hot: {
-		color: 'from-orange-600/20 to-red-600/20',
-		border: 'border-orange-500/70',
-		label: 'Caluroso',
-		badgeClass: 'bg-gradient-to-r from-orange-500 to-red-500',
-		barClass: 'bg-gradient-to-r from-orange-500 to-red-500',
+		color: "from-orange-600/20 to-red-600/20",
+		border: "border-orange-500/70",
+		label: "Caluroso",
+		badgeClass: "bg-gradient-to-r from-orange-500 to-red-500",
+		barClass: "bg-gradient-to-r from-orange-500 to-red-500",
 		icon: <Thermometer className="h-4 w-4" />,
 	},
 	desert: {
-		color: 'from-amber-600/20 to-yellow-600/20',
-		border: 'border-amber-500/70',
-		label: 'Desértico',
-		badgeClass: 'bg-gradient-to-r from-amber-500 to-yellow-500',
-		barClass: 'bg-gradient-to-r from-amber-500 to-yellow-500',
+		color: "from-amber-600/20 to-yellow-600/20",
+		border: "border-amber-500/70",
+		label: "Desértico",
+		badgeClass: "bg-gradient-to-r from-amber-500 to-yellow-500",
+		barClass: "bg-gradient-to-r from-amber-500 to-yellow-500",
 		icon: <Thermometer className="h-4 w-4" />,
 	},
 	tropical: {
-		color: 'from-lime-600/20 to-green-600/20',
-		border: 'border-lime-500/70',
-		label: 'Tropical',
-		badgeClass: 'bg-gradient-to-r from-lime-500 to-green-500',
-		barClass: 'bg-gradient-to-r from-lime-500 to-green-500',
+		color: "from-lime-600/20 to-green-600/20",
+		border: "border-lime-500/70",
+		label: "Tropical",
+		badgeClass: "bg-gradient-to-r from-lime-500 to-green-500",
+		barClass: "bg-gradient-to-r from-lime-500 to-green-500",
 		icon: <Cloud className="h-4 w-4" />,
 	},
 	unknown: {
-		color: 'from-slate-500/20 to-gray-600/20',
-		border: 'border-slate-500/50',
-		label: 'Desconocido',
-		badgeClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
-		barClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
+		color: "from-slate-500/20 to-gray-600/20",
+		border: "border-slate-500/50",
+		label: "Desconocido",
+		badgeClass: "bg-gradient-to-r from-slate-500 to-gray-500",
+		barClass: "bg-gradient-to-r from-slate-500 to-gray-500",
 		icon: <Thermometer className="h-4 w-4" />,
 	},
 };
@@ -176,35 +180,35 @@ interface PlaceCardProps {
 
 // Función para obtener el clima del lugar
 function getPlaceClimate(place: Place) {
-	const climateValue = place.climate?.toLowerCase() || 'unknown';
+	const climateValue = place.climate?.toLowerCase() || "unknown";
 
 	switch (climateValue) {
-		case 'arctic':
-		case 'polar':
-		case 'freezing':
+		case "arctic":
+		case "polar":
+		case "freezing":
 			return CLIMATE_TYPES.arctic;
-		case 'cold':
-		case 'cool':
-		case 'chilly':
+		case "cold":
+		case "cool":
+		case "chilly":
 			return CLIMATE_TYPES.cold;
-		case 'temperate':
-		case 'moderate':
-		case 'mild':
+		case "temperate":
+		case "moderate":
+		case "mild":
 			return CLIMATE_TYPES.temperate;
-		case 'warm':
-		case 'pleasant':
+		case "warm":
+		case "pleasant":
 			return CLIMATE_TYPES.warm;
-		case 'hot':
-		case 'scorching':
-		case 'burning':
+		case "hot":
+		case "scorching":
+		case "burning":
 			return CLIMATE_TYPES.hot;
-		case 'desert':
-		case 'arid':
-		case 'dry':
+		case "desert":
+		case "arid":
+		case "dry":
 			return CLIMATE_TYPES.desert;
-		case 'tropical':
-		case 'humid':
-		case 'jungle':
+		case "tropical":
+		case "humid":
+		case "jungle":
 			return CLIMATE_TYPES.tropical;
 		default:
 			return CLIMATE_TYPES.unknown;
@@ -229,7 +233,9 @@ function getPlaceImportance(place: Place) {
 	}
 
 	// Recursos y peligros
-	const resources = place.resources ? JSON.parse(place.resources as string) : [];
+	const resources = place.resources
+		? JSON.parse(place.resources as string)
+		: [];
 	const dangers = place.dangers ? JSON.parse(place.dangers as string) : [];
 
 	const resourceBonus = Math.min(2, Math.floor(resources.length / 2));
@@ -239,16 +245,19 @@ function getPlaceImportance(place: Place) {
 	const imageBonus = Math.min(1, Math.floor(imageCount / 3));
 
 	// Valor entre 1-12
-	return Math.max(1, Math.min(12, baseValue + resourceBonus + dangerBonus + imageBonus));
+	return Math.max(
+		1,
+		Math.min(12, baseValue + resourceBonus + dangerBonus + imageBonus)
+	);
 }
 
 // Función para formatear población
 function formatPopulation(population: number | undefined) {
 	if (population === undefined || population === null) {
-		return '-';
+		return "-";
 	}
 	if (population === 0) {
-		return '0';
+		return "0";
 	}
 
 	if (population >= 1000000) {
@@ -289,7 +298,7 @@ export function PlaceCard({
 	// Parsear datos JSON
 	const resources = React.useMemo(() => {
 		try {
-			return JSON.parse(place.resources || '[]');
+			return JSON.parse(place.resources || "[]");
 		} catch {
 			return [];
 		}
@@ -298,10 +307,13 @@ export function PlaceCard({
 	// Generar configuración de rareza basada en el clima
 	const rarityConfig: RarityConfig = {
 		name: climate.label.toLowerCase(),
-		color: climate.badgeClass.split('from-')[1].split(' ')[0],
+		color: climate.badgeClass.split("from-")[1].split(" ")[0],
 		borderWidth: 2,
-		borderEffect: importance > 8 ? 'animated' : 'static',
-		glowColor: importance > 8 ? climate.barClass.split('from-')[1].split(' ')[0] : undefined,
+		borderEffect: importance > 8 ? "animated" : "static",
+		glowColor:
+			importance > 8
+				? climate.barClass.split("from-")[1].split(" ")[0]
+				: undefined,
 	};
 
 	return (
@@ -309,11 +321,11 @@ export function PlaceCard({
 			<EntityCardWrapper
 				onClick={onClick}
 				className={cn(
-					'w-full',
+					"w-full",
 					{
-						'aspect-[7/10]': cardOptions.designSystem?.aspectRatio === '7/10',
-						'aspect-square': cardOptions.designSystem?.aspectRatio === '1/1',
-						'aspect-video': cardOptions.designSystem?.aspectRatio === '16/9',
+						"aspect-[7/10]": cardOptions.designSystem?.aspectRatio === "7/10",
+						"aspect-square": cardOptions.designSystem?.aspectRatio === "1/1",
+						"aspect-video": cardOptions.designSystem?.aspectRatio === "16/9",
 					},
 					climate.border,
 					className
@@ -328,39 +340,45 @@ export function PlaceCard({
 				enableExplode={enableExplode}
 				explodeLayers={[
 					{
-						id: 'content',
-						label: 'Contenido',
+						id: "content",
+						label: "Contenido",
 						icon: <div className="w-3 h-3 bg-primary rounded-sm" />,
 					},
 					{
-						id: 'holographic',
-						label: 'Efecto Holo',
-						icon: <div className="w-3 h-3 bg-gradient-to-tr from-purple-400 to-blue-300 opacity-60" />,
+						id: "holographic",
+						label: "Efecto Holo",
+						icon: (
+							<div className="w-3 h-3 bg-gradient-to-tr from-purple-400 to-blue-300 opacity-60" />
+						),
 					},
 					{
-						id: 'border',
-						label: 'Borde',
+						id: "border",
+						label: "Borde",
 						icon: <div className="w-3 h-3 border border-primary rounded-sm" />,
 					},
 					{
-						id: 'filter',
-						label: 'Filtro SVG',
-						icon: <div className="w-3 h-3 bg-blue-300 rounded-full opacity-60" />,
+						id: "filter",
+						label: "Filtro SVG",
+						icon: (
+							<div className="w-3 h-3 bg-blue-300 rounded-full opacity-60" />
+						),
 					},
 				]}
 			>
 				{/* Diseño inspirado en cartas de lugares - contenedor con posicionamiento relativo */}
 				<div
 					className={cn(
-						'relative h-full flex flex-col',
-						cardOptions.contentLayout === 'stats-focus' && 'justify-between',
+						"relative h-full flex flex-col",
+						cardOptions.contentLayout === "stats-focus" && "justify-between",
 						cardOptions.contentPadding && `p-${cardOptions.contentPadding}`,
 						cardOptions.contentSpacing && `gap-${cardOptions.contentSpacing}`
 					)}
 				>
 					{/* Indicador de clima como círculo en esquina superior izquierda */}
 					<div className="absolute top-3 left-3 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-2 flex items-center justify-center z-10 shadow-lg overflow-hidden">
-						<div className={cn('absolute inset-0 opacity-70', climate.badgeClass)} />
+						<div
+							className={cn("absolute inset-0 opacity-70", climate.badgeClass)}
+						/>
 						{climate.icon}
 					</div>
 
@@ -368,37 +386,64 @@ export function PlaceCard({
 					<div className="relative px-3 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b border-border z-10">
 						<div className="flex items-center gap-1.5">
 							<MapPin className="h-4 w-4 text-primary" />
-							<h3 className="font-bold text-base leading-tight line-clamp-1">{place.name}</h3>
-							{place.isFavorite === true && <Star className="h-4 w-4 text-amber-400 ml-auto" />}
+							<h3 className="font-bold text-base leading-tight line-clamp-1">
+								{place.name}
+							</h3>
+							{place.isFavorite === true && (
+								<Star className="h-4 w-4 text-amber-400 ml-auto" />
+							)}
 						</div>
 						<div className="text-xs font-medium text-muted-foreground flex items-center mt-0.5">
 							<span>
-								{place.type || 'Lugar'} • {climate.label}
+								{place.type || "Lugar"} • {climate.label}
 							</span>
 						</div>
 					</div>
 
 					{/* Área de ilustración - Imagen destacada o icono */}
 					<div className="flex-1 relative">
-						{place.featuredImage ? (
-							<div className="absolute inset-0">
-								<img src={place.featuredImage} alt={place.name} className="w-full h-full object-cover" />
-								<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-							</div>
+						{cardOptions.useImageGrid ? (
+							<ImageGrid
+								layout={cardOptions.imageGridLayout || "single"}
+								gap={cardOptions.imageGridGap || 4}
+								style={cardOptions.imageGridStyle || "standard"}
+								images={[
+									{
+										id: "place-image",
+										path: place.featuredImage || "",
+										thumbnail: place.featuredImage || "",
+									},
+								]}
+							/>
 						) : (
-							<div
-								className={cn(
-									'h-full flex flex-col items-center justify-center',
-									'bg-gradient-to-b from-background to-muted/30'
+							<>
+								{place.featuredImage ? (
+									<div className="absolute inset-0">
+										<img
+											src={place.featuredImage}
+											alt={place.name}
+											className="w-full h-full object-cover"
+										/>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+									</div>
+								) : (
+									<div
+										className={cn(
+											"h-full flex flex-col items-center justify-center",
+											"bg-gradient-to-b from-background to-muted/30"
+										)}
+									>
+										<div className="flex items-center justify-center p-4 rounded-full bg-muted/50">
+											<Globe className="w-16 h-16 text-primary/70" />
+										</div>
+										<div className="mt-3 px-4 text-center">
+											<p className="text-xs text-muted-foreground">
+												{place.description || "Sin descripción disponible"}
+											</p>
+										</div>
+									</div>
 								)}
-							>
-								<div className="flex items-center justify-center p-4 rounded-full bg-muted/50">
-									<Globe className="w-16 h-16 text-primary/70" />
-								</div>
-								<div className="mt-3 px-4 text-center">
-									<p className="text-xs text-muted-foreground">{place.description || 'Sin descripción disponible'}</p>
-								</div>
-							</div>
+							</>
 						)}
 
 						{/* Región como overlay */}
@@ -426,10 +471,14 @@ export function PlaceCard({
 									</span>
 								))
 							) : (
-								<span className="text-[10px] text-muted-foreground">Sin recursos disponibles</span>
+								<span className="text-[10px] text-muted-foreground">
+									Sin recursos disponibles
+								</span>
 							)}
 							{resources.length > 3 && (
-								<span className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]">+{resources.length - 3} más</span>
+								<span className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]">
+									+{resources.length - 3} más
+								</span>
 							)}
 						</div>
 					</div>
@@ -439,21 +488,27 @@ export function PlaceCard({
 						{/* Estadísticas principales en grid */}
 						<div className="grid grid-cols-3 gap-3">
 							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{place._count?.images || 0}</div>
+								<div className="text-2xl font-bold">
+									{place._count?.images || 0}
+								</div>
 								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
 									<ImageIcon className="h-3 w-3" />
 									Imágenes
 								</div>
 							</div>
 							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{formatPopulation(place.population)}</div>
+								<div className="text-2xl font-bold">
+									{formatPopulation(place.population)}
+								</div>
 								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
 									<Users className="h-3 w-3" />
 									Población
 								</div>
 							</div>
 							<div className="flex flex-col items-center">
-								<div className="text-2xl font-bold">{place.government?.substring(0, 4) || '-'}</div>
+								<div className="text-2xl font-bold">
+									{place.government?.substring(0, 4) || "-"}
+								</div>
 								<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
 									<Globe className="h-3 w-3" />
 									Gobierno
@@ -465,7 +520,7 @@ export function PlaceCard({
 						<div className="mt-1 flex items-center justify-between">
 							<div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
 								<div
-									className={cn('h-full rounded-full', climate.barClass)}
+									className={cn("h-full rounded-full", climate.barClass)}
 									style={{ width: `${(importance / 12) * 100}%` }}
 								/>
 							</div>
@@ -523,7 +578,7 @@ export function PlaceCard({
 							onHoverStart={() => setIsHovered(true)}
 							onHoverEnd={() => setIsHovered(false)}
 							onClick={(e: React.MouseEvent) => {
-								if ((e.target as HTMLElement).closest('button')) {
+								if ((e.target as HTMLElement).closest("button")) {
 									e.stopPropagation();
 								}
 							}}
@@ -547,7 +602,7 @@ export function PlaceCard({
 					className="visualization-modal fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
 					onClick={() => setConfigOpen(false)}
 					onKeyDown={(e) => {
-						if (e.key === 'Escape') {
+						if (e.key === "Escape") {
 							setConfigOpen(false);
 						}
 					}}
@@ -557,7 +612,7 @@ export function PlaceCard({
 						className="visualization-config-wrapper max-h-[80vh] max-w-4xl overflow-auto rounded-lg border bg-card p-4 shadow-lg"
 						onClick={(e) => e.stopPropagation()}
 						onKeyDown={(e) => {
-							if (e.key === 'Escape') {
+							if (e.key === "Escape") {
 								e.stopPropagation();
 								setConfigOpen(false);
 							}
