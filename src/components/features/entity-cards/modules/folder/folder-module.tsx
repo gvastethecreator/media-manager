@@ -9,38 +9,30 @@ import { useFolderSystem } from './use-folder-system';
  * @param props - Propiedades del módulo
  * @returns Componente React
  */
-export function FolderModule({
-  initialOptions,
-  onChange,
-  disabled,
-  className,
-}: FolderModuleProps) {
-  // Sistema de carpeta
-  const {
-    options,
-    updateCoreFolderConfig,
-    updateCoreLayerSystem,
-    updateCorePerformance,
-    updateCoreEffects,
-    updateCoreConfig,
-    resetOptions
-  } = useFolderSystem(
-    initialOptions,
-    onChange
-  );
+export function FolderModule({ initialOptions, onChange, disabled, className }: FolderModuleProps) {
+	// Sistema de carpeta
+	const {
+		options,
+		updateCoreFolderConfig,
+		updateCoreLayerSystem,
+		updateCorePerformance,
+		updateCoreEffects,
+		updateCoreConfig,
+		resetOptions,
+	} = useFolderSystem(initialOptions, onChange);
 
-  // Renderizar panel de carpeta
-  return (
-    <FolderPanel
-      options={options}
-      updateCoreFolderConfig={updateCoreFolderConfig}
-      updateCoreLayerSystem={updateCoreLayerSystem}
-      updateCorePerformance={updateCorePerformance}
-      updateCoreEffects={updateCoreEffects}
-      updateCoreConfig={updateCoreConfig}
-      resetOptions={resetOptions}
-      disabled={disabled}
-      className={className}
-    />
-  );
+	// Renderizar panel de carpeta
+	return (
+		<FolderPanel
+			options={options}
+			updateCoreFolderConfig={updateCoreFolderConfig}
+			updateCoreLayerSystem={updateCoreLayerSystem}
+			updateCorePerformance={updateCorePerformance}
+			updateCoreEffects={updateCoreEffects}
+			updateCoreConfig={updateCoreConfig}
+			resetOptions={resetOptions}
+			disabled={disabled}
+			className={className}
+		/>
+	);
 }

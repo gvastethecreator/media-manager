@@ -17,9 +17,9 @@ export { DEFAULT_ADVANCED_EFFECTS } from './types';
 
 // Exportar componentes de sección
 export {
-  ScanEffectsSection,
-  TextureEffectsSection,
-  BorderEffectsSection,
-  HolographicEffectsSection,
-  DistortionEffectsSection
+	ScanEffectsSection,
+	TextureEffectsSection,
+	BorderEffectsSection,
+	HolographicEffectsSection,
+	DistortionEffectsSection,
 } from './components/sections';

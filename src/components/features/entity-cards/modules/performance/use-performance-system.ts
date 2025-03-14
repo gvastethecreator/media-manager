@@ -10,80 +10,80 @@ import { DEFAULT_PERFORMANCE_OPTIONS, type PerformanceOptions } from './types';
  * @returns Un objeto con las opciones actuales y funciones para manipularlas
  */
 export function usePerformanceSystem(
-  initialOptions?: Partial<PerformanceOptions>,
-  onChange?: (options: PerformanceOptions) => void
+	initialOptions?: Partial<PerformanceOptions>,
+	onChange?: (options: PerformanceOptions) => void
 ) {
-  // Estado para las opciones de rendimiento
-  const [options, setOptions] = useState<PerformanceOptions>({
-    ...DEFAULT_PERFORMANCE_OPTIONS,
-    ...initialOptions,
-  });
+	// Estado para las opciones de rendimiento
+	const [options, setOptions] = useState<PerformanceOptions>({
+		...DEFAULT_PERFORMANCE_OPTIONS,
+		...initialOptions,
+	});
 
-  // Efecto para notificar cambios en las opciones
-  useEffect(() => {
-    onChange?.(options);
-  }, [options, onChange]);
+	// Efecto para notificar cambios en las opciones
+	useEffect(() => {
+		onChange?.(options);
+	}, [options, onChange]);
 
-  // Función para actualizar una opción específica
-  const updateOption = useCallback((key: keyof PerformanceOptions, value: unknown) => {
-    setOptions((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, []);
+	// Función para actualizar una opción específica
+	const updateOption = useCallback((key: keyof PerformanceOptions, value: unknown) => {
+		setOptions((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	}, []);
 
-  // Función para resetear todas las opciones a los valores predeterminados
-  const resetOptions = useCallback(() => {
-    setOptions(DEFAULT_PERFORMANCE_OPTIONS);
-  }, []);
+	// Función para resetear todas las opciones a los valores predeterminados
+	const resetOptions = useCallback(() => {
+		setOptions(DEFAULT_PERFORMANCE_OPTIONS);
+	}, []);
 
-  // Función para aplicar un preset de rendimiento
-  const applyPreset = useCallback((presetName: 'quality' | 'balanced' | 'performance') => {
-    let preset: Partial<PerformanceOptions> = {};
+	// Función para aplicar un preset de rendimiento
+	const applyPreset = useCallback((presetName: 'quality' | 'balanced' | 'performance') => {
+		let preset: Partial<PerformanceOptions> = {};
 
-    switch (presetName) {
-      case 'quality':
-        preset = {
-          performanceMode: 'quality',
-          enableHardwareAcceleration: true,
-          imageOptimization: true,
-          lazyLoad: false,
-          prefetch: true,
-          virtualizeList: false,
-          animationMaxFPS: 60,
-        };
-        break;
-      case 'balanced':
-        preset = {
-          ...DEFAULT_PERFORMANCE_OPTIONS,
-          performanceMode: 'balanced',
-        };
-        break;
-      case 'performance':
-        preset = {
-          performanceMode: 'performance',
-          enableCache: true,
-          loadingStrategy: 'lazy',
-          enablePreloading: false,
-          lazyLoad: true,
-          virtualizeList: true,
-          imageOptimization: true,
-          reducedMotion: true,
-          animationMaxFPS: 30,
-        };
-        break;
-    }
+		switch (presetName) {
+			case 'quality':
+				preset = {
+					performanceMode: 'quality',
+					enableHardwareAcceleration: true,
+					imageOptimization: true,
+					lazyLoad: false,
+					prefetch: true,
+					virtualizeList: false,
+					animationMaxFPS: 60,
+				};
+				break;
+			case 'balanced':
+				preset = {
+					...DEFAULT_PERFORMANCE_OPTIONS,
+					performanceMode: 'balanced',
+				};
+				break;
+			case 'performance':
+				preset = {
+					performanceMode: 'performance',
+					enableCache: true,
+					loadingStrategy: 'lazy',
+					enablePreloading: false,
+					lazyLoad: true,
+					virtualizeList: true,
+					imageOptimization: true,
+					reducedMotion: true,
+					animationMaxFPS: 30,
+				};
+				break;
+		}
 
-    setOptions((prev) => ({
-      ...prev,
-      ...preset,
-    }));
-  }, []);
+		setOptions((prev) => ({
+			...prev,
+			...preset,
+		}));
+	}, []);
 
-  return {
-    options,
-    updateOption,
-    resetOptions,
-    applyPreset,
-  };
+	return {
+		options,
+		updateOption,
+		resetOptions,
+		applyPreset,
+	};
 }

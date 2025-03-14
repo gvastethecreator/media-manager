@@ -1,279 +1,392 @@
 'use client';
 
+import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	createPresetFromCardOptions,
+	getVisualPresetsByEntityType,
+} from '@/components/features/entity-cards/server-actions/visual-presets.actions';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { toastService } from '@/lib/services/toast.service';
+import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-import { BookOpen, Grid, Info, Layers, LayoutTemplate, Sparkles } from 'lucide-react';
+import type { VisualPreset } from '@prisma/client';
+import { Info, LayoutTemplate, PlusCircle, Save, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import type { CardOptions, CardPresetOption } from '../../types/card-settings-types';
-import { EntityPreviewAdapter } from '../preview/entity-preview-adapter';
+import { useEffect, useState } from 'react';
+import { EntityCardPreview } from '../preview/entity-card-preview';
 
-// Esquema de colores para el panel de presets
+// 🎨 Esquema de colores para el panel de presets
 const presetsColors = {
 	bg: 'bg-teal-500/5',
 	border: 'border-teal-500/20',
 	text: 'text-teal-600',
 	highlight: 'bg-teal-500/10',
+	hover: 'hover:bg-teal-500/10',
 };
 
-// Presets de ejemplo
-const CARD_PRESETS: CardPresetOption[] = [
-	{
-		id: 'default',
-		name: 'Estándar',
-		description: 'Diseño estándar con una sola imagen',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'single',
-			enableScanlines: false,
-			enableGrainEffect: false,
-			enableLightHalo: false,
-			enableAnimatedBorder: false,
-		},
-	},
-	{
-		id: 'dual',
-		name: 'Dual',
-		description: 'Tarjeta con dos imágenes lado a lado',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'dual',
-			imageGridGap: 8,
-			enableGrainEffect: true,
-			grainOptions: {
-				intensity: 0.15,
-				density: 0.5,
-				noise: 'light',
-				animated: false,
-			},
-		},
-	},
-	{
-		id: 'quad',
-		name: 'Cuadrante',
-		description: 'Tarjeta con cuatro imágenes en cuadrícula',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'quad',
-			imageGridGap: 4,
-			enableScanlines: true,
-			scanlinesOptions: {
-				opacity: 0.1,
-				spacing: 4,
-				direction: 'horizontal',
-				animate: true,
-			},
-		},
-	},
-	{
-		id: 'six',
-		name: 'Galería',
-		description: 'Tarjeta con seis imágenes en formato galería',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'six',
-			imageGridGap: 2,
-			enableAnimatedBorder: true,
-			borderOptions: {
-				width: 2,
-				pattern: 'solid',
-				animationType: 'pulse',
-				animation: {
-					type: 'pulse',
-					duration: 3000,
-					timing: 'linear',
-					iteration: 'infinite',
-				},
-			},
-		},
-	},
-	{
-		id: 'minimal',
-		name: 'Minimalista',
-		description: 'Diseño simplificado sin información adicional',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'single',
-			showTitle: false,
-			showDescription: false,
-			showRarity: false,
-			showType: false,
-			showInfo: false,
-			enableLightHalo: true,
-		},
-	},
-	{
-		id: 'complete',
-		name: 'Completo',
-		description: 'Tarjeta completa con todos los efectos visuales',
-		options: {
-			...DEFAULT_SETTINGS_OPTIONS,
-			imageGridLayout: 'dual',
-			imageGridGap: 6,
-			enableScanlines: true,
-			enableGrainEffect: true,
-			enableLightHalo: true,
-			enableAnimatedBorder: true,
-			scanlinesOptions: {
-				opacity: 0.1,
-				spacing: 5,
-				direction: 'horizontal',
-				animate: true,
-			},
-			grainOptions: {
-				intensity: 0.2,
-				density: 0.7,
-				noise: 'film',
-				animated: true,
-			},
-			borderOptions: {
-				width: 3,
-				pattern: 'gradient',
-				animationType: 'rainbow',
-				animation: {
-					type: 'rainbow',
-					duration: 3000,
-					timing: 'linear',
-					iteration: 'infinite',
-				},
-			},
-		},
-	},
-];
-
+/**
+ * Props para el componente PresetsPanel
+ */
 interface PresetsPanelProps {
 	activePreset: string | null;
-	onPresetSelect: (preset: CardPresetOption) => void;
+	onPresetSelect: (preset: { id: string; name: string; options: CardOptions }) => void;
 	entityType?: string;
+	cardOptions?: CardOptions;
 }
 
-export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album' }: PresetsPanelProps) {
+/**
+ * Panel de selección de presets para configuraciones de tarjetas
+ * @component
+ */
+export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album', cardOptions }: PresetsPanelProps) {
+	const { toast } = useToast();
+	const [presets, setPresets] = useState<VisualPreset[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [isSaving, setIsSaving] = useState(false);
+	const [newPresetName, setNewPresetName] = useState('');
+	const [newPresetDescription, setNewPresetDescription] = useState('');
+	const [showNewPresetDialog, setShowNewPresetDialog] = useState(false);
+
+	// Cargar presets al iniciar
+	useEffect(() => {
+		async function loadPresets() {
+			setLoading(true);
+			setError(null);
+			try {
+				const response = await getVisualPresetsByEntityType(entityType);
+				if (response.success && response.data) {
+					setPresets(response.data as VisualPreset[]);
+				} else {
+					setError(response.message);
+					toast({
+						title: 'Error',
+						description: 'No se pudieron cargar los presets',
+						variant: 'destructive',
+					});
+				}
+			} catch (_err) {
+				setError('Error al cargar presets');
+				toast({
+					title: 'Error',
+					description: 'Ocurrió un problema al cargar los presets',
+					variant: 'destructive',
+				});
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		loadPresets();
+	}, [entityType, toast]);
+
+	// Función para crear un nuevo preset a partir de las opciones actuales
+	const handleCreatePreset = async () => {
+		if (!newPresetName.trim()) {
+			toast({
+				title: 'Error',
+				description: 'El nombre del preset es obligatorio',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		setIsSaving(true);
+		try {
+			// Usar las opciones actuales o las predeterminadas
+			const options = cardOptions || adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS);
+
+			const response = await createPresetFromCardOptions(
+				newPresetName.trim(),
+				options,
+				entityType,
+				newPresetDescription.trim() || undefined
+			);
+
+			if (response.success && response.data) {
+				toast({
+					title: 'Éxito',
+					description: 'Preset creado correctamente',
+				});
+
+				// Actualizar la lista de presets
+				const newPreset = response.data as VisualPreset;
+				setPresets((prevPresets) => [...prevPresets, newPreset]);
+
+				// Limpiar el formulario
+				setNewPresetName('');
+				setNewPresetDescription('');
+				setShowNewPresetDialog(false);
+			} else {
+				toast({
+					title: 'Error',
+					description: response.message || 'No se pudo crear el preset',
+					variant: 'destructive',
+				});
+			}
+		} catch (_err) {
+			toast({
+				title: 'Error',
+				description: 'Ocurrió un problema al crear el preset',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	// Función para seleccionar un preset
+	const handleSelectPreset = async (preset: VisualPreset) => {
+		try {
+			// Convertir el preset a opciones de tarjeta
+			const options = adaptBaseToSettingsOptions({
+				coreConfig: preset.coreConfig ? JSON.parse(preset.coreConfig) : {},
+				designConfig: preset.designConfig ? JSON.parse(preset.designConfig) : {},
+				animationConfig: preset.animationConfig ? JSON.parse(preset.animationConfig) : {},
+				layerConfig: preset.layerConfig ? JSON.parse(preset.layerConfig) : {},
+				effectsConfig: preset.effectsConfig ? JSON.parse(preset.effectsConfig) : {},
+				// Incluir otras configuraciones...
+			});
+
+			// Llamar al callback con las opciones adaptadas
+			onPresetSelect({
+				id: preset.id,
+				name: preset.name,
+				options,
+			});
+		} catch (_err) {
+			toast({
+				title: 'Error',
+				description: 'Ocurrió un problema al aplicar el preset',
+				variant: 'destructive',
+			});
+		}
+	};
+
+	// Mostrar mensaje de carga
+	if (loading) {
+		return (
+			<div className={cn('p-4 rounded-lg border', presetsColors.border, presetsColors.bg)}>
+				<p className="text-center text-sm text-muted-foreground">Cargando presets...</p>
+			</div>
+		);
+	}
+
+	// Mostrar mensaje de error
+	if (error) {
+		return (
+			<div className={cn('p-4 rounded-lg border border-destructive/30 bg-destructive/5')}>
+				<p className="text-center text-sm text-destructive">{error}</p>
+				<Button variant="outline" size="sm" className="mt-2 w-full" onClick={() => window.location.reload()}>
+					Reintentar
+				</Button>
+			</div>
+		);
+	}
+
 	return (
-		<Card className={cn('border border-border/40 shadow-sm', presetsColors.border)}>
-			<CardHeader className="p-2.5 pb-1.5">
-				<CardTitle className="text-xs font-medium flex items-center gap-1.5">
-					<Grid className={cn('h-3.5 w-3.5', presetsColors.text)} />
-					<span>Presets</span>
+		<div className={cn('p-4 rounded-lg border', presetsColors.border, presetsColors.bg)}>
+			<div className="flex items-center justify-between mb-4">
+				<div>
+					<h3 className={cn('text-lg font-medium flex items-center gap-2', presetsColors.text)}>
+						<LayoutTemplate size={18} />
+						Presets Visuales
+					</h3>
+					<p className="text-sm text-muted-foreground">Configuraciones predefinidas para el estilo visual</p>
+				</div>
+				<div className="flex items-center gap-2">
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Info className="h-3 w-3 text-muted-foreground cursor-pointer" />
+								<Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowNewPresetDialog(true)}>
+									<PlusCircle className="h-4 w-4" />
+								</Button>
 							</TooltipTrigger>
-							<TooltipContent side="top" className="text-[10px] max-w-[180px]">
-								Selecciona un diseño predefinido para tu tarjeta con diferentes estilos y configuraciones
+							<TooltipContent side="left">
+								<p className="text-xs">Crear nuevo preset</p>
 							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="p-2.5 pt-1.5">
-				<div className="grid grid-cols-2 gap-2">
-					{CARD_PRESETS.map((preset) => (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									className="text-muted-foreground hover:text-primary"
+									onClick={() =>
+										toast({
+											title: 'Información',
+											description:
+												'Los presets te permiten guardar y reutilizar configuraciones visuales para tus entidades.',
+										})
+									}
+									type="button"
+								>
+									<Info size={16} />
+								</button>
+							</TooltipTrigger>
+							<TooltipContent side="left">
+								<p className="text-xs">Selecciona un preset como punto de partida</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				</div>
+			</div>
+
+			{/* Grid de presets */}
+			{presets.length > 0 ? (
+				<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+					{presets.map((preset) => (
 						<PresetCard
 							key={preset.id}
 							preset={preset}
 							isActive={activePreset === preset.id}
-							onClick={() => onPresetSelect(preset)}
+							onClick={() => handleSelectPreset(preset)}
 							entityType={entityType}
 						/>
 					))}
 				</div>
-			</CardContent>
-		</Card>
+			) : (
+				<div className="text-center py-8">
+					<p className="text-muted-foreground mb-4">No hay presets disponibles para este tipo de entidad</p>
+					<Button variant="outline" onClick={() => setShowNewPresetDialog(true)} className="gap-2">
+						<PlusCircle className="h-4 w-4" />
+						Crear el primer preset
+					</Button>
+				</div>
+			)}
+
+			{/* Diálogo para crear nuevo preset */}
+			<Dialog open={showNewPresetDialog} onOpenChange={setShowNewPresetDialog}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Crear nuevo preset visual</DialogTitle>
+						<DialogDescription>
+							Guarda la configuración actual como un preset para reutilizarla más adelante.
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							<Label htmlFor="preset-name">Nombre del preset</Label>
+							<Input
+								id="preset-name"
+								placeholder="Ej: Estilo Holográfico"
+								value={newPresetName}
+								onChange={(e) => setNewPresetName(e.target.value)}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="preset-description">Descripción (opcional)</Label>
+							<Input
+								id="preset-description"
+								placeholder="Ej: Tarjetas con efecto holográfico para álbumes"
+								value={newPresetDescription}
+								onChange={(e) => setNewPresetDescription(e.target.value)}
+							/>
+						</div>
+
+						{/* Vista previa */}
+						<div className="pt-4">
+							<p className="text-sm font-medium mb-2">Vista previa</p>
+							<div className="h-52 flex items-center justify-center bg-muted/30 rounded-md">
+								<div className="w-40">
+									<EntityCardPreview
+										cardOptions={cardOptions || adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS)}
+										entityType={entityType}
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button variant="outline">Cancelar</Button>
+						</DialogClose>
+						<Button onClick={handleCreatePreset} disabled={isSaving || !newPresetName.trim()} className="gap-2">
+							{isSaving ? (
+								<>Guardando...</>
+							) : (
+								<>
+									<Save className="h-4 w-4" />
+									Guardar preset
+								</>
+							)}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</div>
 	);
 }
 
+/**
+ * Props para el componente PresetCard
+ */
 interface PresetCardProps {
-	preset: CardPresetOption;
+	preset: VisualPreset;
 	isActive: boolean;
 	onClick: () => void;
 	entityType: string;
 }
 
+/**
+ * Tarjeta individual que muestra un preset con vista previa
+ * @component
+ */
 function PresetCard({ preset, isActive, onClick, entityType }: PresetCardProps) {
-	// Escala de la preview
-	const scale = 0.4;
+	// Convertir el preset a opciones de tarjeta para la vista previa
+	const presetOptions = React.useMemo(() => {
+		try {
+			return adaptBaseToSettingsOptions({
+				coreConfig: preset.coreConfig ? JSON.parse(preset.coreConfig) : {},
+				designConfig: preset.designConfig ? JSON.parse(preset.designConfig) : {},
+				// Incluir otras configuraciones según necesidad
+			});
+		} catch (err) {
+			console.error('Error al parsear opciones del preset:', err);
+			return adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS);
+		}
+	}, [preset]);
 
 	return (
-		<motion.div
-			whileHover={{ scale: 1.02 }}
-			whileTap={{ scale: 0.98 }}
-			className={cn(
-				'relative rounded-md border cursor-pointer overflow-hidden group',
-				isActive ? 'border-teal-500 ring-1 ring-teal-500 bg-teal-50/10' : 'border-border'
-			)}
-			onClick={onClick}
-		>
-			<div className="p-1.5 pb-1">
-				<div className="text-[10px] font-medium">{preset.name}</div>
-				<div className="text-[9px] text-muted-foreground line-clamp-1">{preset.description}</div>
-			</div>
-
-			{/* Preview en miniatura */}
-			<div className="flex justify-center items-center p-1.5 pt-0 bg-background/40 rounded-b-md">
-				<div
-					style={{
-						transform: `scale(${scale})`,
-						transformOrigin: 'top center',
-						height: '140px',
-					}}
-				>
-					<EntityPreviewAdapter cardOptions={preset.options} entityType={entityType} showInfo={false} />
+		<motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="h-full">
+			<Card
+				className={cn(
+					'cursor-pointer transition-all overflow-hidden h-full border-2',
+					isActive ? `${presetsColors.border} ${presetsColors.highlight}` : 'border-transparent'
+				)}
+				onClick={onClick}
+			>
+				<div className="h-32 overflow-hidden relative bg-muted/30">
+					<div className="scale-75 origin-top absolute inset-0">
+						<EntityCardPreview entityType={entityType} cardOptions={presetOptions} showBackside={false} />
+					</div>
 				</div>
-			</div>
-
-			{/* Indicadores de características */}
-			<div className="absolute bottom-1 right-1 flex gap-0.5">
-				{preset.options.enableScanlines && (
-					<span className="text-purple-500 bg-purple-100 dark:bg-purple-950/30 p-0.5 rounded-sm">
-						<Layers size={8} />
-					</span>
-				)}
-				{preset.options.enableGrainEffect && (
-					<span className="text-amber-500 bg-amber-100 dark:bg-amber-950/30 p-0.5 rounded-sm">
-						<BookOpen size={8} />
-					</span>
-				)}
-				{(preset.options.enableLightHalo || preset.options.enableAnimatedBorder) && (
-					<span className="text-cyan-500 bg-cyan-100 dark:bg-cyan-950/30 p-0.5 rounded-sm">
-						<Sparkles size={8} />
-					</span>
-				)}
-			</div>
-
-			{/* Indicador activo */}
-			{isActive && (
-				<div className="absolute top-0 left-0 w-full h-full border-2 border-teal-500 rounded-md pointer-events-none" />
-			)}
+				<CardContent className="p-3">
+					<div className="flex items-center gap-2 mb-1">
+						{preset.isDefault && <Sparkles size={14} className="text-yellow-500" />}
+						<h4 className="text-sm font-medium truncate">{preset.name}</h4>
+					</div>
+					{preset.description && <p className="text-xs text-muted-foreground line-clamp-2">{preset.description}</p>}
+				</CardContent>
+			</Card>
 		</motion.div>
 	);
 }
-
-export const presets: Record<string, CardOptions> = {
-	default: {
-		...DEFAULT_SETTINGS_OPTIONS,
-	},
-	minimal: {
-		...DEFAULT_SETTINGS_OPTIONS,
-		// ... existing code ...
-	},
-	futuristic: {
-		...DEFAULT_SETTINGS_OPTIONS,
-		// ... existing code ...
-	},
-	retro: {
-		...DEFAULT_SETTINGS_OPTIONS,
-		// ... existing code ...
-	},
-	elegant: {
-		...DEFAULT_SETTINGS_OPTIONS,
-		// ... existing code ...
-	},
-	playful: {
-		...DEFAULT_SETTINGS_OPTIONS,
-		// ... existing code ...
-	},
-};

@@ -9,36 +9,22 @@ import { VideoPanel } from './video-panel';
  * @param props - Propiedades del módulo
  * @returns Componente React
  */
-export function VideoModule({
-  initialOptions,
-  onChange,
-  disabled,
-  className,
-}: VideoModuleProps) {
-  // Sistema de video
-  const {
-    options,
-    updateOption,
-    updateDesignSystemOption,
-    updateEffectOption,
-    updatePerformanceOption,
-    resetOptions
-  } = useVideoSystem(
-    initialOptions,
-    onChange
-  );
+export function VideoModule({ initialOptions, onChange, disabled, className }: VideoModuleProps) {
+	// Sistema de video
+	const { options, updateOption, updateDesignSystemOption, updateEffectOption, updatePerformanceOption, resetOptions } =
+		useVideoSystem(initialOptions, onChange);
 
-  // Renderizar panel de video
-  return (
-    <VideoPanel
-      videoOptions={options}
-      handleVideoChange={updateOption}
-      handleDesignSystemChange={updateDesignSystemOption}
-      handleEffectsChange={updateEffectOption}
-      handlePerformanceChange={updatePerformanceOption}
-      resetOptions={resetOptions}
-      disabled={disabled}
-      className={className}
-    />
-  );
+	// Renderizar panel de video
+	return (
+		<VideoPanel
+			videoOptions={options}
+			handleVideoChange={updateOption}
+			handleDesignSystemChange={updateDesignSystemOption}
+			handleEffectsChange={updateEffectOption}
+			handlePerformanceChange={updatePerformanceOption}
+			resetOptions={resetOptions}
+			disabled={disabled}
+			className={className}
+		/>
+	);
 }

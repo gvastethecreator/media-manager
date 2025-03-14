@@ -78,7 +78,7 @@ export const DEFAULT_ADVANCED_EFFECTS: AdvancedEffectsOptions = {
 	glitchEffectIntensity: 0.3,
 	glitchEffectFrequency: 0.5,
 	pixelate: false,
-	pixelateSize: 5
+	pixelateSize: 5,
 };
 
 /**
