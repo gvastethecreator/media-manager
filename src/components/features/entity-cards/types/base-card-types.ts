@@ -352,6 +352,15 @@ export interface CardDesignData {
 	type?: string;
 	category?: string;
 
+	// Propiedades de imagen
+	useImageGrid?: boolean;
+	recentImages?: string[];
+	imageGridLayout?: 'single' | 'grid' | 'masonry';
+	imageGridGap?: number;
+	imageGridStyle?: 'standard' | 'compact' | 'minimal';
+	avatar?: string;
+	rating?: number;
+
 	// Datos específicos para Album
 	albumInfo?: {
 		totalImages?: number;

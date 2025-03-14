@@ -10,17 +10,17 @@ import type { Place } from '@/types/entities/places';
 import type { Prompt } from '@/types/entities/prompts';
 import type { Tag } from '@/types/entities/tags';
 import type { WorldItem } from '@/types/entities/world-items';
-import { AlbumCardLayout } from '../modules/layouts/album-card-layout';
-import { CharacterCardLayout } from '../modules/layouts/character-card-layout';
-import { CollectionCardLayout } from '../modules/layouts/collection-card-layout';
-import { ConceptCardLayout } from '../modules/layouts/concept-card-layout';
-import { FolderCardLayout } from '../modules/layouts/folder-card-layout';
-import { NoteCardLayout } from '../modules/layouts/note-card-layout';
-import { PlaceCardLayout } from '../modules/layouts/place-card-layout';
-import { PromptCardLayout } from '../modules/layouts/prompt-card-layout';
-import { TagCardLayout } from '../modules/layouts/tag-card-layout';
-import { WorldItemCardLayout } from '../modules/layouts/world-item-card-layout';
-import type { CardOptions } from '../types/card-settings-types';
+import { AlbumCard } from '../layouts/album-card-layout';
+import { CharacterCard } from '../layouts/character-card-layout';
+import { CollectionCard } from '../layouts/collection-card-layout';
+import { ConceptCard } from '../layouts/concept-card-layout';
+import { FolderCard } from '../layouts/folder-card-layout';
+import { NoteCard } from '../layouts/note-card-layout';
+import { PlaceCard } from '../layouts/place-card-layout';
+import { PromptCard } from '../layouts/prompt-card-layout';
+import { TagCard } from '../layouts/tag-card-layout';
+import { WorldItemCard } from '../layouts/world-item-card-layout';
+import type { CardOptions } from '../types/unified-card-types';
 
 // Tipo de unión para todas las entidades posibles
 export type Entity = Folder | Album | Tag | Collection | Character | Place | WorldItem | Concept | Prompt | Note;
@@ -62,7 +62,7 @@ export function EntityCardAdapter({
 	switch (entityType) {
 		case 'folder':
 			return (
-				<FolderCardLayout
+				<FolderCard
 					folder={entity as Folder}
 					options={options}
 					onClick={onClick}
@@ -78,7 +78,7 @@ export function EntityCardAdapter({
 			);
 		case 'album':
 			return (
-				<AlbumCardLayout
+				<AlbumCard
 					album={entity as Album}
 					options={options}
 					onClick={onClick}
@@ -94,7 +94,7 @@ export function EntityCardAdapter({
 			);
 		case 'tag':
 			return (
-				<TagCardLayout
+				<TagCard
 					tag={entity as Tag}
 					options={options}
 					onClick={onClick}
@@ -110,7 +110,7 @@ export function EntityCardAdapter({
 			);
 		case 'collection':
 			return (
-				<CollectionCardLayout
+				<CollectionCard
 					collection={entity as Collection}
 					options={options}
 					onClick={onClick}
@@ -126,7 +126,7 @@ export function EntityCardAdapter({
 			);
 		case 'character':
 			return (
-				<CharacterCardLayout
+				<CharacterCard
 					character={entity as Character}
 					options={options}
 					onClick={onClick}
@@ -142,7 +142,7 @@ export function EntityCardAdapter({
 			);
 		case 'place':
 			return (
-				<PlaceCardLayout
+				<PlaceCard
 					place={entity as Place}
 					options={options}
 					onClick={onClick}
@@ -158,7 +158,7 @@ export function EntityCardAdapter({
 			);
 		case 'worldItem':
 			return (
-				<WorldItemCardLayout
+				<WorldItemCard
 					worldItem={entity as WorldItem}
 					options={options}
 					onClick={onClick}
@@ -174,7 +174,7 @@ export function EntityCardAdapter({
 			);
 		case 'concept':
 			return (
-				<ConceptCardLayout
+				<ConceptCard
 					concept={entity as Concept}
 					options={options}
 					onClick={onClick}
@@ -190,7 +190,7 @@ export function EntityCardAdapter({
 			);
 		case 'prompt':
 			return (
-				<PromptCardLayout
+				<PromptCard
 					prompt={entity as Prompt}
 					options={options}
 					onClick={onClick}
@@ -206,7 +206,7 @@ export function EntityCardAdapter({
 			);
 		case 'note':
 			return (
-				<NoteCardLayout
+				<NoteCard
 					note={entity as Note}
 					options={options}
 					onClick={onClick}

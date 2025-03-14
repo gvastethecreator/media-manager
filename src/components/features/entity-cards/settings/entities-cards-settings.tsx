@@ -777,11 +777,7 @@ export function EntitiesCardsSection() {
 	};
 
 	// Manejador para cuando se selecciona un preset
-	const handlePresetSelect = async (preset: {
-		id: string;
-		name: string;
-		options: CardOptions;
-	}) => {
+	const handlePresetSelect = async (preset: { id: string; name: string; options: CardOptions }) => {
 		// Actualizar las opciones de tarjeta con las del preset
 		setCardOptions(preset.options);
 		setActivePreset(preset.id);

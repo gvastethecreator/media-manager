@@ -104,69 +104,86 @@ export function AnimatedBorderEffectLayer({
 // Estilos globales necesarios para las animaciones
 const GlobalStyles = () => (
 	<style jsx global>{`
-    @keyframes border-flow {
-      0%, 100% {
-        border-color: ${globalThis.currentColor || '#ffffff'};
-      }
-      50% {
-        border-color: transparent;
-      }
-    }
+		@keyframes border-flow {
+			0%,
+			100% {
+				border-color: ${globalThis.currentColor || '#ffffff'};
+			}
+			50% {
+				border-color: transparent;
+			}
+		}
 
-    @keyframes border-pulse {
-      0%, 100% {
-        box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-      50% {
-        box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-    }
+		@keyframes border-pulse {
+			0%,
+			100% {
+				box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+			50% {
+				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+		}
 
-    @keyframes border-rainbow {
-      0% { border-color: #ff0000; }
-      16.6% { border-color: #ff8000; }
-      33.3% { border-color: #ffff00; }
-      50% { border-color: #00ff00; }
-      66.6% { border-color: #0000ff; }
-      83.3% { border-color: #8000ff; }
-      100% { border-color: #ff0000; }
-    }
+		@keyframes border-rainbow {
+			0% {
+				border-color: #ff0000;
+			}
+			16.6% {
+				border-color: #ff8000;
+			}
+			33.3% {
+				border-color: #ffff00;
+			}
+			50% {
+				border-color: #00ff00;
+			}
+			66.6% {
+				border-color: #0000ff;
+			}
+			83.3% {
+				border-color: #8000ff;
+			}
+			100% {
+				border-color: #ff0000;
+			}
+		}
 
-    @keyframes border-sparkle {
-      0%, 100% {
-        border-color: ${globalThis.currentColor || '#ffffff'};
-        box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-      25% {
-        border-color: transparent;
-        box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-      50% {
-        border-color: ${globalThis.currentSecondaryColor || '#00ffff'};
-        box-shadow: 0 0 10px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-      75% {
-        border-color: transparent;
-        box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
-      }
-    }
+		@keyframes border-sparkle {
+			0%,
+			100% {
+				border-color: ${globalThis.currentColor || '#ffffff'};
+				box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+			25% {
+				border-color: transparent;
+				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+			50% {
+				border-color: ${globalThis.currentSecondaryColor || '#00ffff'};
+				box-shadow: 0 0 10px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+			75% {
+				border-color: transparent;
+				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+			}
+		}
 
-    .animate-border-flow {
-      animation: border-flow 4s infinite ease-in-out;
-    }
+		.animate-border-flow {
+			animation: border-flow 4s infinite ease-in-out;
+		}
 
-    .animate-border-pulse {
-      animation: border-pulse 2s infinite ease-in-out;
-    }
+		.animate-border-pulse {
+			animation: border-pulse 2s infinite ease-in-out;
+		}
 
-    .animate-border-rainbow {
-      animation: border-rainbow 6s infinite linear;
-    }
+		.animate-border-rainbow {
+			animation: border-rainbow 6s infinite linear;
+		}
 
-    .animate-border-sparkle {
-      animation: border-sparkle 3s infinite ease-in-out;
-    }
-  `}</style>
+		.animate-border-sparkle {
+			animation: border-sparkle 3s infinite ease-in-out;
+		}
+	`}</style>
 );
 
 // Exportar el componente con los estilos globales

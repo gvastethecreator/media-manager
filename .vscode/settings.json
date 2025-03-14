@@ -50,7 +50,7 @@
   "editor.fontFamily": "DroidSansMono NFM",
   "editor.fontVariations": false,
   "diffEditor.ignoreTrimWhitespace": false,
-  "workbench.colorTheme": "Dark",
+  "typescript.tsserver.useSyntaxServer": "auto",
   "editor.autoClosingComments": "always",
   "window.autoDetectColorScheme": true,
   "extensions.experimental.deferredStartupFinishedActivation": true,
@@ -79,7 +79,6 @@
   "debug.console.fontSize": 12,
   "scm.inputFontSize": 12,
   "workbench.colorCustomizations": {},
-  "biome.rename": true,
   "workbench.panel.showLabels": false,
   "editor.codeActions.triggerOnFocusChange": true,
   "editor.experimentalEditContextEnabled": true,
@@ -95,26 +94,25 @@
   "workbench.editor.preferHistoryBasedLanguageDetection": true,
   "explorer.incrementalNaming": "smart",
   "problems.showCurrentInStatus": true,
-  "biome_lsp.trace.server": "messages",
   "git.confirmSync": false,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.defaultFormatter": "biomejs.biome",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "emmet.showExpandedAbbreviation": "never",
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[json]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -135,6 +133,33 @@
   "typescript.tsserver.web.projectWideIntellisense.enabled": false,
   "typescript.tsserver.web.typeAcquisition.enabled": false,
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "biome.searchInPath": true,
-  "biome.enabled": true
+
+  // Configuración específica para ESLint
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+
+  // Configuración específica para Prettier
+  "prettier.requireConfig": true,
+  "prettier.printWidth": 120,
+  "prettier.singleQuote": true,
+  "prettier.semi": true,
+  "prettier.arrowParens": "always",
+
+  // Configuración Next.js
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+
+  // Formateo al guardar
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false
 }

@@ -12,12 +12,7 @@ export { CorePanel } from './core-panel';
 export { useCoreSettings } from './hooks/use-core-settings';
 
 // Exportar componentes de secciones
-export {
-	InteractivitySection,
-	PerformanceSection,
-	FeedbackSection,
-	ContentSection,
-} from './components/sections';
+export { InteractivitySection, PerformanceSection, FeedbackSection, ContentSection } from './components/sections';
 
 export * from './core-config';
 export * from './core-layer';

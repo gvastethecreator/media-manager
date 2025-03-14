@@ -1,12 +1,4 @@
-export default function imageLoader({
-	src,
-	width,
-	quality,
-}: {
-	src: string;
-	width: number;
-	quality?: number;
-}) {
+export default function imageLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
 	// Si la URL ya es absoluta o es una data URL, la devolvemos tal cual
 	if (src.startsWith('http') || src.startsWith('data:')) {
 		return src;

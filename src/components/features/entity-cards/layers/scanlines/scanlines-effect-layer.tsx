@@ -92,33 +92,45 @@ export function ScanlinesEffectLayer({
 // Estilos globales necesarios para las animaciones
 const GlobalStyles = () => (
 	<style jsx global>{`
-    @keyframes scanlines-horizontal {
-      0% { background-position: 0 0; }
-      100% { background-position: 0 100%; }
-    }
+		@keyframes scanlines-horizontal {
+			0% {
+				background-position: 0 0;
+			}
+			100% {
+				background-position: 0 100%;
+			}
+		}
 
-    @keyframes scanlines-vertical {
-      0% { background-position: 0 0; }
-      100% { background-position: 100% 0; }
-    }
+		@keyframes scanlines-vertical {
+			0% {
+				background-position: 0 0;
+			}
+			100% {
+				background-position: 100% 0;
+			}
+		}
 
-    @keyframes scanlines-diagonal {
-      0% { background-position: 0 0; }
-      100% { background-position: 100% 100%; }
-    }
+		@keyframes scanlines-diagonal {
+			0% {
+				background-position: 0 0;
+			}
+			100% {
+				background-position: 100% 100%;
+			}
+		}
 
-    .animate-scanlines-horizontal {
-      animation: scanlines-horizontal 30s linear infinite;
-    }
+		.animate-scanlines-horizontal {
+			animation: scanlines-horizontal 30s linear infinite;
+		}
 
-    .animate-scanlines-vertical {
-      animation: scanlines-vertical 30s linear infinite;
-    }
+		.animate-scanlines-vertical {
+			animation: scanlines-vertical 30s linear infinite;
+		}
 
-    .animate-scanlines-diagonal {
-      animation: scanlines-diagonal 30s linear infinite;
-    }
-  `}</style>
+		.animate-scanlines-diagonal {
+			animation: scanlines-diagonal 30s linear infinite;
+		}
+	`}</style>
 );
 
 // Exportar el componente con los estilos globales

@@ -6,7 +6,7 @@ import { EntityCardContent } from '@/components/features/entity-cards/entity-car
 import { EntityCardLayerWrapper } from '@/components/features/entity-cards/entity-card-layer-wrapper';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { formatBytes } from '@/lib/utils/format.utils';
+import { formatFileSize } from '@/lib/utils/format';
 import type { Folder } from '@/types/entities/folders';
 import {
 	ArrowUpRight,
@@ -19,13 +19,18 @@ import {
 	Sparkles,
 	Star,
 } from 'lucide-react';
+import { FileIcon, Layers3 } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { Fragment } from 'react';
+import { EntityCardWrapper } from '../../entity-card-wrapper';
+import { usePreset } from '../../hooks/use-preset';
+import type { CardOptions as CardOptionsType } from '../../types/card-settings-types';
 import type { CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
 
 // Opciones visuales optimizadas para un mejor rendimiento
-const DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
+const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
@@ -124,8 +129,6 @@ interface FolderCardProps {
 	className?: string;
 	showVisualConfig?: boolean;
 	visualOptions?: Partial<CardOptions>;
-	isHovered?: boolean;
-	enableExplode?: boolean;
 }
 
 function getFolderRarity(imageCount: number): keyof typeof FOLDER_RARITY {
@@ -156,188 +159,129 @@ function generateFolderRarityConfig(folder: Folder): RarityConfig {
 	};
 }
 
-export function FolderCard({
+export interface FolderCardLayoutProps {
+	folder: Folder;
+	onClick?: () => void;
+	className?: string;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	options?: Partial<CardOptionsType>;
+}
+
+/**
+ * Layout específico para renderizar carpetas como tarjetas estilo Magic
+ * Este componente utiliza EntityCardWrapper para la integración con el sistema de tarjetas
+ */
+export function FolderCardLayout({
 	folder,
-	onEdit,
-	onDelete,
 	onClick,
 	className,
 	showVisualConfig = false,
-	visualOptions,
-	isHovered = false,
+	onVisualConfigClick,
 	enableExplode = false,
-}: FolderCardProps) {
-	const [internalIsHovered, setInternalIsHovered] = useState(false);
-	const [configOpen, setConfigOpen] = useState(false);
-	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({
-		...DEFAULT_FOLDER_OPTIONS,
-		...visualOptions,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	options = {},
+}: FolderCardLayoutProps) {
+	// Usar el hook para obtener configuración de preset si existe
+	const { cardOptions } = usePreset({
+		entityType: 'folder',
+		entityId: folder.id,
+		presetId: folder.presetId || null,
+		baseOptions: options,
 	});
-	const [folderImages, setFolderImages] = useState<RandomImage[]>([]);
-	const [_loading, setLoading] = useState(false);
 
-	// Usar el valor de isHovered que viene como prop o el estado interno
-	const effectiveIsHovered = isHovered || internalIsHovered;
-
-	// Calcular configuración de rareza
-	const rarityConfig = generateFolderRarityConfig(folder);
-
-	// Cargar imágenes de la carpeta
-	useEffect(() => {
-		const loadImages = async () => {
-			if (!folder.id) {
-				return;
-			}
-
-			try {
-				setLoading(true);
-				const images = await getRandomImagesForEntity({
-					entityId: folder.id,
-					entityType: 'folder',
-					limit: 4,
-				});
-
-				if (images && images.length > 0) {
-					setFolderImages(images);
-				}
-			} catch (error) {
-				console.error('Error loading folder images:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadImages();
-	}, [folder.id]);
-
-	// Formatear fecha de creación/actualización
-	const formattedDate = folder.updatedAt
-		? new Date(folder.updatedAt).toLocaleDateString()
-		: folder.createdAt
-			? new Date(folder.createdAt).toLocaleDateString()
-			: null;
-
-	// Formatear tamaño
-	const formattedSize = folder.size ? formatBytes(folder.size) : null;
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{
+			id: 'background',
+			label: 'Fondo',
+			icon: <Layers3 className="h-4 w-4" />,
+		},
+		{
+			id: 'frame',
+			label: 'Marco',
+			icon: <FolderIcon className="h-4 w-4" />,
+		},
+		{
+			id: 'content',
+			label: 'Contenido',
+			icon: <FileIcon className="h-4 w-4" />,
+		},
+	];
 
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					onClose={() => setConfigOpen(false)}
-					options={cardOptions}
-					onOptionsChange={setCardOptions}
-					entityId={folder.id}
-					entityType="folder"
-				/>
-			)}
+		<EntityCardWrapper
+			className={cn('folder-card', className)}
+			entityType="folder"
+			options={cardOptions}
+			onClick={onClick}
+			showVisualizationConfig={showVisualConfig}
+			onVisualizationConfigClick={onVisualConfigClick}
+			enableExplode={enableExplode}
+			explodeLayers={explodeLayers}
+			isExploded={isExploded}
+			activeLayer={activeLayer}
+			onExplodedChange={onExplodedChange}
+			onActiveLayerChange={onActiveLayerChange}
+		>
+			<div className="folder-card-content">
+				{/* Encabezado de la tarjeta */}
+				<div className="folder-card-header">
+					<div className="folder-card-title-container">
+						{folder.emoji && <span className="folder-card-emoji">{folder.emoji}</span>}
+						<h3 className="folder-card-title">{folder.name}</h3>
+					</div>
 
-			<div className={cn('min-h-[300px] relative', className)}>
-				<EntityCardLayerWrapper
-					title={folder.name || 'Carpeta'}
-					description={folder.description || 'Sin descripción'}
-					onClick={onClick}
-					showVisualConfig={showVisualConfig}
-					visualOptions={{
-						...cardOptions,
-						rarityConfig,
-					}}
-					entityType="folder"
-					entityId={folder.id}
-					onHoverStart={() => setInternalIsHovered(true)}
-					onHoverEnd={() => setInternalIsHovered(false)}
-					onConfigClick={() => setConfigOpen(true)}
-					enableExplode={enableExplode}
-				/>
+					{/* Tipo de tarjeta (al estilo Magic) */}
+					<div className="folder-card-type-line">
+						Carpeta {folder.totalFiles > 0 && `• ${folder.totalFiles} archivos`}
+					</div>
+				</div>
 
-				<EntityCardContent
-					title={folder.name || 'Carpeta'}
-					description={folder.description}
-					isHovered={effectiveIsHovered}
-					isPreview={false}
-					entityId={folder.id}
-					onEdit={onEdit ? () => onEdit(folder) : undefined}
-					onDelete={onDelete ? () => onDelete(folder.id) : undefined}
-					icon={<FolderIcon className="h-5 w-5 text-blue-500" />}
-					badges={[
-						{
-							key: 'type',
-							label: folder.type || 'Carpeta',
-							variant: 'secondary',
-						},
-						folder.isPublic !== undefined && {
-							key: 'visibility',
-							label: folder.isPublic ? 'Pública' : 'Privada',
-							variant: 'outline',
-						},
-					].filter(Boolean)}
-					className="p-4"
-				>
-					{/* Contenido personalizado para carpetas */}
-					<div className="mt-4 space-y-3">
-						{/* Grid de imágenes si hay disponibles */}
-						{folderImages.length > 0 && (
-							<div className="grid grid-cols-2 gap-1 h-32">
-								{folderImages.map((img) => (
-									<div
-										key={img.id}
-										className="bg-cover bg-center rounded-md overflow-hidden border border-border/30"
-										style={{ backgroundImage: `url(${img.url})` }}
-									/>
-								))}
-							</div>
+				{/* Cuerpo de la tarjeta */}
+				<div className="folder-card-body">
+					{folder.description && <p className="folder-card-description">{folder.description}</p>}
+
+					{/* Lista de metadatos */}
+					<div className="folder-card-metadata">
+						{folder.totalSize > 0 && (
+							<Fragment>
+								<span className="folder-card-metadata-label">Tamaño:</span>
+								<span className="folder-card-metadata-value">{formatFileSize(folder.totalSize)}</span>
+							</Fragment>
 						)}
 
-						{/* Estadísticas de la carpeta */}
-						<div className="bg-background/30 backdrop-blur-sm rounded-md p-2 space-y-1">
-							<div className="flex items-center justify-between text-xs">
-								<span className="flex items-center text-muted-foreground">
-									<ImageIcon className="h-3 w-3 mr-1" />
-									Imágenes:
-								</span>
-								<span className="font-medium">{folder.imageCount || 0}</span>
-							</div>
+						{folder.lastIndexed && (
+							<Fragment>
+								<span className="folder-card-metadata-label">Última indexación:</span>
+								<span className="folder-card-metadata-value">{new Date(folder.lastIndexed).toLocaleDateString()}</span>
+							</Fragment>
+						)}
 
-							{formattedSize && (
-								<div className="flex items-center justify-between text-xs">
-									<span className="flex items-center text-muted-foreground">
-										<HardDrive className="h-3 w-3 mr-1" />
-										Tamaño:
-									</span>
-									<span className="font-medium">{formattedSize}</span>
-								</div>
-							)}
-
-							{folder.path && (
-								<div className="flex items-center justify-between text-xs">
-									<span className="flex items-center text-muted-foreground">
-										<ArrowUpRight className="h-3 w-3 mr-1" />
-										Ruta:
-									</span>
-									<span className="font-medium truncate max-w-[120px]" title={folder.path}>
-										{folder.path}
-									</span>
-								</div>
-							)}
-						</div>
+						{folder.path && (
+							<Fragment>
+								<span className="folder-card-metadata-label">Ruta:</span>
+								<span className="folder-card-metadata-value folder-card-path">{folder.path}</span>
+							</Fragment>
+						)}
 					</div>
+				</div>
 
-					{/* Metadatos */}
-					<div className="mt-4 flex justify-between text-xs text-muted-foreground">
-						<span>
-							{formattedDate && (
-								<span className="flex items-center">
-									<Clock className="h-3 w-3 mr-1" />
-									{formattedDate}
-								</span>
-							)}
-						</span>
-						<span className="font-semibold" style={{ color: rarityConfig.color }}>
-							{rarityConfig.label}
-						</span>
+				{/* Pie de la tarjeta (al estilo Magic) */}
+				<div className="folder-card-footer">
+					<div className="folder-card-creator-line">
+						<span>{`Creada: ${new Date(folder.createdAt).toLocaleDateString()}`}</span>
 					</div>
-				</EntityCardContent>
+				</div>
 			</div>
-		</>
+		</EntityCardWrapper>
 	);
 }
