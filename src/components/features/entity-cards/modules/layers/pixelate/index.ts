@@ -1,9 +1,9 @@
 import type { LayerComponent } from '../layer-plugin-system';
 import { deletePixelateConfig, getPixelateConfig, updatePixelateConfig } from './actions';
 import { PixelateEffectLayer } from './pixelate-effect-layer';
-import { PixelateSettings } from './pixelate-settings';
 import { createDefaultPixelateConfig, pixelateConfigSchema } from './pixelate-schema';
 import type { PixelateConfig } from './pixelate-schema';
+import { PixelateSettings } from './pixelate-settings';
 
 /**
  * Definición de la capa Pixelate para el sistema de plugins

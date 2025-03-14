@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
+import '@/styles/globals.css';
+import '@/styles/form-animations.css';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
 import type React from 'react';

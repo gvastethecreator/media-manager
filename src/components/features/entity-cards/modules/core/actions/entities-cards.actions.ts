@@ -585,9 +585,7 @@ export async function getBacksideConfig(entityType: string, entityId?: string): 
 		const isDefaultConfig = !entityId;
 
 		// Opciones para la consulta
-		const whereOptions = isDefaultConfig
-			? { entityType, isDefault: true }
-			: { entityType, entityId };
+		const whereOptions = isDefaultConfig ? { entityType, isDefault: true } : { entityType, entityId };
 
 		// Buscar la configuración existente en la base de datos
 		const config = await prisma.backsideConfig.findFirst({
@@ -672,9 +670,7 @@ export async function saveBacksideConfig(
 		const isDefaultConfig = !entityId;
 
 		// Opciones para la consulta
-		const whereOptions = isDefaultConfig
-			? { entityType, isDefault: true }
-			: { entityType, entityId };
+		const whereOptions = isDefaultConfig ? { entityType, isDefault: true } : { entityType, entityId };
 
 		// Preparar datos para upsert
 		const backsideData = {
@@ -682,9 +678,9 @@ export async function saveBacksideConfig(
 			entityId: entityId || null,
 			isDefault: isDefaultConfig,
 			enabled: options.enabled === undefined ? true : Boolean(options.enabled),
-			layoutType: options.layoutType as string || 'standard',
-			colorMode: options.colorMode as string || 'inherit',
-			customColor: options.customColor as string || null,
+			layoutType: (options.layoutType as string) || 'standard',
+			colorMode: (options.colorMode as string) || 'inherit',
+			customColor: (options.customColor as string) || null,
 			opacity: options.opacity !== undefined ? Number.parseFloat(options.opacity.toString()) : 0.95,
 			blurBackground: options.blurBackground === undefined ? true : Boolean(options.blurBackground),
 			blurAmount: options.blurAmount !== undefined ? Number.parseFloat(options.blurAmount.toString()) : 10,
@@ -693,18 +689,18 @@ export async function saveBacksideConfig(
 			showStats: options.showStats === undefined ? true : Boolean(options.showStats),
 			showMetadata: options.showMetadata === undefined ? true : Boolean(options.showMetadata),
 			showRelations: options.showRelations === undefined ? false : Boolean(options.showRelations),
-			attributesConfig: options.attributesConfig as string || '{}',
+			attributesConfig: (options.attributesConfig as string) || '{}',
 			maxDescriptionLength: Number.parseInt(options.maxDescriptionLength as string) || 300,
-			flipAnimation: options.flipAnimation as string || 'rotate',
+			flipAnimation: (options.flipAnimation as string) || 'rotate',
 			flipDuration: Number.parseInt(options.flipDuration as string) || 600,
 			enableAutoFlip: options.enableAutoFlip === undefined ? false : Boolean(options.enableAutoFlip),
 			autoFlipDelay: Number.parseInt(options.autoFlipDelay as string) || 3000,
-			flipTrigger: options.flipTrigger as string || 'click',
-			customBackgroundImage: options.customBackgroundImage as string || null,
-			customTemplate: options.customTemplate as string || null,
-			headingStyle: options.headingStyle as string || 'default',
-			infoStyle: options.infoStyle as string || 'default',
-			separatorStyle: options.separatorStyle as string || 'line',
+			flipTrigger: (options.flipTrigger as string) || 'click',
+			customBackgroundImage: (options.customBackgroundImage as string) || null,
+			customTemplate: (options.customTemplate as string) || null,
+			headingStyle: (options.headingStyle as string) || 'default',
+			infoStyle: (options.infoStyle as string) || 'default',
+			separatorStyle: (options.separatorStyle as string) || 'line',
 		};
 
 		try {
@@ -713,8 +709,8 @@ export async function saveBacksideConfig(
 				where: {
 					backside_entity: {
 						entityType: whereOptions.entityType,
-						entityId: whereOptions.entityId || null
-					}
+						entityId: whereOptions.entityId || null,
+					},
 				},
 				update: backsideData,
 				create: backsideData,
@@ -772,9 +768,7 @@ export async function getCoreConfig(entityType: string, entityId?: string): Prom
 		const isDefaultConfig = !entityId;
 
 		// Opciones para la consulta
-		const whereOptions = isDefaultConfig
-			? { entityType, isDefault: true }
-			: { entityType, entityId };
+		const whereOptions = isDefaultConfig ? { entityType, isDefault: true } : { entityType, entityId };
 
 		// Buscar la configuración existente en la base de datos
 		const config = await prisma.coreConfig.findFirst({
@@ -867,9 +861,7 @@ export async function saveCoreConfig(
 		const isDefaultConfig = !entityId;
 
 		// Opciones para la consulta
-		const whereOptions = isDefaultConfig
-			? { entityType, isDefault: true }
-			: { entityType, entityId };
+		const whereOptions = isDefaultConfig ? { entityType, isDefault: true } : { entityType, entityId };
 
 		// Procesar layerSystem para almacenarlo como JSON
 		let layerSystemJson: string | undefined;
@@ -879,7 +871,7 @@ export async function saveCoreConfig(
 				try {
 					JSON.parse(options.layerSystem);
 					layerSystemJson = options.layerSystem;
-				} catch (e) {
+				} catch (_e) {
 					layerSystemJson = JSON.stringify({
 						order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
 						layerBlending: 'screen',
@@ -898,25 +890,25 @@ export async function saveCoreConfig(
 			entityId: entityId || null,
 			isDefault: isDefaultConfig,
 			layerSystem: layerSystemJson,
-			interactiveMode: options.interactiveMode as string || 'hover',
+			interactiveMode: (options.interactiveMode as string) || 'hover',
 			hoverDelay: Number.parseInt(options.hoverDelay as string) || 100,
-			touchBehavior: options.touchBehavior as string || 'tap',
-			pointerPrecision: options.pointerPrecision as string || 'medium',
+			touchBehavior: (options.touchBehavior as string) || 'tap',
+			pointerPrecision: (options.pointerPrecision as string) || 'medium',
 			motionReduction: options.motionReduction === undefined ? false : Boolean(options.motionReduction),
-			performanceMode: options.performanceMode as string || 'balanced',
+			performanceMode: (options.performanceMode as string) || 'balanced',
 			enableCache: options.enableCache === undefined ? true : Boolean(options.enableCache),
-			loadingStrategy: options.loadingStrategy as string || 'progressive',
+			loadingStrategy: (options.loadingStrategy as string) || 'progressive',
 			enablePreloading: options.enablePreloading === undefined ? true : Boolean(options.enablePreloading),
 			enableHaptics: options.enableHaptics === undefined ? false : Boolean(options.enableHaptics),
 			hapticIntensity: Number.parseFloat(options.hapticIntensity as string) || 0.5,
 			enableSounds: options.enableSounds === undefined ? false : Boolean(options.enableSounds),
 			soundVolume: Number.parseFloat(options.soundVolume as string) || 0.5,
-			soundTheme: options.soundTheme as string || 'minimal',
-			contentArrangement: options.contentArrangement as string || 'standard',
+			soundTheme: (options.soundTheme as string) || 'minimal',
+			contentArrangement: (options.contentArrangement as string) || 'standard',
 			enableAutoHeight: options.enableAutoHeight === undefined ? true : Boolean(options.enableAutoHeight),
 			maxLines: options.maxLines ? Number.parseInt(options.maxLines as string) : null,
-			textTruncation: options.textTruncation as string || 'ellipsis',
-			mediaFit: options.mediaFit as string || 'cover',
+			textTruncation: (options.textTruncation as string) || 'ellipsis',
+			mediaFit: (options.mediaFit as string) || 'cover',
 		};
 
 		try {
@@ -925,8 +917,8 @@ export async function saveCoreConfig(
 				where: {
 					core_entity: {
 						entityType: whereOptions.entityType,
-						entityId: whereOptions.entityId || null
-					}
+						entityId: whereOptions.entityId || null,
+					},
 				},
 				update: coreData,
 				create: coreData,

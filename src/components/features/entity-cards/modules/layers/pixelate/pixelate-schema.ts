@@ -5,11 +5,11 @@ import { layerBaseConfigSchema } from '../layer-config-base';
  * Tipos de algoritmos de pixelado disponibles
  */
 export const pixelateAlgorithmSchema = z.enum([
-	'simple',    // Algoritmo básico de promediado
-	'weighted',  // Da más peso a los píxeles centrales
-	'adaptive',  // Varía el tamaño de píxel según el contenido
-	'color',     // Incluye reducción de colores
-	'mosaic',    // Usa formas geométricas en lugar de cuadrados
+	'simple', // Algoritmo básico de promediado
+	'weighted', // Da más peso a los píxeles centrales
+	'adaptive', // Varía el tamaño de píxel según el contenido
+	'color', // Incluye reducción de colores
+	'mosaic', // Usa formas geométricas en lugar de cuadrados
 ]);
 
 export type PixelateAlgorithm = z.infer<typeof pixelateAlgorithmSchema>;
@@ -21,7 +21,7 @@ export const pixelateZoneSchema = z.object({
 	enabled: z.boolean().default(false),
 	centerX: z.number().min(0).max(1).default(0.5), // Posición X relativa (0-1)
 	centerY: z.number().min(0).max(1).default(0.5), // Posición Y relativa (0-1)
-	radius: z.number().min(0).max(1).default(0.5),  // Radio relativo al tamaño máximo
+	radius: z.number().min(0).max(1).default(0.5), // Radio relativo al tamaño máximo
 	feather: z.number().min(0).max(1).default(0.2), // Suavizado del borde (0-1)
 });
 
@@ -31,10 +31,10 @@ export type PixelateZone = z.infer<typeof pixelateZoneSchema>;
  * Tipo de forma para el pixelado
  */
 export const pixelShapeSchema = z.enum([
-	'square',   // Cuadrados (forma predeterminada)
-	'circle',   // Círculos
-	'diamond',  // Diamantes
-	'hexagon',  // Hexágonos
+	'square', // Cuadrados (forma predeterminada)
+	'circle', // Círculos
+	'diamond', // Diamantes
+	'hexagon', // Hexágonos
 ]);
 
 export type PixelShape = z.infer<typeof pixelShapeSchema>;
@@ -44,8 +44,8 @@ export type PixelShape = z.infer<typeof pixelShapeSchema>;
  */
 export const pixelateTransitionSchema = z.object({
 	enabled: z.boolean().default(false),
-	onEnter: z.boolean().default(true),    // Aplicar al entrar en hover
-	onExit: z.boolean().default(true),     // Aplicar al salir del hover
+	onEnter: z.boolean().default(true), // Aplicar al entrar en hover
+	onExit: z.boolean().default(true), // Aplicar al salir del hover
 	duration: z.number().min(0).max(5000).default(300), // Duración en ms
 	easing: z.string().default('ease-out'), // Tipo de easing
 });

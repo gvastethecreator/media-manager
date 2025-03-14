@@ -35,7 +35,9 @@ export function PixelateEffectLayer({
 	const captureContent = () => {
 		const container = containerRef.current;
 		const canvas = sourceCanvasRef.current;
-		if (!container || !canvas) return null;
+		if (!container || !canvas) {
+			return null;
+		}
 
 		const { width, height } = container.getBoundingClientRect();
 
@@ -47,7 +49,9 @@ export function PixelateEffectLayer({
 		}
 
 		const context = canvas.getContext('2d', { willReadFrequently: true });
-		if (!context) return null;
+		if (!context) {
+			return null;
+		}
 
 		// Usar html2canvas o una técnica similar para capturar el contenido
 		// Por ahora, simplemente creamos un gradiente para demostración
@@ -83,21 +87,27 @@ export function PixelateEffectLayer({
 	// Función para aplicar el efecto de pixelado
 	const applyPixelateEffect = (sourceImageData: ImageData, pixelSize: number, algorithm: string) => {
 		const outputCanvas = canvasRef.current;
-		if (!outputCanvas) return;
+		if (!outputCanvas) {
+			return;
+		}
 
 		const { width, height } = sourceImageData;
 		outputCanvas.width = width;
 		outputCanvas.height = height;
 
 		const ctx = outputCanvas.getContext('2d', { willReadFrequently: true });
-		if (!ctx) return;
+		if (!ctx) {
+			return;
+		}
 
 		// Crear un canvas temporal para el procesamiento
 		const tempCanvas = document.createElement('canvas');
 		tempCanvas.width = width;
 		tempCanvas.height = height;
 		const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-		if (!tempCtx) return;
+		if (!tempCtx) {
+			return;
+		}
 
 		// Poner la imagen original en el canvas temporal
 		tempCtx.putImageData(sourceImageData, 0, 0);
@@ -157,10 +167,16 @@ export function PixelateEffectLayer({
 	};
 
 	// Algoritmo de pixelado ponderado - da más peso a los píxeles centrales
-	const applyWeightedPixelation = (ctx: CanvasRenderingContext2D, sourceCanvas: HTMLCanvasElement, pixelSize: number) => {
+	const applyWeightedPixelation = (
+		ctx: CanvasRenderingContext2D,
+		sourceCanvas: HTMLCanvasElement,
+		pixelSize: number
+	) => {
 		const { width, height } = sourceCanvas;
 		const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
-		if (!sourceCtx) return;
+		if (!sourceCtx) {
+			return;
+		}
 
 		for (let y = 0; y < height; y += pixelSize) {
 			for (let x = 0; x < width; x += pixelSize) {
@@ -190,7 +206,7 @@ export function PixelateEffectLayer({
 					r: data[centerIndex],
 					g: data[centerIndex + 1],
 					b: data[centerIndex + 2],
-					a: data[centerIndex + 3] / 255
+					a: data[centerIndex + 3] / 255,
 				};
 
 				// Calcular color ponderado (50% centro, 50% promedio)
@@ -199,7 +215,7 @@ export function PixelateEffectLayer({
 					r: Math.round(centerColor.r * 0.7 + avgColor.r * 0.3),
 					g: Math.round(centerColor.g * 0.7 + avgColor.g * 0.3),
 					b: Math.round(centerColor.b * 0.7 + avgColor.b * 0.3),
-					a: (centerColor.a * 0.7 + avgColor.a * 0.3)
+					a: centerColor.a * 0.7 + avgColor.a * 0.3,
 				};
 
 				// Dibujar el bloque pixelado
@@ -210,10 +226,16 @@ export function PixelateEffectLayer({
 	};
 
 	// Algoritmo de pixelado adaptativo - varía el tamaño según el contenido
-	const applyAdaptivePixelation = (ctx: CanvasRenderingContext2D, sourceCanvas: HTMLCanvasElement, pixelSize: number) => {
+	const applyAdaptivePixelation = (
+		ctx: CanvasRenderingContext2D,
+		sourceCanvas: HTMLCanvasElement,
+		pixelSize: number
+	) => {
 		const { width, height } = sourceCanvas;
 		const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
-		if (!sourceCtx) return;
+		if (!sourceCtx) {
+			return;
+		}
 
 		// Analizar la imagen para determinar áreas de detalle
 		const detailMap = createDetailMap(sourceCtx, width, height, pixelSize);
@@ -251,7 +273,9 @@ export function PixelateEffectLayer({
 	) => {
 		const { width, height } = sourceCanvas;
 		const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
-		if (!sourceCtx) return;
+		if (!sourceCtx) {
+			return;
+		}
 
 		// Si no hay reducción de color, usar el algoritmo simple
 		if (!colorLevels || colorLevels >= 256) {
@@ -294,7 +318,9 @@ export function PixelateEffectLayer({
 	) => {
 		const { width, height } = sourceCanvas;
 		const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
-		if (!sourceCtx) return;
+		if (!sourceCtx) {
+			return;
+		}
 
 		for (let y = 0; y < height; y += pixelSize) {
 			for (let x = 0; x < width; x += pixelSize) {
@@ -315,7 +341,7 @@ export function PixelateEffectLayer({
 						ctx.arc(
 							x + blockWidth / 2,
 							y + blockHeight / 2,
-							Math.min(blockWidth, blockHeight) / 2 * 0.9,
+							(Math.min(blockWidth, blockHeight) / 2) * 0.9,
 							0,
 							Math.PI * 2
 						);
@@ -331,9 +357,8 @@ export function PixelateEffectLayer({
 						ctx.fill();
 						break;
 					case 'hexagon':
-						drawHexagon(ctx, x + blockWidth / 2, y + blockHeight / 2, Math.min(blockWidth, blockHeight) / 2 * 0.9);
+						drawHexagon(ctx, x + blockWidth / 2, y + blockHeight / 2, (Math.min(blockWidth, blockHeight) / 2) * 0.9);
 						break;
-					case 'square':
 					default:
 						// Para cuadrados simplemente dibujamos un rectángulo
 						ctx.fillRect(x, y, blockWidth, blockHeight);
@@ -346,7 +371,7 @@ export function PixelateEffectLayer({
 	const drawHexagon = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
 		ctx.beginPath();
 		for (let i = 0; i < 6; i++) {
-			const angle = Math.PI / 3 * i;
+			const angle = (Math.PI / 3) * i;
 			const hx = x + size * Math.cos(angle);
 			const hy = y + size * Math.sin(angle);
 			if (i === 0) {
@@ -372,13 +397,12 @@ export function PixelateEffectLayer({
 		maskCanvas.width = width;
 		maskCanvas.height = height;
 		const maskCtx = maskCanvas.getContext('2d');
-		if (!maskCtx) return;
+		if (!maskCtx) {
+			return;
+		}
 
 		// Crear un gradiente radial para la máscara
-		const gradient = maskCtx.createRadialGradient(
-			x, y, radius - feather,
-			x, y, radius
-		);
+		const gradient = maskCtx.createRadialGradient(x, y, radius - feather, x, y, radius);
 		gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
 		gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
@@ -396,7 +420,11 @@ export function PixelateEffectLayer({
 
 	// Función para calcular el color promedio de un array de píxeles
 	const getAverageColor = (data: Uint8ClampedArray) => {
-		let r = 0, g = 0, b = 0, a = 0, count = 0;
+		let r = 0;
+		let g = 0;
+		let b = 0;
+		let a = 0;
+		let count = 0;
 
 		for (let i = 0; i < data.length; i += 4) {
 			// Solo considerar píxeles con suficiente opacidad
@@ -410,13 +438,15 @@ export function PixelateEffectLayer({
 		}
 
 		// Evitar división por cero
-		if (count === 0) count = 1;
+		if (count === 0) {
+			count = 1;
+		}
 
 		return {
 			r: Math.round(r / count),
 			g: Math.round(g / count),
 			b: Math.round(b / count),
-			a: a / count / 255
+			a: a / count / 255,
 		};
 	};
 
@@ -450,12 +480,12 @@ export function PixelateEffectLayer({
 				const avgColor = getAverageColor(data);
 
 				for (let i = 0; i < data.length; i += 4) {
-					if (data[i + 3] < 10) continue; // Ignorar píxeles transparentes
+					if (data[i + 3] < 10) {
+						continue; // Ignorar píxeles transparentes
+					}
 
 					const pixelVariance =
-						Math.abs(data[i] - avgColor.r) +
-						Math.abs(data[i + 1] - avgColor.g) +
-						Math.abs(data[i + 2] - avgColor.b);
+						Math.abs(data[i] - avgColor.r) + Math.abs(data[i + 1] - avgColor.g) + Math.abs(data[i + 2] - avgColor.b);
 
 					variance += pixelVariance;
 				}
@@ -475,8 +505,8 @@ export function PixelateEffectLayer({
 		x: number,
 		y: number,
 		pixelSize: number,
-		width: number,
-		height: number
+		_width: number,
+		_height: number
 	) => {
 		const mapX = Math.floor(x / pixelSize);
 		const mapY = Math.floor(y / pixelSize);
@@ -498,7 +528,9 @@ export function PixelateEffectLayer({
 		const processEffect = () => {
 			// Capturar el contenido como imagen
 			const imageData = captureContent();
-			if (!imageData) return;
+			if (!imageData) {
+				return;
+			}
 
 			// Aplicar el efecto de pixelado
 			applyPixelateEffect(imageData, config.pixelSize, config.algorithm);
@@ -544,10 +576,7 @@ export function PixelateEffectLayer({
 	return (
 		<div
 			ref={containerRef}
-			className={cn(
-				'absolute inset-0 pointer-events-none z-25',
-				isExploded ? 'exploded-layer' : ''
-			)}
+			className={cn('absolute inset-0 pointer-events-none z-25', isExploded ? 'exploded-layer' : '')}
 			style={{
 				mixBlendMode: config.blendMode as React.CSSProperties['mixBlendMode'],
 				...(isExploded ? getExplodeLayerTransform(4) : {}),
@@ -555,12 +584,7 @@ export function PixelateEffectLayer({
 			data-layer-active={activeLayer === 'pixelate' || null}
 		>
 			{/* Canvas fuente (oculto) para capturar el contenido */}
-			<canvas
-				ref={sourceCanvasRef}
-				className="hidden"
-				width={dimensions.width || 1}
-				height={dimensions.height || 1}
-			/>
+			<canvas ref={sourceCanvasRef} className="hidden" width={dimensions.width || 1} height={dimensions.height || 1} />
 
 			{/* Canvas de salida para mostrar el efecto */}
 			<canvas

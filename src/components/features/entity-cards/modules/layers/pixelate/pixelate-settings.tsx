@@ -1,16 +1,14 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import {
 	Select,
 	SelectContent,
@@ -18,17 +16,19 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { LayerSettingsProps } from '../layer-plugin-system';
-import {
-	pixelateConfigSchema,
-	PixelateConfig,
-	createDefaultPixelateConfig
-} from './pixelate-schema';
 import { updatePixelateConfig } from '@/app/actions/pixelate-config.action';
 import { cn } from '@/lib/utils';
+import type { LayerSettingsProps } from '../layer-plugin-system';
+import {
+	type PixelateConfig,
+	createDefaultPixelateConfig,
+	pixelateConfigSchema
+} from './pixelate-schema';
 
 /**
  * Componente de configuración para la capa de pixelado
@@ -67,7 +67,7 @@ export function PixelateSettings({
 
 	// Guardar la configuración
 	const onSubmit = async (data: PixelateConfig) => {
-		if (!entityId) return;
+		if (!entityId) { return; }
 
 		setIsSaving(true);
 		try {

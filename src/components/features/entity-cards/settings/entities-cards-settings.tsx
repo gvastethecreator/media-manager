@@ -1,7 +1,10 @@
 'use client';
 
 import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
-import { getEntityCardConfig, saveEntityCardConfig } from '@/components/features/entity-cards/server-actions/entities-cards.actions';
+import {
+	getEntityCardConfig,
+	saveEntityCardConfig,
+} from '@/components/features/entity-cards/server-actions/entities-cards.actions';
 import type { TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
 
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
@@ -71,7 +74,7 @@ import {
 	AnimationSettingsPanel,
 	ContentSettingsPanel,
 	ExportSettingsPanel,
-	GeneralSettingsPanel
+	GeneralSettingsPanel,
 } from './panels';
 import { AdvancedEffectsSettings } from './panels/advanced-effects-settings';
 import { BacksideSettings } from './panels/backside-settings';
@@ -922,10 +925,7 @@ export function EntitiesCardsSection() {
 										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									{activePanel === 'design' && (
-										<DesignSettingsPanel
-											cardOptions={cardOptions}
-											onChange={handleCardOptionsChange}
-										/>
+										<DesignSettingsPanel cardOptions={cardOptions} onChange={handleCardOptionsChange} />
 									)}
 									{activePanel === 'visual' && (
 										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
@@ -938,23 +938,13 @@ export function EntitiesCardsSection() {
 										/>
 									)}
 									{activePanel === 'advanced' && (
-										<AdvancedSettingsPanel
-											cardOptions={cardOptions}
-											onChange={handleCardOptionsChange}
-										/>
+										<AdvancedSettingsPanel cardOptions={cardOptions} onChange={handleCardOptionsChange} />
 									)}
 									{activePanel === 'general' && (
-										<GeneralSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+										<GeneralSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									{activePanel === 'content' && (
-										<ContentSettingsPanel
-											cardOptions={cardOptions}
-											onChange={handleCardOptionsChange}
-										/>
+										<ContentSettingsPanel cardOptions={cardOptions} onChange={handleCardOptionsChange} />
 									)}
 									{(activePanel === 'filters' || activePanel === 'patterns' || activePanel === 'shaders') && (
 										<LayersSettingsPanel

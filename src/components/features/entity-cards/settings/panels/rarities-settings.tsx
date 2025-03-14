@@ -1,108 +1,111 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DEFAULT_RARITIES, RaritySelector, RaritySystem } from '../../modules/rarities';
 import type { CardOptions } from '../../types/card-settings-types';
+import { FormGroup, FormLayout, FormRow, FormSection, FormToggle, panelColors } from './shared';
 
 interface RaritiesSettingsProps {
-  options: CardOptions;
-  onChange: (options: CardOptions) => void;
-  entityType?: string;
-  entityId?: string;
-  disabled?: boolean;
+	options: CardOptions;
+	onChange: (options: CardOptions) => void;
+	entityType?: string;
+	entityId?: string;
+	disabled?: boolean;
 }
 
 export function RaritiesSettings({
-  options,
-  onChange,
-  entityType = 'generic',
-  entityId,
-  disabled = false
+	options,
+	onChange,
+	entityType = 'generic',
+	entityId,
+	disabled = false,
 }: RaritiesSettingsProps) {
-  // Manejar cambio en el uso del sistema de rareza
-  const handleUseRaritySystem = (enabled: boolean) => {
-    onChange({
-      ...options,
-      raritySystem: enabled,
-    });
-  };
+	// Manejar cambio en el uso del sistema de rareza
+	const handleUseRaritySystem = (enabled: boolean) => {
+		onChange({
+			...options,
+			raritySystem: enabled,
+		});
+	};
 
-  // Manejar cambio en la distribución de rareza
-  const handleRarityDistributionChange = (distribution: Record<string, number>) => {
-    onChange({
-      ...options,
-      rarityDistribution: distribution,
-    });
-  };
+	// Manejar cambio en la distribución de rareza
+	const handleRarityDistributionChange = (distribution: Record<string, number>) => {
+		onChange({
+			...options,
+			rarityDistribution: distribution,
+		});
+	};
 
-  // Manejar selección de rareza predeterminada
-  const handleDefaultRarityChange = (rarityId: string) => {
-    onChange({
-      ...options,
-      defaultRarity: rarityId,
-    });
-  };
+	// Manejar selección de rareza predeterminada
+	const handleDefaultRarityChange = (rarityId: string) => {
+		onChange({
+			...options,
+			defaultRarity: rarityId,
+		});
+	};
 
-  return (
-    <Card className="border-none">
-      <CardHeader className="px-4 py-2.5">
-        <CardTitle className="text-base">Sistema de Rareza</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 py-0 space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="use-rarity-system" className="text-sm">
-            Habilitar sistema de rareza
-          </Label>
-          <Switch
-            id="use-rarity-system"
-            checked={options.raritySystem}
-            onCheckedChange={handleUseRaritySystem}
-            disabled={disabled}
-          />
-        </div>
+	// Componente para la sección de distribución de rareza
+	const DistributionSection = () => (
+		<FormSection
+			title="Distribución de Rarezas"
+			description="Configura la probabilidad de aparición de cada rareza"
+			colorScheme="design"
+		>
+			<FormGroup>
+				<RaritySystem
+					entityType={entityType}
+					entityId={entityId}
+					initialDistribution={options.rarityDistribution}
+					onChange={handleRarityDistributionChange}
+					enabled={options.raritySystem}
+				/>
+			</FormGroup>
+		</FormSection>
+	);
 
-        {options.raritySystem && (
-          <>
-            <Separator className="my-2" />
+	// Componente para la sección de rareza predeterminada
+	const DefaultRaritySection = () => (
+		<FormSection
+			title="Rareza Predeterminada"
+			description="Establece la rareza que se asignará por defecto"
+			colorScheme="design"
+			withSeparator={false}
+		>
+			<FormGroup>
+				<RaritySelector
+					rarities={DEFAULT_RARITIES}
+					selectedRarityId={options.defaultRarity}
+					onSelectRarity={(rarity) => handleDefaultRarityChange(rarity.id)}
+					showChance={true}
+					showLevel={true}
+					size="sm"
+					displayType="list"
+				/>
+			</FormGroup>
+		</FormSection>
+	);
 
-            <Tabs defaultValue="distribution" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-8">
-                <TabsTrigger value="distribution" className="text-xs">Distribución</TabsTrigger>
-                <TabsTrigger value="default" className="text-xs">Rareza por defecto</TabsTrigger>
-              </TabsList>
+	return (
+		<FormLayout
+			title="Sistema de Rareza"
+			description="Configura el sistema de rareza para tus entidades"
+			colorScheme="design"
+			variant="colored"
+		>
+			<FormToggle
+				id="use-rarity-system"
+				label="Habilitar sistema de rareza"
+				description="Activa el sistema de rareza para clasificar tus entidades"
+				checked={options.raritySystem}
+				onCheckedChange={handleUseRaritySystem}
+				disabled={disabled}
+			/>
 
-              <TabsContent value="distribution" className="mt-2 space-y-4">
-                <RaritySystem
-                  entityType={entityType}
-                  entityId={entityId}
-                  initialDistribution={options.rarityDistribution}
-                  onChange={handleRarityDistributionChange}
-                  enabled={options.raritySystem}
-                />
-              </TabsContent>
-
-              <TabsContent value="default" className="mt-2">
-                <div className="space-y-2">
-                  <Label className="text-xs">Rareza predeterminada</Label>
-                  <RaritySelector
-                    rarities={DEFAULT_RARITIES}
-                    selectedRarityId={options.defaultRarity}
-                    onSelectRarity={(rarity) => handleDefaultRarityChange(rarity.id)}
-                    showChance={true}
-                    showLevel={true}
-                    size="sm"
-                    displayType="list"
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
+			{options.raritySystem && (
+				<div className="mt-4 space-y-6">
+					<DistributionSection />
+					<DefaultRaritySection />
+				</div>
+			)}
+		</FormLayout>
+	);
 }
