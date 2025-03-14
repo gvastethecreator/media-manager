@@ -135,7 +135,7 @@
     "ts-jest": "^29.2.6",
     "ts-jest-mock-import-meta": "^1.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
+    "typescript": "5.9.0-dev.20250314",
     "zod": "^3.24.2"
   },
   "pnpm": {

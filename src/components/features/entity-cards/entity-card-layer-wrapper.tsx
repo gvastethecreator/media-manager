@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { BaseCard } from './entity-card-base';
-import type { BaseLayerConfig, LayerComponent } from './layers/layer-plugin-system';
-import { LayerPluginProvider, useLayerPlugin } from './layers/layer-plugin-system';
-import { RegisterLayers } from './layers/register-layers';
+import { BaseCard } from './entity-card';
+import type { BaseLayerConfig, LayerComponent } from './modules/layers/layer-plugin-system';
+import { LayerPluginProvider, useLayerPlugin } from './modules/layers/layer-plugin-system';
+import { RegisterLayers } from './modules/layers/register-layers';
 import type { CardOptions } from './types/card-settings-types';
 
 // Propiedades para el EntityCardLayerWrapper

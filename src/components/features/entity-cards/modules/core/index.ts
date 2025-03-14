@@ -13,12 +13,16 @@ export { useCoreSettings } from './hooks/use-core-settings';
 
 // Exportar componentes de secciones
 export {
-  InteractivitySection,
-  PerformanceSection,
-  FeedbackSection,
-  ContentSection
+	InteractivitySection,
+	PerformanceSection,
+	FeedbackSection,
+	ContentSection,
 } from './components/sections';
 
 export * from './core-config';
 export * from './core-layer';
 export * from './states';
+export * from './presets';
+export * from './system';
+export * from './content';
+export * from './config';

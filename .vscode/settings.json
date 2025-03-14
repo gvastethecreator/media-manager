@@ -1,6 +1,6 @@
 {
   "editor.suggestSelection": "first",
-  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "vsintellicode.modify.editor.suggestSelection": "enabled",
   "files.exclude": {
     "**/.classpath": true,
     "**/.project": true,
@@ -95,7 +95,7 @@
   "workbench.editor.preferHistoryBasedLanguageDetection": true,
   "explorer.incrementalNaming": "smart",
   "problems.showCurrentInStatus": true,
-  "biome_lsp.trace.server": "verbose",
+  "biome_lsp.trace.server": "messages",
   "git.confirmSync": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.defaultFormatter": "biomejs.biome",
@@ -131,5 +131,10 @@
   "files.autoSaveDelay": 1000,
   "editor.detectIndentation": true,
   "editor.insertSpaces": false,
-  "python.defaultInterpreterPath": "./venv/bin/python"
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "typescript.tsserver.web.projectWideIntellisense.enabled": false,
+  "typescript.tsserver.web.typeAcquisition.enabled": false,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "biome.searchInPath": true,
+  "biome.enabled": true
 }
