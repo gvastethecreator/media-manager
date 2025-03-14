@@ -35,8 +35,11 @@
 - dither gradient https://codepen.io/DavidJAldred/pen/pVbQBJ
 - color http://codepen.io/sturobson/pen/QwLNpgv
 - paleta de colores https://codepen.io/suganuma/pen/eYXYjVq
--
+- https://codepen.io/vincentorback/pen/GRmZMmG risograph en threejs para
 https://tympanus.net/Tutorials/R3FImageReveal/
+- pokemon cards : https://codepen.io/simeydotme/pen/abYWJdX
+- 
+-
 
 Opciones de personalización :
 - cursor customizado

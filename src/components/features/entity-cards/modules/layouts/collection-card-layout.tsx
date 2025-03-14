@@ -140,12 +140,20 @@ const COLLECTION_RARITY = {
 };
 
 // Helper to determine collection rarity based on image count
-function determineCollectionRarity(imageCount: number, totalSize = 0): keyof typeof COLLECTION_RARITY {
+function determineCollectionRarity(imageCount: number, _totalSize = 0): keyof typeof COLLECTION_RARITY {
 	// Determinate based on image count
-	if (imageCount >= 500) return 'legendary';
-	if (imageCount >= 200) return 'mythic';
-	if (imageCount >= 100) return 'rare';
-	if (imageCount >= 20) return 'uncommon';
+	if (imageCount >= 500) {
+		return 'legendary';
+	}
+	if (imageCount >= 200) {
+		return 'mythic';
+	}
+	if (imageCount >= 100) {
+		return 'rare';
+	}
+	if (imageCount >= 20) {
+		return 'uncommon';
+	}
 	return 'common';
 }
 
@@ -195,7 +203,7 @@ export function CollectionCard({
 	rarity: initialRarity,
 	texture: initialTexture,
 }: CollectionCardProps) {
-	const [isHovered, setIsHovered] = useState(false);
+	const [isHovered, _setIsHovered] = useState(false);
 	const [configOpen, setConfigOpen] = useState(false);
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({
 		...DEFAULT_COLLECTION_OPTIONS,
@@ -217,19 +225,29 @@ export function CollectionCard({
 		'recentImages' in data && data.recentImages && data.recentImages.length > 0
 			? data.recentImages[0]
 			: 'featuredImage' in data && data.featuredImage
-			? data.featuredImage
-			: null;
+				? data.featuredImage
+				: null;
 
 	// Helper to determine the collection type icon
 	const determineCollectionType = () => {
 		const name = data.name?.toLowerCase() || '';
 		const desc = 'description' in data ? data.description?.toLowerCase() || '' : '';
 
-		if (name.includes('folder') || desc.includes('folder')) return <FolderIcon />;
-		if (name.includes('tag') || desc.includes('tag') || desc.includes('etiqueta')) return <TagIcon />;
-		if (name.includes('book') || desc.includes('book') || desc.includes('libro')) return <BookOpen />;
-		if (name.includes('world') || desc.includes('world') || desc.includes('mundo')) return <Globe />;
-		if (name.includes('grid') || desc.includes('grid') || desc.includes('cuadrícula')) return <Grid3x3 />;
+		if (name.includes('folder') || desc.includes('folder')) {
+			return <FolderIcon />;
+		}
+		if (name.includes('tag') || desc.includes('tag') || desc.includes('etiqueta')) {
+			return <TagIcon />;
+		}
+		if (name.includes('book') || desc.includes('book') || desc.includes('libro')) {
+			return <BookOpen />;
+		}
+		if (name.includes('world') || desc.includes('world') || desc.includes('mundo')) {
+			return <Globe />;
+		}
+		if (name.includes('grid') || desc.includes('grid') || desc.includes('cuadrícula')) {
+			return <Grid3x3 />;
+		}
 
 		// Default icon
 		return <Layers />;
@@ -239,8 +257,7 @@ export function CollectionCard({
 	const collectionName = data.name || 'Colección sin nombre';
 
 	// Format date if available
-	const formattedDate =
-		'createdAt' in data && data.createdAt ? new Date(data.createdAt).toLocaleDateString() : null;
+	const formattedDate = 'createdAt' in data && data.createdAt ? new Date(data.createdAt).toLocaleDateString() : null;
 
 	return (
 		<>
@@ -264,7 +281,7 @@ export function CollectionCard({
 					visualOptions={{
 						...cardOptions,
 						rarityConfig,
-						textureConfig: initialTexture || undefined
+						textureConfig: initialTexture || undefined,
 					}}
 					entityType="collection"
 					entityId={data.id}
@@ -277,8 +294,8 @@ export function CollectionCard({
 						<div className="flex items-center">
 							<div
 								className={cn(
-									"w-10 h-10 rounded-lg flex items-center justify-center",
-									"bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-sm"
+									'w-10 h-10 rounded-lg flex items-center justify-center',
+									'bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-sm'
 								)}
 								style={{ borderColor: rarityConfig.color }}
 							>
@@ -302,7 +319,10 @@ export function CollectionCard({
 							{Array.from({ length: 5 }).map((_, i) => (
 								<Star
 									key={`star-${i}`}
-									className={cn("h-4 w-4", i < (data.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground")}
+									className={cn(
+										'h-4 w-4',
+										i < (data.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+									)}
 								/>
 							))}
 						</div>
@@ -343,10 +363,7 @@ export function CollectionCard({
 						{'topTags' in data && data.topTags && data.topTags.length > 0 && (
 							<div className="flex flex-wrap gap-1 mb-2">
 								{data.topTags.slice(0, 3).map((tag) => (
-									<span
-										key={tag.name}
-										className="px-1.5 py-0.5 bg-background/40 backdrop-blur-sm text-xs rounded"
-									>
+									<span key={tag.name} className="px-1.5 py-0.5 bg-background/40 backdrop-blur-sm text-xs rounded">
 										#{tag.name} ({tag.count})
 									</span>
 								))}

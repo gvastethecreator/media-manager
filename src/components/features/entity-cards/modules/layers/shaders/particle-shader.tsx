@@ -1,6 +1,6 @@
+import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import type { ExplodeLayerTransformFunction } from '../../types/base-card-types';
-import { cn } from '@/lib/utils';
 
 interface ParticleShaderProps {
 	isExploded: boolean;
@@ -78,7 +78,7 @@ export function ParticleShader({
 
 		// Función de animación
 		const animate = () => {
-			setInternalTime(prev => prev + 0.01);
+			setInternalTime((prev) => prev + 0.01);
 
 			if (ctx && canvas) {
 				renderParticles(ctx, canvas);
@@ -114,7 +114,10 @@ export function ParticleShader({
 	return (
 		<canvas
 			ref={canvasRef}
-			className={cn('absolute inset-0 pointer-events-none z-30 particle-shader-layer', isExploded ? 'exploded-layer' : '')}
+			className={cn(
+				'absolute inset-0 pointer-events-none z-30 particle-shader-layer',
+				isExploded ? 'exploded-layer' : ''
+			)}
 			style={{
 				...(isExploded ? getExplodeLayerTransform(5) : {}),
 				opacity: intensity,
