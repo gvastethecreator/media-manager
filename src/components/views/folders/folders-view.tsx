@@ -21,7 +21,7 @@ import type { ViewProps } from '../types';
 const viewLogger = logger.withContext('FoldersView');
 
 // Configuración visual predeterminada para carpetas
-const DEFAULT_FOLDER_OPTIONS = {
+const _DEFAULT_FOLDER_OPTIONS = {
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlines: false,
@@ -30,13 +30,13 @@ const DEFAULT_FOLDER_OPTIONS = {
 	enableGlowEffect: true,
 	enableGrainEffect: false,
 	designSystem: {
-		preset: "folder" as const,
-		variant: "default",
-		aspectRatio: "7/10",
-		cornerStyle: "rounded",
+		preset: 'folder' as const,
+		variant: 'default',
+		aspectRatio: '7/10',
+		cornerStyle: 'rounded',
 		cornerRadius: 12,
 		elevation: 2,
-		shadowStyle: "soft",
+		shadowStyle: 'soft',
 	},
 };
 
@@ -84,7 +84,9 @@ export function FoldersView(_props: ViewProps) {
 		const loadVisualConfig = async () => {
 			try {
 				const response = await fetch('/api/entities/folders/visual-config');
-				if (!response.ok) throw new Error('Error al cargar la configuración visual');
+				if (!response.ok) {
+					throw new Error('Error al cargar la configuración visual');
+				}
 				const config = await response.json();
 				setVisualConfig(config);
 			} catch (error) {

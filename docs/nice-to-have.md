@@ -14,21 +14,22 @@
 - capas de shaders
 - capas de efectos
 
-- table inspect https://codepen.io/jh3y/pen/zxOXLab
-- svg filter reflejo https://codepen.io/jh3y/pen/OPJyVGb
-- 3d explode https://codepen.io/jh3y/pen/gbORRrg
-- colors https://codepen.io/jh3y/pen/mybQbMW
-- boton brillante https://codepen.io/jh3y/details/GgKdeZJ
-- https://codepen.io/jh3y/pen/KwPegGY comparison
-- pixel transition https://codepen.io/jh3y/pen/ogvZpBY
-- text shine https://codepen.io/jh3y/details/Exqbaem
-- otos negros https://codepen.io/marcobiedermann/pen/ExqKeoW
-- carta reactiva https://codepen.io/simeydotme/details/eYXPLEP
-- teclado https://codepen.io/simeydotme/details/eYXPLEP
-- boton de vidrio https://codepen.io/Petr-Knoll/pen/QwWLZdx
-- push button https://codepen.io/Petr-Knoll/pen/qEBWjRV
-- grid https://codepen.io/Petr-Knoll/pen/PogeGNw
-- balatro card https://codepen.io/twogrey/pen/qEWpoeX
+- table inspect https://codepen.io/jh3y/pen/zxOXLab ( para comaprar datos )
+-
+- svg filter reflejo https://codepen.io/jh3y/pen/OPJyVGb ( para el efecto de reflejo )
+- 3d explode https://codepen.io/jh3y/pen/gbORRrg ( para el efecto de explosion y debug )
+- colors https://codepen.io/jh3y/pen/mybQbMW ( para usar distintas paletas de colores )
+- boton brillante https://codepen.io/jh3y/details/GgKdeZJ ( para el efecto de brillo )
+- https://codepen.io/jh3y/pen/KwPegGY comparison ( para comparar el efecto de brillo con el de reflejo )
+- pixel transition https://codepen.io/jh3y/pen/ogvZpBY ( para el efecto de transicion de pixeles )
+- text shine https://codepen.io/jh3y/details/Exqbaem ( puede servir para el efecto de brillo en ciertos lugares de la ui )
+- otos negros https://codepen.io/marcobiedermann/pen/ExqKeoW ( mejores alternativas al color negro )
+- carta reactiva https://codepen.io/simeydotme/details/eYXPLEP ( ejemplos )
+- teclado https://codepen.io/simeydotme/details/eYXPLEP ( para la seccion de shortcuts )
+- boton de vidrio https://codepen.io/Petr-Knoll/pen/QwWLZdx ( boton lindo )
+- push button https://codepen.io/Petr-Knoll/pen/qEBWjRV ( otra alternativa al boton de vidrio )
+- grid https://codepen.io/Petr-Knoll/pen/PogeGNw ( para la seccion de places )
+- balatro card https://codepen.io/twogrey/pen/qEWpoeX ( para la seccion de characters )
 - naves https://codepen.io/atzedent/pen/NPKeGYJ
 - input dissolution https://codepen.io/jh3y/details/raNYLXQ
 - dither gradient https://codepen.io/DavidJAldred/pen/pVbQBJ

@@ -124,6 +124,53 @@ export interface SystemOptions {
 }
 
 /**
+ * Opciones de backside para las tarjetas
+ */
+export interface BacksideOptions {
+	enabled: boolean;
+	layoutType?: string;
+	colorMode?: string;
+	customColor?: string;
+	opacity?: number;
+	blurBackground?: boolean;
+	blurAmount?: number;
+	animation?: string;
+	animationDuration?: number;
+	showBackContent?: boolean;
+}
+
+/**
+ * Opciones de core para las tarjetas
+ */
+export interface CoreOptions {
+	enabled: boolean;
+	layerSystem?: {
+		order?: string[];
+		layerBlending?: string;
+		layerSpacing?: number;
+	};
+	interactiveMode?: string;
+	hoverDelay?: number;
+	touchBehavior?: string;
+	pointerPrecision?: string;
+	motionReduction?: boolean;
+	performanceMode?: string;
+	enableCache?: boolean;
+	loadingStrategy?: string;
+	enablePreloading?: boolean;
+	enableHaptics?: boolean;
+	hapticIntensity?: number;
+	enableSounds?: boolean;
+	soundVolume?: number;
+	soundTheme?: string;
+	contentArrangement?: string;
+	enableAutoHeight?: boolean;
+	maxLines?: number;
+	textTruncation?: string;
+	mediaFit?: string;
+}
+
+/**
  * Configuración completa de las tarjetas
  */
 export interface CardOptions {
@@ -138,6 +185,8 @@ export interface CardOptions {
 		preset?: string;
 		customProperties?: Record<string, unknown>;
 	};
+	backside?: BacksideOptions;
+	core?: CoreOptions;
 }
 
 /**

@@ -51,9 +51,7 @@ export function ImageSettings({ options, onChange, disabled = false }: ImageSett
 								<div className="flex items-center space-x-2">
 									<Switch
 										checked={options.enable3DEffect}
-										onCheckedChange={(checked) =>
-											updateOptions({ enable3DEffect: checked })
-										}
+										onCheckedChange={(checked) => updateOptions({ enable3DEffect: checked })}
 										disabled={disabled}
 									/>
 									<Label className="text-[10px]">Efecto 3D</Label>
@@ -111,9 +109,7 @@ export function ImageSettings({ options, onChange, disabled = false }: ImageSett
 									<div className="flex items-center space-x-2">
 										<Switch
 											checked={options.enableHolographicEffect}
-											onCheckedChange={(checked) =>
-												updateOptions({ enableHolographicEffect: checked })
-											}
+											onCheckedChange={(checked) => updateOptions({ enableHolographicEffect: checked })}
 											disabled={disabled}
 										/>
 										<Label className="text-[10px]">Holográfico</Label>
@@ -124,9 +120,7 @@ export function ImageSettings({ options, onChange, disabled = false }: ImageSett
 									<div className="flex items-center space-x-2">
 										<Switch
 											checked={options.enableGlowEffect}
-											onCheckedChange={(checked) =>
-												updateOptions({ enableGlowEffect: checked })
-											}
+											onCheckedChange={(checked) => updateOptions({ enableGlowEffect: checked })}
 											disabled={disabled}
 										/>
 										<Label className="text-[10px]">Brillo</Label>
@@ -137,9 +131,7 @@ export function ImageSettings({ options, onChange, disabled = false }: ImageSett
 									<div className="flex items-center space-x-2">
 										<Switch
 											checked={options.enableAnimatedBorder}
-											onCheckedChange={(checked) =>
-												updateOptions({ enableAnimatedBorder: checked })
-											}
+											onCheckedChange={(checked) => updateOptions({ enableAnimatedBorder: checked })}
 											disabled={disabled}
 										/>
 										<Label className="text-[10px]">Borde Animado</Label>
@@ -150,9 +142,7 @@ export function ImageSettings({ options, onChange, disabled = false }: ImageSett
 									<div className="flex items-center space-x-2">
 										<Switch
 											checked={options.enableLightHalo}
-											onCheckedChange={(checked) =>
-												updateOptions({ enableLightHalo: checked })
-											}
+											onCheckedChange={(checked) => updateOptions({ enableLightHalo: checked })}
 											disabled={disabled}
 										/>
 										<Label className="text-[10px]">Halo de Luz</Label>
