@@ -4,3 +4,4 @@ export * from './design-preview';
 export * from './design-presets';
 export * from './use-design-system';
 export * from './types';
+export * from './design-adapter';

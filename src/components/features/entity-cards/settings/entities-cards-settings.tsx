@@ -5,6 +5,10 @@ import {
 	getEntityCardConfig,
 	saveEntityCardConfig,
 } from '@/components/features/entity-cards/server-actions/entities-cards.actions';
+import {
+	applyVisualPresetToEntity,
+	getVisualPresetsByEntityType,
+} from '@/components/features/entity-cards/server-actions/visual-presets.actions';
 import type { TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
 
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
@@ -651,12 +655,21 @@ export function EntitiesCardsSection() {
 					categorySystem: !!serverOptions.categorySystem,
 				});
 				setCardOptions(uiOptions);
+
+				// Si la entidad tiene un preset activo, actualizar el estado
+				const entityData = response.data as Record<string, unknown>;
+				if (entityData.presetId) {
+					setActivePreset(entityData.presetId as string);
+				} else {
+					setActivePreset(null);
+				}
 			} else {
 				// Si no hay opciones guardadas, usar las predeterminadas del tipo de entidad
 				const defaultOptions =
 					entityTypes.find((e) => e.entityType === activeEntityType)?.options ||
 					adaptOptions(DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>);
 				setCardOptions(defaultOptions);
+				setActivePreset(null);
 			}
 		} catch (error) {
 			console.error('Error al cargar opciones de tarjeta:', error);
@@ -721,6 +734,8 @@ export function EntitiesCardsSection() {
 				glowOptions: cardOptions.glowOptions ? JSON.stringify(cardOptions.glowOptions) : undefined,
 				borderOptions: cardOptions.borderOptions ? JSON.stringify(cardOptions.borderOptions) : undefined,
 				grainOptions: cardOptions.grainOptions ? JSON.stringify(cardOptions.grainOptions) : undefined,
+				// Agregar información de preset activo
+				presetId: activePreset,
 			};
 
 			// Guardar la configuración en el servidor
@@ -762,17 +777,23 @@ export function EntitiesCardsSection() {
 	};
 
 	// Manejador para cuando se selecciona un preset
-	const handlePresetSelect = (preset: {
+	const handlePresetSelect = async (preset: {
 		id: string;
 		name: string;
 		options: CardOptions;
 	}) => {
+		// Actualizar las opciones de tarjeta con las del preset
 		setCardOptions(preset.options);
 		setActivePreset(preset.id);
+
+		// Notificar al usuario
 		toast({
 			title: 'Éxito',
 			description: `Preset "${preset.name}" aplicado correctamente`,
 		});
+
+		// Aunque optamos por actualizar inmediatamente las opciones visuales,
+		// la asociación entre entidad y preset se guardará cuando el usuario guarde los cambios
 	};
 
 	// Encontrar la entidad activa
@@ -920,14 +941,13 @@ export function EntitiesCardsSection() {
 											activePreset={activePreset}
 											onPresetSelect={handlePresetSelect}
 											entityType={convertEntityId.toApiFormat(activeEntityType)}
+											cardOptions={cardOptions}
 										/>
 									)}
 									{activePanel === 'systems' && (
 										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === 'design' && (
-										<DesignPanel options={cardOptions} onChange={handleCardOptionsChange} />
-									)}
+									{activePanel === 'design' && <DesignPanel options={cardOptions} onChange={handleCardOptionsChange} />}
 									{activePanel === 'visual' && (
 										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}

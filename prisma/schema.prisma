@@ -71,6 +71,8 @@ model Folder {
   isFavorite     Boolean             @default(false)
   emoji          String?             @default("📁")
   color          String?             @default("#3b82f6")
+  presetId       String?
+  preset         VisualPreset?       @relation(fields: [presetId], references: [id])
 
   @@index([path])
   @@index([lastIndexed])
@@ -82,17 +84,19 @@ model FolderVisualConfig {
   id                      String   @id @default(cuid())
   folder                  Folder?
   enable3DEffect          Boolean  @default(true)
-  designSystem            Json?    @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  designSystem            String?  @default("default_design_system")
   enableHolographicEffect Boolean  @default(true)
   enableGlowEffect        Boolean  @default(true)
   enableAnimatedBorder    Boolean  @default(true)
   enableLightHalo         Boolean  @default(true)
-  layerSystem             Json?    @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
-  effects                 Json?    @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
-  performance             Json?    @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
-  states                  Json?    @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  layerSystem             String?  @default("default_layer_system")
+  effects                 String?  @default("default_effects")
+  performance             String?  @default("default_performance")
+  states                  String?  @default("default_states")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+  presetId                String?
+  preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
 
 // Modelo para las imágenes
@@ -132,6 +136,8 @@ model Image {
   concepts             Concept[]          @relation("ImageToConcept")
   prompts              Prompt[]           @relation("ImageToPrompt")
   notes                Note[]             @relation("ImageToNote")
+  presetId             String?
+  preset               VisualPreset?      @relation(fields: [presetId], references: [id])
 
   @@unique([path, folderId], name: "path_folderId")
   @@index([folderId])
@@ -200,13 +206,15 @@ model Album {
   color       String   @default("#3b82f6")
   shortcut    String?
   sortBy      String   @default("name")
-  filters     String   @default("[]")
+  filters     String   @default("empty_array")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   images      Image[]  @relation("ImageToAlbum")
   category    String?
   rarity      String?  @default("common")
   texture     String?
+  presetId    String?
+  preset      VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -229,6 +237,8 @@ model Tag {
   category      String?
   rarity        String?  @default("common")
   texture       String?
+  presetId      String?
+  preset        VisualPreset? @relation("TagToVisualPreset", fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -244,13 +254,13 @@ model Collection {
   color          String   @default("#3b82f6")
   shortcut       String?
   sortBy         String   @default("name")
-  filters        String   @default("[]")
+  filters        String   @default("empty_array")
   url            String?
   alternativeUrl String?
   sourceImage    String?
   platform       String?
   price          Float?
-  editions       String   @default("[]")
+  editions       String   @default("empty_array")
   featuredImage  String?
   isFavorite     Boolean  @default(false)
   createdAt      DateTime @default(now())
@@ -259,6 +269,8 @@ model Collection {
   category       String?
   rarity         String?  @default("common")
   texture        String?
+  presetId       String?
+  preset         VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -281,14 +293,14 @@ model Character {
   backstory            String      @default("")
   stats                String      @default("{}")
   sortBy               String      @default("name")
-  filters              String      @default("[]")
+  filters              String      @default("empty_array")
   psychologicalProfile String      @default("")
   socialProfile        String      @default("")
-  relationships        String      @default("[]")
-  goals                String      @default("[]")
-  fears                String      @default("[]")
-  beliefs              String      @default("[]")
-  personality          String      @default("[]")
+  relationships        String      @default("empty_array")
+  goals                String      @default("empty_array")
+  fears                String      @default("empty_array")
+  beliefs              String      @default("empty_array")
+  personality          String      @default("empty_array")
   featuredImage        String?
   isFavorite           Boolean     @default(false)
   createdAt            DateTime    @default(now())
@@ -300,6 +312,8 @@ model Character {
   concepts             Concept[]   @relation("CharacterToConcept")
   prompts              Prompt[]    @relation("CharacterToPrompt")
   category             String?
+  presetId             String?
+  preset               VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -320,13 +334,13 @@ model Place {
   climate       String    @default("temperate")
   population    Int       @default(0)
   government    String    @default("unknown")
-  dangers       String    @default("[]")
-  resources     String    @default("[]")
+  dangers       String    @default("empty_array")
+  resources     String    @default("empty_array")
   lore          String    @default("")
   history       String    @default("")
   stats         String    @default("{}")
   sortBy        String    @default("name")
-  filters       String    @default("[]")
+  filters       String    @default("empty_array")
   featuredImage String?
   isFavorite    Boolean   @default(false)
   notes         Note[]    @relation("PlaceToNote")
@@ -336,6 +350,8 @@ model Place {
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToPlace")
   category      String?
+  presetId      String?
+  preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -354,12 +370,12 @@ model WorldItem {
   shortcut      String?
   type          String    @default("misc")
   rarity        String    @default("common")
-  properties    String    @default("[]")
+  properties    String    @default("empty_array")
   requirements  String    @default("{}")
   origin        String    @default("")
   stats         String    @default("{}")
   sortBy        String    @default("name")
-  filters       String    @default("[]")
+  filters       String    @default("empty_array")
   featuredImage String?
   isFavorite    Boolean   @default(false)
   notes         Note[]    @relation("WorldItemToNote")
@@ -369,6 +385,8 @@ model WorldItem {
   updatedAt     DateTime  @updatedAt
   images        Image[]   @relation("ImageToWorldItem")
   category      String?
+  presetId      String?
+  preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([createdAt])
@@ -385,7 +403,7 @@ model Concept {
   description   String?
   content       String      @default("")
   category      String      @default("general")
-  tags          String      @default("[]")
+  tags          String      @default("empty_array")
   featuredImage String?
   isFavorite    Boolean     @default(false)
   createdAt     DateTime    @default(now())
@@ -396,6 +414,8 @@ model Concept {
   notes         Note[]      @relation("ConceptToNote")
   prompts       Prompt[]    @relation("ConceptToPrompt")
   images        Image[]     @relation("ImageToConcept")
+  presetId      String?
+  preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([category])
@@ -412,7 +432,7 @@ model Prompt {
   content       String      @default("")
   category      String      @default("general")
   parameters    String      @default("{}")
-  tags          String      @default("[]")
+  tags          String      @default("empty_array")
   featuredImage String?
   isFavorite    Boolean     @default(false)
   createdAt     DateTime    @default(now())
@@ -423,6 +443,8 @@ model Prompt {
   concepts      Concept[]   @relation("ConceptToPrompt")
   notes         Note[]      @relation("PromptToNote")
   images        Image[]     @relation("ImageToPrompt")
+  presetId      String?
+  preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([name])
   @@index([category])
@@ -437,7 +459,7 @@ model Note {
   category      String      @default("general")
   priority      Int         @default(0)
   status        String      @default("active")
-  tags          String      @default("[]")
+  tags          String      @default("empty_array")
   featuredImage String?
   isFavorite    Boolean     @default(false)
   createdAt     DateTime    @default(now())
@@ -448,6 +470,8 @@ model Note {
   concepts      Concept[]   @relation("ConceptToNote")
   prompts       Prompt[]    @relation("PromptToNote")
   images        Image[]     @relation("ImageToNote")
+  presetId      String?
+  preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@index([title])
   @@index([category])
@@ -462,13 +486,13 @@ model CardConfiguration {
   entityType String @unique
 
   // Sistema de diseño
-  designSystemPreset       String? @default("default") // 'default', 'modern', 'classic', 'minimal', 'elegant'
+  designSystemPreset       String? @default("default")
   designSystemVariant      String?
   designSystemAspectRatio  String?
-  designSystemCornerStyle  String? @default("rounded") // 'rounded', 'sharp', 'beveled'
+  designSystemCornerStyle  String? @default("rounded")
   designSystemCornerRadius Int?    @default(12)
   designSystemElevation    Int?    @default(2)
-  designSystemShadowStyle  String? @default("soft") // 'soft', 'hard', 'layered', 'none'
+  designSystemShadowStyle  String? @default("soft")
 
   // Visual
   showTitle       Boolean? @default(true)
@@ -480,9 +504,9 @@ model CardConfiguration {
   showImageCount  Boolean? @default(true)
 
   // Imagen
-  imageGridLayout      String? @default("single") // 'single', 'dual', 'quad', 'six'
+  imageGridLayout      String? @default("single")
   imageGridGap         Int?    @default(4)
-  imageGridStyle       String? @default("standard") // 'standard', 'masonry', 'carousel'
+  imageGridStyle       String? @default("standard")
   imageGridAspectRatio String? @default("16/9")
 
   // Efectos
@@ -501,10 +525,10 @@ model CardConfiguration {
 
   // Sistema
   enableShadow    Boolean? @default(true)
-  cardShadowSize  String?  @default("md") // 'sm', 'md', 'lg', 'xl', '2xl'
+  cardShadowSize  String?  @default("md")
   cardShadowColor String?  @default("rgba(0,0,0,0.2)")
-  cardRoundedSize String?  @default("md") // 'none', 'sm', 'md', 'lg', 'xl', '2xl', 'full'
-  cardBorderSize  String?  @default("sm") // 'none', 'sm', 'md', 'lg'
+  cardRoundedSize String?  @default("md")
+  cardBorderSize  String?  @default("sm")
 
   // Avanzado
   enableHoverAnimation Boolean? @default(true)
@@ -531,27 +555,19 @@ model CardConfiguration {
   primaryColor   String @default("#3b82f6")
   secondaryColor String @default("#8b5cf6")
 
-  // Opciones avanzadas serializadas como JSON
-  holographicOptions         String? // JSON stringified
-  scanlinesOptions           String? // JSON stringified
-  glowOptions                String? // JSON stringified
-  borderOptions              String? // JSON stringified
-  grainOptions               String? // JSON stringified
-  glitchOptions              String? // JSON stringified {enabled, intensity, frequency, duration}
-  chromaticAberrationOptions String? // JSON stringified {enabled, intensity, offset}
-  pixelateOptions            String? // JSON stringified {enabled, intensity, blockSize}
-
-  // Estados y Animaciones
-  statesConfig String? // JSON stringified {hover, focus, active, selected, scales, rotations, translations}
-
-  // Efectos Visuales
-  visualEffectsConfig String? // JSON stringified {brightness, contrast, saturate, hueRotate, etc}
-
-  // Rendimiento
-  performanceConfig String? // JSON stringified {lazyLoad, imageOptimization, etc}
-
-  // Efectos Avanzados
-  effectsConfig String? // JSON stringified {holographic, scanlines, glow, grain, glitch, chromaticAberration, pixelate}
+  // Opciones avanzadas serializadas como strings
+  holographicOptions         String?
+  scanlinesOptions           String?
+  glowOptions                String?
+  borderOptions              String?
+  grainOptions               String?
+  glitchOptions              String?
+  chromaticAberrationOptions String?
+  pixelateOptions            String?
+  statesConfig              String?
+  visualEffectsConfig       String?
+  performanceConfig         String?
+  effectsConfig             String?
 
   // Campos de auditoría
   createdAt DateTime @default(now())
@@ -563,6 +579,9 @@ model CardConfiguration {
 
   coreConfigId     String? @unique
   coreConfig       CoreConfig? @relation(fields: [coreConfigId], references: [id])
+
+  presetId         String?
+  preset           VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@map("card_configurations")
 }
@@ -671,17 +690,19 @@ model ImageVisualConfig {
   id                      String   @id @default(cuid())
   image                   Image?
   enable3DEffect          Boolean  @default(true)
-  designSystem            Json?    @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  designSystem            String?  @default("default_design_system")
   enableHolographicEffect Boolean  @default(true)
   enableGlowEffect        Boolean  @default(true)
   enableAnimatedBorder    Boolean  @default(true)
   enableLightHalo         Boolean  @default(true)
-  layerSystem             Json?    @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
-  effects                 Json?    @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
-  performance             Json?    @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
-  states                  Json?    @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  layerSystem             String?  @default("default_layer_system")
+  effects                 String?  @default("default_effects")
+  performance             String?  @default("default_performance")
+  states                  String?  @default("default_states")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+  presetId                String?
+  preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
 
 model Video {
@@ -695,23 +716,27 @@ model Video {
   updatedAt      DateTime           @updatedAt
   visualConfigId String?            @unique
   visualConfig   VideoVisualConfig? @relation(fields: [visualConfigId], references: [id])
+  presetId       String?
+  preset         VisualPreset?      @relation(fields: [presetId], references: [id])
 }
 
 model VideoVisualConfig {
   id                      String   @id @default(cuid())
   video                   Video?
   enable3DEffect          Boolean  @default(true)
-  designSystem            Json?    @default("{\"preset\":\"modern\",\"cornerStyle\":\"rounded\",\"elevation\":2}")
+  designSystem            String?  @default("default_design_system")
   enableHolographicEffect Boolean  @default(true)
   enableGlowEffect        Boolean  @default(true)
   enableAnimatedBorder    Boolean  @default(true)
   enableLightHalo         Boolean  @default(true)
-  layerSystem             Json?    @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
-  effects                 Json?    @default("{\"shadow\":{\"enabled\":true,\"color\":\"rgba(0,0,0,0.2)\",\"blur\":10,\"spread\":5},\"reflection\":{\"enabled\":true,\"opacity\":0.1,\"blur\":2},\"parallax\":{\"enabled\":true,\"intensity\":0.1,\"perspective\":1000}}")
-  performance             Json?    @default("{\"enableHardwareAcceleration\":true,\"useRAF\":true,\"batchUpdates\":true,\"throttleMs\":16}")
-  states                  Json?    @default("{\"hover\":{\"scale\":1.02,\"rotate\":true,\"lift\":true,\"duration\":200,\"easing\":\"cubic-bezier(0.4,0,0.2,1)\"},\"active\":{\"scale\":0.98,\"brightness\":0.95},\"disabled\":{\"opacity\":0.5,\"grayscale\":true}}")
+  layerSystem             String?  @default("default_layer_system")
+  effects                 String?  @default("default_effects")
+  performance             String?  @default("default_performance")
+  states                  String?  @default("default_states")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+  presetId                String?
+  preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
 
 // Modelo para la configuración de scanlines
@@ -750,7 +775,7 @@ model LayerHolographicConfig {
   enabled            Boolean  @default(true)
   intensity          Float    @default(0.5)
   pattern            String   @default("rainbow")
-  colors             String   @default("[]") // JSON array de colores
+  colors             String   @default("default_colors") // Simplificado
   speed              Float?   @default(1)
   angle              Float?   @default(45)
   scale              Float?   @default(1)
@@ -811,8 +836,8 @@ model LayerBorderConfig {
   animationSpeed Float?   @default(1)
   glowAmount     Float?   @default(0)
   opacity        Float?   @default(1)
-  gradient       String?  @default("[]") // JSON array de colores para gradiente
-  dashPattern    String?  @default("[]") // JSON array para patrón de líneas
+  gradient       String?  @default("default_gradient") // Simplificado
+  dashPattern    String?  @default("default_dash_pattern") // Simplificado
   cornerStyle    String   @default("round")
   borderImage    String? // URL de imagen para borde
   createdAt      DateTime @default(now())
@@ -953,14 +978,14 @@ model LayerFilterConfig {
   opacity        Float   @default(1)
   intensity      Float   @default(1)
 
-  // Configuración de Glow como JSON
-  glow Json? @default("{\"enabled\":false,\"color\":\"rgba(0, 0, 255, 0.3)\",\"radius\":10,\"intensity\":0.5}")
+  // Configuración de Glow como String simplificado
+  glow String? @default("default_glow_config")
 
-  // Configuración de Shadow como JSON
-  shadow Json? @default("{\"enabled\":true,\"color\":\"rgba(0, 0, 0, 0.3)\",\"blur\":5,\"offsetX\":0,\"offsetY\":5,\"inset\":false}")
+  // Configuración de Shadow como String simplificado
+  shadow String? @default("default_shadow_config")
 
-  // Configuración de Distortion como JSON
-  distortion Json? @default("{\"enabled\":false,\"type\":\"wave\",\"amount\":5,\"speed\":1,\"animated\":false}")
+  // Configuración de Distortion como String simplificado
+  distortion String? @default("default_distortion_config")
 
   layerIndex Int      @default(5)
   createdAt  DateTime @default(now())
@@ -990,7 +1015,7 @@ model LayerPixelateConfig {
   // Configuración de área específica
   applyToSpot  Boolean @default(false)
   spotRadius   Int     @default(50)
-  spotPosition Json    @default("{\"x\": 50, \"y\": 50}")
+  spotPosition String  @default("center") // Simplificado para evitar problemas con JSON
 
   // Configuración de color
   colorReduction Boolean @default(false)
@@ -1095,7 +1120,7 @@ model CoreConfig {
   isDefault         Boolean  @default(false)
 
   // Sistema de capas
-  layerSystem       Json?    @default("{\"order\":[\"background\",\"content\",\"effects\",\"holographic\",\"border\",\"filter\"],\"layerBlending\":\"screen\",\"layerSpacing\":2}")
+  layerSystem       String?  @default("default_layer_system") // Simplificando para evitar problemas con JSON
 
   // Interactividad
   interactiveMode   String   @default("hover") // hover, click, none
@@ -1132,4 +1157,80 @@ model CoreConfig {
 
   @@unique([entityType, entityId], name: "core_entity")
   @@index([entityType, isDefault])
+}
+
+// Modelo para presets visuales
+model VisualPreset {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  category    String   @default("general")
+  isDefault   Boolean  @default(false)
+  isPublic    Boolean  @default(true)
+  version     String   @default("1.0.0")
+  author      String?
+  tags        String   @default("empty_array")
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Configuraciones base serializadas como string - simplificadas para evitar problemas
+  coreConfig        String?  @default("default_core_config")
+  designConfig      String?  @default("default_design_config")
+  animationConfig   String?  @default("default_animation_config")
+  layerConfig       String?  @default("default_layer_config")
+  backsideConfig    String?  @default("default_backside_config")
+  effectsConfig     String?  @default("default_effects_config")
+  performanceConfig String?  @default("default_performance_config")
+
+  // Configuraciones comunes para todos los layouts - simplificadas
+  colorConfig       String?  @default("default_color_config")
+  imageGridConfig   String?  @default("default_image_grid_config")
+  layoutConfig      String?  @default("default_layout_config")
+  explodeConfig     String?  @default("default_explode_config")
+  previewConfig     String?  @default("default_preview_config")
+  rarityConfig      String?  @default("default_rarity_config")
+  validationConfig  String?  @default("default_validation_config")
+
+  // Estilo Magic Card común - simplificado
+  magicCardBase     String?  @default("default_magic_card_config")
+
+  // Configuraciones específicas por tipo de entidad - simplificadas
+  folderConfig      String?  @default("default_folder_config")
+  imageConfig       String?  @default("default_image_config")
+  videoConfig       String?  @default("default_video_config")
+  albumConfig       String?  @default("default_album_config")
+  tagConfig         String?  @default("default_tag_config")
+  collectionConfig  String?  @default("default_collection_config")
+  characterConfig   String?  @default("default_character_config")
+  placeConfig       String?  @default("default_place_config")
+  worldItemConfig   String?  @default("default_world_item_config")
+  conceptConfig     String?  @default("default_concept_config")
+  promptConfig      String?  @default("default_prompt_config")
+  noteConfig        String?  @default("default_note_config")
+
+  // Relaciones con entidades
+  folders     Folder[]
+  images      Image[]
+  videos      Video[]
+  characters  Character[]
+  places      Place[]
+  worldItems  WorldItem[]
+  concepts    Concept[]
+  prompts     Prompt[]
+  notes       Note[]
+  albums      Album[]
+  tagItems    Tag[]       @relation("TagToVisualPreset")
+  collections Collection[]
+
+  // Relaciones con configuraciones visuales
+  folderVisualConfigs  FolderVisualConfig[]
+  imageVisualConfigs   ImageVisualConfig[]
+  videoVisualConfigs   VideoVisualConfig[]
+  cardConfigurations   CardConfiguration[]
+
+  @@index([name])
+  @@index([category])
+  @@index([isDefault])
+  @@index([isPublic])
 }
