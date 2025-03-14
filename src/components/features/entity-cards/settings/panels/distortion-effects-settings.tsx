@@ -1,241 +1,465 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
-import { Wand2 } from 'lucide-react';
-import { Sliders } from 'lucide-react';
+import { Scale, Scissors, Slice, Wand2, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { CardOptions } from '../../types/card-settings-types';
+import {
+	FormGroup,
+	FormLayout,
+	FormRow,
+	FormSection,
+	FormSlider,
+	FormToggle,
+	panelColors
+} from './shared';
 
-interface DistortionEffectsSettingsProps {
-	cardOptions: CardOptions;
-	onCardOptionsChange: (options: CardOptions) => void;
+// Tipo para las opciones de efectos de distorsión
+interface DistortionEffectsOptions {
+	enabled: boolean;
+	visibleOnHover: boolean;
+	intensity: number;
+	glitchEffect: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		frequency: number;
+		duration: number;
+	};
+	chromaticAberration: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		offset: number;
+	};
+	pixelate: {
+		enabled: boolean;
+		visibleOnHover: boolean;
+		intensity: number;
+		blockSize: number;
+	};
 }
 
-export function DistortionEffectsSettings({ cardOptions, onCardOptionsChange }: DistortionEffectsSettingsProps) {
-	// Inicializar efectos si no existen
-	const effects = cardOptions.effects || {
-		enabled: false,
-		visibleOnHover: false,
-		intensity: 1,
-		glitchEffect: {
+// Sección de Configuración General
+const GeneralSection = ({
+	effects,
+	onEffectsChange,
+	disabled
+}: {
+	effects: DistortionEffectsOptions;
+	onEffectsChange: (key: string, value: unknown) => void;
+	disabled?: boolean;
+}) => {
+	return (
+		<FormSection
+			title="Configuración General"
+			description="Ajustes generales de los efectos de distorsión"
+			colorScheme="visual"
+		>
+			<FormGroup>
+				<FormRow>
+					<FormToggle
+						id="enable-effects"
+						label="Habilitar Efectos"
+						description="Activa o desactiva todos los efectos de distorsión"
+						checked={effects.enabled}
+						onCheckedChange={(checked) => onEffectsChange('enabled', checked)}
+						disabled={disabled}
+						icon={<Wand2 className="h-3.5 w-3.5 text-muted-foreground" />}
+					/>
+					<FormToggle
+						id="visible-on-hover"
+						label="Visible en Hover"
+						description="Muestra los efectos solo al pasar el cursor"
+						checked={effects.visibleOnHover}
+						onCheckedChange={(checked) => onEffectsChange('visibleOnHover', checked)}
+						disabled={disabled || !effects.enabled}
+					/>
+				</FormRow>
+				<FormRow cols={1}>
+					<FormSlider
+						id="intensity"
+						label="Intensidad Global"
+						description="Intensidad general de los efectos de distorsión"
+						value={effects.intensity}
+						onValueChange={(value) => onEffectsChange('intensity', value)}
+						min={0}
+						max={2}
+						step={0.01}
+						disabled={disabled || !effects.enabled}
+					/>
+				</FormRow>
+			</FormGroup>
+		</FormSection>
+	);
+};
+
+// Sección de Efecto Glitch
+const GlitchSection = ({
+	effects,
+	onDistortionChange,
+	disabled
+}: {
+	effects: DistortionEffectsOptions;
+	onDistortionChange: (effect: 'glitch' | 'chromatic' | 'pixelate', property: string, value: unknown) => void;
+	disabled?: boolean;
+}) => {
+	const isDisabled = disabled || !effects.enabled || !effects.glitchEffect.enabled;
+
+	return (
+		<FormSection
+			title="Efecto Glitch"
+			description="Efecto de falla digital para simular corrupciones"
+			colorScheme="visual"
+			icon={<Zap className="h-3.5 w-3.5 text-muted-foreground" />}
+		>
+			<FormGroup>
+				<FormRow>
+					<FormToggle
+						id="enable-glitch"
+						label="Habilitar Glitch"
+						description="Activa el efecto de falla digital"
+						checked={effects.glitchEffect.enabled}
+						onCheckedChange={(checked) => onDistortionChange('glitch', 'enabled', checked)}
+						disabled={disabled || !effects.enabled}
+					/>
+					<FormToggle
+						id="glitch-visible-on-hover"
+						label="Visible en Hover"
+						description="Muestra el efecto solo al pasar el cursor"
+						checked={effects.glitchEffect.visibleOnHover}
+						onCheckedChange={(checked) => onDistortionChange('glitch', 'visibleOnHover', checked)}
+						disabled={isDisabled}
+					/>
+				</FormRow>
+				<FormRow>
+					<FormSlider
+						id="glitch-intensity"
+						label="Intensidad"
+						description="Fuerza del efecto glitch"
+						value={effects.glitchEffect.intensity}
+						onValueChange={(value) => onDistortionChange('glitch', 'intensity', value)}
+						min={0}
+						max={1}
+						step={0.01}
+						disabled={isDisabled}
+					/>
+				</FormRow>
+				<FormRow>
+					<FormSlider
+						id="glitch-frequency"
+						label="Frecuencia"
+						description="Frecuencia de aparición del efecto"
+						value={effects.glitchEffect.frequency}
+						onValueChange={(value) => onDistortionChange('glitch', 'frequency', value)}
+						min={0}
+						max={1}
+						step={0.01}
+						disabled={isDisabled}
+					/>
+					<FormSlider
+						id="glitch-duration"
+						label="Duración"
+						description="Duración del efecto en segundos"
+						value={effects.glitchEffect.duration}
+						onValueChange={(value) => onDistortionChange('glitch', 'duration', value)}
+						min={0.05}
+						max={1}
+						step={0.01}
+						unit="s"
+						disabled={isDisabled}
+					/>
+				</FormRow>
+			</FormGroup>
+		</FormSection>
+	);
+};
+
+// Sección de Aberración Cromática
+const ChromaticAberrationSection = ({
+	effects,
+	onDistortionChange,
+	disabled
+}: {
+	effects: DistortionEffectsOptions;
+	onDistortionChange: (effect: 'glitch' | 'chromatic' | 'pixelate', property: string, value: unknown) => void;
+	disabled?: boolean;
+}) => {
+	const isDisabled = disabled || !effects.enabled || !effects.chromaticAberration.enabled;
+
+	return (
+		<FormSection
+			title="Aberración Cromática"
+			description="Efecto de separación de colores en los bordes"
+			colorScheme="visual"
+			icon={<Scissors className="h-3.5 w-3.5 text-muted-foreground" />}
+		>
+			<FormGroup>
+				<FormRow>
+					<FormToggle
+						id="enable-chromatic"
+						label="Habilitar Aberración"
+						description="Activa el efecto de aberración cromática"
+						checked={effects.chromaticAberration.enabled}
+						onCheckedChange={(checked) => onDistortionChange('chromatic', 'enabled', checked)}
+						disabled={disabled || !effects.enabled}
+					/>
+					<FormToggle
+						id="chromatic-visible-on-hover"
+						label="Visible en Hover"
+						description="Muestra el efecto solo al pasar el cursor"
+						checked={effects.chromaticAberration.visibleOnHover}
+						onCheckedChange={(checked) => onDistortionChange('chromatic', 'visibleOnHover', checked)}
+						disabled={isDisabled}
+					/>
+				</FormRow>
+				<FormRow>
+					<FormSlider
+						id="chromatic-intensity"
+						label="Intensidad"
+						description="Fuerza del efecto de aberración"
+						value={effects.chromaticAberration.intensity}
+						onValueChange={(value) => onDistortionChange('chromatic', 'intensity', value)}
+						min={0}
+						max={1}
+						step={0.01}
+						disabled={isDisabled}
+					/>
+					<FormSlider
+						id="chromatic-offset"
+						label="Desplazamiento"
+						description="Distancia de separación entre colores"
+						value={effects.chromaticAberration.offset}
+						onValueChange={(value) => onDistortionChange('chromatic', 'offset', value)}
+						min={0}
+						max={0.5}
+						step={0.01}
+						unit="px"
+						disabled={isDisabled}
+					/>
+				</FormRow>
+			</FormGroup>
+		</FormSection>
+	);
+};
+
+// Sección de Pixelado
+const PixelateSection = ({
+	effects,
+	onDistortionChange,
+	disabled
+}: {
+	effects: DistortionEffectsOptions;
+	onDistortionChange: (effect: 'glitch' | 'chromatic' | 'pixelate', property: string, value: unknown) => void;
+	disabled?: boolean;
+}) => {
+	const isDisabled = disabled || !effects.enabled || !effects.pixelate.enabled;
+
+	return (
+		<FormSection
+			title="Pixelado"
+			description="Efecto de reducción de resolución por bloques"
+			colorScheme="visual"
+			icon={<Scale className="h-3.5 w-3.5 text-muted-foreground" />}
+		>
+			<FormGroup>
+				<FormRow>
+					<FormToggle
+						id="enable-pixelate"
+						label="Habilitar Pixelado"
+						description="Activa el efecto de pixelado"
+						checked={effects.pixelate.enabled}
+						onCheckedChange={(checked) => onDistortionChange('pixelate', 'enabled', checked)}
+						disabled={disabled || !effects.enabled}
+					/>
+					<FormToggle
+						id="pixelate-visible-on-hover"
+						label="Visible en Hover"
+						description="Muestra el efecto solo al pasar el cursor"
+						checked={effects.pixelate.visibleOnHover}
+						onCheckedChange={(checked) => onDistortionChange('pixelate', 'visibleOnHover', checked)}
+						disabled={isDisabled}
+					/>
+				</FormRow>
+				<FormRow>
+					<FormSlider
+						id="pixelate-intensity"
+						label="Intensidad"
+						description="Fuerza del efecto de pixelado"
+						value={effects.pixelate.intensity}
+						onValueChange={(value) => onDistortionChange('pixelate', 'intensity', value)}
+						min={0}
+						max={1}
+						step={0.01}
+						disabled={isDisabled}
+					/>
+					<FormSlider
+						id="pixelate-blockSize"
+						label="Tamaño de Bloque"
+						description="Tamaño de los píxeles"
+						value={effects.pixelate.blockSize}
+						onValueChange={(value) => onDistortionChange('pixelate', 'blockSize', value)}
+						min={1}
+						max={32}
+						step={1}
+						unit="px"
+						disabled={isDisabled}
+					/>
+				</FormRow>
+			</FormGroup>
+		</FormSection>
+	);
+};
+
+export function DistortionEffectsSettings({
+	cardOptions,
+	onCardOptionsChange,
+	disabled = false
+}: {
+	cardOptions: CardOptions;
+	onCardOptionsChange: (options: CardOptions) => void;
+	disabled?: boolean;
+}) {
+	// Inicializar efectos de distorsión desde las opciones de la tarjeta
+	const [effects, setEffects] = useState<DistortionEffectsOptions>(
+		cardOptions.effects || {
 			enabled: false,
 			visibleOnHover: false,
-			intensity: 0.5,
-			frequency: 0.1,
-			duration: 0.2,
-		},
-		chromaticAberration: {
-			enabled: false,
-			visibleOnHover: false,
-			intensity: 0.5,
-			offset: 0.1,
-		},
-		pixelate: {
-			enabled: false,
-			visibleOnHover: false,
-			intensity: 0.5,
-			blockSize: 4,
-		},
+			intensity: 1,
+			glitchEffect: {
+				enabled: false,
+				visibleOnHover: false,
+				intensity: 0.5,
+				frequency: 0.1,
+				duration: 0.2,
+			},
+			chromaticAberration: {
+				enabled: false,
+				visibleOnHover: false,
+				intensity: 0.5,
+				offset: 0.1,
+			},
+			pixelate: {
+				enabled: false,
+				visibleOnHover: false,
+				intensity: 0.5,
+				blockSize: 4,
+			},
+		}
+	);
+
+	// Actualizar efectos cuando cambien las opciones externas
+	useEffect(() => {
+		if (cardOptions.effects) {
+			setEffects(cardOptions.effects);
+		}
+	}, [cardOptions.effects]);
+
+	// Manejador para cambios en propiedades de nivel superior
+	const handleEffectsChange = (key: string, value: unknown) => {
+		const updatedEffects = {
+			...effects,
+			[key]: value,
+		};
+
+		setEffects(updatedEffects);
+
+		// Propagar cambios al componente padre
+		onCardOptionsChange({
+			...cardOptions,
+			effects: updatedEffects,
+		});
 	};
 
-	// Manejadores para efectos de distorsión
+	// Manejador para cambios en efectos de distorsión específicos
 	const handleDistortionChange = (
 		effect: 'glitch' | 'chromatic' | 'pixelate',
 		property: string,
-		value: number | boolean
+		value: unknown
 	) => {
-		const newOptions = { ...cardOptions };
-		newOptions.effects = { ...effects };
+		let updatedEffect: DistortionEffectsOptions;
 
 		switch (effect) {
 			case 'glitch':
-				newOptions.effects.glitchEffect = {
-					...effects.glitchEffect,
-					[property]: value,
+				updatedEffect = {
+					...effects,
+					glitchEffect: {
+						...effects.glitchEffect,
+						[property]: value,
+					},
 				};
 				break;
 			case 'chromatic':
-				newOptions.effects.chromaticAberration = {
-					...effects.chromaticAberration,
-					[property]: value,
+				updatedEffect = {
+					...effects,
+					chromaticAberration: {
+						...effects.chromaticAberration,
+						[property]: value,
+					},
 				};
 				break;
 			case 'pixelate':
-				newOptions.effects.pixelate = {
-					...effects.pixelate,
-					[property]: value,
+				updatedEffect = {
+					...effects,
+					pixelate: {
+						...effects.pixelate,
+						[property]: value,
+					},
 				};
 				break;
+			default:
+				return;
 		}
 
-		onCardOptionsChange(newOptions);
+		setEffects(updatedEffect);
+
+		// Propagar cambios al componente padre
+		onCardOptionsChange({
+			...cardOptions,
+			effects: updatedEffect,
+		});
 	};
 
 	return (
-		<Card className="border-none shadow-none">
-			<CardHeader className="p-0">
-				<CardTitle className="text-sm font-medium flex items-center gap-2">
-					<Sliders className="h-4 w-4 text-purple-500" />
-					Efectos de Distorsión
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="p-0 mt-4">
-				<ScrollArea className="h-[400px] pr-4">
-					<div className="space-y-6">
-						{/* Efecto Glitch */}
-						<div className="space-y-4">
-							<div className="flex items-center justify-between">
-								<Label className="text-sm font-medium">Efecto Glitch</Label>
-								<Switch
-									checked={effects.glitchEffect?.enabled || false}
-									onCheckedChange={(checked) => handleDistortionChange('glitch', 'enabled', checked)}
-								/>
-							</div>
-							{effects.glitchEffect?.enabled && (
-								<div className="space-y-4 pl-4">
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
-										<Slider
-											value={[effects.glitchEffect.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'intensity', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Frecuencia</Label>
-										<Slider
-											value={[effects.glitchEffect.frequency || 0.1]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'frequency', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Duración</Label>
-										<Slider
-											value={[effects.glitchEffect.duration || 0.2]}
-											onValueChange={([value]) => handleDistortionChange('glitch', 'duration', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
-										<Switch
-											checked={effects.glitchEffect.visibleOnHover || false}
-											onCheckedChange={(checked) => handleDistortionChange('glitch', 'visibleOnHover', checked)}
-										/>
-									</div>
-								</div>
-							)}
-						</div>
-
-						<Separator />
-
-						{/* Aberración Cromática */}
-						<div className="space-y-4">
-							<div className="flex items-center justify-between">
-								<Label className="text-sm font-medium">Aberración Cromática</Label>
-								<Switch
-									checked={effects.chromaticAberration?.enabled || false}
-									onCheckedChange={(checked) => handleDistortionChange('chromatic', 'enabled', checked)}
-								/>
-							</div>
-							{effects.chromaticAberration?.enabled && (
-								<div className="space-y-4 pl-4">
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
-										<Slider
-											value={[effects.chromaticAberration.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('chromatic', 'intensity', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Offset</Label>
-										<Slider
-											value={[effects.chromaticAberration.offset || 0.1]}
-											onValueChange={([value]) => handleDistortionChange('chromatic', 'offset', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
-										<Switch
-											checked={effects.chromaticAberration.visibleOnHover || false}
-											onCheckedChange={(checked) => handleDistortionChange('chromatic', 'visibleOnHover', checked)}
-										/>
-									</div>
-								</div>
-							)}
-						</div>
-
-						<Separator />
-
-						{/* Pixelación */}
-						<div className="space-y-4">
-							<div className="flex items-center justify-between">
-								<Label className="text-sm font-medium">Pixelación</Label>
-								<Switch
-									checked={effects.pixelate?.enabled || false}
-									onCheckedChange={(checked) => handleDistortionChange('pixelate', 'enabled', checked)}
-								/>
-							</div>
-							{effects.pixelate?.enabled && (
-								<div className="space-y-4 pl-4">
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Intensidad</Label>
-										<Slider
-											value={[effects.pixelate.intensity || 0.5]}
-											onValueChange={([value]) => handleDistortionChange('pixelate', 'intensity', value)}
-											min={0}
-											max={1}
-											step={0.1}
-											className="w-full"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label className="text-xs text-muted-foreground">Tamaño de bloque</Label>
-										<Slider
-											value={[effects.pixelate.blockSize || 4]}
-											onValueChange={([value]) => handleDistortionChange('pixelate', 'blockSize', value)}
-											min={1}
-											max={20}
-											step={1}
-											className="w-full"
-										/>
-									</div>
-									<div className="flex items-center justify-between">
-										<Label className="text-xs text-muted-foreground">Visible al pasar el mouse</Label>
-										<Switch
-											checked={effects.pixelate.visibleOnHover || false}
-											onCheckedChange={(checked) => handleDistortionChange('pixelate', 'visibleOnHover', checked)}
-										/>
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-				</ScrollArea>
-			</CardContent>
-		</Card>
+		<FormLayout
+			title="Efectos de Distorsión"
+			description="Configura efectos de distorsión como glitch, aberración cromática y pixelado"
+			colorScheme="visual"
+			variant="colored"
+			maxHeight={600}
+			tabs={[
+				{ value: 'general', label: 'General', icon: <Wand2 className="h-3.5 w-3.5" /> },
+				{ value: 'glitch', label: 'Glitch', icon: <Zap className="h-3.5 w-3.5" /> },
+				{ value: 'chromatic', label: 'Aberración', icon: <Scissors className="h-3.5 w-3.5" /> },
+				{ value: 'pixelate', label: 'Pixelado', icon: <Scale className="h-3.5 w-3.5" /> },
+			]}
+		>
+			{(tab) => (
+				tab === 'general' ? (
+					<GeneralSection
+						effects={effects}
+						onEffectsChange={handleEffectsChange}
+						disabled={disabled}
+					/>
+				) : tab === 'glitch' ? (
+					<GlitchSection
+						effects={effects}
+						onDistortionChange={handleDistortionChange}
+						disabled={disabled}
+					/>
+				) : tab === 'chromatic' ? (
+					<ChromaticAberrationSection
+						effects={effects}
+						onDistortionChange={handleDistortionChange}
+						disabled={disabled}
+					/>
+				) : (
+					<PixelateSection
+						effects={effects}
+						onDistortionChange={handleDistortionChange}
+						disabled={disabled}
+					/>
+				)
+			)}
+		</FormLayout>
 	);
 }
