@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Scale } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { FormLayout, FormSection, panelColors } from '../../../settings/panels/shared';
+import { FormLayout, FormSection, panelColors } from '../../../../settings/panels/shared';
 import type { CardOptions } from '../../../types/card-settings-types';
 import {
 	BorderEffectsSection,

@@ -1,0 +1,119 @@
+/* Estilos base para bordes de tarjetas */
+.card-border-base {
+	@apply border-[1px] border-solid;
+}
+
+/* Variantes de bordes */
+.card-border-thin {
+	@apply border-[1px];
+}
+
+.card-border-medium {
+	@apply border-[2px];
+}
+
+.card-border-thick {
+	@apply border-[4px];
+}
+
+/* Colores de borde predefinidos */
+.card-border-default {
+	@apply border-[hsl(var(--border))];
+}
+
+.card-border-primary {
+	@apply border-[hsl(var(--primary))];
+}
+
+.card-border-secondary {
+	@apply border-[hsl(var(--secondary))];
+}
+
+.card-border-accent {
+	@apply border-[hsl(var(--accent))];
+}
+
+/* Efectos de borde */
+.card-border-glow {
+	@apply shadow-[0_0_10px_hsla(var(--border)/0.5)];
+}
+
+/* Definimos nuestras propias animaciones */
+@keyframes border-pulse {
+
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.5;
+	}
+}
+
+.card-border-pulse {
+	animation: border-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes border-shine {
+	0% {
+		background-position: 200% 0;
+	}
+
+	100% {
+		background-position: 0 0;
+	}
+}
+
+.card-border-shine {
+	animation: border-shine 2s linear infinite;
+	background: linear-gradient(90deg,
+			rgba(255, 255, 255, 0) 0%,
+			rgba(255, 255, 255, 0.5) 50%,
+			rgba(255, 255, 255, 0) 100%);
+	background-size: 200% 100%;
+}
+
+/* Estilos de borde para estados */
+.card-border-hover {
+	@apply hover:border-[hsl(var(--primary))];
+}
+
+.card-border-active {
+	@apply active:border-[hsl(var(--accent))];
+}
+
+.card-border-disabled {
+	@apply opacity-50;
+}
+
+/* Estilos de borde para rareza - usando valores hexadecimales directamente */
+.card-border-common {
+	@apply border-[#9ca3af];
+	/* Equivalente a gray-400 */
+}
+
+.card-border-uncommon {
+	@apply border-[#22c55e];
+	/* Equivalente a green-500 */
+}
+
+.card-border-rare {
+	@apply border-[#3b82f6];
+	/* Equivalente a blue-500 */
+}
+
+.card-border-epic {
+	@apply border-[#a855f7];
+	/* Equivalente a purple-500 */
+}
+
+.card-border-legendary {
+	@apply border-[#eab308];
+	/* Equivalente a yellow-500 */
+}
+
+.card-border-mythic {
+	@apply border-[#ef4444];
+	/* Equivalente a red-500 */
+}

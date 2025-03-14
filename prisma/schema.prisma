@@ -2,7 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider              = "prisma-client-js"
+  previewFeatures       = ["fullTextSearch", "fullTextIndex"]
+  output                = "../node_modules/.prisma/client"
+  binaryTargets         = ["native"]
+  generateBrowserClient = false
 }
 
 datasource db {
@@ -81,20 +85,20 @@ model Folder {
 
 // Modelo para la configuración visual de carpetas
 model FolderVisualConfig {
-  id                      String   @id @default(cuid())
+  id                      String        @id @default(cuid())
   folder                  Folder?
-  enable3DEffect          Boolean  @default(true)
-  designSystem            String?  @default("default_design_system")
-  enableHolographicEffect Boolean  @default(true)
-  enableGlowEffect        Boolean  @default(true)
-  enableAnimatedBorder    Boolean  @default(true)
-  enableLightHalo         Boolean  @default(true)
-  layerSystem             String?  @default("default_layer_system")
-  effects                 String?  @default("default_effects")
-  performance             String?  @default("default_performance")
-  states                  String?  @default("default_states")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  enable3DEffect          Boolean       @default(true)
+  designSystem            String?       @default("default_design_system")
+  enableHolographicEffect Boolean       @default(true)
+  enableGlowEffect        Boolean       @default(true)
+  enableAnimatedBorder    Boolean       @default(true)
+  enableLightHalo         Boolean       @default(true)
+  layerSystem             String?       @default("default_layer_system")
+  effects                 String?       @default("default_effects")
+  performance             String?       @default("default_performance")
+  states                  String?       @default("default_states")
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
   presetId                String?
   preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
@@ -199,19 +203,19 @@ model UploadedImage {
 // Modelo para los álbumes
 
 model Album {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  emoji       String   @default("📸")
+  id          String        @id @default(cuid())
+  name        String        @unique
+  emoji       String        @default("📸")
   description String?
-  color       String   @default("#3b82f6")
+  color       String        @default("#3b82f6")
   shortcut    String?
-  sortBy      String   @default("name")
-  filters     String   @default("empty_array")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      Image[]  @relation("ImageToAlbum")
+  sortBy      String        @default("name")
+  filters     String        @default("empty_array")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  images      Image[]       @relation("ImageToAlbum")
   category    String?
-  rarity      String?  @default("common")
+  rarity      String?       @default("common")
   texture     String?
   presetId    String?
   preset      VisualPreset? @relation(fields: [presetId], references: [id])
@@ -223,19 +227,19 @@ model Album {
 }
 
 model Tag {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  emoji         String   @default("🏷️")
-  color         String   @default("#3b82f6")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  emoji         String        @default("🏷️")
+  color         String        @default("#3b82f6")
   description   String?
   shortcut      String?
   featuredImage String?
-  isFavorite    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  images        Image[]  @relation("ImageToTag")
+  isFavorite    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  images        Image[]       @relation("ImageToTag")
   category      String?
-  rarity        String?  @default("common")
+  rarity        String?       @default("common")
   texture       String?
   presetId      String?
   preset        VisualPreset? @relation("TagToVisualPreset", fields: [presetId], references: [id])
@@ -247,27 +251,27 @@ model Tag {
 }
 
 model Collection {
-  id             String   @id @default(cuid())
-  name           String   @unique
-  emoji          String   @default("🌟")
+  id             String        @id @default(cuid())
+  name           String        @unique
+  emoji          String        @default("🌟")
   description    String?
-  color          String   @default("#3b82f6")
+  color          String        @default("#3b82f6")
   shortcut       String?
-  sortBy         String   @default("name")
-  filters        String   @default("empty_array")
+  sortBy         String        @default("name")
+  filters        String        @default("empty_array")
   url            String?
   alternativeUrl String?
   sourceImage    String?
   platform       String?
   price          Float?
-  editions       String   @default("empty_array")
+  editions       String        @default("empty_array")
   featuredImage  String?
-  isFavorite     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  images         Image[]  @relation("ImageToCollection")
+  isFavorite     Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  images         Image[]       @relation("ImageToCollection")
   category       String?
-  rarity         String?  @default("common")
+  rarity         String?       @default("common")
   texture        String?
   presetId       String?
   preset         VisualPreset? @relation(fields: [presetId], references: [id])
@@ -280,37 +284,37 @@ model Collection {
 
 // Modelo para los personajes
 model Character {
-  id                   String      @id @default(cuid())
-  name                 String      @unique
-  emoji                String      @default("👤")
-  color                String      @default("#3b82f6")
+  id                   String        @id @default(cuid())
+  name                 String        @unique
+  emoji                String        @default("👤")
+  color                String        @default("#3b82f6")
   description          String?
   shortcut             String?
-  level                Int         @default(1)
-  class                String      @default("unknown")
-  race                 String      @default("unknown")
-  alignment            String      @default("neutral")
-  backstory            String      @default("")
-  stats                String      @default("{}")
-  sortBy               String      @default("name")
-  filters              String      @default("empty_array")
-  psychologicalProfile String      @default("")
-  socialProfile        String      @default("")
-  relationships        String      @default("empty_array")
-  goals                String      @default("empty_array")
-  fears                String      @default("empty_array")
-  beliefs              String      @default("empty_array")
-  personality          String      @default("empty_array")
+  level                Int           @default(1)
+  class                String        @default("unknown")
+  race                 String        @default("unknown")
+  alignment            String        @default("neutral")
+  backstory            String        @default("")
+  stats                String        @default("{}")
+  sortBy               String        @default("name")
+  filters              String        @default("empty_array")
+  psychologicalProfile String        @default("")
+  socialProfile        String        @default("")
+  relationships        String        @default("empty_array")
+  goals                String        @default("empty_array")
+  fears                String        @default("empty_array")
+  beliefs              String        @default("empty_array")
+  personality          String        @default("empty_array")
   featuredImage        String?
-  isFavorite           Boolean     @default(false)
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
-  images               Image[]     @relation("ImageToCharacter")
-  relatedCharacters    Character[] @relation("CharacterRelations")
-  relatedTo            Character[] @relation("CharacterRelations")
-  notes                Note[]      @relation("CharacterToNote")
-  concepts             Concept[]   @relation("CharacterToConcept")
-  prompts              Prompt[]    @relation("CharacterToPrompt")
+  isFavorite           Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  images               Image[]       @relation("ImageToCharacter")
+  relatedCharacters    Character[]   @relation("CharacterRelations")
+  relatedTo            Character[]   @relation("CharacterRelations")
+  notes                Note[]        @relation("CharacterToNote")
+  concepts             Concept[]     @relation("CharacterToConcept")
+  prompts              Prompt[]      @relation("CharacterToPrompt")
   category             String?
   presetId             String?
   preset               VisualPreset? @relation(fields: [presetId], references: [id])
@@ -323,32 +327,32 @@ model Character {
 
 // Modelo para los lugares
 model Place {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  emoji         String    @default("📍")
-  color         String    @default("#3b82f6")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  emoji         String        @default("📍")
+  color         String        @default("#3b82f6")
   description   String?
   shortcut      String?
-  region        String    @default("unknown")
-  type          String    @default("unknown")
-  climate       String    @default("temperate")
-  population    Int       @default(0)
-  government    String    @default("unknown")
-  dangers       String    @default("empty_array")
-  resources     String    @default("empty_array")
-  lore          String    @default("")
-  history       String    @default("")
-  stats         String    @default("{}")
-  sortBy        String    @default("name")
-  filters       String    @default("empty_array")
+  region        String        @default("unknown")
+  type          String        @default("unknown")
+  climate       String        @default("temperate")
+  population    Int           @default(0)
+  government    String        @default("unknown")
+  dangers       String        @default("empty_array")
+  resources     String        @default("empty_array")
+  lore          String        @default("")
+  history       String        @default("")
+  stats         String        @default("{}")
+  sortBy        String        @default("name")
+  filters       String        @default("empty_array")
   featuredImage String?
-  isFavorite    Boolean   @default(false)
-  notes         Note[]    @relation("PlaceToNote")
-  concepts      Concept[] @relation("PlaceToConcept")
-  prompts       Prompt[]  @relation("PlaceToPrompt")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  images        Image[]   @relation("ImageToPlace")
+  isFavorite    Boolean       @default(false)
+  notes         Note[]        @relation("PlaceToNote")
+  concepts      Concept[]     @relation("PlaceToConcept")
+  prompts       Prompt[]      @relation("PlaceToPrompt")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  images        Image[]       @relation("ImageToPlace")
   category      String?
   presetId      String?
   preset        VisualPreset? @relation(fields: [presetId], references: [id])
@@ -362,28 +366,28 @@ model Place {
 
 // Modelo para los objetos del mundo
 model WorldItem {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  emoji         String    @default("🎯")
-  color         String    @default("#3b82f6")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  emoji         String        @default("🎯")
+  color         String        @default("#3b82f6")
   description   String?
   shortcut      String?
-  type          String    @default("misc")
-  rarity        String    @default("common")
-  properties    String    @default("empty_array")
-  requirements  String    @default("{}")
-  origin        String    @default("")
-  stats         String    @default("{}")
-  sortBy        String    @default("name")
-  filters       String    @default("empty_array")
+  type          String        @default("misc")
+  rarity        String        @default("common")
+  properties    String        @default("empty_array")
+  requirements  String        @default("{}")
+  origin        String        @default("")
+  stats         String        @default("{}")
+  sortBy        String        @default("name")
+  filters       String        @default("empty_array")
   featuredImage String?
-  isFavorite    Boolean   @default(false)
-  notes         Note[]    @relation("WorldItemToNote")
-  concepts      Concept[] @relation("WorldItemToConcept")
-  prompts       Prompt[]  @relation("WorldItemToPrompt")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  images        Image[]   @relation("ImageToWorldItem")
+  isFavorite    Boolean       @default(false)
+  notes         Note[]        @relation("WorldItemToNote")
+  concepts      Concept[]     @relation("WorldItemToConcept")
+  prompts       Prompt[]      @relation("WorldItemToPrompt")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  images        Image[]       @relation("ImageToWorldItem")
   category      String?
   presetId      String?
   preset        VisualPreset? @relation(fields: [presetId], references: [id])
@@ -396,24 +400,24 @@ model WorldItem {
 
 // Modelo para los conceptos
 model Concept {
-  id            String      @id @default(cuid())
-  name          String      @unique
-  emoji         String      @default("💡")
-  color         String      @default("#3b82f6")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  emoji         String        @default("💡")
+  color         String        @default("#3b82f6")
   description   String?
-  content       String      @default("")
-  category      String      @default("general")
-  tags          String      @default("empty_array")
+  content       String        @default("")
+  category      String        @default("general")
+  tags          String        @default("empty_array")
   featuredImage String?
-  isFavorite    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  characters    Character[] @relation("CharacterToConcept")
-  places        Place[]     @relation("PlaceToConcept")
-  worldItems    WorldItem[] @relation("WorldItemToConcept")
-  notes         Note[]      @relation("ConceptToNote")
-  prompts       Prompt[]    @relation("ConceptToPrompt")
-  images        Image[]     @relation("ImageToConcept")
+  isFavorite    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  characters    Character[]   @relation("CharacterToConcept")
+  places        Place[]       @relation("PlaceToConcept")
+  worldItems    WorldItem[]   @relation("WorldItemToConcept")
+  notes         Note[]        @relation("ConceptToNote")
+  prompts       Prompt[]      @relation("ConceptToPrompt")
+  images        Image[]       @relation("ImageToConcept")
   presetId      String?
   preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
@@ -424,25 +428,25 @@ model Concept {
 
 // Modelo para los prompts
 model Prompt {
-  id            String      @id @default(cuid())
-  name          String      @unique
-  emoji         String      @default("🎯")
-  color         String      @default("#3b82f6")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  emoji         String        @default("🎯")
+  color         String        @default("#3b82f6")
   description   String?
-  content       String      @default("")
-  category      String      @default("general")
-  parameters    String      @default("{}")
-  tags          String      @default("empty_array")
+  content       String        @default("")
+  category      String        @default("general")
+  parameters    String        @default("{}")
+  tags          String        @default("empty_array")
   featuredImage String?
-  isFavorite    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  characters    Character[] @relation("CharacterToPrompt")
-  places        Place[]     @relation("PlaceToPrompt")
-  worldItems    WorldItem[] @relation("WorldItemToPrompt")
-  concepts      Concept[]   @relation("ConceptToPrompt")
-  notes         Note[]      @relation("PromptToNote")
-  images        Image[]     @relation("ImageToPrompt")
+  isFavorite    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  characters    Character[]   @relation("CharacterToPrompt")
+  places        Place[]       @relation("PlaceToPrompt")
+  worldItems    WorldItem[]   @relation("WorldItemToPrompt")
+  concepts      Concept[]     @relation("ConceptToPrompt")
+  notes         Note[]        @relation("PromptToNote")
+  images        Image[]       @relation("ImageToPrompt")
   presetId      String?
   preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
@@ -453,23 +457,23 @@ model Prompt {
 
 // Modelo para las notas
 model Note {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   title         String
-  content       String      @default("")
-  category      String      @default("general")
-  priority      Int         @default(0)
-  status        String      @default("active")
-  tags          String      @default("empty_array")
+  content       String        @default("")
+  category      String        @default("general")
+  priority      Int           @default(0)
+  status        String        @default("active")
+  tags          String        @default("empty_array")
   featuredImage String?
-  isFavorite    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  characters    Character[] @relation("CharacterToNote")
-  places        Place[]     @relation("PlaceToNote")
-  worldItems    WorldItem[] @relation("WorldItemToNote")
-  concepts      Concept[]   @relation("ConceptToNote")
-  prompts       Prompt[]    @relation("PromptToNote")
-  images        Image[]     @relation("ImageToNote")
+  isFavorite    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  characters    Character[]   @relation("CharacterToNote")
+  places        Place[]       @relation("PlaceToNote")
+  worldItems    WorldItem[]   @relation("WorldItemToNote")
+  concepts      Concept[]     @relation("ConceptToNote")
+  prompts       Prompt[]      @relation("PromptToNote")
+  images        Image[]       @relation("ImageToNote")
   presetId      String?
   preset        VisualPreset? @relation(fields: [presetId], references: [id])
 
@@ -564,24 +568,24 @@ model CardConfiguration {
   glitchOptions              String?
   chromaticAberrationOptions String?
   pixelateOptions            String?
-  statesConfig              String?
-  visualEffectsConfig       String?
-  performanceConfig         String?
-  effectsConfig             String?
+  statesConfig               String?
+  visualEffectsConfig        String?
+  performanceConfig          String?
+  effectsConfig              String?
 
   // Campos de auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Referencias a nuevos modelos
-  backsideConfigId String? @unique
+  backsideConfigId String?         @unique
   backsideConfig   BacksideConfig? @relation(fields: [backsideConfigId], references: [id])
 
-  coreConfigId     String? @unique
-  coreConfig       CoreConfig? @relation(fields: [coreConfigId], references: [id])
+  coreConfigId String?     @unique
+  coreConfig   CoreConfig? @relation(fields: [coreConfigId], references: [id])
 
-  presetId         String?
-  preset           VisualPreset? @relation(fields: [presetId], references: [id])
+  presetId String?
+  preset   VisualPreset? @relation(fields: [presetId], references: [id])
 
   @@map("card_configurations")
 }
@@ -687,20 +691,20 @@ model Texture {
 }
 
 model ImageVisualConfig {
-  id                      String   @id @default(cuid())
+  id                      String        @id @default(cuid())
   image                   Image?
-  enable3DEffect          Boolean  @default(true)
-  designSystem            String?  @default("default_design_system")
-  enableHolographicEffect Boolean  @default(true)
-  enableGlowEffect        Boolean  @default(true)
-  enableAnimatedBorder    Boolean  @default(true)
-  enableLightHalo         Boolean  @default(true)
-  layerSystem             String?  @default("default_layer_system")
-  effects                 String?  @default("default_effects")
-  performance             String?  @default("default_performance")
-  states                  String?  @default("default_states")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  enable3DEffect          Boolean       @default(true)
+  designSystem            String?       @default("default_design_system")
+  enableHolographicEffect Boolean       @default(true)
+  enableGlowEffect        Boolean       @default(true)
+  enableAnimatedBorder    Boolean       @default(true)
+  enableLightHalo         Boolean       @default(true)
+  layerSystem             String?       @default("default_layer_system")
+  effects                 String?       @default("default_effects")
+  performance             String?       @default("default_performance")
+  states                  String?       @default("default_states")
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
   presetId                String?
   preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
@@ -721,20 +725,20 @@ model Video {
 }
 
 model VideoVisualConfig {
-  id                      String   @id @default(cuid())
+  id                      String        @id @default(cuid())
   video                   Video?
-  enable3DEffect          Boolean  @default(true)
-  designSystem            String?  @default("default_design_system")
-  enableHolographicEffect Boolean  @default(true)
-  enableGlowEffect        Boolean  @default(true)
-  enableAnimatedBorder    Boolean  @default(true)
-  enableLightHalo         Boolean  @default(true)
-  layerSystem             String?  @default("default_layer_system")
-  effects                 String?  @default("default_effects")
-  performance             String?  @default("default_performance")
-  states                  String?  @default("default_states")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  enable3DEffect          Boolean       @default(true)
+  designSystem            String?       @default("default_design_system")
+  enableHolographicEffect Boolean       @default(true)
+  enableGlowEffect        Boolean       @default(true)
+  enableAnimatedBorder    Boolean       @default(true)
+  enableLightHalo         Boolean       @default(true)
+  layerSystem             String?       @default("default_layer_system")
+  effects                 String?       @default("default_effects")
+  performance             String?       @default("default_performance")
+  states                  String?       @default("default_states")
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
   presetId                String?
   preset                  VisualPreset? @relation(fields: [presetId], references: [id])
 }
@@ -1063,47 +1067,47 @@ model LayerPatternConfig {
 
 // Modelo para configuración de la parte trasera de tarjetas
 model BacksideConfig {
-  id             String   @id @default(cuid())
-  entityType     String
-  entityId       String?
-  isDefault      Boolean  @default(false)
-  enabled        Boolean  @default(true)
+  id         String  @id @default(cuid())
+  entityType String
+  entityId   String?
+  isDefault  Boolean @default(false)
+  enabled    Boolean @default(true)
 
   // Diseño y estilo
-  layoutType     String   @default("standard") // standard, tabbed, grid, minimal
-  colorMode      String   @default("inherit") // inherit, custom, reverse, contrast
+  layoutType     String  @default("standard") // standard, tabbed, grid, minimal
+  colorMode      String  @default("inherit") // inherit, custom, reverse, contrast
   customColor    String?
-  opacity        Float    @default(0.95)
-  blurBackground Boolean  @default(true)
-  blurAmount     Float    @default(10)
+  opacity        Float   @default(0.95)
+  blurBackground Boolean @default(true)
+  blurAmount     Float   @default(10)
 
   // Contenido
-  showAttributes     Boolean  @default(true)
-  showDescription    Boolean  @default(true)
-  showStats          Boolean  @default(true)
-  showMetadata       Boolean  @default(true)
-  showRelations      Boolean  @default(false)
-  attributesConfig   String?  @default("{}") // JSON para configurar atributos visibles
-  maxDescriptionLength Int?   @default(300)
+  showAttributes       Boolean @default(true)
+  showDescription      Boolean @default(true)
+  showStats            Boolean @default(true)
+  showMetadata         Boolean @default(true)
+  showRelations        Boolean @default(false)
+  attributesConfig     String? @default("{}") // JSON para configurar atributos visibles
+  maxDescriptionLength Int?    @default(300)
 
   // Interacción
-  flipAnimation    String   @default("rotate") // rotate, fade, flip3d, slide
-  flipDuration     Int      @default(600)
-  enableAutoFlip   Boolean  @default(false)
-  autoFlipDelay    Int      @default(3000)
-  flipTrigger      String   @default("click") // click, hover, doubleClick
+  flipAnimation  String  @default("rotate") // rotate, fade, flip3d, slide
+  flipDuration   Int     @default(600)
+  enableAutoFlip Boolean @default(false)
+  autoFlipDelay  Int     @default(3000)
+  flipTrigger    String  @default("click") // click, hover, doubleClick
 
   // Propiedades avanzadas
   customBackgroundImage String?
   customTemplate        String?
 
   // Estilo de UI
-  headingStyle     String   @default("default") // default, large, subtle, accent
-  infoStyle        String   @default("default") // default, pills, cards, minimal
-  separatorStyle   String   @default("line") // line, dotted, gradient, none
+  headingStyle   String @default("default") // default, large, subtle, accent
+  infoStyle      String @default("default") // default, pills, cards, minimal
+  separatorStyle String @default("line") // line, dotted, gradient, none
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relación con CardConfiguration
   cardConfiguration CardConfiguration?
@@ -1114,43 +1118,43 @@ model BacksideConfig {
 
 // Modelo para configuración de Core de tarjetas
 model CoreConfig {
-  id                String   @id @default(cuid())
-  entityType        String
-  entityId          String?
-  isDefault         Boolean  @default(false)
+  id         String  @id @default(cuid())
+  entityType String
+  entityId   String?
+  isDefault  Boolean @default(false)
 
   // Sistema de capas
-  layerSystem       String?  @default("default_layer_system") // Simplificando para evitar problemas con JSON
+  layerSystem String? @default("default_layer_system") // Simplificando para evitar problemas con JSON
 
   // Interactividad
-  interactiveMode   String   @default("hover") // hover, click, none
-  hoverDelay        Int      @default(100)
-  touchBehavior     String   @default("tap") // tap, longPress, doubleTap
-  pointerPrecision  String   @default("medium") // low, medium, high
-  motionReduction   Boolean  @default(false)
+  interactiveMode  String  @default("hover") // hover, click, none
+  hoverDelay       Int     @default(100)
+  touchBehavior    String  @default("tap") // tap, longPress, doubleTap
+  pointerPrecision String  @default("medium") // low, medium, high
+  motionReduction  Boolean @default(false)
 
   // Rendimiento
-  performanceMode   String   @default("balanced") // performance, balanced, quality
-  enableCache       Boolean  @default(true)
-  loadingStrategy   String   @default("progressive") // eager, lazy, progressive
-  enablePreloading  Boolean  @default(true)
+  performanceMode  String  @default("balanced") // performance, balanced, quality
+  enableCache      Boolean @default(true)
+  loadingStrategy  String  @default("progressive") // eager, lazy, progressive
+  enablePreloading Boolean @default(true)
 
   // Feedback y Respuesta
-  enableHaptics     Boolean  @default(false)
-  hapticIntensity   Float    @default(0.5)
-  enableSounds      Boolean  @default(false)
-  soundVolume       Float    @default(0.5)
-  soundTheme        String   @default("minimal")
+  enableHaptics   Boolean @default(false)
+  hapticIntensity Float   @default(0.5)
+  enableSounds    Boolean @default(false)
+  soundVolume     Float   @default(0.5)
+  soundTheme      String  @default("minimal")
 
   // Contenido
-  contentArrangement String   @default("standard") // standard, compact, expanded, minimal
-  enableAutoHeight   Boolean  @default(true)
+  contentArrangement String  @default("standard") // standard, compact, expanded, minimal
+  enableAutoHeight   Boolean @default(true)
   maxLines           Int?
-  textTruncation     String   @default("ellipsis") // ellipsis, fade, scroll
-  mediaFit           String   @default("cover") // cover, contain, fill
+  textTruncation     String  @default("ellipsis") // ellipsis, fade, scroll
+  mediaFit           String  @default("cover") // cover, contain, fill
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relación con CardConfiguration
   cardConfiguration CardConfiguration?
@@ -1175,39 +1179,39 @@ model VisualPreset {
   updatedAt   DateTime @updatedAt
 
   // Configuraciones base serializadas como string - simplificadas para evitar problemas
-  coreConfig        String?  @default("default_core_config")
-  designConfig      String?  @default("default_design_config")
-  animationConfig   String?  @default("default_animation_config")
-  layerConfig       String?  @default("default_layer_config")
-  backsideConfig    String?  @default("default_backside_config")
-  effectsConfig     String?  @default("default_effects_config")
-  performanceConfig String?  @default("default_performance_config")
+  coreConfig        String? @default("default_core_config")
+  designConfig      String? @default("default_design_config")
+  animationConfig   String? @default("default_animation_config")
+  layerConfig       String? @default("default_layer_config")
+  backsideConfig    String? @default("default_backside_config")
+  effectsConfig     String? @default("default_effects_config")
+  performanceConfig String? @default("default_performance_config")
 
   // Configuraciones comunes para todos los layouts - simplificadas
-  colorConfig       String?  @default("default_color_config")
-  imageGridConfig   String?  @default("default_image_grid_config")
-  layoutConfig      String?  @default("default_layout_config")
-  explodeConfig     String?  @default("default_explode_config")
-  previewConfig     String?  @default("default_preview_config")
-  rarityConfig      String?  @default("default_rarity_config")
-  validationConfig  String?  @default("default_validation_config")
+  colorConfig      String? @default("default_color_config")
+  imageGridConfig  String? @default("default_image_grid_config")
+  layoutConfig     String? @default("default_layout_config")
+  explodeConfig    String? @default("default_explode_config")
+  previewConfig    String? @default("default_preview_config")
+  rarityConfig     String? @default("default_rarity_config")
+  validationConfig String? @default("default_validation_config")
 
   // Estilo Magic Card común - simplificado
-  magicCardBase     String?  @default("default_magic_card_config")
+  magicCardBase String? @default("default_magic_card_config")
 
   // Configuraciones específicas por tipo de entidad - simplificadas
-  folderConfig      String?  @default("default_folder_config")
-  imageConfig       String?  @default("default_image_config")
-  videoConfig       String?  @default("default_video_config")
-  albumConfig       String?  @default("default_album_config")
-  tagConfig         String?  @default("default_tag_config")
-  collectionConfig  String?  @default("default_collection_config")
-  characterConfig   String?  @default("default_character_config")
-  placeConfig       String?  @default("default_place_config")
-  worldItemConfig   String?  @default("default_world_item_config")
-  conceptConfig     String?  @default("default_concept_config")
-  promptConfig      String?  @default("default_prompt_config")
-  noteConfig        String?  @default("default_note_config")
+  folderConfig     String? @default("default_folder_config")
+  imageConfig      String? @default("default_image_config")
+  videoConfig      String? @default("default_video_config")
+  albumConfig      String? @default("default_album_config")
+  tagConfig        String? @default("default_tag_config")
+  collectionConfig String? @default("default_collection_config")
+  characterConfig  String? @default("default_character_config")
+  placeConfig      String? @default("default_place_config")
+  worldItemConfig  String? @default("default_world_item_config")
+  conceptConfig    String? @default("default_concept_config")
+  promptConfig     String? @default("default_prompt_config")
+  noteConfig       String? @default("default_note_config")
 
   // Relaciones con entidades
   folders     Folder[]
@@ -1220,14 +1224,14 @@ model VisualPreset {
   prompts     Prompt[]
   notes       Note[]
   albums      Album[]
-  tagItems    Tag[]       @relation("TagToVisualPreset")
+  tagItems    Tag[]        @relation("TagToVisualPreset")
   collections Collection[]
 
   // Relaciones con configuraciones visuales
-  folderVisualConfigs  FolderVisualConfig[]
-  imageVisualConfigs   ImageVisualConfig[]
-  videoVisualConfigs   VideoVisualConfig[]
-  cardConfigurations   CardConfiguration[]
+  folderVisualConfigs FolderVisualConfig[]
+  imageVisualConfigs  ImageVisualConfig[]
+  videoVisualConfigs  VideoVisualConfig[]
+  cardConfigurations  CardConfiguration[]
 
   @@index([name])
   @@index([category])

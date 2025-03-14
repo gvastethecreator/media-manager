@@ -1,27 +1,10 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
+import { SelectItem } from '@/components/ui/select';
+import { FileStackIcon, FlipHorizontalIcon, LayoutIcon, MouseIcon, PaletteIcon } from 'lucide-react';
 import {
-	BoxIcon,
-	FileStackIcon,
-	FlipHorizontalIcon,
-	InfoIcon,
-	LayoutIcon,
-	MessageSquareIcon,
-	MouseIcon,
-	PaletteIcon,
-	RectangleHorizontalIcon,
-} from 'lucide-react';
-import {
-	FormGroup,
 	FormInput,
 	FormLayout,
 	FormRow,
@@ -29,9 +12,8 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-	createNestedOptionChangeHandler,
 	panelColors,
-} from '../../settings/panels/shared';
+} from '@/components/features/entity-cards/settings/panels/shared';
 import type { BacksideOptions, BacksideSystemProps } from './types';
 import { useBacksideSystem } from './use-backside-system';
 

@@ -8,7 +8,7 @@ import {
 	FormSection,
 	FormSlider,
 	FormToggle,
-} from '../../../../settings/panels/shared';
+} from '../../../../../../settings/panels/shared';
 import type { AdvancedEffectsOptions } from '../types';
 
 type SectionProps = {

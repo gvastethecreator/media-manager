@@ -2,14 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import {
-	FormGroup,
-	FormInput,
-	FormLayout,
-	FormRow,
-	FormSection,
-	FormToggle,
-} from '../../settings/panels/shared/form-components';
+import { FormGroup, FormInput, FormLayout, FormRow, FormSection, FormToggle } from '../../../settings/panels/shared';
 import { ColorPaletteSelector } from './color-palette-selector';
 import type { ColorsModuleProps } from './types';
 import { useColors } from './use-colors';

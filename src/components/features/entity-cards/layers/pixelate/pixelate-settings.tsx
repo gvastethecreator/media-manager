@@ -7,40 +7,29 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '@/components/ui/select';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { updatePixelateConfig } from '@/app/actions/pixelate-config.action';
-import { cn } from '@/lib/utils';
 import type { LayerSettingsProps } from '../layer-plugin-system';
-import {
-	type PixelateConfig,
-	createDefaultPixelateConfig,
-	pixelateConfigSchema
-} from './pixelate-schema';
+import { type PixelateConfig, createDefaultPixelateConfig, pixelateConfigSchema } from './pixelate-schema';
 
 /**
  * Componente de configuración para la capa de pixelado
  */
 export function PixelateSettings({
-	config,
 	entityId,
 	entityType,
-	onConfigChange,
+	className,
+	onConfigUpdate,
 }: LayerSettingsProps<PixelateConfig>) {
 	const [activeTab, setActiveTab] = useState('basic');
 	const [isSaving, setIsSaving] = useState(false);
+	const [config, setConfig] = useState<PixelateConfig>(createDefaultPixelateConfig());
 
 	// Configurar el formulario con React Hook Form y validación Zod
 	const form = useForm<PixelateConfig>({
@@ -48,38 +37,30 @@ export function PixelateSettings({
 		defaultValues: config || createDefaultPixelateConfig(),
 	});
 
-	// Actualizar el formulario cuando cambia la configuración externa
-	useEffect(() => {
-		if (config) {
-			form.reset(config);
-		}
-	}, [config, form]);
-
 	// Manejar cambios en el formulario
 	useEffect(() => {
-		const subscription = form.watch((values) => {
+		const subscription = form.watch((values: PixelateConfig) => {
 			// Notificar cambios al componente padre
-			onConfigChange?.(values as PixelateConfig);
+			onConfigUpdate?.(values);
 		});
 
 		return () => subscription.unsubscribe();
-	}, [form, onConfigChange]);
+	}, [form, onConfigUpdate]);
 
 	// Guardar la configuración
 	const onSubmit = async (data: PixelateConfig) => {
-		if (!entityId) { return; }
+		if (!entityId) {
+			return;
+		}
 
 		setIsSaving(true);
 		try {
-			const result = await updatePixelateConfig({
-				entityId,
-				entityType,
-				config: data,
-			});
+			const result = await updatePixelateConfig(entityType, data, entityId);
 
 			if (result.success) {
 				toast.success('Configuración de pixelado guardada');
 				form.reset(data); // Resetear el estado "dirty" del formulario
+				setConfig(data);
 			} else {
 				toast.error(`Error al guardar: ${result.error}`);
 			}
@@ -92,12 +73,10 @@ export function PixelateSettings({
 	};
 
 	return (
-		<Card>
+		<Card className={className}>
 			<CardHeader>
 				<CardTitle>Configuración de Pixelado</CardTitle>
-				<CardDescription>
-					Personaliza el efecto de pixelado para esta entidad
-				</CardDescription>
+				<CardDescription>Personaliza el efecto de pixelado para esta entidad</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -110,15 +89,10 @@ export function PixelateSettings({
 								<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
 										<FormLabel>Habilitar pixelado</FormLabel>
-										<FormDescription>
-											Activa o desactiva el efecto de pixelado
-										</FormDescription>
+										<FormDescription>Activa o desactiva el efecto de pixelado</FormDescription>
 									</div>
 									<FormControl>
-										<Switch
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
+										<Switch checked={field.value} onCheckedChange={field.onChange} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -152,9 +126,7 @@ export function PixelateSettings({
 															onValueChange={(value) => field.onChange(value[0])}
 														/>
 													</FormControl>
-													<FormDescription>
-														Controla el tamaño de los bloques de píxeles
-													</FormDescription>
+													<FormDescription>Controla el tamaño de los bloques de píxeles</FormDescription>
 												</FormItem>
 											)}
 										/>
@@ -166,10 +138,7 @@ export function PixelateSettings({
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Algoritmo</FormLabel>
-													<Select
-														value={field.value}
-														onValueChange={field.onChange}
-													>
+													<Select value={field.value} onValueChange={field.onChange}>
 														<FormControl>
 															<SelectTrigger>
 																<SelectValue placeholder="Seleccionar algoritmo" />
@@ -183,9 +152,7 @@ export function PixelateSettings({
 															<SelectItem value="mosaic">Mosaico</SelectItem>
 														</SelectContent>
 													</Select>
-													<FormDescription>
-														Algoritmo utilizado para el efecto de pixelado
-													</FormDescription>
+													<FormDescription>Algoritmo utilizado para el efecto de pixelado</FormDescription>
 												</FormItem>
 											)}
 										/>
@@ -206,9 +173,7 @@ export function PixelateSettings({
 															onValueChange={(value) => field.onChange(value[0])}
 														/>
 													</FormControl>
-													<FormDescription>
-														Controla la intensidad del efecto
-													</FormDescription>
+													<FormDescription>Controla la intensidad del efecto</FormDescription>
 												</FormItem>
 											)}
 										/>
@@ -230,9 +195,7 @@ export function PixelateSettings({
 																onValueChange={(value) => field.onChange(value[0])}
 															/>
 														</FormControl>
-														<FormDescription>
-															Número de niveles de color por canal
-														</FormDescription>
+														<FormDescription>Número de niveles de color por canal</FormDescription>
 													</FormItem>
 												)}
 											/>
@@ -246,10 +209,7 @@ export function PixelateSettings({
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Forma de píxel</FormLabel>
-														<Select
-															value={field.value}
-															onValueChange={field.onChange}
-														>
+														<Select value={field.value} onValueChange={field.onChange}>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Seleccionar forma" />
@@ -262,9 +222,7 @@ export function PixelateSettings({
 																<SelectItem value="hexagon">Hexágono</SelectItem>
 															</SelectContent>
 														</Select>
-														<FormDescription>
-															Forma geométrica para el efecto mosaico
-														</FormDescription>
+														<FormDescription>Forma geométrica para el efecto mosaico</FormDescription>
 													</FormItem>
 												)}
 											/>
@@ -280,10 +238,7 @@ export function PixelateSettings({
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Modo de fusión</FormLabel>
-													<Select
-														value={field.value}
-														onValueChange={field.onChange}
-													>
+													<Select value={field.value} onValueChange={field.onChange}>
 														<FormControl>
 															<SelectTrigger>
 																<SelectValue placeholder="Seleccionar modo" />
@@ -304,9 +259,7 @@ export function PixelateSettings({
 															<SelectItem value="exclusion">Exclusión</SelectItem>
 														</SelectContent>
 													</Select>
-													<FormDescription>
-														Cómo se fusiona esta capa con las capas inferiores
-													</FormDescription>
+													<FormDescription>Cómo se fusiona esta capa con las capas inferiores</FormDescription>
 												</FormItem>
 											)}
 										/>
@@ -319,15 +272,10 @@ export function PixelateSettings({
 												<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 													<div className="space-y-0.5">
 														<FormLabel>Preservar transparencia</FormLabel>
-														<FormDescription>
-															Mantiene la transparencia original de la imagen
-														</FormDescription>
+														<FormDescription>Mantiene la transparencia original de la imagen</FormDescription>
 													</div>
 													<FormControl>
-														<Switch
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
+														<Switch checked={field.value} onCheckedChange={field.onChange} />
 													</FormControl>
 												</FormItem>
 											)}
@@ -341,15 +289,10 @@ export function PixelateSettings({
 												<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 													<div className="space-y-0.5">
 														<FormLabel>Solo visible en hover</FormLabel>
-														<FormDescription>
-															El efecto solo se muestra al pasar el cursor
-														</FormDescription>
+														<FormDescription>El efecto solo se muestra al pasar el cursor</FormDescription>
 													</div>
 													<FormControl>
-														<Switch
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
+														<Switch checked={field.value} onCheckedChange={field.onChange} />
 													</FormControl>
 												</FormItem>
 											)}
@@ -366,15 +309,10 @@ export function PixelateSettings({
 													<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 														<div className="space-y-0.5">
 															<FormLabel>Habilitar zona</FormLabel>
-															<FormDescription>
-																Aplicar efecto solo en un área específica
-															</FormDescription>
+															<FormDescription>Aplicar efecto solo en un área específica</FormDescription>
 														</div>
 														<FormControl>
-															<Switch
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Switch checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 													</FormItem>
 												)}
@@ -460,10 +398,10 @@ export function PixelateSettings({
 																</FormControl>
 															</FormItem>
 														)}
-													</div>
-												)}
-											</div>
-										)}
+													/>
+												</div>
+											)}
+										</div>
 									</TabsContent>
 
 									{/* Configuración de animación */}
@@ -476,15 +414,10 @@ export function PixelateSettings({
 												<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 													<div className="space-y-0.5">
 														<FormLabel>Habilitar animación</FormLabel>
-														<FormDescription>
-															Anima el efecto de pixelado
-														</FormDescription>
+														<FormDescription>Anima el efecto de pixelado</FormDescription>
 													</div>
 													<FormControl>
-														<Switch
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
+														<Switch checked={field.value} onCheckedChange={field.onChange} />
 													</FormControl>
 												</FormItem>
 											)}
@@ -506,9 +439,7 @@ export function PixelateSettings({
 																onValueChange={(value) => field.onChange(value[0])}
 															/>
 														</FormControl>
-														<FormDescription>
-															Velocidad de la animación
-														</FormDescription>
+														<FormDescription>Velocidad de la animación</FormDescription>
 													</FormItem>
 												)}
 											/>
@@ -525,15 +456,10 @@ export function PixelateSettings({
 													<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 														<div className="space-y-0.5">
 															<FormLabel>Habilitar transiciones</FormLabel>
-															<FormDescription>
-																Transiciones suaves al cambiar el estado
-															</FormDescription>
+															<FormDescription>Transiciones suaves al cambiar el estado</FormDescription>
 														</div>
 														<FormControl>
-															<Switch
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Switch checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 													</FormItem>
 												)}
@@ -568,10 +494,7 @@ export function PixelateSettings({
 														render={({ field }) => (
 															<FormItem>
 																<FormLabel>Tipo de easing</FormLabel>
-																<Select
-																	value={field.value}
-																	onValueChange={field.onChange}
-																>
+																<Select value={field.value} onValueChange={field.onChange}>
 																	<FormControl>
 																		<SelectTrigger>
 																			<SelectValue placeholder="Seleccionar easing" />
@@ -597,15 +520,10 @@ export function PixelateSettings({
 															<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 																<div className="space-y-0.5">
 																	<FormLabel>Al entrar</FormLabel>
-																	<FormDescription>
-																		Aplicar transición al entrar en hover
-																	</FormDescription>
+																	<FormDescription>Aplicar transición al entrar en hover</FormDescription>
 																</div>
 																<FormControl>
-																	<Switch
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
+																	<Switch checked={field.value} onCheckedChange={field.onChange} />
 																</FormControl>
 															</FormItem>
 														)}
@@ -619,15 +537,10 @@ export function PixelateSettings({
 															<FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
 																<div className="space-y-0.5">
 																	<FormLabel>Al salir</FormLabel>
-																	<FormDescription>
-																		Aplicar transición al salir del hover
-																	</FormDescription>
+																	<FormDescription>Aplicar transición al salir del hover</FormDescription>
 																</div>
 																<FormControl>
-																	<Switch
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
+																	<Switch checked={field.value} onCheckedChange={field.onChange} />
 																</FormControl>
 															</FormItem>
 														)}
@@ -656,9 +569,7 @@ export function PixelateSettings({
 													onValueChange={(value) => field.onChange(value[0])}
 												/>
 											</FormControl>
-											<FormDescription>
-												Controla el orden de apilamiento (mayor = más arriba)
-											</FormDescription>
+											<FormDescription>Controla el orden de apilamiento (mayor = más arriba)</FormDescription>
 										</FormItem>
 									)}
 								/>
@@ -667,12 +578,7 @@ export function PixelateSettings({
 
 						{/* Botones de acción */}
 						<div className="flex justify-end space-x-2 pt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => form.reset(config)}
-								disabled={isSaving}
-							>
+							<Button type="button" variant="outline" onClick={() => form.reset(config)} disabled={isSaving}>
 								Restablecer
 							</Button>
 							<Button type="submit" disabled={isSaving || !form.formState.isDirty}>

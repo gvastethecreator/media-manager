@@ -12,7 +12,7 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '../../settings/panels/shared/form-components';
+} from '../../../settings/panels/shared';
 import type { PreviewModuleProps } from './types';
 import { usePreview } from './use-preview';
 

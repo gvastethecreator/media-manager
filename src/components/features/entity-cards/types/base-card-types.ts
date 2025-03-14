@@ -1,5 +1,38 @@
 import type * as React from 'react';
 
+/**
+ * Re-exportar los tipos desde unified-card-types.ts para mantener la compatibilidad con código existente
+ */
+
+export * from './unified-card-types';
+
+/**
+ * Tipo específico para CardDesignPreset que todavía se usa en código existente
+ */
+export type CardDesignPreset =
+	| 'default'
+	| 'minimal'
+	| 'folder'
+	| 'album'
+	| 'character'
+	| 'place'
+	| 'tag'
+	| 'collection'
+	| 'concept'
+	| 'prompt'
+	| 'worldItem'
+	| 'note';
+
+/**
+ * Definición básica de rareza para tarjetas
+ */
+export interface RarityConfig {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+}
+
 // Opciones para presets de tipografía
 export type TypographyPreset =
 	| 'default'
@@ -11,24 +44,6 @@ export type TypographyPreset =
 	| 'retro'
 	| 'minimal'
 	| 'bold';
-
-// Opciones para diseños predefinidos de tarjetas
-export type CardDesignPreset =
-	| 'default'
-	| 'album'
-	| 'tag'
-	| 'collection'
-	| 'character'
-	| 'place'
-	| 'worldItem'
-	| 'concept'
-	| 'prompt'
-	| 'note'
-	| 'folder'
-	| 'image'
-	| 'gallery'
-	| 'stats'
-	| 'profile';
 
 // Configuración de tipografía
 export interface TypographyConfig {
@@ -283,15 +298,6 @@ export interface ScanlinesOptions {
 	direction?: string | 'horizontal' | 'vertical' | 'diagonal';
 	visibleOnHover?: boolean;
 	layerIndex?: number;
-}
-
-// Configuración de rareza
-export interface RarityConfig {
-	name: string;
-	color: string;
-	borderEffect?: string;
-	glowColor?: string;
-	borderWidth?: string | number;
 }
 
 // Configuración de textura

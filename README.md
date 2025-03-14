@@ -47,7 +47,7 @@ Hemos implementado un sistema estandarizado para la integración entre formulari
   - Mensajes de error
   - Diseño responsivo
 
-## Future Plans :
+## Future Plans:
 
 - Agregar soporte para subcarpetas
 - Agregar soporte para videos
@@ -60,4 +60,3 @@ Hemos implementado un sistema estandarizado para la integración entre formulari
 - Mapas de relaciones
 - Mapas de entidades
 - Mejores animaciones
--
