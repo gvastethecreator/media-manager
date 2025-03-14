@@ -1,10 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET(
-	request: Request,
-	{ params }: { params: { entityType: string; entityId: string } },
-) {
+export async function GET(_request: Request, { params }: { params: { entityType: string; entityId: string } }) {
 	try {
 		const { entityType, entityId } = params;
 
@@ -39,33 +36,21 @@ export async function GET(
 				});
 				break;
 			default:
-				return NextResponse.json(
-					{ error: 'Tipo de entidad no válido' },
-					{ status: 400 },
-				);
+				return NextResponse.json({ error: 'Tipo de entidad no válido' }, { status: 400 });
 		}
 
 		if (!visualConfig) {
-			return NextResponse.json(
-				{ error: 'Configuración visual no encontrada' },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: 'Configuración visual no encontrada' }, { status: 404 });
 		}
 
 		return NextResponse.json(visualConfig);
 	} catch (error) {
 		console.error('Error al obtener la configuración visual:', error);
-		return NextResponse.json(
-			{ error: 'Error al obtener la configuración visual' },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: 'Error al obtener la configuración visual' }, { status: 500 });
 	}
 }
 
-export async function PUT(
-	request: Request,
-	{ params }: { params: { entityType: string; entityId: string } },
-) {
+export async function PUT(request: Request, { params }: { params: { entityType: string; entityId: string } }) {
 	try {
 		const { entityType, entityId } = params;
 		const data = await request.json();
@@ -143,26 +128,17 @@ export async function PUT(
 				});
 				break;
 			default:
-				return NextResponse.json(
-					{ error: 'Tipo de entidad no válido' },
-					{ status: 400 },
-				);
+				return NextResponse.json({ error: 'Tipo de entidad no válido' }, { status: 400 });
 		}
 
 		return NextResponse.json(visualConfig);
 	} catch (error) {
 		console.error('Error al actualizar la configuración visual:', error);
-		return NextResponse.json(
-			{ error: 'Error al actualizar la configuración visual' },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: 'Error al actualizar la configuración visual' }, { status: 500 });
 	}
 }
 
-export async function DELETE(
-	request: Request,
-	{ params }: { params: { entityType: string; entityId: string } },
-) {
+export async function DELETE(_request: Request, { params }: { params: { entityType: string; entityId: string } }) {
 	try {
 		const { entityType, entityId } = params;
 
@@ -197,18 +173,12 @@ export async function DELETE(
 				});
 				break;
 			default:
-				return NextResponse.json(
-					{ error: 'Tipo de entidad no válido' },
-					{ status: 400 },
-				);
+				return NextResponse.json({ error: 'Tipo de entidad no válido' }, { status: 400 });
 		}
 
 		return NextResponse.json(visualConfig);
 	} catch (error) {
 		console.error('Error al eliminar la configuración visual:', error);
-		return NextResponse.json(
-			{ error: 'Error al eliminar la configuración visual' },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: 'Error al eliminar la configuración visual' }, { status: 500 });
 	}
 }

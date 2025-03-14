@@ -67,115 +67,87 @@ const tabColors = {
 // Definición de todos los tabs para evitar la duplicación de código
 const tabsData: TabItem[] = [
 	{
-		id: "system",
-		label: "Sistema",
-		icon: (
-			<SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'system',
+		label: 'Sistema',
+		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.system,
 	},
 	{
-		id: "entities-cards",
-		label: "Tarjetas",
-		icon: (
-			<ListIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
-		color: tabColors["entities-cards"],
+		id: 'entities-cards',
+		label: 'Tarjetas',
+		icon: <ListIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors['entities-cards'],
 	},
 	{
-		id: "albums",
-		label: "Albums",
-		icon: (
-			<AlbumIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'albums',
+		label: 'Albums',
+		icon: <AlbumIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.albums,
 	},
 	{
-		id: "collections",
-		label: "Colecciones",
-		icon: (
-			<Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'collections',
+		label: 'Colecciones',
+		icon: <Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.collections,
 	},
 	{
-		id: "tags",
-		label: "Etiquetas",
-		icon: (
-			<TagIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'tags',
+		label: 'Etiquetas',
+		icon: <TagIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.tags,
 	},
 	{
-		id: "characters",
-		label: "Personas",
-		icon: (
-			<UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'characters',
+		label: 'Personas',
+		icon: <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.characters,
 	},
 	{
-		id: "world-items",
-		label: "Objetos",
-		icon: (
-			<BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
-		color: tabColors["world-items"],
+		id: 'world-items',
+		label: 'Objetos',
+		icon: <BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors['world-items'],
 	},
 	{
-		id: "places",
-		label: "Lugares",
-		icon: (
-			<MapPinIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'places',
+		label: 'Lugares',
+		icon: <MapPinIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.places,
 	},
 	{
-		id: "concepts",
-		label: "Conceptos",
-		icon: (
-			<BookIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'concepts',
+		label: 'Conceptos',
+		icon: <BookIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.concepts,
 	},
 	{
-		id: "prompts",
-		label: "Prompts",
-		icon: (
-			<MessageSquareIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'prompts',
+		label: 'Prompts',
+		icon: <MessageSquareIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.prompts,
 	},
 	{
-		id: "notes",
-		label: "Notas",
-		icon: (
-			<StickyNoteIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'notes',
+		label: 'Notas',
+		icon: <StickyNoteIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.notes,
 	},
 	{
-		id: "uploaded-images",
-		label: "Imágenes Subidas",
-		icon: (
-			<UploadCloud className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
-		color: tabColors["uploaded-images"],
+		id: 'uploaded-images',
+		label: 'Imágenes Subidas',
+		icon: <UploadCloud className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors['uploaded-images'],
 	},
 	{
-		id: "shortcuts",
-		label: "Atajos",
-		icon: (
-			<KeyboardIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />
-		),
+		id: 'shortcuts',
+		label: 'Atajos',
+		icon: <KeyboardIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.shortcuts,
 	},
 	{
-		id: "profiles",
-		label: "Perfiles",
-		icon: (
-			<UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:scale-105" />
-		),
+		id: 'profiles',
+		label: 'Perfiles',
+		icon: <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:scale-105" />,
 		color: tabColors.profiles,
 	},
 ];
@@ -195,24 +167,13 @@ export function SettingsView() {
 
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none flex flex-col">
-			<Tabs
-				value={activeTab}
-				onValueChange={setActiveTab}
-				className="w-full rounded-none flex flex-col flex-1"
-			>
+			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none flex flex-col flex-1">
 				{/* TabsList con posición sticky */}
 				<div className="sticky top-0 z-7 backdrop-blur-sm shadow-sm">
 					<TabsList className="flex w-full h-8 bg-transparent rounded-none justify-start border-b-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 						{tabsData.map((tab) => (
-							<TabsTrigger
-								key={tab.id}
-								value={tab.id}
-								className={tabBaseStyles}
-							>
-								<span
-									style={{ color: tab.color }}
-									className="flex items-center justify-center"
-								>
+							<TabsTrigger key={tab.id} value={tab.id} className={tabBaseStyles}>
+								<span style={{ color: tab.color }} className="flex items-center justify-center">
 									{tab.icon}
 								</span>
 								{tab.label}
@@ -223,17 +184,11 @@ export function SettingsView() {
 
 				{/* Contenido de los tabs */}
 				<div className="flex-1 overflow-hidden">
-					<TabsContent
-						value="entities-cards"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="entities-cards" className="px-1 h-full overflow-auto">
 						<EntitiesCardsSection />
 					</TabsContent>
 
-					<TabsContent
-						value="system"
-						className="gap-0 px-1 h-full overflow-auto"
-					>
+					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">
 						<div className="grid grid-cols-2 gap-1 w-full">
 							<FoldersSettings />
 							<ThumbnailsSettings />
@@ -245,10 +200,7 @@ export function SettingsView() {
 						<AlbumsSettings />
 					</TabsContent>
 
-					<TabsContent
-						value="collections"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="collections" className="px-1 h-full overflow-auto">
 						<CollectionsSettings />
 					</TabsContent>
 
@@ -260,10 +212,7 @@ export function SettingsView() {
 						<CharactersSettings />
 					</TabsContent>
 
-					<TabsContent
-						value="world-items"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="world-items" className="px-1 h-full overflow-auto">
 						<WorldItemsSettings />
 					</TabsContent>
 
@@ -283,26 +232,15 @@ export function SettingsView() {
 						<NotesSettings />
 					</TabsContent>
 
-
-
-					<TabsContent
-						value="uploaded-images"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="uploaded-images" className="px-1 h-full overflow-auto">
 						<UploadedImagesSettings />
 					</TabsContent>
 
-					<TabsContent
-						value="shortcuts"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="shortcuts" className="px-1 h-full overflow-auto">
 						<ShortcutsSettings />
 					</TabsContent>
 
-					<TabsContent
-						value="profiles"
-						className="px-1 h-full overflow-auto"
-					>
+					<TabsContent value="profiles" className="px-1 h-full overflow-auto">
 						<ProfilesSettings />
 					</TabsContent>
 				</div>

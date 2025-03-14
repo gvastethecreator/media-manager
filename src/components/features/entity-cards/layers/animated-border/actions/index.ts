@@ -1,1 +1,0 @@
-export * from './animated-border-config.action';

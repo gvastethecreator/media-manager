@@ -3,7 +3,13 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { type ActionResponse, type BaseVisualConfig, actionResponseSchema, baseVisualConfigSchema, entityParamsSchema } from './schemas';
+import {
+	type ActionResponse,
+	type BaseVisualConfig,
+	actionResponseSchema,
+	baseVisualConfigSchema,
+	entityParamsSchema,
+} from './schemas';
 
 // Schema para la validación de la actualización
 const updateVisualConfigSchema = z.object({
