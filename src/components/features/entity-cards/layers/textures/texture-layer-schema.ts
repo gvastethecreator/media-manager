@@ -1,5 +1,5 @@
-import { baseLayerConfigSchema } from '@/lib/schemas/base-layer-config-schema';
 import { z } from 'zod';
+import { layerBaseConfigSchema } from '../layer-config-base';
 
 // Esquema para el patrón de textura
 export const texturePatternSchema = z.enum([
@@ -17,7 +17,7 @@ export const texturePatternSchema = z.enum([
 ]);
 
 // Esquema para la configuración de textura
-export const textureConfigSchema = baseLayerConfigSchema.extend({
+export const textureConfigSchema = layerBaseConfigSchema.extend({
 	textureType: texturePatternSchema.default('digital'),
 	opacity: z.number().min(0).max(1).default(0.5),
 	scale: z.number().min(0.1).max(10).default(1),

@@ -1,15 +1,7 @@
 'use client';
 
-import { Scale, Scissors, Slice, Wand2, Zap } from 'lucide-react';
-import { useState } from 'react';
-import {
-	FormGroup,
-	FormLayout,
-	FormRow,
-	FormSection,
-	FormSlider,
-	FormToggle,
-} from '../../../../settings/panels/shared';
+import { Scale, Slice, Wand2, Zap } from 'lucide-react';
+import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
 import type { DistortionEffectsSystem } from './types';
 
 interface DistortionEffectsPanelProps {

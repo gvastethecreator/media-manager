@@ -1,7 +1,7 @@
 'use client';
 
+import { logActivity } from '@/app/actions/activity/activity.actions';
 import { clientEvents } from '@/lib/client/events.client';
-import { ActivityService } from '@/services/activity.service';
 import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
 
 export interface FileItem {
@@ -109,8 +109,8 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			// Seleccionar el item
 			selectFiles([item.id]);
 
-			// Registrar actividad de vista
-			await ActivityService.logActivity({
+			// Registrar actividad de vista usando server action en lugar del servicio
+			await logActivity({
 				type: 'view',
 				description: `Vista de ${item.name}`,
 				imageId: item.id,

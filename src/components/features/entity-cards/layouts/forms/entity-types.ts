@@ -1,4 +1,3 @@
-import type { BaseFormData } from '@/types/form.types';
 import type {
 	Album as PrismaAlbum,
 	Character as PrismaCharacter,
@@ -157,6 +156,93 @@ export interface PromptFormData extends BaseEntityFormData {
 	tags: string[];
 	featuredImage?: string | null;
 	isFavorite: boolean;
+}
+
+// Tipos de datos para los formularios de entidades
+
+export interface AlbumFormData {
+	id?: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	rating?: number;
+	coverImage?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface CollectionFormData {
+	id?: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	visibility?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface NoteFormData {
+	id?: string;
+	name: string;
+	content?: string;
+	type?: string;
+	tags?: string[];
+	color?: string;
+	emoji?: string;
+	pinned?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface ConceptFormData {
+	id?: string;
+	name: string;
+	description?: string;
+	type?: string;
+	category?: string;
+	references?: string[];
+	relatedConcepts?: string[];
+	emoji?: string;
+	color?: string;
+	image?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface FolderFormData {
+	id?: string;
+	name: string;
+	description?: string;
+	path?: string;
+	emoji?: string;
+	color?: string;
+	presetId?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface CharacterFormData {
+	id?: string;
+	name: string;
+	description?: string;
+	race?: string;
+	class?: string;
+	level?: number;
+	alignment?: string;
+	background?: string;
+	featuredImage?: string;
+	stats?: {
+		strength?: number;
+		dexterity?: number;
+		intelligence?: number;
+		charisma?: number;
+		vitality?: number;
+		[key: string]: number | undefined;
+	};
+	createdAt?: Date;
+	updatedAt?: Date;
 }
 
 // Funciones de conversión

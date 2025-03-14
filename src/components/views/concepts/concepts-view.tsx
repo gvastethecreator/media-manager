@@ -1,10 +1,10 @@
 'use client';
 
-import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
+import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card-layout';
+import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

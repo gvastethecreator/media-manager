@@ -2,16 +2,7 @@
 
 import { Contrast, Droplets, Eye, Palette, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import {
-	FormGroup,
-	FormLayout,
-	FormRow,
-	FormSection,
-	FormSlider,
-	FormToggle,
-	createNestedOptionChangeHandler,
-	panelColors,
-} from '../../../../settings/panels/shared';
+import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
 
 // 📝 Definición de tipos para efectos visuales
 export interface VisualEffectsOptions {
