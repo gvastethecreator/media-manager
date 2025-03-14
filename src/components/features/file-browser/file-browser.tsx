@@ -1,6 +1,5 @@
 'use client';
 
-import { DetailsPanel } from './details/details-panel';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/lib/logger/logger';
 import { cn } from '@/lib/utils';
@@ -15,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import type { ContextMenuAction } from './context-menu/context-menu';
+import { DetailsPanel } from './details/details-panel';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
 import { useThumbnailLoader } from './hooks/use-thumbnail-loader';

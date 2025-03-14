@@ -3,15 +3,18 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { type ActionResponse, type BaseVisualConfig, actionResponseSchema, baseVisualConfigSchema, entityParamsSchema } from './schemas';
+import {
+	type ActionResponse,
+	type BaseVisualConfig,
+	actionResponseSchema,
+	baseVisualConfigSchema,
+	entityParamsSchema,
+} from './schemas';
 
 /**
  * Obtiene la configuración visual para una entidad
  */
-export async function getVisualConfig(
-	entityType: string,
-	entityId?: string
-): Promise<ActionResponse> {
+export async function getVisualConfig(entityType: string, entityId?: string): Promise<ActionResponse> {
 	try {
 		// Validar parámetros
 		const validation = entityParamsSchema.safeParse({ entityType, entityId });

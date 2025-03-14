@@ -190,7 +190,7 @@ export async function getRandomImagesForEntity(
 				// Buscar imágenes de una carpeta específica
 				imagesData = (await prisma.image.findMany({
 					where: {
-						folderId: folderId || { not: null }
+						folderId: folderId || { not: null },
 					},
 					select: {
 						id: true,

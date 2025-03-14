@@ -575,3 +575,402 @@ export async function saveEntityTextureSystem(
 		};
 	}
 }
+
+/**
+ * Obtiene la configuración de backside para una entidad específica
+ */
+export async function getBacksideConfig(entityType: string, entityId?: string): Promise<ActionResponse> {
+	try {
+		// Determinar si buscamos configuración específica o por defecto
+		const isDefaultConfig = !entityId;
+
+		// Opciones para la consulta
+		const whereOptions = isDefaultConfig
+			? { entityType, isDefault: true }
+			: { entityType, entityId };
+
+		// Buscar la configuración existente en la base de datos
+		const config = await prisma.backsideConfig.findFirst({
+			where: whereOptions,
+		});
+
+		// Si no existe configuración, buscar la configuración por defecto (si no estamos ya buscando la default)
+		if (!config && !isDefaultConfig) {
+			const defaultConfig = await prisma.backsideConfig.findFirst({
+				where: { entityType, isDefault: true },
+			});
+
+			if (defaultConfig) {
+				return {
+					success: true,
+					message: `Usando configuración por defecto para backside de ${entityType}`,
+					data: defaultConfig,
+				};
+			}
+		}
+
+		// Si no hay configuración en absoluto, crear una por defecto
+		if (!config) {
+			const defaultBacksideConfig = {
+				entityType,
+				entityId: entityId || undefined,
+				isDefault: isDefaultConfig,
+				enabled: true,
+				layoutType: 'standard',
+				colorMode: 'inherit',
+				opacity: 0.95,
+				blurBackground: true,
+				blurAmount: 10,
+				showAttributes: true,
+				showDescription: true,
+				showStats: true,
+				showMetadata: true,
+				showRelations: false,
+				attributesConfig: '{}',
+				maxDescriptionLength: 300,
+				flipAnimation: 'rotate',
+				flipDuration: 600,
+				enableAutoFlip: false,
+				autoFlipDelay: 3000,
+				flipTrigger: 'click',
+				headingStyle: 'default',
+				infoStyle: 'default',
+				separatorStyle: 'line',
+			};
+
+			return {
+				success: true,
+				message: `Configuración por defecto para backside de ${entityType}`,
+				data: defaultBacksideConfig,
+			};
+		}
+
+		return {
+			success: true,
+			message: `Configuración de backside cargada para ${entityType}`,
+			data: config,
+		};
+	} catch (error) {
+		console.error('Error al obtener la configuración de backside:', error);
+		return {
+			success: false,
+			message: 'No se pudo obtener la configuración de backside',
+		};
+	}
+}
+
+/**
+ * Guarda la configuración de backside para una entidad específica
+ */
+export async function saveBacksideConfig(
+	entityType: string,
+	options: Record<string, unknown>,
+	entityId?: string
+): Promise<ActionResponse> {
+	try {
+		// Determinar si guardamos configuración específica o por defecto
+		const isDefaultConfig = !entityId;
+
+		// Opciones para la consulta
+		const whereOptions = isDefaultConfig
+			? { entityType, isDefault: true }
+			: { entityType, entityId };
+
+		// Preparar datos para upsert
+		const backsideData = {
+			entityType,
+			entityId: entityId || null,
+			isDefault: isDefaultConfig,
+			enabled: options.enabled === undefined ? true : Boolean(options.enabled),
+			layoutType: options.layoutType as string || 'standard',
+			colorMode: options.colorMode as string || 'inherit',
+			customColor: options.customColor as string || null,
+			opacity: options.opacity !== undefined ? Number.parseFloat(options.opacity.toString()) : 0.95,
+			blurBackground: options.blurBackground === undefined ? true : Boolean(options.blurBackground),
+			blurAmount: options.blurAmount !== undefined ? Number.parseFloat(options.blurAmount.toString()) : 10,
+			showAttributes: options.showAttributes === undefined ? true : Boolean(options.showAttributes),
+			showDescription: options.showDescription === undefined ? true : Boolean(options.showDescription),
+			showStats: options.showStats === undefined ? true : Boolean(options.showStats),
+			showMetadata: options.showMetadata === undefined ? true : Boolean(options.showMetadata),
+			showRelations: options.showRelations === undefined ? false : Boolean(options.showRelations),
+			attributesConfig: options.attributesConfig as string || '{}',
+			maxDescriptionLength: Number.parseInt(options.maxDescriptionLength as string) || 300,
+			flipAnimation: options.flipAnimation as string || 'rotate',
+			flipDuration: Number.parseInt(options.flipDuration as string) || 600,
+			enableAutoFlip: options.enableAutoFlip === undefined ? false : Boolean(options.enableAutoFlip),
+			autoFlipDelay: Number.parseInt(options.autoFlipDelay as string) || 3000,
+			flipTrigger: options.flipTrigger as string || 'click',
+			customBackgroundImage: options.customBackgroundImage as string || null,
+			customTemplate: options.customTemplate as string || null,
+			headingStyle: options.headingStyle as string || 'default',
+			infoStyle: options.infoStyle as string || 'default',
+			separatorStyle: options.separatorStyle as string || 'line',
+		};
+
+		try {
+			// Guardar la configuración en la base de datos usando upsert
+			await prisma.backsideConfig.upsert({
+				where: {
+					backside_entity: {
+						entityType: whereOptions.entityType,
+						entityId: whereOptions.entityId || null
+					}
+				},
+				update: backsideData,
+				create: backsideData,
+			});
+		} catch (upsertError) {
+			console.error('Error específico al hacer upsert de backside config:', upsertError);
+			// Si falla, intentar con create (puede ocurrir en nuevas instalaciones)
+			await prisma.backsideConfig.create({
+				data: backsideData,
+			});
+		}
+
+		// Actualizar la relación con CardConfiguration si es la configuración por defecto
+		if (isDefaultConfig) {
+			const backsideConfig = await prisma.backsideConfig.findFirst({
+				where: whereOptions,
+			});
+
+			if (backsideConfig) {
+				await prisma.cardConfiguration.update({
+					where: { entityType },
+					data: {
+						backsideConfigId: backsideConfig.id,
+					},
+				});
+			}
+		}
+
+		// Revalidar las rutas que usan esta configuración
+		revalidatePath('/settings');
+		revalidatePath(`/${entityType}`);
+		if (entityId) {
+			revalidatePath(`/${entityType}/${entityId}`);
+		}
+
+		return {
+			success: true,
+			message: `Configuración de backside guardada para ${entityType}`,
+		};
+	} catch (error) {
+		console.error('Error al guardar la configuración de backside:', error);
+		return {
+			success: false,
+			message: 'No se pudo guardar la configuración de backside',
+		};
+	}
+}
+
+/**
+ * Obtiene la configuración core para una entidad específica
+ */
+export async function getCoreConfig(entityType: string, entityId?: string): Promise<ActionResponse> {
+	try {
+		// Determinar si buscamos configuración específica o por defecto
+		const isDefaultConfig = !entityId;
+
+		// Opciones para la consulta
+		const whereOptions = isDefaultConfig
+			? { entityType, isDefault: true }
+			: { entityType, entityId };
+
+		// Buscar la configuración existente en la base de datos
+		const config = await prisma.coreConfig.findFirst({
+			where: whereOptions,
+		});
+
+		// Si no existe configuración, buscar la configuración por defecto (si no estamos ya buscando la default)
+		if (!config && !isDefaultConfig) {
+			const defaultConfig = await prisma.coreConfig.findFirst({
+				where: { entityType, isDefault: true },
+			});
+
+			if (defaultConfig) {
+				return {
+					success: true,
+					message: `Usando configuración core por defecto para ${entityType}`,
+					data: defaultConfig,
+				};
+			}
+		}
+
+		// Si no hay configuración en absoluto, crear una por defecto
+		if (!config) {
+			const defaultCoreConfig = {
+				entityType,
+				entityId: entityId || undefined,
+				isDefault: isDefaultConfig,
+				layerSystem: JSON.stringify({
+					order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+					layerBlending: 'screen',
+					layerSpacing: 2,
+				}),
+				interactiveMode: 'hover',
+				hoverDelay: 100,
+				touchBehavior: 'tap',
+				pointerPrecision: 'medium',
+				motionReduction: false,
+				performanceMode: 'balanced',
+				enableCache: true,
+				loadingStrategy: 'progressive',
+				enablePreloading: true,
+				enableHaptics: false,
+				hapticIntensity: 0.5,
+				enableSounds: false,
+				soundVolume: 0.5,
+				soundTheme: 'minimal',
+				contentArrangement: 'standard',
+				enableAutoHeight: true,
+				textTruncation: 'ellipsis',
+				mediaFit: 'cover',
+			};
+
+			return {
+				success: true,
+				message: `Configuración core por defecto para ${entityType}`,
+				data: defaultCoreConfig,
+			};
+		}
+
+		// Procesar cualquier campo JSON para devolverlo como objeto
+		const processedConfig = {
+			...config,
+			layerSystem: config.layerSystem ? JSON.parse(config.layerSystem as string) : undefined,
+		};
+
+		return {
+			success: true,
+			message: `Configuración core cargada para ${entityType}`,
+			data: processedConfig,
+		};
+	} catch (error) {
+		console.error('Error al obtener la configuración core:', error);
+		return {
+			success: false,
+			message: 'No se pudo obtener la configuración core',
+		};
+	}
+}
+
+/**
+ * Guarda la configuración core para una entidad específica
+ */
+export async function saveCoreConfig(
+	entityType: string,
+	options: Record<string, unknown>,
+	entityId?: string
+): Promise<ActionResponse> {
+	try {
+		// Determinar si guardamos configuración específica o por defecto
+		const isDefaultConfig = !entityId;
+
+		// Opciones para la consulta
+		const whereOptions = isDefaultConfig
+			? { entityType, isDefault: true }
+			: { entityType, entityId };
+
+		// Procesar layerSystem para almacenarlo como JSON
+		let layerSystemJson: string | undefined;
+		if (options.layerSystem) {
+			if (typeof options.layerSystem === 'string') {
+				// Ya es un string, validamos que sea JSON válido
+				try {
+					JSON.parse(options.layerSystem);
+					layerSystemJson = options.layerSystem;
+				} catch (e) {
+					layerSystemJson = JSON.stringify({
+						order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+						layerBlending: 'screen',
+						layerSpacing: 2,
+					});
+				}
+			} else {
+				// Es un objeto, lo stringificamos
+				layerSystemJson = JSON.stringify(options.layerSystem);
+			}
+		}
+
+		// Preparar datos para upsert
+		const coreData = {
+			entityType,
+			entityId: entityId || null,
+			isDefault: isDefaultConfig,
+			layerSystem: layerSystemJson,
+			interactiveMode: options.interactiveMode as string || 'hover',
+			hoverDelay: Number.parseInt(options.hoverDelay as string) || 100,
+			touchBehavior: options.touchBehavior as string || 'tap',
+			pointerPrecision: options.pointerPrecision as string || 'medium',
+			motionReduction: options.motionReduction === undefined ? false : Boolean(options.motionReduction),
+			performanceMode: options.performanceMode as string || 'balanced',
+			enableCache: options.enableCache === undefined ? true : Boolean(options.enableCache),
+			loadingStrategy: options.loadingStrategy as string || 'progressive',
+			enablePreloading: options.enablePreloading === undefined ? true : Boolean(options.enablePreloading),
+			enableHaptics: options.enableHaptics === undefined ? false : Boolean(options.enableHaptics),
+			hapticIntensity: Number.parseFloat(options.hapticIntensity as string) || 0.5,
+			enableSounds: options.enableSounds === undefined ? false : Boolean(options.enableSounds),
+			soundVolume: Number.parseFloat(options.soundVolume as string) || 0.5,
+			soundTheme: options.soundTheme as string || 'minimal',
+			contentArrangement: options.contentArrangement as string || 'standard',
+			enableAutoHeight: options.enableAutoHeight === undefined ? true : Boolean(options.enableAutoHeight),
+			maxLines: options.maxLines ? Number.parseInt(options.maxLines as string) : null,
+			textTruncation: options.textTruncation as string || 'ellipsis',
+			mediaFit: options.mediaFit as string || 'cover',
+		};
+
+		try {
+			// Guardar la configuración en la base de datos usando upsert
+			await prisma.coreConfig.upsert({
+				where: {
+					core_entity: {
+						entityType: whereOptions.entityType,
+						entityId: whereOptions.entityId || null
+					}
+				},
+				update: coreData,
+				create: coreData,
+			});
+		} catch (upsertError) {
+			console.error('Error específico al hacer upsert de core config:', upsertError);
+			// Si falla, intentar con create (puede ocurrir en nuevas instalaciones)
+			await prisma.coreConfig.create({
+				data: coreData,
+			});
+		}
+
+		// Actualizar la relación con CardConfiguration si es la configuración por defecto
+		if (isDefaultConfig) {
+			const coreConfig = await prisma.coreConfig.findFirst({
+				where: whereOptions,
+			});
+
+			if (coreConfig) {
+				await prisma.cardConfiguration.update({
+					where: { entityType },
+					data: {
+						coreConfigId: coreConfig.id,
+					},
+				});
+			}
+		}
+
+		// Revalidar las rutas que usan esta configuración
+		revalidatePath('/settings');
+		revalidatePath(`/${entityType}`);
+		if (entityId) {
+			revalidatePath(`/${entityType}/${entityId}`);
+		}
+
+		return {
+			success: true,
+			message: `Configuración core guardada para ${entityType}`,
+		};
+	} catch (error) {
+		console.error('Error al guardar la configuración core:', error);
+		return {
+			success: false,
+			message: 'No se pudo guardar la configuración core',
+		};
+	}
+}

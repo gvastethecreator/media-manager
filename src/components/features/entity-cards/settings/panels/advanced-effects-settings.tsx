@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Rainbow, Paintbrush, ArrowUpRight, ScanLine, Wallpaper, Wand2 } from 'lucide-react';
+import { ArrowUpRight, Paintbrush, Rainbow, ScanLine, Wallpaper, Wand2 } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 import type { CardOptions } from '../types';
 import { SliderOption, ToggleOption, createNestedOptionChangeHandler, panelColors } from './shared/panel-helpers';

@@ -8,10 +8,7 @@ import { type ActionResponse, actionResponseSchema, entityParamsSchema } from '.
 /**
  * Elimina la configuración visual para una entidad
  */
-export async function deleteVisualConfig(
-	entityType: string,
-	entityId?: string
-): Promise<ActionResponse> {
+export async function deleteVisualConfig(entityType: string, entityId?: string): Promise<ActionResponse> {
 	try {
 		// Validar parámetros
 		const validation = entityParamsSchema.safeParse({

@@ -10,6 +10,11 @@ import type {
 	TextureSystem,
 } from '@/components/features/entity-cards/types/base-card-types';
 import type { ReactNode } from 'react';
+import type * as React from 'react';
+import type { BaseLayerConfig } from '../layers/layer-plugin-system';
+import type { AnimationSystem } from '../modules/animation';
+import type { DesignSystem } from '../modules/design/types';
+import type { ExplodeSystem } from '../modules/explode';
 
 // Tipo para la configuración del grid de imágenes
 export type ImageGridLayout = 'single' | 'dual' | 'quad' | 'six';
@@ -22,16 +27,10 @@ export interface ImageGrid {
 }
 
 // Extendemos las opciones base de la tarjeta
-export interface CardOptions {
+export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 	// Diseño
 	enable3DEffect?: boolean;
-	designSystem?: {
-		preset?: string;
-		variant?: string;
-		aspectRatio?: string;
-		cornerStyle?: 'rounded' | 'sharp';
-		elevation?: number;
-	};
+	designSystem?: DesignSystem;
 
 	// Efectos Básicos
 	enableHolographicEffect?: boolean;
@@ -44,7 +43,20 @@ export interface CardOptions {
 		order?: string[];
 		layerBlending?: 'normal' | 'multiply' | 'screen' | 'overlay';
 		layerSpacing?: number;
+		explodeView?: boolean;
+		explodeDistance?: number;
 	};
+
+	// Configuración específica de cada capa
+	layerConfigs?: Record<string, BaseLayerConfig>;
+	layerOrder?: string[];
+	explodeView?: boolean;
+	explodeDistance?: number;
+
+	// Sistema de módulos
+	animation?: Partial<AnimationSystem>;
+	design?: Partial<DesignSystem>;
+	explode?: Partial<ExplodeSystem>;
 
 	// Efectos
 	effects?: {
@@ -142,6 +154,23 @@ export interface CardOptions {
 	// Colores
 	primaryColor?: string;
 	secondaryColor?: string;
+	accentColor?: string;
+	backgroundStartColor?: string;
+	backgroundEndColor?: string;
+	textColor?: string;
+	borderColor?: string;
+	useColorPalettes?: boolean;
+	colorPalette?: string;
+
+	// Raridades
+	rarityDistribution?: Record<string, number>;
+	defaultRarity?: string;
+
+	// Grid de imágenes
+	imageGridLayout?: 'single' | 'dual' | 'triple' | 'quad' | 'six';
+	imageGridStyle?: 'standard' | 'masonry' | 'carousel' | 'polaroid' | 'overlap';
+	imageGridGap?: number;
+	imageGridAspectRatio?: string;
 
 	// Estados y Animaciones
 	states?: {
@@ -215,6 +244,59 @@ export interface CardOptions {
 
 	// Efectos Avanzados
 	effects: EffectsOptions;
+
+	// Configuración general
+	title: string;
+	description: string;
+	imageUrl: string;
+	backgroundColor: string;
+	textColor: string;
+
+	// Configuración de contenido
+	showImage: boolean;
+	titlePosition: 'top' | 'bottom' | 'center';
+	descriptionPosition: 'top' | 'bottom' | 'center';
+	imagePosition: 'top' | 'bottom' | 'center' | 'background';
+
+	// Configuración de animación
+	animations: {
+		enabled: boolean;
+		type: 'none' | 'fade' | 'slide' | 'zoom' | 'flip' | 'custom';
+		duration: number;
+		delay: number;
+		easing: string;
+		customAnimation?: string;
+	};
+
+	// Configuración de exportación
+	export: {
+		format: 'png' | 'jpg' | 'svg' | 'webp';
+		quality: number;
+		width: number;
+		height: number;
+		dpi: number;
+	};
+
+	// Configuración avanzada
+	advanced: {
+		customCss: string;
+		customJs: string;
+		customAttributes: Record<string, string>;
+	};
+
+	// Propiedades existentes
+	id?: string;
+	name?: string;
+	borderWidth?: number;
+	borderRadius?: number;
+	padding?: number;
+	margin?: number;
+	width?: number;
+	height?: number;
+	aspectRatio?: string;
+
+	// Otras propiedades que puedan existir
+	[key: string]: unknown;
 }
 
 export interface CardSettingsProps {
