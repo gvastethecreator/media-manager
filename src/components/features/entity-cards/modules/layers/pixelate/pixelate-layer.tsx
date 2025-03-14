@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useEntityContext } from '../../hooks/use-entity-context';
-import { cn } from '@/lib/utils';
 import type { BlendMode } from '@/lib/types/blend-modes';
+import { cn } from '@/lib/utils';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useEntityContext } from '../../hooks/use-entity-context';
+import { usePixelateConfig } from './hooks/use-pixelate-config';
+import { PixelateSettings } from './pixelate-settings';
 import type { PixelateOptions } from './utils/pixelate-algorithms';
 import { pixelateImage } from './utils/pixelate-algorithms';
-import { createPortal } from 'react-dom';
-import { PixelateSettings } from './pixelate-settings';
-import { usePixelateConfig } from './hooks/use-pixelate-config';
 
 interface PixelateLayerProps {
 	entityId?: string;
@@ -20,16 +20,12 @@ interface PixelateLayerProps {
 /**
  * Componente de capa para aplicar efectos de pixelado a imágenes
  */
-export function PixelateLayer({
-	entityId,
-	entityType,
-	className,
-}: PixelateLayerProps) {
+export function PixelateLayer({ entityId, entityType, className }: PixelateLayerProps) {
 	const { imageUrl, canvasRef, setSettingsContent } = useEntityContext();
 
 	// Estado y refs
 	const pixelateCanvasRef = useRef<HTMLCanvasElement | null>(null);
-	const [isProcessing, setIsProcessing] = useState(false);
+	const [_isProcessing, setIsProcessing] = useState(false);
 
 	// Obtener configuración de pixelado
 	const { config, isLoading } = usePixelateConfig({
@@ -122,7 +118,6 @@ export function PixelateLayer({
 
 				// Aplicar opacidad
 				pixelateCanvas.style.opacity = config.opacity.toString();
-
 			} catch (err) {
 				console.error('Error al aplicar pixelado:', err);
 			} finally {
@@ -140,12 +135,7 @@ export function PixelateLayer({
 		}
 
 		// Mostrar panel de configuración cuando el componente está montado
-		setSettingsContent(
-			<PixelateSettings
-				entityId={entityId}
-				entityType={entityType}
-			/>
-		);
+		setSettingsContent(<PixelateSettings entityId={entityId} entityType={entityType} />);
 
 		// Limpiar cuando el componente se desmonte
 		return () => {
@@ -159,7 +149,5 @@ export function PixelateLayer({
 	}
 
 	// Renderizar el canvas usando createPortal para insertarlo en el DOM
-	return pixelateCanvasRef.current
-		? createPortal(null, pixelateCanvasRef.current)
-		: null;
+	return pixelateCanvasRef.current ? createPortal(null, pixelateCanvasRef.current) : null;
 }

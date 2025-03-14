@@ -8,8 +8,9 @@ import { ArrowUpRight, Award, Crown, FlameIcon, Heart, Shield, Sparkles, Sword, 
 import { ImageIcon, StarIcon, UsersIcon } from 'lucide-react';
 import type * as React from 'react';
 import { useMemo, useState } from 'react';
-import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
+import { VisualizationConfig } from '../config/visualization-config';
 import { generateRarityConfig } from '../entity-card-adapter';
+import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
 import type {
 	CardDesignData,
 	CardDesignPreset,
@@ -18,7 +19,6 @@ import type {
 	TextureConfig,
 } from '../types/base-card-types';
 import { ImageGrid } from './image-grid';
-import { VisualizationConfig } from '../config/visualization-config';
 
 interface CharacterCardProps {
 	character: CardDesignData;
@@ -207,13 +207,14 @@ export function CharacterCard({
 		// Mapear el promedio a una rareza
 		if (statAvg >= 8) {
 			return generateRarityConfig('legendary', getClassColor(character.characterInfo?.class || 'unknown'));
-		} else if (statAvg >= 6) {
-			return generateRarityConfig('rare', getClassColor(character.characterInfo?.class || 'unknown'));
-		} else if (statAvg >= 4) {
-			return generateRarityConfig('uncommon', getClassColor(character.characterInfo?.class || 'unknown'));
-		} else {
-			return generateRarityConfig('common', getClassColor(character.characterInfo?.class || 'unknown'));
 		}
+		if (statAvg >= 6) {
+			return generateRarityConfig('rare', getClassColor(character.characterInfo?.class || 'unknown'));
+		}
+		if (statAvg >= 4) {
+			return generateRarityConfig('uncommon', getClassColor(character.characterInfo?.class || 'unknown'));
+		}
+		return generateRarityConfig('common', getClassColor(character.characterInfo?.class || 'unknown'));
 	}, [character, rarity, stats, getClassColor]);
 
 	return (
@@ -237,7 +238,7 @@ export function CharacterCard({
 					visualOptions={{
 						...cardOptions,
 						rarityConfig: characterRarity,
-						textureConfig: texture || undefined
+						textureConfig: texture || undefined,
 					}}
 					entityType="character"
 					entityId={character.id}
@@ -337,7 +338,9 @@ export function CharacterCard({
 
 					{/* Descripción o metadata */}
 					{showMetadata && character.description && (
-						<div className="p-3 pt-2 border-t border-border text-xs card-body line-clamp-3">{character.description}</div>
+						<div className="p-3 pt-2 border-t border-border text-xs card-body line-clamp-3">
+							{character.description}
+						</div>
 					)}
 				</div>
 			</div>

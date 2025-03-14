@@ -204,8 +204,8 @@ export function ConceptCard({
 	const formattedDate = concept.updatedAt
 		? new Date(concept.updatedAt).toLocaleDateString()
 		: concept.createdAt
-		? new Date(concept.createdAt).toLocaleDateString()
-		: null;
+			? new Date(concept.createdAt).toLocaleDateString()
+			: null;
 
 	// Procesamiento de referencias
 	const references = concept.references || [];
@@ -233,7 +233,7 @@ export function ConceptCard({
 					showVisualConfig={showVisualConfig}
 					visualOptions={{
 						...cardOptions,
-						rarityConfig
+						rarityConfig,
 					}}
 					entityType="concept"
 					entityId={concept.id}
@@ -262,7 +262,7 @@ export function ConceptCard({
 							key: 'category',
 							label: concept.category || 'Sin categoría',
 							variant: 'outline',
-						}
+						},
 					]}
 					className="p-4"
 				>
@@ -283,9 +283,7 @@ export function ConceptCard({
 										</li>
 									))}
 									{references.length > 3 && (
-										<li className="text-muted-foreground italic text-xs">
-											+{references.length - 3} más...
-										</li>
+										<li className="text-muted-foreground italic text-xs">+{references.length - 3} más...</li>
 									)}
 								</ul>
 							</div>
@@ -310,15 +308,8 @@ export function ConceptCard({
 
 					{/* Metadatos */}
 					<div className="mt-4 flex justify-between text-xs text-muted-foreground">
-						<span>
-							{formattedDate && (
-								<span>Actualizado: {formattedDate}</span>
-							)}
-						</span>
-						<span
-							className="font-semibold"
-							style={{ color: rarityConfig.color }}
-						>
+						<span>{formattedDate && <span>Actualizado: {formattedDate}</span>}</span>
+						<span className="font-semibold" style={{ color: rarityConfig.color }}>
 							{rarityConfig.label}
 						</span>
 					</div>

@@ -207,7 +207,7 @@ export function AlbumCard({
 					visualOptions={{
 						...cardOptions,
 						rarityConfig: rarityConfig,
-						textureConfig: texture || undefined
+						textureConfig: texture || undefined,
 					}}
 					entityType="album"
 					entityId={data.id}
@@ -236,9 +236,7 @@ export function AlbumCard({
 						<div className={cn('text-sm text-muted-foreground')}>
 							<div className="flex items-center gap-2 mb-1">
 								<Calendar className="w-3.5 h-3.5" />
-								{createdAt && (
-									<span>{createdAt.toLocaleDateString()}</span>
-								)}
+								{createdAt && <span>{createdAt.toLocaleDateString()}</span>}
 							</div>
 
 							<div className="flex items-center gap-2 mb-1">
@@ -255,18 +253,26 @@ export function AlbumCard({
 						{!isPreview && (
 							<div className="mt-3 flex gap-2 pointer-events-auto">
 								{onEdit && (
-									<Button size="sm" variant="outline" onClick={(e) => {
-										e.stopPropagation();
-										onEdit(data.id as string);
-									}}>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={(e) => {
+											e.stopPropagation();
+											onEdit(data.id as string);
+										}}
+									>
 										<PencilIcon className="h-3.5 w-3.5 mr-1" /> Editar
 									</Button>
 								)}
 								{onDelete && (
-									<Button size="sm" variant="outline" onClick={(e) => {
-										e.stopPropagation();
-										onDelete(data.id as string);
-									}}>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={(e) => {
+											e.stopPropagation();
+											onDelete(data.id as string);
+										}}
+									>
 										<Trash2 className="h-3.5 w-3.5 mr-1" /> Eliminar
 									</Button>
 								)}

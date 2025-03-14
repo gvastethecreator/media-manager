@@ -1,13 +1,13 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
-import { useMemo, useState, useEffect } from 'react';
-import * as React from 'react';
-import { Button } from './button';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { useEffect, useMemo, useState } from 'react';
+import type * as React from 'react';
+import { Button } from './button';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 export function PickerExample() {
 	const [background, setBackground] = useState('#B4D455');
@@ -138,13 +138,7 @@ interface ColorPickerProps {
 	className?: string;
 }
 
-export function ColorPicker({
-	id,
-	value,
-	onChange,
-	disabled = false,
-	className
-}: ColorPickerProps) {
+export function ColorPicker({ id, value, onChange, disabled = false, className }: ColorPickerProps) {
 	const [color, setColor] = useState(value || '#000000');
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -172,10 +166,24 @@ export function ColorPicker({
 
 	// Colores predefinidos comunes
 	const presetColors = [
-		'#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-		'#FFFF00', '#FF00FF', '#00FFFF', '#FF9900', '#9900FF',
-		'#1E293B', '#334155', '#475569', '#64748B', '#94A3B8',
-		'#E2E8F0', '#F1F5F9', '#F8FAFC'
+		'#000000',
+		'#FFFFFF',
+		'#FF0000',
+		'#00FF00',
+		'#0000FF',
+		'#FFFF00',
+		'#FF00FF',
+		'#00FFFF',
+		'#FF9900',
+		'#9900FF',
+		'#1E293B',
+		'#334155',
+		'#475569',
+		'#64748B',
+		'#94A3B8',
+		'#E2E8F0',
+		'#F1F5F9',
+		'#F8FAFC',
 	];
 
 	return (
@@ -184,14 +192,11 @@ export function ColorPicker({
 				<Button
 					id={id}
 					variant="outline"
-					className={cn("w-full justify-start text-left font-normal", className)}
+					className={cn('w-full justify-start text-left font-normal', className)}
 					disabled={disabled}
 				>
 					<div className="flex items-center gap-2">
-						<div
-							className="h-4 w-4 rounded-sm border"
-							style={{ backgroundColor: color }}
-						/>
+						<div className="h-4 w-4 rounded-sm border" style={{ backgroundColor: color }} />
 						<span>{color}</span>
 					</div>
 				</Button>
@@ -208,13 +213,7 @@ export function ColorPicker({
 								onChange={(e) => handleColorChange(e.target.value)}
 								className="h-10 w-10 p-0 cursor-pointer"
 							/>
-							<Input
-								type="text"
-								value={color}
-								onChange={handleInputChange}
-								className="flex-1"
-								placeholder="#000000"
-							/>
+							<Input type="text" value={color} onChange={handleInputChange} className="flex-1" placeholder="#000000" />
 						</div>
 					</div>
 
@@ -225,10 +224,7 @@ export function ColorPicker({
 								<button
 									key={presetColor}
 									type="button"
-									className={cn(
-										"h-6 w-6 rounded-md border",
-										color === presetColor && "ring-2 ring-primary"
-									)}
+									className={cn('h-6 w-6 rounded-md border', color === presetColor && 'ring-2 ring-primary')}
 									style={{ backgroundColor: presetColor }}
 									onClick={() => handleColorChange(presetColor)}
 								/>

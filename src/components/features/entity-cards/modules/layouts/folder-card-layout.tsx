@@ -170,7 +170,7 @@ export function FolderCard({
 		...visualOptions,
 	});
 	const [folderImages, setFolderImages] = useState<RandomImage[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [_loading, setLoading] = useState(false);
 
 	// Calcular configuración de rareza
 	const rarityConfig = generateFolderRarityConfig(folder);
@@ -178,7 +178,9 @@ export function FolderCard({
 	// Cargar imágenes de la carpeta
 	useEffect(() => {
 		const loadImages = async () => {
-			if (!folder.id) return;
+			if (!folder.id) {
+				return;
+			}
 
 			try {
 				setLoading(true);
@@ -205,8 +207,8 @@ export function FolderCard({
 	const formattedDate = folder.updatedAt
 		? new Date(folder.updatedAt).toLocaleDateString()
 		: folder.createdAt
-		? new Date(folder.createdAt).toLocaleDateString()
-		: null;
+			? new Date(folder.createdAt).toLocaleDateString()
+			: null;
 
 	// Formatear tamaño
 	const formattedSize = folder.size ? formatBytes(folder.size) : null;
@@ -231,7 +233,7 @@ export function FolderCard({
 					showVisualConfig={showVisualConfig}
 					visualOptions={{
 						...cardOptions,
-						rarityConfig
+						rarityConfig,
 					}}
 					entityType="folder"
 					entityId={folder.id}
@@ -259,7 +261,7 @@ export function FolderCard({
 							key: 'visibility',
 							label: folder.isPublic ? 'Pública' : 'Privada',
 							variant: 'outline',
-						}
+						},
 					].filter(Boolean)}
 					className="p-4"
 				>
@@ -322,10 +324,7 @@ export function FolderCard({
 								</span>
 							)}
 						</span>
-						<span
-							className="font-semibold"
-							style={{ color: rarityConfig.color }}
-						>
+						<span className="font-semibold" style={{ color: rarityConfig.color }}>
 							{rarityConfig.label}
 						</span>
 					</div>
