@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
+import { EntityCardContent } from './entity-card-content';
 import { CardContainer } from './layers/card-container';
 import { LayerRenderer } from './layers/layer-plugin-system';
 import type { BaseLayerConfig } from './layers/layer-plugin-system';
@@ -17,7 +18,7 @@ import { CoreLayer } from './modules/core';
 import type { CoreConfig } from './modules/core/core-config';
 import { useDesignSystem } from './modules/design';
 import type { DesignSystem as DesignSystemType } from './modules/design/types';
-import { ImageGrid, type ImageGridImage, type ImageGridLayout, type ImageGridStyle } from './modules/image-grid';
+import type { ImageGridImage, ImageGridLayout, ImageGridStyle } from './modules/image-grid';
 import { useLayersSystem } from './modules/layers';
 import type { RarityDefinition } from './modules/rarities';
 import type { CardOptions } from './types/card-settings-types';
@@ -134,6 +135,7 @@ export interface EntityCardProps {
 /**
  * Componente EntityCard que aprovecha todos los módulos migrados
  * Esta implementación integra todos los sistemas modulares desarrollados
+ * 🚀 Versión optimizada con separación de responsabilidades
  */
 export function EntityCard({
 	id,
@@ -170,13 +172,6 @@ export function EntityCard({
 	const animationClasses = enableAnimation ? animationSystem.getClasses(isFlipped) : '';
 	const colorClasses = colorSystem.getClasses();
 
-	// Procesar imágenes para el grid
-	const imageGridContent = Array.isArray(image)
-		? image
-		: image
-			? [{ src: image, alt: title || 'Entity card image' }]
-			: [];
-
 	// Función para voltear la tarjeta
 	const handleFlip = () => {
 		if (enableBackside) {
@@ -211,21 +206,17 @@ export function EntityCard({
 				{/* Sistema de capas */}
 				{enableLayers && layers.length > 0 && <LayerRenderer layers={layers} context={{ options, isFlipped }} />}
 
-				{/* Grid de imágenes */}
-				{imageGridContent.length > 0 && (
-					<ImageGrid images={imageGridContent} layout={imageLayout} style={imageStyle} options={options.imageGrid} />
-				)}
-
-				{/* Título y descripción */}
-				{(title || description) && (
-					<div className="entity-card-content">
-						{title && <h3 className="entity-card-title">{title}</h3>}
-						{description && <p className="entity-card-description">{description}</p>}
-					</div>
-				)}
-
-				{/* Contenido personalizado */}
-				{children}
+				{/* Contenido de la tarjeta usando el componente separado */}
+				<EntityCardContent
+					title={title}
+					description={description}
+					image={image}
+					imageLayout={imageLayout}
+					imageStyle={imageStyle}
+					options={options}
+				>
+					{children}
+				</EntityCardContent>
 			</div>
 
 			{/* Cara Posterior */}

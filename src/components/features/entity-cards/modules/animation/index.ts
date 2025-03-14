@@ -16,10 +16,7 @@ export type {
 } from './types';
 
 // Exportar adaptadores para compatibilidad con el sistema antiguo
-export {
-	legacyToAnimationSystem,
-	animationSystemToLegacy,
-} from './animation-adapter';
+export { legacyToAnimationSystem, animationSystemToLegacy } from './animation-adapter';
 
 // Exportar estilos
 export * from './animations.css';
