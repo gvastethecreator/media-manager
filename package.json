@@ -29,6 +29,7 @@
   "dependencies": {
     "@bull-board/api": "^6.7.10",
     "@bull-board/express": "^6.7.10",
+    "@hello-pangea/dnd": "^18.0.1",
     "@prisma/client": "^6.5.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -59,7 +60,7 @@
     "@tanstack/react-query": "^5.67.3",
     "@tanstack/react-query-devtools": "^5.67.3",
     "@tanstack/react-table": "^8.21.2",
-    "@tanstack/react-virtual": "^3.13.3",
+    "@tanstack/react-virtual": "^3.13.4",
     "@types/mime-types": "^2.1.4",
     "@types/uuid": "^10.0.0",
     "bull": "^4.16.5",

@@ -1,49 +1,31 @@
-"use client";
+'use client';
 
-import type { RaritySystem } from "@/app/actions/entities-cards/entities-cards.actions";
-import {
-	getEntityCardConfig,
-	saveEntityCardConfig,
-} from "@/app/actions/entities-cards/entities-cards.actions";
-import type { TextureSystem } from "@/components/features/entity-cards/types/base-card-types";
+import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
+import { getEntityCardConfig, saveEntityCardConfig } from '@/components/features/entity-cards/server-actions/entities-cards.actions';
+import type { TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
 
-import type {
-	RarityConfig,
-	TextureConfig,
-} from "@/components/features/entity-cards/types/base-card-types";
+import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type {
 	CardConfigurationDto,
 	ImageGridLayout,
 	ImageGridStyle,
-} from "@/components/features/entity-cards/types/card-types";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Alert, AlertDescription } from "@/components/ui/alert-enhanced";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toastService } from "@/lib/services/toast.service";
-import { cn } from "@/lib/utils";
+} from '@/components/features/entity-cards/types/card-types';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Alert, AlertDescription } from '@/components/ui/alert-enhanced';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
+import { toastService } from '@/lib/services/toast.service';
+import { cn } from '@/lib/utils';
+import { saveGeneralSettings } from '@/server-actions/settings.actions';
 import {
 	AlertCircle,
 	ChevronRight,
@@ -73,41 +55,57 @@ import {
 	StickyNote,
 	TagIcon,
 	Users,
-} from "lucide-react";
+} from 'lucide-react';
 import { FolderIcon as FolderIconIcon, ImageIcon, VideoIcon } from 'lucide-react';
-import { motion } from "motion/react";
-import type { ReactNode } from "react";
-import type * as React from "react";
-import { useCallback, useEffect, useState } from "react";
-import { adaptBaseToSettingsOptions } from "../base/card-adapter";
-import { DEFAULT_SETTINGS_OPTIONS } from "../config/card-config-defaults";
-import type { CardOptions } from "../types/card-settings-types";
-import { FiltersSettings, PatternsSettings, ShadersSettings } from "./panels";
-import { AdvancedEffectsSettings } from "./panels/advanced-effects-settings";
-import { DesignSettings } from "./panels/design-settings";
-import { DistortionEffectsSettings } from "./panels/distortion-effects-settings";
-import { FolderSettings } from "./panels/folder-settings";
-import { ImageGridSettings } from "./panels/image-grid-settings";
+import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
+import type * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { adaptBaseToSettingsOptions } from '../base/card-adapter';
+import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
+import type { CardOptions } from '../types/card-settings-types';
+import { FiltersSettings, PatternsSettings, ShadersSettings } from './panels';
+import { DesignSettingsPanel } from './panels';
+import {
+	AdvancedSettingsPanel,
+	AnimationSettingsPanel,
+	ContentSettingsPanel,
+	ExportSettingsPanel,
+	GeneralSettingsPanel
+} from './panels';
+import { AdvancedEffectsSettings } from './panels/advanced-effects-settings';
+import { BacksideSettings } from './panels/backside-settings';
+import { ColorPaletteSettings } from './panels/color-palette-settings';
+import { CoreSettings } from './panels/core-settings';
+import { DistortionEffectsSettings } from './panels/distortion-effects-settings';
+import { FolderSettings } from './panels/folder-settings';
+import { GeneralSettings } from './panels/general-settings';
+import { ImageGridSettings } from './panels/image-grid-settings';
 import { ImageSettings } from './panels/image-settings';
-import { InteractionSettings } from "./panels/interaction-settings";
-import { PerformanceSettings } from "./panels/performance-settings";
-import { PresetsPanel } from "./panels/presets-panel";
-import { PreviewSettings } from "./panels/preview-settings";
-import { StatesSettings } from "./panels/states-settings";
-import { SystemSettings } from "./panels/system-settings";
+import { InteractionSettings } from './panels/interaction-settings';
+import { LayersSettings } from './panels/layers-settings';
+import { LayersSettingsPanel } from './panels/layers-settings-panel';
+import { PerformanceSettings } from './panels/performance-settings';
+import { PresetsPanel } from './panels/presets-panel';
+import { PreviewSettings } from './panels/preview-settings';
+import { RaritySettings } from './panels/rarity-settings';
+import { ShadowsSettings } from './panels/shadows-settings';
+import { StatesSettings } from './panels/states-settings';
+import { SystemSettings } from './panels/system-settings';
+import { TexturesSettings } from './panels/textures-settings';
 import { VideoSettings } from './panels/video-settings';
-import { VisualEffectsSettings } from "./panels/visual-effects-settings";
-import { EntityCardPreview } from "./preview/entity-card-preview";
+import { VisualEffectsSettings } from './panels/visual-effects-settings';
+import { EntityCardPreview } from './preview/entity-card-preview';
+
+// Añadir la variable entityId que falta
+const entityId = 'default'; // ID por defecto para componentes que no están asociados a una entidad específica
 
 // Función para adaptar opciones entre diferentes estructuras de tipo
 const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 	// Convertir imageStyle de objeto a string si es necesario
 	const adaptedOptions = { ...options } as Record<string, unknown>;
-	if (
-		adaptedOptions.imageStyle &&
-		typeof adaptedOptions.imageStyle === "object"
-	) {
-		adaptedOptions.imageStyle = "cover"; // Valor predeterminado compatible
+	if (adaptedOptions.imageStyle && typeof adaptedOptions.imageStyle === 'object') {
+		adaptedOptions.imageStyle = 'cover'; // Valor predeterminado compatible
 	}
 
 	// Asegurarnos de que effects tenga la estructura completa
@@ -120,8 +118,7 @@ const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 			effects.glitchEffect = DEFAULT_SETTINGS_OPTIONS.effects.glitchEffect;
 		}
 		if (!effects.chromaticAberration) {
-			effects.chromaticAberration =
-				DEFAULT_SETTINGS_OPTIONS.effects.chromaticAberration;
+			effects.chromaticAberration = DEFAULT_SETTINGS_OPTIONS.effects.chromaticAberration;
 		}
 		if (!effects.pixelate) {
 			effects.pixelate = DEFAULT_SETTINGS_OPTIONS.effects.pixelate;
@@ -147,11 +144,11 @@ interface EntityTypeOptions {
 // Lista de tipos de entidades disponibles con colores para los iconos
 const entityTypes: EntityTypeOptions[] = [
 	{
-		entityType: "card-folder",
-		title: "Carpetas",
-		description: "Configuración de tarjetas para carpetas",
+		entityType: 'card-folder',
+		title: 'Carpetas',
+		description: 'Configuración de tarjetas para carpetas',
 		icon: FolderIconIcon,
-		color: "#3b82f6", // Color azul
+		color: '#3b82f6', // Color azul
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			enable3DEffect: true,
@@ -162,13 +159,13 @@ const entityTypes: EntityTypeOptions[] = [
 			enableGlowEffect: true,
 			enableGrainEffect: false,
 			designSystem: {
-				preset: "folder",
-				variant: "default",
-				aspectRatio: "7/10",
-				cornerStyle: "rounded",
+				preset: 'folder',
+				variant: 'default',
+				aspectRatio: '7/10',
+				cornerStyle: 'rounded',
 				cornerRadius: 12,
 				elevation: 2,
-				shadowStyle: "soft",
+				shadowStyle: 'soft',
 			},
 			layerSystem: {
 				order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
@@ -178,11 +175,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-album",
-		title: "Álbumes",
-		description: "Configuración de tarjetas para álbumes",
+		entityType: 'card-album',
+		title: 'Álbumes',
+		description: 'Configuración de tarjetas para álbumes',
 		icon: <Images className="h-4 w-4" />,
-		color: "#8b5cf6", // Color morado
+		color: '#8b5cf6', // Color morado
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -192,11 +189,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-collection",
-		title: "Colecciones",
-		description: "Configuración de tarjetas para colecciones",
+		entityType: 'card-collection',
+		title: 'Colecciones',
+		description: 'Configuración de tarjetas para colecciones',
 		icon: <LibrarySquare className="h-4 w-4" />,
-		color: "#ef4444", // Color rojo
+		color: '#ef4444', // Color rojo
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -206,11 +203,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-tag",
-		title: "Etiquetas",
-		description: "Configuración de tarjetas para etiquetas",
+		entityType: 'card-tag',
+		title: 'Etiquetas',
+		description: 'Configuración de tarjetas para etiquetas',
 		icon: <TagIcon className="h-4 w-4" />,
-		color: "#f59e0b", // Color naranja
+		color: '#f59e0b', // Color naranja
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -220,11 +217,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-character",
-		title: "Personas",
-		description: "Configuración de tarjetas para personas",
+		entityType: 'card-character',
+		title: 'Personas',
+		description: 'Configuración de tarjetas para personas',
 		icon: <Users className="h-4 w-4" />,
-		color: "#ec4899", // Color rosa
+		color: '#ec4899', // Color rosa
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -234,11 +231,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-world-item",
-		title: "Objetos",
-		description: "Configuración de tarjetas para objetos",
+		entityType: 'card-world-item',
+		title: 'Objetos',
+		description: 'Configuración de tarjetas para objetos',
 		icon: <Package className="h-4 w-4" />,
-		color: "#f59e0b", // Color ámbar
+		color: '#f59e0b', // Color ámbar
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -248,11 +245,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-place",
-		title: "Lugares",
-		description: "Configuración de tarjetas para lugares",
+		entityType: 'card-place',
+		title: 'Lugares',
+		description: 'Configuración de tarjetas para lugares',
 		icon: <MapPin className="h-4 w-4" />,
-		color: "#14b8a6", // Color teal
+		color: '#14b8a6', // Color teal
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -262,11 +259,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-concept",
-		title: "Conceptos",
-		description: "Configuración de tarjetas para conceptos",
+		entityType: 'card-concept',
+		title: 'Conceptos',
+		description: 'Configuración de tarjetas para conceptos',
 		icon: <Lightbulb className="h-4 w-4" />,
-		color: "#3b82f6", // Color azul
+		color: '#3b82f6', // Color azul
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -276,11 +273,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-prompt",
-		title: "Prompts",
-		description: "Configuración de tarjetas para prompts",
+		entityType: 'card-prompt',
+		title: 'Prompts',
+		description: 'Configuración de tarjetas para prompts',
 		icon: <MessageSquare className="h-4 w-4" />,
-		color: "#10b981", // Color verde
+		color: '#10b981', // Color verde
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -290,11 +287,11 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-note",
-		title: "Notas",
-		description: "Configuración de tarjetas para notas",
+		entityType: 'card-note',
+		title: 'Notas',
+		description: 'Configuración de tarjetas para notas',
 		icon: <StickyNote className="h-4 w-4" />,
-		color: "#a855f7", // Color púrpura
+		color: '#a855f7', // Color púrpura
 		options: adaptOptions({
 			...DEFAULT_SETTINGS_OPTIONS,
 			raritySystem: true,
@@ -304,19 +301,19 @@ const entityTypes: EntityTypeOptions[] = [
 		}),
 	},
 	{
-		entityType: "card-image",
-		title: "Imágenes",
-		description: "Configuración de imágenes",
+		entityType: 'card-image',
+		title: 'Imágenes',
+		description: 'Configuración de imágenes',
 		icon: ImageIcon,
-		color: "text-green-500",
+		color: 'text-green-500',
 		options: {} as CardOptions,
 	},
 	{
-		entityType: "card-video",
-		title: "Videos",
-		description: "Configuración de videos",
+		entityType: 'card-video',
+		title: 'Videos',
+		description: 'Configuración de videos',
 		icon: VideoIcon,
-		color: "text-purple-500",
+		color: 'text-purple-500',
 		options: {} as CardOptions,
 	},
 ];
@@ -324,128 +321,139 @@ const entityTypes: EntityTypeOptions[] = [
 // Función para convertir entre ID con prefijo y sin prefijo
 const convertEntityId = {
 	// Convertir de ID con prefijo 'card-' a ID sin prefijo para API
-	toApiFormat: (entityId: string): string => entityId.replace("card-", ""),
+	toApiFormat: (entityId: string): string => entityId.replace('card-', ''),
 
 	// Convertir de ID sin prefijo a ID con prefijo 'card-' para la UI
-	toUiFormat: (entityId: string): string =>
-		entityId.startsWith("card-") ? entityId : `card-${entityId}`,
+	toUiFormat: (entityId: string): string => (entityId.startsWith('card-') ? entityId : `card-${entityId}`),
 };
 
 // Definición de categorías con sus colores y estilos
 const categories = [
 	{
-		id: "basic",
-		title: "Configuración Básica",
+		id: 'basic',
+		title: 'Configuración Básica',
 		icon: Settings2,
-		color: "#3b82f6",
+		color: '#3b82f6',
 		panels: [
 			{
-				id: "presets",
-				title: "Presets y Plantillas",
+				id: 'presets',
+				title: 'Presets y Plantillas',
 				icon: LayoutGrid,
-				color: "#3b82f6",
+				color: '#3b82f6',
 			},
 			{
-				id: "folders",
-				title: "Configuración de Carpetas",
+				id: 'folders',
+				title: 'Configuración de Carpetas',
 				icon: FolderIconIcon,
-				color: "#3b82f6",
+				color: '#3b82f6',
 			},
 			{
-				id: "systems",
-				title: "Sistemas y Atributos",
+				id: 'systems',
+				title: 'Sistemas y Atributos',
 				icon: PaintBucket,
-				color: "#8b5cf6",
+				color: '#8b5cf6',
 			},
 		],
 	},
 	{
-		id: "appearance",
-		title: "Apariencia",
+		id: 'appearance',
+		title: 'Apariencia',
 		icon: Palette,
-		color: "#10b981",
+		color: '#10b981',
 		panels: [
 			{
-				id: "design",
-				title: "Diseño y Colores",
+				id: 'design',
+				title: 'Diseño y Colores',
 				icon: Palette,
-				color: "#10b981",
+				color: '#10b981',
 			},
 			{
-				id: "visual",
-				title: "Efectos Visuales",
+				id: 'visual',
+				title: 'Efectos Visuales',
 				icon: Sparkles,
-				color: "#f59e0b",
+				color: '#f59e0b',
 			},
 			{
-				id: "distortion",
-				title: "Efectos de Distorsión",
+				id: 'distortion',
+				title: 'Efectos de Distorsión',
 				icon: Sliders,
-				color: "#ef4444",
+				color: '#ef4444',
 			},
 			{
-				id: "advanced",
-				title: "Efectos Avanzados",
+				id: 'advanced',
+				title: 'Efectos Avanzados',
 				icon: Settings2,
-				color: "#8b5cf6",
+				color: '#8b5cf6',
 			},
 			{
-				id: "filters",
-				title: "Filtros",
+				id: 'filters',
+				title: 'Filtros',
 				icon: Sliders,
-				color: "#14b8a6",
+				color: '#14b8a6',
 			},
 			{
-				id: "patterns",
-				title: "Patrones",
+				id: 'patterns',
+				title: 'Patrones',
 				icon: Grid2X2,
-				color: "#ec4899",
+				color: '#ec4899',
 			},
 			{
-				id: "shaders",
-				title: "Shaders",
+				id: 'shaders',
+				title: 'Shaders',
 				icon: Sparkles,
-				color: "#f59e0b",
-			},
-		],
-	},
-	{
-		id: "content",
-		title: "Contenido",
-		icon: Grid2X2,
-		color: "#ec4899",
-		panels: [
-			{
-				id: "images",
-				title: "Imágenes y Multimedia",
-				icon: Grid2X2,
-				color: "#ec4899",
+				color: '#f59e0b',
 			},
 			{
-				id: "states",
-				title: "Estados Interactivos",
+				id: 'backside',
+				title: 'Cara Posterior',
 				icon: Repeat,
-				color: "#f59e0b",
-			},
-			{
-				id: "interaction",
-				title: "Interacción",
-				icon: MousePointer,
-				color: "#10b981",
+				color: '#ec4899',
 			},
 		],
 	},
 	{
-		id: "technical",
-		title: "Técnico",
-		icon: Laptop,
-		color: "#14b8a6",
+		id: 'content',
+		title: 'Contenido',
+		icon: Grid2X2,
+		color: '#ec4899',
 		panels: [
 			{
-				id: "performance",
-				title: "Rendimiento y Optimización",
+				id: 'images',
+				title: 'Imágenes y Multimedia',
+				icon: Grid2X2,
+				color: '#ec4899',
+			},
+			{
+				id: 'states',
+				title: 'Estados Interactivos',
+				icon: Repeat,
+				color: '#f59e0b',
+			},
+			{
+				id: 'interaction',
+				title: 'Interacción',
+				icon: MousePointer,
+				color: '#10b981',
+			},
+		],
+	},
+	{
+		id: 'technical',
+		title: 'Técnico',
+		icon: Laptop,
+		color: '#14b8a6',
+		panels: [
+			{
+				id: 'performance',
+				title: 'Rendimiento y Optimización',
 				icon: Laptop,
-				color: "#14b8a6",
+				color: '#14b8a6',
+			},
+			{
+				id: 'core',
+				title: 'Configuración del Core',
+				icon: Settings,
+				color: '#8b5cf6',
 			},
 		],
 	},
@@ -459,25 +467,17 @@ const EntityTypeSelector = ({
 	activeEntityType: string;
 	onEntityTypeChange: (type: string) => void;
 }) => {
-	const activeEntity = entityTypes.find(
-		(e) => e.entityType === activeEntityType
-	);
+	const activeEntity = entityTypes.find((e) => e.entityType === activeEntityType);
 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button
-					variant="outline"
-					className="w-full justify-between text-[11px] font-normal"
-				>
+				<Button variant="outline" className="w-full justify-between text-[11px] font-normal">
 					<div className="flex items-center gap-2">
-						<span
-							className="flex items-center justify-center"
-							style={{ color: activeEntity?.color }}
-						>
+						<span className="flex items-center justify-center" style={{ color: activeEntity?.color }}>
 							{activeEntity?.icon}
 						</span>
-						{activeEntity?.title || "Seleccionar tipo"}
+						{activeEntity?.title || 'Seleccionar tipo'}
 					</div>
 					<ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
@@ -487,18 +487,11 @@ const EntityTypeSelector = ({
 					{entityTypes.map((entityType) => (
 						<Button
 							key={entityType.entityType}
-							variant={
-								activeEntityType === entityType.entityType
-									? "secondary"
-									: "ghost"
-							}
+							variant={activeEntityType === entityType.entityType ? 'secondary' : 'ghost'}
 							className="w-full justify-start gap-2 text-[11px] font-normal"
 							onClick={() => onEntityTypeChange(entityType.entityType)}
 						>
-							<span
-								className="flex items-center justify-center"
-								style={{ color: entityType.color }}
-							>
+							<span className="flex items-center justify-center" style={{ color: entityType.color }}>
 								{entityType.icon}
 							</span>
 							{entityType.title}
@@ -526,9 +519,7 @@ const NavigationPanel = ({
 	activePanel: string;
 	onPanelChange: (panel: string) => void;
 }) => {
-	const [collapsedCategories, setCollapsedCategories] = useState<
-		Record<string, boolean>
-	>({});
+	const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
 	const handleCollapseToggle = (categoryId: string) => {
 		setCollapsedCategories((prev) => ({
@@ -542,10 +533,7 @@ const NavigationPanel = ({
 			<ScrollArea className="flex-1">
 				<div className="p-1 space-y-2">
 					{/* Selector de Tipo de Entidad */}
-					<EntityTypeSelector
-						activeEntityType={activeEntityType}
-						onEntityTypeChange={onEntityTypeChange}
-					/>
+					<EntityTypeSelector activeEntityType={activeEntityType} onEntityTypeChange={onEntityTypeChange} />
 
 					{/* Categorías y Paneles */}
 					<div className="space-y-0.5">
@@ -554,25 +542,20 @@ const NavigationPanel = ({
 								<button
 									onClick={() => handleCollapseToggle(category.id)}
 									className={cn(
-										"flex items-center w-full gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md",
-										"hover:bg-secondary/20 transition-all duration-150",
-										activeCategory === category.id
-											? "bg-secondary/30 text-primary"
-											: "text-muted-foreground"
+										'flex items-center w-full gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md',
+										'hover:bg-secondary/20 transition-all duration-150',
+										activeCategory === category.id ? 'bg-secondary/30 text-primary' : 'text-muted-foreground'
 									)}
 									type="button"
 								>
-									<span
-										className="flex items-center justify-center"
-										style={{ color: category.color }}
-									>
+									<span className="flex items-center justify-center" style={{ color: category.color }}>
 										<category.icon className="h-3.5 w-3.5" />
 									</span>
 									{category.title}
 									<ChevronRight
 										className={cn(
-											"h-3.5 w-3.5 ml-auto transition-transform",
-											collapsedCategories[category.id] ? "rotate-90" : ""
+											'h-3.5 w-3.5 ml-auto transition-transform',
+											collapsedCategories[category.id] ? 'rotate-90' : ''
 										)}
 									/>
 								</button>
@@ -587,18 +570,13 @@ const NavigationPanel = ({
 													onPanelChange(panel.id);
 												}}
 												className={cn(
-													"flex items-center w-full gap-1.5 px-2 py-1.5 text-[10px] font-medium rounded-md",
-													"hover:bg-secondary/20 transition-all duration-150",
-													activePanel === panel.id
-														? "bg-secondary/30 text-primary"
-														: "text-muted-foreground"
+													'flex items-center w-full gap-1.5 px-2 py-1.5 text-[10px] font-medium rounded-md',
+													'hover:bg-secondary/20 transition-all duration-150',
+													activePanel === panel.id ? 'bg-secondary/30 text-primary' : 'text-muted-foreground'
 												)}
 												type="button"
 											>
-												<span
-													className="flex items-center justify-center"
-													style={{ color: panel.color }}
-												>
+												<span className="flex items-center justify-center" style={{ color: panel.color }}>
 													<panel.icon className="h-3.5 w-3.5" />
 												</span>
 												{panel.title}
@@ -616,9 +594,10 @@ const NavigationPanel = ({
 };
 
 export function EntitiesCardsSection() {
+	const { toast } = useToast();
+
 	// Estado para el tipo de entidad activo
-	const [activeEntityType, setActiveEntityType] =
-		useState<string>("card-album");
+	const [activeEntityType, setActiveEntityType] = useState<string>('card-album');
 
 	// Estado para las opciones de la tarjeta activa
 	const [cardOptions, setCardOptions] = useState<CardOptions>(
@@ -626,12 +605,8 @@ export function EntitiesCardsSection() {
 	);
 
 	// Estados para rareza y textura seleccionadas para vista previa
-	const [selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(
-		null
-	);
-	const [selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(
-		null
-	);
+	const [selectedRarity, setSelectedRarity] = useState<RarityConfig | null>(null);
+	const [selectedTexture, setSelectedTexture] = useState<TextureConfig | null>(null);
 
 	// Estado para el preset activo
 	const [activePreset, setActivePreset] = useState<string | null>(null);
@@ -643,8 +618,8 @@ export function EntitiesCardsSection() {
 	const [error, setError] = useState<string | null>(null);
 
 	// Estado para la categoría activa
-	const [activeCategory, setActiveCategory] = useState<string>("basic");
-	const [activePanel, setActivePanel] = useState<string>("presets");
+	const [activeCategory, setActiveCategory] = useState<string>('basic');
+	const [activePanel, setActivePanel] = useState<string>('presets');
 
 	// Estado para mostrar información
 	const [showInfo, setShowInfo] = useState(true);
@@ -676,17 +651,19 @@ export function EntitiesCardsSection() {
 				// Si no hay opciones guardadas, usar las predeterminadas del tipo de entidad
 				const defaultOptions =
 					entityTypes.find((e) => e.entityType === activeEntityType)?.options ||
-					adaptOptions(
-						DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>
-					);
+					adaptOptions(DEFAULT_SETTINGS_OPTIONS as unknown as Record<string, unknown>);
 				setCardOptions(defaultOptions);
 			}
 		} catch (error) {
-			console.error("Error al cargar opciones de tarjeta:", error);
-			setError("No se pudieron cargar las opciones de tarjeta");
-			toastService.error("No se pudieron cargar las opciones de tarjeta");
+			console.error('Error al cargar opciones de tarjeta:', error);
+			setError('No se pudieron cargar las opciones de tarjeta');
+			toast({
+				title: 'Error',
+				description: 'No se pudo cargar la configuración de tarjetas',
+				variant: 'destructive',
+			});
 		}
-	}, [activeEntityType]);
+	}, [activeEntityType, toast]);
 
 	// Cargar opciones al iniciar o cambiar el tipo de entidad
 	useEffect(() => {
@@ -700,7 +677,11 @@ export function EntitiesCardsSection() {
 			setError(null);
 
 			if (!activeEntityType) {
-				toastService.error("No se ha seleccionado un tipo de entidad");
+				toast({
+					title: 'Error',
+					description: 'No se ha seleccionado un tipo de entidad',
+					variant: 'destructive',
+				});
 				return;
 			}
 
@@ -719,8 +700,8 @@ export function EntitiesCardsSection() {
 				enableGrainEffect: !!cardOptions.enableGrainEffect,
 				hoverLiftHeight: cardOptions.hoverLiftHeight || 10,
 				maxRotation: cardOptions.maxRotation || 15,
-				primaryColor: cardOptions.primaryColor || "0, 153, 255",
-				secondaryColor: cardOptions.secondaryColor || "128, 0, 255",
+				primaryColor: cardOptions.primaryColor || '0, 153, 255',
+				secondaryColor: cardOptions.secondaryColor || '128, 0, 255',
 				raritySystem: !!cardOptions.raritySystem,
 				categorySystem: !!cardOptions.categorySystem,
 				textureSystem: !!cardOptions.textureSystem,
@@ -731,39 +712,37 @@ export function EntitiesCardsSection() {
 				showImageCount: !!cardOptions.showImageCount,
 				imageGridAspectRatio: cardOptions.imageGridAspectRatio,
 				// Convertir objetos a JSON para almacenamiento
-				holographicOptions: cardOptions.holographicOptions
-					? JSON.stringify(cardOptions.holographicOptions)
-					: undefined,
-				scanlinesOptions: cardOptions.scanlinesOptions
-					? JSON.stringify(cardOptions.scanlinesOptions)
-					: undefined,
-				glowOptions: cardOptions.glowOptions
-					? JSON.stringify(cardOptions.glowOptions)
-					: undefined,
-				borderOptions: cardOptions.borderOptions
-					? JSON.stringify(cardOptions.borderOptions)
-					: undefined,
-				grainOptions: cardOptions.grainOptions
-					? JSON.stringify(cardOptions.grainOptions)
-					: undefined,
+				holographicOptions: cardOptions.holographicOptions ? JSON.stringify(cardOptions.holographicOptions) : undefined,
+				scanlinesOptions: cardOptions.scanlinesOptions ? JSON.stringify(cardOptions.scanlinesOptions) : undefined,
+				glowOptions: cardOptions.glowOptions ? JSON.stringify(cardOptions.glowOptions) : undefined,
+				borderOptions: cardOptions.borderOptions ? JSON.stringify(cardOptions.borderOptions) : undefined,
+				grainOptions: cardOptions.grainOptions ? JSON.stringify(cardOptions.grainOptions) : undefined,
 			};
 
 			// Guardar la configuración en el servidor
-			const response = await saveEntityCardConfig(
-				apiEntityType,
-				serverOptionsDto
-			);
+			const response = await saveEntityCardConfig(apiEntityType, serverOptionsDto);
 
 			if (response.success) {
-				toastService.success(response.message);
+				toast({
+					title: 'Éxito',
+					description: 'Configuración de tarjetas guardada correctamente',
+				});
 			} else {
 				setError(response.message);
-				toastService.error(response.message);
+				toast({
+					title: 'Error',
+					description: response.message,
+					variant: 'destructive',
+				});
 			}
 		} catch (error) {
-			console.error("Error al guardar opciones:", error);
-			setError("No se pudieron guardar las opciones");
-			toastService.error("No se pudieron guardar las opciones");
+			console.error('Error al guardar opciones:', error);
+			setError('No se pudieron guardar las opciones');
+			toast({
+				title: 'Error',
+				description: 'No se pudo guardar la configuración de tarjetas',
+				variant: 'destructive',
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -786,13 +765,14 @@ export function EntitiesCardsSection() {
 	}) => {
 		setCardOptions(preset.options);
 		setActivePreset(preset.id);
-		toastService.success(`Preset "${preset.name}" aplicado correctamente`);
+		toast({
+			title: 'Éxito',
+			description: `Preset "${preset.name}" aplicado correctamente`,
+		});
 	};
 
 	// Encontrar la entidad activa
-	const activeEntity = entityTypes.find(
-		(e) => e.entityType === activeEntityType
-	);
+	const activeEntity = entityTypes.find((e) => e.entityType === activeEntityType);
 
 	if (error) {
 		return (
@@ -859,9 +839,7 @@ export function EntitiesCardsSection() {
 													</Button>
 												</TooltipTrigger>
 												<TooltipContent side="left" className="text-[10px]">
-													{showInfo
-														? "Ocultar información"
-														: "Mostrar información"}
+													{showInfo ? 'Ocultar información' : 'Mostrar información'}
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
@@ -878,9 +856,7 @@ export function EntitiesCardsSection() {
 													</Button>
 												</TooltipTrigger>
 												<TooltipContent side="left" className="text-[10px]">
-													{showControls
-														? "Ocultar controles"
-														: "Mostrar controles"}
+													{showControls ? 'Ocultar controles' : 'Mostrar controles'}
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
@@ -922,10 +898,8 @@ export function EntitiesCardsSection() {
 									className="mt-6 w-fit self-center text-[11px]"
 									size="lg"
 								>
-									<Save
-										className={cn("h-4 w-4 mr-2", isSaving && "animate-spin")}
-									/>
-									{isSaving ? "Guardando cambios..." : "Guardar configuración"}
+									<Save className={cn('h-4 w-4 mr-2', isSaving && 'animate-spin')} />
+									{isSaving ? 'Guardando cambios...' : 'Guardar configuración'}
 								</Button>
 							</motion.div>
 						)}
@@ -937,110 +911,95 @@ export function EntitiesCardsSection() {
 							<ScrollArea className="h-[calc(100vh-160px)]">
 								<div className="space-y-4">
 									{/* Renderizar el panel activo basado en activePanel */}
-									{activePanel === "presets" && (
+									{activePanel === 'presets' && (
 										<PresetsPanel
 											activePreset={activePreset}
 											onPresetSelect={handlePresetSelect}
 											entityType={convertEntityId.toApiFormat(activeEntityType)}
 										/>
 									)}
-									{activePanel === "systems" && (
-										<SystemSettings
-											options={cardOptions}
+									{activePanel === 'systems' && (
+										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'design' && (
+										<DesignSettingsPanel
+											cardOptions={cardOptions}
 											onChange={handleCardOptionsChange}
-											disabled={false}
 										/>
 									)}
-									{activePanel === "design" && (
-										<DesignSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'visual' && (
+										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "visual" && (
-										<VisualEffectsSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
-									)}
-									{activePanel === "distortion" && (
+									{activePanel === 'distortion' && (
 										<DistortionEffectsSettings
 											options={cardOptions}
 											onChange={handleCardOptionsChange}
 											disabled={false}
 										/>
 									)}
-									{activePanel === "advanced" && (
-										<AdvancedEffectsSettings
+									{activePanel === 'advanced' && (
+										<AdvancedSettingsPanel
+											cardOptions={cardOptions}
+											onChange={handleCardOptionsChange}
+										/>
+									)}
+									{activePanel === 'general' && (
+										<GeneralSettings
 											options={cardOptions}
 											onChange={handleCardOptionsChange}
 											disabled={false}
 										/>
 									)}
-									{activePanel === "filters" && (
-										<FiltersSettings
+									{activePanel === 'content' && (
+										<ContentSettingsPanel
+											cardOptions={cardOptions}
+											onChange={handleCardOptionsChange}
+										/>
+									)}
+									{(activePanel === 'filters' || activePanel === 'patterns' || activePanel === 'shaders') && (
+										<LayersSettingsPanel
 											options={cardOptions}
 											onChange={handleCardOptionsChange}
+											entityType={convertEntityId.toApiFormat(activeEntityType)}
+											entityId={entityId}
 											disabled={false}
 										/>
 									)}
-									{activePanel === "patterns" && (
-										<PatternsSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'images' && (
+										<ImageGridSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "shaders" && (
-										<ShadersSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'states' && (
+										<StatesSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "images" && (
-										<ImageGridSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'interaction' && (
+										<InteractionSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "states" && (
-										<StatesSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'preview' && (
+										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "interaction" && (
-										<InteractionSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'performance' && (
+										<PerformanceSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "preview" && (
-										<PreviewSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'folders' && (
+										<FolderSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "performance" && (
-										<PerformanceSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'shadows' && (
+										<ShadowsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
-									{activePanel === "folders" && (
-										<FolderSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+									{activePanel === 'colorPalette' && (
+										<ColorPaletteSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'rarity' && (
+										<RaritySettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'layers' && (
+										<LayersSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'backside' && (
+										<BacksideSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{activePanel === 'core' && (
+										<CoreSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 								</div>
 							</ScrollArea>
