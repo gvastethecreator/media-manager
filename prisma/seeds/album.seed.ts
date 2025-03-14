@@ -7,18 +7,28 @@ import { seedLogger, tableExists } from './utils.seed';
  */
 export async function seedAlbums(prisma: PrismaClient): Promise<void> {
   seedLogger.info('📔 Creando álbumes por defecto...');
-  
-  // Verificar si la tabla Album existe
-  if (await tableExists(prisma, 'Album')) {
-    // Crear álbumes por defecto
-    await prisma.album.createMany({
-      data: [
+
+  try {
+    // Verificar si la tabla Album existe
+    if (await tableExists(prisma, 'Album')) {
+      // Obtener el preset visual por defecto para álbumes
+      const albumPreset = await prisma.visualPreset.findFirst({
+        where: { name: 'album-default' }
+      });
+
+      // Definir álbumes de ejemplo con sus metadatos
+      const sampleAlbums = [
         {
           name: 'Favoritos 2024',
           emoji: '⭐',
           color: '#eab308',
           description: 'Imágenes favoritas del 2024',
           shortcut: 'f24',
+          sortBy: 'createdAt',
+          filters: JSON.stringify(['isFavorite']),
+          category: 'Favoritos',
+          rarity: 'legendary',
+          presetId: albumPreset?.id
         },
         {
           name: 'Referencias',
@@ -26,6 +36,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#8b5cf6',
           description: 'Referencias e inspiración',
           shortcut: 'ref',
+          sortBy: 'name',
+          filters: JSON.stringify(['type:reference']),
+          category: 'Inspiración',
+          rarity: 'uncommon',
+          presetId: albumPreset?.id
         },
         {
           name: 'Inspiración',
@@ -33,6 +48,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#10b981',
           description: 'Ideas y conceptos',
           shortcut: 'ins',
+          sortBy: 'updatedAt',
+          filters: JSON.stringify(['tag:ideas']),
+          category: 'Inspiración',
+          rarity: 'uncommon',
+          presetId: albumPreset?.id
         },
         {
           name: 'Pruebas',
@@ -40,6 +60,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#eab308',
           description: 'Pruebas y experimentos',
           shortcut: 'pr',
+          sortBy: 'createdAt',
+          filters: JSON.stringify(['tag:experimental']),
+          category: 'Técnico',
+          rarity: 'common',
+          presetId: albumPreset?.id
         },
         {
           name: 'Pixel Art',
@@ -47,6 +72,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#8b5cf6',
           description: 'Pixel Art',
           shortcut: 'pa',
+          sortBy: 'name',
+          filters: JSON.stringify(['type:pixelart']),
+          category: 'Artístico',
+          rarity: 'rare',
+          presetId: albumPreset?.id
         },
         {
           name: 'Upscales',
@@ -54,6 +84,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#10b981',
           description: 'Upscales',
           shortcut: 'up',
+          sortBy: 'createdAt',
+          filters: JSON.stringify(['tag:upscale']),
+          category: 'Técnico',
+          rarity: 'common',
+          presetId: albumPreset?.id
         },
         {
           name: 'Diseños',
@@ -61,6 +96,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#3498db',
           description: 'Diseños y prototipos',
           shortcut: 'dis',
+          sortBy: 'updatedAt',
+          filters: JSON.stringify(['type:design']),
+          category: 'Profesional',
+          rarity: 'rare',
+          presetId: albumPreset?.id
         },
         {
           name: 'Ilustraciones',
@@ -68,6 +108,11 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#f1c40f',
           description: 'Ilustraciones y dibujos',
           shortcut: 'ilu',
+          sortBy: 'name',
+          filters: JSON.stringify(['type:illustration']),
+          category: 'Artístico',
+          rarity: 'rare',
+          presetId: albumPreset?.id
         },
         {
           name: 'Fotografía',
@@ -75,12 +120,27 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
           color: '#2ecc71',
           description: 'Fotografías y capturas',
           shortcut: 'fot',
+          sortBy: 'createdAt',
+          filters: JSON.stringify(['type:photo']),
+          category: 'Profesional',
+          rarity: 'uncommon',
+          presetId: albumPreset?.id
         },
-      ],
-    });
-    
-    seedLogger.info('✅ Álbumes por defecto creados');
-  } else {
-    seedLogger.warn('⚠️ La tabla Album no existe, saltando creación de álbumes');
+      ];
+
+      // Crear álbumes uno por uno para poder usar las relaciones
+      for (const albumData of sampleAlbums) {
+        await prisma.album.create({
+          data: albumData
+        });
+      }
+
+      seedLogger.info(`✅ ${sampleAlbums.length} álbumes creados con presets visuales`);
+    } else {
+      seedLogger.warn('⚠️ La tabla Album no existe, saltando creación de álbumes');
+    }
+  } catch (error) {
+    seedLogger.error('❌ Error creando álbumes:', error);
+    throw error;
   }
 }

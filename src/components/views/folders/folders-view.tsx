@@ -2,12 +2,11 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { getFolders } from '@/services/folder.service';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
@@ -15,7 +14,6 @@ import type { Folder } from '@/types/entities/folders';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { FolderCard } from '../../features/entity-cards/layouts/folder-card-layout';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('FoldersView');
@@ -154,12 +152,13 @@ export function FoldersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<FolderCard
-								folder={folder}
+							<EntityCardAdapter
+								entityType="folder"
+								entity={folder}
 								onClick={() => handleFolderClick(folder)}
 								showVisualConfig={true}
 								enableExplode={true}
-								visualOptions={visualConfig || {}}
+								options={visualConfig || {}}
 							/>
 						</motion.div>
 					))}

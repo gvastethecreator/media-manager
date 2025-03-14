@@ -16,79 +16,79 @@ import { LayerConfig } from '../types';
  * @returns Objeto con estado y funciones para manipular el sistema de capas
  */
 export function useLayersSystem(cardOptions: CardOptions) {
-  const { getLayers } = useLayerPlugin();
-  const availableLayers = getLayers();
+	const { getLayers } = useLayerPlugin();
+	const availableLayers = getLayers();
 
-  // Estado para el diálogo de configuración de capas
-  const [activeLayerConfig, setActiveLayerConfig] = useState<string | null>(null);
+	// Estado para el diálogo de configuración de capas
+	const [activeLayerConfig, setActiveLayerConfig] = useState<string | null>(null);
 
-  // Obtener las configuraciones de capa actuales o inicializar
-  const layerConfigs = cardOptions.layerConfigs || {};
+	// Obtener las configuraciones de capa actuales o inicializar
+	const layerConfigs = cardOptions.layerConfigs || {};
 
-  /**
-   * Resetea todas las capas a su configuración predeterminada
-   */
-  const resetAllLayers = useCallback(() => {
-    const defaultLayerConfigs = {};
-    availableLayers.forEach((layer) => {
-      defaultLayerConfigs[layer.type] = { ...layer.defaultConfig };
-    });
+	/**
+	 * Resetea todas las capas a su configuración predeterminada
+	 */
+	const resetAllLayers = useCallback(() => {
+		const defaultLayerConfigs = {};
+		availableLayers.forEach((layer) => {
+			defaultLayerConfigs[layer.type] = { ...layer.defaultConfig };
+		});
 
-    return defaultLayerConfigs;
-  }, [availableLayers]);
+		return defaultLayerConfigs;
+	}, [availableLayers]);
 
-  /**
-   * Actualiza la configuración de una capa específica
-   */
-  const updateLayerConfig = useCallback((
-    layerType: string,
-    config: Record<string, unknown>,
-    cardOptions: CardOptions,
-    onChange: (options: CardOptions) => void
-  ) => {
-    onChange({
-      ...cardOptions,
-      layerConfigs: {
-        ...cardOptions.layerConfigs,
-        [layerType]: config,
-      },
-    });
-  }, []);
+	/**
+	 * Actualiza la configuración de una capa específica
+	 */
+	const updateLayerConfig = useCallback(
+		(
+			layerType: string,
+			config: Record<string, unknown>,
+			cardOptions: CardOptions,
+			onChange: (options: CardOptions) => void
+		) => {
+			onChange({
+				...cardOptions,
+				layerConfigs: {
+					...cardOptions.layerConfigs,
+					[layerType]: config,
+				},
+			});
+		},
+		[]
+	);
 
-  /**
-   * Habilita o deshabilita una capa específica
-   */
-  const toggleLayerEnabled = useCallback((
-    layerType: string,
-    enabled: boolean,
-    cardOptions: CardOptions,
-    onChange: (options: CardOptions) => void
-  ) => {
-    const currentConfig = cardOptions.layerConfigs?.[layerType] ||
-      availableLayers.find((l) => l.type === layerType)?.defaultConfig ||
-      { enabled: false, layerIndex: 0 };
+	/**
+	 * Habilita o deshabilita una capa específica
+	 */
+	const toggleLayerEnabled = useCallback(
+		(layerType: string, enabled: boolean, cardOptions: CardOptions, onChange: (options: CardOptions) => void) => {
+			const currentConfig = cardOptions.layerConfigs?.[layerType] ||
+				availableLayers.find((l) => l.type === layerType)?.defaultConfig || { enabled: false, layerIndex: 0 };
 
-    onChange({
-      ...cardOptions,
-      layerConfigs: {
-        ...cardOptions.layerConfigs,
-        [layerType]: {
-          ...currentConfig,
-          enabled,
-        },
-      },
-    });
+			onChange({
+				...cardOptions,
+				layerConfigs: {
+					...cardOptions.layerConfigs,
+					[layerType]: {
+						...currentConfig,
+						enabled,
+					},
+				},
+			});
 
-    toastService.success(`Capa ${layerType} ${enabled ? 'habilitada' : 'deshabilitada'}`);
-  }, [availableLayers]);
+			toastService.success(`Capa ${layerType} ${enabled ? 'habilitada' : 'deshabilitada'}`);
+		},
+		[availableLayers]
+	);
 
-  return {
-    availableLayers,
-    layerConfigs,
-    activeLayerConfig,
-    setActiveLayerConfig,
-    resetAllLayers,
-    updateLayerConfig,
-    toggleLayerEnabled
-  };
+	return {
+		availableLayers,
+		layerConfigs,
+		activeLayerConfig,
+		setActiveLayerConfig,
+		resetAllLayers,
+		updateLayerConfig,
+		toggleLayerEnabled,
+	};
 }

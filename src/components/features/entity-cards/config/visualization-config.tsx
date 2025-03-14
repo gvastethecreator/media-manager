@@ -7,8 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { EyeIcon, Palette, Save, Settings, Sliders, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
-import { CardConfigManager } from '../settings/panels/card-config-manager';
-import { VisualEffectsManager } from '../settings/panels/visual-effects-manager';
+import { DesignPanel } from '../modules/design/design-panel';
+import type { DesignSystem } from '../modules/design/types';
+import { VisualEffectsManager } from '../modules/effects/visual/visual-effects-manager';
 
 interface VisualizationConfigProps {
 	options: CardOptions;
@@ -21,14 +22,59 @@ export function VisualizationConfig({ options, onOptionsChange, onClose }: Visua
 	const [localOptions, setLocalOptions] = useState<CardOptions>(options);
 	const [activeTab, setActiveTab] = useState<string>('general');
 
+	// Mapear opciones de tarjeta a sistema de diseño para el DesignPanel
+	const mapToDesignSystem = (cardOptions: CardOptions): DesignSystem => {
+		return {
+			// Valores aproximados basados en los datos disponibles
+			borderRadius: cardOptions.borderRadius,
+			padding: 16, // Valor por defecto
+			aspectRatio: '7/10', // Valor por defecto para tarjetas
+			maxWidth: 400, // Valor por defecto
+
+			// Sombras
+			elevation: cardOptions.shadowIntensity / 10,
+			shadowColor: cardOptions.colors.border,
+
+			// Fondo
+			backgroundColor: cardOptions.colors.background,
+			backgroundOpacity: 100,
+			backdropFilter: 'none',
+			backdropBlurAmount: 0,
+
+			// Bordes
+			borderWidth: cardOptions.showBorder ? 1 : 0,
+			borderStyle: 'solid',
+			borderColor: cardOptions.colors.border,
+
+			// Avanzado
+			customCssClasses: [],
+			customCssVariables: {},
+		};
+	};
+
+	// Mapear sistema de diseño a opciones de tarjeta
+	const mapFromDesignSystem = (designSystem: DesignSystem): Partial<CardOptions> => {
+		return {
+			borderRadius: designSystem.borderRadius,
+			shadowIntensity: designSystem.elevation * 10,
+			showBorder: designSystem.borderWidth > 0,
+			colors: {
+				...localOptions.colors,
+				background: designSystem.backgroundColor,
+				border: designSystem.borderColor,
+			},
+		};
+	};
+
 	// Aplicar cambios al componente padre
 	const applyChanges = () => {
 		onOptionsChange(localOptions);
 		onClose?.();
 	};
 
-	// Manejadores para los cambios de opciones específicas
-	const handleCardConfigChange = (updatedOptions: CardOptions) => {
+	// Manejadores para los cambios en el DesignPanel
+	const handleDesignSystemChange = (designSystem: DesignSystem) => {
+		const updatedOptions = mapFromDesignSystem(designSystem);
 		setLocalOptions((prev) => ({
 			...prev,
 			...updatedOptions,
@@ -70,6 +116,9 @@ export function VisualizationConfig({ options, onOptionsChange, onClose }: Visua
 		}));
 	};
 
+	// Convertir las opciones de tarjeta a sistema de diseño
+	const designSystem = mapToDesignSystem(localOptions);
+
 	return (
 		<div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
 			<div className="bg-card border rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-3 relative">
@@ -102,7 +151,7 @@ export function VisualizationConfig({ options, onOptionsChange, onClose }: Visua
 					</TabsList>
 
 					<TabsContent value="general" className="space-y-3 mt-2">
-						<CardConfigManager options={localOptions} onOptionsChange={handleCardConfigChange} />
+						<DesignPanel designSystem={designSystem} onChange={handleDesignSystemChange} className="p-0" />
 					</TabsContent>
 
 					<TabsContent value="effects" className="space-y-3 mt-2">

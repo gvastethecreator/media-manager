@@ -3,16 +3,18 @@
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { useMemo } from 'react';
-import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
+import type { EntityType } from './adapters/preset-adapter';
+import { DEFAULT_SETTINGS_OPTIONS } from './config/card-config-defaults';
+import { BaseCard } from './entity-card';
+import { adaptOptionsForLayout, adaptSettingsToBaseOptions, isSettingsCardOptions } from './entity-card-adapter';
+import { usePreset } from './hooks/use-preset';
+import type { CardOptions as SettingsCardOptions } from './settings/entities-card-settings-types';
 import type {
 	CardOptions as BaseCardOptions,
 	CardDesignPreset,
 	RarityConfig,
 	TextureConfig,
-} from '../types/base-card-types';
-import type { CardOptions as SettingsCardOptions } from '../types/card-settings-types';
-import { BaseCard } from './base-card';
-import { adaptOptionsForLayout, adaptSettingsToBaseOptions, isSettingsCardOptions } from './card-adapter';
+} from './types/base-card-types';
 
 export interface EntityCardWrapperProps {
 	// Propiedades comunes
@@ -24,6 +26,7 @@ export interface EntityCardWrapperProps {
 	// Configuraciones visuales
 	rarity?: RarityConfig | null;
 	texture?: TextureConfig | null;
+	presetId?: string | null;
 
 	// Interacciones
 	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
@@ -54,6 +57,7 @@ export interface EntityCardWrapperProps {
  * 1. La adaptación de opciones según el tipo de entidad
  * 2. La configuración de aspectos como rareza y textura
  * 3. Compatibilidad de props entre layouts y BaseCard
+ * 4. Integración con el sistema de presets
  */
 export function EntityCardWrapper({
 	children,
@@ -62,6 +66,7 @@ export function EntityCardWrapper({
 	entityType,
 	rarity,
 	texture,
+	presetId,
 	onClick,
 	onHoverStart,
 	onHoverEnd,
@@ -84,6 +89,13 @@ export function EntityCardWrapper({
 		return options as Partial<BaseCardOptions>;
 	}, [options]);
 
+	// Obtener configuración del preset si existe
+	const { cardOptions: presetOptions } = usePreset({
+		entityType: entityType as EntityType,
+		presetId,
+		baseOptions: {}, // No pasamos opciones base aquí, las combinamos manualmente abajo
+	});
+
 	// Configurar la rareza con valores predeterminados si es necesario
 	const defaultRarity: RarityConfig = rarity || {
 		name: 'common',
@@ -94,13 +106,34 @@ export function EntityCardWrapper({
 
 	// Adaptar las opciones para el tipo específico de layout
 	const adaptedOptions = useMemo(() => {
-		const options = adaptOptionsForLayout(baseOptions, entityType);
+		// Combinamos primero las opciones del preset con las opciones base
+		const combinedOptions = {
+			...presetOptions,
+			...baseOptions,
+			// Combinar configuraciones anidadas
+			designSystem: {
+				...(presetOptions.designSystem || {}),
+				...(baseOptions.designSystem || {}),
+			},
+			effects: {
+				...(presetOptions.effects || {}),
+				...(baseOptions.effects || {}),
+			},
+			animation: {
+				...(presetOptions.animation || {}),
+				...(baseOptions.animation || {}),
+			},
+		};
+
+		// Adaptar para el tipo específico de layout
+		const options = adaptOptionsForLayout(combinedOptions, entityType);
+
 		// Asegurar que las opciones de rareza están correctamente configuradas
 		if (rarity && options.raritySystem !== undefined && options.raritySystem?.enabled !== false) {
 			options.raritySystem = { enabled: true };
 		}
 		return options;
-	}, [baseOptions, entityType, rarity]);
+	}, [baseOptions, entityType, rarity, presetOptions]);
 
 	return (
 		<BaseCard

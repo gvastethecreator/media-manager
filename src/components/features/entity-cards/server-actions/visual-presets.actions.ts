@@ -1,0 +1,480 @@
+'use server';
+
+import type { ActionResponse } from '@/components/features/entity-cards/modules/core/actions/entities-cards.actions';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import { prisma } from '@/lib/prisma';
+import type { VisualPreset } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
+import { type EntityType, adaptPresetToCardOptions, parseJsonConfig } from '../adapters/preset-adapter';
+
+// Tipos específicos para presets visuales
+export interface VisualPresetDto {
+	id?: string;
+	name: string;
+	description?: string;
+	category: string;
+	isDefault?: boolean;
+	isPublic?: boolean;
+	author?: string;
+	tags?: string[];
+	metadata?: Record<string, unknown>;
+
+	// Configuraciones serializadas
+	coreConfig?: string;
+	designConfig?: string;
+	animationConfig?: string;
+	layerConfig?: string;
+	backsideConfig?: string;
+	effectsConfig?: string;
+	performanceConfig?: string;
+	colorConfig?: string;
+	imageGridConfig?: string;
+	layoutConfig?: string;
+	explodeConfig?: string;
+	previewConfig?: string;
+	rarityConfig?: string;
+
+	// Configuraciones específicas por tipo de entidad
+	folderConfig?: string;
+	imageConfig?: string;
+	videoConfig?: string;
+	albumConfig?: string;
+	tagConfig?: string;
+	collectionConfig?: string;
+	characterConfig?: string;
+	placeConfig?: string;
+	worldItemConfig?: string;
+	conceptConfig?: string;
+	promptConfig?: string;
+	noteConfig?: string;
+}
+
+/**
+ * Obtiene todos los presets visuales disponibles
+ * Opcionalmente se puede filtrar por categoría
+ */
+export async function getVisualPresets(category?: string): Promise<ActionResponse> {
+	try {
+		const where = category ? { category } : {};
+
+		const presets = await prisma.visualPreset.findMany({
+			where,
+			orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+		});
+
+		return {
+			success: true,
+			message: 'Presets visuales obtenidos correctamente',
+			data: presets,
+		};
+	} catch (error) {
+		console.error('Error al obtener presets visuales:', error);
+		return {
+			success: false,
+			message: 'No se pudieron obtener los presets visuales',
+		};
+	}
+}
+
+/**
+ * Obtiene un preset visual por su ID
+ */
+export async function getVisualPresetById(id: string): Promise<ActionResponse> {
+	try {
+		const preset = await prisma.visualPreset.findUnique({
+			where: { id },
+		});
+
+		if (!preset) {
+			return {
+				success: false,
+				message: 'Preset visual no encontrado',
+			};
+		}
+
+		return {
+			success: true,
+			message: 'Preset visual obtenido correctamente',
+			data: preset,
+		};
+	} catch (error) {
+		console.error('Error al obtener preset visual:', error);
+		return {
+			success: false,
+			message: 'No se pudo obtener el preset visual',
+		};
+	}
+}
+
+/**
+ * Obtiene los presets visuales por tipo de entidad
+ */
+export async function getVisualPresetsByEntityType(entityType: string): Promise<ActionResponse> {
+	try {
+		// Buscar presets con configuración específica para este tipo de entidad
+		// o presets generales que se puedan aplicar a cualquier entidad
+		const presets = await prisma.visualPreset.findMany({
+			where: {
+				OR: [{ category: entityType }, { category: 'general' }],
+			},
+			orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+		});
+
+		return {
+			success: true,
+			message: `Presets visuales para ${entityType} obtenidos correctamente`,
+			data: presets,
+		};
+	} catch (error) {
+		console.error(`Error al obtener presets visuales para ${entityType}:`, error);
+		return {
+			success: false,
+			message: `No se pudieron obtener los presets visuales para ${entityType}`,
+		};
+	}
+}
+
+/**
+ * Crea o actualiza un preset visual
+ */
+export async function saveVisualPreset(preset: VisualPresetDto): Promise<ActionResponse> {
+	try {
+		let serializedTags = '[]';
+		if (preset.tags && Array.isArray(preset.tags)) {
+			serializedTags = JSON.stringify(preset.tags);
+		}
+
+		// Convertir metadata a string si es necesario
+		let metadataStr = undefined;
+		if (preset.metadata) {
+			metadataStr = JSON.stringify(preset.metadata);
+		}
+
+		// Si tiene ID, actualizar el preset existente, sino crear uno nuevo
+		if (preset.id) {
+			const updatedPreset = await prisma.visualPreset.update({
+				where: { id: preset.id },
+				data: {
+					name: preset.name,
+					description: preset.description,
+					category: preset.category,
+					isDefault: preset.isDefault || false,
+					isPublic: preset.isPublic || true,
+					author: preset.author,
+					tags: serializedTags,
+					metadata: metadataStr,
+
+					// Actualizar configuraciones
+					coreConfig: preset.coreConfig,
+					designConfig: preset.designConfig,
+					animationConfig: preset.animationConfig,
+					layerConfig: preset.layerConfig,
+					backsideConfig: preset.backsideConfig,
+					effectsConfig: preset.effectsConfig,
+					performanceConfig: preset.performanceConfig,
+					colorConfig: preset.colorConfig,
+					imageGridConfig: preset.imageGridConfig,
+					layoutConfig: preset.layoutConfig,
+					explodeConfig: preset.explodeConfig,
+					previewConfig: preset.previewConfig,
+					rarityConfig: preset.rarityConfig,
+
+					// Configuraciones específicas
+					folderConfig: preset.folderConfig,
+					imageConfig: preset.imageConfig,
+					videoConfig: preset.videoConfig,
+					albumConfig: preset.albumConfig,
+					tagConfig: preset.tagConfig,
+					collectionConfig: preset.collectionConfig,
+					characterConfig: preset.characterConfig,
+					placeConfig: preset.placeConfig,
+					worldItemConfig: preset.worldItemConfig,
+					conceptConfig: preset.conceptConfig,
+					promptConfig: preset.promptConfig,
+					noteConfig: preset.noteConfig,
+				},
+			});
+
+			revalidatePath('/settings');
+
+			return {
+				success: true,
+				message: 'Preset visual actualizado correctamente',
+				data: updatedPreset,
+			};
+		}
+
+		// Crear nuevo preset
+		const newPreset = await prisma.visualPreset.create({
+			data: {
+				name: preset.name,
+				description: preset.description,
+				category: preset.category,
+				isDefault: preset.isDefault || false,
+				isPublic: preset.isPublic || true,
+				author: preset.author,
+				tags: serializedTags,
+				metadata: metadataStr,
+
+				// Configuraciones
+				coreConfig: preset.coreConfig,
+				designConfig: preset.designConfig,
+				animationConfig: preset.animationConfig,
+				layerConfig: preset.layerConfig,
+				backsideConfig: preset.backsideConfig,
+				effectsConfig: preset.effectsConfig,
+				performanceConfig: preset.performanceConfig,
+				colorConfig: preset.colorConfig,
+				imageGridConfig: preset.imageGridConfig,
+				layoutConfig: preset.layoutConfig,
+				explodeConfig: preset.explodeConfig,
+				previewConfig: preset.previewConfig,
+				rarityConfig: preset.rarityConfig,
+
+				// Configuraciones específicas
+				folderConfig: preset.folderConfig,
+				imageConfig: preset.imageConfig,
+				videoConfig: preset.videoConfig,
+				albumConfig: preset.albumConfig,
+				tagConfig: preset.tagConfig,
+				collectionConfig: preset.collectionConfig,
+				characterConfig: preset.characterConfig,
+				placeConfig: preset.placeConfig,
+				worldItemConfig: preset.worldItemConfig,
+				conceptConfig: preset.conceptConfig,
+				promptConfig: preset.promptConfig,
+				noteConfig: preset.noteConfig,
+			},
+		});
+
+		revalidatePath('/settings');
+
+		return {
+			success: true,
+			message: 'Preset visual creado correctamente',
+			data: newPreset,
+		};
+	} catch (error) {
+		console.error('Error al guardar preset visual:', error);
+		return {
+			success: false,
+			message: 'No se pudo guardar el preset visual',
+		};
+	}
+}
+
+/**
+ * Elimina un preset visual
+ */
+export async function deleteVisualPreset(id: string): Promise<ActionResponse> {
+	try {
+		// Verificar si el preset existe
+		const existingPreset = await prisma.visualPreset.findUnique({
+			where: { id },
+		});
+
+		if (!existingPreset) {
+			return {
+				success: false,
+				message: 'Preset visual no encontrado',
+			};
+		}
+
+		// Eliminar el preset
+		await prisma.visualPreset.delete({
+			where: { id },
+		});
+
+		revalidatePath('/settings');
+
+		return {
+			success: true,
+			message: 'Preset visual eliminado correctamente',
+		};
+	} catch (error) {
+		console.error('Error al eliminar preset visual:', error);
+		return {
+			success: false,
+			message: 'No se pudo eliminar el preset visual',
+		};
+	}
+}
+
+/**
+ * Aplica un preset visual a una entidad
+ * Esto actualiza el campo presetId de la entidad
+ */
+export async function applyVisualPresetToEntity(
+	entityType: string,
+	entityId: string,
+	presetId: string | null
+): Promise<ActionResponse> {
+	try {
+		// Definir el modelo a actualizar según el tipo de entidad
+		let updatedEntity: Record<string, unknown> | null = null;
+
+		switch (entityType) {
+			case 'folder':
+				updatedEntity = await prisma.folder.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'album':
+				updatedEntity = await prisma.album.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'tag':
+				updatedEntity = await prisma.tag.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'collection':
+				updatedEntity = await prisma.collection.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'character':
+				updatedEntity = await prisma.character.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'place':
+				updatedEntity = await prisma.place.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'worldItem':
+				updatedEntity = await prisma.worldItem.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'concept':
+				updatedEntity = await prisma.concept.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'prompt':
+				updatedEntity = await prisma.prompt.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'note':
+				updatedEntity = await prisma.note.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			default:
+				return {
+					success: false,
+					message: `Tipo de entidad ${entityType} no soportado`,
+				};
+		}
+
+		// Revalidar rutas relevantes
+		revalidatePath(`/${entityType}s`);
+		revalidatePath(`/${entityType}/${entityId}`);
+
+		return {
+			success: true,
+			message: presetId
+				? `Preset visual aplicado correctamente a ${entityType}`
+				: `Preset visual removido de ${entityType}`,
+			data: updatedEntity,
+		};
+	} catch (error) {
+		console.error(`Error al aplicar preset visual a ${entityType}:`, error);
+		return {
+			success: false,
+			message: `No se pudo aplicar el preset visual a ${entityType}`,
+		};
+	}
+}
+
+/**
+ * Crea un preset visual a partir de opciones de tarjeta
+ */
+export async function createPresetFromCardOptions(
+	name: string,
+	options: CardOptions,
+	entityType: string,
+	description?: string,
+	isDefault = false
+): Promise<ActionResponse> {
+	try {
+		// Extraer y serializar las diferentes configuraciones de las opciones
+		const presetData: VisualPresetDto = {
+			name,
+			description,
+			category: entityType,
+			isDefault,
+
+			// Serializar las configuraciones
+			coreConfig: JSON.stringify(options.core || {}),
+			designConfig: JSON.stringify(options.designSystem || {}),
+			animationConfig: JSON.stringify(options.animation || {}),
+			layerConfig: JSON.stringify(options.layers || {}),
+			backsideConfig: JSON.stringify(options.backside || {}),
+			effectsConfig: JSON.stringify(options.effects || {}),
+			performanceConfig: JSON.stringify(options.performance || {}),
+			colorConfig: JSON.stringify(options.colors || {}),
+			imageGridConfig: JSON.stringify(options.imageGrid || {}),
+			layoutConfig: JSON.stringify(options.layout || {}),
+			explodeConfig: JSON.stringify(options.explode || {}),
+			previewConfig: JSON.stringify(options.preview || {}),
+			rarityConfig: JSON.stringify(options.raritySystem || {}),
+		};
+
+		// Guardar el preset
+		return await saveVisualPreset(presetData);
+	} catch (error) {
+		console.error('Error al crear preset desde opciones de tarjeta:', error);
+		return {
+			success: false,
+			message: 'No se pudo crear el preset visual desde las opciones de tarjeta',
+		};
+	}
+}
+
+/**
+ * Obtiene las opciones de tarjeta desde un preset visual
+ */
+export async function getCardOptionsFromPreset(presetId: string, entityType: string): Promise<ActionResponse> {
+	try {
+		// Obtener el preset
+		const response = await getVisualPresetById(presetId);
+
+		if (!response.success || !response.data) {
+			return {
+				success: false,
+				message: 'No se pudo obtener el preset visual',
+			};
+		}
+
+		// Convertir el preset a opciones de tarjeta
+		const preset = response.data as VisualPreset;
+		const cardOptions = adaptPresetToCardOptions(preset, entityType as EntityType);
+
+		return {
+			success: true,
+			message: 'Opciones de tarjeta obtenidas correctamente',
+			data: cardOptions,
+		};
+	} catch (error) {
+		console.error('Error al obtener opciones de tarjeta desde preset:', error);
+		return {
+			success: false,
+			message: 'No se pudieron obtener las opciones de tarjeta desde el preset',
+		};
+	}
+}

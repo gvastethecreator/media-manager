@@ -1,153 +1,242 @@
 'use client';
 
-import type { CardOptions } from '@/components/features/entity-cards/types/base-card-types';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
+import { BookOpenText, LayoutGrid, PaintBucket, Ruler } from 'lucide-react';
+import { useState } from 'react';
+import { ColorPicker } from '../shared/color-picker';
 
 interface CardConfigManagerProps {
 	options: CardOptions;
-	onOptionsChange: (options: CardOptions) => void;
+	onOptionsChange: (options: Partial<CardOptions>) => void;
 }
 
+/**
+ * Componente que gestiona la configuración general de diseño de una tarjeta
+ * 📦 Incluye: colores, dimensiones, bordes, estilos generales
+ */
 export function CardConfigManager({ options, onOptionsChange }: CardConfigManagerProps) {
-	// Manejadores para cambios específicos
-	const handle3DEffectChange = (checked: boolean) => {
+	const [expanded, setExpanded] = useState<string[]>(['colors']);
+
+	const handleColorChange = (colorKey: keyof CardOptions['colors'], value: string) => {
 		onOptionsChange({
-			...options,
-			enable3DEffect: checked,
+			colors: {
+				...options.colors,
+				[colorKey]: value,
+			},
 		});
 	};
 
-	const handleHolographicEffectChange = (checked: boolean) => {
+	const handleSizeChange = (size: number[]) => {
 		onOptionsChange({
-			...options,
-			enableHolographicEffect: checked,
+			size: size[0],
 		});
 	};
 
-	const handleScanlinesChange = (checked: boolean) => {
+	const handleBorderRadiusChange = (radius: number[]) => {
 		onOptionsChange({
-			...options,
-			enableScanlines: checked,
+			borderRadius: radius[0],
 		});
 	};
 
-	const handleGlowEffectChange = (checked: boolean) => {
+	const handleShadowIntensityChange = (intensity: number[]) => {
 		onOptionsChange({
-			...options,
-			enableGlowEffect: checked,
+			shadowIntensity: intensity[0],
 		});
 	};
 
-	const handleGrainEffectChange = (checked: boolean) => {
+	const handleOptionToggle = (key: keyof CardOptions, value: boolean) => {
 		onOptionsChange({
-			...options,
-			enableGrainEffect: checked,
-		});
-	};
-
-	const handleHoverLiftChange = (value: number[]) => {
-		onOptionsChange({
-			...options,
-			hoverLiftHeight: value[0],
-		});
-	};
-
-	const handleMaxRotationChange = (value: number[]) => {
-		onOptionsChange({
-			...options,
-			maxRotation: value[0],
+			[key]: value,
 		});
 	};
 
 	return (
-		<motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-			{/* Efectos básicos */}
-			<div className="space-y-2">
-				<h4 className="text-sm font-medium">Efectos Básicos</h4>
-				<div className="space-y-2">
-					<div className="flex items-center justify-between">
-						<Label htmlFor="3d-effect" className="text-xs">
-							Efecto 3D
-						</Label>
-						<Switch id="3d-effect" checked={options.enable3DEffect} onCheckedChange={handle3DEffectChange} />
+		<Accordion type="multiple" value={expanded} onValueChange={setExpanded} className="space-y-2">
+			{/* Sección de colores */}
+			<AccordionItem value="colors" className="border rounded-md">
+				<AccordionTrigger className="px-3 py-2 text-xs font-medium flex items-center">
+					<div className="flex items-center gap-1.5">
+						<PaintBucket className="h-3.5 w-3.5 text-emerald-500" />
+						<span>Colores</span>
 					</div>
-					<div className="flex items-center justify-between">
-						<Label htmlFor="holographic-effect" className="text-xs">
-							Efecto Holográfico
-						</Label>
-						<Switch
-							id="holographic-effect"
-							checked={options.enableHolographicEffect}
-							onCheckedChange={handleHolographicEffectChange}
-						/>
+				</AccordionTrigger>
+				<AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+					<div className="grid grid-cols-2 gap-3">
+						<div className="space-y-1.5">
+							<Label className="text-xs">Fondo</Label>
+							<ColorPicker
+								color={options.colors.background}
+								onChange={(color) => handleColorChange('background', color)}
+							/>
+						</div>
+						<div className="space-y-1.5">
+							<Label className="text-xs">Texto</Label>
+							<ColorPicker color={options.colors.text} onChange={(color) => handleColorChange('text', color)} />
+						</div>
+						<div className="space-y-1.5">
+							<Label className="text-xs">Borde</Label>
+							<ColorPicker color={options.colors.border} onChange={(color) => handleColorChange('border', color)} />
+						</div>
+						<div className="space-y-1.5">
+							<Label className="text-xs">Acento</Label>
+							<ColorPicker color={options.colors.accent} onChange={(color) => handleColorChange('accent', color)} />
+						</div>
 					</div>
-					<div className="flex items-center justify-between">
-						<Label htmlFor="scanlines-effect" className="text-xs">
-							Efecto Scanlines
-						</Label>
-						<Switch id="scanlines-effect" checked={options.enableScanlines} onCheckedChange={handleScanlinesChange} />
-					</div>
-					<div className="flex items-center justify-between">
-						<Label htmlFor="glow-effect" className="text-xs">
-							Efecto de Brillo
-						</Label>
-						<Switch id="glow-effect" checked={options.enableGlowEffect} onCheckedChange={handleGlowEffectChange} />
-					</div>
-					<div className="flex items-center justify-between">
-						<Label htmlFor="grain-effect" className="text-xs">
-							Efecto de Grano
-						</Label>
-						<Switch id="grain-effect" checked={options.enableGrainEffect} onCheckedChange={handleGrainEffectChange} />
-					</div>
-				</div>
-			</div>
+				</AccordionContent>
+			</AccordionItem>
 
-			{/* Configuración de movimiento */}
-			<div className="space-y-2">
-				<h4 className="text-sm font-medium">Movimiento</h4>
-				<div className="space-y-3">
+			{/* Sección de dimensiones */}
+			<AccordionItem value="dimensions" className="border rounded-md">
+				<AccordionTrigger className="px-3 py-2 text-xs font-medium">
+					<div className="flex items-center gap-1.5">
+						<Ruler className="h-3.5 w-3.5 text-blue-500" />
+						<span>Dimensiones</span>
+					</div>
+				</AccordionTrigger>
+				<AccordionContent className="px-3 pb-3 pt-1 space-y-3">
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
-							<Label htmlFor="hover-lift" className="text-xs">
-								Elevación al Hover
-							</Label>
-							<span className="text-xs text-muted-foreground">{options.hoverLiftHeight || 0}px</span>
+							<Label className="text-xs">Tamaño</Label>
+							<span className="text-xs text-muted-foreground">{options.size}%</span>
 						</div>
 						<Slider
-							id="hover-lift"
-							min={0}
-							max={20}
-							step={1}
-							value={[options.hoverLiftHeight || 0]}
-							onValueChange={handleHoverLiftChange}
-							className={cn('w-full', options.enable3DEffect ? 'opacity-100' : 'opacity-50')}
-							disabled={!options.enable3DEffect}
+							value={[options.size]}
+							min={50}
+							max={150}
+							step={5}
+							onValueChange={handleSizeChange}
+							className={cn('w-full')}
 						/>
 					</div>
+
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
-							<Label htmlFor="max-rotation" className="text-xs">
-								Rotación Máxima
-							</Label>
-							<span className="text-xs text-muted-foreground">{options.maxRotation || 0}°</span>
+							<Label className="text-xs">Radio de bordes</Label>
+							<span className="text-xs text-muted-foreground">{options.borderRadius}px</span>
 						</div>
 						<Slider
-							id="max-rotation"
+							value={[options.borderRadius]}
 							min={0}
-							max={30}
+							max={32}
 							step={1}
-							value={[options.maxRotation || 0]}
-							onValueChange={handleMaxRotationChange}
-							className={cn('w-full', options.enable3DEffect ? 'opacity-100' : 'opacity-50')}
-							disabled={!options.enable3DEffect}
+							onValueChange={handleBorderRadiusChange}
+							className={cn('w-full')}
 						/>
 					</div>
-				</div>
-			</div>
-		</motion.div>
+
+					<div className="space-y-2">
+						<div className="flex items-center justify-between">
+							<Label className="text-xs">Intensidad de sombra</Label>
+							<span className="text-xs text-muted-foreground">{options.shadowIntensity}%</span>
+						</div>
+						<Slider
+							value={[options.shadowIntensity]}
+							min={0}
+							max={100}
+							step={5}
+							onValueChange={handleShadowIntensityChange}
+							className={cn('w-full')}
+						/>
+					</div>
+				</AccordionContent>
+			</AccordionItem>
+
+			{/* Sección de estilo */}
+			<AccordionItem value="style" className="border rounded-md">
+				<AccordionTrigger className="px-3 py-2 text-xs font-medium">
+					<div className="flex items-center gap-1.5">
+						<LayoutGrid className="h-3.5 w-3.5 text-purple-500" />
+						<span>Estilo</span>
+					</div>
+				</AccordionTrigger>
+				<AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+					<div className="space-y-2.5">
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Borde visible</Label>
+								<p className="text-[10px] text-muted-foreground">Mostrar borde alrededor de la tarjeta</p>
+							</div>
+							<Switch
+								checked={options.showBorder}
+								onCheckedChange={(checked) => handleOptionToggle('showBorder', checked)}
+							/>
+						</div>
+
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Gradiente de fondo</Label>
+								<p className="text-[10px] text-muted-foreground">Aplicar efecto de gradiente sutil</p>
+							</div>
+							<Switch
+								checked={options.enableGradient}
+								onCheckedChange={(checked) => handleOptionToggle('enableGradient', checked)}
+							/>
+						</div>
+
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Sombra</Label>
+								<p className="text-[10px] text-muted-foreground">Mostrar sombra para efecto de elevación</p>
+							</div>
+							<Switch
+								checked={options.showShadow}
+								onCheckedChange={(checked) => handleOptionToggle('showShadow', checked)}
+							/>
+						</div>
+					</div>
+				</AccordionContent>
+			</AccordionItem>
+
+			{/* Sección de contenido */}
+			<AccordionItem value="content" className="border rounded-md">
+				<AccordionTrigger className="px-3 py-2 text-xs font-medium">
+					<div className="flex items-center gap-1.5">
+						<BookOpenText className="h-3.5 w-3.5 text-amber-500" />
+						<span>Contenido</span>
+					</div>
+				</AccordionTrigger>
+				<AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+					<div className="space-y-2.5">
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Mostrar título</Label>
+								<p className="text-[10px] text-muted-foreground">Visualizar el título de la entidad</p>
+							</div>
+							<Switch
+								checked={options.showTitle}
+								onCheckedChange={(checked) => handleOptionToggle('showTitle', checked)}
+							/>
+						</div>
+
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Mostrar descripción</Label>
+								<p className="text-[10px] text-muted-foreground">Incluir descripción si está disponible</p>
+							</div>
+							<Switch
+								checked={options.showDescription}
+								onCheckedChange={(checked) => handleOptionToggle('showDescription', checked)}
+							/>
+						</div>
+
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label className="text-xs">Mostrar metadatos</Label>
+								<p className="text-[10px] text-muted-foreground">Incluir información adicional</p>
+							</div>
+							<Switch
+								checked={options.showMetadata}
+								onCheckedChange={(checked) => handleOptionToggle('showMetadata', checked)}
+							/>
+						</div>
+					</div>
+				</AccordionContent>
+			</AccordionItem>
+		</Accordion>
 	);
 }

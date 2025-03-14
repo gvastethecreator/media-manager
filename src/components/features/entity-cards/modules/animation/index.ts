@@ -1,6 +1,8 @@
-// Exportar componentes principales
-export { AnimationModule, DEFAULT_ANIMATION_SYSTEM } from './animation-module';
+// Exportar componentes
 export { AnimationPanel } from './animation-panel';
+export { AnimationModule } from './animation-module';
+
+// Exportar hooks
 export { useAnimationSystem } from './use-animation-system';
 
 // Exportar tipos
@@ -12,5 +14,14 @@ export type {
 	AnimationClassesGenerator,
 	UseAnimationSystemHook,
 } from './types';
+
+// Exportar adaptadores para compatibilidad con el sistema antiguo
+export {
+	legacyToAnimationSystem,
+	animationSystemToLegacy,
+} from './animation-adapter';
+
+// Exportar estilos
+export * from './animations.css';
 
 // Nota: El archivo animations.css debe importarse en un archivo CSS principal o en el layout

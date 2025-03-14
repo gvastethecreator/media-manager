@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { logger } from '../src/lib/logger/logger'
-import { seedCardConfigurations } from './seeds/card-configurations.seed'
+// Comentamos la importación problemática
+// import { seedCardConfigurations } from './seeds/card-configurations.seed'
 import { seedProfiles } from './seeds/profile.seed'
 import { seedFolders } from './seeds/folder.seed'
 import { seedAlbums } from './seeds/album.seed'
@@ -12,6 +13,7 @@ import { seedPrompts } from './seeds/prompt.seed'
 import { seedNotes } from './seeds/note.seed'
 import { seedRarities } from './seeds/rarity.seed'
 import { seedTextures } from './seeds/texture.seed'
+import { seedVisualPresets } from './seeds/visual-preset.seed'
 import { safeDeleteMany, seedLogger } from './seeds/utils.seed'
 
 const prisma = new PrismaClient({
@@ -40,7 +42,8 @@ async function main() {
     { model: 'uploadedImage', table: 'UploadedImage' },
     { model: 'cardConfiguration', table: 'card_configurations' },
     { model: 'rarity', table: 'Rarity' },
-    { model: 'texture', table: 'Texture' }
+    { model: 'texture', table: 'Texture' },
+    { model: 'visualPreset', table: 'VisualPreset' }
   ]
 
   // Eliminar registros de cada tabla de forma segura
@@ -52,8 +55,11 @@ async function main() {
     // Sembrar perfiles
     await seedProfiles(prisma)
 
-    // Sembrar las configuraciones de tarjetas
-    await seedCardConfigurations(prisma)
+    // ¡IMPORTANTE! Sembrar primero los presets visuales ya que otras entidades los utilizarán
+    await seedVisualPresets(prisma)
+
+    // Comentamos la semilla problemática
+    // await seedCardConfigurations(prisma)
 
     // Sembrar carpetas
     await seedFolders(prisma)

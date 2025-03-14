@@ -14,7 +14,7 @@ export { useLayersSystem } from './hooks/use-layers-system';
 
 // Exportar tipos
 export type {
-  LayersSettingsPanelProps,
-  LayerConfig,
-  LayerSystemConfig
+	LayersSettingsPanelProps,
+	LayerConfig,
+	LayerSystemConfig,
 } from './types';
