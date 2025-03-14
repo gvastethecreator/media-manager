@@ -1,11 +1,8 @@
 'use client';
 
-import type { RandomImage } from '@/app/actions/images/images-random.action';
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import * as React from 'react';

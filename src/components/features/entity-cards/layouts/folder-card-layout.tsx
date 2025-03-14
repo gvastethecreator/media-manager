@@ -1,33 +1,14 @@
 'use client';
 
-import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
-import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
-import { EntityCardContent } from '@/components/features/entity-cards/entity-card-content';
-import { EntityCardLayerWrapper } from '@/components/features/entity-cards/entity-card-layer-wrapper';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format';
 import type { Folder } from '@/types/entities/folders';
-import {
-	ArrowUpRight,
-	CalendarClock,
-	Clock,
-	FolderIcon,
-	FolderOpenIcon,
-	HardDrive,
-	ImageIcon,
-	Sparkles,
-	Star,
-} from 'lucide-react';
-import { FileIcon, Layers3 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { FileIcon, FolderIcon, Layers3 } from 'lucide-react';
 import { Fragment } from 'react';
-import { EntityCardWrapper } from '../../entity-card-wrapper';
-import { usePreset } from '../../hooks/use-preset';
-import type { CardOptions as CardOptionsType } from '../../types/card-settings-types';
+import { EntityCardWrapper } from '../entity-card-wrapper';
+import { usePreset } from '../hooks/use-preset';
 import type { CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
+import type { CardOptions as CardOptionsType } from '../types/card-settings-types';
 
 // Opciones visuales optimizadas para un mejor rendimiento
 const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
@@ -151,7 +132,6 @@ function generateFolderRarityConfig(folder: Folder): RarityConfig {
 	const rarity = FOLDER_RARITY[rarityKey];
 
 	return {
-		rarity: rarityKey,
 		color: rarity.color,
 		borderColor: rarity.borderColor,
 		glowColor: rarity.glowColor,
@@ -217,11 +197,50 @@ export function FolderCardLayout({
 		},
 	];
 
+	// En lugar de forzar tipos, usamos destructuring y reconstruimos el objeto
+	// para evitar problemas de incompatibilidad de tipos
+	const {
+		enable3DEffect,
+		enableHolographicEffect,
+		enableScanlinesEffect,
+		enableGlowEffect,
+		enableBorderEffect,
+		enableGrainEffect,
+		designSystem,
+		holographicOptions,
+		glowOptions,
+		borderOptions,
+		grainOptions,
+		...restOptions
+	} = cardOptions;
+
+	// Crear un nuevo objeto compatible
+	const compatibleOptions = {
+		enable3DEffect,
+		enableHolographicEffect,
+		enableScanlinesEffect,
+		enableGlowEffect,
+		enableBorderEffect,
+		enableGrainEffect,
+		designSystem: designSystem
+			? {
+					...designSystem,
+					// Asegurarnos de que preset sea compatible
+					preset: designSystem.preset as CardDesignPreset,
+				}
+			: undefined,
+		holographicOptions,
+		glowOptions,
+		borderOptions,
+		grainOptions,
+		...restOptions,
+	};
+
 	return (
 		<EntityCardWrapper
 			className={cn('folder-card', className)}
 			entityType="folder"
-			options={cardOptions}
+			options={compatibleOptions}
 			onClick={onClick}
 			showVisualizationConfig={showVisualConfig}
 			onVisualizationConfigClick={onVisualConfigClick}

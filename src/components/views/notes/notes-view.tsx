@@ -1,10 +1,10 @@
 'use client';
 
-import { getNotes } from '@/app/actions/notes/note.actions';
 import type { NoteWithStats } from '@/app/actions/notes/note.actions';
+import { getNotes } from '@/app/actions/notes/note.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { NoteCard } from '@/components/features/entity-cards/layouts/note-card-layout';
+import { NoteCard } from '@/components/features/entity-cards/layouts/note-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

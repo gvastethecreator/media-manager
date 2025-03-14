@@ -12,7 +12,6 @@ import {
 	Loader2,
 	MousePointerClick,
 	RefreshCwIcon,
-	TimerReset,
 	ZoomIn,
 } from 'lucide-react';
 import {
@@ -24,7 +23,7 @@ import {
 	FormSlider,
 	FormToggle,
 	PanelHeader,
-} from '../../settings/panels/shared/form-components';
+} from '../../../settings/panels/shared';
 import type { PerformanceModuleProps } from './types';
 import { usePerformance } from './use-performance';
 
