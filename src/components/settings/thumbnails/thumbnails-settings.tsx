@@ -41,13 +41,7 @@ const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 ];
 
 // ThumbnailItem component
-function ThumbnailItem({
-	image,
-	index,
-}: {
-	image: LastProcessedThumbnail;
-	index: number;
-}) {
+function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index: number }) {
 	const [thumbnail, setThumbnail] = React.useState<string | null>(null);
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [error, setError] = React.useState<string | null>(null);

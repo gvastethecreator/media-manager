@@ -132,50 +132,65 @@ export function BorderEffectLayer({
 // Estilos globales necesarios para las animaciones
 const GlobalStyles = () => (
 	<style jsx global>{`
-    @keyframes pulse-border {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.6;
-      }
-    }
+		@keyframes pulse-border {
+			0%,
+			100% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0.6;
+			}
+		}
 
-    @keyframes flow-border {
-      0% {
-        border-color: var(--border-color, #ffffff);
-      }
-      50% {
-        border-color: transparent;
-      }
-      100% {
-        border-color: var(--border-color, #ffffff);
-      }
-    }
+		@keyframes flow-border {
+			0% {
+				border-color: var(--border-color, #ffffff);
+			}
+			50% {
+				border-color: transparent;
+			}
+			100% {
+				border-color: var(--border-color, #ffffff);
+			}
+		}
 
-    @keyframes rainbow-border {
-      0% { border-color: #ff0000; }
-      16.6% { border-color: #ff8000; }
-      33.3% { border-color: #ffff00; }
-      50% { border-color: #00ff00; }
-      66.6% { border-color: #0000ff; }
-      83.3% { border-color: #8000ff; }
-      100% { border-color: #ff0000; }
-    }
+		@keyframes rainbow-border {
+			0% {
+				border-color: #ff0000;
+			}
+			16.6% {
+				border-color: #ff8000;
+			}
+			33.3% {
+				border-color: #ffff00;
+			}
+			50% {
+				border-color: #00ff00;
+			}
+			66.6% {
+				border-color: #0000ff;
+			}
+			83.3% {
+				border-color: #8000ff;
+			}
+			100% {
+				border-color: #ff0000;
+			}
+		}
 
-    .animate-pulse-border {
-      animation: pulse-border 2s infinite ease-in-out;
-    }
+		.animate-pulse-border {
+			animation: pulse-border 2s infinite ease-in-out;
+		}
 
-    .animate-flow-border {
-      animation: flow-border 2s infinite ease-in-out;
-      --border-color: inherit;
-    }
+		.animate-flow-border {
+			animation: flow-border 2s infinite ease-in-out;
+			--border-color: inherit;
+		}
 
-    .animate-rainbow-border {
-      animation: rainbow-border 6s infinite linear;
-    }
-  `}</style>
+		.animate-rainbow-border {
+			animation: rainbow-border 6s infinite linear;
+		}
+	`}</style>
 );
 
 // Exportar el componente con los estilos globales

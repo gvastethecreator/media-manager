@@ -13,11 +13,7 @@ export const metadata: Metadata = {
 	description: 'Administrador de imágenes',
 };
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="es" suppressHydrationWarning className="dark">
 			<head>
