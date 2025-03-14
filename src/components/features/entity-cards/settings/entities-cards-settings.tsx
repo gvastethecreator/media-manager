@@ -66,6 +66,7 @@ import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { adaptBaseToSettingsOptions } from '../base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
+import { DesignPanel } from '../modules/design';
 import type { CardOptions } from '../types/card-settings-types';
 import { FiltersSettings, PatternsSettings, ShadersSettings } from './panels';
 import { DesignSettingsPanel } from './panels';
@@ -925,7 +926,7 @@ export function EntitiesCardsSection() {
 										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									{activePanel === 'design' && (
-										<DesignSettingsPanel cardOptions={cardOptions} onChange={handleCardOptionsChange} />
+										<DesignPanel options={cardOptions} onChange={handleCardOptionsChange} />
 									)}
 									{activePanel === 'visual' && (
 										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
