@@ -67,27 +67,16 @@ export function BaseCard({
 	return (
 		<button
 			type="button"
-			className={cn(
-				'relative w-full h-full perspective-1000 bg-transparent border-0 p-0 cursor-pointer',
-				className
-			)}
+			className={cn('relative w-full h-full perspective-1000 bg-transparent border-0 p-0 cursor-pointer', className)}
 			onClick={handleFlip}
 			onKeyDown={handleKeyDown}
 			disabled={!enableBackside}
 		>
 			{/* Contenedor para el efecto 3D */}
-			<div
-				className={cn(
-					'relative w-full h-full transition-transform duration-500',
-					isFlipped && 'rotateY-180'
-				)}
-			>
+			<div className={cn('relative w-full h-full transition-transform duration-500', isFlipped && 'rotateY-180')}>
 				{/* Cara Frontal */}
 				<div
-					className={cn(
-						'absolute inset-0 backface-hidden',
-						isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
-					)}
+					className={cn('absolute inset-0 backface-hidden', isFlipped ? 'pointer-events-none' : 'pointer-events-auto')}
 				>
 					{/* Core Layer - Se incluye solo si está habilitado */}
 					{enableCore && <CoreLayer config={coreConfig} />}
@@ -104,10 +93,7 @@ export function BaseCard({
 							!isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
 						)}
 					>
-						<BacksideLayer
-							content={backsideContent}
-							options={backsideOptions}
-						/>
+						<BacksideLayer content={backsideContent} options={backsideOptions} />
 					</div>
 				)}
 			</div>
