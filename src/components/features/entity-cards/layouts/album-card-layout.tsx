@@ -2,7 +2,7 @@
 
 import type { AlbumWithStats } from '@/app/actions/albums/album.actions';
 import { generateRarityConfig } from '@/components/features/entity-cards/entity-card-adapter';
-import type { AlbumFormData } from '@/components/features/entity-cards/forms/entity-types';
+import type { AlbumFormData } from '@/components/features/entity-cards/modules/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Album as AlbumIcon, PencilIcon, Trash2 } from 'lucide-react';

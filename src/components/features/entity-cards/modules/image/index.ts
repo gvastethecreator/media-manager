@@ -16,9 +16,4 @@ export type { ImageOptions, ImagePanelProps } from './types';
 export { DEFAULT_IMAGE_OPTIONS } from './types';
 
 // Exportar componentes de sección
-export {
-	DesignSection,
-	BasicEffectsSection,
-	DepthEffectsSection,
-	PerformanceSection,
-} from './components/sections';
+export { DesignSection, BasicEffectsSection, DepthEffectsSection, PerformanceSection } from './components/sections';

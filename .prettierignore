@@ -1,0 +1,24 @@
+# Carpetas generadas
+node_modules/
+.next/
+build/
+dist/
+coverage/
+public/
+prisma/
+
+# Archivos específicos
+.vercel
+.git
+**/*.min.js
+**/*.config.js
+
+# Archivos y carpetas generados por herramientas
+.yarn
+.pnp.*
+.vscode
+
+# Lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
