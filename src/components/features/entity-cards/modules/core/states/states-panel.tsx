@@ -1,10 +1,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EyeIcon, FocusIcon, HandIcon, RefreshCwIcon, StarIcon } from 'lucide-react';
 import { useState } from 'react';
-import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
+import {
+	FormGroup,
+	FormLayout,
+	FormRow,
+	FormSection,
+	FormSlider,
+	FormToggle,
+} from '../../../../settings/panels/shared';
 import type { StatesSystem } from './types';
 
 interface StatesPanelProps {

@@ -1,24 +1,18 @@
 'use client';
 
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
 import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
+import { EntityCardContent } from '@/components/features/entity-cards/entity-card-content';
 import type {
-	CardDesignData,
 	CardDesignPreset,
 	CardOptions,
-	RarityConfig,
 	TextureConfig,
-} from '@/components/features/entity-cards/types/base-card-types';
+} from '@/components/features/entity-cards/types/shared-card-types';
 import { cn } from '@/lib/utils';
-import { NoteWithStats } from '@/types/note';
-import type { Note } from '@prisma/client';
-import { Edit, ScrollText, StickyNote, Trash2 } from 'lucide-react';
-import { ImageIcon, StarIcon, UsersIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Note } from '@/types/prisma';
+import { ImageIcon, ScrollText, StarIcon, StickyNote, UsersIcon } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
-import { EntityCardWrapper } from '../entity-base-card';
-import { ImageGrid } from './image-grid';
+import { EntityCardWrapper } from '../entity-card-wrapper';
 
 // Opciones visuales optimizadas para tarjetas de notas
 const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
@@ -43,8 +37,8 @@ const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
 	// Configuración de movimiento
 	hoverLiftHeight: 6,
 	maxRotation: 8,
-	primaryColor: '168, 85, 247', // Un tono púrpura
-	secondaryColor: '192, 132, 252', // Un tono púrpura claro
+	primaryColor: '239, 68, 68', // Un tono rojo
+	secondaryColor: '248, 113, 113', // Un tono rojo claro
 
 	// Opciones de efectos
 	holographicOptions: {
@@ -84,33 +78,43 @@ const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
 		animated: false,
 		visibleOnHover: true,
 	},
+
+	// Opciones para imagen
+	useImageGrid: true,
+	imageGridLayout: 'single',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
 };
 
-// Definición de colores por prioridad
-const PRIORITY_COLORS = {
-	3: {
-		bg: 'bg-rose-100',
-		text: 'text-rose-700',
-		borderColor: '#e11d48',
-		glowColor: 'rgba(225, 29, 72, 0.6)',
+// Definición de los tipos de notas
+const NOTE_TYPES = {
+	standard: {
+		label: 'Estándar',
+		icon: <ScrollText className="h-4 w-4" />,
+		primaryColor: '239, 68, 68', // Rojo
+		secondaryColor: '248, 113, 113', // Rojo claro
+		texture: 'standard' as TextureConfig,
 	},
-	2: {
-		bg: 'bg-amber-100',
-		text: 'text-amber-700',
-		borderColor: '#d97706',
-		glowColor: 'rgba(217, 119, 6, 0.5)',
+	important: {
+		label: 'Importante',
+		icon: <StarIcon className="h-4 w-4" />,
+		primaryColor: '168, 85, 247', // Púrpura
+		secondaryColor: '192, 132, 252', // Púrpura claro
+		texture: 'gold' as TextureConfig,
 	},
-	1: {
-		bg: 'bg-blue-100',
-		text: 'text-blue-700',
-		borderColor: '#2563eb',
-		glowColor: 'rgba(37, 99, 235, 0.4)',
+	concept: {
+		label: 'Concepto',
+		icon: <UsersIcon className="h-4 w-4" />,
+		primaryColor: '59, 130, 246', // Azul
+		secondaryColor: '96, 165, 250', // Azul claro
+		texture: 'silver' as TextureConfig,
 	},
-	0: {
-		bg: 'bg-gray-100',
-		text: 'text-gray-700',
-		borderColor: '#6b7280',
-		glowColor: 'rgba(107, 114, 128, 0.3)',
+	research: {
+		label: 'Investigación',
+		icon: <ImageIcon className="h-4 w-4" />,
+		primaryColor: '34, 197, 94', // Verde
+		secondaryColor: '74, 222, 128', // Verde claro
+		texture: 'bronze' as TextureConfig,
 	},
 };
 
@@ -124,275 +128,114 @@ interface NoteCardProps {
 	visualOptions?: Partial<CardOptions>;
 }
 
-// Componente principal de tarjeta de nota
+// Componente principal para la tarjeta de nota
 export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOptions }: NoteCardProps) {
-	// Estado local
-	const [showConfig, setShowConfig] = useState(false);
-	const [isHovered, setIsHovered] = useState(false);
+	// Estado para controlar si el panel de configuración está abierto
+	const [configOpen, setConfigOpen] = useState(false);
 
-	// Estado para las opciones visuales
+	// Estado para las opciones de la tarjeta
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({
 		...DEFAULT_NOTE_OPTIONS,
 		...visualOptions,
 	});
 
-	// Extraer tags si existen
-	const tags = React.useMemo(() => {
-		if (!note.tags) {
-			return [];
-		}
-		return typeof note.tags === 'string' ? JSON.parse(note.tags) : note.tags;
-	}, [note.tags]);
-
-	// Determinar el color de prioridad
-	const priorityLevel = note.priority ?? 0;
-	const priorityColor =
-		priorityLevel >= 3
-			? PRIORITY_COLORS[3]
-			: priorityLevel >= 2
-				? PRIORITY_COLORS[2]
-				: priorityLevel >= 1
-					? PRIORITY_COLORS[1]
-					: PRIORITY_COLORS[0];
-
-	// Determinar rareza basada en el número de imágenes
-	const rarity = note._count?.images
-		? note._count.images > 10
-			? 'legendary'
-			: note._count.images > 5
-				? 'epic'
-				: 'rare'
-		: 'common';
-
-	// Determinar tipo de nota basado en palabras clave
+	// Función para determinar el tipo de nota según el contenido
 	const determineNoteType = (name: string, description: string) => {
-		const keywords = {
-			story: ['historia', 'cuento', 'relato', 'narrativa'],
-			concept: ['concepto', 'idea', 'teoría', 'propuesta'],
-			research: ['investigación', 'estudio', 'análisis', 'datos'],
-		};
+		// Identificar si es una nota de investigación
+		const isResearch =
+			description?.toLowerCase().includes('investigación') ||
+			description?.toLowerCase().includes('research') ||
+			name?.toLowerCase().includes('investigación') ||
+			name?.toLowerCase().includes('research');
 
-		const text = `${name} ${description}`.toLowerCase();
-		for (const [type, words] of Object.entries(keywords)) {
-			if (words.some((word) => text.includes(word))) {
-				return type as keyof typeof keywords;
-			}
-		}
-		return 'concept';
+		// Identificar si es una nota de concepto
+		const isConcept =
+			description?.toLowerCase().includes('concepto') ||
+			description?.toLowerCase().includes('concept') ||
+			name?.toLowerCase().includes('concepto') ||
+			name?.toLowerCase().includes('concept');
+
+		// Identificar si es una nota importante
+		const isImportant =
+			description?.toLowerCase().includes('importante') ||
+			description?.toLowerCase().includes('important') ||
+			description?.toLowerCase().includes('urgente') ||
+			description?.toLowerCase().includes('urgent') ||
+			name?.toLowerCase().includes('importante') ||
+			name?.toLowerCase().includes('important') ||
+			name?.toLowerCase().includes('urgente') ||
+			name?.toLowerCase().includes('urgent');
+
+		// Devolver el tipo correspondiente
+		if (isResearch) return 'research';
+		if (isConcept) return 'concept';
+		if (isImportant) return 'important';
+		return 'standard';
 	};
 
-	const noteType = determineNoteType(note.name, note.description || '');
+	// Obtener el tipo de nota
+	const noteType = note.type || determineNoteType(note.name || '', note.content || '');
+	const typeInfo = NOTE_TYPES[noteType as keyof typeof NOTE_TYPES] || NOTE_TYPES.standard;
 
-	// Estilos específicos por tipo de nota
-	const noteStyles = {
-		story: {
-			primaryColor: '168, 85, 247', // Púrpura
-			secondaryColor: '192, 132, 252', // Púrpura claro
-			texture: 'gold' as TextureConfig,
-		},
-		concept: {
-			primaryColor: '59, 130, 246', // Azul
-			secondaryColor: '96, 165, 250', // Azul claro
-			texture: 'silver' as TextureConfig,
-		},
-		research: {
-			primaryColor: '34, 197, 94', // Verde
-			secondaryColor: '74, 222, 128', // Verde claro
-			texture: 'bronze' as TextureConfig,
-		},
-	};
-
-	const style = noteStyles[noteType];
+	// Obtener fecha formateada
+	const formattedDate = note.createdAt
+		? new Date(note.createdAt).toLocaleDateString()
+		: new Date().toLocaleDateString();
 
 	return (
 		<>
-			{showConfig && (
+			{configOpen && (
 				<VisualizationConfig
 					options={cardOptions}
-					onOptionsChange={(newOptions) => {
-						setCardOptions({
-							...cardOptions,
-							...newOptions,
-						});
-					}}
-					onClose={() => setShowConfig(false)}
+					onOptionsChange={setCardOptions}
+					onClose={() => setConfigOpen(false)}
 				/>
 			)}
 
-			<EntityCardWrapper
-				className={cn('group relative overflow-hidden', className)}
-				options={{
-					...cardOptions,
-					primaryColor: style.primaryColor,
-					secondaryColor: style.secondaryColor,
-				}}
-				entityType="note"
-				rarity={rarity}
-				texture={style.texture}
-				onHover={() => setIsHovered(true)}
+			<div
+				className={cn('note-card min-h-[250px] w-full relative', className)}
 				onClick={onClick}
-				enableExplode={true}
-				explodeLayers={[
+				style={
 					{
-						element: 'image',
-						scale: 1.1,
-						opacity: 0.8,
-						blur: 2,
-						zIndex: 1,
-					},
-					{
-						element: 'content',
-						scale: 1.05,
-						opacity: 0.9,
-						blur: 1,
-						zIndex: 2,
-					},
-				]}
+						'--primary-color': typeInfo.primaryColor,
+						'--secondary-color': typeInfo.secondaryColor,
+					} as React.CSSProperties
+				}
 			>
-				{/* Estructura principal de la carta de nota (inspirada en pergaminos/conocimiento de MTG) */}
-				<div className="relative flex flex-col h-full text-gray-800">
-					{/* Barra superior con título y prioridad */}
-					<div className={cn('relative px-3 py-2 border-b', priorityColor.bg, priorityColor.text)}>
-						<div className="flex items-center justify-between">
-							<h3 className="text-base font-medium truncate">{note.title}</h3>
-							<div className="flex items-center space-x-1">
-								{(note as unknown as { emoji: string }).emoji && (
-									<span className="text-lg" role="img" aria-label="emoji">
-										{(note as unknown as { emoji: string }).emoji}
-									</span>
-								)}
-								{priorityLevel > 0 && (
-									<div
-										className={cn(
-											'px-2 py-0.5 text-xs rounded-full',
-											priorityColor.bg,
-											priorityColor.text,
-											'font-medium border',
-											`border-${priorityColor.text.split('-')[1]}-400`
-										)}
-									>
-										P{priorityLevel}
-									</div>
-								)}
-							</div>
-						</div>
-					</div>
-
-					{/* Área principal de la carta */}
-					<div className="flex-1 flex flex-col p-3 bg-gradient-to-b from-blue-50/90 to-cyan-50/80 backdrop-blur-sm">
-						{/* Categoría y status */}
-						<div className="flex justify-between mb-2">
-							{note.category && (
-								<span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">{note.category}</span>
-							)}
-							{note.status && (
-								<span
-									className={cn(
-										'text-xs px-2 py-0.5 rounded-full',
-										note.status.toLowerCase() === 'completado' || note.status.toLowerCase() === 'completed'
-											? 'bg-green-100 text-green-800'
-											: note.status.toLowerCase() === 'pendiente' || note.status.toLowerCase() === 'pending'
-												? 'bg-amber-100 text-amber-800'
-												: 'bg-blue-100 text-blue-800'
-									)}
-								>
-									{note.status}
-								</span>
-							)}
-						</div>
-
-						{/* Imagen destacada si existe */}
-						{cardOptions.useImageGrid ? (
-							<ImageGrid
-								layout={cardOptions.imageGridLayout || 'single'}
-								gap={cardOptions.imageGridGap || 4}
-								style={cardOptions.imageGridStyle || 'standard'}
-								images={[
-									{
-										id: 'note-image',
-										path: note.featuredImage || '',
-										thumbnail: note.featuredImage || '',
-									},
-								]}
-								className="mb-3"
-							/>
-						) : (
-							<>
-								{note.featuredImage && (
-									<div className="mb-3 rounded-md overflow-hidden border border-blue-200/60">
-										<div
-											className="w-full h-24 bg-center bg-cover"
-											style={{ backgroundImage: `url(${note.featuredImage})` }}
-										/>
-									</div>
-								)}
-							</>
-						)}
-
-						{/* Contenido principal */}
-						<div
-							className={cn(
-								'flex-1 overflow-auto mb-2 text-sm text-slate-800 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50/50',
-								'max-h-24'
-							)}
-						>
-							{note.content ? (
-								<p className="line-clamp-3">{note.content}</p>
-							) : (
-								<p className="text-blue-500/70 italic text-sm">Sin contenido</p>
-							)}
-						</div>
-
-						{/* Área de tags */}
-						{tags.length > 0 && (
-							<div className="py-1 mb-2 border-t border-blue-200/40">
-								<div className="flex flex-wrap gap-1 mt-1">
-									{tags.map((tag: string) => (
-										<span
-											key={`tag-${tag}`}
-											className="inline-flex items-center text-xs px-2 py-0.5 bg-blue-100/80 text-blue-800 rounded-full"
-										>
-											#{tag}
-										</span>
-									))}
-								</div>
-							</div>
-						)}
-
-						{/* Pie de carta con botones de acción */}
-						<div className="flex items-center justify-end pt-1 border-t border-blue-200/40">
-							{/* Botones de acción - solo visibles al hacer hover */}
-							<div className={`flex space-x-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-								{onEdit && (
-									<button
-										type="button"
-										onClick={(e) => {
-											e.stopPropagation();
-											onEdit(note);
-										}}
-										className="p-1 text-blue-700 hover:text-blue-900 rounded-full hover:bg-blue-200/60"
-									>
-										<Edit className="h-3.5 w-3.5" />
-									</button>
-								)}
-
-								{onDelete && (
-									<button
-										type="button"
-										onClick={(e) => {
-											e.stopPropagation();
-											onDelete(note.id);
-										}}
-										className="p-1 text-blue-700 hover:text-red-600 rounded-full hover:bg-blue-200/60"
-									>
-										<Trash2 className="h-3.5 w-3.5" />
-									</button>
-								)}
-							</div>
-						</div>
-					</div>
-				</div>
-			</EntityCardWrapper>
+				<EntityCardWrapper
+					title={note.name || 'Nota sin título'}
+					description={note.content || ''}
+					entityType="note"
+					entityId={note.id}
+					visualOptions={{
+						...cardOptions,
+						primaryColor: typeInfo.primaryColor,
+						secondaryColor: typeInfo.secondaryColor,
+					}}
+					onConfigClick={() => setConfigOpen(true)}
+				>
+					<EntityCardContent
+						title={note.name || 'Nota sin título'}
+						description={note.content}
+						entityId={note.id}
+						onEdit={onEdit ? () => onEdit(note) : undefined}
+						onDelete={onDelete ? () => onDelete(note.id) : undefined}
+						icon={typeInfo.icon || <StickyNote className="h-4 w-4" />}
+						className="p-4"
+						badges={
+							note.tags && Array.isArray(note.tags) && note.tags.length > 0
+								? note.tags.slice(0, 3).map((tag: string) => ({
+										key: `tag-${tag}`,
+										label: `#${tag}`,
+										variant: 'secondary',
+									}))
+								: []
+						}
+					>
+						<div className="text-xs text-[--muted-foreground] mt-auto">{formattedDate}</div>
+					</EntityCardContent>
+				</EntityCardWrapper>
+			</div>
 		</>
 	);
 }

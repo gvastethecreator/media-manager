@@ -1,5 +1,5 @@
-import { baseLayerConfigSchema } from '@/lib/schemas/base-layer-config-schema';
 import { z } from 'zod';
+import { layerBaseConfigSchema } from '../layer-config-base';
 
 // Esquema para los uniforms de shader
 export const shaderUniformsSchema = z.record(z.string(), z.union([z.number(), z.array(z.number())]));
@@ -12,7 +12,7 @@ export const shaderAdvancedConfigSchema = z.object({
 });
 
 // Esquema principal para la configuración de shaders
-export const shaderConfigSchema = baseLayerConfigSchema.extend({
+export const shaderConfigSchema = layerBaseConfigSchema.extend({
 	type: z.enum(['base', 'distortion', 'hologram', 'wave', 'particle']),
 	intensity: z.number().min(0).max(1).default(0.5),
 	speed: z.number().min(0).max(5).default(1),

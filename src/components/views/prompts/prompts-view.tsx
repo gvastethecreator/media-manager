@@ -1,10 +1,10 @@
 'use client';
 
-import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import type { PromptWithStats } from '@/app/actions/prompts/prompt.actions';
+import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card-layout';
+import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

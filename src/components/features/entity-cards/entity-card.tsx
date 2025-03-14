@@ -1,26 +1,23 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { EntityCardContent } from './entity-card-content';
 import { CardContainer } from './layers/card-container';
+import { useLayersSystem } from './layers/hooks/layers-system';
 import { LayerRenderer } from './layers/layer-plugin-system';
-import type { BaseLayerConfig } from './layers/layer-plugin-system';
 import { useAnimationSystem } from './modules/animation';
 import type { AnimationSystem } from './modules/animation/types';
 import { BacksideLayer } from './modules/backside';
 import type { BacksideOptions } from './modules/backside/types';
-import type { ColorPalette } from './modules/colors';
 import { useColors } from './modules/colors';
 import { CoreLayer } from './modules/core';
 import type { CoreConfig } from './modules/core/core-config';
 import { useDesignSystem } from './modules/design';
 import type { DesignSystem as DesignSystemType } from './modules/design/types';
 import type { ImageGridImage, ImageGridLayout, ImageGridStyle } from './modules/image-grid';
-import { useLayersSystem } from './modules/layers';
-import type { RarityDefinition } from './modules/rarities';
+import './styles/card-borders.css';
 import type { CardOptions } from './types/card-settings-types';
 
 export interface BaseCardProps {

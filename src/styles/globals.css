@@ -1,5 +1,4 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss/preflight";
 @tailwind utilities;
 
 @layer base {
@@ -33,6 +32,9 @@
 		--ring: 222.2 84% 4.9%;
 
 		--radius: 0.5rem;
+
+		--black: 0 0% 0%;
+		--white: 0 0% 100%;
 	}
 
 	.dark {
@@ -64,175 +66,6 @@
 		--input: 217.2 32.6% 17.5%;
 		--ring: 212.7 26.8% 83.9%;
 	}
-}
-
-@layer base {
-	* {
-		@apply border-border;
-	}
-
-	body {
-		@apply bg-background text-foreground;
-	}
-}
-
-/* Card Styles */
-.card {
-	@apply relative overflow-hidden rounded-lg bg-card text-card-foreground shadow-lg transition-all duration-300;
-}
-
-.card-hover {
-	@apply hover:scale-105 hover:shadow-xl;
-}
-
-.card-active {
-	@apply active:scale-95;
-}
-
-.card-disabled {
-	@apply opacity-50 cursor-not-allowed;
-}
-
-.card-selected {
-	@apply ring-2 ring-primary;
-}
-
-/* Card Effects */
-.card-glow {
-	@apply before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-primary/20 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100;
-}
-
-.card-holographic {
-	@apply after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r after:from-white/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-100;
-}
-
-.card-grain {
-	@apply bg-[url('/noise.png')] bg-repeat opacity-5;
-}
-
-/* Card Rarities */
-.card-common {
-	@apply border-2 border-gray-400;
-}
-
-.card-uncommon {
-	@apply border-2 border-green-500;
-}
-
-.card-rare {
-	@apply border-2 border-blue-500;
-}
-
-.card-epic {
-	@apply border-2 border-purple-500;
-}
-
-.card-legendary {
-	@apply border-2 border-yellow-500;
-}
-
-.card-mythic {
-	@apply border-2 border-red-500;
-}
-
-/* Card Animations */
-.animate-shine {
-	@apply animate-shine;
-}
-
-.animate-pulse {
-	@apply animate-pulse;
-}
-
-.animate-rotate {
-	@apply animate-rotate;
-}
-
-/* Card Utilities */
-.card-blend {
-	@apply mix-blend-overlay;
-}
-
-.card-blur {
-	@apply backdrop-blur-sm;
-}
-
-.card-shadow {
-	@apply shadow-lg;
-}
-
-.card-elevation {
-	@apply shadow-xl;
-}
-
-.card-border {
-	@apply border-2;
-}
-
-.card-rounded {
-	@apply rounded-lg;
-}
-
-.card-rounded-full {
-	@apply rounded-full;
-}
-
-.card-rounded-none {
-	@apply rounded-none;
-}
-
-/* Card Content */
-.card-header {
-	@apply flex items-center justify-between p-4;
-}
-
-.card-title {
-	@apply text-lg font-semibold;
-}
-
-.card-subtitle {
-	@apply text-sm text-muted-foreground;
-}
-
-.card-content {
-	@apply p-4;
-}
-
-.card-footer {
-	@apply flex items-center justify-between p-4 border-t;
-}
-
-/* Card Actions */
-.card-actions {
-	@apply flex items-center gap-2;
-}
-
-.card-action {
-	@apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
-}
-
-.card-action-primary {
-	@apply bg-primary text-primary-foreground hover:bg-primary/90;
-}
-
-.card-action-secondary {
-	@apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-}
-
-.card-action-destructive {
-	@apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-}
-
-.card-action-outline {
-	@apply border border-input hover:bg-accent hover:text-accent-foreground;
-}
-
-.card-action-ghost {
-	@apply hover:bg-accent hover:text-accent-foreground;
-}
-
-.card-action-link {
-	@apply text-primary underline-offset-4 hover:underline;
 }
 
 /* Estilos para el estado de redimensionamiento */
@@ -394,4 +227,29 @@
 		opacity: 1;
 		transform: translateY(0);
 	}
+}
+
+/* Agregar la definición de las variables CSS como valores RGB para poder usar con opacidad */
+:root {
+	--background-rgb: 255, 255, 255;
+	--foreground-rgb: 10, 10, 10;
+	--card-rgb: 255, 255, 255;
+	--card-foreground-rgb: 10, 10, 10;
+	--popover-rgb: 255, 255, 255;
+	--popover-foreground-rgb: 10, 10, 10;
+	--primary-rgb: 29, 78, 216;
+	--primary-foreground-rgb: 255, 255, 255;
+	--secondary-rgb: 241, 245, 249;
+	--secondary-foreground-rgb: 15, 23, 42;
+	--muted-rgb: 241, 245, 249;
+	--muted-foreground-rgb: 100, 116, 139;
+	--accent-rgb: 241, 245, 249;
+	--accent-foreground-rgb: 15, 23, 42;
+	--destructive-rgb: 239, 68, 68;
+	--destructive-foreground-rgb: 255, 255, 255;
+	--border-rgb: 226, 232, 240;
+	--input-rgb: 226, 232, 240;
+	--ring-rgb: 10, 10, 10;
+	--black-rgb: 0, 0, 0;
+	--white-rgb: 255, 255, 255;
 }

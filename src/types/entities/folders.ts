@@ -1,5 +1,5 @@
 import type { ExtendedProcessStatus, ProcessStatus } from '@/types/process';
-import type { Image } from './images';
+import { Prisma } from '@prisma/client';
 
 export interface FolderStats {
 	totalFolders: number;
@@ -10,29 +10,49 @@ export interface FolderStats {
 	updatedAt: Date;
 }
 
-export interface Folder {
+/**
+ * Representación de una carpeta en el sistema
+ */
+export type Folder = Prisma.FolderGetPayload<{}> & {
+	totalFiles?: number;
+	totalSize?: number;
+	imageCount?: number;
+	lastIndexed?: Date | string;
+	path?: string;
+	presetId?: string | null;
+};
+
+/**
+ * Datos para crear una carpeta
+ */
+export interface CreateFolderData {
+	name: string;
+	path: string;
+	description?: string;
+	emoji?: string;
+	presetId?: string | null;
+}
+
+/**
+ * Datos para actualizar una carpeta
+ */
+export interface UpdateFolderData {
+	name?: string;
+	description?: string;
+	emoji?: string;
+	presetId?: string | null;
+}
+
+/**
+ * Resumen de una carpeta
+ */
+export interface FolderSummary {
 	id: string;
 	name: string;
 	path: string;
-	totalFiles?: number;
-	totalSize?: number;
-	lastIndexed?: Date | string | null;
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	autoReindex?: boolean;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-
-	// Relaciones
-	images?: Image[];
-
-	// Imágenes recientes para mostrar en la tarjeta
-	recentImages?: string[];
-
-	// Contadores
-	_count?: {
-		images?: number;
-	};
+	imageCount: number;
+	totalSize: number;
+	lastIndexed: Date | null;
 }
 
-export type { ProcessStatus, ExtendedProcessStatus };
+export type { ExtendedProcessStatus, ProcessStatus };

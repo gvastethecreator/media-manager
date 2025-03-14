@@ -8,7 +8,7 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '../../../../settings/panels/shared';
+} from '../../../../../settings/panels/shared';
 import type { ImageOptions } from '../types';
 
 /**

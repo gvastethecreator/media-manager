@@ -1,170 +1,99 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type * as React from 'react';
-import { useMemo } from 'react';
-import type { EntityType } from './adapters/preset-adapter';
-import { DEFAULT_SETTINGS_OPTIONS } from './config/card-config-defaults';
-import { BaseCard } from './entity-card';
-import { adaptOptionsForLayout, adaptSettingsToBaseOptions, isSettingsCardOptions } from './entity-card-adapter';
-import { usePreset } from './hooks/use-preset';
-import type { CardOptions as SettingsCardOptions } from './settings/entities-card-settings-types';
-import type {
-	CardOptions as BaseCardOptions,
-	CardDesignPreset,
-	RarityConfig,
-	TextureConfig,
-} from './types/base-card-types';
+import { SettingsIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ReactNode } from 'react';
+import { EntityTypeIcon } from './entity-type-icon';
+import type { CardOptions } from './types/shared-card-types';
+import { Card3D } from './ui/card-3d';
 
 export interface EntityCardWrapperProps {
-	// Propiedades comunes
-	children: React.ReactNode;
+	title?: string;
+	description?: string;
+	entityType: string;
+	entityId?: string;
+	visualOptions?: Partial<CardOptions>;
+	options?: any; // Cambiado a any para evitar problemas de compatibilidad entre sistemas de tipos
+	children: ReactNode;
+	onConfigClick?: () => void;
+	onClick?: () => void;
 	className?: string;
-	options?: Partial<BaseCardOptions> | Partial<SettingsCardOptions>;
-	entityType: CardDesignPreset;
-
-	// Configuraciones visuales
-	rarity?: RarityConfig | null;
-	texture?: TextureConfig | null;
-	presetId?: string | null;
-
-	// Interacciones
-	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
-	onHoverStart?: () => void;
-	onHoverEnd?: () => void;
-
-	// Configuración visual
+	// Propiedades para visualización de configuración
 	showVisualizationConfig?: boolean;
-	onVisualizationConfigClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-
-	// Soporte para modo explosionado
+	onVisualizationConfigClick?: () => void;
+	// Propiedades para vista explode
 	enableExplode?: boolean;
+	explodeLayers?: Array<{
+		id: string;
+		label: string;
+		icon: React.ReactNode;
+	}>;
 	isExploded?: boolean;
 	activeLayer?: string | null;
 	onExplodedChange?: (isExploded: boolean) => void;
 	onActiveLayerChange?: (layerId: string | null) => void;
-	explodeLayers?: {
-		id: string;
-		label: string;
-		icon: React.ReactNode;
-	}[];
 }
 
-/**
- * EntityCardWrapper - Componente que conecta los layouts específicos con el BaseCard
- *
- * Este componente gestiona:
- * 1. La adaptación de opciones según el tipo de entidad
- * 2. La configuración de aspectos como rareza y textura
- * 3. Compatibilidad de props entre layouts y BaseCard
- * 4. Integración con el sistema de presets
- */
 export function EntityCardWrapper({
-	children,
-	className,
-	options = DEFAULT_SETTINGS_OPTIONS as unknown as Partial<BaseCardOptions>,
+	title,
+	description,
 	entityType,
-	rarity,
-	texture,
-	presetId,
+	entityId = 'default',
+	visualOptions,
+	options,
+	children,
+	onConfigClick,
 	onClick,
-	onHoverStart,
-	onHoverEnd,
-	showVisualizationConfig = false,
+	className,
+	showVisualizationConfig,
 	onVisualizationConfigClick,
-	enableExplode = false,
+	enableExplode,
+	explodeLayers,
 	isExploded,
 	activeLayer,
 	onExplodedChange,
 	onActiveLayerChange,
-	explodeLayers = [],
 }: EntityCardWrapperProps) {
-	// Convertir las opciones al formato correcto dependiendo del tipo
-	const baseOptions = useMemo(() => {
-		if (isSettingsCardOptions(options)) {
-			// Si son opciones del tipo Settings, convertirlas a BaseOptions
-			return adaptSettingsToBaseOptions(options as SettingsCardOptions);
-		}
-		// Si ya son opciones de tipo Base, usarlas directamente
-		return options as Partial<BaseCardOptions>;
-	}, [options]);
+	const titleId = `card-title-${entityId}`;
+	const descriptionId = `card-description-${entityId}`;
 
-	// Obtener configuración del preset si existe
-	const { cardOptions: presetOptions } = usePreset({
-		entityType: entityType as EntityType,
-		presetId,
-		baseOptions: {}, // No pasamos opciones base aquí, las combinamos manualmente abajo
-	});
-
-	// Configurar la rareza con valores predeterminados si es necesario
-	const defaultRarity: RarityConfig = rarity || {
-		name: 'common',
-		color: '#3b82f6',
-		borderWidth: '1px',
-		borderEffect: 'static',
-	};
-
-	// Adaptar las opciones para el tipo específico de layout
-	const adaptedOptions = useMemo(() => {
-		// Combinamos primero las opciones del preset con las opciones base
-		const combinedOptions = {
-			...presetOptions,
-			...baseOptions,
-			// Combinar configuraciones anidadas
-			designSystem: {
-				...(presetOptions.designSystem || {}),
-				...(baseOptions.designSystem || {}),
-			},
-			effects: {
-				...(presetOptions.effects || {}),
-				...(baseOptions.effects || {}),
-			},
-			animation: {
-				...(presetOptions.animation || {}),
-				...(baseOptions.animation || {}),
-			},
-		};
-
-		// Adaptar para el tipo específico de layout
-		const options = adaptOptionsForLayout(combinedOptions, entityType);
-
-		// Asegurar que las opciones de rareza están correctamente configuradas
-		if (rarity && options.raritySystem !== undefined && options.raritySystem?.enabled !== false) {
-			options.raritySystem = { enabled: true };
-		}
-		return options;
-	}, [baseOptions, entityType, rarity, presetOptions]);
+	// Usar options o visualOptions (para compatibilidad)
+	const cardOptions = options || visualOptions;
 
 	return (
-		<BaseCard
-			className={cn(
-				'w-full',
-				{
-					// Aplicar aspecto según el preset configurado
-					'aspect-[3/4]': adaptedOptions.designSystem?.aspectRatio === '3/4',
-					'aspect-[4/5]': adaptedOptions.designSystem?.aspectRatio === '4/5',
-					'aspect-[7/10]': adaptedOptions.designSystem?.aspectRatio === '7/10',
-					'aspect-square': adaptedOptions.designSystem?.aspectRatio === '1/1',
-					'aspect-video': adaptedOptions.designSystem?.aspectRatio === '16/9',
-				},
-				className
-			)}
-			options={adaptedOptions}
-			rarity={defaultRarity}
-			texture={texture || undefined}
+		<Card3D
+			options={cardOptions}
+			className={cn('h-full w-full overflow-hidden', className)}
+			aria-labelledby={title ? titleId : undefined}
+			aria-describedby={description ? descriptionId : undefined}
 			onClick={onClick}
-			onHoverStart={onHoverStart}
-			onHoverEnd={onHoverEnd}
-			showVisualizationConfig={showVisualizationConfig}
-			onVisualizationConfigClick={onVisualizationConfigClick}
-			enableExplode={enableExplode}
-			explodeLayers={explodeLayers}
-			isExploded={isExploded}
-			activeLayer={activeLayer}
-			onExplodedChange={onExplodedChange}
-			onActiveLayerChange={onActiveLayerChange}
 		>
 			{children}
-		</BaseCard>
+
+			{/* Botón de Configuración */}
+			{(onConfigClick || onVisualizationConfigClick) && (
+				<motion.button
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					whileHover={{ scale: 1.1 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={(e) => {
+						e.stopPropagation();
+						if (onConfigClick) onConfigClick();
+						if (onVisualizationConfigClick) onVisualizationConfigClick();
+					}}
+					className="absolute top-2 right-2 z-50 p-1.5 rounded-full bg-[--black]/30 text-[--white] transition-colors hover:bg-[--primary]"
+					aria-label="Configurar visualización"
+				>
+					<SettingsIcon className="h-3.5 w-3.5" />
+				</motion.button>
+			)}
+
+			{/* Indicador de tipo de entidad */}
+			<div className="absolute left-2 top-2 z-50">
+				<EntityTypeIcon type={entityType} size="sm" />
+			</div>
+		</Card3D>
 	);
 }

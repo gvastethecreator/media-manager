@@ -1,6 +1,58 @@
-// Tipos base para efectos
-export interface HolographicEffectOptions {
-	patternType?: string;
+/**
+ * Tipos unificados para el sistema de tarjetas de entidades
+ * Estos tipos son la referencia principal para todas las tarjetas
+ */
+
+// Presets de diseño de tarjetas
+export type CardPreset =
+	| 'default'
+	| 'minimal'
+	| 'folder'
+	| 'album'
+	| 'character'
+	| 'place'
+	| 'tag'
+	| 'collection'
+	| 'concept'
+	| 'prompt'
+	| 'worldItem'
+	| 'note';
+
+// Añadimos alias para compatibilidad
+export type CardDesignPreset = CardPreset;
+
+// Variantes de tarjetas
+export type CardVariant = 'default' | 'alternative' | 'minimal' | 'expanded' | 'compact';
+
+// Estilos de esquinas
+export type CornerStyle = 'rounded' | 'sharp' | 'beveled';
+
+// Estilos de sombras - compatible con shared-card-types.ts
+export type ShadowStyle = 'soft' | 'hard' | 'layered' | 'flat';
+
+// Sistema de diseño de tarjetas
+export interface DesignSystem {
+	preset?: CardPreset;
+	variant?: string;
+	aspectRatio?: string;
+	cornerStyle?: CornerStyle;
+	cornerRadius?: number;
+	elevation?: number;
+	shadowStyle?: ShadowStyle;
+}
+
+// Configuración de animaciones
+export interface AnimationSystem {
+	type?: 'hover' | 'continuous' | 'none';
+	duration?: number;
+	style?: 'bounce' | 'float' | 'pulse' | 'glow' | 'none';
+	intensity?: number;
+}
+
+// Opciones de holográfico
+export interface HolographicOptions {
+	enabled?: boolean;
+	patternType?: 'rainbow' | 'geometric' | 'radial' | 'linear';
 	intensity?: number;
 	animationSpeed?: number;
 	visibleOnHover?: boolean;
@@ -9,77 +61,108 @@ export interface HolographicEffectOptions {
 	layerIndex?: number;
 }
 
-export interface ScanlinesOptions {
-	opacity?: number;
-	spacing?: number;
+// Opciones de brillo
+export interface GlowOptions {
+	enabled?: boolean;
 	color?: string;
-	animate?: boolean;
-	direction?: 'horizontal' | 'vertical';
+	intensity?: number;
+	size?: number;
+	blurAmount?: number;
+	animationType?: 'static' | 'pulse' | 'breathe' | 'flicker';
+	pulseSpeed?: number;
 	visibleOnHover?: boolean;
 	layerIndex?: number;
 }
 
-export interface GlowEffectOptions {
-	enabled?: boolean;
-	color?: string;
-	intensity?: number;
-	radius?: number;
-	spread?: number;
-	animation?: {
-		type?: string;
-		duration?: number;
-		timing?: string;
-		iteration?: number | 'infinite';
-	};
-}
-
+// Opciones de borde
 export interface BorderOptions {
-	color?: string;
+	enabled?: boolean;
 	width?: number;
-	pattern?: string;
-	animationType?: string;
-	glowColor?: string;
+	color?: string;
+	pattern?: 'solid' | 'dashed' | 'dotted' | 'double' | 'gradient';
+	animationType?: 'static' | 'pulse' | 'flow' | 'rainbow';
+	animation?: {
+		type?: 'none' | 'pulse' | 'flow' | 'rainbow';
+		duration?: number;
+		timing?: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
+		iteration?: 'once' | 'infinite';
+	};
 	glowIntensity?: number;
+	glowColor?: string;
 	glowOnHover?: boolean;
 	layerIndex?: number;
 	gradientColors?: string[];
 	gradientAngle?: number;
-	animation?: {
-		type: string;
-		duration: number;
-		timing: string;
-		iteration: string;
-	};
+	opacity?: number;
+	blur?: number;
+	spread?: number;
+	animationSpeed?: number;
+	animationDuration?: number;
 }
 
-export interface GrainEffectOptions {
+// Opciones de grano
+export interface GrainOptions {
+	enabled?: boolean;
 	intensity?: number;
 	density?: number;
 	contrast?: number;
-	noise?: string;
+	noise?: 'subtle' | 'medium' | 'heavy' | 'digital' | 'film' | 'light';
 	animated?: boolean;
-	animationSpeed?: number;
 	visibleOnHover?: boolean;
+	animationSpeed?: number;
 	layerIndex?: number;
 }
 
-// Sistema de diseño
-export interface DesignSystem {
-	preset: CardPreset;
-	variant: CardVariant;
-	aspectRatio: string;
-	cornerStyle: CornerStyle;
-	cornerRadius: string;
-	borderStyle: BorderStyle;
-	borderWidth: string;
-	elevation: string;
-	shadowStyle: ShadowStyle;
-	textStyle: TextStyle;
-	contentPadding: string;
+// Opciones de líneas de escaneo
+export interface ScanlinesOptions {
+	enabled?: boolean;
+	density?: number;
+	opacity?: number;
+	speed?: number;
+	color?: string;
+	animated?: boolean;
+	visibleOnHover?: boolean;
+	spacing?: number;
+	direction?: 'horizontal' | 'vertical' | 'diagonal';
+	animationSpeed?: number;
+	layerIndex?: number;
 }
 
-// Sistema de capas
-export interface LayerSystem {
+// Opciones para la cara posterior
+export interface BacksideOptions {
+	enabled?: boolean;
+	layoutType?: 'mirror' | 'stats' | 'info' | 'custom';
+	colorMode?: 'same' | 'inverse' | 'custom';
+	customColor?: string;
+	opacity?: number;
+	blurBackground?: boolean;
+	blurAmount?: number;
+	animation?: 'fade' | 'slide' | 'flip';
+	animationDuration?: number;
+	showBackContent?: boolean;
+}
+
+// Configuración de capas
+export interface LayersConfig {
+	background?: {
+		enabled: boolean;
+		type?: 'color' | 'gradient' | 'image' | 'pattern';
+		color?: string;
+		gradientType?: 'linear' | 'radial';
+		gradientColors?: string[];
+		patternType?: string;
+		image?: string;
+	};
+	frame?: {
+		enabled: boolean;
+		style?: 'classic' | 'modern' | 'vintage' | 'minimal';
+		color?: string;
+	};
+	content?: {
+		enabled: boolean;
+		layout?: 'default' | 'centered' | 'split';
+	};
+	effects?: string[];
 	order?: string[];
 	blendMode?: string;
 	spacing?: number;
@@ -87,55 +170,28 @@ export interface LayerSystem {
 	explodeDistance?: number;
 }
 
-// Sistema de animación
-export interface AnimationSystem {
-	type?: string;
-	duration?: number;
-	timing?: string;
-	iteration?: number | 'infinite';
+// Paleta de colores
+export interface ColorPalette {
+	primary: string;
+	secondary: string;
+	accent: string;
+	background: string;
+	text: string;
+	border: string;
 }
 
-// Sistema de explosión
-export interface ExplodeSystem {
-	enabled?: boolean;
-	distance?: number;
-	duration?: number;
-	timing?: string;
+// Configuración de rendimiento
+export interface PerformanceOptions {
+	// Optimizaciones generales
+	lazyLoad?: boolean;
+	virtualScroll?: boolean;
+	imageOptimization?: boolean;
+	animationOptimization?: boolean;
+	renderQuality?: 'low' | 'medium' | 'high';
 }
 
-// Configuración de grid de imágenes
-export interface ImageGrid {
-	layout?: 'single' | 'grid' | 'masonry';
-	gap?: number;
-	style?: 'standard' | 'compact' | 'spacious';
-	aspectRatio?: string;
-}
-
-// Estados de la tarjeta
+// Estados para las tarjetas
 export interface CardStates {
-	hover?: {
-		scale?: number;
-		rotate?: boolean;
-		lift?: boolean;
-		duration?: number;
-		easing?: string;
-	};
-	active?: {
-		scale?: number;
-		brightness?: number;
-	};
-	disabled?: {
-		opacity?: number;
-		grayscale?: boolean;
-	};
-	selected?: {
-		style?: string;
-		color?: string;
-	};
-}
-
-// Interactividad de la tarjeta
-export interface CardInteractivity {
 	enableHover?: boolean;
 	enableFocus?: boolean;
 	enableActive?: boolean;
@@ -145,159 +201,68 @@ export interface CardInteractivity {
 	stateDuration?: number;
 }
 
-// Opciones de rendimiento
-export interface PerformanceOptions {
-	enableHardwareAcceleration?: boolean;
-	useRAF?: boolean;
-	batchUpdates?: boolean;
-	throttleMs?: number;
-	enableImageOptimization?: boolean;
-	enableVirtualization?: boolean;
-	enableCaching?: boolean;
+// Opciones para interactividad
+export interface CardInteractivity {
+	enableHoverEffects?: boolean;
+	enableClickEffects?: boolean;
+	hover?: {
+		scale?: number;
+		rotate?: boolean;
+		lift?: boolean;
+		glow?: boolean;
+	};
 }
 
-// Opciones de backside
-export interface BacksideOptions {
-	enabled: boolean;
-	layoutType?: string;
-	colorMode?: string;
-	customColor?: string;
-	opacity?: number;
-	blurBackground?: boolean;
-	blurAmount?: number;
-	showAttributes?: boolean;
-	showDescription?: boolean;
-	showStats?: boolean;
-	showMetadata?: boolean;
-	showRelations?: boolean;
-	maxDescriptionLength?: number;
-	flipAnimation?: string;
-	flipDuration?: number;
-	enableAutoFlip?: boolean;
-	autoFlipDelay?: number;
-	flipTrigger?: string;
-	headingStyle?: string;
-	infoStyle?: string;
-	separatorStyle?: string;
-}
+// Configuración completa de tarjeta
+export interface CardOptions {
+	// Identificadores
+	entityType?: string;
+	entityId?: string;
+	presetId?: string;
 
-// Tipos de diseño
-export type CardPreset = 'default' | 'minimal' | 'detailed' | 'custom';
-export type CardVariant = 'standard' | 'compact' | 'expanded';
-export type CornerStyle = 'rounded' | 'sharp';
-export type BorderStyle = 'solid' | 'dashed' | 'dotted';
-export type ShadowStyle = 'soft' | 'sharp';
-export type TextStyle = 'default' | 'bold' | 'italic';
-
-// Tipos de efectos visuales
-export type VisualEffect = {
-	enableHolographic: boolean;
-	enableGlow: boolean;
-	enableGrain: boolean;
-	holographicIntensity: number;
-	glowIntensity: number;
-	grainIntensity: number;
-	holographicColor: string;
-	glowColor: string;
-	grainColor: string;
-	textureIntensity: number;
-	textureColor: string;
-};
-
-// Tipos de estados
-export type CardState = {
-	hover: {
-		scale: number;
-		rotate: boolean;
-		maxRotation: number;
-		lift: boolean;
-		liftHeight: number;
-		duration: number;
-		easing: string;
-	};
-	active: {
-		scale: number;
-		rotate: number;
-		duration: number;
-		easing: string;
-	};
-	disabled: boolean;
-	selected: boolean;
-};
-
-// Tipos de sistema de diseño
-export type DesignSystem = {
-	preset: CardPreset;
-	variant: CardVariant;
-	aspectRatio: string;
-	cornerStyle: CornerStyle;
-	cornerRadius: string;
-	borderStyle: BorderStyle;
-	borderWidth: string;
-	elevation: string;
-	shadowStyle: ShadowStyle;
-	textStyle: TextStyle;
-	contentPadding: string;
-};
-
-// Tipos de rendimiento
-export type Performance = {
-	enableHardwareAcceleration: boolean;
-	useRAF: boolean;
-	batchUpdates: boolean;
-	throttleMs: number;
-};
-
-// Tipos de metadatos
-export type CardMetadata = {
-	level?: number;
-	type?: string;
-	rarity?: string;
-	class?: string;
-	race?: string;
-	alignment?: string;
-	background?: string;
-	[key: string]: any;
-};
-
-// Tipo principal de opciones de tarjeta
-export type CardOptions = {
-	// Identificación
-	id: string;
-	title: string;
-	subtitle?: string;
-	description: string;
-	entityType: string;
-	rarity?: string;
-
-	// Sistema de diseño
-	designSystem: DesignSystem;
+	// Sistemas principales
+	designSystem?: DesignSystem;
+	animation?: AnimationSystem;
+	colors?: ColorPalette | string;
+	layers?: LayersConfig;
+	states?: CardStates;
+	interactivity?: CardInteractivity;
 
 	// Efectos visuales
-	visualEffects: VisualEffect;
+	enable3DEffect?: boolean;
+	enableHolographicEffect?: boolean;
+	enableScanlinesEffect?: boolean;
+	enableGlowEffect?: boolean;
+	enableBorderEffect?: boolean;
+	enableGrainEffect?: boolean;
+	enableScanlines?: boolean;
+	enableAnimatedBorder?: boolean;
+	enableLightHalo?: boolean;
 
-	// Estados
-	states: CardState;
+	// Opciones detalladas de efectos
+	holographicOptions?: HolographicOptions;
+	glowOptions?: GlowOptions;
+	borderOptions?: BorderOptions;
+	grainOptions?: GrainOptions;
+	scanlinesOptions?: ScanlinesOptions;
+	backside?: BacksideOptions;
 
 	// Rendimiento
-	performance: Performance;
+	performanceMode?: 'quality' | 'balanced' | 'performance';
+	disableAnimationsOnMobile?: boolean;
+	performance?: PerformanceOptions;
 
 	// Metadatos
-	metadata?: CardMetadata;
+	version?: string;
+	lastModified?: string;
 
-	// Badges
-	badges?: string[];
-
-	// Imágenes
-	image?: {
-		src: string;
-		alt: string;
-		width?: number;
-		height?: number;
+	// Propiedades adicionales del base-card-types
+	raritySystem?: {
+		enabled?: boolean;
+		defaultRarity?: string;
+		rarities?: Record<string, any>;
 	};
 
-	// Acciones
-	onClick?: () => void;
-	onHover?: (isHovered: boolean) => void;
-	onSelect?: (isSelected: boolean) => void;
-};
+	// Propiedades para compatibilidad con código existente
+	[key: string]: any;
+}

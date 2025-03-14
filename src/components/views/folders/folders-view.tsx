@@ -3,7 +3,7 @@
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

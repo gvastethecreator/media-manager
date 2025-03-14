@@ -3,7 +3,7 @@
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card-layout';
+import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

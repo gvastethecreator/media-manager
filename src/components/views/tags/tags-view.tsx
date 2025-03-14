@@ -3,7 +3,7 @@
 import { getTags } from '@/app/actions/tags/tag.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { TagCard } from '@/components/features/entity-cards/layouts/tag-card-layout';
+import { TagCard } from '@/components/features/entity-cards/layouts/tag-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';

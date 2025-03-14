@@ -26,7 +26,7 @@ El módulo de capas se integra con el sistema de plugins de capas, permitiendo:
 ## Ejemplo de Uso
 
 ```tsx
-import { LayersPanel } from '@/components/features/entity-cards/modules/layers';
+import { LayersPanel } from '@/components/features/entity-cards/layers';
 
 function CardEditor() {
   const [cardOptions, setCardOptions] = useState<CardOptions>({});
