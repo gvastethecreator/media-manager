@@ -1,27 +1,36 @@
 'use client';
 
-import type { WorldItem } from '@/types/entities/worlditems';
-import { createCardAdapter } from '../adapters/card-adapter-factory';
-import type { CardOptions } from '../types/unified-card-types';
+import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import type { WorldItem } from '../layouts/forms/entity-types';
 import { WorldItemCard as WorldItemCardLayout } from './world-item-card-layout';
 
 // Interfaz para las propiedades del componente WorldItemCard
-export interface WorldItemCardProps {
+export interface WorldItemCardAdapterProps extends BaseCardAdapterProps {
 	worldItem: WorldItem;
-	options?: Partial<CardOptions>;
-	onClick?: () => void;
-	showVisualConfig?: boolean;
-	onVisualConfigClick?: () => void;
-	enableExplode?: boolean;
-	isExploded?: boolean;
-	activeLayer?: string | null;
-	onExplodedChange?: (isExploded: boolean) => void;
-	onActiveLayerChange?: (layerId: string | null) => void;
-	className?: string;
+	onEdit?: (id: string) => void;
+	onDelete?: (id: string) => void;
 }
 
 /**
  * Adaptador para el componente WorldItemCardLayout
  * Creado con la fábrica de adaptadores para simplificar la implementación
  */
-export const WorldItemCard = createCardAdapter(WorldItemCardLayout, 'worldItem');
+export const WorldItemCard = createCustomCardAdapter<WorldItem, any, 'worldItem'>(
+	WorldItemCardLayout,
+	'worldItem',
+	(props: WorldItemCardAdapterProps) => {
+		// Convertir las propiedades del adaptador a las propiedades esperadas por WorldItemCardLayout
+		return {
+			data: props.worldItem as any, // Usamos type assertion para evitar errores de tipo
+			isPreview: false,
+			onEdit: props.onEdit,
+			onDelete: props.onDelete,
+			onClick: props.onClick,
+			className: props.className,
+			showVisualizationConfig: props.showVisualConfig,
+			options: props.options,
+			rarity: null,
+			texture: null,
+		};
+	}
+);

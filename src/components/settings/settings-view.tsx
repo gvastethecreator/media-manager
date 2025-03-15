@@ -1,4 +1,4 @@
-'use client';
+	'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -62,6 +62,7 @@ const tabColors = {
 	'uploaded-images': '#22c55e', // Green
 	shortcuts: '#475569', // Slate
 	'entities-cards': '#6366f1', // Indigo
+	profiles: '#6366f1', // Indigo
 };
 
 // Definición de todos los tabs para evitar la duplicación de código

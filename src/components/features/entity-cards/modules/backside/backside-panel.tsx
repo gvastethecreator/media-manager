@@ -1,9 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SelectItem } from '@/components/ui/select';
-import { FileStackIcon, FlipHorizontalIcon, LayoutIcon, MouseIcon, PaletteIcon } from 'lucide-react';
 import {
 	FormInput,
 	FormLayout,
@@ -12,8 +8,10 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-	panelColors,
 } from '@/components/features/entity-cards/settings/panels/shared';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FlipHorizontalIcon } from 'lucide-react';
 import type { BacksideOptions, BacksideSystemProps } from './types';
 import { useBacksideSystem } from './use-backside-system';
 
@@ -28,49 +26,49 @@ const DesignSection = ({
 	disabled?: boolean;
 }) => {
 	return (
-		<FormSection
-			icon={<LayoutIcon className="h-5 w-5" />}
-			title="Diseño"
-			description="Configura el aspecto visual del reverso de la carta"
-			color={panelColors.design}
-		>
+		<FormSection title="Diseño" description="Configura el aspecto visual del reverso de la carta" colorScheme="design">
 			<FormRow>
 				<FormSelect
+					id="layoutType"
 					label="Tipo de Layout"
 					value={backsideOptions.layoutType || 'standard'}
-					onChange={(value) => handleBacksideChange('layoutType', value)}
+					onValueChange={(value) => handleBacksideChange('layoutType', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="standard">Estándar</SelectItem>
-					<SelectItem value="centered">Centrado</SelectItem>
-					<SelectItem value="tabular">Tabular</SelectItem>
-					<SelectItem value="minimal">Minimalista</SelectItem>
-					<SelectItem value="media">Media-rich</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'standard', label: 'Estándar' },
+						{ value: 'centered', label: 'Centrado' },
+						{ value: 'tabular', label: 'Tabular' },
+						{ value: 'minimal', label: 'Minimalista' },
+						{ value: 'media', label: 'Media-rich' },
+					]}
+				/>
 			</FormRow>
 
 			<FormRow>
 				<FormSelect
+					id="colorMode"
 					label="Modo de Color"
 					value={backsideOptions.colorMode || 'inherit'}
-					onChange={(value) => handleBacksideChange('colorMode', value)}
+					onValueChange={(value) => handleBacksideChange('colorMode', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="inherit">Heredar del frente</SelectItem>
-					<SelectItem value="inverse">Inverso del frente</SelectItem>
-					<SelectItem value="darken">Oscurecer frente</SelectItem>
-					<SelectItem value="lighten">Aclarar frente</SelectItem>
-					<SelectItem value="custom">Color personalizado</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'inherit', label: 'Heredar del frente' },
+						{ value: 'inverse', label: 'Inverso del frente' },
+						{ value: 'darken', label: 'Oscurecer frente' },
+						{ value: 'lighten', label: 'Aclarar frente' },
+						{ value: 'custom', label: 'Color personalizado' },
+					]}
+				/>
 			</FormRow>
 
 			{backsideOptions.colorMode === 'custom' && (
 				<FormRow>
 					<FormInput
+						id="customColor"
 						label="Color Personalizado"
 						type="color"
 						value={backsideOptions.customColor || '#ffffff'}
-						onChange={(e) => handleBacksideChange('customColor', e.target.value)}
+						onChange={(value) => handleBacksideChange('customColor', value)}
 						disabled={disabled}
 					/>
 				</FormRow>
@@ -78,18 +76,20 @@ const DesignSection = ({
 
 			<FormRow>
 				<FormSlider
+					id="opacity"
 					label="Opacidad"
 					min={0}
 					max={1}
 					step={0.05}
-					value={[backsideOptions.opacity || 0.9]}
-					onValueChange={(value) => handleBacksideChange('opacity', value[0])}
+					value={backsideOptions.opacity || 0.9}
+					onValueChange={(value) => handleBacksideChange('opacity', value)}
 					disabled={disabled}
 				/>
 			</FormRow>
 
 			<FormRow>
 				<FormToggle
+					id="blurBackground"
 					label="Fondo Borroso"
 					checked={backsideOptions.blurBackground || false}
 					onCheckedChange={(checked) => handleBacksideChange('blurBackground', checked)}
@@ -100,12 +100,13 @@ const DesignSection = ({
 			{backsideOptions.blurBackground && (
 				<FormRow>
 					<FormSlider
+						id="blurAmount"
 						label="Intensidad de Desenfoque"
 						min={1}
 						max={20}
 						step={1}
-						value={[backsideOptions.blurAmount || 5]}
-						onValueChange={(value) => handleBacksideChange('blurAmount', value[0])}
+						value={backsideOptions.blurAmount || 5}
+						onValueChange={(value) => handleBacksideChange('blurAmount', value)}
 						disabled={disabled}
 					/>
 				</FormRow>
@@ -126,13 +127,13 @@ const ContentSection = ({
 }) => {
 	return (
 		<FormSection
-			icon={<FileStackIcon className="h-5 w-5" />}
 			title="Contenido"
 			description="Configura qué información se muestra en el reverso"
-			color={panelColors.content}
+			colorScheme="performance"
 		>
 			<FormRow>
 				<FormToggle
+					id="showAttributes"
 					label="Mostrar Atributos"
 					checked={backsideOptions.showAttributes || false}
 					onCheckedChange={(checked) => handleBacksideChange('showAttributes', checked)}
@@ -142,6 +143,7 @@ const ContentSection = ({
 
 			<FormRow>
 				<FormToggle
+					id="showDescription"
 					label="Mostrar Descripción"
 					checked={backsideOptions.showDescription || false}
 					onCheckedChange={(checked) => handleBacksideChange('showDescription', checked)}
@@ -152,12 +154,13 @@ const ContentSection = ({
 			{backsideOptions.showDescription && (
 				<FormRow>
 					<FormSlider
+						id="maxDescriptionLength"
 						label="Longitud Máxima"
 						min={50}
 						max={500}
 						step={10}
-						value={[backsideOptions.maxDescriptionLength || 250]}
-						onValueChange={(value) => handleBacksideChange('maxDescriptionLength', value[0])}
+						value={backsideOptions.maxDescriptionLength || 250}
+						onValueChange={(value) => handleBacksideChange('maxDescriptionLength', value)}
 						disabled={disabled}
 					/>
 				</FormRow>
@@ -165,6 +168,7 @@ const ContentSection = ({
 
 			<FormRow>
 				<FormToggle
+					id="showStats"
 					label="Mostrar Estadísticas"
 					checked={backsideOptions.showStats || false}
 					onCheckedChange={(checked) => handleBacksideChange('showStats', checked)}
@@ -174,6 +178,7 @@ const ContentSection = ({
 
 			<FormRow>
 				<FormToggle
+					id="showMetadata"
 					label="Mostrar Metadatos"
 					checked={backsideOptions.showMetadata || false}
 					onCheckedChange={(checked) => handleBacksideChange('showMetadata', checked)}
@@ -183,6 +188,7 @@ const ContentSection = ({
 
 			<FormRow>
 				<FormToggle
+					id="showRelations"
 					label="Mostrar Relaciones"
 					checked={backsideOptions.showRelations || false}
 					onCheckedChange={(checked) => handleBacksideChange('showRelations', checked)}
@@ -204,56 +210,57 @@ const InteractionSection = ({
 	disabled?: boolean;
 }) => {
 	return (
-		<FormSection
-			icon={<MouseIcon className="h-5 w-5" />}
-			title="Interacción"
-			description="Configura cómo se voltea la carta"
-			color={panelColors.interaction}
-		>
+		<FormSection title="Interacción" description="Configura cómo se voltea la carta" colorScheme="system">
 			<FormRow>
 				<FormSelect
+					id="flipAnimation"
 					label="Animación de Volteo"
 					value={backsideOptions.flipAnimation || 'flip'}
-					onChange={(value) => handleBacksideChange('flipAnimation', value)}
+					onValueChange={(value) => handleBacksideChange('flipAnimation', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="flip">Flip</SelectItem>
-					<SelectItem value="rotate">Rotate</SelectItem>
-					<SelectItem value="fade">Fade</SelectItem>
-					<SelectItem value="slide">Slide</SelectItem>
-					<SelectItem value="fold">Fold</SelectItem>
-					<SelectItem value="flip3d">3D Flip</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'flip', label: 'Flip' },
+						{ value: 'rotate', label: 'Rotate' },
+						{ value: 'fade', label: 'Fade' },
+						{ value: 'slide', label: 'Slide' },
+						{ value: 'fold', label: 'Fold' },
+						{ value: 'flip3d', label: '3D Flip' },
+					]}
+				/>
 			</FormRow>
 
 			<FormRow>
 				<FormSlider
+					id="flipDuration"
 					label="Duración de Animación (s)"
 					min={0.1}
 					max={2}
 					step={0.1}
-					value={[backsideOptions.flipDuration || 0.6]}
-					onValueChange={(value) => handleBacksideChange('flipDuration', value[0])}
+					value={backsideOptions.flipDuration || 0.6}
+					onValueChange={(value) => handleBacksideChange('flipDuration', value)}
 					disabled={disabled}
 				/>
 			</FormRow>
 
 			<FormRow>
 				<FormSelect
+					id="flipTrigger"
 					label="Activador de Volteo"
 					value={backsideOptions.flipTrigger || 'hover'}
-					onChange={(value) => handleBacksideChange('flipTrigger', value)}
+					onValueChange={(value) => handleBacksideChange('flipTrigger', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="hover">Hover</SelectItem>
-					<SelectItem value="click">Click</SelectItem>
-					<SelectItem value="double-click">Doble Click</SelectItem>
-					<SelectItem value="contextmenu">Menú Contextual</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'hover', label: 'Hover' },
+						{ value: 'click', label: 'Click' },
+						{ value: 'double-click', label: 'Doble Click' },
+						{ value: 'contextmenu', label: 'Menú Contextual' },
+					]}
+				/>
 			</FormRow>
 
 			<FormRow>
 				<FormToggle
+					id="enableAutoFlip"
 					label="Volteo Automático"
 					checked={backsideOptions.enableAutoFlip || false}
 					onCheckedChange={(checked) => handleBacksideChange('enableAutoFlip', checked)}
@@ -264,12 +271,13 @@ const InteractionSection = ({
 			{backsideOptions.enableAutoFlip && (
 				<FormRow>
 					<FormSlider
+						id="autoFlipDelay"
 						label="Retraso de Auto-volteo (s)"
 						min={1}
 						max={10}
 						step={0.5}
-						value={[backsideOptions.autoFlipDelay || 3]}
-						onValueChange={(value) => handleBacksideChange('autoFlipDelay', value[0])}
+						value={backsideOptions.autoFlipDelay || 3}
+						onValueChange={(value) => handleBacksideChange('autoFlipDelay', value)}
 						disabled={disabled}
 					/>
 				</FormRow>
@@ -289,55 +297,56 @@ const UIStyleSection = ({
 	disabled?: boolean;
 }) => {
 	return (
-		<FormSection
-			icon={<PaletteIcon className="h-5 w-5" />}
-			title="Estilo UI"
-			description="Configura la apariencia de los elementos UI"
-			color={panelColors.style}
-		>
+		<FormSection title="Estilo UI" description="Configura la apariencia de los elementos UI" colorScheme="visual">
 			<FormRow>
 				<FormSelect
+					id="headingStyle"
 					label="Estilo de Títulos"
 					value={backsideOptions.headingStyle || 'large'}
-					onChange={(value) => handleBacksideChange('headingStyle', value)}
+					onValueChange={(value) => handleBacksideChange('headingStyle', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="large">Grande</SelectItem>
-					<SelectItem value="medium">Mediano</SelectItem>
-					<SelectItem value="small">Pequeño</SelectItem>
-					<SelectItem value="minimal">Minimalista</SelectItem>
-					<SelectItem value="fancy">Decorativo</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'large', label: 'Grande' },
+						{ value: 'medium', label: 'Mediano' },
+						{ value: 'small', label: 'Pequeño' },
+						{ value: 'minimal', label: 'Minimalista' },
+						{ value: 'fancy', label: 'Decorativo' },
+					]}
+				/>
 			</FormRow>
 
 			<FormRow>
 				<FormSelect
+					id="infoStyle"
 					label="Estilo de Información"
 					value={backsideOptions.infoStyle || 'compact'}
-					onChange={(value) => handleBacksideChange('infoStyle', value)}
+					onValueChange={(value) => handleBacksideChange('infoStyle', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="compact">Compacto</SelectItem>
-					<SelectItem value="expanded">Expandido</SelectItem>
-					<SelectItem value="card">Tarjetas</SelectItem>
-					<SelectItem value="simple">Simple</SelectItem>
-					<SelectItem value="detailed">Detallado</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'compact', label: 'Compacto' },
+						{ value: 'expanded', label: 'Expandido' },
+						{ value: 'card', label: 'Tarjetas' },
+						{ value: 'simple', label: 'Simple' },
+						{ value: 'detailed', label: 'Detallado' },
+					]}
+				/>
 			</FormRow>
 
 			<FormRow>
 				<FormSelect
+					id="separatorStyle"
 					label="Estilo de Separadores"
 					value={backsideOptions.separatorStyle || 'gradient'}
-					onChange={(value) => handleBacksideChange('separatorStyle', value)}
+					onValueChange={(value) => handleBacksideChange('separatorStyle', value)}
 					disabled={disabled}
-				>
-					<SelectItem value="gradient">Gradiente</SelectItem>
-					<SelectItem value="solid">Sólido</SelectItem>
-					<SelectItem value="dashed">Discontinuo</SelectItem>
-					<SelectItem value="dotted">Punteado</SelectItem>
-					<SelectItem value="none">Ninguno</SelectItem>
-				</FormSelect>
+					options={[
+						{ value: 'gradient', label: 'Gradiente' },
+						{ value: 'solid', label: 'Sólido' },
+						{ value: 'dashed', label: 'Discontinuo' },
+						{ value: 'dotted', label: 'Punteado' },
+						{ value: 'none', label: 'Ninguno' },
+					]}
+				/>
 			</FormRow>
 		</FormSection>
 	);
@@ -367,6 +376,7 @@ export function BacksidePanel({ options, onChange, disabled = false }: BacksideS
 					<FormLayout>
 						<FormRow>
 							<FormToggle
+								id="enabled"
 								label="Habilitar Backside"
 								checked={backsideOptions.enabled}
 								onCheckedChange={(checked) => handleBacksideChange('enabled', checked)}

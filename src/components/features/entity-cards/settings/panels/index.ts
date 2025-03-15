@@ -3,9 +3,9 @@
 // export * from './holographic-settings';
 // export * from './grain-settings';
 // export * from './border-settings';
-// export * from './patterns-settings';
-// export * from './filters-settings';
-// export * from './shaders-settings';
+export * from '../layers/filters/filters-settings'; // Exportando FiltersSettings
+export * from '../layers/patterns/pattern-settings'; // Exportando PatternsSettings
+export * from '../layers/shaders/shader-settings'; // Exportando ShadersSettings
 
 // Panels still to be migrated
 // export * from './visual-effects-settings'; // ✅ Migrado a /layers/filters/visual-effects
@@ -34,31 +34,31 @@ export * from './video-settings';
 export * from './layers-settings-panel';
 
 // Exportaciones de paneles de configuración
-export * from './general-settings-panel';
-export * from './content-settings-panel';
-export * from './layers-settings-panel';
-export * from './design-settings-panel';
-export * from './animation-settings-panel';
-export * from './export-settings-panel';
 export * from './advanced-settings-panel';
+export * from './animation-settings-panel';
 export * from './colors-settings';
+export * from './content-settings-panel';
+export * from './design-settings-panel';
+export * from './export-settings-panel';
+export * from './general-settings-panel';
+export * from './layers-settings-panel';
 export * from './rarities-settings';
 
 // Componentes adaptadores para mantener compatibilidad
 // mientras se completa la migración a la arquitectura de módulos
+export * from './animation-settings'; // Adaptador para /animation
 export * from './backside-settings'; // Adaptador para /backside
 export * from './design-settings'; // Adaptador para /design
-export * from './animation-settings'; // Adaptador para /animation
 
 // Exportaciones de paneles de configuración unificados
-export * from './general-settings-panel';
-export * from './content-settings-panel';
-export * from './layers-settings-panel';
-export * from './design-settings-panel';
-export * from './animation-settings-panel';
-export * from './export-settings-panel';
 export * from './advanced-settings-panel';
+export * from './animation-settings-panel';
 export * from './colors-settings';
+export * from './content-settings-panel';
+export * from './design-settings-panel';
+export * from './export-settings-panel';
+export * from './general-settings-panel';
+export * from './layers-settings-panel';
 export * from './rarities-settings';
 
 /*

@@ -1,173 +1,147 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { BaseLayerConfig, LayerComponent } from './layers/layer-plugin-system';
-import { LayerPluginProvider, useLayerPlugin } from './layers/layer-plugin-system';
-import { RegisterLayers } from './layers/register-layers';
-import type { CardOptions } from './types/card-settings-types';
+import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
+import * as React from 'react';
+import { useRef, useState } from 'react';
+import { LayerRenderer } from './layers/layer-plugin-system';
 
-// Propiedades para el EntityCardLayerWrapper
 interface EntityCardLayerWrapperProps {
 	title: string;
-	description: string;
-	onClick?: () => void;
+	description?: string;
+	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	showVisualConfig?: boolean;
-	visualOptions?: CardOptions;
+	onVisualConfigClick?: () => void;
+	visualOptions?: any;
 	entityType: string;
 	entityId?: string;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
+	children?: React.ReactNode;
 }
 
-/**
- * Componente interno que maneja la carga de configuraciones
- */
-function CardWithLayers({
+export function EntityCardLayerWrapper({
 	title,
 	description,
 	onClick,
-	showVisualConfig,
+	showVisualConfig = false,
+	onVisualConfigClick,
 	visualOptions = {},
 	entityType,
 	entityId,
+	enableExplode = false,
+	isExploded = false,
+	activeLayer = null,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
+	children,
 }: EntityCardLayerWrapperProps) {
-	const { getLayers } = useLayerPlugin();
-	const [layerConfigs, setLayerConfigs] = useState<Record<string, BaseLayerConfig>>({});
-	const [_isLoading, setIsLoading] = useState(true);
+	const [isHovered, setIsHovered] = useState(false);
+	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+	const cardRef = useRef<HTMLDivElement>(null);
 
-	// Función para cargar configuraciones de una capa específica
-	const loadLayerConfig = useCallback(
-		async (layer: LayerComponent) => {
-			if (!layer.getServerActions) {
-				return null;
-			}
+	// Manejar el movimiento del mouse para efectos 3D
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (!cardRef.current) return;
 
-			const { getConfig } = layer.getServerActions();
-			try {
-				const response = await getConfig(entityType, entityId);
-				if (response.success && response.data) {
-					return {
-						...response.data,
-						enabled: response.data.enabled !== undefined ? response.data.enabled : true,
-						layerIndex: response.data.layerIndex || layer.defaultConfig.layerIndex,
-					};
-				}
-			} catch (error) {
-				console.error(`Error al cargar configuración para ${layer.type}:`, error);
-			}
-			return null;
-		},
-		[entityType, entityId]
-	);
+		const rect = cardRef.current.getBoundingClientRect();
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
 
-	// Cargar configuraciones de capas al montar el componente
-	useEffect(() => {
-		const loadAllLayerConfigs = async () => {
-			setIsLoading(true);
+		setMousePosition({ x, y });
+	};
 
-			try {
-				const layers = getLayers();
-				const configs: Record<string, BaseLayerConfig> = {};
+	// Función para transformar capas explotadas
+	const getExplodeLayerTransform = (index: number) => {
+		if (!isExploded) return {};
 
-				// Primero, configuraciones basadas en visualOptions para compatibilidad
-				if (visualOptions.enableGlowEffect) {
-					configs.glow = {
-						enabled: true,
-						layerIndex: 4,
-						...visualOptions.glowOptions,
-					};
-				}
-
-				if (visualOptions.enableScanlinesEffect) {
-					configs.scanlines = {
-						enabled: true,
-						layerIndex: 5,
-						...visualOptions.scanlinesOptions,
-					};
-				}
-
-				if (visualOptions.enableHolographicEffect) {
-					configs.holographic = {
-						enabled: true,
-						layerIndex: 3,
-						...visualOptions.holographicOptions,
-					};
-				}
-
-				if (visualOptions.enableBorderEffect) {
-					configs.border = {
-						enabled: true,
-						layerIndex: 6,
-						...visualOptions.borderOptions,
-					};
-				}
-
-				if (visualOptions.enableGrainEffect) {
-					configs.grain = {
-						enabled: true,
-						layerIndex: 2,
-						...visualOptions.grainOptions,
-					};
-				}
-
-				// Luego, intentar cargar desde server actions para cada capa
-				for (const layer of layers) {
-					if (layer.getServerActions) {
-						const config = await loadLayerConfig(layer);
-						if (config) {
-							// Sobrescribir solo si no hay una configuración manual ya establecida
-							if (!configs[layer.type]) {
-								configs[layer.type] = config;
-							}
-						} else {
-							// Si no hay configuración del servidor, usar la configuración por defecto
-							// Solo si no hay una configuración manual ya establecida
-							if (!configs[layer.type]) {
-								configs[layer.type] = { ...layer.defaultConfig };
-							}
-						}
-					} else if (!configs[layer.type]) {
-						// Para capas sin server actions, usar la configuración por defecto
-						configs[layer.type] = { ...layer.defaultConfig };
-					}
-				}
-
-				setLayerConfigs(configs);
-			} catch (error) {
-				console.error('Error al cargar configuraciones de capas:', error);
-			} finally {
-				setIsLoading(false);
-			}
+		// Calcular desplazamiento basado en el índice
+		const translateY = index * 20; // 20px por capa
+		return {
+			transform: `translateY(${translateY}px)`,
+			transition: 'transform 0.3s ease-out',
 		};
+	};
 
-		loadAllLayerConfigs();
-	}, [getLayers, loadLayerConfig, visualOptions]);
+	// Configuraciones para las capas
+	const configs = {
+		container: {
+			enabled: true,
+			layerIndex: 0,
+		},
+		texture: {
+			enabled: true,
+			layerIndex: 1,
+			textureConfig: visualOptions.textureConfig,
+		},
+		border: {
+			enabled: true,
+			layerIndex: 2,
+			borderConfig: visualOptions.rarityConfig,
+		},
+		glow: {
+			enabled: visualOptions.enableGlowEffect || false,
+			layerIndex: 3,
+			glowOptions: visualOptions.glowOptions,
+		},
+		grain: {
+			enabled: visualOptions.enableGrainEffect || false,
+			layerIndex: 4,
+			grainOptions: visualOptions.grainOptions,
+		},
+		holographic: {
+			enabled: visualOptions.enableHolographicEffect || false,
+			layerIndex: 5,
+			holographicOptions: visualOptions.holographicOptions,
+		},
+		scanlines: {
+			enabled: visualOptions.enableScanlinesEffect || false,
+			layerIndex: 6,
+		},
+		explode: {
+			enabled: enableExplode,
+			layerIndex: 7,
+		},
+	};
 
-	// Utilizar EntityCard en lugar de BaseCard para compatibilidad
 	return (
-		<div className="w-full h-full">
-			{/* Contenido que se verá desde BaseCard */}
-			<div className="w-full h-full">
-				{/* Aquí iría el contenido generado a partir de las configuraciones */}
-				<div className="entity-card-content">
-					<h3 className="entity-card-title">{title}</h3>
-					{description && <p className="entity-card-description">{description}</p>}
-				</div>
-			</div>
-		</div>
-	);
-}
-
-/**
- * Componente que integra el sistema de capas con tarjetas de entidades.
- * Se encarga de:
- * 1. Cargar configuraciones de capas específicas para el tipo de entidad
- * 2. Proporcionar el contexto del sistema de capas
- * 3. Conectar con el BaseCard para renderizado
- */
-export function EntityCardLayerWrapper(props: EntityCardLayerWrapperProps) {
-	return (
-		<LayerPluginProvider>
-			<RegisterLayers />
-			<CardWithLayers {...props} />
-		</LayerPluginProvider>
+		<motion.div
+			ref={cardRef}
+			className={cn('card-wrapper relative w-full h-full', className)}
+			onClick={onClick}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+			onMouseMove={handleMouseMove}
+			initial={{ opacity: 0, scale: 0.95 }}
+			animate={{ opacity: 1, scale: 1 }}
+			transition={{ duration: 0.2 }}
+		>
+			<LayerRenderer
+				isExploded={isExploded}
+				isHovered={isHovered}
+				mousePosition={mousePosition}
+				activeLayer={activeLayer}
+				getExplodeLayerTransform={getExplodeLayerTransform}
+				entityType={entityType}
+				entityId={entityId}
+				configs={configs}
+				context={{
+					title,
+					description,
+					showVisualConfig,
+					onVisualConfigClick,
+					visualOptions,
+					enableExplode,
+					onExplodedChange,
+					onActiveLayerChange,
+				}}
+			/>
+			{children}
+		</motion.div>
 	);
 }

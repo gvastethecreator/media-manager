@@ -1,10 +1,51 @@
 'use client';
 
-import type { VisualPreset } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 import type { EntityType } from '../adapters/preset-adapter';
 import { presetService } from '../adapters/preset-adapter';
 import type { CardOptions } from '../types/card-settings-types';
+
+// Definir interfaz para el preset visual (usar la misma que en adaptadores)
+export interface VisualPreset {
+	id?: string;
+	name: string;
+	description?: string;
+	category: string;
+	isDefault?: boolean;
+	isPublic?: boolean;
+	author?: string;
+	tags?: string[];
+	metadata?: Record<string, unknown>;
+
+	// Configuraciones serializadas
+	coreConfig?: string;
+	designConfig?: string;
+	animationConfig?: string;
+	layerConfig?: string;
+	backsideConfig?: string;
+	effectsConfig?: string;
+	performanceConfig?: string;
+	colorConfig?: string;
+	imageGridConfig?: string;
+	layoutConfig?: string;
+	explodeConfig?: string;
+	previewConfig?: string;
+	rarityConfig?: string;
+
+	// Configuraciones específicas por tipo de entidad
+	folderConfig?: string;
+	imageConfig?: string;
+	videoConfig?: string;
+	albumConfig?: string;
+	tagConfig?: string;
+	collectionConfig?: string;
+	characterConfig?: string;
+	placeConfig?: string;
+	worldItemConfig?: string;
+	conceptConfig?: string;
+	promptConfig?: string;
+	noteConfig?: string;
+}
 
 export interface UsePresetOptions {
 	entityType: EntityType;
@@ -72,7 +113,7 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 		// Obtener opciones del preset
 		const presetOptions = presetService.getCardOptions(presetId || null, entityType);
 
-		// Combinar con las opciones base
+		// Combinar con las opciones base de manera profunda
 		return {
 			...presetOptions,
 			...baseOptions,
@@ -89,6 +130,18 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 				...(presetOptions.effects || {}),
 				...(baseOptions.effects || {}),
 			},
+			// Asegurar que las opciones de capas específicas se combinen correctamente
+			layers: {
+				...(presetOptions.layers || {}),
+				...(baseOptions.layers || {}),
+				items: [
+					...(presetOptions.layers?.items || []),
+					...(baseOptions.layers?.items || []),
+				].filter((item, index, self) =>
+					// Eliminar duplicados usando el id como criterio
+					index === self.findIndex(t => t.id === item.id)
+				)
+			}
 		} as CardOptions;
 	}, [entityType, presetId, baseOptions, preset]);
 

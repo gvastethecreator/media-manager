@@ -9,7 +9,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { getFolders } from '@/services/folder.service';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { Folder } from '@/types/entities/folders';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';

@@ -10,7 +10,7 @@ import {
 	FormSection,
 	FormSlider,
 	FormToggle,
-} from '../../../../settings/panels/shared';
+} from '../../../settings/panels/shared';
 import type { StatesSystem } from './types';
 
 interface StatesPanelProps {

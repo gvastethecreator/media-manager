@@ -9,7 +9,7 @@ import type * as React from 'react';
 import { useState } from 'react';
 import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
 import { VisualizationConfig } from '../config/visualization-config';
-import { EntityCardWrapper } from '../entity-card-layer-wrapper';
+import { EntityCardWrapper } from '../entity-card-wrapper';
 import type { CardDesignData, CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
 import { ImageGrid } from './image-grid';
 

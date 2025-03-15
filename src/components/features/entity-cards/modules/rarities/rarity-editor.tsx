@@ -9,13 +9,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { Rarity } from '@prisma/client';
 import { X } from 'lucide-react';
 import { useState } from 'react';
 
+// Definir un tipo personalizado para la rareza que incluya todas las propiedades necesarias
+interface RarityWithExtendedProps {
+	id: string;
+	name: string;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	color: string;
+	entityType: string;
+	position: number;
+	borderWidth: number | null;
+	// Propiedades adicionales que no están en el tipo Rarity de Prisma
+	probability?: number;
+	enabled?: boolean;
+	borderStyle?: string;
+	textStyle?: string;
+	hasGlow?: boolean;
+	glowColor?: string;
+	glowIntensity?: number;
+	hasAnimation?: boolean;
+	animationType?: string;
+	animationSpeed?: number;
+	// Otras propiedades que puedan ser necesarias
+	[key: string]: any;
+}
+
 interface RarityEditorProps {
-	rarity: Rarity;
-	onUpdate: (rarity: Rarity) => void;
+	rarity: RarityWithExtendedProps;
+	onUpdate: (rarity: RarityWithExtendedProps) => void;
 	onClose: () => void;
 }
 
@@ -27,7 +52,10 @@ export function RarityEditor({ rarity, onUpdate, onClose }: RarityEditorProps) {
 	const [activeTab, setActiveTab] = useState('basic');
 
 	// 🧠 Manejador de cambios para actualizar una propiedad de la rareza
-	const handleChange = (key: keyof Rarity, value: Rarity[keyof Rarity]) => {
+	const handleChange = (
+		key: keyof RarityWithExtendedProps,
+		value: RarityWithExtendedProps[keyof RarityWithExtendedProps]
+	) => {
 		onUpdate({
 			...rarity,
 			[key]: value,
@@ -98,7 +126,11 @@ export function RarityEditor({ rarity, onUpdate, onClose }: RarityEditorProps) {
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="color">Color</Label>
-							<ColorPicker color={rarity.color || '#cccccc'} onChange={(color) => handleChange('color', color)} />
+							<ColorPicker
+								id="color"
+								value={rarity.color || '#cccccc'}
+								onChange={(color) => handleChange('color', color)}
+							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="borderStyle">Estilo de Borde</Label>
@@ -167,7 +199,8 @@ export function RarityEditor({ rarity, onUpdate, onClose }: RarityEditorProps) {
 								<div className="space-y-2">
 									<Label htmlFor="glowColor">Color del Brillo</Label>
 									<ColorPicker
-										color={rarity.glowColor || rarity.color || '#cccccc'}
+										id="glowColor"
+										value={rarity.glowColor || rarity.color || '#cccccc'}
 										onChange={(color) => handleChange('glowColor', color)}
 									/>
 								</div>

@@ -32,7 +32,7 @@ export interface EntityCardContentProps {
 	badges?: {
 		key: string;
 		label: React.ReactNode;
-		variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+		variant?: 'default' | 'secondary' | 'outline';
 	}[];
 	isPreview?: boolean;
 }
@@ -94,7 +94,11 @@ export function EntityCardContent({
 					{/* Grid de imágenes si existe */}
 					{hasImageGrid && (
 						<div className="absolute inset-0">
-							<ImageGrid images={images} layout={imageLayout} style={imageStyle} />
+							<ImageGrid
+								images={images}
+								layout={imageLayout === 'grid' || imageLayout === 'carousel' ? 'quad' : imageLayout}
+								style={imageStyle === 'framed' ? 'bordered' : imageStyle}
+							/>
 						</div>
 					)}
 				</div>

@@ -1,6 +1,6 @@
 // Exportación de componentes
 export { BacksidePanel } from './backside-panel';
-export { default as BacksideLayer } from './backside-layer';
+export { BacksideLayer } from './backside-layer';
 
 // Exportación de hooks
 export { useBacksideSystem } from './use-backside-system';

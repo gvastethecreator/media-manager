@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AnimationPanel, animationSystemToLegacy, legacyToAnimationSystem } from '../../modules/animation';
-import type { AnimationSystem } from '../../modules/animation/types';
-import type { CardOptions } from '../../types/card-settings-types';
+import {
+	AnimationPanel,
+	animationSystemToLegacy,
+	legacyToAnimationSystem,
+} from '@/components/features/entity-cards/modules/animation';
+import type { AnimationSystem } from '@/components/features/entity-cards/modules/animation/types';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 
 /**
  * @deprecated Use AnimationPanel from @/components/features/entity-cards/modules/animation instead
@@ -18,8 +21,8 @@ export function AnimationSettings({
 	onCardOptionsChange: (options: CardOptions) => void;
 	disabled?: boolean;
 }) {
-	// Convertir opciones del formato antiguo al nuevo sistema
-	const animationSystem = legacyToAnimationSystem(cardOptions);
+	// Convertir opciones del formato antiguo al nuevo sistema usando un cast a any
+	const animationSystem = legacyToAnimationSystem(cardOptions as any);
 
 	// Manejar cambios en el sistema de animación
 	const handleAnimationChange = (newAnimationSystem: AnimationSystem) => {
@@ -30,7 +33,7 @@ export function AnimationSettings({
 		onCardOptionsChange({
 			...cardOptions,
 			animation: legacyOptions,
-		});
+		} as any);
 	};
 
 	return <AnimationPanel animationSystem={animationSystem} onChange={handleAnimationChange} disabled={disabled} />;

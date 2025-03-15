@@ -117,3 +117,179 @@
 	@apply border-[#ef4444];
 	/* Equivalente a red-500 */
 }
+
+/* Estilos para bordes de tarjetas */
+
+/* Estilos base para todas las tarjetas */
+.entity-card {
+	position: relative;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+/* Estilos para el contenedor de la tarjeta */
+.entity-card-container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	perspective: 1000px;
+}
+
+/* Estilos para la cara frontal */
+.entity-card-front {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	backface-visibility: hidden;
+}
+
+/* Estilos para la cara posterior */
+.entity-card-back {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	transform: rotateY(180deg);
+	backface-visibility: hidden;
+	z-index: 0;
+}
+
+/* Estilos para bordes básicos */
+.card-border {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 10;
+}
+
+/* Borde sólido */
+.card-border-solid {
+	border: 2px solid var(--border-color, rgba(0, 0, 0, 0.1));
+	border-radius: inherit;
+}
+
+/* Borde con gradiente */
+.card-border-gradient {
+	--gradient-angle: 45deg;
+	--gradient-start: rgba(255, 0, 128, 0.7);
+	--gradient-end: rgba(0, 128, 255, 0.7);
+
+	border-radius: inherit;
+	padding: 2px;
+	background: linear-gradient(var(--gradient-angle), var(--gradient-start), var(--gradient-end));
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	-webkit-mask-composite: source-out;
+}
+
+/* Borde con brillo */
+.card-border-glow {
+	border-radius: inherit;
+	box-shadow: 0 0 15px var(--glow-color, rgba(0, 128, 255, 0.7));
+}
+
+/* Borde con animación de pulso */
+.card-border-pulse {
+	border-radius: inherit;
+	animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+	0% {
+		box-shadow: 0 0 0 0 var(--pulse-color, rgba(0, 128, 255, 0.7));
+	}
+
+	70% {
+		box-shadow: 0 0 0 10px var(--pulse-color-fade, rgba(0, 128, 255, 0));
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 var(--pulse-color-fade, rgba(0, 128, 255, 0));
+	}
+}
+
+/* Borde con animación de flujo */
+.card-border-flow {
+	--flow-color-1: rgba(255, 0, 128, 0.7);
+	--flow-color-2: rgba(0, 128, 255, 0.7);
+	--flow-color-3: rgba(128, 255, 0, 0.7);
+
+	border-radius: inherit;
+	padding: 2px;
+	background: linear-gradient(90deg,
+			var(--flow-color-1),
+			var(--flow-color-2),
+			var(--flow-color-3),
+			var(--flow-color-1));
+	background-size: 300% 100%;
+	animation: flow-border 3s linear infinite;
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	-webkit-mask-composite: source-out;
+}
+
+@keyframes flow-border {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	100% {
+		background-position: 300% 50%;
+	}
+}
+
+/* Borde con animación de arcoíris */
+.card-border-rainbow {
+	--rainbow-color-1: rgba(255, 0, 0, 0.7);
+	--rainbow-color-2: rgba(255, 165, 0, 0.7);
+	--rainbow-color-3: rgba(255, 255, 0, 0.7);
+	--rainbow-color-4: rgba(0, 128, 0, 0.7);
+	--rainbow-color-5: rgba(0, 0, 255, 0.7);
+	--rainbow-color-6: rgba(75, 0, 130, 0.7);
+	--rainbow-color-7: rgba(238, 130, 238, 0.7);
+
+	border-radius: inherit;
+	padding: 2px;
+	background: linear-gradient(90deg,
+			var(--rainbow-color-1),
+			var(--rainbow-color-2),
+			var(--rainbow-color-3),
+			var(--rainbow-color-4),
+			var(--rainbow-color-5),
+			var(--rainbow-color-6),
+			var(--rainbow-color-7),
+			var(--rainbow-color-1));
+	background-size: 400% 100%;
+	animation: rainbow-border 6s linear infinite;
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	-webkit-mask-composite: source-out;
+}
+
+@keyframes rainbow-border {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	100% {
+		background-position: 400% 50%;
+	}
+}
+
+/* Utilidades para perspectiva y transformaciones 3D */
+.perspective-1000 {
+	perspective: 1000px;
+}
+
+.backface-hidden {
+	backface-visibility: hidden;
+}
+
+.rotateY-180 {
+	transform: rotateY(180deg);
+}

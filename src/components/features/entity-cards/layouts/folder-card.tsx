@@ -1,27 +1,36 @@
 'use client';
 
 import type { Folder } from '@/types/entities/folders';
-import { createCardAdapter } from '../adapters/card-adapter-factory';
-import type { CardOptions } from '../types/unified-card-types';
+import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import { FolderCardLayout } from './folder-card-layout';
 
 // Interfaz para las propiedades del componente FolderCard
-export interface FolderCardProps {
+export interface FolderCardAdapterProps extends BaseCardAdapterProps {
 	folder: Folder;
-	options?: Partial<CardOptions>;
-	onClick?: () => void;
-	showVisualConfig?: boolean;
-	onVisualConfigClick?: () => void;
-	enableExplode?: boolean;
-	isExploded?: boolean;
-	activeLayer?: string | null;
-	onExplodedChange?: (isExploded: boolean) => void;
-	onActiveLayerChange?: (layerId: string | null) => void;
-	className?: string;
+	onEdit?: (id: string) => void;
+	onDelete?: (id: string) => void;
 }
 
 /**
  * Adaptador para el componente FolderCardLayout
  * Creado con la fábrica de adaptadores para simplificar la implementación
  */
-export const FolderCard = createCardAdapter(FolderCardLayout, 'folder');
+export const FolderCard = createCustomCardAdapter<Folder, any, 'folder'>(
+	FolderCardLayout,
+	'folder',
+	(props: FolderCardAdapterProps) => {
+		// Convertir las propiedades del adaptador a las propiedades esperadas por FolderCardLayout
+		return {
+			data: props.folder as any, // Usamos type assertion para evitar errores de tipo
+			isPreview: false,
+			onEdit: props.onEdit,
+			onDelete: props.onDelete,
+			onClick: props.onClick,
+			className: props.className,
+			showVisualizationConfig: props.showVisualConfig,
+			options: props.options,
+			rarity: null,
+			texture: null,
+		};
+	}
+);

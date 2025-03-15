@@ -44,6 +44,12 @@ export interface LayerSettingsProps<T extends BaseLayerConfig = BaseLayerConfig>
 	onConfigUpdate?: (config: T) => void;
 }
 
+// Interfaz extendida para componentes que usan el sistema legacy
+export interface LegacyLayerComponentProps {
+	config: BaseLayerConfig;
+	context: Record<string, unknown>;
+}
+
 // Contexto para el sistema de capas
 interface LayerPluginContextType {
 	registerLayer: (layer: LayerComponent) => void;
@@ -124,6 +130,7 @@ export function LayerRenderer({
 	entityType,
 	entityId,
 	configs = {},
+	context = {},
 }: {
 	isExploded: boolean;
 	isHovered: boolean;
@@ -133,9 +140,21 @@ export function LayerRenderer({
 	entityType: string;
 	entityId?: string;
 	configs?: Record<string, BaseLayerConfig>;
+	context?: Record<string, unknown>;
 }) {
 	const { getOrderedLayers } = useLayerPlugin();
 	const orderedLayers = getOrderedLayers();
+
+	// Combinar contexto con otras propiedades para compatibilidad con ambas implementaciones
+	const combinedContext = {
+		...context,
+		isExploded,
+		isHovered,
+		mousePosition,
+		activeLayer,
+		entityType,
+		entityId,
+	};
 
 	return (
 		<>
@@ -147,6 +166,21 @@ export function LayerRenderer({
 					return null;
 				}
 
+				// Verificar si el componente espera la interfaz antigua o nueva
+				// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
+				if ((layer as any).usesLegacyInterface) {
+					// Usar type assertion para manejar componentes legacy
+					return (
+						<LayerComp
+							key={`layer-${layer.type}`}
+							config={config}
+							context={combinedContext}
+							{...({} as any)} // Hack para evitar errores de tipo
+						/>
+					);
+				}
+
+				// De lo contrario, usar la interfaz estándar
 				return (
 					<LayerComp
 						key={`layer-${layer.type}`}

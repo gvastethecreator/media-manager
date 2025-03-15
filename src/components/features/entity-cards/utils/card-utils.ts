@@ -1,9 +1,12 @@
 import { DEFAULT_CARD_OPTIONS } from '../constants/card-constants';
-import type { CardMetadata, CardOptions } from '../types/unified-card-types';
+import type { CardMetadata, CardOptions } from '../types';
 
 // Función para calcular la rareza basada en las estadísticas
 export function calculateRarity(stats: CardMetadata): string {
-	const totalStats = Object.values(stats).reduce((acc, val) => acc + (typeof val === 'number' ? val : 0), 0);
+	const totalStats = Object.values(stats).reduce((acc: number, val) => {
+		return acc + (typeof val === 'number' ? val : 0);
+	}, 0);
+
 	const averageStats = totalStats / Object.keys(stats).length;
 
 	if (averageStats >= 90) return 'mythic';
