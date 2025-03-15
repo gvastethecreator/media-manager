@@ -1,41 +1,60 @@
 /* Estilos base para bordes de tarjetas */
 .card-border-base {
-	@apply border-[1px] border-solid;
+	@layer components {
+		border-width: 1px;
+		border-style: solid;
+	}
 }
 
 /* Variantes de bordes */
 .card-border-thin {
-	@apply border-[1px];
+	@layer components {
+		border-width: 1px;
+	}
 }
 
 .card-border-medium {
-	@apply border-[2px];
+	@layer components {
+		border-width: 2px;
+	}
 }
 
 .card-border-thick {
-	@apply border-[4px];
+	@layer components {
+		border-width: 4px;
+	}
 }
 
 /* Colores de borde predefinidos */
 .card-border-default {
-	@apply border-[hsl(var(--border))];
+	@layer components {
+		border-color: hsl(var(--border));
+	}
 }
 
 .card-border-primary {
-	@apply border-[hsl(var(--primary))];
+	@layer components {
+		border-color: hsl(var(--primary));
+	}
 }
 
 .card-border-secondary {
-	@apply border-[hsl(var(--secondary))];
+	@layer components {
+		border-color: hsl(var(--secondary));
+	}
 }
 
 .card-border-accent {
-	@apply border-[hsl(var(--accent))];
+	@layer components {
+		border-color: hsl(var(--accent));
+	}
 }
 
 /* Efectos de borde */
 .card-border-glow {
-	@apply shadow-[0_0_10px_hsla(var(--border)/0.5)];
+	@layer components {
+		box-shadow: 0 0 10px hsla(var(--border)/0.5);
+	}
 }
 
 /* Definimos nuestras propias animaciones */
@@ -75,46 +94,70 @@
 }
 
 /* Estilos de borde para estados */
-.card-border-hover {
-	@apply hover:border-[hsl(var(--primary))];
+.card-border-hover:hover {
+	@layer components {
+		border-color: hsl(var(--primary));
+	}
 }
 
-.card-border-active {
-	@apply active:border-[hsl(var(--accent))];
+.card-border-active:active {
+	@layer components {
+		border-color: hsl(var(--accent));
+	}
 }
 
 .card-border-disabled {
-	@apply opacity-50;
+	@layer components {
+		opacity: 0.5;
+	}
 }
 
 /* Estilos de borde para rareza - usando valores hexadecimales directamente */
 .card-border-common {
-	@apply border-[#9ca3af];
+	@layer components {
+		border-color: #9ca3af;
+	}
+
 	/* Equivalente a gray-400 */
 }
 
 .card-border-uncommon {
-	@apply border-[#22c55e];
+	@layer components {
+		border-color: #22c55e;
+	}
+
 	/* Equivalente a green-500 */
 }
 
 .card-border-rare {
-	@apply border-[#3b82f6];
+	@layer components {
+		border-color: #3b82f6;
+	}
+
 	/* Equivalente a blue-500 */
 }
 
 .card-border-epic {
-	@apply border-[#a855f7];
+	@layer components {
+		border-color: #a855f7;
+	}
+
 	/* Equivalente a purple-500 */
 }
 
 .card-border-legendary {
-	@apply border-[#eab308];
+	@layer components {
+		border-color: #eab308;
+	}
+
 	/* Equivalente a yellow-500 */
 }
 
 .card-border-mythic {
-	@apply border-[#ef4444];
+	@layer components {
+		border-color: #ef4444;
+	}
+
 	/* Equivalente a red-500 */
 }
 

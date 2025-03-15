@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import Image from 'next/image';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import type { ImageGridImage } from './layouts/image-grid';
@@ -18,9 +19,9 @@ export interface EntityCardContentProps {
 	// Props para imágenes
 	image?: string;
 	images?: ImageGridImage[];
-	imageLayout?: 'single' | 'dual' | 'triple' | 'quad' | 'six';
-	imageStyle?: 'standard' | 'masonry' | 'carousel' | 'polaroid' | 'overlap';
-	options?: Partial<CardOptions>;
+	imageLayout?: 'single' | 'dual' | 'grid';
+	imageStyle?: 'standard' | 'masonry' | 'carousel';
+	options?: CardOptions;
 
 	// Props opcionales
 	className?: string;
@@ -88,33 +89,50 @@ export function EntityCardContent({
 		return () => clearTimeout(timer);
 	}, []);
 
-	return (
-		<div className={cn('relative z-10 flex flex-col h-full', className)}>
-			{/* Cabecera con título e ícono */}
-			<div className="flex items-center gap-2 mb-2">
-				{icon && <div className="flex-shrink-0">{icon}</div>}
-				<div className="flex-grow min-w-0">
-					<h3 className="text-lg font-semibold truncate">{title}</h3>
-				</div>
-			</div>
+	// Si hay children, renderizarlos directamente
+	if (children) {
+		return <div className={cn('entity-card-content w-full h-full', className)}>{children}</div>;
+	}
 
-			{/* Imagen si existe */}
-			{showImage && gridImages.length > 0 && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: isLoaded ? 1 : 0 }}
-					transition={{ duration: 0.3 }}
-					className="entity-card-image-container"
-				>
-					<ImageGrid
-						images={gridImages}
-						layout={imageLayout}
-						style={imageStyle}
-						showCount={showImageCount}
-						aspectRatio={options.imageGridAspectRatio || options.imageGrid?.aspectRatio || '1:1'}
-						gap={options.imageGridGap || options.imageGrid?.gap || 4}
-					/>
-				</motion.div>
+	// Determinar si mostrar imágenes
+	const hasImage = image || images.length > 0;
+	const allImages = image ? [{ src: image, alt: title || 'Imagen' }].concat(images) : images;
+
+	return (
+		<div className={cn('entity-card-content w-full h-full flex flex-col', className)}>
+			{/* Título */}
+			{title && (
+				<div className="entity-card-title-container p-3">
+					<h3 className="entity-card-title text-lg font-semibold">{title}</h3>
+				</div>
+			)}
+
+			{/* Imágenes */}
+			{hasImage && (
+				<div className="entity-card-image-container flex-1">
+					{imageLayout === 'single' && image && (
+						<div className="entity-card-image relative w-full h-full">
+							<Image
+								src={image}
+								alt={title || 'Imagen'}
+								fill
+								className="object-cover"
+								sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+							/>
+						</div>
+					)}
+
+					{(imageLayout !== 'single' || images.length > 0) && (
+						<ImageGrid images={allImages} layout={imageLayout} style={imageStyle} className="w-full h-full" />
+					)}
+				</div>
+			)}
+
+			{/* Descripción */}
+			{description && (
+				<div className="entity-card-description-container p-3">
+					<p className="entity-card-description text-sm">{description}</p>
+				</div>
 			)}
 
 			{/* Etiquetas */}
@@ -127,45 +145,6 @@ export function EntityCardContent({
 					))}
 				</div>
 			)}
-
-			{/* Contenido de texto */}
-			<div className="entity-card-text-content">
-				{/* Título */}
-				{showTitle && title && (
-					<motion.h3
-						initial={{ opacity: 0, y: 5 }}
-						animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 5 }}
-						transition={{ duration: 0.3, delay: 0.1 }}
-						className="entity-card-title"
-					>
-						{title}
-					</motion.h3>
-				)}
-
-				{/* Descripción */}
-				{showDescription && description && (
-					<motion.p
-						initial={{ opacity: 0, y: 5 }}
-						animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 5 }}
-						transition={{ duration: 0.3, delay: 0.2 }}
-						className="entity-card-description"
-					>
-						{description}
-					</motion.p>
-				)}
-
-				{/* Contenido adicional */}
-				{children && (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: isLoaded ? 1 : 0 }}
-						transition={{ duration: 0.3, delay: 0.3 }}
-						className="entity-card-children"
-					>
-						{children}
-					</motion.div>
-				)}
-			</div>
 
 			{/* Acciones */}
 			{!isPreview && (onEdit || onDelete) && (

@@ -1,9 +1,159 @@
 ---
-description: Best practices for using Tailwind CSS**/*.{ts,tsx,css}
+description: Best practices for using Tailwind CSS 4 in an image management application
 globs: **/*.{ts,tsx,css}
+alwaysApply: false
 ---
-- Use utility classes directly in JSX for faster development
-- Create custom components for frequently used UI patterns
-- Utilize the `@apply` directive to create custom utility classes
-- Keep your Tailwind configuration organized and version-controlled
-- We are using tailwind 4
+- **Use utility classes directly in JSX:** Añadir clases Tailwind directamente en elementos JSX para desarrollo rápido de componentes visuales.
+- **Component Abstraction for UI Patterns:** Crear componentes reutilizables para patrones de UI como tarjetas de imágenes o galerías.
+- **Responsive Design with Tailwind Breakpoints:** Utilizar prefijos responsive (`sm:`, `md:`, `lg:`) para diseño adaptativo de galerías de imágenes.
+- **Modern Color System:** Aprovechar el sistema de colores de Tailwind 4 con modificadores de opacidad para superposiciones sobre imágenes.
+- **Custom Utility Creation:** Usar la directiva `@apply` para crear clases personalizadas para patrones comunes como bordes de tarjetas.
+- **Dark Mode Implementation:** Implementar modo oscuro con la variante `dark:` para visualización óptima de imágenes en ambos modos.
+- **Maintain Configuration:** Personalizar colores y variables específicas para la aplicación en `tailwind.config.js`.
+- **Conditional Classes with clsx/twMerge:** Usar `clsx` o `tailwind-merge` para aplicación condicional de clases en estados de selección de imágenes.
+- **Prefer Native CSS Variables:** Para valores dinámicos como relaciones de aspecto, usar variables CSS nativas.
+- **Use shadcn/ui Components:** Aprovechar componentes shadcn/ui con Tailwind para UI consistente.
+- **Image Layout Patterns:** Implementar patrones específicos para disposición de imágenes como grid masonry o aspect ratio.
+- **Animation Classes for Interactions:** Utilizar clases de animación para efectos en hover y selección de imágenes.
+
+```mermaid
+graph TD
+    A[Tailwind CSS] --> B[Layout]
+    A --> C[Components]
+    A --> D[Utilities]
+
+    B --> B1[Grid Systems]
+    B --> B2[Responsive Design]
+    B --> B3[Aspect Ratio]
+
+    C --> C1[Cards]
+    C --> C2[Modal/Dialog]
+    C --> C3[Navigation]
+
+    D --> D1[Color Variants]
+    D --> D2[Shadows/Effects]
+    D --> D3[Typography]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+```
+
+**Ejemplos de implementación**:
+
+```tsx
+// Componente de tarjeta de imagen con Tailwind CSS
+export function ImageCard({ image, isSelected, onClick }) {
+  return (
+    <div
+      className={clsx(
+        // Base styles
+        "relative overflow-hidden rounded-lg transition-all duration-300",
+        // Aspect ratio para consistencia visual
+        "aspect-[3/2]",
+        // Hover effects
+        "hover:ring-2 hover:ring-primary/70 hover:scale-[1.02]",
+        // Selection state
+        isSelected && "ring-2 ring-primary shadow-lg"
+      )}
+      onClick={onClick}
+    >
+      {/* Imagen principal con responsive sizing */}
+      <img
+        src={image.thumbnailUrl}
+        alt={image.title || "Untitled image"}
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+
+      {/* Overlay con gradiente para mejorar legibilidad */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+        {/* Metadatos en overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+          <p className="font-medium text-sm line-clamp-1">{image.title || "Untitled"}</p>
+          <p className="text-xs opacity-80">{image.dimensions}</p>
+        </div>
+      </div>
+
+      {/* Indicador de selección */}
+      {isSelected && (
+        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Implementación de una galería responsive con Tailwind
+export function ImageGallery({ images }) {
+  return (
+    <div className="container mx-auto px-4">
+      {/* Controles con responsive design */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-2xl font-bold dark:text-white">Image Gallery</h2>
+        <div className="flex items-center gap-2">
+          <ViewModeToggle />
+          <SortDropdown />
+        </div>
+      </div>
+
+      {/* Grid responsivo con diferentes columnas según breakpoint */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {images.map(image => (
+          <ImageCard key={image.id} image={image} />
+        ))}
+      </div>
+
+      {/* Paginación/infinite scroll */}
+      <div className="mt-8 flex justify-center">
+        <button className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors">
+          Load More
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Implementación de un visor de imágenes modal
+export function ImageViewer({ image, isOpen, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+      {/* Botón cerrar */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      {/* Contenedor principal con tamaño máximo */}
+      <div className="max-w-[90vw] max-h-[90vh] relative">
+        {/* Imagen con manejo de tamaño */}
+        <img
+          src={image.url}
+          alt={image.title || "Image"}
+          className="max-w-full max-h-[85vh] object-contain rounded-md"
+        />
+
+        {/* Panel de información */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-4 rounded-b-md">
+          <h3 className="text-lg font-medium">{image.title || "Untitled"}</h3>
+          <div className="flex items-center gap-4 text-sm mt-2">
+            <span>{image.dimensions}</span>
+            <span>{image.size}</span>
+            <span>{image.takenAt}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

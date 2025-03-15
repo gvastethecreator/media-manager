@@ -3,12 +3,44 @@
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format';
 import type { Folder } from '@/types/entities/folders';
-import { FileIcon, FolderIcon, Layers3 } from 'lucide-react';
-import { Fragment } from 'react';
+import { Calendar, Clock, FileIcon, FolderIcon, HardDrive, Image, Layers3 } from 'lucide-react';
 import { EntityCardWrapper } from '../entity-card-wrapper';
 import { usePreset } from '../hooks/use-preset';
+import '../styles/folder-card.css';
 import type { CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
 import type { CardOptions as CardOptionsType } from '../types/card-settings-types';
+
+// Define rarity levels for folders
+const FOLDER_RARITY = {
+	common: {
+		color: '#9ca3af',
+		borderColor: 'rgba(156, 163, 175, 0.8)',
+		glowColor: 'rgba(156, 163, 175, 0.6)',
+		label: 'Básica',
+		rarity: 'common' as const,
+	},
+	uncommon: {
+		color: '#22c55e',
+		borderColor: 'rgba(34, 197, 94, 0.8)',
+		glowColor: 'rgba(34, 197, 94, 0.6)',
+		label: 'Notable',
+		rarity: 'uncommon' as const,
+	},
+	rare: {
+		color: '#3b82f6',
+		borderColor: 'rgba(59, 130, 246, 0.8)',
+		glowColor: 'rgba(59, 130, 246, 0.6)',
+		label: 'Avanzada',
+		rarity: 'rare' as const,
+	},
+	legendary: {
+		color: '#eab308',
+		borderColor: 'rgba(234, 179, 8, 0.8)',
+		glowColor: 'rgba(234, 179, 8, 0.7)',
+		label: 'Premium',
+		rarity: 'legendary' as const,
+	},
+};
 
 // Opciones visuales optimizadas para un mejor rendimiento
 const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
@@ -17,7 +49,7 @@ const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
-	enableGrainEffect: false,
+	enableGrainEffect: true,
 
 	// Configuración de diseño específica para carpetas
 	designSystem: {
@@ -25,25 +57,25 @@ const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
 		variant: 'default',
 		aspectRatio: '7/10',
 		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 2,
+		cornerRadius: 16,
+		elevation: 3,
 		shadowStyle: 'soft',
 	},
 
 	// Efectos específicos para carpetas
 	holographicOptions: {
 		patternType: 'geometric',
-		intensity: 0.4,
-		animationSpeed: 1,
+		intensity: 0.5,
+		animationSpeed: 1.2,
 		visibleOnHover: true,
 	},
 
 	glowOptions: {
-		intensity: 0.5,
-		size: 15,
-		blurAmount: 10,
+		intensity: 0.6,
+		size: 20,
+		blurAmount: 15,
 		animationType: 'pulse',
-		pulseSpeed: 2,
+		pulseSpeed: 2.5,
 		visibleOnHover: true,
 	},
 
@@ -57,48 +89,16 @@ const _DEFAULT_FOLDER_OPTIONS: Partial<CardOptions> = {
 			timing: 'ease-in-out',
 			iteration: 'infinite',
 		},
-		glowIntensity: 0.5,
+		glowIntensity: 0.7,
 	},
 
 	grainOptions: {
-		intensity: 0.1,
-		density: 0.5,
-		contrast: 1,
+		intensity: 0.15,
+		density: 0.6,
+		contrast: 1.2,
 		noise: 'subtle',
-		animated: false,
+		animated: true,
 		visibleOnHover: true,
-	},
-};
-
-// Define rarity levels for folders
-const FOLDER_RARITY = {
-	common: {
-		color: '#9ca3af',
-		borderColor: 'rgba(156, 163, 175, 0.5)',
-		glowColor: 'rgba(156, 163, 175, 0.5)',
-		label: 'Básica',
-		rarity: 'common' as const,
-	},
-	uncommon: {
-		color: '#22c55e',
-		borderColor: 'rgba(34, 197, 94, 0.5)',
-		glowColor: 'rgba(34, 197, 94, 0.5)',
-		label: 'Notable',
-		rarity: 'uncommon' as const,
-	},
-	rare: {
-		color: '#3b82f6',
-		borderColor: 'rgba(59, 130, 246, 0.5)',
-		glowColor: 'rgba(59, 130, 246, 0.5)',
-		label: 'Avanzada',
-		rarity: 'rare' as const,
-	},
-	legendary: {
-		color: '#eab308',
-		borderColor: 'rgba(234, 179, 8, 0.7)',
-		glowColor: 'rgba(234, 179, 8, 0.7)',
-		label: 'Premium',
-		rarity: 'legendary' as const,
 	},
 };
 
@@ -154,7 +154,7 @@ export interface FolderCardLayoutProps {
 }
 
 /**
- * Layout específico para renderizar carpetas como tarjetas estilo Magic
+ * Layout específico para renderizar carpetas como tarjetas estilo Magic/Pokémon TCG
  * Este componente utiliza EntityCardWrapper para la integración con el sistema de tarjetas
  */
 export function FolderCardLayout({
@@ -206,7 +206,17 @@ export function FolderCardLayout({
 			label: 'Contenido',
 			icon: <FileIcon className="h-4 w-4" />,
 		},
+		{
+			id: 'effects',
+			label: 'Efectos',
+			icon: <Image className="h-4 w-4" />,
+		},
 	];
+
+	// Obtener la rareza de la carpeta
+	const rarityConfig = generateFolderRarityConfig(folder);
+	const rarityKey = getFolderRarity(folder.imageCount || 0);
+	const rarityClass = `folder-card-rarity-${rarityKey}`;
 
 	// En lugar de forzar tipos, usamos destructuring y reconstruimos el objeto
 	// para evitar problemas de incompatibilidad de tipos
@@ -247,9 +257,15 @@ export function FolderCardLayout({
 		...restOptions,
 	};
 
+	// Formatear la fecha de creación
+	const formattedCreationDate = new Date(folder.createdAt).toLocaleDateString();
+
+	// Formatear la fecha de última indexación
+	const formattedLastIndexed = folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleDateString() : 'No indexada';
+
 	return (
 		<EntityCardWrapper
-			className={cn('folder-card', className)}
+			className={cn('folder-card w-full h-full', rarityClass, className)}
 			entityType="folder"
 			entityId={folder.id}
 			title={folder.name}
@@ -264,53 +280,81 @@ export function FolderCardLayout({
 			onExplodedChange={onExplodedChange}
 			onActiveLayerChange={onActiveLayerChange}
 		>
-			<div className="folder-card-content">
-				{/* Encabezado de la tarjeta */}
-				<div className="folder-card-header">
+			<div className="folder-card-content h-full flex flex-col">
+				{/* Encabezado de la tarjeta con banner de rareza */}
+				<div className={cn('folder-card-header', `folder-header-${rarityKey}`)}>
 					<div className="folder-card-title-container">
 						{folder.emoji && <span className="folder-card-emoji">{folder.emoji}</span>}
 						<h3 className="folder-card-title">{folder.name}</h3>
 					</div>
 
-					{/* Tipo de tarjeta (al estilo Magic) */}
+					{/* Tipo de tarjeta con badge de rareza */}
 					<div className="folder-card-type-line">
-						Carpeta {folder.totalFiles > 0 && `• ${folder.totalFiles} archivos`}
+						<span className="folder-type">Carpeta</span>
+						<span className={cn('folder-rarity-badge', `rarity-${rarityKey}`)}>{FOLDER_RARITY[rarityKey].label}</span>
 					</div>
 				</div>
 
 				{/* Cuerpo de la tarjeta */}
-				<div className="folder-card-body">
-					{folder.description && <p className="folder-card-description">{folder.description}</p>}
+				<div className="folder-card-body flex-1">
+					{/* Descripción con estilo mejorado */}
+					{folder.description && (
+						<div className="folder-card-description-container">
+							<p className="folder-card-description">{folder.description}</p>
+						</div>
+					)}
 
-					{/* Lista de metadatos */}
+					{/* Estadísticas visuales */}
+					<div className="folder-card-stats">
+						<div className="folder-stat-item">
+							<FileIcon className="folder-stat-icon" />
+							<span className="folder-stat-value">{folder.totalFiles || 0}</span>
+							<span className="folder-stat-label">archivos</span>
+						</div>
+
+						<div className="folder-stat-item">
+							<Image className="folder-stat-icon" />
+							<span className="folder-stat-value">{folder.imageCount || 0}</span>
+							<span className="folder-stat-label">imágenes</span>
+						</div>
+
+						<div className="folder-stat-item">
+							<HardDrive className="folder-stat-icon" />
+							<span className="folder-stat-value">{formatFileSize(folder.totalSize || 0)}</span>
+							<span className="folder-stat-label">tamaño</span>
+						</div>
+					</div>
+
+					{/* Lista de metadatos con iconos */}
 					<div className="folder-card-metadata">
-						{folder.totalSize > 0 && (
-							<Fragment>
-								<span className="folder-card-metadata-label">Tamaño:</span>
-								<span className="folder-card-metadata-value">{formatFileSize(folder.totalSize)}</span>
-							</Fragment>
-						)}
+						<div className="folder-metadata-item">
+							<Calendar className="folder-metadata-icon" />
+							<span className="folder-metadata-label">Creada:</span>
+							<span className="folder-metadata-value">{formattedCreationDate}</span>
+						</div>
 
-						{folder.lastIndexed && (
-							<Fragment>
-								<span className="folder-card-metadata-label">Última indexación:</span>
-								<span className="folder-card-metadata-value">{new Date(folder.lastIndexed).toLocaleDateString()}</span>
-							</Fragment>
-						)}
+						<div className="folder-metadata-item">
+							<Clock className="folder-metadata-icon" />
+							<span className="folder-metadata-label">Indexada:</span>
+							<span className="folder-metadata-value">{formattedLastIndexed}</span>
+						</div>
 
 						{folder.path && (
-							<Fragment>
-								<span className="folder-card-metadata-label">Ruta:</span>
-								<span className="folder-card-metadata-value folder-card-path">{folder.path}</span>
-							</Fragment>
+							<div className="folder-metadata-item folder-path-item">
+								<FolderIcon className="folder-metadata-icon" />
+								<span className="folder-metadata-label">Ruta:</span>
+								<span className="folder-metadata-value folder-card-path" title={folder.path}>
+									{folder.path}
+								</span>
+							</div>
 						)}
 					</div>
 				</div>
 
-				{/* Pie de la tarjeta (al estilo Magic) */}
-				<div className="folder-card-footer">
+				{/* Pie de la tarjeta con borde decorativo */}
+				<div className={cn('folder-card-footer', `folder-footer-${rarityKey}`)}>
 					<div className="folder-card-creator-line">
-						<span>{`Creada: ${new Date(folder.createdAt).toLocaleDateString()}`}</span>
+						<span className="folder-id">ID: {folder.id.substring(0, 8)}</span>
 					</div>
 				</div>
 			</div>
