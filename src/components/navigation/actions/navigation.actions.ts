@@ -2,17 +2,17 @@
 
 import { logger } from '@/lib/logger/logger';
 import { revalidatePath } from 'next/cache';
-import { getAlbums } from '../albums/album.actions';
-import { getCharacters } from '../characters/character.actions';
-import { getCollections } from '../collections/collection.actions';
-import { getConcepts } from '../concepts/concept.actions';
-import { getFolders } from '../folders/';
-import { getNotes } from '../notes/note.actions';
-import { getPlaces } from '../places/place.actions';
-import { getPrompts } from '../prompts/prompt.actions';
-import { getSystemStats } from '../stats/stats.actions';
-import { getTags } from '../tags/tag.actions';
-import { getWorldItems } from '../world-items/world-item.actions';
+import { getAlbums } from '@/app/actions/albums/album.actions';
+import { getCharacters } from '@/app/actions/characters/character.actions';
+import { getCollections } from '@/app/actions/collections/collection.actions';
+import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import { getFolders } from '@/app/actions/folders/';
+import { getNotes } from '@/app/actions/notes/note.actions';
+import { getPlaces } from '@/app/actions/places/place.actions';
+import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { getSystemStats } from '@/app/actions/stats/stats.actions';
+import { getTags } from '@/app/actions/tags/tag.actions';
+import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 
 const navLogger = logger.withContext('NavActions');
 

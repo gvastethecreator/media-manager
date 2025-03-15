@@ -1,11 +1,12 @@
 'use client';
 
-import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
-import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import {
 	createPresetFromCardOptions,
 	getVisualPresetsByEntityType,
-} from '@/components/features/entity-cards/server-actions/visual-presets.actions';
+} from '@/components/features/entity-cards/actions/visual-presets.actions';
+import { adaptSettingsToBaseOptions } from '@/components/features/entity-cards/base/card-adapter';
+import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
+import { EntityCardPreview } from '@/components/features/entity-cards/modules/preview/entity-card-preview';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +29,6 @@ import { Info, LayoutTemplate, PlusCircle, Save, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { EntityCardPreview } from '../preview/entity-card-preview';
 
 // 🎨 Esquema de colores para el panel de presets
 const presetsColors = {
@@ -109,7 +109,7 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 		setIsSaving(true);
 		try {
 			// Usar las opciones actuales o las predeterminadas
-			const options = cardOptions || adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS);
+			const options = cardOptions || adaptSettingsToBaseOptions(DEFAULT_SETTINGS_OPTIONS);
 
 			const response = await createPresetFromCardOptions(
 				newPresetName.trim(),
@@ -154,7 +154,7 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 	const handleSelectPreset = async (preset: VisualPreset) => {
 		try {
 			// Convertir el preset a opciones de tarjeta
-			const options = adaptBaseToSettingsOptions({
+			const options = adaptSettingsToBaseOptions({
 				coreConfig: preset.coreConfig ? JSON.parse(preset.coreConfig) : {},
 				designConfig: preset.designConfig ? JSON.parse(preset.designConfig) : {},
 				animationConfig: preset.animationConfig ? JSON.parse(preset.animationConfig) : {},
@@ -307,8 +307,8 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 							<div className="h-52 flex items-center justify-center bg-muted/30 rounded-md">
 								<div className="w-40">
 									<EntityCardPreview
-										cardOptions={cardOptions || adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS)}
-										entityType={entityType}
+										cardOptions={cardOptions || adaptSettingsToBaseOptions(DEFAULT_SETTINGS_OPTIONS)}
+										entityType={entityType as any}
 									/>
 								</div>
 							</div>
@@ -354,14 +354,14 @@ function PresetCard({ preset, isActive, onClick, entityType }: PresetCardProps) 
 	// Convertir el preset a opciones de tarjeta para la vista previa
 	const presetOptions = React.useMemo(() => {
 		try {
-			return adaptBaseToSettingsOptions({
+			return adaptSettingsToBaseOptions({
 				coreConfig: preset.coreConfig ? JSON.parse(preset.coreConfig) : {},
 				designConfig: preset.designConfig ? JSON.parse(preset.designConfig) : {},
 				// Incluir otras configuraciones según necesidad
 			});
 		} catch (err) {
 			console.error('Error al parsear opciones del preset:', err);
-			return adaptBaseToSettingsOptions(DEFAULT_SETTINGS_OPTIONS);
+			return adaptSettingsToBaseOptions(DEFAULT_SETTINGS_OPTIONS);
 		}
 	}, [preset]);
 
@@ -376,7 +376,7 @@ function PresetCard({ preset, isActive, onClick, entityType }: PresetCardProps) 
 			>
 				<div className="h-32 overflow-hidden relative bg-muted/30">
 					<div className="scale-75 origin-top absolute inset-0">
-						<EntityCardPreview entityType={entityType} cardOptions={presetOptions} showBackside={false} />
+						<EntityCardPreview entityType={entityType as any} cardOptions={presetOptions} />
 					</div>
 				</div>
 				<CardContent className="p-3">

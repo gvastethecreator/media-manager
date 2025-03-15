@@ -1,14 +1,19 @@
 'use client';
 
-import type { CardOptions } from '../../settings/types';
+import type { CardOptions } from '../../types/card-settings-types';
 import type { PreviewOptions } from './types';
+
+// Extender el tipo CardOptions para incluir la propiedad preview
+interface ExtendedCardOptions extends CardOptions {
+	preview?: Partial<PreviewOptions>;
+}
 
 /**
  * Convierte las opciones de la tarjeta al formato de opciones de previsualización
  * @param cardOptions - Opciones de la tarjeta
  * @returns Opciones de previsualización
  */
-export function cardToPreviewOptions(cardOptions: CardOptions): PreviewOptions {
+export function cardToPreviewOptions(cardOptions: ExtendedCardOptions): PreviewOptions {
 	const preview = cardOptions.preview || {};
 
 	return {
@@ -32,7 +37,10 @@ export function cardToPreviewOptions(cardOptions: CardOptions): PreviewOptions {
  * @param previewOptions - Nuevas opciones de previsualización
  * @returns Opciones actualizadas de la tarjeta
  */
-export function updateCardWithPreviewOptions(cardOptions: CardOptions, previewOptions: PreviewOptions): CardOptions {
+export function updateCardWithPreviewOptions(
+	cardOptions: ExtendedCardOptions,
+	previewOptions: PreviewOptions
+): ExtendedCardOptions {
 	return {
 		...cardOptions,
 		preview: {

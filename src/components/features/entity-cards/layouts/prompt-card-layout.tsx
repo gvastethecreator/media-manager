@@ -19,7 +19,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import type * as React from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
-import { EntityCardWrapper } from '../entity-card-layer-wrapper';
+import { EntityCardWrapper } from '../entity-card-wrapper';
 import type { CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
 import { ImageGrid } from './image-grid';
 import type { PromptFormData } from './forms/entity-types';

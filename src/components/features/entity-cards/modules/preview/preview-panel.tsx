@@ -1,12 +1,31 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Eye, ZoomIn } from 'lucide-react';
+import { ZoomIn } from 'lucide-react';
 import { motion } from 'motion/react';
-import type { PreviewPanelProps } from '../../types/card-settings-types';
 import { EntityPreviewAdapter } from './entity-preview-adapter';
+
+// Definir el tipo PreviewPanelProps
+interface PreviewPanelProps {
+	cardOptions: CardOptions;
+	rarity?: RarityConfig | null;
+	texture?: TextureConfig | null;
+	showInfo?: boolean;
+	entityType?:
+		| 'card-album'
+		| 'card-collection'
+		| 'card-tag'
+		| 'card-character'
+		| 'card-world-item'
+		| 'card-place'
+		| 'card-concept'
+		| 'card-prompt'
+		| 'card-note'
+		| 'card-folder';
+}
 
 // Esquema de colores para el panel de vista previa
 const previewColors = {
@@ -21,7 +40,7 @@ export function PreviewPanel({
 	rarity,
 	texture,
 	showInfo = true,
-	entityType = 'album',
+	entityType = 'card-album',
 }: PreviewPanelProps) {
 	return (
 		<Card className={cn('border border-border/40 shadow-sm overflow-hidden', previewColors.border)}>
