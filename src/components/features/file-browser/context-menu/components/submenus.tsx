@@ -31,7 +31,7 @@ interface SubmenuProps {
 	file: FileItem;
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 	loadingStates: LoadingStates;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	 
 	onOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
 
