@@ -1,66 +1,35 @@
-# Resumen del Sistema Entity Cards
+# Resumen del Sistema de Tarjetas de Entidad
 
-## Descripción General
+## Propósito
 
-El sistema Entity Cards es un framework modular para renderizar tarjetas de entidades con efectos visuales avanzados. Está diseñado para ser extensible, configurable y reutilizable en toda la aplicación.
-
-## Estructura del Proyecto
-
-```
-entity-cards/
-├─ actions/                  # Acciones del servidor para operaciones específicas
-├─ adapters/                 # Adaptadores para diferentes tipos de entidades
-├─ base/                     # Componentes base y adaptadores fundamentales
-├─ config/                   # Configuraciones predeterminadas
-├─ constants/                # Constantes utilizadas en todo el sistema
-├─ docs/                     # Documentación del sistema
-├─ hooks/                    # Hooks personalizados
-├─ layers/                   # Sistema de capas para efectos visuales
-├─ layouts/                  # Layouts específicos para cada tipo de entidad
-├─ modules/                  # Módulos funcionales (animación, diseño, etc.)
-├─ settings/                 # Paneles de configuración
-├─ styles/                   # Estilos CSS
-├─ types/                    # Definiciones de tipos TypeScript
-├─ ui/                       # Componentes de UI específicos
-├─ utils/                    # Utilidades generales
-```
+El sistema de tarjetas de entidad proporciona una forma unificada y visualmente atractiva de representar diferentes tipos de entidades (carpetas, álbumes, etiquetas, etc.) en la interfaz de usuario. Permite una experiencia coherente mientras mantiene la flexibilidad para mostrar información específica de cada tipo de entidad.
 
 ## Componentes Principales
 
-1. **EntityCard**: Componente principal que renderiza una tarjeta de entidad
-2. **EntityCardAdapter**: Adaptador que selecciona el layout adecuado según el tipo de entidad
-3. **EntityCardContent**: Componente para el contenido de la tarjeta
-4. **EntityCardWrapper**: Wrapper que proporciona funcionalidades comunes
-5. **EntityCardLayerWrapper**: Wrapper para el sistema de capas
+- **EntityCardAdapter**: Punto de entrada principal que determina qué tipo de tarjeta renderizar basado en el tipo de entidad.
+- **EntityCardWrapper**: Contenedor que proporciona funcionalidades comunes como efectos visuales, interactividad y modo de explosión de capas.
+- **Layouts específicos**: Implementaciones para cada tipo de entidad (FolderCardLayout, AlbumCardLayout, etc.).
+- **Sistema de capas**: Permite separar visualmente los componentes de la tarjeta para una mejor comprensión de su estructura.
 
-## Sistema de Tipos
+## Características Clave
 
-El sistema utiliza una estructura de tipos unificada:
-
-- `unified-card-types.ts`: Definiciones de tipos centrales
-- `card-settings-types.ts`: Re-exporta tipos desde unified-card-types
-- `base-card-types.ts`: Tipos específicos para tarjetas base
-- `card-layer-types.ts`: Tipos para el sistema de capas
-
-## Adaptadores
-
-El sistema utiliza varios adaptadores para conectar diferentes partes:
-
-1. **card-adapter-factory.tsx**: Fábrica para crear adaptadores de tarjetas
-2. **entity-card-adapter.ts**: Adaptador principal para seleccionar layouts
-3. **preset-adapter.ts**: Adaptador para presets visuales
+- **Adaptabilidad**: Se ajusta a diferentes tipos de entidades manteniendo una apariencia coherente.
+- **Personalización visual**: Soporta diferentes presets de diseño, efectos y configuraciones visuales.
+- **Interactividad**: Incluye estados hover, click y animaciones para mejorar la experiencia del usuario.
+- **Modo de explosión**: Permite ver las diferentes capas de la tarjeta separadas para entender su estructura.
+- **Rendimiento optimizado**: Utiliza técnicas para minimizar el impacto en el rendimiento de los efectos visuales.
 
 ## Recientes Mejoras y Correcciones
 
-1. **Unificación de Tipos**: Se han consolidado las definiciones de tipos en `unified-card-types.ts`
-2. **Normalización de Importaciones**: Se han estandarizado las rutas de importación
-3. **Corrección de Componentes Faltantes**: Se han implementado o conectado correctamente todos los paneles de configuración
-4. **Corrección de Rutas de Acciones**: Se han actualizado las rutas a las acciones del servidor
-5. **Mejoras de Tipado**: Se han corregido problemas de tipado en varios archivos
+- **Adaptación Responsiva**: Se han añadido clases para que las tarjetas se adapten al tamaño completo de su contenedor.
+- **Documentación Visual**: Se han agregado diagramas Mermaid para visualizar la arquitectura y flujo de datos.
+- **Rediseño de Tarjetas de Carpeta**: Se ha implementado un nuevo diseño inspirado en cartas de Magic/Pokémon TCG con bordes estilizados, efectos visuales mejorados y una estética más atractiva.
+- **Mejoras Visuales**: Se han añadido efectos de resplandor, texturas sutiles y decoraciones de esquinas para dar más profundidad y atractivo visual.
+- **Sistema de Rareza Mejorado**: Se ha refinado el sistema de rareza con gradientes, animaciones y efectos visuales específicos para cada nivel.
 
 ## Próximos Pasos
 
-1. **Pruebas y Verificación**: Ejecutar pruebas para verificar la integración correcta
-2. **Documentación Detallada**: Ampliar la documentación de cada módulo
-3. **Optimización de Rendimiento**: Mejorar el rendimiento de componentes pesados
-4. **Ampliación de Presets**: Añadir más presets visuales predefinidos
+- Implementar más presets de diseño para diferentes contextos de uso.
+- Mejorar la accesibilidad de las tarjetas.
+- Optimizar aún más el rendimiento para grandes cantidades de tarjetas.
+- Añadir más opciones de personalización para el usuario final.

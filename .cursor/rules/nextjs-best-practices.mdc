@@ -1,15 +1,20 @@
 ---
 description: Best practices for Next.js 15 App Router
-globs: app/**/*.{ts,tsx}, app/**/*.{ts,tsx}
+globs: app/**/*.{ts,tsx}
 ---
 
-- Default to Server Components for rendering & data fetching
-- Use Client Components only for browser interactivity
-- Fetch data in Server Components
-- Use Server Actions for server-side mutations and logic
-- Use `generateStaticParams` for static route pre-generation
-- Implement ErrorBoundary for route errors
-- Use `notFound()`/`redirect()` for route handling
-- Organize routes within `app/` with clear naming
-- Use `useSearchParams` & `usePathname` in Client Components
-- Prefer Server Components/Actions for API calls	
+- **Server Components por Defecto:** Usar Server Components para renderizado y fetching de datos
+- **Client Components Solo para Interactividad:** Marcar con 'use client' solo componentes que requieran interactividad del navegador
+- **Fetching de Datos en Server Components:** Aprovechar la obtención de datos directamente en Server Components
+- **Server Actions para Mutaciones:** Utilizar Server Actions para lógica y mutaciones del lado del servidor
+- **Rutas Estáticas con `generateStaticParams`:** Usar para pre-generación de rutas estáticas
+- **Manejo de Errores con ErrorBoundary:** Implementar límites de error para rutas
+- **Redirecciones con `notFound()`/`redirect()`:** Usar funciones nativas para manejo de rutas
+- **Estructura Organizada en `app/`:** Organizar rutas con nombres claros y por entidades
+- **`useSearchParams` & `usePathname`:** Usar en Client Components para acceso a parámetros
+- **Preferir Server Components/Actions para API:** Evitar llamadas a API innecesarias
+- **Streaming para Contenido de Imágenes:** Implementar streaming para contenido de imágenes grandes
+- **Metadatos Dinámicos para SEO:** Utilizar la API de metadatos para optimización dinámica de SEO
+- **Loading UI con Suspense:** Crear UI de carga específica para mejorar la experiencia del usuario
+- **Manejo de Caché para Imágenes:** Implementar estrategias de caché para imágenes y thumbnails
+- **Estructurar Rutas por Entidades:** Organizar rutas alrededor de tipos de entidades (carpetas, colecciones, etc.)

@@ -1,118 +1,177 @@
 /* Estilos base de la tarjeta */
 .card-base {
-	@apply relative overflow-hidden;
+	@layer components {
+		position: relative;
+		overflow: hidden;
+	}
+
 	transform-style: preserve-3d;
 	perspective: 1000px;
 }
 
 /* Efectos de hover */
 .card-hovered {
-	@apply z-10;
+	@layer components {
+		z-index: 10;
+	}
 }
 
 /* Efectos de explosión */
 .exploded-container {
-	@apply pointer-events-none;
+	@layer components {
+		pointer-events: none;
+	}
 }
 
 /* Efectos de brillo */
 .glow-effect {
-	@apply transition-all duration-300;
+	@layer components {
+		transition-property: all;
+		transition-duration: 300ms;
+	}
 }
 
 .glow-default {
-	@apply shadow-lg shadow-primary/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px hsla(var(--primary)/0.2), 0 4px 6px -2px hsla(var(--primary)/0.2);
+	}
 }
 
 .glow-common {
-	@apply shadow-lg shadow-gray-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(156, 163, 175, 0.2), 0 4px 6px -2px rgba(156, 163, 175, 0.2);
+	}
 }
 
 .glow-uncommon {
-	@apply shadow-lg shadow-green-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.2), 0 4px 6px -2px rgba(74, 222, 128, 0.2);
+	}
 }
 
 .glow-rare {
-	@apply shadow-lg shadow-blue-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(96, 165, 250, 0.2), 0 4px 6px -2px rgba(96, 165, 250, 0.2);
+	}
 }
 
 .glow-epic {
-	@apply shadow-lg shadow-purple-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(192, 132, 252, 0.2), 0 4px 6px -2px rgba(192, 132, 252, 0.2);
+	}
 }
 
 .glow-legendary {
-	@apply shadow-lg shadow-yellow-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(250, 204, 21, 0.2), 0 4px 6px -2px rgba(250, 204, 21, 0.2);
+	}
 }
 
 .glow-mythic {
-	@apply shadow-lg shadow-red-400/20;
+	@layer components {
+		box-shadow: 0 10px 15px -3px rgba(248, 113, 113, 0.2), 0 4px 6px -2px rgba(248, 113, 113, 0.2);
+	}
 }
 
 /* Efectos holográficos */
 .holographic-effect {
-	@apply transition-all duration-300;
+	@layer components {
+		transition-property: all;
+		transition-duration: 300ms;
+	}
 }
 
 .holographic-default {
-	@apply bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, hsla(var(--primary)/0.2), hsla(var(--secondary)/0.2), hsla(var(--accent)/0.2));
+	}
 }
 
 .holographic-common {
-	@apply bg-gradient-to-br from-gray-400/20 via-gray-300/20 to-gray-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(156, 163, 175, 0.2), rgba(209, 213, 219, 0.2), rgba(229, 231, 235, 0.2));
+	}
 }
 
 .holographic-uncommon {
-	@apply bg-gradient-to-br from-green-400/20 via-green-300/20 to-green-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(74, 222, 128, 0.2), rgba(134, 239, 172, 0.2), rgba(187, 247, 208, 0.2));
+	}
 }
 
 .holographic-rare {
-	@apply bg-gradient-to-br from-blue-400/20 via-blue-300/20 to-blue-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(96, 165, 250, 0.2), rgba(147, 197, 253, 0.2), rgba(191, 219, 254, 0.2));
+	}
 }
 
 .holographic-epic {
-	@apply bg-gradient-to-br from-purple-400/20 via-purple-300/20 to-purple-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(192, 132, 252, 0.2), rgba(216, 180, 254, 0.2), rgba(233, 213, 255, 0.2));
+	}
 }
 
 .holographic-legendary {
-	@apply bg-gradient-to-br from-yellow-400/20 via-yellow-300/20 to-yellow-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(250, 204, 21, 0.2), rgba(253, 224, 71, 0.2), rgba(254, 240, 138, 0.2));
+	}
 }
 
 .holographic-mythic {
-	@apply bg-gradient-to-br from-red-400/20 via-red-300/20 to-red-200/20;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(248, 113, 113, 0.2), rgba(252, 165, 165, 0.2), rgba(254, 202, 202, 0.2));
+	}
 }
 
 /* Efectos de grano */
 .grain-effect {
-	@apply transition-all duration-300;
+	@layer components {
+		transition-property: all;
+		transition-duration: 300ms;
+	}
 }
 
 /* Efectos de textura */
 .texture-default {
-	@apply bg-gradient-to-br from-primary/5 to-secondary/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, hsla(var(--primary)/0.05), hsla(var(--secondary)/0.05));
+	}
 }
 
 .texture-common {
-	@apply bg-gradient-to-br from-gray-400/5 to-gray-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(156, 163, 175, 0.05), rgba(209, 213, 219, 0.05));
+	}
 }
 
 .texture-uncommon {
-	@apply bg-gradient-to-br from-green-400/5 to-green-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(74, 222, 128, 0.05), rgba(134, 239, 172, 0.05));
+	}
 }
 
 .texture-rare {
-	@apply bg-gradient-to-br from-blue-400/5 to-blue-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(96, 165, 250, 0.05), rgba(147, 197, 253, 0.05));
+	}
 }
 
 .texture-epic {
-	@apply bg-gradient-to-br from-purple-400/5 to-purple-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(192, 132, 252, 0.05), rgba(216, 180, 254, 0.05));
+	}
 }
 
 .texture-legendary {
-	@apply bg-gradient-to-br from-yellow-400/5 to-yellow-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(250, 204, 21, 0.05), rgba(253, 224, 71, 0.05));
+	}
 }
 
 .texture-mythic {
-	@apply bg-gradient-to-br from-red-400/5 to-red-300/5;
+	@layer components {
+		background-image: linear-gradient(to bottom right, rgba(248, 113, 113, 0.05), rgba(252, 165, 165, 0.05));
+	}
 }
 
 /* Animaciones */

@@ -11,3 +11,10 @@ globs: app/actions/**/*.ts, app/components/**/*.tsx
 - **Unit & Integration Testing:** Test backend logic within services called by Server Actions.
 - **Limit Server Action Complexity:** Keep Server Actions simple, delegating complexity to services.
 - **Use with & without Forms:** Utilize Server Actions with both HTML forms and direct action calls.
+- **Structured Error Responses:** Return structured error objects for consistent frontend handling.
+- **Functional Approach:** Use a functional programming approach with pure functions.
+- **Transaction Management:** Implement database transactions for operations affecting multiple records.
+- **External Services Integration:** Abstract external API calls into dedicated service modules.
+- **Progressive Enhancement:** Design Server Actions to support both JavaScript and non-JavaScript clients.
+- **Event-Based Patterns:** Use event-based patterns for complex workflows and side effects.
+- **Modular Organization:** Organize Server Actions in domain-specific modules with clear naming conventions.

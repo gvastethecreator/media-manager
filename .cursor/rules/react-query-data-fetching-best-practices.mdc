@@ -1,11 +1,204 @@
 ---
-description: Concise best practices for React Query data fetching, caching, and mutations.
-globs: app/**/*.{ts,tsx} services/**/*.ts, hooks/**/*.ts
+description: Concise best practices for React Query data fetching, caching, and mutations in an image management application.
+globs: app/**/*.{ts,tsx}, services/**/*.ts, hooks/**/*.ts
+alwaysApply: false
 ---
-- **`useQuery` for Fetching, `useMutation` for Mutations:** Clearly separate data fetching and modification operations.
-- **Error Handling & Loading States:** Implement robust error and loading state management.
-- **Query Caching & `staleTime`/`cacheTime`:** Leverage React Query caching for performance optimization.
-- **Cache Invalidation & Revalidation:** Strategically invalidate and revalidate query caches after mutations.
-- **Strategic Query Keys:** Define clear and organized query keys for effective cache management.
-- **Pagination & Infinite Loading:** Implement pagination and infinite scrolling with React Query features.
-- **Prefetching for User Experience:** Prefetch data for anticipated user interactions to improve perceived performance.
+- **`useQuery` for Fetching, `useMutation` for Mutations:** Usar `useQuery` para obtener imágenes y `useMutation` para operaciones como upload o edición.
+- **Error Handling & Loading States:** Implementar estados de carga visual con esqueletos y gestión de errores personalizada para imágenes.
+- **Query Caching & `staleTime`/`cacheTime`:** Configurar caché agresiva para thumbnails e imágenes con `staleTime` extenso.
+- **Cache Invalidation & Revalidation:** Invalidar estratégicamente la caché después de operaciones como edición o eliminación de imágenes.
+- **Strategic Query Keys:** Definir keys de consulta jerárquicas como `['images', { albumId, filters }]` para invalidación selectiva.
+- **Pagination & Infinite Loading:** Implementar infinite scroll para galerías de imágenes con `useInfiniteQuery`.
+- **Prefetching for User Experience:** Precargar imágenes anticipando interacciones del usuario, como hover sobre álbumes.
+- **Server Actions Integration:** Combinar React Query con Next.js 15 Server Actions para operaciones de datos de imágenes.
+- **Custom Hooks Abstraction:** Crear hooks personalizados como `useImageUpload` o `useImageMetadata` para operaciones específicas.
+- **Optimistic Updates:** Implementar actualizaciones optimistas para favoritos o etiquetado de imágenes.
+- **Suspense Mode:** Utilizar modo suspense de React Query con React 19 para carga de galerías.
+- **Query Client Configuration:** Configurar QueryClient con defaults específicos para recursos de imágenes.
+- **DevTools in Development:** Usar React Query DevTools en desarrollo para depurar consultas de imágenes.
+- **Dependent Queries:** Implementar consultas dependientes para cargar detalles de imágenes después de obtener colecciones.
+- **Background Fetching Indicators:** Mostrar indicadores sutiles para refetch en segundo plano de galerías e imágenes.
+
+```mermaid
+graph TD
+    A[React Query] --> B[Fetching]
+    A --> C[Mutations]
+    A --> D[Cache Management]
+
+    B --> B1[Images List]
+    B --> B2[Image Details]
+    B --> B3[Album Contents]
+
+    C --> C1[Image Upload]
+    C --> C2[Metadata Edit]
+    C --> C3[Image Delete]
+
+    D --> D1[Query Invalidation]
+    D --> D2[Optimistic Updates]
+    D --> D3[Prefetching]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+```
+
+**Ejemplo de implementación**:
+
+```typescript
+// hooks/use-images.ts - Custom hook para gestión de imágenes
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { getImages, getImageById, updateImage, deleteImage } from '@/app/actions/images';
+import type { Image, ImageUpdateInput } from '@/types/image';
+
+// Constantes para keys de consulta
+const IMAGES_KEY = 'images';
+const IMAGE_DETAILS_KEY = 'image-details';
+
+// Hook para obtener lista paginada de imágenes
+export function useImages(filters = {}, pageSize = 20) {
+  return useInfiniteQuery({
+    queryKey: [IMAGES_KEY, filters],
+    queryFn: ({ pageParam = 1 }) => getImages({ page: pageParam, limit: pageSize, ...filters }),
+    getNextPageParam: (lastPage) => {
+      const { pagination } = lastPage;
+      return pagination.currentPage < pagination.pages ? pagination.currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
+    staleTime: 60 * 1000, // 1 minuto
+  });
+}
+
+// Hook para obtener detalles de una imagen
+export function useImageDetails(id: string) {
+  return useQuery({
+    queryKey: [IMAGE_DETAILS_KEY, id],
+    queryFn: () => getImageById(id),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    enabled: !!id, // Solo ejecutar si hay ID
+  });
+}
+
+// Hook para actualizar metadatos de imagen
+export function useUpdateImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: string, updates: ImageUpdateInput }) =>
+      updateImage(data.id, data.updates),
+
+    // Actualización optimista
+    onMutate: async ({ id, updates }) => {
+      // Cancelar queries en curso
+      await queryClient.cancelQueries({ queryKey: [IMAGE_DETAILS_KEY, id] });
+
+      // Snapshot del estado previo
+      const previousImage = queryClient.getQueryData<Image>([IMAGE_DETAILS_KEY, id]);
+
+      // Actualizar optimistamente
+      if (previousImage) {
+        queryClient.setQueryData<Image>([IMAGE_DETAILS_KEY, id], {
+          ...previousImage,
+          ...updates,
+          updatedAt: new Date(),
+        });
+      }
+
+      return { previousImage };
+    },
+
+    // En caso de error, revertir a datos previos
+    onError: (err, { id }, context) => {
+      if (context?.previousImage) {
+        queryClient.setQueryData([IMAGE_DETAILS_KEY, id], context.previousImage);
+      }
+      console.error('Error al actualizar imagen:', err);
+    },
+
+    // Al completar exitosamente, invalidar queries relacionadas
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: [IMAGE_DETAILS_KEY, id] });
+      queryClient.invalidateQueries({ queryKey: [IMAGES_KEY] });
+    },
+  });
+}
+
+// Hook para eliminar imágenes
+export function useDeleteImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteImage,
+
+    onSuccess: (_, id) => {
+      // Invalidar la imagen específica
+      queryClient.removeQueries({ queryKey: [IMAGE_DETAILS_KEY, id] });
+
+      // Invalidar todas las listas que podrían contener esta imagen
+      queryClient.invalidateQueries({ queryKey: [IMAGES_KEY] });
+    },
+  });
+}
+
+// Componente con implementación
+export function ImageGallery({ albumId, tags, searchTerm }) {
+  const filters = useMemo(() => ({ albumId, tags, searchTerm }), [albumId, tags, searchTerm]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error
+  } = useImages(filters);
+
+  const { ref, inView } = useInView();
+
+  // Cargar más imágenes cuando el usuario llega al final
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Prefetching al hover
+  const queryClient = useQueryClient();
+  const prefetchImage = useCallback((id: string) => {
+    queryClient.prefetchQuery({
+      queryKey: [IMAGE_DETAILS_KEY, id],
+      queryFn: () => getImageById(id),
+      staleTime: 5 * 60 * 1000,
+    });
+  }, [queryClient]);
+
+  return (
+    <div className="image-gallery">
+      {isLoading ? (
+        <ImageGallerySkeleton count={12} />
+      ) : error ? (
+        <ErrorDisplay error={error} />
+      ) : (
+        <>
+          <div className="image-grid">
+            {data.pages.map((page) =>
+              page.images.map((image) => (
+                <div
+                  key={image.id}
+                  onMouseEnter={() => prefetchImage(image.id)}
+                >
+                  <ImageCard image={image} />
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Loader infinito */}
+          <div ref={ref} className="loader">
+            {isFetchingNextPage && <Spinner />}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+```

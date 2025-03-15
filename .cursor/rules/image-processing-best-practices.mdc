@@ -1,0 +1,257 @@
+---
+description: Concise best practices for image processing in a Next.js application
+globs: services/image-processing/**/*.ts, lib/image/**/*.ts, app/api/images/**/*.ts
+alwaysApply: false
+---
+- **Sharp para Procesamiento de Imágenes:** Utilizar Sharp para todas las operaciones de procesamiento de imágenes por su rendimiento y eficiencia.
+- **Procesamiento en Background:** Implementar operaciones intensivas de procesamiento en workers de Bull para no bloquear el hilo principal.
+- **Optimización de Thumbnails:** Generar múltiples resoluciones de thumbnails optimizados para diferentes vistas (grid, lista, mobile).
+- **Extracción de Metadatos EXIF:** Extraer y almacenar metadatos EXIF al procesar imágenes para búsqueda y organización.
+- **Preservación de Color:** Mantener perfiles de color ICC durante el procesamiento para fidelidad visual.
+- **Optimización por Formato:** Aplicar parámetros de optimización específicos para cada formato de imagen (JPEG, PNG, WebP, AVIF).
+- **Streaming para Grandes Archivos:** Implementar streaming para archivos de imagen grandes para reducir uso de memoria.
+- **Validación de Imágenes:** Validar archivos como imágenes legítimas antes del procesamiento para prevenir ataques.
+- **Manejo de Orientación EXIF:** Corregir automáticamente la orientación de imágenes según metadatos EXIF.
+- **Limitación de Tamaño:** Establecer límites razonables de tamaño para uploads de imágenes.
+- **Procesamiento Progresivo:** Implementar indicadores de progreso para procesos largos mediante SSE o WebSockets.
+- **Cacheo de Resultados:** Almacenar en caché resultados de procesamiento frecuentes para mejorar rendimiento.
+- **Limpieza de Metadatos Sensibles:** Eliminar datos GPS u otra información sensible según configuración de privacidad.
+- **Conversión de Formatos:** Convertir automáticamente a formatos optimizados como WebP o AVIF para mejor rendimiento.
+- **Compresión Inteligente:** Aplicar niveles de compresión óptimos basados en contenido visual y uso.
+
+```mermaid
+graph TD
+    A[Flujo de Procesamiento] --> B[Validación]
+    B --> C[Procesamiento Inicial]
+    C --> D[Extracción Metadatos]
+    C --> E[Generación Thumbnails]
+    C --> F[Optimización]
+
+    D --> G[Almacenamiento DB]
+    E --> H[Caché]
+    F --> I[Almacenamiento Filesystem]
+
+    G --> J[Indexación Búsqueda]
+    H --> K[Servir UI]
+    I --> L[Almacenamiento Final]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#bbdefb
+    style H fill:#bbdefb
+    style I fill:#bbdefb
+```
+
+**Ejemplo de implementación**:
+
+```typescript
+// services/image-processing/processor.ts
+import sharp from 'sharp';
+import { ExifReader } from 'exifreader';
+import { createReadStream, createWriteStream } from 'fs';
+import { pipeline } from 'stream/promises';
+import { join } from 'path';
+import { nanoid } from 'nanoid';
+import { prisma } from '@/lib/prisma';
+import type { ImageMetadata, ExifMetadata } from '@/types/image';
+
+// Configuraciones para diferentes formatos
+const FORMAT_CONFIGS = {
+  jpeg: { quality: 85, progressive: true },
+  png: { compressionLevel: 8, palette: true },
+  webp: { quality: 80, alphaQuality: 100 },
+  avif: { quality: 70, chromaSubsampling: '4:2:0' }
+};
+
+// Tamaños de thumbnails a generar
+const THUMBNAIL_SIZES = [
+  { width: 200, height: 200, fit: 'cover', name: 'thumbnail_small' },
+  { width: 400, height: 400, fit: 'inside', name: 'thumbnail_medium' },
+  { width: 800, height: 800, fit: 'inside', name: 'thumbnail_large' }
+];
+
+/**
+ * Procesa una imagen, crea thumbnails y extrae metadatos
+ */
+export async function processImage(
+  imageId: string,
+  sourcePath: string,
+  outputDir: string,
+  options = { preserveExif: true, stripGpsData: true }
+): Promise<ImageMetadata> {
+  try {
+    // 1. Validar que el archivo es una imagen válida
+    let pipeline = sharp(sourcePath);
+    const metadata = await pipeline.metadata();
+
+    if (!metadata.width || !metadata.height || !metadata.format) {
+      throw new Error('Archivo no válido como imagen');
+    }
+
+    // 2. Extraer metadatos EXIF
+    const exifData = await extractExifMetadata(sourcePath, options.stripGpsData);
+
+    // 3. Corregir orientación automáticamente
+    pipeline = pipeline.rotate();
+
+    // 4. Generar versión optimizada de la imagen original
+    const optimizedImagePath = join(outputDir, `${imageId}.${metadata.format}`);
+    const formatConfig = FORMAT_CONFIGS[metadata.format as keyof typeof FORMAT_CONFIGS] || {};
+
+    await pipeline
+      .clone()
+      .withMetadata(options.preserveExif ? { orientation: 1 } : {})
+      [metadata.format](formatConfig)
+      .toFile(optimizedImagePath);
+
+    // 5. Generar thumbnails en paralelo
+    const thumbnailTasks = THUMBNAIL_SIZES.map(size =>
+      generateThumbnail(pipeline.clone(), imageId, size, outputDir, metadata.format as string)
+    );
+
+    const thumbnailPaths = await Promise.all(thumbnailTasks);
+
+    // 6. Generar versión WebP para optimización web
+    let webpPath = null;
+    if (metadata.format !== 'webp') {
+      webpPath = join(outputDir, `${imageId}.webp`);
+      await pipeline
+        .clone()
+        .webp(FORMAT_CONFIGS.webp)
+        .toFile(webpPath);
+    }
+
+    // 7. Guardar metadatos en base de datos
+    const imageMetadata: ImageMetadata = {
+      width: metadata.width,
+      height: metadata.height,
+      format: metadata.format as string,
+      size: metadata.size || 0,
+      orientation: metadata.orientation || 1,
+      colorSpace: metadata.space,
+      hasAlpha: metadata.hasAlpha || false,
+      exif: exifData,
+      optimizedPath: optimizedImagePath,
+      thumbnails: thumbnailPaths.reduce((acc, curr) => ({ ...acc, [curr.name]: curr.path }), {}),
+      webpPath: webpPath,
+      processingDate: new Date()
+    };
+
+    // Actualizar la base de datos con los metadatos procesados
+    await prisma.image.update({
+      where: { id: imageId },
+      data: {
+        metadata: imageMetadata,
+        processingStatus: 'COMPLETED',
+        width: metadata.width,
+        height: metadata.height,
+        optimizedPath: optimizedImagePath,
+        thumbnailPath: thumbnailPaths.find(t => t.name === 'thumbnail_medium')?.path || null
+      }
+    });
+
+    return imageMetadata;
+  } catch (error) {
+    console.error('Error procesando imagen:', error);
+
+    // Marcar como fallido en la base de datos
+    await prisma.image.update({
+      where: { id: imageId },
+      data: {
+        processingStatus: 'FAILED',
+        processingError: (error as Error).message
+      }
+    });
+
+    throw error;
+  }
+}
+
+/**
+ * Extrae metadatos EXIF de una imagen
+ */
+async function extractExifMetadata(
+  filePath: string,
+  stripGpsData = true
+): Promise<ExifMetadata | null> {
+  try {
+    const buffer = await sharp(filePath).metadata();
+    if (!buffer.exif) return null;
+
+    const tags = ExifReader.load(buffer.exif);
+
+    // Extraer metadatos relevantes
+    const exifData: ExifMetadata = {
+      make: tags?.Make?.description,
+      model: tags?.Model?.description,
+      exposureTime: tags?.ExposureTime?.description,
+      fNumber: tags?.FNumber?.description,
+      iso: tags?.ISOSpeedRatings?.description,
+      dateTimeOriginal: tags?.DateTimeOriginal?.description,
+      lensModel: tags?.LensModel?.description,
+      software: tags?.Software?.description,
+    };
+
+    // Añadir datos GPS si no están siendo eliminados por privacidad
+    if (!stripGpsData && tags?.GPSLatitude && tags?.GPSLongitude) {
+      exifData.gpsLatitude = tags.GPSLatitude.description;
+      exifData.gpsLongitude = tags.GPSLongitude.description;
+    }
+
+    return exifData;
+  } catch (error) {
+    console.warn('Error extrayendo metadatos EXIF:', error);
+    return null;
+  }
+}
+
+/**
+ * Genera un thumbnail para la imagen
+ */
+async function generateThumbnail(
+  pipeline: sharp.Sharp,
+  imageId: string,
+  size: { width: number; height: number; fit: keyof sharp.FitEnum; name: string },
+  outputDir: string,
+  format: string
+): Promise<{ name: string; path: string }> {
+  const outputPath = join(outputDir, `${imageId}_${size.name}.${format === 'jpeg' ? 'jpg' : format}`);
+
+  await pipeline
+    .resize({
+      width: size.width,
+      height: size.height,
+      fit: size.fit,
+      withoutEnlargement: true
+    })
+    [format](FORMAT_CONFIGS[format as keyof typeof FORMAT_CONFIGS] || {})
+    .toFile(outputPath);
+
+  return { name: size.name, path: outputPath };
+}
+
+/**
+ * Procesa una imagen en streaming para archivos grandes
+ */
+export async function processLargeImage(
+  inputStream: NodeJS.ReadableStream,
+  outputPath: string,
+  options = { format: 'jpeg', quality: 80, width: 1920, height: 1080 }
+): Promise<void> {
+  const transformer = sharp()
+    .resize(options.width, options.height, { fit: 'inside', withoutEnlargement: true })
+    [options.format]({ quality: options.quality });
+
+  const outputStream = createWriteStream(outputPath);
+
+  try {
+    await pipeline(inputStream, transformer, outputStream);
+  } catch (error) {
+    console.error('Error en procesamiento streaming:', error);
+    throw error;
+  }
+}

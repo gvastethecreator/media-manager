@@ -226,8 +226,37 @@ const performanceOptions = {
 };
 ```
 
+### 4. Adaptación al tamaño completo del contenedor
+
+Para que las tarjetas se adapten al tamaño completo de su contenedor, asegúrate de que el contenedor padre tenga dimensiones definidas y utiliza las clases `w-full` y `h-full`:
+
+```tsx
+// Contenedor padre con dimensiones definidas
+<div className="w-64 h-96">
+  <EntityCardAdapter
+    entityType="folder"
+    entity={folder}
+    // Las tarjetas ya incluyen w-full y h-full internamente
+  />
+</div>
+
+// Para contenedores flexibles
+<div className="grid grid-cols-3 gap-4 h-screen">
+  {folders.map(folder => (
+    <EntityCardAdapter
+      key={folder.id}
+      entityType="folder"
+      entity={folder}
+    />
+  ))}
+</div>
+```
+
+Los componentes `EntityCard`, `EntityCardWrapper` y layouts específicos como `FolderCardLayout` ya incluyen las clases necesarias para adaptarse al tamaño completo de su contenedor.
+
 ## Recursos Adicionales
 
 - Consulta `ARCHITECTURE.md` para entender la estructura interna del sistema
 - Revisa los ejemplos en `entity-card-example.tsx`
 - Explora los diferentes módulos en la carpeta `modules/` para funcionalidades específicas
+- Consulta los diagramas en `ARCHITECTURE.md` para visualizar el flujo de datos y la estructura de componentes

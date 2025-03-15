@@ -2,7 +2,17 @@
 description: Best practices for React component development
 globs: **/*.{ts,tsx,js,jsx}
 ---
-- Use functional components with hooks instead of class components
-- Keep components small and focused on a single responsibility
-- Utilize memoization techniques like `useMemo` and `useCallback` for performance
-- Implement proper state management using Context API or state management libraries
+- **Functional Components with Hooks:** Use functional components with hooks instead of class components
+- **Single Responsibility Components:** Keep components small and focused on a single responsibility
+- **Performance Optimization:** Utilize memoization with `useMemo`, `useCallback`, and `memo` for performance
+- **State Management Strategy:** Use React Context for simple state, Zustand for complex global state
+- **React 19 Features Adoption:** Leverage new React 19 features like improved SSR and automatic batching
+- **Document & Error Boundaries:** Implement error boundaries for graceful error handling in component trees
+- **Client/Server Component Separation:** Clearly mark 'use client' directives only where needed
+- **React Hooks Rules:** Follow React hooks rules (call only at top level, only in React functions)
+- **Custom Hook Development:** Extract reusable logic into custom hooks with descriptive names
+- **Conditional Rendering Practices:** Use clean patterns for conditional rendering like ternaries or logical AND
+- **Controlled Form Components:** Prefer controlled components for form inputs with validation patterns
+- **React DevTools Usage:** Use React DevTools for debugging and performance profiling
+- **Component Props Documentation:** Document component props with TypeScript interfaces and JSDoc comments
+- **Component Testing Strategy:** Test components focusing on user interactions rather than implementation details

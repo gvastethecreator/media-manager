@@ -1,16 +1,145 @@
 ---
-description: Concise best practices for Prisma ORM data access, optimizing performance and security.
-globs: lib/prisma.ts, services/**/*.ts, app/actions/**/*.ts
----
----
 description: 
 globs: 
+alwaysApply: false
 ---
-- **Single Prisma Client Instance:** Ensure one shared Prisma Client instance across the application.
-- **Robust Error Handling in Prisma Queries:** Implement proper error handling for Prisma interactions.
-- **Prisma Transactions for Complex Operations:** Use transactions for data integrity in multi-write operations.
-- **Efficient Prisma Queries:** Optimize queries with `select`, `include`, `cursor` and `take`.
-- **Zod Validation Before Persistence:** Validate input data with Zod before database persistence.
-- **Secure Prisma Queries:** Isolate data access logic in Server Actions/Services, exposing only necessary data.
-- **Prisma Migrations & Schema Versioning:** Manage schema updates and migrations effectively.
-- **Database Seeding:** Utilize Prisma seeding for database initialization with test or initial data.
+---
+description: Concise best practices for Prisma ORM data access in an image management application, optimizing performance and security.
+globs: lib/prisma.ts, services/**/*.ts, app/actions/**/*.ts
+alwaysApply: false
+---
+- **Single Prisma Client Instance:** Ensure one shared Prisma Client instance across the application to prevent connection pool exhaustion.
+- **Robust Error Handling in Prisma Queries:** Implement try/catch blocks with specific error types for Prisma interactions.
+- **Prisma Transactions for Complex Operations:** Use transactions for operations that modify multiple image records or relationships.
+- **Efficient Prisma Queries:** Optimize image queries with `select` fields, judicious `include` for related data, and pagination.
+- **Zod Validation Before Persistence:** Validate image metadata with Zod schemas before database persistence.
+- **Secure Prisma Queries:** Prevent SQL injection by using parameterized queries and never raw SQL for image data.
+- **Prisma Migrations & Schema Versioning:** Use Prisma Migrate for all schema changes with descriptive migration names.
+- **Database Seeding:** Create sample image data and test environments with Prisma seeding.
+- **Next.js Integration:** Combine Prisma with Next.js 15 Server Actions for efficient data access in image management.
+- **Cache Optimization:** Implement LRU cache for frequently accessed image metadata.
+- **Query Optimization:** Add strategic indexes for image path and tag searches.
+- **Schema Design Best Practices:** Create appropriate relationships between images, albums, collections, and tags.
+- **Connection Pooling:** Configure appropriate connection pool size based on expected concurrent users.
+- **Batch Operations:** Use Prisma's `createMany` and `updateMany` for efficient batch image operations.
+- **Middleware for Common Operations:** Implement Prisma middleware for automatic timestamping and audit logging.
+
+```mermaid
+graph TD
+    A[Schema Design] --> B[Entities]
+    B --> B1[Image]
+    B --> B2[Album]
+    B --> B3[Collection]
+    B --> B4[Tag]
+
+    A --> C[Relations]
+    C --> C1[Image->Album n:m]
+    C --> C2[Image->Tag n:m]
+    C --> C3[Album->Collection n:1]
+
+    A --> D[Indexes]
+    D --> D1[imagePath_idx]
+    D --> D2[tags_idx]
+    D --> D3[albumId_idx]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+```
+
+**Ejemplo de implementación**:
+
+```typescript
+// lib/prisma.ts - Cliente Prisma singleton
+import { PrismaClient } from '@prisma/client';
+import { LRUCache } from 'lru-cache';
+
+// Configuración de caché LRU para metadatos de imágenes
+const imageMetadataCache = new LRUCache<string, any>({
+  max: 1000, // Almacenar hasta 1000 items
+  ttl: 1000 * 60 * 5, // 5 minutos
+});
+
+// Singleton global
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma = globalForPrisma.prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
+
+// Middleware para logging y auditoría
+prisma.$use(async (params, next) => {
+  const before = Date.now();
+  const result = await next(params);
+  const after = Date.now();
+
+  if (params.model === 'Image' && params.action === 'update') {
+    console.log(`Imagen ${params.args.where.id} actualizada - Tiempo: ${after - before}ms`);
+  }
+
+  return result;
+});
+
+// Estrategia de consulta optimizada para imágenes
+export async function getImagesWithPagination(page = 1, limit = 20, filters = {}) {
+  const cacheKey = `images_${page}_${limit}_${JSON.stringify(filters)}`;
+
+  // Intentar usar caché primero
+  if (imageMetadataCache.has(cacheKey)) {
+    return imageMetadataCache.get(cacheKey);
+  }
+
+  try {
+    const skip = (page - 1) * limit;
+    const [images, total] = await Promise.all([
+      prisma.image.findMany({
+        where: filters,
+        select: {
+          id: true,
+          path: true,
+          title: true,
+          createdAt: true,
+          // Selección parcial para optimizar
+          metadata: {
+            select: {
+              width: true,
+              height: true,
+              format: true
+            }
+          },
+          // Solo incluir tags necesarios
+          tags: {
+            select: {
+              name: true,
+              id: true
+            }
+          }
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.image.count({ where: filters })
+    ]);
+
+    const result = {
+      images,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        currentPage: page
+      }
+    };
+
+    // Almacenar en caché
+    imageMetadataCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error('Error en consulta de imágenes:', error);
+    throw new Error('Error al obtener imágenes');
+  }
+}
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+```

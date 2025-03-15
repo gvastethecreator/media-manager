@@ -8,6 +8,11 @@ alwaysApply: false
 - **Type Guards & Assertions:** Implement type guards and assertions for runtime type safety.
 - **Generics for Reusability:** Utilize generics for reusable, type-safe components and functions.
 - **Enums vs Union Types:** Consider enums for fixed value sets, union types for literal strings.
-- **Code Linting with Biome:** Integrate Biome for linting and automatic code formatting.
+- **Code Linting with ESLint:** Integrate ESLint with TypeScript rules for code quality.
 - **Documentation with JSDoc:** Document code with JSDoc for improved readability and documentation generation.
 - **Code Reviews:** Conduct regular code reviews to ensure TypeScript code quality and type safety.
+- **Prisma Type Integration:** Leverage Prisma's generated types for database entities.
+- **Zod for Runtime Validation:** Use Zod to validate data at runtime, complementing TypeScript's static type checking.
+- **Type Exports Strategy:** Create dedicated type export files (types.ts) for complex modules.
+- **Type Narrowing Techniques:** Use type narrowing techniques like type guards and discriminated unions.
+- **Prefer for...of over forEach:** Use for...of loops instead of forEach for better readability and error handling.
