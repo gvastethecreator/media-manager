@@ -13,7 +13,7 @@ interface CardFooterProps {
 export function CardFooter({ options, children, className }: CardFooterProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
 

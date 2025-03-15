@@ -1,5 +1,5 @@
 import type { VisualPreset } from '@prisma/client';
-import type { CardOptions } from '../types/card-settings-types';
+import type { CardOptions } from '../types/unified-card-types';
 
 /**
  * Tipos de entidades soportadas por el sistema de presets
@@ -56,7 +56,8 @@ export function mergeConfigs<T = PresetModule>(baseConfig: T | null, specificCon
  */
 export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType: EntityType): CardOptions {
 	if (!preset) {
-		return {} as CardOptions;
+		// Proporcionar opciones por defecto según el tipo de entidad
+		return getDefaultOptionsForEntityType(entityType);
 	}
 
 	// Parsear configuraciones base
@@ -122,17 +123,27 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 			entityConfig = {};
 	}
 
+	// Obtener opciones por defecto para el tipo de entidad
+	const defaultOptions = getDefaultOptionsForEntityType(entityType);
+
 	// Configurar el diseño de la tarjeta Magic
 	const magicCard = magicCardBase || {};
-	const frameColor = entityConfig?.frameColor || '#3b82f6';
+	const frameColor = entityConfig?.frameColor || defaultOptions.designSystem?.frameColor || '#3b82f6';
 
 	// Construir las opciones de tarjeta combinando todas las configuraciones
 	const cardOptions: CardOptions = {
+		// Primero las opciones por defecto
+		...defaultOptions,
+
 		// Sistema core
-		core: coreConfig || {},
+		core: {
+			...defaultOptions.core,
+			...coreConfig,
+		},
 
 		// Sistema de diseño
 		designSystem: {
+			...defaultOptions.designSystem,
 			...(designConfig || {}),
 			preset: entityType,
 			frameColor,
@@ -140,48 +151,148 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 		},
 
 		// Animación
-		animation: animationConfig || {},
+		animation: {
+			...defaultOptions.animation,
+			...(animationConfig || {}),
+		},
 
 		// Capas y efectos
-		layers: layerConfig || {},
+		layers: {
+			...defaultOptions.layers,
+			...(layerConfig || {}),
+		},
 		effects: {
+			...defaultOptions.effects,
 			...(effectsConfig || {}),
 			frameColor,
 		},
 
 		// Configuración de backside
-		backside: backsideConfig || {},
+		backside: {
+			...defaultOptions.backside,
+			...(backsideConfig || {}),
+		},
 
 		// Rendimiento
-		performance: performanceConfig || {},
+		performance: {
+			...defaultOptions.performance,
+			...(performanceConfig || {}),
+		},
 
 		// Configuración de colores
 		colors: {
+			...defaultOptions.colors,
 			...(colorConfig || {}),
 			primary: frameColor,
 		},
 
 		// Configuración del grid de imágenes
-		imageGrid: imageGridConfig || {},
+		imageGrid: {
+			...defaultOptions.imageGrid,
+			...(imageGridConfig || {}),
+		},
 
 		// Layout
 		layout: {
+			...defaultOptions.layout,
 			...(layoutConfig || {}),
-			type: entityConfig?.layout || 'standard',
+			type: entityConfig?.layout || defaultOptions.layout?.type || 'standard',
 		},
 
 		// Configuración específica por entidad
 		entityConfig: entityConfig || {},
 
 		// Explode y preview
-		explode: explodeConfig || {},
-		preview: previewConfig || {},
+		explode: {
+			...defaultOptions.explode,
+			...(explodeConfig || {}),
+		},
+		preview: {
+			...defaultOptions.preview,
+			...(previewConfig || {}),
+		},
 
 		// Sistema de rareza
-		raritySystem: rarityConfig || {},
+		raritySystem: {
+			...defaultOptions.raritySystem,
+			...(rarityConfig || {}),
+		},
 	};
 
 	return cardOptions;
+}
+
+/**
+ * Obtiene opciones por defecto según el tipo de entidad
+ */
+function getDefaultOptionsForEntityType(entityType: EntityType): CardOptions {
+	// Opciones base para todos los tipos
+	const baseOptions: CardOptions = {
+		enable3DEffect: true,
+		enableHolographicEffect: false,
+		enableScanlines: false,
+		enableLightHalo: true,
+		enableAnimatedBorder: true,
+		enableGlowEffect: true,
+		enableGrainEffect: false,
+		designSystem: {
+			preset: 'default',
+			variant: 'default',
+			aspectRatio: '1/1',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 2,
+			shadowStyle: 'soft',
+		},
+		layers: {
+			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+			layerBlending: 'normal',
+			layerSpacing: 2,
+		},
+		primaryColor: '#3b82f6',
+		secondaryColor: '#1d4ed8',
+		hoverLiftHeight: 10,
+		maxRotation: 15,
+	};
+
+	// Opciones específicas por tipo
+	switch (entityType) {
+		case 'folder':
+			return {
+				...baseOptions,
+				designSystem: {
+					...baseOptions.designSystem,
+					preset: 'folder',
+					aspectRatio: '7/10',
+				},
+				layers: {
+					...baseOptions.layers,
+					layerBlending: 'screen',
+				},
+			};
+		case 'album':
+			return {
+				...baseOptions,
+				designSystem: {
+					...baseOptions.designSystem,
+					preset: 'album',
+				},
+				enableHolographicEffect: true,
+			};
+		case 'tag':
+			return {
+				...baseOptions,
+				designSystem: {
+					...baseOptions.designSystem,
+					preset: 'tag',
+					aspectRatio: '3/1',
+					cornerRadius: 8,
+				},
+			};
+		// Añadir más casos según sea necesario
+		default:
+			return baseOptions;
+	}
 }
 
 /**

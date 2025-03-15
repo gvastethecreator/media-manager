@@ -13,7 +13,7 @@ interface CardHolographicProps {
 export function CardHolographic({ options, isHovered, className }: CardHolographicProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

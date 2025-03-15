@@ -1,13 +1,12 @@
 'use client';
 
-import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
+import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
-import { ResizablePanel, ResizablePanelGroup, ResizablePanelHandle } from '@/components/ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ViewContainer } from '@/components/views/view-container';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function MainLayout() {
@@ -40,7 +39,7 @@ export function MainLayout() {
 					{navData && <NavPanel initialData={navData} />}
 				</ResizablePanel>
 
-				<ResizablePanelHandle
+				<ResizableHandle
 					withHandle
 					className="cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 					onDragging={handleDragging}

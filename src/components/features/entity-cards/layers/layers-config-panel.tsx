@@ -35,11 +35,11 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 	const layerSystem = getLayerSystemWithDefaults(cardOptions.layerSystem);
 
 	// Estado para la lista de orden de capas
-	const [layerOrder, setLayerOrder] = useState<string[]>(layerSystem.order || DEFAULT_LAYER_SYSTEM.order);
+	const [layerOrder, setLayerOrder] = useState<string[]>(layerSystem.order || DEFAULT_LAYER_SYSTEM.order || []);
 
 	// Actualizar el orden cuando cambian las opciones externas
 	useEffect(() => {
-		setLayerOrder(layerSystem.order || DEFAULT_LAYER_SYSTEM.order);
+		setLayerOrder(layerSystem.order || DEFAULT_LAYER_SYSTEM.order || []);
 	}, [layerSystem.order]);
 
 	// Handler para cambios en la configuración de capas

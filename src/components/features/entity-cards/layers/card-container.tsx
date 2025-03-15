@@ -16,11 +16,11 @@ interface CardContainerProps {
 export function CardContainer({ options, isHovered, onHoverChange, onClick, children, className }: CardContainerProps) {
 	const { designSystem, states, performance } = options;
 
-	const { preset, variant, aspectRatio, cornerStyle, cornerRadius, elevation, shadowStyle } = designSystem;
+	const { preset, variant, aspectRatio, cornerStyle, cornerRadius, elevation, shadowStyle } = designSystem || {};
 
-	const { hover, active, disabled, selected } = states;
+	const { hover, active, disabled, selected } = states || {};
 
-	const { enableHardwareAcceleration, useRAF, batchUpdates, throttleMs } = performance;
+	const { enableHardwareAcceleration, useRAF, batchUpdates, throttleMs } = performance || {};
 
 	// Calcular las transformaciones basadas en el estado
 	const transform = {

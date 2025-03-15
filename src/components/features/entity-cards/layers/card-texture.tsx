@@ -13,7 +13,7 @@ interface CardTextureProps {
 export function CardTexture({ options, isHovered, className }: CardTextureProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { enableHolographic, enableGlow, enableGrain, textureIntensity, textureColor } = visualEffects;
 

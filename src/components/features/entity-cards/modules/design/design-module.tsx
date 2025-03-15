@@ -30,6 +30,21 @@ export const DEFAULT_DESIGN_SYSTEM: DesignSystem = {
 	// Avanzado
 	customCssClasses: [],
 	customCssVariables: {},
+
+	// Propiedades adicionales para compatibilidad
+	preset: 'default',
+	variant: 'default',
+	cornerStyle: 'rounded',
+	cornerRadius: 12,
+	shadowStyle: 'soft',
+	colorScheme: 'auto',
+	fontFamily: 'system-ui',
+	surfaceStyle: 'regular',
+	layoutDensity: 'comfortable',
+	contentPadding: 'medium',
+	glassEffect: false,
+	accentColor: '#3b82f6',
+	textColor: '#000000',
 };
 
 /**

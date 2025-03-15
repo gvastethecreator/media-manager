@@ -30,6 +30,21 @@ export interface DesignSystem {
 	// Avanzado
 	customCssClasses: string[];
 	customCssVariables: Record<string, string>;
+
+	// Propiedades adicionales para compatibilidad
+	preset?: string;
+	variant?: string;
+	cornerStyle?: string;
+	cornerRadius?: number;
+	shadowStyle?: string;
+	colorScheme?: string;
+	fontFamily?: string;
+	surfaceStyle?: string;
+	layoutDensity?: string;
+	contentPadding?: string | number;
+	glassEffect?: boolean;
+	accentColor?: string;
+	textColor?: string;
 }
 
 /**
@@ -65,9 +80,9 @@ export interface DesignModuleProps {
 /**
  * Hook para el sistema de diseño
  */
-export type UseDesignSystemHook = (initialSystem?: Partial<DesignSystem>) => {
+export interface UseDesignSystemHook {
 	designSystem: DesignSystem;
 	updateDesignSystem: (update: Partial<DesignSystem>) => void;
 	resetDesignSystem: () => void;
-	generateDesignStyles: () => React.CSSProperties;
-};
+	generateCssStyles: () => Record<string, string>;
+}

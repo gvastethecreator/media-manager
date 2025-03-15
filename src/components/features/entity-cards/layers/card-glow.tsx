@@ -13,7 +13,7 @@ interface CardGlowProps {
 export function CardGlow({ options, isHovered, className }: CardGlowProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { glowIntensity = 1, glowColor } = visualEffects;
 
