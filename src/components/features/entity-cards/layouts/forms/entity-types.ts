@@ -34,6 +34,8 @@ export interface AlbumFormData extends BaseEntityFormData {
 	featuredImage?: string | null;
 	isFavorite: boolean;
 	category?: string | null;
+	rating?: number;
+	coverImage?: string;
 }
 
 export interface CollectionFormData extends BaseEntityFormData {
@@ -159,18 +161,6 @@ export interface PromptFormData extends BaseEntityFormData {
 }
 
 // Tipos de datos para los formularios de entidades
-
-export interface AlbumFormData {
-	id?: string;
-	name: string;
-	description?: string;
-	emoji?: string;
-	color?: string;
-	rating?: number;
-	coverImage?: string;
-	createdAt?: Date;
-	updatedAt?: Date;
-}
 
 export interface CollectionFormData {
 	id?: string;
@@ -307,15 +297,17 @@ export function albumToFormData(album: Album): AlbumFormData {
 	return {
 		id: album.id,
 		name: album.name,
-		emoji: album.emoji,
-		color: album.color,
+		emoji: album.emoji || '📷',
+		color: album.color || '#3b82f6',
 		description: album.description || '',
 		shortcut: album.shortcut || undefined,
-		sortBy: album.sortBy,
-		filters: album.filters,
+		sortBy: album.sortBy || 'name',
+		filters: album.filters || '[]',
 		featuredImage: album.featuredImage || undefined,
 		isFavorite: album.isFavorite || false,
 		category: album.category || null,
+		rating: album.rating || 0,
+		coverImage: album.coverImage || undefined,
 	};
 }
 
@@ -331,6 +323,7 @@ export function formDataToAlbum(data: AlbumFormData): Omit<PrismaAlbum, 'id' | '
 		category: data.category || null,
 		rarity: null,
 		texture: null,
+		rating: data.rating || 0,
 	};
 }
 

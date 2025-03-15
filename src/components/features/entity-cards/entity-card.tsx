@@ -2,23 +2,26 @@
 
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { EntityCardContent } from './entity-card-content';
-import { CardContainer } from './layers/card-container';
 import { useLayersSystem } from './layers/hooks/layers-system';
 import { LayerRenderer } from './layers/layer-plugin-system';
 import { useAnimationSystem } from './modules/animation';
-import type { AnimationSystem } from './modules/animation/types';
-import { BacksideLayer } from './modules/backside';
-import type { BacksideOptions } from './modules/backside/types';
 import { useColors } from './modules/colors';
 import { CoreLayer } from './modules/core';
-import type { CoreConfig } from './modules/core/core-config';
 import { useDesignSystem } from './modules/design';
-import type { DesignSystem as DesignSystemType } from './modules/design/types';
-import type { ImageGridImage, ImageGridLayout, ImageGridStyle } from './modules/image-grid';
 import './styles/card-borders.css';
-import type { CardOptions } from './types/card-settings-types';
+// Importar tipos desde el archivo centralizado
+import type { AnimationSystemType, BacksideOptionsType, CardOptions, DesignSystemType } from './types';
+// Importar tipos de imagen desde el componente ImageGrid
+import type { ImageGridImage, ImageGridProps } from './layouts/image-grid';
+// Tipo de alias para compatibilidad
+type ImageGridLayout = ImageGridProps['layout'];
+type ImageGridStyle = ImageGridProps['style'];
+// Importar CoreConfig desde el módulo core
+import type { CoreConfig } from './modules/core/core-config';
+// Importar sistema de manejo de errores
+import { CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
@@ -84,7 +87,7 @@ export function BaseCard({
 					className={cn('absolute inset-0 backface-hidden', isFlipped ? 'pointer-events-none' : 'pointer-events-auto')}
 				>
 					{/* Core Layer - Se incluye solo si está habilitado */}
-					{enableCore && <CoreLayer config={coreConfig} />}
+					{enableCore && <CoreLayer entityData={{ id: 'core-layer', name: 'Core Layer' }} config={coreConfig} />}
 
 					{/* Contenido principal de la tarjeta */}
 					{children}
@@ -98,7 +101,7 @@ export function BaseCard({
 							!isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
 						)}
 					>
-						<BacksideLayer content={backsideContent} options={backsideOptions} />
+						<div className="backside-content p-4">{backsideContent}</div>
 					</div>
 				)}
 			</div>
@@ -120,13 +123,15 @@ export interface EntityCardProps {
 	imageStyle?: ImageGridStyle;
 	backsideContent?: React.ReactNode;
 	design?: DesignSystemType;
-	animation?: AnimationSystem;
-	backside?: BacksideOptions;
+	animation?: AnimationSystemType;
+	backside?: BacksideOptionsType;
 	// Flags para habilitar/deshabilitar módulos
 	enableLayers?: boolean;
 	enableDesign?: boolean;
 	enableAnimation?: boolean;
 	enableBackside?: boolean;
+	// Manejadores de eventos
+	onError?: (error: CardError) => void;
 }
 
 /**
@@ -154,74 +159,165 @@ export function EntityCard({
 	enableDesign = true,
 	enableAnimation = true,
 	enableBackside = false,
+	// Manejadores de eventos
+	onError,
 }: EntityCardProps) {
 	// Estado para el flip de la tarjeta
 	const [isFlipped, setIsFlipped] = useState(false);
+	const [error, setError] = useState<CardError | null>(null);
 
-	// Incorporar hooks de los módulos
-	const { designSystem } = useDesignSystem({ designSystem: design || options.designSystem });
-	const { animationSystem } = useAnimationSystem({ animationSystem: animation || options.animation });
-	const { colorSystem } = useColors({ colors: options.colors });
-	const { layersSystem } = useLayersSystem({ layers: options.layers });
+	// Estados para interacción con capas
+	const [isHovered, setIsHovered] = useState(false);
+	const [isExploded, setIsExploded] = useState(false);
+	const [activeLayer, setActiveLayer] = useState<string | null>(null);
+	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-	// Determinar clases CSS basadas en los sistemas modulares
-	const designClasses = enableDesign ? designSystem.getClasses() : '';
-	const animationClasses = enableAnimation ? animationSystem.getClasses(isFlipped) : '';
-	const colorClasses = colorSystem.getClasses();
+	// Referencia al contenedor para calcular posición del mouse
+	const containerRef = useRef<HTMLDivElement>(null);
 
-	// Función para voltear la tarjeta
-	const handleFlip = () => {
-		if (enableBackside) {
-			setIsFlipped(!isFlipped);
+	// Crear manejador de errores
+	const errorHandler = createErrorHandler({
+		onError: (err) => {
+			setError(err);
+			onError?.(err);
+		},
+		logErrors: true,
+	});
+
+	// Incorporar hooks de los módulos con manejo de errores
+	try {
+		// Inicializar hooks con valores predeterminados o proporcionados
+		const designSystemHook = useDesignSystem(design || {});
+		const animationSystemHook = useAnimationSystem(animation || {});
+		const colorsHook = useColors({
+			initialOptions: options.colors
+				? { colorPalette: typeof options.colors === 'string' ? options.colors : undefined }
+				: {},
+		});
+		const layersHook = useLayersSystem({ layers: options.layers });
+
+		// Función para reintentar después de un error
+		const handleRetry = () => {
+			setError(null);
+		};
+
+		// Determinar clases CSS basadas en los sistemas modulares
+		const designClasses = enableDesign ? cn('design-system') : '';
+		const animationClasses = enableAnimation ? cn('animation-system') : '';
+		const colorClasses = cn('color-system');
+
+		// Función para voltear la tarjeta
+		const handleFlip = () => {
+			if (enableBackside) {
+				setIsFlipped(!isFlipped);
+			}
+		};
+
+		// Manejar eventos de teclado para accesibilidad
+		const handleKeyDown = (e: React.KeyboardEvent) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				handleFlip();
+				e.preventDefault();
+			}
+		};
+
+		// Manejar eventos de mouse para interacción con capas
+		const handleMouseEnter = () => {
+			setIsHovered(true);
+		};
+
+		const handleMouseLeave = () => {
+			setIsHovered(false);
+		};
+
+		const handleMouseMove = (e: React.MouseEvent) => {
+			if (containerRef.current) {
+				const rect = containerRef.current.getBoundingClientRect();
+				setMousePosition({
+					x: e.clientX - rect.left,
+					y: e.clientY - rect.top,
+				});
+			}
+		};
+
+		// Función para calcular transformación de capas en modo explotado
+		const getExplodeLayerTransform = (index: number): React.CSSProperties => {
+			if (!isExploded) return {};
+
+			const distance = 20; // Distancia base entre capas
+			const offset = index * distance;
+
+			return {
+				transform: `translateZ(${offset}px)`,
+				zIndex: index * 10,
+			};
+		};
+
+		// Sistema de capas para renderizado
+		const layers = enableLayers && layersHook.layersSystem ? layersHook.layersSystem.getLayers() : [];
+
+		// Si hay un error, mostrar mensaje
+		if (error) {
+			return <CardErrorDisplay error={error} onRetry={handleRetry} />;
 		}
-	};
 
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			handleFlip();
-			e.preventDefault();
-		}
-	};
-
-	// Sistema de capas para renderizado
-	const layers = enableLayers && layersSystem ? layersSystem.getLayers() : [];
-
-	return (
-		<CardContainer
-			id={id}
-			className={cn('entity-card', designClasses, animationClasses, colorClasses, className)}
-			onClick={handleFlip}
-			onKeyDown={handleKeyDown}
-			aria-label={title}
-			options={options}
-			flipped={isFlipped}
-			enableBackside={enableBackside}
-		>
-			{/* Cara Frontal */}
-			<div className="entity-card-front">
-				{/* Sistema de capas */}
-				{enableLayers && layers.length > 0 && <LayerRenderer layers={layers} context={{ options, isFlipped }} />}
-
-				{/* Contenido de la tarjeta usando el componente separado */}
-				<EntityCardContent
-					title={title}
-					description={description}
-					image={image}
-					imageLayout={imageLayout}
-					imageStyle={imageStyle}
-					options={options}
+		return (
+			<div
+				ref={containerRef}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+				onMouseMove={handleMouseMove}
+				className="entity-card-container"
+			>
+				<button
+					type="button"
+					className={cn('entity-card', designClasses, animationClasses, colorClasses, className)}
+					onClick={handleFlip}
+					onKeyDown={handleKeyDown}
+					aria-label={typeof title === 'string' ? title : 'Tarjeta de entidad'}
 				>
-					{children}
-				</EntityCardContent>
-			</div>
+					{/* Cara Frontal */}
+					<div className="entity-card-front">
+						{/* Sistema de capas */}
+						{enableLayers && layers.length > 0 && (
+							<LayerRenderer
+								isExploded={isExploded}
+								isHovered={isHovered}
+								mousePosition={mousePosition}
+								activeLayer={activeLayer}
+								getExplodeLayerTransform={getExplodeLayerTransform}
+								entityType={options.entityType || 'default'}
+								entityId={id}
+								configs={options.layerConfigs}
+							/>
+						)}
 
-			{/* Cara Posterior */}
-			{enableBackside && (
-				<div className="entity-card-back">
-					<BacksideLayer content={backsideContent} options={backside || options.backside} />
-				</div>
-			)}
-		</CardContainer>
-	);
+						{/* Contenido de la tarjeta usando el componente separado */}
+						<EntityCardContent
+							title={title}
+							description={description}
+							image={typeof image === 'string' ? image : undefined}
+							images={Array.isArray(image) ? image : []}
+							imageLayout={imageLayout}
+							imageStyle={imageStyle}
+							options={options}
+						>
+							{children}
+						</EntityCardContent>
+					</div>
+
+					{/* Cara Posterior */}
+					{enableBackside && (
+						<div className="entity-card-back">
+							<div className="backside-content">{backsideContent}</div>
+						</div>
+					)}
+				</button>
+			</div>
+		);
+	} catch (err) {
+		// Capturar cualquier error durante el renderizado
+		const cardError = errorHandler.handleError(err);
+		return <CardErrorDisplay error={cardError} onRetry={() => setError(null)} />;
+	}
 }

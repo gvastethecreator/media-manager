@@ -43,7 +43,7 @@ interface LegacyCardOptions {
  * Convierte las opciones de animación del sistema antiguo al nuevo sistema
  */
 export function legacyToAnimationSystem(legacyOptions: LegacyCardOptions): AnimationSystem {
-	const animation = legacyOptions.animation || {};
+	const animation = (legacyOptions.animation || {}) as Partial<LegacyAnimationOptions>;
 
 	return {
 		// Configuración general
@@ -61,7 +61,7 @@ export function legacyToAnimationSystem(legacyOptions: LegacyCardOptions): Anima
 		// Efectos de hover
 		hoverEffect: animation.hoverEffect !== 'none',
 		hoverScale: animation.hoverScale || 1.05,
-		hoverRotate: animation.hoverRotation > 0,
+		hoverRotate: animation.hoverRotation ? animation.hoverRotation > 0 : false,
 		hoverLift: animation.hoverEffect === 'lift' || animation.hoverEffect === 'scale-and-lift',
 		liftHeight: 5,
 		maxRotation: animation.hoverRotation || 5,

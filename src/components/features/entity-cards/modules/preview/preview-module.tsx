@@ -1,8 +1,5 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { Eye, Info, LayoutGrid, Maximize2, RotateCw, ZoomIn } from 'lucide-react';
 import {
 	FormGroup,
 	FormInput,
@@ -12,7 +9,10 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '../../../settings/panels/shared';
+} from '@/components/features/entity-cards/settings/panels/shared';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Eye, Info, LayoutGrid, Maximize2, RotateCw, ZoomIn } from 'lucide-react';
 import type { PreviewModuleProps } from './types';
 import { usePreview } from './use-preview';
 
@@ -40,7 +40,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Tamaño de Vista Previa"
 							description="Selecciona el tamaño de las tarjetas en la vista previa"
 							value={options.size}
-							onValueChange={(value) => updateOption('size', value)}
+							onValueChange={(value: string) => updateOption('size', value)}
 							options={sizeOptions}
 							disabled={disabled}
 							icon={<Maximize2 className="h-4 w-4" />}
@@ -55,20 +55,16 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 									label="Ancho personalizado"
 									type="number"
 									value={options.customWidth?.toString() || '300'}
-									onChange={(value) => updateOption('customWidth', Number.parseInt(value, 10))}
+									onChange={(value: string) => updateOption('customWidth', Number.parseInt(value, 10))}
 									disabled={disabled}
-									min="100"
-									max="1000"
 								/>
 								<FormInput
 									id="custom-height"
 									label="Alto personalizado"
 									type="number"
 									value={options.customHeight?.toString() || '400'}
-									onChange={(value) => updateOption('customHeight', Number.parseInt(value, 10))}
+									onChange={(value: string) => updateOption('customHeight', Number.parseInt(value, 10))}
 									disabled={disabled}
-									min="100"
-									max="1000"
 								/>
 							</FormRow>
 						</FormGroup>
@@ -82,7 +78,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Mostrar Controles"
 							description="Muestra los controles de navegación en la vista previa"
 							checked={options.showControls}
-							onCheckedChange={(checked) => updateOption('showControls', checked)}
+							onCheckedChange={(checked: boolean) => updateOption('showControls', checked)}
 							disabled={disabled}
 							icon={<LayoutGrid className="h-4 w-4" />}
 						/>
@@ -92,7 +88,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Mostrar Información"
 							description="Muestra información adicional sobre la tarjeta"
 							checked={options.showInfo}
-							onCheckedChange={(checked) => updateOption('showInfo', checked)}
+							onCheckedChange={(checked: boolean) => updateOption('showInfo', checked)}
 							disabled={disabled}
 							icon={<Info className="h-4 w-4" />}
 						/>
@@ -104,7 +100,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Mostrar Borde"
 							description="Muestra un borde alrededor de la tarjeta"
 							checked={options.showBorder}
-							onCheckedChange={(checked) => updateOption('showBorder', checked)}
+							onCheckedChange={(checked: boolean) => updateOption('showBorder', checked)}
 							disabled={disabled}
 						/>
 					</FormGroup>
@@ -117,7 +113,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Habilitar Interacción"
 							description="Permite interactuar con la tarjeta en la vista previa"
 							checked={options.enableInteraction}
-							onCheckedChange={(checked) => updateOption('enableInteraction', checked)}
+							onCheckedChange={(checked: boolean) => updateOption('enableInteraction', checked)}
 							disabled={disabled}
 							icon={<Eye className="h-4 w-4" />}
 						/>
@@ -127,7 +123,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Rotación Automática"
 							description="Rota automáticamente la tarjeta en la vista previa"
 							checked={options.autoRotate}
-							onCheckedChange={(checked) => updateOption('autoRotate', checked)}
+							onCheckedChange={(checked: boolean) => updateOption('autoRotate', checked)}
 							disabled={disabled}
 							icon={<RotateCw className="h-4 w-4" />}
 						/>
@@ -140,7 +136,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 								label="Velocidad de Rotación"
 								description="Ajusta la velocidad de rotación automática"
 								value={options.rotationSpeed || 1}
-								onValueChange={(value) => updateOption('rotationSpeed', value)}
+								onValueChange={(value: number) => updateOption('rotationSpeed', value)}
 								min={0.5}
 								max={5}
 								step={0.5}
@@ -155,7 +151,7 @@ export function PreviewModule({ initialOptions = {}, onChange, disabled = false,
 							label="Nivel de Zoom"
 							description="Ajusta el nivel de zoom inicial"
 							value={options.zoomLevel || 1}
-							onValueChange={(value) => updateOption('zoomLevel', value)}
+							onValueChange={(value: number) => updateOption('zoomLevel', value)}
 							min={0.5}
 							max={2}
 							step={0.1}

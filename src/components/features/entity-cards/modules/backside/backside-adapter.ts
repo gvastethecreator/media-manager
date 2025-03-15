@@ -10,7 +10,7 @@ import type { BacksideOptions } from './types';
  */
 export function legacyToBacksideSystem(options: CardOptions): { options: CardOptions; backside: BacksideOptions } {
 	// Extraer las opciones de backside o crear un objeto vacío si no existen
-	const backside = options.backside || {};
+	const backside = (options.backside || {}) as Partial<BacksideOptions>;
 
 	// Devolver el formato esperado por el BacksidePanel
 	return {
@@ -23,20 +23,27 @@ export function legacyToBacksideSystem(options: CardOptions): { options: CardOpt
 			opacity: backside.opacity ?? 0.95,
 			blurBackground: backside.blurBackground ?? true,
 			blurAmount: backside.blurAmount ?? 10,
+			// Propiedades para el contenido
 			showAttributes: backside.showAttributes ?? true,
 			showDescription: backside.showDescription ?? true,
 			showStats: backside.showStats ?? true,
 			showMetadata: backside.showMetadata ?? true,
 			showRelations: backside.showRelations ?? false,
 			maxDescriptionLength: backside.maxDescriptionLength ?? 300,
+			// Propiedades para la animación
+			animation: backside.animation ?? 'flip',
+			animationDuration: backside.animationDuration ?? 600,
 			flipAnimation: backside.flipAnimation ?? 'rotate',
 			flipDuration: backside.flipDuration ?? 600,
 			enableAutoFlip: backside.enableAutoFlip ?? false,
 			autoFlipDelay: backside.autoFlipDelay ?? 3000,
 			flipTrigger: backside.flipTrigger ?? 'click',
+			// Propiedades para el estilo
 			headingStyle: backside.headingStyle ?? 'default',
 			infoStyle: backside.infoStyle ?? 'default',
 			separatorStyle: backside.separatorStyle ?? 'line',
+			// Propiedades adicionales
+			showBackContent: backside.showBackContent ?? true,
 		},
 	};
 }

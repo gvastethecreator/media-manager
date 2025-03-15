@@ -5,7 +5,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { FolderContentProps } from '@/components/views/base';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 

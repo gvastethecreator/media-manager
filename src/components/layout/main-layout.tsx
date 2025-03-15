@@ -1,9 +1,8 @@
 'use client';
 
-import { getNavigationData } from '@/app/actions/navigation/nav.actions';
+import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
-import { NavPanel } from '@/components/panels/nav/nav-panel';
-import { RightPanel } from '@/components/panels/right-panel';
+import { NavPanel } from '@/components/navigation/navigation-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizablePanel, ResizablePanelGroup, ResizablePanelHandle } from '@/components/ui/resizable';
 import { ViewContainer } from '@/components/views/view-container';

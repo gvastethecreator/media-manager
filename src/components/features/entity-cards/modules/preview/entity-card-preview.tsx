@@ -1,16 +1,10 @@
 'use client';
 
-import { type RandomImage, getRandomImagesForEntity } from '@/app/actions/images/images-random.action';
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
-import { BaseCard } from '@/components/features/entity-cards/base/base-card';
-import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
-import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card-layout';
 import { CharacterCard } from '@/components/features/entity-cards/layouts/character-card-layout';
 import { CollectionCard } from '@/components/features/entity-cards/layouts/collection-card-layout';
 import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card-layout';
-import { FolderCard } from '@/components/features/entity-cards/layouts/folder-card-layout';
-import { ImageGrid } from '@/components/features/entity-cards/layouts/image-grid';
+import { FolderCardLayout as FolderCard } from '@/components/features/entity-cards/layouts/folder-card-layout';
 import { NoteCard } from '@/components/features/entity-cards/layouts/note-card-layout';
 import { PlaceCard } from '@/components/features/entity-cards/layouts/place-card-layout';
 import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card-layout';
@@ -18,33 +12,8 @@ import { TagCard } from '@/components/features/entity-cards/layouts/tag-card-lay
 import { WorldItemCard } from '@/components/features/entity-cards/layouts/world-item-card-layout';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
-import {
-	BadgeCheck,
-	Info as BadgeInfo,
-	Bookmark,
-	CalendarClock,
-	Clock,
-	FolderIcon,
-	HardDrive,
-	Image as ImageIcon,
-	Palette,
-	RefreshCcw,
-	Settings,
-	Settings2,
-	Sparkles,
-	Star,
-	Tag as TagIcon,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import Image from 'next/image';
-import * as React from 'react';
-import { adaptSettingsToBaseOptions } from '../../base/card-adapter';
+import React from 'react';
 
 // Mapeo de tipos de entidad a sus componentes de layout
 const ENTITY_LAYOUTS = {
@@ -198,6 +167,14 @@ export function EntityCardPreview({ cardOptions, rarity, texture, entityType, cl
 		if (!('_count' in mockData)) {
 			(mockData as Record<string, unknown>)._count = { images: mockImages.length };
 		}
+
+		// Añadir propiedades adicionales necesarias para AlbumWithStats
+		if (entityType === 'card-album') {
+			(mockData as Record<string, unknown>).totalSize = 1024 * 1024 * 50; // 50MB
+			(mockData as Record<string, unknown>).lastUpdated = new Date();
+			(mockData as Record<string, unknown>).rarity = 'common';
+			(mockData as Record<string, unknown>).texture = 'standard';
+		}
 	}
 
 	if (!LayoutComponent) {
@@ -217,18 +194,40 @@ export function EntityCardPreview({ cardOptions, rarity, texture, entityType, cl
 		imageGridLayout: cardOptions.imageGridLayout || 'quad',
 		imageGridGap: cardOptions.imageGridGap || 4,
 		imageGridStyle: cardOptions.imageGridStyle || 'standard',
+		// Asegurar que borderOptions.width sea un número definido para evitar conflictos de tipo
+		borderOptions: {
+			...(cardOptions.borderOptions || {}),
+			width: (cardOptions.borderOptions?.width as number) || 2,
+			pattern: (cardOptions.borderOptions?.pattern as any) || 'solid',
+			animationType: (cardOptions.borderOptions?.animationType as any) || 'none',
+			animation: {
+				type: (cardOptions.borderOptions?.animation?.type as any) || 'none',
+				duration: cardOptions.borderOptions?.animation?.duration || 1000,
+				timing: (cardOptions.borderOptions?.animation?.timing as any) || 'linear',
+				iteration: (cardOptions.borderOptions?.animation?.iteration as any) || 'infinite',
+			},
+		},
+		// Asegurar que designSystem.shadowStyle sea compatible
+		designSystem: {
+			...(cardOptions.designSystem || {}),
+			// Convertir 'flat' a 'soft' para evitar conflictos de tipo
+			shadowStyle:
+				cardOptions.designSystem?.shadowStyle === 'flat' ? 'soft' : cardOptions.designSystem?.shadowStyle || 'soft',
+		},
 	};
 
+	// Usar un enfoque más simple con casting para evitar problemas de tipo
 	return (
 		<div className={cn('relative w-full max-w-[100%]', className)}>
-			<LayoutComponent
-				data={mockData}
-				isPreview={true}
-				options={enhancedOptions}
-				rarity={rarity}
-				texture={texture}
-				className="w-full border border-border shadow-md max-h-[350px]"
-			/>
+			{/* Usar casting a any para evitar errores de tipo en la vista previa */}
+			{React.createElement(LayoutComponent as any, {
+				...(entityType === 'card-tag' ? { tag: mockData } : { data: mockData }),
+				isPreview: true,
+				options: enhancedOptions,
+				rarity,
+				texture,
+				className: 'w-full border border-border shadow-md max-h-[350px]',
+			})}
 		</div>
 	);
 }

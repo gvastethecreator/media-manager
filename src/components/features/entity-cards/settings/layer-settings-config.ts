@@ -1,7 +1,8 @@
+import type * as React from 'react';
 import type { BaseLayerConfig } from '../layers/layer-plugin-system';
 
 // Configuración predeterminada para el sistema de capas
-export const DEFAULT_LAYER_SYSTEM = {
+export const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
 	order: [
 		'background',
 		'texture',

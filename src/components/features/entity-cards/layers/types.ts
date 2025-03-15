@@ -1,21 +1,111 @@
 /**
  * 🌈 Tipos para el módulo de capas
  */
-import type { SettingsPanelProps } from '../../types';
 
 /**
- * Props para el panel de configuración de capas
+ * Tipos centralizados para el sistema de capas
+ * @module EntityCards/Layers/Types
  */
-export interface LayersSettingsPanelProps extends SettingsPanelProps {
-	/**
-	 * Tipo de entidad para la que se están configurando las capas
-	 */
-	entityType: string;
+import type { CardOptions } from '../types/card-settings-types';
+import type { ActionResponse, BaseLayerConfig } from '../types/central-types';
 
-	/**
-	 * ID opcional de la entidad para la que se están configurando las capas
-	 */
+/**
+ * Funciones de servidor para una capa
+ */
+export interface LayerServerActions<T extends BaseLayerConfig = BaseLayerConfig> {
+	getConfig: (entityType: string, entityId?: string) => Promise<ActionResponse>;
+	updateConfig: (entityType: string, config: T, entityId?: string) => Promise<ActionResponse>;
+	deleteConfig: (entityType: string, entityId?: string) => Promise<ActionResponse>;
+}
+
+/**
+ * Propiedades comunes para todos los componentes de capa
+ */
+export interface CommonLayerProps {
+	entityType: string;
 	entityId?: string;
+	isExploded?: boolean;
+	isHovered?: boolean;
+	activeLayer?: string | null;
+}
+
+/**
+ * Función para transformar una capa en la vista explotada
+ */
+export type ExplodeLayerTransformFunction = (index: number) => React.CSSProperties;
+
+/**
+ * Propiedades para el panel de configuración de capas
+ */
+export interface LayersSettingsPanelProps {
+	options: CardOptions;
+	onOptionsChange: (options: CardOptions) => void;
+	entityType: string;
+	entityId?: string;
+	className?: string;
+	showPresets?: boolean;
+}
+
+/**
+ * Opciones de configuración global para capas
+ */
+export interface LayersGlobalOptions {
+	renderStrategy: 'stacked' | 'composed' | 'dynamic';
+	compositionMode: 'normal' | 'overlay' | 'screen' | 'multiply';
+	enableHoverEffects: boolean;
+	enableActiveLayerHighlight: boolean;
+	explodeSpacing: number;
+}
+
+/**
+ * Información de una capa para el selector
+ */
+export interface LayerInfo {
+	id: string;
+	name: string;
+	description?: string;
+	icon?: React.ReactNode;
+	category?: string;
+	isEnabled: boolean;
+	layerIndex: number;
+}
+
+/**
+ * Estado del sistema de capas
+ */
+export interface LayersSystemState {
+	activeLayers: string[];
+	explodedView: boolean;
+	selectedLayer: string | null;
+	globalOptions: LayersGlobalOptions;
+	layerConfigs: Record<string, BaseLayerConfig>;
+}
+
+/**
+ * Evento de cambio de capa
+ */
+export interface LayerChangeEvent {
+	layerId: string;
+	enabled: boolean;
+	config: BaseLayerConfig;
+}
+
+/**
+ * Resultado del hook useLayersSystem
+ */
+export interface LayersSystemResult {
+	layersSystem: {
+		isReady: boolean;
+		getLayers: () => LayerInfo[];
+		getLayerConfig: (layerId: string) => BaseLayerConfig | null;
+		updateLayerConfig: (layerId: string, config: Partial<BaseLayerConfig>) => void;
+		enableLayer: (layerId: string, enabled: boolean) => void;
+		setActiveLayer: (layerId: string | null) => void;
+		toggleExplodedView: () => void;
+		isExploded: boolean;
+		activeLayer: string | null;
+		reset: () => void;
+	};
 }
 
 /**

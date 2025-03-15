@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { BacksidePanel, backsideSystemToLegacy, legacyToBacksideSystem } from '../../modules/backside';
-import type { BacksideOptions } from '../../modules/backside/types';
-import type { CardOptions } from '../types';
+import {
+	BacksidePanel,
+	backsideSystemToLegacy,
+	legacyToBacksideSystem,
+} from '@/components/features/entity-cards/modules/backside';
+import type { BacksideOptions } from '@/components/features/entity-cards/modules/backside/types';
+import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 
 /**
  * @deprecated Use BacksidePanel from @/components/features/entity-cards/modules/backside instead
@@ -18,8 +21,8 @@ export function BacksideSettings({
 	onChange: (options: CardOptions) => void;
 	disabled?: boolean;
 }) {
-	// Convertir opciones del formato antiguo al nuevo sistema
-	const backsideSystem = legacyToBacksideSystem(options);
+	// Convertir opciones del formato antiguo al nuevo sistema usando un cast a any
+	const backsideSystem = legacyToBacksideSystem(options as any);
 
 	// Manejar cambios en el sistema de backside
 	const handleBacksideChange = (newBacksideSystem: BacksideOptions) => {
@@ -30,8 +33,8 @@ export function BacksideSettings({
 		onChange({
 			...options,
 			backside: legacyOptions,
-		});
+		} as any);
 	};
 
-	return <BacksidePanel options={backsideSystem} onChange={handleBacksideChange} disabled={disabled} />;
+	return <BacksidePanel options={backsideSystem} onChange={handleBacksideChange as any} disabled={disabled} />;
 }

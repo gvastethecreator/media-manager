@@ -24,6 +24,8 @@ export function useBacksideSystem({ options, onChange, disabled = false }: Backs
 			showMetadata: false,
 			showRelations: false,
 			maxDescriptionLength: 250,
+			animation: 'flip',
+			animationDuration: 600,
 			flipAnimation: 'flip',
 			flipDuration: 0.6,
 			enableAutoFlip: false,
@@ -32,6 +34,7 @@ export function useBacksideSystem({ options, onChange, disabled = false }: Backs
 			headingStyle: 'large',
 			infoStyle: 'compact',
 			separatorStyle: 'gradient',
+			showBackContent: true,
 		}
 	);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Cpu, Layers3, MousePointerSquare, Smile, SpeakerIcon } from 'lucide-react';
+import { Cpu, Layers3, MousePointer, Smile, SpeakerIcon } from 'lucide-react';
 import {
 	FormGroup,
 	FormRow,
@@ -8,7 +8,7 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '../../../../../settings/panels/shared';
+} from '../../../settings/panels/shared';
 import {
 	type CoreOptions,
 	INTERACTIVE_MODE_OPTIONS,
@@ -44,7 +44,7 @@ export const InteractivitySection = ({ coreOptions, handleCoreChange, disabled }
 						value={coreOptions.interactiveMode || 'hover'}
 						onValueChange={(value) => handleCoreChange('interactiveMode', value)}
 						disabled={disabled}
-						icon={<MousePointerSquare className="h-3.5 w-3.5 text-muted-foreground" />}
+						icon={<MousePointer className="h-3.5 w-3.5 text-muted-foreground" />}
 						options={INTERACTIVE_MODE_OPTIONS}
 					/>
 					<FormSlider

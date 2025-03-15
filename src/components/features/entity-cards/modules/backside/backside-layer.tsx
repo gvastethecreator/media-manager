@@ -5,41 +5,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';
-
-export interface BacksideConfig {
-	enabled?: boolean;
-	layoutType?: 'standard' | 'tabbed' | 'grid' | 'minimal';
-	colorMode?: 'inherit' | 'custom' | 'reverse' | 'contrast';
-	customColor?: string;
-	opacity?: number;
-	blurBackground?: boolean;
-	blurAmount?: number;
-
-	// Contenido
-	showAttributes?: boolean;
-	showDescription?: boolean;
-	showStats?: boolean;
-	showMetadata?: boolean;
-	showRelations?: boolean;
-	attributesConfig?: Record<string, unknown>;
-	maxDescriptionLength?: number;
-
-	// Interacción
-	flipAnimation?: 'rotate' | 'fade' | 'flip3d' | 'slide';
-	flipDuration?: number;
-	enableAutoFlip?: boolean;
-	autoFlipDelay?: number;
-	flipTrigger?: 'click' | 'hover' | 'doubleClick';
-
-	// Propiedades avanzadas
-	customBackgroundImage?: string;
-	customTemplate?: string;
-
-	// Estilo de UI
-	headingStyle?: 'default' | 'large' | 'subtle' | 'accent';
-	infoStyle?: 'default' | 'pills' | 'cards' | 'minimal';
-	separatorStyle?: 'line' | 'dotted' | 'gradient' | 'none';
-}
+import type { BacksideOptions } from './types';
 
 export interface EntityData {
 	id: string;
@@ -58,14 +24,14 @@ export interface EntityData {
 }
 
 export interface BacksideLayerProps {
-	config: BacksideConfig;
+	config: BacksideOptions;
 	entityData: EntityData;
 	isFlipped: boolean;
 	onFlip: () => void;
 	className?: string;
 }
 
-const DEFAULT_CONFIG: BacksideConfig = {
+const DEFAULT_CONFIG: BacksideOptions = {
 	enabled: true,
 	layoutType: 'standard',
 	colorMode: 'inherit',
@@ -78,12 +44,17 @@ const DEFAULT_CONFIG: BacksideConfig = {
 	showMetadata: true,
 	showRelations: false,
 	maxDescriptionLength: 300,
+	animation: 'flip',
+	animationDuration: 600,
 	flipAnimation: 'rotate',
-	flipDuration: 600,
+	flipDuration: 0.6,
+	enableAutoFlip: false,
+	autoFlipDelay: 3,
 	flipTrigger: 'click',
 	headingStyle: 'default',
 	infoStyle: 'default',
 	separatorStyle: 'line',
+	showBackContent: true,
 };
 
 export function BacksideLayer({ config, entityData, isFlipped, onFlip, className }: BacksideLayerProps) {
@@ -120,12 +91,6 @@ export function BacksideLayer({ config, entityData, isFlipped, onFlip, className
 
 		if (mergedConfig.blurBackground) {
 			style.backdropFilter = `blur(${mergedConfig.blurAmount}px)`;
-		}
-
-		if (mergedConfig.customBackgroundImage) {
-			style.backgroundImage = `url(${mergedConfig.customBackgroundImage})`;
-			style.backgroundSize = 'cover';
-			style.backgroundPosition = 'center';
 		}
 
 		return style;
@@ -280,12 +245,17 @@ export function BacksideLayer({ config, entityData, isFlipped, onFlip, className
 		}
 	};
 
+	// Calcular la duración de la animación en segundos
+	const animationDuration = mergedConfig.animationDuration
+		? mergedConfig.animationDuration / 1000
+		: mergedConfig.flipDuration || 0.6;
+
 	return (
 		<motion.div
 			className={cn('absolute inset-0 z-10 flex items-center justify-center', className)}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			transition={{ duration: mergedConfig.flipDuration ? mergedConfig.flipDuration / 1000 : 0.6 }}
+			transition={{ duration: animationDuration }}
 		>
 			<Card
 				className="w-full h-full overflow-auto"

@@ -17,7 +17,7 @@ function adaptCardOptionsForPreview(options: CardOptions): Partial<CardOptions> 
 			opacity: 0.2,
 			spacing: 4,
 			direction: 'horizontal',
-			animate: true,
+			animated: true,
 		},
 		grainOptions: options.grainOptions || {
 			intensity: 0.2,
@@ -45,7 +45,17 @@ interface EntityPreviewAdapterProps {
 	texture?: TextureConfig | null;
 	showInfo?: boolean;
 	className?: string;
-	entityType?: string;
+	entityType?:
+		| 'card-album'
+		| 'card-collection'
+		| 'card-tag'
+		| 'card-character'
+		| 'card-world-item'
+		| 'card-place'
+		| 'card-concept'
+		| 'card-prompt'
+		| 'card-note'
+		| 'card-folder';
 }
 
 export function EntityPreviewAdapter({
@@ -53,7 +63,7 @@ export function EntityPreviewAdapter({
 	rarity,
 	texture,
 	showInfo = true,
-	entityType = 'album',
+	entityType = 'card-album',
 	className,
 }: EntityPreviewAdapterProps) {
 	// Adaptamos las opciones para garantizar la compatibilidad
@@ -64,7 +74,6 @@ export function EntityPreviewAdapter({
 			cardOptions={adaptedOptions as CardOptions}
 			rarity={rarity}
 			texture={texture}
-			showInfo={showInfo}
 			entityType={entityType}
 			className={className}
 		/>

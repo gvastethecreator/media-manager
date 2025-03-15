@@ -3,7 +3,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { useNavigation } from '@/lib/utils/navigation.utils';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, FileIcon, FileText, FolderIcon, Hash, ImageIcon, InfoIcon, MapPin } from 'lucide-react';
@@ -30,7 +30,7 @@ interface EntityWithDynamicProperties {
  * Se mostrará a la derecha de los breadcrumbs con un estilo más sutil
  */
 export function EntityDetails() {
-	const { currentView, getCurrentItem } = useNavigation();
+	const { currentView, getCurrentItem } = useNavigationStore();
 	const currentItem = getCurrentItem() as EntityWithDynamicProperties | undefined;
 
 	// Si no hay elemento actual o no es una vista de contenido, no mostrar nada

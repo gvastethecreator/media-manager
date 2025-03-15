@@ -5,39 +5,39 @@ import { generateRarityConfig } from '@/components/features/entity-cards/entity-
 import type { AlbumFormData } from '@/components/features/entity-cards/layouts/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Album as AlbumIcon, PencilIcon, Trash2 } from 'lucide-react';
-import { Calendar, Images, Star } from 'lucide-react';
+import { Album as AlbumIcon, Calendar, Images, PencilIcon, Star, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import * as React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
-import type { CardDesignPreset, CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
+import type { BaseCardRarityConfig, BaseCardTextureConfig } from '../types';
 
 // Asegurar que ambos tipos tienen las propiedades necesarias
-type CardData =
+export type CardData =
 	| (AlbumWithStats & {
 			_count?: { images: number };
 			totalSize?: number;
 			coverImage?: string;
 			recentImages?: string[];
+			rating?: number; // Hacemos rating opcional
 	  })
 	| AlbumFormData;
 
-interface AlbumCardProps {
+export interface AlbumCardProps {
 	data: CardData;
 	isPreview?: boolean;
-	onEdit?: (id: string) => void;
-	onDelete?: (id: string) => void;
+	onEdit?: (id: string, e?: React.MouseEvent) => void;
+	onDelete?: (id: string, e?: React.MouseEvent) => void;
 	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	className?: string;
 	showVisualizationConfig?: boolean;
-	options?: Partial<CardOptions>;
-	rarity?: RarityConfig | null;
-	texture?: TextureConfig | null;
+	options?: any; // Usamos any para evitar problemas de tipo
+	rarity?: BaseCardRarityConfig | null;
+	texture?: BaseCardTextureConfig | null;
 }
 
-const DEFAULT_ALBUM_OPTIONS: Partial<CardOptions> = {
+const DEFAULT_ALBUM_OPTIONS: any = {
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
@@ -47,7 +47,7 @@ const DEFAULT_ALBUM_OPTIONS: Partial<CardOptions> = {
 
 	// Sistema de diseño específico para álbumes
 	designSystem: {
-		preset: 'album' as CardDesignPreset,
+		preset: 'album',
 		variant: 'default',
 		aspectRatio: '4/5',
 		cornerStyle: 'rounded',
@@ -115,7 +115,7 @@ export function AlbumCard({
 	texture,
 }: AlbumCardProps) {
 	const [configOpen, setConfigOpen] = React.useState(false);
-	const [cardOptions, setCardOptions] = React.useState<Partial<CardOptions>>(
+	const [cardOptions, setCardOptions] = React.useState<any>(
 		options || {
 			...DEFAULT_ALBUM_OPTIONS,
 			enable3DEffect: true,
@@ -186,13 +186,28 @@ export function AlbumCard({
 	// Obtener la URL de la imagen de portada
 	const coverImageUrl = 'coverImage' in data && data.coverImage ? data.coverImage : null;
 
+	// Crear funciones de manejo de eventos fuera del JSX
+	const handleEdit = onEdit
+		? (e: React.MouseEvent<HTMLButtonElement>) => {
+				e.stopPropagation();
+				if (data.id) onEdit(data.id as string, e);
+			}
+		: undefined;
+
+	const handleDelete = onDelete
+		? (e: React.MouseEvent<HTMLButtonElement>) => {
+				e.stopPropagation();
+				if (data.id) onDelete(data.id as string, e);
+			}
+		: undefined;
+
 	return (
 		<>
 			{configOpen && (
 				<VisualizationConfig
 					onClose={() => setConfigOpen(false)}
 					options={cardOptions}
-					onOptionsChange={setCardOptions}
+					onOptionsChange={(newOptions: any) => setCardOptions(newOptions)}
 					entityId={data.id as string}
 					entityType="album"
 				/>
@@ -253,26 +268,12 @@ export function AlbumCard({
 						{!isPreview && (
 							<div className="mt-3 flex gap-2 pointer-events-auto">
 								{onEdit && (
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={(e) => {
-											e.stopPropagation();
-											onEdit(data.id as string);
-										}}
-									>
+									<Button size="sm" variant="outline" onClick={handleEdit}>
 										<PencilIcon className="h-3.5 w-3.5 mr-1" /> Editar
 									</Button>
 								)}
 								{onDelete && (
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={(e) => {
-											e.stopPropagation();
-											onDelete(data.id as string);
-										}}
-									>
+									<Button size="sm" variant="outline" onClick={handleDelete}>
 										<Trash2 className="h-3.5 w-3.5 mr-1" /> Eliminar
 									</Button>
 								)}

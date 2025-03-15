@@ -1,12 +1,11 @@
 'use client';
 
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useNavigation } from '@/lib/utils/navigation.utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
 import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
@@ -16,7 +15,6 @@ import {
 	Box,
 	Calendar,
 	Camera,
-	ChevronRight,
 	Clock,
 	Copy,
 	Download,
@@ -41,15 +39,14 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
-import { ViewBreadcrumbs } from './breadcrumbs';
+import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 import { EntityDetails } from './entity-details';
 
 export function ViewToolbar() {
-	const { currentView } = useNavigationStore();
+	const { currentView, getCurrentItem } = useNavigationStore();
 	const { viewMode, setViewMode, selectedItems, clearSelection, sortBy, setSortBy, sortOrder, setSortOrder } =
 		useFileManager();
 	const { isVisible, toggleVisibility } = useDetailsPanel();
-	const { getCurrentItem } = useNavigation();
 
 	// Lista de vistas que requieren el panel de detalles
 	const viewsWithDetails = [
@@ -394,7 +391,7 @@ export function ViewToolbar() {
 				<div className="flex items-center gap-3">
 					<div className="flex items-center justify-center h-9 w-9 rounded-md bg-accent/10">{renderIcon()}</div>
 					<div className="flex items-center">
-						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem()} />
+						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem() || undefined} />
 						<EntityDetails />
 					</div>
 				</div>
