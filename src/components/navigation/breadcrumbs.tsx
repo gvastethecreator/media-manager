@@ -8,7 +8,7 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { useNavigation } from '@/lib/utils/navigation.utils';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { ViewType } from '@/types/file-item';
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -130,7 +130,7 @@ const formatDate = (date: Date): string => {
 };
 
 export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) {
-	const { navigateToHome, navigateToMainFromContent } = useNavigation();
+	const { navigateToHome, navigateToMainFromContent } = useNavigationStore();
 	const config = BREADCRUMB_CONFIG[currentView];
 	const isContentView = currentView.endsWith('-content');
 

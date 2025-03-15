@@ -88,7 +88,7 @@ export function EntityCardExample() {
 					enableBackside={true}
 					enableDesign={true}
 					enableAnimation={true}
-					enableLayers={true}
+					enableLayers={true} 
 					enablePerformance={true}
 					enableEffects={true}
 				/>

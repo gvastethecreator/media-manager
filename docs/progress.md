@@ -1,160 +1,161 @@
-# Progreso de Migración Entity Cards
+# Progreso del Proyecto
 
-## Tareas Completadas
+## Fecha: 17/03/2024
 
-### Módulos Core
+## Progreso de Corrección de Errores en Entity Cards
 
-- ✅ Migrado `states-settings.tsx` a módulo `/core/states`
-- ✅ Implementado hook personalizado `useStatesSystem`
-- ✅ Documentado módulo de estados con README.md
-- ✅ Migrado `interaction-settings.tsx` a módulo `/core/interactions`
-- ✅ Implementado hook personalizado `useInteractions`
-- ✅ Documentado módulo de interacciones con README.md
-- ✅ Migrado `core-settings.tsx` a módulo `/core`
-- ✅ Implementado hook personalizado `useCoreSettings`
-- ✅ Creados componentes de sección para interactividad, rendimiento, retroalimentación y contenido
-- ✅ Documentado módulo core con README.md
-- ✅ Migrado `system-settings.tsx` a módulo `/core/system`
-- ✅ Migrado `content-settings.tsx` a módulo `/core/content`
-- ✅ Migrado `card-config-manager.tsx` a módulo `/core/config`
-- ✅ Migrado `presets-panel.tsx` a módulo `/core/presets`
+### Análisis Inicial
 
-### Módulos de Layers
+- ✅ Análisis de la estructura de componentes de entity-cards
+- ✅ Identificación de errores específicos en los archivos
+- ✅ Planificación de la estrategia de corrección
 
-- ✅ Migrado `distortion-effects-settings.tsx` a módulo `/layers/distortion`
-- ✅ Implementado hook personalizado `useDistortionEffects`
-- ✅ Documentado módulo de distortion con README.md
-- ✅ Migrado `visual-effects-settings.tsx` a módulo `/layers/filters/visual-effects`
-- ✅ Implementado hook personalizado `useVisualEffects`
-- ✅ Documentado módulo de efectos visuales con README.md
-- ✅ Migrado `layers-settings-panel.tsx` a módulo `/layers`
-- ✅ Implementado hook personalizado `useLayersSystem`
-- ✅ Documentado módulo de capas con README.md
+### Tareas Completadas
 
-### Módulos de Efectos
+- ✅ Corrección de errores en `entity-card-adapter.tsx`
+- ✅ Corrección de errores en `entities-cards-settings.tsx`
+- ✅ Corrección de errores en `album-card.tsx`
+- ✅ Corrección de errores en `entity-card-layer-wrapper.tsx`
+- ✅ Implementación de un sistema de tipos centralizado
+- ✅ Mejora del manejo de errores en los componentes
+- ✅ Corrección de archivos de layout
+- ✅ Simplificación del `EntityCardLayerWrapper`
+- ✅ Reemplazo del sistema complejo de carga de configuración
+- ✅ Uso directo del nuevo sistema de capas
+- ✅ Adición de soporte para animaciones con `motion/react`
+- ✅ Implementación de un adaptador personalizado para el sistema de capas duplicado
+- ✅ Verificación de la integración con el resto del proyecto
+- ✅ Creación de documentación completa del sistema de entity-cards
+- ✅ Corrección de errores en `preview-panel.tsx`
+- ✅ Corrección de errores en `preview-adapter.ts`
+- ✅ Corrección de errores en `entity-card.tsx`
+- ✅ Corrección de errores en `album-card-layout.tsx`
+- ✅ Simplificación de los hooks en `entity-card.tsx`
+- ✅ Corrección de errores en los manejadores de eventos de botones
+- ✅ Corrección de errores en `preview-settings-adapter.tsx`
+- ✅ Corrección de errores en `preview-module.tsx`
+- ✅ Corrección de errores en `rarity-editor.tsx`
+- ✅ Corrección de errores en `backside-adapter.ts`
+- ✅ Actualización de tipos en `backside/types.ts`
+- ✅ Corrección de errores en `animation-adapter.ts` (hoverRotation undefined)
+- ✅ Mejora del sistema de manejo de errores en `entity-card.tsx`
+- ✅ Implementación de un sistema de captura de errores con try/catch
+- ✅ Creación de estilos CSS para bordes de tarjetas
+- ✅ Mejora de la accesibilidad con atributos role y tabIndex
+- ✅ Optimización de la inicialización de hooks con valores predeterminados
 
-- ✅ Migrado `advanced-effects-settings.tsx` a módulo `/effects/advanced`
-- ✅ Implementado hook personalizado `useAdvancedEffects`
-- ✅ Creados componentes de sección para cada tipo de efecto
-- ✅ Documentado módulo de efectos avanzados con README.md
-- ✅ Migrado `visual-effects-manager.tsx` a módulo `/effects/visual`
+### Progreso
 
-### Módulos de Imagen
+- Se ha implementado un sistema de tipos centralizado para mejorar la consistencia
+- Se han corregido errores de importación y estructura de tipos
+- Se han mejorado los componentes para manejar casos de error
+- Se ha simplificado la estructura del componente `EntityCardLayerWrapper`
+- Se ha verificado que los componentes se integran correctamente con el resto del sistema
+- Se ha creado documentación detallada del sistema de entity-cards con ejemplos de uso, diagramas y guías de migración
+- Se han corregido errores de tipo en los componentes de previsualización
+- Se han simplificado los hooks en el componente EntityCard para evitar errores de tipo
+- Se han corregido los manejadores de eventos en los botones de edición y eliminación
+- Se ha simplificado el componente BacksideLayer para evitar errores de tipo
+- Se han corregido errores en los componentes de configuración de rareza y backside
+- Se han actualizado las interfaces de tipos para incluir todas las propiedades necesarias
+- Se ha mejorado el sistema de manejo de errores con un enfoque más robusto
+- Se ha implementado un sistema de captura de errores para evitar fallos en la aplicación
+- Se han creado estilos CSS para los bordes de tarjetas
+- Se ha mejorado la accesibilidad de los componentes con atributos ARIA
 
-- ✅ Migrado `image-settings.tsx` a módulo `/image`
-- ✅ Implementado hook personalizado `useImageSettings`
-- ✅ Documentado módulo de imagen con README.md
-- ✅ Migrado `image-grid-settings.tsx` a módulo `/image-grid`
+### Próximas Tareas
 
-### Módulos de Diseño
+- ⬜ Optimización del rendimiento de los componentes
+- ⬜ Implementación de pruebas unitarias para los componentes corregidos
+- ⬜ Creación de componentes de panel de configuración faltantes
+- ✅ Mejora de la accesibilidad de los componentes
 
-- ✅ Migrado `design-settings.tsx` a módulo `/design`
-- ✅ Implementado hook personalizado `useDesignSystem`
-- ✅ Creados componentes para visualización y edición de diseño
-- ✅ Documentado módulo de diseño
+## Verificación de Compilación
 
-### Módulos de Rendimiento
+- ✅ Ejecución del linter sin errores
+- ✅ Compilación exitosa del proyecto
+- ✅ Verificación de tipos TypeScript sin errores
 
-- ✅ Migrado `performance-settings.tsx` a módulo `/performance`
-- ✅ Implementado hook personalizado `usePerformance`
-- ✅ Creado adaptador para mantener compatibilidad con el sistema antiguo
-- ✅ Documentado módulo de rendimiento con README.md
+## Documentación Creada
 
-### Módulos de Colores
+- ✅ Documentación del sistema de entity-cards (`docs/entity-cards-documentation.md`)
+  - Incluye arquitectura del sistema
+  - Diagrama de componentes
+  - Ejemplos de uso
+  - Guía de migración del sistema antiguo al nuevo
+  - Mejores prácticas
 
-- ✅ Migrado `colors-settings.tsx` a módulo `/colors`
-- ✅ Implementado hook personalizado `useColors`
-- ✅ Creado selector de paletas de colores
-- ✅ Creado adaptador para mantener compatibilidad con el sistema antiguo
-- ✅ Documentado módulo de colores con README.md
+## Notas Adicionales
 
-### Módulos de Previsualización
+El sistema de entity-cards ahora está completamente documentado y funcional. La documentación incluye un diagrama de arquitectura en formato mermaid que muestra la estructura del sistema, ejemplos de código para cada componente principal, y una guía de migración para usuarios del sistema antiguo.
 
-- ✅ Migrado `preview-settings.tsx` a módulo `/preview`
-- ✅ Implementado hook personalizado `usePreview`
-- ✅ Creado adaptador para mantener compatibilidad con el sistema antiguo
-- ✅ Documentado módulo de previsualización con README.md
+La documentación servirá como referencia para el equipo de desarrollo y facilitará la incorporación de nuevos miembros al proyecto.
 
-### Módulos de Raridades
+Se ha mejorado significativamente el manejo de errores en el componente EntityCard, implementando un sistema de captura de errores que evita que la aplicación falle completamente cuando ocurre un error en un componente individual. Además, se han corregido problemas específicos en el adaptador de animación y se ha mejorado la inicialización de los hooks con valores predeterminados.
 
-- ✅ Migrado `rarity-editor.tsx` a módulo `/rarities`
-- ✅ Migrado `rarity-distribution.tsx` a módulo `/rarities`
-- ✅ Migrado `rarities-panel.tsx` a módulo `/rarities`
+## Próximos Pasos
 
-### Módulos de Cara Posterior (Backside)
+1. Revisar la documentación con el equipo para asegurar que cubre todos los aspectos necesarios
+2. Implementar las pruebas unitarias para garantizar la estabilidad del sistema
+3. Optimizar el rendimiento de los componentes, especialmente en dispositivos móviles
+4. Implementar componentes de panel de configuración faltantes
 
-- ✅ Migrado `backside-settings.tsx` a módulo `/backside`
-- ✅ Implementado hook personalizado `useBacksideSystem`
-- ✅ Creado adaptador para mantener compatibilidad con el sistema antiguo
-- ✅ Creados componentes para todas las secciones del panel
+## Diagrama de Arquitectura del Sistema
 
-### Módulos de Animación
+```mermaid
+graph TD
+    A[EntityCard] --> B[EntityCardContent]
+    A --> C[LayerRenderer]
+    A --> D[BacksideLayer]
 
-- ✅ Migrado `animation-settings.tsx` a módulo `/animation`
-- ✅ Implementado hook personalizado `useAnimationSystem`
-- ✅ Creado adaptador para mantener compatibilidad con el sistema antiguo
-- ✅ Creados componentes para todas las secciones del panel
+    C --> E[Capa: Background]
+    C --> F[Capa: Texture]
+    C --> G[Capa: Content]
+    C --> H[Capa: Border]
+    C --> I[Capa: Effects]
 
-### Integración Base
+    J[EntityCardAdapter] --> A
 
-- ✅ Creado componente base `EntityCard` con soporte para todos los módulos
-- ✅ Implementado `CardContainer` como componente base para las tarjetas
-- ✅ Implementado `EntityCardWrapper` como interfaz unificada para todas las tarjetas
-- ✅ Creado hook `usePreset` para gestionar configuraciones visuales
-- ✅ Definido sistema de tipos unificado en `unified-card-types.ts`
-- ✅ Agregadas utilidades `deepMerge` y `formatFileSize` para soporte de funcionalidades
+    K[Hooks] --> A
 
-### Integración de Adaptadores
+    K --> K1[useDesignSystem]
+    K --> K2[useAnimationSystem]
+    K --> K3[useColors]
+    K --> K4[useLayersSystem]
 
-- ✅ Creado `card-adapter-factory.ts` para simplificar la creación de adaptadores
-- ✅ Adaptado `FolderCardLayout` con `FolderCard` usando la fábrica
-- ✅ Adaptado `AlbumCardLayout` con `AlbumCard` usando la fábrica
-- ✅ Adaptado `CharacterCardLayout` con `CharacterCard` usando la fábrica
-- ✅ Adaptado `CollectionCardLayout` con `CollectionCard` usando la fábrica
-- ✅ Adaptado `WorldItemCardLayout` con `WorldItemCard` usando la fábrica
-- ✅ Adaptado `ConceptCardLayout` con `ConceptCard` usando la fábrica
-- ✅ Adaptado `NoteCardLayout` con `NoteCard` usando la fábrica
-- ✅ Adaptado `PlaceCardLayout` con `PlaceCard` usando la fábrica
-- ✅ Adaptado `PromptCardLayout` con `PromptCard` usando la fábrica
-- ✅ Adaptado `TagCardLayout` con `TagCard` usando la fábrica
-- ✅ Optimizado `EntityCardAdapter` para usar propiedades comunes y reducir repetición
-- ✅ Implementado manejo de errores para layouts no encontrados
+    L[Layouts] --> J
 
-## Tareas En Progreso
+    L --> L1[AlbumCard]
+    L --> L2[CharacterCard]
+    L --> L3[CollectionCard]
+    L --> L4[OtrosLayouts...]
 
-### Optimización y Compatibilidad
+    M[ErrorHandler] --> A
+    M --> M1[CardErrorDisplay]
+    M --> M2[createErrorHandler]
+```
 
-- 🔄 Resolver los conflictos de tipo restantes entre diferentes versiones de `CardOptions`
-- 🔄 Añadir soporte para propiedades específicas faltantes en ciertos layouts
-- 🔄 Implementar fallbacks para propiedades opcionales no definidas
-- 🔄 Optimizar renderizado condicional en el EntityCardAdapter
+## Diagrama de Flujo de Datos
 
-### Verificación e Integración
+```mermaid
+sequenceDiagram
+    participant App
+    participant EntityCard
+    participant Hooks
+    participant LayerRenderer
+    participant EntityCardContent
 
-- 🔄 Verificar que todos los adaptadores funcionan correctamente
-- 🔄 Asegurar que la experiencia del usuario se mantiene consistente
-- 🔄 Optimizar rendimiento de los nuevos módulos
-- 🔄 Documentar el flujo de datos entre componentes
+    App->>EntityCard: Renderizar con opciones
+    EntityCard->>Hooks: Inicializar sistemas
+    Hooks-->>EntityCard: Devolver configuración
 
-## Tareas Pendientes
+    EntityCard->>LayerRenderer: Renderizar capas
+    LayerRenderer-->>EntityCard: Capas renderizadas
 
-### Refinamiento de la Integración
+    EntityCard->>EntityCardContent: Renderizar contenido
+    EntityCardContent-->>EntityCard: Contenido renderizado
 
-- ⏱️ Implementar caché de renderizado para tarjetas
-- ⏱️ Agregar soporte para lazy-loading de imágenes en tarjetas
-- ⏱️ Agregar capacidad de previsualización para cada tipo de tarjeta
-- ⏱️ Optimizar el rendimiento de renderizado con estrategias de memorización
+    EntityCard-->>App: Tarjeta completa
 
-### Refinamiento de Módulos
-
-- ⏱️ Refactorizar código duplicado en los adaptadores
-- ⏱️ Mejorar cobertura de pruebas para los nuevos módulos
-- ⏱️ Añadir características adicionales según las necesidades del producto
-- ⏱️ Crear diagrama de arquitectura general del sistema de módulos
-
-### Documentación y Soporte
-
-- ⏱️ Crear documentación detallada sobre cómo extender el sistema para nuevos tipos de entidad
-- ⏱️ Implementar ejemplos interactivos para cada tipo de tarjeta
-- ⏱️ Crear una guía de migración para código que use las versiones anteriores
-- ⏱️ Documentar patrones de optimización para casos de uso específicos
+    Note over EntityCard: Manejo de errores en cada paso
+```

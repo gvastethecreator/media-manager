@@ -7,20 +7,27 @@ export interface BacksideOptions {
 	opacity?: number;
 	blurBackground?: boolean;
 	blurAmount?: number;
+	// Propiedades para el contenido
 	showAttributes?: boolean;
 	showDescription?: boolean;
 	showStats?: boolean;
 	showMetadata?: boolean;
 	showRelations?: boolean;
 	maxDescriptionLength?: number;
+	// Propiedades para la animación
+	animation?: string;
+	animationDuration?: number;
 	flipAnimation?: string;
 	flipDuration?: number;
 	enableAutoFlip?: boolean;
 	autoFlipDelay?: number;
 	flipTrigger?: string;
+	// Propiedades para el estilo
 	headingStyle?: string;
 	infoStyle?: string;
 	separatorStyle?: string;
+	// Propiedades adicionales
+	showBackContent?: boolean;
 }
 
 // Tipos para la integración con el sistema de cartas

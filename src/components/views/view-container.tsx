@@ -2,7 +2,7 @@
 
 import { SettingsView } from '@/components/settings/settings-view';
 import { cn } from '@/lib/utils';
-import { useNavigationStore } from '@/store/navigation.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
 import { DotPattern } from '../ui/dot-pattern';

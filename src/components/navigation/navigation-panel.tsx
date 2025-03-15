@@ -1,13 +1,13 @@
 'use client';
 
-import type { NavigationData } from '@/app/actions/navigation/nav.actions';
+import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/store/navigation.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useStatsBaseStore } from '@/store/stats.store';
 import { useUIStore } from '@/store/ui.store';
 import type { ViewType } from '@/types/file-item';
@@ -38,10 +38,10 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { type CategoryChild, NavCategoryChildren } from './nav-category-children';
-import { NavCategoryItem } from './nav-category-item';
-import { NavMainNavigation } from './nav-main-navigation';
-import { NavPanelHeader } from './nav-panel-header';
+import { NavCategoryChildren, type CategoryChild } from './components/nav-category-children';
+import { NavCategoryItem } from './components/nav-category-item';
+import { NavMainNavigation } from './components/nav-main-navigation';
+import { NavPanelHeader } from './components/nav-panel-header';
 
 const categories = [
 	{

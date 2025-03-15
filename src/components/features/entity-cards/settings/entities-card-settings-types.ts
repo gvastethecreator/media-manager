@@ -127,7 +127,6 @@ export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 	borderOptions?: BorderOptions;
 	holographicOptions?: HolographicEffectOptions;
 	glowOptions?: GlowEffectOptions;
-	effects?: DistortionEffects;
 
 	// Sistema
 	enableShadow?: boolean;

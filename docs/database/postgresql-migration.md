@@ -8,7 +8,7 @@ graph TD
         subgraph "Core DB (profiles)"
             A[Profile] --> B[QueueJob]
         end
-        
+
         subgraph "Images DB (imágenes)"
             C[Image] --> D[ImageStats]
             C --> E[ImageVisualConfig]
@@ -20,7 +20,7 @@ graph TD
             K[Activity]
             C --> K
         end
-        
+
         subgraph "Entities DB (entidades)"
             L[Character]
             M[Place]
@@ -35,7 +35,7 @@ graph TD
             O --> Q
             P --> Q
         end
-        
+
         subgraph "Cards DB (tarjetas y configuraciones)"
             R[Album]
             S[Tag]
@@ -56,7 +56,7 @@ graph TD
             AI[LayerPixelateConfig]
             AJ[LayerPatternConfig]
         end
-        
+
         %% Relaciones entre bases de datos
         C --> R
         C --> S

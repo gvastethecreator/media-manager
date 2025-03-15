@@ -1,12 +1,11 @@
 'use client';
 
-import type { AlbumFormData } from '@/components/features/entity-cards/forms/entity-types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import * as React from 'react';
 import { useState } from 'react';
 import { EntityForm } from './entity-form';
+import type { AlbumFormData } from './entity-types';
 
 interface AlbumFormProps {
 	initialData?: AlbumFormData;
