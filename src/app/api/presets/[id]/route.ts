@@ -6,11 +6,17 @@ import { NextResponse } from 'next/server';
  *
  * Retorna un preset visual por ID
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
 	try {
+		// Asegurarse de que params.id esté disponible
+		const id = params.id;
+		if (!id) {
+			return NextResponse.json({ error: 'ID no proporcionado' }, { status: 400 });
+		}
+
 		const preset = await prisma.visualPreset.findUnique({
 			where: {
-				id: params.id,
+				id,
 			},
 		});
 
@@ -20,8 +26,8 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
 		return NextResponse.json(preset);
 	} catch (error) {
-		console.error('Error al obtener el preset:', error);
-		return NextResponse.json({ error: 'Error al obtener el preset' }, { status: 500 });
+		console.error('Error al obtener preset:', error);
+		return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
 	}
 }
 

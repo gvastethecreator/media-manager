@@ -83,6 +83,20 @@ const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 		}
 	}
 
+	// Asegurarnos de que layerSystem tenga la estructura completa
+	if (!adaptedOptions.layerSystem) {
+		adaptedOptions.layerSystem = {
+			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+			layerBlending: 'screen',
+			layerSpacing: 2,
+		};
+	}
+
+	// Asegurarnos de que designSystem tenga la estructura completa
+	if (!adaptedOptions.designSystem) {
+		adaptedOptions.designSystem = DEFAULT_SETTINGS_OPTIONS.designSystem;
+	}
+
 	// Usamos unknown como intermediario para evitar errores de tipo
 	return adaptBaseToSettingsOptions(adaptedOptions as Record<string, unknown>);
 };

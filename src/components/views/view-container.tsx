@@ -1,11 +1,11 @@
 'use client';
 
-import { SettingsView } from '@/components/settings/settings-view';
-import { cn } from '@/lib/utils';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { SettingsView } from '@/components/settings/settings-view';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
-import { DotPattern } from '../ui/dot-pattern';
+import { FolderContentView } from '../folders/views/folder-content-view';
+import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
 import { AlbumsView } from './albums/albums-view';
 import { AllImagesView } from './all-images/all-images-view';
@@ -17,8 +17,6 @@ import { ConceptContentView } from './concepts/concept-content-view';
 import { ConceptsView } from './concepts/concepts-view';
 import { DevelopmentView } from './development/development-view';
 import { FavoritesView } from './favorites/favorites-view';
-import { FolderContentView } from './folders/folder-content-view';
-import { FoldersView } from './folders/folders-view';
 import { NoteContentView } from './notes/note-content-view';
 import { NotesView } from './notes/notes-view';
 import { PlaceContentView } from './places/place-content-view';

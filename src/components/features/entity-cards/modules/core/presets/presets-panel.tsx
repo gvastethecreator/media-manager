@@ -1,14 +1,13 @@
 'use client';
 
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
 import { BookOpen, Grid, Info, Layers, LayoutTemplate, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import * as React from 'react';
-import type { CardOptions, CardPresetOption } from '../../../types/card-settings-types';
 import { EntityPreviewAdapter } from '../../preview/entity-preview-adapter';
 
 // 🎨 Esquema de colores para el panel de presets
@@ -18,6 +17,14 @@ const presetsColors = {
 	text: 'text-teal-600',
 	highlight: 'bg-teal-500/10',
 };
+
+// Definición de la interfaz para las opciones de preset
+export interface CardPresetOption {
+	id: string;
+	name: string;
+	description: string;
+	options: CardOptions;
+}
 
 // 📦 Presets de ejemplo
 const CARD_PRESETS: CardPresetOption[] = [
@@ -84,7 +91,7 @@ const CARD_PRESETS: CardPresetOption[] = [
 				opacity: 0.7,
 			},
 			enableGlowEffect: true,
-			glowEffectOptions: {
+			glowOptions: {
 				color: '#ffffff',
 				intensity: 10,
 				size: 30,
@@ -123,7 +130,7 @@ const CARD_PRESETS: CardPresetOption[] = [
 		options: {
 			...DEFAULT_SETTINGS_OPTIONS,
 			enableAnimatedBorder: true,
-			animatedBorderOptions: {
+			borderOptions: {
 				width: 3,
 				style: 'flowing',
 				speed: 5,

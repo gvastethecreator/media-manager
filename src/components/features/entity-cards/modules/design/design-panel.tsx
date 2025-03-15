@@ -8,12 +8,11 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Box, Layers, Palette, Type } from 'lucide-react';
+import { Box } from 'lucide-react';
 import { useState } from 'react';
-import type { DesignPanelProps, DesignSystemPreset } from './types';
+import type { DesignPanelProps, DesignSystem, DesignSystemPreset } from './types';
 
 // Presets de relación de aspecto
 const aspectRatioOptions = [
@@ -32,17 +31,29 @@ const designPresets: DesignSystemPreset[] = [
 		name: 'Moderno',
 		description: 'Diseño limpio y minimalista con bordes redondeados',
 		designSystem: {
+			// Propiedades base requeridas
+			borderRadius: 12,
+			padding: 16,
+			aspectRatio: '7/10',
+			maxWidth: 400,
+			elevation: 2,
+			shadowColor: 'rgba(0, 0, 0, 0.25)',
+			backgroundColor: 'transparent',
+			backgroundOpacity: 1,
+			backdropFilter: 'none',
+			backdropBlurAmount: 0,
+			borderWidth: 1,
+			borderStyle: 'solid',
+			borderColor: 'rgba(255,255,255,0.1)',
+			customCssClasses: [],
+			customCssVariables: {},
+
+			// Propiedades adicionales
 			preset: 'modern',
 			variant: 'default',
-			aspectRatio: '7/10',
 			cornerStyle: 'rounded',
 			cornerRadius: 12,
-			elevation: 2,
 			shadowStyle: 'soft',
-			backgroundColor: 'transparent',
-			borderWidth: 1,
-			borderColor: 'rgba(255,255,255,0.1)',
-			borderStyle: 'solid',
 			fontFamily: 'system-ui',
 			colorScheme: 'auto',
 		},
@@ -52,17 +63,29 @@ const designPresets: DesignSystemPreset[] = [
 		name: 'Clásico',
 		description: 'Diseño tradicional con bordes definidos',
 		designSystem: {
+			// Propiedades base requeridas
+			borderRadius: 0,
+			padding: 16,
+			aspectRatio: '7/10',
+			maxWidth: 400,
+			elevation: 1,
+			shadowColor: 'rgba(0, 0, 0, 0.25)',
+			backgroundColor: 'transparent',
+			backgroundOpacity: 1,
+			backdropFilter: 'none',
+			backdropBlurAmount: 0,
+			borderWidth: 2,
+			borderStyle: 'solid',
+			borderColor: 'rgba(0,0,0,0.2)',
+			customCssClasses: [],
+			customCssVariables: {},
+
+			// Propiedades adicionales
 			preset: 'classic',
 			variant: 'default',
-			aspectRatio: '7/10',
 			cornerStyle: 'sharp',
 			cornerRadius: 0,
-			elevation: 1,
 			shadowStyle: 'hard',
-			backgroundColor: 'transparent',
-			borderWidth: 2,
-			borderColor: 'rgba(0,0,0,0.2)',
-			borderStyle: 'solid',
 			fontFamily: 'serif',
 			colorScheme: 'light',
 		},
@@ -72,17 +95,29 @@ const designPresets: DesignSystemPreset[] = [
 		name: 'Minimalista',
 		description: 'Diseño ultra simple y ligero',
 		designSystem: {
+			// Propiedades base requeridas
+			borderRadius: 16,
+			padding: 16,
+			aspectRatio: '1/1',
+			maxWidth: 400,
+			elevation: 0,
+			shadowColor: 'rgba(0, 0, 0, 0)',
+			backgroundColor: 'transparent',
+			backgroundOpacity: 1,
+			backdropFilter: 'none',
+			backdropBlurAmount: 0,
+			borderWidth: 0,
+			borderStyle: 'none',
+			borderColor: 'transparent',
+			customCssClasses: [],
+			customCssVariables: {},
+
+			// Propiedades adicionales
 			preset: 'minimalist',
 			variant: 'default',
-			aspectRatio: '1/1',
 			cornerStyle: 'rounded',
 			cornerRadius: 16,
-			elevation: 0,
 			shadowStyle: 'none',
-			backgroundColor: 'transparent',
-			borderWidth: 0,
-			borderColor: 'transparent',
-			borderStyle: 'none',
 			fontFamily: 'system-ui',
 			colorScheme: 'auto',
 		},
@@ -92,17 +127,29 @@ const designPresets: DesignSystemPreset[] = [
 		name: 'Retro',
 		description: 'Diseño con estética vintage',
 		designSystem: {
+			// Propiedades base requeridas
+			borderRadius: 0,
+			padding: 16,
+			aspectRatio: '4/3',
+			maxWidth: 400,
+			elevation: 3,
+			shadowColor: 'rgba(0, 0, 0, 0.5)',
+			backgroundColor: '#f5f5dc',
+			backgroundOpacity: 1,
+			backdropFilter: 'none',
+			backdropBlurAmount: 0,
+			borderWidth: 3,
+			borderStyle: 'solid',
+			borderColor: '#8b4513',
+			customCssClasses: [],
+			customCssVariables: {},
+
+			// Propiedades adicionales
 			preset: 'retro',
 			variant: 'default',
-			aspectRatio: '4/3',
 			cornerStyle: 'sharp',
 			cornerRadius: 0,
-			elevation: 3,
 			shadowStyle: 'hard',
-			backgroundColor: '#f5f5dc',
-			borderWidth: 3,
-			borderColor: '#8b4513',
-			borderStyle: 'solid',
 			fontFamily: 'monospace',
 			colorScheme: 'light',
 		},
@@ -121,20 +168,8 @@ export function DesignPanel({ designSystem, onChange, disabled = false, classNam
 	};
 
 	// Función para actualizar un campo específico
-	const updateField = (field: string, value: any) => {
+	const updateField = <K extends keyof DesignSystem>(field: K, value: DesignSystem[K]) => {
 		onChange({ ...designSystem, [field]: value });
-	};
-
-	// Manejador para actualizar una propiedad específica del sistema de diseño
-	const _handlePropertyChange = <K extends keyof DesignSystem>(property: K, value: DesignSystem[K]) => {
-		if (disabled) {
-			return;
-		}
-
-		onChange({
-			...designSystem,
-			[property]: value,
-		});
 	};
 
 	// Manejador para restablecer a los valores predeterminados

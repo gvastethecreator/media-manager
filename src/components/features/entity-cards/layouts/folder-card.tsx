@@ -19,15 +19,34 @@ export const FolderCard = createCustomCardAdapter<Folder, any, 'folder'>(
 	FolderCardLayout,
 	'folder',
 	(props: FolderCardAdapterProps) => {
+		// Verificar que la carpeta existe y tiene un id
+		if (!props.folder || !props.folder.id) {
+			console.error('Error: La carpeta es undefined o no tiene un id');
+			return {
+				data: null,
+				isPreview: false,
+				folder: null,
+				onEdit: null,
+				onDelete: null,
+				onClick: null,
+				className: props.className,
+				showVisualConfig: false,
+				options: {},
+				rarity: null,
+				texture: null,
+			};
+		}
+
 		// Convertir las propiedades del adaptador a las propiedades esperadas por FolderCardLayout
 		return {
 			data: props.folder as any, // Usamos type assertion para evitar errores de tipo
+			folder: props.folder, // Asegurarnos de pasar la carpeta al layout
 			isPreview: false,
 			onEdit: props.onEdit,
 			onDelete: props.onDelete,
 			onClick: props.onClick,
 			className: props.className,
-			showVisualizationConfig: props.showVisualConfig,
+			showVisualConfig: props.showVisualConfig,
 			options: props.options,
 			rarity: null,
 			texture: null,
