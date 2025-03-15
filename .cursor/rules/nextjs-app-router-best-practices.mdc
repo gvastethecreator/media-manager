@@ -1,11 +1,267 @@
 ---
-description: Concise best practices for Next.js 15 App Router to optimize performance and organization.
-globs: app/**/*.{ts,tsx}
+description: Concise best practices for Next.js 15 App Router in an image management application
+globs: app/**/*.{ts,tsx,js,jsx}
+alwaysApply: false
 ---
-- **Default to Server Components:** Maximize Server Components for rendering & data fetching; use Client Components only for browser interactivity.
-- **Server Data Fetching & Actions:** Fetch data in Server Components; use Server Actions for server-side mutations and logic.
-- **Optimize Dynamic Routes:** Use `generateStaticParams` for static route pre-generation; consider SSR or revalidation for dynamic data.
-- **Error Handling with Boundaries & `notFound`/`redirect`:** Implement `ErrorBoundary` and use `notFound()`/`redirect()` for route errors and redirects.
-- **Logical Route & Folder Structure:** Organize routes within `app/` with clear folder and file naming conventions.
-- **Utilize `useSearchParams` & `usePathname`:** Efficiently access query parameters and pathname in Client Components.
-- **Backend Logic for API Calls:** Prefer Server Components/Actions for API calls; use internal API Routes as intermediaries if needed from Client Components.
+- **Server Components por Defecto:** Usar Server Components para galerías de imágenes y metadatos estáticos.
+- **Client Components para Interactividad:** Usar Client Components solo para elementos interactivos como selección y edición de imágenes.
+- **Fetching de Datos en Server Components:** Obtener datos de imágenes directamente en Server Components para optimizar rendimiento.
+- **Server Actions para Mutaciones:** Utilizar Server Actions para operaciones de carga, actualización y etiquetado de imágenes.
+- **Rutas Estáticas con `generateStaticParams`:** Pre-generar rutas estáticas para álbumes y colecciones frecuentes.
+- **Manejo de Errores con ErrorBoundary:** Implementar límites de error específicos para carga de imágenes.
+- **Redirecciones con `notFound()`/`redirect()`:** Gestionar correctamente imágenes no encontradas o acceso restringido.
+- **Estructura Organizada en `app/`:** Organizar rutas claras como `/images`, `/albums`, `/collections`.
+- **`useSearchParams` & `usePathname`:** Usar en Client Components para filtrado y navegación de imágenes.
+- **Preferir Server Components/Actions para API:** Minimizar llamadas API cliente-servidor con Server Components y Actions.
+- **Streaming para Contenido de Imágenes:** Implementar streaming para carga progresiva de galerías grandes.
+- **Metadatos Dinámicos para SEO:** Utilizar metadatos dinámicos para optimización SEO de páginas de imágenes.
+- **Loading UI con Suspense:** Crear estados de carga específicos para diferentes zonas de la galería.
+- **Manejo de Caché para Imágenes:** Configurar estrategias de caché adecuadas para thumbnails y previsualizaciones.
+- **Estructurar Rutas por Entidades:** Organizar rutas en patrones claros como `/albums/[albumId]`, `/images/[imageId]`.
+- **Parallel Routes para Multivista:** Usar rutas paralelas para mostrar la galería y el editor simultáneamente.
+
+```mermaid
+graph TD
+    A[App Router Structure] --> B[Pages]
+    A --> C[Components]
+    A --> D[Actions]
+
+    B --> B1[/images/page.tsx]
+    B --> B2[/images/[id]/page.tsx]
+    B --> B3[/albums/page.tsx]
+    B --> B4[/albums/[id]/page.tsx]
+
+    C --> C1[ImageGallery.tsx]
+    C --> C2[ImageDetail.tsx]
+    C --> C3[AlbumGrid.tsx]
+
+    D --> D1[uploadImage.ts]
+    D --> D2[updateMetadata.ts]
+    D --> D3[createAlbum.ts]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+```
+
+**Ejemplos de implementación**:
+
+```tsx
+// app/images/page.tsx - Server Component para galería de imágenes
+import { ImageGallery } from '@/components/image-gallery';
+import { getImages } from '@/app/actions/images';
+import { Suspense } from 'react';
+import { ImageGallerySkeleton } from '@/components/skeletons';
+
+export const metadata = {
+  title: 'Image Gallery | Image Manager',
+  description: 'Browse your image collection',
+};
+
+// Generar rutas estáticas para filtros comunes
+export async function generateStaticParams() {
+  return [
+    { filter: 'recent' },
+    { filter: 'favorites' },
+  ];
+}
+
+// Server Component principal
+export default async function ImagesPage({
+  searchParams
+}: {
+  searchParams: { filter?: string; q?: string; page?: string }
+}) {
+  // Acceso directo a los parámetros de búsqueda en el servidor
+  const filter = searchParams.filter || 'all';
+  const query = searchParams.q || '';
+  const page = Number(searchParams.page) || 1;
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-3xl font-bold mb-6">Image Gallery</h1>
+
+      {/* Filtros renderizados en el servidor */}
+      <div className="mb-6">
+        <ImageFilters activeFilter={filter} />
+      </div>
+
+      {/* Contenido principal con suspense */}
+      <Suspense fallback={<ImageGallerySkeleton />}>
+        <ImageGalleryWrapper filter={filter} query={query} page={page} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente auxiliar para suspense
+async function ImageGalleryWrapper({ filter, query, page }) {
+  // Obtención de datos en el servidor
+  const images = await getImages({ filter, query, page, limit: 30 });
+
+  // La galería puede ser un componente de cliente o servidor según las necesidades
+  return <ImageGallery images={images} />;
+}
+
+// app/images/[id]/page.tsx - Página de detalle de imagen
+import { ImageViewer } from '@/components/image-viewer';
+import { getImageById, getRelatedImages } from '@/app/actions/images';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import { ImageDetailSkeleton, RelatedImagesSkeleton } from '@/components/skeletons';
+
+// Metadatos dinámicos basados en la imagen
+export async function generateMetadata({ params }) {
+  const image = await getImageById(params.id);
+
+  if (!image) {
+    return {
+      title: 'Image Not Found',
+    };
+  }
+
+  return {
+    title: `${image.title || 'Untitled Image'} | Image Manager`,
+    description: image.description || `View image details and metadata`,
+    openGraph: {
+      images: [{ url: image.url, width: image.width, height: image.height }],
+    },
+  };
+}
+
+export default async function ImageDetailPage({ params }) {
+  // Obtener los datos de la imagen en el servidor
+  const image = await getImageById(params.id);
+
+  // Manejar imagen no encontrada
+  if (!image) {
+    notFound();
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <Suspense fallback={<ImageDetailSkeleton />}>
+        <ImageViewer image={image} />
+      </Suspense>
+
+      <h2 className="text-2xl font-bold mt-12 mb-6">Related Images</h2>
+
+      <Suspense fallback={<RelatedImagesSkeleton />}>
+        <RelatedImagesWrapper imageId={params.id} tags={image.tags} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Componente auxiliar para imágenes relacionadas
+async function RelatedImagesWrapper({ imageId, tags }) {
+  // Obtener imágenes relacionadas en el servidor
+  const relatedImages = await getRelatedImages(imageId, tags);
+
+  return <RelatedImages images={relatedImages} />;
+}
+
+// app/actions/images.ts - Server Action para cargar imágenes
+'use server'
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { createImageProcessingJob } from '@/lib/bull';
+import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
+import { getCurrentUser } from '@/lib/auth';
+
+// Esquema de validación Zod
+const UploadImageSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  albumId: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+// Server Action para subir imagen
+export async function uploadImage(formData: FormData) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error('Not authenticated');
+  }
+
+  try {
+    // Extraer y validar datos
+    const file = formData.get('file') as File;
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const albumId = formData.get('albumId') as string;
+    const tags = formData.getAll('tags') as string[];
+
+    // Validar datos con Zod
+    const validation = UploadImageSchema.safeParse({
+      title,
+      description,
+      albumId,
+      tags,
+    });
+
+    if (!validation.success) {
+      throw new Error('Invalid image data');
+    }
+
+    // Verificar archivo
+    if (!file || !file.size) {
+      throw new Error('No image file provided');
+    }
+
+    // Guardar archivo temporalmente y crear registro de imagen
+    const imageId = uuidv4();
+    const tempPath = `/tmp/${imageId}-${file.name}`;
+
+    // Guardar metadata en base de datos
+    const image = await prisma.image.create({
+      data: {
+        id: imageId,
+        title: title || file.name,
+        description,
+        path: tempPath,
+        originalFilename: file.name,
+        mimeType: file.type,
+        size: file.size,
+        userId: user.id,
+        albums: albumId ? { connect: { id: albumId } } : undefined,
+        tags: {
+          connectOrCreate: tags.map(tag => ({
+            where: { name: tag },
+            create: { name: tag },
+          })),
+        },
+      },
+    });
+
+    // Buffer del archivo
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Guardar archivo en filesystem
+    // await writeFile(tempPath, buffer); // Implementación simplificada
+
+    // Crear job de procesamiento
+    await createImageProcessingJob({
+      imageId,
+      userId: user.id,
+      path: tempPath,
+    });
+
+    // Revalidar las rutas afectadas
+    revalidatePath('/images');
+    if (albumId) {
+      revalidatePath(`/albums/${albumId}`);
+    }
+
+    return { success: true, imageId };
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return { success: false, error: (error as Error).message };
+  }
+}
