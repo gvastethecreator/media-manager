@@ -24,7 +24,7 @@ import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const gridLogger = logger.withContext('FileGrid');
 
 export interface FileBrowserProps {
@@ -170,7 +170,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 							}
 
 							// Manejar el caso especial de ReactPromise
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							 
 							let processedItem = item;
 
 							// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
@@ -184,7 +184,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 									(typeof item === 'object' && item !== null && 'then' in item && typeof item.then === 'function'))
 							) {
 								try {
-									// eslint-disable-next-line @typescript-eslint/no-unused-vars
+									 
 									gridLogger.warn('Detectado ReactPromise como item, intentando extraer el valor:', item);
 
 									// Para ReactPromise podemos intentar obtener el valor directamente
@@ -196,19 +196,19 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 												processedItem = parsedItem;
 											}
 										} catch (parseError) {
-											// eslint-disable-next-line @typescript-eslint/no-unused-vars
+											 
 											gridLogger.error('Error al parsear el valor del ReactPromise:', parseError);
 										}
 									}
 								} catch (promiseError) {
-									// eslint-disable-next-line @typescript-eslint/no-unused-vars
+									 
 									gridLogger.error('Error al procesar Promise/ReactPromise:', promiseError);
 								}
 							}
 
 							// Verificar que el item (ahora posiblemente extraído de una promesa) tenga un ID válido
 							if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
-								// eslint-disable-next-line @typescript-eslint/no-unused-vars
+								 
 								gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
 								return null;
 							}
