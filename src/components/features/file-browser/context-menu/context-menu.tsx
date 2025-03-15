@@ -29,7 +29,7 @@ import type { FileContextMenuProps } from './types';
 
 export function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
 	// Estado para controlar si el menú está abierto (necesario para ContextMenu)
-	// eslint-disable-next-line no-unused-vars
+	 
 	const [, setIsMenuOpen] = useState(false);
 	const { toggleFavorite, isFavorited } = useFavoritesStore();
 	const { loadingStates, handleOpenChange } = useEntityLoader();
