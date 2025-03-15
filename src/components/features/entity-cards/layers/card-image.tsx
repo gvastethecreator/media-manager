@@ -18,7 +18,7 @@ interface CardImageProps {
 export function CardImage({ options, src, alt, width, height, className }: CardImageProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

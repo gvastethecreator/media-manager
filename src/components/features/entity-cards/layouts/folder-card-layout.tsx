@@ -170,6 +170,17 @@ export function FolderCardLayout({
 	onActiveLayerChange,
 	options = {},
 }: FolderCardLayoutProps) {
+	// Verificar si folder existe y tiene un id
+	if (!folder || !folder.id) {
+		console.error('Error: La carpeta es undefined o no tiene un id');
+		return (
+			<div className="error-card p-4 border border-red-500 rounded-md">
+				<h3 className="text-red-500 font-medium">Error de datos</h3>
+				<p className="text-sm text-gray-500">No se pudo cargar la información de la carpeta</p>
+			</div>
+		);
+	}
+
 	// Usar el hook para obtener configuración de preset si existe
 	const { cardOptions } = usePreset({
 		entityType: 'folder',
@@ -240,12 +251,14 @@ export function FolderCardLayout({
 		<EntityCardWrapper
 			className={cn('folder-card', className)}
 			entityType="folder"
+			entityId={folder.id}
+			title={folder.name}
+			description={folder.description || ''}
 			options={compatibleOptions}
 			onClick={onClick}
-			showVisualizationConfig={showVisualConfig}
-			onVisualizationConfigClick={onVisualConfigClick}
+			showVisualConfig={showVisualConfig}
+			onVisualConfigClick={onVisualConfigClick}
 			enableExplode={enableExplode}
-			explodeLayers={explodeLayers}
 			isExploded={isExploded}
 			activeLayer={activeLayer}
 			onExplodedChange={onExplodedChange}

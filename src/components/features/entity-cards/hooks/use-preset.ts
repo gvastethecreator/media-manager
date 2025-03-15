@@ -113,12 +113,55 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 		// Obtener opciones del preset
 		const presetOptions = presetService.getCardOptions(presetId || null, entityType);
 
+		// Opciones por defecto específicas para el tipo de entidad
+		const defaultTypeOptions = {
+			folder: {
+				designSystem: {
+					preset: 'folder',
+					variant: 'default',
+					aspectRatio: '7/10',
+					cornerStyle: 'rounded',
+					cornerRadius: 12,
+					elevation: 2,
+					shadowStyle: 'soft',
+				},
+				layerSystem: {
+					order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+					layerBlending: 'screen',
+					layerSpacing: 2,
+				},
+			},
+			album: {
+				designSystem: {
+					preset: 'album',
+					variant: 'default',
+					aspectRatio: '1/1',
+				},
+			},
+			tag: {
+				designSystem: {
+					preset: 'tag',
+					variant: 'default',
+					aspectRatio: '3/1',
+				},
+			},
+			// Añadir más tipos según sea necesario
+		};
+
+		// Obtener opciones por defecto para el tipo de entidad actual
+		const typeDefaults = defaultTypeOptions[entityType as keyof typeof defaultTypeOptions] || {};
+
 		// Combinar con las opciones base de manera profunda
 		return {
+			// Primero las opciones por defecto del tipo
+			...typeDefaults,
+			// Luego las opciones del preset
 			...presetOptions,
+			// Finalmente las opciones base proporcionadas
 			...baseOptions,
 			// Asegurar que las opciones anidadas se combinen correctamente
 			designSystem: {
+				...(typeDefaults.designSystem || {}),
 				...(presetOptions.designSystem || {}),
 				...(baseOptions.designSystem || {}),
 			},
@@ -132,16 +175,15 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 			},
 			// Asegurar que las opciones de capas específicas se combinen correctamente
 			layers: {
+				...(typeDefaults.layerSystem || {}),
 				...(presetOptions.layers || {}),
 				...(baseOptions.layers || {}),
-				items: [
-					...(presetOptions.layers?.items || []),
-					...(baseOptions.layers?.items || []),
-				].filter((item, index, self) =>
-					// Eliminar duplicados usando el id como criterio
-					index === self.findIndex(t => t.id === item.id)
-				)
-			}
+				items: [...(presetOptions.layers?.items || []), ...(baseOptions.layers?.items || [])].filter(
+					(item, index, self) =>
+						// Eliminar duplicados usando el id como criterio
+						index === self.findIndex((t) => t.id === item.id)
+				),
+			},
 		} as CardOptions;
 	}, [entityType, presetId, baseOptions, preset]);
 

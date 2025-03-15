@@ -21,7 +21,7 @@ interface CardMetadataProps {
 export function CardMetadata({ options, metadata, className }: CardMetadataProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

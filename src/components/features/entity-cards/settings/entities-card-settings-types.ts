@@ -9,7 +9,6 @@ import type {
 	TextureConfig,
 	TextureSystem,
 } from '@/components/features/entity-cards/types/base-card-types';
-import type { ReactNode } from 'react';
 import type * as React from 'react';
 import type { BaseLayerConfig } from '../layers/layer-plugin-system';
 import type { AnimationSystem } from '../modules/animation';
@@ -59,7 +58,7 @@ export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 	explode?: Partial<ExplodeSystem>;
 
 	// Efectos
-	effects?: {
+	effects: {
 		shadow?: {
 			enabled?: boolean;
 			color?: string;
@@ -79,15 +78,37 @@ export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 	};
 
 	// Rendimiento
-	performance?: {
+	performance: {
 		enableHardwareAcceleration?: boolean;
 		useRAF?: boolean;
 		batchUpdates?: boolean;
 		throttleMs?: number;
+
+		// Optimización de carga
+		lazyLoad?: boolean;
+		imageOptimization?: boolean;
+		prefetchOnHover?: boolean;
+		placeholderImage?: boolean;
+		useSkeletonLoading?: boolean;
+
+		// Virtualización y Caché
+		virtualizeList?: boolean;
+		cacheStrategy?: 'none' | 'memory' | 'persistent';
+
+		// Animaciones y Transiciones
+		reducedMotion?: boolean;
+		animationDuration?: number;
+		animationMaxFPS?: number;
+		animationTimingFunction?: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
+
+		// Respuesta y Retrasos
+		debounceTime?: number;
+		transitionDelay?: number;
 	};
 
 	// Estados
-	states?: {
+	states: {
+		// Estados básicos
 		hover?: {
 			scale?: number;
 			rotate?: boolean;
@@ -103,6 +124,26 @@ export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 			opacity?: number;
 			grayscale?: boolean;
 		};
+
+		// Estados adicionales y transformaciones
+		isHovered?: boolean;
+		isFocused?: boolean;
+		isActive?: boolean;
+		isSelected?: boolean;
+
+		// Transformaciones por estado
+		hoverScale?: number;
+		hoverRotate?: number;
+		hoverTranslateY?: number;
+		focusScale?: number;
+		focusRotate?: number;
+		focusTranslateY?: number;
+		activeScale?: number;
+		activeRotate?: number;
+		activeTranslateY?: number;
+		selectedScale?: number;
+		selectedRotate?: number;
+		selectedTranslateY?: number;
 	};
 
 	// Visual
@@ -171,116 +212,42 @@ export interface CardOptions extends React.ComponentPropsWithoutRef<'div'> {
 	imageGridGap?: number;
 	imageGridAspectRatio?: string;
 
-	// Estados y Animaciones
-	states?: {
-		hover?: boolean;
-		focus?: boolean;
-		active?: boolean;
-		selected?: boolean;
-		hoverScale?: number;
-		hoverRotate?: number;
-		hoverTranslateY?: number;
-		focusScale?: number;
-		focusRotate?: number;
-		focusTranslateY?: number;
-		activeScale?: number;
-		activeRotate?: number;
-		activeTranslateY?: number;
-		selectedScale?: number;
-		selectedRotate?: number;
-		selectedTranslateY?: number;
-	};
-
-	// Efectos Visuales
-	visualEffects?: {
-		// Ajustes de imagen
-		brightness?: number;
-		contrast?: number;
-		saturate?: number;
-		hueRotate?: number;
-
-		// Filtros de estilo
-		grayscale?: number;
-		sepia?: number;
-		invert?: number;
-		opacity?: number;
-
-		// Efectos de desenfoque
-		blur?: number;
-		dropShadow?: boolean;
-
-		// Efectos de fondo
-		backdropBlur?: number;
-		backdropBrightness?: number;
-		backdropSaturate?: number;
-		backdropOpacity?: number;
-	};
-
-	// Rendimiento
-	performance?: {
-		// Optimización de carga
-		lazyLoad?: boolean;
-		imageOptimization?: boolean;
-		prefetchOnHover?: boolean;
-		placeholderImage?: boolean;
-		useSkeletonLoading?: boolean;
-
-		// Virtualización y Caché
-		virtualizeList?: boolean;
-		cacheStrategy?: 'none' | 'memory' | 'persistent';
-		enableHardwareAcceleration?: boolean;
-
-		// Animaciones y Transiciones
-		reducedMotion?: boolean;
-		animationDuration?: number;
-		animationMaxFPS?: number;
-		animationTimingFunction?: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
-
-		// Respuesta y Retrasos
-		debounceTime?: number;
-		transitionDelay?: number;
-	};
-
-	// Efectos Avanzados
-	effects: EffectsOptions;
-
 	// Configuración general
-	title: string;
-	description: string;
-	imageUrl: string;
-	backgroundColor: string;
-	textColor: string;
+	title?: string;
+	description?: string;
+	imageUrl?: string;
+	backgroundColor?: string;
 
 	// Configuración de contenido
-	showImage: boolean;
-	titlePosition: 'top' | 'bottom' | 'center';
-	descriptionPosition: 'top' | 'bottom' | 'center';
-	imagePosition: 'top' | 'bottom' | 'center' | 'background';
+	showImage?: boolean;
+	titlePosition?: 'top' | 'bottom' | 'center';
+	descriptionPosition?: 'top' | 'bottom' | 'center';
+	imagePosition?: 'top' | 'bottom' | 'center' | 'background';
 
 	// Configuración de animación
-	animations: {
-		enabled: boolean;
-		type: 'none' | 'fade' | 'slide' | 'zoom' | 'flip' | 'custom';
-		duration: number;
-		delay: number;
-		easing: string;
+	animations?: {
+		enabled?: boolean;
+		type?: 'none' | 'fade' | 'slide' | 'zoom' | 'flip' | 'custom';
+		duration?: number;
+		delay?: number;
+		easing?: string;
 		customAnimation?: string;
 	};
 
 	// Configuración de exportación
-	export: {
-		format: 'png' | 'jpg' | 'svg' | 'webp';
-		quality: number;
-		width: number;
-		height: number;
-		dpi: number;
+	export?: {
+		format?: 'png' | 'jpg' | 'svg' | 'webp';
+		quality?: number;
+		width?: number;
+		height?: number;
+		dpi?: number;
 	};
 
 	// Configuración avanzada
-	advanced: {
-		customCss: string;
-		customJs: string;
-		customAttributes: Record<string, string>;
+	advanced?: {
+		customCss?: string;
+		customJs?: string;
+		customAttributes?: Record<string, string>;
 	};
 
 	// Propiedades existentes

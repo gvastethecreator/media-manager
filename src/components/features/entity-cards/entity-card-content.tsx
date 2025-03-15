@@ -4,23 +4,23 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import type { ImageGridImage } from './layouts/image-grid';
 import { ImageGrid } from './layouts/image-grid';
-import type { CardOptions } from './types/card-settings-types';
+import type { CardOptions } from './types/unified-card-types';
 
 export interface EntityCardContentProps {
 	// Contenido básico
-	title?: React.ReactNode;
-	description?: React.ReactNode;
+	title?: string;
+	description?: string;
 
 	// Props para imágenes
-	image?: string | null;
+	image?: string;
 	images?: ImageGridImage[];
-	imageLayout?: 'single' | 'dual' | 'quad' | 'six' | 'grid' | 'carousel' | 'none';
-	imageStyle?: 'standard' | 'polaroid' | 'rounded' | 'bordered' | 'framed';
-	options?: CardOptions;
+	imageLayout?: 'single' | 'dual' | 'triple' | 'quad' | 'six';
+	imageStyle?: 'standard' | 'masonry' | 'carousel' | 'polaroid' | 'overlap';
+	options?: Partial<CardOptions>;
 
 	// Props opcionales
 	className?: string;
@@ -59,10 +59,34 @@ export function EntityCardContent({
 	badges = [],
 	isPreview = false,
 }: EntityCardContentProps) {
-	// Procesar imágenes para el grid
-	const hasImageGrid = images && images.length > 0;
-	const hasSimpleImage = typeof image === 'string' && image.length > 0;
-	const hasImage = image || (images && images.length > 0);
+	const [isLoaded, setIsLoaded] = useState(false);
+
+	// Determinar si se debe mostrar el título, descripción, etc.
+	const showTitle = options.showTitle !== false;
+	const showDescription = options.showDescription !== false;
+	const showImage = options.showImage !== false;
+	const showImageCount = options.showImageCount === true;
+
+	// Preparar imágenes para el grid
+	const gridImages: ImageGridImage[] = [];
+
+	// Si hay una imagen principal, añadirla primero
+	if (image) {
+		gridImages.push({ src: image, alt: title || 'Imagen principal' });
+	}
+
+	// Añadir el resto de imágenes
+	if (images && images.length > 0) {
+		gridImages.push(...images);
+	}
+
+	// Efecto para animación de carga
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoaded(true);
+		}, 100);
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<div className={cn('relative z-10 flex flex-col h-full', className)}>
@@ -75,33 +99,22 @@ export function EntityCardContent({
 			</div>
 
 			{/* Imagen si existe */}
-			{hasImage && imageLayout !== 'none' && (
-				<div className="relative aspect-video rounded-md overflow-hidden mb-3">
-					{hasSimpleImage && (
-						<Image
-							src={image as string}
-							alt={typeof title === 'string' ? title : 'Entity image'}
-							fill
-							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-							className={cn('object-cover', {
-								'border border-[--border] p-1': imageStyle === 'bordered',
-								'border-4 border-[--background] shadow-md': imageStyle === 'polaroid',
-								'border border-[--border] p-2 shadow-md': imageStyle === 'framed',
-							})}
-						/>
-					)}
-
-					{/* Grid de imágenes si existe */}
-					{hasImageGrid && (
-						<div className="absolute inset-0">
-							<ImageGrid
-								images={images}
-								layout={imageLayout === 'grid' || imageLayout === 'carousel' ? 'quad' : imageLayout}
-								style={imageStyle === 'framed' ? 'bordered' : imageStyle}
-							/>
-						</div>
-					)}
-				</div>
+			{showImage && gridImages.length > 0 && (
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: isLoaded ? 1 : 0 }}
+					transition={{ duration: 0.3 }}
+					className="entity-card-image-container"
+				>
+					<ImageGrid
+						images={gridImages}
+						layout={imageLayout}
+						style={imageStyle}
+						showCount={showImageCount}
+						aspectRatio={options.imageGridAspectRatio || options.imageGrid?.aspectRatio || '1:1'}
+						gap={options.imageGridGap || options.imageGrid?.gap || 4}
+					/>
+				</motion.div>
 			)}
 
 			{/* Etiquetas */}
@@ -115,11 +128,44 @@ export function EntityCardContent({
 				</div>
 			)}
 
-			{/* Descripción */}
-			{description && <p className="text-sm text-[--muted-foreground] line-clamp-3 mb-3">{description}</p>}
+			{/* Contenido de texto */}
+			<div className="entity-card-text-content">
+				{/* Título */}
+				{showTitle && title && (
+					<motion.h3
+						initial={{ opacity: 0, y: 5 }}
+						animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 5 }}
+						transition={{ duration: 0.3, delay: 0.1 }}
+						className="entity-card-title"
+					>
+						{title}
+					</motion.h3>
+				)}
 
-			{/* Contenido personalizado */}
-			{children}
+				{/* Descripción */}
+				{showDescription && description && (
+					<motion.p
+						initial={{ opacity: 0, y: 5 }}
+						animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 5 }}
+						transition={{ duration: 0.3, delay: 0.2 }}
+						className="entity-card-description"
+					>
+						{description}
+					</motion.p>
+				)}
+
+				{/* Contenido adicional */}
+				{children && (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: isLoaded ? 1 : 0 }}
+						transition={{ duration: 0.3, delay: 0.3 }}
+						className="entity-card-children"
+					>
+						{children}
+					</motion.div>
+				)}
+			</div>
 
 			{/* Acciones */}
 			{!isPreview && (onEdit || onDelete) && (

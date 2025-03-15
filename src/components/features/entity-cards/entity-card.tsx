@@ -9,10 +9,12 @@ import { LayerRenderer } from './layers/layer-plugin-system';
 import { useAnimationSystem } from './modules/animation';
 import { useColors } from './modules/colors';
 import { CoreLayer } from './modules/core';
-import { useDesignSystem } from './modules/design';
+import { legacyToDesignSystem, useDesignSystem } from './modules/design';
 import './styles/card-borders.css';
 // Importar tipos desde el archivo centralizado
-import type { AnimationSystemType, BacksideOptionsType, CardOptions, DesignSystemType } from './types';
+import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './types';
+// Importar tipo DesignSystem desde el módulo de diseño
+import type { DesignSystem } from './modules/design/types';
 // Importar tipos de imagen desde el componente ImageGrid
 import type { ImageGridImage, ImageGridProps } from './layouts/image-grid';
 // Tipo de alias para compatibilidad
@@ -122,7 +124,7 @@ export interface EntityCardProps {
 	imageLayout?: ImageGridLayout;
 	imageStyle?: ImageGridStyle;
 	backsideContent?: React.ReactNode;
-	design?: DesignSystemType;
+	design?: Partial<DesignSystem>;
 	animation?: AnimationSystemType;
 	backside?: BacksideOptionsType;
 	// Flags para habilitar/deshabilitar módulos
@@ -184,17 +186,70 @@ export function EntityCard({
 		logErrors: true,
 	});
 
+	// Opciones por defecto para asegurar que siempre haya valores válidos
+	const defaultOptions = {
+		layerSystem: {
+			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+			layerBlending: 'normal',
+			layerSpacing: 2,
+		},
+		designSystem: {
+			preset: 'default',
+			variant: 'default',
+			aspectRatio: '1/1',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 2,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#3b82f6',
+		secondaryColor: '#1d4ed8',
+		hoverLiftHeight: 10,
+		maxRotation: 15,
+	};
+
+	// Combinar opciones por defecto con las proporcionadas
+	const mergedOptions = {
+		...defaultOptions,
+		...options,
+		// Asegurar que las propiedades anidadas se combinen correctamente
+		layerSystem: {
+			...(defaultOptions.layerSystem || {}),
+			...(options.layerSystem || {}),
+		},
+		designSystem: {
+			...(defaultOptions.designSystem || {}),
+			...(options.designSystem || {}),
+		},
+	};
+
 	// Incorporar hooks de los módulos con manejo de errores
 	try {
 		// Inicializar hooks con valores predeterminados o proporcionados
-		const designSystemHook = useDesignSystem(design || {});
+		const designSystemHook = useDesignSystem(
+			design || (mergedOptions.designSystem ? legacyToDesignSystem(mergedOptions) : {})
+		);
+
 		const animationSystemHook = useAnimationSystem(animation || {});
 		const colorsHook = useColors({
-			initialOptions: options.colors
-				? { colorPalette: typeof options.colors === 'string' ? options.colors : undefined }
+			initialOptions: mergedOptions.colors
+				? { colorPalette: typeof mergedOptions.colors === 'string' ? mergedOptions.colors : undefined }
 				: {},
 		});
-		const layersHook = useLayersSystem({ layers: options.layers });
+		const layersHook = useLayersSystem({
+			layers: mergedOptions.layers || [],
+			// Asegurar que se proporcionen valores por defecto para el sistema de capas
+			layerOrder: mergedOptions.layerSystem?.order || [
+				'background',
+				'content',
+				'effects',
+				'holographic',
+				'border',
+				'filter',
+			],
+			layerBlending: mergedOptions.layerSystem?.layerBlending || 'normal',
+			layerSpacing: mergedOptions.layerSystem?.layerSpacing || 2,
+		});
 
 		// Función para reintentar después de un error
 		const handleRetry = () => {
@@ -208,7 +263,7 @@ export function EntityCard({
 
 		// Función para voltear la tarjeta
 		const handleFlip = () => {
-			if (enableBackside) {
+			if (enableBackside || mergedOptions.backside?.enabled) {
 				setIsFlipped(!isFlipped);
 			}
 		};
@@ -261,6 +316,9 @@ export function EntityCard({
 			return <CardErrorDisplay error={error} onRetry={handleRetry} />;
 		}
 
+		// Aplicar estilos del sistema de diseño si está habilitado
+		const designStyles = enableDesign ? designSystemHook.generateCssStyles() : {};
+
 		return (
 			<div
 				ref={containerRef}
@@ -268,6 +326,7 @@ export function EntityCard({
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
 				className="entity-card-container"
+				style={designStyles as React.CSSProperties}
 			>
 				<button
 					type="button"
@@ -286,9 +345,9 @@ export function EntityCard({
 								mousePosition={mousePosition}
 								activeLayer={activeLayer}
 								getExplodeLayerTransform={getExplodeLayerTransform}
-								entityType={options.entityType || 'default'}
+								entityType={mergedOptions.entityType || 'default'}
 								entityId={id}
-								configs={options.layerConfigs}
+								configs={mergedOptions.layerConfigs}
 							/>
 						)}
 
@@ -300,14 +359,14 @@ export function EntityCard({
 							images={Array.isArray(image) ? image : []}
 							imageLayout={imageLayout}
 							imageStyle={imageStyle}
-							options={options}
+							options={mergedOptions}
 						>
 							{children}
 						</EntityCardContent>
 					</div>
 
 					{/* Cara Posterior */}
-					{enableBackside && (
+					{(enableBackside || mergedOptions.backside?.enabled) && (
 						<div className="entity-card-back">
 							<div className="backside-content">{backsideContent}</div>
 						</div>

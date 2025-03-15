@@ -13,7 +13,7 @@ interface CardGrainProps {
 export function CardGrain({ options, isHovered, className }: CardGrainProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { grainIntensity = 1, grainColor } = visualEffects;
 

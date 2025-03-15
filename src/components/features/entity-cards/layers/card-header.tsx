@@ -19,7 +19,7 @@ interface CardHeaderProps {
 export function CardHeader({ options, title, subtitle, badges, className }: CardHeaderProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
 	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
 

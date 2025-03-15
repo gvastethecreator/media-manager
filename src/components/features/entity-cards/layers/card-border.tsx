@@ -13,7 +13,7 @@ interface CardBorderProps {
 export function CardBorder({ options, isHovered, className }: CardBorderProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius, borderStyle, borderWidth } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius, borderStyle, borderWidth } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

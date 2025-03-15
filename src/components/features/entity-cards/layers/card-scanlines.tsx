@@ -13,9 +13,9 @@ interface CardScanlinesProps {
 export function CardScanlines({ options, isHovered, className }: CardScanlinesProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
-	const { holographicIntensity = 1, holographicColor } = visualEffects;
+	const { holographicIntensity = 1, holographicColor } = visualEffects || {};
 
 	return (
 		<motion.div
