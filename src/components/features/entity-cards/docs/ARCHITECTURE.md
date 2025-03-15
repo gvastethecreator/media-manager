@@ -82,3 +82,119 @@ El sistema de presets permite guardar y aplicar configuraciones visuales:
 - Utiliza Server Components y Server Actions para operaciones del servidor
 - Integra con Prisma para persistencia de configuraciones
 - Utiliza TailwindCSS para estilos y shadcn/ui para componentes de interfaz
+
+## Diagramas de Arquitectura
+
+### Flujo de Datos
+
+```mermaid
+flowchart TD
+    A[Usuario solicita tarjeta] --> B[EntityCardAdapter]
+    B --> C{Tipo de Entidad}
+    C -->|Carpeta| D[FolderCardLayout]
+    C -->|Álbum| E[AlbumCardLayout]
+    C -->|Etiqueta| F[TagCardLayout]
+    C -->|Otros| G[Otros Layouts]
+
+    D & E & F & G --> H[EntityCardWrapper]
+    H --> I[EntityCard]
+    I --> J[EntityCardContent]
+    I --> K[LayerRenderer]
+
+    K --> L1[Capa: Background]
+    K --> L2[Capa: Content]
+    K --> L3[Capa: Effects]
+    K --> L4[Capa: Border]
+
+    J --> M[Renderizado Final]
+    L1 & L2 & L3 & L4 --> M
+```
+
+### Estructura de Componentes
+
+```mermaid
+classDiagram
+    class EntityCardAdapter {
+        +entityType: string
+        +entity: Entity
+        +options: CardOptions
+        +render()
+    }
+
+    class EntityCardWrapper {
+        +entityType: string
+        +entityId: string
+        +title: string
+        +description: string
+        +options: CardOptions
+        +render()
+    }
+
+    class EntityCard {
+        +id: string
+        +title: string
+        +description: string
+        +image: string
+        +options: CardOptions
+        +enableLayers: boolean
+        +enableDesign: boolean
+        +enableAnimation: boolean
+        +render()
+    }
+
+    class EntityCardContent {
+        +title: string
+        +description: string
+        +image: string
+        +images: ImageGridImage[]
+        +imageLayout: string
+        +imageStyle: string
+        +render()
+    }
+
+    class LayerRenderer {
+        +isExploded: boolean
+        +isHovered: boolean
+        +mousePosition: {x,y}
+        +activeLayer: string
+        +entityType: string
+        +entityId: string
+        +configs: object
+        +render()
+    }
+
+    class FolderCardLayout {
+        +folder: Folder
+        +onClick: function
+        +showVisualConfig: boolean
+        +enableExplode: boolean
+        +render()
+    }
+
+    EntityCardAdapter --> EntityCardWrapper
+    EntityCardWrapper --> EntityCard
+    EntityCard --> EntityCardContent
+    EntityCard --> LayerRenderer
+    FolderCardLayout --> EntityCardWrapper
+```
+
+### Sistema de Capas
+
+```mermaid
+flowchart LR
+    A[Tarjeta Base] --> B[Capa: Background]
+    B --> C[Capa: Content]
+    C --> D[Capa: Effects]
+    D --> E[Capa: Holographic]
+    E --> F[Capa: Border]
+    F --> G[Capa: Filter]
+
+    subgraph Modo Explotado
+    H[Tarjeta Explotada] --> I[Capa Background]
+    I --> J[Capa Content]
+    J --> K[Capa Effects]
+    K --> L[Capa Border]
+    end
+
+    A -- "Activar Explosión" --> H
+```

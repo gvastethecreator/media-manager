@@ -1,0 +1,269 @@
+---
+description: Concise best practices for performance optimization in an image management application
+globs: **/*.{ts,tsx,js,jsx}
+alwaysApply: false
+---
+- **Lazy Loading de Imágenes:** Implementar lazy loading para todas las imágenes, cargando solo las visibles en viewport.
+- **Uso de BlurHash:** Utilizar BlurHash o soluciones similares para placeholders estéticos durante la carga de imágenes.
+- **Selección Responsive de Imágenes:** Servir diferentes tamaños de imagen según el dispositivo y la resolución de pantalla.
+- **Next.js Image Optimization:** Aprovechar el componente Image de Next.js para optimización automática y lazy loading.
+- **Prefetching Estratégico:** Precargar imágenes que probablemente serán vistas a continuación (siguiente página, hover).
+- **Code Splitting:** Dividir el código JavaScript por rutas y características para reducir el bundle inicial.
+- **Tree Shaking Agresivo:** Asegurar que solo se incluya código utilizado en los bundles finales.
+- **Web Vitals Monitoring:** Implementar monitorización de Core Web Vitals, con énfasis en LCP para imágenes.
+- **Optimización de Fuentes:** Cargar fuentes críticas de manera óptima y utilizar font-display swap.
+- **CSS Crítico Inline:** Incluir CSS crítico inline para evitar bloqueo de renderizado.
+- **Paginación e Infinite Scroll:** Implementar carga paginada o infinite scroll para colecciones grandes de imágenes.
+- **Virtualización de Listas:** Utilizar virtualización para renderizar solo los elementos visibles en listas largas.
+- **Memoización de Componentes:** Aplicar React.memo y useMemo estratégicamente para evitar re-renders innecesarios.
+- **Optimización de Animaciones:** Utilizar propiedades CSS optimizadas (transform, opacity) para animaciones fluidas.
+- **Debounce y Throttle:** Aplicar debounce en búsquedas y throttle en eventos de scroll para mejorar la responsividad.
+
+```mermaid
+graph TD
+    A[Estrategias de Rendimiento] --> B[Front-end]
+    A --> C[Back-end]
+    A --> D[Monitorización]
+
+    B --> B1[Carga de Imágenes]
+    B --> B2[JavaScript]
+    B --> B3[CSS]
+
+    C --> C1[Optimización de API]
+    C --> C2[Caché]
+    C --> C3[Optimización de Imágenes]
+
+    D --> D1[Core Web Vitals]
+    D --> D2[Error Tracking]
+    D --> D3[Analytics]
+
+    B1 --> B11[Lazy Loading]
+    B1 --> B12[Responsive Images]
+    B1 --> B13[BlurHash/LQIP]
+
+    B2 --> B21[Code Splitting]
+    B2 --> B22[Tree Shaking]
+    B2 --> B23[Memoización]
+
+    C3 --> C31[Sharp]
+    C3 --> C32[Formatos Modernos]
+    C3 --> C33[CDN]
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+    style B1 fill:#bbdefb
+    style C3 fill:#bbdefb
+```
+
+**Ejemplos de implementación**:
+
+```tsx
+// components/optimized-image.tsx - Componente optimizado para imágenes
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { Blurhash } from 'react-blurhash';
+import { useInView } from 'react-intersection-observer';
+
+interface OptimizedImageProps {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  blurhash?: string;
+  priority?: boolean;
+  className?: string;
+}
+
+export function OptimizedImage({
+  src,
+  alt,
+  width,
+  height,
+  blurhash,
+  priority = false,
+  className = '',
+}: OptimizedImageProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: '200px 0px', // Cargar un poco antes de entrar en viewport
+  });
+
+  // Si no hay blurhash, usar un color sólido como fallback
+  const blurColor = !blurhash ? 'bg-gray-200 dark:bg-gray-800' : '';
+
+  return (
+    <div
+      ref={ref}
+      className={`relative overflow-hidden ${className}`}
+      style={{ aspectRatio: `${width}/${height}` }}
+    >
+      {/* BlurHash placeholder */}
+      {blurhash && !isLoaded && (
+        <div className="absolute inset-0 z-0">
+          <Blurhash
+            hash={blurhash}
+            width="100%"
+            height="100%"
+            resolutionX={32}
+            resolutionY={32}
+            punch={1}
+          />
+        </div>
+      )}
+
+      {/* Color placeholder si no hay BlurHash */}
+      {!blurhash && !isLoaded && (
+        <div className={`absolute inset-0 z-0 ${blurColor}`} />
+      )}
+
+      {/* Imagen real */}
+      {(inView || priority) && (
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          className={`z-10 transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setIsLoaded(true)}
+          loading={priority ? 'eager' : 'lazy'}
+          priority={priority}
+        />
+      )}
+    </div>
+  );
+}
+
+// components/virtualized-image-grid.tsx - Grid de imágenes virtualizado
+import { CSSProperties, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { OptimizedImage } from './optimized-image';
+import type { Image } from '@/types/image';
+
+interface VirtualizedImageGridProps {
+  images: Image[];
+  columnCount?: number;
+  gap?: number;
+  onImageClick?: (image: Image) => void;
+}
+
+export function VirtualizedImageGrid({
+  images,
+  columnCount = 3,
+  gap = 16,
+  onImageClick,
+}: VirtualizedImageGridProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Organizar imágenes en filas para virtualización
+  const rows = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < images.length; i += columnCount) {
+      result.push(images.slice(i, i + columnCount));
+    }
+    return result;
+  }, [images, columnCount]);
+
+  // Calcular altura de cada fila basada en el ratio de aspecto de las imágenes
+  const rowHeights = useMemo(() => {
+    return rows.map(row => {
+      // Encuentra la altura apropiada basada en el ratio de aspecto de las imágenes
+      const firstImageInRow = row[0];
+      if (!firstImageInRow) return 200; // Altura por defecto si no hay imagen
+
+      // Calcular basado en aspecto ratio
+      const aspectRatio = firstImageInRow.width / firstImageInRow.height;
+      const estimatedHeight = (window.innerWidth / columnCount) / aspectRatio;
+      return Math.min(400, Math.max(150, estimatedHeight));
+    });
+  }, [rows, columnCount]);
+
+  // Configurar virtualizador
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => rowHeights[index] + gap,
+    overscan: 5, // Renderizar filas extra para scroll fluido
+  });
+
+  return (
+    <div
+      ref={parentRef}
+      className="w-full h-[80vh] overflow-auto"
+    >
+      <div
+        className="relative w-full"
+        style={{ height: `${virtualizer.getTotalSize()}px` }}
+      >
+        {virtualizer.getVirtualItems().map(virtualRow => {
+          const row = rows[virtualRow.index];
+          return (
+            <div
+              key={virtualRow.index}
+              className="absolute top-0 left-0 w-full flex"
+              style={{
+                height: `${rowHeights[virtualRow.index]}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+                gap: `${gap}px`,
+              }}
+            >
+              {row.map((image, colIndex) => (
+                <div
+                  key={image.id}
+                  className="flex-1"
+                  style={{ maxWidth: `${100 / columnCount}%` }}
+                  onClick={() => onImageClick?.(image)}
+                >
+                  <OptimizedImage
+                    src={image.thumbnailUrl}
+                    alt={image.title || 'Image'}
+                    width={image.width}
+                    height={image.height}
+                    blurhash={image.blurhash}
+                    className="w-full h-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// hooks/use-optimized-loading.ts - Hook para precarga de imágenes
+export function useOptimizedLoading(imagesToPreload: string[]) {
+  useEffect(() => {
+    const preloadImages = async () => {
+      const promises = imagesToPreload.map(src => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = src;
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      });
+
+      try {
+        // Precargar en paralelo con límite
+        await Promise.allSettled(promises);
+      } catch (error) {
+        console.warn('Error preloading images:', error);
+      }
+    };
+
+    // Solo precargar si hay imágenes y el navegador está inactivo
+    if (imagesToPreload.length > 0) {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          preloadImages();
+        });
+      } else {
+        setTimeout(preloadImages, 200);
+      }
+    }
+  }, [imagesToPreload]);
+}

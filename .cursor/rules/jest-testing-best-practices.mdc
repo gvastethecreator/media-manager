@@ -1,6 +1,7 @@
 ---
 description: Concise best practices for Jest testing, ensuring code quality and coverage.
 globs: __tests__/**/*.{ts,tsx,js,jsx},components/**/*.test.{ts,tsx,js,jsx},app/**/*.test.{ts,tsx,js,jsx}
+alwaysApply: false
 ---
 - **Unit, Integration & E2E Tests:** Write a mix of unit, integration, and consider E2E tests.
 - **Organized Tests (Co-located or `__tests__`):** Organize tests logically, either co-located or in `__tests__` folders.

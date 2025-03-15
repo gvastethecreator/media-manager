@@ -8,6 +8,7 @@ interface Entity {
 	[key: string]: any;
 }
 
+import { useEffect, useState } from 'react';
 import { createCardAdapter } from './adapters/card-adapter-factory';
 import { AlbumCard } from './layouts/album-card';
 import { CharacterCard } from './layouts/character-card';
@@ -80,6 +81,41 @@ export function EntityCardAdapter({
 	onActiveLayerChange,
 	className,
 }: EntityCardAdapterProps) {
+	// Estado para manejar la carga de datos adicionales si es necesario
+	const [enhancedEntity, setEnhancedEntity] = useState<Entity>(entity);
+
+	// Efecto para cargar datos adicionales según el tipo de entidad
+	useEffect(() => {
+		// Función para cargar datos adicionales de carpetas
+		const loadFolderData = async (folderId: string) => {
+			try {
+				// Solo cargar datos adicionales si no están ya presentes
+				if (!entity.totalFiles && !entity.totalSize) {
+					const response = await fetch(`/api/folders/${folderId}/stats`);
+					if (response.ok) {
+						const stats = await response.json();
+						setEnhancedEntity({
+							...entity,
+							totalFiles: stats.totalFiles || 0,
+							totalSize: stats.totalSize || 0,
+							imageCount: stats.imageCount || 0,
+							lastIndexed: stats.lastIndexed || null,
+						});
+					}
+				}
+			} catch (error) {
+				console.error('Error al cargar estadísticas de carpeta:', error);
+			}
+		};
+
+		// Cargar datos adicionales según el tipo de entidad
+		if (entityType === 'folder' && entity.id) {
+			loadFolderData(entity.id);
+		}
+
+		// Para otros tipos de entidad, podríamos añadir más lógica aquí
+	}, [entityType, entity]);
+
 	// Propiedades comunes para todos los tipos de tarjetas
 	const commonProps = {
 		onClick,
@@ -99,7 +135,7 @@ export function EntityCardAdapter({
 
 	if (CardAdapter) {
 		// Crear un objeto con la propiedad específica para este tipo de entidad
-		const entityProp = { [entityType]: { ...entity, presetId: entity.presetId || null } };
+		const entityProp = { [entityType]: { ...enhancedEntity, presetId: enhancedEntity.presetId || null } };
 		// Combinar las propiedades comunes con la propiedad específica de la entidad
 		return <CardAdapter {...commonProps} {...entityProp} />;
 	}

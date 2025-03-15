@@ -1,0 +1,763 @@
+/* Estilos para tarjetas de carpetas - Inspirado en cartas Magic/Pokémon TCG */
+
+/* Contenedor principal */
+.folder-card {
+	@layer components {
+		position: relative;
+		overflow: hidden;
+		transition-property: all;
+		transition-duration: 300ms;
+		transform-style: preserve-3d;
+		border-radius: 1rem;
+		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+		background-color: #1a1a1a;
+		border: none;
+		/* Borde interno estilizado */
+		background-clip: padding-box;
+
+		/* Efecto de marco dorado para todas las tarjetas */
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			padding: 2px;
+			/* Grosor del borde */
+			border-radius: inherit;
+			background: linear-gradient(135deg,
+					rgba(255, 215, 0, 0.8),
+					rgba(255, 215, 0, 0.2),
+					rgba(255, 215, 0, 0.8));
+			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			-webkit-mask-composite: xor;
+			mask-composite: exclude;
+			pointer-events: none;
+		}
+	}
+}
+
+/* Contenido de la tarjeta */
+.folder-card-content {
+	@layer components {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		background: linear-gradient(to bottom, rgba(30, 30, 30, 0.9), rgba(15, 15, 15, 0.95));
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+}
+
+/* Encabezado de la tarjeta */
+.folder-card-header {
+	@layer components {
+		padding: 0.75rem;
+		border-bottom-width: 0;
+		position: relative;
+		background: linear-gradient(to bottom, rgba(60, 60, 60, 0.4), transparent);
+		text-align: center;
+
+		/* Decoración de esquinas tipo Magic */
+		&::before,
+		&::after {
+			content: "";
+			position: absolute;
+			width: 1.5rem;
+			height: 1.5rem;
+			border-color: currentColor;
+			opacity: 0.6;
+		}
+
+		&::before {
+			top: 0.25rem;
+			left: 0.25rem;
+			border-top: 2px solid;
+			border-left: 2px solid;
+			border-top-left-radius: 0.25rem;
+		}
+
+		&::after {
+			top: 0.25rem;
+			right: 0.25rem;
+			border-top: 2px solid;
+			border-right: 2px solid;
+			border-top-right-radius: 0.25rem;
+		}
+	}
+}
+
+/* Variantes de encabezado por rareza */
+.folder-header-common {
+	@layer components {
+		border-color: rgb(209 213 219);
+		background: linear-gradient(to bottom, rgba(156, 163, 175, 0.3), transparent);
+		color: rgb(209 213 219);
+	}
+}
+
+.folder-header-uncommon {
+	@layer components {
+		border-color: rgb(134 239 172);
+		background: linear-gradient(to bottom, rgba(34, 197, 94, 0.3), transparent);
+		color: rgb(134 239 172);
+	}
+}
+
+.folder-header-rare {
+	@layer components {
+		border-color: rgb(147 197 253);
+		background: linear-gradient(to bottom, rgba(59, 130, 246, 0.3), transparent);
+		color: rgb(147 197 253);
+	}
+}
+
+.folder-header-legendary {
+	@layer components {
+		border-color: rgb(253 224 71);
+		background: linear-gradient(to bottom, rgba(234, 179, 8, 0.3), transparent);
+		color: rgb(253 224 71);
+	}
+}
+
+/* Contenedor del título */
+.folder-card-title-container {
+	@layer components {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 0.5rem;
+		position: relative;
+
+		/* Efecto de resplandor para el título */
+		&::after {
+			content: "";
+			position: absolute;
+			left: 50%;
+			bottom: -0.25rem;
+			transform: translateX(-50%);
+			width: 80%;
+			height: 1px;
+			background: linear-gradient(to right, transparent, currentColor, transparent);
+			opacity: 0.5;
+		}
+	}
+}
+
+/* Emoji de la carpeta */
+.folder-card-emoji {
+	@layer components {
+		margin-right: 0.5rem;
+		font-size: 1.25rem;
+		filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+	}
+}
+
+/* Título de la carpeta */
+.folder-card-title {
+	@layer components {
+		font-size: 1.25rem;
+		font-weight: 700;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+}
+
+/* Línea de tipo */
+.folder-card-type-line {
+	@layer components {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.875rem;
+		color: rgb(209 213 219);
+		padding: 0.25rem 0.5rem;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 0.25rem;
+		margin: 0.25rem 0;
+		position: relative;
+
+		/* Línea decorativa estilo Magic */
+		&::before {
+			content: "";
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 50%;
+			height: 1px;
+			background: linear-gradient(to right, transparent, currentColor 20%, currentColor 80%, transparent);
+			opacity: 0.3;
+		}
+	}
+}
+
+.dark .folder-card-type-line {
+	@layer components {
+		color: rgb(229 231 235);
+	}
+}
+
+/* Tipo de carpeta */
+.folder-type {
+	@layer components {
+		font-weight: 600;
+		font-style: italic;
+		padding: 0 0.5rem;
+		background-color: rgba(0, 0, 0, 0.4);
+		border-radius: 0.125rem;
+		z-index: 1;
+	}
+}
+
+/* Badge de rareza */
+.folder-rarity-badge {
+	@layer components {
+		padding: 0.125rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+		z-index: 1;
+	}
+}
+
+/* Variantes de badge por rareza */
+.rarity-common {
+	@layer components {
+		background: linear-gradient(135deg, rgb(209 213 219), rgb(156 163 175));
+		color: rgb(31 41 55);
+	}
+}
+
+.dark .rarity-common {
+	@layer components {
+		background: linear-gradient(135deg, rgb(75 85 99), rgb(55 65 81));
+		color: rgb(229 231 235);
+	}
+}
+
+.rarity-uncommon {
+	@layer components {
+		background: linear-gradient(135deg, rgb(167 243 208), rgb(34 197 94));
+		color: rgb(1 71 55);
+	}
+}
+
+.dark .rarity-uncommon {
+	@layer components {
+		background: linear-gradient(135deg, rgb(34 197 94), rgb(6 95 70));
+		color: rgb(209 250 229);
+	}
+}
+
+.rarity-rare {
+	@layer components {
+		background: linear-gradient(135deg, rgb(191 219 254), rgb(37 99 235));
+		color: rgb(30 58 138);
+	}
+}
+
+.dark .rarity-rare {
+	@layer components {
+		background: linear-gradient(135deg, rgb(59 130 246), rgb(30 64 175));
+		color: rgb(219 234 254);
+	}
+}
+
+.rarity-legendary {
+	@layer components {
+		background: linear-gradient(135deg, rgb(254 240 138), rgb(202 138 4));
+		color: rgb(113 63 18);
+	}
+}
+
+.dark .rarity-legendary {
+	@layer components {
+		background: linear-gradient(135deg, rgb(234 179 8), rgb(146 64 14));
+		color: rgb(254 249 195);
+	}
+}
+
+/* Cuerpo de la tarjeta */
+.folder-card-body {
+	@layer components {
+		flex: 1 1 0%;
+		padding: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		background: linear-gradient(to bottom, rgba(40, 40, 40, 0.4), rgba(20, 20, 20, 0.6));
+		position: relative;
+
+		/* Textura sutil */
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+			opacity: 0.5;
+			z-index: 0;
+		}
+	}
+}
+
+/* Contenedor de descripción */
+.folder-card-description-container {
+	@layer components {
+		background-color: rgba(15, 15, 15, 0.6);
+		padding: 0.75rem;
+		border-radius: 0.375rem;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		position: relative;
+		z-index: 1;
+	}
+}
+
+.dark .folder-card-description-container {
+	@layer components {
+		background-color: rgba(15, 23, 42, 0.6);
+	}
+}
+
+/* Descripción */
+.folder-card-description {
+	@layer components {
+		font-size: 0.875rem;
+		color: rgb(209 213 219);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		font-style: italic;
+		line-height: 1.4;
+	}
+}
+
+.dark .folder-card-description {
+	@layer components {
+		color: rgb(229 231 235);
+	}
+}
+
+/* Estadísticas */
+.folder-card-stats {
+	@layer components {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+		margin-bottom: 0.5rem;
+		position: relative;
+		z-index: 1;
+	}
+}
+
+/* Elemento de estadística */
+.folder-stat-item {
+	@layer components {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		border-radius: 0.375rem;
+		background: rgba(15, 15, 15, 0.7);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		position: relative;
+		overflow: hidden;
+
+		/* Efecto de brillo en hover */
+		&:hover::after {
+			content: "";
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+			opacity: 0;
+			animation: stat-glow 1.5s ease-out;
+		}
+	}
+}
+
+@keyframes stat-glow {
+	0% {
+		opacity: 0;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+.dark .folder-stat-item {
+	@layer components {
+		background-color: rgba(15, 23, 42, 0.7);
+	}
+}
+
+/* Icono de estadística */
+.folder-stat-icon {
+	@layer components {
+		height: 1.25rem;
+		width: 1.25rem;
+		margin-bottom: 0.25rem;
+		color: rgb(156 163 175);
+		filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+	}
+}
+
+.dark .folder-stat-icon {
+	@layer components {
+		color: rgb(209 213 219);
+	}
+}
+
+/* Valor de estadística */
+.folder-stat-value {
+	@layer components {
+		font-size: 1rem;
+		font-weight: 700;
+		color: rgb(229 231 235);
+		text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+	}
+}
+
+/* Etiqueta de estadística */
+.folder-stat-label {
+	@layer components {
+		font-size: 0.75rem;
+		color: rgb(156 163 175);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+}
+
+.dark .folder-stat-label {
+	@layer components {
+		color: rgb(209 213 219);
+	}
+}
+
+/* Metadatos */
+.folder-card-metadata {
+	@layer components {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-top: auto;
+		background: rgba(15, 15, 15, 0.6);
+		border-radius: 0.375rem;
+		padding: 0.5rem;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		position: relative;
+		z-index: 1;
+	}
+}
+
+/* Elemento de metadatos */
+.folder-metadata-item {
+	@layer components {
+		display: flex;
+		align-items: center;
+		font-size: 0.75rem;
+		color: rgb(209 213 219);
+	}
+}
+
+.dark .folder-metadata-item {
+	@layer components {
+		color: rgb(229 231 235);
+	}
+}
+
+/* Icono de metadatos */
+.folder-metadata-icon {
+	@layer components {
+		height: 0.875rem;
+		width: 0.875rem;
+		margin-right: 0.375rem;
+		color: rgb(156 163 175);
+	}
+}
+
+.dark .folder-metadata-icon {
+	@layer components {
+		color: rgb(209 213 219);
+	}
+}
+
+/* Etiqueta de metadatos */
+.folder-metadata-label {
+	@layer components {
+		font-weight: 600;
+		margin-right: 0.25rem;
+		color: rgb(156 163 175);
+	}
+}
+
+/* Valor de metadatos */
+.folder-metadata-value {
+	@layer components {
+		color: rgb(209 213 219);
+	}
+}
+
+.dark .folder-metadata-value {
+	@layer components {
+		color: rgb(229 231 235);
+	}
+}
+
+/* Elemento de ruta */
+.folder-path-item {
+	@layer components {
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+}
+
+/* Ruta de carpeta */
+.folder-card-path {
+	@layer components {
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		font-size: 0.7rem;
+	}
+}
+
+/* Pie de tarjeta */
+.folder-card-footer {
+	@layer components {
+		padding: 0.5rem;
+		border-top: none;
+		font-size: 0.75rem;
+		color: rgb(156 163 175);
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+		position: relative;
+
+		/* Decoración de esquinas tipo Magic */
+		&::before,
+		&::after {
+			content: "";
+			position: absolute;
+			width: 1.5rem;
+			height: 1.5rem;
+			border-color: currentColor;
+			opacity: 0.6;
+		}
+
+		&::before {
+			bottom: 0.25rem;
+			left: 0.25rem;
+			border-bottom: 2px solid;
+			border-left: 2px solid;
+			border-bottom-left-radius: 0.25rem;
+		}
+
+		&::after {
+			bottom: 0.25rem;
+			right: 0.25rem;
+			border-bottom: 2px solid;
+			border-right: 2px solid;
+			border-bottom-right-radius: 0.25rem;
+		}
+	}
+}
+
+.dark .folder-card-footer {
+	@layer components {
+		color: rgb(209 213 219);
+	}
+}
+
+/* Variantes de pie por rareza */
+.folder-footer-common {
+	@layer components {
+		border-color: rgb(209 213 219);
+	}
+}
+
+.dark .folder-footer-common {
+	@layer components {
+		border-color: rgb(75 85 99);
+	}
+}
+
+.folder-footer-uncommon {
+	@layer components {
+		border-color: rgb(134 239 172);
+	}
+}
+
+.dark .folder-footer-uncommon {
+	@layer components {
+		border-color: rgb(22 163 74);
+	}
+}
+
+.folder-footer-rare {
+	@layer components {
+		border-color: rgb(147 197 253);
+	}
+}
+
+.dark .folder-footer-rare {
+	@layer components {
+		border-color: rgb(37 99 235);
+	}
+}
+
+.folder-footer-legendary {
+	@layer components {
+		border-color: rgb(253 224 71);
+	}
+}
+
+.dark .folder-footer-legendary {
+	@layer components {
+		border-color: rgb(202 138 4);
+	}
+}
+
+/* Línea de creador */
+.folder-card-creator-line {
+	@layer components {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+}
+
+/* ID de carpeta */
+.folder-id {
+	@layer components {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		font-size: 0.75rem;
+		opacity: 0.7;
+		background: rgba(0, 0, 0, 0.3);
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+	}
+}
+
+/* Estilos para tarjetas por rareza */
+.folder-card-rarity-common {
+	@layer components {
+		border-color: rgb(209 213 219);
+
+		&::before {
+			background: linear-gradient(135deg,
+					rgba(209, 213, 219, 0.8),
+					rgba(209, 213, 219, 0.2),
+					rgba(209, 213, 219, 0.8));
+		}
+	}
+}
+
+.folder-card-rarity-uncommon {
+	@layer components {
+		border-color: rgb(134 239 172);
+
+		&::before {
+			background: linear-gradient(135deg,
+					rgba(134, 239, 172, 0.8),
+					rgba(134, 239, 172, 0.2),
+					rgba(134, 239, 172, 0.8));
+		}
+	}
+}
+
+.folder-card-rarity-rare {
+	@layer components {
+		border-color: rgb(147 197 253);
+
+		&::before {
+			background: linear-gradient(135deg,
+					rgba(147, 197, 253, 0.8),
+					rgba(147, 197, 253, 0.2),
+					rgba(147, 197, 253, 0.8));
+		}
+	}
+}
+
+.folder-card-rarity-legendary {
+	@layer components {
+		border-color: rgb(253 224 71);
+
+		&::before {
+			background: linear-gradient(135deg,
+					rgba(253, 224, 71, 0.8),
+					rgba(253, 224, 71, 0.2),
+					rgba(253, 224, 71, 0.8));
+		}
+	}
+}
+
+/* Efectos de hover */
+.folder-card:hover .folder-stat-icon,
+.folder-card:hover .folder-metadata-icon {
+	@layer components {
+		color: var(--primary);
+	}
+}
+
+/* Animación para tarjetas legendarias */
+@keyframes legendary-glow {
+
+	0%,
+	100% {
+		box-shadow: 0 0 15px rgba(234, 179, 8, 0.5), 0 0 30px rgba(234, 179, 8, 0.2);
+	}
+
+	50% {
+		box-shadow: 0 0 25px rgba(234, 179, 8, 0.7), 0 0 50px rgba(234, 179, 8, 0.3);
+	}
+}
+
+.folder-card-rarity-legendary {
+	@layer components {
+		animation: legendary-glow 3s ease-in-out infinite;
+	}
+}
+
+/* Animación para tarjetas raras */
+@keyframes rare-pulse {
+
+	0%,
+	100% {
+		border-color: rgba(59, 130, 246, 0.5);
+		box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+	}
+
+	50% {
+		border-color: rgba(59, 130, 246, 0.8);
+		box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+	}
+}
+
+.folder-card-rarity-rare {
+	@layer components {
+		animation: rare-pulse 4s ease-in-out infinite;
+	}
+}
+
+/* Modo oscuro */
+.dark .folder-card {
+	@layer components {
+		background-color: rgba(17, 24, 39, 0.8);
+	}
+}

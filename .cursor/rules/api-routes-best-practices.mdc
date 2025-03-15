@@ -1,11 +1,25 @@
 ---
+description: working with api routes
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for secure, performant, and organized Next.js 15 API Routes.
-globs: api/**/*.ts
+globs: app/api/**/*.ts
 alwaysApply: false
 ---
 - **Organized API Route Structure:** Structure API routes with descriptive folders and filenames within `app/api/`.
 - **HTTP Method Handling:** Implement handlers for relevant HTTP methods (GET, POST, PUT, DELETE).
 - **Input Validation in API Routes:** Always validate input data in API routes using Zod or similar.
 - **Error Handling in API Routes:** Implement robust error handling with appropriate HTTP status codes.
-- **Server Actions for Frontend Mutations:** Always Server Actions as an alternative for frontend-initiated mutations.
+- **Server Actions for Frontend Mutations:** Always prefer Server Actions as an alternative for frontend-initiated mutations.
 - **Pagination in API List Routes:** Implement pagination for API routes returning lists of resources.
+- **Image Content Delivery:** Use specialized image routes with proper content-type and caching headers.
+- **Stream Handling for Large Files:** Implement streaming for large file responses (especially images).
+- **Thumbnail Processing:** Use specialized thumbnail routes with caching and optimization.
+- **Event Stream Implementation:** Use proper event stream patterns for progress monitoring.
+- **Route-Specific Rate Limiting:** Apply rate limiting strategies for resource-intensive routes.
+- **Conditional Requests:** Support conditional requests with ETags and Last-Modified headers.
+- **Response Compression:** Implement response compression for textual and JSON responses.
+- **CORS Configuration:** Configure appropriate CORS headers based on route security requirements.
+- **Security Headers:** Add appropriate security headers for all API responses.

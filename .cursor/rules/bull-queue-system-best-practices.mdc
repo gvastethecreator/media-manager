@@ -1,8 +1,13 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for reliable and performant Bull queue system usage.
 globs: services/**/*.ts, app/api/**/*.ts, lib/bull.ts
 ---
-- **Separate Queues by Job Type:** Use distinct queues for different job categories.
+- **Separate Queues by Job Type:** Use distinct queues for different job categories (image processing, thumbnails, etc.).
 - **Error Handling & Retry Mechanism:** Implement robust error handling and retry mechanisms for job failures.
 - **Bull Board for Monitoring & Management:** Utilize Bull Board for queue monitoring and management.
 - **Separate Workers from Main Application:** Run Bull workers in separate processes for scalability.
@@ -10,3 +15,11 @@ globs: services/**/*.ts, app/api/**/*.ts, lib/bull.ts
 - **Queue Cleanup:** Implement a queue cleanup strategy to remove completed/failed jobs.
 - **Job Prioritization:** Use Bull's prioritization options for critical jobs.
 - **Bull Queue Security:** Consider security measures for sensitive data in Bull queues.
+- **Image Processing Queues:** Implement dedicated queues for image processing operations.
+- **Thumbnail Generation Queue:** Use a dedicated queue for thumbnail generation with proper concurrency.
+- **Progress Tracking:** Implement progress tracking for long-running jobs like batch processing.
+- **Job Completion Events:** Use job completion events to trigger follow-up actions.
+- **Memory Management:** Configure memory limits and garbage collection for image processing jobs.
+- **Queue Metrics:** Implement metrics collection for queue performance and health monitoring.
+- **Graceful Shutdown:** Handle graceful shutdown to prevent job loss during application restart.
+- **Job Data Validation:** Validate job data before processing to prevent errors during execution.

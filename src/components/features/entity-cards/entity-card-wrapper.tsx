@@ -161,7 +161,7 @@ export function EntityCardWrapper({
 	return (
 		<EntityCard
 			id={entityId}
-			className={cn('entity-card-wrapper', className)}
+			className={cn('entity-card-wrapper w-full h-full', className)}
 			title={title}
 			description={description}
 			image={image}

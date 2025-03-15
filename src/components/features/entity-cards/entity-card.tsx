@@ -261,6 +261,9 @@ export function EntityCard({
 		const animationClasses = enableAnimation ? cn('animation-system') : '';
 		const colorClasses = cn('color-system');
 
+		// Determinar clases específicas por tipo de entidad
+		const entityTypeClass = mergedOptions.entityType ? `entity-type-${mergedOptions.entityType}` : '';
+
 		// Función para voltear la tarjeta
 		const handleFlip = () => {
 			if (enableBackside || mergedOptions.backside?.enabled) {
@@ -325,18 +328,25 @@ export function EntityCard({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
-				className="entity-card-container"
+				className={cn('entity-card-container w-full h-full', entityTypeClass)}
 				style={designStyles as React.CSSProperties}
 			>
 				<button
 					type="button"
-					className={cn('entity-card', designClasses, animationClasses, colorClasses, className)}
+					className={cn(
+						'entity-card w-full h-full',
+						designClasses,
+						animationClasses,
+						colorClasses,
+						entityTypeClass,
+						className
+					)}
 					onClick={handleFlip}
 					onKeyDown={handleKeyDown}
 					aria-label={typeof title === 'string' ? title : 'Tarjeta de entidad'}
 				>
 					{/* Cara Frontal */}
-					<div className="entity-card-front">
+					<div className="entity-card-front w-full h-full">
 						{/* Sistema de capas */}
 						{enableLayers && layers.length > 0 && (
 							<LayerRenderer
@@ -367,8 +377,8 @@ export function EntityCard({
 
 					{/* Cara Posterior */}
 					{(enableBackside || mergedOptions.backside?.enabled) && (
-						<div className="entity-card-back">
-							<div className="backside-content">{backsideContent}</div>
+						<div className="entity-card-back w-full h-full">
+							<div className="backside-content w-full h-full">{backsideContent}</div>
 						</div>
 					)}
 				</button>
