@@ -1,99 +1,179 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { SettingsIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { ReactNode } from 'react';
-import { EntityTypeIcon } from './entity-type-icon';
-import type { CardOptions } from './types/shared-card-types';
-import { Card3D } from './ui/card-3d';
+import { useCallback, useState } from 'react';
+import { EntityCard } from './entity-card';
+import type { CardOptions } from './types/unified-card-types';
+
+// Opciones por defecto para todas las tarjetas
+const DEFAULT_CARD_OPTIONS: Partial<CardOptions> = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	designSystem: {
+		preset: 'default',
+		variant: 'default',
+		aspectRatio: '1/1',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 2,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'normal',
+		layerSpacing: 2,
+	},
+	primaryColor: '#3b82f6',
+	secondaryColor: '#1d4ed8',
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+};
+
+// Opciones específicas por tipo de entidad
+const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
+	folder: {
+		designSystem: {
+			preset: 'folder',
+			variant: 'default',
+			aspectRatio: '7/10',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 2,
+			shadowStyle: 'soft',
+		},
+		layerSystem: {
+			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+			layerBlending: 'screen',
+			layerSpacing: 2,
+		},
+	},
+	album: {
+		designSystem: {
+			preset: 'album',
+			variant: 'default',
+			aspectRatio: '1/1',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 2,
+			shadowStyle: 'soft',
+		},
+	},
+	tag: {
+		designSystem: {
+			preset: 'tag',
+			variant: 'default',
+			aspectRatio: '3/1',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 1,
+			shadowStyle: 'soft',
+		},
+	},
+	// Añadir más tipos según sea necesario
+};
 
 export interface EntityCardWrapperProps {
-	title?: string;
-	description?: string;
 	entityType: string;
 	entityId?: string;
-	visualOptions?: Partial<CardOptions>;
-	options?: any; // Cambiado a any para evitar problemas de compatibilidad entre sistemas de tipos
-	children: ReactNode;
-	onConfigClick?: () => void;
-	onClick?: () => void;
+	title?: string;
+	description?: string;
+	image?: string;
+	options?: Partial<CardOptions>;
 	className?: string;
-	// Propiedades para visualización de configuración
-	showVisualizationConfig?: boolean;
-	onVisualizationConfigClick?: () => void;
-	// Propiedades para vista explode
+	children?: React.ReactNode;
+	onClick?: () => void;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
 	enableExplode?: boolean;
-	explodeLayers?: Array<{
-		id: string;
-		label: string;
-		icon: React.ReactNode;
-	}>;
 	isExploded?: boolean;
 	activeLayer?: string | null;
 	onExplodedChange?: (isExploded: boolean) => void;
 	onActiveLayerChange?: (layerId: string | null) => void;
 }
 
+/**
+ * Wrapper para EntityCard que maneja opciones por defecto según el tipo de entidad
+ */
 export function EntityCardWrapper({
+	entityType,
+	entityId,
 	title,
 	description,
-	entityType,
-	entityId = 'default',
-	visualOptions,
-	options,
-	children,
-	onConfigClick,
-	onClick,
+	image,
+	options = {},
 	className,
-	showVisualizationConfig,
-	onVisualizationConfigClick,
-	enableExplode,
-	explodeLayers,
-	isExploded,
-	activeLayer,
+	children,
+	onClick,
+	showVisualConfig = false,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded = false,
+	activeLayer = null,
 	onExplodedChange,
 	onActiveLayerChange,
 }: EntityCardWrapperProps) {
-	const titleId = `card-title-${entityId}`;
-	const descriptionId = `card-description-${entityId}`;
+	// Estado para controlar la explosión de capas
+	const [internalIsExploded, setInternalIsExploded] = useState(isExploded);
+	const [internalActiveLayer, setInternalActiveLayer] = useState<string | null>(activeLayer);
 
-	// Usar options o visualOptions (para compatibilidad)
-	const cardOptions = options || visualOptions;
+	// Manejar cambios en el estado de explosión
+	const handleExplodedChange = useCallback(
+		(newIsExploded: boolean) => {
+			setInternalIsExploded(newIsExploded);
+			onExplodedChange?.(newIsExploded);
+		},
+		[onExplodedChange]
+	);
+
+	// Manejar cambios en la capa activa
+	const handleActiveLayerChange = useCallback(
+		(layerId: string | null) => {
+			setInternalActiveLayer(layerId);
+			onActiveLayerChange?.(layerId);
+		},
+		[onActiveLayerChange]
+	);
+
+	// Combinar opciones por defecto con opciones específicas del tipo y opciones proporcionadas
+	const typeOptions = ENTITY_TYPE_OPTIONS[entityType] || {};
+	const mergedOptions = {
+		...DEFAULT_CARD_OPTIONS,
+		...typeOptions,
+		...options,
+		// Asegurar que las propiedades anidadas se combinen correctamente
+		designSystem: {
+			...(DEFAULT_CARD_OPTIONS.designSystem || {}),
+			...(typeOptions.designSystem || {}),
+			...(options.designSystem || {}),
+		},
+		layerSystem: {
+			...(DEFAULT_CARD_OPTIONS.layerSystem || {}),
+			...(typeOptions.layerSystem || {}),
+			...(options.layerSystem || {}),
+		},
+	};
 
 	return (
-		<Card3D
-			options={cardOptions}
-			className={cn('h-full w-full overflow-hidden', className)}
-			aria-labelledby={title ? titleId : undefined}
-			aria-describedby={description ? descriptionId : undefined}
+		<EntityCard
+			id={entityId}
+			className={cn('entity-card-wrapper', className)}
+			title={title}
+			description={description}
+			image={image}
+			options={mergedOptions}
+			enableLayers={enableExplode}
+			enableDesign={true}
+			enableAnimation={true}
+			enableBackside={false}
 			onClick={onClick}
+			onError={(error) => console.error('Error en EntityCard:', error)}
 		>
 			{children}
-
-			{/* Botón de Configuración */}
-			{(onConfigClick || onVisualizationConfigClick) && (
-				<motion.button
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					whileHover={{ scale: 1.1 }}
-					whileTap={{ scale: 0.95 }}
-					onClick={(e) => {
-						e.stopPropagation();
-						if (onConfigClick) onConfigClick();
-						if (onVisualizationConfigClick) onVisualizationConfigClick();
-					}}
-					className="absolute top-2 right-2 z-50 p-1.5 rounded-full bg-[--black]/30 text-[--white] transition-colors hover:bg-[--primary]"
-					aria-label="Configurar visualización"
-				>
-					<SettingsIcon className="h-3.5 w-3.5" />
-				</motion.button>
-			)}
-
-			{/* Indicador de tipo de entidad */}
-			<div className="absolute left-2 top-2 z-50">
-				<EntityTypeIcon type={entityType} size="sm" />
-			</div>
-		</Card3D>
+		</EntityCard>
 	);
 }

@@ -22,7 +22,7 @@ export function CardContent({ options, children, className }: CardContentProps) 
 		contentPadding,
 		contentSpacing,
 		contentAlignment,
-	} = designSystem;
+	} = designSystem || {};
 
 	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
 

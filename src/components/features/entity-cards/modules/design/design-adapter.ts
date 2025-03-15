@@ -1,6 +1,6 @@
 'use client';
 
-import type { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/unified-card-types';
 import type { DesignSystem } from './types';
 
 /**
@@ -13,22 +13,37 @@ export function legacyToDesignSystem(options: CardOptions): DesignSystem {
 	const designSystem = options.designSystem || {};
 
 	return {
+		// Propiedades base requeridas
+		borderRadius: designSystem.cornerRadius || 8,
+		padding: designSystem.padding || 16,
+		aspectRatio: designSystem.aspectRatio || '1/1',
+		maxWidth: designSystem.maxWidth || 400,
+		elevation: designSystem.elevation || 1,
+		shadowColor: designSystem.shadowColor || 'rgba(0, 0, 0, 0.25)',
+		backgroundColor: designSystem.backgroundColor || '#ffffff',
+		backgroundOpacity: designSystem.backgroundOpacity || 1,
+		backdropFilter: designSystem.backdropFilter || 'none',
+		backdropBlurAmount: designSystem.backdropBlurAmount || 0,
+		borderWidth: designSystem.borderWidth || 1,
+		borderStyle: designSystem.borderStyle || 'solid',
+		borderColor: designSystem.borderColor || '#e5e7eb',
+		customCssClasses: designSystem.customCssClasses || [],
+		customCssVariables: designSystem.customCssVariables || {},
+
+		// Propiedades adicionales para compatibilidad
 		preset: designSystem.preset || 'default',
+		variant: designSystem.variant || 'default',
 		cornerStyle: designSystem.cornerStyle || 'rounded',
 		cornerRadius: designSystem.cornerRadius || 8,
 		shadowStyle: designSystem.shadowStyle || 'soft',
-		elevation: designSystem.elevation || 1,
-		backgroundColor: designSystem.backgroundColor || '#ffffff',
-		textColor: designSystem.textColor || '#000000',
-		accentColor: designSystem.accentColor || '#3b82f6',
-		borderStyle: designSystem.borderStyle || 'solid',
-		borderWidth: designSystem.borderWidth || 1,
-		borderColor: designSystem.borderColor || '#e5e7eb',
-		glassEffect: designSystem.glassEffect || false,
-		contentPadding: designSystem.contentPadding || 'medium',
-		layoutDensity: designSystem.layoutDensity || 'comfortable',
+		colorScheme: designSystem.colorScheme || 'auto',
 		fontFamily: designSystem.fontFamily || 'system',
 		surfaceStyle: designSystem.surfaceStyle || 'regular',
+		layoutDensity: designSystem.layoutDensity || 'comfortable',
+		contentPadding: designSystem.contentPadding || 'medium',
+		glassEffect: designSystem.glassEffect || false,
+		accentColor: designSystem.accentColor || '#3b82f6',
+		textColor: designSystem.textColor || '#000000',
 	};
 }
 

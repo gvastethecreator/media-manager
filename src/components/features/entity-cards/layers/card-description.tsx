@@ -14,7 +14,7 @@ interface CardDescriptionProps {
 export function CardDescription({ options, description, maxLength = 150, className }: CardDescriptionProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

@@ -15,7 +15,7 @@ interface CardStatsProps {
 export function CardStats({ options, stats, className }: CardStatsProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
 	const { holographicIntensity = 1, holographicColor } = visualEffects;
 

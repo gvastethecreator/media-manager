@@ -76,6 +76,17 @@ export function EntityCardAdapter({
 	onActiveLayerChange,
 	className,
 }: EntityCardAdapterProps) {
+	// Verificar que la entidad existe
+	if (!entity) {
+		console.error(`Error: La entidad de tipo ${entityType} es undefined`);
+		return (
+			<div className="error-card p-4 border border-red-500 rounded-md">
+				<h3 className="text-red-500 font-medium">Error de datos</h3>
+				<p className="text-sm text-gray-500">No se pudo cargar la información de la entidad</p>
+			</div>
+		);
+	}
+
 	// Pasamos las propiedades comunes a todos los tipos de tarjetas
 	const commonProps = {
 		onClick,

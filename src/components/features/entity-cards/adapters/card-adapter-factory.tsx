@@ -1,6 +1,7 @@
 'use client';
 
 import type { FunctionComponent } from 'react';
+import * as React from 'react';
 import { useMemo } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
@@ -42,7 +43,7 @@ export function createCardAdapter<
 		}, [props]);
 
 		// Renderizar el componente con las propiedades
-		return <CardLayout {...layoutProps} />;
+		return React.createElement(CardLayout, layoutProps);
 	};
 }
 
@@ -53,8 +54,8 @@ export function createCardAdapter<
  * @param propsMapper Función que transforma las propiedades del adaptador a las propiedades del layout
  * @returns Una función de componente adaptador
  */
-export function createCustomCardAdapter<T, P, EntityKey extends string>(
-	CardLayout: FunctionComponent<P>,
+export function createCustomCardAdapter<T, P extends object, EntityKey extends string>(
+	CardLayout: React.ComponentType<P>,
 	entityKey: EntityKey,
 	propsMapper: (props: BaseCardAdapterProps & { [K in EntityKey]: T }) => P
 ) {
@@ -69,6 +70,27 @@ export function createCustomCardAdapter<T, P, EntityKey extends string>(
 		}, [props]);
 
 		// Renderizar el componente con las propiedades transformadas
-		return <CardLayout {...layoutProps} />;
+		// Usamos una aserción de tipo para evitar errores de tipo
+		return React.createElement(CardLayout as any, layoutProps);
 	};
 }
+
+/**
+ * NOTA: Para crear adaptadores personalizados, se recomienda crear un componente específico
+ * que haga la transformación de propiedades directamente, en lugar de usar una función factory.
+ *
+ * Ejemplo:
+ *
+ * ```tsx
+ * function CustomAlbumAdapter(props: BaseCardAdapterProps & { album: Album }) {
+ *   const transformedProps = useMemo(() => {
+ *     // Transformar props aquí
+ *     return {
+ *       // Propiedades transformadas
+ *     };
+ *   }, [props]);
+ *
+ *   return <AlbumCardLayout {...transformedProps} />;
+ * }
+ * ```
+ */

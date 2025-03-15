@@ -20,7 +20,7 @@ interface CardExplodeProps {
 export function CardExplode({ options, isExploded, layers, onLayerClick, className }: CardExplodeProps) {
 	const { designSystem, visualEffects } = options;
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
 	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
 

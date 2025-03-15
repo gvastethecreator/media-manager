@@ -37,22 +37,22 @@ export * from './shaders';
 export * from './textures';
 
 // Exportar componentes auxiliares
-export { default as CardBackside } from './card-backside';
-export { default as CardBorder } from './card-border';
-export { default as CardContainer } from './card-container';
-export { default as CardContent } from './card-content';
-export { default as CardDescription } from './card-description';
-export { default as CardExplode } from './card-explode';
-export { default as CardFooter } from './card-footer';
-export { default as CardGlow } from './card-glow';
-export { default as CardGrain } from './card-grain';
-export { default as CardHeader } from './card-header';
-export { default as CardHolographic } from './card-holographic';
-export { default as CardImage } from './card-image';
-export { default as CardMetadata } from './card-metadata';
-export { default as CardScanlines } from './card-scanlines';
-export { default as CardStats } from './card-stats';
-export { default as CardTexture } from './card-texture';
+export { default as CardBackside } from './backside';
+export { default as CardBorder } from './border';
+export { default as CardContainer } from './container';
+export { default as CardContent } from './content';
+export { default as CardDescription } from './description';
+export { default as CardExplode } from './explode';
+export { default as CardFooter } from './footer';
+export { default as CardGlow } from './glow';
+export { default as CardGrain } from './grain';
+export { default as CardHeader } from './header';
+export { default as CardHolographic } from './holographic';
+export { default as CardImage } from './image';
+export { default as CardMetadata } from './metadata';
+export { default as CardScanlines } from './scanlines';
+export { default as CardStats } from './stats';
+export { default as CardTexture } from './texture';
 
 // Exportar plantillas para nuevas capas
 export * from './templates';
