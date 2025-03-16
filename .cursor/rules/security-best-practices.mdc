@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise security best practices for an image management application
 globs: **/*.{ts,tsx,js,jsx}
 alwaysApply: false

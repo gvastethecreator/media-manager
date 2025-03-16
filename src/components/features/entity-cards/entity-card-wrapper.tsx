@@ -51,6 +51,8 @@ const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
 			layerBlending: 'screen',
 			layerSpacing: 2,
 		},
+		primaryColor: '#3b82f6',
+		secondaryColor: '#1d4ed8',
 	},
 	album: {
 		designSystem: {
@@ -62,6 +64,8 @@ const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
 			elevation: 2,
 			shadowStyle: 'soft',
 		},
+		primaryColor: '#ec4899',
+		secondaryColor: '#db2777',
 	},
 	tag: {
 		designSystem: {
@@ -73,8 +77,100 @@ const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
 			elevation: 1,
 			shadowStyle: 'soft',
 		},
+		primaryColor: '#8b5cf6',
+		secondaryColor: '#7c3aed',
 	},
-	// Añadir más tipos según sea necesario
+	collection: {
+		designSystem: {
+			preset: 'collection',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#f97316',
+		secondaryColor: '#ea580c',
+	},
+	character: {
+		designSystem: {
+			preset: 'character',
+			variant: 'default',
+			aspectRatio: '3/4',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#ef4444',
+		secondaryColor: '#dc2626',
+	},
+	place: {
+		designSystem: {
+			preset: 'place',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#0ea5e9',
+		secondaryColor: '#06b6d4',
+	},
+	worldItem: {
+		designSystem: {
+			preset: 'world-item',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#f59e0b',
+		secondaryColor: '#d97706',
+	},
+	concept: {
+		designSystem: {
+			preset: 'concept',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#a855f7',
+		secondaryColor: '#8b5cf6',
+	},
+	prompt: {
+		designSystem: {
+			preset: 'prompt',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#10b981',
+		secondaryColor: '#059669',
+	},
+	note: {
+		designSystem: {
+			preset: 'note',
+			variant: 'default',
+			aspectRatio: '3/2',
+			cornerStyle: 'rounded',
+			cornerRadius: 12,
+			elevation: 3,
+			shadowStyle: 'soft',
+		},
+		primaryColor: '#ec4899',
+		secondaryColor: '#db2777',
+	},
 };
 
 export interface EntityCardWrapperProps {

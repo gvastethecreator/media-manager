@@ -3,12 +3,13 @@
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { CollectionCard } from '@/components/features/entity-cards/layouts/collection-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { Collection } from '@prisma/client';
 import { BookMarked } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -16,6 +17,39 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('CollectionsView');
+
+// Configuración visual predeterminada para colecciones
+const DEFAULT_COLLECTION_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'collection',
+		variant: 'default',
+		aspectRatio: '1/1',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 3,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	primaryColor: '#9333ea',
+	secondaryColor: '#6366f1',
+	hoverLiftHeight: 12,
+	maxRotation: 15,
+};
 
 // Extender el tipo Collection para incluir los campos adicionales
 interface CollectionWithDetails extends Collection {
@@ -32,6 +66,7 @@ export function CollectionsView(_props: ViewProps) {
 	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_COLLECTION_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithDetails[]>(collections);
@@ -70,6 +105,37 @@ export function CollectionsView(_props: ViewProps) {
 	useEffect(() => {
 		loadCollections();
 	}, [loadCollections]);
+
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const response = await fetch('/api/entities/collections/visual-config');
+				if (!response.ok) {
+					throw new Error('Error al cargar la configuración visual');
+				}
+				const config = await response.json();
+				// Combinar la configuración del servidor con las opciones predeterminadas
+				setVisualConfig({
+					...DEFAULT_COLLECTION_OPTIONS,
+					...config,
+					// Asegurar que las propiedades anidadas se combinen correctamente
+					designSystem: {
+						...(DEFAULT_COLLECTION_OPTIONS.designSystem || {}),
+						...(config.designSystem || {}),
+					},
+					layerSystem: {
+						...(DEFAULT_COLLECTION_OPTIONS.layerSystem || {}),
+						...(config.layerSystem || {}),
+					},
+				});
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+				// Si hay un error, mantenemos la configuración predeterminada
+			}
+		};
+
+		loadVisualConfig();
+	}, []);
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithDetails) => {
@@ -126,17 +192,13 @@ export function CollectionsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<CollectionCard
-								data={collection}
+							<EntityCardAdapter
+								entityType="collection"
+								entity={collection}
 								onClick={() => handleCollectionClick(collection)}
-								options={{
-									useImageGrid: true,
-									imageGridLayout: 'quad',
-									imageGridGap: 4,
-									imageGridStyle: 'standard',
-									enableGlow: true,
-									enableBorderEffect: true,
-								}}
+								showVisualConfig={true}
+								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

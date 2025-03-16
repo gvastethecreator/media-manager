@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for efficient Lodash usage, minimizing bundle size.
 globs: **/*.{ts,tsx,js,jsx}
 ---
