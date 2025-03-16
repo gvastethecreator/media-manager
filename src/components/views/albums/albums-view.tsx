@@ -3,12 +3,13 @@
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { Album } from '@prisma/client';
 import { Album as AlbumIcon } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -16,6 +17,40 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('AlbumsView');
+
+// Configuración visual predeterminada para álbumes
+const DEFAULT_ALBUM_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'album',
+		variant: 'default',
+		aspectRatio: '5/7',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 2,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	// Añadir propiedades necesarias para evitar errores de tipo
+	primaryColor: '#3b82f6',
+	secondaryColor: '#8b5cf6',
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+};
 
 // Extender el tipo Album para incluir los campos adicionales
 interface AlbumWithDetails extends Album {
@@ -32,6 +67,7 @@ export function AlbumsView(_props: ViewProps) {
 	const [albums, setAlbums] = useState<AlbumWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_ALBUM_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithDetails[]>(albums);
@@ -70,6 +106,37 @@ export function AlbumsView(_props: ViewProps) {
 	useEffect(() => {
 		loadAlbums();
 	}, [loadAlbums]);
+
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const response = await fetch('/api/entities/albums/visual-config');
+				if (!response.ok) {
+					throw new Error('Error al cargar la configuración visual');
+				}
+				const config = await response.json();
+				// Combinar la configuración del servidor con las opciones predeterminadas
+				setVisualConfig({
+					...DEFAULT_ALBUM_OPTIONS,
+					...config,
+					// Asegurar que las propiedades anidadas se combinen correctamente
+					designSystem: {
+						...(DEFAULT_ALBUM_OPTIONS.designSystem || {}),
+						...(config.designSystem || {}),
+					},
+					layerSystem: {
+						...(DEFAULT_ALBUM_OPTIONS.layerSystem || {}),
+						...(config.layerSystem || {}),
+					},
+				});
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+				// Si hay un error, mantenemos la configuración predeterminada
+			}
+		};
+
+		loadVisualConfig();
+	}, []);
 
 	const handleAlbumClick = useCallback(
 		(album: AlbumWithDetails) => {
@@ -126,17 +193,13 @@ export function AlbumsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<AlbumCard
-								data={album}
+							<EntityCardAdapter
+								entityType="album"
+								entity={album}
 								onClick={() => handleAlbumClick(album)}
-								options={{
-									useImageGrid: true,
-									imageGridLayout: 'quad',
-									imageGridGap: 4,
-									imageGridStyle: 'standard',
-									enableGlow: true,
-									enableBorderEffect: true,
-								}}
+								showVisualConfig={true}
+								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

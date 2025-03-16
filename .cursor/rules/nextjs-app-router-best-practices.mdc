@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for Next.js 15 App Router in an image management application
 globs: app/**/*.{ts,tsx,js,jsx}
 alwaysApply: false

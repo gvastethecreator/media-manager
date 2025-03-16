@@ -751,40 +751,57 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 	// Navegación
 	setCurrentFolder: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de carpeta no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('📁 Cambiando a carpeta:', id);
 			const state = get();
-			const folder = state.folders.find((f) => f.id === id) || null;
+			const folder = state.folders.find((f) => f.id === id);
+
+			if (!folder) {
+				fileManagerLogger.info('⚠️ Carpeta no encontrada en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentFolderId: id,
+					currentFolder: null,
+					isLoading: false,
+					error: 'Carpeta no encontrada'
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
-				currentFolder: folder,
 				currentFolderId: id,
-				currentTag: null,
-				currentTagId: null,
-				currentCollection: null,
+				currentFolder: folder,
 				currentCollectionId: null,
-				currentAlbum: null,
+				currentCollection: null,
+				currentTagId: null,
+				currentTag: null,
 				currentAlbumId: null,
-				currentCharacter: null,
+				currentAlbum: null,
 				currentCharacterId: null,
-				currentPlace: null,
+				currentCharacter: null,
 				currentPlaceId: null,
-				currentWorldItem: null,
+				currentPlace: null,
 				currentWorldItemId: null,
-				currentConcept: null,
+				currentWorldItem: null,
 				currentConceptId: null,
-				currentPrompt: null,
+				currentConcept: null,
 				currentPromptId: null,
-				currentNote: null,
+				currentPrompt: null,
 				currentNoteId: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
-			// Obtener imágenes ya transformadas por transformImageToFileItem
+			// Las imágenes ya vienen transformadas por convertServerImageToFileItem
 			const images = await getFolderImages(id);
 
-			// No es necesario aplicar transformToFileItem nuevamente
 			set({
 				currentItems: images,
 				displayedItems: images.slice(0, ITEMS_PER_BATCH),
@@ -801,9 +818,27 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentCollection: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de colección no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('📚 Cambiando a colección:', id);
 			const state = get();
-			const collection = state.collections.find((c) => c.id === id) || null;
+			const collection = state.collections.find((c) => c.id === id);
+
+			if (!collection) {
+				fileManagerLogger.info('⚠️ Colección no encontrada en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentCollectionId: id,
+					currentCollection: null,
+					isLoading: false,
+					error: 'Colección no encontrada'
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
@@ -811,22 +846,22 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentFolder: null,
 				currentCollectionId: id,
 				currentCollection: collection,
-				currentTag: null,
 				currentTagId: null,
-				currentAlbum: null,
+				currentTag: null,
 				currentAlbumId: null,
-				currentCharacter: null,
+				currentAlbum: null,
 				currentCharacterId: null,
-				currentPlace: null,
+				currentCharacter: null,
 				currentPlaceId: null,
-				currentWorldItem: null,
+				currentPlace: null,
 				currentWorldItemId: null,
-				currentConcept: null,
+				currentWorldItem: null,
 				currentConceptId: null,
-				currentPrompt: null,
+				currentConcept: null,
 				currentPromptId: null,
-				currentNote: null,
+				currentPrompt: null,
 				currentNoteId: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -899,9 +934,27 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentAlbum: async (id: string) => {
 		try {
-			fileManagerLogger.info('📁 Cambiando a álbum:', id);
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de álbum no proporcionado, ignorando');
+				return;
+			}
+
+			fileManagerLogger.info('🖼️ Cambiando a álbum:', id);
 			const state = get();
-			const album = state.albums.find((a) => a.id === id) || null;
+			const album = state.albums.find((a) => a.id === id);
+
+			if (!album) {
+				fileManagerLogger.info('⚠️ Álbum no encontrado en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentAlbumId: id,
+					currentAlbum: null,
+					isLoading: false,
+					error: 'Álbum no encontrado'
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
@@ -913,18 +966,18 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentTag: null,
 				currentAlbumId: id,
 				currentAlbum: album,
-				currentCharacter: null,
 				currentCharacterId: null,
-				currentPlace: null,
+				currentCharacter: null,
 				currentPlaceId: null,
-				currentWorldItem: null,
+				currentPlace: null,
 				currentWorldItemId: null,
-				currentConcept: null,
+				currentWorldItem: null,
 				currentConceptId: null,
-				currentPrompt: null,
+				currentConcept: null,
 				currentPromptId: null,
-				currentNote: null,
+				currentPrompt: null,
 				currentNoteId: null,
+				currentNote: null,
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
@@ -984,16 +1037,50 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentPlace: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de lugar no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('🏙️ Cambiando a lugar:', id);
 			const state = get();
-			const place = state.places.find((p) => p.id === id) || null;
+			const place = state.places.find((p) => p.id === id);
+
+			if (!place) {
+				fileManagerLogger.info('⚠️ Lugar no encontrado en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentPlaceId: id,
+					currentPlace: null,
+					isLoading: false,
+					error: 'Lugar no encontrado'
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
 				currentFolderId: null,
 				currentFolder: null,
+				currentCollectionId: null,
+				currentCollection: null,
+				currentTagId: null,
+				currentTag: null,
+				currentAlbumId: null,
+				currentAlbum: null,
+				currentCharacterId: null,
+				currentCharacter: null,
 				currentPlaceId: id,
 				currentPlace: place,
+				currentWorldItemId: null,
+				currentWorldItem: null,
+				currentConceptId: null,
+				currentConcept: null,
+				currentPromptId: null,
+				currentPrompt: null,
+				currentNoteId: null,
+				currentNote: null,
 				currentView: 'place-content',
 				isLoading: true,
 				lastUpdate: Date.now(),
@@ -1020,9 +1107,27 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentWorldItem: async (id: string) => {
 		try {
-			fileManagerLogger.info('🌍 Cambiando a objeto:', id);
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de objeto no proporcionado, ignorando');
+				return;
+			}
+
+			fileManagerLogger.info('🧩 Cambiando a objeto:', id);
 			const state = get();
-			const worldItem = state.worldItems.find((w) => w.id === id) || null;
+			const worldItem = state.worldItems.find((w) => w.id === id);
+
+			if (!worldItem) {
+				fileManagerLogger.info('⚠️ Objeto no encontrado en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentWorldItemId: id,
+					currentWorldItem: null,
+					isLoading: false,
+					error: 'Objeto no encontrado'
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
@@ -1040,22 +1145,25 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				currentPlace: null,
 				currentWorldItemId: id,
 				currentWorldItem: worldItem,
-				currentConcept: null,
 				currentConceptId: null,
-				currentPrompt: null,
+				currentConcept: null,
 				currentPromptId: null,
-				currentNote: null,
+				currentPrompt: null,
 				currentNoteId: null,
+				currentNote: null,
+				currentView: 'world-item-content',
 				isLoading: true,
 				lastUpdate: Date.now(),
 			});
 
 			// Las imágenes ya vienen transformadas
 			const images = await getWorldItemImages(id);
+			// Convertir todas las imágenes al tipo FileItem
+			const fileItems = images.map(convertToFileItem);
 
 			set({
-				currentItems: images,
-				displayedItems: images.slice(0, ITEMS_PER_BATCH),
+				currentItems: fileItems,
+				displayedItems: fileItems.slice(0, ITEMS_PER_BATCH),
 				isLoading: false,
 				lastUpdate: Date.now(),
 			});

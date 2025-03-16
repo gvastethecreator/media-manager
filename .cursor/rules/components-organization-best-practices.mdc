@@ -1,13 +1,12 @@
 ---
-description: 
+description: when working with components
 globs: 
 alwaysApply: false
 ---
 ---
 description: Concise best practices for organized and maintainable React component structure.
-globs: components/**/*.{ts,tsx,js,jsx}, app/**/*.{ts,tsx,js,jsx}
+globs: components
 ---
-- **Separate by Component Type:** Organize components by type into `ui/`, `features/`, `layout/`, and `app/` folders.
 - **Reusable UI Components in `components/ui/`:** Design generic, reusable UI components in `components/ui/`.
 - **Composition in Feature Components:** Build feature components by composing UI components and adding feature logic.
 - **Descriptive Component Names:** Use clear, consistent, and descriptive component names.

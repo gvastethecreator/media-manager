@@ -1,4 +1,9 @@
 ---
+description: working with images
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for image processing in a Next.js application
 globs: services/image-processing/**/*.ts, lib/image/**/*.ts, app/api/images/**/*.ts
 alwaysApply: false
@@ -105,7 +110,7 @@ export async function processImage(
     await pipeline
       .clone()
       .withMetadata(options.preserveExif ? { orientation: 1 } : {})
-      [metadata.format](formatConfig)
+      [metadata.format](mdc:formatConfig)
       .toFile(optimizedImagePath);
 
     // 5. Generar thumbnails en paralelo
@@ -228,7 +233,7 @@ async function generateThumbnail(
       fit: size.fit,
       withoutEnlargement: true
     })
-    [format](FORMAT_CONFIGS[format as keyof typeof FORMAT_CONFIGS] || {})
+    [format](mdc:FORMAT_CONFIGS[format as keyof typeof FORMAT_CONFIGS] || {})
     .toFile(outputPath);
 
   return { name: size.name, path: outputPath };
@@ -244,7 +249,7 @@ export async function processLargeImage(
 ): Promise<void> {
   const transformer = sharp()
     .resize(options.width, options.height, { fit: 'inside', withoutEnlargement: true })
-    [options.format]({ quality: options.quality });
+    [options.format](mdc:{ quality: options.quality });
 
   const outputStream = createWriteStream(outputPath);
 

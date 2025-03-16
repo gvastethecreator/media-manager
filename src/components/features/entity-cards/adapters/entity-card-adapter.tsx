@@ -115,6 +115,7 @@ export function EntityCardAdapter({
 			return <CharacterCard character={entity as Character} {...commonProps} />;
 		case 'place':
 			return <PlaceCard place={entity as Place} {...commonProps} />;
+		case 'world-item':
 		case 'worldItem':
 			return <WorldItemCard worldItem={entity as WorldItem} {...commonProps} />;
 		case 'concept':

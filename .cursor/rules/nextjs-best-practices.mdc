@@ -1,6 +1,7 @@
 ---
 description: Best practices for Next.js 15 App Router
-globs: app/**/*.{ts,tsx}
+globs: *.ts,*.tsx
+alwaysApply: false
 ---
 
 - **Server Components por Defecto:** Usar Server Components para renderizado y fetching de datos

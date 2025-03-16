@@ -4,13 +4,13 @@ import type { PromptWithStats } from '@/app/actions/prompts/prompt.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { PromptCard } from '@/components/features/entity-cards/layouts/prompt-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import type { Prompt } from '@prisma/client';
 import { MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -19,11 +19,37 @@ import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('PromptsView');
 
-// Función adaptadora para convertir PromptWithStats a CardData (Prompt)
-const adaptPromptWithStats = (prompt: PromptWithStats): Prompt => {
-	// Extraemos solo las propiedades que coincidan con el tipo Prompt
-	const { _count, lastUpdated, ...promptData } = prompt;
-	return promptData as Prompt;
+// Configuración visual predeterminada para prompts
+const DEFAULT_PROMPT_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'prompt',
+		variant: 'default',
+		aspectRatio: '3/2',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 3,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	primaryColor: '#10b981',
+	secondaryColor: '#059669',
+	hoverLiftHeight: 10,
+	maxRotation: 15,
 };
 
 export function PromptsView(_props: ViewProps) {
@@ -33,6 +59,7 @@ export function PromptsView(_props: ViewProps) {
 	const [prompts, setPrompts] = useState<PromptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_PROMPT_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticPrompts, _addEvent] = clientEvents.useEvents<PromptWithStats[]>(prompts);
@@ -53,10 +80,29 @@ export function PromptsView(_props: ViewProps) {
 		}
 	}, []);
 
+	// Cargar la configuración visual desde el servidor
+	const loadVisualConfig = useCallback(async () => {
+		try {
+			viewLogger.info('🔄 Cargando configuración visual para prompts...');
+			const response = await fetch('/api/entities/prompts/visual-config');
+			if (!response.ok) {
+				throw new Error(`Error ${response.status}: ${response.statusText}`);
+			}
+			const config = await response.json();
+			setVisualConfig({ ...DEFAULT_PROMPT_OPTIONS, ...config });
+			viewLogger.info('✅ Configuración visual cargada');
+		} catch (err) {
+			viewLogger.error('❌ Error cargando configuración visual:', err);
+			// Mantener la configuración predeterminada en caso de error
+		}
+	}, []);
+
 	useEffect(() => {
 		// Cargar prompts inicialmente
 		fetchPrompts();
-	}, [fetchPrompts]);
+		// Cargar configuración visual
+		loadVisualConfig();
+	}, [fetchPrompts, loadVisualConfig]);
 
 	const handlePromptClick = useCallback(
 		(prompt: PromptWithStats) => {
@@ -113,13 +159,14 @@ export function PromptsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 							className="cursor-pointer"
-							onClick={() => handlePromptClick(prompt)}
 						>
-							<PromptCard
-								data={adaptPromptWithStats(prompt)}
-								onEdit={() => handleEditPrompt(prompt.id)}
-								onDelete={() => handleDeletePrompt(prompt.id)}
-								className="h-full"
+							<EntityCardAdapter
+								entityType="prompt"
+								entity={prompt}
+								onClick={() => handlePromptClick(prompt)}
+								showVisualConfig={true}
+								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

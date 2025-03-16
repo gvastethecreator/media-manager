@@ -4,13 +4,13 @@ import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ConceptCard } from '@/components/features/entity-cards/layouts/concept-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import type { Concept } from '@prisma/client';
 import { LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,39 @@ import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('ConceptsView');
 
+// Configuración visual predeterminada para conceptos
+const DEFAULT_CONCEPT_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'concept',
+		variant: 'default',
+		aspectRatio: '3/2',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 3,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	primaryColor: '#a855f7',
+	secondaryColor: '#8b5cf6',
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+};
+
 export function ConceptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentConcept } = useFileManager();
@@ -26,6 +59,7 @@ export function ConceptsView(_props: ViewProps) {
 	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CONCEPT_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptWithStats[]>(concepts);
@@ -46,10 +80,29 @@ export function ConceptsView(_props: ViewProps) {
 		}
 	}, []);
 
+	// Cargar la configuración visual desde el servidor
+	const loadVisualConfig = useCallback(async () => {
+		try {
+			viewLogger.info('🔄 Cargando configuración visual para conceptos...');
+			const response = await fetch('/api/entities/concepts/visual-config');
+			if (!response.ok) {
+				throw new Error(`Error ${response.status}: ${response.statusText}`);
+			}
+			const config = await response.json();
+			setVisualConfig({ ...DEFAULT_CONCEPT_OPTIONS, ...config });
+			viewLogger.info('✅ Configuración visual cargada');
+		} catch (err) {
+			viewLogger.error('❌ Error cargando configuración visual:', err);
+			// Mantener la configuración predeterminada en caso de error
+		}
+	}, []);
+
 	useEffect(() => {
 		// Cargar conceptos inicialmente
 		fetchConcepts();
-	}, [fetchConcepts]);
+		// Cargar configuración visual
+		loadVisualConfig();
+	}, [fetchConcepts, loadVisualConfig]);
 
 	const handleConceptClick = useCallback(
 		(concept: ConceptWithStats) => {
@@ -107,12 +160,13 @@ export function ConceptsView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 							className="cursor-pointer"
 						>
-							<ConceptCard
-								concept={concept as unknown as Concept}
+							<EntityCardAdapter
+								entityType="concept"
+								entity={concept}
 								onClick={() => handleConceptClick(concept)}
-								onEdit={() => handleEditConcept(concept)}
-								onDelete={() => handleDeleteConcept(concept.id)}
+								showVisualConfig={true}
 								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

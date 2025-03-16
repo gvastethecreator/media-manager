@@ -1,6 +1,6 @@
 ---
 description: Best practices for using Tailwind CSS 4 in an image management application
-globs: **/*.{ts,tsx,css}
+globs: *.ts,*.tsx,*.css
 alwaysApply: false
 ---
 - **Use utility classes directly in JSX:** Añadir clases Tailwind directamente en elementos JSX para desarrollo rápido de componentes visuales.

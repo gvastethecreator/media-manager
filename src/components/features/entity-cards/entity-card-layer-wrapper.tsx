@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useRef, useState } from 'react';
-import { LayerRenderer } from './layers/layer-plugin-system';
+import { LayerPluginProvider, LayerRenderer } from './layers/layer-plugin-system';
 
 interface EntityCardLayerWrapperProps {
 	title: string;
@@ -121,26 +121,28 @@ export function EntityCardLayerWrapper({
 			animate={{ opacity: 1, scale: 1 }}
 			transition={{ duration: 0.2 }}
 		>
-			<LayerRenderer
-				isExploded={isExploded}
-				isHovered={isHovered}
-				mousePosition={mousePosition}
-				activeLayer={activeLayer}
-				getExplodeLayerTransform={getExplodeLayerTransform}
-				entityType={entityType}
-				entityId={entityId}
-				configs={configs}
-				context={{
-					title,
-					description,
-					showVisualConfig,
-					onVisualConfigClick,
-					visualOptions,
-					enableExplode,
-					onExplodedChange,
-					onActiveLayerChange,
-				}}
-			/>
+			<LayerPluginProvider>
+				<LayerRenderer
+					isExploded={isExploded}
+					isHovered={isHovered}
+					mousePosition={mousePosition}
+					activeLayer={activeLayer}
+					getExplodeLayerTransform={getExplodeLayerTransform}
+					entityType={entityType}
+					entityId={entityId}
+					configs={configs}
+					context={{
+						title,
+						description,
+						showVisualConfig,
+						onVisualConfigClick,
+						visualOptions,
+						enableExplode,
+						onExplodedChange,
+						onActiveLayerChange,
+					}}
+				/>
+			</LayerPluginProvider>
 			{children}
 		</motion.div>
 	);

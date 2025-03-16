@@ -3,18 +3,52 @@
 import { getTags } from '@/app/actions/tags/tag.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { TagCard } from '@/components/features/entity-cards/layouts/tag-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { TagIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('TagsView');
+
+// Configuración visual predeterminada para etiquetas
+const DEFAULT_TAG_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'tag',
+		variant: 'default',
+		aspectRatio: '4/3',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 2,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	primaryColor: '#3b82f6',
+	secondaryColor: '#10b981',
+	hoverLiftHeight: 8,
+	maxRotation: 12,
+};
 
 // Definir los tipos de etiquetas permitidos
 type TagType = 'normal' | 'trap' | 'spell' | 'effect' | 'ritual';
@@ -71,6 +105,7 @@ export function TagsView(_props: ViewProps) {
 	const [tags, setTags] = useState<TagWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_TAG_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticTags, _addEvent] = clientEvents.useEvents<TagWithDetails[]>(tags);
@@ -111,6 +146,37 @@ export function TagsView(_props: ViewProps) {
 	useEffect(() => {
 		loadTags();
 	}, [loadTags]);
+
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const response = await fetch('/api/entities/tags/visual-config');
+				if (!response.ok) {
+					throw new Error('Error al cargar la configuración visual');
+				}
+				const config = await response.json();
+				// Combinar la configuración del servidor con las opciones predeterminadas
+				setVisualConfig({
+					...DEFAULT_TAG_OPTIONS,
+					...config,
+					// Asegurar que las propiedades anidadas se combinen correctamente
+					designSystem: {
+						...(DEFAULT_TAG_OPTIONS.designSystem || {}),
+						...(config.designSystem || {}),
+					},
+					layerSystem: {
+						...(DEFAULT_TAG_OPTIONS.layerSystem || {}),
+						...(config.layerSystem || {}),
+					},
+				});
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+				// Si hay un error, mantenemos la configuración predeterminada
+			}
+		};
+
+		loadVisualConfig();
+	}, []);
 
 	const handleTagClick = useCallback(
 		(tag: TagWithDetails) => {
@@ -168,17 +234,13 @@ export function TagsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.05 }}
 						>
-							<TagCard
-								data={tag}
+							<EntityCardAdapter
+								entityType="tag"
+								entity={tag}
 								onClick={() => handleTagClick(tag)}
-								options={{
-									useImageGrid: true,
-									imageGridLayout: 'quad',
-									imageGridGap: 4,
-									imageGridStyle: 'standard',
-									enableGlow: true,
-									enableBorderEffect: true,
-								}}
+								showVisualConfig={true}
+								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

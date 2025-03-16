@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for accessible Radix UI component implementation in an image management application.
 globs: components/**/*.{ts,tsx}
 alwaysApply: false
