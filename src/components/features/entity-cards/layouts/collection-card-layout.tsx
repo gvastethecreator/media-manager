@@ -2,14 +2,10 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatBytes } from '@/lib/utils/format.utils';
 import type { Collection } from '@prisma/client';
 import {
-	ArrowUpRight,
-	BookMarked,
 	BookOpen,
 	Clock,
-	Folder,
 	FolderIcon,
 	Globe,
 	Grid3x3,
@@ -20,7 +16,6 @@ import {
 	TagIcon,
 	Trash2,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import Image from 'next/image';
 import type * as React from 'react';
 import { useState } from 'react';
@@ -203,6 +198,20 @@ export function CollectionCard({
 	rarity: initialRarity,
 	texture: initialTexture,
 }: CollectionCardProps) {
+	// Verificar si data existe y tiene las propiedades necesarias
+	if (!data) {
+		console.warn('CollectionCard: Se recibió un objeto data indefinido');
+		// Crear un data por defecto para evitar errores
+		data = {
+			id: 'placeholder',
+			name: 'Colección sin nombre',
+			description: 'Sin descripción',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			_count: { images: 0 },
+		} as CardData;
+	}
+
 	const [isHovered, _setIsHovered] = useState(false);
 	const [configOpen, setConfigOpen] = useState(false);
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({

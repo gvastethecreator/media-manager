@@ -10,7 +10,10 @@ export async function GET(request: Request, { params }: { params: { type: string
 	try {
 		// Por convención, los presets default para un tipo tienen la categoría 'type:nombreTipo'
 		// También podemos hacer búsqueda en los metadatos si se almacena como JSON
-		const entityType = params.type;
+		const entityType = await Promise.resolve(params.type);
+		if (!entityType) {
+			return NextResponse.json({ error: 'Tipo de entidad no proporcionado' }, { status: 400 });
+		}
 
 		// Obtenemos la URL actual para parsear parámetros de query
 		const { searchParams } = new URL(request.url);

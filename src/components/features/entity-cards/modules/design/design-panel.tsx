@@ -1,5 +1,6 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -10,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Box } from 'lucide-react';
+import { AlertCircle, Box } from 'lucide-react';
 import { useState } from 'react';
-import type { DesignPanelProps, DesignSystem, DesignSystemPreset } from './types';
+import { DesignPanelProps, DesignSystem, DesignSystemPreset } from './types';
 
 // Presets de relación de aspecto
 const aspectRatioOptions = [
@@ -158,12 +159,19 @@ const designPresets: DesignSystemPreset[] = [
 
 export function DesignPanel({ designSystem, onChange, disabled = false, className }: DesignPanelProps) {
 	const [activeTab, setActiveTab] = useState('general');
+	const [customCssKey, setCustomCssKey] = useState<string>('');
+	const [customCssValue, setCustomCssValue] = useState<string>('');
 
 	// Función para seleccionar un preset completo
 	const selectPreset = (presetId: string) => {
 		const preset = designPresets.find((p) => p.id === presetId);
 		if (preset) {
-			onChange(preset.designSystem);
+			onChange({
+				...preset.designSystem,
+				// Mantenemos las clases y variables CSS personalizadas
+				customCssClasses: designSystem.customCssClasses || [],
+				customCssVariables: designSystem.customCssVariables || {},
+			});
 		}
 	};
 
@@ -187,6 +195,53 @@ export function DesignPanel({ designSystem, onChange, disabled = false, classNam
 			borderWidth: 1,
 			borderStyle: 'solid',
 			borderColor: 'rgba(0, 0, 0, 0.1)',
+		});
+	};
+
+	// Agregar una variable CSS personalizada
+	const handleAddCustomCssVariable = () => {
+		if (!customCssKey || !customCssValue) return;
+
+		const newCustomCssVariables = {
+			...designSystem.customCssVariables,
+			[customCssKey]: customCssValue,
+		};
+
+		onChange({
+			...designSystem,
+			customCssVariables: newCustomCssVariables,
+		});
+
+		setCustomCssKey('');
+		setCustomCssValue('');
+	};
+
+	// Eliminar una variable CSS personalizada
+	const handleRemoveCustomCssVariable = (key: string) => {
+		const newCustomCssVariables = { ...designSystem.customCssVariables };
+		delete newCustomCssVariables[key];
+
+		onChange({
+			...designSystem,
+			customCssVariables: newCustomCssVariables,
+		});
+	};
+
+	// Agregar una clase CSS personalizada
+	const handleAddCustomClass = (className: string) => {
+		if (!className || designSystem.customCssClasses?.includes(className)) return;
+
+		onChange({
+			...designSystem,
+			customCssClasses: [...(designSystem.customCssClasses || []), className],
+		});
+	};
+
+	// Eliminar una clase CSS personalizada
+	const handleRemoveCustomClass = (className: string) => {
+		onChange({
+			...designSystem,
+			customCssClasses: (designSystem.customCssClasses || []).filter((c) => c !== className),
 		});
 	};
 
@@ -222,7 +277,15 @@ export function DesignPanel({ designSystem, onChange, disabled = false, classNam
 									<SelectContent>
 										{designPresets.map((preset) => (
 											<SelectItem key={preset.id} value={preset.id}>
-												{preset.name}
+												<div className="flex items-center gap-2">
+													<div
+														className="w-3 h-3 rounded-full"
+														style={{
+															backgroundColor: preset.designSystem.accentColor || preset.designSystem.borderColor,
+														}}
+													/>
+													<span>{preset.name}</span>
+												</div>
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -478,7 +541,7 @@ export function DesignPanel({ designSystem, onChange, disabled = false, classNam
 								<Label>Clases CSS Personalizadas</Label>
 								<Input
 									placeholder="clase1 clase2 clase3"
-									value={designSystem.customCssClasses.join(' ')}
+									value={designSystem.customCssClasses?.join(' ') || ''}
 									onChange={(e) => updateField('customCssClasses', e.target.value.split(' ').filter(Boolean))}
 									disabled={disabled}
 								/>
@@ -487,59 +550,53 @@ export function DesignPanel({ designSystem, onChange, disabled = false, classNam
 
 							<div className="space-y-2">
 								<Label>Variables CSS Personalizadas</Label>
-								{Object.entries(designSystem.customCssVariables).map(([key, value], index) => (
-									<div key={index} className="flex gap-2">
-										<Input
-											placeholder="Nombre"
-											value={key}
-											onChange={(e) => {
-												const newVars = { ...designSystem.customCssVariables };
-												const oldValue = newVars[key];
-												delete newVars[key];
-												newVars[e.target.value] = oldValue;
-												updateField('customCssVariables', newVars);
-											}}
-											disabled={disabled}
-											className="flex-1"
-										/>
-										<Input
-											placeholder="Valor"
-											value={value}
-											onChange={(e) => {
-												updateField('customCssVariables', {
-													...designSystem.customCssVariables,
-													[key]: e.target.value,
-												});
-											}}
-											disabled={disabled}
-											className="flex-1"
-										/>
-										<Button
-											variant="destructive"
-											size="icon"
-											onClick={() => {
-												const newVars = { ...designSystem.customCssVariables };
-												delete newVars[key];
-												updateField('customCssVariables', newVars);
-											}}
-											disabled={disabled}
-										>
-											×
-										</Button>
-									</div>
-								))}
+								<Alert variant="info" className="py-2 mb-2">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle className="text-xs">Personalización avanzada</AlertTitle>
+									<AlertDescription className="text-xs">
+										Estas variables están disponibles en el CSS como variables personalizadas (--nombre-variable).
+									</AlertDescription>
+								</Alert>
+
+								<div className="grid grid-cols-2 gap-2 mb-2">
+									<Input
+										placeholder="Nombre (sin --)"
+										value={customCssKey}
+										onChange={(e) => setCustomCssKey(e.target.value)}
+									/>
+									<Input
+										placeholder="Valor"
+										value={customCssValue}
+										onChange={(e) => setCustomCssValue(e.target.value)}
+									/>
+								</div>
 								<Button
 									variant="outline"
-									onClick={() => {
-										updateField('customCssVariables', {
-											...designSystem.customCssVariables,
-											[`variable-${Object.keys(designSystem.customCssVariables).length + 1}`]: '',
-										});
-									}}
-									disabled={disabled}
+									size="sm"
+									className="w-full mb-4"
+									onClick={handleAddCustomCssVariable}
+									disabled={!customCssKey || !customCssValue}
 								>
-									Agregar Variable
+									Agregar variable CSS
 								</Button>
+
+								{Object.keys(designSystem.customCssVariables || {}).length > 0 ? (
+									<div className="space-y-2 mt-2">
+										{Object.entries(designSystem.customCssVariables || {}).map(([key, value]) => (
+											<div key={key} className="flex items-center justify-between p-2 bg-muted/20 rounded-md">
+												<div>
+													<span className="text-sm font-mono">--{key}:</span>{' '}
+													<span className="text-sm text-muted-foreground">{value}</span>
+												</div>
+												<Button variant="ghost" size="sm" onClick={() => handleRemoveCustomCssVariable(key)}>
+													×
+												</Button>
+											</div>
+										))}
+									</div>
+								) : (
+									<p className="text-sm text-muted-foreground">No hay variables CSS personalizadas.</p>
+								)}
 							</div>
 						</div>
 					</TabsContent>

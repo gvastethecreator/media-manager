@@ -11,11 +11,13 @@ interface CardBorderProps {
 }
 
 export function CardBorder({ options, isHovered, className }: CardBorderProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius, borderStyle, borderWidth } = designSystem || {};
 
-	const { holographicIntensity = 1, holographicColor } = visualEffects;
+	// Obtenemos las propiedades directamente de options o de holographicOptions
+	const holographicIntensity = options.holographicOptions?.intensity || 1;
+	const holographicColor = options.holographicOptions?.primaryColor;
 
 	return (
 		<motion.div

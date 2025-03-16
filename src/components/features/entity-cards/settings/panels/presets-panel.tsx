@@ -354,9 +354,29 @@ function PresetCard({ preset, isActive, onClick, entityType }: PresetCardProps) 
 	// Convertir el preset a opciones de tarjeta para la vista previa
 	const presetOptions = React.useMemo(() => {
 		try {
+			// Verificar y parsear coreConfig
+			let parsedCoreConfig = {};
+			if (preset.coreConfig && preset.coreConfig !== 'default_core_config') {
+				try {
+					parsedCoreConfig = JSON.parse(preset.coreConfig);
+				} catch (e) {
+					console.warn('Error al parsear coreConfig:', e);
+				}
+			}
+
+			// Verificar y parsear designConfig
+			let parsedDesignConfig = {};
+			if (preset.designConfig && preset.designConfig !== 'default_design_config') {
+				try {
+					parsedDesignConfig = JSON.parse(preset.designConfig);
+				} catch (e) {
+					console.warn('Error al parsear designConfig:', e);
+				}
+			}
+
 			return adaptSettingsToBaseOptions({
-				coreConfig: preset.coreConfig ? JSON.parse(preset.coreConfig) : {},
-				designConfig: preset.designConfig ? JSON.parse(preset.designConfig) : {},
+				coreConfig: parsedCoreConfig,
+				designConfig: parsedDesignConfig,
 				// Incluir otras configuraciones según necesidad
 			});
 		} catch (err) {

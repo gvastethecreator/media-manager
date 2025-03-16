@@ -11,7 +11,7 @@ interface CardContentProps {
 }
 
 export function CardContent({ options, children, className }: CardContentProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const {
 		preset,
@@ -24,7 +24,10 @@ export function CardContent({ options, children, className }: CardContentProps) 
 		contentAlignment,
 	} = designSystem || {};
 
-	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
+	// Obtenemos las propiedades directamente de options
+	const enableHolographic = options.enableHolographicEffect;
+	const enableGlow = options.enableGlowEffect;
+	const enableGrain = options.enableGrainEffect;
 
 	// Función para obtener las clases de layout
 	const getLayoutClasses = () => {

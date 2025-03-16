@@ -12,11 +12,13 @@ interface CardDescriptionProps {
 }
 
 export function CardDescription({ options, description, maxLength = 150, className }: CardDescriptionProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
-	const { holographicIntensity = 1, holographicColor } = visualEffects;
+	// Obtenemos las propiedades directamente de options o de holographicOptions
+	const holographicIntensity = options.holographicOptions?.intensity || 1;
+	const holographicColor = options.holographicOptions?.primaryColor;
 
 	// Formatear la descripción si excede el máximo
 	const formattedDescription = description.length > maxLength ? `${description.slice(0, maxLength)}...` : description;

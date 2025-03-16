@@ -5,7 +5,29 @@ import { DEFAULT_DESIGN_SYSTEM } from './design-module';
 import type { DesignSystem, UseDesignSystemHook } from './types';
 
 /**
- * Hook personalizado para gestionar el estado del sistema de diseño
+ * Función auxiliar para convertir un color hex a RGB
+ */
+export function hexToRgb(hex: string): string {
+	// Si no es un color hex válido, devolver blanco
+	if (!hex.match(/^#([A-Fa-f0-9]{3}){1,2}$/)) {
+		return '255, 255, 255';
+	}
+
+	// Expandir color hex corto (por ejemplo, #FFF a #FFFFFF)
+	if (hex.length === 4) {
+		hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+	}
+
+	// Convertir a RGB
+	const r = parseInt(hex.substring(1, 3), 16);
+	const g = parseInt(hex.substring(3, 5), 16);
+	const b = parseInt(hex.substring(5, 7), 16);
+
+	return `${r}, ${g}, ${b}`;
+}
+
+/**
+ * 🎨 Hook personalizado para gestionar el estado del sistema de diseño
  * y generar estilos CSS basados en la configuración actual.
  */
 export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): UseDesignSystemHook {
@@ -13,6 +35,9 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 	const [designSystem, setDesignSystem] = useState<DesignSystem>({
 		...DEFAULT_DESIGN_SYSTEM,
 		...initialDesignSystem,
+		// Asegurar que las propiedades críticas siempre estén definidas
+		customCssClasses: initialDesignSystem?.customCssClasses || DEFAULT_DESIGN_SYSTEM.customCssClasses || [],
+		customCssVariables: initialDesignSystem?.customCssVariables || DEFAULT_DESIGN_SYSTEM.customCssVariables || {},
 	});
 
 	// Función para actualizar el sistema de diseño
@@ -20,6 +45,9 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 		setDesignSystem((prevState) => ({
 			...prevState,
 			...updates,
+			// Asegurar que las propiedades críticas siempre estén definidas
+			customCssClasses: updates.customCssClasses || prevState.customCssClasses || [],
+			customCssVariables: updates.customCssVariables || prevState.customCssVariables || {},
 		}));
 	}, []);
 
@@ -44,6 +72,7 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 			borderWidth,
 			borderStyle,
 			borderColor,
+			textColor,
 			customCssVariables,
 		} = designSystem;
 
@@ -88,6 +117,12 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 			borderWidth: `${borderWidth}px`,
 			borderStyle,
 			borderColor,
+			color: textColor || '#000000',
+			position: 'relative',
+			overflow: 'hidden',
+			width: '100%',
+			height: '100%',
+			transition: 'all 0.3s ease',
 		};
 
 		// Agregar variables CSS personalizadas
@@ -104,18 +139,4 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 		resetDesignSystem,
 		generateCssStyles,
 	};
-}
-
-// Función auxiliar para convertir color hexadecimal a RGB
-function hexToRgb(hex: string): string {
-	// Eliminar el # si está presente
-	const cleanHex = hex.replace('#', '');
-
-	// Convertir a valores RGB
-	const r = Number.parseInt(cleanHex.substring(0, 2), 16);
-	const g = Number.parseInt(cleanHex.substring(2, 4), 16);
-	const b = Number.parseInt(cleanHex.substring(4, 6), 16);
-
-	// Devolver formato RGB
-	return `${r}, ${g}, ${b}`;
 }

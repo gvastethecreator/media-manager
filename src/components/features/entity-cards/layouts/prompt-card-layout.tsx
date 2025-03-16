@@ -16,13 +16,13 @@ import {
 	Wand2,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
 import type * as React from 'react';
+import { useState } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardWrapper } from '../entity-card-wrapper';
 import type { CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
-import { ImageGrid } from './image-grid';
 import type { PromptFormData } from './forms/entity-types';
+import { ImageGrid } from './image-grid';
 
 type CardData =
 	| (Prompt & {
@@ -68,6 +68,20 @@ export function PromptCard({
 	rarity: initialRarity,
 	texture: initialTexture,
 }: PromptCardProps) {
+	// Verificar si data existe y tiene las propiedades necesarias
+	if (!data) {
+		console.warn('PromptCard: Se recibió un objeto data indefinido');
+		// Crear un data por defecto para evitar errores
+		data = {
+			id: 'placeholder',
+			name: 'Prompt sin nombre',
+			content: 'Sin contenido',
+			type: 'text',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Prompt;
+	}
+
 	const [isHovered, setIsHovered] = useState(false);
 	const [configOpen, setConfigOpen] = useState(false);
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>(

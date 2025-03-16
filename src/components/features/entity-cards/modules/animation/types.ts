@@ -3,19 +3,19 @@
  */
 
 /**
- * Configuración del sistema de animación
+ * Interfaz para el sistema de animación
  */
 export interface AnimationSystem {
 	// Configuración general
 	enabled: boolean;
 	reducedMotion: boolean;
-	transitionDuration: number;
+	transitionDuration: number; // en milisegundos
 	timingFunction: string;
 
 	// Animaciones de entrada/salida
 	entranceAnimation: string;
 	exitAnimation: string;
-	entranceDelay: number;
+	entranceDelay: number; // en milisegundos
 	loopAnimations: boolean;
 
 	// Efectos de hover
@@ -23,8 +23,8 @@ export interface AnimationSystem {
 	hoverScale: number;
 	hoverRotate: boolean;
 	hoverLift: boolean;
-	liftHeight: number;
-	maxRotation: number;
+	liftHeight: number; // en píxeles
+	maxRotation: number; // en grados
 
 	// Efectos de click
 	clickEffect: boolean;
@@ -33,7 +33,7 @@ export interface AnimationSystem {
 }
 
 /**
- * Preset del sistema de animación
+ * Interfaz para presets del sistema de animación
  */
 export interface AnimationSystemPreset {
 	id: string;
@@ -43,36 +43,34 @@ export interface AnimationSystemPreset {
 }
 
 /**
- * Props para el componente AnimationPanel
+ * Props para el panel de animación
  */
 export interface AnimationPanelProps {
 	animationSystem: AnimationSystem;
-	onChange: (animationSystem: AnimationSystem) => void;
+	onChange: (updatedSystem: AnimationSystem) => void;
 	disabled?: boolean;
 	className?: string;
 }
 
 /**
- * Props para el componente AnimationModule
+ * Props para el módulo de animación
  */
 export interface AnimationModuleProps {
 	initialAnimationSystem?: Partial<AnimationSystem>;
-	onChange?: (animationSystem: AnimationSystem) => void;
+	onChange?: (updatedSystem: AnimationSystem) => void;
 	disabled?: boolean;
 	className?: string;
 }
 
 /**
- * Generador de clases CSS para animaciones
+ * Tipo para el hook useAnimationSystem
  */
-export type AnimationClassesGenerator = (animationSystem: AnimationSystem) => string;
-
-/**
- * Hook para animaciones
- */
-export type UseAnimationSystemHook = (initialSystem?: Partial<AnimationSystem>) => {
+export interface UseAnimationSystemHook {
 	animationSystem: AnimationSystem;
 	updateAnimationSystem: (update: Partial<AnimationSystem>) => void;
 	resetAnimationSystem: () => void;
-	generateAnimationClasses: () => string;
-};
+	applyCustomTimingFunction: (x1: number, y1: number, x2: number, y2: number) => void;
+	getAnimationClasses: () => string;
+	getAnimationVariables: () => Record<string, string>;
+	getAnimationStyles: () => React.CSSProperties;
+}

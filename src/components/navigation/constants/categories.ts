@@ -1,0 +1,81 @@
+import type { CategoryItem } from '@/components/navigation/types';
+import type { ViewType } from '@/types/file-item';
+import {
+	BookImage,
+	Box,
+	Camera,
+	FolderIcon,
+	Lightbulb,
+	MapPin,
+	StickyNote,
+	TagIcon,
+	Terminal,
+	User2,
+} from 'lucide-react';
+
+/**
+ * Definición de las categorías principales del panel de navegación
+ * Cada categoría tiene un id, icono, etiqueta y color
+ */
+export const NAVIGATION_CATEGORIES: CategoryItem[] = [
+	{
+		id: 'folders' as ViewType,
+		icon: FolderIcon,
+		label: 'Carpetas',
+		color: '#22c55e',
+	},
+	{
+		id: 'collections' as ViewType,
+		icon: BookImage,
+		label: 'Colecciones',
+		color: '#ef4444',
+	},
+	{
+		id: 'albums' as ViewType,
+		icon: Camera,
+		label: 'Álbumes',
+		color: '#8b5cf6',
+	},
+	{
+		id: 'characters' as ViewType,
+		icon: User2,
+		label: 'Personajes',
+		color: '#ec4899',
+	},
+	{
+		id: 'places' as ViewType,
+		icon: MapPin,
+		label: 'Lugares',
+		color: '#14b8a6',
+	},
+	{
+		id: 'world-items' as ViewType,
+		icon: Box,
+		label: 'Objetos',
+		color: '#f59e0b',
+	},
+	{
+		id: 'concepts' as ViewType,
+		icon: Lightbulb,
+		label: 'Conceptos',
+		color: '#3b82f6',
+	},
+	{
+		id: 'prompts' as ViewType,
+		icon: Terminal,
+		label: 'Prompts',
+		color: '#10b981',
+	},
+	{
+		id: 'notes' as ViewType,
+		icon: StickyNote,
+		label: 'Notas',
+		color: '#a855f7',
+	},
+	{
+		id: 'tags' as ViewType,
+		icon: TagIcon,
+		label: 'Etiquetas',
+		color: '#f59e0b',
+	},
+];

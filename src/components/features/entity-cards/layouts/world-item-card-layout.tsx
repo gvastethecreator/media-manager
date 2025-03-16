@@ -218,6 +218,21 @@ export function WorldItemCard({
 	visualOptions,
 	enableExplode = true,
 }: WorldItemCardProps) {
+	// Verificar si worldItem existe y tiene las propiedades necesarias
+	if (!worldItem) {
+		console.warn('WorldItemCard: Se recibió un objeto worldItem indefinido');
+		// Crear un worldItem por defecto para evitar errores
+		worldItem = {
+			id: 'placeholder',
+			name: 'Objeto sin nombre',
+			description: 'Sin descripción',
+			type: 'Unknown',
+			rarity: 'common',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as WorldItem;
+	}
+
 	// Usar el hook para obtener configuración de preset si existe
 	const { cardOptions } = usePreset({
 		entityType: 'worldItem',

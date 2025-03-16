@@ -4,15 +4,14 @@
  */
 
 // 🚀 Exportar componentes principales
-export * from './preview-module';
-export * from './preview-settings-adapter';
-
-// 🧰 Exportar hooks y utilidades
-export * from './use-preview';
+export * from './entity-card-preview';
+export * from './entity-preview-adapter';
 export * from './preview-adapter';
-
-// 📝 Exportar tipos y constantes
+export * from './preview-module';
+export * from './preview-panel';
+export * from './preview-settings-adapter';
 export * from './types';
+export * from './use-preview';
 
-export { EntityCardPreview } from './entity-card-preview';
-export { ImageGrid } from './image-grid';
+// Re-exportar ImageGrid desde modules/image-grid
+export { ImageGrid } from '@/components/features/entity-cards/modules/image-grid/image-grid';

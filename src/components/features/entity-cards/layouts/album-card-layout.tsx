@@ -1,7 +1,6 @@
 'use client';
 
 import type { AlbumWithStats } from '@/app/actions/albums/album.actions';
-import { generateRarityConfig } from '@/components/features/entity-cards/entity-card-adapter';
 import type { AlbumFormData } from '@/components/features/entity-cards/layouts/forms/entity-types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,6 +11,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
 import type { BaseCardRarityConfig, BaseCardTextureConfig } from '../types';
+import { generateRarityConfig } from '../utils/rarity-utils';
 
 // Asegurar que ambos tipos tienen las propiedades necesarias
 export type CardData =
@@ -114,6 +114,20 @@ export function AlbumCard({
 	rarity,
 	texture,
 }: AlbumCardProps) {
+	// Verificar si data existe y tiene las propiedades necesarias
+	if (!data) {
+		console.warn('AlbumCard: Se recibió un objeto data indefinido');
+		// Crear un data por defecto para evitar errores
+		data = {
+			id: 'placeholder',
+			name: 'Álbum sin nombre',
+			description: 'Sin descripción',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			_count: { images: 0 },
+		} as CardData;
+	}
+
 	const [configOpen, setConfigOpen] = React.useState(false);
 	const [cardOptions, setCardOptions] = React.useState<any>(
 		options || {
@@ -130,14 +144,14 @@ export function AlbumCard({
 	// Para componente preview, detectar cambios y animar
 	const prevDataRef = useRef<CardData | null>(null);
 
-	// Calcular rareza basada en los datos del álbum
-	const rarityConfig = useMemo(() => {
-		// Si se proporciona una rareza inicial, usarla
+	// Calcular la configuración de rareza basada en los datos
+	const rarityConfig = useMemo<BaseCardRarityConfig>(() => {
+		// Si se proporciona una configuración de rareza, usarla
 		if (rarity) {
 			return rarity;
 		}
 
-		// Si es un álbum con estadísticas, basamos la rareza en la cantidad de imágenes
+		// Calcular rareza basada en el número de imágenes
 		if ('_count' in data && data._count) {
 			const imageCount = data._count.images || 0;
 

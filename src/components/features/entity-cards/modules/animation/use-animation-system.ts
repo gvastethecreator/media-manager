@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { useCallback, useState } from 'react';
 import { DEFAULT_ANIMATION_SYSTEM } from './animation-module';
+import { generateAnimationClasses, generateAnimationStyles, generateAnimationVariables } from './css-generator';
 import type { AnimationSystem } from './types';
 
 /**
@@ -36,55 +36,44 @@ export function useAnimationSystem(initialSystem?: Partial<AnimationSystem>) {
 	}, [initialSystem]);
 
 	/**
+	 * Aplicar una función de temporización personalizada
+	 */
+	const applyCustomTimingFunction = useCallback(
+		(x1: number, y1: number, x2: number, y2: number) => {
+			const cubicBezier = `cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})`;
+			updateAnimationSystem({ timingFunction: cubicBezier });
+		},
+		[updateAnimationSystem]
+	);
+
+	/**
 	 * Generar clases CSS basadas en la configuración de animación
 	 */
-	const generateAnimationClasses = useCallback(() => {
-		if (!animationSystem.enabled) {
-			return '';
-		}
+	const getAnimationClasses = useCallback(() => {
+		return generateAnimationClasses(animationSystem);
+	}, [animationSystem]);
 
-		const classes = [];
+	/**
+	 * Generar variables CSS basadas en la configuración de animación
+	 */
+	const getAnimationVariables = useCallback(() => {
+		return generateAnimationVariables(animationSystem);
+	}, [animationSystem]);
 
-		// Clases para la duración y función de temporización
-		classes.push(`transition-all duration-${animationSystem.transitionDuration}`);
-
-		// Diferentes funciones de temporización
-		if (animationSystem.timingFunction === 'ease') {
-			classes.push('ease');
-		} else if (animationSystem.timingFunction === 'ease-in') {
-			classes.push('ease-in');
-		} else if (animationSystem.timingFunction === 'ease-out') {
-			classes.push('ease-out');
-		} else if (animationSystem.timingFunction === 'ease-in-out') {
-			classes.push('ease-in-out');
-		} else if (animationSystem.timingFunction === 'linear') {
-			classes.push('linear');
-		} else {
-			// Para cubic-bezier personalizados, agregamos un estilo inline
-			classes.push('transition-timing-function-custom');
-		}
-
-		// Clases para animaciones de entrada
-		if (animationSystem.entranceAnimation && animationSystem.entranceAnimation !== 'none') {
-			classes.push(`animate-${animationSystem.entranceAnimation}`);
-
-			if (animationSystem.entranceDelay > 0) {
-				classes.push(`delay-${animationSystem.entranceDelay}`);
-			}
-		}
-
-		// Clases para animaciones en bucle
-		if (animationSystem.loopAnimations) {
-			classes.push('animate-loop');
-		}
-
-		return cn(...classes);
+	/**
+	 * Generar estilos CSS en línea basados en la configuración de animación
+	 */
+	const getAnimationStyles = useCallback(() => {
+		return generateAnimationStyles(animationSystem);
 	}, [animationSystem]);
 
 	return {
 		animationSystem,
 		updateAnimationSystem,
 		resetAnimationSystem,
-		generateAnimationClasses,
+		applyCustomTimingFunction,
+		getAnimationClasses,
+		getAnimationVariables,
+		getAnimationStyles,
 	};
 }

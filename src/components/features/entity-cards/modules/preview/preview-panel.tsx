@@ -1,71 +1,103 @@
 'use client';
 
-import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
-import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { ZoomIn } from 'lucide-react';
+import { Layers, ZoomIn } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 import { EntityPreviewAdapter } from './entity-preview-adapter';
+import type { PreviewPanelProps } from './types';
 
-// Definir el tipo PreviewPanelProps
-interface PreviewPanelProps {
-	cardOptions: CardOptions;
-	rarity?: RarityConfig | null;
-	texture?: TextureConfig | null;
-	showInfo?: boolean;
-	entityType?:
-		| 'card-album'
-		| 'card-collection'
-		| 'card-tag'
-		| 'card-character'
-		| 'card-world-item'
-		| 'card-place'
-		| 'card-concept'
-		| 'card-prompt'
-		| 'card-note'
-		| 'card-folder';
-}
-
-// Esquema de colores para el panel de vista previa
-const previewColors = {
-	bg: 'bg-blue-500/5',
-	border: 'border-blue-500/20',
-	text: 'text-blue-600',
-	highlight: 'bg-blue-500/10',
-};
-
+/**
+ * Panel de vista previa para tarjetas de entidad
+ * Muestra una tarjeta con controles adicionales y efectos visuales
+ */
 export function PreviewPanel({
 	cardOptions,
 	rarity,
 	texture,
 	showInfo = true,
+	showControls = true,
+	showBorder = true,
+	enableInteraction = true,
+	previewMode = 'full',
+	className,
 	entityType = 'card-album',
 }: PreviewPanelProps) {
+	// Estado para el modo de explosión de capas
+	const [isExploded, setIsExploded] = useState(false);
+	// Estado para el zoom
+	const [zoomLevel, setZoomLevel] = useState(1);
+
+	// Función para alternar el modo de explosión
+	const toggleExplode = () => {
+		setIsExploded(!isExploded);
+	};
+
+	// Función para aumentar el zoom
+	const increaseZoom = () => {
+		setZoomLevel((prev) => Math.min(prev + 0.1, 2));
+	};
+
+	// Función para disminuir el zoom
+	const decreaseZoom = () => {
+		setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
+	};
+
 	return (
-		<Card className={cn('border border-border/40 shadow-sm overflow-hidden', previewColors.border)}>
-			<CardContent className="p-2 flex items-center justify-center">
-				<motion.div
-					initial={{ opacity: 0, scale: 0.95 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.2 }}
-					className="mx-auto relative group"
+		<Card
+			className={cn(
+				'relative overflow-hidden transition-all duration-300',
+				showBorder ? 'border border-border' : 'border-0',
+				className
+			)}
+		>
+			<CardContent className="p-0">
+				{/* Contenedor de la tarjeta con zoom */}
+				<div
+					className="flex items-center justify-center p-6"
+					style={{
+						transform: `scale(${zoomLevel})`,
+						transition: 'transform 0.3s ease',
+					}}
 				>
+					{/* Adaptador de vista previa de entidad */}
 					<EntityPreviewAdapter
 						cardOptions={cardOptions}
 						rarity={rarity}
 						texture={texture}
 						showInfo={showInfo}
 						entityType={entityType}
+						previewMode={previewMode}
 					/>
+				</div>
 
-					{/* Indicador de zoom en hover */}
-					<div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-						<div className={cn('rounded-full p-1', previewColors.highlight)}>
-							<ZoomIn className={cn('h-3 w-3', previewColors.text)} />
-						</div>
+				{/* Controles flotantes */}
+				{showControls && (
+					<div className="absolute bottom-2 right-2 flex gap-1">
+						<motion.button
+							whileHover={{ scale: 1.1 }}
+							whileTap={{ scale: 0.9 }}
+							onClick={toggleExplode}
+							className={cn(
+								'p-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm',
+								isExploded && 'bg-primary/20 border-primary/50'
+							)}
+							title="Explotar capas"
+						>
+							<Layers className="h-3.5 w-3.5" />
+						</motion.button>
+						<motion.button
+							whileHover={{ scale: 1.1 }}
+							whileTap={{ scale: 0.9 }}
+							onClick={increaseZoom}
+							className="p-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm"
+							title="Aumentar zoom"
+						>
+							<ZoomIn className="h-3.5 w-3.5" />
+						</motion.button>
 					</div>
-				</motion.div>
+				)}
 			</CardContent>
 		</Card>
 	);
