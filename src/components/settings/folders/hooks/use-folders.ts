@@ -2,9 +2,8 @@
 
 import { reindexAllFolders } from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/lib/services/toast.service';
-import type { FolderStats } from '@/types/entities/folders';
 import type {
 	ErrorResponse,
 	ExtendedProcessStatus,
@@ -13,13 +12,13 @@ import type {
 	ReindexAllProgressData,
 } from '@/types/process';
 import { useCallback, useEffect, useState } from 'react';
-import { type ExtendedFolder, initialGlobalProcessingState, initialGlobalReindexStatus } from '../folder-types';
+import { type ExtendedFolder, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
 import { useFoldersPolling } from './use-folders-polling';
 import { useFoldersState } from './use-folders-state';
 
-const folderLogger = logger.withContext('useFolders');
+const folderLogger = serverLogger.withContext('useFolders');
 
 /**
  * Hook principal para la gestión completa de carpetas

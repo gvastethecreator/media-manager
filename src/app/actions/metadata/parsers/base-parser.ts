@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * Tipo para los datos de generación por IA
@@ -50,7 +50,7 @@ export interface AIGenerationParserModule {
  * Logger común para los parsers de generación por IA
  * (No exportado directamente - ahora es una función interna)
  */
-const parserLogger = logger.withContext('AIGenerationParser');
+const parserLogger = serverLogger.withContext('AIGenerationParser');
 
 /**
  * Obtener el logger del parser (versión async exportada)

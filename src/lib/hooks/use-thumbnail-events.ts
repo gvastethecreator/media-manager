@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail.service';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import { EventSourcePolyfill } from 'event-source-polyfill';
@@ -28,7 +28,7 @@ export function useThumbnailEvents() {
 				clearTimeout(heartbeatTimeout);
 			}
 			heartbeatTimeout = setTimeout(() => {
-				logger.warn('⚠️ No se ha recibido heartbeat en', HEARTBEAT_TIMEOUT);
+				serverLogger.warn('⚠️ No se ha recibido heartbeat en', HEARTBEAT_TIMEOUT);
 				reconnect();
 			}, HEARTBEAT_TIMEOUT);
 		};
@@ -50,13 +50,13 @@ export function useThumbnailEvents() {
 				});
 
 				eventSource.onopen = () => {
-					logger.info('🔌 Conexión SSE establecida');
+					serverLogger.info('🔌 Conexión SSE establecida');
 					reconnectAttempts = 0;
 					resetHeartbeatTimeout();
 				};
 
 				eventSource.onerror = (error) => {
-					logger.error('❌ Error en conexión SSE:', error);
+					serverLogger.error('❌ Error en conexión SSE:', error);
 					setError('Error en la conexión de eventos');
 					reconnect();
 				};
@@ -76,7 +76,7 @@ export function useThumbnailEvents() {
 						}
 						return data;
 					} catch (error: unknown) {
-						logger.error('❌ Error procesando evento:', error);
+						serverLogger.error('❌ Error procesando evento:', error);
 						return null;
 					}
 				};
@@ -111,7 +111,7 @@ export function useThumbnailEvents() {
 					}
 				};
 			} catch (error) {
-				logger.error('❌ Error creando conexión SSE:', error);
+				serverLogger.error('❌ Error creando conexión SSE:', error);
 				setError(error instanceof Error ? error.message : 'Error al establecer la conexión');
 				reconnect();
 			}
@@ -119,7 +119,7 @@ export function useThumbnailEvents() {
 
 		const reconnect = () => {
 			if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-				logger.error('❌ Máximo número de intentos de reconexión alcanzado');
+				serverLogger.error('❌ Máximo número de intentos de reconexión alcanzado');
 				setError('No se pudo restablecer la conexión después de varios intentos');
 				return;
 			}
@@ -137,7 +137,7 @@ export function useThumbnailEvents() {
 			const delay = RETRY_INTERVAL * 2 ** (reconnectAttempts - 1);
 
 			retryTimeout = setTimeout(() => {
-				logger.info(`🔄 Intento de reconexión ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
+				serverLogger.info(`🔄 Intento de reconexión ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
 				connect();
 			}, delay);
 		};

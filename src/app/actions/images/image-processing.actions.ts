@@ -2,12 +2,12 @@
 
 import { existsSync } from 'fs';
 import fs from 'node:fs/promises';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
 import type { ImageProcessingOptions } from './image-types.actions';
 
-const imageLogger = logger.withContext('ImageProcessing');
+const imageLogger = serverLogger.withContext('ImageProcessing');
 
 /**
  * Procesa una imagen según las opciones especificadas

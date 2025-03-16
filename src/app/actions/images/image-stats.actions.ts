@@ -1,10 +1,10 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-const imageLogger = logger.withContext('ImageStats');
+const imageLogger = serverLogger.withContext('ImageStats');
 
 /**
  * Actualiza las estadísticas de visualización o descarga de una imagen

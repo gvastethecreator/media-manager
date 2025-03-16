@@ -1,14 +1,14 @@
 import { existsSync } from 'fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileMetadata } from '@/types/file-item';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 
-const apiLogger = logger.withContext('ImageAPI');
+const apiLogger = serverLogger.withContext('ImageAPI');
 
 export async function GET(_request: Request, context: { params: { id: string } }) {
 	const headers = new Headers();

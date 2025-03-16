@@ -1,5 +1,5 @@
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ThumbnailError, ThumbnailProcessStatus, ThumbnailStats } from '@/types/thumbnails';
 import { create } from 'zustand';
 
@@ -103,7 +103,7 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 			const stats = await thumbnailActions.getThumbnailStats();
 			store.setStats(stats);
 		} catch (error) {
-			logger.error('Error inicializando thumbnails:', error);
+			serverLogger.error('Error inicializando thumbnails:', error);
 			store.setError(error instanceof Error ? error.message : 'Error desconocido');
 		} finally {
 			store.setLoading(false);

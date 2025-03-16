@@ -1,10 +1,10 @@
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { statsService } from '@/services/stats.service';
 import type { ImageStats } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-const statsLogger = logger.withContext('StatsHook');
+const statsLogger = serverLogger.withContext('StatsHook');
 
 export const STATS_QUERY_KEYS = {
 	all: ['stats'] as const,

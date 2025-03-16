@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { logger } from '../lib/logger/logger';
+import { serverLogger } from '../lib/logger/server-logger';
 import type { BaseEntity, BaseStore, ExtendedStore, StoreHook } from './types';
 
 export interface StoreOptions<T extends BaseEntity> {
 	name: string;
-	logger?: typeof logger;
+	logger?: typeof serverLogger;
 	initialState?: Partial<BaseStore<T>>;
 	actions?: {
 		beforeCreate?: <C = unknown>(data: C) => Promise<C>;
@@ -30,7 +30,7 @@ export function createStoreFactory<
 		deleteItem: (id: string) => Promise<void>;
 	}
 ): StoreHook<T, S, CreateType, UpdateType> {
-	const storeLogger = options.logger?.withContext(options.name) || logger.withContext(options.name);
+	const storeLogger = options.logger?.withContext(options.name) || serverLogger.withContext(options.name);
 
 	return create<ExtendedStore<T, S, CreateType, UpdateType>>((set, get) => {
 		const baseStore: BaseStore<T, CreateType, UpdateType> = {

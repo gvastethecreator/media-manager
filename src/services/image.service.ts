@@ -3,14 +3,14 @@ import { createHash } from 'node:crypto';
 import { extractMetadata } from '@/app/actions/metadata';
 import { thumbnailCache } from '@/lib/cache';
 import { imageConfig } from '@/lib/config';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import type { Image } from '@prisma/client';
 import sharp from 'sharp';
 import { statsService } from './stats.service';
 
-const imageLogger = logger.withContext('ImageService');
+const imageLogger = serverLogger.withContext('ImageService');
 
 export type { ThumbnailQuality };
 export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities;

@@ -3,13 +3,13 @@
 import { getFolderImages, reindexFolder } from '@/app/actions/folders';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { FolderContentProps } from '@/components/views/base';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 
-const viewLogger = logger.withContext('FolderContentView');
+const viewLogger = serverLogger.withContext('FolderContentView');
 
 export function FolderContentView() {
 	const {

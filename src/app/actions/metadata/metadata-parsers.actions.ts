@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileMetadata } from '@/types/metadata';
 import ExifReader, { type ExpandedTags, type Tags } from 'exifreader';
 import sharp from 'sharp';
@@ -15,7 +15,7 @@ import type {
 import { withRetry } from './metadata-utils.actions';
 import { extractAIGenerationInfo } from './parsers';
 
-const parserLogger = logger.withContext('MetadataParsers');
+const parserLogger = serverLogger.withContext('MetadataParsers');
 
 // Tipo mejorado para los datos EXIF
 interface ExifData {

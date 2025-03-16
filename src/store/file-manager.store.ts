@@ -9,7 +9,7 @@ import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
 import { getStats } from '@/app/actions/stats/stats.actions';
 import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	FileItem,
 	ImageStats,
@@ -27,7 +27,7 @@ import type {
 import type { ViewMode } from '@/types/settings';
 import { create } from 'zustand';
 
-const fileManagerLogger = logger.withContext('FileManagerStore');
+const fileManagerLogger = serverLogger.withContext('FileManagerStore');
 
 // Tipos para entidades
 interface BaseEntity {

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/file-manager.store';
@@ -25,7 +25,7 @@ import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
  
-const gridLogger = logger.withContext('FileGrid');
+const gridLogger = serverLogger.withContext('FileGrid');
 
 export interface FileBrowserProps {
 	items: FileItem[];

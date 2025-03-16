@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import sharp from 'sharp';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 import { formatBytes } from './utils/format.utils';
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png';
@@ -50,7 +50,7 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 		}
 
 		const finalOptions = { ...DEFAULT_OPTIONS, ...options };
-		logger.debug('Procesando imagen:', { path: imagePath, options: finalOptions });
+		serverLogger.debug('Procesando imagen:', { path: imagePath, options: finalOptions });
 
 		const image = sharp(imagePath, {
 			failOn: 'none',
@@ -115,7 +115,7 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 			size: buffer.length,
 		};
 
-		logger.debug('Imagen procesada:', {
+		serverLogger.debug('Imagen procesada:', {
 			path: imagePath,
 			originalSize: metadata.size,
 			newSize: formatBytes(buffer.length),
@@ -124,7 +124,7 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 
 		return result;
 	} catch (error) {
-		logger.error('Error procesando imagen:', {
+		serverLogger.error('Error procesando imagen:', {
 			path: imagePath,
 			error: error instanceof Error ? error.message : error,
 		});
@@ -148,7 +148,7 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 			throw new Error(`Archivo no encontrado: ${imagePath}`);
 		}
 
-		logger.debug('Creando thumbnail:', { path: imagePath, options });
+		serverLogger.debug('Creando thumbnail:', { path: imagePath, options });
 
 		// Primer intento con opciones originales
 		const result = await processImage(imagePath, {
@@ -162,7 +162,7 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 			return result;
 		}
 
-		logger.warn('Thumbnail demasiado grande, reintentando con menor calidad:', {
+		serverLogger.warn('Thumbnail demasiado grande, reintentando con menor calidad:', {
 			path: imagePath,
 			size: formatBytes(result.size),
 			maxSize: formatBytes(MAX_THUMBNAIL_SIZE),
@@ -180,7 +180,7 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 			throw new Error('No se pudo generar un thumbnail de tamaño aceptable');
 		}
 
-		logger.info('Thumbnail generado con calidad reducida:', {
+		serverLogger.info('Thumbnail generado con calidad reducida:', {
 			path: imagePath,
 			originalSize: formatBytes(result.size),
 			newSize: formatBytes(lowerQualityResult.size),
@@ -189,7 +189,7 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 
 		return lowerQualityResult;
 	} catch (error) {
-		logger.error('Error creando thumbnail:', {
+		serverLogger.error('Error creando thumbnail:', {
 			path: imagePath,
 			error: error instanceof Error ? error.message : error,
 		});

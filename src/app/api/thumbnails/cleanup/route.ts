@@ -1,9 +1,9 @@
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const thumbLogger = logger.withContext('ThumbnailCleanupAPI');
+const thumbLogger = serverLogger.withContext('ThumbnailCleanupAPI');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

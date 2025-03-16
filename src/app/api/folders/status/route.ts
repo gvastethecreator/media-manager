@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
 import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
 import type { ProcessStatus } from '@/types/process';
@@ -15,7 +15,7 @@ interface FolderResponse {
 	error?: string;
 }
 
-const statusLogger = logger.withContext('FolderStatusAPI');
+const statusLogger = serverLogger.withContext('FolderStatusAPI');
 
 // Estado global compartido para procesos de reindexación
 const lastProcessStatus: Record<string, ProcessStatus> = {};
