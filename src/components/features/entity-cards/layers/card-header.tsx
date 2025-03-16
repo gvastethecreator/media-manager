@@ -17,11 +17,14 @@ interface CardHeaderProps {
 }
 
 export function CardHeader({ options, title, subtitle, badges, className }: CardHeaderProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius, textStyle } = designSystem || {};
 
-	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
+	// Obtenemos las propiedades directamente de options
+	const enableHolographic = options.enableHolographicEffect;
+	const enableGlow = options.enableGlowEffect;
+	const enableGrain = options.enableGrainEffect;
 
 	return (
 		<motion.div

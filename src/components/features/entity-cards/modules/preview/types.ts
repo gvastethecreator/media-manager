@@ -55,3 +55,19 @@ export interface PreviewModuleProps {
 	disabled?: boolean;
 	className?: string;
 }
+
+/**
+ * Props para el panel de previsualización
+ */
+export interface PreviewPanelProps {
+	cardOptions: any;
+	rarity?: any;
+	texture?: any;
+	showInfo?: boolean;
+	showControls?: boolean;
+	showBorder?: boolean;
+	enableInteraction?: boolean;
+	previewMode?: 'full' | 'thumbnail' | 'compact';
+	className?: string;
+	entityType?: string;
+}

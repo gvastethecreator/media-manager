@@ -9,13 +9,15 @@ interface ExtendedCardOptions extends CardOptions {
 }
 
 /**
- * Convierte las opciones de la tarjeta al formato de opciones de previsualización
- * @param cardOptions - Opciones de la tarjeta
- * @returns Opciones de previsualización
+ * Adapta las opciones de CardOptions a PreviewOptions
+ * @param options - Opciones de tarjeta
+ * @returns Opciones de vista previa
  */
-export function cardToPreviewOptions(cardOptions: ExtendedCardOptions): PreviewOptions {
-	const preview = cardOptions.preview || {};
+export function adaptCardOptionsToPreviewOptions(options: CardOptions): PreviewOptions {
+	// Extraer las opciones de preview o crear un objeto vacío si no existen
+	const preview = (options as ExtendedCardOptions).preview || {};
 
+	// Valores predeterminados para PreviewOptions
 	return {
 		size: preview.size || 'medium',
 		customWidth: preview.customWidth || 300,
@@ -32,20 +34,64 @@ export function cardToPreviewOptions(cardOptions: ExtendedCardOptions): PreviewO
 }
 
 /**
- * Actualiza las opciones de la tarjeta con las nuevas opciones de previsualización
- * @param cardOptions - Opciones actuales de la tarjeta
- * @param previewOptions - Nuevas opciones de previsualización
- * @returns Opciones actualizadas de la tarjeta
+ * Adapta las opciones de PreviewOptions a CardOptions
+ * @param previewOptions - Opciones de vista previa
+ * @param existingOptions - Opciones de tarjeta existentes
+ * @returns Opciones de tarjeta actualizadas
  */
-export function updateCardWithPreviewOptions(
-	cardOptions: ExtendedCardOptions,
-	previewOptions: PreviewOptions
-): ExtendedCardOptions {
+export function adaptPreviewOptionsToCardOptions(
+	previewOptions: PreviewOptions,
+	existingOptions: CardOptions = {}
+): CardOptions {
 	return {
-		...cardOptions,
+		...existingOptions,
 		preview: {
-			...cardOptions.preview,
+			...(existingOptions as ExtendedCardOptions).preview,
 			...previewOptions,
 		},
 	};
+}
+
+/**
+ * Aplica una opción específica de vista previa a las opciones de tarjeta
+ * @param options - Opciones de tarjeta
+ * @param key - Clave de la opción
+ * @param value - Valor de la opción
+ * @returns Opciones de tarjeta actualizadas
+ */
+export function applyPreviewOptionToCardOptions<K extends keyof PreviewOptions>(
+	options: CardOptions,
+	key: K,
+	value: PreviewOptions[K]
+): CardOptions {
+	return {
+		...options,
+		preview: {
+			...(options as ExtendedCardOptions).preview,
+			[key]: value,
+		},
+	};
+}
+
+/**
+ * Obtiene el tamaño de la vista previa en píxeles
+ * @param options - Opciones de vista previa
+ * @returns Dimensiones en píxeles
+ */
+export function getPreviewDimensions(options: PreviewOptions): { width: number; height: number } {
+	switch (options.size) {
+		case 'small':
+			return { width: 200, height: 300 };
+		case 'medium':
+			return { width: 300, height: 400 };
+		case 'large':
+			return { width: 400, height: 600 };
+		case 'custom':
+			return {
+				width: options.customWidth || 300,
+				height: options.customHeight || 400,
+			};
+		default:
+			return { width: 300, height: 400 };
+	}
 }

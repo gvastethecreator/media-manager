@@ -5,11 +5,20 @@
 
 // 🚀 Exportar componentes principales
 export * from './performance-module';
+export * from './performance-panel';
 export * from './performance-settings-adapter';
 
-// 🧰 Exportar hooks y utilidades
-export * from './use-performance';
+// 📊 Exportar adaptadores
 export * from './performance-adapter';
 
-// 📝 Exportar tipos y constantes
+// 🪝 Exportar hooks
+export * from './use-animation-performance';
+export * from './use-image-optimization';
+export * from './use-performance';
+export * from './use-performance-system';
+
+// 🎭 Exportar presets
+export * from './performance-presets';
+
+// 📝 Exportar tipos
 export * from './types';

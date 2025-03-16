@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { BaseLayerConfig, LayerComponentProps } from '../layer-plugin-system';
 import { BaseShader } from './base-shader';
 import { DistortionShader } from './distortion-shader';
@@ -41,18 +41,19 @@ export function ShaderEffectLayer({
 	// Efecto para animar el shader si está habilitado
 	useEffect(() => {
 		if (config.animated) {
+			let frame: number;
+
 			const animate = () => {
 				setTime((prevTime) => prevTime + 0.01 * config.speed);
-				const frame = requestAnimationFrame(animate);
-				setAnimationFrame(frame);
+				frame = requestAnimationFrame(animate);
 				return frame;
 			};
 
-			const _frame = animate();
+			frame = requestAnimationFrame(animate);
 
 			return () => {
-				if (animationFrame) {
-					cancelAnimationFrame(animationFrame);
+				if (frame) {
+					cancelAnimationFrame(frame);
 				}
 			};
 		}

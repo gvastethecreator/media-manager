@@ -272,6 +272,21 @@ export function PlaceCard({
 	visualOptions,
 	enableExplode = true,
 }: PlaceCardProps) {
+	// Verificar si place existe y tiene las propiedades necesarias
+	if (!place) {
+		console.warn('PlaceCard: Se recibió un objeto place indefinido');
+		// Crear un place por defecto para evitar errores
+		place = {
+			id: 'placeholder',
+			name: 'Lugar sin nombre',
+			description: 'Sin descripción',
+			type: 'Unknown',
+			climate: 'temperate',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Place;
+	}
+
 	// Usar el hook para obtener configuración de preset si existe
 	const { cardOptions } = usePreset({
 		entityType: 'place',

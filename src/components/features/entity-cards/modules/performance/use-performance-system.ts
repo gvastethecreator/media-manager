@@ -80,10 +80,193 @@ export function usePerformanceSystem(
 		}));
 	}, []);
 
+	// Función para verificar si la opción de hardware acceleration está disponible
+	const checkHardwareAcceleration = useCallback(() => {
+		// Verificar si el navegador soporta aceleración por hardware
+		const canvas = document.createElement('canvas');
+		const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+		if (!gl) {
+			// WebGL no disponible, deshabilitar aceleración por hardware
+			updateOption('enableHardwareAcceleration', false);
+			return false;
+		}
+
+		return true;
+	}, [updateOption]);
+
+	// Función para verificar si el dispositivo tiene preferencias de reducción de movimiento
+	const checkReducedMotionPreference = useCallback(() => {
+		if (typeof window !== 'undefined') {
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			if (prefersReducedMotion && options.reducedMotion !== true) {
+				updateOption('reducedMotion', true);
+				return true;
+			}
+		}
+		return options.reducedMotion === true;
+	}, [options.reducedMotion, updateOption]);
+
+	// Función para adaptar automáticamente las opciones según el dispositivo
+	const adaptToDevice = useCallback(() => {
+		// Detectar tipo de dispositivo
+		const isMobile = typeof window !== 'undefined' &&
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+		// Detectar conexión lenta
+		const isSlowConnection = typeof navigator !== 'undefined' &&
+			navigator.connection &&
+			(navigator.connection.saveData ||
+			 (navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
+
+		// Adaptar según el dispositivo y conexión
+		if (isMobile || isSlowConnection) {
+			const mobilePreset: Partial<PerformanceOptions> = {
+				lazyLoad: true,
+				virtualizeList: true,
+				imageOptimization: true,
+				throttleMs: 200,
+				debounceTime: 500,
+				animationMaxFPS: 30,
+				cacheStrategy: 'memory',
+			};
+
+			setOptions((prev) => ({
+				...prev,
+				...mobilePreset,
+			}));
+
+			return true;
+		}
+
+		return false;
+	}, []);
+
+	// Función para obtener el impacto en rendimiento de cada opción
+	const getPerformanceImpact = useCallback(() => {
+		const impact = {
+			high: [] as Array<keyof PerformanceOptions>,
+			medium: [] as Array<keyof PerformanceOptions>,
+			low: [] as Array<keyof PerformanceOptions>,
+		};
+
+		// Opciones de alto impacto
+		if (!options.lazyLoad) impact.high.push('lazyLoad');
+		if (!options.virtualizeList && options.virtualizeList !== undefined) impact.high.push('virtualizeList');
+		if (!options.imageOptimization) impact.high.push('imageOptimization');
+
+		// Opciones de impacto medio
+		if (!options.batchUpdates) impact.medium.push('batchUpdates');
+		if (options.animationMaxFPS && options.animationMaxFPS > 60) impact.medium.push('animationMaxFPS');
+		if (!options.enableCache) impact.medium.push('enableCache');
+
+		// Opciones de bajo impacto
+		if (!options.useRAF) impact.low.push('useRAF');
+		if (options.throttleMs && options.throttleMs < 100) impact.low.push('throttleMs');
+
+		return impact;
+	}, [options]);
+
+	// Función para obtener recomendaciones de rendimiento
+	const getPerformanceRecommendations = useCallback(() => {
+		const impact = getPerformanceImpact();
+		const recommendations: Record<string, string> = {};
+
+		// Generar recomendaciones basadas en el impacto
+		impact.high.forEach((option) => {
+			switch (option) {
+				case 'lazyLoad':
+					recommendations.lazyLoad = 'Habilitar la carga diferida para mejorar significativamente el rendimiento inicial';
+					break;
+				case 'virtualizeList':
+					recommendations.virtualizeList = 'Habilitar la virtualización de listas para mejorar el rendimiento con muchas tarjetas';
+					break;
+				case 'imageOptimization':
+					recommendations.imageOptimization = 'Habilitar la optimización de imágenes para reducir el consumo de memoria y mejorar los tiempos de carga';
+					break;
+			}
+		});
+
+		impact.medium.forEach((option) => {
+			switch (option) {
+				case 'batchUpdates':
+					recommendations.batchUpdates = 'Habilitar el procesamiento por lotes para reducir el número de renderizados';
+					break;
+				case 'animationMaxFPS':
+					recommendations.animationMaxFPS = 'Reducir el máximo de FPS para animaciones a 60 o menos para ahorrar recursos';
+					break;
+				case 'enableCache':
+					recommendations.enableCache = 'Habilitar el caché para mejorar los tiempos de carga en navegaciones repetidas';
+					break;
+			}
+		});
+
+		return recommendations;
+	}, [getPerformanceImpact]);
+
+	// Función para aplicar optimizaciones automáticas basadas en el rendimiento actual
+	const applyAutoOptimizations = useCallback(() => {
+		// Detectar rendimiento del dispositivo
+		let isLowPerfDevice = false;
+
+		// Si está disponible, usar hardwareConcurrency como indicador
+		if (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) {
+			isLowPerfDevice = navigator.hardwareConcurrency <= 4;
+		}
+
+		// Si está disponible, usar deviceMemory como indicador
+		if (typeof navigator !== 'undefined' && (navigator as any).deviceMemory) {
+			isLowPerfDevice = isLowPerfDevice || (navigator as any).deviceMemory <= 4;
+		}
+
+		if (isLowPerfDevice) {
+			// Aplicar optimizaciones para dispositivos de bajo rendimiento
+			const lowPerfOptimizations: Partial<PerformanceOptions> = {
+				reducedMotion: true,
+				animationMaxFPS: 30,
+				lazyLoad: true,
+				virtualizeList: true,
+				throttleMs: 200,
+				imageOptimization: true,
+				performanceMode: 'performance',
+			};
+
+			setOptions((prev) => ({
+				...prev,
+				...lowPerfOptimizations,
+			}));
+
+			return true;
+		}
+
+		return false;
+	}, []);
+
+	// Efecto para verificar capacidades del dispositivo al montar
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			checkHardwareAcceleration();
+			checkReducedMotionPreference();
+		}
+	}, [checkHardwareAcceleration, checkReducedMotionPreference]);
+
 	return {
+		// Estado
 		options,
+
+		// Métodos para manipular el estado
 		updateOption,
 		resetOptions,
 		applyPreset,
+
+		// Métodos para análisis y recomendación
+		getPerformanceImpact,
+		getPerformanceRecommendations,
+
+		// Métodos de adaptación automática
+		adaptToDevice,
+		applyAutoOptimizations,
+		checkHardwareAcceleration,
+		checkReducedMotionPreference,
 	};
 }

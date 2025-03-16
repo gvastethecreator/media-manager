@@ -12,6 +12,7 @@ alwaysApply: true
 - Clearly flag errors found and propose fixes.
 - Analize throughly and search in the codebase before acting.
 - Always continue as much as possible in the task until finished.
+- Always check the directory to get the structure of the current task folder.
 
 - Always use codebase_search with target_directories="{{INSERT THE FOLDER HERE}}" first to find existing core files
    -. Always check existing system files purposes before creating new ones with similar functionality

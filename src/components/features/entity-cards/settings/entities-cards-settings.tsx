@@ -6,7 +6,15 @@ import {
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import { DesignPanel } from '@/components/features/entity-cards/modules/design';
-import { EntityCardPreview } from '@/components/features/entity-cards/modules/preview/entity-card-preview';
+import {
+	adaptEntityCardToLayerSystem,
+	adaptLayerSystemToEntityCard,
+} from '@/components/features/entity-cards/modules/layers/entity-card-layer-adapter';
+import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers/layer-management-dialog';
+import { LayersPanel } from '@/components/features/entity-cards/modules/layers/layers-panel';
+import { RegisterAllLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
+import { PreviewPanel } from '@/components/features/entity-cards/modules/preview/preview-panel';
+import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import type {
@@ -24,17 +32,21 @@ import { cn } from '@/lib/utils';
 import {
 	AlertCircle,
 	ChevronRight,
+	Eye,
+	EyeOff,
 	FolderIcon as FolderIconIcon,
 	Grid2X2,
 	ImageIcon,
 	Images,
-	Info,
 	Laptop,
+	LayersIcon,
 	LayoutGrid,
 	LibrarySquare,
 	Lightbulb,
 	MapPin,
+	Maximize2,
 	MessageSquare,
+	Minimize2,
 	MousePointer,
 	Package,
 	PaintBucket,
@@ -49,10 +61,14 @@ import {
 	TagIcon,
 	Users,
 	VideoIcon,
+	ZoomIn,
+	ZoomOut,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import { LayerPluginProvider } from '../layers/layer-plugin-system';
+import { LayersProvider } from '../modules/layers/use-layers';
 import { PresetsPanel } from './panels/presets-panel';
 
 // Añadir la variable entityId que falta
@@ -314,6 +330,12 @@ const categories = [
 				color: '#3b82f6',
 			},
 			{
+				id: 'preview',
+				title: 'Vista Previa',
+				icon: ZoomIn,
+				color: '#10b981',
+			},
+			{
 				id: 'folders',
 				title: 'Configuración de Carpetas',
 				icon: FolderIconIcon,
@@ -338,6 +360,12 @@ const categories = [
 				title: 'Diseño y Colores',
 				icon: Palette,
 				color: '#10b981',
+			},
+			{
+				id: 'layers',
+				title: 'Sistema de Capas',
+				icon: LayersIcon,
+				color: '#8b5cf6',
 			},
 			{
 				id: 'visual',
@@ -586,6 +614,9 @@ async function saveGeneralSettings(
 	}
 }
 
+// Tipos de paneles disponibles
+type PanelType = 'presets' | 'design' | 'effects' | 'layers' | 'system' | 'preview' | 'performance';
+
 export function EntitiesCardsSection() {
 	const { toast } = useToast();
 
@@ -612,11 +643,17 @@ export function EntitiesCardsSection() {
 
 	// Estado para la categoría activa
 	const [activeCategory, setActiveCategory] = useState<string>('basic');
-	const [activePanel, setActivePanel] = useState<string>('presets');
+	const [activePanel, setActivePanel] = useState<PanelType>('design');
 
-	// Estado para mostrar información
+	// Estado para mostrar información y controles en la vista previa
 	const [showInfo, setShowInfo] = useState(true);
 	const [showControls, setShowControls] = useState(true);
+
+	// Estado para el zoom de la vista previa
+	const [previewZoom, setPreviewZoom] = useState(1);
+
+	// Estado para el modo de vista previa expandida
+	const [isExpandedPreview, setIsExpandedPreview] = useState(false);
 
 	// Cargar opciones al cambiar el tipo de entidad
 	const loadEntityOptions = useCallback(async () => {
@@ -638,6 +675,15 @@ export function EntitiesCardsSection() {
 					raritySystem: !!serverOptions.raritySystem,
 					textureSystem: !!serverOptions.textureSystem,
 					categorySystem: !!serverOptions.categorySystem,
+					// Asegurar que las opciones de preview estén inicializadas
+					preview: {
+						size: 'medium',
+						showControls: true,
+						showInfo: true,
+						showBorder: true,
+						enableInteraction: true,
+						...(serverOptions.preview || {}),
+					},
 				});
 				setCardOptions(uiOptions);
 
@@ -753,7 +799,16 @@ export function EntitiesCardsSection() {
 
 	// Manejar cambios en opciones de tarjeta
 	const handleCardOptionsChange = (newOptions: CardOptions) => {
-		setCardOptions(newOptions);
+		// Asegurarse de que las propiedades de preview se mantengan
+		const updatedOptions = {
+			...newOptions,
+			preview: {
+				...(cardOptions.preview || {}),
+				...(newOptions.preview || {}),
+			},
+		};
+
+		setCardOptions(updatedOptions);
 		// Solo limpiamos el preset activo si se cambia alguna configuración
 		if (activePreset) {
 			setActivePreset(null);
@@ -829,8 +884,14 @@ export function EntitiesCardsSection() {
 								key={`preview-${activeEntityType}`}
 								className="flex flex-col items-center"
 							>
+								{/* Registrar todas las capas disponibles */}
+								<LayerPluginProvider>
+									<RegisterAllLayers />
+								</LayerPluginProvider>
+
 								<div className="relative flex-1 flex items-center justify-center w-full">
-									<div className="absolute top-2 right-2 flex gap-2">
+									{/* Controles de vista previa */}
+									<div className="absolute top-2 right-2 flex gap-2 z-10">
 										<TooltipProvider>
 											<Tooltip>
 												<TooltipTrigger asChild>
@@ -840,7 +901,7 @@ export function EntitiesCardsSection() {
 														className="h-8 w-8"
 														onClick={() => setShowInfo(!showInfo)}
 													>
-														<Info className="h-4 w-4" />
+														{showInfo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 													</Button>
 												</TooltipTrigger>
 												<TooltipContent side="left" className="text-[10px]">
@@ -865,15 +926,76 @@ export function EntitiesCardsSection() {
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="outline"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => setPreviewZoom(Math.min(previewZoom + 0.1, 1.5))}
+													>
+														<ZoomIn className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side="left" className="text-[10px]">
+													Aumentar zoom
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="outline"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => setPreviewZoom(Math.max(previewZoom - 0.1, 0.5))}
+													>
+														<ZoomOut className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side="left" className="text-[10px]">
+													Reducir zoom
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="outline"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => setIsExpandedPreview(!isExpandedPreview)}
+													>
+														{isExpandedPreview ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side="left" className="text-[10px]">
+													{isExpandedPreview ? 'Vista normal' : 'Vista expandida'}
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
 									</div>
 
-									<EntityCardPreview
-										cardOptions={cardOptions}
-										entityType={convertEntityId.toApiFormat(activeEntityType) as any}
-										rarity={selectedRarity}
-										texture={selectedTexture}
-										className="w-full max-w-[350px]"
-									/>
+									{/* Panel de vista previa */}
+									<div
+										className={cn(
+											'transition-all duration-300 ease-in-out',
+											isExpandedPreview ? 'scale-110' : 'scale-100'
+										)}
+										style={{ transform: `scale(${previewZoom})` }}
+									>
+										<PreviewPanel
+											cardOptions={cardOptions}
+											rarity={selectedRarity}
+											texture={selectedTexture}
+											showInfo={showInfo}
+											entityType={convertEntityId.toApiFormat(activeEntityType) as any}
+											className="w-full max-w-[350px]"
+										/>
+									</div>
 
 									{showControls && (
 										<div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
@@ -893,19 +1015,49 @@ export function EntitiesCardsSection() {
 											>
 												Sin Textura
 											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-[11px]"
+												onClick={() => {
+													setPreviewZoom(1);
+													setIsExpandedPreview(false);
+												}}
+											>
+												Restablecer Vista
+											</Button>
 										</div>
 									)}
 								</div>
 
-								<Button
-									onClick={handleSaveOptions}
-									disabled={isSaving}
-									className="mt-6 w-fit self-center text-[11px]"
-									size="lg"
-								>
-									<Save className={cn('h-4 w-4 mr-2', isSaving && 'animate-spin')} />
-									{isSaving ? 'Guardando cambios...' : 'Guardar configuración'}
-								</Button>
+								<div className="mt-4 flex gap-2 justify-center">
+									<Button
+										onClick={handleSaveOptions}
+										disabled={isSaving}
+										className="w-fit self-center text-[11px]"
+										size="lg"
+									>
+										<Save className={cn('h-4 w-4 mr-2', isSaving && 'animate-spin')} />
+										{isSaving ? 'Guardando cambios...' : 'Guardar configuración'}
+									</Button>
+
+									{/* Botón para gestionar capas */}
+									<LayerManagementDialog
+										entityType={convertEntityId.toApiFormat(activeEntityType)}
+										config={adaptEntityCardToLayerSystem(cardOptions)}
+										onChange={(layerConfig) => {
+											// Convertir la configuración de capas a formato de tarjeta
+											const newCardOptions = adaptLayerSystemToEntityCard(layerConfig);
+											handleCardOptionsChange(newCardOptions);
+										}}
+										trigger={
+											<Button variant="outline" size="lg" className="w-fit self-center text-[11px]">
+												<LayersIcon className="h-4 w-4 mr-2" />
+												Gestionar Capas
+											</Button>
+										}
+									/>
+								</div>
 							</motion.div>
 						)}
 					</div>
@@ -924,16 +1076,35 @@ export function EntitiesCardsSection() {
 											cardOptions={cardOptions}
 										/>
 									)}
+									{activePanel === 'design' && (
+										<DesignPanel designSystem={{} as any} onChange={handleCardOptionsChange} />
+									)}
+									{/* Panel de vista previa */}
+									{activePanel === 'preview' && (
+										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+									)}
+									{/* Panel de capas */}
+									{activePanel === 'layers' && (
+										<LayersProvider initialConfig={adaptCardOptionsToLayersConfig(cardOptions)}>
+											<LayersPanel
+												config={adaptEntityCardToLayerSystem(cardOptions)}
+												onChange={(layerConfig) => {
+													// Convertir la configuración de capas a formato de tarjeta
+													const newCardOptions = adaptLayerSystemToEntityCard(layerConfig);
+													handleCardOptionsChange(newCardOptions);
+												}}
+												cardOptions={cardOptions}
+												onCardOptionsChange={handleCardOptionsChange}
+											/>
+										</LayersProvider>
+									)}
 									{/* Comentar o modificar los componentes que no existen */}
 									{/*
 									{activePanel === 'systems' && (
 										<SystemSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									*/}
-									{activePanel === 'design' && (
-										<DesignPanel designSystem={{} as any} onChange={handleCardOptionsChange} />
-									)}
-									{/* Comentar el resto de componentes que no existen */}
+									{/* Comentar o modificar los componentes que no existen */}
 									{/*
 									{activePanel === 'visual' && (
 										<VisualEffectsSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
@@ -971,9 +1142,6 @@ export function EntitiesCardsSection() {
 									)}
 									{activePanel === 'interaction' && (
 										<InteractionSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
-									)}
-									{activePanel === 'preview' && (
-										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									{activePanel === 'performance' && (
 										<PerformanceSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />

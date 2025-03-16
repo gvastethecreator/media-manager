@@ -159,3 +159,152 @@ sequenceDiagram
 
     Note over EntityCard: Manejo de errores en cada paso
 ```
+
+### Tarea 3.5: Integración del módulo de capas (layers) para EntityCard
+
+#### Tarea 3.5.1: Integración completa con EntityCard ✅ (Completado)
+
+Implementación de la integración bidireccional entre el sistema de capas y EntityCard:
+
+- Creación de funciones adaptadoras bidireccionales entre EntityCard y el sistema de capas
+- Implementación de configuración dinámica de capas basada en el tipo de entidad
+- Optimización del renderizado de capas mediante técnicas de memoización y renderizado condicional
+- Soporte para registro de capas personalizadas por tipo de entidad
+
+#### Tarea 3.5.2: Mejora de la gestión de capas ✅ (Completado)
+
+Implementación de un sistema de presets y panel de administración visual:
+
+- Diseño e implementación de estructura de datos para presets de capas
+- Creación de componentes UI para gestionar capas y presets:
+  - `LayerPresetsPanel`: Panel para seleccionar y aplicar presets predefinidos
+  - `LayerAdminPanel`: Panel para configuración detallada de capas individuales
+  - `LayerManagementDialog`: Diálogo completo que integra ambos paneles
+  - `CommonLayerControls`: Componente reutilizable para controles comunes
+- Implementación de hooks personalizados:
+  - `useLayerPresets`: Hook para gestionar presets de capas
+  - `useEntityCardLayers`: Hook principal para integrar capas con tarjetas
+- Desarrollo de sistema de almacenamiento local para guardar configuraciones personalizadas
+- Implementación de previsualización en tiempo real de cambios en las capas
+
+#### Tarea 3.5.3: Optimización del sistema de plugins de capas 🔄 (En progreso)
+
+Mejoras planificadas para el sistema de plugins:
+
+- Implementación de carga diferida (lazy loading) de capas para mejorar rendimiento
+- Optimización de la gestión de memoria para capas complejas
+- Mejora del sistema de eventos para comunicación entre capas
+- Implementación de API para extensiones de terceros
+
+#### Tarea 3.5.4: Documentación del sistema de capas 📝 (Pendiente)
+
+Documentación planificada:
+
+- Guía de desarrollo para crear nuevas capas
+- Documentación de API para integración con otros componentes
+- Ejemplos de uso y casos de estudio
+- Guía de mejores prácticas para rendimiento
+
+```mermaid
+gantt
+    title Plan de Integración de Capas
+    dateFormat  YYYY-MM-DD
+    section Tareas
+    Tarea 3.5.1: done, t351, 2023-11-01, 2023-11-10
+    Tarea 3.5.2: done, t352, 2023-11-10, 2023-11-20
+    Tarea 3.5.3: active, t353, 2023-11-20, 2023-12-01
+    Tarea 3.5.4: t354, 2023-12-01, 2023-12-10
+```
+
+### Notas de implementación para Tarea 3.5.2
+
+La implementación del sistema de gestión de capas incluye:
+
+1. **Sistema de presets**:
+
+   - Estructura de datos flexible para definir presets por categoría y tipo de entidad
+   - Soporte para presets predefinidos y personalizados
+   - Almacenamiento persistente de presets personalizados en localStorage
+   - Interfaz visual para seleccionar, aplicar y gestionar presets
+
+2. **Panel de administración visual**:
+
+   - Interfaz de usuario intuitiva para configurar capas individuales
+   - Controles específicos para cada tipo de capa
+   - Configuración global para ajustes que afectan a todas las capas
+   - Previsualización en tiempo real de los cambios
+
+3. **Integración con EntityCard**:
+
+   - Hook `useEntityCardLayers` para gestionar capas en componentes de tarjeta
+   - Adaptadores bidireccionales para convertir entre propiedades de EntityCard y configuración de capas
+   - Soporte para configuraciones específicas por tipo de entidad
+   - Optimización de rendimiento mediante memoización y actualización selectiva
+
+4. **Mejoras de UX**:
+   - Interfaz de usuario coherente con el diseño del sistema
+   - Feedback visual inmediato al realizar cambios
+   - Accesibilidad mejorada con etiquetas y descripciones claras
+   - Soporte para teclado y navegación por tabulación
+
+### Tarea 3.6: Adaptación de vistas al sistema de tarjetas EntityCard 🔄 (En progreso)
+
+## Fecha: 18/03/2024
+
+## Refactorización del Componente de Navegación
+
+### Análisis Inicial
+
+- ✅ Análisis de la estructura del componente `navigation-panel.tsx`
+- ✅ Identificación de áreas para refactorización
+- ✅ Planificación de la estrategia de refactorización
+
+### Tareas Completadas
+
+- ✅ Creación de tipos centralizados en `types/index.ts`
+- ✅ Extracción de constantes a `constants/categories.ts`
+- ✅ Creación de hooks personalizados:
+  - ✅ `useCategoryCollapse`: Manejo del estado de colapso de categorías
+  - ✅ `useCategoryHandlers`: Manejo de interacciones con categorías
+  - ✅ `useCategoryStats`: Cálculo de estadísticas para categorías
+  - ✅ `useMainNavigation`: Manejo de la navegación principal
+- ✅ Refactorización del componente principal `NavPanel`
+- ✅ Creación de documentación completa del componente
+
+### Progreso
+
+- Se ha implementado una estructura modular para el componente de navegación
+- Se han extraído las funcionalidades a hooks personalizados para mejorar la reutilización
+- Se han centralizado los tipos y constantes para mejorar la mantenibilidad
+- Se ha documentado completamente el componente con diagramas y ejemplos de uso
+
+### Próximas Tareas
+
+- ⬜ Optimización del rendimiento del componente de navegación
+- ⬜ Implementación de pruebas unitarias para los hooks creados
+- ⬜ Mejora de la accesibilidad del componente de navegación
+
+## Diagrama de Arquitectura del Componente de Navegación
+
+```mermaid
+graph TD
+    A[navigation-panel.tsx] --> B[hooks/]
+    A --> C[components/]
+    A --> D[constants/]
+    A --> E[types/]
+
+    B --> B1[use-category-collapse.ts]
+    B --> B2[use-category-handlers.ts]
+    B --> B3[use-category-stats.ts]
+    B --> B4[use-main-navigation.ts]
+    B --> B5[index.ts]
+
+    C --> C1[nav-category-children.tsx]
+    C --> C2[nav-category-item.tsx]
+    C --> C3[nav-main-navigation.tsx]
+    C --> C4[nav-panel-header.tsx]
+
+    D --> D1[categories.ts]
+
+    E --> E1[index.ts]
+```
