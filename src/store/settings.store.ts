@@ -12,7 +12,7 @@ import {
 } from '@/types/settings';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { logger } from '../lib/logger/logger';
+import { serverLogger } from '../lib/logger/server-logger';
 
 // Estado base para settings
 interface SettingsState extends AppSettings {
@@ -44,7 +44,7 @@ interface SettingsState extends AppSettings {
 	updateShortcuts: (shortcuts: Partial<ShortcutSettings>) => void;
 }
 
-const settingsLogger = logger.withContext('SettingsStore');
+const settingsLogger = serverLogger.withContext('SettingsStore');
 
 // Función para filtrar valores undefined de los shortcuts
 function filterUndefinedValues(obj: Record<string, string | undefined>): Record<string, string> {

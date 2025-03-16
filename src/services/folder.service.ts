@@ -7,13 +7,13 @@ import {
 	reindexFolder as reindexFolderAction,
 } from '@/app/actions/folders';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FolderStats } from '@/types/entities/folders';
 import type { ExtendedProcessStatus } from '@/types/process';
 
-const folderLogger = logger.withContext('FolderService');
+const folderLogger = serverLogger.withContext('FolderService');
 
 export enum FOLDER_EVENTS {
 	PROGRESS = 'folder:progress',

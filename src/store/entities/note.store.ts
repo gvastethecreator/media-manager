@@ -8,11 +8,11 @@ import {
 	getNotes,
 	updateNote as updateNoteAction,
 } from '@/app/actions/notes/note.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Note } from '@prisma/client';
 import { create } from 'zustand';
 
-const noteLogger = logger.withContext('NoteStore');
+const noteLogger = serverLogger.withContext('NoteStore');
 
 const mapToNoteWithStats = (note: Awaited<ReturnType<typeof getNotes>>[0]): NoteWithStats => ({
 	...note,

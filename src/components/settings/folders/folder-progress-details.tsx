@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ExtendedProcessStatus, ProcessPhase } from '@/types/process';
@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Crear una instancia de logger para este componente
-const componentLogger = logger.withContext('FolderProgressDetails');
+const componentLogger = serverLogger.withContext('FolderProgressDetails');
 
 interface FolderProgressDetailsProps {
 	status: ExtendedProcessStatus;

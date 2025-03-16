@@ -1,9 +1,9 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const uiLogger = logger.withContext('UIStore');
+const uiLogger = serverLogger.withContext('UIStore');
 
 export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards' | 'details';
 export type ThumbnailSize = 'small' | 'medium' | 'large';

@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const filesLogger = logger.withContext('FilesAPI');
+const filesLogger = serverLogger.withContext('FilesAPI');
 
 export async function GET(_request: NextRequest, context: { params: { id: string } }) {
 	try {

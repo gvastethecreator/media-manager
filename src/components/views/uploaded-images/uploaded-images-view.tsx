@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
 import type { UploadedImageType } from '@/types/entities/entities';
@@ -39,7 +39,7 @@ import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
 
-const viewLogger = logger.withContext('UploadedImagesView');
+const viewLogger = serverLogger.withContext('UploadedImagesView');
 
 export function UploadedImagesView() {
 	const [isLoading, setIsLoading] = useState(true);

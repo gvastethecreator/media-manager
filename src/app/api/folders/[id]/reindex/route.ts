@@ -1,8 +1,8 @@
 import { reindexFolder } from '@/app/actions/folders/folder-indexing.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const routeLogger = logger.withContext('FolderReindexRoute');
+const routeLogger = serverLogger.withContext('FolderReindexRoute');
 
 export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
 	try {

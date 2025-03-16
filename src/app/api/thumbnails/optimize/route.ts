@@ -1,9 +1,9 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { optimizeThumbnail } from '@/lib/thumbnail';
 import type { NextRequest } from 'next/server';
 
-const thumbLogger = logger.withContext('ThumbnailOptimize');
+const thumbLogger = serverLogger.withContext('ThumbnailOptimize');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

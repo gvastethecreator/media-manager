@@ -49,6 +49,18 @@ Hemos implementado un sistema estandarizado para la integración entre formulari
   - Mensajes de error
   - Diseño responsivo
 
+### Sistema de Logging Avanzado
+
+La aplicación cuenta con un sistema de logging avanzado que facilita la depuración y el monitoreo:
+
+- **EnhancedLogger**: Logger mejorado con soporte para colores, iconos y métodos avanzados.
+- **ServerLogger**: Logger optimizado para entornos de servidor con estilos ANSI.
+- **ApiLogger**: Logger específico para rutas API.
+- **ActionLogger**: Wrapper para Server Actions con logging mejorado.
+- **LogViewer**: Componente UI para visualizar logs en la interfaz.
+
+Para más detalles, consulta la [documentación del sistema de logging](docs/logging-architecture.md).
+
 ## Future Plans:
 
 - Agregar soporte para subcarpetas

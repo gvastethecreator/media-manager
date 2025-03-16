@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 
-const _queryLogger = logger.withContext('ReactQuery');
+const _queryLogger = serverLogger.withContext('ReactQuery');
 
 export const queryClient = new QueryClient({
 	defaultOptions: {

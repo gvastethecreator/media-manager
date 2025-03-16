@@ -1,12 +1,12 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { ProfileCreate, ProfileUpdate } from '@/services/profile.service';
 import type { Profile } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const profileLogger = logger.withContext('ProfileActions');
+const profileLogger = serverLogger.withContext('ProfileActions');
 
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]'] as const;
 

@@ -9,10 +9,10 @@ import {
 	getTags,
 	updateTag as updateTagAction,
 } from '@/app/actions/tags/tag.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { create } from 'zustand';
 
-const tagsLogger = logger.withContext('TagsStore');
+const tagsLogger = serverLogger.withContext('TagsStore');
 
 interface TagsStore {
 	tags: TagWithStats[];

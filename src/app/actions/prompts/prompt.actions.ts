@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
@@ -10,7 +10,7 @@ import type { FileItem } from '@/types/file-item';
 import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const promptLogger = logger.withContext('PromptActions');
+const promptLogger = serverLogger.withContext('PromptActions');
 
 const REVALIDATE_PATHS = ['/settings', '/prompts', '/prompts/[id]'] as const;
 

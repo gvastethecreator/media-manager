@@ -1,8 +1,8 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { IndexStatus } from './folder-index-status-badge';
 import type { ExtendedFolder } from './folder-types';
 
-const folderLogger = logger.withContext('FolderUtils');
+const folderLogger = serverLogger.withContext('FolderUtils');
 
 export function getFolderIndexStatus(folder: ExtendedFolder): IndexStatus {
 	// Verificar si hay un error en la carpeta

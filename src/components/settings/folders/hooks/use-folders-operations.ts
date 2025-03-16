@@ -1,20 +1,12 @@
 'use client';
 
-import {
-	createFolder,
-	deleteFolder,
-	reindexAllFolders,
-	reindexFolder,
-	updateFolderAutoReindex,
-} from '@/app/actions/folders';
-import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
+import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/lib/services/toast.service';
-import { folderService } from '@/services/folder.service';
 import { useCallback } from 'react';
 
-const operationsLogger = logger.withContext('FoldersOperations');
+const operationsLogger = serverLogger.withContext('FoldersOperations');
 
 interface UseOperationsOptions {
 	onStartProcessing: (folderId: string) => void;

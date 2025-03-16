@@ -1,11 +1,11 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useOptimistic } from 'react';
 import type { EventType } from '../server/events.server';
 import type { EventData } from '../server/events.server';
 
-const eventsLogger = logger.withContext('ClientEvents');
+const eventsLogger = serverLogger.withContext('ClientEvents');
 
 // Mapa de suscriptores de eventos
 type EventCallback<T = unknown> = (data: T) => void;

@@ -7,7 +7,7 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFavoritesStore } from '@/store/entities/favorites.store';
 import { useFileManager } from '@/store/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';

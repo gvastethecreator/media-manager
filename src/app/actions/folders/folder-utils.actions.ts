@@ -2,7 +2,7 @@
 
 import { existsSync } from 'fs';
 import { join, normalize, sep } from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { checkPathExists, generatePathVariants, normalizePath } from '@/lib/path-utils';
 import type {
 	FileItem,
@@ -19,7 +19,7 @@ import type {
 import { revalidatePath } from 'next/cache';
 import type { ImageWithRelations } from './folder-types.actions';
 
-const folderLogger = logger.withContext('FolderUtils');
+const folderLogger = serverLogger.withContext('FolderUtils');
 
 const REVALIDATE_PATHS = ['/settings', '/folders', '/folders/[id]'] as const;
 
@@ -42,7 +42,7 @@ interface FileItemWithSrc extends FileItem {
  */
 export async function transformImageToFileItem(image: ImageWithRelations): Promise<FileItemWithSrc> {
 	try {
-		logger.debug('🏞️ Transformando imagen a FileItem:', image.id);
+		serverLogger.debug('🏞️ Transformando imagen a FileItem:', image.id);
 
 		// Parsear metadata si existe
 		let metadataString = '';
@@ -52,7 +52,7 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 				metadataString = JSON.stringify(image.metadata);
 				JSON.parse(metadataString);
 			} catch (error) {
-				logger.error('⚠️ Error parseando metadata:', error);
+				serverLogger.error('⚠️ Error parseando metadata:', error);
 				// Si no es JSON válido, lo guardamos como string
 				metadataString = JSON.stringify(image.metadata);
 			}
@@ -159,7 +159,7 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 
 		return fileItem;
 	} catch (error) {
-		logger.error('❌ Error transformando imagen a FileItem:', error);
+		serverLogger.error('❌ Error transformando imagen a FileItem:', error);
 		throw error;
 	}
 }

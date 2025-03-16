@@ -8,7 +8,7 @@ import {
 	getPlaces,
 	updatePlace,
 } from '@/app/actions/places/place.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Place } from '@prisma/client';
 import { create } from 'zustand';
 
@@ -30,7 +30,7 @@ interface PlacesStore {
 	addImageToPlace: (imageId: string, placeId: string) => Promise<void>;
 }
 
-const placesLogger = logger.withContext('PlacesStore');
+const placesLogger = serverLogger.withContext('PlacesStore');
 
 export const usePlacesStore = create<PlacesStore>((set, _get) => ({
 	places: [],

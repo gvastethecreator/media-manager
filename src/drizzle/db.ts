@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
@@ -36,14 +36,14 @@ class DrizzleDatabase {
 
 		// Configurar cliente SQLite
 		this.sqlite = new Database('./prisma/dev.db', {
-			verbose: process.env.NODE_ENV === 'development' ? (message) => logger.debug(`[SQLite]: ${message}`) : undefined,
+			verbose: process.env.NODE_ENV === 'development' ? (message) => serverLogger.debug(`[SQLite]: ${message}`) : undefined,
 		});
 
 		// Configurar Drizzle
 		this.db = drizzle(this.sqlite, { schema, logger: true });
 
 		// Configurar eventos de logging
-		logger.info('🔌 Drizzle Database initialized');
+		serverLogger.info('🔌 Drizzle Database initialized');
 	}
 
 	public static getInstance(config?: DatabaseConfig): DrizzleDatabase {
@@ -64,7 +64,7 @@ class DrizzleDatabase {
 	public async disconnect(): Promise<void> {
 		if (this.sqlite) {
 			this.sqlite.close();
-			logger.info('🔌 Database connection closed');
+			serverLogger.info('🔌 Database connection closed');
 		}
 	}
 }

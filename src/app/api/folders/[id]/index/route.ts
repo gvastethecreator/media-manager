@@ -1,8 +1,8 @@
 import { indexFolder } from '@/app/actions/folders';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const routeLogger = logger.withContext('FolderIndexRoute');
+const routeLogger = serverLogger.withContext('FolderIndexRoute');
 
 export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
 	try {

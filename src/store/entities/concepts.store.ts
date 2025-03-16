@@ -1,11 +1,11 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Concept } from '@prisma/client';
 import { create } from 'zustand';
 
 // Definir logger específico para este store
-const conceptsLogger = logger.withContext('ConceptsStore');
+const conceptsLogger = serverLogger.withContext('ConceptsStore');
 
 // Tipos
 export interface ConceptCreate {

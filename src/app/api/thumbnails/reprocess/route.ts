@@ -1,11 +1,11 @@
-import { existsSync } from 'fs';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import { ThumbnailQuality } from '@/types/thumbnails';
+import { existsSync } from 'fs';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const thumbLogger = logger.withContext('ThumbnailReprocessAPI');
+const thumbLogger = serverLogger.withContext('ThumbnailReprocessAPI');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

@@ -9,7 +9,7 @@ import type { CardOptions } from '@/components/features/entity-cards/types/unifi
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext('NotesView');
+const viewLogger = serverLogger.withContext('NotesView');
 
 // Configuración visual predeterminada para notas
 const DEFAULT_NOTE_OPTIONS: CardOptions = {

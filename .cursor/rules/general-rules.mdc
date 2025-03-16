@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-
+- Jamás correr 'npm dev' o 'pnpm dev' ( no hace falta )
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
 - Treat me as an expert—be thorough, accurate, and up-to-date.
@@ -29,12 +29,14 @@ alwaysApply: true
 - Before starting your task, create a plan of action in @progress.md to keep track of your work.
 - When adjusting code, show only relevant changes—brief and clear.
 - When using the command line use Windows 11 and PowerShell—use accurate commands.
+- Don't create directories, just add the file ( that will work )
 
 - Never forget the current stack stack and follow up the rules // check @package.json
-
-- Nextjs15.2
+- Important!! 
+- We are using PNPM 
+- Nextjs 15.2
 - React19
-- Prisma as ORM
+- Prisma as ORM ( soon migrating to drizzle )
 - Tailwindcss 4
 - Shadcn/ui ( integrated with tailwind 4 )
 - 'motion/react' for animations

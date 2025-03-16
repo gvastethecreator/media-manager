@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
 	FileItem,
@@ -12,7 +12,7 @@ import type {
 } from '@/types/file-item';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const imagesLogger = logger.withContext('ImagesAPI');
+const imagesLogger = serverLogger.withContext('ImagesAPI');
 
 // Definir una interfaz que se adapte a lo que realmente estamos devolviendo
 interface ApiResponseFileItem {

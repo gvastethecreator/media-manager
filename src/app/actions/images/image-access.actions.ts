@@ -1,10 +1,10 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
 
-const imageLogger = logger.withContext('ImageAccess');
+const imageLogger = serverLogger.withContext('ImageAccess');
 
 /**
  * Obtiene la URL para acceder a una imagen

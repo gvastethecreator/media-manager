@@ -8,11 +8,11 @@ import {
 	getConcepts,
 	updateConcept as updateConceptAction,
 } from '@/app/actions/concepts/concept.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Concept } from '@prisma/client';
 import { create } from 'zustand';
 
-const conceptLogger = logger.withContext('ConceptStore');
+const conceptLogger = serverLogger.withContext('ConceptStore');
 
 const mapToConceptWithStats = (concept: Awaited<ReturnType<typeof getConcepts>>[0]): ConceptWithStats => ({
 	...concept,

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 
-const _errorLogger = logger.withContext('ErrorHandler');
+const _errorLogger = serverLogger.withContext('ErrorHandler');
 
 export class StatsError extends Error {
 	constructor(

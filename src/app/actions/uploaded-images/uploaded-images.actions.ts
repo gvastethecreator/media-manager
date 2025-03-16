@@ -2,14 +2,14 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images.service';
 import type { UploadedImageType } from '@/types/entities/entities';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 
-const actionLogger = logger.withContext('ServerAction:UploadedImages');
+const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 
 /**

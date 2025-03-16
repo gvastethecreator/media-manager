@@ -1,10 +1,10 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { statsEventEmitter } from '@/services/stats.service';
 import { useEffect } from 'react';
 
-const statsLogger = logger.withContext('StatsHook');
+const statsLogger = serverLogger.withContext('StatsHook');
 
 export function useStatsService() {
 	useEffect(() => {

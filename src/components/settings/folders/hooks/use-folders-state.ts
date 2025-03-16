@@ -1,12 +1,12 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { getFolders } from '@/services/folder.service';
 import type { Folder, FolderStats } from '@/types/entities/folders';
 import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
-const stateLogger = logger.withContext('FoldersState');
+const stateLogger = serverLogger.withContext('FoldersState');
 
 /**
  * Hook para gestionar el estado básico de las carpetas

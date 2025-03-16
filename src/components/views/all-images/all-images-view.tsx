@@ -6,12 +6,12 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { useFiles } from '@/lib/contexts';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileItem as FileItemType } from '@/types/file-item';
 import { ImageIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const viewLogger = logger.withContext('AllImagesView');
+const viewLogger = serverLogger.withContext('AllImagesView');
 
 export function AllImagesView() {
 	const { currentItems: items, handleSelectItem, isLoading: contextLoading, setFiles } = useFiles();
