@@ -3,14 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { ArrowUpRight, Edit, Star, Tag, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Edit, Tag, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';
-import { DEFAULT_SETTINGS_OPTIONS } from '../config/card-config-defaults';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardWrapper } from '../entity-card-wrapper';
-import type { CardDesignData, CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
+import type { CardDesignPreset, CardOptions, RarityConfig } from '../types/base-card-types';
 import { ImageGrid } from './image-grid';
 
 // Variantes para la tarjeta de etiqueta inspirada en Yu-Gi-Oh
@@ -158,6 +157,20 @@ export function TagCard({
 	onClick,
 	showVisualizationConfig = false,
 }: TagCardProps) {
+	// Verificar si tag existe y tiene las propiedades necesarias
+	if (!tag) {
+		console.warn('TagCard: Se recibió un objeto tag indefinido');
+		// Crear un tag por defecto para evitar errores
+		tag = {
+			id: 'placeholder',
+			name: 'Etiqueta sin nombre',
+			description: 'Sin descripción',
+			type: 'normal',
+			rarity: 'common',
+			count: 0,
+		};
+	}
+
 	const [showConfig, setShowConfig] = useState(false);
 	const [isHovered, setIsHovered] = useState(false);
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({

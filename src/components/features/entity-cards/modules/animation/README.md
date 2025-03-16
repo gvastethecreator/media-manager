@@ -1,115 +1,201 @@
 # Módulo de Animación para Entity Cards
 
-Este módulo proporciona un sistema de animación configurable para las tarjetas de entidad en la aplicación.
+## Descripción
 
-## Características
-
-- **Configuración completa**: Permite personalizar todos los aspectos de las animaciones.
-- **Presets predefinidos**: Incluye varios estilos de animación listos para usar.
-- **Animaciones interactivas**: Efectos para hover, click y transiciones.
-- **Accesibilidad**: Modo de movimiento reducido para usuarios con sensibilidad al movimiento.
-- **Rendimiento optimizado**: Animaciones eficientes que no afectan al rendimiento.
+El módulo de animación proporciona un sistema completo para gestionar animaciones y efectos interactivos en las tarjetas de entidad. Permite configurar animaciones de entrada/salida, efectos de hover, efectos de clic y otras propiedades relacionadas con el movimiento y las transiciones.
 
 ## Componentes Principales
 
-### `AnimationModule`
+### AnimationModule
 
-El componente principal que encapsula toda la funcionalidad del módulo de animación.
+Componente principal que gestiona la configuración de animaciones. Acepta un sistema de animación inicial y proporciona una interfaz para modificarlo.
 
 ```tsx
 import { AnimationModule } from '@/components/features/entity-cards/modules/animation';
 
-function MyComponent() {
-  return (
-    <AnimationModule
-      initialAnimationSystem={{
-        enabled: true,
-        hoverEffect: true,
-        // Otras opciones...
-      }}
-      onChange={(animationSystem) => {
-        // Guardar configuración actualizada
-      }}
-    />
-  );
-}
+<AnimationModule
+	initialAnimationSystem={myAnimationSystem}
+	onChange={(updatedSystem) => console.log('Sistema actualizado:', updatedSystem)}
+	disabled={false}
+	className="my-custom-class"
+/>;
 ```
 
-### `AnimationPanel`
+### AnimationPanel
 
-Panel de configuración UI para ajustar las animaciones.
+Panel de configuración visual que permite al usuario modificar las propiedades de animación a través de una interfaz gráfica.
 
 ```tsx
 import { AnimationPanel } from '@/components/features/entity-cards/modules/animation';
-import { useState } from 'react';
 
-function ConfigPanel() {
-  const [animationConfig, setAnimationConfig] = useState(/* config inicial */);
-
-  return (
-    <AnimationPanel
-      animationSystem={animationConfig}
-      onChange={setAnimationConfig}
-    />
-  );
-}
+<AnimationPanel
+	animationSystem={myAnimationSystem}
+	onChange={(updatedSystem) => console.log('Sistema actualizado:', updatedSystem)}
+	disabled={false}
+	className="my-custom-class"
+/>;
 ```
 
 ## Hooks
 
-### `useAnimationSystem`
+### useAnimationSystem
 
-Hook para gestionar el estado de animación en componentes.
+Hook personalizado para gestionar el estado del sistema de animación. Proporciona funciones para actualizar, restablecer y generar clases/estilos CSS.
 
 ```tsx
 import { useAnimationSystem } from '@/components/features/entity-cards/modules/animation';
 
-function AnimatedComponent() {
-  const {
-    animationSystem,
-    updateAnimationSystem,
-    resetAnimationSystem,
-    generateAnimationClasses
-  } = useAnimationSystem();
+function MyComponent() {
+	const {
+		animationSystem,
+		updateAnimationSystem,
+		resetAnimationSystem,
+		getAnimationClasses,
+		getAnimationVariables,
+		getAnimationStyles,
+	} = useAnimationSystem({
+		enabled: true,
+		hoverEffect: true,
+		// ... otras propiedades
+	});
 
-  return (
-    <div className={generateAnimationClasses()}>
-      {/* Contenido animado */}
-    </div>
-  );
+	return (
+		<div className={getAnimationClasses()} style={getAnimationStyles()}>
+			Contenido animado
+		</div>
+	);
 }
 ```
 
-## Tipos
+## Utilidades
 
-El módulo exporta varios tipos útiles:
+### Generación de CSS
 
-- `AnimationSystem`: La configuración completa del sistema de animación.
-- `AnimationSystemPreset`: Estructura para presets de animación predefinidos.
-- `AnimationPanelProps`: Props para el panel de configuración.
-- `AnimationModuleProps`: Props para el módulo principal.
-- `AnimationClassesGenerator`: Función que genera clases CSS basadas en configuración.
-- `UseAnimationSystemHook`: Tipo para el hook de animación.
+El módulo incluye funciones para generar clases, variables y estilos CSS basados en la configuración de animación:
 
-## Estilos CSS
+```tsx
+import {
+	generateAnimationClasses,
+	generateAnimationVariables,
+	generateAnimationStyles,
+} from '@/components/features/entity-cards/modules/animation';
 
-El módulo incluye un archivo CSS (`animations.css`) con todas las animaciones y utilidades necesarias.
-Este archivo debe importarse en el archivo CSS principal de la aplicación.
+// Generar clases CSS
+const classes = generateAnimationClasses(myAnimationSystem);
 
-```css
-/* En globals.css */
-@import './components/features/entity-cards/modules/animation/animations.css';
+// Generar variables CSS
+const variables = generateAnimationVariables(myAnimationSystem);
+
+// Generar estilos en línea
+const styles = generateAnimationStyles(myAnimationSystem);
 ```
 
-## Integración con Entity Cards
+#### Funciones de temporización personalizadas
 
-Para integrar las animaciones en las tarjetas de entidad:
+El sistema soporta funciones de temporización estándar (`ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`) y también funciones `cubic-bezier` personalizadas:
 
-1. Añadir la configuración de animación al modelo `CardOptions`.
-2. Aplicar las clases generadas por `generateAnimationClasses()` al componente de tarjeta.
-3. Utilizar el hook `useAnimationSystem` para gestionar el estado de animación.
+```tsx
+// Ejemplo de configuración con cubic-bezier personalizado
+const animationSystem = {
+	// ... otras propiedades
+	timingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Función elástica
+};
 
-## Accesibilidad
+// El generador aplicará automáticamente esta función como estilo en línea
+const styles = generateAnimationStyles(animationSystem);
+```
 
-El sistema respeta las preferencias del usuario para animaciones reducidas mediante la opción `reducedMotion`.
-Cuando está activada, se deshabilitan todas las animaciones decorativas manteniendo solo las esenciales para la usabilidad.
+También puedes aplicar funciones de temporización personalizadas directamente desde el hook:
+
+```tsx
+import { useAnimationSystem } from '@/components/features/entity-cards/modules/animation';
+
+function MyComponent() {
+	const { applyCustomTimingFunction } = useAnimationSystem();
+
+	// Aplicar una función elástica
+	const handleApplyElasticTiming = () => {
+		applyCustomTimingFunction(0.34, 1.56, 0.64, 1);
+	};
+
+	// Aplicar una función de rebote
+	const handleApplyBounceTiming = () => {
+		applyCustomTimingFunction(0.68, -0.6, 0.32, 1.6);
+	};
+
+	return (
+		<div>
+			<button onClick={handleApplyElasticTiming}>Aplicar timing elástico</button>
+			<button onClick={handleApplyBounceTiming}>Aplicar timing con rebote</button>
+		</div>
+	);
+}
+```
+
+### Adaptadores
+
+Para mantener la compatibilidad con sistemas antiguos, se incluyen adaptadores:
+
+```tsx
+import { legacyToAnimationSystem, animationSystemToLegacy } from '@/components/features/entity-cards/modules/animation';
+
+// Convertir opciones antiguas al nuevo sistema
+const newSystem = legacyToAnimationSystem(legacyOptions);
+
+// Convertir nuevo sistema a formato antiguo
+const legacyOptions = animationSystemToLegacy(newSystem);
+```
+
+## Presets
+
+El módulo incluye presets predefinidos para diferentes estilos de animación:
+
+- **Estándar**: Animaciones suaves y sutiles
+- **Minimalista**: Animaciones muy sutiles
+- **Enérgico**: Animaciones vívidas y dinámicas
+- **Sin animaciones**: Deshabilita todas las animaciones
+
+## Integración con Entity Card
+
+El módulo de animación se integra directamente con el componente EntityCard:
+
+```tsx
+import { EntityCard } from '@/components/features/entity-cards';
+
+<EntityCard
+	// ... otras props
+	options={{
+		// ... otras opciones
+		animationSystem: {
+			enabled: true,
+			hoverEffect: true,
+			clickEffect: true,
+			entranceAnimation: 'fade-in',
+			// ... otras propiedades
+		},
+	}}
+/>;
+```
+
+## Diagrama de Flujo
+
+```mermaid
+graph TD
+    A[EntityCard] --> B[useAnimationSystem]
+    B --> C[AnimationSystem State]
+    C --> D[generateAnimationClasses]
+    C --> E[generateAnimationVariables]
+    C --> F[generateAnimationStyles]
+    D & E & F --> G[Aplicar a EntityCard]
+
+    H[AnimationModule] --> I[AnimationPanel]
+    I --> J[Actualizar AnimationSystem]
+    J --> C
+```
+
+## Próximas Mejoras
+
+- Implementación de animaciones personalizadas mediante keyframes
+- Soporte para animaciones basadas en scroll
+- Optimización de rendimiento para dispositivos de gama baja
+- Integración con preferencias de sistema para reducción de movimiento

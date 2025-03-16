@@ -130,6 +130,20 @@ interface NoteCardProps {
 
 // Componente principal para la tarjeta de nota
 export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOptions }: NoteCardProps) {
+	// Verificar si note existe y tiene las propiedades necesarias
+	if (!note) {
+		console.warn('NoteCard: Se recibió un objeto note indefinido');
+		// Crear un note por defecto para evitar errores
+		note = {
+			id: 'placeholder',
+			name: 'Nota sin nombre',
+			content: 'Sin contenido',
+			type: 'text',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Note;
+	}
+
 	// Estado para controlar si el panel de configuración está abierto
 	const [configOpen, setConfigOpen] = useState(false);
 

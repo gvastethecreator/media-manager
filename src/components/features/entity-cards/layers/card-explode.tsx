@@ -18,11 +18,14 @@ interface CardExplodeProps {
 }
 
 export function CardExplode({ options, isExploded, layers, onLayerClick, className }: CardExplodeProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
+
+	// Obtenemos las propiedades directamente de options en lugar de visualEffects
+	const enableHolographic = options.enableHolographicEffect;
+	const enableGlow = options.enableGlowEffect;
+	const enableGrain = options.enableGrainEffect;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
-
-	const { enableHolographic, enableGlow, enableGrain } = visualEffects;
 
 	// Función para calcular la transformación de cada capa
 	const getLayerTransform = (index: number) => {

@@ -1,7 +1,7 @@
 'use client';
 
 import type * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { LayerConfigResponse } from '../types/card-layer-types';
 
 // Tipo base para la configuración de una capa
@@ -65,50 +65,59 @@ export function LayerPluginProvider({ children }: { children: React.ReactNode })
 	const [layers, setLayers] = useState<Record<string, LayerComponent>>({});
 
 	// Registrar una nueva capa
-	const registerLayer = (layer: LayerComponent) => {
-		setLayers((prev) => ({
-			...prev,
-			[layer.type]: layer,
-		}));
-	};
+	const registerLayer = useCallback((layer: LayerComponent) => {
+		setLayers((prev) => {
+			// Si la capa ya está registrada, no hacer nada
+			if (prev[layer.type]) {
+				return prev;
+			}
+			// Si no, añadirla
+			return {
+				...prev,
+				[layer.type]: layer,
+			};
+		});
+	}, []);
 
 	// Eliminar una capa
-	const unregisterLayer = (layerType: string) => {
+	const unregisterLayer = useCallback((layerType: string) => {
 		setLayers((prev) => {
 			const newLayers = { ...prev };
 			delete newLayers[layerType];
 			return newLayers;
 		});
-	};
+	}, []);
 
 	// Obtener una capa específica
-	const getLayer = (layerType: string) => {
-		return layers[layerType];
-	};
+	const getLayer = useCallback(
+		(layerType: string) => {
+			return layers[layerType];
+		},
+		[layers]
+	);
 
 	// Obtener todas las capas
-	const getLayers = () => {
+	const getLayers = useCallback(() => {
 		return Object.values(layers);
-	};
+	}, [layers]);
 
 	// Obtener capas ordenadas por índice
-	const getOrderedLayers = () => {
+	const getOrderedLayers = useCallback(() => {
 		return Object.values(layers).sort((a, b) => a.defaultConfig.layerIndex - b.defaultConfig.layerIndex);
-	};
+	}, [layers]);
 
-	return (
-		<LayerPluginContext.Provider
-			value={{
-				registerLayer,
-				unregisterLayer,
-				getLayer,
-				getLayers,
-				getOrderedLayers,
-			}}
-		>
-			{children}
-		</LayerPluginContext.Provider>
+	const contextValue = useMemo(
+		() => ({
+			registerLayer,
+			unregisterLayer,
+			getLayer,
+			getLayers,
+			getOrderedLayers,
+		}),
+		[registerLayer, unregisterLayer, getLayer, getLayers, getOrderedLayers]
 	);
+
+	return <LayerPluginContext.Provider value={contextValue}>{children}</LayerPluginContext.Provider>;
 }
 
 // Hook para utilizar el contexto de capas

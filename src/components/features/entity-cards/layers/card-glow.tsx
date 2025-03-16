@@ -11,11 +11,13 @@ interface CardGlowProps {
 }
 
 export function CardGlow({ options, isHovered, className }: CardGlowProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
-	const { glowIntensity = 1, glowColor } = visualEffects;
+	// Obtenemos las propiedades directamente de options o de glowOptions
+	const glowIntensity = options.glowOptions?.intensity || 1;
+	const glowColor = options.glowOptions?.color;
 
 	return (
 		<motion.div

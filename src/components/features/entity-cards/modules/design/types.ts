@@ -1,6 +1,8 @@
 /**
- * Tipos para el sistema de diseño de tarjetas
+ * 🎨 Tipos para el sistema de diseño de tarjetas
  */
+
+import { CardOptions } from '../../types/card-settings-types';
 
 /**
  * Configuración del sistema de diseño
@@ -58,23 +60,23 @@ export interface DesignSystemPreset {
 }
 
 /**
- * Props para el componente DesignPanel
- */
-export interface DesignPanelProps {
-	designSystem: DesignSystem;
-	onChange: (designSystem: DesignSystem) => void;
-	disabled?: boolean;
-	className?: string;
-}
-
-/**
- * Props para el componente DesignModule
+ * Props para el módulo de diseño
  */
 export interface DesignModuleProps {
 	initialDesignSystem?: Partial<DesignSystem>;
 	onChange?: (designSystem: DesignSystem) => void;
-	disabled?: boolean;
-	className?: string;
+	cardOptions?: CardOptions;
+	onCardOptionsChange?: (options: Partial<CardOptions>) => void;
+}
+
+/**
+ * Props para el panel de diseño
+ */
+export interface DesignPanelProps {
+	designSystem: DesignSystem;
+	onChange: (designSystem: DesignSystem) => void;
+	cardOptions?: CardOptions;
+	onCardOptionsChange?: (options: Partial<CardOptions>) => void;
 }
 
 /**

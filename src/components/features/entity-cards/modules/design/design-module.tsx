@@ -1,10 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { adaptDesignSystemToCardOptions } from './adapters';
 import { DesignPanel } from './design-panel';
-import type { DesignModuleProps, DesignSystem } from './types';
+import { DesignModuleProps, DesignSystem } from './types';
 
-// Configuración predeterminada para el sistema de diseño
+/**
+ * Función auxiliar para combinar profundamente dos objetos
+ */
+function deepMerge<T>(target: T, source: Partial<T>): T {
+	const output = { ...target } as T;
+
+	if (!source) return output;
+
+	if (typeof source === 'object' && source !== null) {
+		Object.keys(source as Record<string, any>).forEach((key) => {
+			const targetValue = (target as Record<string, any>)[key];
+			const sourceValue = (source as Record<string, any>)[key];
+
+			if (typeof sourceValue === 'object' && sourceValue !== null && !Array.isArray(sourceValue)) {
+				if (typeof targetValue !== 'object' || targetValue === null) {
+					(output as Record<string, any>)[key] = sourceValue;
+				} else {
+					(output as Record<string, any>)[key] = deepMerge(targetValue, sourceValue);
+				}
+			} else if (sourceValue !== undefined) {
+				(output as Record<string, any>)[key] = sourceValue;
+			}
+		});
+	}
+
+	return output;
+}
+
+/**
+ * 🎨 Configuración predeterminada para el sistema de diseño
+ */
 export const DEFAULT_DESIGN_SYSTEM: DesignSystem = {
 	// Configuración general
 	borderRadius: 12,
@@ -48,32 +79,47 @@ export const DEFAULT_DESIGN_SYSTEM: DesignSystem = {
 };
 
 /**
- * Módulo para gestionar la configuración de diseño de tarjetas
+ * 🎨 Módulo de diseño para Entity Cards
+ *
+ * Este módulo proporciona una interfaz para configurar el aspecto visual
+ * de las tarjetas de entidad, incluyendo colores, bordes, estilos y más.
  */
-export function DesignModule({ initialDesignSystem, onChange, disabled, className }: DesignModuleProps) {
-	// Inicializar el estado del sistema de diseño con los valores predeterminados y los proporcionados
-	const [designSystem, setDesignSystem] = useState<DesignSystem>({
-		...DEFAULT_DESIGN_SYSTEM,
-		...initialDesignSystem,
-	});
+export function DesignModule({
+	initialDesignSystem = {},
+	onChange,
+	cardOptions,
+	onCardOptionsChange,
+}: DesignModuleProps) {
+	// Estado del sistema de diseño
+	const [designSystem, setDesignSystem] = useState<DesignSystem>(() =>
+		deepMerge(DEFAULT_DESIGN_SYSTEM, initialDesignSystem)
+	);
 
-	// Actualizar el estado cuando cambien las props iniciales
+	// Actualizar el sistema de diseño cuando cambian las props
 	useEffect(() => {
-		if (initialDesignSystem) {
-			setDesignSystem((prevState) => ({
-				...prevState,
-				...initialDesignSystem,
-			}));
-		}
+		setDesignSystem((prevSystem) => deepMerge(prevSystem, initialDesignSystem));
 	}, [initialDesignSystem]);
 
 	// Manejar cambios en el sistema de diseño
-	const handleDesignChange = (updatedSystem: DesignSystem) => {
-		setDesignSystem(updatedSystem);
-		onChange?.(updatedSystem);
+	const handleDesignSystemChange = (newDesignSystem: DesignSystem) => {
+		setDesignSystem(newDesignSystem);
+		onChange?.(newDesignSystem);
+
+		// Actualizar las opciones de tarjeta si hay un manejador disponible
+		if (onCardOptionsChange) {
+			const updatedCardOptions = adaptDesignSystemToCardOptions(newDesignSystem);
+			onCardOptionsChange(updatedCardOptions);
+		}
 	};
 
 	return (
-		<DesignPanel designSystem={designSystem} onChange={handleDesignChange} disabled={disabled} className={className} />
+		<div className="space-y-4">
+			<DesignPanel
+				designSystem={designSystem}
+				onChange={handleDesignSystemChange}
+				cardOptions={cardOptions}
+				onCardOptionsChange={onCardOptionsChange}
+			/>
+		</div>
 	);
 }

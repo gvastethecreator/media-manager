@@ -1,15 +1,13 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn, deepMerge } from '@/lib/utils';
 import type * as React from 'react';
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { EntityCardContent } from './entity-card-content';
-import { useLayersSystem } from './layers/hooks/layers-system';
-import { LayerRenderer } from './layers/layer-plugin-system';
+import { LayerPluginProvider, LayerRenderer } from './layers/layer-plugin-system';
 import { useAnimationSystem } from './modules/animation';
-import { useColors } from './modules/colors';
 import { CoreLayer } from './modules/core';
-import { legacyToDesignSystem, useDesignSystem } from './modules/design';
+import { useDesignSystem } from './modules/design';
 import './styles/card-borders.css';
 // Importar tipos desde el archivo centralizado
 import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './types';
@@ -23,7 +21,8 @@ type ImageGridStyle = ImageGridProps['style'];
 // Importar CoreConfig desde el módulo core
 import type { CoreConfig } from './modules/core/core-config';
 // Importar sistema de manejo de errores
-import { CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
+import { RegisterLayers } from './layers/register-layers';
+import { CardError, createErrorHandler } from './utils/error-handler';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
@@ -209,118 +208,164 @@ export function EntityCard({
 	};
 
 	// Combinar opciones por defecto con las proporcionadas
-	const mergedOptions = {
-		...defaultOptions,
-		...options,
-		// Asegurar que las propiedades anidadas se combinen correctamente
-		layerSystem: {
-			...(defaultOptions.layerSystem || {}),
-			...(options.layerSystem || {}),
+	const mergedOptions = useMemo(() => {
+		return deepMerge(defaultOptions, options);
+	}, [options]);
+
+	// Obtener clases y estilos del sistema de diseño
+	const { designClasses, designStyles, colorClasses } = useDesignSystem({
+		designSystem: mergedOptions.designSystem,
+		primaryColor: mergedOptions.primaryColor,
+		secondaryColor: mergedOptions.secondaryColor,
+		entityType: mergedOptions.entityType || 'default',
+	});
+
+	// Obtener clases y estilos del sistema de animación
+	const { animationClasses, getAnimationStyles } = useAnimationSystem({
+		enabled: enableAnimation,
+		hoverEffect: true,
+		clickEffect: true,
+		entranceAnimation: 'fade-in',
+		exitAnimation: 'fade-out',
+		transitionDuration: 300,
+		timingFunction: 'ease-in-out',
+		hoverScale: mergedOptions.hoverScale || 1.05,
+		liftHeight: mergedOptions.hoverLiftHeight || 10,
+		maxRotation: mergedOptions.maxRotation || 15,
+	});
+
+	// Clase específica para el tipo de entidad
+	const entityTypeClass = useMemo(() => {
+		return mergedOptions.entityType ? `entity-type-${mergedOptions.entityType}` : '';
+	}, [mergedOptions.entityType]);
+
+	// Manejar eventos de mouse para efectos de hover
+	const handleMouseEnter = useCallback(() => {
+		setIsHovered(true);
+	}, []);
+
+	const handleMouseLeave = useCallback(() => {
+		setIsHovered(false);
+		setMousePosition({ x: 0, y: 0 });
+	}, []);
+
+	const handleMouseMove = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			if (!containerRef.current) return;
+
+			const rect = containerRef.current.getBoundingClientRect();
+			const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+			const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+
+			setMousePosition({ x, y });
 		},
-		designSystem: {
-			...(defaultOptions.designSystem || {}),
-			...(options.designSystem || {}),
-		},
-	};
+		[containerRef]
+	);
 
-	// Incorporar hooks de los módulos con manejo de errores
-	try {
-		// Inicializar hooks con valores predeterminados o proporcionados
-		const designSystemHook = useDesignSystem(
-			design || (mergedOptions.designSystem ? legacyToDesignSystem(mergedOptions) : {})
-		);
+	// Manejar flip de la tarjeta
+	const handleFlip = useCallback(() => {
+		if (enableBackside || mergedOptions.backside?.enabled) {
+			setIsFlipped((prev) => !prev);
+		}
+	}, [enableBackside, mergedOptions.backside?.enabled]);
 
-		const animationSystemHook = useAnimationSystem(animation || {});
-		const colorsHook = useColors({
-			initialOptions: mergedOptions.colors
-				? { colorPalette: typeof mergedOptions.colors === 'string' ? mergedOptions.colors : undefined }
-				: {},
-		});
-		const layersHook = useLayersSystem({
-			layers: mergedOptions.layers || [],
-			// Asegurar que se proporcionen valores por defecto para el sistema de capas
-			layerOrder: mergedOptions.layerSystem?.order || [
-				'background',
-				'content',
-				'effects',
-				'holographic',
-				'border',
-				'filter',
-			],
-			layerBlending: mergedOptions.layerSystem?.layerBlending || 'normal',
-			layerSpacing: mergedOptions.layerSystem?.layerSpacing || 2,
-		});
-
-		// Función para reintentar después de un error
-		const handleRetry = () => {
-			setError(null);
-		};
-
-		// Determinar clases CSS basadas en los sistemas modulares
-		const designClasses = enableDesign ? cn('design-system') : '';
-		const animationClasses = enableAnimation ? cn('animation-system') : '';
-		const colorClasses = cn('color-system');
-
-		// Determinar clases específicas por tipo de entidad
-		const entityTypeClass = mergedOptions.entityType ? `entity-type-${mergedOptions.entityType}` : '';
-
-		// Función para voltear la tarjeta
-		const handleFlip = () => {
-			if (enableBackside || mergedOptions.backside?.enabled) {
-				setIsFlipped(!isFlipped);
-			}
-		};
-
-		// Manejar eventos de teclado para accesibilidad
-		const handleKeyDown = (e: React.KeyboardEvent) => {
+	// Manejar navegación por teclado
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				handleFlip();
-				e.preventDefault();
 			}
-		};
+		},
+		[handleFlip]
+	);
 
-		// Manejar eventos de mouse para interacción con capas
-		const handleMouseEnter = () => {
-			setIsHovered(true);
-		};
-
-		const handleMouseLeave = () => {
-			setIsHovered(false);
-		};
-
-		const handleMouseMove = (e: React.MouseEvent) => {
-			if (containerRef.current) {
-				const rect = containerRef.current.getBoundingClientRect();
-				setMousePosition({
-					x: e.clientX - rect.left,
-					y: e.clientY - rect.top,
-				});
-			}
-		};
-
-		// Función para calcular transformación de capas en modo explotado
-		const getExplodeLayerTransform = (index: number): React.CSSProperties => {
+	// Calcular transformación para modo explodido
+	const getExplodeLayerTransform = useCallback(
+		(index: number) => {
 			if (!isExploded) return {};
 
-			const distance = 20; // Distancia base entre capas
-			const offset = index * distance;
+			const spacing = mergedOptions.layerSystem?.layerSpacing || 2;
+			const offset = index * spacing;
+			const perspective = 800;
 
 			return {
 				transform: `translateZ(${offset}px)`,
-				zIndex: index * 10,
+				zIndex: index,
+				transition: 'transform 0.3s ease-out',
+				perspective: `${perspective}px`,
 			};
+		},
+		[isExploded, mergedOptions.layerSystem?.layerSpacing]
+	);
+
+	// Obtener capas configuradas
+	const layers = useMemo(() => {
+		if (!enableLayers) return [];
+
+		// Obtener orden de capas desde las opciones o usar orden por defecto
+		const layerOrder = mergedOptions.layerSystem?.order || defaultOptions.layerSystem.order;
+
+		// Filtrar capas habilitadas
+		return layerOrder.filter((layerId) => {
+			const layerConfig = mergedOptions.layerConfigs?.[layerId];
+			return layerConfig?.enabled !== false;
+		});
+	}, [enableLayers, mergedOptions.layerSystem?.order, mergedOptions.layerConfigs]);
+
+	// Si hay un error, mostrar mensaje
+	if (error) {
+		return (
+			<div className="entity-card-error p-4 border border-red-500 rounded-md">
+				<h3 className="text-red-500 font-medium">Error en la tarjeta</h3>
+				<p className="text-sm text-gray-500">{error.message}</p>
+				{error.details && <pre className="mt-2 text-xs bg-gray-100 p-2 rounded">{error.details}</pre>}
+			</div>
+		);
+	}
+
+	// Renderizar tarjeta
+	try {
+		// Configuraciones para las capas
+		const layerConfigs = {
+			container: {
+				enabled: true,
+				layerIndex: 0,
+			},
+			texture: {
+				enabled: mergedOptions.textureConfig?.enabled ?? true,
+				layerIndex: 1,
+				textureConfig: mergedOptions.textureConfig,
+			},
+			border: {
+				enabled: mergedOptions.rarityConfig?.enabled ?? true,
+				layerIndex: 2,
+				borderConfig: mergedOptions.rarityConfig,
+			},
+			glow: {
+				enabled: mergedOptions.enableGlowEffect || false,
+				layerIndex: 3,
+				glowOptions: mergedOptions.glowOptions,
+			},
+			grain: {
+				enabled: mergedOptions.enableGrainEffect || false,
+				layerIndex: 4,
+				grainOptions: mergedOptions.grainOptions,
+			},
+			holographic: {
+				enabled: mergedOptions.enableHolographicEffect || false,
+				layerIndex: 5,
+				holographicOptions: mergedOptions.holographicOptions,
+			},
+			scanlines: {
+				enabled: mergedOptions.enableScanlinesEffect || false,
+				layerIndex: 6,
+			},
+			explode: {
+				enabled: enableLayers,
+				layerIndex: 7,
+			},
+			...mergedOptions.layerConfigs,
 		};
-
-		// Sistema de capas para renderizado
-		const layers = enableLayers && layersHook.layersSystem ? layersHook.layersSystem.getLayers() : [];
-
-		// Si hay un error, mostrar mensaje
-		if (error) {
-			return <CardErrorDisplay error={error} onRetry={handleRetry} />;
-		}
-
-		// Aplicar estilos del sistema de diseño si está habilitado
-		const designStyles = enableDesign ? designSystemHook.generateCssStyles() : {};
 
 		return (
 			<div
@@ -329,7 +374,10 @@ export function EntityCard({
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
 				className={cn('entity-card-container w-full h-full', entityTypeClass)}
-				style={designStyles as React.CSSProperties}
+				style={{
+					...getAnimationStyles(),
+					...(designStyles as React.CSSProperties),
+				}}
 			>
 				<button
 					type="button"
@@ -349,16 +397,28 @@ export function EntityCard({
 					<div className="entity-card-front w-full h-full">
 						{/* Sistema de capas */}
 						{enableLayers && layers.length > 0 && (
-							<LayerRenderer
-								isExploded={isExploded}
-								isHovered={isHovered}
-								mousePosition={mousePosition}
-								activeLayer={activeLayer}
-								getExplodeLayerTransform={getExplodeLayerTransform}
-								entityType={mergedOptions.entityType || 'default'}
-								entityId={id}
-								configs={mergedOptions.layerConfigs}
-							/>
+							<LayerPluginProvider>
+								{/* Registrar las capas necesarias */}
+								<RegisterLayers />
+
+								{/* Renderizar las capas */}
+								<LayerRenderer
+									isExploded={isExploded}
+									isHovered={isHovered}
+									mousePosition={mousePosition}
+									activeLayer={activeLayer}
+									getExplodeLayerTransform={getExplodeLayerTransform}
+									entityType={mergedOptions.entityType || 'default'}
+									entityId={id}
+									configs={layerConfigs}
+									context={{
+										title,
+										description,
+										image,
+										options: mergedOptions,
+									}}
+								/>
+							</LayerPluginProvider>
 						)}
 
 						{/* Contenido de la tarjeta usando el componente separado */}
@@ -385,8 +445,8 @@ export function EntityCard({
 			</div>
 		);
 	} catch (err) {
-		// Capturar cualquier error durante el renderizado
-		const cardError = errorHandler.handleError(err);
-		return <CardErrorDisplay error={cardError} onRetry={() => setError(null)} />;
+		// Capturar errores durante el renderizado
+		errorHandler(err as Error);
+		return null;
 	}
 }

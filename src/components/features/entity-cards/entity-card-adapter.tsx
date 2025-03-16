@@ -9,18 +9,50 @@ interface Entity {
 }
 
 import { useEffect, useState } from 'react';
-import { createCardAdapter } from './adapters/card-adapter-factory';
-import { AlbumCard } from './layouts/album-card';
-import { CharacterCard } from './layouts/character-card';
-import { CollectionCard } from './layouts/collection-card';
-import { ConceptCard } from './layouts/concept-card';
-import { FolderCard } from './layouts/folder-card';
-import { NoteCard } from './layouts/note-card';
-import { PlaceCard } from './layouts/place-card';
-import { PromptCard } from './layouts/prompt-card';
-import { TagCard } from './layouts/tag-card';
-import { WorldItemCard } from './layouts/world-item-card';
 import type { CardOptions } from './types';
+import { createCardAdapter } from './adapters/card-adapter-factory';
+
+// Importamos los tipos pero no los componentes directamente
+import type { Entity } from './adapters/entity-card-adapter';
+// Importamos la función de utilidad para generar configuración de rareza
+import { generateRarityConfig } from './utils/rarity-utils';
+
+// Definimos un objeto para almacenar los adaptadores de tarjeta
+// Los cargaremos dinámicamente para evitar dependencias circulares
+const ENTITY_ADAPTERS: Record<string, any> = {};
+
+// Función para cargar dinámicamente los adaptadores
+const loadAdapters = async () => {
+	// Importamos los adaptadores de tarjeta dinámicamente
+	const folderModule = await import('./layouts/folder-card');
+	const albumModule = await import('./layouts/album-card');
+	const tagModule = await import('./layouts/tag-card');
+	const collectionModule = await import('./layouts/collection-card');
+	const characterModule = await import('./layouts/character-card');
+	const placeModule = await import('./layouts/place-card');
+	const worldItemModule = await import('./layouts/world-item-card');
+	const conceptModule = await import('./layouts/concept-card');
+	const promptModule = await import('./layouts/prompt-card');
+	const noteModule = await import('./layouts/note-card');
+
+	// Asignamos los adaptadores al objeto
+	ENTITY_ADAPTERS.folder = folderModule.FolderCard;
+	ENTITY_ADAPTERS.album = albumModule.AlbumCard;
+	ENTITY_ADAPTERS.tag = tagModule.TagCard;
+	ENTITY_ADAPTERS.collection = collectionModule.CollectionCard;
+	ENTITY_ADAPTERS.character = characterModule.CharacterCard;
+	ENTITY_ADAPTERS.place = placeModule.PlaceCard;
+	ENTITY_ADAPTERS['world-item'] = worldItemModule.WorldItemCard;
+	ENTITY_ADAPTERS.worldItem = worldItemModule.WorldItemCard;
+	ENTITY_ADAPTERS.concept = conceptModule.ConceptCard;
+	ENTITY_ADAPTERS.prompt = promptModule.PromptCard;
+	ENTITY_ADAPTERS.note = noteModule.NoteCard;
+};
+
+// Cargar los adaptadores al inicializar
+loadAdapters().catch((error) => {
+	console.error('Error al cargar adaptadores de tarjeta:', error);
+});
 
 export interface EntityCardAdapterProps {
 	entityType: string;
@@ -37,31 +69,8 @@ export interface EntityCardAdapterProps {
 	className?: string;
 }
 
-// Crear un adaptador para cada tipo de entidad
-const folderAdapter = createCardAdapter(FolderCard, 'folder');
-const albumAdapter = createCardAdapter(AlbumCard, 'album');
-const tagAdapter = createCardAdapter(TagCard, 'tag');
-const collectionAdapter = createCardAdapter(CollectionCard, 'collection');
-const characterAdapter = createCardAdapter(CharacterCard, 'character');
-const placeAdapter = createCardAdapter(PlaceCard, 'place');
-const worldItemAdapter = createCardAdapter(WorldItemCard, 'worldItem');
-const conceptAdapter = createCardAdapter(ConceptCard, 'concept');
-const promptAdapter = createCardAdapter(PromptCard, 'prompt');
-const noteAdapter = createCardAdapter(NoteCard, 'note');
-
-// Mapa de tipos de entidad a adaptadores
-const ENTITY_ADAPTERS: Record<string, any> = {
-	folder: folderAdapter,
-	album: albumAdapter,
-	tag: tagAdapter,
-	collection: collectionAdapter,
-	character: characterAdapter,
-	place: placeAdapter,
-	worldItem: worldItemAdapter,
-	concept: conceptAdapter,
-	prompt: promptAdapter,
-	note: noteAdapter,
-};
+// Exportamos la función de utilidad para generar configuración de rareza
+export { generateRarityConfig };
 
 /**
  * Adaptador genérico para cualquier tipo de entidad
@@ -83,6 +92,23 @@ export function EntityCardAdapter({
 }: EntityCardAdapterProps) {
 	// Estado para manejar la carga de datos adicionales si es necesario
 	const [enhancedEntity, setEnhancedEntity] = useState<Entity>(entity);
+	// Estado para controlar si los adaptadores están cargados
+	const [adaptersLoaded, setAdaptersLoaded] = useState(false);
+
+	// Efecto para verificar si los adaptadores están cargados
+	useEffect(() => {
+		// Verificar si los adaptadores están cargados
+		if (Object.keys(ENTITY_ADAPTERS).length > 0) {
+			setAdaptersLoaded(true);
+		} else {
+			// Si no están cargados, intentar cargarlos de nuevo
+			loadAdapters()
+				.then(() => setAdaptersLoaded(true))
+				.catch((error) => {
+					console.error('Error al cargar adaptadores de tarjeta:', error);
+				});
+		}
+	}, []);
 
 	// Efecto para cargar datos adicionales según el tipo de entidad
 	useEffect(() => {
@@ -116,6 +142,15 @@ export function EntityCardAdapter({
 		// Para otros tipos de entidad, podríamos añadir más lógica aquí
 	}, [entityType, entity]);
 
+	// Si los adaptadores no están cargados, mostrar un indicador de carga
+	if (!adaptersLoaded) {
+		return (
+			<div className="loading-card p-4 border border-gray-200 rounded-md">
+				<p className="text-sm text-gray-500">Cargando componente de tarjeta...</p>
+			</div>
+		);
+	}
+
 	// Propiedades comunes para todos los tipos de tarjetas
 	const commonProps = {
 		onClick,
@@ -148,14 +183,4 @@ export function EntityCardAdapter({
 			<p className="text-sm text-gray-500">No se ha encontrado un layout para: {entityType}</p>
 		</div>
 	);
-}
-
-// Función auxiliar para generar configuración de rareza
-export function generateRarityConfig(level: string, color: string = '#3b82f6') {
-	return {
-		name: level,
-		color,
-		borderWidth: level === 'common' ? '1px' : level === 'uncommon' ? '2px' : '3px',
-		borderEffect: level === 'common' ? 'static' : level === 'uncommon' ? 'pulse' : 'glow',
-	};
 }

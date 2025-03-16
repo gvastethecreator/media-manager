@@ -1,21 +1,13 @@
 'use client';
 
 import { getTags } from '@/app/actions/tags/tag.actions';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { EntityView } from '@/components/views/base/entity-view-template';
 import { useFileManager } from '@/store/file-manager.store';
 import { TagIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import type { ViewProps } from '../types';
-
-const viewLogger = logger.withContext('TagsView');
 
 // Configuración visual predeterminada para etiquetas
 const DEFAULT_TAG_OPTIONS: CardOptions = {
@@ -99,88 +91,41 @@ const getTagType = (category?: string | null): TagType => {
 	}
 };
 
-export function TagsView(_props: ViewProps) {
+/**
+ * 🏷️ Vista de etiquetas
+ *
+ * Muestra todas las etiquetas disponibles en el sistema utilizando el componente EntityCard
+ */
+export function TagsView(props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentTag } = useFileManager();
-	const [tags, setTags] = useState<TagWithDetails[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_TAG_OPTIONS);
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticTags, _addEvent] = clientEvents.useEvents<TagWithDetails[]>(tags);
+	// Función para cargar etiquetas
+	const fetchTags = useCallback(async () => {
+		const data = await getTags();
 
-	const loadTags = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando etiquetas...');
-			const data = await getTags();
-			const transformedData = data.map((tagData) => {
-				// Filtrar valores nulos en recentImages
-				const recentImages = tagData.recentImages
-					? tagData.recentImages.filter((img): img is string => img !== null)
-					: [];
+		// Transformar los datos para adaptarlos al formato esperado
+		return data.map((tagData) => {
+			// Filtrar valores nulos en recentImages
+			const recentImages = tagData.recentImages
+				? tagData.recentImages.filter((img): img is string => img !== null)
+				: [];
 
-				return {
-					...tagData,
-					recentImages,
-					_count: tagData._count || { images: tagData.count || 0 },
-					// Usar la función para determinar el tipo de etiqueta
-					type: getTagType(tagData.category),
-					createdAt: new Date(tagData.createdAt),
-					updatedAt: new Date(tagData.updatedAt),
-				} as TagWithDetails;
-			});
-
-			setTags(transformedData);
-			viewLogger.info(`✅ ${data.length} etiquetas cargadas`);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando etiquetas:', error);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
+			return {
+				...tagData,
+				recentImages,
+				_count: tagData._count || { images: tagData.count || 0 },
+				// Usar la función para determinar el tipo de etiqueta
+				type: getTagType(tagData.category),
+				createdAt: new Date(tagData.createdAt),
+				updatedAt: new Date(tagData.updatedAt),
+			} as TagWithDetails;
+		});
 	}, []);
 
-	useEffect(() => {
-		loadTags();
-	}, [loadTags]);
-
-	useEffect(() => {
-		const loadVisualConfig = async () => {
-			try {
-				const response = await fetch('/api/entities/tags/visual-config');
-				if (!response.ok) {
-					throw new Error('Error al cargar la configuración visual');
-				}
-				const config = await response.json();
-				// Combinar la configuración del servidor con las opciones predeterminadas
-				setVisualConfig({
-					...DEFAULT_TAG_OPTIONS,
-					...config,
-					// Asegurar que las propiedades anidadas se combinen correctamente
-					designSystem: {
-						...(DEFAULT_TAG_OPTIONS.designSystem || {}),
-						...(config.designSystem || {}),
-					},
-					layerSystem: {
-						...(DEFAULT_TAG_OPTIONS.layerSystem || {}),
-						...(config.layerSystem || {}),
-					},
-				});
-			} catch (error) {
-				console.error('Error al cargar la configuración visual:', error);
-				// Si hay un error, mantenemos la configuración predeterminada
-			}
-		};
-
-		loadVisualConfig();
-	}, []);
-
+	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
 		(tag: TagWithDetails) => {
-			viewLogger.info('🖱️ Click en etiqueta:', tag.name);
 			setCurrentView('tag-content');
 			setCurrentTag(tag.id);
 			// Actualizar la información completa de la etiqueta en el store
@@ -201,51 +146,19 @@ export function TagsView(_props: ViewProps) {
 		[setCurrentView, setCurrentTag]
 	);
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!optimisticTags || optimisticTags.length === 0) {
-		return (
-			<EmptyState
-				icon={TagIcon}
-				title="No hay etiquetas creadas"
-				description="Crea etiquetas para categorizar y filtrar tus imágenes."
-			/>
-		);
-	}
-
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{optimisticTags.map((tag, index) => (
-						<motion.div
-							key={tag.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.05 }}
-						>
-							<EntityCardAdapter
-								entityType="tag"
-								entity={tag}
-								onClick={() => handleTagClick(tag)}
-								showVisualConfig={true}
-								enableExplode={true}
-								options={visualConfig}
-							/>
-						</motion.div>
-					))}
-				</div>
-			</div>
-		</ScrollArea>
+		<EntityView<TagWithDetails>
+			{...props}
+			title="Etiquetas"
+			description="Organiza y filtra tus imágenes con etiquetas personalizadas"
+			emptyStateIcon={TagIcon}
+			emptyStateTitle="No hay etiquetas creadas"
+			emptyStateDescription="Crea etiquetas para categorizar y filtrar tus imágenes."
+			fetchEntities={fetchTags}
+			onEntityClick={handleTagClick}
+			entityType="tag"
+			defaultOptions={DEFAULT_TAG_OPTIONS}
+			visualConfigEndpoint="/api/entities/tags/visual-config"
+		/>
 	);
 }
