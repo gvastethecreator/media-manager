@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for performance optimization in an image management application
 globs: **/*.{ts,tsx,js,jsx}
 alwaysApply: false

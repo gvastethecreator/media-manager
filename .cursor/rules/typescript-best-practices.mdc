@@ -1,6 +1,6 @@
 ---
 description: TypeScript coding standards and type safety guidelines for image management applications
-globs: **/*.{ts,tsx}
+globs: *.ts,*.tsx
 alwaysApply: false
 ---
 - **Modo Estricto en `tsconfig.json`:** Habilitar el modo estricto para mejorar la verificación de tipos y seguridad.

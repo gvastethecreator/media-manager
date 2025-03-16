@@ -1,6 +1,7 @@
 ---
 description: Any task on server actions
-globs: app/actions/**/*.ts
+globs: *.actions.*
+alwaysApply: false
 ---
 # Reglas para Server Actions en Next.js 15
 

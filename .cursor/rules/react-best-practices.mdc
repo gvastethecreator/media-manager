@@ -1,6 +1,7 @@
 ---
 description: Best practices for React component development
-globs: **/*.{ts,tsx,js,jsx}
+globs: *.ts,*.tsx,*.js,*.jsx
+alwaysApply: false
 ---
 - **Functional Components with Hooks:** Use functional components with hooks instead of class components
 - **Single Responsibility Components:** Keep components small and focused on a single responsibility
