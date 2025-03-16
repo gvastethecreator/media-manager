@@ -11,9 +11,10 @@ Estamos en pleno desarrollo y todavía hay muchas funcionalidades que se irán a
 - Shadcn UI
 - Tailwind CSS 4
 - TypeScript
-- Prisma para ORM
+- Drizzle ORM (migrado desde Prisma)
 
 ## Features :
+
 - Agregar carpetas
 - Visor de imagenes
 - Navegador de archivos (por ahora sin soporte de subcarpetas)
@@ -22,6 +23,7 @@ Estamos en pleno desarrollo y todavía hay muchas funcionalidades que se irán a
 - Sistema de Entity Cards para distintos tipos de entidades
 - Configuración avanzada de tarjetas con sistema modular
 - Sistema de formularios estandarizado para una mejor experiencia de usuario
+- Base de datos SQLite con Drizzle ORM para mejor rendimiento
 
 ## Sistema de Entity Cards
 
