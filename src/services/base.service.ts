@@ -1,9 +1,9 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem } from '@/types/file-item';
 import { type ServerImage, imageConverterService } from './image-converter.service';
 
-const baseLogger = logger.withContext('BaseService');
+const baseLogger = serverLogger.withContext('BaseService');
 
 export interface BaseStats {
 	_count: {
@@ -32,7 +32,7 @@ export class BaseService {
 	constructor(model: PrismaModelOperations, modelName: string) {
 		this.model = model;
 		this.modelName = modelName;
-		this.logger = logger.withContext(`${modelName}Service`);
+		this.logger = serverLogger.withContext(`${modelName}Service`);
 	}
 
 	protected async getItemsWithStats<T extends { id: string }>(
@@ -40,7 +40,7 @@ export class BaseService {
 		orderBy: PrismaFilter = { createdAt: 'desc' }
 	): Promise<(T & BaseStats)[]> {
 		try {
-			this.logger.info(`🔍 Obteniendo lista de ${this.modelName}...`);
+			this.serverLogger.info(`🔍 Obteniendo lista de ${this.modelName}...`);
 
 			// 1. Obtener items con conteo de imágenes
 			const items = (await this.model.findMany({
@@ -80,10 +80,10 @@ export class BaseService {
 				} as T & BaseStats;
 			});
 
-			this.logger.info(`✅ ${items.length} ${this.modelName} obtenidos`);
+			this.serverLogger.info(`✅ ${items.length} ${this.modelName} obtenidos`);
 			return itemsWithStats;
 		} catch (error) {
-			this.logger.error(`❌ Error al obtener ${this.modelName}:`, error);
+			this.serverLogger.error(`❌ Error al obtener ${this.modelName}:`, error);
 			throw error;
 		}
 	}
@@ -93,7 +93,7 @@ export class BaseService {
 		include: PrismaFilter = {}
 	): Promise<(T & BaseStats) | null> {
 		try {
-			this.logger.info(`🔍 Obteniendo ${this.modelName}:`, id);
+			this.serverLogger.info(`🔍 Obteniendo ${this.modelName}:`, id);
 
 			const item = (await this.model.findUnique({
 				where: { id },
@@ -125,7 +125,7 @@ export class BaseService {
 				totalSize: totalSize._sum?.size || 0,
 			};
 		} catch (error) {
-			this.logger.error(`❌ Error al obtener ${this.modelName}:`, error);
+			this.serverLogger.error(`❌ Error al obtener ${this.modelName}:`, error);
 			throw error;
 		}
 	}
@@ -191,7 +191,7 @@ export class BaseService {
 
 			return images.map((image) => imageConverterService.convertServerImageToFileItem(image as ServerImage));
 		} catch (error) {
-			this.logger.error(`❌ Error al obtener imágenes de ${this.modelName}:`, error);
+			this.serverLogger.error(`❌ Error al obtener imágenes de ${this.modelName}:`, error);
 			throw error;
 		}
 	}

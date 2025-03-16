@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
@@ -11,7 +11,7 @@ import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
-const noteLogger = logger.withContext('NoteActions');
+const noteLogger = serverLogger.withContext('NoteActions');
 
 const REVALIDATE_PATHS = ['/settings', '/notes', '/notes/[id]'] as const;
 

@@ -1,8 +1,8 @@
 import { deleteFile, getDirectoryInfo, getFileAsDataUrl, getFileInfo } from '@/app/actions/files/file.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/lib/toast';
 
-const fileLogger = logger.withContext('FileOperationsService');
+const fileLogger = serverLogger.withContext('FileOperationsService');
 
 /**
  * Interfaz para operaciones de archivos que pueden ser implementadas

@@ -8,7 +8,7 @@ import {
 	getCollections,
 	updateCollection,
 } from '@/app/actions/collections/collection.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Collection } from '@prisma/client';
 import { create } from 'zustand';
 
@@ -25,7 +25,7 @@ interface CollectionsStore {
 	selectItem: (collection: Collection) => void;
 }
 
-const collectionsLogger = logger.withContext('CollectionsStore');
+const collectionsLogger = serverLogger.withContext('CollectionsStore');
 
 export const useCollectionsStore = create<CollectionsStore>((set, get) => ({
 	collections: [],

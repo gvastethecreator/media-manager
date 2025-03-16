@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { COLLECTION_EVENTS, collectionEventsService } from '@/services/collection-events.service';
@@ -11,7 +11,7 @@ import type { Collection } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
-const collectionLogger = logger.withContext('CollectionActions');
+const collectionLogger = serverLogger.withContext('CollectionActions');
 const REVALIDATE_PATHS = ['/settings', '/collections', '/collections/[id]', '/images/[id]'] as const;
 
 // Códigos de error

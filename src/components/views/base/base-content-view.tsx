@@ -4,14 +4,14 @@ import { EmptyState } from '@/components/core/data-display/empty-state/empty-sta
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
 import { FolderIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import { useContentView } from './content-view-provider';
 
-const baseLogger = logger.withContext('BaseContentView');
+const baseLogger = serverLogger.withContext('BaseContentView');
 
 export interface BaseContentViewProps {
 	className?: string;

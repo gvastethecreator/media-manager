@@ -651,7 +651,6 @@
 
 /* Estilos para el estado de redimensionamiento */
 
-
 .resize-active {
 	cursor: col-resize !important;
 	user-select: none !important;
@@ -809,5 +808,18 @@
 	to {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+/*
+  ---break---
+*/
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+	}
+  body {
+    @apply bg-background text-foreground;
 	}
 }

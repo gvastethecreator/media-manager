@@ -3,13 +3,13 @@
 import { getConceptImages } from '@/app/actions/concepts/concept.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { Lightbulb } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
-const viewLogger = logger.withContext('ConceptContentView');
+const viewLogger = serverLogger.withContext('ConceptContentView');
 
 export function ConceptContentView() {
 	const {

@@ -8,11 +8,11 @@ import {
 	getCharacters,
 	updateCharacter as updateCharacterAction,
 } from '@/app/actions/characters/character.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Character } from '@prisma/client';
 import { create } from 'zustand';
 
-const charactersLogger = logger.withContext('CharactersStore');
+const charactersLogger = serverLogger.withContext('CharactersStore');
 
 interface CharactersStore {
 	characters: CharacterWithStats[];

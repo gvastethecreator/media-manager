@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useAlbumsStore } from '@/store/entities/albums.store';
 import { useCharactersStore } from '@/store/entities/characters.store';
 import { useCollectionsStore } from '@/store/entities/collections.store';

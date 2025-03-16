@@ -1,11 +1,11 @@
 import type { PromptCreate } from '@/app/actions/prompts/prompt.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { Prompt } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
-const promptLogger = logger.withContext('PromptService');
+const promptLogger = serverLogger.withContext('PromptService');
 
 // Constantes para los tipos de eventos
 const EVENTS = {

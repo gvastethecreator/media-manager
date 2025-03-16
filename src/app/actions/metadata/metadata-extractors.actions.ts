@@ -3,7 +3,7 @@
 import { type Stats, statSync } from 'fs';
 import * as fs from 'node:fs/promises';
 import { CacheManager } from '@/lib/cache';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
@@ -23,7 +23,7 @@ import {
 } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
 
-const extractorLogger = logger.withContext('MetadataExtractors');
+const extractorLogger = serverLogger.withContext('MetadataExtractors');
 const metadataCache = new CacheManager<FileMetadata>({
 	name: 'metadata',
 	ttl: 60 * 60 * 1000, // 1 hora

@@ -1,7 +1,7 @@
 import type { FileMetadata } from '@/types/metadata';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 
-const cacheLogger = logger.withContext('Cache');
+const cacheLogger = serverLogger.withContext('Cache');
 
 interface CacheOptions {
 	ttl?: number; // Time to live in milliseconds

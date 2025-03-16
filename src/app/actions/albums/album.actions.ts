@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
@@ -9,7 +9,7 @@ import type { Album as PrismaAlbum } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
-const albumLogger = logger.withContext('AlbumActions');
+const albumLogger = serverLogger.withContext('AlbumActions');
 const REVALIDATE_PATHS = ['/settings', '/albums', '/albums/[id]'] as const;
 
 // Códigos de error

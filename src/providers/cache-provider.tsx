@@ -9,13 +9,13 @@ import {
 	thumbnailCache,
 	worldItemsCache,
 } from '@/lib/cache';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { queryClient } from '@/lib/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 
-const cacheProviderLogger = logger.withContext('CacheProvider');
+const cacheProviderLogger = serverLogger.withContext('CacheProvider');
 
 export function CacheProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {

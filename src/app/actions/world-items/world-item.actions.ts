@@ -1,7 +1,7 @@
 'use server';
 
 import { worldItemsCache } from '@/lib/cache';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { EventType } from '@/lib/server/events.server';
@@ -12,7 +12,7 @@ import type { Image, WorldItem as PrismaWorldItem } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
-const worldItemLogger = logger.withContext('WorldItemActions');
+const worldItemLogger = serverLogger.withContext('WorldItemActions');
 const REVALIDATE_PATHS = ['/settings', '/world-items', '/world-items/[id]'] as const;
 
 // Códigos de error

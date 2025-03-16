@@ -4,13 +4,13 @@ import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Box } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-const viewLogger = logger.withContext('WorldItemContentView');
+const viewLogger = serverLogger.withContext('WorldItemContentView');
 
 export function WorldItemContentView() {
 	const { currentWorldItemId } = useFileManager();

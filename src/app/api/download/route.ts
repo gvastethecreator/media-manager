@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getFileInfo } from '@/app/actions/files/file.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const downloadLogger = logger.withContext('DownloadAPI');
+const downloadLogger = serverLogger.withContext('DownloadAPI');
 
 /**
  * Handler para procesar solicitudes POST de descarga

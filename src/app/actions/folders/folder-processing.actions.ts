@@ -7,7 +7,7 @@ import { extname, join } from 'node:path';
 import * as path from 'node:path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emitProgress } from '@/lib/server/events.server';
@@ -16,7 +16,7 @@ import type { FileMetadata } from '@/types/metadata';
 import { FolderError, type ProcessStatus, SUPPORTED_FORMATS } from './folder-types.actions';
 import { verifyPathExists } from './folder-utils.actions';
 
-const folderLogger = logger.withContext('FolderProcessing');
+const folderLogger = serverLogger.withContext('FolderProcessing');
 
 /**
  * Calcula un puntaje de salud basado en la cantidad de errores y el total de archivos

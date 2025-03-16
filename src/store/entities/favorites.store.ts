@@ -1,8 +1,8 @@
 import { getFavorites, toggleFavorite } from '@/app/actions/favorites/favorite.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { create } from 'zustand';
 
-const favoritesLogger = logger.withContext('FavoritesStore');
+const favoritesLogger = serverLogger.withContext('FavoritesStore');
 
 interface FavoritesState {
 	favorites: string[];

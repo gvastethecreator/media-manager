@@ -10,7 +10,7 @@
 
 import fs from 'node:fs/promises';
 import { thumbnailCache } from '@/lib/cache';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
 import { ThumbnailQuality } from '@/types/thumbnails';
@@ -18,7 +18,7 @@ import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 
-const imageLogger = logger.withContext('ImageThumbnails');
+const imageLogger = serverLogger.withContext('ImageThumbnails');
 
 /**
  * Obtiene la miniatura de una imagen

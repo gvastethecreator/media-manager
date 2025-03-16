@@ -1,9 +1,9 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { DEFAULT_RETRY_CONFIG, type ImageFormat, type RetryConfig } from './metadata-types.actions';
 
-const metadataLogger = logger.withContext('MetadataUtils');
+const metadataLogger = serverLogger.withContext('MetadataUtils');
 
 /**
  * Implementa un mecanismo de retry con backoff exponencial y jitter opcional

@@ -8,11 +8,11 @@ import {
 	getAlbums,
 	updateAlbum as updateAlbumAction,
 } from '@/app/actions/albums/album.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Album } from '@prisma/client';
 import { create } from 'zustand';
 
-const albumsLogger = logger.withContext('AlbumsStore');
+const albumsLogger = serverLogger.withContext('AlbumsStore');
 
 export type AlbumWithStats = ActionAlbumWithStats;
 

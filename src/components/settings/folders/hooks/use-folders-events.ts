@@ -1,13 +1,13 @@
 'use client';
 
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
 import type { FolderStats } from '@/types/entities/folders';
 import type { ErrorResponse, ProcessStatus, ReindexAllCompleteData, ReindexAllProgressData } from '@/types/process';
 import { useCallback, useEffect } from 'react';
 
-const eventsLogger = logger.withContext('FoldersEvents');
+const eventsLogger = serverLogger.withContext('FoldersEvents');
 
 interface FolderEventsCallbacks {
 	onProgress: (status: ProcessStatus) => void;

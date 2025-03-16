@@ -1,5 +1,5 @@
 import { processImage } from '@/lib/image-processing';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { UploadedImageType } from '@/types/entities/entities';
@@ -17,7 +17,7 @@ import type {
 	UploadedImageStats,
 } from '@/types/uploaded-images';
 
-const uploadedImagesLogger = logger.withContext('UploadedImagesService');
+const uploadedImagesLogger = serverLogger.withContext('UploadedImagesService');
 
 interface WhereClause {
 	type?: UploadedImageType;

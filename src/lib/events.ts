@@ -1,8 +1,8 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from 'next/cache';
 import { useOptimistic } from 'react';
 
-const eventsLogger = logger.withContext('Events');
+const eventsLogger = serverLogger.withContext('Events');
 
 export type EventType =
 	| 'create'

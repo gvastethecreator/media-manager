@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { Image } from '@prisma/client';
@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache';
 
 import type { CreateImageInput, GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
-const imageLogger = logger.withContext('ImageCRUD');
+const imageLogger = serverLogger.withContext('ImageCRUD');
 
 /**
  * Obtiene una imagen por su ID

@@ -1,9 +1,9 @@
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { metadataCache } from '@/lib/cache';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { NextResponse } from 'next/server';
 
-const routeLogger = logger.withContext('CacheAPI');
+const routeLogger = serverLogger.withContext('CacheAPI');
 
 export async function POST() {
 	try {

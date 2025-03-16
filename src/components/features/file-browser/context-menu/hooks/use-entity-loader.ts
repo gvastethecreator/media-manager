@@ -1,6 +1,6 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useAlbumsStore } from '@/store/entities/albums.store';
 import { useCharactersStore } from '@/store/entities/characters.store';
 import { useCollectionsStore } from '@/store/entities/collections.store';
@@ -14,7 +14,7 @@ import { useWorldItemsStore } from '@/store/entities/world-items.store';
 import { useCallback, useState } from 'react';
 import type { LoadingStates } from '../types';
 
-const entityLoaderLogger = logger.withContext('EntityLoader');
+const entityLoaderLogger = serverLogger.withContext('EntityLoader');
 
 // Estado inicial para la carga de entidades
 const initialLoadingStates: LoadingStates = {

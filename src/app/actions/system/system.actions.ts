@@ -3,11 +3,11 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 
-const systemLogger = logger.withContext('SystemActions');
+const systemLogger = serverLogger.withContext('SystemActions');
 
 // Tiempo de revalidación en segundos
 const SYSTEM_REVALIDATE_SECONDS = 60;

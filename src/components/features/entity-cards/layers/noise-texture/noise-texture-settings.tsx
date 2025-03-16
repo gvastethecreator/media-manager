@@ -1,24 +1,21 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Badge, Dice, Download, InfoIcon, RefreshCw, Save, Sparkles, Sync } from 'lucide-react';
+import { Badge, Dices, RefreshCw, RotateCw, Save, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import type { NoiseTextureConfig } from './actions/noise-texture-config.action';
-import { getNoiseTextureConfig, updateNoiseTextureConfig } from './actions/noise-texture-config.action';
+import { updateNoiseTextureConfig } from './actions/noise-texture-config.action';
 import { noiseCache, perlinNoiseOctaves, simplexNoiseOctaves } from './utils/noise-algorithms';
 
 // Crear un schema para la configuración del formulario
@@ -522,7 +519,7 @@ export function NoiseTextureSettings({ config, onChange, onReset, entityType, en
 									className="flex-1"
 								/>
 								<Button variant="outline" size="icon" onClick={generateRandomSeed} title="Generar semilla aleatoria">
-									<Dice className="h-4 w-4" />
+									<Dices className="h-4 w-4" />
 								</Button>
 								<Button
 									variant="outline"
@@ -582,7 +579,7 @@ export function NoiseTextureSettings({ config, onChange, onReset, entityType, en
 								</Button>
 
 								<Button variant="outline" size="sm" className="text-xs" onClick={handleUpdatePreview}>
-									<Sync className="h-3 w-3 mr-1" />
+									<RotateCw className="h-3 w-3 mr-1" />
 									Actualizar preview
 								</Button>
 

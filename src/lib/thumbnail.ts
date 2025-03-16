@@ -3,12 +3,12 @@ import { promises as fs } from 'fs';
 import { createHash } from 'node:crypto';
 import { extname, join } from 'node:path';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils/format.utils';
 
-const thumbLogger = logger.withContext('Thumbnail');
+const thumbLogger = serverLogger.withContext('Thumbnail');
 
 // Configuración de caché
 const CACHE_DIR = '.thumbnail-cache';

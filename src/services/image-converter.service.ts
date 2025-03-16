@@ -1,7 +1,7 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Dimensions, FileItem } from '@/types/file-item';
 
-const converterLogger = logger.withContext('ImageConverter');
+const converterLogger = serverLogger.withContext('ImageConverter');
 
 interface RelatedCollection {
 	id: string;

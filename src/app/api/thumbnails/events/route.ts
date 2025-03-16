@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type ProcessStatus, type ThumbnailError, thumbnailService } from '@/services/thumbnail.service';
 import type { NextRequest } from 'next/server';
 
@@ -26,7 +26,7 @@ const ERROR_HEADERS = {
 	...CORS_HEADERS,
 };
 
-const eventLogger = logger.withContext('ThumbnailEventsAPI');
+const eventLogger = serverLogger.withContext('ThumbnailEventsAPI');
 
 // Definir los tipos que necesitamos pero que no están exportados
 type CompleteData = Record<string, unknown>;

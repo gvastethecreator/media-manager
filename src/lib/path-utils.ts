@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import { normalize, sep } from 'node:path';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 
-const pathUtilsLogger = logger.withContext('PathUtils');
+const pathUtilsLogger = serverLogger.withContext('PathUtils');
 
 /**
  * Normaliza una ruta para uso en el sistema

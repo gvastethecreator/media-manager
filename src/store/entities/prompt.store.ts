@@ -8,11 +8,11 @@ import {
 	getPrompts,
 	updatePrompt as updatePromptAction,
 } from '@/app/actions/prompts/prompt.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Prompt } from '@prisma/client';
 import { create } from 'zustand';
 
-const promptLogger = logger.withContext('PromptStore');
+const promptLogger = serverLogger.withContext('PromptStore');
 
 const mapToPromptWithStats = (prompt: Awaited<ReturnType<typeof getPrompts>>[0]): PromptWithStats => ({
 	...prompt,

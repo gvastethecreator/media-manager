@@ -1,10 +1,10 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus } from '@/types/process';
 import { revalidatePath } from 'next/cache';
 
-const eventsLogger = logger.withContext('ServerEvents');
+const eventsLogger = serverLogger.withContext('ServerEvents');
 
 // Mapa de rutas a revalidar por tipo de evento
 const EVENT_PATHS: Record<EventType, string[]> = {

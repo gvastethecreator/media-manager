@@ -1,12 +1,12 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { Activity } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const activityLogger = logger.withContext('ActivityActions');
+const activityLogger = serverLogger.withContext('ActivityActions');
 
 const REVALIDATE_PATHS = ['/settings', '/activities'] as const;
 

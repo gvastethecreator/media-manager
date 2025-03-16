@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { folders, profiles, queueJobs } from './schema';
@@ -19,7 +19,7 @@ export class DrizzleRepository {
 			try {
 				return await db.select().from(profiles);
 			} catch (error) {
-				logger.error('Error al obtener perfiles:', error);
+				serverLogger.error('Error al obtener perfiles:', error);
 				throw new Error('Error al obtener perfiles');
 			}
 		},
@@ -32,7 +32,7 @@ export class DrizzleRepository {
 				const result = await db.select().from(profiles).where(eq(profiles.id, id));
 				return result[0] || null;
 			} catch (error) {
-				logger.error(`Error al obtener perfil con ID ${id}:`, error);
+				serverLogger.error(`Error al obtener perfil con ID ${id}:`, error);
 				throw new Error(`Error al obtener perfil con ID ${id}`);
 			}
 		},
@@ -45,7 +45,7 @@ export class DrizzleRepository {
 				const result = await db.insert(profiles).values(data).returning();
 				return result[0];
 			} catch (error) {
-				logger.error('Error al crear perfil:', error);
+				serverLogger.error('Error al crear perfil:', error);
 				throw new Error('Error al crear perfil');
 			}
 		},
@@ -63,7 +63,7 @@ export class DrizzleRepository {
 					.returning();
 				return result[0];
 			} catch (error) {
-				logger.error(`Error al actualizar perfil con ID ${id}:`, error);
+				serverLogger.error(`Error al actualizar perfil con ID ${id}:`, error);
 				throw new Error(`Error al actualizar perfil con ID ${id}`);
 			}
 		},
@@ -76,7 +76,7 @@ export class DrizzleRepository {
 				await db.delete(profiles).where(eq(profiles.id, id));
 				return true;
 			} catch (error) {
-				logger.error(`Error al eliminar perfil con ID ${id}:`, error);
+				serverLogger.error(`Error al eliminar perfil con ID ${id}:`, error);
 				throw new Error(`Error al eliminar perfil con ID ${id}`);
 			}
 		},
@@ -93,7 +93,7 @@ export class DrizzleRepository {
 			try {
 				return await db.select().from(folders);
 			} catch (error) {
-				logger.error('Error al obtener carpetas:', error);
+				serverLogger.error('Error al obtener carpetas:', error);
 				throw new Error('Error al obtener carpetas');
 			}
 		},
@@ -106,7 +106,7 @@ export class DrizzleRepository {
 				const result = await db.select().from(folders).where(eq(folders.id, id));
 				return result[0] || null;
 			} catch (error) {
-				logger.error(`Error al obtener carpeta con ID ${id}:`, error);
+				serverLogger.error(`Error al obtener carpeta con ID ${id}:`, error);
 				throw new Error(`Error al obtener carpeta con ID ${id}`);
 			}
 		},
@@ -119,7 +119,7 @@ export class DrizzleRepository {
 				const result = await db.select().from(folders).where(eq(folders.path, path));
 				return result[0] || null;
 			} catch (error) {
-				logger.error(`Error al obtener carpeta con ruta ${path}:`, error);
+				serverLogger.error(`Error al obtener carpeta con ruta ${path}:`, error);
 				throw new Error(`Error al obtener carpeta con ruta ${path}`);
 			}
 		},
@@ -132,7 +132,7 @@ export class DrizzleRepository {
 				const result = await db.insert(folders).values(data).returning();
 				return result[0];
 			} catch (error) {
-				logger.error('Error al crear carpeta:', error);
+				serverLogger.error('Error al crear carpeta:', error);
 				throw new Error('Error al crear carpeta');
 			}
 		},
@@ -150,7 +150,7 @@ export class DrizzleRepository {
 					.returning();
 				return result[0];
 			} catch (error) {
-				logger.error(`Error al actualizar carpeta con ID ${id}:`, error);
+				serverLogger.error(`Error al actualizar carpeta con ID ${id}:`, error);
 				throw new Error(`Error al actualizar carpeta con ID ${id}`);
 			}
 		},
@@ -163,7 +163,7 @@ export class DrizzleRepository {
 				await db.delete(folders).where(eq(folders.id, id));
 				return true;
 			} catch (error) {
-				logger.error(`Error al eliminar carpeta con ID ${id}:`, error);
+				serverLogger.error(`Error al eliminar carpeta con ID ${id}:`, error);
 				throw new Error(`Error al eliminar carpeta con ID ${id}`);
 			}
 		},
@@ -180,7 +180,7 @@ export class DrizzleRepository {
 			try {
 				return await db.select().from(queueJobs);
 			} catch (error) {
-				logger.error('Error al obtener trabajos de cola:', error);
+				serverLogger.error('Error al obtener trabajos de cola:', error);
 				throw new Error('Error al obtener trabajos de cola');
 			}
 		},
@@ -193,7 +193,7 @@ export class DrizzleRepository {
 				const result = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 				return result[0] || null;
 			} catch (error) {
-				logger.error(`Error al obtener trabajo de cola con ID ${id}:`, error);
+				serverLogger.error(`Error al obtener trabajo de cola con ID ${id}:`, error);
 				throw new Error(`Error al obtener trabajo de cola con ID ${id}`);
 			}
 		},
@@ -206,7 +206,7 @@ export class DrizzleRepository {
 				const result = await db.insert(queueJobs).values(data).returning();
 				return result[0];
 			} catch (error) {
-				logger.error('Error al crear trabajo de cola:', error);
+				serverLogger.error('Error al crear trabajo de cola:', error);
 				throw new Error('Error al crear trabajo de cola');
 			}
 		},
@@ -227,7 +227,7 @@ export class DrizzleRepository {
 					.returning();
 				return result[0];
 			} catch (error) {
-				logger.error(`Error al actualizar trabajo de cola con ID ${id}:`, error);
+				serverLogger.error(`Error al actualizar trabajo de cola con ID ${id}:`, error);
 				throw new Error(`Error al actualizar trabajo de cola con ID ${id}`);
 			}
 		},
@@ -240,7 +240,7 @@ export class DrizzleRepository {
 				await db.delete(queueJobs).where(eq(queueJobs.id, id));
 				return true;
 			} catch (error) {
-				logger.error(`Error al eliminar trabajo de cola con ID ${id}:`, error);
+				serverLogger.error(`Error al eliminar trabajo de cola con ID ${id}:`, error);
 				throw new Error(`Error al eliminar trabajo de cola con ID ${id}`);
 			}
 		},

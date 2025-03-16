@@ -1,10 +1,10 @@
 import { getImageUrl } from '@/app/actions/images';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { create } from 'zustand';
 
-const resourceLogger = logger.withContext('ImageResources');
+const resourceLogger = serverLogger.withContext('ImageResources');
 
 // Configuración optimizada
 const CACHE_CONFIG = {
