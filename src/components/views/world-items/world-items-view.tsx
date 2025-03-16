@@ -4,12 +4,13 @@ import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.ac
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { WorldItemCard } from '@/components/features/entity-cards/layouts/world-item-card';
+import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { logger } from '@/lib/logger/logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,12 +18,46 @@ import type { ViewProps } from '../types';
 
 const viewLogger = logger.withContext('WorldItemsView');
 
+// Configuración visual predeterminada para objetos del mundo
+const DEFAULT_WORLD_ITEM_OPTIONS: CardOptions = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlines: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
+	enableGlowEffect: true,
+	enableGrainEffect: false,
+	useImageGrid: true,
+	imageGridLayout: 'quad',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
+	designSystem: {
+		preset: 'world-item',
+		variant: 'default',
+		aspectRatio: '3/2',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		elevation: 3,
+		shadowStyle: 'soft',
+	},
+	layerSystem: {
+		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+		layerBlending: 'screen',
+		layerSpacing: 2,
+	},
+	primaryColor: '#f59e0b',
+	secondaryColor: '#d97706',
+	hoverLiftHeight: 10,
+	maxRotation: 15,
+};
+
 export function WorldItemsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentWorldItem } = useFileManager();
 	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_WORLD_ITEM_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticWorldItems, _addEvent] = clientEvents.useEvents<WorldItemWithStats[]>(worldItems);
@@ -43,10 +78,29 @@ export function WorldItemsView(_props: ViewProps) {
 		}
 	}, []);
 
+	// Cargar la configuración visual desde el servidor
+	const loadVisualConfig = useCallback(async () => {
+		try {
+			viewLogger.info('🔄 Cargando configuración visual para objetos del mundo...');
+			const response = await fetch('/api/entities/world-items/visual-config');
+			if (!response.ok) {
+				throw new Error(`Error ${response.status}: ${response.statusText}`);
+			}
+			const config = await response.json();
+			setVisualConfig({ ...DEFAULT_WORLD_ITEM_OPTIONS, ...config });
+			viewLogger.info('✅ Configuración visual cargada');
+		} catch (err) {
+			viewLogger.error('❌ Error cargando configuración visual:', err);
+			// Mantener la configuración predeterminada en caso de error
+		}
+	}, []);
+
 	useEffect(() => {
 		// Cargar objetos inicialmente
 		fetchWorldItems();
-	}, [fetchWorldItems]);
+		// Cargar configuración visual
+		loadVisualConfig();
+	}, [fetchWorldItems, loadVisualConfig]);
 
 	const handleWorldItemClick = useCallback(
 		(worldItem: WorldItemWithStats) => {
@@ -99,13 +153,15 @@ export function WorldItemsView(_props: ViewProps) {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
+							className="cursor-pointer"
 						>
-							<WorldItemCard
-								worldItem={worldItem}
+							<EntityCardAdapter
+								entityType="worldItem"
+								entity={worldItem}
 								onClick={() => handleWorldItemClick(worldItem)}
-								onEdit={() => handleEditWorldItem(worldItem)}
-								onDelete={() => handleDeleteWorldItem(worldItem.id)}
+								showVisualConfig={true}
 								enableExplode={true}
+								options={visualConfig}
 							/>
 						</motion.div>
 					))}

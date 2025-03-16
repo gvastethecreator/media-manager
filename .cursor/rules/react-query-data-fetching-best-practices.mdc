@@ -1,4 +1,9 @@
 ---
+description: data fetching, caching, and mutations in an image management application.
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for React Query data fetching, caching, and mutations in an image management application.
 globs: app/**/*.{ts,tsx}, services/**/*.ts, hooks/**/*.ts
 alwaysApply: false

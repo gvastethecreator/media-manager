@@ -1,5 +1,5 @@
 ---
-description: 
+description: working with stores, types, transformers, state management.
 globs: 
 alwaysApply: false
 ---

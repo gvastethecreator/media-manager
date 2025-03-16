@@ -1,4 +1,9 @@
 ---
+description: working with server actions
+globs: 
+alwaysApply: false
+---
+---
 description: Concise best practices for secure, performant, and organized Next.js 15 Server Actions.
 globs: app/actions/**/*.ts, app/components/**/*.tsx
 ---
