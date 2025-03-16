@@ -113,6 +113,21 @@ export function CharacterCard({
 	onActiveLayerChange,
 	className,
 }: CharacterCardProps) {
+	// Verificar si character existe y tiene las propiedades necesarias
+	if (!character) {
+		console.warn('CharacterCard: Se recibió un objeto character indefinido');
+		// Crear un character por defecto para evitar errores
+		character = {
+			id: 'placeholder',
+			name: 'Personaje sin nombre',
+			description: 'Sin descripción',
+			class: 'Unknown',
+			level: 1,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Character;
+	}
+
 	// Combinar las opciones predeterminadas con las opciones proporcionadas
 	const cardOptions = { ...DEFAULT_CHARACTER_OPTIONS, ...options };
 

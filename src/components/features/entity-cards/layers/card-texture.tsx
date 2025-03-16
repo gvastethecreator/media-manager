@@ -11,11 +11,18 @@ interface CardTextureProps {
 }
 
 export function CardTexture({ options, isHovered, className }: CardTextureProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
-	const { enableHolographic, enableGlow, enableGrain, textureIntensity, textureColor } = visualEffects;
+	// Usar las propiedades correctas de CardOptions en lugar de visualEffects
+	const enableHolographic = options.enableHolographicEffect || false;
+	const enableGlow = options.enableGlowEffect || false;
+	const enableGrain = options.enableGrainEffect || false;
+
+	// Valores por defecto para propiedades que no existen directamente
+	const textureIntensity = options.holographicOptions?.intensity || 0.5;
+	const textureColor = options.holographicOptions?.primaryColor || options.primaryColor || '#3b82f6';
 
 	// Calcular el color de la textura basado en la rareza
 	const textureColorClass = options.rarity ? `texture-${options.rarity.toLowerCase()}` : 'texture-default';

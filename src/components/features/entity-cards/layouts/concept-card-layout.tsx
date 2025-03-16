@@ -4,7 +4,6 @@ import { VisualizationConfig } from '@/components/features/entity-cards/config/v
 import { EntityCardContent } from '@/components/features/entity-cards/entity-card-content';
 import { EntityCardLayerWrapper } from '@/components/features/entity-cards/entity-card-layer-wrapper';
 import type {
-	CardDesignData,
 	CardDesignPreset,
 	CardOptions,
 	RarityConfig,
@@ -12,11 +11,8 @@ import type {
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Concept } from '@prisma/client';
-import { Book, Edit, LightbulbIcon, LinkIcon, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
+import { Book, LightbulbIcon, LinkIcon } from 'lucide-react';
 import { useState } from 'react';
-import { ImageGrid } from './image-grid';
 
 // Opciones visuales optimizadas para tarjetas de conceptos
 const DEFAULT_CONCEPT_OPTIONS: Partial<CardOptions> = {
@@ -190,6 +186,20 @@ export function ConceptCard({
 	showVisualConfig = false,
 	visualOptions,
 }: ConceptCardProps) {
+	// Verificar si concept existe y tiene las propiedades necesarias
+	if (!concept) {
+		console.warn('ConceptCard: Se recibió un objeto concept indefinido');
+		// Crear un concept por defecto para evitar errores
+		concept = {
+			id: 'placeholder',
+			name: 'Concepto sin nombre',
+			description: 'Sin descripción',
+			category: 'Unknown',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Concept;
+	}
+
 	const [isHovered, setIsHovered] = useState(false);
 	const [configOpen, setConfigOpen] = useState(false);
 	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({

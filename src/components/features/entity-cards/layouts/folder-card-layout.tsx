@@ -170,15 +170,19 @@ export function FolderCardLayout({
 	onActiveLayerChange,
 	options = {},
 }: FolderCardLayoutProps) {
-	// Verificar si folder existe y tiene un id
-	if (!folder || !folder.id) {
-		console.error('Error: La carpeta es undefined o no tiene un id');
-		return (
-			<div className="error-card p-4 border border-red-500 rounded-md">
-				<h3 className="text-red-500 font-medium">Error de datos</h3>
-				<p className="text-sm text-gray-500">No se pudo cargar la información de la carpeta</p>
-			</div>
-		);
+	// Verificar si folder existe y tiene las propiedades necesarias
+	if (!folder) {
+		console.warn('FolderCardLayout: Se recibió un objeto folder indefinido');
+		// Crear un folder por defecto para evitar errores
+		folder = {
+			id: 'placeholder',
+			name: 'Carpeta sin nombre',
+			path: '/placeholder',
+			totalFiles: 0,
+			totalSize: 0,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Folder;
 	}
 
 	// Usar el hook para obtener configuración de preset si existe

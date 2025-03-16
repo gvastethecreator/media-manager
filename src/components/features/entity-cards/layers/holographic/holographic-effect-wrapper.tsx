@@ -43,6 +43,7 @@ export function HolographicEffectWrapper({
 			return;
 		}
 
+		// Función para manejar el movimiento del ratón
 		const handleMouseMove = (event: MouseEvent) => {
 			setMousePosition({
 				x: event.clientX,
@@ -62,7 +63,7 @@ export function HolographicEffectWrapper({
 
 		// Devolver una función de limpieza vacía si no hay listener
 		return () => {};
-	}, [mergedConfig.interactiveMode, mergedConfig.enabled]);
+	}, [mergedConfig.enabled, mergedConfig.interactiveMode]);
 
 	// Si no está habilitado, no renderizar nada
 	if (!mergedConfig.enabled) {

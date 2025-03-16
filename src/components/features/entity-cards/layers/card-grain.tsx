@@ -11,11 +11,13 @@ interface CardGrainProps {
 }
 
 export function CardGrain({ options, isHovered, className }: CardGrainProps) {
-	const { designSystem, visualEffects } = options;
+	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
 
-	const { grainIntensity = 1, grainColor } = visualEffects;
+	// Obtenemos las propiedades directamente de options o de grainOptions
+	const grainIntensity = options.grainOptions?.intensity || 1;
+	const grainColor = options.grainOptions?.color;
 
 	return (
 		<motion.div
