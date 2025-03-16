@@ -8,14 +8,14 @@ import type { CardOptions } from '@/components/features/entity-cards/types/unifi
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext('CharactersView');
+const viewLogger = serverLogger.withContext('CharactersView');
 
 // Configuración visual predeterminada para personajes
 const DEFAULT_CHARACTER_OPTIONS: CardOptions = {

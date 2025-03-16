@@ -8,7 +8,7 @@ import type { CardOptions } from '@/components/features/entity-cards/types/unifi
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import type { Collection } from '@prisma/client';
 import { BookMarked } from 'lucide-react';
@@ -16,7 +16,7 @@ import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = logger.withContext('CollectionsView');
+const viewLogger = serverLogger.withContext('CollectionsView');
 
 // Configuración visual predeterminada para colecciones
 const DEFAULT_COLLECTION_OPTIONS: CardOptions = {

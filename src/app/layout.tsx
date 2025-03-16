@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import '@/app/globals.css';
-import '@/styles/form-animations.css';
+import { ServerInitializer } from '@/components/server/server-initializer';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
+import '@/styles/form-animations.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import type React from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				)}
 			>
 				<AppProvider>
+					<ServerInitializer />
 					<div className="relative min-h-screen w-full">{children}</div>
 				</AppProvider>
 			</body>

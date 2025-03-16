@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
 	try {
 		// Asegurarse de que params.id esté disponible y sea un string
-		const id = await Promise.resolve(params.id);
+		const id = params.id;
 		if (!id) {
 			return NextResponse.json({ error: 'ID no proporcionado' }, { status: 400 });
 		}
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
  */
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
 	try {
-		const id = await Promise.resolve(params.id);
+		const id = params.id;
 		if (!id) {
 			return NextResponse.json({ error: 'ID no proporcionado' }, { status: 400 });
 		}

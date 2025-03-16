@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { EntityType } from '@/types/entities/entities';
@@ -14,7 +14,7 @@ import type {
 	RemoveFavoriteParams,
 } from '@/types/favorites';
 
-const favoritesLogger = logger.withContext('FavoritesService');
+const favoritesLogger = serverLogger.withContext('FavoritesService');
 
 // Constantes para los tipos de eventos
 const EVENTS = {

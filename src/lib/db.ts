@@ -1,5 +1,5 @@
 import { type Prisma, PrismaClient } from '@prisma/client';
-import { logger } from './logger/logger';
+import { serverLogger } from './logger/server-logger';
 
 // Tipos para la configuración de la base de datos
 interface DatabaseConfig {
@@ -50,19 +50,19 @@ class Database {
 		// Configurar eventos de logging
 		this.client.$on('error' as never, (e: Prisma.LogEvent) => {
 			this.lastError = e instanceof Error ? e : new Error(String(e));
-			logger.error('Error de base de datos:', e);
+			serverLogger.error('Error de base de datos:', e);
 		});
 
 		this.client.$on('warn' as never, (e: Prisma.LogEvent) => {
-			logger.warn('Advertencia de base de datos:', e);
+			serverLogger.warn('Advertencia de base de datos:', e);
 		});
 
 		this.client.$on('info' as never, (e: Prisma.LogEvent) => {
-			logger.info('Info de base de datos:', e);
+			serverLogger.info('Info de base de datos:', e);
 		});
 
 		this.client.$on('query' as never, (e: Prisma.QueryEvent) => {
-			logger.debug('Query ejecutada:', {
+			serverLogger.debug('Query ejecutada:', {
 				query: e.query,
 				params: e.params,
 				duration: e.duration,
@@ -85,12 +85,12 @@ class Database {
 	 */
 	public async initialize(): Promise<void> {
 		if (this.isInitialized) {
-			logger.debug('La base de datos ya está inicializada');
+			serverLogger.debug('La base de datos ya está inicializada');
 			return;
 		}
 
 		if (this.isInitializing) {
-			logger.debug('La base de datos está en proceso de inicialización');
+			serverLogger.debug('La base de datos está en proceso de inicialización');
 			return this.connectionPromise;
 		}
 
@@ -114,7 +114,7 @@ class Database {
 
 		while (attempts < this.config.retryAttempts) {
 			try {
-				logger.info('Conectando a la base de datos...');
+				serverLogger.info('Conectando a la base de datos...');
 
 				// Intentar conectar
 				await this.client.$connect();
@@ -124,12 +124,12 @@ class Database {
 
 				this.isInitialized = true;
 				this.lastError = undefined;
-				logger.info('Conexión establecida correctamente');
+				serverLogger.info('Conexión establecida correctamente');
 				return;
 			} catch (error) {
 				attempts++;
 				this.lastError = error instanceof Error ? error : new Error(String(error));
-				logger.error(`Error al conectar (intento ${attempts}/${this.config.retryAttempts}):`, {
+				serverLogger.error(`Error al conectar (intento ${attempts}/${this.config.retryAttempts}):`, {
 					error: this.lastError.message,
 				});
 
@@ -154,9 +154,9 @@ class Database {
 		try {
 			await this.client.$disconnect();
 			this.isInitialized = false;
-			logger.info('Conexión cerrada correctamente');
+			serverLogger.info('Conexión cerrada correctamente');
 		} catch (error) {
-			logger.error('Error al cerrar conexión:', error);
+			serverLogger.error('Error al cerrar conexión:', error);
 			throw error;
 		}
 	}
@@ -211,7 +211,7 @@ export async function initializeDatabase(_config?: DatabaseConfig): Promise<void
 	try {
 		await db.initialize();
 	} catch (error) {
-		logger.error('Error al inicializar la base de datos:', error);
+		serverLogger.error('Error al inicializar la base de datos:', error);
 		throw error;
 	}
 }

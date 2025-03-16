@@ -2,7 +2,7 @@
 
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import { thumbnailService } from '@/services/thumbnail.service';
@@ -10,7 +10,7 @@ import type { ProcessOptions } from '@/services/thumbnail.service';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
 import { revalidatePath } from 'next/cache';
 
-const thumbLogger = logger.withContext('ThumbnailActions');
+const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
 export interface ThumbnailResponse {
 	thumbnail: string;

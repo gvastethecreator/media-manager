@@ -308,3 +308,25 @@ graph TD
 
     E --> E1[index.ts]
 ```
+
+## Sistema de Logging y Monitoreo
+
+### Completado
+
+- ✅ Sistema de logging mejorado con soporte para colores, iconos y contextos
+- ✅ Componente LogViewer para visualizar logs en la interfaz de usuario
+- ✅ Consola de depuración integrada en la aplicación
+- ✅ Loggers especializados para servidor, API y Server Actions
+- ✅ Monitor de sistema para recursos (CPU, memoria, red)
+- ✅ Monitor de aplicación para estadísticas (solicitudes, rendimiento, errores)
+- ✅ Panel de estadísticas del servidor en tiempo real
+- ✅ Middleware para rastreo de solicitudes HTTP
+- ✅ Inicialización automática del sistema de monitoreo
+- ✅ Documentación completa de la arquitectura de logging
+
+### Pendiente
+
+- ⬜ Integración con servicios externos de monitoreo
+- ⬜ Almacenamiento persistente de logs para análisis histórico
+- ⬜ Alertas automáticas basadas en umbrales de rendimiento
+- ⬜ Dashboard administrativo con métricas avanzadas

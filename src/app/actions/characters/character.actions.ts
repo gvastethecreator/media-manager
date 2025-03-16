@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
@@ -8,7 +8,7 @@ import type { Character } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
-const characterLogger = logger.withContext('CharacterActions');
+const characterLogger = serverLogger.withContext('CharacterActions');
 const REVALIDATE_PATHS = ['/settings', '/characters', '/characters/[id]'] as const;
 
 // Códigos de error

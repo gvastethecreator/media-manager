@@ -1,11 +1,11 @@
 'use client';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { useImageResources } from '@/store/image-resources.store';
 import type * as React from 'react';
 import { useCallback, useRef } from 'react';
 
-const thumbnailLogger = logger.withContext('ThumbnailLoader');
+const thumbnailLogger = serverLogger.withContext('ThumbnailLoader');
 
 interface UseThumbnailLoaderResult {
 	loadThumbnail: (itemId: string) => Promise<string | null>;

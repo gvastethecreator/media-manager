@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { LayerConfigEditor } from '../../layers/layer-config-editor';
-import { useRegisteredLayers } from '../../layers/layer-plugin-system';
+import { useLayerPlugin } from './layer-plugin-system';
 import { LayersPanelProps } from './types';
 import { useLayers } from './use-layers';
 
@@ -35,7 +35,8 @@ export function LayersPanel({ config, onChange, cardOptions, onCardOptionsChange
 	const [showLayerEditor, setShowLayerEditor] = useState(false);
 
 	const { toggleLayerEnabled, updateLayerOrder, resetToDefaults } = useLayers();
-	const registeredLayers = useRegisteredLayers();
+	const { getLayers } = useLayerPlugin();
+	const registeredLayers = getLayers();
 
 	const handleToggleLayer = (layerType: string, enabled: boolean) => {
 		toggleLayerEnabled(layerType, enabled);

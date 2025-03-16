@@ -3,13 +3,13 @@ import { readdir, stat } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const reindexLogger = logger.withContext('ReindexAPI');
+const reindexLogger = serverLogger.withContext('ReindexAPI');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

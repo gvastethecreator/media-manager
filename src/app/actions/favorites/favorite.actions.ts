@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { ImageMetadata } from '@/lib/types';
@@ -9,7 +9,7 @@ import type { FileItem } from '@/types/files';
 import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const favoriteLogger = logger.withContext('FavoriteActions');
+const favoriteLogger = serverLogger.withContext('FavoriteActions');
 
 // Definir interfaces para los  tipos relacionados
 interface ImageWithRelations extends Image {

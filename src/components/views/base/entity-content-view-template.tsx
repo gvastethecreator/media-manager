@@ -15,7 +15,7 @@ import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/mod
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
@@ -82,7 +82,7 @@ export function EntityContentView<T extends FileItem>({
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(defaultOptions);
 
 	// Logger contextual
-	const viewLogger = logger.withContext(`${entityType}ContentView`);
+	const viewLogger = serverLogger.withContext(`${entityType}ContentView`);
 
 	// Visor de imágenes
 	const { openViewer } = useImageViewer();

@@ -1,7 +1,7 @@
 'use server';
 
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -10,7 +10,7 @@ import { indexFolder } from './folder-indexing.actions';
 import { FolderError, type FolderResponse, type FolderUpdate, type ImageWithRelations } from './folder-types.actions';
 import { revalidateAllPaths } from './folder-utils.actions';
 
-const folderLogger = logger.withContext('FolderCRUD');
+const folderLogger = serverLogger.withContext('FolderCRUD');
 
 /**
  * Obtiene todas las carpetas registradas

@@ -8,11 +8,11 @@ import {
 	getWorldItems,
 	updateWorldItem as updateWorldItemAction,
 } from '@/app/actions/world-items/world-item.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { WorldItem } from '@prisma/client';
 import { create } from 'zustand';
 
-const worldItemsLogger = logger.withContext('WorldItemsStore');
+const worldItemsLogger = serverLogger.withContext('WorldItemsStore');
 
 const mapToWorldItemWithStats = (worldItem: Awaited<ReturnType<typeof getWorldItems>>[0]): WorldItemWithStats => ({
 	...worldItem,

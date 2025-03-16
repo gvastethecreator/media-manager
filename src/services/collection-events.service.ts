@@ -1,8 +1,8 @@
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import type { Collection } from '@prisma/client';
 
-const collectionEventsLogger = logger.withContext('CollectionEventsService');
+const collectionEventsLogger = serverLogger.withContext('CollectionEventsService');
 
 export const COLLECTION_EVENTS = {
 	COLLECTION_CREATED: 'collection:created',

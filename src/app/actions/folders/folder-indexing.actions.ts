@@ -1,7 +1,7 @@
 'use server';
 
 import { existsSync } from 'fs';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit, emitProgress } from '@/lib/server/events.server';
@@ -11,7 +11,7 @@ import { processDirectory, processDirectoryForReindex } from './folder-processin
 import { FolderError, type FolderResponse } from './folder-types.actions';
 import { revalidateAllPaths, verifyPathExists } from './folder-utils.actions';
 
-const folderLogger = logger.withContext('FolderIndexing');
+const folderLogger = serverLogger.withContext('FolderIndexing');
 
 /**
  * Indexar una carpeta existente

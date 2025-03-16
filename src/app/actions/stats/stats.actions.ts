@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { unstable_cache } from 'next/cache';
@@ -10,7 +10,7 @@ const STATS_CACHE_TAG = 'stats';
 const STATS_REVALIDATE_SECONDS = 60; // 1 minuto
 
 // Logger para estadísticas
-const statsLogger = logger.withContext('StatsActions');
+const statsLogger = serverLogger.withContext('StatsActions');
 
 // Manejo de errores - enfoque funcional
 enum StatsErrorCode {

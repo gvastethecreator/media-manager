@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from 'next/cache';
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { getCharacters } from '@/app/actions/characters/character.actions';
@@ -14,7 +14,7 @@ import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { getTags } from '@/app/actions/tags/tag.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 
-const navLogger = logger.withContext('NavActions');
+const navLogger = serverLogger.withContext('NavActions');
 
 type SystemStats = {
 	totalImages: number;

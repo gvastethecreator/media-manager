@@ -6,11 +6,11 @@ import {
 	incrementImageView,
 	invalidateStats,
 } from '@/app/actions/stats/stats.actions';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 
-const statsLogger = logger.withContext('StatsService');
+const statsLogger = serverLogger.withContext('StatsService');
 
 // Eventos de estadísticas
 export const STATS_EVENTS = {

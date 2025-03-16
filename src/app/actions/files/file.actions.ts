@@ -1,13 +1,12 @@
 'use server';
 
-import fs from 'node:fs/promises';
-import { stat } from 'node:fs/promises';
-import path from 'node:path';
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from 'next/cache';
+import fs, { stat } from 'node:fs/promises';
+import path from 'node:path';
 
-const fileLogger = logger.withContext('FileActions');
+const fileLogger = serverLogger.withContext('FileActions');
 
 // Rutas a revalidar cuando se realizan operaciones de archivos
 const REVALIDATE_PATHS = ['/'] as const;

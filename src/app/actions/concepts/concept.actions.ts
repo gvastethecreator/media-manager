@@ -1,6 +1,6 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { EventType } from '@/lib/server/events.server';
@@ -13,7 +13,7 @@ import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
-const conceptLogger = logger.withContext('ConceptActions');
+const conceptLogger = serverLogger.withContext('ConceptActions');
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
 
 // Códigos de error

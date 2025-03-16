@@ -128,6 +128,9 @@ importers:
       better-sqlite3:
         specifier: ^11.9.0
         version: 11.9.0
+      browser-logger:
+        specifier: ^1.0.0
+        version: 1.0.0
       bull:
         specifier: ^4.16.5
         version: 4.16.5
@@ -155,6 +158,9 @@ importers:
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.0(@libsql/client@0.14.0)(@prisma/client@6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2))(@types/better-sqlite3@7.6.12)(better-sqlite3@11.9.0)(gel@2.0.1)(prisma@6.5.0(typescript@5.8.2))
+      drizzle-seed:
+        specifier: ^0.3.1
+        version: 0.3.1(drizzle-orm@0.40.0(@libsql/client@0.14.0)(@prisma/client@6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2))(@types/better-sqlite3@7.6.12)(better-sqlite3@11.9.0)(gel@2.0.1)(prisma@6.5.0(typescript@5.8.2)))
       embla-carousel-react:
         specifier: ^8.5.2
         version: 8.5.2(react@19.0.0)
@@ -3637,6 +3643,9 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
+  browser-logger@1.0.0:
+    resolution: {integrity: sha512-a1ruylH1DQwt95qD/ZxAQ3bTiBz3lr+25HAaFWfp/bhEmmPH+eBQCAiB54k0BcDSuHOvH69DONrcMxs/FbvkTA==}
+
   browserslist@4.24.4:
     resolution: {integrity: sha512-KDi1Ny1gSePi1vm0q4oxSF8b4DR44GF4BbmS2YdhPLOEqd8pDviZOGH/GsmRwoWJ2+5Lr085X7naowMwKHDG1A==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -4223,6 +4232,14 @@ packages:
       sql.js:
         optional: true
       sqlite3:
+        optional: true
+
+  drizzle-seed@0.3.1:
+    resolution: {integrity: sha512-F/0lgvfOAsqlYoHM/QAGut4xXIOXoE5VoAdv2FIl7DpGYVXlAzKuJO+IphkKUFK3Dz+rFlOsQLnMNrvoQ0cx7g==}
+    peerDependencies:
+      drizzle-orm: '>=0.36.4'
+    peerDependenciesMeta:
+      drizzle-orm:
         optional: true
 
   dunder-proto@1.0.1:
@@ -10636,6 +10653,8 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
+  browser-logger@1.0.0: {}
+
   browserslist@4.24.4:
     dependencies:
       caniuse-lite: 1.0.30001705
@@ -11112,6 +11131,12 @@ snapshots:
       better-sqlite3: 11.9.0
       gel: 2.0.1
       prisma: 6.5.0(typescript@5.8.2)
+
+  drizzle-seed@0.3.1(drizzle-orm@0.40.0(@libsql/client@0.14.0)(@prisma/client@6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2))(@types/better-sqlite3@7.6.12)(better-sqlite3@11.9.0)(gel@2.0.1)(prisma@6.5.0(typescript@5.8.2))):
+    dependencies:
+      pure-rand: 6.1.0
+    optionalDependencies:
+      drizzle-orm: 0.40.0(@libsql/client@0.14.0)(@prisma/client@6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2))(@types/better-sqlite3@7.6.12)(better-sqlite3@11.9.0)(gel@2.0.1)(prisma@6.5.0(typescript@5.8.2))
 
   dunder-proto@1.0.1:
     dependencies:

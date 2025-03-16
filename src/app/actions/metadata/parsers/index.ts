@@ -1,10 +1,10 @@
 'use server';
 
-import { logger } from '@/lib/logger/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type AIGenerationMetadata, type AIGenerationParserModule, getParserLogger } from './base-parser';
 
 // Logger específico para el módulo
-const moduleLogger = logger.withContext('AIGenerationParsers');
+const moduleLogger = serverLogger.withContext('AIGenerationParsers');
 
 /**
  * Función asíncrona para obtener todos los parsers
