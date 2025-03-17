@@ -44,30 +44,30 @@ export function useCategoryStats(initialData: NavigationData) {
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
 				case 'collections':
-					return stats?.totalCollections || 0;
+					return stats?.totalCollections || collections.length || 0;
 				case 'folders':
-					return stats?.totalFolders || 0;
+					return stats?.totalFolders || folders.length || 0;
 				case 'tags':
-					return stats?.totalTags || 0;
+					return stats?.totalTags || tags.length || 0;
 				case 'albums':
-					return stats?.totalAlbums || 0;
+					return stats?.totalAlbums || albums.length || 0;
 				case 'characters':
-					return stats?.totalCharacters || 0;
+					return stats?.totalCharacters || characters.length || 0;
 				case 'places':
-					return stats?.totalPlaces || 0;
+					return stats?.totalPlaces || places.length || 0;
 				case 'world-items':
-					return stats?.totalObjects || 0;
+					return stats?.totalObjects || worldItems.length || 0;
 				case 'concepts':
-					return concepts.length;
+					return concepts.length || 0;
 				case 'prompts':
-					return prompts.length;
+					return prompts.length || 0;
 				case 'notes':
-					return notes.length;
+					return notes.length || 0;
 				default:
 					return 0;
 			}
 		},
-		[concepts, notes, prompts, stats]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems]
 	);
 
 	// Calcula y devuelve el número de imágenes para una categoría
@@ -102,12 +102,30 @@ export function useCategoryStats(initialData: NavigationData) {
 						0
 					);
 				case 'world-items':
-					return worldItems.reduce((sum: number, worldItem) => sum + (worldItem._count?.images || 0), 0);
+					return worldItems.reduce(
+						(sum: number, worldItem: { _count?: { images: number } }) => sum + (worldItem._count?.images || 0),
+						0
+					);
+				case 'concepts':
+					return concepts.reduce(
+						(sum: number, concept: { _count?: { images: number } }) => sum + (concept._count?.images || 0),
+						0
+					);
+				case 'prompts':
+					return prompts.reduce(
+						(sum: number, prompt: { _count?: { images: number } }) => sum + (prompt._count?.images || 0),
+						0
+					);
+				case 'notes':
+					return notes.reduce(
+						(sum: number, note: { _count?: { images: number } }) => sum + (note._count?.images || 0),
+						0
+					);
 				default:
 					return 0;
 			}
 		},
-		[albums, characters, collections, folders, places, tags, worldItems]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems]
 	);
 
 	// Función para obtener los elementos hijos de cada categoría con corrección de tipos

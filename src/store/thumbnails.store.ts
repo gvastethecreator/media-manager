@@ -1,6 +1,6 @@
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ThumbnailError, ThumbnailProcessStatus, ThumbnailStats } from '@/types/thumbnails';
+import type { ThumbnailStats } from '@/types/thumbnails';
 import { create } from 'zustand';
 
 export interface ProcessStatus {
@@ -100,11 +100,36 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 			store.setLoading(true);
 			store.setError(null);
 
-			const stats = await thumbnailActions.getThumbnailStats();
-			store.setStats(stats);
+			// Intentar obtener estadísticas con reintentos
+			let retries = 3;
+			let stats = null;
+			let lastError = null;
+
+			while (retries > 0 && !stats) {
+				try {
+					stats = await thumbnailActions.getThumbnailStats();
+					break;
+				} catch (error) {
+					lastError = error;
+					retries--;
+					// Esperar antes de reintentar
+					if (retries > 0) {
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+					}
+				}
+			}
+
+			if (stats) {
+				store.setStats(stats);
+			} else {
+				// Si después de los reintentos no se pudo obtener, establecer un error amigable
+				throw new Error('No se pudieron cargar las estadísticas de miniaturas. Por favor, intenta más tarde.');
+			}
 		} catch (error) {
 			serverLogger.error('Error inicializando thumbnails:', error);
 			store.setError(error instanceof Error ? error.message : 'Error desconocido');
+			// Establecer estadísticas vacías para evitar errores en la UI
+			store.setStats(initialStats);
 		} finally {
 			store.setLoading(false);
 		}

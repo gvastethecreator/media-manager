@@ -13,23 +13,17 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
-import { useThumbnailEvents } from '@/lib/hooks/use-thumbnail-events';
 import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ProcessOptions } from '@/services/thumbnail.service';
 import { useThumbnailStore } from '@/store/thumbnails.store';
-import type {
-	CleanResult,
-	LastProcessedThumbnail,
-	OptimizeResult,
-	ReprocessResult,
-	ThumbnailCallbacks,
-} from '@/types/thumbnails';
+import type { LastProcessedThumbnail, ThumbnailCallbacks } from '@/types/thumbnails';
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import * as React from 'react';
+import { ThumbnailError } from './thumbnail-error';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{
@@ -113,6 +107,7 @@ export function ThumbnailsSettings() {
 		processStatus: thumbnailProcessStatus,
 		initialize: initializeThumbnails,
 		setProcessing: setThumbnailProcessing,
+		error: thumbnailError,
 	} = useThumbnailStore();
 
 	const [showErrors, setShowErrors] = React.useState(false);
@@ -137,6 +132,11 @@ export function ThumbnailsSettings() {
 	React.useEffect(() => {
 		initializeThumbnails();
 	}, [initializeThumbnails]);
+
+	// Función para reintentar la inicialización
+	const handleRetryInitialize = () => {
+		initializeThumbnails();
+	};
 
 	// Manejador común para procesos de miniaturas
 	const handleThumbnailProcess = async (
@@ -246,6 +246,15 @@ export function ThumbnailsSettings() {
 			</CardHeader>
 			<Separator className="my-0" />
 			<CardContent className="p-2">
+				{thumbnailError && (
+					<div className="mb-4">
+						<ThumbnailError
+							error={thumbnailError}
+							onRetry={handleRetryInitialize}
+							description="No se pudieron cargar las estadísticas de miniaturas. Esto puede deberse a un problema de conexión con la base de datos."
+						/>
+					</div>
+				)}
 				<div className="space-y-3">
 					<div className="grid grid-cols-2 gap-1	">
 						<div className="space-y-1.5">

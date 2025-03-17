@@ -4,7 +4,8 @@ globs:
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-- Jamás correr 'npm dev' o 'pnpm dev' ( no hace falta )
+- NEVER!! Jamás correr 'npm dev' o 'pnpm dev' ( no hace falta )
+- NEVER!! use git commands
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
 - Treat me as an expert—be thorough, accurate, and up-to-date.

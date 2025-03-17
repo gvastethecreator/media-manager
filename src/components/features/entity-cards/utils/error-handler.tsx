@@ -72,6 +72,7 @@ export function createErrorHandler(options: ErrorHandlerOptions = {}) {
 
 /**
  * Componente para mostrar errores de tarjeta
+ * 🚨 Versión mejorada con mejor UX y diseño consistente
  */
 export function CardErrorDisplay({
 	error,
@@ -86,10 +87,14 @@ export function CardErrorDisplay({
 		<div
 			className={`flex flex-col items-center justify-center p-4 border border-destructive/50 rounded-md bg-destructive/10 text-destructive-foreground ${className}`}
 		>
-			<AlertCircle className="h-8 w-8 mb-2" />
-			<h3 className="text-lg font-semibold mb-1">{error.code}</h3>
+			<AlertCircle className="h-8 w-8 mb-2 text-destructive" />
+			<h3 className="text-lg font-semibold mb-1">{error.code || 'Error'}</h3>
 			<p className="text-sm text-center mb-3">{error.message}</p>
-			{error.details && <p className="text-xs text-center mb-3 opacity-80">{error.details}</p>}
+			{error.details && (
+				<div className="w-full bg-background/20 rounded p-2 mb-3">
+					<p className="text-xs font-mono text-center opacity-80">{error.details}</p>
+				</div>
+			)}
 			{onRetry && (
 				<Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
 					<RefreshCw className="h-4 w-4 mr-2" />

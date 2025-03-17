@@ -1,4 +1,5 @@
 import '@/app/globals.css';
+import { GlobalErrorHandler } from '@/components/core/global-error-handler';
 import { ServerInitializer } from '@/components/server/server-initializer';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
@@ -38,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			>
 				<AppProvider>
 					<ServerInitializer />
-					<div className="relative min-h-screen w-full">{children}</div>
+					<div className="relative min-h-screen w-full">
+						<GlobalErrorHandler>{children}</GlobalErrorHandler>
+					</div>
 				</AppProvider>
 			</body>
 		</html>

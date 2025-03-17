@@ -17,6 +17,9 @@ export function useCategoryHandlers() {
 		setCurrentCharacter,
 		setCurrentPlace,
 		setCurrentWorldItem,
+		setCurrentConcept,
+		setCurrentPrompt,
+		setCurrentNote,
 		currentCollectionId,
 		currentFolderId,
 		currentTagId,
@@ -29,139 +32,157 @@ export function useCategoryHandlers() {
 		currentNoteId,
 	} = useFileManager();
 
+	// Función para limpiar todas las selecciones actuales
+	const clearAllSelections = useCallback(() => {
+		// 🧹 Limpiar todas las selecciones para evitar estados huérfanos
+		setCurrentCollection('');
+		setCurrentFolder('');
+		setCurrentTag('');
+		setCurrentAlbum('');
+		setCurrentCharacter('');
+		setCurrentPlace('');
+		setCurrentWorldItem('');
+		setCurrentConcept('');
+		setCurrentPrompt('');
+		setCurrentNote('');
+	}, [
+		setCurrentCollection,
+		setCurrentFolder,
+		setCurrentTag,
+		setCurrentAlbum,
+		setCurrentCharacter,
+		setCurrentPlace,
+		setCurrentWorldItem,
+		setCurrentConcept,
+		setCurrentPrompt,
+		setCurrentNote,
+	]);
+
 	// Función para manejar el clic en una categoría
 	const handleCategoryClick = useCallback(
 		(id: ViewType) => {
 			// Limpiar selecciones anteriores para evitar estados huérfanos
-			if (id !== 'collection-content') {
-				setCurrentCollection('');
-			}
-			if (id !== 'folder-content') {
-				setCurrentFolder('');
-			}
-			if (id !== 'tag-content') {
-				setCurrentTag('');
-			}
-			if (id !== 'album-content') {
-				setCurrentAlbum('');
-			}
-			if (id !== 'character-content') {
-				setCurrentCharacter('');
-			}
-			if (id !== 'place-content') {
-				setCurrentPlace('');
-			}
-			if (id !== 'world-item-content') {
-				setCurrentWorldItem('');
-			}
+			clearAllSelections();
 
 			// Actualizar la vista actual
 			setCurrentView(id);
 		},
-		[
-			setCurrentView,
-			setCurrentCollection,
-			setCurrentFolder,
-			setCurrentTag,
-			setCurrentAlbum,
-			setCurrentCharacter,
-			setCurrentPlace,
-			setCurrentWorldItem,
-		]
+		[clearAllSelections, setCurrentView]
 	);
 
 	// Función para manejar el clic en una colección
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
 			// Limpiar otras selecciones
-			setCurrentFolder('');
-			setCurrentTag('');
-			setCurrentAlbum('');
-			setCurrentCharacter('');
-			setCurrentPlace('');
-			setCurrentWorldItem('');
+			clearAllSelections();
 
 			// Establecer vista y colección actual
 			setCurrentView('collection-content');
 			setCurrentCollection(collectionId);
 		},
-		[
-			setCurrentView,
-			setCurrentCollection,
-			setCurrentFolder,
-			setCurrentTag,
-			setCurrentAlbum,
-			setCurrentCharacter,
-			setCurrentPlace,
-			setCurrentWorldItem,
-		]
+		[clearAllSelections, setCurrentView, setCurrentCollection]
 	);
 
 	// Función para manejar el clic en una carpeta
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
 			// Limpiar otras selecciones
-			setCurrentCollection('');
-			setCurrentTag('');
-			setCurrentAlbum('');
-			setCurrentCharacter('');
-			setCurrentPlace('');
-			setCurrentWorldItem('');
+			clearAllSelections();
 
 			// Establecer vista y carpeta actual
 			setCurrentView('folder-content');
 			setCurrentFolder(folderId);
 		},
-		[
-			setCurrentView,
-			setCurrentCollection,
-			setCurrentFolder,
-			setCurrentTag,
-			setCurrentAlbum,
-			setCurrentCharacter,
-			setCurrentPlace,
-			setCurrentWorldItem,
-		]
+		[clearAllSelections, setCurrentView, setCurrentFolder]
 	);
 
 	const handleTagClick = useCallback(
 		(tagName: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
 			setCurrentView('tag-content');
 			setCurrentTag(tagName);
 		},
-		[setCurrentView, setCurrentTag]
+		[clearAllSelections, setCurrentView, setCurrentTag]
 	);
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
 			setCurrentView('album-content');
 			setCurrentAlbum(albumId);
 		},
-		[setCurrentView, setCurrentAlbum]
+		[clearAllSelections, setCurrentView, setCurrentAlbum]
 	);
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
 			setCurrentView('character-content');
 			setCurrentCharacter(characterId);
 		},
-		[setCurrentView, setCurrentCharacter]
+		[clearAllSelections, setCurrentView, setCurrentCharacter]
 	);
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
 			setCurrentView('place-content');
 			setCurrentPlace(placeId);
 		},
-		[setCurrentView, setCurrentPlace]
+		[clearAllSelections, setCurrentView, setCurrentPlace]
 	);
 
 	const handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
 			setCurrentView('world-item-content');
 			setCurrentWorldItem(worldItemId);
 		},
-		[setCurrentView, setCurrentWorldItem]
+		[clearAllSelections, setCurrentView, setCurrentWorldItem]
+	);
+
+	// Añadir manejadores para conceptos, prompts y notas
+	const handleConceptClick = useCallback(
+		(conceptId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('concept-content');
+			setCurrentConcept(conceptId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentConcept]
+	);
+
+	const handlePromptClick = useCallback(
+		(promptId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('prompt-content');
+			setCurrentPrompt(promptId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentPrompt]
+	);
+
+	const handleNoteClick = useCallback(
+		(noteId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('note-content');
+			setCurrentNote(noteId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentNote]
 	);
 
 	// Función para obtener el manejador de clic adecuado para cada tipo de categoría
@@ -182,6 +203,12 @@ export function useCategoryHandlers() {
 					return handlePlaceClick;
 				case 'world-items':
 					return handleWorldItemClick;
+				case 'concepts':
+					return handleConceptClick;
+				case 'prompts':
+					return handlePromptClick;
+				case 'notes':
+					return handleNoteClick;
 				default:
 					return () => {};
 			}
@@ -194,6 +221,9 @@ export function useCategoryHandlers() {
 			handlePlaceClick,
 			handleTagClick,
 			handleWorldItemClick,
+			handleConceptClick,
+			handlePromptClick,
+			handleNoteClick,
 		]
 	);
 
@@ -280,8 +310,12 @@ export function useCategoryHandlers() {
 		handleCharacterClick,
 		handlePlaceClick,
 		handleWorldItemClick,
+		handleConceptClick,
+		handlePromptClick,
+		handleNoteClick,
 		getItemClickHandler,
 		hasCategoryChildSelected,
 		getSelectedChildId,
+		clearAllSelections,
 	};
 }
