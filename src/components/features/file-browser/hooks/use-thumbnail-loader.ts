@@ -7,12 +7,26 @@ import { useCallback, useRef } from 'react';
 
 const thumbnailLogger = serverLogger.withContext('ThumbnailLoader');
 
+/**
+ * Resultado del hook useThumbnailLoader
+ */
 interface UseThumbnailLoaderResult {
 	loadThumbnail: (itemId: string) => Promise<string | null>;
 	loadQueueRef: React.MutableRefObject<Set<string>>;
 	retryCountRef: React.MutableRefObject<Map<string, number>>;
 }
 
+/**
+ * Hook para gestionar la carga optimizada de miniaturas
+ *
+ * Este hook proporciona:
+ * - Carga eficiente de miniaturas con gestión de cola
+ * - Sistema de reintentos para miniaturas que fallan
+ * - Seguimiento de miniaturas en proceso de carga
+ * - Integración con el store de recursos de imágenes
+ *
+ * @returns Objeto con función de carga y referencias a colas de carga
+ */
 export function useThumbnailLoader(): UseThumbnailLoaderResult {
 	const imageResources = useImageResources();
 

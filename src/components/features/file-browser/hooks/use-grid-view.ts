@@ -7,12 +7,18 @@ import type * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useThumbnailLoader } from './use-thumbnail-loader';
 
+/**
+ * Props para el hook useGridView
+ */
 interface UseGridViewProps {
 	viewMode: ViewMode;
 	isResizing?: boolean;
 	loadMoreItems?: () => void;
 }
 
+/**
+ * Resultado del hook useGridView
+ */
 interface UseGridViewResult {
 	parentRef: React.RefObject<HTMLDivElement | null>;
 	loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -23,6 +29,22 @@ interface UseGridViewResult {
 	debouncedLoadThumbnails: (visibleItems: FileItem[]) => void;
 }
 
+/**
+ * Hook para gestionar la visualización y comportamiento del grid de archivos
+ *
+ * Este hook maneja:
+ * - Referencias al contenedor principal y elemento de carga infinita
+ * - Cálculo y actualización del ancho del contenedor
+ * - Estados de scroll y transición entre vistas
+ * - Carga optimizada de miniaturas visibles
+ * - Observación de redimensionamiento
+ * - Scroll infinito para carga de más items
+ *
+ * @param viewMode - Modo de visualización actual (grid, list, masonry, cards)
+ * @param isResizing - Indica si el contenedor está siendo redimensionado
+ * @param loadMoreItems - Función para cargar más items (scroll infinito)
+ * @returns Objeto con referencias, estados y funciones para la vista
+ */
 export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridViewProps): UseGridViewResult {
 	const parentRef = useRef<HTMLDivElement>(null);
 	const loadMoreRef = useRef<HTMLDivElement>(null);

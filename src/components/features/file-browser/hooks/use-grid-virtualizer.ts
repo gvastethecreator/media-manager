@@ -2,10 +2,13 @@
 
 import type { FileItem } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
-import { type VirtualItem, useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { type RefObject, useCallback, useMemo } from 'react';
 import { type BaseGridConfig, GRID_CONFIG, getMetadata } from '../config/grid-config';
 
+/**
+ * Props para el hook useGridVirtualizer
+ */
 interface UseGridVirtualizerProps {
 	items: FileItem[];
 	parentRef: RefObject<HTMLDivElement>;
@@ -13,6 +16,9 @@ interface UseGridVirtualizerProps {
 	containerWidth: number;
 }
 
+/**
+ * Resultado del hook useGridVirtualizer
+ */
 interface VirtualizerResult {
 	columns: number;
 	itemSize: number;
@@ -21,6 +27,21 @@ interface VirtualizerResult {
 	calculateMasonryHeight: (item: FileItem, baseWidth: number) => number;
 }
 
+/**
+ * Hook para implementar virtualización en el grid de archivos
+ *
+ * Este hook proporciona:
+ * - Cálculo optimizado de dimensiones del grid según el modo de vista
+ * - Configuración del virtualizador para renderizado eficiente
+ * - Cálculo de altura para vista masonry basado en proporciones de imagen
+ * - Adaptación a cambios de tamaño del contenedor
+ *
+ * @param items - Lista de archivos a virtualizar
+ * @param parentRef - Referencia al elemento contenedor
+ * @param viewMode - Modo de visualización actual
+ * @param containerWidth - Ancho del contenedor
+ * @returns Objeto con dimensiones calculadas y virtualizador configurado
+ */
 export function useGridVirtualizer({
 	items,
 	parentRef,

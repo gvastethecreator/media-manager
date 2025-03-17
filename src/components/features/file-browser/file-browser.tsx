@@ -7,7 +7,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { Pin, PinOff, X } from 'lucide-react';
 import type * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,16 +17,24 @@ import type { ContextMenuAction } from './context-menu/context-menu';
 import { DetailsPanel } from './details/details-panel';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
-import { useThumbnailLoader } from './hooks/use-thumbnail-loader';
 import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
- 
+
 const gridLogger = serverLogger.withContext('FileGrid');
 
+/**
+ * FileBrowser - Componente avanzado para visualización y gestión de archivos
+ *
+ * Este componente implementa una interfaz de navegación de archivos con múltiples modos de visualización
+ * (grid, lista, masonry, tarjetas) y funcionalidades avanzadas como virtualización, carga optimizada
+ * de miniaturas, selección múltiple y panel de detalles interactivo.
+ *
+ * @see Documentación completa en docs/components/file-browser.md
+ */
 export interface FileBrowserProps {
 	items: FileItem[];
 	isResizing?: boolean;
@@ -35,6 +43,17 @@ export interface FileBrowserProps {
 	loadMoreItems?: () => void;
 }
 
+/**
+ * Componente principal para la visualización y navegación de archivos
+ *
+ * Características principales:
+ * - Múltiples modos de visualización (grid, lista, masonry, tarjetas)
+ * - Virtualización para rendimiento optimizado
+ * - Carga diferida de miniaturas
+ * - Panel de detalles interactivo y arrastrable
+ * - Selección múltiple de archivos
+ * - Integración con sistema de menú contextual
+ */
 export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) {
 	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
 	const imageResources = useImageResources();
@@ -170,7 +189,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 							}
 
 							// Manejar el caso especial de ReactPromise
-							 
+
 							let processedItem = item;
 
 							// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
@@ -184,7 +203,6 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 									(typeof item === 'object' && item !== null && 'then' in item && typeof item.then === 'function'))
 							) {
 								try {
-									 
 									gridLogger.warn('Detectado ReactPromise como item, intentando extraer el valor:', item);
 
 									// Para ReactPromise podemos intentar obtener el valor directamente
@@ -196,19 +214,16 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 												processedItem = parsedItem;
 											}
 										} catch (parseError) {
-											 
 											gridLogger.error('Error al parsear el valor del ReactPromise:', parseError);
 										}
 									}
 								} catch (promiseError) {
-									 
 									gridLogger.error('Error al procesar Promise/ReactPromise:', promiseError);
 								}
 							}
 
 							// Verificar que el item (ahora posiblemente extraído de una promesa) tenga un ID válido
 							if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
-								 
 								gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
 								return null;
 							}
