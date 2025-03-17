@@ -22,7 +22,7 @@ type ImageGridStyle = ImageGridProps['style'];
 import type { CoreConfig } from './modules/core/core-config';
 // Importar sistema de manejo de errores
 import { RegisterLayers } from './layers/register-layers';
-import { CardError, createErrorHandler } from './utils/error-handler';
+import { CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
@@ -312,15 +312,9 @@ export function EntityCard({
 		});
 	}, [enableLayers, mergedOptions.layerSystem?.order, mergedOptions.layerConfigs]);
 
-	// Si hay un error, mostrar mensaje
+	// Si hay un error, mostrar mensaje utilizando CardErrorDisplay
 	if (error) {
-		return (
-			<div className="entity-card-error p-4 border border-red-500 rounded-md">
-				<h3 className="text-red-500 font-medium">Error en la tarjeta</h3>
-				<p className="text-sm text-gray-500">{error.message}</p>
-				{error.details && <pre className="mt-2 text-xs bg-gray-100 p-2 rounded">{error.details}</pre>}
-			</div>
-		);
+		return <CardErrorDisplay error={error} className="w-full h-full" onRetry={() => setError(null)} />;
 	}
 
 	// Renderizar tarjeta

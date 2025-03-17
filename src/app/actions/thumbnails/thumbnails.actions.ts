@@ -1,14 +1,13 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
-import { thumbnailService } from '@/services/thumbnail.service';
 import type { ProcessOptions } from '@/services/thumbnail.service';
+import { thumbnailService } from '@/services/thumbnail.service';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
-import { revalidatePath } from 'next/cache';
+import { existsSync } from 'fs';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
@@ -244,6 +243,15 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 	try {
 		thumbLogger.info('🔄 Obteniendo estadísticas de thumbnails');
 
+		// Verificar la conexión a la base de datos antes de continuar
+		try {
+			// Consulta simple para verificar la conexión
+			await prisma.$queryRaw`SELECT 1`;
+		} catch (dbError) {
+			thumbLogger.error('❌ Error de conexión a la base de datos:', dbError);
+			throw new Error('No se pudo conectar a la base de datos. Verifica tu conexión.');
+		}
+
 		const [totalFiles, withThumbnail, pending, errors] = await Promise.all([
 			prisma.image.count(),
 			prisma.image.count({
@@ -293,7 +301,13 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		};
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
-		throw error;
+
+		// Mejorar el mensaje de error para el usuario
+		if (error instanceof Error) {
+			throw error;
+		} else {
+			throw new Error('Error al obtener estadísticas de miniaturas. Por favor, intenta más tarde.');
+		}
 	}
 }
 

@@ -5,6 +5,8 @@ import {
 
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
+import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
+import { RegisterLayers } from '@/components/features/entity-cards/layers/register-layers';
 import { DesignPanel } from '@/components/features/entity-cards/modules/design';
 import {
 	adaptEntityCardToLayerSystem,
@@ -13,8 +15,10 @@ import {
 import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers/layer-management-dialog';
 import { LayersPanel } from '@/components/features/entity-cards/modules/layers/layers-panel';
 import { RegisterAllLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
+import { adaptCardOptionsToLayersConfig } from '@/components/features/entity-cards/modules/layers/use-layers';
 import { PreviewPanel } from '@/components/features/entity-cards/modules/preview/preview-panel';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
+import { PresetsPanel } from '@/components/features/entity-cards/settings/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import type {
@@ -67,9 +71,7 @@ import {
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { LayerPluginProvider } from '../layers/layer-plugin-system';
 import { LayersProvider } from '../modules/layers/use-layers';
-import { PresetsPanel } from './panels/presets-panel';
 
 // Añadir la variable entityId que falta
 const entityId = 'default'; // ID por defecto para componentes que no están asociados a una entidad específica
@@ -1086,16 +1088,19 @@ export function EntitiesCardsSection() {
 									{/* Panel de capas */}
 									{activePanel === 'layers' && (
 										<LayersProvider initialConfig={adaptCardOptionsToLayersConfig(cardOptions)}>
-											<LayersPanel
-												config={adaptEntityCardToLayerSystem(cardOptions)}
-												onChange={(layerConfig) => {
-													// Convertir la configuración de capas a formato de tarjeta
-													const newCardOptions = adaptLayerSystemToEntityCard(layerConfig);
-													handleCardOptionsChange(newCardOptions);
-												}}
-												cardOptions={cardOptions}
-												onCardOptionsChange={handleCardOptionsChange}
-											/>
+											<LayerPluginProvider>
+												<RegisterLayers />
+												<LayersPanel
+													config={adaptEntityCardToLayerSystem(cardOptions)}
+													onChange={(layerConfig) => {
+														// Convertir la configuración de capas a formato de tarjeta
+														const newCardOptions = adaptLayerSystemToEntityCard(layerConfig);
+														handleCardOptionsChange(newCardOptions);
+													}}
+													cardOptions={cardOptions}
+													onCardOptionsChange={handleCardOptionsChange}
+												/>
+											</LayerPluginProvider>
 										</LayersProvider>
 									)}
 									{/* Comentar o modificar los componentes que no existen */}

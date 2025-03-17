@@ -25,7 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import type { VisualPreset } from '@prisma/client';
-import { Info, LayoutTemplate, PlusCircle, Save, Sparkles } from 'lucide-react';
+import { LayoutTemplate, PlusCircle, Save, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -95,7 +95,7 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 		loadPresets();
 	}, [entityType, toast]);
 
-	// Función para crear un nuevo preset a partir de las opciones actuales
+	// Función para crear un nuevo preset
 	const handleCreatePreset = async () => {
 		if (!newPresetName.trim()) {
 			toast({
@@ -111,11 +111,12 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 			// Usar las opciones actuales o las predeterminadas
 			const options = cardOptions || adaptSettingsToBaseOptions(DEFAULT_SETTINGS_OPTIONS);
 
+			// Crear el preset
 			const response = await createPresetFromCardOptions(
-				newPresetName.trim(),
+				newPresetName,
 				options,
 				entityType,
-				newPresetDescription.trim() || undefined
+				newPresetDescription || undefined
 			);
 
 			if (response.success && response.data) {
@@ -125,13 +126,19 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 				});
 
 				// Actualizar la lista de presets
-				const newPreset = response.data as VisualPreset;
-				setPresets((prevPresets) => [...prevPresets, newPreset]);
+				setPresets((prev) => [...prev, response.data as VisualPreset]);
 
-				// Limpiar el formulario
+				// Cerrar el diálogo
+				setShowNewPresetDialog(false);
 				setNewPresetName('');
 				setNewPresetDescription('');
-				setShowNewPresetDialog(false);
+
+				// Seleccionar el nuevo preset
+				onPresetSelect({
+					id: (response.data as VisualPreset).id,
+					name: (response.data as VisualPreset).name,
+					options,
+				});
 			} else {
 				toast({
 					title: 'Error',
@@ -207,47 +214,23 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 						<LayoutTemplate size={18} />
 						Presets Visuales
 					</h3>
-					<p className="text-sm text-muted-foreground">Configuraciones predefinidas para el estilo visual</p>
+					<p className="text-sm text-muted-foreground">Configuraciones predefinidas para estilos de tarjetas</p>
 				</div>
-				<div className="flex items-center gap-2">
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowNewPresetDialog(true)}>
-									<PlusCircle className="h-4 w-4" />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent side="left">
-								<p className="text-xs">Crear nuevo preset</p>
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									className="text-muted-foreground hover:text-primary"
-									onClick={() =>
-										toast({
-											title: 'Información',
-											description:
-												'Los presets te permiten guardar y reutilizar configuraciones visuales para tus entidades.',
-										})
-									}
-									type="button"
-								>
-									<Info size={16} />
-								</button>
-							</TooltipTrigger>
-							<TooltipContent side="left">
-								<p className="text-xs">Selecciona un preset como punto de partida</p>
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
-				</div>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="outline" size="sm" onClick={() => setShowNewPresetDialog(true)}>
+								<PlusCircle className="h-4 w-4 mr-2" />
+								Nuevo Preset
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p className="text-xs">Guardar la configuración actual como preset</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
 			</div>
 
-			{/* Grid de presets */}
 			{presets.length > 0 ? (
 				<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 					{presets.map((preset) => (
