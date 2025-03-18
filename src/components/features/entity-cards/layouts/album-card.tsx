@@ -2,7 +2,7 @@
 
 import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Album } from '../layouts/forms/entity-types';
-import { AlbumCard as AlbumCardLayout, type AlbumCardProps } from './album-card-layout';
+import { AlbumCard as AlbumCardLayout, type AlbumCardProps, type CardData } from './album-card-layout';
 
 // Interfaz para las propiedades del componente AlbumCard que extiende las propiedades base
 export interface AlbumCardAdapterProps extends BaseCardAdapterProps {
@@ -21,7 +21,7 @@ export const AlbumCard = createCustomCardAdapter<Album, AlbumCardProps, 'album'>
 	(props: AlbumCardAdapterProps) => {
 		// Convertir las propiedades del adaptador a las propiedades esperadas por AlbumCardLayout
 		return {
-			data: props.album as any, // Usamos type assertion para evitar errores de tipo
+			data: props.album as CardData, // Usamos un type assertion explícito al tipo esperado
 			isPreview: false,
 			onEdit: props.onEdit,
 			onDelete: props.onDelete,

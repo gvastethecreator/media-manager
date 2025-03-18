@@ -49,7 +49,7 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 			};
 		}
 
-		let config;
+		let config: GlowConfig | null = null;
 
 		// Si tenemos un ID específico, buscar esa configuración
 		if (entityId) {

@@ -1,12 +1,14 @@
+'use client';
+
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ExplodeLayerTransformFunction } from '../../types/base-card-types';
 
 interface ParticleShaderProps {
-	isExploded: boolean;
-	isHovered: boolean;
-	activeLayer: string | null;
-	getExplodeLayerTransform: ExplodeLayerTransformFunction;
+	isExploded?: boolean;
+	isHovered?: boolean;
+	activeLayer?: string | null;
+	getExplodeLayerTransform?: ExplodeLayerTransformFunction;
 	options?: {
 		visibleOnHover?: boolean;
 		intensity?: number;
@@ -14,8 +16,6 @@ interface ParticleShaderProps {
 	};
 	uniforms?: {
 		time?: number;
-		resolution?: number[];
-		mousePos?: number[];
 		particleCount?: number;
 		particleSize?: number;
 		particleSpeed?: number;
@@ -23,23 +23,27 @@ interface ParticleShaderProps {
 	};
 }
 
-export function ParticleShader({
-	isExploded,
-	isHovered,
-	activeLayer,
-	getExplodeLayerTransform,
-	options = {},
-	uniforms = {},
-}: ParticleShaderProps) {
-	const { visibleOnHover = true, intensity = 1, duration = 1 } = options;
-	const { time = 0, particleCount = 100, particleSize = 2, particleSpeed = 1 } = uniforms;
-
-	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const animationFrameRef = useRef<number | null>(null);
+/**
+ * Hook personalizado para manejar la renderización de partículas
+ */
+function useRenderParticles({
+	intensity,
+	particleCount,
+	particleSize,
+	particleSpeed,
+	time,
+}: {
+	intensity: number;
+	particleCount: number;
+	particleSize: number;
+	particleSpeed: number;
+	time: number;
+}) {
 	const [internalTime, setInternalTime] = useState(time);
+	const animationFrameRef = useRef<number | null>(null);
 
 	// Función para renderizar las partículas
-	const renderParticles = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+	const renderParticles = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
 		// Limpiar el canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -61,7 +65,42 @@ export function ParticleShader({
 			ctx.arc(x, y, particleSize * (0.5 + Math.sin(t + i) * 0.5), 0, Math.PI * 2);
 			ctx.fill();
 		}
+	}, [internalTime, intensity, particleCount, particleSize, particleSpeed]);
+
+	// Efecto para actualizar el tiempo
+	useEffect(() => {
+		setInternalTime(time);
+	}, [time]);
+
+	return {
+		internalTime,
+		setInternalTime,
+		renderParticles,
+		animationFrameRef
 	};
+}
+
+export function ParticleShader({
+	isExploded,
+	isHovered,
+	activeLayer,
+	getExplodeLayerTransform,
+	options = {},
+	uniforms = {},
+}: ParticleShaderProps) {
+	const { visibleOnHover = true, intensity = 1, duration = 1 } = options;
+	const { time = 0, particleCount = 100, particleSize = 2, particleSpeed = 1 } = uniforms;
+
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+
+	// Usar nuestro hook personalizado
+	const { renderParticles, setInternalTime, animationFrameRef } = useRenderParticles({
+		intensity,
+		particleCount,
+		particleSize,
+		particleSpeed,
+		time
+	});
 
 	// Efecto para configurar y animar las partículas
 	useEffect(() => {
@@ -100,12 +139,7 @@ export function ParticleShader({
 				cancelAnimationFrame(animationFrameRef.current);
 			}
 		};
-	}, [particleCount, particleSize, particleSpeed, intensity]);
-
-	// Actualizar el tiempo interno cuando cambia time en uniforms
-	useEffect(() => {
-		setInternalTime(time);
-	}, [time]);
+	}, [renderParticles, setInternalTime]);
 
 	if (!isHovered && visibleOnHover) {
 		return null;
@@ -115,15 +149,19 @@ export function ParticleShader({
 		<canvas
 			ref={canvasRef}
 			className={cn(
-				'absolute inset-0 pointer-events-none z-30 particle-shader-layer',
-				isExploded ? 'exploded-layer' : ''
+				'absolute inset-0 w-full h-full z-40 pointer-events-none transition-opacity duration-300',
+				isExploded ? 'exploded-layer layer-particles' : '',
+				isHovered ? 'opacity-100' : 'opacity-0'
 			)}
-			style={{
-				...(isExploded ? getExplodeLayerTransform(5) : {}),
-				opacity: intensity,
-				transition: `opacity ${duration}s ease-in-out`,
-			}}
-			data-layer-active={activeLayer === 'particle' || null}
+			style={
+				isExploded && getExplodeLayerTransform
+					? {
+						...getExplodeLayerTransform(6),
+						transitionDuration: `${duration}s`,
+					}
+					: { transitionDuration: `${duration}s` }
+			}
+			data-layer-active={activeLayer === 'particles' || null}
 		/>
 	);
 }

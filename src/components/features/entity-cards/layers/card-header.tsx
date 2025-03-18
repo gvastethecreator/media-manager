@@ -58,7 +58,7 @@ export function CardHeader({ options, title, subtitle, badges, className }: Card
 						<div className="flex flex-wrap gap-2">
 							{badges.map((badge, index) => (
 								<motion.div
-									key={index}
+									key={`badge-${badge.text || badge.label || index}`}
 									className={cn(
 										'px-2 py-1 rounded-full text-xs font-medium',
 										'flex items-center space-x-1',

@@ -2,7 +2,7 @@
 
 import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Character } from '../layouts/forms/entity-types';
-import { CharacterCard as CharacterCardLayout } from './character-card-layout';
+import { CharacterCard as CharacterCardLayout, type CharacterCardProps } from './character-card-layout';
 
 // Interfaz para las propiedades del componente CharacterCard
 export interface CharacterCardAdapterProps extends BaseCardAdapterProps {
@@ -15,22 +15,25 @@ export interface CharacterCardAdapterProps extends BaseCardAdapterProps {
  * Adaptador para el componente CharacterCardLayout
  * Creado con la fábrica de adaptadores para simplificar la implementación
  */
-export const CharacterCard = createCustomCardAdapter<Character, any, 'character'>(
+export const CharacterCard = createCustomCardAdapter<Character, CharacterCardProps, 'character'>(
 	CharacterCardLayout,
 	'character',
 	(props: CharacterCardAdapterProps) => {
 		// Convertir las propiedades del adaptador a las propiedades esperadas por CharacterCardLayout
 		return {
-			data: props.character as any, // Usamos type assertion para evitar errores de tipo
+			character: props.character,
 			isPreview: false,
 			onEdit: props.onEdit,
 			onDelete: props.onDelete,
 			onClick: props.onClick,
 			className: props.className,
-			showVisualizationConfig: props.showVisualConfig,
+			showVisualConfig: props.showVisualConfig,
 			options: props.options,
-			rarity: null,
-			texture: null,
+			enableExplode: props.enableExplode,
+			isExploded: props.isExploded,
+			activeLayer: props.activeLayer,
+			onExplodedChange: props.onExplodedChange,
+			onActiveLayerChange: props.onActiveLayerChange
 		};
 	}
 );
