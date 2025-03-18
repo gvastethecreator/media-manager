@@ -36,7 +36,8 @@ class DrizzleDatabase {
 
 		// Configurar cliente SQLite
 		this.sqlite = new Database('./prisma/dev.db', {
-			verbose: process.env.NODE_ENV === 'development' ? (message) => serverLogger.debug(`[SQLite]: ${message}`) : undefined,
+			verbose:
+				process.env.NODE_ENV === 'development' ? (message) => serverLogger.debug(`[SQLite]: ${message}`) : undefined,
 		});
 
 		// Configurar Drizzle

@@ -5,22 +5,27 @@
 Basado en el análisis de la estructura de carpetas, se han identificado varios archivos excesivamente grandes que podrían beneficiarse de una refactorización para mejorar la mantenibilidad y legibilidad del código. Los archivos más críticos son:
 
 1. **folder.actions.ts (1101 líneas)**
+
    - Ubicación: `src/app/actions/folder.actions.ts`
    - Responsabilidad: Server actions para operaciones con carpetas
 
 2. **image.actions.ts (817 líneas)**
+
    - Ubicación: `src/app/actions/image.actions.ts`
    - Responsabilidad: Server actions para operaciones con imágenes
 
 3. **metadata.actions.ts (760 líneas)**
+
    - Ubicación: `src/app/actions/metadata.actions.ts`
    - Responsabilidad: Server actions para operaciones con metadatos
 
 4. **folder.service.ts (573 líneas)**
+
    - Ubicación: `src/services/folder.service.ts`
    - Responsabilidad: Servicios para operaciones con carpetas
 
 5. **system-images.service.ts (455 líneas)**
+
    - Ubicación: `src/services/system-images.service.ts`
    - Responsabilidad: Servicios para imágenes del sistema
 
@@ -64,19 +69,19 @@ const folderLogger = logger.withContext('FolderActions');
 export const REVALIDATE_PATHS = ['/settings', '/folders', '/folders/[id]'] as const;
 
 export function revalidateFolderPaths() {
-  for (const path of REVALIDATE_PATHS) {
-    revalidatePath(path);
-  }
-  folderLogger.info('🔄 Rutas de carpetas revalidadas');
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	folderLogger.info('🔄 Rutas de carpetas revalidadas');
 }
 
 // En folder-create.actions.ts - usar la utilidad
 import { revalidateFolderPaths } from './folder-utils.actions';
 
 export async function createFolder(data: CreateFolderInput) {
-  // Lógica de creación...
-  revalidateFolderPaths();
-  return folder;
+	// Lógica de creación...
+	revalidateFolderPaths();
+	return folder;
 }
 ```
 
@@ -93,20 +98,20 @@ import { generateThumbnails } from '@/domains/thumbnails/actions/generate.action
 import { extractMetadata } from '@/domains/metadata/actions/extract.actions';
 
 export async function indexFolder(folderId: string) {
-  // 1. Obtener contenidos de la carpeta
-  const contents = await processFolderContents(folderId);
+	// 1. Obtener contenidos de la carpeta
+	const contents = await processFolderContents(folderId);
 
-  // 2. Extraer metadatos
-  await extractMetadata(contents.files);
+	// 2. Extraer metadatos
+	await extractMetadata(contents.files);
 
-  // 3. Generar miniaturas
-  await generateThumbnails(contents.images);
+	// 3. Generar miniaturas
+	await generateThumbnails(contents.images);
 
-  // 4. Actualizar stats
-  return {
-    processed: contents.files.length,
-    images: contents.images.length
-  };
+	// 4. Actualizar stats
+	return {
+		processed: contents.files.length,
+		images: contents.images.length,
+	};
 }
 ```
 
@@ -115,6 +120,7 @@ export async function indexFolder(folderId: string) {
 ### Fase 1: Análisis y Diseño (1-2 días)
 
 1. **Mapeo de Responsabilidades**:
+
    - Analizar cada archivo grande para identificar grupos de funciones relacionadas
    - Definir límites claros entre diferentes responsabilidades
    - Documentar dependencias entre funciones
@@ -129,10 +135,12 @@ export async function indexFolder(folderId: string) {
 Para cada archivo grande, seguir este proceso:
 
 1. **Crear Estructura Base**:
+
    - Crear carpetas y archivos según el diseño planeado
    - Implementar archivo index.ts para re-exportaciones
 
 2. **Extraer Utilidades Comunes**:
+
    - Crear archivos de utilidades compartidas
    - Mover funciones helper y constantes compartidas
 
@@ -144,6 +152,7 @@ Para cada archivo grande, seguir este proceso:
 ### Fase 3: Pruebas y Optimización (2-3 días)
 
 1. **Verificación Funcional**:
+
    - Probar cada grupo de funcionalidad refactorizada
    - Asegurar que el comportamiento es idéntico al original
 
@@ -157,6 +166,7 @@ Para cada archivo grande, seguir este proceso:
 ### Estructura Actual
 
 El archivo actual mezcla múltiples responsabilidades:
+
 - Creación y gestión de carpetas
 - Indexación de archivos
 - Generación de thumbnails
@@ -190,7 +200,7 @@ export * from './folder-stats.actions';
 export * from './folder-events.actions';
 
 // domains/folder/actions/folder-crud.actions.ts
-'use server';
+('use server');
 
 import { prisma } from '@/core/database/prisma';
 import { revalidateFolderPaths } from './folder-events.actions';
@@ -198,18 +208,18 @@ import { FolderCreateInput, FolderUpdateInput } from '../types';
 import { folderValidator } from '@/utils/validation/folder-validators';
 
 export async function createFolder(input: FolderCreateInput) {
-  // Validar input
-  const validatedData = folderValidator.parse(input);
+	// Validar input
+	const validatedData = folderValidator.parse(input);
 
-  // Crear carpeta
-  const folder = await prisma.folder.create({
-    data: validatedData
-  });
+	// Crear carpeta
+	const folder = await prisma.folder.create({
+		data: validatedData,
+	});
 
-  // Revalidar y notificar
-  await revalidateFolderPaths();
+	// Revalidar y notificar
+	await revalidateFolderPaths();
 
-  return folder;
+	return folder;
 }
 
 // Etc...
@@ -218,11 +228,13 @@ export async function createFolder(input: FolderCreateInput) {
 ## Consideraciones para la Migración
 
 1. **Enfoque Gradual**:
+
    - Refactorizar un archivo grande a la vez
    - Comenzar con el más problemático o el más utilizado
    - Mantener funcionalidad idéntica en cada paso
 
 2. **Pruebas Continuas**:
+
    - Verificar que cada parte refactorizada sigue funcionando correctamente
    - Implementar pruebas unitarias donde sea posible
 

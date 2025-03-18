@@ -150,12 +150,12 @@ export const useStore = create<Store>((set) => ({
 ### Logging
 
 ```typescript
-import { logger } from "@/lib/logger";
+import { logger } from '@/lib/logger';
 
-const componentLogger = logger.withContext("ComponentName");
+const componentLogger = logger.withContext('ComponentName');
 
-componentLogger.info("Mensaje informativo");
-componentLogger.error("Error en componente", { error });
+componentLogger.info('Mensaje informativo');
+componentLogger.error('Error en componente', { error });
 ```
 
 ## Despliegue

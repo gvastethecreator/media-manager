@@ -36,12 +36,13 @@
 - color http://codepen.io/sturobson/pen/QwLNpgv
 - paleta de colores https://codepen.io/suganuma/pen/eYXYjVq
 - https://codepen.io/vincentorback/pen/GRmZMmG risograph en threejs para
-https://tympanus.net/Tutorials/R3FImageReveal/
+  https://tympanus.net/Tutorials/R3FImageReveal/
 - pokemon cards : https://codepen.io/simeydotme/pen/abYWJdX
 - https://codepen.io/stelabouras/pen/abxoogL
 -
 
 Opciones de personalización :
+
 - cursor customizado
 - otros theme
 - low performance mode

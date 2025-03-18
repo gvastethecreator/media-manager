@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, createContext, useContext } from 'react';
-import { EntityType } from '@/types/entities';
+import type { EntityType } from '@/types/entities/entities';
 import { DEFAULT_SYSTEM_CONFIG, SystemConfig, SystemContextType } from './types';
 import { deepMerge } from '@/lib/utils';
 
@@ -87,7 +87,7 @@ export function useSystem() {
 export function useRaritySystem() {
   const { config, updateConfig, getRarityForEntity } = useSystem();
 
-  const updateRarityConfig = useCallback((newConfig: Partial<typeof config.rarity>) => {
+  const updateRarityConfig = useCallback((newConfig: Partial<SystemConfig['rarity']>) => {
     updateConfig({ rarity: newConfig });
   }, [updateConfig]);
 
@@ -104,7 +104,7 @@ export function useRaritySystem() {
 export function useTextureSystem() {
   const { config, updateConfig, getTextureForEntity } = useSystem();
 
-  const updateTextureConfig = useCallback((newConfig: Partial<typeof config.texture>) => {
+  const updateTextureConfig = useCallback((newConfig: Partial<SystemConfig['texture']>) => {
     updateConfig({ texture: newConfig });
   }, [updateConfig]);
 
@@ -121,7 +121,7 @@ export function useTextureSystem() {
 export function useCategorySystem() {
   const { config, updateConfig, getCategoryForEntity } = useSystem();
 
-  const updateCategoryConfig = useCallback((newConfig: Partial<typeof config.category>) => {
+  const updateCategoryConfig = useCallback((newConfig: Partial<SystemConfig['category']>) => {
     updateConfig({ category: newConfig });
   }, [updateConfig]);
 

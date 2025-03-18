@@ -55,24 +55,31 @@ graph TD
 ## Componentes Principales
 
 ### 1. EntitiesCardsSection
+
 Componente principal que agrupa toda la configuración y permite seleccionar la entidad a configurar. Maneja el estado global y la comunicación con las acciones del servidor.
 
 ### 2. RarityManager
+
 Permite gestionar los diferentes niveles de rareza para cada tipo de entidad:
+
 - Crear, editar y eliminar rarezas
 - Asignar colores y probabilidades
 - Distribuir automáticamente las probabilidades
 - Vista previa de rarezas
 
 ### 3. TextureManager
+
 Permite gestionar las texturas que se pueden aplicar a las tarjetas:
+
 - Crear, editar y eliminar texturas
 - Definir patrones CSS y colores
 - Aplicar presets predefinidos
 - Vista previa en tiempo real
 
 ### 4. Server Actions
+
 Funciones del servidor para gestionar la persistencia de los datos:
+
 - `getEntityCardConfig`: Obtiene la configuración de tarjetas para un tipo de entidad
 - `saveEntityCardConfig`: Guarda la configuración de tarjetas
 - `getEntityRaritySystem`: Obtiene el sistema de rarezas para un tipo de entidad
@@ -83,10 +90,13 @@ Funciones del servidor para gestionar la persistencia de los datos:
 ## Modelos de Base de Datos
 
 ### CardConfiguration
+
 Almacena la configuración visual general de las tarjetas para cada tipo de entidad.
 
 ### Rarity
+
 Almacena la configuración de rarezas para cada tipo de entidad:
+
 - Nombre de la rareza
 - Color
 - Probabilidad
@@ -94,7 +104,9 @@ Almacena la configuración de rarezas para cada tipo de entidad:
 - Descripción
 
 ### Texture
+
 Almacena la configuración de texturas para cada tipo de entidad:
+
 - Nombre de la textura
 - Patrón CSS
 - Colores primario y secundario
@@ -104,16 +116,19 @@ Almacena la configuración de texturas para cada tipo de entidad:
 ## Funcionalidades Principales
 
 1. **Configuración visual de tarjetas**:
+
    - Efectos 3D (rotación, elevación)
    - Efectos visuales (holográfico, scanlines, brillo)
    - Colores personalizados
 
 2. **Sistema de rarezas**:
+
    - Definición de múltiples niveles de rareza
    - Colores y probabilidades personalizadas
    - Distribución automática basada en posición
 
 3. **Sistema de texturas**:
+
    - Patrones CSS personalizados
    - Presets predefinidos (metálico, holográfico, etc.)
    - Vista previa en tiempo real

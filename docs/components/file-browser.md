@@ -45,11 +45,11 @@ graph TD
 
 ```typescript
 export interface FileBrowserProps {
-    items: FileItem[];              // Lista de archivos a mostrar
-    isResizing?: boolean;           // Indica si el contenedor está siendo redimensionado
-    onItemClick?: (item: FileItem) => void;        // Manejador de clic en item
-    onItemDoubleClick?: (item: FileItem) => void;  // Manejador de doble clic en item
-    loadMoreItems?: () => void;     // Función para cargar más items (scroll infinito)
+	items: FileItem[]; // Lista de archivos a mostrar
+	isResizing?: boolean; // Indica si el contenedor está siendo redimensionado
+	onItemClick?: (item: FileItem) => void; // Manejador de clic en item
+	onItemDoubleClick?: (item: FileItem) => void; // Manejador de doble clic en item
+	loadMoreItems?: () => void; // Función para cargar más items (scroll infinito)
 }
 ```
 
@@ -81,14 +81,14 @@ sequenceDiagram
     FB->>DP: Obtener estado del panel (isVisible, isFixed)
     FB->>GV: Inicializar vista (parentRef, containerWidth)
     GV->>VZ: Configurar virtualización
-    
+
     Note over FB,VZ: Renderizado inicial
 
     FB->>VZ: Obtener items virtuales
     VZ-->>FB: Items visibles
     FB->>TL: Cargar miniaturas para items visibles
     TL->>IR: Solicitar/almacenar recursos
-    
+
     Note over FB,IR: Interacción del usuario
 
     FB->>FM: Actualizar selección
@@ -144,11 +144,11 @@ El componente se integra con varios sistemas de la aplicación:
 ## Ejemplo de Uso
 
 ```tsx
-<FileBrowser 
-  items={images}
-  onItemClick={handleImageSelect}
-  onItemDoubleClick={handleImageOpen}
-  loadMoreItems={fetchMoreImages}
+<FileBrowser
+	items={images}
+	onItemClick={handleImageSelect}
+	onItemDoubleClick={handleImageOpen}
+	loadMoreItems={fetchMoreImages}
 />
 ```
 

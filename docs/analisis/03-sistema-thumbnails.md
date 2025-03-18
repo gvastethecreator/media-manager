@@ -38,48 +38,52 @@ graph TD
 ```typescript
 // Calidades configuradas
 export enum ThumbnailQuality {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
+	LOW = 'low',
+	MEDIUM = 'medium',
+	HIGH = 'high',
 }
 
 export const THUMBNAIL_QUALITY_CONFIG = {
-  [ThumbnailQuality.LOW]: {
-    width: 200,
-    height: 200,
-    quality: 60,
-  },
-  [ThumbnailQuality.MEDIUM]: {
-    width: 400,
-    height: 400,
-    quality: 75,
-  },
-  [ThumbnailQuality.HIGH]: {
-    width: 800,
-    height: 800,
-    quality: 85,
-  },
+	[ThumbnailQuality.LOW]: {
+		width: 200,
+		height: 200,
+		quality: 60,
+	},
+	[ThumbnailQuality.MEDIUM]: {
+		width: 400,
+		height: 400,
+		quality: 75,
+	},
+	[ThumbnailQuality.HIGH]: {
+		width: 800,
+		height: 800,
+		quality: 85,
+	},
 };
 ```
 
 ## Problemas Identificados
 
 1. **Gestión de Memoria**:
+
    - Potencial riesgo de memory leaks durante procesamiento de imágenes grandes
    - No hay limitaciones efectivas para procesos concurrentes
    - Falta de limpieza proactiva de recursos
 
 2. **Sistema de Caché**:
+
    - Caché basado en sistema de archivos sin validación periódica
    - No hay estadísticas de hit/miss rate
    - Desincronización potencial entre caché y base de datos
 
 3. **Procesamiento en Background**:
+
    - Sistema de colas incompleto (uso parcial de Bull)
    - Falta de workers dedicados para procesamiento asíncrono
    - Control limitado de fallos y reintentos
 
 4. **Optimización de Formato**:
+
    - Soporte limitado para formatos modernos (AVIF solo parcialmente soportado)
    - No hay adaptación automática según dispositivo/navegador
    - Configuración fija de calidad sin adaptación dinámica
@@ -104,50 +108,50 @@ import { ExpressAdapter } from '@bull-board/express';
 
 // Crear cola de procesamiento
 export const thumbnailQueue = new Bull('image-thumbnails', {
-  redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: Number(process.env.REDIS_PORT) || 6379,
-  },
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 1000,
-    },
-    removeOnComplete: true,
-    removeOnFail: false,
-  },
+	redis: {
+		host: process.env.REDIS_HOST || 'localhost',
+		port: Number(process.env.REDIS_PORT) || 6379,
+	},
+	defaultJobOptions: {
+		attempts: 3,
+		backoff: {
+			type: 'exponential',
+			delay: 1000,
+		},
+		removeOnComplete: true,
+		removeOnFail: false,
+	},
 });
 
 // Configurar procesamiento
 thumbnailQueue.process(async (job) => {
-  const { filePath, options } = job.data;
+	const { filePath, options } = job.data;
 
-  // Actualizar progreso
-  await job.progress(10);
+	// Actualizar progreso
+	await job.progress(10);
 
-  try {
-    // Proceso de generación
-    const thumbnail = await generateThumbnail(filePath, options);
+	try {
+		// Proceso de generación
+		const thumbnail = await generateThumbnail(filePath, options);
 
-    // Actualizar BD
-    await prisma.image.update({
-      where: { path: filePath },
-      data: {
-        thumbnail: thumbnail.buffer,
-        thumbnailSize: thumbnail.size,
-        thumbnailWidth: thumbnail.width,
-        thumbnailHeight: thumbnail.height,
-        thumbnailError: null,
-      }
-    });
+		// Actualizar BD
+		await prisma.image.update({
+			where: { path: filePath },
+			data: {
+				thumbnail: thumbnail.buffer,
+				thumbnailSize: thumbnail.size,
+				thumbnailWidth: thumbnail.width,
+				thumbnailHeight: thumbnail.height,
+				thumbnailError: null,
+			},
+		});
 
-    return { success: true, size: thumbnail.size };
-  } catch (error) {
-    // Gestión de errores
-    console.error('Thumbnail generation failed:', error);
-    throw error;
-  }
+		return { success: true, size: thumbnail.size };
+	} catch (error) {
+		// Gestión de errores
+		console.error('Thumbnail generation failed:', error);
+		throw error;
+	}
 });
 
 // Configurar dashboard
@@ -155,8 +159,8 @@ const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 
 createBullBoard({
-  queues: [new BullAdapter(thumbnailQueue)],
-  serverAdapter,
+	queues: [new BullAdapter(thumbnailQueue)],
+	serverAdapter,
 });
 ```
 
@@ -171,81 +175,81 @@ import path from 'path';
 
 // Configuración LRU para metadatos de caché
 const cacheMetadata = new LRUCache<string, ThumbnailCacheEntry>({
-  max: 5000,           // Máximo número de entradas
-  ttl: 1000 * 60 * 60, // 1 hora de TTL
-  updateAgeOnGet: true,
-  allowStale: true,
+	max: 5000, // Máximo número de entradas
+	ttl: 1000 * 60 * 60, // 1 hora de TTL
+	updateAgeOnGet: true,
+	allowStale: true,
 });
 
 // Estructura para metadatos de caché
 interface ThumbnailCacheEntry {
-  key: string;
-  path: string;
-  size: number;
-  width: number;
-  height: number;
-  format: string;
-  createdAt: number;
-  lastAccessed: number;
-  hits: number;
+	key: string;
+	path: string;
+	size: number;
+	width: number;
+	height: number;
+	format: string;
+	createdAt: number;
+	lastAccessed: number;
+	hits: number;
 }
 
 // Implementación mejorada
 async function getFromCache(cacheKey: string): Promise<ThumbnailResult | null> {
-  // Verificar en memoria primero
-  const metadata = cacheMetadata.get(cacheKey);
-  if (!metadata) return null;
+	// Verificar en memoria primero
+	const metadata = cacheMetadata.get(cacheKey);
+	if (!metadata) return null;
 
-  try {
-    // Verificar en disco
-    const cachePath = path.join(CACHE_DIR, `${cacheKey}.${metadata.format}`);
-    const buffer = await fs.readFile(cachePath);
+	try {
+		// Verificar en disco
+		const cachePath = path.join(CACHE_DIR, `${cacheKey}.${metadata.format}`);
+		const buffer = await fs.readFile(cachePath);
 
-    // Actualizar estadísticas
-    metadata.hits += 1;
-    metadata.lastAccessed = Date.now();
-    cacheMetadata.set(cacheKey, metadata);
+		// Actualizar estadísticas
+		metadata.hits += 1;
+		metadata.lastAccessed = Date.now();
+		cacheMetadata.set(cacheKey, metadata);
 
-    return {
-      buffer,
-      width: metadata.width,
-      height: metadata.height,
-      format: metadata.format as ImageFormat,
-      size: buffer.length,
-    };
-  } catch (error) {
-    // Si falló lectura de disco, eliminar de metadatos
-    cacheMetadata.delete(cacheKey);
-    return null;
-  }
+		return {
+			buffer,
+			width: metadata.width,
+			height: metadata.height,
+			format: metadata.format as ImageFormat,
+			size: buffer.length,
+		};
+	} catch (error) {
+		// Si falló lectura de disco, eliminar de metadatos
+		cacheMetadata.delete(cacheKey);
+		return null;
+	}
 }
 
 // Función de mantenimiento periódico
 async function maintainCache() {
-  // Limpiar entradas antiguas
-  const now = Date.now();
-  const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 días
-  const oldEntries = [...cacheMetadata.values()]
-    .filter(entry => (now - entry.lastAccessed) > maxAge)
-    .map(entry => entry.key);
+	// Limpiar entradas antiguas
+	const now = Date.now();
+	const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 días
+	const oldEntries = [...cacheMetadata.values()]
+		.filter((entry) => now - entry.lastAccessed > maxAge)
+		.map((entry) => entry.key);
 
-  for (const key of oldEntries) {
-    const entry = cacheMetadata.get(key);
-    if (entry) {
-      try {
-        await fs.unlink(path.join(CACHE_DIR, `${key}.${entry.format}`));
-      } catch (error) {
-        console.warn(`Could not delete cache file: ${key}`, error);
-      }
-      cacheMetadata.delete(key);
-    }
-  }
+	for (const key of oldEntries) {
+		const entry = cacheMetadata.get(key);
+		if (entry) {
+			try {
+				await fs.unlink(path.join(CACHE_DIR, `${key}.${entry.format}`));
+			} catch (error) {
+				console.warn(`Could not delete cache file: ${key}`, error);
+			}
+			cacheMetadata.delete(key);
+		}
+	}
 
-  // Reporte de estadísticas
-  const totalEntries = cacheMetadata.size;
-  const totalHits = [...cacheMetadata.values()].reduce((sum, entry) => sum + entry.hits, 0);
+	// Reporte de estadísticas
+	const totalEntries = cacheMetadata.size;
+	const totalHits = [...cacheMetadata.values()].reduce((sum, entry) => sum + entry.hits, 0);
 
-  console.info(`Cache maintenance complete. Entries: ${totalEntries}, Hits: ${totalHits}`);
+	console.info(`Cache maintenance complete. Entries: ${totalEntries}, Hits: ${totalHits}`);
 }
 ```
 
@@ -256,55 +260,54 @@ Implementar soporte avanzado para formatos modernos:
 ```typescript
 // Detectar formato óptimo según agente de usuario
 function determineOptimalFormat(userAgent: string): ImageFormat {
-  if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-    return 'jpeg'; // Safari tiene mejor soporte para JPEG que WebP
-  }
+	if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+		return 'jpeg'; // Safari tiene mejor soporte para JPEG que WebP
+	}
 
-  // Comprobar soporte para AVIF
-  const supportsAVIF = userAgent.includes('Chrome/85') ||
-                      userAgent.includes('Firefox/93');
-  if (supportsAVIF) return 'avif';
+	// Comprobar soporte para AVIF
+	const supportsAVIF = userAgent.includes('Chrome/85') || userAgent.includes('Firefox/93');
+	if (supportsAVIF) return 'avif';
 
-  // WebP como formato por defecto para navegadores modernos
-  return 'webp';
+	// WebP como formato por defecto para navegadores modernos
+	return 'webp';
 }
 
 // Ajuste dinámico de calidad basado en contenido
 async function determineOptimalQuality(imagePath: string): Promise<number> {
-  const metadata = await sharp(imagePath).metadata();
+	const metadata = await sharp(imagePath).metadata();
 
-  // Para imágenes con mucho detalle (como fotografías), usamos mayor calidad
-  if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
-    return 82; // Mayor calidad para fotografías
-  }
+	// Para imágenes con mucho detalle (como fotografías), usamos mayor calidad
+	if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+		return 82; // Mayor calidad para fotografías
+	}
 
-  // Para imágenes con áreas planas de color (como gráficos)
-  if (metadata.format === 'png' || metadata.format === 'gif') {
-    return 75; // Menor calidad es suficiente
-  }
+	// Para imágenes con áreas planas de color (como gráficos)
+	if (metadata.format === 'png' || metadata.format === 'gif') {
+		return 75; // Menor calidad es suficiente
+	}
 
-  return 80; // Calidad por defecto
+	return 80; // Calidad por defecto
 }
 
 // Procesamiento adaptativo
 async function generateAdaptiveThumbnail(
-  filePath: string,
-  userAgent: string,
-  options: Partial<ThumbnailOptions> = {}
+	filePath: string,
+	userAgent: string,
+	options: Partial<ThumbnailOptions> = {}
 ): Promise<ThumbnailResult> {
-  // Determinar formato óptimo según navegador
-  const format = options.format || determineOptimalFormat(userAgent);
+	// Determinar formato óptimo según navegador
+	const format = options.format || determineOptimalFormat(userAgent);
 
-  // Calcular calidad óptima según contenido
-  const suggestedQuality = await determineOptimalQuality(filePath);
-  const quality = options.quality || suggestedQuality;
+	// Calcular calidad óptima según contenido
+	const suggestedQuality = await determineOptimalQuality(filePath);
+	const quality = options.quality || suggestedQuality;
 
-  // Generar thumbnail con parámetros optimizados
-  return generateThumbnail(filePath, {
-    ...options,
-    format,
-    quality
-  });
+	// Generar thumbnail con parámetros optimizados
+	return generateThumbnail(filePath, {
+		...options,
+		format,
+		quality,
+	});
 }
 ```
 
@@ -318,84 +321,85 @@ import { Counter, Gauge, Histogram } from 'prom-client';
 
 // Definir métricas
 export const thumbnailMetrics = {
-  generationCount: new Counter({
-    name: 'thumbnail_generation_total',
-    help: 'Total number of thumbnails generated',
-    labelNames: ['quality', 'format', 'status']
-  }),
+	generationCount: new Counter({
+		name: 'thumbnail_generation_total',
+		help: 'Total number of thumbnails generated',
+		labelNames: ['quality', 'format', 'status'],
+	}),
 
-  cacheHits: new Counter({
-    name: 'thumbnail_cache_hits_total',
-    help: 'Total number of thumbnail cache hits',
-  }),
+	cacheHits: new Counter({
+		name: 'thumbnail_cache_hits_total',
+		help: 'Total number of thumbnail cache hits',
+	}),
 
-  cacheMisses: new Counter({
-    name: 'thumbnail_cache_misses_total',
-    help: 'Total number of thumbnail cache misses',
-  }),
+	cacheMisses: new Counter({
+		name: 'thumbnail_cache_misses_total',
+		help: 'Total number of thumbnail cache misses',
+	}),
 
-  processingTime: new Histogram({
-    name: 'thumbnail_processing_duration_seconds',
-    help: 'Time spent generating thumbnails',
-    buckets: [0.1, 0.5, 1, 2, 5, 10], // buckets in seconds
-  }),
+	processingTime: new Histogram({
+		name: 'thumbnail_processing_duration_seconds',
+		help: 'Time spent generating thumbnails',
+		buckets: [0.1, 0.5, 1, 2, 5, 10], // buckets in seconds
+	}),
 
-  queueSize: new Gauge({
-    name: 'thumbnail_queue_size',
-    help: 'Current size of the thumbnail processing queue',
-  }),
+	queueSize: new Gauge({
+		name: 'thumbnail_queue_size',
+		help: 'Current size of the thumbnail processing queue',
+	}),
 
-  // Instrumentar funciones clave
-  instrumentedGenerateThumbnail: async function(
-    filePath: string,
-    options: Partial<ThumbnailOptions> = {}
-  ): Promise<ThumbnailResult> {
-    const timer = this.processingTime.startTimer();
+	// Instrumentar funciones clave
+	instrumentedGenerateThumbnail: async function (
+		filePath: string,
+		options: Partial<ThumbnailOptions> = {}
+	): Promise<ThumbnailResult> {
+		const timer = this.processingTime.startTimer();
 
-    try {
-      const result = await generateThumbnail(filePath, options);
-      this.generationCount.inc({
-        quality: options.quality || 'medium',
-        format: result.format,
-        status: 'success'
-      });
-      return result;
-    } catch (error) {
-      this.generationCount.inc({
-        quality: options.quality || 'medium',
-        format: options.format || 'unknown',
-        status: 'error'
-      });
-      throw error;
-    } finally {
-      timer();
-    }
-  }
+		try {
+			const result = await generateThumbnail(filePath, options);
+			this.generationCount.inc({
+				quality: options.quality || 'medium',
+				format: result.format,
+				status: 'success',
+			});
+			return result;
+		} catch (error) {
+			this.generationCount.inc({
+				quality: options.quality || 'medium',
+				format: options.format || 'unknown',
+				status: 'error',
+			});
+			throw error;
+		} finally {
+			timer();
+		}
+	},
 };
 
 // Actualizar periódicamente la métrica de cola
 setInterval(() => {
-  thumbnailQueue.getJobCounts().then(counts => {
-    thumbnailMetrics.queueSize.set(
-      counts.waiting + counts.active + counts.delayed
-    );
-  });
+	thumbnailQueue.getJobCounts().then((counts) => {
+		thumbnailMetrics.queueSize.set(counts.waiting + counts.active + counts.delayed);
+	});
 }, 5000);
 ```
 
 ## Plan de Implementación
 
 1. **Fase 1: Implementación de Sistema de Colas**
+
    - Configurar instancia de Redis (o adaptador de almacenamiento)
    - Implementar Bull Queue para procesamiento de thumbnails
    - Crear panel de administración para monitoreo de colas
 
 2. **Fase 2: Optimización de Caché**
+
    - Migrar a sistema LRU para metadatos
    - Implementar mantenimiento periódico
    - Añadir métricas y estadísticas
 
 3. **Fase 3: Mejoras de Formato**
+
    - Implementar detección de formato óptimo
    - Añadir soporte mejorado para AVIF y WebP
    - Optimizar estrategia de calidad

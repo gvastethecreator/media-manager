@@ -98,6 +98,6 @@ Además, se puede forzar una actualización manual utilizando el botón "Actuali
 import { DevelopmentView } from '@/components/views/development/development-view';
 
 export default function DevelopmentPage() {
-  return <DevelopmentView />;
+	return <DevelopmentView />;
 }
 ```

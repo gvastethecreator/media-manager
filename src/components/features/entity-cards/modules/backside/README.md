@@ -27,9 +27,9 @@ Hook personalizado que encapsula toda la lógica del sistema de backside:
 
 ```tsx
 const { backsideOptions, handleBacksideChange, disabled } = useBacksideSystem({
-  options, // Opciones actuales de la carta
-  onChange, // Función para actualizar las opciones
-  disabled, // Estado deshabilitado
+	options, // Opciones actuales de la carta
+	onChange, // Función para actualizar las opciones
+	disabled, // Estado deshabilitado
 });
 ```
 
@@ -41,27 +41,27 @@ El módulo define los siguientes tipos principales:
 
 ```typescript
 interface BacksideOptions {
-  enabled: boolean;
-  layoutType?: string;
-  colorMode?: string;
-  customColor?: string;
-  opacity?: number;
-  blurBackground?: boolean;
-  blurAmount?: number;
-  showAttributes?: boolean;
-  showDescription?: boolean;
-  showStats?: boolean;
-  showMetadata?: boolean;
-  showRelations?: boolean;
-  maxDescriptionLength?: number;
-  flipAnimation?: string;
-  flipDuration?: number;
-  enableAutoFlip?: boolean;
-  autoFlipDelay?: number;
-  flipTrigger?: string;
-  headingStyle?: string;
-  infoStyle?: string;
-  separatorStyle?: string;
+	enabled: boolean;
+	layoutType?: string;
+	colorMode?: string;
+	customColor?: string;
+	opacity?: number;
+	blurBackground?: boolean;
+	blurAmount?: number;
+	showAttributes?: boolean;
+	showDescription?: boolean;
+	showStats?: boolean;
+	showMetadata?: boolean;
+	showRelations?: boolean;
+	maxDescriptionLength?: number;
+	flipAnimation?: string;
+	flipDuration?: number;
+	enableAutoFlip?: boolean;
+	autoFlipDelay?: number;
+	flipTrigger?: string;
+	headingStyle?: string;
+	infoStyle?: string;
+	separatorStyle?: string;
 }
 ```
 
@@ -69,11 +69,11 @@ interface BacksideOptions {
 
 ```typescript
 interface BacksideSystemProps {
-  options: {
-    backside?: BacksideOptions;
-  };
-  onChange: (options: { backside?: BacksideOptions }) => void;
-  disabled?: boolean;
+	options: {
+		backside?: BacksideOptions;
+	};
+	onChange: (options: { backside?: BacksideOptions }) => void;
+	disabled?: boolean;
 }
 ```
 
@@ -85,25 +85,19 @@ Para integrar el sistema de backside en otro componente:
 import { BacksidePanel } from '@/components/features/entity-cards/modules/backside';
 
 function MyComponent() {
-  const [options, setOptions] = useState({
-    backside: {
-      enabled: true,
-      layoutType: 'standard',
-      // ...otras opciones
-    }
-  });
+	const [options, setOptions] = useState({
+		backside: {
+			enabled: true,
+			layoutType: 'standard',
+			// ...otras opciones
+		},
+	});
 
-  const handleChange = (newOptions) => {
-    setOptions(newOptions);
-  };
+	const handleChange = (newOptions) => {
+		setOptions(newOptions);
+	};
 
-  return (
-    <BacksidePanel
-      options={options}
-      onChange={handleChange}
-      disabled={false}
-    />
-  );
+	return <BacksidePanel options={options} onChange={handleChange} disabled={false} />;
 }
 ```
 

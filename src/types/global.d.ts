@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 
 declare global {
-	var prisma: PrismaClient | undefined;
+	let prisma: PrismaClient | undefined;
 	interface Window {
 		electron?: {
 			openPath: (path: string) => void;

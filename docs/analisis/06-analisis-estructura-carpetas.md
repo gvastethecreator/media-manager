@@ -59,14 +59,17 @@ La implementación es bastante consistente, pero hay algunas redundancias y falt
 ## Problemas Identificados
 
 1. **Falta de Modularidad Clara**:
+
    - La carpeta `lib/` ha crecido demasiado y mezcla diferentes responsabilidades
    - Algunos archivos son excesivamente grandes (ej. `folder.actions.ts` con 1100+ líneas)
 
 2. **Inconsistencia en Nombrado y Estructura**:
+
    - Mezcla de archivos sueltos y carpetas para conceptos relacionados
    - Variaciones en el formato de nombrado (singular vs plural)
 
 3. **Superposición de Responsabilidades**:
+
    - Algunas funcionalidades están divididas entre `lib/`, `services/` y `app/actions/`
    - Existe duplicación potencial entre tipos en `types/` y otras partes
 
@@ -181,16 +184,19 @@ domains/images/
 ## Plan de Implementación
 
 1. **Fase 1: Reorganización de Alto Nivel**
+
    - Crear la nueva estructura de carpetas
    - Mover archivos a sus nuevas ubicaciones manteniendo funcionalidad
    - Actualizar imports para reflejar la nueva estructura
 
 2. **Fase 2: Refactorización de Módulos Grandes**
+
    - Identificar archivos con más de 300 líneas
    - Dividir en módulos más pequeños y enfocados
    - Implementar archivos index.ts para exportaciones
 
 3. **Fase 3: Estandarización**
+
    - Aplicar patrones de nombrado consistentes
    - Revisar y consolidar tipos duplicados
    - Documentar la nueva estructura y convenciones

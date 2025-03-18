@@ -62,12 +62,12 @@ Puedes personalizar las notificaciones con opciones adicionales:
 
 ```typescript
 toastService.success('Archivo guardado', {
-  description: 'El archivo se ha guardado correctamente en la ubicación especificada.',
-  duration: 5000, // 5 segundos
-  action: {
-    label: 'Deshacer',
-    onClick: () => handleUndo()
-  }
+	description: 'El archivo se ha guardado correctamente en la ubicación especificada.',
+	duration: 5000, // 5 segundos
+	action: {
+		label: 'Deshacer',
+		onClick: () => handleUndo(),
+	},
 });
 ```
 
@@ -160,14 +160,11 @@ toastService.system.success('La operación se ha completado correctamente');
 Puedes mostrar notificaciones basadas en promesas:
 
 ```typescript
-toastService.promise(
-  saveData(),
-  {
-    loading: 'Guardando datos...',
-    success: 'Datos guardados correctamente',
-    error: 'Error al guardar los datos'
-  }
-);
+toastService.promise(saveData(), {
+	loading: 'Guardando datos...',
+	success: 'Datos guardados correctamente',
+	error: 'Error al guardar los datos',
+});
 ```
 
 ## Descartar Notificaciones
@@ -180,7 +177,7 @@ const { id } = toastService.info('Esta notificación se cerrará automáticament
 
 // Descartar la notificación después de 2 segundos
 setTimeout(() => {
-  toastService.dismiss(id);
+	toastService.dismiss(id);
 }, 2000);
 ```
 
@@ -189,6 +186,7 @@ setTimeout(() => {
 Si estás utilizando el sistema anterior de notificaciones (shadcn/ui toast), debes migrar al nuevo sistema:
 
 1. Reemplaza las importaciones:
+
    ```typescript
    // Antes
    import { toast } from '@/components/ui/use-toast';
@@ -198,17 +196,18 @@ Si estás utilizando el sistema anterior de notificaciones (shadcn/ui toast), de
    ```
 
 2. Actualiza las llamadas:
+
    ```typescript
    // Antes
    toast({
-     title: 'Título',
-     description: 'Descripción',
-     variant: 'default'
+   	title: 'Título',
+   	description: 'Descripción',
+   	variant: 'default',
    });
 
    // Después
    toastService.show('Título', {
-     description: 'Descripción'
+   	description: 'Descripción',
    });
    ```
 
