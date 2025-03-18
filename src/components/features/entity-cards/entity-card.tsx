@@ -44,6 +44,8 @@ export interface BaseCardProps {
 	// Propiedades específicas de Core
 	coreConfig?: CoreConfig;
 	enableCore?: boolean;
+	// Manejador de eventos de clic
+	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export function BaseCard({
@@ -54,32 +56,62 @@ export function BaseCard({
 	backsideOptions,
 	enableCore = false,
 	coreConfig,
+	onClick,
 }: BaseCardProps) {
 	// Estado para el flip de la tarjeta
 	const [isFlipped, setIsFlipped] = useState(false);
 
 	// Función para voltear la tarjeta
-	const handleFlip = () => {
-		if (enableBackside) {
-			setIsFlipped(!isFlipped);
-		}
-	};
+	const handleFlip = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			// Si hay un manejador onClick externo, priorizar ese
+			if (onClick) {
+				onClick(e);
+				return;
+			}
+
+			// Si no hay onClick externo y está habilitado el backside, manejar flip
+			if (enableBackside) {
+				setIsFlipped(!isFlipped);
+				e.stopPropagation(); // Evitar propagación adicional
+			}
+		},
+		[enableBackside, isFlipped, onClick]
+	);
 
 	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			handleFlip();
-			e.preventDefault();
-		}
-	};
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				if (onClick) {
+					// Simular un evento de clic para el manejador onClick
+					const syntheticEvent = new MouseEvent('click', {
+						bubbles: true,
+						cancelable: true,
+						view: window,
+					}) as unknown as React.MouseEvent<HTMLDivElement>;
+					onClick(syntheticEvent);
+				} else if (enableBackside) {
+					setIsFlipped(!isFlipped);
+				}
+				e.preventDefault();
+			}
+		},
+		[enableBackside, isFlipped, onClick]
+	);
 
 	return (
-		<button
-			type="button"
-			className={cn('relative w-full h-full perspective-1000 bg-transparent border-0 p-0 cursor-pointer', className)}
+		<div
+			role="button"
+			tabIndex={0}
+			className={cn(
+				'relative w-full h-full perspective-1000 bg-transparent border-0 p-0',
+				className,
+				onClick || enableBackside ? 'cursor-pointer' : 'cursor-default'
+			)}
 			onClick={handleFlip}
 			onKeyDown={handleKeyDown}
-			disabled={!enableBackside}
+			aria-pressed={isFlipped}
 		>
 			{/* Contenedor para el efecto 3D */}
 			<div className={cn('relative w-full h-full transition-transform duration-500', isFlipped && 'rotateY-180')}>
@@ -106,7 +138,7 @@ export function BaseCard({
 					</div>
 				)}
 			</div>
-		</button>
+		</div>
 	);
 }
 
@@ -132,6 +164,7 @@ export interface EntityCardProps {
 	enableAnimation?: boolean;
 	enableBackside?: boolean;
 	// Manejadores de eventos
+	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 	onError?: (error: CardError) => void;
 }
 
@@ -161,6 +194,7 @@ export function EntityCard({
 	enableAnimation = true,
 	enableBackside = false,
 	// Manejadores de eventos
+	onClick,
 	onError,
 }: EntityCardProps) {
 	// Estado para el flip de la tarjeta
@@ -263,20 +297,60 @@ export function EntityCard({
 	);
 
 	// Manejar flip de la tarjeta
-	const handleFlip = useCallback(() => {
-		if (enableBackside || mergedOptions.backside?.enabled) {
-			setIsFlipped((prev) => !prev);
-		}
-	}, [enableBackside, mergedOptions.backside?.enabled]);
+	const handleFlip = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			// Si hay un manejador onClick, no hacer flip (priorizar el onClick)
+			if (onClick) {
+				return;
+			}
+
+			if (enableBackside || mergedOptions.backside?.enabled) {
+				setIsFlipped((prev) => !prev);
+			}
+
+			// Detener propagación para evitar conflictos con otros manejadores
+			e.stopPropagation();
+		},
+		[enableBackside, mergedOptions.backside?.enabled, onClick]
+	);
 
 	// Manejar navegación por teclado
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
-				handleFlip();
+				if (onClick) {
+					// Simular un clic si hay un manejador onClick
+					const syntheticEvent = new MouseEvent('click', {
+						bubbles: true,
+						cancelable: true,
+						view: window,
+					}) as unknown as React.MouseEvent<HTMLDivElement>;
+					onClick(syntheticEvent);
+				} else if (enableBackside || mergedOptions.backside?.enabled) {
+					setIsFlipped((prev) => !prev);
+				}
+				e.preventDefault();
 			}
 		},
-		[handleFlip]
+		[handleFlip, onClick, enableBackside, mergedOptions.backside?.enabled]
+	);
+
+	// Manejar clic en la tarjeta
+	const handleClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			// Si hay un manejador de onClick, llamarlo directamente
+			if (onClick) {
+				onClick(e);
+				// No llamar a handleFlip si hay un onClick para evitar comportamiento dual
+				return;
+			}
+
+			// Si no hay onClick, manejar el flip si está habilitado
+			if (enableBackside || mergedOptions.backside?.enabled) {
+				setIsFlipped((prev) => !prev);
+			}
+		},
+		[onClick, enableBackside, mergedOptions.backside?.enabled]
 	);
 
 	// Calcular transformación para modo explodido
@@ -367,25 +441,24 @@ export function EntityCard({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
-				className={cn('entity-card-container w-full h-full', entityTypeClass)}
+				onClick={handleClick}
+				onKeyDown={handleKeyDown}
+				tabIndex={0}
+				role="button"
+				aria-pressed={isFlipped}
+				className={cn(
+					'entity-card-container w-full h-full relative',
+					entityTypeClass,
+					className,
+					onClick ? 'cursor-pointer' : enableBackside ? 'cursor-pointer' : 'cursor-default'
+				)}
 				style={{
 					...getAnimationStyles(),
 					...(designStyles as React.CSSProperties),
 				}}
 			>
-				<button
-					type="button"
-					className={cn(
-						'entity-card w-full h-full',
-						designClasses,
-						animationClasses,
-						colorClasses,
-						entityTypeClass,
-						className
-					)}
-					onClick={handleFlip}
-					onKeyDown={handleKeyDown}
-					aria-label={typeof title === 'string' ? title : 'Tarjeta de entidad'}
+				<div
+					className={cn('entity-card w-full h-full', designClasses, animationClasses, colorClasses, entityTypeClass)}
 				>
 					{/* Cara Frontal */}
 					<div className="entity-card-front w-full h-full">
@@ -430,12 +503,12 @@ export function EntityCard({
 					</div>
 
 					{/* Cara Posterior */}
-					{(enableBackside || mergedOptions.backside?.enabled) && (
+					{(enableBackside || mergedOptions.backside?.enabled) && isFlipped && (
 						<div className="entity-card-back w-full h-full">
 							<div className="backside-content w-full h-full">{backsideContent}</div>
 						</div>
 					)}
-				</button>
+				</div>
 			</div>
 		);
 	} catch (err) {

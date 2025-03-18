@@ -101,16 +101,36 @@ export function FoldersView(_props: ViewProps) {
 			try {
 				viewLogger.info('🖱️ Click en carpeta:', folder.name);
 
-				// Limpiar selecciones previas
-				clearSelection();
-
-				// Asegurarnos de establecer la carpeta actual en el store antes de cambiar de vista
+				// Verificaciones de seguridad
 				if (!folder || !folder.id) {
 					viewLogger.error('❌ Carpeta inválida:', folder);
 					return;
 				}
 
-				// Actualizar primero el store con la información completa de la carpeta
+				// Limpiar selecciones previas
+				clearSelection();
+
+				// Asegurarnos de establecer la información completa de la carpeta en ambos stores
+
+				// 1. Actualizar el store de navegación
+				useNavigationStore.setState({
+					currentView: 'folder-content',
+					currentItem: {
+						id: folder.id,
+						name: folder.name,
+						path: folder.path,
+						description: folder.description,
+						emoji: folder.emoji,
+						_count: folder._count,
+						totalSize: folder.totalSize,
+						lastIndexed: folder.lastIndexed,
+						createdAt: folder.createdAt,
+						itemType: 'folder',
+					},
+					navigationDirection: 1, // Indicar navegación hacia adelante
+				});
+
+				// 2. Actualizar el store de gestor de archivos
 				useFileManager.setState({
 					currentFolder: {
 						id: folder.id,
@@ -126,16 +146,20 @@ export function FoldersView(_props: ViewProps) {
 					},
 					currentFolderId: folder.id,
 					currentView: 'folder-content',
-					isLoading: true,
+					isLoading: true, // Indicar que comenzará la carga
+					selectedItems: [], // Limpiar selección explícitamente
+					currentItems: [], // Limpiar items actuales para evitar datos antiguos
 				});
 
-				// Ahora cambiar la vista
+				// 3. Ahora cambiar la vista
 				setCurrentView('folder-content');
+
+				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`);
 			} catch (error) {
 				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
 			}
 		},
-		[setCurrentView, setCurrentFolder, clearSelection]
+		[setCurrentView, clearSelection]
 	);
 
 	if (error) {
@@ -171,21 +195,31 @@ export function FoldersView(_props: ViewProps) {
 							return null;
 						}
 
+						// Crear una función de clic específica para esta carpeta
+						const onFolderClick = () => handleFolderClick(folder);
+
 						return (
 							<motion.div
 								key={folder.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: index * 0.1 }}
+								className="cursor-pointer"
+								onClick={onFolderClick}
 							>
-								<EntityCardAdapter
-									entityType="folder"
-									entity={folder}
-									onClick={() => handleFolderClick(folder)}
-									showVisualConfig={true}
-									enableExplode={true}
-									options={visualConfig}
-								/>
+								<div
+									className="h-full w-full transition-all ease-in-out hover:scale-[1.02] active:scale-[0.98] duration-200"
+									data-folder-id={folder.id}
+								>
+									<EntityCardAdapter
+										entityType="folder"
+										entity={folder}
+										onClick={onFolderClick}
+										showVisualConfig={true}
+										enableExplode={true}
+										options={visualConfig}
+									/>
+								</div>
 							</motion.div>
 						);
 					})}

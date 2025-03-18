@@ -37,6 +37,8 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		currentContainerId,
 		containerName,
 		setCurrentContainer,
+		onItemClick: customItemClickHandler,
+		onItemDoubleClick: customItemDoubleClickHandler,
 		emptyState = {},
 	} = useContentView();
 
@@ -102,30 +104,63 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
+			// Usar el manejador personalizado si está disponible
+			if (customItemClickHandler) {
+				customItemClickHandler(item);
+				return;
+			}
+
+			// De lo contrario, usar el manejador predeterminado
 			if (toggleItemSelection) {
-				toggleItemSelection(item, false);
+				try {
+					toggleItemSelection(item, false);
+				} catch (error) {
+					baseLogger.error('❌ Error al seleccionar item:', {
+						itemId: item.id,
+						error: error instanceof Error ? error.message : 'Error desconocido',
+					});
+				}
 			}
 		},
-		[toggleItemSelection]
+		[toggleItemSelection, customItemClickHandler]
 	);
 
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
+			// Usar el manejador personalizado si está disponible
+			if (customItemDoubleClickHandler) {
+				customItemDoubleClickHandler(item);
+				return;
+			}
+
+			// De lo contrario, usar el manejador predeterminado para abrir el visor
 			if (!items) {
 				return;
 			}
 
-			const metadata = getMetadata(item.metadata);
-			if (item.type === 'image' || metadata?.mimeType?.startsWith('image/')) {
-				const imageItems = items.filter((i) => {
-					const meta = getMetadata(i.metadata);
-					return i.type === 'image' || meta?.mimeType?.startsWith('image/');
+			try {
+				const metadata = getMetadata(item.metadata);
+				if (item.type === 'image' || metadata?.mimeType?.startsWith('image/')) {
+					const imageItems = items.filter((i) => {
+						const meta = getMetadata(i.metadata);
+						return i.type === 'image' || meta?.mimeType?.startsWith('image/');
+					});
+					const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+					openViewer(imageItems, currentIndex);
+					baseLogger.info('🖼️ Abriendo visor de imágenes:', {
+						itemId: item.id,
+						itemIndex: currentIndex,
+						totalItems: imageItems.length,
+					});
+				}
+			} catch (error) {
+				baseLogger.error('❌ Error al abrir el visor de imágenes:', {
+					itemId: item.id,
+					error: error instanceof Error ? error.message : 'Error desconocido',
 				});
-				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
-				openViewer(imageItems, currentIndex);
 			}
 		},
-		[items, openViewer]
+		[items, openViewer, customItemDoubleClickHandler]
 	);
 
 	if (error) {
@@ -154,7 +189,17 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
 				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					<FileBrowser items={items} onItemClick={handleItemClick} onItemDoubleClick={handleItemDoubleClick} />
+					<FileBrowser
+						items={items}
+						onItemClick={handleItemClick}
+						onItemDoubleClick={handleItemDoubleClick}
+						// Pasar funciones opcionales para cargar más items si existen en el contexto
+						loadMoreItems={
+							// Pasar callback para cargar más items si está disponible
+							// Esto se implementará en futuras versiones
+							undefined
+						}
+					/>
 				</BlurFade>
 			</div>
 		</div>

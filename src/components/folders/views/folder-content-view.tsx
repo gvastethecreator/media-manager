@@ -6,6 +6,7 @@ import type { FolderContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
+import { useImageResources } from '@/store/image-resources.store';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -23,7 +24,8 @@ export function FolderContentView() {
 		setIsLoading,
 	} = useFileManager();
 
-	const { setCurrentView } = useNavigationStore();
+	const { setCurrentView, currentItem } = useNavigationStore();
+	const { preloadResources } = useImageResources();
 	const [error, setError] = useState<string | null>(null);
 
 	// Establecer la vista actual al montar el componente
@@ -45,6 +47,13 @@ export function FolderContentView() {
 				setIsLoading(true);
 				const images = await getFolderImages(currentFolderId);
 
+				// Validar respuesta
+				if (!images || !Array.isArray(images)) {
+					throw new Error('Respuesta de imágenes inválida');
+				}
+
+				viewLogger.info(`🖼️ Imágenes encontradas: ${images.length}`);
+
 				// Actualizar la información de la carpeta en el store
 				if (currentFolder) {
 					useFileManager.setState({
@@ -54,6 +63,18 @@ export function FolderContentView() {
 							lastIndexed: new Date(),
 						},
 					});
+				}
+
+				// Precargar recursos de imágenes para thumbnails
+				if (images.length > 0) {
+					try {
+						// Intentar precargar los recursos para las miniaturas
+						const imageIds = images.map((img) => img.id);
+						preloadResources(imageIds);
+					} catch (preloadError) {
+						viewLogger.warn('⚠️ Error al precargar recursos:', preloadError);
+						// No interrumpimos el flujo principal si falla la precarga
+					}
 				}
 
 				setItems(images);
@@ -68,7 +89,7 @@ export function FolderContentView() {
 		};
 
 		loadFolderInfo();
-	}, [currentFolderId, setItems, currentFolder, setIsLoading]);
+	}, [currentFolderId, setItems, currentFolder, setIsLoading, preloadResources]);
 
 	const handleReindexFolder = useCallback(
 		async (id: string) => {
@@ -80,7 +101,24 @@ export function FolderContentView() {
 				// Recargar las imágenes después de reindexar
 				if (id) {
 					const images = await getFolderImages(id);
+
+					// Validar respuesta
+					if (!images || !Array.isArray(images)) {
+						throw new Error('Respuesta de imágenes inválida después de reindexar');
+					}
+
 					setItems(images);
+
+					// Actualizar contador en la carpeta
+					if (currentFolder) {
+						useFileManager.setState({
+							currentFolder: {
+								...currentFolder,
+								_count: { images: images.length },
+								lastIndexed: new Date(),
+							},
+						});
+					}
 				}
 				viewLogger.info('✅ Carpeta reindexada:', id);
 			} catch (error) {
@@ -91,8 +129,22 @@ export function FolderContentView() {
 				setIsLoading(false);
 			}
 		},
-		[setItems, setIsLoading]
+		[setItems, setIsLoading, currentFolder]
 	);
+
+	// Manejar clic en item
+	const handleItemClick = useCallback(
+		(item) => {
+			toggleItemSelection(item, false);
+		},
+		[toggleItemSelection]
+	);
+
+	// Manejar doble clic en item
+	const handleItemDoubleClick = useCallback((item) => {
+		// Aquí podríamos implementar una acción de vista previa completa o edición
+		viewLogger.info('🖱️ Doble clic en item:', item.name);
+	}, []);
 
 	const contentProps: FolderContentProps = {
 		items,
@@ -100,14 +152,16 @@ export function FolderContentView() {
 		error,
 		toggleItemSelection,
 		currentContainerId: currentFolderId ?? null,
-		containerName: currentFolder?.name ?? null,
+		containerName: currentFolder?.name ?? currentItem?.name ?? 'Carpeta sin nombre',
 		setCurrentContainer: setCurrentFolder,
 		reindexFolder: handleReindexFolder,
+		onItemClick: handleItemClick,
+		onItemDoubleClick: handleItemDoubleClick,
 		emptyState: {
 			icon: Folder,
 			title: 'Carpeta vacía',
 			description: `No se encontraron imágenes en ${
-				currentFolder?.name || 'esta carpeta'
+				currentFolder?.name || currentItem?.name || 'esta carpeta'
 			}. Puedes reindexar la carpeta para buscar nuevas imágenes.`,
 		},
 	};
