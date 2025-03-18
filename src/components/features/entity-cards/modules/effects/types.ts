@@ -2,7 +2,7 @@
  * 🎨 Tipos para el módulo de efectos
  */
 
-import { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/card-settings-types';
 
 /**
  * Opciones de efectos visuales

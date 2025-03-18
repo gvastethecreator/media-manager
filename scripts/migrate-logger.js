@@ -37,7 +37,7 @@ function migrateFile(filePath) {
 	}
 
 	let modified = false;
-	let originalContent = content;
+	const originalContent = content;
 
 	// Reemplazar importaciones de logger
 	if (
@@ -94,7 +94,7 @@ console.log(`Encontrados ${tsFiles.length} archivos para analizar`);
 
 // Migrar cada archivo
 let migratedCount = 0;
-let migratedFiles = [];
+const migratedFiles = [];
 
 for (const file of tsFiles) {
 	if (migrateFile(file)) {

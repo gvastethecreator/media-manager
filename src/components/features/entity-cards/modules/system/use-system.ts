@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, createContext, useContext } from 'react';
 import type { EntityType } from '@/types/entities/entities';
-import { DEFAULT_SYSTEM_CONFIG, SystemConfig, SystemContextType } from './types';
+import { DEFAULT_SYSTEM_CONFIG, type SystemConfig, type SystemContextType } from './types';
 import { deepMerge } from '@/lib/utils';
 
 /**

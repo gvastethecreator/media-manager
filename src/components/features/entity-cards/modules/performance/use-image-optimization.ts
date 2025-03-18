@@ -182,7 +182,7 @@ export function useImageOptimization({ options, enabled = true }: UseImageOptimi
 	 * Obtener atributos para imagen optimizada
 	 */
 	const getImageProps = useCallback(
-		(src: string, alt: string = '', width?: number, height?: number) => {
+		(src: string, alt = '', width?: number, height?: number) => {
 			// Props básicos
 			const props: Record<string, unknown> = {
 				src,

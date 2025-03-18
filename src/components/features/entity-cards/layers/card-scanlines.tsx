@@ -68,7 +68,7 @@ export function CardScanlines({ options, isHovered, className }: CardScanlinesPr
 				}}
 				transition={{
 					duration: 2,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>
@@ -107,7 +107,7 @@ export function CardScanlines({ options, isHovered, className }: CardScanlinesPr
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -126,7 +126,7 @@ export function CardScanlines({ options, isHovered, className }: CardScanlinesPr
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>

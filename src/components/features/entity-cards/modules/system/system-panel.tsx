@@ -11,10 +11,10 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn, deepMerge } from '@/lib/utils';
-import { EntityType } from '@/types/entities';
+import type { EntityType } from '@/types/entities';
 import { Layers, PlusCircle, Settings2, Sparkles, Tag, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { SystemConfig, SystemPanelProps } from './types';
+import type { SystemConfig, SystemPanelProps } from './types';
 import { useCategorySystem, useRaritySystem, useTextureSystem } from './use-system';
 
 /**

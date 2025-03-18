@@ -2,7 +2,7 @@
  * 🧩 Tipos para el módulo de sistema de Entity Cards
  */
 
-import { EntityType } from '@/types/entities';
+import type { EntityType } from '@/types/entities';
 
 /**
  * Configuración del sistema de rareza

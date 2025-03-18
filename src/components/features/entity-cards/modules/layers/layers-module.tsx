@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { LayerPluginProvider } from '../../layers/layer-plugin-system';
 import { RegisterLayers } from '../../layers/register-layers';
 import { LayersPanel } from './layers-panel';
-import { DEFAULT_LAYERS_CONFIG, LayersModuleConfig, LayersModuleProps } from './types';
+import { DEFAULT_LAYERS_CONFIG, type LayersModuleConfig, type LayersModuleProps } from './types';
 import { LayersProvider, adaptLayersConfigToCardOptions } from './use-layers';
 
 /**

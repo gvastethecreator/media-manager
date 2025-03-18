@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
-import { BookImage, Image as ImageIcon, Search, Star, UploadCloud } from 'lucide-react';
+import { Image as ImageIcon, Search, Star, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface NavMainNavigationProps {
 	currentView: string;
 	onNavigate: (id: ViewType) => void;
+	isCollapsed?: boolean;
 }
 
 interface NavigationItem {
@@ -36,7 +37,7 @@ const navigationItems: NavigationItem[] = [
 		id: 'favorites' as ViewType,
 		label: 'Favoritos',
 		icon: Star,
-		description: 'Tus imágenes favoritas',
+		description: 'Imágenes favoritas',
 	},
 	{
 		id: 'search' as ViewType,
@@ -46,21 +47,21 @@ const navigationItems: NavigationItem[] = [
 	},
 ];
 
-export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigationProps) {
+export function NavMainNavigation({ currentView, onNavigate, isCollapsed = false }: NavMainNavigationProps) {
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
-			className="px-2 pb-2 pt-1"
+			className={cn('pb-2 pt-1', isCollapsed ? 'px-1' : 'px-2')}
 		>
-			<div className="rounded-md p-1 shadow-sm">
-				<div className="flex justify-between gap-1">
+			<div className={cn('rounded-md p-1 shadow-sm', isCollapsed && 'p-0.5')}>
+				<div className={cn('flex', isCollapsed ? 'flex-col gap-2' : 'justify-between gap-1')}>
 					{navigationItems.map(({ id, icon: Icon, label, description }, index) => {
 						const isActive = currentView === id;
 
 						return (
-							<TooltipProvider key={id} delayDuration={1000}>
+							<TooltipProvider key={id} delayDuration={isCollapsed ? 200 : 1000}>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<motion.div
@@ -73,13 +74,14 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 												stiffness: 200,
 												damping: 15,
 											}}
-											className="flex-1"
+											className={cn('flex-1', isCollapsed && 'w-full')}
 										>
 											<Button
 												variant="outline"
 												className={cn(
-													'relative w-full h-8 p-2 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
+													'relative h-8 p-2 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
 													'flex items-center justify-center',
+													isCollapsed ? 'w-full' : 'w-full',
 													isActive
 														? 'bg-secondary/70 text-foreground'
 														: 'hover:bg-secondary/30 text-muted-foreground hover:text-foreground'
@@ -103,7 +105,12 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 												{isActive && (
 													<motion.div
 														layoutId="nav-dot"
-														className="absolute -bottom-[0.5px] left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+														className={cn(
+															'absolute w-1 h-1 rounded-full bg-primary',
+															isCollapsed
+																? '-right-[0.5px] top-1/2 transform -translate-y-1/2'
+																: '-bottom-[0.5px] left-1/2 transform -translate-x-1/2'
+														)}
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
 														transition={{ delay: 0.05 }}
@@ -122,12 +129,12 @@ export function NavMainNavigation({ currentView, onNavigate }: NavMainNavigation
 															isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
 														)}
 													/>
-													<span className="text-xs font-medium truncate">{label}</span>
+													{!isCollapsed && <span className="text-xs font-medium truncate">{label}</span>}
 												</motion.div>
 											</Button>
 										</motion.div>
 									</TooltipTrigger>
-									<TooltipContent side="bottom" className="text-xs p-2">
+									<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs p-2">
 										<p className="font-medium text-amber-400">{label}</p>
 										<p>{description}</p>
 										{id === 'all-images' && (

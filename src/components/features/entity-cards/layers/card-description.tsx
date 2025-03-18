@@ -80,7 +80,7 @@ export function CardDescription({ options, description, maxLength = 150, classNa
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -99,7 +99,7 @@ export function CardDescription({ options, description, maxLength = 150, classNa
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>
