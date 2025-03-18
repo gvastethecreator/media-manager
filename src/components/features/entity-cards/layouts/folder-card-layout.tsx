@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format';
 import type { Folder } from '@/types/entities/folders';
 import { Calendar, Clock, FileIcon, FolderIcon, HardDrive, Image, Layers3 } from 'lucide-react';
+import { useCallback } from 'react';
 import { EntityCardWrapper } from '../entity-card-wrapper';
 import { usePreset } from '../hooks/use-preset';
 import '../styles/folder-card.css';
@@ -247,121 +248,117 @@ export function FolderCardLayout({
 		enableGlowEffect,
 		enableBorderEffect,
 		enableGrainEffect,
-		designSystem: designSystem
-			? {
-					...designSystem,
-					// Asegurarnos de que preset sea compatible
-					preset: designSystem.preset as CardDesignPreset,
-				}
-			: undefined,
+		designSystem: designSystem || {
+			preset: 'folder',
+			variant: 'default',
+			aspectRatio: '7/10',
+			cornerStyle: 'rounded',
+			cornerRadius: 16,
+		},
 		holographicOptions,
 		glowOptions,
 		borderOptions,
 		grainOptions,
 		...restOptions,
+		rarityConfig,
 	};
 
-	// Formatear la fecha de creación
-	const formattedCreationDate = new Date(folder.createdAt).toLocaleDateString();
-
-	// Formatear la fecha de última indexación
-	const formattedLastIndexed = folder.lastIndexed ? new Date(folder.lastIndexed).toLocaleDateString() : 'No indexada';
+	// Manejar el clic en la carpeta de manera segura
+	const handleClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			// Si existe una función onClick, la llamamos
+			if (onClick) {
+				e.preventDefault();
+				e.stopPropagation();
+				onClick();
+			}
+		},
+		[onClick]
+	);
 
 	return (
-		<EntityCardWrapper
-			className={cn('folder-card w-full h-full', rarityClass, className)}
-			entityType="folder"
-			entityId={folder.id}
-			title={folder.name}
-			description={folder.description || ''}
-			options={compatibleOptions}
-			onClick={onClick}
-			showVisualConfig={showVisualConfig}
-			onVisualConfigClick={onVisualConfigClick}
-			enableExplode={enableExplode}
-			isExploded={isExploded}
-			activeLayer={activeLayer}
-			onExplodedChange={onExplodedChange}
-			onActiveLayerChange={onActiveLayerChange}
+		<div
+			className={cn(
+				'folder-card-container relative w-full h-full group',
+				rarityClass,
+				onClick && 'cursor-pointer',
+				className
+			)}
+			onClick={handleClick}
+			role={onClick ? 'button' : undefined}
+			tabIndex={onClick ? 0 : undefined}
+			onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
 		>
-			<div className="folder-card-content h-full flex flex-col">
-				{/* Encabezado de la tarjeta con banner de rareza */}
-				<div className={cn('folder-card-header', `folder-header-${rarityKey}`)}>
-					<div className="folder-card-title-container">
-						{folder.emoji && <span className="folder-card-emoji">{folder.emoji}</span>}
-						<h3 className="folder-card-title">{folder.name}</h3>
+			<EntityCardWrapper
+				title={folder.name}
+				description={folder.description || ''}
+				entity={folder}
+				entityType="folder"
+				className={cn('folder-card-wrapper relative w-full h-full', rarityClass)}
+				options={compatibleOptions}
+			>
+				<div className="folder-card-content p-3 flex flex-col h-full w-full">
+					{/* Cabecera de la tarjeta con emoji e información principal */}
+					<div className="folder-card-header mb-2">
+						<div className="folder-emoji text-2xl">{folder.emoji || <FolderIcon className="h-6 w-6" />}</div>
+						<h3 className="folder-title text-base font-bold line-clamp-1 mt-1">{folder.name}</h3>
 					</div>
 
-					{/* Tipo de tarjeta con badge de rareza */}
-					<div className="folder-card-type-line">
-						<span className="folder-type">Carpeta</span>
-						<span className={cn('folder-rarity-badge', `rarity-${rarityKey}`)}>{FOLDER_RARITY[rarityKey].label}</span>
-					</div>
-				</div>
+					{/* Cuerpo de la tarjeta con información detallada */}
+					<div className="folder-card-body flex-grow">
+						<div className="folder-stats text-xs space-y-1">
+							{/* Estadísticas principales */}
+							<div className="flex items-center gap-1">
+								<Image className="h-3 w-3 opacity-70" />
+								<span className="flex-grow">{folder._count?.images || folder.imageCount || 0} imágenes</span>
+							</div>
 
-				{/* Cuerpo de la tarjeta */}
-				<div className="folder-card-body flex-1">
-					{/* Descripción con estilo mejorado */}
-					{folder.description && (
-						<div className="folder-card-description-container">
-							<p className="folder-card-description">{folder.description}</p>
-						</div>
-					)}
+							{folder.totalSize !== undefined && (
+								<div className="flex items-center gap-1">
+									<HardDrive className="h-3 w-3 opacity-70" />
+									<span className="flex-grow">{formatFileSize(folder.totalSize)}</span>
+								</div>
+							)}
 
-					{/* Estadísticas visuales */}
-					<div className="folder-card-stats">
-						<div className="folder-stat-item">
-							<FileIcon className="folder-stat-icon" />
-							<span className="folder-stat-value">{folder.totalFiles || 0}</span>
-							<span className="folder-stat-label">archivos</span>
-						</div>
+							{/* Fecha de indexación */}
+							{folder.lastIndexed && (
+								<div className="flex items-center gap-1">
+									<Clock className="h-3 w-3 opacity-70" />
+									<span className="flex-grow text-xs">
+										Indexado:{' '}
+										{typeof folder.lastIndexed === 'string'
+											? new Date(folder.lastIndexed).toLocaleDateString()
+											: folder.lastIndexed.toLocaleDateString()}
+									</span>
+								</div>
+							)}
 
-						<div className="folder-stat-item">
-							<Image className="folder-stat-icon" />
-							<span className="folder-stat-value">{folder.imageCount || 0}</span>
-							<span className="folder-stat-label">imágenes</span>
-						</div>
-
-						<div className="folder-stat-item">
-							<HardDrive className="folder-stat-icon" />
-							<span className="folder-stat-value">{formatFileSize(folder.totalSize || 0)}</span>
-							<span className="folder-stat-label">tamaño</span>
-						</div>
-					</div>
-
-					{/* Lista de metadatos con iconos */}
-					<div className="folder-card-metadata">
-						<div className="folder-metadata-item">
-							<Calendar className="folder-metadata-icon" />
-							<span className="folder-metadata-label">Creada:</span>
-							<span className="folder-metadata-value">{formattedCreationDate}</span>
-						</div>
-
-						<div className="folder-metadata-item">
-							<Clock className="folder-metadata-icon" />
-							<span className="folder-metadata-label">Indexada:</span>
-							<span className="folder-metadata-value">{formattedLastIndexed}</span>
-						</div>
-
-						{folder.path && (
-							<div className="folder-metadata-item folder-path-item">
-								<FolderIcon className="folder-metadata-icon" />
-								<span className="folder-metadata-label">Ruta:</span>
-								<span className="folder-metadata-value folder-card-path" title={folder.path}>
-									{folder.path}
+							{/* Fecha de creación */}
+							<div className="flex items-center gap-1">
+								<Calendar className="h-3 w-3 opacity-70" />
+								<span className="flex-grow text-xs">
+									Creado:{' '}
+									{typeof folder.createdAt === 'string'
+										? new Date(folder.createdAt).toLocaleDateString()
+										: folder.createdAt.toLocaleDateString()}
 								</span>
 							</div>
-						)}
+						</div>
 					</div>
-				</div>
 
-				{/* Pie de la tarjeta con borde decorativo */}
-				<div className={cn('folder-card-footer', `folder-footer-${rarityKey}`)}>
-					<div className="folder-card-creator-line">
-						<span className="folder-id">ID: {folder.id.substring(0, 8)}</span>
+					{/* Pie de la tarjeta con acciones e información adicional */}
+					<div className="folder-card-footer mt-2 text-xs flex items-center justify-between">
+						<div className="folder-rarity">
+							<span className="inline-block px-2 py-0.5 rounded-full bg-opacity-20 text-[10px]">
+								{FOLDER_RARITY[rarityKey].label}
+							</span>
+						</div>
 					</div>
 				</div>
-			</div>
-		</EntityCardWrapper>
+			</EntityCardWrapper>
+
+			{/* Capa para manejo de clics que garantiza que toda el área sea clickeable */}
+			{onClick && <div className="absolute inset-0 z-10 opacity-0" onClick={handleClick} aria-hidden="true" />}
+		</div>
 	);
 }
