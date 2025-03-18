@@ -124,7 +124,7 @@ export function TemplateLayerSettings({
 		}
 
 		loadConfig();
-	}, [entityType, entityId]);
+	}, []);
 
 	// Actualizar un campo de la configuración
 	const updateField = <K extends keyof TemplateLayerConfig>(key: K, value: TemplateLayerConfig[K]) => {
@@ -199,7 +199,7 @@ export function TemplateLayerSettings({
 				<select
 					id="mode"
 					value={config.mode}
-					onChange={(e) => updateField('mode', e.target.value as any)}
+					onChange={(e) => updateField('mode', e.target.value as 'normal' | 'intense' | 'subtle')}
 					disabled={isLoading || !config.enabled}
 					className="w-full p-2 border border-input rounded-md bg-background"
 				>

@@ -45,7 +45,8 @@ export function CardStats({ options, stats, className }: CardStatsProps) {
 					{Object.entries(stats).map(([key, value]) => (
 						<div key={key} className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-labelledby="stat-icon-title">
+									<title id="stat-icon-title">Estadística: {key}</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"

@@ -302,12 +302,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
 
-		// Mejorar el mensaje de error para el usuario
 		if (error instanceof Error) {
 			throw error;
-		} else {
-			throw new Error('Error al obtener estadísticas de miniaturas. Por favor, intenta más tarde.');
 		}
+		throw new Error('Error al obtener estadísticas de miniaturas. Por favor, intenta más tarde.');
 	}
 }
 

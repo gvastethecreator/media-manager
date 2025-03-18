@@ -27,11 +27,11 @@ import { ImageGrid } from './image-grid';
 
 type CardData =
 	| (Collection & {
-			_count?: { images: number };
-			totalSize?: number;
-			recentImages?: string[];
-			topTags?: { name: string; count: number }[];
-	  })
+		_count?: { images: number };
+		totalSize?: number;
+		recentImages?: string[];
+		topTags?: { name: string; count: number }[];
+	})
 	| CollectionFormData;
 
 // Opciones visuales optimizadas para tarjetas de colecciones inspiradas en Magic
@@ -325,12 +325,12 @@ export function CollectionCard({
 
 						{/* Estrellas de rating */}
 						<div className="flex">
-							{Array.from({ length: 5 }).map((_, i) => (
+							{[1, 2, 3, 4, 5].map((starPosition) => (
 								<Star
-									key={`star-${i}`}
+									key={`rating-star-${starPosition}`}
 									className={cn(
 										'h-4 w-4',
-										i < (data.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+										starPosition <= (data.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
 									)}
 								/>
 							))}

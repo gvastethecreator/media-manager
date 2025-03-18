@@ -177,14 +177,14 @@ export function LayerRenderer({
 
 				// Verificar si el componente espera la interfaz antigua o nueva
 				// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
-				if ((layer as any).usesLegacyInterface) {
+				if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
 					// Usar type assertion para manejar componentes legacy
 					return (
 						<LayerComp
 							key={`layer-${layer.type}`}
 							config={config}
 							context={combinedContext}
-							{...({} as any)} // Hack para evitar errores de tipo
+							{...({} as Record<string, unknown>)} // Hack para evitar errores de tipo
 						/>
 					);
 				}

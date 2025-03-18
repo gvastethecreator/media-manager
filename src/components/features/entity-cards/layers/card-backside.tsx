@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { useId } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
 interface CardBacksideProps {
@@ -11,6 +12,7 @@ interface CardBacksideProps {
 }
 
 export function CardBackside({ options, isFlipped, className }: CardBacksideProps) {
+	const uniqueId = useId();
 	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
@@ -68,30 +70,35 @@ export function CardBackside({ options, isFlipped, className }: CardBacksideProp
 
 			{/* Líneas decorativas */}
 			<div className="absolute inset-0">
-				{Array.from({ length: 3 }).map((_, index) => (
-					<motion.div
-						key={index}
-						className={cn(
-							'absolute inset-0',
-							'bg-gradient-to-r',
-							holographicColor || 'from-white/20 via-transparent to-white/20',
-							'blur-sm'
-						)}
-						style={{
-							top: `${(index + 1) * 25}%`,
-						}}
-						animate={{
-							opacity: [0, 0.5, 0],
-							x: ['-100%', '100%', '-100%'],
-						}}
-						transition={{
-							duration: 2,
-							delay: index * 0.2,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: 'linear',
-						}}
-					/>
-				))}
+				{Array.from({ length: 3 }).map((_, index) => {
+					// Crear un ID único para cada línea usando el índice pero añadiendo datos adicionales para hacerlo único
+					const lineId = `backside-line-${uniqueId}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+
+					return (
+						<motion.div
+							key={lineId}
+							className={cn(
+								'absolute inset-0',
+								'bg-gradient-to-r',
+								holographicColor || 'from-white/20 via-transparent to-white/20',
+								'blur-sm'
+							)}
+							style={{
+								top: `${(index + 1) * 25}%`,
+							}}
+							animate={{
+								opacity: [0, 0.5, 0],
+								x: ['-100%', '100%', '-100%'],
+							}}
+							transition={{
+								duration: 2,
+								delay: index * 0.2,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: 'linear',
+							}}
+						/>
+					);
+				})}
 			</div>
 
 			{/* Efecto de pulso */}

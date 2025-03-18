@@ -43,7 +43,7 @@ export async function getGrainConfig(entityType: string, entityId?: string): Pro
 			};
 		}
 
-		let config;
+		let config: GrainConfig | null = null;
 
 		if (entityId) {
 			config = await prisma.layerGrainConfig.findFirst({

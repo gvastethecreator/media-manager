@@ -44,7 +44,7 @@ export async function getBorderConfig(entityType: string, entityId?: string): Pr
 			};
 		}
 
-		let config;
+		let config: Record<string, unknown> | null = null;
 
 		if (entityId) {
 			config = await prisma.layerBorderConfig.findFirst({

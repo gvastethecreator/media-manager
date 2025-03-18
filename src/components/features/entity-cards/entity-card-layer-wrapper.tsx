@@ -12,7 +12,7 @@ interface EntityCardLayerWrapperProps {
 	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	showVisualConfig?: boolean;
 	onVisualConfigClick?: () => void;
-	visualOptions?: any;
+	visualOptions?: Record<string, unknown>;
 	entityType: string;
 	entityId?: string;
 	enableExplode?: boolean;

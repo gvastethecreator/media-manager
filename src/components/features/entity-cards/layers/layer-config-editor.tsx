@@ -2,16 +2,10 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toastService } from '@/lib/services/toast.service';
-import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type BaseLayerConfig, useLayerPlugin } from './layer-plugin-system';
@@ -89,7 +83,7 @@ export function LayerConfigEditor({
 	}, [layer, layerType, entityType, entityId]);
 
 	// Función para actualizar una propiedad específica
-	const updateConfig = (key: string, value: any) => {
+	const updateConfig = (key: string, value: unknown) => {
 		if (!config) {
 			return;
 		}

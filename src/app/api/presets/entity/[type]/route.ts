@@ -22,7 +22,9 @@ export async function GET(request: Request, { params }: { params: { type: string
 		const limit = Number(searchParams.get('limit') || '10');
 
 		// Construir las condiciones de búsqueda
-		const where: any = {
+		const where: {
+			OR: Array<{category?: string} | {[key: string]: {not: null}}>
+		} = {
 			OR: [{ category: `type:${entityType}` }, { category: entityType }, { [`${entityType}Config`]: { not: null } }],
 		};
 

@@ -78,10 +78,10 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 					form.reset(response.data);
 				}
 			} catch (error) {
-				console.error('Error al cargar la configuración:', error);
+				console.error('Error al cargar la configuraci?n:', error);
 				toast({
 					title: 'Error',
-					description: 'No se pudo cargar la configuración holográfica',
+					description: 'No se pudo cargar la configuraci?n hologr?fica',
 					variant: 'destructive',
 				});
 			} finally {
@@ -98,17 +98,17 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 			const response = await updateHolographicConfig(entityType, values, entityId);
 			if (response.success) {
 				toast({
-					title: 'Éxito',
-					description: 'Configuración holográfica actualizada',
+					title: '?xito',
+					description: 'Configuraci?n hologr?fica actualizada',
 				});
 			} else {
 				throw new Error(response.message);
 			}
 		} catch (error) {
-			console.error('Error al actualizar la configuración:', error);
+			console.error('Error al actualizar la configuraci?n:', error);
 			toast({
 				title: 'Error',
-				description: 'No se pudo actualizar la configuración holográfica',
+				description: 'No se pudo actualizar la configuraci?n hologr?fica',
 				variant: 'destructive',
 			});
 		} finally {
@@ -119,8 +119,8 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 	return (
 		<Card className={cn('w-full', className)}>
 			<CardHeader>
-				<CardTitle>Configuración Holográfica</CardTitle>
-				<CardDescription>Personaliza el efecto holográfico</CardDescription>
+				<CardTitle>Configuraci?n Hologr?fica</CardTitle>
+				<CardDescription>Personaliza el efecto hologr?fico</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -131,8 +131,8 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
-										<FormLabel className="text-base">Activar Efecto Holográfico</FormLabel>
-										<FormDescription>Habilita o deshabilita el efecto holográfico</FormDescription>
+										<FormLabel className="text-base">Activar Efecto Hologr?fico</FormLabel>
+										<FormDescription>Habilita o deshabilita el efecto hologr?fico</FormDescription>
 									</div>
 									<FormControl>
 										<Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -166,15 +166,15 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 								name="pattern"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Patrón</FormLabel>
+										<FormLabel>Patr?n</FormLabel>
 										<Select onValueChange={field.onChange} defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Selecciona un patrón" />
+													<SelectValue placeholder="Selecciona un patr?n" />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="rainbow">Arcoíris</SelectItem>
+												<SelectItem value="rainbow">Arco?ris</SelectItem>
 												<SelectItem value="linear">Lineal</SelectItem>
 												<SelectItem value="radial">Radial</SelectItem>
 												<SelectItem value="custom">Personalizado</SelectItem>
@@ -187,21 +187,25 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 
 						<div className="grid grid-cols-3 gap-4">
 							{form.watch('pattern') === 'custom' &&
-								form.watch('colors').map((_color, index) => (
-									<FormField
-										key={index}
-										control={form.control}
-										name={`colors.${index}`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Color {index + 1}</FormLabel>
-												<FormControl>
-													<Input type="color" {...field} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-								))}
+								form.watch('colors').map((_color, index) => {
+									const colorId = `color-${index}-${Math.random().toString(36).substr(2, 9)}`;
+
+									return (
+										<FormField
+											key={colorId}
+											control={form.control}
+											name={`colors.${index}`}
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Color {index + 1}</FormLabel>
+													<FormControl>
+														<Input type="color" {...field} />
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+									);
+								})}
 						</div>
 
 						<div className="grid grid-cols-2 gap-4">
@@ -220,7 +224,7 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 											<SelectContent>
 												<SelectItem value="normal">Normal</SelectItem>
 												<SelectItem value="screen">Pantalla</SelectItem>
-												<SelectItem value="overlay">Superposición</SelectItem>
+												<SelectItem value="overlay">Superposici?n</SelectItem>
 												<SelectItem value="soft-light">Luz Suave</SelectItem>
 											</SelectContent>
 										</Select>
@@ -242,8 +246,8 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 											</FormControl>
 											<SelectContent>
 												<SelectItem value="none">Ninguno</SelectItem>
-												<SelectItem value="tilt">Inclinación</SelectItem>
-												<SelectItem value="mouse">Ratón</SelectItem>
+												<SelectItem value="tilt">Inclinaci?n</SelectItem>
+												<SelectItem value="mouse">Rat?n</SelectItem>
 											</SelectContent>
 										</Select>
 									</FormItem>
@@ -276,7 +280,7 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 								name="refraction"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Refracción</FormLabel>
+										<FormLabel>Refracci?n</FormLabel>
 										<FormControl>
 											<Slider
 												min={0}
@@ -297,7 +301,7 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 								name="dispersion"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Dispersión</FormLabel>
+										<FormLabel>Dispersi?n</FormLabel>
 										<FormControl>
 											<Slider
 												min={0}
@@ -353,8 +357,8 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
-										<FormLabel className="text-base">Animación</FormLabel>
-										<FormDescription>Habilita o deshabilita la animación del efecto</FormDescription>
+										<FormLabel className="text-base">Animaci?n</FormLabel>
+										<FormDescription>Habilita o deshabilita la animaci?n del efecto</FormDescription>
 									</div>
 									<FormControl>
 										<Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -389,7 +393,7 @@ export function HolographicSettings({ entityType, entityId, className }: Hologra
 									name="angle"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Ángulo</FormLabel>
+											<FormLabel>?ngulo</FormLabel>
 											<FormControl>
 												<Input
 													type="number"

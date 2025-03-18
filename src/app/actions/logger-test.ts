@@ -8,7 +8,7 @@ const testActionLogger = actionLogger.createActionLogger('TestActions');
 /**
  * Acción de ejemplo que simula un procesamiento exitoso
  */
-export const successAction = testActionLogger.wrapAction(async (data: any) => {
+export const successAction = testActionLogger.wrapAction(async (data: Record<string, unknown>) => {
 	// Simular algún procesamiento
 	await new Promise((resolve) => setTimeout(resolve, 300));
 

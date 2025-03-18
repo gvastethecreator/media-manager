@@ -43,7 +43,7 @@ export async function getScanlinesConfig(entityType: string, entityId?: string):
 			};
 		}
 
-		let config;
+		let config: ScanlinesConfig | null = null;
 
 		if (entityId) {
 			config = await prisma.layerScanlinesConfig.findFirst({

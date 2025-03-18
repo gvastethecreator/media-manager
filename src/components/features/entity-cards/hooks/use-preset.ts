@@ -185,7 +185,7 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 				),
 			},
 		} as CardOptions;
-	}, [entityType, presetId, baseOptions, preset]);
+	}, [entityType, presetId, baseOptions]);
 
 	return {
 		cardOptions,

@@ -43,66 +43,78 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 	}, [layerSystem.order]);
 
 	// Handler para cambios en la configuración de capas
-	const handleLayerSystemChange = (key: string, value: any) => {
+	const handleLayerSystemChange = (key: string, value: unknown) => {
 		onCardOptionsChange({
 			...cardOptions,
 			layerSystem: {
-				...layerSystem,
+				...cardOptions.layerSystem,
 				[key]: value,
 			},
 		});
 	};
 
 	// Manejar el reordenamiento de capas
-	const handleDragEnd = (result: any) => {
+	const handleDragEnd = (result: {
+		destination?: { index: number };
+		source: { index: number };
+	}) => {
 		if (!result.destination) {
 			return;
 		}
 
-		const items = Array.from(layerOrder);
-		const [reorderedItem] = items.splice(result.source.index, 1);
-		items.splice(result.destination.index, 0, reorderedItem);
+		const sourceIndex = result.source.index;
+		const destinationIndex = result.destination.index;
 
-		setLayerOrder(items);
-		handleLayerSystemChange('order', items);
-		toastService.success('Orden de capas actualizado');
+		// Si el orden no cambió, no hacemos nada
+		if (sourceIndex === destinationIndex) {
+			return;
+		}
+
+		// Obtenemos el nuevo orden de capas
+		const currentOrder = [...(cardOptions.layerSystem?.order || [])];
+		const [removed] = currentOrder.splice(sourceIndex, 1);
+		currentOrder.splice(destinationIndex, 0, removed);
+
+		// Actualizar orden de capas
+		onCardOptionsChange({
+			...cardOptions,
+			layerSystem: {
+				...cardOptions.layerSystem,
+				order: currentOrder,
+			},
+		});
 	};
 
-	// Habilitar/deshabilitar todas las capas
-	const handleToggleAllLayers = (enabled: boolean) => {
+	// Handler para habilitar/deshabilitar todas las capas
+	const handleEnableAll = () => {
 		const newLayerConfigs = { ...cardOptions.layerConfigs };
 
-		availableLayers.forEach((layer) => {
+		for (const layer of availableLayers) {
 			const currentConfig = newLayerConfigs[layer.type] || { ...layer.defaultConfig };
 			newLayerConfigs[layer.type] = {
 				...currentConfig,
-				enabled,
+				enabled: true,
 			};
-		});
+		}
 
 		onCardOptionsChange({
 			...cardOptions,
 			layerConfigs: newLayerConfigs,
 		});
-
-		toastService.success(enabled ? 'Todas las capas habilitadas' : 'Todas las capas deshabilitadas');
 	};
 
-	// Restablecer todo a valores predeterminados
 	const handleResetAll = () => {
 		// Crear nuevas configuraciones de capas con valores predeterminados
-		const defaultLayerConfigs: Record<string, any> = {};
-		availableLayers.forEach((layer) => {
+		const defaultLayerConfigs: Record<string, Record<string, unknown>> = {};
+
+		for (const layer of availableLayers) {
 			defaultLayerConfigs[layer.type] = { ...layer.defaultConfig };
-		});
+		}
 
 		onCardOptionsChange({
 			...cardOptions,
-			layerSystem: { ...DEFAULT_LAYER_SYSTEM },
 			layerConfigs: defaultLayerConfigs,
 		});
-
-		toastService.success('Todas las configuraciones restablecidas a valores predeterminados');
 	};
 
 	return (
@@ -196,13 +208,12 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 							)}
 
 							<div className="flex justify-between pt-4">
-								<Button variant="outline" size="sm" onClick={() => handleToggleAllLayers(true)}>
+								<Button variant="outline" size="sm" onClick={() => handleEnableAll()}>
 									<Eye className="h-4 w-4 mr-2" />
 									Habilitar Todas
 								</Button>
-								<Button variant="outline" size="sm" onClick={() => handleToggleAllLayers(false)}>
-									<EyeOff className="h-4 w-4 mr-2" />
-									Deshabilitar Todas
+								<Button variant="outline" size="sm" onClick={() => handleResetAll()}>
+									Restablecer Todo
 								</Button>
 							</div>
 						</div>

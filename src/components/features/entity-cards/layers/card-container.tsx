@@ -40,7 +40,7 @@ export function CardContainer({ options, isHovered, onHoverChange, onClick, chil
 		aspectRatio,
 		borderRadius: cornerStyle === 'rounded' ? cornerRadius : 0,
 		boxShadow: shadowStyle === 'soft' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-		transform: `translateZ(0)`,
+		transform: 'translateZ(0)',
 		willChange: enableHardwareAcceleration ? 'transform' : 'auto',
 	};
 

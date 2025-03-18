@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
-import { Code, Eye, EyeOff, Palette, Play, Square, Wand2 } from 'lucide-react';
+import { Eye, Square, Wand2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { LayerSettingsProps } from '../layer-plugin-system';
 import type { ShaderConfig } from './shader-config-schema';
@@ -48,7 +48,7 @@ export function ShaderSettings({ entityType, entityId, className, onConfigUpdate
 		};
 
 		loadConfig();
-	}, [entityId, entityType]);
+	}, []);
 
 	// Manejar cambios en la configuración
 	const handleConfigChange = <K extends keyof ShaderConfig>(key: K, value: ShaderConfig[K]) => {
