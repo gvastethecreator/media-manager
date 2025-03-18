@@ -58,6 +58,16 @@ export interface BaseContentProps {
 	 * Función para recargar los items de la vista
 	 */
 	onRefresh?: () => Promise<void>;
+
+	/**
+	 * Función personalizada para manejar el clic en un item
+	 */
+	onItemClick?: (item: FileItem) => void;
+
+	/**
+	 * Función personalizada para manejar el doble clic en un item
+	 */
+	onItemDoubleClick?: (item: FileItem) => void;
 }
 
 /**
