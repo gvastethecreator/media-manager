@@ -23,6 +23,9 @@ export function ContentViewProvider({
 	containerName,
 	setCurrentContainer,
 	emptyState,
+	onItemClick,
+	onItemDoubleClick,
+	onRefresh,
 }: ContentViewProviderProps) {
 	const handleToggleItemSelection = useCallback(
 		(item: FileItem, isMultiSelect: boolean) => {
@@ -43,6 +46,9 @@ export function ContentViewProvider({
 			containerName,
 			setCurrentContainer,
 			emptyState,
+			onItemClick,
+			onItemDoubleClick,
+			onRefresh,
 		}),
 		[
 			items,
@@ -53,6 +59,9 @@ export function ContentViewProvider({
 			containerName,
 			setCurrentContainer,
 			emptyState,
+			onItemClick,
+			onItemDoubleClick,
+			onRefresh,
 		]
 	);
 
