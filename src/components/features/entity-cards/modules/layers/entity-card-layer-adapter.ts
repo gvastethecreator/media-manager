@@ -152,10 +152,13 @@ export function adaptLayerSystemToEntityCard(
  * @param targetFormat - Formato objetivo ('entityCard' o 'layerSystem')
  * @returns Configuración convertida al formato objetivo
  */
-export function detectAndConvertLayerConfig(config: any, targetFormat: 'entityCard' | 'layerSystem'): any {
+export function detectAndConvertLayerConfig(
+	config: Record<string, unknown>,
+	targetFormat: 'entityCard' | 'layerSystem'
+): Record<string, unknown> {
 	// Detectar formato actual
-	const isEntityCardFormat = config.visualOptions !== undefined || config.cardType !== undefined;
-	const isLayerSystemFormat = config.layerSystem !== undefined && config.layerConfigs !== undefined;
+	const isEntityCardFormat = 'visualOptions' in config || 'cardType' in config;
+	const isLayerSystemFormat = 'layerSystem' in config && 'layerConfigs' in config;
 
 	// Si ya está en el formato objetivo, devolver sin cambios
 	if (targetFormat === 'entityCard' && isEntityCardFormat) return config;
@@ -216,8 +219,6 @@ export function useEntityTypeLayerConfig(
  * Este módulo proporciona funciones para adaptar el sistema de capas
  * a las tarjetas de entidad, permitiendo una integración bidireccional.
  */
-
-import type { LayerConfig } from '../../../layers/types';
 
 /**
  * Configuración del sistema de capas para tarjetas de entidad
@@ -321,7 +322,10 @@ export function getEntityTypeLayerConfig(entityType: string): EntityCardLayerSys
 /**
  * Convierte propiedades de EntityCard a configuración de capas
  */
-export function entityCardPropsToLayerConfig(entityType: string, props: any): EntityCardLayerSystemConfig {
+export function entityCardPropsToLayerConfig(
+	entityType: string,
+	props: Record<string, unknown>
+): EntityCardLayerSystemConfig {
 	// Obtener configuración base para el tipo de entidad
 	const baseConfig = getEntityTypeLayerConfig(entityType);
 
@@ -368,8 +372,8 @@ export function entityCardPropsToLayerConfig(entityType: string, props: any): En
 /**
  * Convierte configuración de capas a propiedades de EntityCard
  */
-export function layerConfigToEntityCardProps(config: EntityCardLayerSystemConfig): Record<string, any> {
-	const props: Record<string, any> = {};
+export function layerConfigToEntityCardProps(config: EntityCardLayerSystemConfig): Record<string, unknown> {
+	const props: Record<string, unknown> = {};
 
 	// Extraer propiedades específicas de la configuración de capas
 	if (config.layers.border?.color) {

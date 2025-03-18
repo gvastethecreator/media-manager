@@ -349,9 +349,9 @@ export function PlaceCard({
 		enableGrainEffect,
 		designSystem: designSystem
 			? {
-				...designSystem,
-				preset: designSystem.preset,
-			}
+					...designSystem,
+					preset: designSystem.preset,
+				}
 			: undefined,
 		holographicOptions,
 		glowOptions,
@@ -393,7 +393,7 @@ export function PlaceCard({
 					onClose={() => setConfigOpen(false)}
 					options={cardOptions}
 					onOptionsChange={(newOptions) => {
-						setCardOptions(prev => ({ ...prev, ...newOptions }));
+						setCardOptions((prev) => ({ ...prev, ...newOptions }));
 					}}
 					entityId={place.id}
 					entityType="place"

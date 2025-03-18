@@ -75,7 +75,13 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 					<div className="absolute inset-0 flex items-center justify-center">
 						<div className="text-center">
 							<div className="w-12 h-12 mx-auto mb-2 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-labelledby="img-placeholder-title">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									aria-labelledby="img-placeholder-title"
+								>
 									<title id="img-placeholder-title">Imagen no disponible</title>
 									<path
 										strokeLinecap="round"

@@ -9,7 +9,7 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter, type Entity } from '@/components/features/entity-cards/entity-card-adapter';
 import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
 import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
@@ -29,7 +29,7 @@ export interface EntityContentViewProps<T> extends ViewProps {
 	// Propiedades específicas para la vista
 	title?: string;
 	description?: string;
-	emptyStateIcon?: React.ComponentType<any>;
+	emptyStateIcon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 	emptyStateTitle?: string;
 	emptyStateDescription?: string;
 	// ID de la entidad padre
@@ -49,7 +49,7 @@ export interface EntityContentViewProps<T> extends ViewProps {
 	// Endpoint para cargar configuración visual
 	visualConfigEndpoint?: string;
 	// Función para transformar datos (opcional)
-	transformData?: (data: any[]) => T[];
+	transformData?: (data: Record<string, unknown>[]) => T[];
 	// Clase CSS adicional
 	className?: string;
 }
@@ -188,7 +188,7 @@ export function EntityContentView<T extends FileItem>({
 			if (item.type === 'image' && optimisticItems) {
 				const imageItems = optimisticItems.filter((i) => i.type === 'image');
 				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
-				openViewer(imageItems as any[], currentIndex);
+				openViewer(imageItems as unknown as Entity[], currentIndex);
 			}
 		},
 		[onItemDoubleClick, optimisticItems, openViewer]
@@ -243,7 +243,7 @@ export function EntityContentView<T extends FileItem>({
 					{optimisticItems.map((item, index) => {
 						// Verificar que el elemento tenga un id válido
 						if (!item || !item.id) {
-							console.error(`Elemento sin id válido:`, item);
+							console.error('Elemento sin id válido:', item);
 							return null;
 						}
 
@@ -258,7 +258,7 @@ export function EntityContentView<T extends FileItem>({
 									<RegisterEntityTypeLayers entityType={entityType} />
 									<EntityCardAdapter
 										entityType={entityType}
-										entity={item as any}
+										entity={item as unknown as Entity}
 										onClick={() => handleItemClick(item)}
 										onDoubleClick={() => handleItemDoubleClick(item)}
 										showVisualConfig={true}

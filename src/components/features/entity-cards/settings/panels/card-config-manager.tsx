@@ -22,42 +22,42 @@ interface CardConfigManagerProps {
 export function CardConfigManager({ options, onOptionsChange }: CardConfigManagerProps) {
 	const [expanded, setExpanded] = useState<string[]>(['colors']);
 
-	// Usar un cast a any para evitar errores de tipo
+	// Usamos Record<string, string> para definir el tipo de colors
 	const handleColorChange = (colorKey: string, value: string) => {
 		onOptionsChange({
 			colors: {
-				...(options.colors as any),
+				...(options.colors as Record<string, string>),
 				[colorKey]: value,
 			},
-		} as any);
+		});
 	};
 
 	const handleSizeChange = (size: number[]) => {
 		onOptionsChange({
 			size: size[0],
-		} as any);
+		});
 	};
 
 	const handleBorderRadiusChange = (radius: number[]) => {
 		onOptionsChange({
 			borderRadius: radius[0],
-		} as any);
+		});
 	};
 
 	const handleShadowIntensityChange = (intensity: number[]) => {
 		onOptionsChange({
 			shadowIntensity: intensity[0],
-		} as any);
+		});
 	};
 
 	const handleOptionToggle = (key: string, value: boolean) => {
 		onOptionsChange({
 			[key]: value,
-		} as any);
+		});
 	};
 
-	// Usar un cast a any para acceder a propiedades que no existen en CardOptions
-	const optionsAny = options as any;
+	// Usar Record<string, unknown> para acceder a propiedades que no existen en CardOptions
+	const optionsExtended = options as Record<string, unknown>;
 
 	return (
 		<Accordion type="multiple" value={expanded} onValueChange={setExpanded} className="space-y-2">
@@ -74,28 +74,28 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 						<div className="space-y-1.5">
 							<Label className="text-xs">Fondo</Label>
 							<ColorPicker
-								color={(options.colors as any)?.background || '#ffffff'}
+								color={(options.colors as Record<string, string>)?.background || '#ffffff'}
 								onChange={(color) => handleColorChange('background', color)}
 							/>
 						</div>
 						<div className="space-y-1.5">
 							<Label className="text-xs">Texto</Label>
 							<ColorPicker
-								color={(options.colors as any)?.text || '#000000'}
+								color={(options.colors as Record<string, string>)?.text || '#000000'}
 								onChange={(color) => handleColorChange('text', color)}
 							/>
 						</div>
 						<div className="space-y-1.5">
 							<Label className="text-xs">Borde</Label>
 							<ColorPicker
-								color={(options.colors as any)?.border || '#e2e8f0'}
+								color={(options.colors as Record<string, string>)?.border || '#e2e8f0'}
 								onChange={(color) => handleColorChange('border', color)}
 							/>
 						</div>
 						<div className="space-y-1.5">
 							<Label className="text-xs">Acento</Label>
 							<ColorPicker
-								color={(options.colors as any)?.accent || '#3b82f6'}
+								color={(options.colors as Record<string, string>)?.accent || '#3b82f6'}
 								onChange={(color) => handleColorChange('accent', color)}
 							/>
 						</div>
@@ -115,10 +115,10 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
 							<Label className="text-xs">Tamaño</Label>
-							<span className="text-xs text-muted-foreground">{optionsAny.size || 100}%</span>
+							<span className="text-xs text-muted-foreground">{Number(optionsExtended.size || 100)}%</span>
 						</div>
 						<Slider
-							value={[optionsAny.size || 100]}
+							value={[Number(optionsExtended.size || 100)]}
 							min={50}
 							max={150}
 							step={5}
@@ -130,10 +130,10 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
 							<Label className="text-xs">Radio de bordes</Label>
-							<span className="text-xs text-muted-foreground">{optionsAny.borderRadius || 8}px</span>
+							<span className="text-xs text-muted-foreground">{Number(optionsExtended.borderRadius || 8)}px</span>
 						</div>
 						<Slider
-							value={[optionsAny.borderRadius || 8]}
+							value={[Number(optionsExtended.borderRadius || 8)]}
 							min={0}
 							max={32}
 							step={1}
@@ -145,10 +145,10 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
 							<Label className="text-xs">Intensidad de sombra</Label>
-							<span className="text-xs text-muted-foreground">{optionsAny.shadowIntensity || 50}%</span>
+							<span className="text-xs text-muted-foreground">{Number(optionsExtended.shadowIntensity || 50)}%</span>
 						</div>
 						<Slider
-							value={[optionsAny.shadowIntensity || 50]}
+							value={[Number(optionsExtended.shadowIntensity || 50)]}
 							min={0}
 							max={100}
 							step={5}
@@ -175,7 +175,7 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 								<p className="text-[10px] text-muted-foreground">Mostrar borde alrededor de la tarjeta</p>
 							</div>
 							<Switch
-								checked={optionsAny.showBorder || false}
+								checked={Boolean(optionsExtended.showBorder) || false}
 								onCheckedChange={(checked) => handleOptionToggle('showBorder', checked)}
 							/>
 						</div>
@@ -186,7 +186,7 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 								<p className="text-[10px] text-muted-foreground">Aplicar efecto de gradiente sutil</p>
 							</div>
 							<Switch
-								checked={optionsAny.enableGradient || false}
+								checked={Boolean(optionsExtended.enableGradient) || false}
 								onCheckedChange={(checked) => handleOptionToggle('enableGradient', checked)}
 							/>
 						</div>
@@ -197,7 +197,7 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 								<p className="text-[10px] text-muted-foreground">Mostrar sombra para efecto de elevación</p>
 							</div>
 							<Switch
-								checked={optionsAny.showShadow || false}
+								checked={Boolean(optionsExtended.showShadow) || false}
 								onCheckedChange={(checked) => handleOptionToggle('showShadow', checked)}
 							/>
 						</div>
@@ -243,7 +243,7 @@ export function CardConfigManager({ options, onOptionsChange }: CardConfigManage
 								<p className="text-[10px] text-muted-foreground">Incluir información adicional</p>
 							</div>
 							<Switch
-								checked={optionsAny.showMetadata || false}
+								checked={Boolean(optionsExtended.showMetadata) || false}
 								onCheckedChange={(checked) => handleOptionToggle('showMetadata', checked)}
 							/>
 						</div>

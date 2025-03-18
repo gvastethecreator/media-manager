@@ -28,7 +28,7 @@ export const NoteCard = createCustomCardAdapter<Note, NoteCardProps, 'note'>(
 			onClick: props.onClick,
 			className: props.className,
 			visualOptions: props.options,
-			showVisualConfig: props.showVisualConfig
+			showVisualConfig: props.showVisualConfig,
 		};
 	}
 );

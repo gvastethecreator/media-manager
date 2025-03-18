@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo, createContext, useContext } from 'react';
-import { DEFAULT_LAYERS_CONFIG, type LayersContextType, type LayersModuleConfig } from './types';
 import { deepMerge } from '@/lib/utils';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { LayerConfig } from '../../layers/types';
+import { DEFAULT_LAYERS_CONFIG, type LayersContextType, type LayersModuleConfig } from './types';
 
 /**
  * 🌈 Contexto para el sistema de capas
@@ -99,19 +99,19 @@ export function useLayers() {
 /**
  * 🌈 Adaptador de cardOptions a LayersModuleConfig
  */
-export function adaptCardOptionsToLayersConfig(cardOptions?: any): Partial<LayersModuleConfig> {
+export function adaptCardOptionsToLayersConfig(cardOptions?: Record<string, unknown>): Partial<LayersModuleConfig> {
 	if (!cardOptions) return {};
 
 	return {
-		layerSystem: cardOptions.layerSystem || DEFAULT_LAYERS_CONFIG.layerSystem,
-		layerConfigs: cardOptions.layerConfigs || DEFAULT_LAYERS_CONFIG.layerConfigs,
+		layerSystem: cardOptions.layerSystem as LayerSystemConfig,
+		layerConfigs: cardOptions.layerConfigs as Record<string, LayerConfig>,
 	};
 }
 
 /**
  * 🌈 Adaptador de LayersModuleConfig a cardOptions
  */
-export function adaptLayersConfigToCardOptions(config: LayersModuleConfig): any {
+export function adaptLayersConfigToCardOptions(config: LayersModuleConfig): Record<string, unknown> {
 	return {
 		layerSystem: config.layerSystem,
 		layerConfigs: config.layerConfigs,

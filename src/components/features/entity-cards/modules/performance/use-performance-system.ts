@@ -115,14 +115,11 @@ export function usePerformanceSystem(
 			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 		// Detectar conexión lenta
-		const isSlowConnection =
-			typeof navigator !== 'undefined' &&
-			navigator.connection &&
-			(navigator.connection.saveData ||
-				(navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
+		const hasSaveDataMode =
+			navigator.connection && (navigator.connection.saveData || navigator.connection.effectiveType?.includes('2g'));
 
 		// Adaptar según el dispositivo y conexión
-		if (isMobile || isSlowConnection) {
+		if (isMobile || hasSaveDataMode) {
 			const mobilePreset: Partial<PerformanceOptions> = {
 				lazyLoad: true,
 				virtualizeList: true,
@@ -175,7 +172,7 @@ export function usePerformanceSystem(
 		const recommendations: Record<string, string> = {};
 
 		// Generar recomendaciones basadas en el impacto
-		impact.high.forEach((option) => {
+		for (const option of impact.high) {
 			switch (option) {
 				case 'lazyLoad':
 					recommendations.lazyLoad =
@@ -190,9 +187,9 @@ export function usePerformanceSystem(
 						'Habilitar la optimización de imágenes para reducir el consumo de memoria y mejorar los tiempos de carga';
 					break;
 			}
-		});
+		}
 
-		impact.medium.forEach((option) => {
+		for (const option of impact.medium) {
 			switch (option) {
 				case 'batchUpdates':
 					recommendations.batchUpdates = 'Habilitar el procesamiento por lotes para reducir el número de renderizados';
@@ -206,7 +203,7 @@ export function usePerformanceSystem(
 						'Habilitar el caché para mejorar los tiempos de carga en navegaciones repetidas';
 					break;
 			}
-		});
+		}
 
 		return recommendations;
 	}, [getPerformanceImpact]);

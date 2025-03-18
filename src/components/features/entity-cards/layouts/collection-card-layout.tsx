@@ -21,19 +21,19 @@ import type * as React from 'react';
 import { useState } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
-import type { CollectionFormData } from '../layouts/forms/entity-types';
+import type { CollectionFormData } from '../types/forms-types';
 import type { CardDesignPreset, CardOptions, RarityConfig, TextureConfig } from '../types/shared-card-types';
 import { ImageGrid } from './image-grid';
 
 // Definimos un tipo para los datos de la colección más específico
 type CardData =
 	| (Collection & {
-		_count?: { images: number };
-		totalSize?: number;
-		recentImages?: string[];
-		topTags?: { name: string; count: number }[];
-		rating?: number; // Añadimos explícitamente rating aquí
-	})
+			_count?: { images: number };
+			totalSize?: number;
+			recentImages?: string[];
+			topTags?: { name: string; count: number }[];
+			rating?: number; // Añadimos explícitamente rating aquí
+	  })
 	| CollectionFormData;
 
 // Opciones visuales optimizadas para tarjetas de colecciones inspiradas en Magic
@@ -338,7 +338,9 @@ export function CollectionCard({
 									key={`rating-star-${starPosition}`}
 									className={cn(
 										'h-4 w-4',
-										starPosition <= (('rating' in data ? data.rating : 0) || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+										starPosition <= (('rating' in data ? data.rating : 0) || 0)
+											? 'text-yellow-400 fill-yellow-400'
+											: 'text-muted-foreground'
 									)}
 								/>
 							))}
@@ -349,9 +351,17 @@ export function CollectionCard({
 					<div className="flex-1 rounded-lg overflow-hidden bg-muted/20 mb-3 min-h-[120px]">
 						{'recentImages' in data && data.recentImages && data.recentImages.length > 0 && cardOptions.useImageGrid ? (
 							<ImageGrid
-								layout={(cardOptions.imageGridLayout === 'grid' || cardOptions.imageGridLayout === 'masonry') ? 'quad' : 'single'}
+								layout={
+									cardOptions.imageGridLayout === 'grid' || cardOptions.imageGridLayout === 'masonry'
+										? 'quad'
+										: 'single'
+								}
 								gap={cardOptions.imageGridGap || 4}
-								style={(cardOptions.imageGridStyle === 'standard' || cardOptions.imageGridStyle === 'polaroid') ? cardOptions.imageGridStyle : 'standard'}
+								style={
+									cardOptions.imageGridStyle === 'standard' || cardOptions.imageGridStyle === 'polaroid'
+										? cardOptions.imageGridStyle
+										: 'standard'
+								}
 								images={data.recentImages.map((path: string, idx: number) => ({
 									id: `img-${idx}`,
 									path,

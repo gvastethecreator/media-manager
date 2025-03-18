@@ -1,6 +1,6 @@
-import type * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
+import type * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -46,6 +46,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
 			role="link"
 			aria-disabled="true"
 			aria-current="page"
+			tabIndex={0}
 			className={cn('text-foreground font-normal', className)}
 			{...props}
 		/>
@@ -82,11 +83,8 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'
 }
 
 export {
-	Breadcrumb,
-	BreadcrumbList,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-	BreadcrumbEllipsis,
+	Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem,
+	BreadcrumbLink, BreadcrumbList, BreadcrumbPage,
+	BreadcrumbSeparator
 };
+

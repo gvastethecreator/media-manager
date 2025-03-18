@@ -72,7 +72,7 @@ export function adaptCardOptionsWithSystemConfig(
 
 		const textureConfig = config.texture.customTextures[textureKey];
 
-		if (textureConfig && textureConfig.url) {
+		if (textureConfig?.url) {
 			updatedOptions = {
 				...updatedOptions,
 				textureUrl: textureConfig.url,

@@ -76,55 +76,58 @@ export function PixelateEffectLayer({
 		}
 
 		return null;
-	}, [sourceCanvasRef, canvasRef]);
+	}, []);
 
 	// También envolvemos esta función en useCallback
-	const applyPixelateEffect = useCallback((sourceImageData: ImageData, pixelSize: number, algorithm: string) => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
+	const applyPixelateEffect = useCallback(
+		(sourceImageData: ImageData, pixelSize: number, algorithm: string) => {
+			const canvas = canvasRef.current;
+			if (!canvas) return;
 
-		const ctx = canvas.getContext('2d');
-		if (!ctx) return;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return;
 
-		// Crear un canvas temporal para el procesamiento
-		const tempCanvas = document.createElement('canvas');
-		tempCanvas.width = canvas.width;
-		tempCanvas.height = canvas.height;
-		const tempCtx = tempCanvas.getContext('2d');
-		if (!tempCtx) return;
+			// Crear un canvas temporal para el procesamiento
+			const tempCanvas = document.createElement('canvas');
+			tempCanvas.width = canvas.width;
+			tempCanvas.height = canvas.height;
+			const tempCtx = tempCanvas.getContext('2d');
+			if (!tempCtx) return;
 
-		// Poner los datos de la imagen en el canvas temporal
-		tempCtx.putImageData(sourceImageData, 0, 0);
+			// Poner los datos de la imagen en el canvas temporal
+			tempCtx.putImageData(sourceImageData, 0, 0);
 
-		// Limpiar el canvas principal
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+			// Limpiar el canvas principal
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		// Aplicar el algoritmo correspondiente
-		switch (algorithm) {
-			case 'simple':
-				applySimplePixelation(ctx, tempCanvas, pixelSize);
-				break;
-			case 'weighted':
-				applyWeightedPixelation(ctx, tempCanvas, pixelSize);
-				break;
-			case 'adaptive':
-				applyAdaptivePixelation(ctx, tempCanvas, pixelSize);
-				break;
-			case 'color-reduced':
-				applyColorReducedPixelation(ctx, tempCanvas, pixelSize, 8);
-				break;
-			case 'mosaic':
-				applyMosaicPixelation(ctx, tempCanvas, pixelSize, 'square');
-				break;
-			default:
-				applySimplePixelation(ctx, tempCanvas, pixelSize);
-		}
+			// Aplicar el algoritmo correspondiente
+			switch (algorithm) {
+				case 'simple':
+					applySimplePixelation(ctx, tempCanvas, pixelSize);
+					break;
+				case 'weighted':
+					applyWeightedPixelation(ctx, tempCanvas, pixelSize);
+					break;
+				case 'adaptive':
+					applyAdaptivePixelation(ctx, tempCanvas, pixelSize);
+					break;
+				case 'color-reduced':
+					applyColorReducedPixelation(ctx, tempCanvas, pixelSize, 8);
+					break;
+				case 'mosaic':
+					applyMosaicPixelation(ctx, tempCanvas, pixelSize, 'square');
+					break;
+				default:
+					applySimplePixelation(ctx, tempCanvas, pixelSize);
+			}
 
-		// Si hay zonas de efecto, aplicarlas
-		if (config.effectZone && config.effectZone !== 'full') {
-			applyEffectZone(ctx, canvas.width, canvas.height);
-		}
-	}, [canvasRef, config.effectZone]);
+			// Si hay zonas de efecto, aplicarlas
+			if (config.effectZone && config.effectZone !== 'full') {
+				applyEffectZone(ctx, canvas.width, canvas.height);
+			}
+		},
+		[config.effectZone]
+	);
 
 	// Algoritmo de pixelado simple - promedia los colores en cada bloque
 	const applySimplePixelation = (ctx: CanvasRenderingContext2D, sourceCanvas: HTMLCanvasElement, pixelSize: number) => {
@@ -539,14 +542,7 @@ export function PixelateEffectLayer({
 				cancelAnimationFrame(animationFrame);
 			}
 		};
-	}, [
-		config.pixelSize,
-		config.algorithm,
-		config.animated,
-		captureContent,
-		applyPixelateEffect,
-		isReady
-	]);
+	}, [config.pixelSize, config.algorithm, config.animated, captureContent, applyPixelateEffect, isReady]);
 
 	return (
 		<div

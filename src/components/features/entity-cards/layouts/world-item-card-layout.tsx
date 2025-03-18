@@ -277,9 +277,9 @@ export function WorldItemCard({
 		enableGrainEffect,
 		designSystem: designSystem
 			? {
-				...designSystem,
-				preset: designSystem.preset as CardDesignPreset,
-			}
+					...designSystem,
+					preset: designSystem.preset as CardDesignPreset,
+				}
 			: undefined,
 		holographicOptions,
 		glowOptions,
@@ -299,17 +299,17 @@ export function WorldItemCard({
 	// Preparamos un array de imágenes compatible con ImageGridImage
 	const images: ImageGridImage[] = worldItem.featuredImage
 		? [
-			{
-				id: 'world-item-image',
-				src: worldItem.featuredImage,
-				alt: worldItem.name,
-			},
-		]
+				{
+					id: 'world-item-image',
+					src: worldItem.featuredImage,
+					alt: worldItem.name,
+				},
+			]
 		: [];
 
 	// Convertimos el designSystem a un formato compatible con el nuevo EntityCard
 	const designConfig: DesignSystem = {
-		preset: (designSystem?.preset || 'worldItem'),
+		preset: designSystem?.preset || 'worldItem',
 		variant: designSystem?.variant || 'default',
 		aspectRatio: designSystem?.aspectRatio || '7/10',
 		cornerStyle: designSystem?.cornerStyle || 'rounded',

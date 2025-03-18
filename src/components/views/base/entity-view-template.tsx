@@ -9,7 +9,7 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter, type Entity } from '@/components/features/entity-cards/entity-card-adapter';
 import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
 import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
@@ -26,7 +26,7 @@ export interface EntityViewProps<T> extends ViewProps {
 	// Propiedades específicas para la vista
 	title?: string;
 	description?: string;
-	emptyStateIcon?: React.ComponentType<any>;
+	emptyStateIcon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 	emptyStateTitle?: string;
 	emptyStateDescription?: string;
 	// Función para cargar entidades
@@ -40,7 +40,7 @@ export interface EntityViewProps<T> extends ViewProps {
 	// Endpoint para cargar configuración visual
 	visualConfigEndpoint?: string;
 	// Función para transformar datos (opcional)
-	transformData?: (data: any[]) => T[];
+	transformData?: (data: Record<string, unknown>[]) => T[];
 	// Clase CSS adicional
 	className?: string;
 }
@@ -175,7 +175,7 @@ export function EntityView<T extends { id: string }>({
 					{optimisticEntities.map((entity, index) => {
 						// Verificar que la entidad tenga un id válido
 						if (!entity || !entity.id) {
-							console.error(`Entidad sin id válido:`, entity);
+							console.error('Entidad sin id válido:', entity);
 							return null;
 						}
 
@@ -190,7 +190,7 @@ export function EntityView<T extends { id: string }>({
 									<RegisterEntityTypeLayers entityType={entityType} />
 									<EntityCardAdapter
 										entityType={entityType}
-										entity={entity as any}
+										entity={entity as unknown as Entity}
 										onClick={() => onEntityClick(entity)}
 										showVisualConfig={true}
 										enableExplode={true}

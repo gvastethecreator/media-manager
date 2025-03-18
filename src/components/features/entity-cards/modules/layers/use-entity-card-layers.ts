@@ -18,21 +18,29 @@ import {
 } from './entity-card-layer-adapter';
 import { useLayerPlugin } from './layer-plugin-system';
 
+/**
+ * Opciones para el hook useEntityCardLayers
+ */
 export interface UseEntityCardLayersOptions {
 	/**
-	 * Tipo de entidad (image, folder, album, tag, etc.)
+	 * Tipo de entidad (image, album, folder, etc.)
 	 */
 	entityType: string;
 
 	/**
+	 * ID de la entidad (opcional)
+	 */
+	entityId?: string;
+
+	/**
 	 * Propiedades iniciales de la tarjeta
 	 */
-	initialProps?: Record<string, any>;
+	initialProps?: Record<string, unknown>;
 
 	/**
 	 * Configuración inicial de capas (opcional)
 	 */
-	initialConfig?: Partial<EntityCardLayerSystemConfig>;
+	initialLayerConfig?: Partial<EntityCardLayerSystemConfig>;
 
 	/**
 	 * Si es true, guarda automáticamente los cambios en localStorage
@@ -40,16 +48,19 @@ export interface UseEntityCardLayersOptions {
 	autoSave?: boolean;
 }
 
+/**
+ * Resultado del hook useEntityCardLayers
+ */
 export interface UseEntityCardLayersResult {
 	/**
-	 * Configuración actual de capas
+	 * Configuración de capas
 	 */
 	layerConfig: EntityCardLayerSystemConfig;
 
 	/**
 	 * Propiedades derivadas para la tarjeta de entidad
 	 */
-	cardProps: Record<string, any>;
+	cardProps: Record<string, unknown>;
 
 	/**
 	 * Actualiza la configuración de capas
@@ -59,15 +70,20 @@ export interface UseEntityCardLayersResult {
 	/**
 	 * Actualiza la configuración de una capa específica
 	 */
-	updateLayerSettings: (layerId: string, settings: any) => void;
+	updateLayerSettings: (layerId: string, settings: Record<string, unknown>) => void;
 
 	/**
-	 * Activa o desactiva una capa
+	 * Toggle de una capa (activar/desactivar)
 	 */
-	toggleLayer: (layerId: string, enabled?: boolean) => void;
+	toggleLayer: (layerId: string, enabled: boolean) => void;
 
 	/**
-	 * Restablece la configuración a los valores predeterminados
+	 * Reordena las capas
+	 */
+	reorderLayers: (layerIds: string[]) => void;
+
+	/**
+	 * Resetea la configuración a los valores por defecto
 	 */
 	resetToDefaults: () => void;
 
@@ -82,12 +98,13 @@ export interface UseEntityCardLayersResult {
  */
 export function useEntityCardLayers({
 	entityType,
+	entityId,
 	initialProps = {},
-	initialConfig = {},
+	initialLayerConfig = {},
 	autoSave = false,
 }: UseEntityCardLayersOptions): UseEntityCardLayersResult {
 	// Obtener el plugin de capas
-	const { getRegisteredLayers } = useLayerPlugin();
+	const { getRegisteredLayers, getNextLayerIndex } = useLayerPlugin();
 
 	// Inicializar configuración
 	const getInitialConfig = useCallback(() => {
@@ -98,8 +115,8 @@ export function useEntityCardLayers({
 		const propsConfig = entityCardPropsToLayerConfig(entityType, initialProps);
 
 		// Fusionar configuraciones
-		return mergeLayerConfigs(mergeLayerConfigs(baseConfig, propsConfig), initialConfig);
-	}, [entityType, initialProps, initialConfig]);
+		return mergeLayerConfigs(mergeLayerConfigs(baseConfig, propsConfig), initialLayerConfig);
+	}, [entityType, initialProps, initialLayerConfig]);
 
 	// Estado para la configuración de capas
 	const [layerConfig, setLayerConfig] = useState<EntityCardLayerSystemConfig>(getInitialConfig());
@@ -126,14 +143,14 @@ export function useEntityCardLayers({
 
 	// Actualizar configuración de una capa específica
 	const updateLayerSettings = useCallback(
-		(layerId: string, settings: any) => {
+		(layerId: string, settings: Record<string, unknown>) => {
 			setLayerConfig((prev) => {
 				const newConfig = {
 					...prev,
 					layers: {
 						...prev.layers,
 						[layerId]: {
-							...prev.layers[layerId],
+							...(prev.layers[layerId] || {}),
 							...settings,
 						},
 					},
@@ -152,10 +169,10 @@ export function useEntityCardLayers({
 
 	// Activar o desactivar una capa
 	const toggleLayer = useCallback(
-		(layerId: string, enabled?: boolean) => {
+		(layerId: string, enabled: boolean) => {
 			setLayerConfig((prev) => {
 				const currentLayer = prev.layers[layerId] || {};
-				const newEnabled = enabled !== undefined ? enabled : !currentLayer.enabled;
+				const newEnabled = enabled;
 
 				const newConfig = {
 					...prev,
@@ -200,28 +217,48 @@ export function useEntityCardLayers({
 		const registeredLayers = getRegisteredLayers();
 
 		// Asegurarse de que todas las capas registradas tengan una entrada en la configuración
-		const newLayers: Record<string, any> = { ...layerConfig.layers };
+		const newLayers: Record<string, Record<string, unknown>> = { ...layerConfig.layers };
 		let hasChanges = false;
 
-		for (const layer of registeredLayers) {
-			// Si la capa no tiene configuración, inicializarla con valores predeterminados
-			if (!newLayers[layer.id]) {
-				newLayers[layer.id] = {
-					...layer.defaultConfig,
-					enabled: false, // Por defecto, las capas nuevas están desactivadas
+		// Comprobar cada capa registrada
+		for (const layerId of Object.keys(registeredLayers)) {
+			if (!newLayers[layerId]) {
+				// Si la capa no tiene configuración, crear una por defecto
+				newLayers[layerId] = {
+					enabled: layerId === 'base' || layerId === 'content',
+					layer: layerId,
+					layerIndex: getNextLayerIndex(newLayers),
 				};
 				hasChanges = true;
 			}
 		}
 
-		// Actualizar configuración si hay cambios
+		// Actualizar la configuración si se encontraron cambios
 		if (hasChanges) {
 			setLayerConfig((prev) => ({
 				...prev,
 				layers: newLayers,
 			}));
 		}
-	}, [getRegisteredLayers]);
+	}, [getRegisteredLayers, getNextLayerIndex, layerConfig.layers]);
+
+	// Reordenar capas
+	const reorderLayers = useCallback((layerIds: string[]) => {
+		setLayerConfig((prev) => {
+			const newLayers = layerIds.reduce(
+				(acc, layerId) => {
+					acc[layerId] = prev.layers[layerId];
+					return acc;
+				},
+				{} as Record<string, Record<string, unknown>>
+			);
+
+			return {
+				...prev,
+				layers: newLayers,
+			};
+		});
+	}, []);
 
 	return {
 		layerConfig,
@@ -229,6 +266,7 @@ export function useEntityCardLayers({
 		updateLayerConfig,
 		updateLayerSettings,
 		toggleLayer,
+		reorderLayers,
 		resetToDefaults,
 		saveConfig,
 	};

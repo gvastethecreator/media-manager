@@ -4,6 +4,7 @@ import {
 	createPresetFromCardOptions,
 	getVisualPresetsByEntityType,
 } from '@/components/features/entity-cards/actions/visual-presets.actions';
+import type { EntityType } from '@/components/features/entity-cards/adapters/preset-adapter';
 import { adaptSettingsToBaseOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import { EntityCardPreview } from '@/components/features/entity-cards/modules/preview/entity-card-preview';
@@ -291,7 +292,7 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 								<div className="w-40">
 									<EntityCardPreview
 										cardOptions={cardOptions || adaptSettingsToBaseOptions(DEFAULT_SETTINGS_OPTIONS)}
-										entityType={entityType as any}
+										entityType={entityType as EntityType}
 									/>
 								</div>
 							</div>
@@ -379,7 +380,7 @@ function PresetCard({ preset, isActive, onClick, entityType }: PresetCardProps) 
 			>
 				<div className="h-32 overflow-hidden relative bg-muted/30">
 					<div className="scale-75 origin-top absolute inset-0">
-						<EntityCardPreview entityType={entityType as any} cardOptions={presetOptions} />
+						<EntityCardPreview entityType={entityType as EntityType} cardOptions={presetOptions} />
 					</div>
 				</div>
 				<CardContent className="p-3">
