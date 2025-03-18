@@ -138,7 +138,7 @@ export function adaptDesignSystemToCardOptions(designSystem?: DesignSystem): Par
 /**
  * 🎨 Función para convertir un diseño legacy al nuevo formato DesignSystem
  */
-export function legacyToDesignSystem(legacyOptions: any): Partial<DesignSystem> {
+export function legacyToDesignSystem(legacyOptions: Partial<CardOptions>): Partial<DesignSystem> {
 	const designSystem: Partial<DesignSystem> = {};
 
 	if (legacyOptions.designSystem) {

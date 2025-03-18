@@ -187,6 +187,7 @@ export function PresetsPanel({ activePreset, onPresetSelect, entityType = 'album
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<button
+								type="button"
 								className="text-muted-foreground hover:text-primary"
 								onClick={() =>
 									toastService.info(

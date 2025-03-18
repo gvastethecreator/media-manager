@@ -2,7 +2,6 @@
 
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
 import type { DesignSystem } from './types';
 
 /**
@@ -20,21 +19,22 @@ interface DesignPreviewProps {
  */
 export function DesignPreview({ designSystem, children, className, showPlaceholder = false }: DesignPreviewProps) {
 	// Función para convertir un color hex a RGB
-	const hexToRgb = (hex: string) => {
+	const hexToRgb = (hexColor: string) => {
 		// Si no es un color hex válido, devolver blanco
-		if (!hex.match(/^#([A-Fa-f0-9]{3}){1,2}$/)) {
+		if (!hexColor.match(/^#([A-Fa-f0-9]{3}){1,2}$/)) {
 			return '255, 255, 255';
 		}
 
 		// Expandir color hex corto (por ejemplo, #FFF a #FFFFFF)
-		if (hex.length === 4) {
-			hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+		let processedHex = hexColor;
+		if (hexColor.length === 4) {
+			processedHex = `#${hexColor[1]}${hexColor[1]}${hexColor[2]}${hexColor[2]}${hexColor[3]}${hexColor[3]}`;
 		}
 
 		// Convertir a RGB
-		const r = Number.parseInt(hex.substring(1, 3), 16);
-		const g = Number.parseInt(hex.substring(3, 5), 16);
-		const b = Number.parseInt(hex.substring(5, 7), 16);
+		const r = Number.parseInt(processedHex.substring(1, 3), 16);
+		const g = Number.parseInt(processedHex.substring(3, 5), 16);
+		const b = Number.parseInt(processedHex.substring(5, 7), 16);
 
 		return `${r}, ${g}, ${b}`;
 	};
@@ -68,7 +68,7 @@ export function DesignPreview({ designSystem, children, className, showPlacehold
 	};
 
 	// Generar estilos basados en el sistema de diseño
-	const styles: React.CSSProperties = {
+	const styles: React.CSSProperties & Record<string, string> = {
 		borderRadius: `${designSystem.borderRadius}px`,
 		padding: `${designSystem.padding}px`,
 		aspectRatio: designSystem.aspectRatio,
@@ -90,10 +90,10 @@ export function DesignPreview({ designSystem, children, className, showPlacehold
 		transition: 'all 0.3s ease',
 	};
 
-	// Agregar variables CSS personalizadas
-	Object.entries(designSystem.customCssVariables || {}).forEach(([key, value]) => {
-		(styles as any)[`--${key}`] = value;
-	});
+	// Agregar variables CSS personalizadas usando for...of
+	for (const [key, value] of Object.entries(designSystem.customCssVariables || {})) {
+		styles[`--${key}`] = value;
+	}
 
 	// Contenido de muestra para la previsualización
 	const placeholderContent = (

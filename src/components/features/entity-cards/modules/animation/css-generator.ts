@@ -90,9 +90,10 @@ export function generateAnimationStyles(animationSystem: AnimationSystem): React
 	const variables = generateAnimationVariables(animationSystem);
 
 	// Convertir variables a estilos en línea
-	Object.entries(variables).forEach(([key, value]) => {
-		styles[key as any] = value;
-	});
+	for (const [key, value] of Object.entries(variables)) {
+		// Usar una aserción de tipo más segura que 'any'
+		styles[key as keyof React.CSSProperties] = value;
+	}
 
 	// Agregar transición personalizada si es necesario
 	if (animationSystem.enabled) {

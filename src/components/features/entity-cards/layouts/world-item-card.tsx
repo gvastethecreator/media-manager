@@ -2,7 +2,7 @@
 
 import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { WorldItem } from '../layouts/forms/entity-types';
-import { WorldItemCard as WorldItemCardLayout } from './world-item-card-layout';
+import { WorldItemCard as WorldItemCardLayout, type WorldItemCardProps } from './world-item-card-layout';
 
 // Interfaz para las propiedades del componente WorldItemCard
 export interface WorldItemCardAdapterProps extends BaseCardAdapterProps {
@@ -15,22 +15,20 @@ export interface WorldItemCardAdapterProps extends BaseCardAdapterProps {
  * Adaptador para el componente WorldItemCardLayout
  * Creado con la fábrica de adaptadores para simplificar la implementación
  */
-export const WorldItemCard = createCustomCardAdapter<WorldItem, any, 'worldItem'>(
+export const WorldItemCard = createCustomCardAdapter<WorldItem, WorldItemCardProps, 'worldItem'>(
 	WorldItemCardLayout,
 	'worldItem',
 	(props: WorldItemCardAdapterProps) => {
 		// Convertir las propiedades del adaptador a las propiedades esperadas por WorldItemCardLayout
 		return {
-			data: props.worldItem as any, // Usamos type assertion para evitar errores de tipo
-			isPreview: false,
-			onEdit: props.onEdit,
+			worldItem: props.worldItem,
+			onEdit: props.onEdit ? (item: WorldItem) => props.onEdit?.(item.id) : undefined,
 			onDelete: props.onDelete,
 			onClick: props.onClick,
 			className: props.className,
-			showVisualizationConfig: props.showVisualConfig,
-			options: props.options,
-			rarity: null,
-			texture: null,
+			showVisualConfig: props.showVisualConfig,
+			visualOptions: props.options,
+			enableExplode: props.enableExplode,
 		};
 	}
 );
