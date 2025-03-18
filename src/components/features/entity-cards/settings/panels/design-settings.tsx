@@ -21,19 +21,19 @@ export function DesignSettings({
 	onChange: (options: CardOptions) => void;
 	disabled?: boolean;
 }) {
-	// Convertir opciones del formato antiguo al nuevo sistema usando un cast a any
-	const designSystem = legacyToDesignSystem(options as any);
+	// Convertir opciones del formato antiguo al nuevo sistema usando un cast a tipos parciales
+	const designSystem = legacyToDesignSystem(options as Record<string, unknown>);
 
 	// Manejar cambios en el sistema de diseño
-	const handleDesignChange = (newDesignSystem: DesignSystem) => {
-		// Convertir de nuevo al formato antiguo
-		const legacyOptions = designSystemToLegacy(newDesignSystem);
+	const handleDesignChange = (newSystem: Record<string, unknown>) => {
+		// Convertir de nuevo al formato antiguo para mantener compatibilidad
+		const legacyOptions = designSystemToLegacy(newSystem);
 
-		// Actualizar opciones de la carta usando un cast a any para evitar el error de tipo
+		// Actualizar opciones con el formato legacy
 		onChange({
 			...options,
 			designSystem: legacyOptions,
-		} as any);
+		} as Record<string, unknown>);
 	};
 
 	return <DesignPanel designSystem={designSystem} onChange={handleDesignChange} disabled={disabled} />;

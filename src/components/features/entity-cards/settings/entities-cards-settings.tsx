@@ -3,6 +3,7 @@ import {
 	saveEntityCardConfig,
 } from '@/components/features/entity-cards/modules/core/actions/entities-cards.actions';
 
+import type { EntityType } from '@/components/features/entity-cards/adapters/preset-adapter';
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
@@ -16,7 +17,6 @@ import { LayerManagementDialog } from '@/components/features/entity-cards/module
 import { LayersPanel } from '@/components/features/entity-cards/modules/layers/layers-panel';
 import { RegisterAllLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
 import { adaptCardOptionsToLayersConfig } from '@/components/features/entity-cards/modules/layers/use-layers';
-import { PreviewPanel } from '@/components/features/entity-cards/modules/preview/preview-panel';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import { PresetsPanel } from '@/components/features/entity-cards/settings/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
@@ -657,6 +657,10 @@ export function EntitiesCardsSection() {
 	// Estado para el modo de vista previa expandida
 	const [isExpandedPreview, setIsExpandedPreview] = useState(false);
 
+	// Estado para la capa activa en la vista previa
+	const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+	const [isExploded, setIsExploded] = useState(false);
+
 	// Cargar opciones al cambiar el tipo de entidad
 	const loadEntityOptions = useCallback(async () => {
 		try {
@@ -989,13 +993,15 @@ export function EntitiesCardsSection() {
 										)}
 										style={{ transform: `scale(${previewZoom})` }}
 									>
-										<PreviewPanel
+										<PreviewSettings
 											cardOptions={cardOptions}
 											rarity={selectedRarity}
 											texture={selectedTexture}
-											showInfo={showInfo}
-											entityType={convertEntityId.toApiFormat(activeEntityType) as any}
-											className="w-full max-w-[350px]"
+											entityType={convertEntityId.toApiFormat(activeEntityType) as EntityType}
+											activeLayerId={activeLayerId}
+											isExploded={isExploded}
+											onExplodedChange={setIsExploded}
+											onActiveLayerChange={setActiveLayerId}
 										/>
 									</div>
 
@@ -1079,7 +1085,7 @@ export function EntitiesCardsSection() {
 										/>
 									)}
 									{activePanel === 'design' && (
-										<DesignPanel designSystem={{} as any} onChange={handleCardOptionsChange} />
+										<DesignPanel designSystem={{} as import('@/components/features/entity-cards/modules/design/types').DesignSystem} onChange={handleCardOptionsChange} />
 									)}
 									{/* Panel de vista previa */}
 									{activePanel === 'preview' && (

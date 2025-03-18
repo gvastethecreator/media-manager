@@ -30,7 +30,7 @@ export const PlaceCard = createCustomCardAdapter<Place, PlaceCardProps, 'place'>
 			className: props.className,
 			showVisualConfig: props.showVisualConfig,
 			visualOptions: props.options as Partial<CardOptions>,
-			enableExplode: props.enableExplode
+			enableExplode: props.enableExplode,
 		};
 	}
 );

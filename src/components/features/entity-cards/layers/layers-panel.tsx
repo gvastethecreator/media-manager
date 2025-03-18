@@ -113,8 +113,9 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 							return (
 								<div
 									key={layer.type}
-									className={`flex items-center justify-between p-3 rounded-md border ${isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
-										}`}
+									className={`flex items-center justify-between p-3 rounded-md border ${
+										isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
+									}`}
 								>
 									<div className="flex items-center gap-2">
 										<Switch

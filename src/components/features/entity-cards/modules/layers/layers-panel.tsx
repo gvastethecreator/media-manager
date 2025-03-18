@@ -120,7 +120,7 @@ export function LayersPanel({ config, onChange, cardOptions, onCardOptionsChange
 		setShowLayerEditor(true);
 	};
 
-	const handleLayerConfigChange = (layerType: string, layerConfig: any) => {
+	const handleLayerConfigChange = (layerType: string, layerConfig: Record<string, unknown>) => {
 		onChange({
 			...config,
 			layerConfigs: {
