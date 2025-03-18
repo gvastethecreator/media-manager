@@ -13,7 +13,7 @@ export interface FolderStats {
 /**
  * Representación de una carpeta en el sistema
  */
-export type Folder = Prisma.FolderGetPayload<{}> & {
+export type Folder = Prisma.FolderGetPayload<Record<string, never>> & {
 	totalFiles?: number;
 	totalSize?: number;
 	imageCount?: number;

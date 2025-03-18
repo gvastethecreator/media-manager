@@ -33,43 +33,57 @@
 
 .glow-default {
 	@layer components {
-		box-shadow: 0 10px 15px -3px hsla(var(--primary)/0.2), 0 4px 6px -2px hsla(var(--primary)/0.2);
+		box-shadow:
+			0 10px 15px -3px hsla(var(--primary) / 0.2),
+			0 4px 6px -2px hsla(var(--primary) / 0.2);
 	}
 }
 
 .glow-common {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(156, 163, 175, 0.2), 0 4px 6px -2px rgba(156, 163, 175, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(156, 163, 175, 0.2),
+			0 4px 6px -2px rgba(156, 163, 175, 0.2);
 	}
 }
 
 .glow-uncommon {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.2), 0 4px 6px -2px rgba(74, 222, 128, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(74, 222, 128, 0.2),
+			0 4px 6px -2px rgba(74, 222, 128, 0.2);
 	}
 }
 
 .glow-rare {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(96, 165, 250, 0.2), 0 4px 6px -2px rgba(96, 165, 250, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(96, 165, 250, 0.2),
+			0 4px 6px -2px rgba(96, 165, 250, 0.2);
 	}
 }
 
 .glow-epic {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(192, 132, 252, 0.2), 0 4px 6px -2px rgba(192, 132, 252, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(192, 132, 252, 0.2),
+			0 4px 6px -2px rgba(192, 132, 252, 0.2);
 	}
 }
 
 .glow-legendary {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(250, 204, 21, 0.2), 0 4px 6px -2px rgba(250, 204, 21, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(250, 204, 21, 0.2),
+			0 4px 6px -2px rgba(250, 204, 21, 0.2);
 	}
 }
 
 .glow-mythic {
 	@layer components {
-		box-shadow: 0 10px 15px -3px rgba(248, 113, 113, 0.2), 0 4px 6px -2px rgba(248, 113, 113, 0.2);
+		box-shadow:
+			0 10px 15px -3px rgba(248, 113, 113, 0.2),
+			0 4px 6px -2px rgba(248, 113, 113, 0.2);
 	}
 }
 
@@ -83,43 +97,78 @@
 
 .holographic-default {
 	@layer components {
-		background-image: linear-gradient(to bottom right, hsla(var(--primary)/0.2), hsla(var(--secondary)/0.2), hsla(var(--accent)/0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			hsla(var(--primary) / 0.2),
+			hsla(var(--secondary) / 0.2),
+			hsla(var(--accent) / 0.2)
+		);
 	}
 }
 
 .holographic-common {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(156, 163, 175, 0.2), rgba(209, 213, 219, 0.2), rgba(229, 231, 235, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(156, 163, 175, 0.2),
+			rgba(209, 213, 219, 0.2),
+			rgba(229, 231, 235, 0.2)
+		);
 	}
 }
 
 .holographic-uncommon {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(74, 222, 128, 0.2), rgba(134, 239, 172, 0.2), rgba(187, 247, 208, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(74, 222, 128, 0.2),
+			rgba(134, 239, 172, 0.2),
+			rgba(187, 247, 208, 0.2)
+		);
 	}
 }
 
 .holographic-rare {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(96, 165, 250, 0.2), rgba(147, 197, 253, 0.2), rgba(191, 219, 254, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(96, 165, 250, 0.2),
+			rgba(147, 197, 253, 0.2),
+			rgba(191, 219, 254, 0.2)
+		);
 	}
 }
 
 .holographic-epic {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(192, 132, 252, 0.2), rgba(216, 180, 254, 0.2), rgba(233, 213, 255, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(192, 132, 252, 0.2),
+			rgba(216, 180, 254, 0.2),
+			rgba(233, 213, 255, 0.2)
+		);
 	}
 }
 
 .holographic-legendary {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(250, 204, 21, 0.2), rgba(253, 224, 71, 0.2), rgba(254, 240, 138, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(250, 204, 21, 0.2),
+			rgba(253, 224, 71, 0.2),
+			rgba(254, 240, 138, 0.2)
+		);
 	}
 }
 
 .holographic-mythic {
 	@layer components {
-		background-image: linear-gradient(to bottom right, rgba(248, 113, 113, 0.2), rgba(252, 165, 165, 0.2), rgba(254, 202, 202, 0.2));
+		background-image: linear-gradient(
+			to bottom right,
+			rgba(248, 113, 113, 0.2),
+			rgba(252, 165, 165, 0.2),
+			rgba(254, 202, 202, 0.2)
+		);
 	}
 }
 
@@ -134,7 +183,7 @@
 /* Efectos de textura */
 .texture-default {
 	@layer components {
-		background-image: linear-gradient(to bottom right, hsla(var(--primary)/0.05), hsla(var(--secondary)/0.05));
+		background-image: linear-gradient(to bottom right, hsla(var(--primary) / 0.05), hsla(var(--secondary) / 0.05));
 	}
 }
 
@@ -186,7 +235,6 @@
 }
 
 @keyframes pulse {
-
 	0%,
 	100% {
 		opacity: 1;
@@ -261,11 +309,15 @@
 }
 
 .shadow-md {
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	box-shadow:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1),
+		0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .shadow-lg {
-	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	box-shadow:
+		0 10px 15px -3px rgba(0, 0, 0, 0.1),
+		0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Efectos de elevación */

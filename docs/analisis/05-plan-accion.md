@@ -17,16 +17,19 @@ Las tareas están categorizadas por prioridad (Alta, Media, Baja) y complejidad 
 ### Prioridad Alta
 
 1. **Completar el Sistema de Eventos** (Complejidad: Media)
+
    - Finalizar migración según docs/progress.md
    - Implementar tipado estricto para eventos
    - Estandarizar emisión y manejo de eventos
 
 2. **Implementar Sistema de Colas Bull** (Complejidad: Alta)
+
    - Configurar Redis para colas de procesamiento
    - Implementar workers dedicados
    - Crear panel de administración con @bull-board
 
 3. **Optimizar Consultas Prisma** (Complejidad: Media)
+
    - Auditar y optimizar consultas existentes
    - Implementar paginación y filtros eficientes
    - Mejorar manejo de relaciones
@@ -39,16 +42,19 @@ Las tareas están categorizadas por prioridad (Alta, Media, Baja) y complejidad 
 ### Prioridad Media
 
 5. **Mejorar Sistema de Caché** (Complejidad: Alta)
+
    - Implementar sistema LRU para metadatos
    - Establecer estrategia de caché por tipo de datos
    - Optimizar invalidación
 
 6. **Refactorizar Gestión de Estado** (Complejidad: Media)
+
    - Estandarizar stores Zustand
    - Implementar estrategia optimizada para React Query
    - Separar estado UI vs estado de datos
 
 7. **Optimizar Server Components** (Complejidad: Media)
+
    - Auditar y refactorizar componentes
    - Establecer límites claros entre Server/Client
    - Reducir JavaScript innecesario en cliente
@@ -61,11 +67,13 @@ Las tareas están categorizadas por prioridad (Alta, Media, Baja) y complejidad 
 ### Prioridad Baja
 
 9. **Implementar Monitoreo y Métricas** (Complejidad: Alta)
+
    - Añadir sistema de métricas
    - Crear dashboard para visualización
    - Configurar alertas para errores
 
 10. **Mejorar Experiencia de Usuario** (Complejidad: Media)
+
     - Implementar animaciones con Motion
     - Mejorar accesibilidad
     - Optimizar para dispositivos móviles
@@ -107,17 +115,20 @@ gantt
 **Objetivo**: Establecer una base sólida para el resto de mejoras abordando problemas críticos.
 
 1. **Completar Sistema de Eventos**
+
    - Seguir plan en docs/progress.md
    - Implementar tipos estrictos para eventos
    - Refactorizar para emisión consistente
 
 2. **Implementar Sistema de Colas Bull**
+
    - Instalar y configurar Redis
    - Implementar colas para procesamiento de imágenes
    - Crear workers dedicados
    - Implementar panel de administración
 
 3. **Optimizar Consultas Prisma**
+
    - Auditar consultas existentes
    - Implementar paginación y filtrado
    - Optimizar relaciones y includes
@@ -132,11 +143,13 @@ gantt
 **Objetivo**: Optimizar rendimiento y experiencia de usuario mejorando sistemas clave.
 
 1. **Mejorar Sistema de Caché**
+
    - Implementar sistema LRU para metadatos
    - Establecer estrategia de limpieza
    - Añadir métricas y estadísticas
 
 2. **Refactorizar Gestión de Estado**
+
    - Estandarizar stores Zustand
    - Optimizar React Query
    - Implementar hooks para Server Actions
@@ -151,16 +164,19 @@ gantt
 **Objetivo**: Añadir características avanzadas y pulir la aplicación.
 
 1. **Implementar Formatos de Imagen Modernos**
+
    - Añadir soporte AVIF
    - Implementar detección automática
    - Optimizar calidad/tamaño
 
 2. **Implementar Monitoreo**
+
    - Añadir métricas de rendimiento
    - Crear dashboard
    - Configurar alertas
 
 3. **Mejorar UX**
+
    - Implementar animaciones
    - Mejorar accesibilidad
    - Optimizar para móviles
@@ -173,16 +189,19 @@ gantt
 ## Beneficios Esperados
 
 1. **Rendimiento**
+
    - Reducción de tiempos de carga en 30-50%
    - Mejora en la eficiencia de procesamiento de imágenes
    - Menor consumo de memoria
 
 2. **Experiencia de Usuario**
+
    - Interfaz más fluida con animaciones
    - Mejor accesibilidad
    - Soporte mejorado para móviles
 
 3. **Mantenibilidad**
+
    - Código más estructurado y predecible
    - Tipado estricto para reducir errores
    - Patrones consistentes

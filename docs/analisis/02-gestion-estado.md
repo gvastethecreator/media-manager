@@ -16,26 +16,26 @@ Los stores Zustand siguen un enfoque estructurado pero con algunas inconsistenci
 ```typescript
 // Patrón común:
 export const useImageStore = create<ImageState>((set, get) => ({
-  // estado...
-  acciones: () => {
-    // lógica que modifica el estado
-    set((state) => ({ ...state, /* cambios */ }));
-  }
+	// estado...
+	acciones: () => {
+		// lógica que modifica el estado
+		set((state) => ({ ...state /* cambios */ }));
+	},
 }));
 
 // Algunos stores utilizan el middleware persist:
 export const useSettingsStore = create<SettingsState>()(
-  persist(
-    (set, get) => ({
-      // configuración y acciones...
-    }),
-    { name: 'settings-storage' }
-  )
+	persist(
+		(set, get) => ({
+			// configuración y acciones...
+		}),
+		{ name: 'settings-storage' }
+	)
 );
 
 // Otros stores utilizan un patrón factory:
 export const useProfileStore = createStoreFactory<Profile, ProfileState>('profile', {
-  // estado extendido específico...
+	// estado extendido específico...
 });
 ```
 
@@ -46,17 +46,18 @@ La configuración actual de React Query:
 ```typescript
 // Configuración básica en src/lib/react-query.ts
 export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60, // 1 minuto
-      gcTime: 1000 * 60 * 5, // 5 minutos
-      retry: 2,
-    },
-  },
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60, // 1 minuto
+			gcTime: 1000 * 60 * 5, // 5 minutos
+			retry: 2,
+		},
+	},
 });
 ```
 
 Los hooks para datos están implementados de manera inconsistente:
+
 - Algunos utilizan clave de consulta estructurada
 - Otros utilizan gestión personalizada de la caché
 - La invalidación de cache no sigue un patrón consistente
@@ -64,16 +65,19 @@ Los hooks para datos están implementados de manera inconsistente:
 ## Problemas Identificados
 
 1. **Fragmentación del Estado**:
+
    - Estado dividido entre múltiples stores sin una clara separación de responsabilidades
    - Duplicación de lógica entre stores diferentes
    - Inconsistencia en el manejo de errores y estados de carga
 
 2. **React Query Subutilizado**:
+
    - No se aprovechan características avanzadas como queryClient.prefetchQuery
    - Configuración estática sin optimizaciones por tipo de datos
    - Falta de estrategias para datos relacionados (invalidación en cascada)
 
 3. **Persistencia Inconsistente**:
+
    - Algunos stores utilizan middleware persist, otros no
    - Falta de estrategia clara para datos que deben o no persistir
    - Potenciales problemas de sincronización entre estado persistido y datos del servidor
@@ -92,28 +96,36 @@ Implementar un patrón consistente para todos los stores:
 ```typescript
 // Patrón recomendado para stores Zustand
 export const createEntityStore = <T extends BaseEntity>(entityName: string) =>
-  create<EntityStore<T>>()(
-    persist(
-      (set, get) => ({
-        // Estado base común
-        items: [],
-        isLoading: false,
-        error: null,
+	create<EntityStore<T>>()(
+		persist(
+			(set, get) => ({
+				// Estado base común
+				items: [],
+				isLoading: false,
+				error: null,
 
-        // Acciones estándar (CRUD)
-        fetch: async () => {/* implementación */},
-        add: async (item) => {/* implementación */},
-        update: async (id, item) => {/* implementación */},
-        remove: async (id) => {/* implementación */},
+				// Acciones estándar (CRUD)
+				fetch: async () => {
+					/* implementación */
+				},
+				add: async (item) => {
+					/* implementación */
+				},
+				update: async (id, item) => {
+					/* implementación */
+				},
+				remove: async (id) => {
+					/* implementación */
+				},
 
-        // Estado específico de la entidad...
-      }),
-      {
-        name: `${entityName}-store`,
-        partialize: (state) => ({ items: state.items }),
-      }
-    )
-  );
+				// Estado específico de la entidad...
+			}),
+			{
+				name: `${entityName}-store`,
+				partialize: (state) => ({ items: state.items }),
+			}
+		)
+	);
 ```
 
 ### 2. Optimización de React Query
@@ -121,24 +133,24 @@ export const createEntityStore = <T extends BaseEntity>(entityName: string) =>
 ```typescript
 // Configuración mejorada
 export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: (query) => {
-        // Ajustar staleTime según el tipo de datos
-        if (query.queryKey[0] === 'stats') return 1000 * 30; // 30s para estadísticas
-        if (query.queryKey[0] === 'settings') return 1000 * 60 * 60; // 1h para configuraciones
-        return 1000 * 60; // 1min por defecto
-      },
-      retry: (failureCount, error) => {
-        if (error instanceof NetworkError) return failureCount < 3;
-        return failureCount < 1;
-      },
-      refetchOnWindowFocus: (query) => {
-        // Solo refrescar datos dinámicos al enfocar
-        return ['stats', 'notifications'].includes(query.queryKey[0] as string);
-      },
-    },
-  },
+	defaultOptions: {
+		queries: {
+			staleTime: (query) => {
+				// Ajustar staleTime según el tipo de datos
+				if (query.queryKey[0] === 'stats') return 1000 * 30; // 30s para estadísticas
+				if (query.queryKey[0] === 'settings') return 1000 * 60 * 60; // 1h para configuraciones
+				return 1000 * 60; // 1min por defecto
+			},
+			retry: (failureCount, error) => {
+				if (error instanceof NetworkError) return failureCount < 3;
+				return failureCount < 1;
+			},
+			refetchOnWindowFocus: (query) => {
+				// Solo refrescar datos dinámicos al enfocar
+				return ['stats', 'notifications'].includes(query.queryKey[0] as string);
+			},
+		},
+	},
 });
 ```
 
@@ -147,6 +159,7 @@ export const queryClient = new QueryClient({
 Establecer un patrón claro para la comunicación:
 
 1. **Estado Derivado del Servidor**:
+
    - Datos obtenidos en Server Components pasados a Client Components
    - Uso de React Query para refrescar datos cuando sea necesario
    - Preferencia por RSC para datos iniciales
@@ -197,11 +210,13 @@ Dividir claramente la responsabilidad:
 ## Plan de Implementación
 
 1. **Fase 1: Estandarización**
+
    - Refactorizar stores para seguir un patrón consistente
    - Definir claves de consulta estándar para React Query
    - Documentar patrones aprobados para gestión de estado
 
 2. **Fase 2: Optimización**
+
    - Implementar configuración avanzada de React Query
    - Introducir prefetching para mejorar experiencia de usuario
    - Optimizar flujos de revalidación de datos

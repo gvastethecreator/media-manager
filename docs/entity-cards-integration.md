@@ -25,32 +25,28 @@ El componente `EntityCardWrapper` simplifica la integración con `BaseCard` y ma
 ### Ejemplo básico:
 
 ```tsx
-import { EntityCardWrapper } from "@/components/features/entity-cards/base/entity-card-wrapper";
-import { generateRarityConfig } from "@/components/features/entity-cards/base/card-adapter";
+import { EntityCardWrapper } from '@/components/features/entity-cards/base/entity-card-wrapper';
+import { generateRarityConfig } from '@/components/features/entity-cards/base/card-adapter';
 
-export function MyEntityCard({
-  entity,
-  options,
-  onClick
-}) {
-  // Generar configuración de rareza
-  const rarityConfig = generateRarityConfig(entity.rarity, entity.color);
+export function MyEntityCard({ entity, options, onClick }) {
+	// Generar configuración de rareza
+	const rarityConfig = generateRarityConfig(entity.rarity, entity.color);
 
-  return (
-    <EntityCardWrapper
-      className="my-card-class"
-      options={options}
-      entityType="album" // Tipo de diseño: album, tag, character, etc.
-      rarity={rarityConfig}
-      onClick={onClick}
-    >
-      {/* Contenido específico de la tarjeta */}
-      <div className="flex flex-col h-full p-3">
-        <h3>{entity.name}</h3>
-        <p>{entity.description}</p>
-      </div>
-    </EntityCardWrapper>
-  );
+	return (
+		<EntityCardWrapper
+			className="my-card-class"
+			options={options}
+			entityType="album" // Tipo de diseño: album, tag, character, etc.
+			rarity={rarityConfig}
+			onClick={onClick}
+		>
+			{/* Contenido específico de la tarjeta */}
+			<div className="flex flex-col h-full p-3">
+				<h3>{entity.name}</h3>
+				<p>{entity.description}</p>
+			</div>
+		</EntityCardWrapper>
+	);
 }
 ```
 
@@ -66,19 +62,19 @@ Cada tipo de entidad puede tener opciones visuales específicas por defecto. Pue
 
 ### Propiedades disponibles en EntityCardWrapper:
 
-| Propiedad | Tipo | Descripción |
-|-----------|------|-------------|
-| `children` | ReactNode | Contenido de la tarjeta |
-| `className` | string | Clases CSS adicionales |
-| `options` | Partial<BaseCardOptions \| SettingsCardOptions> | Configuración visual |
-| `entityType` | CardDesignPreset | Tipo de entidad (album, tag, character, etc.) |
-| `rarity` | RarityConfig | Configuración de rareza |
-| `texture` | TextureConfig | Configuración de textura |
-| `onClick` | function | Manejador de clics |
-| `onHoverStart` | function | Evento al iniciar hover |
-| `onHoverEnd` | function | Evento al finalizar hover |
-| `showVisualizationConfig` | boolean | Mostrar botón de configuración |
-| `enableExplode` | boolean | Habilitar vista explotada |
+| Propiedad                 | Tipo                                            | Descripción                                   |
+| ------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| `children`                | ReactNode                                       | Contenido de la tarjeta                       |
+| `className`               | string                                          | Clases CSS adicionales                        |
+| `options`                 | Partial<BaseCardOptions \| SettingsCardOptions> | Configuración visual                          |
+| `entityType`              | CardDesignPreset                                | Tipo de entidad (album, tag, character, etc.) |
+| `rarity`                  | RarityConfig                                    | Configuración de rareza                       |
+| `texture`                 | TextureConfig                                   | Configuración de textura                      |
+| `onClick`                 | function                                        | Manejador de clics                            |
+| `onHoverStart`            | function                                        | Evento al iniciar hover                       |
+| `onHoverEnd`              | function                                        | Evento al finalizar hover                     |
+| `showVisualizationConfig` | boolean                                         | Mostrar botón de configuración                |
+| `enableExplode`           | boolean                                         | Habilitar vista explotada                     |
 
 ## Funciones Auxiliares
 
@@ -87,13 +83,13 @@ Cada tipo de entidad puede tener opciones visuales específicas por defecto. Pue
 Genera una configuración de rareza estándar basada en el nombre de rareza:
 
 ```tsx
-import { generateRarityConfig } from "@/components/features/entity-cards/base/card-adapter";
+import { generateRarityConfig } from '@/components/features/entity-cards/base/card-adapter';
 
 // Uso básico
-const rarityConfig = generateRarityConfig("legendary");
+const rarityConfig = generateRarityConfig('legendary');
 
 // Con color personalizado (se usa si no hay rareza)
-const customRarity = generateRarityConfig(undefined, "#3b82f6");
+const customRarity = generateRarityConfig(undefined, '#3b82f6');
 ```
 
 ### adaptOptionsForLayout
@@ -101,9 +97,9 @@ const customRarity = generateRarityConfig(undefined, "#3b82f6");
 Adapta las opciones de configuración según el tipo de entidad:
 
 ```tsx
-import { adaptOptionsForLayout } from "@/components/features/entity-cards/base/card-adapter";
+import { adaptOptionsForLayout } from '@/components/features/entity-cards/base/card-adapter';
 
-const adaptedOptions = adaptOptionsForLayout(baseOptions, "album");
+const adaptedOptions = adaptOptionsForLayout(baseOptions, 'album');
 ```
 
 ## Mejores Prácticas

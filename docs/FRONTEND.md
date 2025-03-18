@@ -1,5 +1,7 @@
 # 🎨 Frontend Stack & Guidelines
+
 ## 📚 Stack Tecnológico
+
 ### Core
 
 - **Next.js 15**

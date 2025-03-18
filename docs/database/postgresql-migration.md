@@ -75,10 +75,12 @@ graph TD
 La arquitectura propuesta divide el esquema actual en 4 bases de datos PostgreSQL separadas pero relacionadas:
 
 1. **Core DB (profiles)**: Contiene los modelos fundamentales para el funcionamiento del sistema.
+
    - Profile: Perfiles de usuario
    - QueueJob: Sistema de colas
 
 2. **Images DB (imágenes)**: Gestiona todo lo relacionado con imágenes y carpetas.
+
    - Image: Imágenes y sus metadatos
    - Folder: Estructura de carpetas
    - Video: Videos
@@ -86,6 +88,7 @@ La arquitectura propuesta divide el esquema actual en 4 bases de datos PostgreSQ
    - Estadísticas y actividades
 
 3. **Entities DB (entidades)**: Almacena las entidades del mundo.
+
    - Character: Personajes
    - Place: Lugares
    - WorldItem: Objetos del mundo

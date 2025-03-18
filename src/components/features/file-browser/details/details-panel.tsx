@@ -12,23 +12,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import type { ImageItem } from '@/types/image-item';
 import type { FileMetadata } from '@/types/metadata.types';
-import {
-	Bug,
-	Calendar,
-	Camera,
-	FileImage,
-	FileText,
-	Folder,
-	HardDrive,
-	Info,
-	Layers,
-	Loader2,
-	MapPin as MapIcon,
-	Settings2,
-	Sparkles,
-} from 'lucide-react';
+import { Bug, Camera, FileImage, Info, Loader2, MapPin as MapIcon, Settings2, Sparkles } from 'lucide-react';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ExifInfo, GPSInfo, IPTCInfo, TechnicalInfo, XMPInfo } from './details-panel-metadata-sections';
@@ -156,7 +142,12 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 		console.group('🔍 Depuración de Metadata');
 		if (item?.metadata) {
 			try {
-			} catch (_error) {}
+				console.log('Metadata completa:', item.metadata);
+				const metadataObj = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
+				console.table(metadataObj);
+			} catch (_error) {
+				console.error('Error al analizar metadata:', item.metadata);
+			}
 		}
 		console.groupEnd();
 

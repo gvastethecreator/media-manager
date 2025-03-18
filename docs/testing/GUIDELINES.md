@@ -47,7 +47,7 @@ src/
 ## Estructura de un Test
 
 ```typescript
-describe("Módulo/Componente", () => {
+describe('Módulo/Componente', () => {
 	// Setup común
 	beforeAll(() => {
 		// Configuración inicial
@@ -57,8 +57,8 @@ describe("Módulo/Componente", () => {
 		// Reset entre tests
 	});
 
-	describe("Funcionalidad específica", () => {
-		it("debería hacer algo específico", () => {
+	describe('Funcionalidad específica', () => {
+		it('debería hacer algo específico', () => {
 			// Arrange
 			// Act
 			// Assert
@@ -110,17 +110,17 @@ describe("Módulo/Componente", () => {
 ### Test Unitario
 
 ```typescript
-import { formatBytes } from "@/lib/utils";
+import { formatBytes } from '@/lib/utils';
 
-describe("formatBytes", () => {
-	it("debería formatear bytes correctamente", () => {
-		expect(formatBytes(1024)).toBe("1 KB");
-		expect(formatBytes(1024 * 1024)).toBe("1 MB");
+describe('formatBytes', () => {
+	it('debería formatear bytes correctamente', () => {
+		expect(formatBytes(1024)).toBe('1 KB');
+		expect(formatBytes(1024 * 1024)).toBe('1 MB');
 	});
 
-	it("debería manejar valores inválidos", () => {
-		expect(formatBytes(-1)).toBe("0 B");
-		expect(formatBytes(NaN)).toBe("0 B");
+	it('debería manejar valores inválidos', () => {
+		expect(formatBytes(-1)).toBe('0 B');
+		expect(formatBytes(NaN)).toBe('0 B');
 	});
 });
 ```
@@ -128,19 +128,17 @@ describe("formatBytes", () => {
 ### Test de Integración
 
 ```typescript
-import { generateThumbnail } from "@/lib/thumbnail";
-import { getImageMetadata } from "@/lib/metadata";
+import { generateThumbnail } from '@/lib/thumbnail';
+import { getImageMetadata } from '@/lib/metadata';
 
-describe("Generación de Thumbnails", () => {
-	it("debería generar thumbnail con metadata", async () => {
-		const imagePath = "test.jpg";
+describe('Generación de Thumbnails', () => {
+	it('debería generar thumbnail con metadata', async () => {
+		const imagePath = 'test.jpg';
 		const metadata = await getImageMetadata(imagePath);
 		const thumbnail = await generateThumbnail(imagePath);
 
-		expect(thumbnail.width).toBeLessThanOrEqual(
-			metadata.dimensions?.width || 0
-		);
-		expect(thumbnail.format).toBe("webp");
+		expect(thumbnail.width).toBeLessThanOrEqual(metadata.dimensions?.width || 0);
+		expect(thumbnail.format).toBe('webp');
 	});
 });
 ```
@@ -202,16 +200,12 @@ describe("Generación de Thumbnails", () => {
 ```typescript
 // jest.config.js
 module.exports = {
-	testEnvironment: "jsdom",
-	setupFilesAfterEnv: ["<rootDir>/src/tests/setup.ts"],
+	testEnvironment: 'jsdom',
+	setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
 	moduleNameMapper: {
-		"^@/(.*)$": "<rootDir>/src/$1",
+		'^@/(.*)$': '<rootDir>/src/$1',
 	},
-	collectCoverageFrom: [
-		"src/**/*.{ts,tsx}",
-		"!src/**/*.d.ts",
-		"!src/tests/**/*",
-	],
+	collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/tests/**/*'],
 };
 ```
 
