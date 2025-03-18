@@ -358,7 +358,20 @@ export function FolderCardLayout({
 			</EntityCardWrapper>
 
 			{/* Capa para manejo de clics que garantiza que toda el área sea clickeable */}
-			{onClick && <div className="absolute inset-0 z-10 opacity-0" onClick={handleClick} aria-hidden="true" />}
+			{onClick && (
+				<div
+					className="absolute inset-0 z-10 opacity-0"
+					onClick={handleClick}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							handleClick(e);
+						}
+					}}
+					role="button"
+					tabIndex={0}
+				/>
+			)}
 		</div>
 	);
 }

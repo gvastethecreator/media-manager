@@ -2,7 +2,7 @@
 
 import type { Folder } from '@/types/entities/folders';
 import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
-import { FolderCardLayout } from './folder-card-layout';
+import { FolderCardLayout, type FolderCardLayoutProps } from './folder-card-layout';
 
 // Interfaz para las propiedades del componente FolderCard
 export interface FolderCardAdapterProps extends BaseCardAdapterProps {
@@ -15,7 +15,7 @@ export interface FolderCardAdapterProps extends BaseCardAdapterProps {
  * Adaptador para el componente FolderCardLayout
  * Creado con la fábrica de adaptadores para simplificar la implementación
  */
-export const FolderCard = createCustomCardAdapter<Folder, any, 'folder'>(
+export const FolderCard = createCustomCardAdapter<Folder, FolderCardLayoutProps, 'folder'>(
 	FolderCardLayout,
 	'folder',
 	(props: FolderCardAdapterProps) => {
@@ -23,24 +23,17 @@ export const FolderCard = createCustomCardAdapter<Folder, any, 'folder'>(
 		if (!props.folder || !props.folder.id) {
 			console.error('Error: La carpeta es undefined o no tiene un id');
 			return {
-				data: null,
-				isPreview: false,
 				folder: null,
-				onEdit: null,
-				onDelete: null,
-				onClick: null,
+				isPreview: false,
 				className: props.className,
 				showVisualConfig: false,
 				options: {},
-				rarity: null,
-				texture: null,
-			};
+			} as FolderCardLayoutProps;
 		}
 
 		// Convertir las propiedades del adaptador a las propiedades esperadas por FolderCardLayout
 		return {
-			data: props.folder as any, // Usamos type assertion para evitar errores de tipo
-			folder: props.folder, // Asegurarnos de pasar la carpeta al layout
+			folder: props.folder,
 			isPreview: false,
 			onEdit: props.onEdit,
 			onDelete: props.onDelete,
@@ -48,8 +41,11 @@ export const FolderCard = createCustomCardAdapter<Folder, any, 'folder'>(
 			className: props.className,
 			showVisualConfig: props.showVisualConfig,
 			options: props.options,
-			rarity: null,
-			texture: null,
+			enableExplode: props.enableExplode,
+			isExploded: props.isExploded,
+			activeLayer: props.activeLayer,
+			onExplodedChange: props.onExplodedChange,
+			onActiveLayerChange: props.onActiveLayerChange
 		};
 	}
 );

@@ -5,7 +5,7 @@ export async function GET(_request: Request, { params }: { params: { entityType:
 	try {
 		const { entityType, entityId } = params;
 
-		let visualConfig;
+		let visualConfig: Record<string, unknown> | null = null;
 
 		switch (entityType) {
 			case 'folders':
@@ -55,7 +55,7 @@ export async function PUT(request: Request, { params }: { params: { entityType: 
 		const { entityType, entityId } = params;
 		const data = await request.json();
 
-		let visualConfig;
+		let visualConfig: Record<string, unknown> | null = null;
 
 		switch (entityType) {
 			case 'folders':
@@ -142,7 +142,7 @@ export async function DELETE(_request: Request, { params }: { params: { entityTy
 	try {
 		const { entityType, entityId } = params;
 
-		let visualConfig;
+		let visualConfig: Record<string, unknown> | null = null;
 
 		switch (entityType) {
 			case 'folders':

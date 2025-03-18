@@ -2,9 +2,8 @@
 
 import { useLayerPlugin } from '@/components/features/entity-cards/layers/layer-plugin-system';
 import { toastService } from '@/lib/services/toast.service';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { CardOptions } from '../../../types/card-settings-types';
-import { LayerConfig } from '../types';
 
 /**
  * 🪝 Hook para gestionar el sistema de capas
@@ -30,9 +29,10 @@ export function useLayersSystem(cardOptions: CardOptions) {
 	 */
 	const resetAllLayers = useCallback(() => {
 		const defaultLayerConfigs = {};
-		availableLayers.forEach((layer) => {
+
+		for (const layer of availableLayers) {
 			defaultLayerConfigs[layer.type] = { ...layer.defaultConfig };
-		});
+		}
 
 		return defaultLayerConfigs;
 	}, [availableLayers]);

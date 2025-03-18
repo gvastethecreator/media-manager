@@ -5,8 +5,12 @@ import { NextResponse } from 'next/server';
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('InitServerRoute');
 
-// Variable para controlar si ya se ha inicializado
-let isInitialized = false;
+// Función para verificar si el servidor ya está inicializado
+async function isServerInitialized(): Promise<boolean> {
+	// Aquí iría la lógica para verificar si el servidor ya está inicializado
+	// Por ahora, retornamos false como ejemplo
+	return false;
+}
 
 /**
  * Ruta de API para inicializar el servidor
@@ -18,29 +22,28 @@ let isInitialized = false;
  */
 export async function GET() {
 	try {
-		if (!isInitialized) {
+		// Verificar si el servidor ya está inicializado
+		const isServerAlreadyInitialized = await isServerInitialized();
+
+		if (!isServerAlreadyInitialized) {
 			logger.info('Inicializando servidor desde ruta de API');
 
 			// Inicializar servidor
 			initializeServer();
 
-			// Marcar como inicializado
-			isInitialized = true;
-
 			return NextResponse.json({
-				success: true,
 				message: 'Servidor inicializado correctamente',
 				timestamp: new Date().toISOString(),
 			});
-		} else {
-			logger.info('Servidor ya inicializado, omitiendo inicialización');
-
-			return NextResponse.json({
-				success: true,
-				message: 'Servidor ya estaba inicializado',
-				timestamp: new Date().toISOString(),
-			});
 		}
+
+		logger.info('Servidor ya inicializado, omitiendo inicialización');
+
+		// Devolver una respuesta indicando que el servidor ya está inicializado
+		return NextResponse.json({
+			message: 'Server already initialized',
+			timestamp: new Date().toISOString(),
+		});
 	} catch (error) {
 		logger.error('Error al inicializar el servidor', {
 			error: error instanceof Error ? error.message : String(error),

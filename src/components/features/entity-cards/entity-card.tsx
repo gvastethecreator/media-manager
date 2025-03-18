@@ -101,9 +101,9 @@ export function BaseCard({
 	);
 
 	return (
-		<div
-			role="button"
+		<button
 			tabIndex={0}
+			type="button"
 			className={cn(
 				'relative w-full h-full perspective-1000 bg-transparent border-0 p-0',
 				className,
@@ -138,7 +138,7 @@ export function BaseCard({
 					</div>
 				)}
 			</div>
-		</div>
+		</button>
 	);
 }
 
@@ -208,7 +208,7 @@ export function EntityCard({
 	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
 	// Referencia al contenedor para calcular posición del mouse
-	const containerRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLButtonElement>(null);
 
 	// Crear manejador de errores
 	const errorHandler = createErrorHandler({
@@ -287,52 +287,41 @@ export function EntityCard({
 		(e: React.MouseEvent<HTMLDivElement>) => {
 			if (!containerRef.current) return;
 
+			// Obtener coordenadas relativas al contenedor
 			const rect = containerRef.current.getBoundingClientRect();
-			const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-			const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+			const x = ((e.clientX - rect.left) / rect.width) * 100;
+			const y = ((e.clientY - rect.top) / rect.height) * 100;
 
 			setMousePosition({ x, y });
 		},
-		[containerRef]
+		[] // No necesitamos containerRef como dependencia
 	);
 
 	// Manejar flip de la tarjeta
-	const handleFlip = useCallback(
-		(e: React.MouseEvent<HTMLDivElement>) => {
-			// Si hay un manejador onClick, no hacer flip (priorizar el onClick)
-			if (onClick) {
-				return;
-			}
-
-			if (enableBackside || mergedOptions.backside?.enabled) {
-				setIsFlipped((prev) => !prev);
-			}
-
-			// Detener propagación para evitar conflictos con otros manejadores
-			e.stopPropagation();
-		},
-		[enableBackside, mergedOptions.backside?.enabled, onClick]
-	);
+	const handleFlip = useCallback(() => {
+		if (enableBackside || mergedOptions.backside?.enabled) {
+			setIsFlipped((prev) => !prev);
+		}
+	}, [enableBackside, mergedOptions.backside?.enabled]);
 
 	// Manejar navegación por teclado
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
-				if (onClick) {
-					// Simular un clic si hay un manejador onClick
-					const syntheticEvent = new MouseEvent('click', {
-						bubbles: true,
-						cancelable: true,
-						view: window,
-					}) as unknown as React.MouseEvent<HTMLDivElement>;
-					onClick(syntheticEvent);
-				} else if (enableBackside || mergedOptions.backside?.enabled) {
-					setIsFlipped((prev) => !prev);
-				}
 				e.preventDefault();
+				if (enableBackside && mergedOptions.backside?.enabled) {
+					handleFlip();
+				} else if (onClick) {
+					onClick();
+				}
+			}
+
+			// Agregar lógica para que Escape cierre la carta si está volteada
+			if (e.key === 'Escape' && isFlipped) {
+				handleFlip();
 			}
 		},
-		[handleFlip, onClick, enableBackside, mergedOptions.backside?.enabled]
+		[enableBackside, mergedOptions.backside?.enabled, onClick, isFlipped, handleFlip]
 	);
 
 	// Manejar clic en la tarjeta
@@ -347,10 +336,10 @@ export function EntityCard({
 
 			// Si no hay onClick, manejar el flip si está habilitado
 			if (enableBackside || mergedOptions.backside?.enabled) {
-				setIsFlipped((prev) => !prev);
+				handleFlip();
 			}
 		},
-		[onClick, enableBackside, mergedOptions.backside?.enabled]
+		[onClick, enableBackside, mergedOptions.backside?.enabled, handleFlip]
 	);
 
 	// Calcular transformación para modo explodido
@@ -436,15 +425,15 @@ export function EntityCard({
 		};
 
 		return (
-			<div
+			<button
 				ref={containerRef}
+				type="button"
+				onClick={handleClick}
+				onKeyDown={handleKeyDown}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
-				onClick={handleClick}
-				onKeyDown={handleKeyDown}
 				tabIndex={0}
-				role="button"
 				aria-pressed={isFlipped}
 				className={cn(
 					'entity-card-container w-full h-full relative',
@@ -509,7 +498,7 @@ export function EntityCard({
 						</div>
 					)}
 				</div>
-			</div>
+			</button>
 		);
 	} catch (err) {
 		// Capturar errores durante el renderizado
