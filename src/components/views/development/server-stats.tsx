@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { RefreshCw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Logger específico para este componente
 const logger = serverLogger.withContext('ServerStats');
@@ -81,7 +81,7 @@ export function ServerStats() {
 	const [activeTab, setActiveTab] = useState('system');
 
 	// Función para cargar las estadísticas
-	const fetchStats = async () => {
+	const fetchStats = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -110,7 +110,7 @@ export function ServerStats() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
 
 	// Cargar estadísticas al montar el componente
 	useEffect(() => {
@@ -120,7 +120,7 @@ export function ServerStats() {
 		const interval = setInterval(fetchStats, 30000);
 
 		return () => clearInterval(interval);
-	}, []);
+	}, [fetchStats]);
 
 	return (
 		<div className="space-y-4">
@@ -229,8 +229,8 @@ export function ServerStats() {
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-4">
-										{systemStats.network.map((net, index) => (
-											<div key={index} className="border rounded-md p-3">
+										{systemStats.network.map((net) => (
+											<div key={`network-${net.interface}-${net.mac}`} className="border rounded-md p-3">
 												<div className="flex items-center justify-between mb-2">
 													<span className="font-medium">{net.interface}</span>
 													<Badge variant="outline">{net.mac}</Badge>

@@ -33,7 +33,10 @@ export const apiLogger = {
 		const logger = serverLogger.withContext(`API:${routeName}`);
 
 		// Función para filtrar campos sensibles
-		const filterSensitiveData = (obj: Record<string, any>, sensitiveFields: string[]): Record<string, any> => {
+		const filterSensitiveData = (
+			obj: Record<string, unknown>,
+			sensitiveFields: string[]
+		): Record<string, unknown> => {
 			if (!obj || typeof obj !== 'object') return obj;
 
 			const result = { ...obj };
@@ -41,7 +44,7 @@ export const apiLogger = {
 				if (sensitiveFields.includes(key.toLowerCase())) {
 					result[key] = '[REDACTED]';
 				} else if (typeof result[key] === 'object' && result[key] !== null) {
-					result[key] = filterSensitiveData(result[key], sensitiveFields);
+					result[key] = filterSensitiveData(result[key] as Record<string, unknown>, sensitiveFields);
 				}
 			}
 			return result;
@@ -69,7 +72,7 @@ export const apiLogger = {
 				const requestId = req.headers.get('x-request-id') || `req_${Date.now()}`;
 				const startTime = Date.now();
 
-				const logData: Record<string, any> = {
+				const logData: Record<string, unknown> = {
 					method: req.method,
 					url: req.url,
 					requestId,
@@ -133,7 +136,7 @@ export const apiLogger = {
 				const { requestId, startTime, path } = requestInfo;
 				const responseTime = Date.now() - startTime;
 
-				const logData: Record<string, any> = {
+				const logData: Record<string, unknown> = {
 					status: res.status,
 					statusText: res.statusText,
 					responseTime: `${responseTime}ms`,

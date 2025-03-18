@@ -1,0 +1,28 @@
+# Directorios generados
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Cachés
+.image-cache/
+.thumbnail-cache/
+
+# Assets públicos (imágenes, fuentes, etc.)
+public/assets/
+
+# Archivos generados
+next-env.d.ts
+*.d.ts
+*.tsbuildinfo
+
+# Migraciones de Prisma
+prisma/migrations/
+
+# Archivos de ambiente
+.env
+.env.*
+
+# Archivos de cache
+.cache/

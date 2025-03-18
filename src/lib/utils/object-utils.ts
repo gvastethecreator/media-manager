@@ -9,7 +9,7 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
 	const output = { ...target };
 
 	if (isObject(target) && isObject(source)) {
-		Object.keys(source).forEach((key) => {
+		for (const key of Object.keys(source)) {
 			if (isObject(source[key])) {
 				if (!(key in target)) {
 					Object.assign(output, { [key]: source[key] });
@@ -22,7 +22,7 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
 			} else {
 				Object.assign(output, { [key]: source[key] });
 			}
-		});
+		}
 	}
 
 	return output;

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import type { LogEntry } from '@/components/ui/log-viewer';
+import { useCallback, useEffect, useRef } from 'react';
 
 type ConsoleMethods = 'log' | 'info' | 'warn' | 'error' | 'debug';
+type ConsoleFunction = (...args: unknown[]) => void;
 
 interface UseConsoleCapture {
 	/**
@@ -33,18 +34,20 @@ export function useConsoleCapture(
 	methods: ConsoleMethods[] = ['log', 'info', 'warn', 'error', 'debug']
 ): UseConsoleCapture {
 	const isCapturingRef = useRef(false);
-	const originalConsole = useRef<Record<ConsoleMethods, any>>({} as any);
+	const originalConsole = useRef<Record<ConsoleMethods, ConsoleFunction>>(
+		{} as Record<ConsoleMethods, ConsoleFunction>
+	);
 
 	// Iniciar captura
-	const startCapture = () => {
+	const startCapture = useCallback(() => {
 		if (isCapturingRef.current) return;
 
 		// Guardar las funciones originales
-		methods.forEach((method) => {
+		for (const method of methods) {
 			originalConsole.current[method] = console[method];
 
 			// Reemplazar con nuestra función
-			console[method] = (...args: any[]) => {
+			console[method] = (...args: unknown[]) => {
 				// Llamar a la función original
 				originalConsole.current[method](...args);
 
@@ -64,8 +67,6 @@ export function useConsoleCapture(
 					case 'error':
 						level = 'error';
 						break;
-					case 'info':
-					case 'log':
 					default:
 						level = 'info';
 						break;
@@ -83,24 +84,24 @@ export function useConsoleCapture(
 				// Enviar al callback
 				onCaptureLog(logEntry);
 			};
-		});
+		}
 
 		isCapturingRef.current = true;
-	};
+	}, [methods, onCaptureLog]);
 
 	// Detener captura
-	const stopCapture = () => {
+	const stopCapture = useCallback(() => {
 		if (!isCapturingRef.current) return;
 
 		// Restaurar funciones originales
-		methods.forEach((method) => {
+		for (const method of methods) {
 			if (originalConsole.current[method]) {
 				console[method] = originalConsole.current[method];
 			}
-		});
+		}
 
 		isCapturingRef.current = false;
-	};
+	}, [methods]);
 
 	// Limpiar al desmontar
 	useEffect(() => {
@@ -109,7 +110,7 @@ export function useConsoleCapture(
 				stopCapture();
 			}
 		};
-	}, []);
+	}, [stopCapture]);
 
 	return {
 		startCapture,

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { DrizzleRepository } from '@/drizzle/repository';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
 	try {

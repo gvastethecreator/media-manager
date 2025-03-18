@@ -1,9 +1,9 @@
 'use client';
 
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, FileIcon, FileText, FolderIcon, Hash, ImageIcon, InfoIcon, MapPin } from 'lucide-react';
