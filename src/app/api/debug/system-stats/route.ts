@@ -1,7 +1,7 @@
-import os from 'node:os';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { systemMonitor } from '@/lib/server/system-monitor';
 import { NextResponse } from 'next/server';
+import os from 'os';
 
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('SystemStatsAPI');

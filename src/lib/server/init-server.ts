@@ -17,7 +17,7 @@ let isInitialized = false;
 /**
  * Inicializa todos los componentes del servidor
  */
-export function initializeServer() {
+export async function initializeServer() {
 	// Evitar inicialización múltiple
 	if (isInitialized) {
 		initLogger.warn('El servidor ya ha sido inicializado');
@@ -29,10 +29,10 @@ export function initializeServer() {
 		initLogger.info('Iniciando servidor...');
 
 		// Iniciar monitor de aplicación
-		appMonitor.logStartup();
+		await appMonitor.logStartup();
 
 		// Iniciar monitor con intervalos personalizados
-		const stopMonitor = appMonitor.start({
+		const stopMonitor = await appMonitor.start({
 			interval: 60000, // Estadísticas de aplicación cada 1 minuto
 			includeSystemStats: true,
 			systemStatsInterval: 300000, // Estadísticas de sistema cada 5 minutos
@@ -65,14 +65,14 @@ function setupCleanShutdown(stopMonitor: () => void) {
 	const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
 	for (const signal of signals) {
-		process.on(signal, () => {
+		process.on(signal, async () => {
 			initLogger.info(`Señal ${signal} recibida, cerrando servidor...`);
 
 			// Detener monitor
 			stopMonitor();
 
 			// Registrar apagado
-			appMonitor.logShutdown();
+			await appMonitor.logShutdown();
 
 			// Dar tiempo para que los logs se escriban
 			setTimeout(() => {
