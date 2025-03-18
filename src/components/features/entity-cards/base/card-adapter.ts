@@ -89,7 +89,7 @@ export function adaptSettingsToBaseOptions(options: CardOptions): Record<string,
  * @param color El color base (opcional)
  * @returns La configuración de rareza
  */
-export function generateRarityConfig(level: string, color: string = '#3b82f6') {
+export function generateRarityConfig(level: string, color = '#3b82f6') {
 	return {
 		name: level,
 		color,

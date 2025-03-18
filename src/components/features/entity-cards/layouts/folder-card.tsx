@@ -1,7 +1,7 @@
 'use client';
 
 import type { Folder } from '@/types/entities/folders';
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import { FolderCardLayout } from './folder-card-layout';
 
 // Interfaz para las propiedades del componente FolderCard

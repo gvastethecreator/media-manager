@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
 import { serverLogger } from '../logger/server-logger';
 
 // Interfaz para las opciones del logger de API

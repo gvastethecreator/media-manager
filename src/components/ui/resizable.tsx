@@ -1,12 +1,16 @@
 'use client';
 
+import { GripVerticalIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from 'lucide-react';
 import * as React from 'react';
-import { GripVerticalIcon } from 'lucide-react';
 import * as ResizablePrimitive from 'react-resizable-panels';
 
 import { cn } from '@/lib/utils';
 
-function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) {
+interface ResizablePanelGroupProps extends React.ComponentProps<typeof ResizablePrimitive.PanelGroup> {
+	onToggleCollapse?: (collapsed: boolean) => void;
+}
+
+function ResizablePanelGroup({ className, onToggleCollapse, ...props }: ResizablePanelGroupProps) {
 	return (
 		<ResizablePrimitive.PanelGroup
 			data-slot="resizable-panel-group"
@@ -16,9 +20,65 @@ function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeo
 	);
 }
 
-function ResizablePanel({ ...props }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
-	return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
+interface ResizablePanelProps extends React.ComponentProps<typeof ResizablePrimitive.Panel> {
+	isCollapsed?: boolean;
+	onCollapse?: () => void;
+	onExpand?: () => void;
+	showToggleButton?: boolean;
+	toggleButtonPosition?: 'start' | 'end';
+	toggleButtonClassName?: string;
 }
+
+const ResizablePanel = React.forwardRef<React.ElementRef<typeof ResizablePrimitive.Panel>, ResizablePanelProps>(
+	(
+		{
+			className,
+			isCollapsed,
+			onCollapse,
+			onExpand,
+			showToggleButton,
+			toggleButtonPosition = 'end',
+			toggleButtonClassName,
+			...props
+		},
+		ref
+	) => {
+		return (
+			<ResizablePrimitive.Panel
+				ref={ref}
+				data-slot="resizable-panel"
+				data-collapsed={isCollapsed ? 'true' : 'false'}
+				className={cn('relative transition-all duration-300 ease-in-out', className)}
+				onCollapse={onCollapse}
+				onExpand={onExpand}
+				{...props}
+			>
+				{showToggleButton && (
+					<button
+						type="button"
+						onClick={() => {
+							if (isCollapsed) {
+								onExpand?.();
+							} else {
+								onCollapse?.();
+							}
+						}}
+						className={cn(
+							'absolute z-10 p-1.5 rounded-md bg-background border shadow-sm hover:bg-accent',
+							toggleButtonPosition === 'start' ? 'left-3 top-3' : 'right-3 top-3',
+							toggleButtonClassName
+						)}
+						aria-label={isCollapsed ? 'Expandir panel' : 'Colapsar panel'}
+					>
+						{isCollapsed ? <PanelLeftOpenIcon className="h-4 w-4" /> : <PanelLeftCloseIcon className="h-4 w-4" />}
+					</button>
+				)}
+				{props.children}
+			</ResizablePrimitive.Panel>
+		);
+	}
+);
+ResizablePanel.displayName = 'ResizablePanel';
 
 function ResizableHandle({
 	withHandle,
@@ -45,4 +105,4 @@ function ResizableHandle({
 	);
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup };

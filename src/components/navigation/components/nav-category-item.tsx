@@ -1,9 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
-import { ChevronDown, ChevronRight, type LucideIcon } from 'lucide-react';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useMemo } from 'react';
@@ -19,9 +20,11 @@ interface NavCategoryItemProps {
 	imageCount: number;
 	onClick: () => void;
 	onToggleCollapse: (event: React.MouseEvent | React.KeyboardEvent) => void;
+	showLabel?: boolean;
 }
 
 export function NavCategoryItem({
+	id,
 	label,
 	color,
 	icon: Icon,
@@ -31,6 +34,7 @@ export function NavCategoryItem({
 	imageCount,
 	onClick,
 	onToggleCollapse,
+	showLabel = true,
 }: NavCategoryItemProps) {
 	const colorWithOpacity = useMemo(() => {
 		// Convertir el color a rgba con una opacidad de 0.2
@@ -46,32 +50,38 @@ export function NavCategoryItem({
 		return `rgba(${r}, ${g}, ${b}, 0.15)`;
 	}, [color]);
 
-	return (
+	const categoryItem = (
 		<div
-			className="flex items-center w-full h-7 rounded-none mt-0 group border-l-2 hover:border-opacity-100 transition-all duration-150 nav-category-item"
+			className={cn(
+				'flex items-center w-full h-7 rounded-none mt-0 group border-l-2 hover:border-opacity-100 transition-all duration-150 nav-category-item',
+				!showLabel && 'justify-center pl-0'
+			)}
 			style={{
 				borderLeftColor: color,
 				borderLeftWidth: isCurrent ? '2px' : '0px',
 				color,
 			}}
 		>
-			{/* Botón específico para colapsar/expandir */}
-			<button
-				type="button"
-				className="flex h-5 w-5 shrink-0 items-center justify-center hover:bg-gray-100/10 border-0 bg-transparent p-0 transition-colors cursor-pointer"
-				onClick={onToggleCollapse}
-				aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
-			>
-				<motion.div initial={false} animate={{ rotate: isCollapsed ? 0 : 90 }} transition={{ duration: 0.15 }}>
-					<ChevronRight className="h-3 w-3 text-foreground/60" />
-				</motion.div>
-			</button>
+			{/* Botón específico para colapsar/expandir - solo visible cuando se muestran las etiquetas */}
+			{showLabel && (
+				<button
+					type="button"
+					className="flex h-5 w-5 shrink-0 items-center justify-center hover:bg-gray-100/10 border-0 bg-transparent p-0 transition-colors cursor-pointer"
+					onClick={onToggleCollapse}
+					aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
+				>
+					<motion.div initial={false} animate={{ rotate: isCollapsed ? 0 : 90 }} transition={{ duration: 0.15 }}>
+						<ChevronRight className="h-3 w-3 text-foreground/60" />
+					</motion.div>
+				</button>
+			)}
 
 			{/* Botón de categoría */}
 			<Button
 				variant="ghost"
 				className={cn(
 					'flex-1 justify-start gap-2 h-7 px-2 py-0 text-sm transition-all text-xs rounded-none cursor-pointer',
+					!showLabel && 'justify-center px-1 w-full',
 					isCurrent ? 'bg-secondary/30' : 'hover:bg-secondary/10'
 				)}
 				style={{
@@ -80,18 +90,51 @@ export function NavCategoryItem({
 				onClick={onClick}
 			>
 				<Icon className="h-3.5 w-3.5 shrink-0" />
-				<span className="flex-1 text-left truncate font-medium">{label}</span>
 
-				<div className="flex items-center space-x-2">
-					<div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/60 text-muted-foreground min-w-[24px] nav-count-badge">
-						{itemCount}
-					</div>
+				{showLabel && (
+					<>
+						<span className="flex-1 text-left truncate font-medium">{label}</span>
 
-					<div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/30 text-muted-foreground min-w-[24px] nav-count-badge">
-						{imageCount}
-					</div>
-				</div>
+						<div className="flex items-center space-x-2">
+							<div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/60 text-muted-foreground min-w-[24px] nav-count-badge">
+								{itemCount}
+							</div>
+
+							<div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/30 text-muted-foreground min-w-[24px] nav-count-badge">
+								{imageCount}
+							</div>
+						</div>
+					</>
+				)}
 			</Button>
 		</div>
 	);
+
+	// Si el panel está colapsado, envolver en un tooltip
+	if (!showLabel) {
+		return (
+			<TooltipProvider delayDuration={200}>
+				<Tooltip>
+					<TooltipTrigger asChild>{categoryItem}</TooltipTrigger>
+					<TooltipContent side="right" className="text-xs p-2">
+						<p className="font-medium text-amber-400">{label}</p>
+						<p className="flex items-center gap-2">
+							<span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/60 text-muted-foreground min-w-[24px]">
+								{itemCount}
+							</span>
+							<span>elementos</span>
+						</p>
+						<p className="flex items-center gap-2">
+							<span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/30 text-muted-foreground min-w-[24px]">
+								{imageCount}
+							</span>
+							<span>imágenes</span>
+						</p>
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+		);
+	}
+
+	return categoryItem;
 }

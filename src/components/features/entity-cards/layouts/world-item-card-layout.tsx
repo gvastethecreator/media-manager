@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import * as React from 'react';
 import { EntityCard } from '../entity-card';
 import { usePreset } from '../hooks/use-preset';
-import { AnimationSystem } from '../modules/animation/types';
+import type { AnimationSystem } from '../modules/animation/types';
 import type { DesignSystem } from '../modules/design/types';
 import type { ImageGridImage } from '../modules/image-grid/image-grid';
 import { ImageGrid } from './image-grid';

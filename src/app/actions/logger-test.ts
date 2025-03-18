@@ -26,7 +26,7 @@ export const successAction = testActionLogger.wrapAction(async (data: any) => {
 /**
  * Acción de ejemplo que simula un error
  */
-export const errorAction = testActionLogger.wrapAction(async (shouldFail: boolean = true) => {
+export const errorAction = testActionLogger.wrapAction(async (shouldFail = true) => {
 	// Simular algún procesamiento
 	await new Promise((resolve) => setTimeout(resolve, 200));
 

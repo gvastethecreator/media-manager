@@ -12,10 +12,10 @@ export * from './character-card-types';
 export * from './unified-card-types';
 
 // Exportar selectivamente de base-card-types para evitar ambigüedades
-import * as BaseCardTypes from './base-card-types';
+import type * as BaseCardTypes from './base-card-types';
 
 // Exportar selectivamente de shared-card-types
-import * as SharedCardTypes from './shared-card-types';
+import type * as SharedCardTypes from './shared-card-types';
 
 // Re-exportar interfaces comunes para facilitar su uso
 export type {

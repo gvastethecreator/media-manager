@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Tag } from '../layouts/forms/entity-types';
 import { TagCard as TagCardLayout } from './tag-card-layout';
 

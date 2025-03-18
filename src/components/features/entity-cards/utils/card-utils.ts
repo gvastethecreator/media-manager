@@ -89,7 +89,7 @@ export function generateCardId(): string {
 }
 
 // Función para formatear el texto de descripción
-export function formatDescription(text: string, maxLength: number = 150): string {
+export function formatDescription(text: string, maxLength = 150): string {
 	if (text.length <= maxLength) return text;
 	return text.substring(0, maxLength) + '...';
 }
@@ -98,8 +98,8 @@ export function formatDescription(text: string, maxLength: number = 150): string
 export function calculateImageSize(
 	width: number,
 	height: number,
-	maxWidth: number = 300,
-	maxHeight: number = 400
+	maxWidth = 300,
+	maxHeight = 400
 ): { width: number; height: number } {
 	const aspectRatio = width / height;
 	let newWidth = width;

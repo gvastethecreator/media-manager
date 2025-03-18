@@ -8,9 +8,9 @@ import type {
 	TextureConfig,
 } from '@/components/features/entity-cards/types/shared-card-types';
 import { cn } from '@/lib/utils';
-import { Note } from '@/types/prisma';
+import type { Note } from '@/types/prisma';
 import { ImageIcon, ScrollText, StarIcon, StickyNote, UsersIcon } from 'lucide-react';
-import * as React from 'react';
+import type * as React from 'react';
 import { useState } from 'react';
 import { EntityCardWrapper } from '../entity-card-wrapper';
 

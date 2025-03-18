@@ -143,7 +143,7 @@ export function VisualizationConfig({
 									onChange={(e) =>
 										handleChange('glowOptions', {
 											...options.glowOptions,
-											intensity: parseFloat(e.target.value),
+											intensity: Number.parseFloat(e.target.value),
 										})
 									}
 									className="w-full"
@@ -159,7 +159,7 @@ export function VisualizationConfig({
 									onChange={(e) =>
 										handleChange('glowOptions', {
 											...options.glowOptions,
-											size: parseFloat(e.target.value),
+											size: Number.parseFloat(e.target.value),
 										})
 									}
 									className="w-full"
@@ -184,7 +184,7 @@ export function VisualizationConfig({
 									onChange={(e) =>
 										handleChange('holographicOptions', {
 											...options.holographicOptions,
-											intensity: parseFloat(e.target.value),
+											intensity: Number.parseFloat(e.target.value),
 										})
 									}
 									className="w-full"
@@ -200,7 +200,7 @@ export function VisualizationConfig({
 									onChange={(e) =>
 										handleChange('holographicOptions', {
 											...options.holographicOptions,
-											animationSpeed: parseFloat(e.target.value),
+											animationSpeed: Number.parseFloat(e.target.value),
 										})
 									}
 									className="w-full"
@@ -329,7 +329,7 @@ export function VisualizationConfig({
 									max="10"
 									step="1"
 									value={options.imageGridGap || 4}
-									onChange={(e) => handleChange('imageGridGap', parseInt(e.target.value))}
+									onChange={(e) => handleChange('imageGridGap', Number.parseInt(e.target.value))}
 									className="w-full"
 								/>
 							</div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { DEFAULT_DESIGN_SYSTEM } from './design-module';
-import { DesignSystem, DesignSystemPreset } from './types';
+import type { DesignSystem, DesignSystemPreset } from './types';
 
 /**
  * 🎨 Presets de diseño para las tarjetas de entidad

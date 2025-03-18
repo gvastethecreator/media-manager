@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adaptDesignSystemToCardOptions } from './adapters';
 import { DesignPanel } from './design-panel';
-import { DesignModuleProps, DesignSystem } from './types';
+import type { DesignModuleProps, DesignSystem } from './types';
 
 /**
  * Función auxiliar para combinar profundamente dos objetos

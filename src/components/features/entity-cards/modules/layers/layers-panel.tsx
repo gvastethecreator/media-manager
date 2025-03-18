@@ -23,7 +23,7 @@ import {
 import { useState } from 'react';
 import { LayerConfigEditor } from '../../layers/layer-config-editor';
 import { useLayerPlugin } from './layer-plugin-system';
-import { LayersPanelProps } from './types';
+import type { LayersPanelProps } from './types';
 import { useLayers } from './use-layers';
 
 /**

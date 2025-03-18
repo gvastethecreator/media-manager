@@ -2,7 +2,7 @@
  * 🎨 Tipos para el sistema de diseño de tarjetas
  */
 
-import { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/card-settings-types';
 
 /**
  * Configuración del sistema de diseño

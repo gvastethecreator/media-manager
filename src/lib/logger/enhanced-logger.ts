@@ -71,7 +71,7 @@ export class EnhancedLogger {
 	private useIcons: boolean;
 	private showContext: boolean;
 	private enableBrowserStyles: boolean;
-	private groupLevel: number = 0;
+	private groupLevel = 0;
 	private isBrowser: boolean;
 
 	constructor(options: LoggerOptions = {}) {

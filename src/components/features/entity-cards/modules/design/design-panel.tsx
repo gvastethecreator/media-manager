@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { AlertCircle, Box } from 'lucide-react';
 import { useState } from 'react';
-import { DesignPanelProps, DesignSystem, DesignSystemPreset } from './types';
+import type { DesignPanelProps, DesignSystem, DesignSystemPreset } from './types';
 
 // Presets de relación de aspecto
 const aspectRatioOptions = [

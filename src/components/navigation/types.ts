@@ -4,6 +4,8 @@ import type { LucideIcon } from 'lucide-react';
 
 export interface NavPanelProps {
 	initialData: NavigationData;
+	isCollapsed?: boolean;
+	onToggleCollapse?: () => void;
 }
 
 export interface CategoryItem {

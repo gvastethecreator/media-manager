@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import * as React from 'react';
+import type * as React from 'react';
 import { useEffect, useState } from 'react';
 import type { ImageGridImage } from './layouts/image-grid';
 import { ImageGrid } from './layouts/image-grid';

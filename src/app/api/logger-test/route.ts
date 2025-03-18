@@ -1,5 +1,5 @@
 import { apiLogger } from '@/lib/server/api-logger';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 // Crear un logger específico para esta ruta API
 const routeLogger = apiLogger.createRouteLogger('LoggerTest');

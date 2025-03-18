@@ -4,7 +4,7 @@ export * from './repository';
 export * from './schema';
 
 // Exportar tipos inferidos
-import * as schema from './schema';
+import type * as schema from './schema';
 
 // Tipos para las tablas
 export type Profile = typeof schema.profiles.$inferSelect;

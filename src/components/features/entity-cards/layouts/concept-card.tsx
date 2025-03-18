@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Concept } from '../layouts/forms/entity-types';
 import { ConceptCard as ConceptCardLayout } from './concept-card-layout';
 

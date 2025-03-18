@@ -96,7 +96,7 @@ export function CardStats({ options, stats, className }: CardStatsProps) {
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -115,7 +115,7 @@ export function CardStats({ options, stats, className }: CardStatsProps) {
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>
