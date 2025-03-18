@@ -98,7 +98,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 	useEffect(() => {
 		setLoadedImages({});
 		setErrorImages({});
-	}, [images]);
+	}, []);
 
 	// Manejar imagen cargada
 	const handleImageLoad = (id: string) => {
@@ -159,22 +159,22 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 					const overlapStyles: React.CSSProperties =
 						style === 'overlap'
 							? {
-									top: `${index * 10}px`,
-									left: `${index * 10}px`,
-									zIndex: displayImages.length - index,
-									width: '100%',
-									height: '100%',
-									transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (index + 1)}deg)`,
-								}
+								top: `${index * 10}px`,
+								left: `${index * 10}px`,
+								zIndex: displayImages.length - index,
+								width: '100%',
+								height: '100%',
+								transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (index + 1)}deg)`,
+							}
 							: {};
 
 					// Definir estilos para carousel
 					const carouselStyles: React.CSSProperties =
 						style === 'carousel'
 							? {
-									minWidth: '85%',
-									scrollSnapAlign: 'center',
-								}
+								minWidth: '85%',
+								scrollSnapAlign: 'center',
+							}
 							: {};
 
 					// Combinar estilos
@@ -195,6 +195,15 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 							)}
 							style={combinedStyles}
 							onClick={() => handleImageClick(image)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									handleImageClick(image);
+								}
+							}}
+							tabIndex={0}
+							role="button"
+							aria-label={`Ver imagen ${image.alt || ''}`}
 						>
 							{errorImages[image.id] ? (
 								<div className="flex h-full w-full items-center justify-center bg-muted/50">

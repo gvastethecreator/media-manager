@@ -21,16 +21,18 @@ import type * as React from 'react';
 import { useState } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
-import type { CollectionFormData } from '../forms/entity-types';
-import type { CardDesignPreset, CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
+import type { CollectionFormData } from '../layouts/forms/entity-types';
+import type { CardDesignPreset, CardOptions, RarityConfig, TextureConfig } from '../types/shared-card-types';
 import { ImageGrid } from './image-grid';
 
+// Definimos un tipo para los datos de la colección más específico
 type CardData =
 	| (Collection & {
 		_count?: { images: number };
 		totalSize?: number;
 		recentImages?: string[];
 		topTags?: { name: string; count: number }[];
+		rating?: number; // Añadimos explícitamente rating aquí
 	})
 	| CollectionFormData;
 
@@ -98,6 +100,12 @@ const DEFAULT_COLLECTION_OPTIONS: Partial<CardOptions> = {
 		animated: false,
 		visibleOnHover: true,
 	},
+
+	// Opciones de imagen
+	useImageGrid: false, // Por defecto no usamos grid
+	imageGridLayout: 'grid',
+	imageGridGap: 4,
+	imageGridStyle: 'standard',
 };
 
 // Define rarity levels for collections
@@ -156,11 +164,11 @@ function determineCollectionRarity(imageCount: number, _totalSize = 0): keyof ty
 function generateRarityConfig(rarityKey: keyof typeof COLLECTION_RARITY): RarityConfig {
 	const rarity = COLLECTION_RARITY[rarityKey];
 	return {
-		rarity: rarityKey,
 		color: rarity.color,
 		borderColor: rarity.borderColor,
 		glowColor: rarity.glowColor,
 		label: rarity.label,
+		rarity: rarityKey,
 	};
 }
 
@@ -274,7 +282,7 @@ export function CollectionCard({
 				<VisualizationConfig
 					onClose={() => setConfigOpen(false)}
 					options={cardOptions}
-					onOptionsChange={setCardOptions}
+					onOptionsChange={(newOptions) => setCardOptions(newOptions)}
 					entityId={data.id as string}
 					entityType="collection"
 				/>
@@ -330,7 +338,7 @@ export function CollectionCard({
 									key={`rating-star-${starPosition}`}
 									className={cn(
 										'h-4 w-4',
-										starPosition <= (data.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
+										starPosition <= (('rating' in data ? data.rating : 0) || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'
 									)}
 								/>
 							))}
@@ -339,12 +347,12 @@ export function CollectionCard({
 
 					{/* Imagen destacada o grid de imágenes */}
 					<div className="flex-1 rounded-lg overflow-hidden bg-muted/20 mb-3 min-h-[120px]">
-						{cardOptions.useImageGrid && 'recentImages' in data && data.recentImages && data.recentImages.length > 0 ? (
+						{'recentImages' in data && data.recentImages && data.recentImages.length > 0 && cardOptions.useImageGrid ? (
 							<ImageGrid
-								layout={cardOptions.imageGridLayout || 'grid'}
+								layout={(cardOptions.imageGridLayout === 'grid' || cardOptions.imageGridLayout === 'masonry') ? 'quad' : 'single'}
 								gap={cardOptions.imageGridGap || 4}
-								style={cardOptions.imageGridStyle || 'standard'}
-								images={data.recentImages.map((path, idx) => ({
+								style={(cardOptions.imageGridStyle === 'standard' || cardOptions.imageGridStyle === 'polaroid') ? cardOptions.imageGridStyle : 'standard'}
+								images={data.recentImages.map((path: string, idx: number) => ({
 									id: `img-${idx}`,
 									path,
 									thumbnail: path,
@@ -371,7 +379,7 @@ export function CollectionCard({
 						{/* Tags principales */}
 						{'topTags' in data && data.topTags && data.topTags.length > 0 && (
 							<div className="flex flex-wrap gap-1 mb-2">
-								{data.topTags.slice(0, 3).map((tag) => (
+								{data.topTags.slice(0, 3).map((tag: { name: string; count: number }) => (
 									<span key={tag.name} className="px-1.5 py-0.5 bg-background/40 backdrop-blur-sm text-xs rounded">
 										#{tag.name} ({tag.count})
 									</span>

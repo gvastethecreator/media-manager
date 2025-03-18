@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
-import type { BaseLayerConfig, LayerComponentProps } from '../layer-plugin-system';
+import type { LayerComponentProps } from '../layer-plugin-system';
 import type { TextureConfig } from './texture-layer-schema';
 
 /**
@@ -430,10 +430,10 @@ export function TextureEffectLayer({
 			const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 			return result
 				? {
-						r: Number.parseInt(result[1], 16),
-						g: Number.parseInt(result[2], 16),
-						b: Number.parseInt(result[3], 16),
-					}
+					r: Number.parseInt(result[1], 16),
+					g: Number.parseInt(result[2], 16),
+					b: Number.parseInt(result[3], 16),
+				}
 				: null;
 		};
 
@@ -453,7 +453,6 @@ export function TextureEffectLayer({
 		config.opacity,
 		config.scale,
 		config.density,
-		config.contrast,
 		config.animated,
 		config.animationSpeed,
 		config.rotation,

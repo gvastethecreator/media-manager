@@ -288,7 +288,7 @@ export function PlaceCard({
 	}
 
 	// Usar el hook para obtener configuración de preset si existe
-	const { cardOptions } = usePreset({
+	const { cardOptions, setCardOptions } = usePreset({
 		entityType: 'place',
 		entityId: place.id,
 		presetId: place.presetId || null,
@@ -349,9 +349,9 @@ export function PlaceCard({
 		enableGrainEffect,
 		designSystem: designSystem
 			? {
-					...designSystem,
-					preset: designSystem.preset,
-				}
+				...designSystem,
+				preset: designSystem.preset,
+			}
 			: undefined,
 		holographicOptions,
 		glowOptions,
@@ -391,10 +391,9 @@ export function PlaceCard({
 			{configOpen && (
 				<VisualizationConfig
 					onClose={() => setConfigOpen(false)}
-					options={cardOptions as any}
+					options={cardOptions}
 					onOptionsChange={(newOptions) => {
-						const typedOptions = newOptions as any;
-						// Este componente viene del hook usePreset, que gestiona el estado
+						setCardOptions(prev => ({ ...prev, ...newOptions }));
 					}}
 					entityId={place.id}
 					entityType="place"

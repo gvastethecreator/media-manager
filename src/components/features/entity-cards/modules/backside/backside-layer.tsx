@@ -271,6 +271,7 @@ export function BacksideLayer({ config, entityData, isFlipped, onFlip, className
 							<p className="text-xs text-muted-foreground">{entityData.type}</p>
 						</div>
 						<button
+							type="button"
 							className="text-xs text-muted-foreground hover:text-foreground"
 							onClick={(e) => {
 								e.stopPropagation();

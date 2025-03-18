@@ -3,7 +3,7 @@
 import { deepMerge } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { EffectsPanel } from './effects-panel';
-import { DEFAULT_EFFECTS_CONFIG, type EffectsConfig, type EffectsModuleProps } from './types';
+import { DEFAULT_EFFECTS_CONFIG, type CardOptions, type EffectsConfig, type EffectsModuleProps } from './types';
 
 /**
  * 🎨 Módulo de efectos para Entity Cards
@@ -55,7 +55,7 @@ export function EffectsModule({ initialConfig = {}, onChange, cardOptions, onCar
 /**
  * 🎨 Adaptador de cardOptions a EffectsConfig
  */
-export function adaptCardOptionsToEffectsConfig(cardOptions?: Partial<any>): Partial<EffectsConfig> {
+export function adaptCardOptionsToEffectsConfig(cardOptions?: Partial<CardOptions>): Partial<EffectsConfig> {
 	if (!cardOptions) return {};
 
 	return {
@@ -72,7 +72,7 @@ export function adaptCardOptionsToEffectsConfig(cardOptions?: Partial<any>): Par
 /**
  * 🎨 Adaptador de EffectsConfig a cardOptions
  */
-export function adaptEffectsConfigToCardOptions(config: EffectsConfig): any {
+export function adaptEffectsConfigToCardOptions(config: EffectsConfig): Partial<CardOptions> {
 	return {
 		holographicOptions: config.visual.holographic,
 		scanlinesOptions: config.visual.scanlines,

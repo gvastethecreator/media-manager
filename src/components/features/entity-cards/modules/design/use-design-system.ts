@@ -14,14 +14,15 @@ export function hexToRgb(hex: string): string {
 	}
 
 	// Expandir color hex corto (por ejemplo, #FFF a #FFFFFF)
+	let formattedHex = hex;
 	if (hex.length === 4) {
-		hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+		formattedHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
 	}
 
 	// Convertir a RGB
-	const r = Number.parseInt(hex.substring(1, 3), 16);
-	const g = Number.parseInt(hex.substring(3, 5), 16);
-	const b = Number.parseInt(hex.substring(5, 7), 16);
+	const r = Number.parseInt(formattedHex.substring(1, 3), 16);
+	const g = Number.parseInt(formattedHex.substring(3, 5), 16);
+	const b = Number.parseInt(formattedHex.substring(5, 7), 16);
 
 	return `${r}, ${g}, ${b}`;
 }
@@ -126,9 +127,9 @@ export function useDesignSystem(initialDesignSystem?: Partial<DesignSystem>): Us
 		};
 
 		// Agregar variables CSS personalizadas
-		Object.entries(customCssVariables).forEach(([key, value]) => {
+		for (const [key, value] of Object.entries(customCssVariables)) {
 			styles[`--${key}`] = value;
-		});
+		}
 
 		return styles;
 	}, [designSystem]);
