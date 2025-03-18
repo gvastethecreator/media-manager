@@ -5,8 +5,8 @@
  * incluyendo loggers, monitores y otros servicios.
  */
 
-import { appMonitor } from './app-monitor';
 import { serverLogger } from '../logger/server-logger';
+import { appMonitor } from './app-monitor';
 
 // Logger específico para la inicialización
 const initLogger = serverLogger.withContext('ServerInit');

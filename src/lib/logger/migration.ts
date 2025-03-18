@@ -14,7 +14,7 @@ import { EnhancedLogger } from './enhanced-logger';
 export class Logger {
 	private enhancedLogger: EnhancedLogger;
 
-	constructor(options: any = {}) {
+	constructor(options: Record<string, unknown> = {}) {
 		// Crear una nueva instancia de EnhancedLogger directamente
 		this.enhancedLogger = new EnhancedLogger({
 			context: options.context || 'App',
@@ -32,25 +32,25 @@ export class Logger {
 		newLogger.enhancedLogger = new EnhancedLogger({
 			context,
 			// Copiar las opciones actuales
-			timestamp: this.enhancedLogger['timestamp'],
-			level: this.enhancedLogger['level'],
-			useColors: this.enhancedLogger['useColors'],
-			useIcons: this.enhancedLogger['useIcons'],
-			showContext: this.enhancedLogger['showContext'],
+			timestamp: this.enhancedLogger.timestamp,
+			level: this.enhancedLogger.level,
+			useColors: this.enhancedLogger.useColors,
+			useIcons: this.enhancedLogger.useIcons,
+			showContext: this.enhancedLogger.showContext,
 		});
 		return newLogger;
 	}
 
-	withOptions(options: any): Logger {
+	withOptions(options: Record<string, unknown>): Logger {
 		const newLogger = new Logger();
 		// Crear una nueva instancia con las opciones combinadas
 		newLogger.enhancedLogger = new EnhancedLogger({
-			context: options.context || this.enhancedLogger['context'],
-			timestamp: options.timestamp !== undefined ? options.timestamp : this.enhancedLogger['timestamp'],
-			level: options.level || this.enhancedLogger['level'],
-			useColors: options.useColors !== undefined ? options.useColors : this.enhancedLogger['useColors'],
-			useIcons: options.useIcons !== undefined ? options.useIcons : this.enhancedLogger['useIcons'],
-			showContext: options.showContext !== undefined ? options.showContext : this.enhancedLogger['showContext'],
+			context: options.context || this.enhancedLogger.context,
+			timestamp: options.timestamp !== undefined ? options.timestamp : this.enhancedLogger.timestamp,
+			level: options.level || this.enhancedLogger.level,
+			useColors: options.useColors !== undefined ? options.useColors : this.enhancedLogger.useColors,
+			useIcons: options.useIcons !== undefined ? options.useIcons : this.enhancedLogger.useIcons,
+			showContext: options.showContext !== undefined ? options.showContext : this.enhancedLogger.showContext,
 		});
 		return newLogger;
 	}

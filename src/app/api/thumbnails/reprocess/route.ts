@@ -1,8 +1,8 @@
+import { existsSync } from 'fs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import { ThumbnailQuality } from '@/types/thumbnails';
-import { existsSync } from 'fs';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const thumbLogger = serverLogger.withContext('ThumbnailReprocessAPI');

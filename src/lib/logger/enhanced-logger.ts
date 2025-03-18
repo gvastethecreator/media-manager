@@ -132,8 +132,6 @@ export class EnhancedLogger {
 				case 'error':
 					console.error(formattedMessage);
 					break;
-				case 'info':
-				case 'success':
 				default:
 					console.info(formattedMessage);
 					break;
@@ -150,7 +148,7 @@ export class EnhancedLogger {
 		const levelStyle = `background: ${style.browserColor}; color: white; padding: 2px 4px; border-radius: 2px; font-weight: bold;`;
 		const resetStyle = 'font-weight: normal;';
 
-		// Determinar qué método de console usar
+		// Determinar qué método de consola usar
 		let consoleMethod: 'debug' | 'info' | 'warn' | 'error' = 'info';
 		switch (level) {
 			case 'debug':
@@ -162,8 +160,6 @@ export class EnhancedLogger {
 			case 'error':
 				consoleMethod = 'error';
 				break;
-			case 'info':
-			case 'success':
 			default:
 				consoleMethod = 'info';
 				break;
