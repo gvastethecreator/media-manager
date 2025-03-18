@@ -1,16 +1,13 @@
-import { createHash, createHmac } from 'node:crypto';
-import fs from 'node:fs/promises';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
-import { clientEvents } from '@/lib/client/events.client';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { optimizeThumbnail } from '@/lib/thumbnail';
+import { createHmac } from 'crypto';
+import fs from 'fs/promises';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
-export { ThumbnailQuality, THUMBNAIL_QUALITY_CONFIG };
+export { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality };
 
 export enum EVENTS {
 	PROGRESS = 'progress',

@@ -1,3 +1,5 @@
+'use server';
+
 /**
  * Monitor de sistema para Next.js
  *
@@ -5,7 +7,7 @@
  * del servidor y mostrar estadísticas en tiempo real.
  */
 
-import os from 'node:os';
+import os from 'os';
 import { serverLogger } from '../logger/server-logger';
 
 // Logger específico para el monitor de sistema
@@ -210,7 +212,7 @@ function logSystemStats(): void {
  * @param interval Intervalo en milisegundos (por defecto 60000 = 1 minuto)
  * @returns Función para detener el monitor
  */
-export function startSystemMonitor(interval = 60000): () => void {
+export async function startSystemMonitor(interval = 60000): Promise<() => void> {
 	// Mostrar estadísticas iniciales
 	logSystemStats();
 
@@ -229,14 +231,14 @@ export function startSystemMonitor(interval = 60000): () => void {
 /**
  * Muestra estadísticas del sistema una sola vez
  */
-export function logSystemStatsOnce(): void {
+export async function logSystemStatsOnce(): Promise<void> {
 	logSystemStats();
 }
 
 /**
  * Registra estadísticas del sistema al inicio de la aplicación
  */
-export function logSystemStartup(): void {
+export async function logSystemStartup(): Promise<void> {
 	const stats = getSystemStats();
 
 	systemLogger.separator('Inicio del Servidor');
@@ -246,8 +248,8 @@ export function logSystemStartup(): void {
 		nodejs: stats.nodejs.version,
 		pid: stats.nodejs.pid,
 		cpu: {
-			model: stats.cpu.model,
 			cores: stats.cpu.cores,
+			model: stats.cpu.model,
 		},
 		memory: {
 			total: formatBytes(stats.memory.total),
@@ -259,29 +261,30 @@ export function logSystemStartup(): void {
 }
 
 /**
- * Registra estadísticas del sistema al apagar la aplicación
+ * Registra estadísticas del sistema al cierre de la aplicación
  */
-export function logSystemShutdown(): void {
+export async function logSystemShutdown(): Promise<void> {
 	const stats = getSystemStats();
 
-	systemLogger.separator('Apagado del Servidor');
+	systemLogger.separator('Cierre del Servidor');
 
-	systemLogger.system('Servidor apagado', {
+	systemLogger.system('Servidor cerrando', {
 		uptime: formatUptime(stats.uptime.process),
 		memory: {
-			peak: formatBytes(process.memoryUsage().heapTotal),
-			final: formatBytes(process.memoryUsage().heapUsed),
+			processUsed: formatBytes(stats.memory.processUsed),
 		},
 	});
 
 	systemLogger.separatorEnd();
 }
 
-// Exportar funciones principales
-export const systemMonitor = {
-	start: startSystemMonitor,
-	logOnce: logSystemStatsOnce,
-	logStartup: logSystemStartup,
-	logShutdown: logSystemShutdown,
-	getStats: getSystemStats,
-};
+// No exportar objetos en archivos con 'use server'
+// Crear funciones asíncronas para acceder a ellos
+export async function getSystemMonitorHelpers() {
+	return {
+		getSystemStats,
+		formatBytes,
+		formatUptime,
+		logSystemStats
+	};
+}
