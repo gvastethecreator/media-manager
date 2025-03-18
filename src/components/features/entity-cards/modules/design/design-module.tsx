@@ -14,20 +14,24 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
 	if (!source) return output;
 
 	if (typeof source === 'object' && source !== null) {
-		Object.keys(source as Record<string, any>).forEach((key) => {
-			const targetValue = (target as Record<string, any>)[key];
-			const sourceValue = (source as Record<string, any>)[key];
+		const sourceObj = source as Record<string, unknown>;
+		const targetObj = target as Record<string, unknown>;
+		const outputObj = output as Record<string, unknown>;
+
+		for (const key of Object.keys(sourceObj)) {
+			const targetValue = targetObj[key];
+			const sourceValue = sourceObj[key];
 
 			if (typeof sourceValue === 'object' && sourceValue !== null && !Array.isArray(sourceValue)) {
 				if (typeof targetValue !== 'object' || targetValue === null) {
-					(output as Record<string, any>)[key] = sourceValue;
+					outputObj[key] = sourceValue;
 				} else {
-					(output as Record<string, any>)[key] = deepMerge(targetValue, sourceValue);
+					outputObj[key] = deepMerge(targetValue as T, sourceValue as Partial<T>);
 				}
 			} else if (sourceValue !== undefined) {
-				(output as Record<string, any>)[key] = sourceValue;
+				outputObj[key] = sourceValue;
 			}
-		});
+		}
 	}
 
 	return output;

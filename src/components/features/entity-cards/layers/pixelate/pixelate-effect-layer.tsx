@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LayerComponentProps } from '../layer-plugin-system';
 import type { PixelateConfig } from './pixelate-schema';
 
@@ -31,119 +32,99 @@ export function PixelateEffectLayer({
 		return null;
 	}
 
-	// Función para capturar el contenido como imagen
-	const captureContent = () => {
-		const container = containerRef.current;
-		const canvas = sourceCanvasRef.current;
-		if (!container || !canvas) {
+	// Envolvemos funciones en useCallback para evitar recreaciones en cada renderizado
+	const captureContent = useCallback(() => {
+		if (!canvasRef.current || !sourceCanvasRef.current) {
 			return null;
 		}
 
-		const { width, height } = container.getBoundingClientRect();
+		const canvas = canvasRef.current;
+		const content = sourceCanvasRef.current;
+		const ctx = canvas.getContext('2d');
 
-		// Solo actualizar dimensiones si han cambiado
-		if (width !== dimensions.width || height !== dimensions.height) {
-			setDimensions({ width, height });
-			canvas.width = width;
-			canvas.height = height;
-		}
-
-		const context = canvas.getContext('2d', { willReadFrequently: true });
-		if (!context) {
-			return null;
-		}
-
-		// Usar html2canvas o una técnica similar para capturar el contenido
-		// Por ahora, simplemente creamos un gradiente para demostración
-		context.clearRect(0, 0, width, height);
-
-		// Crear un gradiente de demostración
-		const gradient = context.createLinearGradient(0, 0, width, height);
-		gradient.addColorStop(0, 'rgba(0, 100, 200, 0.5)');
-		gradient.addColorStop(1, 'rgba(100, 50, 200, 0.8)');
-		context.fillStyle = gradient;
-		context.fillRect(0, 0, width, height);
-
-		// Dibujar algunos elementos de demostración
-		context.fillStyle = 'rgba(255, 255, 255, 0.8)';
-		context.font = '20px Arial';
-		context.fillText('Contenido original', width / 2 - 80, height / 2);
-
-		// Dibujar círculos aleatorios
-		for (let i = 0; i < 20; i++) {
-			const x = Math.random() * width;
-			const y = Math.random() * height;
-			const radius = Math.random() * 20 + 5;
-
-			context.beginPath();
-			context.arc(x, y, radius, 0, Math.PI * 2);
-			context.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`;
-			context.fill();
-		}
-
-		return context.getImageData(0, 0, width, height);
-	};
-
-	// Función para aplicar el efecto de pixelado
-	const applyPixelateEffect = (sourceImageData: ImageData, pixelSize: number, algorithm: string) => {
-		const outputCanvas = canvasRef.current;
-		if (!outputCanvas) {
-			return;
-		}
-
-		const { width, height } = sourceImageData;
-		outputCanvas.width = width;
-		outputCanvas.height = height;
-
-		const ctx = outputCanvas.getContext('2d', { willReadFrequently: true });
 		if (!ctx) {
-			return;
+			return null;
 		}
+
+		// Ajustar tamaño del canvas
+		canvas.width = content.offsetWidth * window.devicePixelRatio;
+		canvas.height = content.offsetHeight * window.devicePixelRatio;
+
+		// Capturar contenido como imagen
+		html2canvas(content, {
+			backgroundColor: null,
+			scale: window.devicePixelRatio,
+			logging: false,
+			allowTaint: true,
+			useCORS: true,
+		}).then((contentCanvas) => {
+			if (ctx && canvas) {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.drawImage(contentCanvas, 0, 0, canvas.width, canvas.height);
+			}
+		});
+
+		// Creamos una imagen de datos temporal para devolver
+		try {
+			const tempCtx = canvas.getContext('2d');
+			if (tempCtx) {
+				const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+				return imageData;
+			}
+		} catch (err) {
+			console.error('Error al capturar contenido:', err);
+		}
+
+		return null;
+	}, [sourceCanvasRef, canvasRef]);
+
+	// También envolvemos esta función en useCallback
+	const applyPixelateEffect = useCallback((sourceImageData: ImageData, pixelSize: number, algorithm: string) => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
 
 		// Crear un canvas temporal para el procesamiento
 		const tempCanvas = document.createElement('canvas');
-		tempCanvas.width = width;
-		tempCanvas.height = height;
-		const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-		if (!tempCtx) {
-			return;
-		}
+		tempCanvas.width = canvas.width;
+		tempCanvas.height = canvas.height;
+		const tempCtx = tempCanvas.getContext('2d');
+		if (!tempCtx) return;
 
-		// Poner la imagen original en el canvas temporal
+		// Poner los datos de la imagen en el canvas temporal
 		tempCtx.putImageData(sourceImageData, 0, 0);
 
 		// Limpiar el canvas principal
-		ctx.clearRect(0, 0, width, height);
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		// Determinar el tamaño real de píxel basado en la intensidad
-		const effectivePixelSize = Math.max(1, Math.round(pixelSize * config.intensity));
-
-		// Aplicar el algoritmo de pixelado según la configuración
+		// Aplicar el algoritmo correspondiente
 		switch (algorithm) {
 			case 'simple':
-				applySimplePixelation(ctx, tempCanvas, effectivePixelSize);
+				applySimplePixelation(ctx, tempCanvas, pixelSize);
 				break;
 			case 'weighted':
-				applyWeightedPixelation(ctx, tempCanvas, effectivePixelSize);
+				applyWeightedPixelation(ctx, tempCanvas, pixelSize);
 				break;
 			case 'adaptive':
-				applyAdaptivePixelation(ctx, tempCanvas, effectivePixelSize);
+				applyAdaptivePixelation(ctx, tempCanvas, pixelSize);
 				break;
-			case 'color':
-				applyColorReducedPixelation(ctx, tempCanvas, effectivePixelSize, config.colorReduction);
+			case 'color-reduced':
+				applyColorReducedPixelation(ctx, tempCanvas, pixelSize, 8);
 				break;
 			case 'mosaic':
-				applyMosaicPixelation(ctx, tempCanvas, effectivePixelSize, config.shape);
+				applyMosaicPixelation(ctx, tempCanvas, pixelSize, 'square');
 				break;
 			default:
-				applySimplePixelation(ctx, tempCanvas, effectivePixelSize);
+				applySimplePixelation(ctx, tempCanvas, pixelSize);
 		}
 
-		// Aplicar la zona de efecto si está habilitada
-		if (config.zone.enabled) {
-			applyEffectZone(ctx, width, height);
+		// Si hay zonas de efecto, aplicarlas
+		if (config.effectZone && config.effectZone !== 'full') {
+			applyEffectZone(ctx, canvas.width, canvas.height);
 		}
-	};
+	}, [canvasRef, config.effectZone]);
 
 	// Algoritmo de pixelado simple - promedia los colores en cada bloque
 	const applySimplePixelation = (ctx: CanvasRenderingContext2D, sourceCanvas: HTMLCanvasElement, pixelSize: number) => {
@@ -561,16 +542,10 @@ export function PixelateEffectLayer({
 	}, [
 		config.pixelSize,
 		config.algorithm,
-		config.intensity,
-		config.colorReduction,
-		config.shape,
 		config.animated,
-		config.animationSpeed,
-		config.zone.enabled,
-		config.zone.radius,
-		config.zone.feather,
-		dimensions.width,
-		dimensions.height,
+		captureContent,
+		applyPixelateEffect,
+		isReady
 	]);
 
 	return (
