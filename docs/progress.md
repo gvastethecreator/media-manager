@@ -1,332 +1,618 @@
-# Progreso del Proyecto
+# Migración de Componentes
 
-## Fecha: 17/03/2024
+## Objetivo
 
-## Progreso de Corrección de Errores en Entity Cards
+Reorganizar los componentes de las entidades de Prisma en carpetas específicas para una mejor estructura y encapsulación.
 
-### Análisis Inicial
+## Estructura de Carpetas
 
-- ✅ Análisis de la estructura de componentes de entity-cards
-- ✅ Identificación de errores específicos en los archivos
-- ✅ Planificación de la estrategia de corrección
+Para cada entidad, se creará la siguiente estructura de carpetas:
 
-### Tareas Completadas
-
-- ✅ Corrección de errores en `entity-card-adapter.tsx`
-- ✅ Corrección de errores en `entities-cards-settings.tsx`
-- ✅ Corrección de errores en `album-card.tsx`
-- ✅ Corrección de errores en `entity-card-layer-wrapper.tsx`
-- ✅ Implementación de un sistema de tipos centralizado
-- ✅ Mejora del manejo de errores en los componentes
-- ✅ Corrección de archivos de layout
-- ✅ Simplificación del `EntityCardLayerWrapper`
-- ✅ Reemplazo del sistema complejo de carga de configuración
-- ✅ Uso directo del nuevo sistema de capas
-- ✅ Adición de soporte para animaciones con `motion/react`
-- ✅ Implementación de un adaptador personalizado para el sistema de capas duplicado
-- ✅ Verificación de la integración con el resto del proyecto
-- ✅ Creación de documentación completa del sistema de entity-cards
-- ✅ Corrección de errores en `preview-panel.tsx`
-- ✅ Corrección de errores en `preview-adapter.ts`
-- ✅ Corrección de errores en `entity-card.tsx`
-- ✅ Corrección de errores en `album-card-layout.tsx`
-- ✅ Simplificación de los hooks en `entity-card.tsx`
-- ✅ Corrección de errores en los manejadores de eventos de botones
-- ✅ Corrección de errores en `preview-settings-adapter.tsx`
-- ✅ Corrección de errores en `preview-module.tsx`
-- ✅ Corrección de errores en `rarity-editor.tsx`
-- ✅ Corrección de errores en `backside-adapter.ts`
-- ✅ Actualización de tipos en `backside/types.ts`
-- ✅ Corrección de errores en `animation-adapter.ts` (hoverRotation undefined)
-- ✅ Mejora del sistema de manejo de errores en `entity-card.tsx`
-- ✅ Implementación de un sistema de captura de errores con try/catch
-- ✅ Creación de estilos CSS para bordes de tarjetas
-- ✅ Mejora de la accesibilidad con atributos role y tabIndex
-- ✅ Optimización de la inicialización de hooks con valores predeterminados
-
-### Progreso
-
-- Se ha implementado un sistema de tipos centralizado para mejorar la consistencia
-- Se han corregido errores de importación y estructura de tipos
-- Se han mejorado los componentes para manejar casos de error
-- Se ha simplificado la estructura del componente `EntityCardLayerWrapper`
-- Se ha verificado que los componentes se integran correctamente con el resto del sistema
-- Se ha creado documentación detallada del sistema de entity-cards con ejemplos de uso, diagramas y guías de migración
-- Se han corregido errores de tipo en los componentes de previsualización
-- Se han simplificado los hooks en el componente EntityCard para evitar errores de tipo
-- Se han corregido los manejadores de eventos en los botones de edición y eliminación
-- Se ha simplificado el componente BacksideLayer para evitar errores de tipo
-- Se han corregido errores en los componentes de configuración de rareza y backside
-- Se han actualizado las interfaces de tipos para incluir todas las propiedades necesarias
-- Se ha mejorado el sistema de manejo de errores con un enfoque más robusto
-- Se ha implementado un sistema de captura de errores para evitar fallos en la aplicación
-- Se han creado estilos CSS para los bordes de tarjetas
-- Se ha mejorado la accesibilidad de los componentes con atributos ARIA
-
-### Próximas Tareas
-
-- ⬜ Optimización del rendimiento de los componentes
-- ⬜ Implementación de pruebas unitarias para los componentes corregidos
-- ⬜ Creación de componentes de panel de configuración faltantes
-- ✅ Mejora de la accesibilidad de los componentes
-
-## Verificación de Compilación
-
-- ✅ Ejecución del linter sin errores
-- ✅ Compilación exitosa del proyecto
-- ✅ Verificación de tipos TypeScript sin errores
-
-## Documentación Creada
-
-- ✅ Documentación del sistema de entity-cards (`docs/entity-cards-documentation.md`)
-  - Incluye arquitectura del sistema
-  - Diagrama de componentes
-  - Ejemplos de uso
-  - Guía de migración del sistema antiguo al nuevo
-  - Mejores prácticas
-
-## Notas Adicionales
-
-El sistema de entity-cards ahora está completamente documentado y funcional. La documentación incluye un diagrama de arquitectura en formato mermaid que muestra la estructura del sistema, ejemplos de código para cada componente principal, y una guía de migración para usuarios del sistema antiguo.
-
-La documentación servirá como referencia para el equipo de desarrollo y facilitará la incorporación de nuevos miembros al proyecto.
-
-Se ha mejorado significativamente el manejo de errores en el componente EntityCard, implementando un sistema de captura de errores que evita que la aplicación falle completamente cuando ocurre un error en un componente individual. Además, se han corregido problemas específicos en el adaptador de animación y se ha mejorado la inicialización de los hooks con valores predeterminados.
-
-## Próximos Pasos
-
-1. Revisar la documentación con el equipo para asegurar que cubre todos los aspectos necesarios
-2. Implementar las pruebas unitarias para garantizar la estabilidad del sistema
-3. Optimizar el rendimiento de los componentes, especialmente en dispositivos móviles
-4. Implementar componentes de panel de configuración faltantes
-
-## Diagrama de Arquitectura del Sistema
-
-```mermaid
-graph TD
-    A[EntityCard] --> B[EntityCardContent]
-    A --> C[LayerRenderer]
-    A --> D[BacksideLayer]
-
-    C --> E[Capa: Background]
-    C --> F[Capa: Texture]
-    C --> G[Capa: Content]
-    C --> H[Capa: Border]
-    C --> I[Capa: Effects]
-
-    J[EntityCardAdapter] --> A
-
-    K[Hooks] --> A
-
-    K --> K1[useDesignSystem]
-    K --> K2[useAnimationSystem]
-    K --> K3[useColors]
-    K --> K4[useLayersSystem]
-
-    L[Layouts] --> J
-
-    L --> L1[AlbumCard]
-    L --> L2[CharacterCard]
-    L --> L3[CollectionCard]
-    L --> L4[OtrosLayouts...]
-
-    M[ErrorHandler] --> A
-    M --> M1[CardErrorDisplay]
-    M --> M2[createErrorHandler]
+```
+src/components/[entity]/
+  ├── actions/        # Server actions
+  ├── docs/           # Documentación específica
+  ├── hooks/          # Custom hooks
+  ├── services/       # Servicios
+  ├── settings/       # Configuraciones
+  ├── store/          # Estado global (Zustand)
+  ├── types/          # Tipos y interfaces
+  └── views/          # Componentes visuales
 ```
 
-## Diagrama de Flujo de Datos
-
-```mermaid
-sequenceDiagram
-    participant App
-    participant EntityCard
-    participant Hooks
-    participant LayerRenderer
-    participant EntityCardContent
-
-    App->>EntityCard: Renderizar con opciones
-    EntityCard->>Hooks: Inicializar sistemas
-    Hooks-->>EntityCard: Devolver configuración
-
-    EntityCard->>LayerRenderer: Renderizar capas
-    LayerRenderer-->>EntityCard: Capas renderizadas
-
-    EntityCard->>EntityCardContent: Renderizar contenido
-    EntityCardContent-->>EntityCard: Contenido renderizado
-
-    EntityCard-->>App: Tarjeta completa
-
-    Note over EntityCard: Manejo de errores en cada paso
-```
-
-### Tarea 3.5: Integración del módulo de capas (layers) para EntityCard
-
-#### Tarea 3.5.1: Integración completa con EntityCard ✅ (Completado)
-
-Implementación de la integración bidireccional entre el sistema de capas y EntityCard:
-
-- Creación de funciones adaptadoras bidireccionales entre EntityCard y el sistema de capas
-- Implementación de configuración dinámica de capas basada en el tipo de entidad
-- Optimización del renderizado de capas mediante técnicas de memoización y renderizado condicional
-- Soporte para registro de capas personalizadas por tipo de entidad
-
-#### Tarea 3.5.2: Mejora de la gestión de capas ✅ (Completado)
-
-Implementación de un sistema de presets y panel de administración visual:
-
-- Diseño e implementación de estructura de datos para presets de capas
-- Creación de componentes UI para gestionar capas y presets:
-  - `LayerPresetsPanel`: Panel para seleccionar y aplicar presets predefinidos
-  - `LayerAdminPanel`: Panel para configuración detallada de capas individuales
-  - `LayerManagementDialog`: Diálogo completo que integra ambos paneles
-  - `CommonLayerControls`: Componente reutilizable para controles comunes
-- Implementación de hooks personalizados:
-  - `useLayerPresets`: Hook para gestionar presets de capas
-  - `useEntityCardLayers`: Hook principal para integrar capas con tarjetas
-- Desarrollo de sistema de almacenamiento local para guardar configuraciones personalizadas
-- Implementación de previsualización en tiempo real de cambios en las capas
-
-#### Tarea 3.5.3: Optimización del sistema de plugins de capas 🔄 (En progreso)
-
-Mejoras planificadas para el sistema de plugins:
-
-- Implementación de carga diferida (lazy loading) de capas para mejorar rendimiento
-- Optimización de la gestión de memoria para capas complejas
-- Mejora del sistema de eventos para comunicación entre capas
-- Implementación de API para extensiones de terceros
-
-#### Tarea 3.5.4: Documentación del sistema de capas 📝 (Pendiente)
-
-Documentación planificada:
-
-- Guía de desarrollo para crear nuevas capas
-- Documentación de API para integración con otros componentes
-- Ejemplos de uso y casos de estudio
-- Guía de mejores prácticas para rendimiento
-
-```mermaid
-gantt
-    title Plan de Integración de Capas
-    dateFormat  YYYY-MM-DD
-    section Tareas
-    Tarea 3.5.1: done, t351, 2023-11-01, 2023-11-10
-    Tarea 3.5.2: done, t352, 2023-11-10, 2023-11-20
-    Tarea 3.5.3: active, t353, 2023-11-20, 2023-12-01
-    Tarea 3.5.4: t354, 2023-12-01, 2023-12-10
-```
-
-### Notas de implementación para Tarea 3.5.2
-
-La implementación del sistema de gestión de capas incluye:
-
-1. **Sistema de presets**:
-
-   - Estructura de datos flexible para definir presets por categoría y tipo de entidad
-   - Soporte para presets predefinidos y personalizados
-   - Almacenamiento persistente de presets personalizados en localStorage
-   - Interfaz visual para seleccionar, aplicar y gestionar presets
-
-2. **Panel de administración visual**:
-
-   - Interfaz de usuario intuitiva para configurar capas individuales
-   - Controles específicos para cada tipo de capa
-   - Configuración global para ajustes que afectan a todas las capas
-   - Previsualización en tiempo real de los cambios
-
-3. **Integración con EntityCard**:
-
-   - Hook `useEntityCardLayers` para gestionar capas en componentes de tarjeta
-   - Adaptadores bidireccionales para convertir entre propiedades de EntityCard y configuración de capas
-   - Soporte para configuraciones específicas por tipo de entidad
-   - Optimización de rendimiento mediante memoización y actualización selectiva
-
-4. **Mejoras de UX**:
-   - Interfaz de usuario coherente con el diseño del sistema
-   - Feedback visual inmediato al realizar cambios
-   - Accesibilidad mejorada con etiquetas y descripciones claras
-   - Soporte para teclado y navegación por tabulación
-
-### Tarea 3.6: Adaptación de vistas al sistema de tarjetas EntityCard 🔄 (En progreso)
-
-## Fecha: 18/03/2024
-
-## Refactorización del Componente de Navegación
-
-### Análisis Inicial
-
-- ✅ Análisis de la estructura del componente `navigation-panel.tsx`
-- ✅ Identificación de áreas para refactorización
-- ✅ Planificación de la estrategia de refactorización
-
-### Tareas Completadas
-
-- ✅ Creación de tipos centralizados en `types/index.ts`
-- ✅ Extracción de constantes a `constants/categories.ts`
-- ✅ Creación de hooks personalizados:
-  - ✅ `useCategoryCollapse`: Manejo del estado de colapso de categorías
-  - ✅ `useCategoryHandlers`: Manejo de interacciones con categorías
-  - ✅ `useCategoryStats`: Cálculo de estadísticas para categorías
-  - ✅ `useMainNavigation`: Manejo de la navegación principal
-- ✅ Refactorización del componente principal `NavPanel`
-- ✅ Creación de documentación completa del componente
-
-### Progreso
-
-- Se ha implementado una estructura modular para el componente de navegación
-- Se han extraído las funcionalidades a hooks personalizados para mejorar la reutilización
-- Se han centralizado los tipos y constantes para mejorar la mantenibilidad
-- Se ha documentado completamente el componente con diagramas y ejemplos de uso
-
-### Próximas Tareas
-
-- ⬜ Optimización del rendimiento del componente de navegación
-- ⬜ Implementación de pruebas unitarias para los hooks creados
-- ⬜ Mejora de la accesibilidad del componente de navegación
-
-## Diagrama de Arquitectura del Componente de Navegación
-
-```mermaid
-graph TD
-    A[navigation-panel.tsx] --> B[hooks/]
-    A --> C[components/]
-    A --> D[constants/]
-    A --> E[types/]
-
-    B --> B1[use-category-collapse.ts]
-    B --> B2[use-category-handlers.ts]
-    B --> B3[use-category-stats.ts]
-    B --> B4[use-main-navigation.ts]
-    B --> B5[index.ts]
-
-    C --> C1[nav-category-children.tsx]
-    C --> C2[nav-category-item.tsx]
-    C --> C3[nav-main-navigation.tsx]
-    C --> C4[nav-panel-header.tsx]
-
-    D --> D1[categories.ts]
-
-    E --> E1[index.ts]
-```
-
-## Sistema de Logging y Monitoreo
+## Progreso
 
 ### Completado
 
-- ✅ Sistema de logging mejorado con soporte para colores, iconos y contextos
-- ✅ Componente LogViewer para visualizar logs en la interfaz de usuario
-- ✅ Consola de depuración integrada en la aplicación
-- ✅ Loggers especializados para servidor, API y Server Actions
-- ✅ Monitor de sistema para recursos (CPU, memoria, red)
-- ✅ Monitor de aplicación para estadísticas (solicitudes, rendimiento, errores)
-- ✅ Panel de estadísticas del servidor en tiempo real
-- ✅ Middleware para rastreo de solicitudes HTTP
-- ✅ Inicialización automática del sistema de monitoreo
-- ✅ Documentación completa de la arquitectura de logging
+- ✅ Albums
+- ✅ Collections
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Tags
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Characters
+- ✅ Places
+- ✅ World-items
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Prompts
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Notes
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Concept
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Folders
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
+- ✅ Images
+  - ✅ Tipos
+  - ✅ Store
+  - ✅ Acciones
+  - ✅ Servicios
+  - ✅ Vistas
+  - ✅ Hooks
+  - ✅ Configuración
 
-### Pendiente
+### Corrección de Errores Post-Migración
 
-- ⬜ Integración con servicios externos de monitoreo
-- ⬜ Almacenamiento persistente de logs para análisis histórico
-- ⬜ Alertas automáticas basadas en umbrales de rendimiento
-- ⬜ Dashboard administrativo con métricas avanzadas
+- ✅ Corregir importaciones en `collection.actions.ts`
+  - ✅ Actualizar importación de `CollectionEventType` y `collectionEventService`
+  - ✅ Corregir métodos de emisión de eventos
+  - ✅ Corregir error en `groupBy` de Prisma
+- ✅ Actualizar importaciones en `submenus.tsx`
+  - ✅ Corregir rutas de importación de los stores
+- ✅ Crear estructura de carpetas faltante
+  - ✅ Crear carpeta `store` en `concept`
+  - ✅ Mover `concept.store.ts` a la carpeta `store`
+  - ✅ Actualizar exportaciones en `index.ts`
+  - ✅ Crear carpeta `store` en `notes`
+  - ✅ Mover `note.store.ts` a `notes.store.ts` en la carpeta `store`
+  - ✅ Actualizar exportaciones en `index.ts`
+  - ✅ Crear carpeta `actions` en `concept`
+  - ✅ Mover `concept.actions.ts` a la carpeta `actions`
+  - ✅ Crear carpeta `actions` en `notes`
+  - ✅ Mover `note.actions.ts` a la carpeta `actions`
+  - ✅ Crear carpeta `views` en `notes`
+  - ✅ Mover `notes-view.tsx` a `note-view.tsx` en la carpeta `views`
+  - ✅ Mover `note-content-view.tsx` a la carpeta `views`
+  - ✅ Actualizar importaciones en las vistas
+  - ✅ Crear carpeta `views` en `concept`
+  - ✅ Mover `concepts-view.tsx` a `concept-view.tsx` en la carpeta `views`
+  - ✅ Mover `concept-content-view.tsx` a la carpeta `views`
+  - ✅ Actualizar importaciones en las vistas
+- ✅ Actualizar archivos index.ts para exportar correctamente desde las nuevas ubicaciones
+  - ✅ Actualizar `src/components/prompts/index.ts`
+  - ✅ Actualizar `src/components/tags/index.ts`
+  - ✅ Verificar y corregir otros archivos index.ts
+- ✅ Corregir servicios de eventos y acciones
+  - ✅ Crear servicio de eventos para prompts (`prompt-events.service.ts`)
+  - ✅ Actualizar acciones de prompts para usar el servicio de eventos
+  - ✅ Corregir errores en las funciones de emisión de eventos
+- ✅ Actualizar referencias en componentes del menú contextual
+  - ✅ Corregir importaciones en `use-entity-loader.ts`
+  - ✅ Corregir importaciones en `context-action-handler.ts`
+- ✅ Actualizar referencias en el resto del proyecto
+  - ✅ Revisar y corregir importaciones en componentes de UI
+  - ✅ Revisar y corregir importaciones en páginas
+  - ✅ Revisar y corregir importaciones en hooks globales
+  - ✅ Revisar y corregir importaciones en servicios
+  - ✅ Revisar y corregir importaciones en componentes de features
+  - ✅ Revisar y corregir importaciones en componentes de navegación
+  - ✅ Revisar y corregir importaciones en componentes de layout
+- ✅ Corregir importaciones específicas
+  - ✅ Corregir importaciones en `favorites.store.ts` para usar la nueva ubicación de las acciones
+  - ✅ Corregir importaciones en `favorites-view.tsx` para usar la nueva ubicación de las acciones
+  - ✅ Corregir importaciones en `view-container.tsx` para usar las nuevas ubicaciones de los componentes
+  - ✅ Corregir importaciones en `navigation.actions.ts` para usar las nuevas ubicaciones de las acciones
+
+### ✅ Resuelto: Error en hook useCategoryCollapse
+
+- Se corrigió un error de variable no definida en el hook `useCategoryCollapse`
+- El parámetro era recibido como `_categoryId` pero usado como `categoryId` en el cuerpo de la función
+- Se renombró el parámetro para mantener la consistencia y corregir el error
+
+### ✅ Resuelto: Función faltante getPlaceImages
+
+- Se implementó la función `getPlaceImages` en el archivo `src/components/places/actions/place.actions.ts`
+- Esta función era importada pero no estaba definida en el módulo, causando errores en tiempo de ejecución
+- La implementación sigue el patrón de las otras funciones de obtención de imágenes en el proyecto
+
+### ✅ Resuelto: Configuración de Prisma
+
+- Se eliminó la configuración personalizada de `output` en `prisma/schema.prisma`
+- Esto permite que Prisma genere el cliente en la ubicación predeterminada
+- Soluciona el error `Cannot find module '.prisma/client/default'`
+
+### ✅ Resuelto: Más errores de parámetros con guión bajo
+
+- Se corrigieron varios errores donde se recibían parámetros con guión bajo pero se usaban sin él
+- **Errores corregidos**:
+  - En `src/components/navigation/hooks/use-category-stats.ts`: `_categoryId` vs `categoryId`
+  - En `src/components/navigation/hooks/use-category-handlers.ts`: `_categoryId` vs `categoryId`
+  - En `src/components/stats/hooks/use-stats.ts`: `_imageId` vs `imageId`
+  - En `src/store/ui.store.ts`: `_state` vs `state`
+  - En `src/components/views/view-container.tsx`: `_direction` vs `direction`
+  - En `src/components/profiles/profiles-settings.tsx`: `_emoji` vs `emoji`
+  - En `src/components/features/entity-cards/layouts/forms/entity-form.tsx`: `_emoji` vs `emoji`
+  - En `src/components/features/entity-cards/layouts/forms/collection-form.tsx`: `_prev` vs `prev`
+  - En `src/components/features/file-browser/details/details-panel.store.ts`: `_visible/fixed` vs `visible/fixed`
+  - En varios archivos de gráficos: `_value` vs `value`
+- Estos errores causaban referencias a variables no definidas y crashes en la aplicación
+- Se implementó una solución homogénea: usar el nombre del parámetro exactamente como se define
+
+### ✅ Mejorado: Script de corrección automática de errores TypeScript
+
+- Se mejoró el script `scripts/fix-ts-errors.js` para detectar y corregir automáticamente los errores de parámetros con guión bajo
+- Nuevos patrones añadidos:
+  - Corregir referencias a `state` dentro de `produce` con `_state`
+  - Corregir referencias a `emoji` en `onEmojiSelect` con `_emoji`
+  - Corregir referencias a `prev` en `setFormData` con `_prev`
+  - Corregir referencias a `value` en formatters con `_value`
+  - Corregir referencias a parámetros en setters
+  - Corregir switch que usa variable sin guión bajo cuando el parámetro tiene guión bajo
+  - Corregir referencias generales a variables sin guión bajo cuando el parámetro tiene guión bajo
+- Estos patrones permitirán prevenir de manera proactiva este tipo de errores en todo el código
+
+### ✅ Mejorado: Configuración de ESLint y Herramientas de Calidad de Código
+
+- Se creó un nuevo archivo de configuración para ESLint (`eslint.config.mjs`) con reglas personalizadas
+- Se añadió una regla específica para detectar y prevenir el uso incorrecto de variables con guiones bajos
+- Se integró la configuración con Prettier para mantener un estilo consistente en el código
+- Se añadieron scripts en `package.json` para facilitar la ejecución de las herramientas:
+  - `lint:vars`: Verifica la presencia de patrones de nombres de variables problemáticos
+  - `lint:vars:fix`: Corrige automáticamente los patrones de nombres de variables
+  - `lint:fix`: Ejecuta el script de corrección de errores de lint
+  - `lint:staged`: Ejecuta ESLint solo en los archivos modificados que están preparados para commit
+- Se creó un hook de pre-commit que verifica:
+  - Errores de ESLint en archivos TypeScript/TSX modificados
+  - Patrones de nombres de variables problemáticos
+  - Uso de `console.log` (como advertencia)
+- Estas mejoras ayudarán a mantener la calidad del código y prevenir problemas comunes antes de que lleguen al repositorio
+- **Documentación detallada:** Se ha creado el documento [docs/quality-code.md](./quality-code.md) con una explicación completa del sistema de calidad de código implementado
+
+## Nota Técnica
+
+- Se mantendrá la compatibilidad con las APIs existentes
+- Se actualizarán las importaciones en los archivos afectados
+- Se seguirán las mejores prácticas de TypeScript y React
+
+## Diagrama de Estructura
+
+```mermaid
+graph TD
+    A[Entity] --> B[actions]
+    A --> C[docs]
+    A --> D[hooks]
+    A --> E[services]
+    A --> F[settings]
+    A --> G[store]
+    A --> H[types]
+    A --> I[views]
+
+    B --> B1[index.ts]
+    C --> C1[README.md]
+    D --> D1[use-entity.ts]
+    D --> D2[index.ts]
+    E --> E1[entity-events.service.ts]
+    F --> F1[entity-settings.tsx]
+    G --> G1[index.ts]
+    H --> H1[index.ts]
+    I --> I1[entity-view.tsx]
+    I --> I2[entity-card.tsx]
+    I --> I3[entity-form.tsx]
+```
+
+## Próximos Pasos
+
+1. ✅ Verificar y actualizar todas las referencias a los componentes migrados en el resto del proyecto
+2. ✅ Asegurar que todas las importaciones estén correctamente actualizadas
+3. ⬜ Realizar pruebas para confirmar que la funcionalidad se mantiene intacta
+4. ⬜ Documentar cualquier cambio en la API o en el uso de los componentes
+
+## Lista de Tareas Pendientes
+
+- [ ] Revisar importaciones en componentes de navegación
+- [ ] Revisar importaciones en componentes de layout
+- [ ] Revisar importaciones en componentes de features
+- [ ] Revisar importaciones en páginas de la aplicación
+- [ ] Revisar importaciones en componentes de UI
+- [ ] Verificar que todos los stores estén correctamente exportados
+- [ ] Verificar que todos los hooks estén correctamente exportados
+- [ ] Verificar que todas las acciones del servidor estén correctamente exportadas
+
+## Plan de Acción para Consolidar la Estructura de Imágenes
+
+### Análisis de la Situación Actual (Actualizado)
+
+Después de revisar nuevamente la estructura actual de la carpeta `src/components/images`, se han identificado los siguientes problemas pendientes:
+
+1. Archivos de tipos (`image.ts`, `image-item.ts`, `images.ts`, `image-processing.ts`, `image-loader.ts`) que siguen en la raíz y deben moverse a la carpeta `types`
+2. Archivos duplicados en las carpetas `services` y `store` que deben consolidarse
+3. Algunos archivos de acciones posiblemente duplicados que deben revisarse
+
+### Estado Actual
+
+**Archivos en la raíz que deben moverse:**
+
+- [x] `image.ts` → `types/image.ts`
+- [x] `image-item.ts` → `types/image-item.ts`
+- [x] `images.ts` → `types/images.ts`
+- [x] `image-processing.ts` → `types/image-processing.ts`
+- [x] `image-loader.ts` → `types/image-loader.ts`
+
+**Archivos duplicados que deben consolidarse:**
+
+- [x] `services/image.service.ts` y `services/image.service (2).ts`
+- [x] `store/image-resources.store.ts` y `store/image-resources.store (2).ts`
+
+**Posibles duplicados en acciones:**
+
+- [x] `actions/image.actions.ts` y `actions/image-access.actions.ts` (verificar si tienen funcionalidad similar)
+- [x] `actions/thumbnail.actions.ts` y `actions/image-thumbnails.actions.ts` (verificar si tienen funcionalidad similar)
+
+### Tareas de Consolidación (Actualizadas)
+
+#### 1. Reorganización de Archivos
+
+- [x] Mover `image-processing.actions.ts` a la carpeta `actions`
+- [x] Mover `image-resources.store.ts` a la carpeta `store` (verificar si ya existe una copia)
+- [x] Mover `image.service.ts` y `image-converter.service.ts` a la carpeta `services`
+- [x] Mover `folder-images.action.ts` a la carpeta `actions` y renombrarlo a `folder-images.actions.ts`
+- [x] Mover `image.ts` a la carpeta `types`
+- [x] Mover `image-item.ts` a la carpeta `types`
+- [x] Mover `images.ts` a la carpeta `types`
+- [x] Mover `image-processing.ts` a la carpeta `types`
+- [x] Mover `image-loader.ts` a la carpeta `types`
+
+#### 2. Eliminación de Duplicados
+
+- [x] Revisar y consolidar `services/image.service.ts` y `services/image.service (2).ts`
+- [x] Revisar y consolidar `store/image-resources.store.ts` y `store/image-resources.store (2).ts`
+- [x] Revisar y consolidar posibles duplicados en acciones (`image.actions.ts` vs `image-access.actions.ts`, `thumbnail.actions.ts` vs `image-thumbnails.actions.ts`)
+
+#### 3. Actualización de Importaciones
+
+- [x] Actualizar el archivo `index.ts` para exportar correctamente todos los archivos desde sus nuevas ubicaciones
+- [x] Actualizar el archivo `types/index.ts` para incluir los nuevos archivos de tipos
+- [x] Actualizar el archivo `actions/index.ts` para reflejar los cambios en los archivos de acciones
+- [x] Verificar que no haya referencias a rutas antiguas en el resto del proyecto
+
+### Tareas Pendientes (Actualizadas)
+
+- [x] Copiar los archivos de tipos restantes a la carpeta `types`
+- [x] Eliminar los archivos duplicados después de consolidar su funcionalidad
+- [x] Eliminar los archivos originales que ya han sido movidos a sus respectivas carpetas
+- [x] Verificar que todas las importaciones en el proyecto apunten a las nuevas ubicaciones
+- [x] Actualizar la documentación con la nueva estructura
+- [ ] Realizar pruebas para asegurar que la funcionalidad se mantiene intacta
+
+### Próximos Pasos
+
+1. Realizar pruebas para asegurar que la funcionalidad se mantiene intacta
+2. Continuar con la consolidación de otros componentes siguiendo el mismo patrón
+
+### Conclusión
+
+Se ha completado exitosamente la consolidación de la estructura del componente de imágenes, siguiendo el patrón establecido para todos los componentes del proyecto. La nueva estructura es más organizada, modular y fácil de mantener, lo que facilitará el desarrollo futuro y la colaboración entre desarrolladores.
+
+```mermaid
+graph TD
+    A[Componente Images] --> B[actions]
+    A --> C[docs]
+    A --> D[hooks]
+    A --> E[services]
+    A --> F[settings]
+    A --> G[store]
+    A --> H[types]
+    A --> I[views]
+
+    B --> B1[image-crud.actions.ts]
+    B --> B2[image-access.actions.ts]
+    B --> B3[image-thumbnails.actions.ts]
+    B --> B4[image-processing.actions.ts]
+    B --> B5[image-stats.actions.ts]
+    B --> B6[image-types.actions.ts]
+    B --> B7[images-random.action.ts]
+    B --> B8[folder-images.actions.ts]
+    B --> B10[thumbnail.actions.ts]
+    B --> B11[index.ts]
+
+    E --> E1[image.service.ts]
+    E --> E2[image-converter.service.ts]
+    E --> E3[index.ts]
+
+    G --> G1[image-resources.store.ts]
+    G --> G2[index.ts]
+
+    H --> H1[images.types.ts]
+    H --> H2[image.ts]
+    H --> H3[image-item.ts]
+    H --> H4[images.ts]
+    H --> H5[image-processing.ts]
+    H --> H6[image-loader.ts]
+    H --> H7[index.ts]
+
+    D --> D1[index.ts]
+    I --> I1[index.ts]
+```
+
+## Plan de Acción para Consolidar la Estructura de Thumbnails y Stats
+
+### Análisis de la Situación Actual
+
+Después de revisar la estructura actual de las carpetas `src/components/thumbnails` y `src/components/stats`, se ha identificado que estos componentes necesitan ser reorganizados siguiendo el mismo patrón que se aplicó al componente `images`.
+
+#### Componente Thumbnails
+
+**Estructura Actual:**
+
+- `thumbnails.store.ts`
+- `thumbnail.service.ts`
+- `thumbnail.ts`
+- `use-thumbnail-events.ts`
+
+**Estructura Deseada:**
+
+- `store/thumbnails.store.ts`
+- `services/thumbnail.service.ts`
+- `types/thumbnail.ts`
+- `hooks/use-thumbnail-events.ts`
+- `actions/` (crear si es necesario)
+- `docs/README.md`
+- `index.ts`
+
+#### Componente Stats
+
+**Estructura Actual:**
+
+- `stats.service.ts`
+- `stats.store.ts`
+- `use-stats.ts`
+- `use-stats-service.ts`
+
+**Estructura Deseada:**
+
+- `services/stats.service.ts`
+- `store/stats.store.ts`
+- `hooks/use-stats.ts`
+- `hooks/use-stats-service.ts`
+- `actions/` (crear si es necesario)
+- `types/` (crear si es necesario)
+- `docs/README.md`
+- `index.ts`
+
+### Tareas de Consolidación
+
+#### 1. Componente Thumbnails
+
+- [ ] Crear la estructura de carpetas necesaria
+
+  - [ ] `src/components/thumbnails/store`
+  - [ ] `src/components/thumbnails/services`
+  - [ ] `src/components/thumbnails/types`
+  - [ ] `src/components/thumbnails/hooks`
+  - [ ] `src/components/thumbnails/actions`
+  - [ ] `src/components/thumbnails/docs`
+
+- [ ] Mover los archivos a sus respectivas carpetas
+
+  - [ ] Mover `thumbnails.store.ts` a `store/thumbnails.store.ts`
+  - [ ] Mover `thumbnail.service.ts` a `services/thumbnail.service.ts`
+  - [ ] Mover `thumbnail.ts` a `types/thumbnail.ts`
+  - [ ] Mover `use-thumbnail-events.ts` a `hooks/use-thumbnail-events.ts`
+
+- [ ] Crear archivos index.ts en cada subcarpeta
+
+  - [ ] Crear `store/index.ts`
+  - [ ] Crear `services/index.ts`
+  - [ ] Crear `types/index.ts`
+  - [ ] Crear `hooks/index.ts`
+  - [ ] Crear `actions/index.ts`
+
+- [ ] Crear archivo principal `index.ts` para exportar todo
+
+- [ ] Crear documentación en `docs/README.md`
+
+#### 2. Componente Stats
+
+- [ ] Crear la estructura de carpetas necesaria
+
+  - [ ] `src/components/stats/store`
+  - [ ] `src/components/stats/services`
+  - [ ] `src/components/stats/hooks`
+  - [ ] `src/components/stats/actions`
+  - [ ] `src/components/stats/types`
+  - [ ] `src/components/stats/docs`
+
+- [ ] Mover los archivos a sus respectivas carpetas
+
+  - [ ] Mover `stats.store.ts` a `store/stats.store.ts`
+  - [ ] Mover `stats.service.ts` a `services/stats.service.ts`
+  - [ ] Mover `use-stats.ts` a `hooks/use-stats.ts`
+  - [ ] Mover `use-stats-service.ts` a `hooks/use-stats-service.ts`
+
+- [ ] Crear archivos index.ts en cada subcarpeta
+
+  - [ ] Crear `store/index.ts`
+  - [ ] Crear `services/index.ts`
+  - [ ] Crear `hooks/index.ts`
+  - [ ] Crear `actions/index.ts`
+  - [ ] Crear `types/index.ts`
+
+- [ ] Crear archivo principal `index.ts` para exportar todo
+
+- [ ] Crear documentación en `docs/README.md`
+
+#### 3. Actualización de Importaciones
+
+- [ ] Verificar y actualizar las importaciones en el resto del proyecto que hagan referencia a estos componentes
+
+### Diagramas de Estructura
+
+#### Estructura del Componente Thumbnails
+
+```mermaid
+graph TD
+    A[Componente Thumbnails] --> B[actions]
+    A --> C[docs]
+    A --> D[hooks]
+    A --> E[services]
+    A --> G[store]
+    A --> H[types]
+
+    D --> D1[use-thumbnail-events.ts]
+    D --> D2[index.ts]
+
+    E --> E1[thumbnail.service.ts]
+    E --> E2[index.ts]
+
+    G --> G1[thumbnails.store.ts]
+    G --> G2[index.ts]
+
+    H --> H1[thumbnail.ts]
+    H --> H2[index.ts]
+
+    C --> C1[README.md]
+```
+
+#### Estructura del Componente Stats
+
+```mermaid
+graph TD
+    A[Componente Stats] --> B[actions]
+    A --> C[docs]
+    A --> D[hooks]
+    A --> E[services]
+    A --> G[store]
+    A --> H[types]
+
+    D --> D1[use-stats.ts]
+    D --> D2[use-stats-service.ts]
+    D --> D3[index.ts]
+
+    E --> E1[stats.service.ts]
+    E --> E2[index.ts]
+
+    G --> G1[stats.store.ts]
+    G --> G2[index.ts]
+
+    H --> H1[index.ts]
+
+    C --> C1[README.md]
+```
+
+## Correcciones de Estructura y Refactorización
+
+### ✅ Resuelto: Problemas de importación
+
+- Se creó un archivo puente `src/lib/thumbnail.ts` para mantener la compatibilidad con las importaciones existentes
+- Este archivo exporta la funcionalidad de generación de miniaturas desde su ubicación real en `src/components/thumbnails/utils/thumbnail.generator.ts`
+- Solución para evitar errores de construcción relacionados con `Module not found: Can't resolve '@/lib/thumbnail'`
+
+### ✅ Resuelto: Error en hook useCategoryCollapse
+
+- Se corrigió un error de variable no definida en el hook `useCategoryCollapse`
+- El parámetro era recibido como `_categoryId` pero usado como `categoryId` en el cuerpo de la función
+- Se renombró el parámetro para mantener la consistencia y corregir el error
+
+### ✅ Resuelto: Función faltante getPlaceImages
+
+- Se implementó la función `getPlaceImages` en el archivo `src/components/places/actions/place.actions.ts`
+- Esta función era importada pero no estaba definida en el módulo, causando errores en tiempo de ejecución
+- La implementación sigue el patrón de las otras funciones de obtención de imágenes en el proyecto
+
+### ✅ Resuelto: Configuración de Prisma
+
+- Se eliminó la configuración personalizada de `output` en `prisma/schema.prisma`
+- Esto permite que Prisma genere el cliente en la ubicación predeterminada
+- Soluciona el error `Cannot find module '.prisma/client/default'`
+
+### ✅ Resuelto: Más errores de parámetros con guión bajo
+
+- Se corrigieron varios errores donde se recibían parámetros con guión bajo pero se usaban sin él
+- **Errores corregidos**:
+  - En `src/components/navigation/hooks/use-category-stats.ts`: `_categoryId` vs `categoryId`
+  - En `src/components/navigation/hooks/use-category-handlers.ts`: `_categoryId` vs `categoryId`
+  - En `src/components/stats/hooks/use-stats.ts`: `_imageId` vs `imageId`
+  - En `src/store/ui.store.ts`: `_state` vs `state`
+  - En `src/components/views/view-container.tsx`: `_direction` vs `direction`
+  - En `src/components/profiles/profiles-settings.tsx`: `_emoji` vs `emoji`
+  - En `src/components/features/entity-cards/layouts/forms/entity-form.tsx`: `_emoji` vs `emoji`
+  - En `src/components/features/entity-cards/layouts/forms/collection-form.tsx`: `_prev` vs `prev`
+  - En `src/components/features/file-browser/details/details-panel.store.ts`: `_visible/fixed` vs `visible/fixed`
+  - En varios archivos de gráficos: `_value` vs `value`
+- Estos errores causaban referencias a variables no definidas y crashes en la aplicación
+- Se implementó una solución homogénea: usar el nombre del parámetro exactamente como se define
+
+### ✅ Mejorado: Script de corrección automática de errores TypeScript
+
+- Se mejoró el script `scripts/fix-ts-errors.js` para detectar y corregir automáticamente los errores de parámetros con guión bajo
+- Nuevos patrones añadidos:
+  - Corregir referencias a `state` dentro de `produce` con `_state`
+  - Corregir referencias a `emoji` en `onEmojiSelect` con `_emoji`
+  - Corregir referencias a `prev` en `setFormData` con `_prev`
+  - Corregir referencias a `value` en formatters con `_value`
+  - Corregir referencias a parámetros en setters
+  - Corregir switch que usa variable sin guión bajo cuando el parámetro tiene guión bajo
+  - Corregir referencias generales a variables sin guión bajo cuando el parámetro tiene guión bajo
+- Estos patrones permitirán prevenir de manera proactiva este tipo de errores en todo el código
+
+### ✅ Mejorado: Configuración de ESLint y Herramientas de Calidad de Código
+
+- Se creó un nuevo archivo de configuración para ESLint (`eslint.config.mjs`) con reglas personalizadas
+- Se añadió una regla específica para detectar y prevenir el uso incorrecto de variables con guiones bajos
+- Se integró la configuración con Prettier para mantener un estilo consistente en el código
+- Se añadieron scripts en `package.json` para facilitar la ejecución de las herramientas:
+  - `lint:vars`: Verifica la presencia de patrones de nombres de variables problemáticos
+  - `lint:vars:fix`: Corrige automáticamente los patrones de nombres de variables
+  - `lint:fix`: Ejecuta el script de corrección de errores de lint
+  - `lint:staged`: Ejecuta ESLint solo en los archivos modificados que están preparados para commit
+- Se creó un hook de pre-commit que verifica:
+  - Errores de ESLint en archivos TypeScript/TSX modificados
+  - Patrones de nombres de variables problemáticos
+  - Uso de `console.log` (como advertencia)
+- Estas mejoras ayudarán a mantener la calidad del código y prevenir problemas comunes antes de que lleguen al repositorio
+
+## Nota Técnica
+
+- Se mantendrá la compatibilidad con las APIs existentes
+- Se actualizarán las importaciones en los archivos afectados
+- Se seguirán las mejores prácticas de TypeScript y React
