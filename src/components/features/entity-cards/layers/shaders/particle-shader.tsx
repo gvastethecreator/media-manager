@@ -43,29 +43,32 @@ function useRenderParticles({
 	const animationFrameRef = useRef<number | null>(null);
 
 	// Función para renderizar las partículas
-	const renderParticles = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-		// Limpiar el canvas
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	const renderParticles = useCallback(
+		(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+			// Limpiar el canvas
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		// Configurar el estilo de las partículas
-		ctx.fillStyle = `rgba(255, 255, 255, ${intensity * 0.5})`;
+			// Configurar el estilo de las partículas
+			ctx.fillStyle = `rgba(255, 255, 255, ${intensity * 0.5})`;
 
-		// Generar y dibujar partículas
-		for (let i = 0; i < particleCount; i++) {
-			// Usar el tiempo y el índice para calcular la posición
-			const t = internalTime * particleSpeed * 0.1;
-			const angle = (i / particleCount) * Math.PI * 2;
+			// Generar y dibujar partículas
+			for (let i = 0; i < particleCount; i++) {
+				// Usar el tiempo y el índice para calcular la posición
+				const t = internalTime * particleSpeed * 0.1;
+				const angle = (i / particleCount) * Math.PI * 2;
 
-			// Calcular posiciones con movimiento basado en seno y coseno
-			const x = canvas.width / 2 + Math.cos(angle + t) * (canvas.width / 4);
-			const y = canvas.height / 2 + Math.sin(angle + t) * (canvas.height / 4);
+				// Calcular posiciones con movimiento basado en seno y coseno
+				const x = canvas.width / 2 + Math.cos(angle + t) * (canvas.width / 4);
+				const y = canvas.height / 2 + Math.sin(angle + t) * (canvas.height / 4);
 
-			// Dibujar la partícula
-			ctx.beginPath();
-			ctx.arc(x, y, particleSize * (0.5 + Math.sin(t + i) * 0.5), 0, Math.PI * 2);
-			ctx.fill();
-		}
-	}, [internalTime, intensity, particleCount, particleSize, particleSpeed]);
+				// Dibujar la partícula
+				ctx.beginPath();
+				ctx.arc(x, y, particleSize * (0.5 + Math.sin(t + i) * 0.5), 0, Math.PI * 2);
+				ctx.fill();
+			}
+		},
+		[internalTime, intensity, particleCount, particleSize, particleSpeed]
+	);
 
 	// Efecto para actualizar el tiempo
 	useEffect(() => {
@@ -76,7 +79,7 @@ function useRenderParticles({
 		internalTime,
 		setInternalTime,
 		renderParticles,
-		animationFrameRef
+		animationFrameRef,
 	};
 }
 
@@ -99,7 +102,7 @@ export function ParticleShader({
 		particleCount,
 		particleSize,
 		particleSpeed,
-		time
+		time,
 	});
 
 	// Efecto para configurar y animar las partículas
@@ -156,9 +159,9 @@ export function ParticleShader({
 			style={
 				isExploded && getExplodeLayerTransform
 					? {
-						...getExplodeLayerTransform(6),
-						transitionDuration: `${duration}s`,
-					}
+							...getExplodeLayerTransform(6),
+							transitionDuration: `${duration}s`,
+						}
 					: { transitionDuration: `${duration}s` }
 			}
 			data-layer-active={activeLayer === 'particles' || null}

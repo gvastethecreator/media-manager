@@ -159,22 +159,22 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 					const overlapStyles: React.CSSProperties =
 						style === 'overlap'
 							? {
-								top: `${index * 10}px`,
-								left: `${index * 10}px`,
-								zIndex: displayImages.length - index,
-								width: '100%',
-								height: '100%',
-								transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (index + 1)}deg)`,
-							}
+									top: `${index * 10}px`,
+									left: `${index * 10}px`,
+									zIndex: displayImages.length - index,
+									width: '100%',
+									height: '100%',
+									transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (index + 1)}deg)`,
+								}
 							: {};
 
 					// Definir estilos para carousel
 					const carouselStyles: React.CSSProperties =
 						style === 'carousel'
 							? {
-								minWidth: '85%',
-								scrollSnapAlign: 'center',
-							}
+									minWidth: '85%',
+									scrollSnapAlign: 'center',
+								}
 							: {};
 
 					// Combinar estilos
@@ -185,13 +185,15 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 					};
 
 					return (
-						<div
+						<button
 							key={image.id}
+							type="button"
 							className={cn(
 								'image-container relative overflow-hidden transition-transform',
 								animated && 'duration-300 hover:scale-105',
 								style === 'polaroid' && 'p-2 bg-white shadow-md',
-								errorImages[image.id] && 'bg-muted'
+								errorImages[image.id] && 'bg-muted',
+								'text-left'
 							)}
 							style={combinedStyles}
 							onClick={() => handleImageClick(image)}
@@ -201,8 +203,6 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 									handleImageClick(image);
 								}
 							}}
-							tabIndex={0}
-							role="button"
 							aria-label={`Ver imagen ${image.alt || ''}`}
 						>
 							{errorImages[image.id] ? (
@@ -232,7 +232,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 									)}
 								</>
 							)}
-						</div>
+						</button>
 					);
 				})
 			) : (

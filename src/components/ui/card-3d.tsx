@@ -10,7 +10,7 @@ interface Card3DProps {
 	children: ReactNode;
 	className?: string;
 	style?: CSSProperties;
-	options?: any; // Cambiado a any para mayor flexibilidad
+	options?: Record<string, unknown>; // Reemplazado any por un tipo más seguro
 	onClick?: () => void;
 	// Props de accesibilidad
 	'aria-labelledby'?: string;

@@ -290,7 +290,6 @@ export function getPresetByName(name: string): PerformanceOptions {
 			return LOW_END_DEVICE_PRESET;
 		case 'accessibility':
 			return ACCESSIBILITY_PRESET;
-		case 'balanced':
 		default:
 			return BALANCED_PRESET;
 	}
@@ -316,7 +315,7 @@ export function detectBestPreset(): string {
 		// @ts-expect-error - No todos los navegadores soportan esta API
 		(navigator.connection.saveData ||
 			// @ts-expect-error
-			(navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
+			navigator.connection.effectiveType?.includes('2g'));
 
 	// Detectar dispositivo de bajo rendimiento
 	const isLowEndDevice =
@@ -324,6 +323,13 @@ export function detectBestPreset(): string {
 		(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
 		// @ts-expect-error
 		(navigator.deviceMemory && navigator.deviceMemory <= 2);
+
+	// Detección de ahorro de datos - reducir efectos visuales
+	const hasSaveDataMode =
+		navigator.connection &&
+		(navigator.connection.saveData ||
+			// @ts-expect-error
+			navigator.connection.effectiveType?.includes('2g'));
 
 	// Aplicar lógica de detección
 	if (prefersReducedMotion) {

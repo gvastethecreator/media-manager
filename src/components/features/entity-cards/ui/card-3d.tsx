@@ -6,11 +6,18 @@ import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Tipos flexibles para permitir diferentes sistemas de tipos
+interface Card3DOptions {
+	enable3DEffect?: boolean;
+	maxRotation?: number;
+	hoverLiftHeight?: number;
+	[key: string]: unknown;
+}
+
 interface Card3DProps {
 	children: ReactNode;
 	className?: string;
 	style?: CSSProperties;
-	options?: any; // Cambiado a any para mayor flexibilidad
+	options?: Card3DOptions;
 	onClick?: () => void;
 	// Props de accesibilidad
 	'aria-labelledby'?: string;

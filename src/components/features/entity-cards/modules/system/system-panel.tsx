@@ -178,177 +178,175 @@ function RarityPanel({
 			</div>
 
 			{config.rarity.enabled && (
-				<>
-					<div className="grid gap-4">
-						<div className="space-y-2">
-							<Label>Rareza por defecto</Label>
-							<Select value={config.rarity.defaultRarity} onValueChange={handleDefaultRarityChange}>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecciona una rareza" />
-								</SelectTrigger>
-								<SelectContent>
-									{Object.entries(config.rarity.customRarities).map(([id, rarity]) => (
-										<SelectItem key={id} value={id}>
-											<div className="flex items-center gap-2">
-												<div className="w-3 h-3 rounded-full" style={{ backgroundColor: rarity.color }} />
-												{rarity.name}
-											</div>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label>Rarezas disponibles</Label>
-							<Accordion type="multiple" className="w-full">
+				<div className="grid gap-4">
+					<div className="space-y-2">
+						<Label>Rareza por defecto</Label>
+						<Select value={config.rarity.defaultRarity} onValueChange={handleDefaultRarityChange}>
+							<SelectTrigger>
+								<SelectValue placeholder="Selecciona una rareza" />
+							</SelectTrigger>
+							<SelectContent>
 								{Object.entries(config.rarity.customRarities).map(([id, rarity]) => (
-									<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
-										<AccordionTrigger className="py-2 hover:no-underline">
-											<div className="flex items-center gap-2">
-												<div className="w-3 h-3 rounded-full" style={{ backgroundColor: rarity.color }} />
-												<span>{rarity.name}</span>
-												{config.rarity.defaultRarity === id && (
-													<Badge variant="outline" className="ml-2 text-xs">
-														Por defecto
-													</Badge>
-												)}
-											</div>
-										</AccordionTrigger>
-										<AccordionContent className="pb-3 pt-1">
-											<div className="space-y-3">
-												<div className="grid grid-cols-2 gap-3">
-													<div className="space-y-1">
-														<Label className="text-xs">Color principal</Label>
-														<div className="flex gap-2">
-															<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.color }} />
-															<Input
-																type="text"
-																value={rarity.color}
-																onChange={(e) => handleUpdateRarityProperty(id, 'color', e.target.value)}
-																className="w-full"
-															/>
-														</div>
-													</div>
-													<div className="space-y-1">
-														<Label className="text-xs">Color de borde</Label>
-														<div className="flex gap-2">
-															<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.borderColor }} />
-															<Input
-																type="text"
-																value={rarity.borderColor}
-																onChange={(e) => handleUpdateRarityProperty(id, 'borderColor', e.target.value)}
-																className="w-full"
-															/>
-														</div>
-													</div>
-												</div>
+									<SelectItem key={id} value={id}>
+										<div className="flex items-center gap-2">
+											<div className="w-3 h-3 rounded-full" style={{ backgroundColor: rarity.color }} />
+											{rarity.name}
+										</div>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
 
-												<div className="grid grid-cols-2 gap-3">
-													<div className="space-y-1">
-														<Label className="text-xs">Color de fondo</Label>
-														<div className="flex gap-2">
-															<div
-																className="w-8 h-8 rounded border"
-																style={{ backgroundColor: rarity.backgroundColor }}
-															/>
-															<Input
-																type="text"
-																value={rarity.backgroundColor}
-																onChange={(e) => handleUpdateRarityProperty(id, 'backgroundColor', e.target.value)}
-																className="w-full"
-															/>
-														</div>
-													</div>
-													<div className="space-y-1">
-														<Label className="text-xs">Color de texto</Label>
-														<div className="flex gap-2">
-															<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.textColor }} />
-															<Input
-																type="text"
-																value={rarity.textColor}
-																onChange={(e) => handleUpdateRarityProperty(id, 'textColor', e.target.value)}
-																className="w-full"
-															/>
-														</div>
-													</div>
-												</div>
-
+					<div className="space-y-2">
+						<Label>Rarezas disponibles</Label>
+						<Accordion type="multiple" className="w-full">
+							{Object.entries(config.rarity.customRarities).map(([id, rarity]) => (
+								<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
+									<AccordionTrigger className="py-2 hover:no-underline">
+										<div className="flex items-center gap-2">
+											<div className="w-3 h-3 rounded-full" style={{ backgroundColor: rarity.color }} />
+											<span>{rarity.name}</span>
+											{config.rarity.defaultRarity === id && (
+												<Badge variant="outline" className="ml-2 text-xs">
+													Por defecto
+												</Badge>
+											)}
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="pb-3 pt-1">
+										<div className="space-y-3">
+											<div className="grid grid-cols-2 gap-3">
 												<div className="space-y-1">
-													<Label className="text-xs">Color de brillo</Label>
+													<Label className="text-xs">Color principal</Label>
 													<div className="flex gap-2">
-														<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.glowColor }} />
+														<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.color }} />
 														<Input
 															type="text"
-															value={rarity.glowColor}
-															onChange={(e) => handleUpdateRarityProperty(id, 'glowColor', e.target.value)}
+															value={rarity.color}
+															onChange={(e) => handleUpdateRarityProperty(id, 'color', e.target.value)}
 															className="w-full"
 														/>
 													</div>
 												</div>
-
 												<div className="space-y-1">
-													<div className="flex items-center justify-between">
-														<Label className="text-xs">Intensidad de brillo</Label>
-														<span className="text-xs text-muted-foreground">{rarity.glowIntensity}</span>
+													<Label className="text-xs">Color de borde</Label>
+													<div className="flex gap-2">
+														<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.borderColor }} />
+														<Input
+															type="text"
+															value={rarity.borderColor}
+															onChange={(e) => handleUpdateRarityProperty(id, 'borderColor', e.target.value)}
+															className="w-full"
+														/>
 													</div>
-													<Slider
-														value={[rarity.glowIntensity]}
-														min={0}
-														max={10}
-														step={1}
-														onValueChange={(value) => handleUpdateRarityProperty(id, 'glowIntensity', value[0])}
+												</div>
+											</div>
+
+											<div className="grid grid-cols-2 gap-3">
+												<div className="space-y-1">
+													<Label className="text-xs">Color de fondo</Label>
+													<div className="flex gap-2">
+														<div
+															className="w-8 h-8 rounded border"
+															style={{ backgroundColor: rarity.backgroundColor }}
+														/>
+														<Input
+															type="text"
+															value={rarity.backgroundColor}
+															onChange={(e) => handleUpdateRarityProperty(id, 'backgroundColor', e.target.value)}
+															className="w-full"
+														/>
+													</div>
+												</div>
+												<div className="space-y-1">
+													<Label className="text-xs">Color de texto</Label>
+													<div className="flex gap-2">
+														<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.textColor }} />
+														<Input
+															type="text"
+															value={rarity.textColor}
+															onChange={(e) => handleUpdateRarityProperty(id, 'textColor', e.target.value)}
+															className="w-full"
+														/>
+													</div>
+												</div>
+											</div>
+
+											<div className="space-y-1">
+												<Label className="text-xs">Color de brillo</Label>
+												<div className="flex gap-2">
+													<div className="w-8 h-8 rounded border" style={{ backgroundColor: rarity.glowColor }} />
+													<Input
+														type="text"
+														value={rarity.glowColor}
+														onChange={(e) => handleUpdateRarityProperty(id, 'glowColor', e.target.value)}
+														className="w-full"
 													/>
 												</div>
-
-												<Button
-													variant="destructive"
-													size="sm"
-													className="mt-2 w-full"
-													onClick={() => handleRemoveRarity(id)}
-													disabled={Object.keys(config.rarity.customRarities).length <= 1}
-												>
-													<Trash2 className="h-4 w-4 mr-2" />
-													Eliminar rareza
-												</Button>
 											</div>
-										</AccordionContent>
-									</AccordionItem>
-								))}
-							</Accordion>
-						</div>
 
-						<div className="space-y-2 pt-2 border-t">
-							<Label>Añadir nueva rareza</Label>
-							<div className="grid grid-cols-2 gap-3 mb-2">
-								<div>
-									<Input
-										placeholder="ID (ej: mythic)"
-										value={newRarityId}
-										onChange={(e) => setNewRarityId(e.target.value)}
-									/>
-								</div>
-								<div>
-									<Input
-										placeholder="Nombre (ej: Mítico)"
-										value={newRarityName}
-										onChange={(e) => setNewRarityName(e.target.value)}
-									/>
-								</div>
-							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								className="w-full"
-								onClick={handleAddRarity}
-								disabled={!newRarityId || !newRarityName}
-							>
-								<PlusCircle className="h-4 w-4 mr-2" />
-								Añadir rareza
-							</Button>
-						</div>
+											<div className="space-y-1">
+												<div className="flex items-center justify-between">
+													<Label className="text-xs">Intensidad de brillo</Label>
+													<span className="text-xs text-muted-foreground">{rarity.glowIntensity}</span>
+												</div>
+												<Slider
+													value={[rarity.glowIntensity]}
+													min={0}
+													max={10}
+													step={1}
+													onValueChange={(value) => handleUpdateRarityProperty(id, 'glowIntensity', value[0])}
+												/>
+											</div>
+
+											<Button
+												variant="destructive"
+												size="sm"
+												className="mt-2 w-full"
+												onClick={() => handleRemoveRarity(id)}
+												disabled={Object.keys(config.rarity.customRarities).length <= 1}
+											>
+												<Trash2 className="h-4 w-4 mr-2" />
+												Eliminar rareza
+											</Button>
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
 					</div>
-				</>
+
+					<div className="space-y-2 pt-2 border-t">
+						<Label>Añadir nueva rareza</Label>
+						<div className="grid grid-cols-2 gap-3 mb-2">
+							<div>
+								<Input
+									placeholder="ID (ej: mythic)"
+									value={newRarityId}
+									onChange={(e) => setNewRarityId(e.target.value)}
+								/>
+							</div>
+							<div>
+								<Input
+									placeholder="Nombre (ej: Mítico)"
+									value={newRarityName}
+									onChange={(e) => setNewRarityName(e.target.value)}
+								/>
+							</div>
+						</div>
+						<Button
+							variant="outline"
+							size="sm"
+							className="w-full"
+							onClick={handleAddRarity}
+							disabled={!newRarityId || !newRarityName}
+						>
+							<PlusCircle className="h-4 w-4 mr-2" />
+							Añadir rareza
+						</Button>
+					</div>
+				</div>
 			)}
 		</div>
 	);
@@ -469,134 +467,132 @@ function TexturePanel({
 			</div>
 
 			{config.texture.enabled && (
-				<>
-					<div className="grid gap-4">
-						<div className="space-y-2">
-							<Label>Textura por defecto</Label>
-							<Select value={config.texture.defaultTexture} onValueChange={handleDefaultTextureChange}>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecciona una textura" />
-								</SelectTrigger>
-								<SelectContent>
-									{Object.entries(config.texture.customTextures).map(([id, texture]) => (
-										<SelectItem key={id} value={id}>
-											{texture.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label>Texturas disponibles</Label>
-							<Accordion type="multiple" className="w-full">
+				<div className="grid gap-4">
+					<div className="space-y-2">
+						<Label>Textura por defecto</Label>
+						<Select value={config.texture.defaultTexture} onValueChange={handleDefaultTextureChange}>
+							<SelectTrigger>
+								<SelectValue placeholder="Selecciona una textura" />
+							</SelectTrigger>
+							<SelectContent>
 								{Object.entries(config.texture.customTextures).map(([id, texture]) => (
-									<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
-										<AccordionTrigger className="py-2 hover:no-underline">
-											<div className="flex items-center gap-2">
-												<span>{texture.name}</span>
-												{config.texture.defaultTexture === id && (
-													<Badge variant="outline" className="ml-2 text-xs">
-														Por defecto
-													</Badge>
-												)}
-											</div>
-										</AccordionTrigger>
-										<AccordionContent className="pb-3 pt-1">
-											<div className="space-y-3">
-												<div className="space-y-1">
-													<Label className="text-xs">URL de la textura</Label>
-													<Input
-														type="text"
-														value={texture.url}
-														onChange={(e) => handleUpdateTextureProperty(id, 'url', e.target.value)}
-													/>
-												</div>
-
-												<div className="space-y-1">
-													<div className="flex items-center justify-between">
-														<Label className="text-xs">Opacidad</Label>
-														<span className="text-xs text-muted-foreground">{texture.opacity}</span>
-													</div>
-													<Slider
-														value={[texture.opacity * 100]}
-														min={0}
-														max={100}
-														step={1}
-														onValueChange={(value) => handleUpdateTextureProperty(id, 'opacity', value[0] / 100)}
-													/>
-												</div>
-
-												<div className="space-y-1">
-													<Label className="text-xs">Modo de mezcla</Label>
-													<Select
-														value={texture.blendMode}
-														onValueChange={(value) => handleUpdateTextureProperty(id, 'blendMode', value)}
-													>
-														<SelectTrigger>
-															<SelectValue placeholder="Selecciona un modo de mezcla" />
-														</SelectTrigger>
-														<SelectContent>
-															{blendModes.map((mode) => (
-																<SelectItem key={mode} value={mode}>
-																	{mode}
-																</SelectItem>
-															))}
-														</SelectContent>
-													</Select>
-												</div>
-
-												<Button
-													variant="destructive"
-													size="sm"
-													className="mt-2 w-full"
-													onClick={() => handleRemoveTexture(id)}
-													disabled={Object.keys(config.texture.customTextures).length <= 1}
-												>
-													<Trash2 className="h-4 w-4 mr-2" />
-													Eliminar textura
-												</Button>
-											</div>
-										</AccordionContent>
-									</AccordionItem>
+									<SelectItem key={id} value={id}>
+										{texture.name}
+									</SelectItem>
 								))}
-							</Accordion>
-						</div>
+							</SelectContent>
+						</Select>
+					</div>
 
-						<div className="space-y-2 pt-2 border-t">
-							<Label>Añadir nueva textura</Label>
-							<div className="grid gap-3 mb-2">
-								<div className="grid grid-cols-2 gap-3">
-									<Input
-										placeholder="ID (ej: wood)"
-										value={newTextureId}
-										onChange={(e) => setNewTextureId(e.target.value)}
-									/>
-									<Input
-										placeholder="Nombre (ej: Madera)"
-										value={newTextureName}
-										onChange={(e) => setNewTextureName(e.target.value)}
-									/>
-								</div>
+					<div className="space-y-2">
+						<Label>Texturas disponibles</Label>
+						<Accordion type="multiple" className="w-full">
+							{Object.entries(config.texture.customTextures).map(([id, texture]) => (
+								<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
+									<AccordionTrigger className="py-2 hover:no-underline">
+										<div className="flex items-center gap-2">
+											<span>{texture.name}</span>
+											{config.texture.defaultTexture === id && (
+												<Badge variant="outline" className="ml-2 text-xs">
+													Por defecto
+												</Badge>
+											)}
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="pb-3 pt-1">
+										<div className="space-y-3">
+											<div className="space-y-1">
+												<Label className="text-xs">URL de la textura</Label>
+												<Input
+													type="text"
+													value={texture.url}
+													onChange={(e) => handleUpdateTextureProperty(id, 'url', e.target.value)}
+												/>
+											</div>
+
+											<div className="space-y-1">
+												<div className="flex items-center justify-between">
+													<Label className="text-xs">Opacidad</Label>
+													<span className="text-xs text-muted-foreground">{texture.opacity}</span>
+												</div>
+												<Slider
+													value={[texture.opacity * 100]}
+													min={0}
+													max={100}
+													step={1}
+													onValueChange={(value) => handleUpdateTextureProperty(id, 'opacity', value[0] / 100)}
+												/>
+											</div>
+
+											<div className="space-y-1">
+												<Label className="text-xs">Modo de mezcla</Label>
+												<Select
+													value={texture.blendMode}
+													onValueChange={(value) => handleUpdateTextureProperty(id, 'blendMode', value)}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Selecciona un modo de mezcla" />
+													</SelectTrigger>
+													<SelectContent>
+														{blendModes.map((mode) => (
+															<SelectItem key={mode} value={mode}>
+																{mode}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											<Button
+												variant="destructive"
+												size="sm"
+												className="mt-2 w-full"
+												onClick={() => handleRemoveTexture(id)}
+												disabled={Object.keys(config.texture.customTextures).length <= 1}
+											>
+												<Trash2 className="h-4 w-4 mr-2" />
+												Eliminar textura
+											</Button>
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
+					</div>
+
+					<div className="space-y-2 pt-2 border-t">
+						<Label>Añadir nueva textura</Label>
+						<div className="grid gap-3 mb-2">
+							<div className="grid grid-cols-2 gap-3">
 								<Input
-									placeholder="URL (ej: /textures/wood.jpg)"
-									value={newTextureUrl}
-									onChange={(e) => setNewTextureUrl(e.target.value)}
+									placeholder="ID (ej: wood)"
+									value={newTextureId}
+									onChange={(e) => setNewTextureId(e.target.value)}
+								/>
+								<Input
+									placeholder="Nombre (ej: Madera)"
+									value={newTextureName}
+									onChange={(e) => setNewTextureName(e.target.value)}
 								/>
 							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								className="w-full"
-								onClick={handleAddTexture}
-								disabled={!newTextureId || !newTextureName || !newTextureUrl}
-							>
-								<PlusCircle className="h-4 w-4 mr-2" />
-								Añadir textura
-							</Button>
+							<Input
+								placeholder="URL (ej: /textures/wood.jpg)"
+								value={newTextureUrl}
+								onChange={(e) => setNewTextureUrl(e.target.value)}
+							/>
 						</div>
+						<Button
+							variant="outline"
+							size="sm"
+							className="w-full"
+							onClick={handleAddTexture}
+							disabled={!newTextureId || !newTextureName || !newTextureUrl}
+						>
+							<PlusCircle className="h-4 w-4 mr-2" />
+							Añadir textura
+						</Button>
 					</div>
-				</>
+				</div>
 			)}
 		</div>
 	);
@@ -717,146 +713,144 @@ function CategoryPanel({
 			</div>
 
 			{config.category.enabled && (
-				<>
-					<div className="grid gap-4">
-						<div className="space-y-2">
-							<Label>Categoría por defecto</Label>
-							<Select value={config.category.defaultCategory} onValueChange={handleDefaultCategoryChange}>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecciona una categoría" />
-								</SelectTrigger>
-								<SelectContent>
-									{Object.entries(config.category.customCategories).map(([id, category]) => (
-										<SelectItem key={id} value={id}>
-											<div className="flex items-center gap-2">
-												<div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
-												{category.name}
-											</div>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label>Categorías disponibles</Label>
-							<Accordion type="multiple" className="w-full">
+				<div className="grid gap-4">
+					<div className="space-y-2">
+						<Label>Categoría por defecto</Label>
+						<Select value={config.category.defaultCategory} onValueChange={handleDefaultCategoryChange}>
+							<SelectTrigger>
+								<SelectValue placeholder="Selecciona una categoría" />
+							</SelectTrigger>
+							<SelectContent>
 								{Object.entries(config.category.customCategories).map(([id, category]) => (
-									<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
-										<AccordionTrigger className="py-2 hover:no-underline">
-											<div className="flex items-center gap-2">
-												<div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
-												<span>{category.name}</span>
-												{config.category.defaultCategory === id && (
-													<Badge variant="outline" className="ml-2 text-xs">
-														Por defecto
-													</Badge>
-												)}
-											</div>
-										</AccordionTrigger>
-										<AccordionContent className="pb-3 pt-1">
-											<div className="space-y-3">
-												<div className="space-y-1">
-													<Label className="text-xs">Icono</Label>
-													<Select
-														value={category.icon}
-														onValueChange={(value) => handleUpdateCategoryProperty(id, 'icon', value)}
-													>
-														<SelectTrigger>
-															<SelectValue placeholder="Selecciona un icono" />
-														</SelectTrigger>
-														<SelectContent>
-															{iconOptions.map((icon) => (
-																<SelectItem key={icon} value={icon}>
-																	{icon}
-																</SelectItem>
-															))}
-														</SelectContent>
-													</Select>
-												</div>
-
-												<div className="space-y-1">
-													<Label className="text-xs">Color</Label>
-													<div className="flex gap-2">
-														<div className="w-8 h-8 rounded border" style={{ backgroundColor: category.color }} />
-														<Input
-															type="text"
-															value={category.color}
-															onChange={(e) => handleUpdateCategoryProperty(id, 'color', e.target.value)}
-															className="w-full"
-														/>
-													</div>
-												</div>
-
-												<Button
-													variant="destructive"
-													size="sm"
-													className="mt-2 w-full"
-													onClick={() => handleRemoveCategory(id)}
-													disabled={Object.keys(config.category.customCategories).length <= 1}
-												>
-													<Trash2 className="h-4 w-4 mr-2" />
-													Eliminar categoría
-												</Button>
-											</div>
-										</AccordionContent>
-									</AccordionItem>
+									<SelectItem key={id} value={id}>
+										<div className="flex items-center gap-2">
+											<div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+											{category.name}
+										</div>
+									</SelectItem>
 								))}
-							</Accordion>
-						</div>
+							</SelectContent>
+						</Select>
+					</div>
 
-						<div className="space-y-2 pt-2 border-t">
-							<Label>Añadir nueva categoría</Label>
-							<div className="grid gap-3 mb-2">
-								<div className="grid grid-cols-2 gap-3">
+					<div className="space-y-2">
+						<Label>Categorías disponibles</Label>
+						<Accordion type="multiple" className="w-full">
+							{Object.entries(config.category.customCategories).map(([id, category]) => (
+								<AccordionItem key={id} value={id} className="border px-3 rounded-md mb-2">
+									<AccordionTrigger className="py-2 hover:no-underline">
+										<div className="flex items-center gap-2">
+											<div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+											<span>{category.name}</span>
+											{config.category.defaultCategory === id && (
+												<Badge variant="outline" className="ml-2 text-xs">
+													Por defecto
+												</Badge>
+											)}
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="pb-3 pt-1">
+										<div className="space-y-3">
+											<div className="space-y-1">
+												<Label className="text-xs">Icono</Label>
+												<Select
+													value={category.icon}
+													onValueChange={(value) => handleUpdateCategoryProperty(id, 'icon', value)}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Selecciona un icono" />
+													</SelectTrigger>
+													<SelectContent>
+														{iconOptions.map((icon) => (
+															<SelectItem key={icon} value={icon}>
+																{icon}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											<div className="space-y-1">
+												<Label className="text-xs">Color</Label>
+												<div className="flex gap-2">
+													<div className="w-8 h-8 rounded border" style={{ backgroundColor: category.color }} />
+													<Input
+														type="text"
+														value={category.color}
+														onChange={(e) => handleUpdateCategoryProperty(id, 'color', e.target.value)}
+														className="w-full"
+													/>
+												</div>
+											</div>
+
+											<Button
+												variant="destructive"
+												size="sm"
+												className="mt-2 w-full"
+												onClick={() => handleRemoveCategory(id)}
+												disabled={Object.keys(config.category.customCategories).length <= 1}
+											>
+												<Trash2 className="h-4 w-4 mr-2" />
+												Eliminar categoría
+											</Button>
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							))}
+						</Accordion>
+					</div>
+
+					<div className="space-y-2 pt-2 border-t">
+						<Label>Añadir nueva categoría</Label>
+						<div className="grid gap-3 mb-2">
+							<div className="grid grid-cols-2 gap-3">
+								<Input
+									placeholder="ID (ej: project)"
+									value={newCategoryId}
+									onChange={(e) => setNewCategoryId(e.target.value)}
+								/>
+								<Input
+									placeholder="Nombre (ej: Proyecto)"
+									value={newCategoryName}
+									onChange={(e) => setNewCategoryName(e.target.value)}
+								/>
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								<Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
+									<SelectTrigger>
+										<SelectValue placeholder="Selecciona un icono" />
+									</SelectTrigger>
+									<SelectContent>
+										{iconOptions.map((icon) => (
+											<SelectItem key={icon} value={icon}>
+												{icon}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<div className="flex gap-2">
+									<div className="w-8 h-8 rounded border" style={{ backgroundColor: newCategoryColor }} />
 									<Input
-										placeholder="ID (ej: project)"
-										value={newCategoryId}
-										onChange={(e) => setNewCategoryId(e.target.value)}
+										type="text"
+										value={newCategoryColor}
+										onChange={(e) => setNewCategoryColor(e.target.value)}
+										className="w-full"
 									/>
-									<Input
-										placeholder="Nombre (ej: Proyecto)"
-										value={newCategoryName}
-										onChange={(e) => setNewCategoryName(e.target.value)}
-									/>
-								</div>
-								<div className="grid grid-cols-2 gap-3">
-									<Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona un icono" />
-										</SelectTrigger>
-										<SelectContent>
-											{iconOptions.map((icon) => (
-												<SelectItem key={icon} value={icon}>
-													{icon}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<div className="flex gap-2">
-										<div className="w-8 h-8 rounded border" style={{ backgroundColor: newCategoryColor }} />
-										<Input
-											type="text"
-											value={newCategoryColor}
-											onChange={(e) => setNewCategoryColor(e.target.value)}
-											className="w-full"
-										/>
-									</div>
 								</div>
 							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								className="w-full"
-								onClick={handleAddCategory}
-								disabled={!newCategoryId || !newCategoryName}
-							>
-								<PlusCircle className="h-4 w-4 mr-2" />
-								Añadir categoría
-							</Button>
 						</div>
+						<Button
+							variant="outline"
+							size="sm"
+							className="w-full"
+							onClick={handleAddCategory}
+							disabled={!newCategoryId || !newCategoryName}
+						>
+							<PlusCircle className="h-4 w-4 mr-2" />
+							Añadir categoría
+						</Button>
 					</div>
-				</>
+				</div>
 			)}
 		</div>
 	);

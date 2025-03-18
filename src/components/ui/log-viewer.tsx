@@ -78,7 +78,7 @@ export function LogViewer({
 		if (autoScroll && scrollRef.current) {
 			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
 		}
-	}, [filteredLogs, autoScroll]);
+	}, [autoScroll]);
 
 	// Contar logs por nivel
 	const logCounts = logs.reduce(

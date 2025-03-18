@@ -33,7 +33,7 @@ export const CharacterCard = createCustomCardAdapter<Character, CharacterCardPro
 			isExploded: props.isExploded,
 			activeLayer: props.activeLayer,
 			onExplodedChange: props.onExplodedChange,
-			onActiveLayerChange: props.onActiveLayerChange
+			onActiveLayerChange: props.onActiveLayerChange,
 		};
 	}
 );

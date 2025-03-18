@@ -146,6 +146,7 @@ export function LayerExplodeControl({
 }) {
 	return (
 		<button
+			type="button"
 			className={cn(
 				'flex items-center justify-center p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors',
 				isExploded && 'bg-primary/20 ring-2 ring-primary/50',
@@ -164,7 +165,10 @@ export function LayerExplodeControl({
 				strokeWidth="2"
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				aria-hidden="true"
+				role="img"
 			>
+				<title>{isExploded ? 'Desactivar vista explosionada' : 'Activar vista explosionada'}</title>
 				{isExploded ? (
 					<>
 						<rect x="4" y="4" width="16" height="16" rx="2" />
@@ -201,6 +205,7 @@ export function LayerSelectControl({
 		<div className={cn('flex flex-col gap-2', className)}>
 			{layers.map((layer) => (
 				<button
+					type="button"
 					key={layer.id}
 					className={cn(
 						'flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors',
@@ -220,7 +225,10 @@ export function LayerSelectControl({
 							strokeWidth="2"
 							strokeLinecap="round"
 							strokeLinejoin="round"
+							aria-hidden="true"
+							role="img"
 						>
+							<title>{`Capa: ${layer.name}`}</title>
 							<path d="M12 3L2 12L12 21L22 12L12 3Z" />
 						</svg>
 					)}

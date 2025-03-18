@@ -16,12 +16,12 @@ import { generateRarityConfig } from '../utils/rarity-utils';
 // Asegurar que ambos tipos tienen las propiedades necesarias
 export type CardData =
 	| (AlbumWithStats & {
-		_count?: { images: number };
-		totalSize?: number;
-		coverImage?: string;
-		recentImages?: string[];
-		rating?: number; // Hacemos rating opcional
-	})
+			_count?: { images: number };
+			totalSize?: number;
+			coverImage?: string;
+			recentImages?: string[];
+			rating?: number; // Hacemos rating opcional
+	  })
 	| AlbumFormData;
 
 export interface AlbumCardProps {
@@ -197,16 +197,16 @@ export function AlbumCard({
 	// Crear funciones de manejo de eventos fuera del JSX
 	const handleEdit = onEdit
 		? (e: React.MouseEvent<HTMLButtonElement>) => {
-			e.stopPropagation();
-			if (data.id) onEdit(data.id as string, e);
-		}
+				e.stopPropagation();
+				if (data.id) onEdit(data.id as string, e);
+			}
 		: undefined;
 
 	const handleDelete = onDelete
 		? (e: React.MouseEvent<HTMLButtonElement>) => {
-			e.stopPropagation();
-			if (data.id) onDelete(data.id as string);
-		}
+				e.stopPropagation();
+				if (data.id) onDelete(data.id as string);
+			}
 		: undefined;
 
 	return (
