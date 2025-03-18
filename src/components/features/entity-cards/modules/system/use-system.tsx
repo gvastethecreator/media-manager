@@ -14,46 +14,52 @@ const SystemContext = createContext<SystemContextType | null>(null);
  * Hook interno para crear el estado del sistema
  */
 function useSystemState(initialConfig?: Partial<SystemConfig>): SystemContextType {
-	const [config, setConfig] = useState<SystemConfig>(() =>
-		deepMerge(DEFAULT_SYSTEM_CONFIG, initialConfig || {}) as SystemConfig
+	const [config, setConfig] = useState<SystemConfig>(
+		() => deepMerge(DEFAULT_SYSTEM_CONFIG, initialConfig || {}) as SystemConfig
 	);
 
 	const updateConfig = useCallback((newConfig: Partial<SystemConfig>) => {
-		setConfig(prevConfig => deepMerge(prevConfig, newConfig) as SystemConfig);
+		setConfig((prevConfig) => deepMerge(prevConfig, newConfig) as SystemConfig);
 	}, []);
 
 	// Funciones para obtener configuraciones específicas para entidades
-	const getRarityForEntity = useCallback((entityId: string, entityType: EntityType): string => {
-		// Aquí se implementaría la lógica para obtener la rareza de una entidad específica
-		// Por ahora, devolvemos la rareza por defecto
-		return config.rarity.defaultRarity;
-	}, [config.rarity.defaultRarity]);
+	const getRarityForEntity = useCallback(
+		(entityId: string, entityType: EntityType): string => {
+			// Aquí se implementaría la lógica para obtener la rareza de una entidad específica
+			// Por ahora, devolvemos la rareza por defecto
+			return config.rarity.defaultRarity;
+		},
+		[config.rarity.defaultRarity]
+	);
 
-	const getTextureForEntity = useCallback((entityId: string, entityType: EntityType): string => {
-		// Aquí se implementaría la lógica para obtener la textura de una entidad específica
-		// Por ahora, devolvemos la textura por defecto
-		return config.texture.defaultTexture;
-	}, [config.texture.defaultTexture]);
+	const getTextureForEntity = useCallback(
+		(entityId: string, entityType: EntityType): string => {
+			// Aquí se implementaría la lógica para obtener la textura de una entidad específica
+			// Por ahora, devolvemos la textura por defecto
+			return config.texture.defaultTexture;
+		},
+		[config.texture.defaultTexture]
+	);
 
-	const getCategoryForEntity = useCallback((entityId: string, entityType: EntityType): string => {
-		// Aquí se implementaría la lógica para obtener la categoría de una entidad específica
-		// Por ahora, devolvemos la categoría por defecto
-		return config.category.defaultCategory;
-	}, [config.category.defaultCategory]);
+	const getCategoryForEntity = useCallback(
+		(entityId: string, entityType: EntityType): string => {
+			// Aquí se implementaría la lógica para obtener la categoría de una entidad específica
+			// Por ahora, devolvemos la categoría por defecto
+			return config.category.defaultCategory;
+		},
+		[config.category.defaultCategory]
+	);
 
-	return useMemo(() => ({
-		config,
-		updateConfig,
-		getRarityForEntity,
-		getTextureForEntity,
-		getCategoryForEntity
-	}), [
-		config,
-		updateConfig,
-		getRarityForEntity,
-		getTextureForEntity,
-		getCategoryForEntity
-	]);
+	return useMemo(
+		() => ({
+			config,
+			updateConfig,
+			getRarityForEntity,
+			getTextureForEntity,
+			getCategoryForEntity,
+		}),
+		[config, updateConfig, getRarityForEntity, getTextureForEntity, getCategoryForEntity]
+	);
 }
 
 /**
@@ -61,18 +67,14 @@ function useSystemState(initialConfig?: Partial<SystemConfig>): SystemContextTyp
  */
 export function SystemProvider({
 	children,
-	initialConfig
+	initialConfig,
 }: {
 	children: React.ReactNode;
 	initialConfig?: Partial<SystemConfig>;
 }) {
 	const value = useSystemState(initialConfig);
 
-	return (
-		<SystemContext.Provider value={value}>
-			{children}
-		</SystemContext.Provider>
-	);
+	return <SystemContext.Provider value={value}>{children}</SystemContext.Provider>;
 }
 
 /**
@@ -94,14 +96,17 @@ export function useSystem() {
 export function useRaritySystem() {
 	const { config, updateConfig, getRarityForEntity } = useSystem();
 
-	const updateRarityConfig = useCallback((newConfig: Partial<SystemConfig['rarity']>) => {
-		updateConfig({ rarity: newConfig });
-	}, [updateConfig]);
+	const updateRarityConfig = useCallback(
+		(newConfig: Partial<SystemConfig['rarity']>) => {
+			updateConfig({ rarity: newConfig });
+		},
+		[updateConfig]
+	);
 
 	return {
 		rarityConfig: config.rarity,
 		updateRarityConfig,
-		getRarityForEntity
+		getRarityForEntity,
 	};
 }
 
@@ -111,14 +116,17 @@ export function useRaritySystem() {
 export function useTextureSystem() {
 	const { config, updateConfig, getTextureForEntity } = useSystem();
 
-	const updateTextureConfig = useCallback((newConfig: Partial<SystemConfig['texture']>) => {
-		updateConfig({ texture: newConfig });
-	}, [updateConfig]);
+	const updateTextureConfig = useCallback(
+		(newConfig: Partial<SystemConfig['texture']>) => {
+			updateConfig({ texture: newConfig });
+		},
+		[updateConfig]
+	);
 
 	return {
 		textureConfig: config.texture,
 		updateTextureConfig,
-		getTextureForEntity
+		getTextureForEntity,
 	};
 }
 
@@ -128,13 +136,16 @@ export function useTextureSystem() {
 export function useCategorySystem() {
 	const { config, updateConfig, getCategoryForEntity } = useSystem();
 
-	const updateCategoryConfig = useCallback((newConfig: Partial<SystemConfig['category']>) => {
-		updateConfig({ category: newConfig });
-	}, [updateConfig]);
+	const updateCategoryConfig = useCallback(
+		(newConfig: Partial<SystemConfig['category']>) => {
+			updateConfig({ category: newConfig });
+		},
+		[updateConfig]
+	);
 
 	return {
 		categoryConfig: config.category,
 		updateCategoryConfig,
-		getCategoryForEntity
+		getCategoryForEntity,
 	};
 }

@@ -46,10 +46,8 @@ export default function ApiLoggerTestPage() {
 
 									fetch(url)
 										.then((response) => response.json())
-										.then((data) => {
-										})
-										.catch((error) => {
-										});
+										.then((data) => {})
+										.catch((error) => {});
 								}}
 							>
 								Enviar GET
@@ -110,10 +108,8 @@ export default function ApiLoggerTestPage() {
 									body: JSON.stringify(jsonData),
 								})
 									.then((response) => response.json())
-									.then((data) => {
-									})
-									.catch((error) => {
-									});
+									.then((data) => {})
+									.catch((error) => {});
 							}}
 						>
 							Enviar POST

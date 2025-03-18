@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import { DebugNav } from '@/components/views/development/debug-nav';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: {

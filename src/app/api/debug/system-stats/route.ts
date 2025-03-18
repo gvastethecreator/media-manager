@@ -1,7 +1,7 @@
+import os from 'node:os';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { systemMonitor } from '@/lib/server/system-monitor';
 import { NextResponse } from 'next/server';
-import os from 'node:os';
 
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('SystemStatsAPI');
@@ -72,7 +72,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
 }
 
 /**

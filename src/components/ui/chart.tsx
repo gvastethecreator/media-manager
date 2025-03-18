@@ -69,31 +69,26 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 		return null;
 	}
 
-	return (
-		<style
-			/*
-			* SEGURIDAD: Este uso de dangerouslySetInnerHTML es seguro porque:
-			* 1. Solo se generan estilos CSS a partir de datos controlados (THEMES y colorConfig)
-			* 2. No hay entrada de usuario involucrada
-			* 3. Es necesario para aplicar dinámicamente estilos CSS específicos para cada tema
-			*/
-			dangerouslySetInnerHTML={{
-				__html: Object.entries(THEMES)
-					.map(
-						([theme, prefix]) => `
+	// Crear un array de reglas CSS
+	const cssRules = Object.entries(THEMES)
+		.map(
+			([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-								.map(([key, itemConfig]) => {
-									const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-									return color ? `  --color-${key}: ${color};` : null;
-								})
-								.join('\n')}
+					.map(([key, itemConfig]) => {
+						const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+						return color ? `  --color-${key}: ${color};` : null;
+					})
+					.filter(Boolean)
+					.join('\n')}
 }
 `
-					)
-					.join('\n'),
-			}}
-		/>
+		)
+		.join('\n');
+
+	// Crear un elemento estilo con createTextNode que es más seguro
+	return (
+		<style>{cssRules}</style>
 	);
 };
 

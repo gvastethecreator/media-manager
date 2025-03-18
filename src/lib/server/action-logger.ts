@@ -30,14 +30,14 @@ export const actionLogger = {
 		const logger = serverLogger.withContext(`Action:${actionName}`);
 
 		// Función para filtrar campos sensibles
-		const filterSensitiveData = (obj: any, sensitiveFields: string[]): any => {
+		const filterSensitiveData = (obj: unknown, sensitiveFields: string[]): unknown => {
 			if (!obj || typeof obj !== 'object') return obj;
 
 			if (Array.isArray(obj)) {
 				return obj.map((item) => filterSensitiveData(item, sensitiveFields));
 			}
 
-			const result = { ...obj };
+			const result = { ...(obj as Record<string, unknown>) };
 			for (const key of Object.keys(result)) {
 				if (sensitiveFields.includes(key.toLowerCase())) {
 					result[key] = '[REDACTED]';
@@ -54,7 +54,7 @@ export const actionLogger = {
 			 * @param actionFn Función de acción del servidor a envolver
 			 * @returns Función envuelta con logging
 			 */
-			wrapAction: <T extends (...args: any[]) => Promise<any>>(actionFn: T): T => {
+			wrapAction: <T extends (...args: unknown[]) => Promise<unknown>>(actionFn: T): T => {
 				const wrappedAction = async (...args: Parameters<T>): Promise<ReturnType<T>> => {
 					const actionId = `action_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 					const startTime = Date.now();

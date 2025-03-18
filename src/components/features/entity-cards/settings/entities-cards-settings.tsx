@@ -1085,7 +1085,12 @@ export function EntitiesCardsSection() {
 										/>
 									)}
 									{activePanel === 'design' && (
-										<DesignPanel designSystem={{} as import('@/components/features/entity-cards/modules/design/types').DesignSystem} onChange={handleCardOptionsChange} />
+										<DesignPanel
+											designSystem={
+												{} as import('@/components/features/entity-cards/modules/design/types').DesignSystem
+											}
+											onChange={handleCardOptionsChange}
+										/>
 									)}
 									{/* Panel de vista previa */}
 									{activePanel === 'preview' && (

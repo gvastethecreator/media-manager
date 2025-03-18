@@ -5,7 +5,7 @@
  * del servidor y mostrar estadísticas en tiempo real.
  */
 
-import os from 'os';
+import os from 'node:os';
 import { serverLogger } from '../logger/server-logger';
 
 // Logger específico para el monitor de sistema
@@ -128,13 +128,13 @@ function getSystemStats(): SystemStats {
  * @returns Cadena formateada
  */
 function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) return '0 B';
 
 	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
 }
 
 /**

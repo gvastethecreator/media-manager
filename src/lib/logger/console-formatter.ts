@@ -274,7 +274,7 @@ export function createTextBlock(
 	// Contenido con padding
 	for (const line of lines) {
 		const paddedLine =
-			line.length > contentWidth ? line.substring(0, contentWidth - 3) + '...' : line.padEnd(contentWidth, ' ');
+			line.length > contentWidth ? `${line.substring(0, contentWidth - 3)}...` : line.padEnd(contentWidth, ' ');
 
 		result += `${color}│${CONSOLE_COLORS.reset}${paddingStr}${paddedLine}${paddingStr}${color}│${CONSOLE_COLORS.reset}\n`;
 	}
@@ -291,7 +291,7 @@ export function createTextBlock(
  * @param options Opciones de formato
  * @returns Tabla formateada
  */
-export function createConsoleTable<T extends Record<string, any>>(
+export function createConsoleTable<T extends Record<string, unknown>>(
 	data: T[],
 	options: {
 		title?: string;
@@ -361,7 +361,7 @@ export function createConsoleTable<T extends Record<string, any>>(
 		result += `${color}${'─'.repeat(columnWidths[colStr] + 2)}┼${CONSOLE_COLORS.reset}`;
 	}
 	// Corregir el último caracter
-	result = result.slice(0, -1) + `${color}┤${CONSOLE_COLORS.reset}\n`;
+	result = `${result.slice(0, -1)}${color}┤${CONSOLE_COLORS.reset}\n`;
 
 	// Filas de datos
 	for (const row of data) {

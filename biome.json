@@ -24,6 +24,9 @@
       "style": {
         "useConst": "error",
         "useTemplate": "error"
+      },
+      "performance": {
+        "noDelete": "error"
       }
     }
   },
@@ -40,7 +43,10 @@
       "**/.next/**",
       "**/dist/**",
       "**/build/**",
-      "**/coverage/**"
+      "**/coverage/**",
+      "**/.image-cache/**",
+      "**/.thumbnail-cache/**",
+      "**/public/assets/**"
     ]
   },
   "javascript": {
@@ -58,5 +64,10 @@
       "indentStyle": "space",
       "indentWidth": 2
     }
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
   }
 }

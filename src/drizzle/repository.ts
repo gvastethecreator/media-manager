@@ -7,11 +7,12 @@ import { folders, profiles, queueJobs } from './schema';
  * Repositorio para operaciones de base de datos con Drizzle
  * Proporciona una capa de abstracción sobre las operaciones de Drizzle
  */
-export class DrizzleRepository {
+// Transformamos la clase a un namespace para evitar el error complexity/noStaticOnlyClass
+export const DrizzleRepository = {
 	/**
 	 * Operaciones para perfiles de usuario
 	 */
-	static profiles = {
+	profiles: {
 		/**
 		 * Obtener todos los perfiles
 		 */
@@ -80,12 +81,12 @@ export class DrizzleRepository {
 				throw new Error(`Error al eliminar perfil con ID ${id}`);
 			}
 		},
-	};
+	},
 
 	/**
 	 * Operaciones para carpetas
 	 */
-	static folders = {
+	folders: {
 		/**
 		 * Obtener todas las carpetas
 		 */
@@ -167,12 +168,12 @@ export class DrizzleRepository {
 				throw new Error(`Error al eliminar carpeta con ID ${id}`);
 			}
 		},
-	};
+	},
 
 	/**
 	 * Operaciones para trabajos de cola
 	 */
-	static queueJobs = {
+	queueJobs: {
 		/**
 		 * Obtener todos los trabajos de cola
 		 */
@@ -244,5 +245,5 @@ export class DrizzleRepository {
 				throw new Error(`Error al eliminar trabajo de cola con ID ${id}`);
 			}
 		},
-	};
-}
+	},
+};

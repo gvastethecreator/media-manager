@@ -9,7 +9,7 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter, type Entity } from '@/components/features/entity-cards/entity-card-adapter';
+import { type Entity, EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
 import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';

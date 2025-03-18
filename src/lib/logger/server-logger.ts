@@ -6,17 +6,17 @@
  */
 
 import {
-	CONSOLE_COLORS,
-	createConsoleTable,
-	createElapsedTime,
-	createProgressBar,
-	createSeparator,
-	createSeparatorEnd,
-	createTextBlock,
-	formatConsoleMessage,
-	type LogType,
+    CONSOLE_COLORS,
+    type LogType,
+    createConsoleTable,
+    createElapsedTime,
+    createProgressBar,
+    createSeparator,
+    createSeparatorEnd,
+    createTextBlock,
+    formatConsoleMessage,
 } from './console-formatter';
-import { loggerConfig, type LogLevel } from './logger.config';
+import { type LogLevel, loggerConfig } from './logger.config';
 
 // Colores ANSI para la consola del servidor
 const SERVER_COLORS = {
@@ -262,7 +262,7 @@ export class ServerLogger {
 	}
 
 	// Método para crear una tabla en la consola
-	table<T extends Record<string, any>>(
+	table<T extends Record<string, unknown>>(
 		data: T[],
 		options: {
 			title?: string;
