@@ -139,7 +139,7 @@ export function ParticleShader({
 				cancelAnimationFrame(animationFrameRef.current);
 			}
 		};
-	}, [renderParticles, setInternalTime]);
+	}, [renderParticles, animationFrameRef, setInternalTime]);
 
 	if (!isHovered && visibleOnHover) {
 		return null;

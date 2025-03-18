@@ -151,7 +151,7 @@ export function AnimationPanel({ animationSystem, onChange, disabled = false, cl
 	};
 
 	// Función para actualizar un campo específico
-	const updateField = (field: string, value: any) => {
+	const updateField = <K extends keyof AnimationSystem>(field: K, value: AnimationSystem[K]) => {
 		onChange({ ...animationSystem, [field]: value });
 	};
 

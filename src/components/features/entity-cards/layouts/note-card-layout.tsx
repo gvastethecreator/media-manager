@@ -209,6 +209,15 @@ export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOpt
 			<div
 				className={cn('note-card min-h-[250px] w-full relative', className)}
 				onClick={onClick}
+				onKeyDown={(e) => {
+					// Activar el click cuando se presiona Enter o Space
+					if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+						e.preventDefault();
+						onClick();
+					}
+				}}
+				tabIndex={onClick ? 0 : undefined} // Solo es focusable si tiene un onClick
+				role={onClick ? 'button' : undefined} // Asignar rol de botón si es interactivo
 				style={
 					{
 						'--primary-color': typeInfo.primaryColor,
@@ -239,10 +248,10 @@ export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOpt
 						badges={
 							note.tags && Array.isArray(note.tags) && note.tags.length > 0
 								? note.tags.slice(0, 3).map((tag: string) => ({
-										key: `tag-${tag}`,
-										label: `#${tag}`,
-										variant: 'secondary',
-									}))
+									key: `tag-${tag}`,
+									label: `#${tag}`,
+									variant: 'secondary',
+								}))
 								: []
 						}
 					>
