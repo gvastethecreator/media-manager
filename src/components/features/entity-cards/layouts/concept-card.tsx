@@ -28,7 +28,7 @@ export const ConceptCard = createCustomCardAdapter<Concept, ConceptCardProps, 'c
 			onClick: props.onClick,
 			className: props.className,
 			showVisualizationConfig: props.showVisualConfig,
-			options: props.options
+			options: props.options,
 		};
 	}
 );

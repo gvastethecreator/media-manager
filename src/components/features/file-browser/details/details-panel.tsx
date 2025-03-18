@@ -142,7 +142,6 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 		console.group('🔍 Depuración de Metadata');
 		if (item?.metadata) {
 			try {
-				console.log('Metadata completa:', item.metadata);
 				const metadataObj = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
 				console.table(metadataObj);
 			} catch (_error) {
@@ -342,7 +341,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 										metadata.generation.type?.toLowerCase().includes('invoke') && 'bg-purple-500/10 text-purple-500',
 										metadata.generation.type?.toLowerCase().includes('novel') && 'bg-pink-500/10 text-pink-500',
 										metadata.generation.type?.toLowerCase().includes('midjourney') &&
-											'bg-indigo-500/10 text-indigo-500',
+										'bg-indigo-500/10 text-indigo-500',
 										metadata.generation.type?.toLowerCase().includes('dall') && 'bg-orange-500/10 text-orange-500'
 									)}
 								>

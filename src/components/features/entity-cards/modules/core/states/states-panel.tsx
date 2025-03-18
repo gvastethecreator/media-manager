@@ -53,7 +53,19 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 	const handleStateChange = (stateName: keyof StatesSystem, enabled: boolean) => {
 		if (enabled) {
 			// Habilitar el estado con valores predeterminados
-			const defaultValues: Record<string, any> = {
+			const defaultValues: Record<
+				string,
+				{
+					scale?: number;
+					rotate?: boolean;
+					lift?: boolean;
+					duration?: number;
+					easing?: string;
+					translateX?: number;
+					translateY?: number;
+					delay?: number;
+				}
+			> = {
 				hover: {
 					scale: 1.02,
 					rotate: true,
@@ -103,7 +115,10 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 			...statesSystem,
 			[stateName]: {
 				...statesSystem[stateName],
-				[propertyName]: value,
+				config: {
+					...statesSystem[stateName].config,
+					[propertyName]: value,
+				},
 			},
 		});
 	};
@@ -123,7 +138,19 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 
 	// Manejador para resetear un estado específico
 	const handleResetState = (stateName: keyof StatesSystem) => {
-		const defaultValues: Record<string, any> = {
+		const defaultValues: Record<
+			string,
+			{
+				scale?: number;
+				rotate?: boolean;
+				lift?: boolean;
+				duration?: number;
+				easing?: string;
+				translateX?: number;
+				translateY?: number;
+				delay?: number;
+			}
+		> = {
 			hover: {
 				scale: 1.02,
 				rotate: true,

@@ -133,7 +133,9 @@ export function VisualizationConfig({
 							<h4 className="text-xs uppercase tracking-wide text-muted-foreground">Brillo</h4>
 
 							<div className="grid grid-cols-2 gap-2">
-								<label htmlFor="intensity" className="text-xs">Intensidad</label>
+								<label htmlFor="intensity" className="text-xs">
+									Intensidad
+								</label>
 								<input
 									type="range"
 									min="0"
@@ -149,7 +151,9 @@ export function VisualizationConfig({
 									className="w-full"
 								/>
 
-								<label htmlFor="size" className="text-xs">Tamaño</label>
+								<label htmlFor="size" className="text-xs">
+									Tamaño
+								</label>
 								<input
 									type="range"
 									min="0"
@@ -174,7 +178,9 @@ export function VisualizationConfig({
 							<h4 className="text-xs uppercase tracking-wide text-muted-foreground">Holográfico</h4>
 
 							<div className="grid grid-cols-2 gap-2">
-								<label htmlFor="glowIntensity" className="text-xs">Intensidad</label>
+								<label htmlFor="glowIntensity" className="text-xs">
+									Intensidad
+								</label>
 								<input
 									type="range"
 									min="0"
@@ -190,7 +196,9 @@ export function VisualizationConfig({
 									className="w-full"
 								/>
 
-								<label htmlFor="animationSpeed" className="text-xs">Velocidad de Animación</label>
+								<label htmlFor="animationSpeed" className="text-xs">
+									Velocidad de Animación
+								</label>
 								<input
 									type="range"
 									min="0"
@@ -218,7 +226,9 @@ export function VisualizationConfig({
 						<h4 className="text-xs uppercase tracking-wide text-muted-foreground">Sistema de Diseño</h4>
 
 						<div className="grid grid-cols-2 gap-2">
-							<label htmlFor="designPreset" className="text-xs">Preset</label>
+							<label htmlFor="designPreset" className="text-xs">
+								Preset
+							</label>
 							<select
 								id="designPreset"
 								value={options.designSystem?.preset || 'default'}
@@ -241,7 +251,9 @@ export function VisualizationConfig({
 								<option value="concept">Concepto</option>
 							</select>
 
-							<label htmlFor="aspectRatio" className="text-xs">Relación de Aspecto</label>
+							<label htmlFor="aspectRatio" className="text-xs">
+								Relación de Aspecto
+							</label>
 							<select
 								id="aspectRatio"
 								value={options.designSystem?.aspectRatio || '7/10'}
@@ -259,7 +271,9 @@ export function VisualizationConfig({
 								<option value="4/5">4:5 (Polaroid)</option>
 							</select>
 
-							<label htmlFor="cornerStyle" className="text-xs">Estilo de Esquinas</label>
+							<label htmlFor="cornerStyle" className="text-xs">
+								Estilo de Esquinas
+							</label>
 							<select
 								id="cornerStyle"
 								value={options.designSystem?.cornerStyle || 'rounded'}
@@ -301,7 +315,9 @@ export function VisualizationConfig({
 
 						{options.useImageGrid && (
 							<div className="grid grid-cols-2 gap-2">
-								<label htmlFor="imageGridLayout" className="text-xs">Diseño</label>
+								<label htmlFor="imageGridLayout" className="text-xs">
+									Diseño
+								</label>
 								<select
 									id="imageGridLayout"
 									value={options.imageGridLayout || 'single'}
@@ -314,7 +330,9 @@ export function VisualizationConfig({
 									<option value="carousel">Carrusel</option>
 								</select>
 
-								<label htmlFor="imageGridStyle" className="text-xs">Estilo</label>
+								<label htmlFor="imageGridStyle" className="text-xs">
+									Estilo
+								</label>
 								<select
 									id="imageGridStyle"
 									value={options.imageGridStyle || 'standard'}
@@ -327,7 +345,9 @@ export function VisualizationConfig({
 									<option value="minimal">Minimalista</option>
 								</select>
 
-								<label htmlFor="imageGridGap" className="text-xs">Espacio entre imágenes</label>
+								<label htmlFor="imageGridGap" className="text-xs">
+									Espacio entre imágenes
+								</label>
 								<input
 									id="imageGridGap"
 									type="range"

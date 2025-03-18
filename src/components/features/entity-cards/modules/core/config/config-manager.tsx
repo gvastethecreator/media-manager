@@ -2,10 +2,10 @@
 
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormRow, FormSlider, FormToggle } from '../../../settings/panels/shared';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Layers, Paintbrush, Settings, Sliders, Sparkles } from 'lucide-react';
+import { FormRow, FormSlider, FormToggle } from '../../../settings/panels/shared';
 
 // 🎨 Esquema de colores para el panel
 const panelColors = {

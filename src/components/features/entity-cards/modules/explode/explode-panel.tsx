@@ -7,7 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Layers, Play, Rotate3D, Settings } from 'lucide-react';
+import { Layers, Play, Rotate3D } from 'lucide-react';
 import { useState } from 'react';
 import type { ExplodeDirection, ExplodePanelProps, ExplodeSystemPreset } from './types';
 
@@ -185,7 +185,7 @@ export function ExplodePanel({
 	};
 
 	// Función para actualizar un campo específico
-	const updateField = (field: string, value: any) => {
+	const updateField = (field: string, value: unknown) => {
 		onChange({ ...explodeSystem, [field]: value });
 	};
 

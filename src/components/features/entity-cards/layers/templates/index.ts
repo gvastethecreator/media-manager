@@ -4,10 +4,10 @@
  */
 import type { LayerComponent } from '../layer-plugin-system';
 import {
+	type TemplateLayerConfig,
 	deleteTemplateConfig,
 	getTemplateConfig,
 	updateTemplateConfig,
-	type TemplateLayerConfig,
 } from './actions/template-config.action';
 import { TemplateEffectLayer, TemplateLayerSettings } from './layer-template';
 

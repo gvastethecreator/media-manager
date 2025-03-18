@@ -64,18 +64,19 @@ export function LayerAdminPanel({ entityType, config, onChange, className }: Lay
 	};
 
 	// Actualizar una capa específica
-	const updateLayerConfig = (layerId: string, layerConfig: any) => {
+	const updateLayerConfig = (layerId: string, layerConfig: Record<string, unknown>) => {
 		const newConfig = {
 			...localConfig,
-			layers: {
-				...localConfig.layers,
+			layerConfigs: {
+				...localConfig.layerConfigs,
 				[layerId]: {
-					...localConfig.layers[layerId],
+					...(localConfig.layerConfigs[layerId] || {}),
 					...layerConfig,
 				},
 			},
 		};
-		updateConfig(newConfig);
+		setLocalConfig(newConfig);
+		onChange(newConfig);
 	};
 
 	// Alternar visibilidad de una capa
@@ -267,7 +268,13 @@ export function LayerAdminPanel({ entityType, config, onChange, className }: Lay
 /**
  * Componente para configurar propiedades comunes de capas
  */
-export function CommonLayerControls({ config, onChange }: { config: any; onChange: (config: any) => void }) {
+export function CommonLayerControls({
+	config,
+	onChange,
+}: {
+	config: Record<string, unknown>;
+	onChange: (config: Record<string, unknown>) => void;
+}) {
 	return (
 		<div className="space-y-3">
 			{config.opacity !== undefined && (

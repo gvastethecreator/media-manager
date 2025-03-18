@@ -35,7 +35,26 @@ interface RarityWithExtendedProps {
 	animationType?: string;
 	animationSpeed?: number;
 	// Otras propiedades que puedan ser necesarias
-	[key: string]: any;
+	[key: string]: unknown;
+}
+
+// Tipo para las opciones de configuración de rareza
+interface RarityOptions {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+	icon?: React.ReactNode;
+	style?: string;
+	glow?: boolean;
+	glowIntensity?: number;
+	border?: boolean;
+	borderWidth?: number;
+	animation?: boolean;
+	animationType?: string;
+	animationSpeed?: number;
+	// Otras propiedades adicionales
+	[key: string]: unknown;
 }
 
 interface RarityEditorProps {

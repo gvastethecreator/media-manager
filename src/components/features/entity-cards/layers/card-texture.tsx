@@ -45,7 +45,13 @@ export function CardTexture({ options, isHovered, className }: CardTextureProps)
 			}}
 		>
 			{/* Patrón de textura */}
-			<svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" role="presentation">
+			<svg
+				className="absolute inset-0 w-full h-full"
+				viewBox="0 0 100 100"
+				preserveAspectRatio="none"
+				aria-hidden="true"
+				role="presentation"
+			>
 				<filter id="texture">
 					<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="4" stitchTiles="stitch" />
 				</filter>

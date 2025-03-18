@@ -91,7 +91,7 @@ export function generateCardId(): string {
 // Función para formatear el texto de descripción
 export function formatDescription(text: string, maxLength = 150): string {
 	if (text.length <= maxLength) return text;
-	return text.substring(0, maxLength) + '...';
+	return `${text.substring(0, maxLength)}...`;
 }
 
 // Función para calcular el tamaño de la imagen

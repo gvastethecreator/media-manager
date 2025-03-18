@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormToggle } from '../../../settings/panels/shared';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +15,7 @@ import {
 	PaletteIcon,
 	Settings2Icon,
 } from 'lucide-react';
+import { FormToggle } from '../../../settings/panels/shared';
 import type { CardOptions } from '../../../types/card-settings-types';
 
 // �� Esquema de colores para el panel

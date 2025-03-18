@@ -197,7 +197,9 @@ export function useAnimationPerformance({
 
 			// Retornar función para cancelar animación
 			return () => {
-				timeoutIds.forEach((id) => clearTimeout(id));
+				for (const id of timeoutIds) {
+					clearTimeout(id);
+				}
 				setIsAnimating(false);
 			};
 		},

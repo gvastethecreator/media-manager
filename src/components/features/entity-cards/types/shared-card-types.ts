@@ -173,5 +173,5 @@ export interface CardOptions {
 	effects?: EffectsOptions;
 
 	// Permitir propiedades adicionales para compatibilidad entre sistemas
-	[key: string]: any;
+	[key: string]: unknown;
 }

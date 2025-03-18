@@ -61,18 +61,19 @@ export interface VisualPreset {
 }
 
 // Tipos para respuestas de acciones del servidor
-export interface ActionResponse<T = any> {
+export interface ActionResponse<T = unknown> {
 	success: boolean;
 	message: string;
 	data?: T;
-	error?: any;
+	error?: string;
+	status?: number;
 }
 
 // Tipos para opciones de capas
 export interface BaseLayerConfig {
 	enabled: boolean;
 	layerIndex: number;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Tipos para configuraciones de efectos
@@ -80,7 +81,7 @@ export interface EffectConfig {
 	enabled: boolean;
 	intensity: number;
 	visibleOnHover?: boolean;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Tipos para configuraciones de animación
@@ -89,7 +90,7 @@ export interface AnimationConfig {
 	duration: number;
 	easing: string;
 	delay?: number;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Tipos para configuraciones de diseño
@@ -103,7 +104,7 @@ export interface DesignConfig {
 	backgroundColor?: string;
 	textColor?: string;
 	accentColor?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Tipos para configuraciones de rendimiento
@@ -112,7 +113,7 @@ export interface PerformanceConfig {
 	useRAF?: boolean;
 	batchUpdates?: boolean;
 	throttleMs?: number;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Tipos para configuraciones de colores
@@ -123,7 +124,7 @@ export interface ColorConfig {
 	background?: string;
 	foreground?: string;
 	border?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 // Exportar otras interfaces según sea necesario

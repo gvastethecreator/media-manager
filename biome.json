@@ -14,7 +14,7 @@
         "useExhaustiveDependencies": "error"
       },
       "suspicious": {
-        "noConsoleLog": "warn",
+        "noConsoleLog": "off",
         "noExplicitAny": "error"
       },
       "a11y": {

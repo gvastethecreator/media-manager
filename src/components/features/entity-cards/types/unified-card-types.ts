@@ -213,6 +213,18 @@ export interface CardInteractivity {
 	};
 }
 
+// Definición para el objeto de rareza
+export interface RarityDefinition {
+	color: string;
+	borderColor?: string;
+	glowColor?: string;
+	label: string;
+	rarity: string;
+	probability?: number;
+	effects?: unknown;
+	[key: string]: unknown;
+}
+
 // Configuración completa de tarjeta
 export interface CardOptions {
 	// Identificadores
@@ -260,9 +272,9 @@ export interface CardOptions {
 	raritySystem?: {
 		enabled?: boolean;
 		defaultRarity?: string;
-		rarities?: Record<string, any>;
+		rarities?: Record<string, RarityDefinition>;
 	};
 
 	// Propiedades para compatibilidad con código existente
-	[key: string]: any;
+	[key: string]: unknown;
 }

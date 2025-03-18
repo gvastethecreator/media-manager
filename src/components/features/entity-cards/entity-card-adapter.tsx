@@ -13,25 +13,12 @@ import type { CardOptions } from './types';
 
 // Importamos la función de utilidad para generar configuración de rareza
 import { generateRarityConfig } from './utils/rarity-utils';
-import type { ReactElement } from 'react';
 
-// Definimos un tipo para los componentes de tarjeta
-type CardComponent = React.ComponentType<{
-	onClick?: () => void;
-	className?: string;
-	showVisualConfig?: boolean;
-	onVisualConfigClick?: () => void;
-	enableExplode?: boolean;
-	isExploded?: boolean;
-	activeLayer?: string | null;
-	onExplodedChange?: (isExploded: boolean) => void;
-	onActiveLayerChange?: (layerId: string | null) => void;
-	options?: Partial<CardOptions>;
-	[key: string]: unknown;
-}>;
+// Definir un tipo para los componentes de tarjeta
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CardComponent = (props: Record<string, unknown>) => JSX.Element;
 
-// Definimos un objeto para almacenar los adaptadores de tarjeta
-// Los cargaremos dinámicamente para evitar dependencias circulares
+// Definición simplificada para el registro de componentes de tarjeta
 const ENTITY_ADAPTERS: Record<string, CardComponent> = {};
 
 // Función para cargar dinámicamente los adaptadores

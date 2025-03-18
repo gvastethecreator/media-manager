@@ -28,7 +28,7 @@ export const PromptCard = createCustomCardAdapter<Prompt, PromptCardProps, 'prom
 			onClick: props.onClick,
 			className: props.className,
 			showVisualizationConfig: props.showVisualConfig,
-			options: props.options
+			options: props.options,
 		};
 	}
 );

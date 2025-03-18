@@ -264,12 +264,14 @@ function PresetCard({
 	onDelete?: () => void;
 }) {
 	return (
-		<div
+		<button
+			type="button"
 			className={cn(
-				'relative overflow-hidden rounded-md border p-4 cursor-pointer transition-all',
-				isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-primary/50 hover:bg-accent'
+				'relative p-4 border rounded-lg cursor-pointer hover:border-primary/50 transition-colors text-left w-full',
+				isSelected && 'border-primary bg-primary/5'
 			)}
 			onClick={onSelect}
+			aria-pressed={isSelected}
 		>
 			{isSelected && (
 				<div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
@@ -303,6 +305,6 @@ function PresetCard({
 					<TrashIcon className="h-3 w-3" />
 				</Button>
 			)}
-		</div>
+		</button>
 	);
 }

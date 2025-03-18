@@ -248,10 +248,10 @@ export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOpt
 						badges={
 							note.tags && Array.isArray(note.tags) && note.tags.length > 0
 								? note.tags.slice(0, 3).map((tag: string) => ({
-									key: `tag-${tag}`,
-									label: `#${tag}`,
-									variant: 'secondary',
-								}))
+										key: `tag-${tag}`,
+										label: `#${tag}`,
+										variant: 'secondary',
+									}))
 								: []
 						}
 					>

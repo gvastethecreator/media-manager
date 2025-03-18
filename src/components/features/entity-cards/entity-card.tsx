@@ -9,19 +9,19 @@ import { useAnimationSystem } from './modules/animation';
 import { CoreLayer } from './modules/core';
 import { useDesignSystem } from './modules/design';
 import './styles/card-borders.css';
-// Importar tipos desde el archivo centralizado
-import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './types';
-// Importar tipo DesignSystem desde el módulo de diseño
-import type { DesignSystem } from './modules/design/types';
 // Importar tipos de imagen desde el componente ImageGrid
 import type { ImageGridImage, ImageGridProps } from './layouts/image-grid';
+// Importar tipo DesignSystem desde el módulo de diseño
+import type { DesignSystem } from './modules/design/types';
+// Importar tipos desde el archivo centralizado
+import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './types';
 // Tipo de alias para compatibilidad
 type ImageGridLayout = ImageGridProps['layout'];
 type ImageGridStyle = ImageGridProps['style'];
-// Importar CoreConfig desde el módulo core
-import type { CoreConfig } from './modules/core/core-config';
 // Importar sistema de manejo de errores
 import { RegisterLayers } from './layers/register-layers';
+// Importar CoreConfig desde el módulo core
+import type { CoreConfig } from './modules/core/core-config';
 import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
 
 export interface BaseCardProps {

@@ -45,7 +45,7 @@ export const FolderCard = createCustomCardAdapter<Folder, FolderCardLayoutProps,
 			isExploded: props.isExploded,
 			activeLayer: props.activeLayer,
 			onExplodedChange: props.onExplodedChange,
-			onActiveLayerChange: props.onActiveLayerChange
+			onActiveLayerChange: props.onActiveLayerChange,
 		};
 	}
 );
