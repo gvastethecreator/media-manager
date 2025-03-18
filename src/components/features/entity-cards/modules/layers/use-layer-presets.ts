@@ -10,7 +10,7 @@
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EntityCardLayerSystemConfig } from './entity-card-layer-adapter';
-import { LAYER_PRESETS, LayerPreset, applyPresetToConfig, createCustomPreset, getPresetById } from './layer-presets';
+import { LAYER_PRESETS, type LayerPreset, applyPresetToConfig, createCustomPreset, getPresetById } from './layer-presets';
 
 /**
  * Interfaz para el resultado del hook useLayerPresets

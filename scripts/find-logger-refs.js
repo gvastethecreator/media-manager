@@ -34,7 +34,7 @@ console.log(`Encontrados ${tsFiles.length} archivos para analizar`);
 
 // Buscar referencias al logger antiguo
 let referencesCount = 0;
-let filesWithReferences = [];
+const filesWithReferences = [];
 
 for (const file of tsFiles) {
 	try {

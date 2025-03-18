@@ -79,7 +79,7 @@ export function CardGrain({ options, isHovered, className }: CardGrainProps) {
 				}}
 				transition={{
 					duration: 20,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>

@@ -124,7 +124,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -143,7 +143,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>

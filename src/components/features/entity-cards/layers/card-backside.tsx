@@ -87,7 +87,7 @@ export function CardBackside({ options, isFlipped, className }: CardBacksideProp
 						transition={{
 							duration: 2,
 							delay: index * 0.2,
-							repeat: Infinity,
+							repeat: Number.POSITIVE_INFINITY,
 							ease: 'linear',
 						}}
 					/>
@@ -108,7 +108,7 @@ export function CardBackside({ options, isFlipped, className }: CardBacksideProp
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>

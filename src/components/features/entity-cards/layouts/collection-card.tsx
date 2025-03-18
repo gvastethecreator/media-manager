@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Collection } from '../layouts/forms/entity-types';
 import { CollectionCard as CollectionCardLayout } from './collection-card-layout';
 

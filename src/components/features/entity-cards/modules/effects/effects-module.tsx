@@ -3,7 +3,7 @@
 import { deepMerge } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { EffectsPanel } from './effects-panel';
-import { DEFAULT_EFFECTS_CONFIG, EffectsConfig, EffectsModuleProps } from './types';
+import { DEFAULT_EFFECTS_CONFIG, type EffectsConfig, type EffectsModuleProps } from './types';
 
 /**
  * 🎨 Módulo de efectos para Entity Cards

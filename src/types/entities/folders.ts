@@ -1,5 +1,5 @@
 import type { ExtendedProcessStatus, ProcessStatus } from '@/types/process';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export interface FolderStats {
 	totalFolders: number;

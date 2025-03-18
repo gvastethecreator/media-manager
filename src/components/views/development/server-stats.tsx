@@ -297,7 +297,7 @@ export function ServerStats() {
 													<span className="text-sm text-muted-foreground">Tasa de éxito</span>
 													<span className="font-medium">{appStats.requests.successRate}</span>
 												</div>
-												<Progress value={parseFloat(appStats.requests.successRate)} className="h-2" />
+												<Progress value={Number.parseFloat(appStats.requests.successRate)} className="h-2" />
 											</div>
 										)}
 									</CardContent>
@@ -377,7 +377,7 @@ export function ServerStats() {
 												<span className="text-sm text-muted-foreground">Ratio de caché</span>
 												<span className="font-medium">{appStats.cache.ratio}</span>
 											</div>
-											<Progress value={parseFloat(appStats.cache.ratio)} className="h-2" />
+											<Progress value={Number.parseFloat(appStats.cache.ratio)} className="h-2" />
 										</div>
 									</CardContent>
 								</Card>

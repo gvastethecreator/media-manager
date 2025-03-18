@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { WorldItem } from '../layouts/forms/entity-types';
 import { WorldItemCard as WorldItemCardLayout } from './world-item-card-layout';
 

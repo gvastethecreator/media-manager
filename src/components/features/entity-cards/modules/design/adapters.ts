@@ -1,8 +1,8 @@
 'use client';
 
-import { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/card-settings-types';
 import { DEFAULT_DESIGN_SYSTEM } from './design-module';
-import { DesignSystem } from './types';
+import type { DesignSystem } from './types';
 
 /**
  * 🎨 Adaptador de cardOptions a DesignSystem

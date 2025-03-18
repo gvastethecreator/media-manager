@@ -3,7 +3,7 @@
 import { deepMerge } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { SystemPanel } from './system-panel';
-import { DEFAULT_SYSTEM_CONFIG, SystemConfig, SystemModuleProps } from './types';
+import { DEFAULT_SYSTEM_CONFIG, type SystemConfig, type SystemModuleProps } from './types';
 import { SystemProvider } from './use-system';
 
 /**

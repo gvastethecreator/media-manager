@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 // Definir tipos para las entidades basados en los modelos de Prisma
 export type Note = Prisma.NoteGetPayload<Record<string, never>>;

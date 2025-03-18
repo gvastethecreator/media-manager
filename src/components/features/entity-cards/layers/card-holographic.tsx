@@ -79,7 +79,7 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 						transition={{
 							duration: 2,
 							delay: index * 0.2,
-							repeat: Infinity,
+							repeat: Number.POSITIVE_INFINITY,
 							ease: 'linear',
 						}}
 					/>
@@ -103,7 +103,7 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>

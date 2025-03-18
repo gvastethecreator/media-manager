@@ -10,7 +10,7 @@ import type { BaseCardRarityConfig } from '../types/base-card-types';
  * @param color Color base para la rareza
  * @returns Configuración de rareza
  */
-export function generateRarityConfig(level: string, color: string = '#3b82f6'): BaseCardRarityConfig {
+export function generateRarityConfig(level: string, color = '#3b82f6'): BaseCardRarityConfig {
 	return {
 		name: level,
 		color,

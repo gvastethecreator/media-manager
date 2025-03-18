@@ -107,7 +107,7 @@ export function CardBorder({ options, isHovered, className }: CardBorderProps) {
 				}}
 				transition={{
 					duration: 2,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -126,7 +126,7 @@ export function CardBorder({ options, isHovered, className }: CardBorderProps) {
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>

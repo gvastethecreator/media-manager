@@ -15,7 +15,7 @@ import {
 	SparklesIcon,
 	TagIcon,
 } from 'lucide-react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export interface EntityTypeIconProps {
 	type: string;

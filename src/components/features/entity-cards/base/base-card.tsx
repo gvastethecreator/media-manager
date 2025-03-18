@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { CardOptions, RarityConfig, TextureConfig } from '../types/shared-card-types';
+import type { CardOptions, RarityConfig, TextureConfig } from '../types/shared-card-types';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
