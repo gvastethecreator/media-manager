@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sliders, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/card-settings-types';
 import { AdvancedEffectsPanel } from './advanced';
-import { EffectsConfig, EffectsPanelProps } from './types';
+import type { EffectsConfig, EffectsPanelProps } from './types';
 import { VisualEffectsManager } from './visual';
 
 /**

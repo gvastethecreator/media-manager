@@ -1,7 +1,7 @@
 'use client';
 
 import type { Place } from '../layouts/forms/entity-types';
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { CardOptions } from '../types/unified-card-types';
 import { PlaceCard as PlaceCardLayout } from './place-card-layout';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Album } from '../layouts/forms/entity-types';
 import { AlbumCard as AlbumCardLayout, type AlbumCardProps } from './album-card-layout';
 

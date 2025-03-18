@@ -181,7 +181,7 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'easeInOut',
 				}}
 			/>
@@ -200,7 +200,7 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 				}}
 				transition={{
 					duration: 3,
-					repeat: Infinity,
+					repeat: Number.POSITIVE_INFINITY,
 					ease: 'linear',
 				}}
 			/>

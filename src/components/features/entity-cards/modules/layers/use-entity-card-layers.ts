@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-	EntityCardLayerSystemConfig,
+	type EntityCardLayerSystemConfig,
 	entityCardPropsToLayerConfig,
 	getEntityLayerConfig,
 	layerConfigToEntityCardProps,

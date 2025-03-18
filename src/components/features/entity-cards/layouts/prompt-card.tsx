@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
+import { type BaseCardAdapterProps, createCustomCardAdapter } from '../adapters/card-adapter-factory';
 import type { Prompt } from '../layouts/forms/entity-types';
 import { PromptCard as PromptCardLayout } from './prompt-card-layout';
 

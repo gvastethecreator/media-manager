@@ -22,7 +22,7 @@ type ImageGridStyle = ImageGridProps['style'];
 import type { CoreConfig } from './modules/core/core-config';
 // Importar sistema de manejo de errores
 import { RegisterLayers } from './layers/register-layers';
-import { CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
+import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
 
 export interface BaseCardProps {
 	children: React.ReactNode;

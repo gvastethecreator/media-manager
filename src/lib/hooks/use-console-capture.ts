@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { type LogEntry } from '@/components/ui/log-viewer';
+import type { LogEntry } from '@/components/ui/log-viewer';
 
 type ConsoleMethods = 'log' | 'info' | 'warn' | 'error' | 'debug';
 

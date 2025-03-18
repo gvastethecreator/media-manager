@@ -3,8 +3,8 @@
  */
 
 import { deepMerge } from '@/lib/utils';
-import { EntityType } from '@/types/entities';
-import { DEFAULT_SYSTEM_CONFIG, SystemConfig } from './types';
+import type { EntityType } from '@/types/entities';
+import { DEFAULT_SYSTEM_CONFIG, type SystemConfig } from './types';
 
 /**
  * Tipo para las opciones de tarjeta

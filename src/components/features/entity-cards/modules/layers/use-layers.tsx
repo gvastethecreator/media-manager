@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useCallback, useMemo, createContext, useContext } from 'react';
-import { DEFAULT_LAYERS_CONFIG, LayersContextType, LayersModuleConfig } from './types';
+import { DEFAULT_LAYERS_CONFIG, type LayersContextType, type LayersModuleConfig } from './types';
 import { deepMerge } from '@/lib/utils';
-import { LayerConfig } from '../../layers/types';
+import type { LayerConfig } from '../../layers/types';
 
 /**
  * 🌈 Contexto para el sistema de capas
