@@ -124,7 +124,7 @@ export function DebugConsole() {
 										<h3 className="text-lg font-medium">Captura de Logs</h3>
 										<p className="text-sm text-muted-foreground">
 											Esta herramienta captura automáticamente todos los logs de consola y los muestra en la interfaz.
-											Puedes detener la captura en cualquier momento con el botón "Detener Captura".
+											Puedes detener la captura en cualquier momento con el botón &quot;Detener Captura&quot;.
 										</p>
 									</div>
 

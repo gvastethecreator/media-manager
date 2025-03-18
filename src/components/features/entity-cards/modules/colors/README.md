@@ -19,29 +19,31 @@ El módulo de colores proporciona un sistema completo para gestionar y configura
 import { ColorsModule } from '@/components/features/entity-cards/modules/colors';
 
 function MyComponent() {
-  const handleChange = (options) => {
-    console.log('Opciones actualizadas:', options);
-  };
+	const handleChange = (options) => {
+		console.log('Opciones actualizadas:', options);
+	};
 
-  return (
-    <ColorsModule
-      initialOptions={{
-        useColorPalettes: true,
-        colorPalette: 'modern-blue'
-      }}
-      onChange={handleChange}
-    />
-  );
+	return (
+		<ColorsModule
+			initialOptions={{
+				useColorPalettes: true,
+				colorPalette: 'modern-blue',
+			}}
+			onChange={handleChange}
+		/>
+	);
 }
 ```
 
 ## 🔧 Opciones de Configuración
 
 ### Modo de Paleta
+
 - `useColorPalettes`: Habilita el uso de paletas de colores predefinidas
 - `colorPalette`: ID de la paleta de colores seleccionada
 
 ### Colores Personalizados
+
 - `primaryColor`: Color principal (formato RGB: '59, 130, 246')
 - `secondaryColor`: Color secundario
 - `accentColor`: Color de acento

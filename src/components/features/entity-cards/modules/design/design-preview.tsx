@@ -18,12 +18,7 @@ interface DesignPreviewProps {
 /**
  * 🎨 Componente para mostrar una vista previa del diseño
  */
-export function DesignPreview({
-	designSystem,
-	children,
-	className,
-	showPlaceholder = false
-}: DesignPreviewProps) {
+export function DesignPreview({ designSystem, children, className, showPlaceholder = false }: DesignPreviewProps) {
 	// Función para convertir un color hex a RGB
 	const hexToRgb = (hex: string) => {
 		// Si no es un color hex válido, devolver blanco
@@ -92,7 +87,7 @@ export function DesignPreview({
 		overflow: 'hidden',
 		width: '100%',
 		height: '100%',
-		transition: 'all 0.3s ease'
+		transition: 'all 0.3s ease',
 	};
 
 	// Agregar variables CSS personalizadas
@@ -107,9 +102,7 @@ export function DesignPreview({
 			<div className="w-2/3 h-3 bg-primary/20 rounded-full" />
 			<div className="w-full h-12 mt-2 bg-primary/10 rounded-md" />
 			<div className="flex-1 mt-2 bg-primary/5 rounded-md flex items-center justify-center">
-				<div className="text-xl font-light text-primary/40">
-					{designSystem.preset || 'Vista previa'}
-				</div>
+				<div className="text-xl font-light text-primary/40">{designSystem.preset || 'Vista previa'}</div>
 			</div>
 			<div className="w-full flex gap-1 mt-2">
 				<div className="w-1/3 h-2 bg-primary/15 rounded-full" />
@@ -120,14 +113,7 @@ export function DesignPreview({
 	);
 
 	return (
-		<Card
-			className={cn(
-				'design-system-preview',
-				...designSystem.customCssClasses || [],
-				className
-			)}
-			style={styles}
-		>
+		<Card className={cn('design-system-preview', ...(designSystem.customCssClasses || []), className)} style={styles}>
 			{showPlaceholder ? placeholderContent : children}
 		</Card>
 	);

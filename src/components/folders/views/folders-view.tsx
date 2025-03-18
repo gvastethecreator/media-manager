@@ -40,7 +40,7 @@ const _DEFAULT_FOLDER_OPTIONS = {
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentFolder } = useFileManager();
+	const { setCurrentFolder, clearSelection } = useFileManager();
 	const [folders, setFolders] = useState<Folder[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -97,27 +97,45 @@ export function FoldersView(_props: ViewProps) {
 	}, []);
 
 	const handleFolderClick = useCallback(
-		(folder: Folder) => {
-			viewLogger.info('🖱️ Click en carpeta:', folder.name);
-			setCurrentView('folder-content');
-			setCurrentFolder(folder.id);
-			// Actualizar la información completa de la carpeta en el store
-			useFileManager.setState({
-				currentFolder: {
-					id: folder.id,
-					name: folder.name,
-					path: folder.path,
-					description: folder.description,
-					emoji: folder.emoji,
-					_count: folder._count,
-					totalSize: folder.totalSize,
-					lastIndexed: folder.lastIndexed,
-					createdAt: folder.createdAt,
-					updatedAt: folder.updatedAt,
-				},
-			});
+		async (folder: Folder) => {
+			try {
+				viewLogger.info('🖱️ Click en carpeta:', folder.name);
+
+				// Limpiar selecciones previas
+				clearSelection();
+
+				// Asegurarnos de establecer la carpeta actual en el store antes de cambiar de vista
+				if (!folder || !folder.id) {
+					viewLogger.error('❌ Carpeta inválida:', folder);
+					return;
+				}
+
+				// Actualizar primero el store con la información completa de la carpeta
+				useFileManager.setState({
+					currentFolder: {
+						id: folder.id,
+						name: folder.name,
+						path: folder.path,
+						description: folder.description,
+						emoji: folder.emoji,
+						_count: folder._count,
+						totalSize: folder.totalSize,
+						lastIndexed: folder.lastIndexed,
+						createdAt: folder.createdAt,
+						updatedAt: folder.updatedAt,
+					},
+					currentFolderId: folder.id,
+					currentView: 'folder-content',
+					isLoading: true,
+				});
+
+				// Ahora cambiar la vista
+				setCurrentView('folder-content');
+			} catch (error) {
+				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
+			}
 		},
-		[setCurrentView, setCurrentFolder]
+		[setCurrentView, setCurrentFolder, clearSelection]
 	);
 
 	if (error) {

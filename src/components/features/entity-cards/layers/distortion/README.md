@@ -21,24 +21,24 @@ El componente principal que encapsula toda la funcionalidad del módulo.
 import { DistortionEffectsModule } from '@/components/features/entity-cards/modules/layers/distortion';
 
 function MyComponent() {
-  return (
-    <DistortionEffectsModule
-      initialEffectsSystem={{
-        enabled: true,
-        visibleOnHover: true,
-        intensity: 0.5,
-        glitchEffect: {
-          enabled: true,
-          intensity: 0.3,
-          // Más configuraciones...
-        },
-        // Más efectos...
-      }}
-      onChange={(effectsSystem) => {
-        // Guardar configuración actualizada
-      }}
-    />
-  );
+	return (
+		<DistortionEffectsModule
+			initialEffectsSystem={{
+				enabled: true,
+				visibleOnHover: true,
+				intensity: 0.5,
+				glitchEffect: {
+					enabled: true,
+					intensity: 0.3,
+					// Más configuraciones...
+				},
+				// Más efectos...
+			}}
+			onChange={(effectsSystem) => {
+				// Guardar configuración actualizada
+			}}
+		/>
+	);
 }
 ```
 
@@ -51,14 +51,9 @@ import { DistortionEffectsPanel } from '@/components/features/entity-cards/modul
 import { useState } from 'react';
 
 function ConfigPanel() {
-  const [effectsConfig, setEffectsConfig] = useState(/* config inicial */);
+	const [effectsConfig, setEffectsConfig] = useState(/* config inicial */);
 
-  return (
-    <DistortionEffectsPanel
-      effectsSystem={effectsConfig}
-      onChange={setEffectsConfig}
-    />
-  );
+	return <DistortionEffectsPanel effectsSystem={effectsConfig} onChange={setEffectsConfig} />;
 }
 ```
 
@@ -70,19 +65,9 @@ Hook para gestionar los efectos de distorsión en componentes.
 import { useDistortionEffects } from '@/components/features/entity-cards/modules/layers/distortion';
 
 function DistortedCard() {
-  const {
-    effectsSystem,
-    updateEffect,
-    toggleEffects,
-    toggleEffect,
-    generateEffectClasses
-  } = useDistortionEffects();
+	const { effectsSystem, updateEffect, toggleEffects, toggleEffect, generateEffectClasses } = useDistortionEffects();
 
-  return (
-    <div className={generateEffectClasses(isHovered)}>
-      {/* Contenido de la tarjeta */}
-    </div>
-  );
+	return <div className={generateEffectClasses(isHovered)}>{/* Contenido de la tarjeta */}</div>;
 }
 ```
 

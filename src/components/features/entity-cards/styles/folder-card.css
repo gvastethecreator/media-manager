@@ -17,18 +17,19 @@
 
 		/* Efecto de marco dorado para todas las tarjetas */
 		&::before {
-			content: "";
+			content: '';
 			position: absolute;
 			inset: 0;
 			padding: 2px;
 			/* Grosor del borde */
 			border-radius: inherit;
-			background: linear-gradient(135deg,
-					rgba(255, 215, 0, 0.8),
-					rgba(255, 215, 0, 0.2),
-					rgba(255, 215, 0, 0.8));
-			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			background: linear-gradient(135deg, rgba(255, 215, 0, 0.8), rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.8));
+			-webkit-mask:
+				linear-gradient(#fff 0 0) content-box,
+				linear-gradient(#fff 0 0);
+			mask:
+				linear-gradient(#fff 0 0) content-box,
+				linear-gradient(#fff 0 0);
 			-webkit-mask-composite: xor;
 			mask-composite: exclude;
 			pointer-events: none;
@@ -60,7 +61,7 @@
 		/* Decoración de esquinas tipo Magic */
 		&::before,
 		&::after {
-			content: "";
+			content: '';
 			position: absolute;
 			width: 1.5rem;
 			height: 1.5rem;
@@ -130,7 +131,7 @@
 
 		/* Efecto de resplandor para el título */
 		&::after {
-			content: "";
+			content: '';
 			position: absolute;
 			left: 50%;
 			bottom: -0.25rem;
@@ -182,7 +183,7 @@
 
 		/* Línea decorativa estilo Magic */
 		&::before {
-			content: "";
+			content: '';
 			position: absolute;
 			left: 0;
 			right: 0;
@@ -296,7 +297,7 @@
 
 		/* Textura sutil */
 		&::before {
-			content: "";
+			content: '';
 			position: absolute;
 			inset: 0;
 			background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
@@ -373,7 +374,7 @@
 
 		/* Efecto de brillo en hover */
 		&:hover::after {
-			content: "";
+			content: '';
 			position: absolute;
 			top: -50%;
 			left: -50%;
@@ -534,7 +535,7 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 		font-size: 0.7rem;
 	}
 }
@@ -552,7 +553,7 @@
 		/* Decoración de esquinas tipo Magic */
 		&::before,
 		&::after {
-			content: "";
+			content: '';
 			position: absolute;
 			width: 1.5rem;
 			height: 1.5rem;
@@ -645,7 +646,7 @@
 /* ID de carpeta */
 .folder-id {
 	@layer components {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 		font-size: 0.75rem;
 		opacity: 0.7;
 		background: rgba(0, 0, 0, 0.3);
@@ -660,10 +661,7 @@
 		border-color: rgb(209 213 219);
 
 		&::before {
-			background: linear-gradient(135deg,
-					rgba(209, 213, 219, 0.8),
-					rgba(209, 213, 219, 0.2),
-					rgba(209, 213, 219, 0.8));
+			background: linear-gradient(135deg, rgba(209, 213, 219, 0.8), rgba(209, 213, 219, 0.2), rgba(209, 213, 219, 0.8));
 		}
 	}
 }
@@ -673,10 +671,7 @@
 		border-color: rgb(134 239 172);
 
 		&::before {
-			background: linear-gradient(135deg,
-					rgba(134, 239, 172, 0.8),
-					rgba(134, 239, 172, 0.2),
-					rgba(134, 239, 172, 0.8));
+			background: linear-gradient(135deg, rgba(134, 239, 172, 0.8), rgba(134, 239, 172, 0.2), rgba(134, 239, 172, 0.8));
 		}
 	}
 }
@@ -686,10 +681,7 @@
 		border-color: rgb(147 197 253);
 
 		&::before {
-			background: linear-gradient(135deg,
-					rgba(147, 197, 253, 0.8),
-					rgba(147, 197, 253, 0.2),
-					rgba(147, 197, 253, 0.8));
+			background: linear-gradient(135deg, rgba(147, 197, 253, 0.8), rgba(147, 197, 253, 0.2), rgba(147, 197, 253, 0.8));
 		}
 	}
 }
@@ -699,10 +691,7 @@
 		border-color: rgb(253 224 71);
 
 		&::before {
-			background: linear-gradient(135deg,
-					rgba(253, 224, 71, 0.8),
-					rgba(253, 224, 71, 0.2),
-					rgba(253, 224, 71, 0.8));
+			background: linear-gradient(135deg, rgba(253, 224, 71, 0.8), rgba(253, 224, 71, 0.2), rgba(253, 224, 71, 0.8));
 		}
 	}
 }
@@ -717,14 +706,17 @@
 
 /* Animación para tarjetas legendarias */
 @keyframes legendary-glow {
-
 	0%,
 	100% {
-		box-shadow: 0 0 15px rgba(234, 179, 8, 0.5), 0 0 30px rgba(234, 179, 8, 0.2);
+		box-shadow:
+			0 0 15px rgba(234, 179, 8, 0.5),
+			0 0 30px rgba(234, 179, 8, 0.2);
 	}
 
 	50% {
-		box-shadow: 0 0 25px rgba(234, 179, 8, 0.7), 0 0 50px rgba(234, 179, 8, 0.3);
+		box-shadow:
+			0 0 25px rgba(234, 179, 8, 0.7),
+			0 0 50px rgba(234, 179, 8, 0.3);
 	}
 }
 
@@ -736,7 +728,6 @@
 
 /* Animación para tarjetas raras */
 @keyframes rare-pulse {
-
 	0%,
 	100% {
 		border-color: rgba(59, 130, 246, 0.5);

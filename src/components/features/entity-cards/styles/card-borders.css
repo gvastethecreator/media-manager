@@ -53,13 +53,12 @@
 /* Efectos de borde */
 .card-border-glow {
 	@layer components {
-		box-shadow: 0 0 10px hsla(var(--border)/0.5);
+		box-shadow: 0 0 10px hsla(var(--border) / 0.5);
 	}
 }
 
 /* Definimos nuestras propias animaciones */
 @keyframes border-pulse {
-
 	0%,
 	100% {
 		opacity: 1;
@@ -86,10 +85,12 @@
 
 .card-border-shine {
 	animation: border-shine 2s linear infinite;
-	background: linear-gradient(90deg,
-			rgba(255, 255, 255, 0) 0%,
-			rgba(255, 255, 255, 0.5) 50%,
-			rgba(255, 255, 255, 0) 100%);
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.5) 50%,
+		rgba(255, 255, 255, 0) 100%
+	);
 	background-size: 200% 100%;
 }
 
@@ -222,8 +223,12 @@
 	border-radius: inherit;
 	padding: 2px;
 	background: linear-gradient(var(--gradient-angle), var(--gradient-start), var(--gradient-end));
-	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: source-out;
 }
@@ -262,15 +267,21 @@
 
 	border-radius: inherit;
 	padding: 2px;
-	background: linear-gradient(90deg,
-			var(--flow-color-1),
-			var(--flow-color-2),
-			var(--flow-color-3),
-			var(--flow-color-1));
+	background: linear-gradient(
+		90deg,
+		var(--flow-color-1),
+		var(--flow-color-2),
+		var(--flow-color-3),
+		var(--flow-color-1)
+	);
 	background-size: 300% 100%;
 	animation: flow-border 3s linear infinite;
-	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: source-out;
 }
@@ -297,19 +308,25 @@
 
 	border-radius: inherit;
 	padding: 2px;
-	background: linear-gradient(90deg,
-			var(--rainbow-color-1),
-			var(--rainbow-color-2),
-			var(--rainbow-color-3),
-			var(--rainbow-color-4),
-			var(--rainbow-color-5),
-			var(--rainbow-color-6),
-			var(--rainbow-color-7),
-			var(--rainbow-color-1));
+	background: linear-gradient(
+		90deg,
+		var(--rainbow-color-1),
+		var(--rainbow-color-2),
+		var(--rainbow-color-3),
+		var(--rainbow-color-4),
+		var(--rainbow-color-5),
+		var(--rainbow-color-6),
+		var(--rainbow-color-7),
+		var(--rainbow-color-1)
+	);
 	background-size: 400% 100%;
 	animation: rainbow-border 6s linear infinite;
-	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: source-out;
 }

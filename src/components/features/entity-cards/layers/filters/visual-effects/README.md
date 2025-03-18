@@ -20,20 +20,20 @@ Componente principal que proporciona una interfaz para configurar todos los efec
 import { VisualEffectsModule } from '../modules/layers/filters/visual-effects';
 
 function MyComponent() {
-  const handleChange = (effects) => {
-    console.log('Efectos actualizados:', effects);
-  };
+	const handleChange = (effects) => {
+		console.log('Efectos actualizados:', effects);
+	};
 
-  return (
-    <VisualEffectsModule
-      initialEffects={{
-        brightness: 110,
-        contrast: 105
-      }}
-      onChange={handleChange}
-      disabled={false}
-    />
-  );
+	return (
+		<VisualEffectsModule
+			initialEffects={{
+				brightness: 110,
+				contrast: 105,
+			}}
+			onChange={handleChange}
+			disabled={false}
+		/>
+	);
 }
 ```
 
@@ -45,37 +45,37 @@ Un hook personalizado para gestionar efectos visuales dentro de componentes.
 import { useVisualEffects } from '../modules/layers/filters/visual-effects';
 
 function MyComponent() {
-  const {
-    effects,
-    updateEffect,
-    updateEffects,
-    resetEffects,
-    hasActiveEffects,
-    generateCssFilters,
-    generateBackdropCssFilters
-  } = useVisualEffects({
-    initialEffects: {
-      brightness: 120,
-      contrast: 110
-    }
-  });
+	const {
+		effects,
+		updateEffect,
+		updateEffects,
+		resetEffects,
+		hasActiveEffects,
+		generateCssFilters,
+		generateBackdropCssFilters,
+	} = useVisualEffects({
+		initialEffects: {
+			brightness: 120,
+			contrast: 110,
+		},
+	});
 
-  // Actualizar un efecto individual
-  const handleBrightnessChange = (value) => {
-    updateEffect('brightness', value);
-  };
+	// Actualizar un efecto individual
+	const handleBrightnessChange = (value) => {
+		updateEffect('brightness', value);
+	};
 
-  // Aplicar los filtros CSS generados
-  return (
-    <div
-      style={{
-        filter: generateCssFilters(),
-        backdropFilter: generateBackdropCssFilters()
-      }}
-    >
-      Contenido con efectos visuales aplicados
-    </div>
-  );
+	// Aplicar los filtros CSS generados
+	return (
+		<div
+			style={{
+				filter: generateCssFilters(),
+				backdropFilter: generateBackdropCssFilters(),
+			}}
+		>
+			Contenido con efectos visuales aplicados
+		</div>
+	);
 }
 ```
 
@@ -89,22 +89,26 @@ function MyComponent() {
 ## Efectos Disponibles
 
 ### Ajustes de Imagen
+
 - `brightness`: Controla el brillo (0-200%)
 - `contrast`: Controla el contraste (0-200%)
 - `saturate`: Controla la saturación (0-200%)
 - `hueRotate`: Controla la rotación de tono (0-360°)
 
 ### Filtros de Estilo
+
 - `grayscale`: Controla la escala de grises (0-100%)
 - `sepia`: Controla el efecto sepia (0-100%)
 - `invert`: Controla la inversión de colores (0-100%)
 - `opacity`: Controla la opacidad (0-100%)
 
 ### Efectos de Desenfoque
+
 - `blur`: Controla el desenfoque (0-20px)
 - `dropShadow`: Activa/desactiva la sombra
 
 ### Efectos de Fondo
+
 - `backdropBlur`: Controla el desenfoque de fondo (0-20px)
 - `backdropBrightness`: Controla el brillo de fondo (0-200%)
 - `backdropSaturate`: Controla la saturación de fondo (0-200%)
@@ -115,33 +119,34 @@ function MyComponent() {
 Para integrar efectos visuales en tus entity cards:
 
 1. **Importa el hook**:
+
    ```tsx
    import { useVisualEffects } from '../modules/layers/filters/visual-effects';
    ```
 
 2. **Usa el hook en tu componente**:
+
    ```tsx
    const { effects, generateCssFilters } = useVisualEffects({
-     initialEffects: cardOptions.visualEffects
+   	initialEffects: cardOptions.visualEffects,
    });
    ```
 
 3. **Aplica los filtros al elemento**:
+
    ```tsx
-   <div
-     className="card-content"
-     style={{ filter: generateCssFilters() }}
-   >
-     {/* Contenido de la tarjeta */}
+   <div className="card-content" style={{ filter: generateCssFilters() }}>
+   	{/* Contenido de la tarjeta */}
    </div>
    ```
 
 4. **Guarda configuraciones actualizadas**:
+
    ```tsx
    const { updateEffects } = useVisualEffects();
 
    const handleSaveConfig = (newEffects) => {
-     updateEffects(newEffects);
-     saveCardOptions({ ...cardOptions, visualEffects: newEffects });
+   	updateEffects(newEffects);
+   	saveCardOptions({ ...cardOptions, visualEffects: newEffects });
    };
    ```

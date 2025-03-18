@@ -20,21 +20,21 @@ El componente principal que encapsula toda la funcionalidad del módulo de estad
 import { StatesModule } from '@/components/features/entity-cards/modules/core/states';
 
 function MyComponent() {
-  return (
-    <StatesModule
-      initialStatesSystem={{
-        hover: {
-          scale: 1.03,
-          rotate: true,
-          lift: true
-        },
-        // Otros estados...
-      }}
-      onChange={(statesSystem) => {
-        // Guardar configuración actualizada
-      }}
-    />
-  );
+	return (
+		<StatesModule
+			initialStatesSystem={{
+				hover: {
+					scale: 1.03,
+					rotate: true,
+					lift: true,
+				},
+				// Otros estados...
+			}}
+			onChange={(statesSystem) => {
+				// Guardar configuración actualizada
+			}}
+		/>
+	);
 }
 ```
 
@@ -47,14 +47,9 @@ import { StatesPanel } from '@/components/features/entity-cards/modules/core/sta
 import { useState } from 'react';
 
 function ConfigPanel() {
-  const [statesConfig, setStatesConfig] = useState(/* config inicial */);
+	const [statesConfig, setStatesConfig] = useState(/* config inicial */);
 
-  return (
-    <StatesPanel
-      statesSystem={statesConfig}
-      onChange={setStatesConfig}
-    />
-  );
+	return <StatesPanel statesSystem={statesConfig} onChange={setStatesConfig} />;
 }
 ```
 
@@ -66,19 +61,9 @@ Hook para gestionar el estado de interacción en componentes.
 import { useStatesSystem } from '@/components/features/entity-cards/modules/core/states';
 
 function InteractiveCard() {
-  const {
-    statesSystem,
-    updateState,
-    toggleState,
-    resetState,
-    generateStateClasses
-  } = useStatesSystem();
+	const { statesSystem, updateState, toggleState, resetState, generateStateClasses } = useStatesSystem();
 
-  return (
-    <div className={generateStateClasses('hover')}>
-      {/* Contenido de la tarjeta */}
-    </div>
-  );
+	return <div className={generateStateClasses('hover')}>{/* Contenido de la tarjeta */}</div>;
 }
 ```
 

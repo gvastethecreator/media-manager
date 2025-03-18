@@ -27,9 +27,6 @@ export async function GET() {
 		return NextResponse.json(DEFAULT_FOLDER_OPTIONS);
 	} catch (error) {
 		console.error('Error al obtener la configuración visual:', error);
-		return NextResponse.json(
-			{ error: 'Error al obtener la configuración visual' },
-			{ status: 500 }
-		);
+		return NextResponse.json({ error: 'Error al obtener la configuración visual' }, { status: 500 });
 	}
 }

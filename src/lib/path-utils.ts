@@ -12,7 +12,7 @@ const pathUtilsLogger = serverLogger.withContext('PathUtils');
 export function normalizePath(path: string): string {
 	// Normalizar separadores según el sistema operativo
 	let normalized = normalize(path)
-		.replace(/[\/\\]+/g, sep) // Reemplazar múltiples separadores con el separador del sistema
+		.replace(/[/\\]+/g, sep) // Reemplazar múltiples separadores con el separador del sistema
 		.trim();
 
 	// Normalizar variaciones comunes en rutas

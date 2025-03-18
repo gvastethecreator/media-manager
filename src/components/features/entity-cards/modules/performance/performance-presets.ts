@@ -313,16 +313,16 @@ export function detectBestPreset(): string {
 	// Detectar conexión lenta (si la API está disponible)
 	const hasSlowConnection =
 		'connection' in navigator &&
-		// @ts-ignore - No todos los navegadores soportan esta API
+		// @ts-expect-error - No todos los navegadores soportan esta API
 		(navigator.connection.saveData ||
-			// @ts-ignore
+			// @ts-expect-error
 			(navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
 
 	// Detectar dispositivo de bajo rendimiento
 	const isLowEndDevice =
-		// @ts-ignore
+		// @ts-expect-error
 		(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
-		// @ts-ignore
+		// @ts-expect-error
 		(navigator.deviceMemory && navigator.deviceMemory <= 2);
 
 	// Aplicar lógica de detección

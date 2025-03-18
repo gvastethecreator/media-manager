@@ -12,9 +12,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayersIcon, Settings2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { LayerPluginProvider } from '../../../../layers/layer-plugin-system';
 import type { EntityCardProps } from '../../../entity-card';
 import { EntityCard } from '../../../entity-card';
-import { LayerPluginProvider } from '../../../../layers/layer-plugin-system';
 import { LayerManagementButton } from '../layer-management-dialog';
 import { RegisterEntityTypeLayers } from '../register-layers';
 import { useEntityCardLayers } from '../use-entity-card-layers';
@@ -147,7 +147,7 @@ function EntityCardWithLayersContent({
 									<h3 className="text-lg font-medium mb-2">Sobre este ejemplo</h3>
 									<p className="text-sm text-muted-foreground">
 										Este ejemplo muestra cómo integrar el sistema de capas con EntityCard. Puedes personalizar las capas
-										haciendo clic en el botón "Gestionar Capas".
+										haciendo clic en el botón &quot;Gestionar Capas&quot;.
 									</p>
 								</div>
 

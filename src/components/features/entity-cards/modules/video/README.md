@@ -20,13 +20,13 @@ Componente principal que integra todo el sistema de video.
 import { VideoModule } from '@/components/features/entity-cards/modules/video';
 
 <VideoModule
-  initialOptions={{
-    videoAutoplay: false,
-    videoLoop: true,
-    videoMuted: true
-  }}
-  onChange={(options) => console.log('Video options updated:', options)}
-/>
+	initialOptions={{
+		videoAutoplay: false,
+		videoLoop: true,
+		videoMuted: true,
+	}}
+	onChange={(options) => console.log('Video options updated:', options)}
+/>;
 ```
 
 ### VideoPanel
@@ -37,13 +37,13 @@ Panel de configuración para ajustar las opciones de video.
 import { VideoPanel } from '@/components/features/entity-cards/modules/video';
 
 <VideoPanel
-  videoOptions={videoOptions}
-  handleVideoChange={handleVideoChange}
-  handleDesignSystemChange={handleDesignSystemChange}
-  handleEffectsChange={handleEffectsChange}
-  handlePerformanceChange={handlePerformanceChange}
-  resetOptions={handleResetOptions}
-/>
+	videoOptions={videoOptions}
+	handleVideoChange={handleVideoChange}
+	handleDesignSystemChange={handleDesignSystemChange}
+	handleEffectsChange={handleEffectsChange}
+	handlePerformanceChange={handlePerformanceChange}
+	resetOptions={handleResetOptions}
+/>;
 ```
 
 ## Hooks
@@ -55,14 +55,8 @@ Hook para gestionar el estado y la lógica del sistema de video.
 ```tsx
 import { useVideoSystem } from '@/components/features/entity-cards/modules/video';
 
-const {
-  options,
-  updateOption,
-  updateDesignSystemOption,
-  updateEffectOption,
-  updatePerformanceOption,
-  resetOptions
-} = useVideoSystem(initialOptions, handleOptionsChange);
+const { options, updateOption, updateDesignSystemOption, updateEffectOption, updatePerformanceOption, resetOptions } =
+	useVideoSystem(initialOptions, handleOptionsChange);
 ```
 
 ## Tipos
@@ -71,26 +65,26 @@ const {
 import { VideoOptions } from '@/components/features/entity-cards/modules/video';
 
 const defaultOptions: VideoOptions = {
-  enable3DEffect: false,
-  videoAutoplay: false,
-  videoLoop: true,
-  // ...
+	enable3DEffect: false,
+	videoAutoplay: false,
+	videoLoop: true,
+	// ...
 };
 ```
 
 ## Opciones Disponibles
 
-| Opción | Tipo | Descripción |
-|--------|------|-------------|
-| `enable3DEffect` | boolean | Habilitar efectos tridimensionales |
-| `enableHolographicEffect` | boolean | Activar efecto holográfico |
-| `enableGlowEffect` | boolean | Añadir efecto de brillo |
-| `enableAnimatedBorder` | boolean | Animar el borde de la tarjeta |
-| `videoAutoplay` | boolean | Reproducir video automáticamente |
-| `videoLoop` | boolean | Repetir video en bucle |
-| `videoMuted` | boolean | Silenciar video |
-| `videoControls` | boolean | Mostrar controles de reproducción |
-| `videoPlaybackRate` | number | Velocidad de reproducción |
+| Opción                    | Tipo    | Descripción                        |
+| ------------------------- | ------- | ---------------------------------- |
+| `enable3DEffect`          | boolean | Habilitar efectos tridimensionales |
+| `enableHolographicEffect` | boolean | Activar efecto holográfico         |
+| `enableGlowEffect`        | boolean | Añadir efecto de brillo            |
+| `enableAnimatedBorder`    | boolean | Animar el borde de la tarjeta      |
+| `videoAutoplay`           | boolean | Reproducir video automáticamente   |
+| `videoLoop`               | boolean | Repetir video en bucle             |
+| `videoMuted`              | boolean | Silenciar video                    |
+| `videoControls`           | boolean | Mostrar controles de reproducción  |
+| `videoPlaybackRate`       | number  | Velocidad de reproducción          |
 
 ## Integración
 

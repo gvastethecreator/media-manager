@@ -60,9 +60,9 @@ export interface PreviewModuleProps {
  * Props para el panel de previsualización
  */
 export interface PreviewPanelProps {
-	cardOptions: any;
-	rarity?: any;
-	texture?: any;
+	cardOptions: Record<string, unknown>;
+	rarity?: Record<string, unknown>;
+	texture?: Record<string, unknown>;
 	showInfo?: boolean;
 	showControls?: boolean;
 	showBorder?: boolean;

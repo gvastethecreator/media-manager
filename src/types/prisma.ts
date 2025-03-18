@@ -1,12 +1,12 @@
 import { Prisma } from '@prisma/client';
 
 // Definir tipos para las entidades basados en los modelos de Prisma
-export type Note = Prisma.NoteGetPayload<{}>;
-export type Album = Prisma.AlbumGetPayload<{}>;
-export type Collection = Prisma.CollectionGetPayload<{}>;
-export type Concept = Prisma.ConceptGetPayload<{}>;
-export type Folder = Prisma.FolderGetPayload<{}>;
-export type Character = Prisma.CharacterGetPayload<{}>;
+export type Note = Prisma.NoteGetPayload<Record<string, never>>;
+export type Album = Prisma.AlbumGetPayload<Record<string, never>>;
+export type Collection = Prisma.CollectionGetPayload<Record<string, never>>;
+export type Concept = Prisma.ConceptGetPayload<Record<string, never>>;
+export type Folder = Prisma.FolderGetPayload<Record<string, never>>;
+export type Character = Prisma.CharacterGetPayload<Record<string, never>>;
 
 // Tipos extendidos para incluir estadísticas y datos adicionales
 export type NoteWithStats = Note & {

@@ -117,7 +117,7 @@ export function EntityPreviewAdapter({
 
 	// Añadir propiedades específicas según el modo de vista previa
 	const previewOptions = React.useMemo(() => {
-		let opts = { ...adaptedOptions };
+		const opts = { ...adaptedOptions };
 
 		// Ajustar opciones según el modo de vista previa
 		if (previewMode === 'thumbnail') {

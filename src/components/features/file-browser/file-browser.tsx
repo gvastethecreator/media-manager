@@ -7,8 +7,8 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
-import { AnimatePresence, motion } from 'motion/react';
 import { Pin, PinOff, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
@@ -133,7 +133,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 	// Sincronizar nuestra ref local con la ref del hook
 	useEffect(() => {
 		if (gridParentRef.current) {
-			// @ts-ignore - Sabemos que es seguro asignar esto
+			// @ts-expect-error - Sabemos que es seguro asignar esto
 			parentRef.current = gridParentRef.current;
 		}
 	}, [parentRef]);

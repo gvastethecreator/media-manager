@@ -21,19 +21,19 @@ El componente principal que encapsula toda la funcionalidad del módulo de vista
 import { ExplodeModule } from '@/components/features/entity-cards/modules/explode';
 
 function MyComponent() {
-  return (
-    <ExplodeModule
-      initialExplodeSystem={{
-        enabled: true,
-        distance: 20,
-        // Otras opciones...
-      }}
-      layersList={['Background', 'Content', 'Overlay']}
-      onChange={(explodeSystem) => {
-        // Guardar configuración actualizada
-      }}
-    />
-  );
+	return (
+		<ExplodeModule
+			initialExplodeSystem={{
+				enabled: true,
+				distance: 20,
+				// Otras opciones...
+			}}
+			layersList={['Background', 'Content', 'Overlay']}
+			onChange={(explodeSystem) => {
+				// Guardar configuración actualizada
+			}}
+		/>
+	);
 }
 ```
 
@@ -46,15 +46,15 @@ import { ExplodePanel } from '@/components/features/entity-cards/modules/explode
 import { useState } from 'react';
 
 function ConfigPanel() {
-  const [explodeConfig, setExplodeConfig] = useState(/* config inicial */);
+	const [explodeConfig, setExplodeConfig] = useState(/* config inicial */);
 
-  return (
-    <ExplodePanel
-      explodeSystem={explodeConfig}
-      onChange={setExplodeConfig}
-      layersList={['Background', 'Content', 'Overlay']}
-    />
-  );
+	return (
+		<ExplodePanel
+			explodeSystem={explodeConfig}
+			onChange={setExplodeConfig}
+			layersList={['Background', 'Content', 'Overlay']}
+		/>
+	);
 }
 ```
 
@@ -68,25 +68,17 @@ Hook para gestionar el estado de la vista explosionada en componentes.
 import { useExplodeSystem } from '@/components/features/entity-cards/modules/explode';
 
 function ExplodedComponent() {
-  const {
-    explodeSystem,
-    updateExplodeSystem,
-    resetExplodeSystem,
-    generateExplodeStyles
-  } = useExplodeSystem();
+	const { explodeSystem, updateExplodeSystem, resetExplodeSystem, generateExplodeStyles } = useExplodeSystem();
 
-  return (
-    <div>
-      {layers.map((layer, index) => (
-        <div
-          key={index}
-          style={generateExplodeStyles(index, layers.length)}
-        >
-          {layer}
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div>
+			{layers.map((layer, index) => (
+				<div key={index} style={generateExplodeStyles(index, layers.length)}>
+					{layer}
+				</div>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -117,28 +109,24 @@ Para integrar la vista explosionada en las tarjetas de entidad:
 import { useExplodeSystem } from '@/components/features/entity-cards/modules/explode';
 
 function LayeredCard() {
-  const { explodeSystem, generateExplodeStyles } = useExplodeSystem({
-    enabled: true,
-    distance: 15,
-    direction: '3d',
-    rotationY: 15
-  });
+	const { explodeSystem, generateExplodeStyles } = useExplodeSystem({
+		enabled: true,
+		distance: 15,
+		direction: '3d',
+		rotationY: 15,
+	});
 
-  const layers = ['background', 'content', 'overlay'];
+	const layers = ['background', 'content', 'overlay'];
 
-  return (
-    <div className="card-container">
-      {layers.map((layer, index) => (
-        <div
-          key={layer}
-          className={`card-layer ${layer}`}
-          style={generateExplodeStyles(index, layers.length)}
-        >
-          {/* Contenido de la capa */}
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div className="card-container">
+			{layers.map((layer, index) => (
+				<div key={layer} className={`card-layer ${layer}`} style={generateExplodeStyles(index, layers.length)}>
+					{/* Contenido de la capa */}
+				</div>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -146,25 +134,23 @@ function LayeredCard() {
 
 ```tsx
 function InteractiveLayeredCard() {
-  const [isExploded, setIsExploded] = useState(false);
+	const [isExploded, setIsExploded] = useState(false);
 
-  return (
-    <>
-      <button onClick={() => setIsExploded(!isExploded)}>
-        {isExploded ? 'Vista Normal' : 'Vista Explosionada'}
-      </button>
+	return (
+		<>
+			<button onClick={() => setIsExploded(!isExploded)}>{isExploded ? 'Vista Normal' : 'Vista Explosionada'}</button>
 
-      <ExplodeModule
-        initialExplodeSystem={{
-          enabled: isExploded,
-          distance: 25,
-          direction: '3d'
-        }}
-        onChange={(config) => {
-          // Manejar cambios en la configuración
-        }}
-      />
-    </>
-  );
+			<ExplodeModule
+				initialExplodeSystem={{
+					enabled: isExploded,
+					distance: 25,
+					direction: '3d',
+				}}
+				onChange={(config) => {
+					// Manejar cambios en la configuración
+				}}
+			/>
+		</>
+	);
 }
 ```

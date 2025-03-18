@@ -110,14 +110,16 @@ export function usePerformanceSystem(
 	// Función para adaptar automáticamente las opciones según el dispositivo
 	const adaptToDevice = useCallback(() => {
 		// Detectar tipo de dispositivo
-		const isMobile = typeof window !== 'undefined' &&
+		const isMobile =
+			typeof window !== 'undefined' &&
 			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 		// Detectar conexión lenta
-		const isSlowConnection = typeof navigator !== 'undefined' &&
+		const isSlowConnection =
+			typeof navigator !== 'undefined' &&
 			navigator.connection &&
 			(navigator.connection.saveData ||
-			 (navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
+				(navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')));
 
 		// Adaptar según el dispositivo y conexión
 		if (isMobile || isSlowConnection) {
@@ -176,13 +178,16 @@ export function usePerformanceSystem(
 		impact.high.forEach((option) => {
 			switch (option) {
 				case 'lazyLoad':
-					recommendations.lazyLoad = 'Habilitar la carga diferida para mejorar significativamente el rendimiento inicial';
+					recommendations.lazyLoad =
+						'Habilitar la carga diferida para mejorar significativamente el rendimiento inicial';
 					break;
 				case 'virtualizeList':
-					recommendations.virtualizeList = 'Habilitar la virtualización de listas para mejorar el rendimiento con muchas tarjetas';
+					recommendations.virtualizeList =
+						'Habilitar la virtualización de listas para mejorar el rendimiento con muchas tarjetas';
 					break;
 				case 'imageOptimization':
-					recommendations.imageOptimization = 'Habilitar la optimización de imágenes para reducir el consumo de memoria y mejorar los tiempos de carga';
+					recommendations.imageOptimization =
+						'Habilitar la optimización de imágenes para reducir el consumo de memoria y mejorar los tiempos de carga';
 					break;
 			}
 		});
@@ -193,10 +198,12 @@ export function usePerformanceSystem(
 					recommendations.batchUpdates = 'Habilitar el procesamiento por lotes para reducir el número de renderizados';
 					break;
 				case 'animationMaxFPS':
-					recommendations.animationMaxFPS = 'Reducir el máximo de FPS para animaciones a 60 o menos para ahorrar recursos';
+					recommendations.animationMaxFPS =
+						'Reducir el máximo de FPS para animaciones a 60 o menos para ahorrar recursos';
 					break;
 				case 'enableCache':
-					recommendations.enableCache = 'Habilitar el caché para mejorar los tiempos de carga en navegaciones repetidas';
+					recommendations.enableCache =
+						'Habilitar el caché para mejorar los tiempos de carga en navegaciones repetidas';
 					break;
 			}
 		});
@@ -214,9 +221,13 @@ export function usePerformanceSystem(
 			isLowPerfDevice = navigator.hardwareConcurrency <= 4;
 		}
 
-		// Si está disponible, usar deviceMemory como indicador
-		if (typeof navigator !== 'undefined' && (navigator as any).deviceMemory) {
-			isLowPerfDevice = isLowPerfDevice || (navigator as any).deviceMemory <= 4;
+		// Comprobar si el dispositivo tiene memoria limitada
+		if (typeof navigator !== 'undefined') {
+			// @ts-expect-error - La propiedad deviceMemory no está en todos los navegadores
+			if (navigator.deviceMemory) {
+				// @ts-expect-error - La propiedad deviceMemory no está en todos los navegadores
+				isLowPerfDevice = isLowPerfDevice || navigator.deviceMemory <= 4;
+			}
 		}
 
 		if (isLowPerfDevice) {
