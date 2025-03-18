@@ -7,14 +7,34 @@ import { EntityType } from '@/types/entities';
 import { DEFAULT_SYSTEM_CONFIG, SystemConfig } from './types';
 
 /**
+ * Tipo para las opciones de tarjeta
+ */
+export interface CardOptions {
+	borderColor?: string;
+	backgroundColor?: string;
+	textColor?: string;
+	glowColor?: string;
+	glowIntensity?: number;
+	textureUrl?: string;
+	textureOpacity?: number;
+	textureBlendMode?: string;
+	categoryIcon?: string;
+	categoryColor?: string;
+	rarityKey?: string;
+	textureKey?: string;
+	categoryKey?: string;
+	[key: string]: unknown;
+}
+
+/**
  * Adapta las opciones de tarjeta para incluir configuraciones del sistema
  */
 export function adaptCardOptionsWithSystemConfig(
-	options: Record<string, any>,
+	options: CardOptions,
 	systemConfig: Partial<SystemConfig> = {},
 	entityType?: EntityType,
 	entityId?: string
-): Record<string, any> {
+): CardOptions {
 	const config = deepMerge(DEFAULT_SYSTEM_CONFIG, systemConfig) as SystemConfig;
 
 	// Si no hay tipo de entidad, devolvemos las opciones sin modificar

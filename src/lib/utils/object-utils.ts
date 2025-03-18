@@ -5,7 +5,7 @@
  * @param source Objeto fuente cuyos valores se fusionarán
  * @returns Nuevo objeto con la combinación de ambos
  */
-export function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+export function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
 	const output = { ...target };
 
 	if (isObject(target) && isObject(source)) {
@@ -14,7 +14,10 @@ export function deepMerge<T extends Record<string, any>>(target: T, source: Part
 				if (!(key in target)) {
 					Object.assign(output, { [key]: source[key] });
 				} else {
-					output[key] = deepMerge(target[key], source[key]);
+					output[key] = deepMerge(
+						target[key] as Record<string, unknown>,
+						source[key] as Record<string, unknown>
+					) as T[Extract<keyof T, string>];
 				}
 			} else {
 				Object.assign(output, { [key]: source[key] });
@@ -28,23 +31,23 @@ export function deepMerge<T extends Record<string, any>>(target: T, source: Part
 /**
  * Verifica si un valor es un objeto
  */
-function isObject(item: any): item is Record<string, any> {
-	return item && typeof item === 'object' && !Array.isArray(item);
+function isObject(item: unknown): item is Record<string, unknown> {
+	return item !== null && typeof item === 'object' && !Array.isArray(item);
 }
 
 /**
  * Obtiene un valor de un objeto por un path como 'a.b.c'
  */
-export function getValueByPath(obj: any, path: string): any {
+export function getValueByPath<T = unknown>(obj: Record<string, unknown>, path: string): T | undefined {
 	return path.split('.').reduce((prev, curr) => {
-		return prev ? prev[curr] : undefined;
-	}, obj);
+		return prev && typeof prev === 'object' ? (prev as Record<string, unknown>)[curr] : undefined;
+	}, obj) as T | undefined;
 }
 
 /**
  * Establece un valor en un objeto por un path como 'a.b.c'
  */
-export function setValueByPath(obj: any, path: string, value: any): any {
+export function setValueByPath<T extends Record<string, unknown>>(obj: T, path: string, value: unknown): T {
 	const result = { ...obj };
 	const parts = path.split('.');
 
@@ -54,7 +57,7 @@ export function setValueByPath(obj: any, path: string, value: any): any {
 		if (!current[part] || typeof current[part] !== 'object') {
 			current[part] = {};
 		}
-		current = current[part];
+		current = current[part] as Record<string, unknown>;
 	}
 
 	current[parts[parts.length - 1]] = value;

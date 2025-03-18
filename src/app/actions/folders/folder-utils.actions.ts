@@ -1,9 +1,7 @@
 'use server';
 
-import { existsSync } from 'fs';
-import { join, normalize, sep } from 'node:path';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { checkPathExists, generatePathVariants, normalizePath } from '@/lib/path-utils';
+import { checkPathExists } from '@/lib/path-utils';
 import type {
 	FileItem,
 	RelatedAlbum,
@@ -119,6 +117,21 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 		// Transformar stats (si existen)
 		const stats = null;
 
+		// Procesar thumbnail si existe
+		let thumbnailBase64 = '';
+		if (image.thumbnail && Buffer.isBuffer(image.thumbnail)) {
+			try {
+				thumbnailBase64 = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
+				serverLogger.debug('✅ Thumbnail convertido a base64', {
+					imageId: image.id,
+					thumbnailSize: image.thumbnailSize,
+					thumbnailLength: thumbnailBase64.length,
+				});
+			} catch (error) {
+				serverLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
+			}
+		}
+
 		const fileItem: FileItemWithSrc = {
 			id: image.id || '',
 			hash: '',
@@ -129,7 +142,7 @@ export async function transformImageToFileItem(image: ImageWithRelations): Promi
 			width: image.width ? Number(image.width) : 0,
 			height: image.height ? Number(image.height) : 0,
 			metadata: metadataString,
-			thumbnail: '',
+			thumbnail: thumbnailBase64,
 			thumbnailSize: image.thumbnailSize ? Number(image.thumbnailSize) : null,
 			thumbnailWidth: image.thumbnailWidth ? Number(image.thumbnailWidth) : null,
 			thumbnailHeight: image.thumbnailHeight ? Number(image.thumbnailHeight) : null,

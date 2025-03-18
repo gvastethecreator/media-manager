@@ -321,10 +321,7 @@ export function getEntityTypeLayerConfig(entityType: string): EntityCardLayerSys
 /**
  * Convierte propiedades de EntityCard a configuración de capas
  */
-export function entityCardPropsToLayerConfig(
-	entityType: string,
-	props: any
-): EntityCardLayerSystemConfig {
+export function entityCardPropsToLayerConfig(entityType: string, props: any): EntityCardLayerSystemConfig {
 	// Obtener configuración base para el tipo de entidad
 	const baseConfig = getEntityTypeLayerConfig(entityType);
 
@@ -371,9 +368,7 @@ export function entityCardPropsToLayerConfig(
 /**
  * Convierte configuración de capas a propiedades de EntityCard
  */
-export function layerConfigToEntityCardProps(
-	config: EntityCardLayerSystemConfig
-): Record<string, any> {
+export function layerConfigToEntityCardProps(config: EntityCardLayerSystemConfig): Record<string, any> {
 	const props: Record<string, any> = {};
 
 	// Extraer propiedades específicas de la configuración de capas
@@ -421,17 +416,11 @@ export function mergeLayerConfigs(
 /**
  * Guarda la configuración de capas para un tipo de entidad
  */
-export function saveEntityTypeLayerConfig(
-	entityType: string,
-	config: EntityCardLayerSystemConfig
-): void {
+export function saveEntityTypeLayerConfig(entityType: string, config: EntityCardLayerSystemConfig): void {
 	// Aquí implementaríamos la lógica para guardar la configuración
 	// en localStorage, base de datos, etc.
 	try {
-		localStorage.setItem(
-			`entity-card-layer-config-${entityType}`,
-			JSON.stringify(config)
-		);
+		localStorage.setItem(`entity-card-layer-config-${entityType}`, JSON.stringify(config));
 	} catch (error) {
 		console.error('Error al guardar configuración de capas:', error);
 	}
@@ -440,9 +429,7 @@ export function saveEntityTypeLayerConfig(
 /**
  * Carga la configuración de capas guardada para un tipo de entidad
  */
-export function loadSavedEntityTypeLayerConfig(
-	entityType: string
-): EntityCardLayerSystemConfig | null {
+export function loadSavedEntityTypeLayerConfig(entityType: string): EntityCardLayerSystemConfig | null {
 	try {
 		const saved = localStorage.getItem(`entity-card-layer-config-${entityType}`);
 		if (saved) {

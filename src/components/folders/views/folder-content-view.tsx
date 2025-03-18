@@ -1,13 +1,13 @@
 'use client';
 
 import { getFolderImages, reindexFolder } from '@/app/actions/folders';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { FolderContentProps } from '@/components/views/base';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Folder } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = serverLogger.withContext('FolderContentView');
 
@@ -24,6 +24,7 @@ export function FolderContentView() {
 	} = useFileManager();
 
 	const { setCurrentView } = useNavigationStore();
+	const [error, setError] = useState<string | null>(null);
 
 	// Establecer la vista actual al montar el componente
 	useEffect(() => {
@@ -35,11 +36,13 @@ export function FolderContentView() {
 		const loadFolderInfo = async () => {
 			if (!currentFolderId) {
 				viewLogger.error('❌ No se encontró una carpeta actual');
+				setError('No se encontró una carpeta actual');
 				return;
 			}
 
 			try {
 				viewLogger.info('🔄 Cargando información de la carpeta:', currentFolderId);
+				setIsLoading(true);
 				const images = await getFolderImages(currentFolderId);
 
 				// Actualizar la información de la carpeta en el store
@@ -54,14 +57,18 @@ export function FolderContentView() {
 				}
 
 				setItems(images);
-				viewLogger.info('✅ Información de la carpeta cargada');
+				viewLogger.info(`✅ Información de la carpeta cargada: ${images.length} imágenes`);
 			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 				viewLogger.error('❌ Error cargando información de la carpeta:', error);
+				setError(errorMessage);
+			} finally {
+				setIsLoading(false);
 			}
 		};
 
 		loadFolderInfo();
-	}, [currentFolderId, setItems, currentFolder]);
+	}, [currentFolderId, setItems, currentFolder, setIsLoading]);
 
 	const handleReindexFolder = useCallback(
 		async (id: string) => {
@@ -77,7 +84,9 @@ export function FolderContentView() {
 				}
 				viewLogger.info('✅ Carpeta reindexada:', id);
 			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 				viewLogger.error('❌ Error reindexando carpeta:', error);
+				setError(errorMessage);
 			} finally {
 				setIsLoading(false);
 			}
@@ -88,6 +97,7 @@ export function FolderContentView() {
 	const contentProps: FolderContentProps = {
 		items,
 		isLoading,
+		error,
 		toggleItemSelection,
 		currentContainerId: currentFolderId ?? null,
 		containerName: currentFolder?.name ?? null,
@@ -98,7 +108,7 @@ export function FolderContentView() {
 			title: 'Carpeta vacía',
 			description: `No se encontraron imágenes en ${
 				currentFolder?.name || 'esta carpeta'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+			}. Puedes reindexar la carpeta para buscar nuevas imágenes.`,
 		},
 	};
 

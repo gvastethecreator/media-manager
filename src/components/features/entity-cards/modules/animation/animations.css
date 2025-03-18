@@ -2,7 +2,6 @@
 
 /* Utilidades para animaciones */
 @layer utilities {
-
 	/* Animaciones de entrada */
 	.animate-fade-in {
 		animation: fadeIn 0.3s ease-in-out forwards;

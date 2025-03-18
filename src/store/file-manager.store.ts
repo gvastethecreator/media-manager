@@ -767,7 +767,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 					currentFolderId: id,
 					currentFolder: null,
 					isLoading: false,
-					error: 'Carpeta no encontrada'
+					error: 'Carpeta no encontrada',
 				});
 				return;
 			}
@@ -834,7 +834,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 					currentCollectionId: id,
 					currentCollection: null,
 					isLoading: false,
-					error: 'Colección no encontrada'
+					error: 'Colección no encontrada',
 				});
 				return;
 			}
@@ -950,7 +950,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 					currentAlbumId: id,
 					currentAlbum: null,
 					isLoading: false,
-					error: 'Álbum no encontrado'
+					error: 'Álbum no encontrado',
 				});
 				return;
 			}
@@ -1053,7 +1053,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 					currentPlaceId: id,
 					currentPlace: null,
 					isLoading: false,
-					error: 'Lugar no encontrado'
+					error: 'Lugar no encontrado',
 				});
 				return;
 			}
@@ -1123,7 +1123,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 					currentWorldItemId: id,
 					currentWorldItem: null,
 					isLoading: false,
-					error: 'Objeto no encontrado'
+					error: 'Objeto no encontrado',
 				});
 				return;
 			}

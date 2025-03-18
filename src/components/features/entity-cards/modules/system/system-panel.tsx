@@ -152,7 +152,7 @@ function RarityPanel({
 		});
 	};
 
-	const handleUpdateRarityProperty = (rarityId: string, property: string, value: any) => {
+	const handleUpdateRarityProperty = (rarityId: string, property: string, value: string | number) => {
 		onChange({
 			rarity: {
 				...config.rarity,
@@ -424,7 +424,7 @@ function TexturePanel({
 		});
 	};
 
-	const handleUpdateTextureProperty = (textureId: string, property: string, value: any) => {
+	const handleUpdateTextureProperty = (textureId: string, property: string, value: string | number) => {
 		onChange({
 			texture: {
 				...config.texture,
@@ -673,7 +673,7 @@ function CategoryPanel({
 		});
 	};
 
-	const handleUpdateCategoryProperty = (categoryId: string, property: string, value: any) => {
+	const handleUpdateCategoryProperty = (categoryId: string, property: string, value: string | number) => {
 		onChange({
 			category: {
 				...config.category,

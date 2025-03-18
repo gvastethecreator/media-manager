@@ -15,25 +15,25 @@ export { LayerDemo } from './layer-demo';
 
 // Exportar tipos
 export type {
-  BaseLayerConfig,
-  LayerComponent,
-  LayerComponentProps,
-  LayerSettingsProps,
-  LegacyLayerComponentProps
+	BaseLayerConfig,
+	LayerComponent,
+	LayerComponentProps,
+	LayerSettingsProps,
+	LegacyLayerComponentProps,
 } from './layer-plugin-system';
 
 export type {
-  LayerConfig,
-  LayerSystemConfig,
-  LayersGlobalOptions,
-  LayerInfo,
-  LayersSystemState,
-  LayerChangeEvent,
-  LayersSystemResult,
-  CommonLayerProps,
-  ExplodeLayerTransformFunction,
-  LayersSettingsPanelProps,
-  LayerServerActions
+	LayerConfig,
+	LayerSystemConfig,
+	LayersGlobalOptions,
+	LayerInfo,
+	LayersSystemState,
+	LayerChangeEvent,
+	LayersSystemResult,
+	CommonLayerProps,
+	ExplodeLayerTransformFunction,
+	LayersSettingsPanelProps,
+	LayerServerActions,
 } from './types';
 
 // Exportar capas individuales

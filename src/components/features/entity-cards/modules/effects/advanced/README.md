@@ -35,14 +35,9 @@ El módulo incluye el hook `useAdvancedEffects` que proporciona:
 import { AdvancedEffectsPanel } from '@/components/features/entity-cards/modules/effects/advanced';
 
 function CardEditor() {
-  const [cardOptions, setCardOptions] = useState<CardOptions>({});
+	const [cardOptions, setCardOptions] = useState<CardOptions>({});
 
-  return (
-    <AdvancedEffectsPanel
-      options={cardOptions}
-      onChange={setCardOptions}
-    />
-  );
+	return <AdvancedEffectsPanel options={cardOptions} onChange={setCardOptions} />;
 }
 ```
 
@@ -50,41 +45,41 @@ function CardEditor() {
 
 ```typescript
 interface AdvancedEffectsOptions {
-  // Efectos de Escaneo
-  scanlines?: boolean;
-  scanlinesDensity?: number;
-  scanlinesOpacity?: number;
+	// Efectos de Escaneo
+	scanlines?: boolean;
+	scanlinesDensity?: number;
+	scanlinesOpacity?: number;
 
-  // Efectos de Textura
-  grain?: boolean;
-  grainDensity?: number;
-  grainOpacity?: number;
-  noiseTexture?: boolean;
-  noiseTextureDensity?: number;
-  noiseTextureOpacity?: number;
+	// Efectos de Textura
+	grain?: boolean;
+	grainDensity?: number;
+	grainOpacity?: number;
+	noiseTexture?: boolean;
+	noiseTextureDensity?: number;
+	noiseTextureOpacity?: number;
 
-  // Efectos de Borde
-  borderGlow?: boolean;
-  borderGlowColor?: string;
-  borderGlowWidth?: number;
-  borderGlowSpread?: number;
-  borderGlowIntensity?: number;
+	// Efectos de Borde
+	borderGlow?: boolean;
+	borderGlowColor?: string;
+	borderGlowWidth?: number;
+	borderGlowSpread?: number;
+	borderGlowIntensity?: number;
 
-  // Efectos Holográficos
-  holographicEffect?: boolean;
-  holographicRainbowMode?: boolean;
-  holographicEffectColor?: string;
-  holographicEffectIntensity?: number;
+	// Efectos Holográficos
+	holographicEffect?: boolean;
+	holographicRainbowMode?: boolean;
+	holographicEffectColor?: string;
+	holographicEffectIntensity?: number;
 
-  // Efectos de Distorsión
-  chromaticAberration?: boolean;
-  chromaticAberrationOffset?: number;
-  chromaticAberrationIntensity?: number;
-  glitchEffect?: boolean;
-  glitchEffectIntensity?: number;
-  glitchEffectFrequency?: number;
-  pixelate?: boolean;
-  pixelateSize?: number;
+	// Efectos de Distorsión
+	chromaticAberration?: boolean;
+	chromaticAberrationOffset?: number;
+	chromaticAberrationIntensity?: number;
+	glitchEffect?: boolean;
+	glitchEffectIntensity?: number;
+	glitchEffectFrequency?: number;
+	pixelate?: boolean;
+	pixelateSize?: number;
 }
 ```
 

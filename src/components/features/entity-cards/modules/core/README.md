@@ -30,10 +30,10 @@ Hook personalizado para gestionar las opciones del núcleo:
 
 ```tsx
 const {
-  coreOptions,           // Estado actual de las opciones
-  updateCoreOption,      // Actualiza una opción específica
-  updateNestedOption,    // Actualiza una opción anidada
-  resetToDefaults        // Restablece a valores predeterminados
+	coreOptions, // Estado actual de las opciones
+	updateCoreOption, // Actualiza una opción específica
+	updateNestedOption, // Actualiza una opción anidada
+	resetToDefaults, // Restablece a valores predeterminados
 } = useCoreSettings(initialOptions);
 ```
 
@@ -43,20 +43,14 @@ const {
 import { CorePanel, useCoreSettings } from '@/components/features/entity-cards/modules/core';
 
 function MyComponent() {
-  const [options, setOptions] = useState({
-    core: {
-      enabled: true,
-      // otras opciones...
-    }
-    // otras configuraciones...
-  });
+	const [options, setOptions] = useState({
+		core: {
+			enabled: true,
+			// otras opciones...
+		},
+		// otras configuraciones...
+	});
 
-  return (
-    <CorePanel
-      options={options}
-      onChange={setOptions}
-      disabled={false}
-    />
-  );
+	return <CorePanel options={options} onChange={setOptions} disabled={false} />;
 }
 ```

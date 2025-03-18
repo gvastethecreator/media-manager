@@ -1,14 +1,7 @@
 'use client';
 
 import { Cpu, Layers3, MousePointer, Smile, SpeakerIcon } from 'lucide-react';
-import {
-	FormGroup,
-	FormRow,
-	FormSection,
-	FormSelect,
-	FormSlider,
-	FormToggle,
-} from '../../../settings/panels/shared';
+import { FormGroup, FormRow, FormSection, FormSelect, FormSlider, FormToggle } from '../../../settings/panels/shared';
 import {
 	type CoreOptions,
 	INTERACTIVE_MODE_OPTIONS,

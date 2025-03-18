@@ -18,25 +18,26 @@ El módulo de rendimiento proporciona configuraciones y optimizaciones para mejo
 import { PerformanceModule } from '@/components/features/entity-cards/modules/performance';
 
 function MyComponent() {
-  const handleChange = (options) => {
-    console.log('Opciones actualizadas:', options);
-  };
+	const handleChange = (options) => {
+		console.log('Opciones actualizadas:', options);
+	};
 
-  return (
-    <PerformanceModule
-      initialOptions={{
-        performanceMode: 'balanced',
-        enableCache: true
-      }}
-      onChange={handleChange}
-    />
-  );
+	return (
+		<PerformanceModule
+			initialOptions={{
+				performanceMode: 'balanced',
+				enableCache: true,
+			}}
+			onChange={handleChange}
+		/>
+	);
 }
 ```
 
 ## 🔧 Opciones de Configuración
 
 ### Estrategia de Carga
+
 - `loadingStrategy`: Define cómo se cargan los recursos (eager, lazy, progressive)
 - `enablePreloading`: Habilita la precarga de recursos
 - `lazyLoad`: Carga las imágenes solo cuando están a punto de ser visibles
@@ -45,6 +46,7 @@ function MyComponent() {
 - `prefetchOnHover`: Precarga recursos al pasar el cursor sobre la tarjeta
 
 ### Virtualización y Caché
+
 - `performanceMode`: Balance entre rendimiento y calidad visual
 - `enableCache`: Habilita el uso de caché
 - `virtualizeList`: Renderiza solo las tarjetas visibles en la ventana
@@ -55,6 +57,7 @@ function MyComponent() {
 - `throttleMs`: Milisegundos entre actualizaciones
 
 ### Animaciones
+
 - `reducedMotion`: Reduce o elimina las animaciones
 - `useRAF`: Utiliza requestAnimationFrame para las animaciones
 - `animationDuration`: Duración de las animaciones

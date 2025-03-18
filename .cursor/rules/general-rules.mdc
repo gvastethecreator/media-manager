@@ -4,8 +4,7 @@ globs:
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-- NEVER!! Jamás correr 'npm dev' o 'pnpm dev' ( no hace falta )
-- NEVER!! use git commands
+
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
 - Treat me as an expert—be thorough, accurate, and up-to-date.
@@ -29,7 +28,6 @@ alwaysApply: true
 - Comment key code for readability and maintainability, also use emojis on comments.
 - Before starting your task, create a plan of action in @progress.md to keep track of your work.
 - When adjusting code, show only relevant changes—brief and clear.
-- When using the command line use Windows 11 and PowerShell—use accurate commands.
 - Don't create directories, just add the file ( that will work )
 
 - Never forget the current stack stack and follow up the rules // check @package.json

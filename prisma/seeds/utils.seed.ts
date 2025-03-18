@@ -35,7 +35,7 @@ export async function safeDeleteMany(prisma: PrismaClient, model: string, tableN
 
     if (exists) {
       // La tabla existe, procedemos a eliminar
-      // @ts-ignore - Ignoramos el error de tipo ya que accedemos dinámicamente a la propiedad
+      // @ts-expect-error - Ignoramos el error de tipo ya que accedemos dinámicamente a la propiedad
       await prisma[model].deleteMany()
       seedLogger.info(`✅ Eliminados registros de ${tableName}`)
     } else {

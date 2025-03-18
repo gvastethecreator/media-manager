@@ -64,17 +64,15 @@ import { NavPanel } from '@/components/navigation/navigation-panel';
 import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const navigationData = await getNavigationData();
+	const navigationData = await getNavigationData();
 
-  return (
-    <div className="flex h-screen">
-      <aside className="w-64 border-r">
-        <NavPanel initialData={navigationData} />
-      </aside>
-      <main className="flex-1">
-        {children}
-      </main>
-    </div>
-  );
+	return (
+		<div className="flex h-screen">
+			<aside className="w-64 border-r">
+				<NavPanel initialData={navigationData} />
+			</aside>
+			<main className="flex-1">{children}</main>
+		</div>
+	);
 }
 ```
