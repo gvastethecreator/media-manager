@@ -28,10 +28,11 @@ export async function GET() {
 		if (!isServerAlreadyInitialized) {
 			logger.info('Inicializando servidor desde ruta de API');
 
-			// Inicializar servidor
-			initializeServer();
+			// Inicializar servidor (ahora es asíncrono)
+			await initializeServer();
 
 			return NextResponse.json({
+				success: true,
 				message: 'Servidor inicializado correctamente',
 				timestamp: new Date().toISOString(),
 			});
@@ -41,6 +42,7 @@ export async function GET() {
 
 		// Devolver una respuesta indicando que el servidor ya está inicializado
 		return NextResponse.json({
+			success: true,
 			message: 'Server already initialized',
 			timestamp: new Date().toISOString(),
 		});

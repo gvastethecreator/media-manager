@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '../logger/server-logger';
-import { systemMonitor } from './system-monitor';
+import { logSystemShutdown, logSystemStartup, logSystemStatsOnce, startSystemMonitor } from './system-monitor';
 
 // Logger específico para el monitor de aplicación
 const appLogger = serverLogger.withContext('AppMonitor');
@@ -250,18 +250,12 @@ function logAppStats(): void {
  * @param options Opciones de configuración
  * @returns Función para detener el monitor
  */
-export function startAppMonitor(
-	options: {
-		interval?: number;
-		includeSystemStats?: boolean;
-		systemStatsInterval?: number;
-	} = {}
-): () => void {
-	const {
-		interval = 60000, // 1 minuto por defecto
-		includeSystemStats = true,
-		systemStatsInterval = 300000, // 5 minutos por defecto
-	} = options;
+export async function start(options: {
+	interval?: number;
+	includeSystemStats?: boolean;
+	systemStatsInterval?: number;
+} = {}): Promise<() => void> {
+	const { interval = 60000, includeSystemStats = true, systemStatsInterval = 300000 } = options;
 
 	// Mostrar estadísticas iniciales
 	logAppStats();
@@ -271,10 +265,10 @@ export function startAppMonitor(
 		logAppStats();
 	}, interval);
 
-	// Iniciar monitor de sistema si está habilitado
-	let stopSystemMonitor: (() => void) | undefined;
+	// Iniciar monitor de sistema si se solicita
+	let stopSystemMonitor: (() => void) | null = null;
 	if (includeSystemStats) {
-		stopSystemMonitor = systemMonitor.start(systemStatsInterval);
+		stopSystemMonitor = await startSystemMonitor(systemStatsInterval);
 	}
 
 	// Devolver función para detener ambos monitores
@@ -291,17 +285,17 @@ export function startAppMonitor(
  * Muestra estadísticas de la aplicación una sola vez
  * @param includeSystemStats Indica si se deben incluir estadísticas del sistema
  */
-export function logAppStatsOnce(includeSystemStats = true): void {
+export async function logAppStatsOnce(includeSystemStats = true): Promise<void> {
 	logAppStats();
 	if (includeSystemStats) {
-		systemMonitor.logOnce();
+		await logSystemStatsOnce();
 	}
 }
 
 /**
- * Registra estadísticas al inicio de la aplicación
+ * Registra estadísticas de la aplicación al inicio
  */
-export function logAppStartup(): void {
+export async function logAppStartup(): Promise<void> {
 	appLogger.separator('Inicio de la Aplicación');
 	appLogger.info('Aplicación iniciada', {
 		timestamp: new Date().toISOString(),
@@ -310,44 +304,52 @@ export function logAppStartup(): void {
 	});
 	appLogger.separatorEnd();
 
-	// Registrar también estadísticas del sistema
-	systemMonitor.logStartup();
+	// Registrar estadísticas del sistema
+	await logSystemStartup();
 }
 
 /**
- * Registra estadísticas al apagar la aplicación
+ * Registra estadísticas de la aplicación al cierre
  */
-export function logAppShutdown(): void {
-	const stats = getAppStats();
-
-	appLogger.separator('Apagado de la Aplicación');
-	appLogger.info('Aplicación apagada', {
-		timestamp: new Date().toISOString(),
-		requests: {
-			total: stats.requests.total,
-			success: stats.requests.success,
-			error: stats.requests.error,
-		},
-		errors: {
-			total: stats.errors.count,
-		},
+export async function logAppShutdown(): Promise<void> {
+	appLogger.separator('Cierre de la Aplicación');
+	appLogger.info('Aplicación cerrando', {
+		uptime: formatUptime(process.uptime()),
+		requests: appStatsState.requests.total,
+		errors: appStatsState.errors.count,
 	});
 	appLogger.separatorEnd();
 
-	// Registrar también estadísticas del sistema
-	systemMonitor.logShutdown();
+	// Registrar estadísticas del sistema
+	await logSystemShutdown();
 }
 
-// Exportar funciones principales
+// Formatea segundos a una unidad legible (duplicado de system-monitor para evitar dependencias circulares)
+function formatUptime(seconds: number): string {
+	const days = Math.floor(seconds / (3600 * 24));
+	const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = Math.floor(seconds % 60);
+
+	const parts = [];
+	if (days > 0) parts.push(`${days}d`);
+	if (hours > 0) parts.push(`${hours}h`);
+	if (minutes > 0) parts.push(`${minutes}m`);
+	if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+	return parts.join(' ');
+}
+
+// Exportar funciones principales como un objeto para retrocompatibilidad con código existente
 export const appMonitor = {
-	start: startAppMonitor,
-	logOnce: logAppStatsOnce,
-	logStartup: logAppStartup,
-	logShutdown: logAppShutdown,
-	getStats: getAppStats,
 	trackRequest,
 	trackPendingRequest,
 	trackError,
 	trackDatabaseQuery,
 	trackCacheAccess,
+	getAppStats,
+	start,
+	logStatsOnce: logAppStatsOnce,
+	logStartup: logAppStartup,
+	logShutdown: logAppShutdown,
 };
