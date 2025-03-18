@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import type { ExplodeLayerTransformFunction } from '../../types/base-card-types';
 import type { NoiseTextureConfig } from './actions/noise-texture-config.action';
-import { generateNoiseMap, noiseCache, noiseMapToImageData } from './utils/noise-algorithms';
+import { noiseCache, noiseMapToImageData } from './utils/noise-algorithms';
 
 interface NoiseTextureLayerProps {
 	isExploded: boolean;
@@ -187,7 +187,7 @@ export function NoiseTextureLayer({
 				ref={canvasRef}
 				className="w-full h-full"
 				style={{
-					mixBlendMode: blendMode as any,
+					mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'],
 				}}
 			/>
 		</motion.div>

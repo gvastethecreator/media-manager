@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { useId } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
 interface CardHolographicProps {
@@ -11,6 +12,7 @@ interface CardHolographicProps {
 }
 
 export function CardHolographic({ options, isHovered, className }: CardHolographicProps) {
+	const uniqueId = useId();
 	const { designSystem } = options;
 
 	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
@@ -60,30 +62,35 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 
 			{/* Líneas holográficas */}
 			<div className="absolute inset-0">
-				{Array.from({ length: 5 }).map((_, index) => (
-					<motion.div
-						key={index}
-						className={cn(
-							'absolute inset-0',
-							'bg-gradient-to-r',
-							holographicColor || 'from-white/20 via-transparent to-white/20',
-							'blur-sm'
-						)}
-						style={{
-							top: `${(index + 1) * 20}%`,
-						}}
-						animate={{
-							opacity: [0, 0.5, 0],
-							x: ['-100%', '100%', '-100%'],
-						}}
-						transition={{
-							duration: 2,
-							delay: index * 0.2,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: 'linear',
-						}}
-					/>
-				))}
+				{Array.from({ length: 5 }).map((_, index) => {
+					// Crear un ID único para cada línea holográfica
+					const lineId = `holographic-line-${uniqueId}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+
+					return (
+						<motion.div
+							key={lineId}
+							className={cn(
+								'absolute inset-0',
+								'bg-gradient-to-r',
+								holographicColor || 'from-white/20 via-transparent to-white/20',
+								'blur-sm'
+							)}
+							style={{
+								top: `${(index + 1) * 20}%`,
+							}}
+							animate={{
+								opacity: [0, 0.5, 0],
+								x: ['-100%', '100%', '-100%'],
+							}}
+							transition={{
+								duration: 2,
+								delay: index * 0.2,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: 'linear',
+							}}
+						/>
+					);
+				})}
 			</div>
 
 			{/* Efecto de borde holográfico */}

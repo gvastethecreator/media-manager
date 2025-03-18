@@ -10,48 +10,48 @@ import * as React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { VisualizationConfig } from '../config/visualization-config';
 import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
-import type { BaseCardRarityConfig, BaseCardTextureConfig } from '../types';
+import type { BaseCardRarityConfig, BaseCardTextureConfig, CardOptions } from '../types';
 import { generateRarityConfig } from '../utils/rarity-utils';
 
 // Asegurar que ambos tipos tienen las propiedades necesarias
 export type CardData =
 	| (AlbumWithStats & {
-			_count?: { images: number };
-			totalSize?: number;
-			coverImage?: string;
-			recentImages?: string[];
-			rating?: number; // Hacemos rating opcional
-	  })
+		_count?: { images: number };
+		totalSize?: number;
+		coverImage?: string;
+		recentImages?: string[];
+		rating?: number; // Hacemos rating opcional
+	})
 	| AlbumFormData;
 
 export interface AlbumCardProps {
 	data: CardData;
 	isPreview?: boolean;
 	onEdit?: (id: string, e?: React.MouseEvent) => void;
-	onDelete?: (id: string, e?: React.MouseEvent) => void;
+	onDelete?: (id: string) => void;
 	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
 	className?: string;
 	showVisualizationConfig?: boolean;
-	options?: any; // Usamos any para evitar problemas de tipo
+	options?: Partial<CardOptions>;
 	rarity?: BaseCardRarityConfig | null;
 	texture?: BaseCardTextureConfig | null;
 }
 
-const DEFAULT_ALBUM_OPTIONS: any = {
+const DEFAULT_ALBUM_OPTIONS: Partial<CardOptions> = {
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
-	enableGrainEffect: true,
+	enableGrainEffect: false,
 
 	// Sistema de diseño específico para álbumes
 	designSystem: {
 		preset: 'album',
 		variant: 'default',
-		aspectRatio: '4/5',
+		aspectRatio: '3/4',
 		cornerStyle: 'rounded',
-		cornerRadius: 8,
+		cornerRadius: 12,
 		elevation: 2,
 		shadowStyle: 'soft',
 	},
@@ -129,15 +129,9 @@ export function AlbumCard({
 	}
 
 	const [configOpen, setConfigOpen] = React.useState(false);
-	const [cardOptions, setCardOptions] = React.useState<any>(
+	const [cardOptions, setCardOptions] = React.useState<Partial<CardOptions>>(
 		options || {
 			...DEFAULT_ALBUM_OPTIONS,
-			enable3DEffect: true,
-			enableHolographicEffect: true,
-			enableScanlines: false,
-			enableLightHalo: false,
-			enableGrainEffect: false,
-			hoverLiftHeight: 10,
 		}
 	);
 
@@ -203,25 +197,26 @@ export function AlbumCard({
 	// Crear funciones de manejo de eventos fuera del JSX
 	const handleEdit = onEdit
 		? (e: React.MouseEvent<HTMLButtonElement>) => {
-				e.stopPropagation();
-				if (data.id) onEdit(data.id as string, e);
-			}
+			e.stopPropagation();
+			if (data.id) onEdit(data.id as string, e);
+		}
 		: undefined;
 
 	const handleDelete = onDelete
 		? (e: React.MouseEvent<HTMLButtonElement>) => {
-				e.stopPropagation();
-				if (data.id) onDelete(data.id as string, e);
-			}
+			e.stopPropagation();
+			if (data.id) onDelete(data.id as string);
+		}
 		: undefined;
 
 	return (
 		<>
 			{configOpen && (
 				<VisualizationConfig
+					isOpen={configOpen}
 					onClose={() => setConfigOpen(false)}
 					options={cardOptions}
-					onOptionsChange={(newOptions: any) => setCardOptions(newOptions)}
+					onOptionsChange={(newOptions: Partial<CardOptions>) => setCardOptions(newOptions)}
 					entityId={data.id as string}
 					entityType="album"
 				/>

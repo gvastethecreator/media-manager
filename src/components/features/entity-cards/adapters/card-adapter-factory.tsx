@@ -67,11 +67,10 @@ export function createCustomCardAdapter<T, P extends object, EntityKey extends s
 		// Transformar propiedades usando el mapper y memoizar el resultado
 		const layoutProps = useMemo(() => {
 			return propsMapper(props);
-		}, [props]);
+		}, [props, propsMapper]);
 
 		// Renderizar el componente con las propiedades transformadas
-		// Usamos una aserción de tipo para evitar errores de tipo
-		return React.createElement(CardLayout as any, layoutProps);
+		return React.createElement(CardLayout as React.ComponentType<P>, layoutProps);
 	};
 }
 

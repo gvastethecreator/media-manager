@@ -22,7 +22,7 @@ export type EntityType =
  * Interface para los módulos de configuración
  */
 export interface PresetModule {
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**

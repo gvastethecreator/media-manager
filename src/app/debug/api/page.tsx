@@ -47,10 +47,8 @@ export default function ApiLoggerTestPage() {
 									fetch(url)
 										.then((response) => response.json())
 										.then((data) => {
-											console.log('Respuesta recibida:', data);
 										})
 										.catch((error) => {
-											console.error('Error:', error);
 										});
 								}}
 							>
@@ -94,12 +92,12 @@ export default function ApiLoggerTestPage() {
 						<Button
 							onClick={() => {
 								const jsonInput = document.getElementById('jsonBody') as HTMLTextAreaElement;
-								let jsonData;
+								let jsonData: Record<string, unknown>;
 
 								try {
 									jsonData = JSON.parse(jsonInput.value);
 								} catch (error) {
-									alert('JSON inválido: ' + (error as Error).message);
+									alert(`JSON inválido: ${(error as Error).message}`);
 									return;
 								}
 
@@ -113,10 +111,8 @@ export default function ApiLoggerTestPage() {
 								})
 									.then((response) => response.json())
 									.then((data) => {
-										console.log('Respuesta recibida:', data);
 									})
 									.catch((error) => {
-										console.error('Error:', error);
 									});
 							}}
 						>

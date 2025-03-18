@@ -5,21 +5,34 @@ interface Entity {
 	id: string;
 	name: string;
 	description?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 import { useEffect, useState } from 'react';
 import type { CardOptions } from './types';
-import { createCardAdapter } from './adapters/card-adapter-factory';
 
-// Importamos los tipos pero no los componentes directamente
-import type { Entity } from './adapters/entity-card-adapter';
 // Importamos la función de utilidad para generar configuración de rareza
 import { generateRarityConfig } from './utils/rarity-utils';
+import type { ReactElement } from 'react';
+
+// Definimos un tipo para los componentes de tarjeta
+type CardComponent = React.ComponentType<{
+	onClick?: () => void;
+	className?: string;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	options?: Partial<CardOptions>;
+	[key: string]: unknown;
+}>;
 
 // Definimos un objeto para almacenar los adaptadores de tarjeta
 // Los cargaremos dinámicamente para evitar dependencias circulares
-const ENTITY_ADAPTERS: Record<string, any> = {};
+const ENTITY_ADAPTERS: Record<string, CardComponent> = {};
 
 // Función para cargar dinámicamente los adaptadores
 const loadAdapters = async () => {

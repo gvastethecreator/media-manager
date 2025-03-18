@@ -44,7 +44,7 @@ export async function getHolographicConfig(entityType: string, entityId?: string
 			};
 		}
 
-		let config;
+		let config: HolographicConfig | null = null;
 
 		if (entityId) {
 			config = await prisma.layerHolographicConfig.findFirst({

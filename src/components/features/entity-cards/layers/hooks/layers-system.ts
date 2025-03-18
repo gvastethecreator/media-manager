@@ -39,11 +39,11 @@ export function useLayersSystem({ layers }: { layers?: LayersConfig }) {
 	};
 
 	// Establecer la configuración de una capa específica
-	const setLayerConfig = (layerId: string, layerConfig: any) => {
+	const setLayerConfig = (layerId: string, layerConfig: Record<string, unknown>) => {
 		setConfig((current) => ({
 			...current,
 			[layerId]: {
-				...((current[layerId as keyof LayersConfig] as any) || {}),
+				...((current[layerId as keyof LayersConfig] as Record<string, unknown>) || {}),
 				...layerConfig,
 			},
 		}));

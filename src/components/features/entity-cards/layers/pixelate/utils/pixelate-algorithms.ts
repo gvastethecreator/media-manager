@@ -491,10 +491,12 @@ export class PixelateCache {
 
 		// Verificar si existe en caché
 		if (this.cache.has(key)) {
-			const entry = this.cache.get(key)!;
-			// Actualizar timestamp
-			entry.timestamp = Date.now();
-			return entry.imageData;
+			const entry = this.cache.get(key);
+			// Si entry existe, actualizar timestamp
+			if (entry) {
+				entry.timestamp = Date.now();
+				return entry.imageData;
+			}
 		}
 
 		// Generar imagen pixelada

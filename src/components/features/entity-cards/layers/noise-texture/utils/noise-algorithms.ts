@@ -63,20 +63,20 @@ function dotProduct(gradient: [number, number], x: number, y: number): number {
  * Genera valores de ruido entre 0 y 1 para coordenadas (x, y)
  */
 export function perlinNoise(x: number, y: number, seed = 0, scale = 1): number {
-	// Escalar las coordenadas
-	x *= scale;
-	y *= scale;
+	// Escalar las coordenadas usando variables locales
+	const scaledX = x * scale;
+	const scaledY = y * scale;
 
 	// Tabla de permutación mezclada por semilla
 	const perm = shufflePermutationTable(seed);
 
 	// Coordenadas de celda
-	const xi = Math.floor(x) & 255;
-	const yi = Math.floor(y) & 255;
+	const xi = Math.floor(scaledX) & 255;
+	const yi = Math.floor(scaledY) & 255;
 
 	// Coordenadas relativas dentro de la celda (0-1)
-	const xf = x - Math.floor(x);
-	const yf = y - Math.floor(y);
+	const xf = scaledX - Math.floor(scaledX);
+	const yf = scaledY - Math.floor(scaledY);
 
 	// Coordenadas con suavizado
 	const u = smoothstep(xf);
@@ -164,17 +164,17 @@ const SIMPLEX_GRAD3: [number, number, number][] = [
  * Genera valores de ruido entre 0 y 1 para coordenadas (x, y)
  */
 export function simplexNoise(x: number, y: number, seed = 0, scale = 1): number {
-	// Escalar las coordenadas
-	x *= scale;
-	y *= scale;
+	// Escalar las coordenadas usando variables locales
+	const scaledX = x * scale;
+	const scaledY = y * scale;
 
 	// Tabla de permutación mezclada por semilla
 	const perm = shufflePermutationTable(seed);
 
 	// Transformación para triángulos equiláteros
-	const s = (x + y) * SIMPLEX_SKEW;
-	const i = Math.floor(x + s);
-	const j = Math.floor(y + s);
+	const s = (scaledX + scaledY) * SIMPLEX_SKEW;
+	const i = Math.floor(scaledX + s);
+	const j = Math.floor(scaledY + s);
 
 	// Deshacer transformación para las esquinas
 	const t = (i + j) * SIMPLEX_UNSKEW;
@@ -182,8 +182,8 @@ export function simplexNoise(x: number, y: number, seed = 0, scale = 1): number 
 	const Y0 = j - t;
 
 	// Coordenadas relativas
-	const x0 = x - X0;
-	const y0 = y - Y0;
+	const x0 = scaledX - X0;
+	const y0 = scaledY - Y0;
 
 	// Determinar en qué triángulo estamos
 	const i1 = x0 > y0 ? 1 : 0;
@@ -394,10 +394,12 @@ class NoiseMapCache {
 
 		// Verificar si existe en caché
 		if (this.cache.has(key)) {
-			const entry = this.cache.get(key)!;
-			// Actualizar timestamp para LRU
-			entry.timestamp = Date.now();
-			return entry.map;
+			const entry = this.cache.get(key);
+			// Si entry existe, actualizar timestamp para LRU
+			if (entry) {
+				entry.timestamp = Date.now();
+				return entry.map;
+			}
 		}
 
 		// Generar nuevo mapa

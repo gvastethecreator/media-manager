@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import type { CardOptions } from '../types/unified-card-types';
 
-interface CardMetadataProps {
+export interface CardMetadataProps {
 	options: CardOptions;
 	metadata: {
 		level?: number;
@@ -13,7 +13,7 @@ interface CardMetadataProps {
 		class?: string;
 		race?: string;
 		alignment?: string;
-		[key: string]: any;
+		[key: string]: string | number | undefined;
 	};
 	className?: string;
 }
@@ -52,7 +52,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.level && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Nivel</title>
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
 								</svg>
 							</span>
@@ -64,7 +65,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.type && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Tipo</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -81,7 +83,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.rarity && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Rareza</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -98,7 +101,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.class && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Clase</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -115,7 +119,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.race && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Raza</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -132,7 +137,8 @@ export function CardMetadata({ options, metadata, className }: CardMetadataProps
 					{metadata.alignment && (
 						<div className="flex items-center space-x-2">
 							<span className="w-4 h-4 text-white/40">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+									<title>Alineación</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"

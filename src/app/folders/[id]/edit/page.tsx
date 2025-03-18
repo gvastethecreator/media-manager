@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import type { Folder } from '@/types/entities/folders';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +22,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [folder, setFolder] = useState<any>(null);
+	const [folder, setFolder] = useState<Folder | null>(null);
 
 	useEffect(() => {
 		async function loadFolder() {
