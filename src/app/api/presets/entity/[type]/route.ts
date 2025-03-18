@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: { type: string
 
 		// Construir las condiciones de búsqueda
 		const where: {
-			OR: Array<{category?: string} | {[key: string]: {not: null}}>
+			OR: Array<{ category?: string } | { [key: string]: { not: null } }>;
 		} = {
 			OR: [{ category: `type:${entityType}` }, { category: entityType }, { [`${entityType}Config`]: { not: null } }],
 		};

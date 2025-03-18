@@ -59,16 +59,10 @@ function InputOTPSlot({
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
 	return (
-		<div
-			data-slot="input-otp-separator"
-			className="flex items-center justify-center"
-			tabIndex={-1}
-			{...props}
-		>
+		<div data-slot="input-otp-separator" className="flex items-center justify-center" tabIndex={-1} {...props}>
 			<MinusIcon />
 		</div>
 	);
 }
 
 export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot };
-

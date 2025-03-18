@@ -13,7 +13,5 @@
     "DavidAnson.vscode-markdownlint",
     "ms-vscode.vscode-typescript-next"
   ],
-  "unwantedRecommendations": [
-    "biomejs.biome"
-  ]
+  "unwantedRecommendations": ["biomejs.biome"]
 }
