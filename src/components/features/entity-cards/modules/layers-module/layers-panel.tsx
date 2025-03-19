@@ -20,7 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
+import { clsx } from 'clsx';
 import { Eye, EyeOff, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLayerPlugin } from '../../layers/layer-plugin-system';
@@ -323,23 +323,24 @@ export function LayersPanel({
 												const isEnabled = layerConfig.enabled !== false;
 
 												return (
-													<div
+													<button
 														key={layerId}
-														className={cn(
-															"flex items-center p-1.5 rounded-md",
-															"hover:bg-accent/50 transition-colors",
-															selectedLayerId === layerId && "bg-accent/30",
-															!isEnabled && "opacity-50"
+														className={clsx(
+															// Base style
+															'relative flex items-center w-full p-2 rounded-lg',
+															// Hover style
+															'hover:bg-accent/40 transition-colors',
+															// Selected style
+															selectedLayerId === layerId && 'bg-accent',
+															// Disabled style
+															!isEnabled && 'opacity-50'
 														)}
-														onClick={() => setSelectedLayerId(layerId)}
-														onKeyDown={(e) => {
-															if (e.key === 'Enter' || e.key === ' ') {
-																e.preventDefault();
+														onClick={() => {
+															if (isEnabled) {
 																setSelectedLayerId(layerId);
 															}
 														}}
 														tabIndex={0}
-														role="button"
 														aria-pressed={selectedLayerId === layerId}
 													>
 														<button
@@ -363,7 +364,7 @@ export function LayersPanel({
 															{layerConfig.layerIndex !== undefined ?
 																`z-index: ${layerConfig.layerIndex}` : ''}
 														</span>
-													</div>
+													</button>
 												);
 											})
 										) : (

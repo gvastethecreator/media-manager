@@ -33,9 +33,10 @@ interface GlowSettingsProps {
 	entityType: string;
 	entityId?: string;
 	className?: string;
+	onConfigChange?: (config: GlowFormValues) => void;
 }
 
-export function GlowSettings({ entityType, entityId, className }: GlowSettingsProps) {
+export function GlowSettings({ entityType, entityId, className, onConfigChange }: GlowSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm<GlowFormValues>({
@@ -92,28 +93,40 @@ export function GlowSettings({ entityType, entityId, className }: GlowSettingsPr
 	}, [entityType, entityId, form]);
 
 	const onSubmit = async (values: GlowFormValues) => {
-		try {
-			setIsLoading(true);
-			const response = await updateGlowConfig(entityType, values, entityId);
+		setIsLoading(true);
 
-			if (response.success) {
+		try {
+			// Si hay una función onConfigChange, la llamamos con los valores
+			if (onConfigChange) {
+				onConfigChange(values);
 				toast({
-					title: 'Éxito',
-					description: 'Configuración de glow actualizada correctamente.',
-				});
-			} else {
-				toast({
-					title: 'Error',
-					description: response.message,
-					variant: 'destructive',
+					title: "Configuración actualizada",
+					description: "La configuración de brillo ha sido actualizada.",
 				});
 			}
+			// Si no hay onConfigChange, usamos la acción de servidor
+			else if (entityId) {
+				const result = await updateGlowConfig(entityType, entityId, values);
+
+				if (result.success) {
+					toast({
+						title: "Configuración guardada",
+						description: "La configuración de brillo ha sido guardada.",
+					});
+				} else {
+					toast({
+						title: "Error al guardar",
+						description: result.error || "Ha ocurrido un error al guardar la configuración.",
+						variant: "destructive",
+					});
+				}
+			}
 		} catch (error) {
-			console.error('Error al actualizar la configuración de glow:', error);
+			console.error("Error al guardar la configuración:", error);
 			toast({
-				title: 'Error',
-				description: 'No se pudo actualizar la configuración de glow.',
-				variant: 'destructive',
+				title: "Error",
+				description: "Ha ocurrido un error al guardar la configuración.",
+				variant: "destructive",
 			});
 		} finally {
 			setIsLoading(false);

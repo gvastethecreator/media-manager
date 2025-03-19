@@ -1,7 +1,7 @@
 'use client';
 
+import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
 import { Scale, Slice, Wand2, Zap } from 'lucide-react';
-import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
 import type { DistortionEffectsSystem } from './types';
 
 interface DistortionEffectsPanelProps {
@@ -28,8 +28,10 @@ const GeneralSection = ({
 			title="Configuración General"
 			description="Ajustes globales para todos los efectos de distorsión"
 			colorScheme="advanced"
-			icon={<Wand2 className="h-3.5 w-3.5 text-muted-foreground" />}
 		>
+			<div className="flex items-center mb-2">
+				<Wand2 className="h-3.5 w-3.5 text-muted-foreground mr-2" />
+			</div>
 			<FormGroup>
 				<FormRow cols={1}>
 					<FormToggle
@@ -37,7 +39,7 @@ const GeneralSection = ({
 						label="Habilitar Efectos de Distorsión"
 						description="Activa o desactiva todos los efectos de distorsión"
 						checked={effects.enabled}
-						onCheckedChange={(checked) => onEffectsChange('enabled', checked)}
+						onCheckedChange={(checked: boolean) => onEffectsChange('enabled', checked)}
 						disabled={disabled}
 					/>
 				</FormRow>
@@ -50,7 +52,7 @@ const GeneralSection = ({
 								label="Solo visible al pasar el cursor"
 								description="Los efectos solo se mostrarán al pasar el cursor sobre la tarjeta"
 								checked={effects.visibleOnHover}
-								onCheckedChange={(checked) => onEffectsChange('visibleOnHover', checked)}
+								onCheckedChange={(checked: boolean) => onEffectsChange('visibleOnHover', checked)}
 								disabled={disabled}
 							/>
 						</FormRow>
@@ -61,7 +63,7 @@ const GeneralSection = ({
 								label="Intensidad global"
 								description="Controla la intensidad general de todos los efectos"
 								value={effects.intensity}
-								onValueChange={(value) => onEffectsChange('intensity', value)}
+								onValueChange={(value: number) => onEffectsChange('intensity', value)}
 								min={0}
 								max={1}
 								step={0.01}
@@ -92,8 +94,10 @@ const GlitchSection = ({
 			title="Efecto Glitch"
 			description="Simula errores digitales y ruido para un aspecto dañado"
 			colorScheme="advanced"
-			icon={<Zap className="h-3.5 w-3.5 text-muted-foreground" />}
 		>
+			<div className="flex items-center mb-2">
+				<Zap className="h-3.5 w-3.5 text-muted-foreground mr-2" />
+			</div>
 			<FormGroup>
 				<FormRow cols={1}>
 					<FormToggle
@@ -101,7 +105,7 @@ const GlitchSection = ({
 						label="Habilitar Efecto Glitch"
 						description="Activa o desactiva el efecto glitch"
 						checked={effects.glitchEffect.enabled}
-						onCheckedChange={(checked) => onDistortionChange('glitch', 'enabled', checked)}
+						onCheckedChange={(checked: boolean) => onDistortionChange('glitch', 'enabled', checked)}
 						disabled={disabled || !effects.enabled}
 					/>
 				</FormRow>
@@ -114,7 +118,7 @@ const GlitchSection = ({
 								label="Solo visible al pasar el cursor"
 								description="El efecto solo se mostrará al pasar el cursor sobre la tarjeta"
 								checked={effects.glitchEffect.visibleOnHover}
-								onCheckedChange={(checked) => onDistortionChange('glitch', 'visibleOnHover', checked)}
+								onCheckedChange={(checked: boolean) => onDistortionChange('glitch', 'visibleOnHover', checked)}
 								disabled={disabled}
 							/>
 						</FormRow>
@@ -125,7 +129,7 @@ const GlitchSection = ({
 								label="Intensidad"
 								description="Controla la intensidad del efecto glitch"
 								value={effects.glitchEffect.intensity}
-								onValueChange={(value) => onDistortionChange('glitch', 'intensity', value)}
+								onValueChange={(value: number) => onDistortionChange('glitch', 'intensity', value)}
 								min={0}
 								max={1}
 								step={0.01}
@@ -139,7 +143,7 @@ const GlitchSection = ({
 								label="Frecuencia"
 								description="Controla la frecuencia con la que ocurre el efecto"
 								value={effects.glitchEffect.frequency}
-								onValueChange={(value) => onDistortionChange('glitch', 'frequency', value)}
+								onValueChange={(value: number) => onDistortionChange('glitch', 'frequency', value)}
 								min={0}
 								max={1}
 								step={0.01}
@@ -153,7 +157,7 @@ const GlitchSection = ({
 								label="Duración"
 								description="Duración de cada glitch en segundos"
 								value={effects.glitchEffect.duration}
-								onValueChange={(value) => onDistortionChange('glitch', 'duration', value)}
+								onValueChange={(value: number) => onDistortionChange('glitch', 'duration', value)}
 								min={0.05}
 								max={1}
 								step={0.01}
@@ -185,8 +189,10 @@ const ChromaticAberrationSection = ({
 			title="Aberración Cromática"
 			description="Desplazamiento de los canales de color RGB para un aspecto retro"
 			colorScheme="advanced"
-			icon={<Slice className="h-3.5 w-3.5 text-muted-foreground" />}
 		>
+			<div className="flex items-center mb-2">
+				<Slice className="h-3.5 w-3.5 text-muted-foreground mr-2" />
+			</div>
 			<FormGroup>
 				<FormRow cols={1}>
 					<FormToggle
@@ -194,7 +200,7 @@ const ChromaticAberrationSection = ({
 						label="Habilitar Aberración Cromática"
 						description="Activa o desactiva el efecto de aberración cromática"
 						checked={effects.chromaticAberration.enabled}
-						onCheckedChange={(checked) => onDistortionChange('chromatic', 'enabled', checked)}
+						onCheckedChange={(checked: boolean) => onDistortionChange('chromatic', 'enabled', checked)}
 						disabled={disabled || !effects.enabled}
 					/>
 				</FormRow>
@@ -207,7 +213,7 @@ const ChromaticAberrationSection = ({
 								label="Solo visible al pasar el cursor"
 								description="El efecto solo se mostrará al pasar el cursor sobre la tarjeta"
 								checked={effects.chromaticAberration.visibleOnHover}
-								onCheckedChange={(checked) => onDistortionChange('chromatic', 'visibleOnHover', checked)}
+								onCheckedChange={(checked: boolean) => onDistortionChange('chromatic', 'visibleOnHover', checked)}
 								disabled={disabled}
 							/>
 						</FormRow>
@@ -218,7 +224,7 @@ const ChromaticAberrationSection = ({
 								label="Intensidad"
 								description="Controla la intensidad del efecto"
 								value={effects.chromaticAberration.intensity}
-								onValueChange={(value) => onDistortionChange('chromatic', 'intensity', value)}
+								onValueChange={(value: number) => onDistortionChange('chromatic', 'intensity', value)}
 								min={0}
 								max={1}
 								step={0.01}
@@ -232,7 +238,7 @@ const ChromaticAberrationSection = ({
 								label="Desplazamiento"
 								description="Cantidad de píxeles a desplazar los canales de color"
 								value={effects.chromaticAberration.offset}
-								onValueChange={(value) => onDistortionChange('chromatic', 'offset', value)}
+								onValueChange={(value: number) => onDistortionChange('chromatic', 'offset', value)}
 								min={0}
 								max={10}
 								step={0.1}
@@ -264,8 +270,10 @@ const PixelateSection = ({
 			title="Efecto Pixelado"
 			description="Reduce la resolución para crear un aspecto pixelado"
 			colorScheme="advanced"
-			icon={<Scale className="h-3.5 w-3.5 text-muted-foreground" />}
 		>
+			<div className="flex items-center mb-2">
+				<Scale className="h-3.5 w-3.5 text-muted-foreground mr-2" />
+			</div>
 			<FormGroup>
 				<FormRow cols={1}>
 					<FormToggle
@@ -273,7 +281,7 @@ const PixelateSection = ({
 						label="Habilitar Pixelado"
 						description="Activa o desactiva el efecto de pixelado"
 						checked={effects.pixelate.enabled}
-						onCheckedChange={(checked) => onDistortionChange('pixelate', 'enabled', checked)}
+						onCheckedChange={(checked: boolean) => onDistortionChange('pixelate', 'enabled', checked)}
 						disabled={disabled || !effects.enabled}
 					/>
 				</FormRow>
@@ -286,7 +294,7 @@ const PixelateSection = ({
 								label="Solo visible al pasar el cursor"
 								description="El efecto solo se mostrará al pasar el cursor sobre la tarjeta"
 								checked={effects.pixelate.visibleOnHover}
-								onCheckedChange={(checked) => onDistortionChange('pixelate', 'visibleOnHover', checked)}
+								onCheckedChange={(checked: boolean) => onDistortionChange('pixelate', 'visibleOnHover', checked)}
 								disabled={disabled}
 							/>
 						</FormRow>
@@ -297,7 +305,7 @@ const PixelateSection = ({
 								label="Intensidad"
 								description="Controla la intensidad del efecto"
 								value={effects.pixelate.intensity}
-								onValueChange={(value) => onDistortionChange('pixelate', 'intensity', value)}
+								onValueChange={(value: number) => onDistortionChange('pixelate', 'intensity', value)}
 								min={0}
 								max={1}
 								step={0.01}
@@ -311,7 +319,7 @@ const PixelateSection = ({
 								label="Tamaño de bloques"
 								description="Tamaño de los bloques de píxeles"
 								value={effects.pixelate.blockSize}
-								onValueChange={(value) => onDistortionChange('pixelate', 'blockSize', value)}
+								onValueChange={(value: number) => onDistortionChange('pixelate', 'blockSize', value)}
 								min={1}
 								max={32}
 								step={1}
@@ -353,13 +361,19 @@ export function DistortionEffectsPanel({
 
 		const effectKey = effectMap[effect];
 
-		onChange({
-			...effectsSystem,
-			[effectKey]: {
-				...effectsSystem[effectKey as keyof DistortionEffectsSystem],
-				[property]: value,
-			},
-		});
+		// Creamos una copia segura del objeto utilizando un "as" explícito
+		const currentEffect = effectsSystem[effectKey as keyof DistortionEffectsSystem];
+
+		// Verificamos que es un objeto antes de hacer el spread
+		if (typeof currentEffect === 'object' && currentEffect !== null) {
+			onChange({
+				...effectsSystem,
+				[effectKey]: {
+					...currentEffect,
+					[property]: value,
+				},
+			});
+		}
 	};
 
 	return (

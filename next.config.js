@@ -1,6 +1,6 @@
-import type { NextConfig } from 'next';
+/** @type {import('next').NextConfig} */
 
-const nextConfig: NextConfig = {
+const nextConfig = {
 	images: {
 		remotePatterns: [
 			{
@@ -28,6 +28,15 @@ const nextConfig: NextConfig = {
 	// Configuración de webpack para resolver los módulos node:
 	webpack: (config, { isServer }) => {
 		// Soporte para importaciones node:*
+		if (!config.resolve) {
+			config.resolve = {};
+		}
+
+		if (!config.resolve.alias) {
+			config.resolve.alias = {};
+		}
+
+		// Mapear los módulos node: a sus contrapartes regulares
 		config.resolve.alias = {
 			...config.resolve.alias,
 			'node:os': 'os',
@@ -36,6 +45,19 @@ const nextConfig: NextConfig = {
 			'node:crypto': 'crypto',
 			'node:stream': 'stream',
 			'node:fs/promises': 'fs/promises',
+			'node:util': 'util',
+			'node:events': 'events',
+			'node:buffer': 'buffer',
+			'node:url': 'url',
+			'node:http': 'http',
+			'node:https': 'https',
+			'node:assert': 'assert',
+			'node:net': 'net',
+			'node:tls': 'tls',
+			'node:zlib': 'zlib',
+			'node:dns': 'dns',
+			'node:tty': 'tty',
+			'node:child_process': 'child_process',
 		};
 
 		return config;
@@ -63,4 +85,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default nextConfig;
+module.exports = nextConfig;

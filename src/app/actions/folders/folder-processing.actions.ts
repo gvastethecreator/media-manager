@@ -1,10 +1,5 @@
 'use server';
 
-import { existsSync } from 'fs';
-import { statSync } from 'fs';
-import { readdir, stat } from 'node:fs/promises';
-import { extname, join } from 'node:path';
-import * as path from 'node:path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -13,6 +8,9 @@ import { prisma } from '@/lib/prisma';
 import { emitProgress } from '@/lib/server/events.server';
 import { generateThumbnail } from '@/lib/thumbnail';
 import type { FileMetadata } from '@/types/metadata';
+import { readdir, stat } from 'fs/promises';
+import * as path from 'path';
+import { extname, join } from 'path';
 import { FolderError, type ProcessStatus, SUPPORTED_FORMATS } from './folder-types.actions';
 import { verifyPathExists } from './folder-utils.actions';
 

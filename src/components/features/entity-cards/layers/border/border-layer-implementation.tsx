@@ -68,20 +68,23 @@ export const borderLayerImplementation: LayerImplementation = {
     render: (props: LayerRenderProps) => {
         const { config, isHovered, isActive, isExploded, entityType, entityId, mousePosition } = props;
 
-        const effectConfig = {
+        // Asegurarse de que los props sean válidos y proporcionar valores por defecto
+        const safeConfig: BorderConfig = {
             ...defaultConfig,
-            ...config
-        } as BorderConfig;
+            ...(config as Record<string, unknown> || {})
+        };
+
+        const safeMousePosition = mousePosition || { x: 0, y: 0 };
 
         // Pasar la configuración al componente de efecto
         return (
             <BorderEffectLayerWithStyles
-                config={effectConfig}
+                config={safeConfig}
                 isHovered={!!isHovered}
                 isExploded={!!isExploded}
                 activeLayer={isActive ? 'border' : null}
-                entityType={entityType}
-                mousePosition={mousePosition || { x: 0, y: 0 }}
+                entityType={entityType || 'default'}
+                mousePosition={safeMousePosition}
                 getExplodeLayerTransform={getExplodeTransform}
                 entityId={entityId}
             />
@@ -91,14 +94,23 @@ export const borderLayerImplementation: LayerImplementation = {
     // Componente para configurar la capa
     Settings: (props: LayerSettingsProps) => {
         const { config, onChange, entityType, entityId } = props;
-        const typedConfig = config as unknown as BorderConfig;
+
+        // Asegurarse de que los props sean válidos
+        const safeConfig: BorderConfig = {
+            ...defaultConfig,
+            ...(config as Record<string, unknown> || {})
+        };
 
         return (
             <BorderSettings
-                entityType={entityType}
+                entityType={entityType || 'default'}
                 entityId={entityId}
-                initialConfig={typedConfig}
-                onConfigUpdate={(newConfig) => onChange(newConfig as any)}
+                initialConfig={safeConfig}
+                onConfigUpdate={(newConfig) => {
+                    if (onChange) {
+                        onChange(newConfig as unknown as Record<string, unknown>);
+                    }
+                }}
             />
         );
     }
