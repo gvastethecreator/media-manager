@@ -92,7 +92,12 @@ export function SearchView(_props: ViewProps) {
 									}
 								}}
 							/>
-							<Button onClick={handleSearch}>Buscar</Button>
+							<Button
+								type="button"
+								onClick={handleSearch}
+							>
+								Buscar
+							</Button>
 						</div>
 
 						<Tabs defaultValue="basic" className="w-full">

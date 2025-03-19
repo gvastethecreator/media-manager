@@ -154,19 +154,19 @@ export function useAccesibility({ options, enabled = true }: UseAccesibilityProp
       switch (elementType) {
         case 'card':
           labels['aria-label'] = `Tarjeta: ${data.title || 'Sin título'}`;
-          labels['role'] = 'article';
+          labels.role = 'article';
           break;
         case 'button':
           labels['aria-label'] = `${data.label || 'Botón'}`;
-          labels['role'] = 'button';
+          labels.role = 'button';
           break;
         case 'image':
           labels['aria-label'] = data.alt as string || `Imagen: ${data.title || 'Sin descripción'}`;
-          labels['role'] = 'img';
+          labels.role = 'img';
           break;
         case 'modal':
           labels['aria-modal'] = 'true';
-          labels['role'] = 'dialog';
+          labels.role = 'dialog';
           labels['aria-labelledby'] = data.titleId as string || 'modal-title';
           break;
         default:
@@ -264,15 +264,15 @@ export function useAccesibility({ options, enabled = true }: UseAccesibilityProp
       const ariaLabels = getAccessibleLabels(elementType, data);
 
       // Aplicar atributos ARIA
-      Object.entries(ariaLabels).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(ariaLabels)) {
         element.setAttribute(key, value);
-      });
+      }
 
       // Aplicar propiedades CSS
       const styles = getAccessibilityStyles();
-      Object.entries(styles).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(styles)) {
         element.style.setProperty(key, value);
-      });
+      }
 
       // Asegurar tamaño mínimo para objetivos táctiles
       if (

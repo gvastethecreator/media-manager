@@ -177,7 +177,7 @@ export function adaptLayerImplementationToComponent(implementation: LayerImpleme
     Component: AdaptedComponent,
     defaultConfig: defaultConfig,
     SettingsComponent: AdaptedSettingsComponent,
-    getServerActions: serverActions ? () => serverActions as Record<string, Function> : undefined
+    getServerActions: serverActions ? () => serverActions as Record<string, (...args: unknown[]) => unknown> : undefined
   };
 
   // Verificar que el componente resultante sea válido

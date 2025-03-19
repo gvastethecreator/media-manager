@@ -212,7 +212,12 @@ export const ColorPaletteSelector: React.FC<ColorPaletteSelectorProps> = ({
 			<div className="flex justify-between items-center">
 				<h3 className="text-sm font-medium">Paleta de colores</h3>
 				{allowCustom && (
-					<Button variant="outline" size="sm" className="h-7 text-xs">
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="h-7 text-xs"
+					>
 						<Plus className="h-3.5 w-3.5 mr-1" />
 						Personalizada
 					</Button>

@@ -85,22 +85,22 @@ export function EntityCardLayerWrapper({
 			borderConfig: visualOptions.rarityConfig,
 		},
 		glow: {
-			enabled: visualOptions.enableGlowEffect || false,
+			enabled: !!visualOptions.enableGlowEffect,
 			layerIndex: 3,
 			glowOptions: visualOptions.glowOptions,
 		},
 		grain: {
-			enabled: visualOptions.enableGrainEffect || false,
+			enabled: !!visualOptions.enableGrainEffect,
 			layerIndex: 4,
 			grainOptions: visualOptions.grainOptions,
 		},
 		holographic: {
-			enabled: visualOptions.enableHolographicEffect || false,
+			enabled: !!visualOptions.enableHolographicEffect,
 			layerIndex: 5,
 			holographicOptions: visualOptions.holographicOptions,
 		},
 		scanlines: {
-			enabled: visualOptions.enableScanlinesEffect || false,
+			enabled: !!visualOptions.enableScanlinesEffect,
 			layerIndex: 6,
 		},
 		explode: {

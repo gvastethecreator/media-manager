@@ -11,10 +11,17 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Layers, Settings } from 'lucide-react';
 import { useState } from 'react';
-import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults } from '../settings/layer-settings-config';
+import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults, type LayerSystemConfig } from '../settings/layer-settings-config';
 import { FormGroup, FormLayout, FormSection } from '../settings/panels/shared';
 import { useLayersSystem } from './hooks/use-layers-system';
+import type { BaseLayerConfig } from './layer-plugin-system';
 import type { LayersSettingsPanelProps } from './types';
+
+// Extendemos la interfaz LayersSettingsPanelProps para incluir las propiedades faltantes
+interface ExtendedLayersSettingsPanelProps extends LayersSettingsPanelProps {
+	onChange: (options: any) => void;
+	disabled?: boolean;
+}
 
 /**
  * 🌈 Panel unificado de configuración de capas
@@ -22,7 +29,7 @@ import type { LayersSettingsPanelProps } from './types';
  * Permite gestionar todas las capas disponibles y su configuración
  * incluyendo habilitación/deshabilitación, orden y propiedades específicas.
  */
-export function LayersPanel({ options, onChange, entityType, entityId, disabled = false }: LayersSettingsPanelProps) {
+export function LayersPanel({ options, onChange, entityType, entityId, disabled = false }: ExtendedLayersSettingsPanelProps) {
 	// Estado para la pestaña activa
 	const [activeTab, setActiveTab] = useState('general');
 
@@ -30,11 +37,11 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 	const { availableLayers, activeLayerConfig, setActiveLayerConfig, toggleLayerEnabled } = useLayersSystem(options);
 
 	// Asegurarnos de tener configuraciones predeterminadas
-	getLayerSystemWithDefaults(options.layerSystem);
+	getLayerSystemWithDefaults(options.layerSystem as Partial<LayerSystemConfig>);
 
 	// Resetear todas las capas a la configuración predeterminada
 	const handleResetAll = () => {
-		const defaultLayerConfigs = {};
+		const defaultLayerConfigs: Record<string, BaseLayerConfig> = {};
 
 		for (const layer of availableLayers) {
 			defaultLayerConfigs[layer.type] = { ...layer.defaultConfig };
@@ -52,7 +59,7 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 		onChange({
 			...options,
 			layerConfigs: {
-				...options.layerConfigs,
+				...(options.layerConfigs as Record<string, unknown> || {}),
 				[layerType]: config,
 			},
 		});
@@ -97,17 +104,17 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 			title="Capas Disponibles"
 			description="Configura las capas individuales y su comportamiento"
 			colorScheme="design"
-			headerAction={
-				<Button variant="outline" size="sm" onClick={handleResetAll} disabled={disabled}>
-					Restablecer Todo
-				</Button>
-			}
 		>
 			<FormGroup>
+				<div className="flex justify-end mb-4">
+					<Button variant="outline" size="sm" onClick={handleResetAll} disabled={disabled}>
+						Restablecer Todo
+					</Button>
+				</div>
 				<ScrollArea className="h-[320px] pr-4">
 					<div className="space-y-3">
 						{availableLayers.map((layer) => {
-							const layerConfig = options.layerConfigs?.[layer.type] || layer.defaultConfig;
+							const layerConfig = (options.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
 							const isEnabled = layerConfig.enabled;
 
 							return (

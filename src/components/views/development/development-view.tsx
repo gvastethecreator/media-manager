@@ -49,7 +49,13 @@ export function DevelopmentView(_props: ViewProps) {
 						<h1 className="text-2xl font-bold">Panel de Desarrollo</h1>
 						<p className="text-muted-foreground">Monitoreo y gestión del sistema</p>
 					</div>
-					<Button variant="outline" className="gap-2" onClick={handleRefresh} disabled={isLoading}>
+					<Button
+						type="button"
+						variant="outline"
+						className="gap-2"
+						onClick={handleRefresh}
+						disabled={isLoading}
+					>
 						{isLoading ? (
 							<>
 								<Loader2 className="h-4 w-4 animate-spin" />

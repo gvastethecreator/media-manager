@@ -13,7 +13,7 @@ import {
 	LayerPluginProvider,
 	LayersPanel,
 	LayersProvider,
-	RegisterAllLayers
+	RegisterAllLayers,
 } from '@/components/features/entity-cards/layers';
 import { DesignPanel } from '@/components/features/entity-cards/modules/design';
 import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-module/layer-management-dialog';
@@ -75,6 +75,58 @@ import { useCallback, useEffect, useState } from 'react';
 // Añadir la variable entityId que falta
 const entityId = 'default'; // ID por defecto para componentes que no están asociados a una entidad específica
 
+// Importar correctamente el tipo de la configuración del sistema de capas y DesignSystem
+
+// Definir correctamente DEFAULT_CARD_SETTINGS con las propiedades correctas de DesignSystem
+const DEFAULT_CARD_SETTINGS = {
+	effects: {
+		glitchEffect: { enabled: false, intensity: 0.5 },
+		chromaticAberration: { enabled: false, intensity: 0.5 },
+		pixelate: { enabled: false, intensity: 0.5 }
+	},
+	designSystem: {
+		// Configuración general
+		borderRadius: 12,
+		padding: 16,
+		aspectRatio: '7/10',
+		maxWidth: 400,
+
+		// Sombras y elevación
+		elevation: 3,
+		shadowColor: 'rgba(0, 0, 0, 0.25)',
+
+		// Estilo de fondo
+		backgroundColor: '#ffffff',
+		backgroundOpacity: 1,
+		backdropFilter: 'none',
+		backdropBlurAmount: 0,
+
+		// Bordes
+		borderWidth: 1,
+		borderStyle: 'solid',
+		borderColor: 'rgba(0, 0, 0, 0.1)',
+
+		// Avanzado
+		customCssClasses: [],
+		customCssVariables: {},
+
+		// Propiedades adicionales para compatibilidad
+		preset: 'default',
+		variant: 'default',
+		cornerStyle: 'rounded',
+		cornerRadius: 12,
+		shadowStyle: 'soft',
+		colorScheme: 'auto',
+		fontFamily: 'system-ui',
+		surfaceStyle: 'regular',
+		layoutDensity: 'comfortable',
+		contentPadding: 'medium',
+		glassEffect: false,
+		accentColor: '#3b82f6',
+		textColor: '#000000',
+	}
+} as const;
+
 // Función para adaptar opciones entre diferentes estructuras de tipo
 const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 	// Convertir imageStyle de objeto a string si es necesario
@@ -85,18 +137,18 @@ const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 
 	// Asegurarnos de que effects tenga la estructura completa
 	if (!adaptedOptions.effects) {
-		adaptedOptions.effects = DEFAULT_SETTINGS_OPTIONS.effects;
+		adaptedOptions.effects = DEFAULT_CARD_SETTINGS.effects;
 	} else {
 		// Asegurar que cada subefecto esté inicializado
 		const effects = adaptedOptions.effects as Record<string, unknown>;
 		if (!effects.glitchEffect) {
-			effects.glitchEffect = DEFAULT_SETTINGS_OPTIONS.effects.glitchEffect;
+			effects.glitchEffect = DEFAULT_CARD_SETTINGS.effects.glitchEffect;
 		}
 		if (!effects.chromaticAberration) {
-			effects.chromaticAberration = DEFAULT_SETTINGS_OPTIONS.effects.chromaticAberration;
+			effects.chromaticAberration = DEFAULT_CARD_SETTINGS.effects.chromaticAberration;
 		}
 		if (!effects.pixelate) {
-			effects.pixelate = DEFAULT_SETTINGS_OPTIONS.effects.pixelate;
+			effects.pixelate = DEFAULT_CARD_SETTINGS.effects.pixelate;
 		}
 	}
 
@@ -111,7 +163,7 @@ const adaptOptions = (options: Record<string, unknown>): CardOptions => {
 
 	// Asegurarnos de que designSystem tenga la estructura completa
 	if (!adaptedOptions.designSystem) {
-		adaptedOptions.designSystem = DEFAULT_SETTINGS_OPTIONS.designSystem;
+		adaptedOptions.designSystem = DEFAULT_CARD_SETTINGS.designSystem;
 	}
 
 	// Usamos unknown como intermediario para evitar errores de tipo
@@ -615,8 +667,10 @@ async function saveGeneralSettings(
 	}
 }
 
-// Tipos de paneles disponibles
-type PanelType = 'presets' | 'design' | 'effects' | 'layers' | 'system' | 'preview' | 'performance';
+// Modificar el tipo PanelType para que incluya todos los paneles posibles
+type PanelType = 'presets' | 'design' | 'effects' | 'layers' | 'system' | 'preview' | 'performance' |
+	'visual' | 'distortion' | 'advanced' | 'images' | 'states' | 'interaction' |
+	'folders' | 'shadows' | 'colorPalette' | 'rarity' | 'backside' | 'core';
 
 export function EntitiesCardsSection() {
 	const { toast } = useToast();
@@ -723,6 +777,24 @@ export function EntitiesCardsSection() {
 		loadEntityOptions();
 	}, [loadEntityOptions]);
 
+	// Crear un adaptador para el cambio de panel que haga el cast correcto
+	const handlePanelChange = (panel: string) => {
+		setActivePanel(panel as PanelType);
+	};
+
+	// Función para forzar el tipo correcto en cardOptions para evitar errores de tipado
+	const getCardOptionsAsNumbersAndStrings = () => {
+		return {
+			...cardOptions,
+			hoverLiftHeight: (cardOptions.hoverLiftHeight as number) || 10,
+			maxRotation: (cardOptions.maxRotation as number) || 15,
+			primaryColor: (cardOptions.primaryColor as string) || '0, 153, 255',
+			secondaryColor: (cardOptions.secondaryColor as string) || '128, 0, 255',
+			imageGridGap: (cardOptions.imageGridGap as number),
+			imageGridAspectRatio: (cardOptions.imageGridAspectRatio as string),
+		};
+	};
+
 	// Guardar opciones de tarjeta
 	const handleSaveOptions = async () => {
 		try {
@@ -742,6 +814,9 @@ export function EntitiesCardsSection() {
 			const apiEntityType = convertEntityId.toApiFormat(activeEntityType);
 
 			// Extraemos solo las propiedades que necesitamos enviar al servidor
+			// Usar el helper para obtener los tipos correctos
+			const typedCardOptions = getCardOptionsAsNumbersAndStrings();
+
 			const serverOptionsDto: CardConfigurationDto = {
 				entityType: apiEntityType,
 				enable3DEffect: !!cardOptions.enable3DEffect,
@@ -751,19 +826,19 @@ export function EntitiesCardsSection() {
 				enableAnimatedBorder: !!cardOptions.enableAnimatedBorder,
 				enableGlowEffect: !!cardOptions.enableGlowEffect,
 				enableGrainEffect: !!cardOptions.enableGrainEffect,
-				hoverLiftHeight: cardOptions.hoverLiftHeight || 10,
-				maxRotation: cardOptions.maxRotation || 15,
-				primaryColor: cardOptions.primaryColor || '0, 153, 255',
-				secondaryColor: cardOptions.secondaryColor || '128, 0, 255',
+				hoverLiftHeight: typedCardOptions.hoverLiftHeight,
+				maxRotation: typedCardOptions.maxRotation,
+				primaryColor: typedCardOptions.primaryColor,
+				secondaryColor: typedCardOptions.secondaryColor,
 				raritySystem: !!cardOptions.raritySystem,
 				categorySystem: !!cardOptions.categorySystem,
 				textureSystem: !!cardOptions.textureSystem,
 				// Grid de imágenes
 				imageGridLayout: cardOptions.imageGridLayout as ImageGridLayout,
-				imageGridGap: cardOptions.imageGridGap,
+				imageGridGap: typedCardOptions.imageGridGap,
 				imageGridStyle: cardOptions.imageGridStyle as ImageGridStyle,
 				showImageCount: !!cardOptions.showImageCount,
-				imageGridAspectRatio: cardOptions.imageGridAspectRatio,
+				imageGridAspectRatio: typedCardOptions.imageGridAspectRatio,
 				// Convertir objetos a JSON para almacenamiento
 				holographicOptions: cardOptions.holographicOptions ? JSON.stringify(cardOptions.holographicOptions) : undefined,
 				scanlinesOptions: cardOptions.scanlinesOptions ? JSON.stringify(cardOptions.scanlinesOptions) : undefined,
@@ -875,7 +950,7 @@ export function EntitiesCardsSection() {
 							activeCategory={activeCategory}
 							onCategoryChange={setActiveCategory}
 							activePanel={activePanel}
-							onPanelChange={setActivePanel}
+							onPanelChange={handlePanelChange}
 						/>
 					</div>
 
@@ -1088,10 +1163,22 @@ export function EntitiesCardsSection() {
 									)}
 									{activePanel === 'design' && (
 										<DesignPanel
-											designSystem={
-												{} as import('@/components/features/entity-cards/modules/design/types').DesignSystem
-											}
-											onChange={handleCardOptionsChange}
+											designSystem={{
+												preset: cardOptions.designSystem?.preset || 'default',
+												variant: cardOptions.designSystem?.variant || 'default',
+												aspectRatio: cardOptions.designSystem?.aspectRatio || '7/10',
+												cornerStyle: cardOptions.designSystem?.cornerStyle || 'rounded',
+												cornerRadius: cardOptions.designSystem?.cornerRadius || 12,
+												elevation: cardOptions.designSystem?.elevation || 3,
+												shadowStyle: cardOptions.designSystem?.shadowStyle || 'soft',
+											} as any}
+											onChange={(designSystem: any) => {
+												// Adaptador para convertir el cambio de designSystem a un cambio de CardOptions
+												handleCardOptionsChange({
+													...cardOptions,
+													designSystem: designSystem
+												});
+											}}
 										/>
 									)}
 									{/* Panel de vista previa */}
@@ -1107,15 +1194,12 @@ export function EntitiesCardsSection() {
 										<LayersProvider initialConfig={adaptCardOptionsToLayersConfig(cardOptions)}>
 											<LayerPluginProvider>
 												<RegisterAllLayers />
+												{/* Usar props según la definición que vimos en LayersPanel */}
 												<LayersPanel
-													config={adaptEntityCardToLayerSystem(cardOptions)}
-													onChange={(layerConfig) => {
-														// Convertir la configuración de capas a formato de tarjeta
-														const newCardOptions = adaptLayerSystemToEntityCard(layerConfig);
-														handleCardOptionsChange(newCardOptions);
-													}}
-													cardOptions={cardOptions}
-													onCardOptionsChange={handleCardOptionsChange}
+													options={cardOptions}
+													onOptionsChange={handleCardOptionsChange}
+													entityType={convertEntityId.toApiFormat(activeEntityType)}
+													entityId={entityId}
 												/>
 											</LayerPluginProvider>
 										</LayersProvider>
