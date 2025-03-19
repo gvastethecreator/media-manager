@@ -9,7 +9,7 @@
  * se transforman correctamente.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { LayerComponent } from './layer-plugin-system';
 import { useLayerPlugin } from './layer-plugin-system';
 import type { LayerImplementation, LayerRenderProps } from './types';
@@ -33,6 +33,26 @@ const VERIFIED_LAYERS: Record<string, LayerImplementation> = {
 	'holographic': holographicLayerImplementation,
 	'filter': filterLayerImplementation
 };
+
+// Tipo para las props que reciben los componentes de capa
+interface LayerComponentProps {
+	config: Record<string, unknown>;
+	isHovered?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string;
+	mousePosition?: { x: number; y: number };
+	entityType?: string;
+	entityId?: string;
+	context?: Record<string, unknown>;
+}
+
+// Tipo para las props de los componentes de configuración
+interface LayerSettingsProps {
+	config: Record<string, unknown>;
+	onConfigUpdate: (config: Record<string, unknown>) => void;
+	entityType?: string;
+	entityId?: string;
+}
 
 /**
  * Transforma una implementación de capa en un componente de capa compatible
@@ -60,7 +80,7 @@ export function transformLayerImplementationToComponent(
 
 	try {
 		// Crear el componente adaptado que recibirá las props del sistema de plugins
-		const Component = (props: any) => {
+		const Component = (props: LayerComponentProps) => {
 			try {
 				// Adaptar props al formato esperado por la implementación
 				const renderProps: LayerRenderProps = {
@@ -87,7 +107,7 @@ export function transformLayerImplementationToComponent(
 
 		// Crear componente de configuración si existe
 		const SettingsComponent = implementation.Settings
-			? (props: any) => {
+			? (props: LayerSettingsProps) => {
 				try {
 					return implementation.Settings ?
 						<implementation.Settings
@@ -194,27 +214,17 @@ export function UnifiedLayerRegistration({
 
 			return false;
 		}
-	}, [registerLayer, debug]);
+	}, [registerLayer, debug, setRegistrationStatus]);
 
 	// Efecto para registrar todas las capas
-	// Memoizamos las dependencias explícitamente para evitar rerenderizados innecesarios
-	const dependencyKey = useMemo(() => {
-		const additionalLayersKeys = Object.keys(additionalLayers || {}).sort().join(',');
-		return `${entityType || 'default'}-${additionalLayersKeys}-${debug ? 'debug' : 'normal'}`;
-	}, [entityType, additionalLayers, debug]);
-
 	useEffect(() => {
 		if (debug) {
 			console.log('🔍 Iniciando registro unificado de capas...');
 		}
 
-		// Limpiar capas existentes si es posible
-		if (typeof clearLayers === 'function') {
-			clearLayers();
-			if (debug) console.log('🧹 Capas existentes limpiadas');
-		} else {
-			console.warn('⚠️ clearLayers no está disponible, omitiendo limpieza');
-		}
+		// Limpiar capas existentes solo al montar el componente
+		clearLayers();
+		if (debug) console.log('🧹 Capas existentes limpiadas');
 
 		// Registrar las capas verificadas
 		for (const [name, implementation] of Object.entries(VERIFIED_LAYERS)) {
@@ -238,26 +248,45 @@ export function UnifiedLayerRegistration({
 			}
 		}
 
-		// Función de limpieza
+		// Función de limpieza solo al desmontar el componente
 		return () => {
-			if (typeof clearLayers === 'function') {
-				clearLayers();
-				if (debug) console.log('🧹 Limpiando registro de capas al desmontar');
-			}
+			clearLayers();
+			if (debug) console.log('🧹 Limpiando registro de capas al desmontar');
 		};
-	}, [dependencyKey, registerSafely, clearLayers]);
+	}, [registerSafely, entityType, additionalLayers, debug]);
 
 	// Si está en modo debug, mostrar estadísticas
 	if (debug) {
 		return (
-			<div className="layer-registration-debug hidden">
-				<div>Capas registradas exitosamente: {registrationStatus.success.length}</div>
-				<div>Capas fallidas: {registrationStatus.failed.length}</div>
+			<div className="text-xs border-l-4 border-yellow-500 bg-yellow-50 p-2 dark:bg-yellow-900/20 dark:text-yellow-200">
+				<h3 className="font-bold">🔍 Estado del Registro de Capas</h3>
+				<div className="mt-1">
+					<p>✅ Registradas: {registrationStatus.success.length} capas</p>
+					{registrationStatus.success.length > 0 && (
+						<ul className="list-disc list-inside">
+							{registrationStatus.success.map(name => (
+								<li key={name}>{name}</li>
+							))}
+						</ul>
+					)}
+					{registrationStatus.failed.length > 0 && (
+						<>
+							<p className="text-red-600 dark:text-red-400">
+								❌ Fallidas: {registrationStatus.failed.length} capas
+							</p>
+							<ul className="list-disc list-inside text-red-600 dark:text-red-400">
+								{registrationStatus.failed.map(name => (
+									<li key={name}>{name}</li>
+								))}
+							</ul>
+						</>
+					)}
+				</div>
 			</div>
 		);
 	}
 
-	// Normalmente no renderizamos nada visible
+	// En modo normal, no renderizar nada
 	return null;
 }
 

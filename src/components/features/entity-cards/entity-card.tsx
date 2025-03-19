@@ -27,6 +27,28 @@ import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/er
 import { useCardDebug } from './debug/card-debug-toolbar';
 import { RegisterLayersForEntity } from './layers/unified-layer-registration';
 
+// Definir un tipo extendido de CardOptions para resolver los problemas de tipo
+export interface EntityCardOptions extends CardOptions {
+	entityType?: string;
+	backside?: { enabled?: boolean };
+	textureConfig?: any;
+	rarityConfig?: any;
+	layerConfigs?: Record<string, any>;
+	hoverScale?: number;
+	enableGlowEffect?: boolean;
+	enableHolographicEffect?: boolean;
+	enableGrainEffect?: boolean;
+	enableScanlinesEffect?: boolean;
+	layerSystem?: {
+		order?: string[];
+		layerBlending?: string;
+		layerSpacing?: number;
+	};
+	glowOptions?: any;
+	holographicOptions?: any;
+	grainOptions?: any;
+}
+
 export interface BaseCardProps {
 	children: React.ReactNode;
 	className?: string;
@@ -66,10 +88,11 @@ export function BaseCard({
 
 	// Función para voltear la tarjeta
 	const handleFlip = useCallback(
-		(e: React.MouseEvent<HTMLDivElement>) => {
+		(e: React.MouseEvent<HTMLButtonElement>) => {
 			// Si hay un manejador onClick externo, priorizar ese
 			if (onClick) {
-				onClick(e);
+				// Convertir el tipo para que sea compatible
+				onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
 				return;
 			}
 
@@ -84,7 +107,7 @@ export function BaseCard({
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
+		(e: React.KeyboardEvent<HTMLButtonElement>) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				if (onClick) {
 					// Simular un evento de clic para el manejador onClick
@@ -226,7 +249,7 @@ export function EntityCard({
 	const { debugState, isDebugEnabled, shouldRenderLayer } = useCardDebug();
 
 	// Opciones por defecto para asegurar que siempre haya valores válidos
-	const defaultOptions = {
+	const defaultOptions: EntityCardOptions = {
 		layerSystem: {
 			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
 			layerBlending: 'normal',
@@ -249,19 +272,14 @@ export function EntityCard({
 
 	// Combinar opciones por defecto con las proporcionadas
 	const mergedOptions = useMemo(() => {
-		return deepMerge(defaultOptions, options);
+		return deepMerge(defaultOptions, options) as EntityCardOptions;
 	}, [options]);
 
-	// Obtener clases y estilos del sistema de diseño
-	const { designClasses, designStyles, colorClasses } = useDesignSystem({
-		designSystem: mergedOptions.designSystem,
-		primaryColor: mergedOptions.primaryColor,
-		secondaryColor: mergedOptions.secondaryColor,
-		entityType: mergedOptions.entityType || 'default',
-	});
+	// Corregir el tipo para useDesignSystem
+	const { designSystem, generateCssStyles } = useDesignSystem(mergedOptions.designSystem as any);
 
 	// Obtener clases y estilos del sistema de animación
-	const { animationClasses, getAnimationStyles } = useAnimationSystem({
+	const { getAnimationStyles } = useAnimationSystem({
 		enabled: enableAnimation && (!isDebugEnabled || shouldRenderLayer('animation')),
 		hoverEffect: true,
 		clickEffect: true,
@@ -270,8 +288,8 @@ export function EntityCard({
 		transitionDuration: 300,
 		timingFunction: 'ease-in-out',
 		hoverScale: mergedOptions.hoverScale || 1.05,
-		liftHeight: mergedOptions.hoverLiftHeight || 10,
-		maxRotation: mergedOptions.maxRotation || 15,
+		liftHeight: Number(mergedOptions.hoverLiftHeight) || 10,
+		maxRotation: Number(mergedOptions.maxRotation) || 15,
 	});
 
 	// Clase específica para el tipo de entidad
@@ -289,18 +307,38 @@ export function EntityCard({
 		setMousePosition({ x: 0, y: 0 });
 	}, []);
 
+	// Añadir una referencia para throttling de actualizaciones
+	const lastUpdateRef = useRef<number>(0);
+	// Añadir referencia para almacenar la última posición
+	const lastPositionRef = useRef({ x: 0, y: 0 });
+
 	const handleMouseMove = useCallback(
-		(e: React.MouseEvent<HTMLDivElement>) => {
+		(e: React.MouseEvent<HTMLButtonElement>) => {
 			if (!containerRef.current) return;
+
+			// Implementar throttling para evitar demasiadas actualizaciones
+			const now = Date.now();
+			if (now - lastUpdateRef.current < 33) { // ~30 fps (1000ms / 30 = 33.33ms)
+				return;
+			}
 
 			// Obtener coordenadas relativas al contenedor
 			const rect = containerRef.current.getBoundingClientRect();
 			const x = ((e.clientX - rect.left) / rect.width) * 100;
 			const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-			setMousePosition({ x, y });
+			// Comprobar si hay un cambio significativo en la posición
+			const deltaX = Math.abs(x - lastPositionRef.current.x);
+			const deltaY = Math.abs(y - lastPositionRef.current.y);
+
+			// Solo actualizar si hay un cambio notable en la posición (más de 1%)
+			if (deltaX > 1 || deltaY > 1) {
+				lastPositionRef.current = { x, y };
+				lastUpdateRef.current = now;
+				setMousePosition({ x, y });
+			}
 		},
-		[] // No necesitamos containerRef como dependencia
+		[containerRef]
 	);
 
 	// Manejar flip de la tarjeta
@@ -312,13 +350,19 @@ export function EntityCard({
 
 	// Manejar navegación por teclado
 	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
+		(e: React.KeyboardEvent<HTMLButtonElement>) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
 				if (enableBackside && mergedOptions.backside?.enabled) {
 					handleFlip();
 				} else if (onClick) {
-					onClick();
+					// Creamos un evento sintético compatible con el tipo esperado
+					const syntheticEvent = new MouseEvent('click', {
+						bubbles: true,
+						cancelable: true,
+						view: window,
+					}) as unknown as React.MouseEvent<HTMLDivElement>;
+					onClick(syntheticEvent);
 				}
 			}
 
@@ -332,10 +376,11 @@ export function EntityCard({
 
 	// Manejar clic en la tarjeta
 	const handleClick = useCallback(
-		(e: React.MouseEvent<HTMLDivElement>) => {
+		(e: React.MouseEvent<HTMLButtonElement>) => {
 			// Si hay un manejador de onClick, llamarlo directamente
 			if (onClick) {
-				onClick(e);
+				// Convertir el tipo para que sea compatible
+				onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
 				// No llamar a handleFlip si hay un onClick para evitar comportamiento dual
 				return;
 			}
@@ -367,12 +412,18 @@ export function EntityCard({
 		[isExploded, mergedOptions.layerSystem?.layerSpacing]
 	);
 
-	// Obtener capas configuradas
+	// Obtener capas configuradas con comprobación adicional de undefined
 	const layers = useMemo(() => {
 		if (!enableLayers) return [];
 
-		// Obtener orden de capas desde las opciones o usar orden por defecto
-		const layerOrder = mergedOptions.layerSystem?.order || defaultOptions.layerSystem.order;
+		// Asegurarnos de tener un orden de capas válido
+		const defaultLayerOrder = ['background', 'content', 'effects', 'holographic', 'border', 'filter'];
+		const layerOrder = mergedOptions.layerSystem?.order ?? defaultLayerOrder;
+
+		// Verificar que layerOrder es un array
+		if (!Array.isArray(layerOrder)) {
+			return defaultLayerOrder;
+		}
 
 		// Filtrar capas habilitadas
 		return layerOrder.filter((layerId) => {
@@ -395,32 +446,32 @@ export function EntityCard({
 				layerIndex: 0,
 			},
 			texture: {
-				enabled: mergedOptions.textureConfig?.enabled ?? true,
+				enabled: !!mergedOptions.textureConfig?.enabled,
 				layerIndex: 1,
 				textureConfig: mergedOptions.textureConfig,
 			},
 			border: {
-				enabled: mergedOptions.rarityConfig?.enabled ?? true,
+				enabled: !!mergedOptions.rarityConfig?.enabled,
 				layerIndex: 2,
 				borderConfig: mergedOptions.rarityConfig,
 			},
 			glow: {
-				enabled: mergedOptions.enableGlowEffect || false,
+				enabled: !!mergedOptions.enableGlowEffect,
 				layerIndex: 3,
 				glowOptions: mergedOptions.glowOptions,
 			},
 			grain: {
-				enabled: mergedOptions.enableGrainEffect || false,
+				enabled: !!mergedOptions.enableGrainEffect,
 				layerIndex: 4,
 				grainOptions: mergedOptions.grainOptions,
 			},
 			holographic: {
-				enabled: mergedOptions.enableHolographicEffect || false,
+				enabled: !!mergedOptions.enableHolographicEffect,
 				layerIndex: 5,
 				holographicOptions: mergedOptions.holographicOptions,
 			},
 			scanlines: {
-				enabled: mergedOptions.enableScanlinesEffect || false,
+				enabled: !!mergedOptions.enableScanlinesEffect,
 				layerIndex: 6,
 			},
 			explode: {
@@ -429,6 +480,9 @@ export function EntityCard({
 			},
 			...mergedOptions.layerConfigs,
 		};
+
+		// Obtener estilos a aplicar
+		const designStyles = generateCssStyles ? generateCssStyles() : {};
 
 		return (
 			<button
@@ -449,11 +503,11 @@ export function EntityCard({
 				)}
 				style={{
 					...getAnimationStyles(),
-					...(designStyles as React.CSSProperties),
+					...designStyles,
 				}}
 			>
 				<div
-					className={cn('entity-card w-full h-full', designClasses, animationClasses, colorClasses, entityTypeClass)}
+					className={cn('entity-card w-full h-full', entityTypeClass)}
 				>
 					{/* Cara Frontal */}
 					<div className="entity-card-front w-full h-full">
@@ -510,10 +564,10 @@ export function EntityCard({
 							title={title}
 							description={description}
 							image={typeof image === 'string' ? image : undefined}
-							images={Array.isArray(image) ? image : []}
-							imageLayout={imageLayout}
-							imageStyle={imageStyle}
-							options={mergedOptions}
+							images={Array.isArray(image) ? image as any : []}
+							imageLayout={imageLayout as any}
+							imageStyle={imageStyle as any}
+							options={mergedOptions as any}
 						>
 							{children}
 						</EntityCardContent>
@@ -532,7 +586,17 @@ export function EntityCard({
 		);
 	} catch (err) {
 		// Capturar errores durante el renderizado
-		errorHandler(err as Error);
+		if (errorHandler) {
+			if (typeof errorHandler === 'function') {
+				(errorHandler as (err: Error) => void)(err as Error);
+			} else if (typeof (errorHandler as any).handleError === 'function') {
+				(errorHandler as any).handleError(err as Error);
+			} else {
+				console.error('Error al renderizar EntityCard:', err);
+			}
+		} else {
+			console.error('Error al renderizar EntityCard:', err);
+		}
 		return null;
 	}
 }

@@ -15,7 +15,6 @@ import type { CardOptions } from './types';
 import { generateRarityConfig } from './utils/rarity-utils';
 
 // Definir un tipo para los componentes de tarjeta
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CardComponent = (props: Record<string, unknown>) => JSX.Element;
 
 // Definición simplificada para el registro de componentes de tarjeta

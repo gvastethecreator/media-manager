@@ -145,6 +145,7 @@ export function LayerAdminPanel({ entityType, config, onChange, className }: Lay
 													<Tooltip>
 														<TooltipTrigger asChild>
 															<Button
+																type="button"
 																variant="ghost"
 																size="icon"
 																className="h-8 w-8"
@@ -257,7 +258,12 @@ export function LayerAdminPanel({ entityType, config, onChange, className }: Lay
 				</Tabs>
 			</CardContent>
 			<CardFooter className="flex justify-end">
-				<Button variant="outline" onClick={() => updateConfig(config)} className="mr-2">
+				<Button
+					type="button"
+					variant="outline"
+					onClick={() => updateConfig(config)}
+					className="mr-2"
+				>
 					Restablecer
 				</Button>
 			</CardFooter>

@@ -324,6 +324,7 @@ export function LayersPanel({
 
 												return (
 													<button
+														type="button"
 														key={layerId}
 														className={clsx(
 															// Base style

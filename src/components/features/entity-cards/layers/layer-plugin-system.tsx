@@ -42,7 +42,8 @@ export interface LayerSettingsProps<T extends BaseLayerConfig = BaseLayerConfig>
 	entityType: string;
 	entityId?: string;
 	className?: string;
-	onConfigUpdate?: (config: T) => void;
+	config?: T;
+	onConfigUpdate?: (config: Partial<T>) => void;
 }
 
 // Interfaz extendida para componentes que usan el sistema legacy
@@ -50,6 +51,14 @@ export interface LegacyLayerComponentProps {
 	config: BaseLayerConfig;
 	context: Record<string, unknown>;
 }
+
+// Componente con tipo para componentes legacy
+type LegacyLayerComponent = {
+	type: string;
+	Component: React.ComponentType<LegacyLayerComponentProps>;
+	defaultConfig: BaseLayerConfig;
+	usesLegacyInterface?: boolean;
+};
 
 // Contexto para el sistema de capas
 interface LayerPluginContextType {
@@ -92,7 +101,14 @@ export function LayerPluginProvider({ children }: { children: React.ReactNode })
 
 	// Limpiar todas las capas
 	const clearLayers = useCallback(() => {
-		setLayers({});
+		setLayers(prevLayers => {
+			// Solo actualizar si realmente hay capas para limpiar
+			if (Object.keys(prevLayers).length > 0) {
+				return {};
+			}
+			// Si no hay capas, devolver el mismo objeto para evitar re-renderizados
+			return prevLayers;
+		});
 	}, []);
 
 	// Obtener una capa específica
@@ -214,18 +230,18 @@ export function LayerRenderer({
 					// Verificar si el componente espera la interfaz antigua o nueva
 					// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
 					if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
-						// Usar type assertion para manejar componentes legacy
+						// Primero convertimos a unknown y luego al tipo esperado
+						const LegacyComp = (layer.Component as unknown) as React.ComponentType<LegacyLayerComponentProps>;
 						return (
 							<ErrorBoundary
 								key={`layer-${layer.type}`}
 								fallback={<div className="layer-error" data-error-layer={layer.type} />}
 								onError={(error) => console.error(`Error en capa ${layer.type}:`, error)}
 							>
-								<LayerComp
+								<LegacyComp
 									key={`layer-${layer.type}`}
 									config={config}
 									context={combinedContext}
-									{...({} as Record<string, unknown>)} // Hack para evitar errores de tipo
 								/>
 							</ErrorBoundary>
 						);

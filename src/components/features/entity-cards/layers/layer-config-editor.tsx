@@ -206,6 +206,7 @@ export function LayerConfigEditor({
 								entityType={entityType}
 								entityId={entityId}
 								className="w-full"
+								config={config}
 								onConfigUpdate={(updatedConfig) => {
 									setConfig({
 										...config,

@@ -189,10 +189,19 @@ export function LayerManagementDialog({
 				</div>
 
 				<DialogFooter className="flex justify-between">
-					<Button variant="outline" onClick={handleCancel}>
+					<Button
+						type="button"
+						variant="outline"
+						onClick={handleCancel}
+					>
 						Cancelar
 					</Button>
-					<Button onClick={handleApplyAndClose}>Aplicar Cambios</Button>
+					<Button
+						type="button"
+						onClick={handleApplyAndClose}
+					>
+						Aplicar Cambios
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

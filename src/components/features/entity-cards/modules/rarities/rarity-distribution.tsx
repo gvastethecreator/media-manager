@@ -37,9 +37,10 @@ export function RarityDistribution({ rarities, onUpdate }: RarityDistributionPro
 		const baseChance = 100 / newRarities.length;
 		const extraChance = 100 % newRarities.length;
 
-		newRarities.forEach((rarity, index) => {
+		for (let index = 0; index < newRarities.length; index++) {
+			const rarity = newRarities[index];
 			rarity.chance = baseChance + (index < extraChance ? 1 : 0);
-		});
+		}
 
 		onUpdate(newRarities);
 	};
@@ -51,7 +52,13 @@ export function RarityDistribution({ rarities, onUpdate }: RarityDistributionPro
 				<div className="flex items-center gap-2">
 					<Switch checked={autoDistribute} onCheckedChange={setAutoDistribute} id="auto-distribute" />
 					<Label htmlFor="auto-distribute">Distribución Automática</Label>
-					<Button variant="outline" size="sm" onClick={handleAutoDistribute} className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						type="button"
+						onClick={handleAutoDistribute}
+						className="flex items-center gap-2"
+					>
 						<Wand2 className="h-4 w-4" />
 						Distribuir
 					</Button>

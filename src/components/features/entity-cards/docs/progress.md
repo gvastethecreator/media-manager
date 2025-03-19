@@ -69,7 +69,7 @@
   - ✅ Adaptación a preferencias de accesibilidad
   - ✅ Optimizaciones para móviles y conexiones lentas
 
-### ✅ Corrección de Errores
+### ✅ Corrección de Errores Iniciales
 
 - Resuelto problema de dependencia circular entre componentes de tarjeta
 - Implementado sistema de carga dinámica de adaptadores para evitar dependencias circulares
@@ -82,268 +82,157 @@
 - Corregido error en PresetCard al intentar parsear valores por defecto como JSON (verificación de valores por defecto añadida)
 - Corregido error de entidades indefinidas en todos los componentes de tarjeta (verificación de nulidad y valores por defecto añadidos)
 
-## Módulos Pendientes
+## Nuevo Plan de Revisión y Corrección
 
-### 🔄 Módulo de Rendimiento (Performance)
+### Fase I: Corrección de Errores de Lint (En progreso)
 
-- Actualmente: Parcialmente implementado (60%)
-- Componentes principales implementados:
-  - ✅ PerformanceModule: UI principal de configuración
-  - ✅ PerformanceSettings: Adaptador para panel de ajustes
-  - ✅ performance-panel.tsx: Panel con opciones detalladas
-  - ✅ use-performance.ts: Hook básico para gestionar opciones
-  - ✅ performance-adapter.ts: Adaptador para opciones antiguas
-- Pendiente de implementación:
-  - ⏳ use-performance-system.ts: Implementación completa del sistema
-  - ⏳ use-animation-performance.ts: Hook para optimización de animaciones
-  - ⏳ use-image-optimization.ts: Hook para optimización de imágenes
-  - ⏳ performance-presets.ts: Presets optimizados para diferentes escenarios
-  - ⏳ Integración con el sistema de capas para optimización automática
+- ✅ **TAREA 1.1**: Corregir uso de tipo `any` en el código
+  - ✅ Reemplazado `any` en register-all-layers.tsx con tipos específicos
+  - ✅ Reemplazado `any` en unified-layer-registration.tsx con interfaces específicas
+  - ⏳ Revisar y corregir otros usos de `any` en el código
 
-## Plan de Trabajo
+- ✅ **TAREA 1.2**: Corregir errores de dependencias en useEffect
+  - ✅ Corregido useEffect en unified-layer-registration.tsx
+  - ⏳ Revisar otros hooks para asegurar dependencias exhaustivas
 
-### Fase 1: Completar Módulos Básicos (Completada)
+- ✅ **TAREA 1.3**: Corregir uso de tipos prohibidos
+  - ✅ Reemplazado `Function` en layer-adapter.tsx con tipos más específicos
+  - ⏳ Revisar otros usos de tipos prohibidos
 
-- ✅ Implementar módulo de vista previa
-- ✅ Corregir errores de dependencia circular
-- ✅ Corregir error de LayerPluginProvider
-- ✅ Corregir error en DesignPanel (customCssClasses)
-- ✅ Corregir error en DesignPanel (customCssVariables)
-- ✅ Mejorar hook useDesignSystem
-- ✅ Corregir error en PresetCard (JSON.parse)
-- ✅ Corregir error de entidades indefinidas en componentes de tarjeta
-- ✅ Implementar módulo de sistema
-- ✅ Implementar módulo de efectos
-- ✅ Implementar módulo de capas
-- ✅ Implementar módulo de diseño
+- ✅ **TAREA 1.4**: Optimizar iteraciones con for...of
+  - ✅ Reemplazado forEach con for...of en use-accesibility.ts
+  - ⏳ Identificar y optimizar otras iteraciones
 
-### Fase 2: Finalizar Pendientes (Completada)
+- ✅ **TAREA 1.5**: Corregir acceso a propiedades con corchetes
+  - ✅ Reemplazado labels['role'] con labels.role
+  - ⏳ Revisar otros usos similares en el código
 
-- ✅ Integrar todos los módulos implementados para una experiencia coherente
-- ✅ Completar módulo de rendimiento:
-  - ✅ **TAREA 2.1**: Implementar hook use-performance-system.ts completo
-  - ✅ **TAREA 2.2**: Crear hook use-animation-performance.ts
-  - ✅ **TAREA 2.3**: Crear hook use-image-optimization.ts
-  - ✅ **TAREA 2.4**: Desarrollar presets optimizados para diferentes escenarios
-  - ✅ **TAREA 2.5**: Integrar con sistema existente mediante index.ts
+- ✅ **TAREA 1.6**: Añadir tipos de botón explícitos
+  - ✅ Añadido type="button" a botones en layers-panel.tsx
+  - ⏳ Revisar otros botones sin tipo explícito
 
-### Fase 3: Optimización y Mejoras (En progreso)
+### Fase II: Optimización de Rendimiento (Planificado)
 
-- ✅ **TAREA 3.0**: Mejora del módulo de animación
+- ⏳ **TAREA 2.1**: Optimizar renderizado de componentes
+  - Identificar componentes con múltiples renderizados
+  - Implementar memoización con React.memo, useMemo y useCallback
+  - Optimizar renderizado condicional
 
-  - Implementación de un generador de clases CSS para animaciones
-  - Refactorización del hook useAnimationSystem para mejor reutilización
-  - Creación de funciones para generar variables y estilos CSS
-  - Integración con el componente EntityCard
-  - Adición de clase CSS para funciones de temporización personalizadas
-  - Mejora en el manejo de funciones cubic-bezier personalizadas
-  - Implementación del método applyCustomTimingFunction para facilitar la aplicación de funciones personalizadas
+- ⏳ **TAREA 2.2**: Reducir cálculos innecesarios
+  - Identificar cálculos pesados en renderizado
+  - Extraer cálculos a useMemo o useCallback cuando sea apropiado
+  - Evitar regeneración de funciones en cada renderizado
 
-- ✅ **TAREA 3.1**: Mejora de la integración de capas
+- ⏳ **TAREA 2.3**: Optimizar carga de recursos
+  - Implementar lazy loading para componentes pesados
+  - Optimizar carga de imágenes y assets
+  - Implementar estrategias de precarga inteligentes
 
-  - Refactorización del componente EntityCard para mejor integración con el sistema de capas
-  - Implementación correcta del LayerPluginProvider y RegisterLayers
-  - Configuración adecuada de las capas con sus propiedades
-  - Mejora en la gestión del contexto de capas
-  - Optimización del renderizado de capas
+- ⏳ **TAREA 2.4**: Mejorar gestión de estado
+  - Revisar jerarquía de estado para evitar re-rendizados en cascada
+  - Implementar estrategias de state colocation
+  - Optimizar uso de contextos y reducir su alcance
 
-- ⏳ **TAREA 3.2**: Optimización de carga de imágenes
+### Fase III: Mejora de la Arquitectura (Planificado)
 
-  - Implementar carga progresiva de imágenes
-  - Soporte para formatos modernos (WebP, AVIF)
-  - Redimensionamiento automático según el viewport
-  - Precargar imágenes críticas
+- ⏳ **TAREA 3.1**: Refactorización de componentes con problemas
+  - Identificar componentes con responsabilidades mezcladas
+  - Separar componentes en unidades más pequeñas y cohesivas
+  - Implementar patrón de componentes contenedores y de presentación
 
-- ⏳ **TAREA 3.3**: Mejorar la accesibilidad
+- ⏳ **TAREA 3.2**: Estandarización de interfaces
+  - Revisar y estandarizar interfaces de componentes
+  - Unificar patrones de props y callbacks
+  - Mejorar documentación de tipos
 
-  - Verificar contraste de colores
-  - Mejorar navegación por teclado
-  - Añadir atributos ARIA
-  - Soportar preferencias de movimiento reducido
+- ⏳ **TAREA 3.3**: Mejora del sistema de capas
+  - Implementar sistema de presets para capas
+  - Crear panel visual para administración de capas
+  - Optimizar sistema de plugins
 
-- ⏳ **TAREA 3.4**: Implementar pruebas unitarias
-  - Pruebas para hooks principales
-  - Pruebas para componentes visuales
-  - Pruebas de integración entre módulos
-  - Pruebas de rendimiento y comparativas
+### Fase IV: Pruebas y Documentación (Planificado)
 
-### Fase 4: Documentación y Ejemplos
+- ⏳ **TAREA 4.1**: Implementar pruebas unitarias
+  - Añadir pruebas para hooks principales
+  - Añadir pruebas para componentes críticos
+  - Implementar pruebas de integración entre módulos
 
-- ⏳ **TAREA 4.1**: Documentar cada módulo con ejemplos de uso
+- ⏳ **TAREA 4.2**: Mejorar documentación
+  - Actualizar JSDoc en componentes y hooks
+  - Crear guías de uso para cada módulo
+  - Desarrollar ejemplos prácticos
 
-  - Crear guías de inicio rápido
-  - Documentar configuraciones avanzadas
-  - Ejemplos de personalización
-  - Patrones comunes y mejores prácticas
+- ⏳ **TAREA 4.3**: Establecer métricas de rendimiento
+  - Implementar herramientas de medición de rendimiento
+  - Establecer línea base y objetivos de rendimiento
+  - Documentar resultados y mejoras
 
-- ⏳ **TAREA 4.2**: Crear guías de integración
-
-  - Integración con el sistema de entidades
-  - Integración con vistas de galería
-  - Integración con formularios y editores
-  - Integración con el sistema de favoritos
-
-- ⏳ **TAREA 4.3**: Preparar ejemplos de personalización
-  - Crear catálogo de presets visuales
-  - Ejemplos de configuración para diferentes casos de uso
-  - Showcases de efectos avanzados
-  - Demostraciones interactivas
-
-## Diagrama de Progreso
+## Diagrama de Progreso Actualizado
 
 ```mermaid
 gantt
-    title Progreso de Implementación de Entity Cards
+    title Plan de Revisión y Corrección de Entity Cards
     dateFormat  YYYY-MM-DD
-    section Módulos Básicos
-    Módulo de Vista Previa    :done,    des1, 2023-11-01, 2023-11-15
-    Corrección de Errores     :done,    des1.5, 2023-11-15, 2023-11-24
-    Módulo de Sistema         :done,    des3, 2023-11-20, 2023-12-05
-    Módulo de Efectos         :done,    des4, 2023-12-05, 2023-12-20
-    Módulo de Capas           :done,    des5, 2023-12-15, 2023-12-30
-    Módulo de Diseño          :done,    des2, 2023-11-10, 2024-01-15
-
-    section Integración y Pruebas
-    Integración de Módulos    :done,    des6, 2023-12-25, 2024-01-15
-    Módulo de Rendimiento     :done,    des7, 2024-01-05, 2024-03-16
-    Tarea 2.1: Hook Sistema   :done,    des7.1, 2024-03-10, 2024-03-14
-    Tarea 2.2: Hook Animación :done,    des7.2, 2024-03-14, 2024-03-15
-    Tarea 2.3: Hook Imágenes  :done,    des7.3, 2024-03-15, 2024-03-16
-    Tarea 2.4: Presets        :done,    des7.4, 2024-03-16, 2024-03-16
-    Tarea 2.5: Integración    :done,    des7.5, 2024-03-16, 2024-03-16
+    section Corrección de Errores
+    Lint: Tipo any                 :active,  task1.1, 2024-03-20, 2024-03-22
+    Lint: useEffect deps           :active,  task1.2, 2024-03-20, 2024-03-22
+    Lint: Tipos prohibidos         :active,  task1.3, 2024-03-20, 2024-03-22
+    Lint: Optimizar iteraciones    :active,  task1.4, 2024-03-20, 2024-03-22
+    Lint: Acceso a propiedades     :active,  task1.5, 2024-03-20, 2024-03-22
+    Lint: Tipos de botón           :active,  task1.6, 2024-03-20, 2024-03-22
 
     section Optimización
-    Optimizar Carga Imágenes  :active,  des8.1, 2024-03-17, 2024-03-27
-    Mejorar Accesibilidad     :         des8.2, 2024-03-27, 2024-04-06
-    Pruebas Unitarias         :         des8.3, 2024-04-06, 2024-04-21
+    Optimizar renderizado          :         task2.1, 2024-03-22, 2024-03-24
+    Reducir cálculos               :         task2.2, 2024-03-24, 2024-03-26
+    Optimizar carga                :         task2.3, 2024-03-26, 2024-03-28
+    Mejorar gestión de estado      :         task2.4, 2024-03-28, 2024-03-30
 
-    section Documentación
-    Documentar Módulos        :         des10.1, 2024-04-21, 2024-05-01
-    Guías de Integración      :         des10.2, 2024-05-01, 2024-05-11
-    Ejemplos de Personalización:        des10.3, 2024-05-11, 2024-05-21
+    section Arquitectura
+    Refactorizar componentes       :         task3.1, 2024-03-30, 2024-04-02
+    Estandarizar interfaces        :         task3.2, 2024-04-02, 2024-04-04
+    Mejorar sistema de capas       :         task3.3, 2024-04-04, 2024-04-07
+
+    section Pruebas y Docs
+    Pruebas unitarias              :         task4.1, 2024-04-07, 2024-04-10
+    Mejorar documentación          :         task4.2, 2024-04-10, 2024-04-13
+    Métricas de rendimiento        :         task4.3, 2024-04-13, 2024-04-15
 ```
-
-## Notas Adicionales
-
-- Se ha mejorado la estructura del código para facilitar la mantenibilidad
-- Se han implementado adaptadores para garantizar la compatibilidad entre diferentes formatos de opciones
-- Se ha documentado cada módulo con ejemplos de uso
-- Se ha creado un diagrama de arquitectura para visualizar la estructura del sistema
-- Se ha implementado un sistema de carga dinámica para evitar dependencias circulares
-- Se ha implementado el módulo de sistema completo con configuraciones para rarezas, texturas y categorías
-- Se ha integrado el sistema de configuración con los tipos de entidad para aplicar diferentes configuraciones según el tipo
-- Se ha implementado el módulo de efectos completo con configuraciones para efectos visuales y avanzados
-- Se ha implementado el módulo de capas completo con gestión de orden, visibilidad y configuración de capas
-- Se ha implementado el módulo de diseño completo con sistema de presets y personalización avanzada
-- Se ha completado el módulo de rendimiento con optimizaciones para diferentes escenarios y hooks especializados
-- Se ha unificado la integración entre los diferentes módulos para mantener la coherencia en la interfaz de usuario
 
 ## Próximos Pasos Inmediatos
 
-1. **Implementar optimizaciones en componentes existentes**:
+1. **Continuar con la corrección de errores de lint**:
+   - Revisar todos los archivos de módulos restantes en busca de problemas similares
+   - Aplicar correcciones sistemáticas usando los mismos patrones
+   - Verificar que las correcciones no introducen nuevos errores
 
-   - Integrar los hooks de rendimiento en componentes clave
-   - Aplicar técnicas de memoización en componentes pesados
-   - Implementar virtualización para listas largas de tarjetas
+2. **Iniciar pruebas de rendimiento**:
+   - Implementar mediciones para evaluar el rendimiento actual
+   - Identificar cuellos de botella específicos
+   - Priorizar optimizaciones basadas en datos objetivos
 
-2. **Mejorar accesibilidad**:
+3. **Revisar componentes con alto nivel de re-renders**:
+   - Analizar el árbol de componentes para identificar renderizados innecesarios
+   - Aplicar técnicas de memoización estratégicamente
+   - Refinar la gestión de estado para minimizar actualizaciones en cascada
 
-   - Verificar contraste de colores
-   - Mejorar navegación por teclado
-   - Añadir atributos ARIA
-   - Soportar preferencias de movimiento reducido
+## Reglas de Desarrollo
 
-3. **Desarrollar pruebas automáticas**:
+1. **Nunca usar `any` excepto en casos extremos**:
+   - Crear interfaces explícitas
+   - Utilizar tipos genéricos cuando sea apropiado
+   - Preferir `unknown` sobre `any` cuando sea necesario
 
-   - Crear pruebas unitarias para los nuevos hooks
-   - Implementar tests de integración para verificar compatibilidad entre módulos
-   - Desarrollar benchmarks de rendimiento
+2. **Optimizar hooks de React**:
+   - Asegurar dependencias correctas en useEffect, useMemo y useCallback
+   - Evitar funciones inline en props que causan re-renders
+   - Extraer lógica compleja a hooks personalizados
 
-4. **Completar documentación técnica**:
-   - Actualizar README con ejemplos de uso de las nuevas funcionalidades
-   - Crear guías de integración para desarrolladores
-   - Documentar presets disponibles y sus casos de uso
+3. **Seguir patrones de rendimiento**:
+   - Preferir for...of sobre forEach
+   - Minimizar operaciones sincrónicas costosas
+   - Utilizar técnicas de renderizado condicional eficientes
 
-## Nuevas Tareas para Integración de Capas
-
-### Fase 3.5: Mejora del Sistema de Capas (Nueva)
-
-- ✅ **TAREA 3.5.1**: Integración completa del sistema de capas con EntityCard
-
-  - ✅ Crear adaptadores bidireccionales entre EntityCard y el sistema de capas
-  - ✅ Implementar soporte para configuración dinámica de capas según tipo de entidad
-  - ✅ Optimizar el renderizado de capas para mejorar el rendimiento
-  - ✅ Añadir soporte para capas personalizadas por tipo de entidad
-
-- ⏳ **TAREA 3.5.2**: Mejora de la gestión de capas
-
-  - Implementar sistema de presets de capas para diferentes tipos de tarjetas
-  - Crear panel de administración visual para capas
-  - Añadir soporte para guardar/cargar configuraciones de capas
-  - Implementar sistema de exportación/importación de configuraciones
-
-- ⏳ **TAREA 3.5.3**: Optimización del sistema de plugins de capas
-
-  - Refactorizar el sistema de registro de capas para mejor rendimiento
-  - Implementar carga diferida (lazy loading) de capas no críticas
-  - Añadir sistema de prioridades para el orden de renderizado
-  - Mejorar la gestión de dependencias entre capas
-
-- ⏳ **TAREA 3.5.4**: Documentación del sistema de capas
-  - Crear guía completa para desarrolladores sobre cómo crear nuevas capas
-  - Documentar API del sistema de plugins de capas
-  - Crear ejemplos de implementación para diferentes tipos de capas
-  - Desarrollar tutoriales interactivos para el uso del sistema de capas
-
-```mermaid
-gantt
-    title Plan de Integración del Sistema de Capas
-    dateFormat  YYYY-MM-DD
-    section Integración de Capas
-    Tarea 3.5.1: Integración con EntityCard  :done,    des3.5.1, 2024-03-18, 2024-03-25
-    Tarea 3.5.2: Mejora de gestión           :active,  des3.5.2, 2024-03-25, 2024-04-01
-    Tarea 3.5.3: Optimización de plugins     :         des3.5.3, 2024-04-01, 2024-04-08
-    Tarea 3.5.4: Documentación               :         des3.5.4, 2024-04-08, 2024-04-15
-```
-
-## Detalles de Implementación para Tarea 3.5.1 (Completada)
-
-### Adaptadores Bidireccionales
-
-- ✅ Creada función `adaptEntityCardToLayerSystem` para convertir opciones de EntityCard a configuración de capas
-- ✅ Creada función `adaptLayerSystemToEntityCard` para el proceso inverso
-- ✅ Implementado sistema de detección automática de configuraciones con `detectAndConvertLayerConfig`
-
-### Configuración Dinámica por Tipo de Entidad
-
-- ✅ Desarrollado sistema para cargar configuraciones específicas según el tipo de entidad
-- ✅ Implementado hook `useEntityTypeLayerConfig` para gestionar cambios en tiempo real
-- ✅ Creado sistema de fallback para tipos de entidad sin configuración específica
-
-### Optimización de Renderizado
-
-- ✅ Implementadas técnicas de memoización para componentes de capa con `React.memo`
-- ✅ Añadido sistema de renderizado condicional basado en configuración
-- ✅ Optimizado cálculo de transformaciones con `useCallback` y `useMemo`
-
-### Soporte para Capas Personalizadas
-
-- ✅ Creado sistema de registro de capas por tipo de entidad
-- ✅ Implementados componentes `RegisterLayers`, `RegisterAllLayers` y `RegisterEntityTypeLayers`
-- ✅ Desarrollado mecanismo de extensión para capas existentes
-
-## Detalles de Implementación para Tarea 3.5.2 (En Progreso)
-
-### Sistema de Presets de Capas
-
-- ⏳ Diseñar estructura de datos para presets de capas
-- ⏳ Implementar sistema de guardado/carga de presets
-- ⏳ Crear interfaz de usuario para selección de presets
-- ⏳ Desarrollar presets predefinidos para tipos comunes de tarjetas
-
-### Panel de Administración Visual
-
-- ⏳ Diseñar interfaz de usuario para gestión de capas
-- ⏳ Implementar funcionalidades de arrastrar y soltar para reordenar capas
-- ⏳ Crear controles visuales para configuración de capas
-- ⏳ Desarrollar vista previa en tiempo real de cambios en capas
+4. **Mantener una arquitectura limpia**:
+   - Separar claramente lógica y presentación
+   - Mantener interfaces coherentes entre módulos relacionados
+   - Documentar decisiones arquitectónicas importantes
