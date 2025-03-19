@@ -7,12 +7,12 @@
  * la interfaz LayerImplementation definida en el sistema de capas.
  */
 
-import type { Sparkles } from 'lucide-react';
-import type { GlowEffectLayer } from './glow-effect-layer';
-import type { GlowSettings } from './glow-settings';
-import { deleteGlowConfig, getGlowConfig, updateGlowConfig } from './actions';
-import type { LayerImplementation } from '../types';
+import { Sparkles } from 'lucide-react';
 import type { GlowEffectOptions } from '../../types/base-card-types';
+import type { LayerImplementation } from '../types';
+import { deleteGlowConfig, getGlowConfig, updateGlowConfig } from './actions';
+import { GlowEffectLayer } from './glow-effect-layer';
+import { GlowSettings } from './glow-settings';
 
 /**
  * Configuración por defecto de la capa de brillo
@@ -78,7 +78,7 @@ export const glowLayerImplementation: LayerImplementation = {
                 entityType={entityType}
                 entityId={entityId}
                 className="w-full"
-                onConfigUpdate={(newConfig) => onChange(newConfig)}
+                onConfigChange={(newConfig: GlowEffectOptions) => onChange(newConfig as unknown as Record<string, unknown>)}
             />
         );
     }

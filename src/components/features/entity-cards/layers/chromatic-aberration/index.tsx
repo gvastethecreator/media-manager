@@ -8,7 +8,7 @@
  */
 
 import { Zap } from 'lucide-react';
-import { type LayerImplementation, type LayerRenderProps, type LayerSettingsProps } from '../types';
+import type { LayerImplementation, LayerRenderProps, LayerSettingsProps } from '../types';
 import ChromaticAberrationEffectLayer, { type ChromaticAberrationConfig } from './chromatic-aberration-effect-layer';
 import { ChromaticAberrationSettings } from './chromatic-aberration-settings';
 
@@ -96,7 +96,7 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 				entityType={entityType}
 				entityId={entityId}
 				initialConfig={typedConfig}
-				onConfigUpdate={(newConfig) => onChange(newConfig as any)}
+				onConfigUpdate={(newConfig) => onChange(newConfig as unknown as Record<string, unknown>)}
 			/>
 		);
 	}

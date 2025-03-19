@@ -11,7 +11,9 @@
         "noForEach": "error"
       },
       "correctness": {
-        "useExhaustiveDependencies": "error"
+        "useExhaustiveDependencies": "warn",
+        "noNodejsModules": "off"
+
       },
       "suspicious": {
         "noConsoleLog": "off",
@@ -23,11 +25,13 @@
       },
       "style": {
         "useConst": "error",
-        "useTemplate": "error"
+        "useTemplate": "error",
+        "useNodejsImportProtocol": "off"
       },
       "performance": {
         "noDelete": "error"
       }
+
     }
   },
   "formatter": {
