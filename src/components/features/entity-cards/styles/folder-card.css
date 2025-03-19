@@ -706,6 +706,7 @@
 
 /* Animación para tarjetas legendarias */
 @keyframes legendary-glow {
+
 	0%,
 	100% {
 		box-shadow:
@@ -728,6 +729,7 @@
 
 /* Animación para tarjetas raras */
 @keyframes rare-pulse {
+
 	0%,
 	100% {
 		border-color: rgba(59, 130, 246, 0.5);
@@ -751,4 +753,213 @@
 	@layer components {
 		background-color: rgba(17, 24, 39, 0.8);
 	}
+}
+
+/* Estilos base para tarjetas de carpeta */
+.folder-card-container {
+	--folder-primary-color: rgba(156, 163, 175, 0.8);
+	--folder-glow-color: rgba(156, 163, 175, 0.3);
+	position: relative;
+	perspective: 1000px;
+	transform-style: preserve-3d;
+	will-change: transform;
+}
+
+/* Efectos de animación al pasar el mouse */
+.folder-card-container:hover .folder-card-wrapper {
+	transform: translateY(-5px) rotateX(5deg);
+	box-shadow: 0 15px 35px -10px var(--folder-glow-color);
+}
+
+/* Estilos específicos por rareza */
+.folder-card-rarity-common {
+	--folder-primary-color: rgba(156, 163, 175, 0.8);
+	--folder-glow-color: rgba(156, 163, 175, 0.3);
+}
+
+.folder-card-rarity-uncommon {
+	--folder-primary-color: rgba(34, 197, 94, 0.8);
+	--folder-glow-color: rgba(34, 197, 94, 0.3);
+}
+
+.folder-card-rarity-rare {
+	--folder-primary-color: rgba(59, 130, 246, 0.8);
+	--folder-glow-color: rgba(59, 130, 246, 0.4);
+}
+
+.folder-card-rarity-legendary {
+	--folder-primary-color: rgba(234, 179, 8, 0.8);
+	--folder-glow-color: rgba(234, 179, 8, 0.4);
+}
+
+.folder-card-rarity-mythic {
+	--folder-primary-color: rgba(217, 70, 239, 0.8);
+	--folder-glow-color: rgba(217, 70, 239, 0.4);
+}
+
+/* Patrones y texturas */
+.bg-grid-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3Ccircle cx='13' cy='13' r='1'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 12px 12px;
+}
+
+.bg-noise-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+	background-size: 150px 150px;
+}
+
+.bg-sparkle-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.8' fill-rule='evenodd'%3E%3Cpath d='M10 0l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 30px 30px;
+}
+
+/* Efectos holográficos para carpetas legendarias y míticas */
+@keyframes holographic-shift {
+	0% {
+		filter: hue-rotate(0deg) saturate(1.5);
+		opacity: 0.5;
+	}
+
+	25% {
+		filter: hue-rotate(90deg) saturate(2);
+		opacity: 0.8;
+	}
+
+	50% {
+		filter: hue-rotate(180deg) saturate(2.2);
+		opacity: 0.6;
+	}
+
+	75% {
+		filter: hue-rotate(270deg) saturate(2);
+		opacity: 0.8;
+	}
+
+	100% {
+		filter: hue-rotate(360deg) saturate(1.5);
+		opacity: 0.5;
+	}
+}
+
+.folder-card-rarity-legendary .folder-card-image::before,
+.folder-card-rarity-mythic .folder-card-image::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(45deg,
+			rgba(255, 0, 0, 0.2),
+			rgba(255, 255, 0, 0.2),
+			rgba(0, 255, 0, 0.2),
+			rgba(0, 255, 255, 0.2),
+			rgba(0, 0, 255, 0.2),
+			rgba(255, 0, 255, 0.2),
+			rgba(255, 0, 0, 0.2));
+	mix-blend-mode: overlay;
+	pointer-events: none;
+	animation: holographic-shift 5s infinite linear;
+	z-index: 10;
+}
+
+.folder-card-rarity-mythic .folder-card-image::before {
+	animation-duration: 3s;
+	background-size: 200% 200%;
+	opacity: 0.7;
+}
+
+/* Efectos de foil para legendarias y míticas */
+@keyframes foil-effect {
+	0% {
+		opacity: 0;
+		transform: translateY(100%);
+	}
+
+	50% {
+		opacity: 0.5;
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-100%);
+	}
+}
+
+.folder-card-rarity-legendary::after,
+.folder-card-rarity-mythic::after {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: linear-gradient(135deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0) 35%,
+			rgba(255, 255, 255, 0.1) 45%,
+			rgba(255, 255, 255, 0.5) 50%,
+			rgba(255, 255, 255, 0.1) 55%,
+			rgba(255, 255, 255, 0) 65%,
+			transparent 100%);
+	transform: rotate(30deg);
+	pointer-events: none;
+	z-index: 20;
+	animation: foil-effect 5s infinite ease-in-out;
+	mix-blend-mode: overlay;
+}
+
+.folder-card-rarity-mythic::after {
+	animation-duration: 3.5s;
+	background: linear-gradient(135deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0) 35%,
+			rgba(217, 70, 239, 0.1) 45%,
+			rgba(255, 255, 255, 0.5) 50%,
+			rgba(217, 70, 239, 0.1) 55%,
+			rgba(255, 255, 255, 0) 65%,
+			transparent 100%);
+}
+
+/* Efectos para resaltar las estrellas al pasar el mouse */
+.folder-card-container:hover .folder-rarity {
+	transform: scale(1.1);
+	transition: transform 0.3s ease-out;
+}
+
+/* Efecto de resplandor para el borde en hover */
+.folder-card-container:hover .folder-card-image {
+	box-shadow: 0 0 15px 2px var(--folder-glow-color);
+	transition: box-shadow 0.3s ease-out;
+}
+
+/* Animación para el icono de la carpeta */
+@keyframes folder-pulse {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.08);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+.folder-card-rarity-legendary .folder-emoji,
+.folder-card-rarity-mythic .folder-emoji {
+	animation: folder-pulse 2s infinite ease-in-out;
+}
+
+/* Estilo más detallado para las carpetas legendarias y míticas */
+.folder-card-rarity-legendary .folder-card-content,
+.folder-card-rarity-mythic .folder-card-content {
+	background-color: rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(1px);
+}
+
+/* Estilo para el borde de las tarjetas */
+.folder-card-wrapper {
+	transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+	border: 1px solid var(--folder-primary-color);
+	box-shadow: 0 5px 15px -5px var(--folder-glow-color);
 }

@@ -21,8 +21,11 @@ type ImageGridStyle = ImageGridProps['style'];
 // Importar sistema de manejo de errores
 import { RegisterLayers } from './layers/register-layers';
 // Importar CoreConfig desde el módulo core
+import { ErrorBoundary } from 'react-error-boundary';
 import type { CoreConfig } from './modules/core/core-config';
 import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
+// Importaciones para el sistema de depuración
+import { useCardDebug } from './debug/card-debug-toolbar';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
@@ -219,6 +222,9 @@ export function EntityCard({
 		logErrors: true,
 	});
 
+	// Obtener configuración de depuración
+	const { debugState, isDebugEnabled, shouldRenderLayer } = useCardDebug();
+
 	// Opciones por defecto para asegurar que siempre haya valores válidos
 	const defaultOptions = {
 		layerSystem: {
@@ -256,7 +262,7 @@ export function EntityCard({
 
 	// Obtener clases y estilos del sistema de animación
 	const { animationClasses, getAnimationStyles } = useAnimationSystem({
-		enabled: enableAnimation,
+		enabled: enableAnimation && (!isDebugEnabled || shouldRenderLayer('animation')),
 		hoverEffect: true,
 		clickEffect: true,
 		entranceAnimation: 'fade-in',
@@ -451,29 +457,48 @@ export function EntityCard({
 				>
 					{/* Cara Frontal */}
 					<div className="entity-card-front w-full h-full">
-						{/* Sistema de capas */}
-						{enableLayers && layers.length > 0 && (
+						{/* Sistema de capas - Sólo se muestra si está habilitado en la depuración */}
+						{enableLayers && layers.length > 0 && (!isDebugEnabled || shouldRenderLayer('layers')) && (
 							<LayerPluginProvider>
 								{/* Registrar las capas necesarias */}
 								<RegisterLayers />
 
 								{/* Renderizar las capas */}
-								<LayerRenderer
-									isExploded={isExploded}
-									isHovered={isHovered}
-									mousePosition={mousePosition}
-									activeLayer={activeLayer}
-									getExplodeLayerTransform={getExplodeLayerTransform}
-									entityType={mergedOptions.entityType || 'default'}
-									entityId={id}
-									configs={layerConfigs}
-									context={{
-										title,
-										description,
-										image,
-										options: mergedOptions,
-									}}
-								/>
+								<ErrorBoundary fallback={<div className="bg-destructive/10 rounded p-2 text-xs">Error en efectos</div>}>
+									<LayerRenderer
+										isExploded={isExploded}
+										isHovered={isHovered}
+										mousePosition={mousePosition}
+										activeLayer={activeLayer}
+										getExplodeLayerTransform={getExplodeLayerTransform}
+										entityType={mergedOptions.entityType || 'default'}
+										entityId={id}
+										configs={{
+											// Filtrar configuraciones basadas en el estado de depuración
+											container: layerConfigs.container,
+											texture: isDebugEnabled && !shouldRenderLayer('design') ? { ...layerConfigs.texture, enabled: false } : layerConfigs.texture,
+											border: isDebugEnabled && !shouldRenderLayer('border') ? { ...layerConfigs.border, enabled: false } : layerConfigs.border,
+											glow: isDebugEnabled && !shouldRenderLayer('glow') ? { ...layerConfigs.glow, enabled: false } : layerConfigs.glow,
+											grain: isDebugEnabled && !shouldRenderLayer('grain') ? { ...layerConfigs.grain, enabled: false } : layerConfigs.grain,
+											holographic: isDebugEnabled && !shouldRenderLayer('holographic') ? { ...layerConfigs.holographic, enabled: false } : layerConfigs.holographic,
+											scanlines: isDebugEnabled && !shouldRenderLayer('scanlines') ? { ...layerConfigs.scanlines, enabled: false } : layerConfigs.scanlines,
+											explode: layerConfigs.explode,
+											pixelate: isDebugEnabled && !shouldRenderLayer('pixelate') ?
+												{ ...mergedOptions.layerConfigs?.pixelate, enabled: false } :
+												mergedOptions.layerConfigs?.pixelate,
+											...Object.fromEntries(
+												Object.entries(mergedOptions.layerConfigs || {})
+													.filter(([key]) => !['container', 'texture', 'border', 'glow', 'grain', 'holographic', 'scanlines', 'explode', 'pixelate'].includes(key))
+											)
+										}}
+										context={{
+											title,
+											description,
+											image,
+											options: mergedOptions,
+										}}
+									/>
+								</ErrorBoundary>
 							</LayerPluginProvider>
 						)}
 
@@ -492,11 +517,13 @@ export function EntityCard({
 					</div>
 
 					{/* Cara Posterior */}
-					{(enableBackside || mergedOptions.backside?.enabled) && isFlipped && (
-						<div className="entity-card-back w-full h-full">
-							<div className="backside-content w-full h-full">{backsideContent}</div>
-						</div>
-					)}
+					{(enableBackside || mergedOptions.backside?.enabled) &&
+						(!isDebugEnabled || shouldRenderLayer('backsideEnabled')) &&
+						isFlipped && (
+							<div className="entity-card-back w-full h-full">
+								<div className="backside-content w-full h-full">{backsideContent}</div>
+							</div>
+						)}
 				</div>
 			</button>
 		);

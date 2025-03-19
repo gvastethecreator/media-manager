@@ -20,14 +20,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { LayersIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { EntityCardLayerSystemConfig } from './entity-card-layer-adapter';
 import { LayerAdminPanel } from './layer-admin-panel';
 import { LayerPresetsPanel } from './layer-presets-panel';
+import type { LayersModuleConfig } from './types';
 
 export interface LayerManagementDialogProps {
 	entityType: string;
-	config: EntityCardLayerSystemConfig;
+	config: EntityCardLayerSystemConfig | LayersModuleConfig;
 	onChange: (config: EntityCardLayerSystemConfig) => void;
 	trigger?: React.ReactNode;
 	open?: boolean;
@@ -47,7 +48,36 @@ export function LayerManagementDialog({
 }: LayerManagementDialogProps) {
 	const [isOpen, setIsOpen] = useState(open || false);
 	const [activeTab, setActiveTab] = useState('presets');
-	const [localConfig, setLocalConfig] = useState<EntityCardLayerSystemConfig>(config);
+
+	// Convertir config a EntityCardLayerSystemConfig si es necesario
+	const entityCardConfig = useMemo((): EntityCardLayerSystemConfig => {
+		// Si ya es EntityCardLayerSystemConfig o tiene la propiedad globalOpacity
+		if ('globalOpacity' in config || config.layers === undefined) {
+			return config as EntityCardLayerSystemConfig;
+		}
+
+		// Convertir de LayersModuleConfig a EntityCardLayerSystemConfig
+		return {
+			layerSystem: config.layerSystem,
+			layerConfigs: config.layerConfigs,
+			layers: config.layers,
+			globalOpacity: 100
+		};
+	}, [config]);
+
+	const [localConfig, setLocalConfig] = useState<EntityCardLayerSystemConfig>(() => {
+		return {
+			...entityCardConfig,
+			// Asegurar que todas las propiedades requeridas estén presentes
+			layerSystem: {
+				...entityCardConfig.layerSystem,
+				enabledLayers: entityCardConfig.layerSystem?.enabledLayers || {},
+				layerOrder: entityCardConfig.layerSystem?.layerOrder || []
+			},
+			layerConfigs: entityCardConfig.layerConfigs || {},
+			layers: entityCardConfig.layers || {}
+		};
+	});
 
 	// Sincronizar estado de apertura controlado externamente
 	useEffect(() => {
@@ -58,13 +88,25 @@ export function LayerManagementDialog({
 
 	// Sincronizar config externa con estado local
 	useEffect(() => {
-		setLocalConfig(config);
-	}, [config]);
+		setLocalConfig({
+			...entityCardConfig,
+			// Asegurar que todas las propiedades requeridas estén presentes
+			layerSystem: {
+				...entityCardConfig.layerSystem,
+				enabledLayers: entityCardConfig.layerSystem?.enabledLayers || {},
+				layerOrder: entityCardConfig.layerSystem?.layerOrder || []
+			},
+			layerConfigs: entityCardConfig.layerConfigs || {},
+			layers: entityCardConfig.layers || {}
+		});
+	}, [entityCardConfig]);
 
 	// Manejar cambio de estado de apertura
 	const handleOpenChange = (newOpen: boolean) => {
 		setIsOpen(newOpen);
-		onOpenChange?.(newOpen);
+		if (onOpenChange) {
+			onOpenChange(newOpen);
+		}
 
 		// Si se cierra el diálogo, aplicar cambios finales
 		if (!newOpen) {
@@ -73,8 +115,19 @@ export function LayerManagementDialog({
 	};
 
 	// Manejar cambios en la configuración
-	const handleConfigChange = (newConfig: EntityCardLayerSystemConfig) => {
-		setLocalConfig(newConfig);
+	const handleConfigChange = (newConfig: Partial<EntityCardLayerSystemConfig>) => {
+		setLocalConfig(prev => ({
+			...prev,
+			...newConfig,
+			layerSystem: {
+				...prev.layerSystem,
+				...(newConfig.layerSystem || {})
+			},
+			layerConfigs: {
+				...prev.layerConfigs,
+				...(newConfig.layerConfigs || {})
+			}
+		}));
 		// No propagamos los cambios inmediatamente para permitir previsualización
 	};
 
@@ -86,7 +139,7 @@ export function LayerManagementDialog({
 
 	// Cancelar cambios y cerrar
 	const handleCancel = () => {
-		setLocalConfig(config);
+		setLocalConfig(entityCardConfig);
 		handleOpenChange(false);
 	};
 
@@ -111,21 +164,25 @@ export function LayerManagementDialog({
 
 						<div className="flex-1 overflow-hidden">
 							<TabsContent value="presets" className="h-full mt-0">
-								<LayerPresetsPanel
-									entityType={entityType}
-									currentConfig={localConfig}
-									onApplyPreset={handleConfigChange}
-									className="h-full"
-								/>
+								{activeTab === 'presets' && (
+									<LayerPresetsPanel
+										entityType={entityType}
+										currentConfig={localConfig}
+										onApplyPreset={handleConfigChange}
+										className="h-full"
+									/>
+								)}
 							</TabsContent>
 
 							<TabsContent value="advanced" className="h-full mt-0">
-								<LayerAdminPanel
-									entityType={entityType}
-									config={localConfig}
-									onChange={handleConfigChange}
-									className="h-full"
-								/>
+								{activeTab === 'advanced' && (
+									<LayerAdminPanel
+										entityType={entityType}
+										config={localConfig}
+										onChange={handleConfigChange}
+										className="h-full"
+									/>
+								)}
 							</TabsContent>
 						</div>
 					</Tabs>
@@ -152,7 +209,7 @@ export function LayerManagementButton({
 	className,
 }: {
 	entityType: string;
-	config: EntityCardLayerSystemConfig;
+	config: EntityCardLayerSystemConfig | LayersModuleConfig;
 	onChange: (config: EntityCardLayerSystemConfig) => void;
 	className?: string;
 }) {

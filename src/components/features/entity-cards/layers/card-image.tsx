@@ -6,6 +6,22 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
+// Función para validar si la URL de la imagen es válida
+function isValidImageUrl(url: string): boolean {
+	if (!url || url.trim() === '') return false;
+
+	// Verificar si es una URL externa
+	if (url.startsWith('http://') || url.startsWith('https://')) return true;
+
+	// Verificar si es una URL interna
+	if (url.startsWith('/')) return true;
+
+	return false;
+}
+
+// Imagen por defecto para usar cuando no hay URL válida
+const DEFAULT_IMAGE = '/placeholders/character-placeholder.jpg';
+
 interface CardImageProps {
 	options: CardOptions;
 	src: string;
@@ -27,6 +43,9 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(false);
 
+	// Verificar si la URL de la imagen es válida
+	const imageUrl = isValidImageUrl(src) ? src : DEFAULT_IMAGE;
+
 	return (
 		<motion.div
 			className={cn(
@@ -39,7 +58,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 			animate={{ opacity: 1 }}
 			transition={{
 				duration: 0.3,
-				ease: 'easeOut',
+				ease: [0.4, 0, 0.2, 1],
 			}}
 		>
 			{/* Fondo base */}
@@ -48,7 +67,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 			{/* Contenedor de imagen */}
 			<div className="relative z-10 w-full h-full">
 				<Image
-					src={src}
+					src={imageUrl}
 					alt={alt}
 					width={width || 400}
 					height={height || 300}
@@ -59,7 +78,10 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 						isLoading ? 'opacity-0' : 'opacity-100'
 					)}
 					onLoadingComplete={() => setIsLoading(false)}
-					onError={() => setError(true)}
+					onError={() => {
+						setError(true);
+						setIsLoading(false);
+					}}
 					priority
 				/>
 
@@ -132,7 +154,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 				transition={{
 					duration: 3,
 					repeat: Number.POSITIVE_INFINITY,
-					ease: 'easeInOut',
+					ease: [0.4, 0, 0.2, 1],
 				}}
 			/>
 
@@ -151,7 +173,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 				transition={{
 					duration: 3,
 					repeat: Number.POSITIVE_INFINITY,
-					ease: 'linear',
+					ease: "linear",
 				}}
 			/>
 		</motion.div>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
-import { GlowSettings } from './glow/glow-settings';
 import { type BaseLayerConfig, LayerPluginProvider, LayerRenderer, useLayerPlugin } from './layer-plugin-system';
 import { RegisterLayers } from './register-layers';
 

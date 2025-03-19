@@ -41,16 +41,24 @@ interface AnimatedBorderSettingsProps {
 	entityType: string;
 	entityId?: string;
 	className?: string;
+	initialConfig?: AnimatedBorderFormValues;
+	onConfigUpdate?: (config: AnimatedBorderFormValues) => void;
 }
 
-export function AnimatedBorderSettings({ entityType, entityId, className }: AnimatedBorderSettingsProps) {
+export function AnimatedBorderSettings({
+	entityType,
+	entityId,
+	className,
+	initialConfig,
+	onConfigUpdate
+}: AnimatedBorderSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [previewStyle, setPreviewStyle] = useState<Record<string, string>>({});
 
 	// Inicializar el formulario con valores por defecto
 	const form = useForm<AnimatedBorderFormValues>({
 		resolver: zodResolver(animatedBorderFormSchema),
-		defaultValues: {
+		defaultValues: initialConfig || {
 			enabled: true,
 			width: 2,
 			color: '#ffffff',
@@ -66,6 +74,13 @@ export function AnimatedBorderSettings({ entityType, entityId, className }: Anim
 
 	// Cargar la configuración al montar el componente
 	useEffect(() => {
+		// Si se proporciona initialConfig, no es necesario cargar del servidor
+		if (initialConfig) {
+			form.reset(initialConfig);
+			updatePreview(initialConfig);
+			return;
+		}
+
 		const loadConfig = async () => {
 			setIsLoading(true);
 			try {
@@ -87,15 +102,20 @@ export function AnimatedBorderSettings({ entityType, entityId, className }: Anim
 		};
 
 		loadConfig();
-	}, [entityType, entityId, form]);
+	}, [entityType, entityId, form, initialConfig]);
 
-	// Actualizar el preview cuando cambien los valores del formulario
+	// Observar cambios en el formulario para actualizar la vista previa
 	useEffect(() => {
-		const subscription = form.watch((values) => {
-			updatePreview(values as AnimatedBorderConfig);
+		const subscription = form.watch((value) => {
+			updatePreview(value as AnimatedBorderConfig);
+
+			// Si hay una función onConfigUpdate, llamarla con los nuevos valores
+			if (onConfigUpdate) {
+				onConfigUpdate(value as AnimatedBorderFormValues);
+			}
 		});
 		return () => subscription.unsubscribe();
-	}, [form]);
+	}, [form, onConfigUpdate]);
 
 	// Función para actualizar el estilo de previsualización
 	const updatePreview = (values: AnimatedBorderConfig) => {
@@ -133,11 +153,16 @@ export function AnimatedBorderSettings({ entityType, entityId, className }: Anim
 		setPreviewStyle(style);
 	};
 
-	// Manejar el envío del formulario
 	const onSubmit = async (values: AnimatedBorderFormValues) => {
+		// Si hay un manejador de actualización externo, usarlo
+		if (onConfigUpdate) {
+			onConfigUpdate(values);
+			return;
+		}
+
 		setIsLoading(true);
 		try {
-			const response = await updateAnimatedBorderConfig(entityType, values, entityId);
+			const response = await updateAnimatedBorderConfig(entityType, values as AnimatedBorderConfig, entityId);
 			if (response.success) {
 				toast({
 					title: 'Éxito',

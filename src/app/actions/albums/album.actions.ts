@@ -359,30 +359,19 @@ export async function getAlbumImages(id: string): Promise<FileItem[]> {
 			});
 
 			if (!albumExists) {
-				throw createAlbumError('Álbum no encontrado', AlbumErrorCode.NOT_FOUND);
+				albumLogger.warn('ℹ️ Álbum no encontrado, retornando array vacío:', id);
+				return [];
 			}
 		}
 
 		albumLogger.info(`✅ ${images.length} imágenes obtenidas`);
-		return images.map((image) => ({
-			...image,
-			type: 'image',
-			metadata: image.metadata,
-			modifiedAt: image.updatedAt,
-			accessedAt: image.createdAt,
-			tags: image.tags?.map((t) => ({ id: t.id, name: t.name, color: t.color })) || [],
-			collections: image.collections?.map((c) => ({ id: c.id, name: c.name })) || [],
-			albums: image.albums?.map((a) => ({ id: a.id, name: a.name })) || [],
-			characters: image.characters?.map((c) => ({ id: c.id, name: c.name })) || [],
-			places: image.places?.map((p) => ({ id: p.id, name: p.name })) || [],
-			worldItems: image.worldItems?.map((o) => ({ id: o.id, name: o.name })) || [],
-			thumbnail: image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null,
-			concepts: [],
-			prompts: [],
-			notes: [],
-		}));
+		return images.map((img) => convertServerImageToFileItem(img as ServerImage));
 	} catch (error) {
 		albumLogger.error('❌ Error al obtener imágenes del álbum:', error);
+		// Preservar el error si ya es un AlbumError
+		if (error instanceof Error && error.name === 'AlbumError') {
+			throw error;
+		}
 		throw createAlbumError('No se pudieron obtener las imágenes del álbum', AlbumErrorCode.OPERATION_FAILED, error);
 	}
 }

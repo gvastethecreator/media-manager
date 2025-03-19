@@ -39,14 +39,22 @@ interface BorderSettingsProps {
 	entityType: string;
 	entityId?: string;
 	className?: string;
+	initialConfig?: BorderFormValues;
+	onConfigUpdate?: (config: BorderFormValues) => void;
 }
 
-export function BorderSettings({ entityType, entityId, className }: BorderSettingsProps) {
+export function BorderSettings({
+	entityType,
+	entityId,
+	className,
+	initialConfig,
+	onConfigUpdate
+}: BorderSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm<BorderFormValues>({
 		resolver: zodResolver(borderFormSchema),
-		defaultValues: {
+		defaultValues: initialConfig || {
 			enabled: true,
 			width: 2,
 			style: 'solid',
@@ -65,6 +73,11 @@ export function BorderSettings({ entityType, entityId, className }: BorderSettin
 	});
 
 	useEffect(() => {
+		if (initialConfig) {
+			form.reset(initialConfig);
+			return;
+		}
+
 		const loadConfig = async () => {
 			setIsLoading(true);
 			try {
@@ -85,9 +98,23 @@ export function BorderSettings({ entityType, entityId, className }: BorderSettin
 		};
 
 		loadConfig();
-	}, [entityType, entityId, form]);
+	}, [entityType, entityId, form, initialConfig]);
+
+	useEffect(() => {
+		if (onConfigUpdate) {
+			const subscription = form.watch((value) => {
+				onConfigUpdate(value as BorderFormValues);
+			});
+			return () => subscription.unsubscribe();
+		}
+	}, [form, onConfigUpdate]);
 
 	const onSubmit = async (values: BorderFormValues) => {
+		if (onConfigUpdate) {
+			onConfigUpdate(values);
+			return;
+		}
+
 		setIsLoading(true);
 		try {
 			const response = await updateBorderConfig(entityType, values, entityId);

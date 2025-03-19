@@ -2,15 +2,33 @@
  * 🌈 Tipos para el módulo de capas
  */
 
-import type { LayerConfig, LayerSystemConfig } from '../../layers/types';
+import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../../layers/types';
 import type { CardOptions } from '../../types/card-settings-types';
 
 /**
- * Configuración del módulo de capas
+ * Configuración del sistema de capas extendida
+ * Extiende la configuración básica de LayerSystemConfig de layers/types.ts
  */
 export interface LayersModuleConfig {
-	layerSystem: LayerSystemConfig;
+	/**
+	 * Configuración del sistema de capas
+	 */
+	layerSystem: LayerSystemConfig & {
+		/**
+		 * Espaciado entre capas cuando se usa renderStrategy 'stacked'
+		 */
+		layerSpacing?: number;
+	};
+
+	/**
+	 * Configuraciones individuales de cada capa
+	 */
 	layerConfigs: Record<string, LayerConfig>;
+
+	/**
+	 * Capas registradas en el sistema
+	 */
+	layers: Record<string, LayerImplementation>;
 }
 
 /**
@@ -43,6 +61,16 @@ export interface LayersContextType {
 	updateLayerConfig: (layerType: string, config: Partial<LayerConfig>) => void;
 	updateLayerOrder: (newOrder: string[]) => void;
 	resetToDefaults: () => void;
+
+	/**
+	 * Registrar una nueva capa en el sistema
+	 */
+	registerLayer: (layer: LayerImplementation) => void;
+
+	/**
+	 * Eliminar todas las capas registradas
+	 */
+	unregisterAllLayers: () => void;
 }
 
 /**
@@ -50,6 +78,10 @@ export interface LayersContextType {
  */
 export const DEFAULT_LAYERS_CONFIG: LayersModuleConfig = {
 	layerSystem: {
+		enabled: true,
+		renderStrategy: 'stacked',
+		compositionMode: 'normal',
+		layerSpacing: 2,
 		enabledLayers: {
 			container: true,
 			border: true,
@@ -82,12 +114,15 @@ export const DEFAULT_LAYERS_CONFIG: LayersModuleConfig = {
 			'stats',
 			'footer',
 		],
-		explode: {
-			enabled: false,
-			distance: 1.5,
-			perspective: 800,
-		},
-		animateOnHover: true,
+		options: {
+			explode: {
+				enabled: false,
+				distance: 1.5,
+				perspective: 800,
+			},
+			animateOnHover: true,
+		}
 	},
 	layerConfigs: {},
+	layers: {},
 };

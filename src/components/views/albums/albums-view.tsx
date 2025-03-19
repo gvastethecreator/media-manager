@@ -3,6 +3,7 @@
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { getCardOptionsFromPreset } from '@/components/features/entity-cards/actions/visual-presets.actions';
 import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -68,9 +69,24 @@ export function AlbumsView(_props: ViewProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_ALBUM_OPTIONS);
+	const [albumPresets, setAlbumPresets] = useState<Record<string, CardOptions>>({});
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithDetails[]>(albums);
+
+	// Función para cargar la configuración de un preset
+	const loadPresetConfig = useCallback(async (presetId: string): Promise<CardOptions | null> => {
+		try {
+			const response = await getCardOptionsFromPreset(presetId, 'album');
+			if (response.success && response.data) {
+				return response.data as CardOptions;
+			}
+			return null;
+		} catch (error) {
+			viewLogger.error('❌ Error cargando preset:', error);
+			return null;
+		}
+	}, []);
 
 	const loadAlbums = useCallback(async () => {
 		try {
@@ -94,6 +110,29 @@ export function AlbumsView(_props: ViewProps) {
 
 			setAlbums(transformedData);
 			viewLogger.info(`✅ ${data.length} álbumes cargados`);
+
+			// Cargar presets para cada álbum que tenga presetId
+			const presets: Record<string, CardOptions> = {};
+			const presetsToLoad = transformedData.filter(album => album.presetId);
+
+			if (presetsToLoad.length > 0) {
+				viewLogger.info(`🔄 Cargando ${presetsToLoad.length} presets para álbumes...`);
+
+				// Cargar presets en paralelo
+				const presetPromises = presetsToLoad.map(async (album) => {
+					if (album.presetId) {
+						const presetOptions = await loadPresetConfig(album.presetId);
+						if (presetOptions) {
+							presets[album.id] = presetOptions;
+						}
+					}
+				});
+
+				await Promise.all(presetPromises);
+				viewLogger.info(`✅ ${Object.keys(presets).length} presets cargados`);
+			}
+
+			setAlbumPresets(presets);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			viewLogger.error('❌ Error cargando álbumes:', error);
@@ -101,7 +140,7 @@ export function AlbumsView(_props: ViewProps) {
 		} finally {
 			setIsLoading(false);
 		}
-	}, []);
+	}, [loadPresetConfig]);
 
 	useEffect(() => {
 		loadAlbums();
@@ -160,6 +199,16 @@ export function AlbumsView(_props: ViewProps) {
 		[setCurrentView, setCurrentAlbum]
 	);
 
+	// Modificar la función para obtener opciones de tarjeta para un álbum específico
+	const getAlbumCardOptions = useCallback((albumId: string): CardOptions => {
+		// Si el álbum tiene un preset personalizado, usarlo
+		if (albumPresets[albumId]) {
+			return albumPresets[albumId];
+		}
+		// Si no, usar la configuración por defecto
+		return visualConfig;
+	}, [albumPresets, visualConfig]);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -199,7 +248,7 @@ export function AlbumsView(_props: ViewProps) {
 								onClick={() => handleAlbumClick(album)}
 								showVisualConfig={true}
 								enableExplode={true}
-								options={visualConfig}
+								options={getAlbumCardOptions(album.id)}
 							/>
 						</motion.div>
 					))}

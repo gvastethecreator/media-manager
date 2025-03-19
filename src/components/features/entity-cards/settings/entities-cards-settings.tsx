@@ -6,17 +6,12 @@ import {
 import type { EntityType } from '@/components/features/entity-cards/adapters/preset-adapter';
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
-import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
-import { RegisterLayers } from '@/components/features/entity-cards/layers/register-layers';
-import { DesignPanel } from '@/components/features/entity-cards/modules/design';
 import {
-	adaptEntityCardToLayerSystem,
-	adaptLayerSystemToEntityCard,
-} from '@/components/features/entity-cards/modules/layers/entity-card-layer-adapter';
-import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers/layer-management-dialog';
-import { LayersPanel } from '@/components/features/entity-cards/modules/layers/layers-panel';
-import { RegisterAllLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
-import { adaptCardOptionsToLayersConfig } from '@/components/features/entity-cards/modules/layers/use-layers';
+	adaptCardOptionsToLayersConfig, adaptEntityCardToLayerSystem,
+	adaptLayerSystemToEntityCard, LayerPluginProvider, LayersPanel, LayersProvider, RegisterAllLayers
+} from '@/components/features/entity-cards/layers';
+import { DesignPanel } from '@/components/features/entity-cards/modules/design';
+import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-module/layer-management-dialog';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import { PresetsPanel } from '@/components/features/entity-cards/settings/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
@@ -71,7 +66,6 @@ import {
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { LayersProvider } from '../modules/layers/use-layers';
 
 // Añadir la variable entityId que falta
 const entityId = 'default'; // ID por defecto para componentes que no están asociados a una entidad específica
@@ -1094,13 +1088,17 @@ export function EntitiesCardsSection() {
 									)}
 									{/* Panel de vista previa */}
 									{activePanel === 'preview' && (
-										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
+										<PreviewSettings
+											options={cardOptions}
+											onChange={handleCardOptionsChange}
+											disabled={false}
+										/>
 									)}
 									{/* Panel de capas */}
 									{activePanel === 'layers' && (
 										<LayersProvider initialConfig={adaptCardOptionsToLayersConfig(cardOptions)}>
 											<LayerPluginProvider>
-												<RegisterLayers />
+												<RegisterAllLayers />
 												<LayersPanel
 													config={adaptEntityCardToLayerSystem(cardOptions)}
 													onChange={(layerConfig) => {

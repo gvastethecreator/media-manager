@@ -129,6 +129,127 @@ export interface LayerConfig {
 }
 
 /**
+ * Implementación de una capa en el sistema
+ * Esta interfaz define la estructura que debe seguir cualquier capa que se registre en el sistema
+ */
+export interface LayerImplementation {
+	/**
+	 * Identificador único de la capa
+	 */
+	type: string;
+
+	/**
+	 * Nombre amigable para mostrar en la UI
+	 */
+	name: string;
+
+	/**
+	 * Descripción de la funcionalidad de la capa
+	 */
+	description?: string;
+
+	/**
+	 * Categoría a la que pertenece la capa
+	 */
+	category?: string;
+
+	/**
+	 * Configuración por defecto para la capa
+	 */
+	defaultConfig?: LayerConfig;
+
+	/**
+	 * Icono para representar la capa en la UI
+	 */
+	icon?: React.ReactNode;
+
+	/**
+	 * Tipos de entidad compatibles con esta capa
+	 */
+	compatibleEntityTypes?: string[];
+
+	/**
+	 * Función para renderizar la capa
+	 */
+	render: (props: LayerRenderProps) => React.ReactNode;
+
+	/**
+	 * Componente para configurar la capa (opcional)
+	 */
+	Settings?: React.ComponentType<LayerSettingsProps>;
+}
+
+/**
+ * Props para renderizar una capa
+ */
+export interface LayerRenderProps {
+	/**
+	 * Configuración actual de la capa
+	 */
+	config: LayerConfig;
+
+	/**
+	 * Si el mouse está sobre la tarjeta
+	 */
+	isHovered?: boolean;
+
+	/**
+	 * Posición relativa del mouse sobre la tarjeta
+	 */
+	mousePosition?: { x: number; y: number };
+
+	/**
+	 * Si la capa está activa/seleccionada
+	 */
+	isActive?: boolean;
+
+	/**
+	 * Si la vista está en modo explotado
+	 */
+	isExploded?: boolean;
+
+	/**
+	 * Tipo de entidad
+	 */
+	entityType: string;
+
+	/**
+	 * ID de la entidad (opcional)
+	 */
+	entityId?: string;
+
+	/**
+	 * Contexto adicional para la capa
+	 */
+	context?: Record<string, unknown>;
+}
+
+/**
+ * Props para el componente de configuración de una capa
+ */
+export interface LayerSettingsProps {
+	/**
+	 * Configuración actual de la capa
+	 */
+	config: LayerConfig;
+
+	/**
+	 * Callback para actualizar la configuración
+	 */
+	onChange: (config: Partial<LayerConfig>) => void;
+
+	/**
+	 * Tipo de entidad
+	 */
+	entityType: string;
+
+	/**
+	 * ID de la entidad (opcional)
+	 */
+	entityId?: string;
+}
+
+/**
  * Configuración del sistema de capas
  */
 export interface LayerSystemConfig {
@@ -146,6 +267,16 @@ export interface LayerSystemConfig {
 	 * Modo de composición para capas superpuestas
 	 */
 	compositionMode: 'normal' | 'overlay' | 'screen' | 'multiply';
+
+	/**
+	 * Capas habilitadas con sus estados
+	 */
+	enabledLayers?: Record<string, boolean>;
+
+	/**
+	 * Orden de renderizado de las capas
+	 */
+	layerOrder?: string[];
 
 	/**
 	 * Opciones adicionales para el sistema de capas
