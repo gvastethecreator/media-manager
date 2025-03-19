@@ -10,7 +10,7 @@
 import { cn } from '@/lib/utils';
 import { Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { type LayerImplementation, type LayerRenderProps, type LayerSettingsProps } from '../types';
+import type { LayerImplementation, LayerRenderProps, LayerSettingsProps } from '../types';
 import { DistortionEffectsModule } from './distortion-effects-module';
 import type { DistortionEffectsSystem } from './types';
 import { useDistortionEffects } from './use-distortion-effects';
@@ -150,7 +150,7 @@ export const distortionLayerImplementation: LayerImplementation = {
 		const { config, onChange, entityType, entityId } = props;
 		const [effectsSystem, setEffectsSystem] = useState<DistortionEffectsSystem & { layerIndex: number }>({
 			...defaultConfig,
-			...(config as any)
+			...(config as unknown as DistortionEffectsSystem)
 		});
 
 		// Actualizar el estado cuando cambien las props
@@ -168,11 +168,11 @@ export const distortionLayerImplementation: LayerImplementation = {
 			setEffectsSystem({
 				...updatedSystem,
 				layerIndex: effectsSystem.layerIndex
-			});
+			} as DistortionEffectsSystem & { layerIndex: number });
 			onChange({
 				...updatedSystem,
 				layerIndex: effectsSystem.layerIndex
-			} as any);
+			} as unknown as Record<string, unknown>);
 		};
 
 		return (

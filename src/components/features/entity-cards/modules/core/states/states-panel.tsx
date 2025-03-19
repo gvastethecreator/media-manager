@@ -1,9 +1,9 @@
 'use client';
 
+import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
 import { Button } from '@/components/ui/button';
 import { EyeIcon, FocusIcon, HandIcon, RefreshCwIcon, StarIcon } from 'lucide-react';
 import { useState } from 'react';
-import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
 import type { StatesSystem } from './types';
 
 interface StatesPanelProps {

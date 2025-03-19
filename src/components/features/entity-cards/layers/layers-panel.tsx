@@ -11,8 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Layers, Settings } from 'lucide-react';
 import { useState } from 'react';
-import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults } from '../../layer-settings-config';
-import { FormGroup, FormLayout, FormSection } from '../../settings/panels/shared';
+import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults } from '../settings/layer-settings-config';
+import { FormGroup, FormLayout, FormSection } from '../settings/panels/shared';
 import { useLayersSystem } from './hooks/use-layers-system';
 import type { LayersSettingsPanelProps } from './types';
 
@@ -113,9 +113,8 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 							return (
 								<div
 									key={layer.type}
-									className={`flex items-center justify-between p-3 rounded-md border ${
-										isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
-									}`}
+									className={`flex items-center justify-between p-3 rounded-md border ${isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
+										}`}
 								>
 									<div className="flex items-center gap-2">
 										<Switch

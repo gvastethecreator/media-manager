@@ -8,12 +8,12 @@
  */
 'use server';
 
-import fs from 'node:fs/promises';
 import { thumbnailCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
 import { ThumbnailQuality } from '@/types/thumbnails';
+import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';

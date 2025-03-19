@@ -131,6 +131,6 @@ export const scanlinesServerActions = {
 
 // Exportaciones adicionales
 export * from './actions';
-export { ScanlinesEffectLayerWithStyles } from './scanlines-effect-layer';
+export { ScanlinesEffectLayer } from './scanlines-effect-layer';
 export { ScanlinesSettings } from './scanlines-settings';
 

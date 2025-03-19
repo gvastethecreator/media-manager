@@ -7,13 +7,13 @@
  * la interfaz LayerImplementation definida en el sistema de capas.
  */
 
-import type { Grid3X3 } from 'lucide-react';
-import type { TextureEffectLayer } from './texture-effect-layer';
+import { Grid3X3 } from 'lucide-react';
 import type { LayerImplementation } from '../types';
+import { TextureEffectLayer } from './texture-effect-layer';
 import type { TextureConfig } from './texture-layer-schema';
 
 // Importamos los componentes y acciones necesarios
-import type { TextureAdvancedOptions } from './texture-advanced-options';
+import { TextureAdvancedOptions } from './texture-advanced-options';
 
 // Simulamos las acciones del servidor, en un entorno real deberían implementarse
 const getTextureConfig = async (entityType: string, entityId?: string) => {
@@ -108,7 +108,7 @@ export const textureLayerImplementation: LayerImplementation = {
 	Settings: ({ config, onChange, entityType, entityId }) => {
 		return (
 			<TextureAdvancedOptions
-				config={config as TextureConfig}
+				texture={config as TextureConfig}
 				onChange={(newConfig) => onChange(newConfig)}
 			/>
 		);
@@ -123,5 +123,6 @@ export const textureServerActions = {
 };
 
 // Exportaciones adicionales
-export { TextureEffectLayer } from './texture-effect-layer';
 export { TextureAdvancedOptions } from './texture-advanced-options';
+export { TextureEffectLayer } from './texture-effect-layer';
+

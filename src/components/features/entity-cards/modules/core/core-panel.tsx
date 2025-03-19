@@ -1,9 +1,9 @@
 'use client';
 
+import { FormLayout, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutGrid, Settings2, Volume2, Zap } from 'lucide-react';
 import { useState } from 'react';
-import { FormLayout, FormToggle } from '../../settings/panels/shared';
 import type { CardOptions } from '../../types/card-settings-types';
 import { ContentSection, FeedbackSection, InteractivitySection, PerformanceSection } from './components/sections';
 import { useCoreSettings } from './hooks/use-core-settings';

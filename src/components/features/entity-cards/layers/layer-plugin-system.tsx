@@ -1,7 +1,7 @@
 'use client';
 
 import type * as React from 'react';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import type { LayerConfigResponse } from '../types/card-layer-types';
 
@@ -55,6 +55,7 @@ export interface LegacyLayerComponentProps {
 interface LayerPluginContextType {
 	registerLayer: (layer: LayerComponent) => void;
 	unregisterLayer: (layerType: string) => void;
+	clearLayers: () => void;
 	getLayer: (layerType: string) => LayerComponent | undefined;
 	getLayers: () => LayerComponent[];
 	getOrderedLayers: () => LayerComponent[];
@@ -89,6 +90,11 @@ export function LayerPluginProvider({ children }: { children: React.ReactNode })
 		});
 	}, []);
 
+	// Limpiar todas las capas
+	const clearLayers = useCallback(() => {
+		setLayers({});
+	}, []);
+
 	// Obtener una capa específica
 	const getLayer = useCallback(
 		(layerType: string) => {
@@ -111,11 +117,12 @@ export function LayerPluginProvider({ children }: { children: React.ReactNode })
 		() => ({
 			registerLayer,
 			unregisterLayer,
+			clearLayers,
 			getLayer,
 			getLayers,
 			getOrderedLayers,
 		}),
-		[registerLayer, unregisterLayer, getLayer, getLayers, getOrderedLayers]
+		[registerLayer, unregisterLayer, clearLayers, getLayer, getLayers, getOrderedLayers]
 	);
 
 	return <LayerPluginContext.Provider value={contextValue}>{children}</LayerPluginContext.Provider>;
@@ -155,18 +162,6 @@ export function LayerRenderer({
 	const { getOrderedLayers } = useLayerPlugin();
 	const orderedLayers = getOrderedLayers();
 
-	// Agregamos un useEffect para garantizar que las capas se inicialicen correctamente
-	const [layerInitialized, setLayerInitialized] = useState(false);
-
-	useEffect(() => {
-		// Dar un pequeño tiempo para que el DOM se renderice completamente
-		const timer = setTimeout(() => {
-			setLayerInitialized(true);
-		}, 50);
-
-		return () => clearTimeout(timer);
-	}, []);
-
 	// Combinar contexto con otras propiedades para compatibilidad con ambas implementaciones
 	const combinedContext = {
 		...context,
@@ -178,14 +173,35 @@ export function LayerRenderer({
 		entityId,
 	};
 
-	// No renderizar hasta que esté inicializado
-	if (!layerInitialized) {
-		return <div className="layer-system-initializing" data-testid="layer-system-initializing" />;
+	// Verificar que haya capas para renderizar
+	if (!orderedLayers || orderedLayers.length === 0) {
+		console.log('ℹ️ No hay capas disponibles para renderizar');
+		return null;
 	}
+
+	// Antes de renderizar, filtrar las capas inválidas
+	const validLayers = orderedLayers.filter(layer => {
+		if (!layer) {
+			console.warn('⚠️ Se encontró una capa indefinida');
+			return false;
+		}
+
+		if (!layer.Component) {
+			console.error(`❌ La capa ${layer?.type || 'desconocida'} no tiene un componente válido.`);
+			return false;
+		}
+
+		return true;
+	});
 
 	return (
 		<>
-			{orderedLayers.map((layer) => {
+			{validLayers.map((layer) => {
+				// Este punto ya debería ser seguro, pero añadimos una verificación adicional
+				if (!layer || !layer.Component) {
+					return null;
+				}
+
 				const LayerComp = layer.Component;
 				const config = configs[layer.type] || layer.defaultConfig;
 
@@ -200,7 +216,11 @@ export function LayerRenderer({
 					if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
 						// Usar type assertion para manejar componentes legacy
 						return (
-							<ErrorBoundary key={`layer-${layer.type}`} fallback={<div className="layer-error" />}>
+							<ErrorBoundary
+								key={`layer-${layer.type}`}
+								fallback={<div className="layer-error" data-error-layer={layer.type} />}
+								onError={(error) => console.error(`Error en capa ${layer.type}:`, error)}
+							>
 								<LayerComp
 									key={`layer-${layer.type}`}
 									config={config}
@@ -213,7 +233,11 @@ export function LayerRenderer({
 
 					// De lo contrario, usar la interfaz estándar
 					return (
-						<ErrorBoundary key={`layer-${layer.type}`} fallback={<div className="layer-error" />}>
+						<ErrorBoundary
+							key={`layer-${layer.type}`}
+							fallback={<div className="layer-error" data-error-layer={layer.type} />}
+							onError={(error) => console.error(`Error en capa ${layer.type}:`, error)}
+						>
 							<LayerComp
 								key={`layer-${layer.type}`}
 								isExploded={isExploded}
@@ -229,7 +253,7 @@ export function LayerRenderer({
 					);
 				} catch (err) {
 					console.error(`Error renderizando capa ${layer.type}:`, err);
-					return <div key={`layer-error-${layer.type}`} className="layer-error" />;
+					return <div key={`layer-error-${layer.type}`} className="layer-error" data-error-layer={layer.type} />;
 				}
 			})}
 		</>

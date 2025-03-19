@@ -8,7 +8,7 @@
  */
 
 import { Zap } from 'lucide-react';
-import { type LayerImplementation, type LayerRenderProps, type LayerSettingsProps } from '../types';
+import type { LayerImplementation, LayerRenderProps, LayerSettingsProps } from '../types';
 import AnimatedBorderEffectLayerWithStyles, { type AnimatedBorderConfig } from './animated-border-effect-layer';
 import { AnimatedBorderSettings } from './animated-border-settings';
 
@@ -97,7 +97,7 @@ export const animatedBorderLayerImplementation: LayerImplementation = {
 				entityType={entityType}
 				entityId={entityId}
 				initialConfig={typedConfig}
-				onConfigUpdate={(newConfig) => onChange(newConfig as any)}
+				onConfigUpdate={(newConfig) => onChange(newConfig as unknown as Record<string, unknown>)}
 			/>
 		);
 	}

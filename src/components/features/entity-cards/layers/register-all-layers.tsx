@@ -11,14 +11,18 @@ import { useEffect } from 'react';
 import { useLayerPlugin } from './layer-plugin-system';
 
 // Importar todas las implementaciones de capas
-import { animatedBorderLayer } from './animated-border';
+import { animatedBorderLayerImplementation } from './animated-border';
 import { borderLayerImplementation } from './border/border-layer-implementation';
 import { chromaticAberrationLayerImplementation } from './chromatic-aberration';
-import { filterLayer } from './filters';
+import { contentLayerImplementation } from './content';
+import { distortionLayerImplementation } from './distortion';
+import { filterLayerImplementation } from './filters';
 import { glitchLayer } from './glitch';
 import { glowLayerImplementation } from './glow/glow-layer-implementation';
 import { grainLayer } from './grain';
 import { holographicLayer } from './holographic';
+import { imageLayerImplementation } from './image';
+import { metadataLayerImplementation } from './metadata';
 import { noiseTextureLayer } from './noise-texture';
 import { patternLayer } from './patterns';
 import { pixelateLayer } from './pixelate';
@@ -37,23 +41,22 @@ export function RegisterAllLayers() {
 		unregisterAllLayers();
 
 		// Registrar capas con la nueva implementación (LayerImplementation)
+		registerLayer(animatedBorderLayerImplementation);
 		registerLayer(borderLayerImplementation);
+		registerLayer(chromaticAberrationLayerImplementation);
+		registerLayer(contentLayerImplementation);
+		registerLayer(distortionLayerImplementation);
 		registerLayer(glowLayerImplementation);
+		registerLayer(imageLayerImplementation);
+		registerLayer(metadataLayerImplementation);
 		registerLayer(scanlinesLayerImplementation);
 		registerLayer(textureLayerImplementation);
-		registerLayer(chromaticAberrationLayerImplementation);
 
 		// Registrar capas con la implementación legacy
 		registerLayer({
-			type: 'animated-border',
-			Component: animatedBorderLayer.Component,
-			defaultConfig: animatedBorderLayer.defaultConfig,
-		});
-
-		registerLayer({
 			type: 'filter',
-			Component: filterLayer.Component,
-			defaultConfig: filterLayer.defaultConfig,
+			Component: filterLayerImplementation.Component,
+			defaultConfig: filterLayerImplementation.defaultConfig,
 		});
 
 		registerLayer({
