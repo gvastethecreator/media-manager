@@ -1,15 +1,11 @@
 {
-  "server-sequential-thinking": {
-    "command": "cmd",
-    "args": [
-      "/c",
-      "npx",
-      "-y",
-      "@smithery/cli@latest",
-      "run",
-      "@smithery-ai/server-sequential-thinking",
-      "--config",
-      "{}"
-    ]
+  "mcpServers": {
+    "desktop-commander": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@wonderwhy-er/desktop-commander"
+      ]
+    }
   }
 }

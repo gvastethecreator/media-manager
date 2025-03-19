@@ -4,8 +4,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
-import os from 'os';
 
 const systemLogger = serverLogger.withContext('SystemActions');
 

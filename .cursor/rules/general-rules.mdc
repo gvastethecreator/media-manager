@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-
+- Always answer and comment in spanish.
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
 - Treat me as an expert—be thorough, accurate, and up-to-date.

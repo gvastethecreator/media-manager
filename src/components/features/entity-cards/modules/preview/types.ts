@@ -2,6 +2,9 @@
  * Tipos para el módulo de previsualización
  */
 
+import type { EntityType } from '../../adapters/preset-adapter';
+import type { RarityConfig, TextureConfig } from '../../types/base-card-types';
+
 /**
  * Opciones de configuración de previsualización
  */
@@ -54,6 +57,14 @@ export interface PreviewModuleProps {
 	onChange?: (options: PreviewOptions) => void;
 	disabled?: boolean;
 	className?: string;
+	// Campos adicionales para la versión extendida
+	rarity?: RarityConfig | null;
+	texture?: TextureConfig | null;
+	entityType?: EntityType;
+	activeLayerId?: string | null;
+	isExploded?: boolean;
+	onExplodedChange?: (value: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
 }
 
 /**

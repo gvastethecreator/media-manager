@@ -7,6 +7,7 @@ import '@/styles/form-animations.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import type React from 'react';
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -37,12 +38,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					'selection:bg-primary selection:text-primary-foreground'
 				)}
 			>
-				<AppProvider>
+				<Providers>
 					<ServerInitializer />
-					<div className="relative min-h-screen w-full">
-						<GlobalErrorHandler>{children}</GlobalErrorHandler>
-					</div>
-				</AppProvider>
+					<AppProvider>
+						<div className="relative min-h-screen w-full">
+							<GlobalErrorHandler>{children}</GlobalErrorHandler>
+						</div>
+					</AppProvider>
+				</Providers>
 			</body>
 		</html>
 	);

@@ -7,7 +7,7 @@
  * del servidor y mostrar estadísticas en tiempo real.
  */
 
-import os from 'os';
+import os from 'node:os';
 import { serverLogger } from '../logger/server-logger';
 
 // Logger específico para el monitor de sistema

@@ -280,6 +280,18 @@ export async function deleteCharacter(id: string) {
 export async function getCharacterImages(id: string) {
 	try {
 		characterLogger.info('🖼️ Obteniendo imágenes del personaje:', id);
+
+		// Verificar primero si el personaje existe
+		const character = await prisma.character.findUnique({
+			where: { id },
+			select: { id: true }
+		});
+
+		if (!character) {
+			characterLogger.warn('ℹ️ Personaje no encontrado, retornando array vacío:', id);
+			return [];
+		}
+
 		const images = await prisma.image.findMany({
 			where: {
 				characters: {

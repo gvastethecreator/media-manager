@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { type Entity, EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
-import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/modules/layers/register-layers';
+import { RegisterEntityTypeLayers } from '@/components/features/entity-cards/modules/layers-module/register-layers';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';

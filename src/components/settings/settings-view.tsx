@@ -1,10 +1,8 @@
 'use client';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	AlbumIcon,
-	BlocksIcon,
 	BookIcon,
 	BoxIcon,
 	Grid2X2Icon,
@@ -16,10 +14,11 @@ import {
 	StickyNoteIcon,
 	TagIcon,
 	UploadCloud,
-	UserIcon,
+	UserIcon
 } from 'lucide-react';
 import * as React from 'react';
 
+import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
 import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings/entities-cards-settings';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -186,7 +185,9 @@ export function SettingsView() {
 				{/* Contenido de los tabs */}
 				<div className="flex-1 overflow-hidden">
 					<TabsContent value="entities-cards" className="px-1 h-full overflow-auto">
-						<EntitiesCardsSection />
+						<LayerPluginProvider>
+							<EntitiesCardsSection />
+						</LayerPluginProvider>
 					</TabsContent>
 
 					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">

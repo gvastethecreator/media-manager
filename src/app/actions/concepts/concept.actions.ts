@@ -2,14 +2,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
 import type { EventType } from '@/lib/server/events.server';
-import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
+import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { Concept } from '@/types/entities/concepts';
 import type { FileItem } from '@/types/file-item';
 import type { Concept as PrismaConcept } from '@prisma/client';
-import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -277,7 +275,9 @@ export async function getConceptImages(conceptId: string): Promise<FileItem[]> {
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			// Cambiar de lanzar error a simplemente registrar un mensaje informativo
+			conceptLogger.warn('ℹ️ Concepto no encontrado, retornando array vacío:', conceptId);
+			return [];
 		}
 
 		// Solución temporal hasta que se implementen las relaciones correctamente

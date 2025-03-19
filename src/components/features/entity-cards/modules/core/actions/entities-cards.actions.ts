@@ -1,7 +1,8 @@
 'use server';
 
-import type { TextureConfig, TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
+import type { TextureSystem } from '@/components/features/entity-cards/types/base-card-types';
 import type { CardConfigurationDto } from '@/components/features/entity-cards/types/card-types';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { Rarity as PrismaRarity, Texture as PrismaTexture } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
@@ -116,6 +117,8 @@ export interface ActionResponse {
 	data?: unknown;
 }
 
+const logger = serverLogger.withContext('EntityCardActiones');
+
 /**
  * Obtiene la configuración de tarjeta para una entidad específica
  */
@@ -126,42 +129,23 @@ export async function getEntityCardConfig(entityType: string): Promise<ActionRes
 			where: { entityType },
 		});
 
-		// Si no existe configuración, crear una por defecto
 		if (!config) {
-			const defaultConfig: CardOptions = {
-				enable3DEffect: true,
-				enableHolographicEffect: true,
-				enableScanlines: true,
-				enableLightHalo: true,
-				enableAnimatedBorder: true,
-				enableGlowEffect: true,
-				enableGrainEffect: true,
-				hoverLiftHeight: 10,
-				maxRotation: 15,
-				primaryColor: '#3b82f6',
-				secondaryColor: '#8b5cf6',
-				raritySystem: false,
-				categorySystem: true,
-				textureSystem: false,
-			};
-
 			return {
-				success: true,
-				message: `Configuración por defecto para ${entityType}`,
-				data: defaultConfig,
+				success: false,
+				message: `No se encontró configuración para el tipo de entidad: ${entityType}`,
 			};
 		}
 
 		return {
 			success: true,
-			message: `Configuración de tarjeta cargada para ${entityType}`,
+			message: 'Configuración de tarjeta obtenida correctamente',
 			data: config,
 		};
 	} catch (error) {
-		console.error('Error al obtener la configuración de tarjeta:', error);
+		logger.error('❌ Error al obtener configuración de tarjeta:', error);
 		return {
 			success: false,
-			message: 'No se pudo obtener la configuración de tarjeta',
+			message: 'Error al obtener la configuración de tarjeta',
 		};
 	}
 }
@@ -169,59 +153,41 @@ export async function getEntityCardConfig(entityType: string): Promise<ActionRes
 /**
  * Guarda la configuración de tarjeta para una entidad específica
  */
-export async function saveEntityCardConfig(entityType: string, options: CardConfigurationDto): Promise<ActionResponse> {
+export async function saveEntityCardConfig(
+	entityType: string,
+	config: CardConfigurationDto
+): Promise<ActionResponse> {
 	try {
-		// Guardar la configuración en la base de datos usando upsert
-		await prisma.cardConfiguration.upsert({
+		// Actualizar o crear la configuración
+		const updatedConfig = await prisma.cardConfiguration.upsert({
 			where: { entityType },
 			update: {
-				enable3DEffect: options.enable3DEffect,
-				enableHolographicEffect: options.enableHolographicEffect,
-				enableScanlines: options.enableScanlines,
-				enableLightHalo: options.enableLightHalo,
-				enableAnimatedBorder: options.enableAnimatedBorder,
-				enableGlowEffect: options.enableGlowEffect,
-				enableGrainEffect: options.enableGrainEffect,
-				hoverLiftHeight: options.hoverLiftHeight,
-				maxRotation: options.maxRotation,
-				primaryColor: options.primaryColor,
-				secondaryColor: options.secondaryColor,
-				raritySystem: options.raritySystem,
-				categorySystem: options.categorySystem,
-				textureSystem: options.textureSystem,
+				...config,
+				// Añadir campos adicionales necesarios
+				updatedAt: new Date(),
 			},
 			create: {
 				entityType,
-				enable3DEffect: options.enable3DEffect,
-				enableHolographicEffect: options.enableHolographicEffect,
-				enableScanlines: options.enableScanlines,
-				enableLightHalo: options.enableLightHalo,
-				enableAnimatedBorder: options.enableAnimatedBorder,
-				enableGlowEffect: options.enableGlowEffect,
-				enableGrainEffect: options.enableGrainEffect,
-				hoverLiftHeight: options.hoverLiftHeight,
-				maxRotation: options.maxRotation,
-				primaryColor: options.primaryColor,
-				secondaryColor: options.secondaryColor,
-				raritySystem: options.raritySystem,
-				categorySystem: options.categorySystem,
-				textureSystem: options.textureSystem,
+				...config,
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			},
 		});
 
-		// Revalidar las rutas que usan esta configuración
+		// Revalidar rutas relevantes
 		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
+		revalidatePath(`/api/entities/${entityType}/visual-config`);
 
 		return {
 			success: true,
-			message: `Configuración de tarjeta guardada para ${entityType}`,
+			message: 'Configuración de tarjeta guardada correctamente',
+			data: updatedConfig,
 		};
 	} catch (error) {
-		console.error('Error al guardar la configuración de tarjeta:', error);
+		logger.error('❌ Error al guardar configuración de tarjeta:', error);
 		return {
 			success: false,
-			message: 'No se pudo guardar la configuración de tarjeta',
+			message: 'Error al guardar la configuración de tarjeta',
 		};
 	}
 }
@@ -963,6 +929,124 @@ export async function saveCoreConfig(
 		return {
 			success: false,
 			message: 'No se pudo guardar la configuración core',
+		};
+	}
+}
+
+/**
+ * Aplica un preset visual a una entidad específica
+ * @param entityType Tipo de entidad (album, folder, tag, etc.)
+ * @param entityId ID de la entidad
+ * @param presetId ID del preset a aplicar (null para quitar)
+ */
+export async function applyPresetToEntity(
+	entityType: string,
+	entityId: string,
+	presetId: string | null
+): Promise<ActionResponse> {
+	try {
+		// Verificar que los parámetros sean válidos
+		if (!entityType || !entityId) {
+			return {
+				success: false,
+				message: 'Tipo de entidad e ID son obligatorios',
+			};
+		}
+
+		logger.info(`🔄 Aplicando preset ${presetId || 'ninguno'} a ${entityType} con ID ${entityId}`);
+
+		// Objeto para almacenar la entidad actualizada
+		let updatedEntity: unknown = null;
+
+		// Según el tipo de entidad, actualizar el campo presetId
+		switch (entityType) {
+			case 'album':
+				updatedEntity = await prisma.album.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'folder':
+				updatedEntity = await prisma.folder.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'tag':
+				updatedEntity = await prisma.tag.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'collection':
+				updatedEntity = await prisma.collection.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'character':
+				updatedEntity = await prisma.character.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'place':
+				updatedEntity = await prisma.place.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'worldItem':
+				updatedEntity = await prisma.worldItem.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'concept':
+				updatedEntity = await prisma.concept.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'prompt':
+				updatedEntity = await prisma.prompt.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			case 'note':
+				updatedEntity = await prisma.note.update({
+					where: { id: entityId },
+					data: { presetId },
+				});
+				break;
+			default:
+				return {
+					success: false,
+					message: `Tipo de entidad no soportado: ${entityType}`,
+				};
+		}
+
+		// Revalidar todas las rutas relevantes
+		revalidatePath(`/${entityType}s`);
+		revalidatePath(`/${entityType}/${entityId}`);
+		revalidatePath(`/api/entities/${entityType}s`);
+		revalidatePath(`/api/entities/${entityType}/${entityId}`);
+
+		logger.info(`✅ Preset aplicado correctamente a ${entityType} con ID ${entityId}`);
+
+		return {
+			success: true,
+			message: presetId
+				? `Preset aplicado correctamente a ${entityType}`
+				: `Preset removido de ${entityType}`,
+			data: updatedEntity,
+		};
+	} catch (error) {
+		logger.error(`❌ Error al aplicar preset a ${entityType}:`, error);
+		return {
+			success: false,
+			message: `Error al aplicar preset a ${entityType}`,
 		};
 	}
 }
