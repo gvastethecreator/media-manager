@@ -9,13 +9,13 @@
 
 import { deepMerge } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
+import { RegisterAllLayers } from '../../layers';
 import { LayerPluginProvider } from '../../layers/layer-plugin-system';
 import {
 	adaptLayerSystemToEntityCard,
 	type EntityCardLayerSystemConfig
 } from './entity-card-layer-adapter';
 import { LayersPanel } from './layers-panel';
-import { RegisterAllLayers } from './register-layers';
 import { DEFAULT_LAYERS_CONFIG, type LayersModuleConfig, type LayersModuleProps } from './types';
 import { LayersProvider } from './use-layers';
 
