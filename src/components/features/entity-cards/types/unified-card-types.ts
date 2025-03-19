@@ -239,8 +239,16 @@ export interface CardOptions {
 	layers?: LayersConfig;
 	states?: CardStates;
 	interactivity?: CardInteractivity;
-
-	// Efectos visuales
+	imageGrid?: {
+		layout?: 'single' | 'dual' | 'triple' | 'quad' | 'six';
+		style?: 'standard' | 'masonry' | 'carousel' | 'polaroid' | 'overlap';
+		gap?: number;
+		columns?: number;
+		rows?: number;
+		aspectRatio?: string;
+		showCount?: boolean;
+		animated?: boolean;
+	};
 	enable3DEffect?: boolean;
 	enableHolographicEffect?: boolean;
 	enableScanlinesEffect?: boolean;
