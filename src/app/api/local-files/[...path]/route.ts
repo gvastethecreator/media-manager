@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from 'fs/promises';
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
+import * as path from 'path';
 
 export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
 	try {

@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
-import { readdir, stat } from 'node:fs/promises';
-import { extname, join } from 'node:path';
+import { readdir, stat } from 'fs/promises';
+import { extname, join } from 'path';
 import { extractMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { serverLogger } from '@/lib/logger/server-logger';

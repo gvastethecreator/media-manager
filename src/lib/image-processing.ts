@@ -1,5 +1,5 @@
-import * as path from 'node:path';
 import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
+import * as path from 'path';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 

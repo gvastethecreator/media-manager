@@ -12,6 +12,7 @@ import { useLayers } from '../modules/layers-module/use-layers';
 
 // Importar implementaciones de capas
 import { borderLayerImplementation } from './border/border-layer-implementation';
+import { chromaticAberrationLayerImplementation } from './chromatic-aberration';
 import { glowLayerImplementation } from './glow/glow-layer-implementation';
 import { scanlinesLayerImplementation } from './scanlines';
 import { textureLayerImplementation } from './textures';
@@ -37,6 +38,7 @@ export function RegisterLayersV2() {
 		registerLayer(glowLayerImplementation);
 		registerLayer(textureLayerImplementation);
 		registerLayer(scanlinesLayerImplementation);
+		registerLayer(chromaticAberrationLayerImplementation);
 
 		// Añadir más capas a medida que se implementen
 		// registerLayer(holographicLayerImplementation);
@@ -65,26 +67,31 @@ export function RegisterLayersV2ByEntityType({ entityType }: { entityType: strin
 			borderLayerImplementation,
 			glowLayerImplementation,
 			textureLayerImplementation,
-			scanlinesLayerImplementation
+			scanlinesLayerImplementation,
+			chromaticAberrationLayerImplementation
 		],
 		folder: [
 			borderLayerImplementation,
 			glowLayerImplementation,
-			textureLayerImplementation
+			textureLayerImplementation,
+			chromaticAberrationLayerImplementation
 		],
 		album: [
 			borderLayerImplementation,
 			glowLayerImplementation,
-			textureLayerImplementation
+			textureLayerImplementation,
+			chromaticAberrationLayerImplementation
 		],
 		tag: [
 			borderLayerImplementation,
-			glowLayerImplementation
+			glowLayerImplementation,
+			chromaticAberrationLayerImplementation
 		],
 		collection: [
 			borderLayerImplementation,
 			glowLayerImplementation,
-			textureLayerImplementation
+			textureLayerImplementation,
+			chromaticAberrationLayerImplementation
 		],
 		// Añadir más tipos según sea necesario
 	}), []);
