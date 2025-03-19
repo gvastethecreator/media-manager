@@ -19,13 +19,13 @@ import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './ty
 type ImageGridLayout = ImageGridProps['layout'];
 type ImageGridStyle = ImageGridProps['style'];
 // Importar sistema de manejo de errores
-import { RegisterLayers } from './layers/register-layers';
 // Importar CoreConfig desde el módulo core
 import { ErrorBoundary } from 'react-error-boundary';
 import type { CoreConfig } from './modules/core/core-config';
 import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
 // Importaciones para el sistema de depuración
 import { useCardDebug } from './debug/card-debug-toolbar';
+import { RegisterLayersForEntity } from './layers/unified-layer-registration';
 
 export interface BaseCardProps {
 	children: React.ReactNode;
@@ -461,7 +461,10 @@ export function EntityCard({
 						{enableLayers && layers.length > 0 && (!isDebugEnabled || shouldRenderLayer('layers')) && (
 							<LayerPluginProvider>
 								{/* Registrar las capas necesarias */}
-								<RegisterLayers />
+								<RegisterLayersForEntity
+									entityType={mergedOptions.entityType || 'default'}
+									debug={false}
+								/>
 
 								{/* Renderizar las capas */}
 								<ErrorBoundary fallback={<div className="bg-destructive/10 rounded p-2 text-xs">Error en efectos</div>}>

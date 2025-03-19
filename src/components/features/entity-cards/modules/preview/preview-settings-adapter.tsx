@@ -74,7 +74,7 @@ export function PreviewSettings(props: PreviewSettingsProps) {
 
 		// Renderizamos el nuevo módulo
 		return <PreviewModule initialOptions={previewOptions} onChange={handlePreviewChange} disabled={disabled} />;
-	} else {
+	}
 		// Caso 2: Formato extendido con cardOptions, rarity, texture, etc.
 		const { cardOptions, rarity, texture, entityType, activeLayerId, isExploded, onExplodedChange, onActiveLayerChange } = props;
 
@@ -112,5 +112,4 @@ export function PreviewSettings(props: PreviewSettingsProps) {
 				onActiveLayerChange={onActiveLayerChange}
 			/>
 		);
-	}
 }

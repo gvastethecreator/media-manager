@@ -1,5 +1,6 @@
 'use client';
 
+import { FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,7 +16,6 @@ import {
 	PaletteIcon,
 	Settings2Icon,
 } from 'lucide-react';
-import { FormToggle } from '../../../settings/panels/shared';
 import type { CardOptions } from '../../../types/card-settings-types';
 
 // �� Esquema de colores para el panel

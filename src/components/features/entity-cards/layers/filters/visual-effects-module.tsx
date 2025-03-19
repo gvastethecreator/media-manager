@@ -1,8 +1,8 @@
 'use client';
 
+import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
 import { Contrast, Droplets, Eye, Palette, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '../../../settings/panels/shared';
 
 // 📝 Definición de tipos para efectos visuales
 export interface VisualEffectsOptions {
@@ -370,7 +370,7 @@ export function VisualEffectsModule({ initialEffects, onChange, disabled, classN
 				label="Habilitar Efectos Visuales"
 				description="Activa o desactiva todos los efectos visuales"
 				checked={true}
-				onCheckedChange={() => {}}
+				onCheckedChange={() => { }}
 				disabled={disabled}
 			/>
 

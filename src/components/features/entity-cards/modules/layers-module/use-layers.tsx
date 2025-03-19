@@ -139,55 +139,87 @@ export function LayersProvider({
 			return;
 		}
 
-		// Registrar la capa
-		setConfig(prevConfig => {
-			// Verificar si la capa ya está registrada
-			if (prevConfig.layers[layer.type]) {
-				// Si ya está registrada, simplemente devolver la configuración actual
-				return prevConfig;
-			}
+		// Verificar que la capa tenga una función de renderizado válida
+		if (!layer.render || typeof layer.render !== 'function') {
+			console.error(`Error al registrar capa ${layer.type}: no tiene una función render válida`);
+			return;
+		}
 
-			// Actualizar el estado con la nueva capa
-			const updatedConfig = {
-				...prevConfig,
-				layers: {
-					...prevConfig.layers,
-					[layer.type]: layer,
-				},
-				// Asegurar que tengamos una configuración para esta capa
-				layerConfigs: {
-					...prevConfig.layerConfigs,
-					[layer.type]: prevConfig.layerConfigs[layer.type] || layer.defaultConfig || {
-						enabled: true,
-						layerIndex: Object.keys(prevConfig.layers).length,
+		try {
+			// Registrar la capa
+			setConfig(prevConfig => {
+				// Verificar si la capa ya está registrada
+				if (prevConfig.layers[layer.type]) {
+					console.log(`Capa ${layer.type} ya está registrada, actualizando configuración`);
+					// Actualizar config en lugar de ignorar
+					return {
+						...prevConfig,
+						layers: {
+							...prevConfig.layers,
+							[layer.type]: layer
+						},
+						layerConfigs: {
+							...prevConfig.layerConfigs,
+							[layer.type]: {
+								...prevConfig.layerConfigs[layer.type],
+								...layer.defaultConfig
+							}
+						}
+					};
+				}
+
+				console.log(`Registrando nueva capa: ${layer.type}`);
+
+				// Asegurar que tengamos una configuración válida
+				const defaultConfig = layer.defaultConfig || {
+					enabled: true,
+					layerIndex: Object.keys(prevConfig.layers).length,
+					type: layer.type
+				};
+
+				// Actualizar el estado con la nueva capa
+				const updatedConfig = {
+					...prevConfig,
+					layers: {
+						...prevConfig.layers,
+						[layer.type]: layer,
 					},
-				},
-			};
-
-			// Actualizar el orden si es necesario
-			const layerOrder = [...(prevConfig.layerSystem.layerOrder || [])];
-			if (!layerOrder.includes(layer.type)) {
-				layerOrder.push(layer.type);
-				updatedConfig.layerSystem = {
-					...updatedConfig.layerSystem,
-					layerOrder,
+					// Asegurar que tengamos una configuración para esta capa
+					layerConfigs: {
+						...prevConfig.layerConfigs,
+						[layer.type]: prevConfig.layerConfigs[layer.type] || defaultConfig,
+					},
 				};
-			}
 
-			// Habilitar la capa por defecto si no está ya en enabledLayers
-			if (updatedConfig.layerSystem.enabledLayers === undefined) {
-				updatedConfig.layerSystem.enabledLayers = {};
-			}
+				// Actualizar el orden si es necesario
+				const layerOrder = [...(prevConfig.layerSystem.layerOrder || [])];
+				if (!layerOrder.includes(layer.type)) {
+					layerOrder.push(layer.type);
+					updatedConfig.layerSystem = {
+						...updatedConfig.layerSystem,
+						layerOrder,
+					};
+				}
 
-			if (updatedConfig.layerSystem.enabledLayers[layer.type] === undefined) {
-				updatedConfig.layerSystem.enabledLayers = {
-					...updatedConfig.layerSystem.enabledLayers,
-					[layer.type]: true,
-				};
-			}
+				// Habilitar la capa por defecto si no está ya en enabledLayers
+				if (updatedConfig.layerSystem.enabledLayers === undefined) {
+					updatedConfig.layerSystem.enabledLayers = {};
+				}
 
-			return updatedConfig;
-		});
+				if (updatedConfig.layerSystem.enabledLayers[layer.type] === undefined) {
+					updatedConfig.layerSystem.enabledLayers = {
+						...updatedConfig.layerSystem.enabledLayers,
+						[layer.type]: true,
+					};
+				}
+
+				return updatedConfig;
+			});
+
+			console.log(`✅ Capa ${layer.type} registrada correctamente`);
+		} catch (error) {
+			console.error(`❌ Error inesperado al registrar capa ${layer.type}:`, error);
+		}
 	};
 
 	// Eliminar todas las capas registradas

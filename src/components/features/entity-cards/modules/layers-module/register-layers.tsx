@@ -11,6 +11,7 @@
 import { useEffect } from 'react';
 import { useLayerPlugin } from '../../layers/layer-plugin-system';
 import type { LayerImplementation } from '../../layers/types';
+import { adaptLayerImplementationToComponent } from './layer-adapter';
 
 // Importar implementaciones de las capas individuales
 import { animatedBorderLayerImplementation } from '../../layers/animated-border';
@@ -20,7 +21,7 @@ import { contentLayerImplementation } from '../../layers/content';
 import { distortionLayerImplementation } from '../../layers/distortion';
 import { filterLayerImplementation } from '../../layers/filters';
 import { glowLayerImplementation } from '../../layers/glow/glow-layer-implementation';
-import { holographicLayerImplementation } from '../../layers/holographic';
+import { holographicLayerImplementation } from '../../layers/holographic/holographic-layer-implementation';
 import { imageLayerImplementation } from '../../layers/image';
 import { metadataLayerImplementation } from '../../layers/metadata';
 import { scanlinesLayerImplementation } from '../../layers/scanlines';
@@ -43,17 +44,38 @@ const ALL_LAYERS: Record<string, LayerImplementation> = {
 };
 
 // Función auxiliar para registrar de forma segura
-function safeRegisterLayer(registerFn: (layer: LayerImplementation) => void, layer: LayerImplementation | undefined, layerName: string) {
+function safeRegisterLayer(
+	registerFn: (layer: LayerImplementation) => void,
+	layer: LayerImplementation | undefined,
+	layerName: string
+) {
 	if (!layer) {
-		console.warn(`Capa ${layerName} no disponible`);
+		console.warn(`⚠️ Capa ${layerName} no disponible o indefinida`);
+		return false;
+	}
+
+	// Verificar que la implementación tenga propiedades básicas válidas
+	if (!layer.type || typeof layer.render !== 'function') {
+		console.error(`❌ Capa ${layerName} inválida: falta tipo o función render`, layer);
 		return false;
 	}
 
 	try {
-		registerFn(layer);
+		// Adaptar la implementación al formato de componente
+		const adaptedLayer = adaptLayerImplementationToComponent(layer);
+
+		// Verificar que la adaptación generó un componente válido
+		if (!adaptedLayer || !adaptedLayer.Component) {
+			console.error(`❌ Adaptación fallida para ${layerName}: no se generó un componente válido`);
+			return false;
+		}
+
+		// Registrar la capa adaptada
+		registerFn(adaptedLayer);
+		console.log(`✅ Capa registrada: ${layerName}`);
 		return true;
 	} catch (error) {
-		console.error(`Error al registrar capa ${layerName}:`, error);
+		console.error(`❌ Error al registrar capa ${layerName}:`, error);
 		return false;
 	}
 }
@@ -69,7 +91,11 @@ export function RegisterAllLayers({ additionalLayers }: { additionalLayers?: Rec
 	useEffect(() => {
 		try {
 			// Limpiar capas existentes para evitar duplicados
-			clearLayers();
+			if (typeof clearLayers === 'function') {
+				clearLayers();
+			} else {
+				console.warn('⚠️ clearLayers no está disponible, omitiendo limpieza');
+			}
 
 			// Registrar todas las capas estándar disponibles
 			for (const [name, layer] of Object.entries(ALL_LAYERS)) {
@@ -90,7 +116,9 @@ export function RegisterAllLayers({ additionalLayers }: { additionalLayers?: Rec
 
 		// Limpiar al desmontar
 		return () => {
-			clearLayers();
+			if (typeof clearLayers === 'function') {
+				clearLayers();
+			}
 		};
 	}, [registerLayer, clearLayers, additionalLayers]);
 
@@ -130,7 +158,11 @@ export function RegisterLayers({
 	useEffect(() => {
 		try {
 			// Limpiar capas existentes
-			clearLayers();
+			if (typeof clearLayers === 'function') {
+				clearLayers();
+			} else {
+				console.warn('⚠️ clearLayers no está disponible, omitiendo limpieza');
+			}
 
 			// Determinar qué capas registrar
 			const layersToRegister = entityType
@@ -166,7 +198,9 @@ export function RegisterLayers({
 
 		// Limpiar al desmontar
 		return () => {
-			clearLayers();
+			if (typeof clearLayers === 'function') {
+				clearLayers();
+			}
 		};
 	}, [registerLayer, clearLayers, entityType, additionalLayers]);
 
@@ -191,13 +225,15 @@ export function RegisterCustomLayers({
 	useEffect(() => {
 		try {
 			// Limpiar capas existentes si se solicita
-			if (clearExisting) {
+			if (clearExisting && typeof clearLayers === 'function') {
 				clearLayers();
+			} else if (clearExisting) {
+				console.warn('⚠️ clearLayers no está disponible, omitiendo limpieza');
 			}
 
 			// Registrar las capas proporcionadas
 			for (const layer of layers) {
-				if (layer && layer.type) {
+				if (layer?.type) {
 					safeRegisterLayer(registerLayer, layer, layer.type);
 				}
 			}
@@ -209,7 +245,7 @@ export function RegisterCustomLayers({
 
 		// Limpiar al desmontar si se solicitó limpieza
 		return () => {
-			if (clearExisting) {
+			if (clearExisting && typeof clearLayers === 'function') {
 				clearLayers();
 			}
 		};
