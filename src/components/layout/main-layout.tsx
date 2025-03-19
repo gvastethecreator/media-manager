@@ -51,6 +51,11 @@ export function MainLayout() {
 		setIsNavPanelCollapsed(false);
 	}, [setIsNavPanelCollapsed]);
 
+	// Función para alternar el colapso del panel
+	const toggleNavPanelCollapse = useCallback(() => {
+		setIsNavPanelCollapsed(prev => !prev);
+	}, [setIsNavPanelCollapsed]);
+
 	// Mantener el tamaño del panel al redimensionar
 	const handleNavPanelResize = useCallback(
 		(size: number) => {
@@ -69,9 +74,9 @@ export function MainLayout() {
 					defaultSize={navPanelSize}
 					minSize={isNavPanelCollapsed ? 0 : 15}
 					maxSize={30}
-					className={cn('bg-background-primary', isNavPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
+					className={cn('bg-background-primary transition-all', isNavPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
 					style={{
-						transition: isResizing ? 'none' : 'all 0.3s ease-in-out',
+						transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
 					}}
 					collapsible
 					collapsedSize={4}
@@ -84,7 +89,7 @@ export function MainLayout() {
 						<NavPanel
 							initialData={navData}
 							isCollapsed={isNavPanelCollapsed}
-							onToggleCollapse={() => (isNavPanelCollapsed ? handleNavPanelExpand() : handleNavPanelCollapse())}
+							onToggleCollapse={toggleNavPanelCollapse}
 						/>
 					)}
 				</ResizablePanel>
@@ -107,6 +112,7 @@ export function MainLayout() {
 								style={{
 									opacity: isResizing ? 0 : 1,
 									visibility: isResizing ? 'hidden' : 'visible',
+									transition: 'opacity 0.2s ease-in-out'
 								}}
 							>
 								<ViewContainer />
