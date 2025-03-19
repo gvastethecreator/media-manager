@@ -79,7 +79,7 @@ export function NavMainNavigation({ currentView, onNavigate, isCollapsed = false
 											<Button
 												variant="outline"
 												className={cn(
-													'relative h-8 p-2 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
+													'relative h-8 p-1 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
 													'flex items-center justify-center',
 													isCollapsed ? 'w-full' : 'w-full',
 													isActive
@@ -129,7 +129,7 @@ export function NavMainNavigation({ currentView, onNavigate, isCollapsed = false
 															isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
 														)}
 													/>
-													{!isCollapsed && <span className="text-xs font-medium truncate">{label}</span>}
+
 												</motion.div>
 											</Button>
 										</motion.div>

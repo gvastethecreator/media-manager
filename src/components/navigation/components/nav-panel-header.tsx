@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
-import { Bug, Moon, Settings2, Sun } from 'lucide-react';
+import { Bug, ChevronLeft, ChevronRight, Moon, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 
@@ -13,6 +13,7 @@ interface NavPanelHeaderProps {
 	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
 	isCollapsed?: boolean;
+	onToggleCollapse?: () => void;
 }
 
 export function NavPanelHeader({
@@ -20,15 +21,16 @@ export function NavPanelHeader({
 	onOpenSettings,
 	onOpenDevelopment,
 	isCollapsed = false,
+	onToggleCollapse,
 }: NavPanelHeaderProps) {
 	const { settings } = useProfileContext();
 	const { profiles = [], activeProfile } = settings;
 	const activeProfileData = profiles.find((p) => p.id === activeProfile) ||
 		profiles[0] || {
-			name: 'Default',
-			emoji: '👤',
-			color: '#3b82f6',
-		};
+		name: 'Default',
+		emoji: '👤',
+		color: '#3b82f6',
+	};
 
 	const { theme, setTheme } = useTheme();
 
@@ -63,7 +65,7 @@ export function NavPanelHeader({
 							<motion.div
 								initial={{ opacity: 0, width: 0 }}
 								animate={{ opacity: 1, width: 'auto' }}
-								transition={{ delay: 0.2 }}
+								transition={{ delay: 0.1 }}
 								className="flex items-center"
 							>
 								<span className="text-xs leading-tight text-foreground/60">{activeProfileData?.name}</span>
@@ -77,7 +79,24 @@ export function NavPanelHeader({
 
 				{/* Controles y acciones */}
 				<div className={cn('flex items-center', isCollapsed ? 'flex-col gap-2' : 'gap-1')}>
-					<TooltipProvider delayDuration={300}>
+					<TooltipProvider delayDuration={150}>
+						{/* Botón para colapsar/expandir */}
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+									onClick={onToggleCollapse}
+								>
+									{isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs">
+								<p className="font-medium text-amber-400">{isCollapsed ? 'Expandir' : 'Colapsar'} Panel</p>
+							</TooltipContent>
+						</Tooltip>
+
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button
@@ -89,7 +108,7 @@ export function NavPanelHeader({
 									<Bug className="h-3.5 w-3.5" />
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent side="right" className="text-xs">
+							<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs">
 								<p className="font-medium text-amber-400">Modo Desarrollador</p>
 								<p>Accede a herramientas de desarrollo y depuración</p>
 								<p className="text-[10px] text-zinc-400 mt-1.5">Solo para administradores</p>

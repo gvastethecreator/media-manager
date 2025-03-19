@@ -3,22 +3,23 @@
  * @module
  */
 
-// 🚀 Exportar componentes principales
+// Exportar componentes principales
 export * from './performance-module';
 export * from './performance-panel';
 export * from './performance-settings-adapter';
 
-// 📊 Exportar adaptadores
+// Exportar adaptadores
 export * from './performance-adapter';
 
-// 🪝 Exportar hooks
+// Exportar hooks
+export * from './use-accesibility';
 export * from './use-animation-performance';
 export * from './use-image-optimization';
 export * from './use-performance';
 export * from './use-performance-system';
 
-// 🎭 Exportar presets
+// Exportar presets
 export * from './performance-presets';
 
-// 📝 Exportar tipos
+// Exportar tipos
 export * from './types';
