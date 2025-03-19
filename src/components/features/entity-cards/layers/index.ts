@@ -19,19 +19,22 @@ export * from './types';
 
 // Core del sistema de capas
 export {
-	LayerPluginProvider, LayerRenderer, useLayerPlugin, type BaseLayerConfig, type LayerComponent,
-	type LayerComponentProps,
-	type LayerSettingsProps, type LegacyLayerComponentProps
+    LayerPluginProvider, LayerRenderer, useLayerPlugin, type BaseLayerConfig, type LayerComponent,
+    type LayerComponentProps,
+    type LayerSettingsProps, type LegacyLayerComponentProps
 } from './layer-plugin-system';
 
 // Componentes de registro de capas
-export { RegisterAllLayers } from './register-all-layers';
+export { RegisterAllLayers, RegisterLayersByEntityType } from './register-all-layers';
 export { RegisterLayers } from './register-layers';
-export { RegisterLayersV2, RegisterLayersV2ByEntityType } from './register-layers-v2';
+export { RegisterAllLayers as RegisterLayersV2, RegisterLayersByEntityType as RegisterLayersV2ByEntityType };
+
+// Para mantener compatibilidad con código existente que use las versiones V2
+import { RegisterAllLayers, RegisterLayersByEntityType } from './register-all-layers';
 
 // Utilidades de capa
-export { CardExplode } from './card-explode';
-export { LayerSelector } from './layer-selector';
+    export { CardExplode } from './card-explode';
+    export { LayerSelector } from './layer-selector';
 
 // Componentes de capa específicos para entidades
 export { CardBorder } from './card-border';
@@ -48,29 +51,29 @@ export * from './textures';
 
 // Re-exportar módulos relacionados con capas desde layers-module
 export {
-	LayersProvider,
-	useLayers
+    LayersProvider,
+    useLayers
 } from '../modules/layers-module/use-layers';
 
 export {
-	LayersPanel
+    LayersPanel
 } from './layers-panel';
 
 export {
-	LayersConfigPanel
+    LayersConfigPanel
 } from './layers-config-panel';
 
 export {
-	LayerConfigEditor
+    LayerConfigEditor
 } from './layer-config-editor';
 
 // Adaptadores entre formatos de capa
 export {
-	adaptEntityCardToLayerSystem,
-	adaptLayerSystemToEntityCard
+    adaptEntityCardToLayerSystem,
+    adaptLayerSystemToEntityCard
 } from '../modules/layers-module/entity-card-layer-adapter';
 
 export {
-	adaptCardOptionsToLayersConfig
+    adaptCardOptionsToLayersConfig
 } from '../modules/layers-module/use-layers';
 

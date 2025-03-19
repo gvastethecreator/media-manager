@@ -11,7 +11,7 @@ export const contentLayerImplementation: LayerImplementation = {
   type: 'content',
   name: 'Contenido',
   description: 'Muestra el contenido principal de la entidad',
-  component: ContentLayerComponent,
+  render: (props) => ContentLayerComponent(props),
   defaultConfig: {
     enabled: true,
     layerIndex: 20,

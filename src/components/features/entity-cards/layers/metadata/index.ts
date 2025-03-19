@@ -11,7 +11,7 @@ export const metadataLayerImplementation: LayerImplementation = {
   type: 'metadata',
   name: 'Metadatos',
   description: 'Muestra metadatos relevantes de la entidad',
-  component: MetadataLayerComponent,
+  render: (props) => MetadataLayerComponent(props),
   defaultConfig: {
     enabled: true,
     layerIndex: 30,
