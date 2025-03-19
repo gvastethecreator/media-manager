@@ -3,18 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-	Book,
-	Calendar,
 	Eye,
 	FileIcon,
 	Folder,
-	Grid2X2,
 	Layers,
 	MousePointer,
 	RefreshCwIcon,
-	Settings2,
 	Sliders,
-	Sparkles,
+	Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -23,9 +19,8 @@ import {
 	FormRow,
 	FormSection,
 	FormSelect,
-	FormSeparator,
 	FormSlider,
-	FormToggle,
+	FormToggle
 } from '../../../../settings/panels/shared/form-components';
 import {
 	type FolderOptions,
@@ -484,7 +479,14 @@ export function FolderPanel({
 			icon={<Folder className="h-4 w-4" />}
 			variant="colored"
 			trailing={
-				<Button onClick={resetOptions} variant="outline" size="sm" disabled={disabled} className="mt-1">
+				<Button
+					type="button"
+					onClick={resetOptions}
+					variant="outline"
+					size="sm"
+					disabled={disabled}
+					className="mt-1"
+				>
 					<RefreshCwIcon className="mr-1 h-3 w-3" />
 					Restablecer
 				</Button>

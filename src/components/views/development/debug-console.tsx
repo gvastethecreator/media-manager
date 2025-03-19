@@ -89,20 +89,40 @@ export function DebugConsole() {
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-wrap gap-2 mb-4">
-						<Button onClick={generateExampleLogs} variant="default">
-							Generar Logs de Ejemplo
+						<Button
+							type="button"
+							onClick={generateExampleLogs}
+							variant="default"
+						>
+							Generar logs de ejemplo
 						</Button>
-						<Button onClick={generateGroupedLogs} variant="outline">
-							Generar Grupo de Logs
+						<Button
+							type="button"
+							onClick={generateGroupedLogs}
+							variant="outline"
+						>
+							Generar logs agrupados
 						</Button>
-						<Button onClick={measurePerformance} variant="outline">
-							Medir Rendimiento
+						<Button
+							type="button"
+							onClick={measurePerformance}
+							variant="outline"
+						>
+							Medir rendimiento
 						</Button>
-						<Button onClick={clearLogs} variant="destructive">
-							Limpiar Logs
+						<Button
+							type="button"
+							onClick={clearLogs}
+							variant="destructive"
+						>
+							Limpiar logs
 						</Button>
-						<Button onClick={isCapturing ? stopCapture : startCapture} variant={isCapturing ? 'default' : 'outline'}>
-							{isCapturing ? 'Detener Captura' : 'Iniciar Captura'}
+						<Button
+							type="button"
+							onClick={isCapturing ? stopCapture : startCapture}
+							variant={isCapturing ? 'default' : 'outline'}
+						>
+							{isCapturing ? 'Detener captura' : 'Iniciar captura'}
 						</Button>
 					</div>
 

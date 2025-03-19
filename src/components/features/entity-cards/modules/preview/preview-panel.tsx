@@ -76,6 +76,7 @@ export function PreviewPanel({
 				{showControls && (
 					<div className="absolute bottom-2 right-2 flex gap-1">
 						<motion.button
+							type="button"
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.9 }}
 							onClick={toggleExplode}
@@ -88,6 +89,7 @@ export function PreviewPanel({
 							<Layers className="h-3.5 w-3.5" />
 						</motion.button>
 						<motion.button
+							type="button"
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.9 }}
 							onClick={increaseZoom}

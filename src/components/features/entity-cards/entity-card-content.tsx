@@ -7,8 +7,7 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
-import type { ImageGridImage } from './layouts/image-grid';
-import { ImageGrid } from './layouts/image-grid';
+import { ImageGrid, type ImageGridImage } from './layouts/image-grid';
 import type { CardOptions } from './types/unified-card-types';
 
 export interface EntityCardContentProps {
@@ -19,8 +18,8 @@ export interface EntityCardContentProps {
 	// Props para imágenes
 	image?: string;
 	images?: ImageGridImage[];
-	imageLayout?: 'single' | 'dual' | 'grid';
-	imageStyle?: 'standard' | 'masonry' | 'carousel';
+	imageLayout?: 'single' | 'dual' | 'quad' | 'six'; // Tipos correspondientes a layouts/image-grid.tsx
+	imageStyle?: 'standard' | 'polaroid' | 'rounded' | 'bordered'; // Tipos correspondientes a layouts/image-grid.tsx
 	options?: CardOptions;
 
 	// Props opcionales
@@ -68,17 +67,12 @@ export function EntityCardContent({
 	const showImage = options.showImage !== false;
 	const showImageCount = options.showImageCount === true;
 
-	// Preparar imágenes para el grid
-	const gridImages: ImageGridImage[] = [];
+	// Preparamos un array de strings para cuando solo tenemos URLs
+	let stringImages: string[] = [];
 
-	// Si hay una imagen principal, añadirla primero
+	// Si hay una imagen principal como string, la usamos
 	if (image) {
-		gridImages.push({ src: image, alt: title || 'Imagen principal' });
-	}
-
-	// Añadir el resto de imágenes
-	if (images && images.length > 0) {
-		gridImages.push(...images);
+		stringImages = [image];
 	}
 
 	// Efecto para animación de carga
@@ -96,19 +90,18 @@ export function EntityCardContent({
 
 	// Determinar si mostrar imágenes
 	const hasImage = image || images.length > 0;
-	const allImages = image ? [{ src: image, alt: title || 'Imagen' }].concat(images) : images;
 
 	return (
 		<div className={cn('entity-card-content w-full h-full flex flex-col', className)}>
 			{/* Título */}
-			{title && (
+			{title && showTitle && (
 				<div className="entity-card-title-container p-3">
 					<h3 className="entity-card-title text-lg font-semibold">{title}</h3>
 				</div>
 			)}
 
 			{/* Imágenes */}
-			{hasImage && (
+			{hasImage && showImage && (
 				<div className="entity-card-image-container flex-1">
 					{imageLayout === 'single' && image && (
 						<div className="entity-card-image relative w-full h-full">
@@ -123,13 +116,18 @@ export function EntityCardContent({
 					)}
 
 					{(imageLayout !== 'single' || images.length > 0) && (
-						<ImageGrid images={allImages} layout={imageLayout} style={imageStyle} className="w-full h-full" />
+						<ImageGrid
+							images={images.length > 0 ? images : stringImages}
+							layout={imageLayout}
+							style={imageStyle}
+							className="w-full h-full"
+						/>
 					)}
 				</div>
 			)}
 
 			{/* Descripción */}
-			{description && (
+			{description && showDescription && (
 				<div className="entity-card-description-container p-3">
 					<p className="entity-card-description text-sm">{description}</p>
 				</div>

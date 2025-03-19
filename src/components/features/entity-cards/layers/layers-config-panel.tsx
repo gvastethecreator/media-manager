@@ -12,10 +12,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { ArrowDownUp, ArrowUpDown, Eye, EyeOff, GripVertical, Layers } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults } from '../settings/layer-settings-config';
+import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults, type LayerSystemConfig } from '../settings/layer-settings-config';
 import type { CardOptions } from '../types/card-settings-types';
 import { useLayerPlugin } from './layer-plugin-system';
 
@@ -32,7 +32,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 	const [activeTab, setActiveTab] = useState('general');
 
 	// Asegurarnos de que tengamos valores predeterminados
-	const layerSystem = getLayerSystemWithDefaults(cardOptions.layerSystem);
+	const layerSystem = getLayerSystemWithDefaults(cardOptions.layerSystem as Partial<LayerSystemConfig>);
 
 	// Estado para la lista de orden de capas
 	const [layerOrder, setLayerOrder] = useState<string[]>(layerSystem.order || DEFAULT_LAYER_SYSTEM.order || []);
@@ -47,17 +47,14 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 		onCardOptionsChange({
 			...cardOptions,
 			layerSystem: {
-				...cardOptions.layerSystem,
+				...(cardOptions.layerSystem as Record<string, unknown> || {}),
 				[key]: value,
 			},
 		});
 	};
 
 	// Manejar el reordenamiento de capas
-	const handleDragEnd = (result: {
-		destination?: { index: number };
-		source: { index: number };
-	}) => {
+	const handleDragEnd = (result: DropResult) => {
 		if (!result.destination) {
 			return;
 		}
@@ -71,7 +68,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 		}
 
 		// Obtenemos el nuevo orden de capas
-		const currentOrder = [...(cardOptions.layerSystem?.order || [])];
+		const currentOrder = [...((cardOptions.layerSystem as any)?.order || [])];
 		const [removed] = currentOrder.splice(sourceIndex, 1);
 		currentOrder.splice(destinationIndex, 0, removed);
 
@@ -79,7 +76,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 		onCardOptionsChange({
 			...cardOptions,
 			layerSystem: {
-				...cardOptions.layerSystem,
+				...(cardOptions.layerSystem as Record<string, unknown> || {}),
 				order: currentOrder,
 			},
 		});
@@ -87,7 +84,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 
 	// Handler para habilitar/deshabilitar todas las capas
 	const handleEnableAll = () => {
-		const newLayerConfigs = { ...cardOptions.layerConfigs };
+		const newLayerConfigs: Record<string, Record<string, unknown>> = { ...(cardOptions.layerConfigs as Record<string, Record<string, unknown>> || {}) };
 
 		for (const layer of availableLayers) {
 			const currentConfig = newLayerConfigs[layer.type] || { ...layer.defaultConfig };
@@ -235,7 +232,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 													return null;
 												}
 
-												const layerConfig = cardOptions.layerConfigs?.[layerId] || layer.defaultConfig;
+												const layerConfig = (cardOptions.layerConfigs as Record<string, any>)?.[layerId] || layer.defaultConfig;
 												const isEnabled = layerConfig.enabled;
 
 												return (
@@ -298,7 +295,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 										</TableHeader>
 										<TableBody>
 											{availableLayers.map((layer) => {
-												const layerConfig = cardOptions.layerConfigs?.[layer.type] || layer.defaultConfig;
+												const layerConfig = (cardOptions.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
 												return (
 													<TableRow key={layer.type}>
 														<TableCell>

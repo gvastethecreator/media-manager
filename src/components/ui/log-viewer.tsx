@@ -99,7 +99,12 @@ export function LogViewer({
 							{filteredLogs.length} logs
 						</Badge>
 						{onClear && (
-							<Button variant="ghost" size="sm" onClick={onClear}>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								onClick={onClear}
+							>
 								Limpiar
 							</Button>
 						)}

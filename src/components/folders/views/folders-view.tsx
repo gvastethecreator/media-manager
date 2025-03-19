@@ -14,7 +14,7 @@ import { useFileManager } from '@/store/file-manager.store';
 import type { Folder } from '@/types/entities/folders';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = serverLogger.withContext('FoldersView');
@@ -110,6 +110,41 @@ const DEFAULT_FOLDER_OPTIONS: CardOptions = {
 	accentColor: '#60a5fa',
 	backgroundColor: '#1e293b',
 };
+
+// Componente memoizado para cada tarjeta de carpeta
+const MemoizedFolderCard = React.memo(
+	({
+		folder,
+		cardOptions,
+		onFolderClick,
+	}: {
+		folder: Folder;
+		cardOptions: CardOptions;
+		onFolderClick: () => void;
+	}) => {
+		return (
+			<EntityCardAdapter
+				key={`folder-card-${folder.id}`}
+				entityType="folder"
+				entity={folder}
+				onClick={onFolderClick}
+				showVisualConfig={true}
+				enableExplode={true}
+				options={cardOptions}
+			/>
+		);
+	},
+	(prevProps, nextProps) => {
+		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
+		return (
+			prevProps.folder.id === nextProps.folder.id &&
+			prevProps.folder.name === nextProps.folder.name &&
+			prevProps.folder.emoji === nextProps.folder.emoji &&
+			prevProps.folder.imageCount === nextProps.folder.imageCount &&
+			JSON.stringify(prevProps.cardOptions) === JSON.stringify(nextProps.cardOptions)
+		);
+	}
+);
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
@@ -350,13 +385,10 @@ export function FoldersView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-folder-id={folder.id}
 								>
-									<EntityCardAdapter
-										entityType="folder"
-										entity={folder}
-										onClick={onFolderClick}
-										showVisualConfig={true}
-										enableExplode={true}
-										options={getFolderCardOptions(folder.id)}
+									<MemoizedFolderCard
+										folder={folder}
+										cardOptions={getFolderCardOptions(folder.id)}
+										onFolderClick={onFolderClick}
 									/>
 								</div>
 							</motion.div>

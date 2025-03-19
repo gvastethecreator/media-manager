@@ -262,6 +262,7 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 							<FormSection>
 								<FormRow>
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										className="w-full text-xs h-8"
@@ -337,6 +338,7 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 							<FormSection>
 								<FormRow>
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										className="w-full text-xs h-8"
@@ -399,6 +401,7 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 							<FormSection>
 								<FormRow>
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										className="w-full text-xs h-8"
@@ -486,6 +489,7 @@ export function StatesPanel({ statesSystem, onChange, disabled = false, classNam
 							<FormSection>
 								<FormRow>
 									<Button
+										type="button"
 										variant="outline"
 										size="sm"
 										className="w-full text-xs h-8"

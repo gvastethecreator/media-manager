@@ -20,21 +20,19 @@ export * from './types';
 // Core del sistema de capas
 export {
     LayerPluginProvider, LayerRenderer, useLayerPlugin, type BaseLayerConfig, type LayerComponent,
-    type LayerComponentProps,
-    type LayerSettingsProps, type LegacyLayerComponentProps
+    type LayerComponentProps, type LayerSettingsProps, type LegacyLayerComponentProps
 } from './layer-plugin-system';
 
 // Componentes de registro de capas
 export { RegisterAllLayers, RegisterLayersByEntityType } from './register-all-layers';
 export { RegisterLayers } from './register-layers';
-export { RegisterAllLayers as RegisterLayersV2, RegisterLayersByEntityType as RegisterLayersV2ByEntityType };
 
-// Para mantener compatibilidad con código existente que use las versiones V2
-import { RegisterAllLayers, RegisterLayersByEntityType } from './register-all-layers';
+// Componentes de utilidad para backward compatibility
+export { RegisterAllLayers as RegisterLayersV2, RegisterLayersByEntityType as RegisterLayersV2ByEntityType } from './register-all-layers';
 
 // Utilidades de capa
-    export { CardExplode } from './card-explode';
-    export { LayerSelector } from './layer-selector';
+export { CardExplode } from './card-explode';
+export { LayerSelector } from './layer-selector';
 
 // Componentes de capa específicos para entidades
 export { CardBorder } from './card-border';

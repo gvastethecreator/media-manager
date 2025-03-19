@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import * as React from 'react';
 
 /**
  * Tipo para errores de tarjeta
@@ -96,7 +95,13 @@ export function CardErrorDisplay({
 				</div>
 			)}
 			{onRetry && (
-				<Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={onRetry}
+					className="mt-2"
+				>
 					<RefreshCw className="h-4 w-4 mr-2" />
 					Reintentar
 				</Button>

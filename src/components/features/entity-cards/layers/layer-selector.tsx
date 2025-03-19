@@ -74,8 +74,9 @@ export function LayerSelector({
 			<SettingsComponent
 				entityType={entityType || 'generic'}
 				entityId={entityId}
+				className="w-full"
 				config={config as BaseLayerConfig}
-				onConfigUpdate={onChange}
+				onConfigUpdate={(updatedConfig) => onChange(updatedConfig)}
 			/>
 		);
 	}
