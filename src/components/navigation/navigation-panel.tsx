@@ -3,6 +3,7 @@
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { memo } from 'react';
 import { NavCategoryChildren } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';
 import { NavMainNavigation } from './components/nav-main-navigation';
@@ -18,7 +19,7 @@ import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavi
  * @param {NavPanelProps} props - Propiedades del componente
  * @returns {JSX.Element} Componente de panel de navegación
  */
-export function NavPanel({ initialData, isCollapsed = false }: NavPanelProps) {
+export function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }: NavPanelProps) {
 	// Hooks para manejar la lógica del panel
 	const { isCategoryCollapsed, handleCollapseToggle } = useCategoryCollapse();
 	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId } = useCategoryHandlers();
@@ -37,6 +38,7 @@ export function NavPanel({ initialData, isCollapsed = false }: NavPanelProps) {
 				onOpenSettings={handleOpenSettings}
 				onOpenDevelopment={handleOpenDevelopment}
 				isCollapsed={isCollapsed}
+				onToggleCollapse={onToggleCollapse}
 			/>
 
 			<ScrollArea className="flex-1 h-full">
@@ -63,7 +65,7 @@ export function NavPanel({ initialData, isCollapsed = false }: NavPanelProps) {
 								/>
 
 								{!isCollapsed && (
-									<NavCategoryChildren
+									<MemoizedNavCategoryChildren
 										categoryId={id}
 										isCollapsed={isCategoryCollapsed(id)}
 										selectedChildId={getSelectedChildId(id)}
@@ -80,3 +82,6 @@ export function NavPanel({ initialData, isCollapsed = false }: NavPanelProps) {
 		</div>
 	);
 }
+
+// Componente memoizado para mejorar rendimiento
+const MemoizedNavCategoryChildren = memo(NavCategoryChildren);

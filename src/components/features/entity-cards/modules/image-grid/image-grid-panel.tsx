@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { Grid2X2, ImageIcon, LayoutGrid, Rows } from 'lucide-react';
-import { LayoutList, LayoutTemplate } from 'lucide-react';
+import { Grid2X2, ImageIcon, LayoutGrid, Rows, LayoutList } from 'lucide-react';
+import { LayoutTemplate } from 'lucide-react';
 import type { CardOptions } from '../../types/card-settings-types';
 
 // 🎨 Esquema de colores para el panel
@@ -93,30 +93,30 @@ export function ImageGridPanel({ options, onChange, disabled = false }: ImageGri
 									</Label>
 								</div>
 								<div>
-									<RadioGroupItem value="grid" id="grid" className="peer sr-only" disabled={disabled} />
+									<RadioGroupItem value="triple" id="triple" className="peer sr-only" disabled={disabled} />
 									<Label
-										htmlFor="grid"
+										htmlFor="triple"
+										className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+									>
+										<LayoutList className="mb-1 h-4 w-4" />
+										<span className="text-xs">Triple</span>
+									</Label>
+								</div>
+								<div>
+									<RadioGroupItem value="quad" id="quad" className="peer sr-only" disabled={disabled} />
+									<Label
+										htmlFor="quad"
 										className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
 									>
 										<Grid2X2 className="mb-1 h-4 w-4" />
 										<span className="text-xs">Cuadrícula</span>
 									</Label>
 								</div>
-								<div>
-									<RadioGroupItem value="masonry" id="masonry" className="peer sr-only" disabled={disabled} />
-									<Label
-										htmlFor="masonry"
-										className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-									>
-										<LayoutTemplate className="mb-1 h-4 w-4" />
-										<span className="text-xs">Mosaico</span>
-									</Label>
-								</div>
 							</RadioGroup>
 						</div>
 
 						{/* Configuración específica para grid */}
-						{options.imageGrid?.layout === 'grid' && (
+						{options.imageGrid?.layout === 'quad' && (
 							<>
 								<div className="space-y-3">
 									<Label className="text-xs font-medium">Columnas</Label>
