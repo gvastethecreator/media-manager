@@ -17,6 +17,8 @@ import { animatedBorderLayerImplementation } from '../../layers/animated-border'
 import { borderLayerImplementation } from '../../layers/border/border-layer-implementation';
 import { chromaticAberrationLayerImplementation } from '../../layers/chromatic-aberration';
 import { contentLayerImplementation } from '../../layers/content';
+import { distortionLayerImplementation } from '../../layers/distortion';
+import { filterLayerImplementation } from '../../layers/filters';
 import { glowLayerImplementation } from '../../layers/glow/glow-layer-implementation';
 import { holographicLayerImplementation } from '../../layers/holographic';
 import { imageLayerImplementation } from '../../layers/image';
@@ -35,7 +37,9 @@ const ALL_LAYERS: Record<string, LayerImplementation> = {
 	scanlines: scanlinesLayerImplementation,
 	texture: textureLayerImplementation,
 	'animated-border': animatedBorderLayerImplementation,
-	'chromatic-aberration': chromaticAberrationLayerImplementation
+	'chromatic-aberration': chromaticAberrationLayerImplementation,
+	'distortion': distortionLayerImplementation,
+	'filter': filterLayerImplementation
 };
 
 // Función auxiliar para registrar de forma segura

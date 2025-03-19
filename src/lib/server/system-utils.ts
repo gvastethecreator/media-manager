@@ -7,7 +7,7 @@
  * que dependen de módulos de Node.js y solo deben ejecutarse en el servidor.
  */
 
-import os from 'node:os';
+import os from 'os';
 
 /**
  * Interfaz para estadísticas del sistema

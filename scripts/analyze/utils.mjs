@@ -3,8 +3,8 @@
  * @module utils
  */
 
+import { existsSync } from 'fs';
 import fs from 'fs/promises';
-import { existsSync } from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { CONFIG } from './config.mjs';

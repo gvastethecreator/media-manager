@@ -1,5 +1,5 @@
+import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
-import { createHash } from 'node:crypto';
 
 /**
  * Calcula el hash SHA-256 de un archivo

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * 🌈 Sistema de capas para Entity Cards
  *
@@ -5,93 +7,70 @@
  * ofreciendo una arquitectura extensible basada en plugins.
  */
 
-// Exportar componentes principales del sistema de plugins
+/**
+ * 🧩 Exportaciones del sistema de capas
+ *
+ * Este archivo centraliza las exportaciones del sistema de capas,
+ * para simplificar las importaciones en otros archivos.
+ */
+
+// Tipos básicos
+export * from './types';
+
+// Core del sistema de capas
 export {
-	LayerPluginProvider,
-	useLayerPlugin,
-	LayerRenderer
+	LayerPluginProvider, LayerRenderer, useLayerPlugin, type BaseLayerConfig, type LayerComponent,
+	type LayerComponentProps,
+	type LayerSettingsProps, type LegacyLayerComponentProps
 } from './layer-plugin-system';
 
-// Exportar tipos para capas
-export type {
-	LayerConfig,
-	LayerImplementation,
-	LayerRenderProps,
-	LayerSettingsProps,
-	LayerSystemConfig
-} from './types';
-
-// Exportar registradores de capas
+// Componentes de registro de capas
+export { RegisterAllLayers } from './register-all-layers';
 export { RegisterLayers } from './register-layers';
 export { RegisterLayersV2, RegisterLayersV2ByEntityType } from './register-layers-v2';
 
-// Exportar componentes de UI para capas
+// Utilidades de capa
+export { CardExplode } from './card-explode';
 export { LayerSelector } from './layer-selector';
-export { LayerConfigEditor } from './layer-config-editor';
-export { LayersPanel } from './layers-panel';
-export { layerBaseConfigSchema } from './layer-config-base';
-export { CardContainer } from './card-container';
 
-// Exportar capas individuales
-export { borderLayerImplementation } from './border/border-layer-implementation';
-export { glowLayerImplementation } from './glow/glow-layer-implementation';
-export { scanlinesLayerImplementation } from './scanlines';
-export { textureLayerImplementation } from './textures';
+// Componentes de capa específicos para entidades
+export { CardBorder } from './card-border';
+export { CardContent } from './card-content';
+export { CardGlow } from './card-glow';
+export { CardScanlines } from './card-scanlines';
 
-// Exportar integraciones con el módulo de capas
+// Re-exportar capas individuales para acceso directo
+export * from './border';
+export * from './chromatic-aberration';
+export * from './glow';
+export * from './scanlines';
+export * from './textures';
+
+// Re-exportar módulos relacionados con capas desde layers-module
 export {
-	adaptLayerSystemToEntityCard,
-	adaptEntityCardToLayerSystem
+	LayersProvider,
+	useLayers
+} from '../modules/layers-module/use-layers';
+
+export {
+	LayersPanel
+} from './layers-panel';
+
+export {
+	LayersConfigPanel
+} from './layers-config-panel';
+
+export {
+	LayerConfigEditor
+} from './layer-config-editor';
+
+// Adaptadores entre formatos de capa
+export {
+	adaptEntityCardToLayerSystem,
+	adaptLayerSystemToEntityCard
 } from '../modules/layers-module/entity-card-layer-adapter';
 
 export {
-	LayersProvider,
-	useLayers,
 	adaptCardOptionsToLayersConfig
 } from '../modules/layers-module/use-layers';
 
-// Exportar registradores de capas del módulo
-export {
-	RegisterAllLayers,
-	RegisterLayers as RegisterLayersByEntityType
-} from '../modules/layers-module/register-layers';
-
-// Exportar tipos
-export type {
-	BaseLayerConfig,
-	LayerComponent,
-	LayerComponentProps,
-	LegacyLayerComponentProps
-} from './layer-plugin-system';
-
-export type {
-	CommonLayerProps,
-	ExplodeLayerTransformFunction,
-	LayerChangeEvent,
-	LayerInfo,
-	LayerServerActions,
-	LayersGlobalOptions,
-	LayersSettingsPanelProps,
-	LayersSystemResult,
-	LayersSystemState
-} from './types';
-
-// Exportar componentes específicos
-export { CardBackside } from './card-backside';
-export { CardBorder } from './card-border';
-export { CardContent } from './card-content';
-export { CardDescription } from './card-description';
-export { CardExplode } from './card-explode';
-export { CardFooter } from './card-footer';
-export { CardGlow } from './card-glow';
-export { CardGrain } from './card-grain';
-export { CardHeader } from './card-header';
-export { CardHolographic } from './card-holographic';
-export { CardImage } from './card-image';
-export { CardMetadata } from './card-metadata';
-export { CardScanlines } from './card-scanlines';
-export { CardStats } from './card-stats';
-export { CardTexture } from './card-texture';
-
-// Exportar plantillas para nuevas capas
-export * from './templates';
