@@ -25,6 +25,21 @@ const nextConfig: NextConfig = {
 	eslint: {
 		ignoreDuringBuilds: true,
 	},
+	// Configuración de webpack para resolver los módulos node:
+	webpack: (config, { isServer }) => {
+		// Soporte para importaciones node:*
+		config.resolve.alias = {
+			...config.resolve.alias,
+			'node:os': 'os',
+			'node:fs': 'fs',
+			'node:path': 'path',
+			'node:crypto': 'crypto',
+			'node:stream': 'stream',
+			'node:fs/promises': 'fs/promises',
+		};
+
+		return config;
+	},
 	async headers() {
 		return [
 			{

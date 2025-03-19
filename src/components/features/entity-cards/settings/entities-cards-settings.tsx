@@ -7,8 +7,13 @@ import type { EntityType } from '@/components/features/entity-cards/adapters/pre
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
 import {
-	adaptCardOptionsToLayersConfig, adaptEntityCardToLayerSystem,
-	adaptLayerSystemToEntityCard, LayerPluginProvider, LayersPanel, LayersProvider, RegisterAllLayers
+	adaptCardOptionsToLayersConfig,
+	adaptEntityCardToLayerSystem,
+	adaptLayerSystemToEntityCard,
+	LayerPluginProvider,
+	LayersPanel,
+	LayersProvider,
+	RegisterAllLayers
 } from '@/components/features/entity-cards/layers';
 import { DesignPanel } from '@/components/features/entity-cards/modules/design';
 import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-module/layer-management-dialog';
@@ -987,16 +992,19 @@ export function EntitiesCardsSection() {
 										)}
 										style={{ transform: `scale(${previewZoom})` }}
 									>
-										<PreviewSettings
-											cardOptions={cardOptions}
-											rarity={selectedRarity}
-											texture={selectedTexture}
-											entityType={convertEntityId.toApiFormat(activeEntityType) as EntityType}
-											activeLayerId={activeLayerId}
-											isExploded={isExploded}
-											onExplodedChange={setIsExploded}
-											onActiveLayerChange={setActiveLayerId}
-										/>
+										<LayerPluginProvider>
+											<RegisterAllLayers />
+											<PreviewSettings
+												cardOptions={cardOptions}
+												rarity={selectedRarity}
+												texture={selectedTexture}
+												entityType={convertEntityId.toApiFormat(activeEntityType) as EntityType}
+												activeLayerId={activeLayerId}
+												isExploded={isExploded}
+												onExplodedChange={setIsExploded}
+												onActiveLayerChange={setActiveLayerId}
+											/>
+										</LayerPluginProvider>
 									</div>
 
 									{showControls && (

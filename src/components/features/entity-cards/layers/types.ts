@@ -8,6 +8,7 @@
  */
 import type { CardOptions } from '../types/card-settings-types';
 import type { ActionResponse, BaseLayerConfig } from '../types/central-types';
+import type { DistortionEffectsSystem } from '../types/distortion-effects-types';
 
 /**
  * Funciones de servidor para una capa
@@ -282,4 +283,55 @@ export interface LayerSystemConfig {
 	 * Opciones adicionales para el sistema de capas
 	 */
 	options?: Record<string, unknown>;
+}
+
+/**
+ * Configuración para la capa de distorsión
+ */
+export interface DistortionConfig extends BaseLayerConfig, DistortionEffectsSystem {
+	layerIndex: number;
+	[key: string]: unknown;
+}
+
+/**
+ * Configuración para la capa de filtros
+ */
+export interface FilterLayerConfig extends BaseLayerConfig {
+	// Configuración básica de filtros
+	visibleOnHover: boolean;
+	opacity: number;
+	intensity: number;
+
+	// Configuración de efectos específicos
+	glow?: {
+		enabled: boolean;
+		color: string;
+		radius: number;
+		intensity: number;
+		animated?: boolean;
+		animationSpeed?: number;
+		visibleOnHover?: boolean;
+	};
+
+	shadow?: {
+		enabled: boolean;
+		color: string;
+		blur: number;
+		offsetX: number;
+		offsetY: number;
+		inset?: boolean;
+		visibleOnHover?: boolean;
+	};
+
+	distortion?: {
+		enabled: boolean;
+		type: string;
+		amount: number;
+		speed: number;
+		animated?: boolean;
+		frequency?: number;
+		visibleOnHover?: boolean;
+	};
+
+	[key: string]: unknown;
 }
