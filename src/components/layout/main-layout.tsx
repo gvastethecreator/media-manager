@@ -98,7 +98,7 @@ export function MainLayout() {
 					onDragging={handleDragging}
 				/>
 
-				<ResizablePanel defaultSize={60} minSize={40} className="h-full w-full">
+				<ResizablePanel defaultSize={80} minSize={70} className="h-full w-full">
 					<div className="flex flex-col h-full">
 						<ViewToolbar />
 						<div ref={contentWrapperRef} className="flex-1 relative resize-container">
