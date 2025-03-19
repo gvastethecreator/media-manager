@@ -23,22 +23,24 @@ function isValidImageUrl(url: string): boolean {
 const DEFAULT_IMAGE = '/placeholders/character-placeholder.jpg';
 
 interface CardImageProps {
-	options: CardOptions;
+	options?: CardOptions;
 	src: string;
 	alt: string;
 	width?: number;
 	height?: number;
 	className?: string;
+	onError?: () => void;
 }
 
-export function CardImage({ options, src, alt, width, height, className }: CardImageProps) {
-	const { designSystem } = options;
+export function CardImage({ options, src, alt, width, height, className, onError }: CardImageProps) {
+	// Asegurarse de que options y designSystem existen para evitar errores
+	const designSystem = options?.designSystem || {};
 
-	const { preset, variant, cornerStyle, cornerRadius } = designSystem || {};
+	const { preset, variant, cornerStyle, cornerRadius } = designSystem;
 
 	// Obtenemos las propiedades directamente de options o de holographicOptions
-	const holographicIntensity = options.holographicOptions?.intensity || 1;
-	const holographicColor = options.holographicOptions?.primaryColor;
+	const holographicIntensity = options?.holographicOptions?.intensity || 1;
+	const holographicColor = options?.holographicOptions?.primaryColor;
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(false);
@@ -81,6 +83,7 @@ export function CardImage({ options, src, alt, width, height, className }: CardI
 					onError={() => {
 						setError(true);
 						setIsLoading(false);
+						if (onError) onError();
 					}}
 					priority
 				/>

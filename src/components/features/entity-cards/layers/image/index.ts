@@ -11,7 +11,7 @@ export const imageLayerImplementation: LayerImplementation = {
   type: 'image',
   name: 'Imagen',
   description: 'Muestra la imagen principal de la entidad',
-  component: ImageLayerComponent,
+  render: (props) => ImageLayerComponent(props),
   defaultConfig: {
     enabled: true,
     layerIndex: 10,
