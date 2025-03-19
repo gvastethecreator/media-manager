@@ -10,6 +10,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useLayerPlugin } from './layer-plugin-system';
+import type { LayerImplementation, LayerRenderProps } from './types';
 
 // Importar todas las implementaciones de capas
 import { animatedBorderLayerImplementation } from './animated-border';
@@ -81,7 +82,7 @@ const ENTITY_TYPE_LAYERS = {
  * Adaptador para convertir implementaciones con 'render' al formato con 'Component'
  * que espera el sistema de plugins de capas
  */
-function adaptLayerImplementation(implementation: any) {
+function adaptLayerImplementation(implementation: LayerImplementation) {
 	// Validar que la implementación existe
 	if (!implementation) {
 		console.error('❌ Se intentó adaptar una implementación de capa undefined o null');
@@ -113,7 +114,7 @@ function adaptLayerImplementation(implementation: any) {
 		console.log(`ℹ️ Adaptando capa ${implementation.type} de formato render a Component`);
 		return {
 			...implementation,
-			Component: (props: any) => implementation.render(props),
+			Component: (props: LayerRenderProps) => implementation.render(props),
 			// Asegurarnos de que el resto de propiedades se mantienen
 			type: implementation.type,
 			defaultConfig: implementation.defaultConfig

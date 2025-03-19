@@ -377,8 +377,15 @@ export function VideoPanel({
 			icon={<Video className="h-4 w-4" />}
 			variant="colored"
 			trailing={
-				<Button onClick={resetOptions} variant="outline" size="sm" disabled={disabled} className="mt-1">
-					Restablecer
+				<Button
+					type="button"
+					onClick={resetOptions}
+					variant="outline"
+					size="sm"
+					disabled={disabled}
+					className="mt-1"
+				>
+					Restaurar valores predeterminados
 				</Button>
 			}
 		>

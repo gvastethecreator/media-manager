@@ -24,7 +24,7 @@ import { PromptCard } from '../layouts/prompt-card';
 import { TagCard } from '../layouts/tag-card';
 import { WorldItemCard } from '../layouts/world-item-card';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
 // Tipo de unión para todas las entidades posibles
@@ -109,121 +109,134 @@ async function loadEntityPresetConfig(
  * Adaptador genérico para cualquier tipo de entidad
  * Selecciona el layout apropiado según el tipo de entidad
  */
-export function EntityCardAdapter({
-	entityType,
-	entity,
-	options = {},
-	onClick,
-	showVisualConfig = false,
-	onVisualConfigClick,
-	enableExplode = false,
-	isExploded,
-	activeLayer,
-	onExplodedChange,
-	onActiveLayerChange,
-	className,
-}: EntityCardAdapterProps) {
-	// Estado para almacenar las opciones finales de la tarjeta (combinando defaults, presets y override)
-	const [cardOptions, setCardOptions] = useState<CardOptions | null>(null);
-	// Estado para controlar si se está cargando el preset
-	const [isLoadingPreset, setIsLoadingPreset] = useState(!!entity.presetId);
-
-	// Efecto para cargar el preset si la entidad tiene uno
-	useEffect(() => {
-		// Solo cargar el preset si la entidad tiene un presetId
-		if (entity?.presetId) {
-			setIsLoadingPreset(true);
-
-			// Valores por defecto basados en las opciones proporcionadas
-			const defaultOptions = options as CardOptions;
-
-			// Cargar el preset
-			loadEntityPresetConfig(entity, entityType, defaultOptions)
-				.then(presetOptions => {
-					// Actualizar las opciones con las del preset
-					setCardOptions(presetOptions);
-				})
-				.catch(error => {
-					console.error('Error cargando preset para tarjeta de entidad:', error);
-					// En caso de error, usar las opciones proporcionadas
-					setCardOptions(defaultOptions);
-				})
-				.finally(() => {
-					setIsLoadingPreset(false);
-				});
-		} else {
-			// Si no hay presetId, usar las opciones proporcionadas directamente
-			setCardOptions(options as CardOptions);
-			setIsLoadingPreset(false);
-		}
-	}, [entity, entity.presetId, entityType, options]);
-
-	// Verificar que la entidad existe
-	if (!entity) {
-		console.error(`Error: La entidad de tipo ${entityType} es undefined`);
-		return (
-			<div className="error-card p-4 border border-red-500 rounded-md">
-				<h3 className="text-red-500 font-medium">Error de datos</h3>
-				<p className="text-sm text-gray-500">No se pudo cargar la información de la entidad</p>
-			</div>
-		);
-	}
-
-	// Si el preset está cargando, mostrar una versión simplificada de la tarjeta
-	if (isLoadingPreset) {
-		return (
-			<div className="loading-card p-4 border border-muted rounded-md animate-pulse">
-				<div className="h-32 bg-muted/30 rounded-md mb-2" />
-				<div className="h-4 w-2/3 bg-muted/30 rounded-md" />
-				<div className="h-3 w-1/2 bg-muted/30 rounded-md mt-2" />
-			</div>
-		);
-	}
-
-	// Pasamos las propiedades comunes a todos los tipos de tarjetas
-	const commonProps = {
+export const EntityCardAdapter = React.memo(
+	function EntityCardAdapterInner({
+		entityType,
+		entity,
+		options = {},
 		onClick,
-		className,
-		showVisualConfig,
+		showVisualConfig = false,
 		onVisualConfigClick,
-		enableExplode,
+		enableExplode = false,
 		isExploded,
 		activeLayer,
 		onExplodedChange,
 		onActiveLayerChange,
-		options: cardOptions as CardOptions,
-	};
+		className,
+	}: EntityCardAdapterProps) {
+		// Estado para almacenar las opciones finales de la tarjeta (combinando defaults, presets y override)
+		const [cardOptions, setCardOptions] = useState<CardOptions | null>(null);
+		// Estado para controlar si se está cargando el preset
+		const [isLoadingPreset, setIsLoadingPreset] = useState(!!entity.presetId);
 
-	// Renderizamos el adaptador según el tipo de entidad
-	switch (entityType) {
-		case 'folder':
-			return <FolderCard folder={entity as Folder} {...commonProps} />;
-		case 'album':
-			return <AlbumCard album={entity as Album} {...commonProps} />;
-		case 'tag':
-			return <TagCard tag={entity as Tag} {...commonProps} />;
-		case 'collection':
-			return <CollectionCard collection={entity as Collection} {...commonProps} />;
-		case 'character':
-			return <CharacterCard character={entity as Character} {...commonProps} />;
-		case 'place':
-			return <PlaceCard place={entity as Place} {...commonProps} />;
-		case 'world-item':
-		case 'worldItem':
-			return <WorldItemCard worldItem={entity as WorldItem} {...commonProps} />;
-		case 'concept':
-			return <ConceptCard concept={entity as Concept} {...commonProps} />;
-		case 'prompt':
-			return <PromptCard prompt={entity as Prompt} {...commonProps} />;
-		case 'note':
-			return <NoteCard note={entity as Note} {...commonProps} />;
-		default:
-			console.warn(`No se ha implementado todavía un layout para el tipo de entidad: ${entityType}`);
+		// Efecto para cargar el preset si la entidad tiene uno
+		useEffect(() => {
+			// Solo cargar el preset si la entidad tiene un presetId
+			if (entity?.presetId) {
+				setIsLoadingPreset(true);
+
+				// Valores por defecto basados en las opciones proporcionadas
+				const defaultOptions = options as CardOptions;
+
+				// Cargar el preset
+				loadEntityPresetConfig(entity, entityType, defaultOptions)
+					.then(presetOptions => {
+						// Actualizar las opciones con las del preset
+						setCardOptions(presetOptions);
+					})
+					.catch(error => {
+						console.error('Error cargando preset para tarjeta de entidad:', error);
+						// En caso de error, usar las opciones proporcionadas
+						setCardOptions(defaultOptions);
+					})
+					.finally(() => {
+						setIsLoadingPreset(false);
+					});
+			} else {
+				// Si no hay presetId, usar las opciones proporcionadas directamente
+				setCardOptions(options as CardOptions);
+				setIsLoadingPreset(false);
+			}
+		}, [entity, entity.presetId, entityType, options]);
+
+		// Verificar que la entidad existe
+		if (!entity) {
+			console.error(`Error: La entidad de tipo ${entityType} es undefined`);
 			return (
 				<div className="error-card p-4 border border-red-500 rounded-md">
-					<h3 className="text-red-500 font-medium">Tipo de entidad no soportado</h3>
-					<p className="text-sm text-gray-500">No se ha encontrado un layout para: {entityType}</p>
+					<h3 className="text-red-500 font-medium">Error de datos</h3>
+					<p className="text-sm text-gray-500">No se pudo cargar la información de la entidad</p>
 				</div>
 			);
+		}
+
+		// Si el preset está cargando, mostrar una versión simplificada de la tarjeta
+		if (isLoadingPreset) {
+			return (
+				<div className="loading-card p-4 border border-muted rounded-md animate-pulse">
+					<div className="h-32 bg-muted/30 rounded-md mb-2" />
+					<div className="h-4 w-2/3 bg-muted/30 rounded-md" />
+					<div className="h-3 w-1/2 bg-muted/30 rounded-md mt-2" />
+				</div>
+			);
+		}
+
+		// Pasamos las propiedades comunes a todos los tipos de tarjetas
+		const commonProps = {
+			onClick,
+			className,
+			showVisualConfig,
+			onVisualConfigClick,
+			enableExplode,
+			isExploded,
+			activeLayer,
+			onExplodedChange,
+			onActiveLayerChange,
+			options: cardOptions as CardOptions,
+		};
+
+		// Renderizamos el adaptador según el tipo de entidad
+		switch (entityType) {
+			case 'folder':
+				return <FolderCard folder={entity as Folder} {...commonProps} />;
+			case 'album':
+				return <AlbumCard album={entity as Album} {...commonProps} />;
+			case 'tag':
+				return <TagCard tag={entity as Tag} {...commonProps} />;
+			case 'collection':
+				return <CollectionCard collection={entity as Collection} {...commonProps} />;
+			case 'character':
+				return <CharacterCard character={entity as Character} {...commonProps} />;
+			case 'place':
+				return <PlaceCard place={entity as Place} {...commonProps} />;
+			case 'world-item':
+			case 'worldItem':
+				return <WorldItemCard worldItem={entity as WorldItem} {...commonProps} />;
+			case 'concept':
+				return <ConceptCard concept={entity as Concept} {...commonProps} />;
+			case 'prompt':
+				return <PromptCard prompt={entity as Prompt} {...commonProps} />;
+			case 'note':
+				return <NoteCard note={entity as Note} {...commonProps} />;
+			default:
+				console.warn(`No se ha implementado todavía un layout para el tipo de entidad: ${entityType}`);
+				return (
+					<div className="error-card p-4 border border-red-500 rounded-md">
+						<h3 className="text-red-500 font-medium">Tipo de entidad no soportado</h3>
+						<p className="text-sm text-gray-500">No se ha encontrado un layout para: {entityType}</p>
+					</div>
+				);
+		}
+	},
+	(prevProps, nextProps) => {
+		// Función de comparación personalizada para evitar re-renderizados innecesarios
+		// Solo re-renderizar si cambian propiedades clave
+		return (
+			prevProps.entityType === nextProps.entityType &&
+			prevProps.entity.id === nextProps.entity.id &&
+			prevProps.isExploded === nextProps.isExploded &&
+			prevProps.activeLayer === nextProps.activeLayer &&
+			JSON.stringify(prevProps.options) === JSON.stringify(nextProps.options)
+		);
 	}
-}
+);

@@ -87,26 +87,26 @@ function EntityCardWithLayersContent({
 		// Propiedades adicionales específicas del tipo de entidad
 		...(entityType === 'folder'
 			? {
-					itemCount: 42,
-					icon: 'folder',
-				}
+				itemCount: 42,
+				icon: 'folder',
+			}
 			: {}),
 		...(entityType === 'album'
 			? {
-					itemCount: 24,
-					icon: 'album',
-					thumbnails: [
-						'https://picsum.photos/100/100?random=1',
-						'https://picsum.photos/100/100?random=2',
-						'https://picsum.photos/100/100?random=3',
-					],
-				}
+				itemCount: 24,
+				icon: 'album',
+				thumbnails: [
+					'https://picsum.photos/100/100?random=1',
+					'https://picsum.photos/100/100?random=2',
+					'https://picsum.photos/100/100?random=3',
+				],
+			}
 			: {}),
 		...(entityType === 'tag'
 			? {
-					icon: 'tag',
-					color: '#f59e0b',
-				}
+				icon: 'tag',
+				color: '#f59e0b',
+			}
 			: {}),
 	};
 
@@ -162,7 +162,13 @@ function EntityCardWithLayersContent({
 								</div>
 
 								<div className="pt-4">
-									<Button variant="outline" size="sm" onClick={resetToDefaults} className="w-full">
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={resetToDefaults}
+										className="w-full"
+									>
 										<Settings2Icon className="mr-2 h-4 w-4" />
 										Restablecer a valores predeterminados
 									</Button>

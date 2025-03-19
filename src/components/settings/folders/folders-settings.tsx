@@ -16,8 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { AlertCircle, EraserIcon, FolderIcon, Info, RefreshCw } from 'lucide-react';
-import { Folder } from 'lucide-react';
+import { AlertCircle, EraserIcon, Folder, FolderIcon, Info, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { FolderCard } from './folder-card';
@@ -104,6 +103,7 @@ export function FoldersSettings() {
 
 					<div className="flex items-center gap-1.5">
 						<Button
+							type="button"
 							variant="outline"
 							size="sm"
 							onClick={handleClearCache}
@@ -115,6 +115,7 @@ export function FoldersSettings() {
 						</Button>
 
 						<Button
+							type="button"
 							variant="outline"
 							size="sm"
 							onClick={handleReindexAll}
@@ -194,7 +195,7 @@ export function FoldersSettings() {
 						</DialogDescription>
 					</DialogHeader>
 					<div className="flex items-center space-x-2 py-4">
-						<Switch id="clear-cache" checked={false} onCheckedChange={() => {}} />
+						<Switch id="clear-cache" checked={false} onCheckedChange={() => { }} />
 						<Label htmlFor="clear-cache" className="text-sm font-normal cursor-pointer">
 							Limpiar caché de metadatos (recomendado si hay problemas)
 						</Label>

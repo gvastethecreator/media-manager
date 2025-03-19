@@ -126,7 +126,14 @@ export function ServerStats() {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h2 className="text-2xl font-bold">Estadísticas del Servidor</h2>
-				<Button variant="outline" size="sm" onClick={fetchStats} disabled={loading} className="flex items-center gap-2">
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={fetchStats}
+					disabled={loading}
+					className="flex items-center gap-2"
+				>
 					<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
 					Actualizar
 				</Button>
