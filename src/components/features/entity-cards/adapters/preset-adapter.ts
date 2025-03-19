@@ -1,3 +1,6 @@
+'use client';
+
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { VisualPreset } from '@prisma/client';
 import type { CardOptions, CardPreset, ColorPalette, LayersConfig } from '../types/unified-card-types';
 
@@ -24,6 +27,8 @@ export type EntityType =
 export interface PresetModule {
 	[key: string]: unknown;
 }
+
+const logger = serverLogger.withContext('PresetAdapter');
 
 /**
  * Convierte una cadena JSON en un objeto, con manejo de errores
@@ -431,3 +436,103 @@ export class PresetService {
 
 // Exportar una instancia singleton del servicio
 export const presetService = new PresetService();
+
+/**
+ * Adapta opciones de tarjeta a un formato de preset
+ * @param cardOptions Opciones de tarjeta
+ * @param entityType Tipo de entidad
+ */
+export function adaptCardOptionsToPreset(cardOptions: CardOptions, entityType: EntityType): Record<string, unknown> {
+	try {
+		// Crear un objeto que contiene solo las propiedades relevantes para un preset
+		const presetConfig: Record<string, unknown> = {
+			// Propiedades básicas
+			enable3DEffect: cardOptions.enable3DEffect,
+			enableHolographicEffect: cardOptions.enableHolographicEffect,
+			enableScanlines: cardOptions.enableScanlines,
+			enableLightHalo: cardOptions.enableLightHalo,
+			enableAnimatedBorder: cardOptions.enableAnimatedBorder,
+			enableGlowEffect: cardOptions.enableGlowEffect,
+			enableGrainEffect: cardOptions.enableGrainEffect,
+			hoverLiftHeight: cardOptions.hoverLiftHeight,
+			maxRotation: cardOptions.maxRotation,
+			primaryColor: cardOptions.primaryColor,
+			secondaryColor: cardOptions.secondaryColor,
+
+			// Sistemas
+			raritySystem: cardOptions.raritySystem,
+			categorySystem: cardOptions.categorySystem,
+			textureSystem: cardOptions.textureSystem,
+
+			// Sistemas anidados (si existen)
+			designSystem: cardOptions.designSystem,
+			layerSystem: cardOptions.layerSystem,
+			animation: cardOptions.animation,
+			effects: cardOptions.effects,
+			performance: cardOptions.performance,
+			core: cardOptions.core,
+		};
+
+		// Añadir propiedades específicas según el tipo de entidad
+		switch (entityType) {
+			case 'folder':
+				// Propiedades específicas para carpetas
+				presetConfig.folderConfig = {
+					showTotalFiles: cardOptions.showTotalFiles,
+					showTotalSize: cardOptions.showTotalSize,
+					showLastIndexed: cardOptions.showLastIndexed,
+				};
+				break;
+			case 'album':
+				// Propiedades específicas para álbumes
+				presetConfig.albumConfig = {
+					imageGridLayout: cardOptions.imageGridLayout,
+					imageGridGap: cardOptions.imageGridGap,
+					imageGridStyle: cardOptions.imageGridStyle,
+					useImageGrid: cardOptions.useImageGrid,
+				};
+				break;
+			// ... otros casos para los demás tipos de entidades
+		}
+
+		return presetConfig;
+	} catch (error) {
+		logger.error('❌ Error adaptando opciones de tarjeta a preset:', error);
+		return {};
+	}
+}
+
+/**
+ * Parsea una configuración JSON almacenada como string
+ * @param jsonConfig String JSON con la configuración
+ */
+export function parseJsonConfigLegacy(jsonConfig: string): Record<string, unknown> {
+	try {
+		if (!jsonConfig) return {};
+		return JSON.parse(jsonConfig) as Record<string, unknown>;
+	} catch (error) {
+		logger.error('❌ Error parseando configuración JSON:', error);
+		return {};
+	}
+}
+
+/**
+ * Convierte un ID de entidad entre diferentes formatos
+ */
+export const convertEntityId = {
+	/**
+	 * Convierte un ID de componente a formato API
+	 * Ej: 'card-album' -> 'album'
+	 */
+	toApiFormat(componentId: string): string {
+		return componentId.replace(/^card-/, '');
+	},
+
+	/**
+	 * Convierte un ID de API a formato de componente
+	 * Ej: 'album' -> 'card-album'
+	 */
+	toComponentFormat(apiId: string): string {
+		return `card-${apiId}`;
+	},
+};

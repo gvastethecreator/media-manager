@@ -2,10 +2,108 @@
 
 import type { ActionResponse } from '@/components/features/entity-cards/modules/core/actions/entities-cards.actions';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { VisualPreset } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
-import { type EntityType, adaptPresetToCardOptions, parseJsonConfig } from '../adapters/preset-adapter';
+
+const logger = serverLogger.withContext('VisualPresetsActions');
+
+/**
+ * Función segura para el servidor que parsea JSON guardado como string
+ */
+function parseJsonConfigServer(jsonConfig?: string | null): Record<string, unknown> {
+	try {
+		if (!jsonConfig) return {};
+
+		// Si el string comienza con "default_", devolver un objeto con la configuración por defecto
+		if (jsonConfig.startsWith('default_')) {
+			const configType = jsonConfig.replace('default_', '').replace('_config', '');
+			return getDefaultConfig(configType);
+		}
+
+		// Intentar parsear como JSON normal
+		return JSON.parse(jsonConfig) as Record<string, unknown>;
+	} catch (error) {
+		logger.error('❌ Error parseando configuración JSON:', error);
+		return {};
+	}
+}
+
+/**
+ * Obtiene la configuración por defecto según el tipo
+ */
+function getDefaultConfig(configType: string): Record<string, unknown> {
+	switch (configType) {
+		case 'core':
+			return {
+				enabled: true,
+				version: '1.0.0',
+				mode: 'standard'
+			};
+		case 'design':
+			return {
+				preset: 'default',
+				variant: 'default',
+				aspectRatio: '1/1',
+				cornerStyle: 'rounded',
+				cornerRadius: 12,
+				elevation: 2,
+				shadowStyle: 'soft'
+			};
+		case 'animation':
+			return {
+				enabled: true,
+				duration: 300,
+				easing: 'ease-in-out'
+			};
+		case 'layer':
+			return {
+				order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
+				spacing: 2
+			};
+		case 'backside':
+			return {
+				enabled: true,
+				style: 'standard'
+			};
+		case 'effects':
+			return {
+				glow: true,
+				shadow: true,
+				reflection: false
+			};
+		case 'performance':
+			return {
+				quality: 'high',
+				optimizeRendering: true
+			};
+		case 'ra':
+		case 'rarity':
+			return {
+				enabled: true,
+				system: 'standard'
+			};
+		case 'la':
+		case 'layout':
+			return {
+				type: 'standard',
+				padding: 16
+			};
+		case 'pe':
+			return {
+				quality: 'high',
+				optimizeRendering: true
+			};
+		case 'ba':
+			return {
+				enabled: true,
+				style: 'standard'
+			};
+		default:
+			return {};
+	}
+}
 
 // Tipos específicos para presets visuales
 export interface VisualPresetDto {
@@ -447,34 +545,165 @@ export async function createPresetFromCardOptions(
 }
 
 /**
- * Obtiene las opciones de tarjeta desde un preset visual
+ * Obtiene la configuración de tarjeta a partir de un preset visual
+ * @param presetId ID del preset visual
+ * @param entityType Tipo de entidad para personalizar la configuración
  */
-export async function getCardOptionsFromPreset(presetId: string, entityType: string): Promise<ActionResponse> {
+export async function getCardOptionsFromPreset(
+	presetId: string,
+	entityType: string
+): Promise<ActionResponse> {
 	try {
-		// Obtener el preset
-		const response = await getVisualPresetById(presetId);
+		logger.info(`🔄 Obteniendo configuración de preset ${presetId} para ${entityType}`);
 
-		if (!response.success || !response.data) {
+		// Buscar el preset en la base de datos
+		const preset = await prisma.visualPreset.findUnique({
+			where: { id: presetId },
+		});
+
+		if (!preset) {
 			return {
 				success: false,
-				message: 'No se pudo obtener el preset visual',
+				message: 'Preset visual no encontrado',
 			};
 		}
 
-		// Convertir el preset a opciones de tarjeta
-		const preset = response.data as VisualPreset;
-		const cardOptions = adaptPresetToCardOptions(preset, entityType as EntityType);
+		// Convertir el preset a opciones de tarjeta utilizables
+		const cardOptions = convertPresetToCardOptions(preset, entityType);
+
+		logger.info(`✅ Configuración de preset ${presetId} obtenida correctamente`);
 
 		return {
 			success: true,
-			message: 'Opciones de tarjeta obtenidas correctamente',
+			message: 'Configuración de preset obtenida correctamente',
 			data: cardOptions,
 		};
 	} catch (error) {
-		console.error('Error al obtener opciones de tarjeta desde preset:', error);
+		logger.error(`❌ Error obteniendo configuración de preset ${presetId}:`, error);
 		return {
 			success: false,
-			message: 'No se pudieron obtener las opciones de tarjeta desde el preset',
+			message: 'Error al obtener la configuración del preset',
 		};
+	}
+}
+
+/**
+ * Convierte el modelo VisualPreset en opciones de tarjeta utilizables (CardOptions)
+ */
+function convertPresetToCardOptions(preset: VisualPreset, entityType: string): CardOptions {
+	// Opciones base para todos los presets
+	const baseOptions: Record<string, unknown> = {};
+
+	try {
+		// Parsear diferentes configuraciones del preset con logging
+		logger.info('🔄 Procesando configuraciones del preset...');
+
+		// Core config
+		if (preset.coreConfig) {
+			logger.debug('Parseando coreConfig:', preset.coreConfig);
+			baseOptions.core = parseJsonConfigServer(preset.coreConfig);
+		}
+
+		// Design config
+		if (preset.designConfig) {
+			logger.debug('Parseando designConfig:', preset.designConfig);
+			baseOptions.designSystem = parseJsonConfigServer(preset.designConfig);
+		}
+
+		// Animation config
+		if (preset.animationConfig) {
+			logger.debug('Parseando animationConfig:', preset.animationConfig);
+			baseOptions.animation = parseJsonConfigServer(preset.animationConfig);
+		}
+
+		// Layer config
+		if (preset.layerConfig) {
+			logger.debug('Parseando layerConfig:', preset.layerConfig);
+			baseOptions.layers = parseJsonConfigServer(preset.layerConfig);
+		}
+
+		// Backside config
+		if (preset.backsideConfig) {
+			logger.debug('Parseando backsideConfig:', preset.backsideConfig);
+			baseOptions.backside = parseJsonConfigServer(preset.backsideConfig);
+		}
+
+		// Effects config
+		if (preset.effectsConfig) {
+			logger.debug('Parseando effectsConfig:', preset.effectsConfig);
+			baseOptions.effects = parseJsonConfigServer(preset.effectsConfig);
+		}
+
+		// Performance config
+		if (preset.performanceConfig) {
+			logger.debug('Parseando performanceConfig:', preset.performanceConfig);
+			baseOptions.performance = parseJsonConfigServer(preset.performanceConfig);
+		}
+
+		// Color config
+		if (preset.colorConfig) {
+			logger.debug('Parseando colorConfig:', preset.colorConfig);
+			baseOptions.colors = parseJsonConfigServer(preset.colorConfig);
+		}
+
+		// Image grid config
+		if (preset.imageGridConfig) {
+			logger.debug('Parseando imageGridConfig:', preset.imageGridConfig);
+			baseOptions.imageGrid = parseJsonConfigServer(preset.imageGridConfig);
+		}
+
+		// Layout config
+		if (preset.layoutConfig) {
+			logger.debug('Parseando layoutConfig:', preset.layoutConfig);
+			baseOptions.layout = parseJsonConfigServer(preset.layoutConfig);
+		}
+
+		// Explode config
+		if (preset.explodeConfig) {
+			logger.debug('Parseando explodeConfig:', preset.explodeConfig);
+			baseOptions.explode = parseJsonConfigServer(preset.explodeConfig);
+		}
+
+		// Preview config
+		if (preset.previewConfig) {
+			logger.debug('Parseando previewConfig:', preset.previewConfig);
+			baseOptions.preview = parseJsonConfigServer(preset.previewConfig);
+		}
+
+		// Rarity config
+		if (preset.rarityConfig) {
+			logger.debug('Parseando rarityConfig:', preset.rarityConfig);
+			baseOptions.rarityConfig = parseJsonConfigServer(preset.rarityConfig);
+		}
+
+		// Aplicar configuraciones específicas según el tipo de entidad
+		logger.info(`🔄 Aplicando configuración específica para tipo: ${entityType}`);
+
+		// Configuración específica por tipo de entidad
+		const entityConfigs: Record<string, string | null | undefined> = {
+			folder: preset.folderConfig,
+			album: preset.albumConfig,
+			tag: preset.tagConfig,
+			collection: preset.collectionConfig,
+			character: preset.characterConfig,
+			place: preset.placeConfig,
+			worldItem: preset.worldItemConfig,
+			concept: preset.conceptConfig,
+			prompt: preset.promptConfig,
+			note: preset.noteConfig,
+		};
+
+		const entityConfig = entityConfigs[entityType];
+		if (entityConfig) {
+			logger.debug(`Parseando configuración para ${entityType}:`, entityConfig);
+			Object.assign(baseOptions, parseJsonConfigServer(entityConfig));
+		}
+
+		logger.info('✅ Conversión de preset completada exitosamente');
+		return baseOptions as CardOptions;
+	} catch (error) {
+		logger.error('❌ Error en convertPresetToCardOptions:', error);
+		// En caso de error, devolver opciones por defecto
+		return getDefaultConfig('core') as CardOptions;
 	}
 }

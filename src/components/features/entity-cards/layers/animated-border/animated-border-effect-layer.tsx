@@ -3,7 +3,25 @@
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import type { LayerComponentProps } from '../layer-plugin-system';
-import type { AnimatedBorderConfig } from './actions/animated-border-config.action';
+
+/**
+ * Configuración para el borde animado
+ */
+export interface AnimatedBorderConfig {
+	enabled: boolean;
+	width: number;
+	color: string;
+	secondaryColor: string;
+	animationSpeed: number;
+	animationType: 'flow' | 'pulse' | 'rainbow' | 'sparkle';
+	glowAmount: number;
+	opacity: number;
+	glowColor: string;
+	borderRadius: number;
+	dashArray?: string;
+	layerIndex: number;
+	[key: string]: unknown;
+}
 
 /**
  * AnimatedBorderEffectLayer - Componente que añade un borde animado a la tarjeta.
@@ -14,6 +32,10 @@ export function AnimatedBorderEffectLayer({
 	activeLayer,
 	getExplodeLayerTransform,
 	config,
+	isHovered = false,
+	mousePosition = { x: 0, y: 0 },
+	entityType,
+	entityId,
 }: LayerComponentProps<AnimatedBorderConfig>) {
 	// Valores por defecto
 	const defaultConfig: AnimatedBorderConfig = {
@@ -27,6 +49,7 @@ export function AnimatedBorderEffectLayer({
 		opacity: 0.8,
 		glowColor: 'rgba(255, 255, 255, 0.5)',
 		borderRadius: 4,
+		layerIndex: 10,
 	};
 
 	// Combinar configuración
@@ -93,7 +116,7 @@ export function AnimatedBorderEffectLayer({
 			style={{
 				...getBorderStyle(),
 				...getGlowStyle(),
-				...(isExploded ? getExplodeLayerTransform(10) : {}),
+				...(isExploded ? getExplodeLayerTransform(mergedConfig.layerIndex) : {}),
 				animationDuration: `${6 / (mergedConfig.animationSpeed || 1)}s`,
 			}}
 			data-layer-active={activeLayer === 'animated-border' || null}
@@ -101,13 +124,20 @@ export function AnimatedBorderEffectLayer({
 	);
 }
 
+// Variables para colores en animaciones
+const colorVars = {
+	currentColor: '#ffffff',
+	currentSecondaryColor: '#00ffff',
+	currentGlowColor: 'rgba(255, 255, 255, 0.5)',
+};
+
 // Estilos globales necesarios para las animaciones
 const GlobalStyles = () => (
 	<style jsx global>{`
 		@keyframes border-flow {
 			0%,
 			100% {
-				border-color: ${globalThis.currentColor || '#ffffff'};
+				border-color: ${colorVars.currentColor};
 			}
 			50% {
 				border-color: transparent;
@@ -117,10 +147,10 @@ const GlobalStyles = () => (
 		@keyframes border-pulse {
 			0%,
 			100% {
-				box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				box-shadow: 0 0 5px 0 ${colorVars.currentGlowColor};
 			}
 			50% {
-				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				box-shadow: 0 0 15px 0 ${colorVars.currentGlowColor};
 			}
 		}
 
@@ -151,20 +181,20 @@ const GlobalStyles = () => (
 		@keyframes border-sparkle {
 			0%,
 			100% {
-				border-color: ${globalThis.currentColor || '#ffffff'};
-				box-shadow: 0 0 5px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				border-color: ${colorVars.currentColor};
+				box-shadow: 0 0 5px 0 ${colorVars.currentGlowColor};
 			}
 			25% {
 				border-color: transparent;
-				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				box-shadow: 0 0 15px 0 ${colorVars.currentGlowColor};
 			}
 			50% {
-				border-color: ${globalThis.currentSecondaryColor || '#00ffff'};
-				box-shadow: 0 0 10px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				border-color: ${colorVars.currentSecondaryColor};
+				box-shadow: 0 0 10px 0 ${colorVars.currentGlowColor};
 			}
 			75% {
 				border-color: transparent;
-				box-shadow: 0 0 15px 0 ${globalThis.currentGlowColor || 'rgba(255, 255, 255, 0.5)'};
+				box-shadow: 0 0 15px 0 ${colorVars.currentGlowColor};
 			}
 		}
 
@@ -188,11 +218,11 @@ const GlobalStyles = () => (
 
 // Exportar el componente con los estilos globales
 export default function AnimatedBorderEffectLayerWithStyles(props: LayerComponentProps<AnimatedBorderConfig>) {
-	// Establecer variables globales para que sean accesibles desde los keyframes
-	if (typeof window !== 'undefined') {
-		globalThis.currentColor = props.config?.color || '#ffffff';
-		globalThis.currentSecondaryColor = props.config?.secondaryColor || '#00ffff';
-		globalThis.currentGlowColor = props.config?.glowColor || 'rgba(255, 255, 255, 0.5)';
+	// Actualizar variables de color con los valores de configuración
+	if (typeof window !== 'undefined' && props.config) {
+		colorVars.currentColor = props.config.color || '#ffffff';
+		colorVars.currentSecondaryColor = props.config.secondaryColor || '#00ffff';
+		colorVars.currentGlowColor = props.config.glowColor || 'rgba(255, 255, 255, 0.5)';
 	}
 
 	return (
