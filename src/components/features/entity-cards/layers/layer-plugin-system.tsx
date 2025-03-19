@@ -1,7 +1,8 @@
 'use client';
 
 import type * as React from 'react';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import type { LayerConfigResponse } from '../types/card-layer-types';
 
 // Tipo base para la configuración de una capa
@@ -154,6 +155,18 @@ export function LayerRenderer({
 	const { getOrderedLayers } = useLayerPlugin();
 	const orderedLayers = getOrderedLayers();
 
+	// Agregamos un useEffect para garantizar que las capas se inicialicen correctamente
+	const [layerInitialized, setLayerInitialized] = useState(false);
+
+	useEffect(() => {
+		// Dar un pequeño tiempo para que el DOM se renderice completamente
+		const timer = setTimeout(() => {
+			setLayerInitialized(true);
+		}, 50);
+
+		return () => clearTimeout(timer);
+	}, []);
+
 	// Combinar contexto con otras propiedades para compatibilidad con ambas implementaciones
 	const combinedContext = {
 		...context,
@@ -165,6 +178,11 @@ export function LayerRenderer({
 		entityId,
 	};
 
+	// No renderizar hasta que esté inicializado
+	if (!layerInitialized) {
+		return <div className="layer-system-initializing" data-testid="layer-system-initializing" />;
+	}
+
 	return (
 		<>
 			{orderedLayers.map((layer) => {
@@ -175,34 +193,44 @@ export function LayerRenderer({
 					return null;
 				}
 
-				// Verificar si el componente espera la interfaz antigua o nueva
-				// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
-				if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
-					// Usar type assertion para manejar componentes legacy
-					return (
-						<LayerComp
-							key={`layer-${layer.type}`}
-							config={config}
-							context={combinedContext}
-							{...({} as Record<string, unknown>)} // Hack para evitar errores de tipo
-						/>
-					);
-				}
+				// Agregar manejo de errores para cada capa individual
+				try {
+					// Verificar si el componente espera la interfaz antigua o nueva
+					// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
+					if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
+						// Usar type assertion para manejar componentes legacy
+						return (
+							<ErrorBoundary key={`layer-${layer.type}`} fallback={<div className="layer-error" />}>
+								<LayerComp
+									key={`layer-${layer.type}`}
+									config={config}
+									context={combinedContext}
+									{...({} as Record<string, unknown>)} // Hack para evitar errores de tipo
+								/>
+							</ErrorBoundary>
+						);
+					}
 
-				// De lo contrario, usar la interfaz estándar
-				return (
-					<LayerComp
-						key={`layer-${layer.type}`}
-						isExploded={isExploded}
-						isHovered={isHovered}
-						mousePosition={mousePosition}
-						activeLayer={activeLayer}
-						getExplodeLayerTransform={getExplodeLayerTransform}
-						config={config}
-						entityType={entityType}
-						entityId={entityId}
-					/>
-				);
+					// De lo contrario, usar la interfaz estándar
+					return (
+						<ErrorBoundary key={`layer-${layer.type}`} fallback={<div className="layer-error" />}>
+							<LayerComp
+								key={`layer-${layer.type}`}
+								isExploded={isExploded}
+								isHovered={isHovered}
+								mousePosition={mousePosition}
+								activeLayer={activeLayer}
+								getExplodeLayerTransform={getExplodeLayerTransform}
+								config={config}
+								entityType={entityType}
+								entityId={entityId}
+							/>
+						</ErrorBoundary>
+					);
+				} catch (err) {
+					console.error(`Error renderizando capa ${layer.type}:`, err);
+					return <div key={`layer-error-${layer.type}`} className="layer-error" />;
+				}
 			})}
 		</>
 	);

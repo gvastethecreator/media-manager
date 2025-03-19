@@ -8,15 +8,15 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useLayerPlugin } from '../../layers/layer-plugin-system';
 import {
-	type EntityCardLayerSystemConfig,
-	entityCardPropsToLayerConfig,
-	getEntityLayerConfig,
-	layerConfigToEntityCardProps,
-	mergeLayerConfigs,
-	saveEntityTypeLayerConfig,
+    type EntityCardLayerSystemConfig,
+    entityCardPropsToLayerConfig,
+    getEntityLayerConfig,
+    layerConfigToEntityCardProps,
+    mergeLayerConfigs,
+    saveEntityTypeLayerConfig,
 } from './entity-card-layer-adapter';
-import { useLayerPlugin } from './layer-plugin-system';
 
 /**
  * Opciones para el hook useEntityCardLayers

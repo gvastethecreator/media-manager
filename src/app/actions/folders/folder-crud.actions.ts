@@ -1,13 +1,11 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { fsService } from '@/services/fs.server';
-import { indexFolder } from './folder-indexing.actions';
-import { FolderError, type FolderResponse, type FolderUpdate, type ImageWithRelations } from './folder-types.actions';
+import { existsSync } from 'fs';
+import { FolderError, type FolderUpdate, type ImageWithRelations } from './folder-types.actions';
 import { revalidateAllPaths } from './folder-utils.actions';
 
 const folderLogger = serverLogger.withContext('FolderCRUD');
@@ -92,8 +90,8 @@ export async function getFolder(id: string) {
 		});
 
 		if (!folder) {
-			folderLogger.warn('❌ Carpeta no encontrada:', id);
-			throw new FolderError('Carpeta no encontrada');
+			folderLogger.warn('ℹ️ Carpeta no encontrada, retornando null:', id);
+			return null;
 		}
 
 		folderLogger.info('✅ Carpeta obtenida:', folder.name);
@@ -258,7 +256,8 @@ export async function getFolderImages(id: string) {
 		});
 
 		if (!folder) {
-			throw new FolderError('Carpeta no encontrada');
+			folderLogger.warn('ℹ️ Carpeta no encontrada, retornando array vacío:', id);
+			return [];
 		}
 
 		// Uso de Promise.all para esperar a que todas las promesas se resuelvan
@@ -335,3 +334,4 @@ export async function updateFolderAutoReindex(id: string, autoReindex: boolean) 
 
 // Importamos esta función del archivo folder-utils
 import { transformImageToFileItem } from './folder-utils.actions';
+

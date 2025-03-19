@@ -230,7 +230,8 @@ export async function getPlaceImages(id: string) {
 		})) as ExtendedPlace | null;
 
 		if (!place) {
-			throw new PlaceError('Lugar no encontrado');
+			placeLogger.warn('ℹ️ Lugar no encontrado, retornando array vacío:', id);
+			return [];
 		}
 
 		const images = place.images.map((img) => convertServerImageToFileItem(img as ServerImage));

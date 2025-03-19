@@ -37,7 +37,7 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 			}}
 			transition={{
 				duration: 0.3,
-				ease: 'easeOut',
+				ease: [0.4, 0, 0.2, 1],
 			}}
 		>
 			{/* Efecto de iridiscencia */}
@@ -86,7 +86,7 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 								duration: 2,
 								delay: index * 0.2,
 								repeat: Number.POSITIVE_INFINITY,
-								ease: 'linear',
+								ease: "linear",
 							}}
 						/>
 					);
@@ -111,7 +111,7 @@ export function CardHolographic({ options, isHovered, className }: CardHolograph
 				transition={{
 					duration: 3,
 					repeat: Number.POSITIVE_INFINITY,
-					ease: 'easeInOut',
+					ease: [0.4, 0, 0.2, 1],
 				}}
 			/>
 		</motion.div>

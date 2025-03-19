@@ -446,7 +446,8 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 		});
 
 		if (!collection) {
-			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
+			collectionLogger.warn('ℹ️ Colección no encontrada, retornando array vacío:', id);
+			return [];
 		}
 
 		const images = collection.images.map((img) => convertServerImageToFileItem(img as ServerImage));

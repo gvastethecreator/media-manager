@@ -10,7 +10,7 @@ export * from './core';
 export * from './rarities';
 
 // Módulos de Capas
-export * from './layers';
+export * from './layers-module';
 
 // Módulos de Efectos
 export * from './effects';

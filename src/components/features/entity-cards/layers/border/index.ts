@@ -1,38 +1,21 @@
 'use client';
 
-import * as React from 'react';
-import type { LayerComponent } from '../layer-plugin-system';
-import { deleteBorderConfig, getBorderConfig, updateBorderConfig } from './actions';
-import BorderEffectLayerWithStyles, { BorderEffectLayer, type BorderConfig } from './border-effect-layer';
-import { BorderSettings } from './border-settings';
+/**
+ * 🔲 Implementación de capa de borde
+ *
+ * Este archivo proporciona exportaciones para el sistema de capas.
+ * La implementación principal ahora se encuentra en border-layer-implementation.tsx.
+ */
 
-// Registrar la capa para el sistema de plugins
-export const borderLayer: LayerComponent<BorderConfig> = {
-	type: 'border',
-	Component: BorderEffectLayerWithStyles,
-	SettingsComponent: BorderSettings,
-	defaultConfig: {
-		enabled: true,
-		width: 2,
-		style: 'solid',
-		color: '#ffffff',
-		radius: 8,
-		animated: false,
-		animationType: 'none',
-		animationSpeed: 1,
-		glowAmount: 0,
-		opacity: 1,
-		cornerStyle: 'round',
-		layerIndex: 2,
-	},
-	getServerActions: () => ({
-		getConfig: getBorderConfig,
-		updateConfig: updateBorderConfig,
-		deleteConfig: deleteBorderConfig,
-	}),
-};
+// Exportar la implementación principal desde el archivo border-layer-implementation.tsx
+export { borderLayerImplementation, borderLayerImplementation as default } from './border-layer-implementation';
 
-// Exportaciones adicionales
+// Exportar componentes individuales para uso directo si es necesario
 export { BorderEffectLayer } from './border-effect-layer';
 export { BorderSettings } from './border-settings';
+
+// Exportar configuración y tipos
+export type { BorderConfig } from './border-effect-layer';
+
+// Exportar acciones para uso directo
 export * from './actions';

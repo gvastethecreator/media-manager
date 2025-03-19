@@ -3,11 +3,9 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { Prompt } from '@/types/entities/prompts';
 import type { FileItem } from '@/types/file-item';
-import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const promptLogger = serverLogger.withContext('PromptActions');
@@ -224,7 +222,8 @@ export async function getPromptImages(promptId: string): Promise<FileItem[]> {
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			promptLogger.warn('ℹ️ Prompt no encontrado, retornando array vacío:', promptId);
+			return [];
 		}
 
 		// Solución temporal hasta que se implementen las relaciones correctamente

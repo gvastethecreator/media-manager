@@ -1,10 +1,25 @@
 'use client';
 
+// ⚠️ ADVERTENCIA: Este archivo está obsoleto y será eliminado en futuras versiones.
+// Por favor, importa desde '@/components/features/entity-cards/layers/layer-plugin-system' directamente.
+
 import type * as React from 'react';
 import { createContext, useContext, useState } from 'react';
 import type { LayerConfigResponse } from '../types/card-layer-types';
 
-// Tipo base para la configuración de una capa
+// Importar desde la implementación principal para asegurar compatibilidad
+import {
+	LayerPluginProvider as OriginalLayerPluginProvider,
+	LayerRenderer as OriginalLayerRenderer,
+	useLayerPlugin as originalUseLayerPlugin,
+} from '../../layers/layer-plugin-system';
+
+// Re-exportar para mantener compatibilidad
+export const LayerPluginProvider = OriginalLayerPluginProvider;
+export const LayerRenderer = OriginalLayerRenderer;
+export const useLayerPlugin = originalUseLayerPlugin;
+
+// También exportamos las interfaces originales para mantener compatibilidad
 export interface BaseLayerConfig {
 	enabled: boolean;
 	layerIndex: number;
@@ -61,7 +76,8 @@ interface LayerPluginContextType {
 
 const LayerPluginContext = createContext<LayerPluginContextType | undefined>(undefined);
 
-export function LayerPluginProvider({ children }: { children: React.ReactNode }) {
+// Redefinidas con nombres diferentes para evitar conflictos
+export function InternalLayerPluginProvider({ children }: { children: React.ReactNode }) {
 	const [layers, setLayers] = useState<Record<string, LayerComponent>>({});
 
 	// Registrar una nueva capa
@@ -111,8 +127,8 @@ export function LayerPluginProvider({ children }: { children: React.ReactNode })
 	);
 }
 
-// Hook para utilizar el contexto de capas
-export function useLayerPlugin() {
+// Hook para utilizar el contexto de capas - renombrado para evitar conflicto
+export function internalUseLayerPlugin() {
 	const context = useContext(LayerPluginContext);
 	if (!context) {
 		throw new Error('useLayerPlugin debe ser usado dentro de un LayerPluginProvider');
@@ -120,8 +136,8 @@ export function useLayerPlugin() {
 	return context;
 }
 
-// Componente para renderizar todas las capas ordenadas
-export function LayerRenderer({
+// Componente para renderizar todas las capas ordenadas - renombrado para evitar conflicto
+export function InternalLayerRenderer({
 	isExploded,
 	isHovered,
 	mousePosition,

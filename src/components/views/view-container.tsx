@@ -2,8 +2,10 @@
 
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
+import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
+import CardDebugToolbar from '../features/entity-cards/debug/card-debug-toolbar';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
@@ -115,7 +117,9 @@ export function ViewContainer() {
 	const { currentView, navigationDirection } = useNavigationStore();
 
 	return (
-		<div className="relative w-full h-full overflow-auto bg-background">
+		<div className={cn('h-full flex flex-col')}>
+			<CardDebugToolbar />
+
 			<AnimatePresence initial={false} custom={navigationDirection}>
 				<motion.div
 					key={currentView}

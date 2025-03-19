@@ -30,8 +30,157 @@ const DEFAULT_PRESETS = [
 			layerBlending: 'screen',
 			layerSpacing: 2,
 		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableHolographicEffect: false,
+			enableGlowEffect: true,
+			enableAnimatedBorder: false,
+			enableLightHalo: true,
+			enableGrainEffect: false,
+		}),
 	},
-	// Preset para carpetas
+	// Preset para carpetas con estilo TCG
+	{
+		name: 'folder-tcg',
+		description: 'Preset de carpetas estilo cartas coleccionables tipo TCG',
+		category: 'folder',
+		isDefault: false,
+		isPublic: true,
+		version: '1.0.0',
+		author: 'Sistema',
+		tags: JSON.stringify(['folder', 'tcg', 'collectible', 'rarity']),
+		colorConfig: JSON.stringify({
+			primary: '#3b82f6',
+			secondary: '#60a5fa',
+			accent: '#93c5fd',
+		}),
+		designConfig: JSON.stringify({
+			preset: 'folder',
+			variant: 'tcg',
+			cornerStyle: 'rounded',
+			aspectRatio: '7/10',
+			cornerRadius: 16,
+			elevation: 3,
+			shadowStyle: 'dramatic',
+		}),
+		layerConfig: JSON.stringify({
+			order: ['background', 'texture', 'content', 'effects', 'holographic', 'border', 'filter'],
+			layerBlending: 'screen',
+			layerSpacing: 3,
+			explodeView: true,
+		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableHolographicEffect: true,
+			enableGlowEffect: true,
+			enableAnimatedBorder: true,
+			enableLightHalo: true,
+			enableGrainEffect: true,
+			noiseTexture: {
+				enabled: true,
+				visibleOnHover: true,
+				intensity: 0.2,
+				scale: 1.5,
+			},
+			chromaticAberration: {
+				enabled: true,
+				visibleOnHover: true,
+				intensity: 0.3,
+			},
+		}),
+		backsideConfig: JSON.stringify({
+			enabled: true,
+			layoutType: 'tabbed',
+			showAttributes: true,
+			showDescription: true,
+			showStats: true,
+			showMetadata: true,
+			flipAnimation: 'rotate3d',
+		}),
+		rarityConfig: JSON.stringify({
+			enabled: true,
+			rarities: {
+				common: {
+					color: '#9ca3af',
+					borderColor: 'rgba(156, 163, 175, 0.8)',
+					glowColor: 'rgba(156, 163, 175, 0.6)',
+					label: 'Común',
+					stars: 1,
+					textureType: 'noise',
+					glowIntensity: 0.4,
+					textureOpacity: 0.15
+				},
+				uncommon: {
+					color: '#22c55e',
+					borderColor: 'rgba(34, 197, 94, 0.8)',
+					glowColor: 'rgba(34, 197, 94, 0.6)',
+					label: 'Poco Común',
+					stars: 2,
+					textureType: 'dots',
+					glowIntensity: 0.5,
+					textureOpacity: 0.2
+				},
+				rare: {
+					color: '#3b82f6',
+					borderColor: 'rgba(59, 130, 246, 0.8)',
+					glowColor: 'rgba(59, 130, 246, 0.6)',
+					label: 'Rara',
+					stars: 3,
+					textureType: 'grid',
+					glowIntensity: 0.65,
+					textureOpacity: 0.25,
+					borderAnimation: 'pulse'
+				},
+				legendary: {
+					color: '#eab308',
+					borderColor: 'rgba(234, 179, 8, 0.8)',
+					glowColor: 'rgba(234, 179, 8, 0.7)',
+					label: 'Legendaria',
+					stars: 4,
+					holographic: true,
+					textureType: 'sparkle',
+					glowIntensity: 0.8,
+					textureOpacity: 0.3,
+					borderAnimation: 'flow'
+				},
+				mythic: {
+					color: '#d946ef',
+					borderColor: 'rgba(217, 70, 239, 0.8)',
+					glowColor: 'rgba(217, 70, 239, 0.7)',
+					label: 'Mítica',
+					stars: 5,
+					holographic: true,
+					textureType: 'rainbow',
+					glowIntensity: 1,
+					textureOpacity: 0.35,
+					borderAnimation: 'rainbow'
+				}
+			}
+		}),
+		folderConfig: JSON.stringify({
+			layout: 'tcg',
+			showFileCount: true,
+			showTotalSize: true,
+			showLastUpdated: true,
+			iconPosition: 'top-center',
+			frameColor: '#3b82f6',
+			rarityEnabled: true,
+			showRarityStars: true,
+			showRarityLabel: true,
+			heroImageEnabled: true,
+			statsDisplayMode: 'detailed',
+			tcgMode: true,
+		}),
+		animationConfig: JSON.stringify({
+			hoverEffect: 'lift',
+			entranceAnimation: 'fade-in',
+			hoverScale: 1.05,
+			hoverRotation: true,
+			hoverLightEffect: true,
+			maxRotation: 15,
+		}),
+	},
+	// Preset para carpetas estándar
 	{
 		name: 'folder-default',
 		description: 'Preset visual por defecto para carpetas',
@@ -59,6 +208,11 @@ const DEFAULT_PRESETS = [
 			showLastUpdated: true,
 			iconPosition: 'top-left',
 			frameColor: '#3b82f6',
+		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableGlowEffect: true,
+			enableLightHalo: true,
 		}),
 	},
 	// Preset para álbumes
@@ -89,6 +243,11 @@ const DEFAULT_PRESETS = [
 			showFilters: true,
 			frameColor: '#2980b9',
 		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableGlowEffect: true,
+			enableHolographicEffect: true,
+		}),
 	},
 	// Preset para colecciones
 	{
@@ -118,6 +277,11 @@ const DEFAULT_PRESETS = [
 			showPrice: true,
 			showEditions: true,
 			frameColor: '#c0392b',
+		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableGlowEffect: true,
+			enableAnimatedBorder: true,
 		}),
 	},
 	// Preset para etiquetas
@@ -178,6 +342,11 @@ const DEFAULT_PRESETS = [
 			showAlignment: true,
 			showStats: true,
 			frameColor: '#d35400',
+		}),
+		effectsConfig: JSON.stringify({
+			enable3DEffect: true,
+			enableGlowEffect: true,
+			enableHolographicEffect: true,
 		}),
 	},
 	// Preset para lugares

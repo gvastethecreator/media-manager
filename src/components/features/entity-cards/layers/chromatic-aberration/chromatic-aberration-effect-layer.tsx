@@ -15,6 +15,7 @@ export interface ChromaticAberrationConfig {
 	quality: 'low' | 'medium' | 'high';
 	mode: 'simple' | 'advanced';
 	layerIndex: number;
+	[key: string]: unknown; // Añadido para compatibilidad con índices dinámicos
 }
 
 /**
@@ -23,10 +24,13 @@ export interface ChromaticAberrationConfig {
  */
 export function ChromaticAberrationEffectLayer({
 	isExploded,
-	isHovered,
+	isHovered = false,
+	mousePosition = { x: 0, y: 0 },
 	activeLayer,
 	getExplodeLayerTransform,
 	config,
+	entityType,
+	entityId,
 }: LayerComponentProps<ChromaticAberrationConfig>) {
 	// Valores por defecto
 	const defaultConfig: ChromaticAberrationConfig = {

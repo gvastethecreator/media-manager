@@ -1,9 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { EntityCard } from './entity-card';
 import type { CardOptions } from './types/unified-card-types';
+import type { CardError } from './utils/error-handler';
 
 // Opciones por defecto para todas las tarjetas
 const DEFAULT_CARD_OPTIONS: Partial<CardOptions> = {
@@ -121,7 +122,7 @@ const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
 	},
 	worldItem: {
 		designSystem: {
-			preset: 'world-item',
+			preset: 'worldItem',
 			variant: 'default',
 			aspectRatio: '3/2',
 			cornerStyle: 'rounded',
@@ -190,6 +191,7 @@ export interface EntityCardWrapperProps {
 	activeLayer?: string | null;
 	onExplodedChange?: (isExploded: boolean) => void;
 	onActiveLayerChange?: (layerId: string | null) => void;
+	explodeLayers?: Array<{ id: string; label: string; icon?: React.ReactNode }>;
 }
 
 /**
@@ -212,6 +214,7 @@ export function EntityCardWrapper({
 	activeLayer = null,
 	onExplodedChange,
 	onActiveLayerChange,
+	explodeLayers,
 }: EntityCardWrapperProps) {
 	// Estado para controlar la explosión de capas
 	const [internalIsExploded, setInternalIsExploded] = useState(isExploded);
@@ -254,6 +257,60 @@ export function EntityCardWrapper({
 		},
 	};
 
+	// Agregar un manejo de errores
+	const [hasRenderError, setHasRenderError] = useState(false);
+	const errorRef = useRef<CardError | null>(null);
+
+	// Función para manejar errores de renderizado
+	const handleRenderError = useCallback((error: CardError) => {
+		console.error('Error de renderizado en EntityCard:', error);
+		errorRef.current = error;
+		setHasRenderError(true);
+	}, []);
+
+	// Si hay un error, mostrar una versión simplificada
+	if (hasRenderError) {
+		return (
+			<div className="entity-card-error p-4 border border-destructive/50 rounded-lg flex flex-col h-full shadow-lg">
+				<div className="text-destructive text-sm font-medium mb-2">
+					Error de renderizado
+				</div>
+				<div className="text-xs text-muted-foreground mb-4">
+					{errorRef.current?.message || 'Error desconocido'}
+				</div>
+				<div className="flex-1 flex items-center justify-center rounded bg-muted/30 overflow-hidden">
+					{image ? (
+						typeof image === 'string' ? (
+							<img
+								src={image}
+								alt={title || 'Imagen'}
+								className="object-cover h-full w-full"
+							/>
+						) : (
+							<div className="grid grid-cols-2 gap-1 p-1 h-full w-full">
+								{(image as Array<{ src?: string } | string>).slice(0, 4).map((img, idx) => (
+									<img
+										key={`img-${entityId || ''}-${idx}`}
+										src={typeof img === 'string' ? img : img.src || ''}
+										alt={`Imagen ${idx + 1}`}
+										className="object-cover h-full w-full rounded-sm"
+									/>
+								))}
+							</div>
+						)
+					) : (
+						<div className="text-muted-foreground">Sin imagen</div>
+					)}
+				</div>
+				<div className="mt-2 text-sm font-medium truncate">{title || 'Sin título'}</div>
+				{description && (
+					<div className="text-xs text-muted-foreground line-clamp-2 mt-1">{description}</div>
+				)}
+			</div>
+		);
+	}
+
+	// Renderizado normal
 	return (
 		<EntityCard
 			id={entityId}
@@ -267,7 +324,7 @@ export function EntityCardWrapper({
 			enableAnimation={true}
 			enableBackside={false}
 			onClick={onClick}
-			onError={(error) => console.error('Error en EntityCard:', error)}
+			onError={handleRenderError}
 		>
 			{children}
 		</EntityCard>

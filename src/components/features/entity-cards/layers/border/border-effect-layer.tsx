@@ -20,6 +20,7 @@ export interface BorderConfig {
 	cornerStyle?: 'round' | 'bevel' | 'miter';
 	borderImage?: string;
 	layerIndex: number;
+	[key: string]: unknown; // Añadido para permitir índices de string
 }
 
 /**
@@ -28,9 +29,13 @@ export interface BorderConfig {
  */
 export function BorderEffectLayer({
 	isExploded,
+	isHovered = false,
+	mousePosition = { x: 0, y: 0 },
 	activeLayer,
 	getExplodeLayerTransform,
 	config,
+	entityType,
+	entityId,
 }: LayerComponentProps<BorderConfig>) {
 	// Valores por defecto
 	const defaultConfig: BorderConfig = {

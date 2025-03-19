@@ -21,8 +21,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { RefreshCwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLayerPlugin } from '../../layers/layer-plugin-system';
 import type { EntityCardLayerSystemConfig } from './entity-card-layer-adapter';
-import { useLayerPlugin } from './layer-plugin-system';
 
 export interface LayerAdminPanelProps {
 	entityType: string;

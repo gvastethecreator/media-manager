@@ -248,7 +248,11 @@ export function CharacterCard({
 				/>
 
 				{/* Imagen */}
-				<CardImage options={cardOptions} src={character.featuredImage || ''} alt={character.name} />
+				<CardImage
+					options={cardOptions}
+					src={character.featuredImage ? character.featuredImage : '/placeholders/character-placeholder.jpg'}
+					alt={character.name}
+				/>
 
 				{/* Contenido */}
 				<CardContent options={cardOptions}>

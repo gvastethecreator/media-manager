@@ -24,6 +24,28 @@ export interface LayerPreset {
 	config: EntityCardLayerSystemConfig;
 }
 
+// Actualizar template común para todos los presets
+const defaultLayerSystem = {
+	...DEFAULT_LAYER_SYSTEM,
+	enabled: true,
+	renderStrategy: 'stacked' as const,
+	compositionMode: 'normal' as const,
+	enabledLayers: {
+		container: true,
+		border: true,
+		content: true,
+	},
+	layerOrder: [
+		'container',
+		'border',
+		'content',
+		'image',
+		'glow',
+		'texture',
+		'metadata',
+	],
+};
+
 /**
  * Preset básico con solo bordes
  */
@@ -35,9 +57,7 @@ const basicPreset: LayerPreset = {
 	entityTypes: ['image', 'folder', 'album', 'tag', 'collection'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
 		},
 		layerConfigs: {
 			container: {
@@ -70,9 +90,17 @@ const glowPreset: LayerPreset = {
 	entityTypes: ['image', 'folder', 'album'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				glow: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+				'glow',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -113,9 +141,20 @@ const holographicPreset: LayerPreset = {
 	entityTypes: ['image', 'album'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			compositionMode: 'screen',
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				holographic: true,
+				glow: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+				'holographic',
+				'glow',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -163,9 +202,20 @@ const retroPreset: LayerPreset = {
 	entityTypes: ['image', 'folder', 'album'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			compositionMode: 'multiply',
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				scanlines: true,
+				grain: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+				'scanlines',
+				'grain',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -212,9 +262,19 @@ const folderPreset: LayerPreset = {
 	entityTypes: ['folder'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				texture: true,
+				metadata: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+				'texture',
+				'metadata',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -260,9 +320,18 @@ const imagePreset: LayerPreset = {
 	entityTypes: ['image'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				image: true,
+				metadata: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'image',
+				'metadata',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -304,9 +373,18 @@ const albumPreset: LayerPreset = {
 	entityTypes: ['album'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				imageGrid: true,
+				metadata: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'imageGrid',
+				'metadata',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -351,9 +429,15 @@ const tagPreset: LayerPreset = {
 	entityTypes: ['tag'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -388,9 +472,20 @@ const glitchPreset: LayerPreset = {
 	entityTypes: ['image', 'album'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			compositionMode: 'screen',
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				glitch: true,
+				chromaticAberration: true,
+			},
+			layerOrder: [
+				'container',
+				'border',
+				'content',
+				'glitch',
+				'chromaticAberration',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -436,9 +531,16 @@ const animatedBorderPreset: LayerPreset = {
 	entityTypes: ['image', 'album', 'folder'],
 	config: {
 		layerSystem: {
-			...DEFAULT_LAYER_SYSTEM,
-			enabled: true,
-			renderStrategy: 'stacked',
+			...defaultLayerSystem,
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				animatedBorder: true,
+			},
+			layerOrder: [
+				'container',
+				'content',
+				'animatedBorder',
+			],
 		},
 		layerConfigs: {
 			container: {
@@ -462,7 +564,95 @@ const animatedBorderPreset: LayerPreset = {
 };
 
 /**
- * Todos los presets disponibles
+ * Preset minimalista
+ */
+const minimalistPreset: LayerPreset = {
+	id: 'minimalist',
+	name: 'Minimalista',
+	description: 'Diseño limpio y minimalista con bordes finos',
+	category: 'basic',
+	entityTypes: ['image', 'folder', 'album', 'tag', 'collection'],
+	config: {
+		layerSystem: {
+			...defaultLayerSystem,
+		},
+		layerConfigs: {
+			container: {
+				enabled: true,
+				layerIndex: 0,
+			},
+			border: {
+				enabled: true,
+				layerIndex: 1,
+				borderWidth: 1,
+				borderStyle: 'solid',
+				borderColor: 'var(--border-color, rgba(200, 200, 200, 0.5))',
+			},
+			content: {
+				enabled: true,
+				layerIndex: 2,
+			},
+		},
+	},
+};
+
+/**
+ * Preset de tarjeta de vidrio
+ */
+const glassPreset: LayerPreset = {
+	id: 'glass',
+	name: 'Cristal',
+	description: 'Efecto de cristal con transparencia y reflejo sutil',
+	category: 'advanced',
+	entityTypes: ['image', 'folder', 'album'],
+	config: {
+		layerSystem: {
+			...defaultLayerSystem,
+			compositionMode: 'screen',
+			enabledLayers: {
+				...defaultLayerSystem.enabledLayers,
+				glow: true,
+				texture: true,
+			},
+		},
+		layerConfigs: {
+			container: {
+				enabled: true,
+				layerIndex: 0,
+				backgroundColor: 'rgba(255, 255, 255, 0.1)',
+			},
+			border: {
+				enabled: true,
+				layerIndex: 1,
+				borderWidth: 1,
+				borderStyle: 'solid',
+				borderColor: 'var(--border-color, rgba(255, 255, 255, 0.3))',
+			},
+			content: {
+				enabled: true,
+				layerIndex: 2,
+			},
+			glow: {
+				enabled: true,
+				layerIndex: 3,
+				glowColor: 'var(--glow-color, rgba(255, 255, 255, 0.3))',
+				glowSize: 10,
+				glowIntensity: 0.4,
+				animateOnHover: true,
+			},
+			texture: {
+				enabled: true,
+				layerIndex: 4,
+				textureType: 'glass',
+				textureOpacity: 0.2,
+				blendMode: 'screen',
+			},
+		},
+	},
+};
+
+/**
+ * Lista de todos los presets disponibles
  */
 export const LAYER_PRESETS: LayerPreset[] = [
 	basicPreset,
@@ -475,6 +665,8 @@ export const LAYER_PRESETS: LayerPreset[] = [
 	tagPreset,
 	glitchPreset,
 	animatedBorderPreset,
+	minimalistPreset,
+	glassPreset,
 ];
 
 /**
@@ -542,5 +734,70 @@ export function applyPresetToConfig(
 			...preset.config.layerSystem,
 		},
 		layerConfigs: mergedLayerConfigs,
+		layers: existingConfig.layers || {},
 	};
+}
+
+/**
+ * Guarda un preset personalizado en el almacenamiento local
+ */
+export function saveCustomPreset(preset: LayerPreset): void {
+	try {
+		// Obtener presets personalizados existentes
+		const storedPresets = localStorage.getItem('custom-layer-presets');
+		const customPresets: LayerPreset[] = storedPresets ? JSON.parse(storedPresets) : [];
+
+		// Añadir o actualizar
+		const existingIndex = customPresets.findIndex(p => p.id === preset.id);
+		if (existingIndex >= 0) {
+			customPresets[existingIndex] = preset;
+		} else {
+			customPresets.push(preset);
+		}
+
+		// Guardar
+		localStorage.setItem('custom-layer-presets', JSON.stringify(customPresets));
+	} catch (error) {
+		console.error('Error al guardar preset personalizado:', error);
+	}
+}
+
+/**
+ * Carga presets personalizados del almacenamiento local
+ */
+export function loadCustomPresets(): LayerPreset[] {
+	try {
+		const storedPresets = localStorage.getItem('custom-layer-presets');
+		return storedPresets ? JSON.parse(storedPresets) : [];
+	} catch (error) {
+		console.error('Error al cargar presets personalizados:', error);
+		return [];
+	}
+}
+
+/**
+ * Elimina un preset personalizado
+ */
+export function deleteCustomPreset(presetId: string): boolean {
+	try {
+		const storedPresets = localStorage.getItem('custom-layer-presets');
+		if (!storedPresets) return false;
+
+		const customPresets: LayerPreset[] = JSON.parse(storedPresets);
+		const newPresets = customPresets.filter(p => p.id !== presetId);
+
+		localStorage.setItem('custom-layer-presets', JSON.stringify(newPresets));
+		return true;
+	} catch (error) {
+		console.error('Error al eliminar preset personalizado:', error);
+		return false;
+	}
+}
+
+/**
+ * Obtiene todos los presets, incluyendo los personalizados
+ */
+export function getAllPresets(): LayerPreset[] {
+	const customPresets = loadCustomPresets();
+	return [...LAYER_PRESETS, ...customPresets];
 }

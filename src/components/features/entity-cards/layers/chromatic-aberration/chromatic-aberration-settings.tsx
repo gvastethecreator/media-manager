@@ -8,7 +8,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -45,16 +44,24 @@ interface ChromaticAberrationSettingsProps {
 	entityType: string;
 	entityId?: string;
 	className?: string;
+	initialConfig?: ChromaticAberrationFormValues;
+	onConfigUpdate?: (config: ChromaticAberrationFormValues) => void;
 }
 
-export function ChromaticAberrationSettings({ entityType, entityId, className }: ChromaticAberrationSettingsProps) {
+export function ChromaticAberrationSettings({
+	entityType,
+	entityId,
+	className,
+	initialConfig,
+	onConfigUpdate
+}: ChromaticAberrationSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [previewStyle, setPreviewStyle] = useState<Record<string, string>>({});
 
 	// Inicializar el formulario con valores por defecto
 	const form = useForm<ChromaticAberrationFormValues>({
 		resolver: zodResolver(chromaticAberrationFormSchema),
-		defaultValues: {
+		defaultValues: initialConfig || {
 			enabled: true,
 			offset: 2,
 			intensity: 0.5,
@@ -70,17 +77,24 @@ export function ChromaticAberrationSettings({ entityType, entityId, className }:
 			blurAmount: 0.5,
 			quality: 'medium',
 			colorMode: 'rgb',
-		},
+		}
 	});
 
 	// Cargar la configuración al montar el componente
 	useEffect(() => {
+		// Si se proporciona initialConfig, no es necesario cargar del servidor
+		if (initialConfig) {
+			form.reset(initialConfig);
+			updatePreview(initialConfig);
+			return;
+		}
+
 		const loadConfig = async () => {
 			setIsLoading(true);
 			try {
 				const response = await getChromaticAberrationConfig(entityType, entityId);
 				if (response.success && response.data) {
-					form.reset(response.data);
+					form.reset(response.data as unknown as ChromaticAberrationFormValues);
 					updatePreview(response.data);
 				}
 			} catch (error) {
@@ -96,15 +110,20 @@ export function ChromaticAberrationSettings({ entityType, entityId, className }:
 		};
 
 		loadConfig();
-	}, [entityType, entityId, form]);
+	}, [entityType, entityId, form, initialConfig]);
 
-	// Actualizar el preview cuando cambien los valores del formulario
+	// Observar cambios en el formulario para actualizar la vista previa
 	useEffect(() => {
-		const subscription = form.watch((values) => {
-			updatePreview(values as ChromaticAberrationConfig);
+		const subscription = form.watch((value) => {
+			updatePreview(value as ChromaticAberrationConfig);
+
+			// Si hay una función onConfigUpdate, llamarla con los nuevos valores
+			if (onConfigUpdate) {
+				onConfigUpdate(value as ChromaticAberrationFormValues);
+			}
 		});
 		return () => subscription.unsubscribe();
-	}, [form]);
+	}, [form, onConfigUpdate]);
 
 	// Función para actualizar el estilo de previsualización
 	const updatePreview = (values: ChromaticAberrationConfig) => {
@@ -125,9 +144,19 @@ export function ChromaticAberrationSettings({ entityType, entityId, className }:
 
 	// Manejar el envío del formulario
 	const onSubmit = async (values: ChromaticAberrationFormValues) => {
+		// Si hay un manejador de actualización externo, usarlo
+		if (onConfigUpdate) {
+			onConfigUpdate(values);
+			return;
+		}
+
 		setIsLoading(true);
 		try {
-			const response = await updateChromaticAberrationConfig(entityType, values, entityId);
+			const response = await updateChromaticAberrationConfig(
+				entityType,
+				values as unknown as ChromaticAberrationConfig,
+				entityId
+			);
 			if (response.success) {
 				toast({
 					title: 'Éxito',
