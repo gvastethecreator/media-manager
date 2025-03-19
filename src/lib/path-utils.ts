@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { normalize, sep } from 'node:path';
+import { normalize, sep } from 'path';
 import { serverLogger } from './logger/server-logger';
 
 const pathUtilsLogger = serverLogger.withContext('PathUtils');

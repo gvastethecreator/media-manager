@@ -1,10 +1,9 @@
-import { existsSync } from 'fs';
-import { createReadStream } from 'fs';
-import { pipeline } from 'node:stream/promises';
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality, normalizeQuality } from '@/lib/config/thumbnail.config';
+import { THUMBNAIL_QUALITY_CONFIG, normalizeQuality } from '@/lib/config/thumbnail.config';
 import { prisma } from '@/lib/prisma';
+import { createReadStream, existsSync } from 'fs';
 import { type NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
+import { pipeline } from 'stream/promises';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 

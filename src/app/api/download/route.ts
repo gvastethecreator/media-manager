@@ -1,7 +1,6 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import { getFileInfo } from '@/app/actions/files/file.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
+import fs from 'fs/promises';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 

@@ -42,7 +42,7 @@
 ### 3. Optimización de implementaciones de capa (Prioridad: MEDIA)
 - [x] Revisar cada implementación de capa individual (`border`, `glow`, etc.)
 - [x] Asegurar que todas implementen la interfaz `LayerImplementation` correctamente
-- [x] Completar implementaciones faltantes o parciales para `border`, `animated-border` y `chromatic-aberration`
+- [x] Completar implementaciones faltantes o parciales para `border`, `animated-border`, `chromatic-aberration`, `distortion` y `filter`
 - [x] Documentar las capas implementadas según un estándar unificado
 - [ ] Completar implementaciones para las demás capas
 
@@ -86,6 +86,12 @@
 - ✅ `src/components/features/entity-cards/layers/chromatic-aberration/index.tsx` (implementación completa)
 - ✅ `src/components/features/entity-cards/layers/chromatic-aberration/index.ts` (actualizadas exportaciones)
 - ✅ `src/components/features/entity-cards/layers/chromatic-aberration/actions/index.ts` (exportaciones)
+- ✅ `src/components/features/entity-cards/layers/distortion/distortion-layer-implementation.tsx` (implementación completa)
+- ✅ `src/components/features/entity-cards/layers/distortion/index.ts` (actualizadas exportaciones)
+- ✅ `src/components/features/entity-cards/layers/types.ts` (añadida interfaz DistortionConfig)
+- ✅ `src/components/features/entity-cards/layers/filters/filter-layer-implementation.tsx` (implementación completa)
+- ✅ `src/components/features/entity-cards/layers/filters/index.ts` (actualizadas exportaciones)
+- ✅ `src/components/features/entity-cards/layers/types.ts` (añadida interfaz FilterLayerConfig)
 
 ### Archivos con problemas pendientes
 - [ ] `src/components/features/entity-cards/layers/register-layers-v2.tsx`
@@ -101,6 +107,8 @@
 ✅ `border`: Capa de borde estándar
 ✅ `animated-border`: Capa de borde con efectos de animación
 ✅ `chromatic-aberration`: Capa de aberración cromática
+✅ `distortion`: Capa de efectos de distorsión (glitch, pixelado)
+✅ `filter`: Capa de filtros (sombras, resplandor y distorsión)
 ⚠️ `glow`: Capa de resplandor
 ⚠️ `holographic`: Capa de efecto holográfico
 ⚠️ `content`: Capa de contenido principal
@@ -122,13 +130,14 @@
 ✅ Implementación de funciones auxiliares para la transformación de capas en modo explotado
 ✅ Creación de acciones de servidor para las capas implementadas
 ✅ Eliminación de la propiedad `getServerActions` en `LayerImplementation` que causaba errores
+✅ Integración de módulos existentes como `DistortionEffectsModule` y `FilterSettings` dentro del sistema de capas
 
 ### Problemas resueltos
 ✅ **Inconsistencia de tipos entre sistemas**: Se resolvió mediante adaptadores de tipo y el uso de `[key: string]: unknown` para compatibilidad con índices dinámicos.
 
 ✅ **Diferentes estructuras en componentes de capa**: Se han estandarizado los componentes de capas para que usen una estructura común basada en la interfaz `LayerImplementation`.
 
-✅ **Interfaces parcialmente implementadas**: Se han completado las implementaciones de `border`, `animated-border` y `chromatic-aberration` para que cumplan con toda la interfaz requerida.
+✅ **Interfaces parcialmente implementadas**: Se han completado las implementaciones de `border`, `animated-border`, `chromatic-aberration`, `distortion` y `filter` para que cumplan con toda la interfaz requerida.
 
 ✅ **Problemas con globalThis**: Se ha reemplazado el uso de `globalThis` en los estilos CSS con un objeto de variables más seguro.
 
@@ -136,11 +145,16 @@
 
 ✅ **Errores con getServerActions**: Se eliminó esta propiedad de las implementaciones al no formar parte de la interfaz `LayerImplementation`.
 
+✅ **Reutilización de módulos existentes**: Se ha integrado los módulos existentes dentro del sistema de capas, demostrando la capacidad del sistema para incorporar funcionalidades existentes.
+
+✅ **Reemplazo de LayerComponent por LayerImplementation**: Se han actualizado las implementaciones de capa para usar la nueva interfaz, asegurando compatibilidad con el sistema actual.
+
 ### Próximos pasos
 1. **Continuar con implementaciones de capa**: Implementar el resto de capas siguiendo el patrón establecido.
 2. **Verificar registro de capas**: Confirmar que todas las capas implementadas se registran correctamente.
 3. **Probar visualización**: Comprobar que las capas se muestran correctamente en el módulo de previsualización.
 4. **Optimizar sistema de plugins**: Mejorar la eficiencia del sistema de plugins para evitar re-renderizados innecesarios.
+5. **Completar con acciones de servidor**: Para las capas que aún no tienen acciones de servidor, implementarlas siguiendo el patrón establecido.
 
 ## Notas adicionales
 - Se ha establecido un patrón claro para la implementación de capas basado en los archivos de capas ya implementadas
@@ -149,3 +163,5 @@
 - Todas las implementaciones siguen un estándar de documentación con comentarios explicativos
 - Se ha simplificado el sistema de exportaciones en los archivos `index.ts` para facilitar el uso e importación de componentes
 - Se han actualizado las referencias en el módulo de registro para incluir todas las capas implementadas
+- Para la implementación de `distortion` y `filter`, se han aprovechado los módulos existentes, demostrando la flexibilidad del sistema
+- La capa de filtros incluye varios efectos visuales como sombras, resplandor y distorsión, que pueden aplicarse simultáneamente

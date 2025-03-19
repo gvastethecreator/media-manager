@@ -1,6 +1,6 @@
 'use client';
 
-import { LayerPluginProvider, LayerRenderer, useLayerPlugin } from '@/components/features/entity-cards/layers';
+import { LayerPluginProvider, LayerRenderer, RegisterAllLayers, useLayerPlugin } from '@/components/features/entity-cards/layers';
 import {
 	FormGroup,
 	FormInput,
@@ -88,10 +88,43 @@ function CardPreview({
 
 			{/* Mensaje de ayuda */}
 			{layers.length === 0 && (
-				<div className="absolute inset-0 flex items-center justify-center text-center p-4">
+				<div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 gap-2">
 					<p className="text-muted-foreground text-sm">
-						No hay capas registradas. Asegúrate de que el componente RegisterLayers esté incluido.
+						No hay capas registradas. El componente RegisterAllLayers debería estar incluido.
 					</p>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => {
+							// Force reload the component to register layers
+							window.location.reload();
+						}}
+						className="text-xs"
+					>
+						Reintentar cargar capas
+					</Button>
+				</div>
+			)}
+
+			{/* Mostrar información sobre las capas activas cuando hay capas pero ninguna está activa */}
+			{layers.length > 0 && isExploded && (
+				<div className="absolute bottom-2 right-2 bg-background/80 rounded-md p-2 text-xs">
+					<div className="font-medium mb-1">Capas activas ({layers.length})</div>
+					<div className="flex flex-wrap gap-1">
+						{layers.map(layer => (
+							<div
+								key={layer.type}
+								className={cn(
+									"px-1.5 py-0.5 rounded text-[10px]",
+									activeLayerId === layer.type
+										? "bg-primary text-primary-foreground"
+										: "bg-muted text-muted-foreground"
+								)}
+							>
+								{layer.type}
+							</div>
+						))}
+					</div>
 				</div>
 			)}
 		</div>
@@ -191,6 +224,7 @@ export function PreviewModule({
 
 	return (
 		<LayerPluginProvider>
+			<RegisterAllLayers />
 			<Card className={cn('w-full bg-slate-50/20 border-slate-200/50', className)}>
 				<div className="p-1">
 					{/* Vista previa de la tarjeta con capas */}

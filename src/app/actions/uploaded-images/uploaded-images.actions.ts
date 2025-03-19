@@ -1,7 +1,7 @@
 'use server';
 
-import { mkdir, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
+import { mkdir, writeFile } from 'fs/promises';
+import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images.service';
 import type { UploadedImageType } from '@/types/entities/entities';

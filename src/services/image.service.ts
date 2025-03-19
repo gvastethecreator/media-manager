@@ -1,5 +1,3 @@
-import { promises as fs } from 'fs';
-import { createHash } from 'node:crypto';
 import { extractMetadata } from '@/app/actions/metadata';
 import { thumbnailCache } from '@/lib/cache';
 import { imageConfig } from '@/lib/config';
@@ -7,6 +5,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import type { Image } from '@prisma/client';
+import { createHash } from 'crypto';
+import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { statsService } from './stats.service';
 
