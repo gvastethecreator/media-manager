@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Prompt } from '@prisma/client';
 import {
 	Bot,
 	Code,
@@ -11,399 +10,714 @@ import {
 	Image as ImageIcon,
 	MessageSquare,
 	PencilIcon,
-	Sparkles,
+	Star,
 	Trash2,
-	Wand2,
+	Wand2
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useState } from 'react';
-import { VisualizationConfig } from '../config/visualization-config';
+import { useCallback, useMemo } from 'react';
+
+// Importar componentes base
+import {
+	CardDescriptionSection,
+	CardFooter,
+	CardHeader,
+	CardImageSection,
+	CardMetadataSection
+} from '../base';
+
+// Importar tipos y utilidades
 import { EntityCardWrapper } from '../entity-card-wrapper';
-import type { CardOptions, RarityConfig, TextureConfig } from '../types/base-card-types';
-import type { PromptFormData } from './forms/entity-types';
-import { ImageGrid } from './image-grid';
+import { usePreset } from '../hooks/use-preset';
+import { adaptCardOptions } from '../types';
+import type { CardOptions } from '../types/unified-card-types';
 
-type CardData =
-	| (Prompt & {
-			_count?: { uses: number };
-			category?: string;
-			tags?: string[];
-	  })
-	| PromptFormData;
+import '../../styles/prompt-card.css';
 
-interface PromptCardProps {
-	data: CardData;
-	isPreview?: boolean;
-	onEdit?: (id: string) => void;
-	onDelete?: (id: string) => void;
-	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
-	onCopy?: (text: string) => void;
-	className?: string;
-	showVisualizationConfig?: boolean;
-	options?: Partial<CardOptions>;
-	rarity?: RarityConfig | null;
-	texture?: TextureConfig | null;
+// TIPOS DE DATOS
+// ==============================
+
+// Corregir la definición de ExtendedPrompt para que pueda tener presetId opcional
+export interface ExtendedPrompt {
+	id: string;
+	name: string;
+	description?: string | null;
+	content?: string;
+	emoji?: string;
+	color?: string;
+	presetId?: string | null;
+	createdAt: Date | string;
+	updatedAt: Date | string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	platform?: string;
+	type?: string;
+	category?: string;
+	_count?: { uses: number };
+	tags: string[] | string;
+	title?: string;
 }
 
-/**
- * Componente PromptCard - Diseñado con inspiración en tarjetas de comandos de IA
- *
- * Características:
- * - Diseño futurista con elementos de interfaz de IA
- * - Visualización del texto del prompt con opción de copia
- * - Indicadores de categoría y número de usos
- * - Efectos visuales que sugieren tecnología avanzada
- */
-export function PromptCard({
-	data,
-	isPreview = false,
-	onEdit,
-	onDelete,
-	onClick,
-	onCopy,
-	className,
-	showVisualizationConfig = false,
-	options,
-	rarity: initialRarity,
-	texture: initialTexture,
-}: PromptCardProps) {
-	// Verificar si data existe y tiene las propiedades necesarias
-	if (!data) {
-		console.warn('PromptCard: Se recibió un objeto data indefinido');
-		// Crear un data por defecto para evitar errores
-		data = {
-			id: 'placeholder',
-			name: 'Prompt sin nombre',
-			content: 'Sin contenido',
-			type: 'text',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		} as Prompt;
-	}
+// Definimos la interfaz para la configuración de rareza de prompts
+interface PromptRarity {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+	rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+	stars: number;
+	textureType: string;
+	glowIntensity: number;
+	textureOpacity: number;
+	holographic?: boolean;
+	borderAnimation?: string;
+}
 
-	const [isHovered, setIsHovered] = useState(false);
-	const [configOpen, setConfigOpen] = useState(false);
-	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>(
-		options || {
-			enable3DEffect: true,
-			enableHolographicEffect: true,
-			enableScanlines: true,
-			enableLightHalo: true,
-			enableGrainEffect: false,
-			scanlinesDensity: 20,
-			scanlinesOpacity: 0.1,
-			hoverLiftHeight: 10,
-		}
-	);
-
-	// Determinar el número de usos
-	const usesCount = '_count' in data && data._count ? data._count.uses : 0;
-
-	// Determinar el nivel de rareza basado en el número de usos
-	const rarityLevel = Math.min(5, Math.max(1, Math.ceil(usesCount / 10)));
-
-	const rarityNames = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-	const rarityConfig = initialRarity || {
-		name: rarityNames[rarityLevel - 1],
+// Sistema de rareza detallado para prompts en formato TCG futurista
+const PROMPT_RARITY: Record<string, PromptRarity> = {
+	common: {
 		color: '#6366f1', // Indigo
-		borderWidth: 1 + rarityLevel * 0.5,
+		borderColor: 'rgba(99, 102, 241, 0.5)',
+		glowColor: 'rgba(99, 102, 241, 0.3)',
+		label: 'Común',
+		rarity: 'common',
+		stars: 1,
+		textureType: 'noise',
+		glowIntensity: 0.2,
+		textureOpacity: 0.05
+	},
+	uncommon: {
+		color: '#4f46e5', // Indigo más oscuro
+		borderColor: 'rgba(79, 70, 229, 0.5)',
+		glowColor: 'rgba(79, 70, 229, 0.3)',
+		label: 'Poco común',
+		rarity: 'uncommon',
+		stars: 2,
+		textureType: 'grid',
+		glowIntensity: 0.3,
+		textureOpacity: 0.08
+	},
+	rare: {
+		color: '#7c3aed', // Violeta
+		borderColor: 'rgba(124, 58, 237, 0.5)',
+		glowColor: 'rgba(124, 58, 237, 0.4)',
+		label: 'Raro',
+		rarity: 'rare',
+		stars: 3,
+		textureType: 'circuit',
+		glowIntensity: 0.5,
+		textureOpacity: 0.1,
+		borderAnimation: 'pulse'
+	},
+	epic: {
+		color: '#a855f7', // Púrpura
+		borderColor: 'rgba(168, 85, 247, 0.5)',
+		glowColor: 'rgba(168, 85, 247, 0.5)',
+		label: 'Épico',
+		rarity: 'epic',
+		stars: 4,
+		textureType: 'dots',
+		glowIntensity: 0.7,
+		textureOpacity: 0.15,
+		holographic: true,
+		borderAnimation: 'flow'
+	},
+	legendary: {
+		color: '#d946ef', // Fucsia
+		borderColor: 'rgba(217, 70, 239, 0.5)',
+		glowColor: 'rgba(217, 70, 239, 0.6)',
+		label: 'Legendario',
+		rarity: 'legendary',
+		stars: 5,
+		textureType: 'hologram',
+		glowIntensity: 0.9,
+		textureOpacity: 0.2,
+		holographic: true,
+		borderAnimation: 'rainbow'
+	},
+};
+
+// Opciones visuales optimizadas para tarjetas de prompts con estilo futurista
+const DEFAULT_PROMPT_OPTIONS: Partial<CardOptions> = {
+	enable3DEffect: true,
+	enableHolographicEffect: true,
+	enableScanlinesEffect: false,
+	enableGlowEffect: true,
+	enableBorderEffect: true,
+	enableGrainEffect: false,
+
+	// Sistema de diseño específico para prompts
+	designSystem: {
+		preset: 'prompt',
+		variant: 'default',
+		aspectRatio: '9/16',
+		cornerStyle: 'rounded',
+		cornerRadius: 8,
+		elevation: 3,
+		shadowStyle: 'soft',
+	},
+
+	// Efectos específicos para prompts
+	holographicOptions: {
+		patternType: 'rainbow',
+		intensity: 0.6,
+		animationSpeed: 1.5,
+		visibleOnHover: true,
+	},
+
+	glowOptions: {
+		intensity: 0.7,
+		size: 20,
+		blurAmount: 15,
+		animationType: 'pulse',
+		pulseSpeed: 2.5,
+		visibleOnHover: true,
+	},
+
+	// Configuración de movimiento
+	hoverLiftHeight: 10,
+	maxRotation: 10,
+	primaryColor: '#6366f1', // Indigo
+	secondaryColor: '#7c3aed', // Violeta
+
+	// Sistema de capas
+	layerSystem: {
+		order: ['base', 'content', 'gloss', 'filter', 'effects', 'border'],
+		layerBlending: 'normal',
+		layerSpacing: 2,
+	},
+};
+
+export interface PromptCardProps {
+	prompt: ExtendedPrompt;
+	options?: Partial<CardOptions>;
+	onClick?: () => void;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
+	onEdit?: (prompt: ExtendedPrompt) => void;
+	onDelete?: (id: string) => void;
+	onCopy?: (text: string) => void;
+	isPreview?: boolean;
+}
+
+// UTILIDADES Y COMPONENTES AUXILIARES
+// ==============================
+
+// Componente para mostrar estrellas de rareza
+function RarityStars({ count }: { count: number }) {
+	return (
+		<div className="flex items-center justify-center mt-1">
+			{Array.from({ length: 5 }).map((_, i) => (
+				<Star
+					key={`rarity-star-${i}`}
+					className={cn(
+						"h-3 w-3 mx-0.5",
+						i < count ? "text-primary fill-current" : "text-muted-foreground/30"
+					)}
+				/>
+			))}
+		</div>
+	);
+}
+
+// Determinar la rareza del prompt basado en varios factores
+function calculatePromptRarity(prompt: ExtendedPrompt): keyof typeof PROMPT_RARITY {
+	const content = prompt.content || '';
+	const usesCount = prompt._count?.uses || 0;
+
+	const isComplex = content.length > 300;
+	const hasSystemInstructions = content.toLowerCase().includes('system:') ||
+		content.toLowerCase().includes('system instructions:');
+	const hasTags = prompt.tags &&
+		(typeof prompt.tags === 'string'
+			? prompt.tags !== '[]' && prompt.tags !== ''
+			: prompt.tags.length > 0);
+
+	// Calculamos puntuación de rareza
+	let rarityScore = 0;
+
+	// Puntuación basada en uso
+	if (usesCount >= 50) rarityScore += 4;
+	else if (usesCount >= 30) rarityScore += 3;
+	else if (usesCount >= 15) rarityScore += 2;
+	else if (usesCount >= 5) rarityScore += 1;
+
+	// Factores adicionales
+	if (isComplex) rarityScore += 1;
+	if (hasSystemInstructions) rarityScore += 1;
+	if (hasTags) rarityScore += 1;
+
+	// Determinamos la rareza final
+	if (rarityScore >= 5) return 'legendary';
+	if (rarityScore >= 4) return 'epic';
+	if (rarityScore >= 2) return 'rare';
+	if (rarityScore >= 1) return 'uncommon';
+	return 'common';
+}
+
+// Corregir los errores en el rarityConfig con las propiedades que faltan
+function generatePromptRarityConfig(prompt: ExtendedPrompt) {
+	const rarityKey = calculatePromptRarity(prompt);
+	const rarity = PROMPT_RARITY[rarityKey];
+
+	return {
+		enabled: true,
+		rarity: rarityKey,
+		color: rarity.color,
+		borderColor: rarity.borderColor,
+		glowColor: rarity.glowColor,
 		borderStyle: 'solid',
-		borderGlow: true,
-		borderGlowIntensity: 0.3 + rarityLevel * 0.1,
-		borderGlowColor: '99, 102, 241', // Indigo RGB
-		borderGlowRadius: 4 + rarityLevel,
-		borderGlowSpread: 2 + rarityLevel,
+		borderWidth: 2,
+		frameType: 'standard',
+		label: rarity.label,
+		stars: rarity.stars,
+		textureType: rarity.textureType,
+		textureOpacity: rarity.textureOpacity,
+		glowIntensity: rarity.glowIntensity,
+		borderAnimation: rarity.borderAnimation
 	};
+}
 
-	// Determinar el tipo de prompt basado en el contenido o categoría
-	const determinePromptType = () => {
-		const content = 'content' in data && data.content ? data.content.toLowerCase() : '';
-		const title = 'title' in data && data.title ? data.title.toLowerCase() : '';
-		const category = 'category' in data && data.category ? data.category.toLowerCase() : '';
+// Determinar el tipo de prompt basado en el contenido o categoría
+function getPromptTypeInfo(prompt: ExtendedPrompt) {
+	const content = prompt.content?.toLowerCase() || '';
+	const title = prompt.title?.toLowerCase() || '';
+	const category = prompt.category?.toLowerCase() || '';
 
-		const textToAnalyze = `${title} ${content} ${category}`;
+	const textToAnalyze = `${title} ${content} ${category}`;
 
-		if (
-			textToAnalyze.includes('imagen') ||
-			textToAnalyze.includes('dibujo') ||
-			textToAnalyze.includes('visual') ||
-			textToAnalyze.includes('arte') ||
-			textToAnalyze.includes('photo') ||
-			textToAnalyze.includes('imagen')
-		) {
-			return 'image';
-		}
-
-		if (
-			textToAnalyze.includes('código') ||
-			textToAnalyze.includes('programación') ||
-			textToAnalyze.includes('function') ||
-			textToAnalyze.includes('class') ||
-			textToAnalyze.includes('script') ||
-			textToAnalyze.includes('desarrolla')
-		) {
-			return 'code';
-		}
-
-		if (
-			textToAnalyze.includes('texto') ||
-			textToAnalyze.includes('escribe') ||
-			textToAnalyze.includes('redacta') ||
-			textToAnalyze.includes('artículo') ||
-			textToAnalyze.includes('ensayo') ||
-			textToAnalyze.includes('historia')
-		) {
-			return 'text';
-		}
-
-		if (
-			textToAnalyze.includes('chat') ||
-			textToAnalyze.includes('conversación') ||
-			textToAnalyze.includes('diálogo') ||
-			textToAnalyze.includes('pregunta') ||
-			textToAnalyze.includes('responde')
-		) {
-			return 'chat';
-		}
-
-		return 'general';
-	};
-
-	const promptType = determinePromptType();
-
-	// Configuración visual basada en el tipo de prompt
-	const promptStyles = {
-		image: {
-			bgGradient: 'from-fuchsia-900 via-purple-800 to-indigo-900',
-			accentColor: 'text-fuchsia-300',
-			borderColor: 'border-fuchsia-500',
+	if (
+		textToAnalyze.includes('imagen') ||
+		textToAnalyze.includes('dibujo') ||
+		textToAnalyze.includes('visual') ||
+		textToAnalyze.includes('arte') ||
+		textToAnalyze.includes('photo') ||
+		textToAnalyze.includes('imagen')
+	) {
+		return {
+			type: 'image',
 			icon: <ImageIcon className="h-5 w-5" />,
 			label: 'Imagen',
-		},
-		code: {
-			bgGradient: 'from-cyan-900 via-blue-800 to-indigo-900',
-			accentColor: 'text-cyan-300',
-			borderColor: 'border-cyan-500',
+			className: 'prompt-type-image'
+		};
+	}
+
+	if (
+		textToAnalyze.includes('código') ||
+		textToAnalyze.includes('programación') ||
+		textToAnalyze.includes('function') ||
+		textToAnalyze.includes('class') ||
+		textToAnalyze.includes('script') ||
+		textToAnalyze.includes('desarrolla')
+	) {
+		return {
+			type: 'code',
 			icon: <Code className="h-5 w-5" />,
 			label: 'Código',
-		},
-		text: {
-			bgGradient: 'from-emerald-900 via-teal-800 to-cyan-900',
-			accentColor: 'text-emerald-300',
-			borderColor: 'border-emerald-500',
+			className: 'prompt-type-code'
+		};
+	}
+
+	if (
+		textToAnalyze.includes('texto') ||
+		textToAnalyze.includes('escribe') ||
+		textToAnalyze.includes('redacta') ||
+		textToAnalyze.includes('artículo') ||
+		textToAnalyze.includes('ensayo') ||
+		textToAnalyze.includes('historia')
+	) {
+		return {
+			type: 'text',
 			icon: <FileText className="h-5 w-5" />,
 			label: 'Texto',
-		},
-		chat: {
-			bgGradient: 'from-amber-900 via-orange-800 to-red-900',
-			accentColor: 'text-amber-300',
-			borderColor: 'border-amber-500',
+			className: 'prompt-type-text'
+		};
+	}
+
+	if (
+		textToAnalyze.includes('chat') ||
+		textToAnalyze.includes('conversación') ||
+		textToAnalyze.includes('diálogo') ||
+		textToAnalyze.includes('pregunta') ||
+		textToAnalyze.includes('responde')
+	) {
+		return {
+			type: 'chat',
 			icon: <MessageSquare className="h-5 w-5" />,
 			label: 'Chat',
-		},
-		general: {
-			bgGradient: 'from-indigo-900 via-violet-800 to-purple-900',
-			accentColor: 'text-indigo-300',
-			borderColor: 'border-indigo-500',
-			icon: <Wand2 className="h-5 w-5" />,
-			label: 'General',
-		},
+			className: 'prompt-type-chat'
+		};
+	}
+
+	// Por defecto, asumimos que es un prompt creativo general
+	return {
+		type: 'creative',
+		icon: <Wand2 className="h-5 w-5" />,
+		label: 'Creativo',
+		className: 'prompt-type-creative'
+	};
+}
+
+// COMPONENTE PRINCIPAL
+// ==============================
+export function PromptCardLayout({
+	prompt: initialPrompt,
+	options = {},
+	onClick,
+	showVisualConfig = false,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
+	onEdit,
+	onDelete,
+	onCopy,
+	isPreview = false,
+}: PromptCardProps) {
+	// Garantizar que nunca procesamos un prompt undefined
+	const prompt = initialPrompt || {
+		id: 'placeholder',
+		title: 'Prompt sin nombre',
+		name: 'Prompt sin nombre',
+		emoji: '🎯',
+		description: '',
+		color: '#3b82f6',
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		category: 'general',
+		presetId: null,
+		content: 'Sin contenido',
+		parameters: '{}',
+		tags: [],
+		featuredImage: null,
+		isFavorite: false
+	} as ExtendedPrompt;
+
+	// Usar el hook para obtener configuración de preset
+	const { cardOptions } = usePreset({
+		entityType: 'prompt',
+		entityId: prompt.id as string,
+		presetId: prompt.presetId || null,
+		baseOptions: options,
+	});
+
+	// Obtener la rareza del prompt
+	const rarityConfig = generatePromptRarityConfig(prompt);
+	const rarityClass = `prompt-card-rarity-${rarityConfig.rarity}`;
+
+	// Obtener información del tipo de prompt
+	const promptTypeInfo = getPromptTypeInfo(prompt);
+
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{ id: 'background', label: 'Fondo', icon: <Wand2 className="h-4 w-4" /> },
+		{ id: 'frame', label: 'Marco', icon: <FileText className="h-4 w-4" /> },
+		{ id: 'content', label: 'Contenido', icon: <Bot className="h-4 w-4" /> },
+		{ id: 'effects', label: 'Efectos', icon: <Star className="h-4 w-4" /> },
+	];
+
+	// Manejadores de eventos
+	const handleEdit = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onEdit && prompt) {
+			onEdit(prompt);
+		}
+	}, [onEdit, prompt]);
+
+	const handleDelete = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onDelete && prompt?.id) {
+			onDelete(prompt.id);
+		}
+	}, [onDelete, prompt?.id]);
+
+	const handleCopy = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onCopy && prompt.content) {
+			onCopy(prompt.content);
+		}
+	}, [onCopy, prompt.content]);
+
+	// Generar configuración avanzada basada en la rareza
+	const enhancedCardOptions = useMemo(() => {
+		// Valores por defecto
+		const defaults = DEFAULT_PROMPT_OPTIONS;
+
+		// Ajustar intensidad de efectos según rareza
+		const intensity = rarityConfig.glowIntensity || 0.5;
+
+		// Habilitar efectos especiales para prompts épicos y legendarios
+		const isSpecial = rarityConfig.rarity === 'legendary' || rarityConfig.rarity === 'epic';
+
+		// Crear opciones combinadas
+		return {
+			...defaults,
+			enableHolographicEffect: isSpecial,
+			enableScanlinesEffect: isSpecial,
+
+			// Configurar glows basados en rareza
+			glowOptions: {
+				...(defaults.glowOptions || {}),
+				intensity: intensity,
+				color: rarityConfig.glowColor,
+				size: 20 + (rarityConfig.stars * 2),
+				visibleOnIdle: rarityConfig.rarity === 'legendary',
+				animationType: isSpecial ? 'pulse' : 'static',
+			},
+
+			// Configurar bordes animados
+			borderOptions: {
+				...(defaults.borderOptions || {}),
+				width: rarityConfig.stars * 0.5,
+				color: rarityConfig.borderColor,
+				pattern: isSpecial ? 'gradient' : 'solid',
+				animationType: rarityConfig.borderAnimation || 'none',
+				glowIntensity: intensity,
+			},
+
+			// Configurar texturas específicas
+			textureConfig: {
+				type: rarityConfig.textureType || 'noise',
+				intensity: rarityConfig.textureOpacity || 0.15,
+				scale: 1 + (rarityConfig.stars * 0.1),
+				blendMode: 'overlay',
+			},
+
+			// Configuración de rareza
+			rarityConfig,
+
+			// Efectos adicionales
+			effects: {
+				...(defaults.effects || {}),
+				chromaticAberration: {
+					enabled: isSpecial,
+					visibleOnHover: true,
+					intensity: rarityConfig.rarity === 'legendary' ? 0.4 : 0.2,
+				},
+				noiseTexture: {
+					enabled: true,
+					visibleOnHover: !isSpecial,
+					intensity: rarityConfig.textureOpacity || 0.15,
+				},
+				glitchEffect: {
+					enabled: rarityConfig.rarity === 'legendary',
+					visibleOnHover: true,
+					intensity: 0.3,
+					frequency: 0.1,
+				},
+			},
+		};
+	}, [rarityConfig]);
+
+	// Formatear tags para mostrar
+	const formattedTags = useMemo(() => {
+		if (!prompt.tags) return [];
+		if (typeof prompt.tags === 'string') {
+			try {
+				const parsed = JSON.parse(prompt.tags);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch {
+				return [];
+			}
+		}
+		return prompt.tags;
+	}, [prompt.tags]);
+
+	// Procesar los metadatos para la sección de metadatos
+	const metadataItems = useMemo(() => {
+		const items = [];
+
+		if (prompt.category) {
+			items.push({
+				label: 'Categoría',
+				value: prompt.category,
+				icon: <FileText className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		if (prompt._count?.uses) {
+			items.push({
+				label: 'Usos',
+				value: prompt._count.uses.toString(),
+				icon: <Bot className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		return items;
+	}, [prompt.category, prompt._count?.uses]);
+
+	// Función para colorear el tipo de prompt
+	const getTypeColor = () => {
+		const type = promptTypeInfo.type;
+		switch (type) {
+			case 'image': return 'bg-pink-500/20 text-pink-200';
+			case 'code': return 'bg-blue-500/20 text-blue-200';
+			case 'text': return 'bg-green-500/20 text-green-200';
+			case 'chat': return 'bg-yellow-500/20 text-yellow-200';
+			default: return 'bg-purple-500/20 text-purple-200';
+		}
 	};
 
-	const style = promptStyles[promptType as keyof typeof promptStyles] || promptStyles.general;
-
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					options={cardOptions}
-					onOptionsChange={(newOptions) => {
-						setCardOptions({
-							...cardOptions,
-							...newOptions,
-						});
-					}}
-					onClose={() => setConfigOpen(false)}
-				/>
-			)}
-
+		<div className={cn(
+			'prompt-card-container relative w-full h-full group',
+			rarityClass,
+			onClick && 'cursor-pointer',
+			className
+		)}>
 			<EntityCardWrapper
-				className={cn(`bg-gradient-to-br ${style.bgGradient}`, className)}
-				options={cardOptions}
+				title={prompt.title || prompt.name || 'Prompt sin nombre'}
+				description={prompt.content || ''}
+				entityId={prompt.id as string}
 				entityType="prompt"
-				rarity={rarityConfig}
-				texture={initialTexture}
-				onClick={onClick ? (e) => onClick(e) : undefined}
-				onHoverStart={() => setIsHovered(true)}
-				onHoverEnd={() => setIsHovered(false)}
-				showVisualizationConfig={showVisualizationConfig}
-				onVisualizationConfigClick={() => setConfigOpen(true)}
+				className={cn('prompt-card-wrapper relative w-full h-full', rarityClass)}
+				options={adaptCardOptions(enhancedCardOptions)}
+				showVisualConfig={showVisualConfig}
+				onVisualConfigClick={onVisualConfigClick}
+				enableExplode={enableExplode}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
+				explodeLayers={explodeLayers}
+				onClick={onClick}
 			>
-				{/* Elementos decorativos de fondo */}
-				<div className="absolute inset-0 overflow-hidden">
-					{/* Círculos decorativos */}
-					<div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border border-white/10 opacity-20" />
-					<div className="absolute -bottom-20 -left-10 w-60 h-60 rounded-full border border-white/10 opacity-10" />
-
-					{/* Líneas de circuito */}
-					<svg
-						className="absolute inset-0 w-full h-full opacity-10"
-						xmlns="http://www.w3.org/2000/svg"
-						aria-label="Decorative circuit lines"
-						role="presentation"
-					>
-						<title>Circuit Pattern</title>
-						<path
-							d="M10,30 L50,30 L50,10 L90,10"
-							stroke="currentColor"
-							strokeWidth="1"
-							fill="none"
-							className={style.accentColor}
-						/>
-						<path
-							d="M10,50 L30,50 L30,70 L70,70 L70,50 L90,50"
-							stroke="currentColor"
-							strokeWidth="1"
-							fill="none"
-							className={style.accentColor}
-						/>
-						<path d="M50,90 L50,70" stroke="currentColor" strokeWidth="1" fill="none" className={style.accentColor} />
-					</svg>
-				</div>
-
-				{/* Contenido principal */}
-				<div className="flex flex-col h-full p-4 relative z-10">
+				<div className="prompt-card-content flex flex-col h-full w-full relative p-3">
 					{/* Cabecera con título y tipo */}
-					<div className="flex items-center justify-between mb-3">
-						<h3 className="text-lg font-bold text-white line-clamp-1">{'title' in data && data.title}</h3>
-
-						<div
-							className={cn(
-								'flex items-center justify-center rounded-full p-1',
-								'border',
-								style.borderColor,
-								'bg-black/30 backdrop-blur-sm'
+					<CardHeader
+						title={prompt.title || prompt.name || 'Prompt sin nombre'}
+						entityType="prompt"
+						className="mb-2 relative z-10"
+						rightContent={
+							<div className={cn(
+								'flex items-center justify-center p-1 rounded-full border',
+								'bg-black/30 backdrop-blur-sm',
+								promptTypeInfo.className
 							)}
-						>
-							<div className={style.accentColor}>{style.icon}</div>
-						</div>
-					</div>
+								style={{ borderColor: rarityConfig.borderColor }}>
+								<div style={{ color: rarityConfig.color }}>{promptTypeInfo.icon}</div>
+							</div>
+						}
+					/>
+
+					{/* Indicador de rareza */}
+					<RarityStars count={rarityConfig.stars} />
 
 					{/* Contenido del prompt */}
-					<div className={cn('flex-1 mb-3 p-3 rounded', 'border', style.borderColor, 'bg-black/30 backdrop-blur-sm')}>
+					<div className={cn(
+						'flex-1 mb-3 p-3 rounded prompt-content',
+						'border bg-black/30 backdrop-blur-sm'
+					)}
+						style={{ borderColor: rarityConfig.borderColor }}>
 						<div className="flex items-center justify-between mb-1">
 							<div className="flex items-center gap-1">
-								<Bot className="h-3.5 w-3.5 text-white/70" />
-								<span className="text-xs text-white/70">Prompt</span>
+								<Bot className="h-3.5 w-3.5 text-card-foreground/70" />
+								<span className="text-xs text-card-foreground/70">Prompt</span>
 							</div>
 
-							{onCopy && 'content' in data && data.content && (
+							{onCopy && prompt.content && (
 								<Button
 									size="icon"
 									variant="ghost"
 									className="h-6 w-6 rounded-full hover:bg-white/10"
-									onClick={(e) => {
-										e.stopPropagation();
-										onCopy(data.content);
-									}}
+									onClick={handleCopy}
 								>
-									<Copy className="h-3 w-3 text-white/70" />
+									<Copy className="h-3 w-3 text-card-foreground/70" />
 								</Button>
 							)}
 						</div>
 
-						<p className="text-sm text-white/90 line-clamp-4 whitespace-pre-line">
-							{'content' in data && data.content}
-						</p>
+						<CardDescriptionSection
+							description={prompt.content || 'Sin contenido'}
+							maxLines={5}
+							className="text-sm text-card-foreground/90 whitespace-pre-line"
+						/>
 					</div>
 
 					{/* Imagen destacada (si existe) */}
-					{'featuredImage' in data && data.featuredImage && (
-						<div className="mb-3 rounded overflow-hidden border border-white/10 h-32">
-							{cardOptions.useImageGrid ? (
-								<ImageGrid
-									layout={cardOptions.imageGridLayout || 'single'}
-									gap={cardOptions.imageGridGap || 2}
-									style={{ height: '100%' }}
-									images={[{ src: data.featuredImage, alt: 'content' in data ? data.content : 'Prompt image' }]}
-								/>
-							) : (
-								<img
-									src={data.featuredImage}
-									alt={'content' in data ? data.content : 'Prompt image'}
-									className="w-full h-full object-cover"
-								/>
-							)}
-						</div>
-					)}
-
-					{/* Información adicional */}
-					<div className="mt-auto">
-						{/* Etiquetas y categoría */}
-						<div className="flex flex-wrap gap-1 mb-2">
-							{'category' in data && data.category && (
-								<span
-									className={cn(
-										'px-2 py-0.5 text-xs rounded-full',
-										'border',
-										style.borderColor,
-										'bg-black/30',
-										style.accentColor
-									)}
-								>
-									{data.category}
-								</span>
-							)}
-
-							{'tags' in data &&
-								data.tags &&
-								data.tags.map((tag) => (
-									<span key={`tag-${tag}`} className="px-2 py-0.5 text-xs rounded-full bg-white/10 text-white/80">
-										{tag}
-									</span>
-								))}
-						</div>
-
-						{/* Estadísticas */}
-						<div className="flex items-center justify-between text-xs text-white/70">
-							<div className="flex items-center gap-1">
-								<Sparkles className="h-3.5 w-3.5" />
-								<span>{rarityNames[rarityLevel - 1]}</span>
-							</div>
-
-							<div className="flex items-center gap-1">
-								<span>
-									{usesCount} {usesCount === 1 ? 'uso' : 'usos'}
-								</span>
-							</div>
-						</div>
-					</div>
-
-					{/* Efecto de brillo en hover */}
-					{isHovered && (
-						<motion.div
-							className="absolute inset-0 pointer-events-none"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 0.1 }}
-							transition={{ duration: 0.3 }}
+					{prompt.featuredImage && (
+						<div
+							className="mb-3 rounded overflow-hidden border"
+							style={{ borderColor: rarityConfig.borderColor }}
 						>
-							<div className={cn('absolute inset-0 bg-gradient-to-br opacity-30', style.bgGradient)} />
-						</motion.div>
+							<CardImageSection
+								imageUrl={prompt.featuredImage}
+								alt={prompt.title || prompt.name || 'Prompt'}
+								aspectRatio="wide"
+								overlayContent={
+									<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+								}
+							/>
+						</div>
 					)}
 
-					{/* Botones de edición/eliminación */}
-					{!isPreview && isHovered && 'id' in data && data.id && (
-						<div className="absolute top-2 right-2 flex gap-1">
+					{/* Metadatos y etiquetas */}
+					{metadataItems.length > 0 && (
+						<CardMetadataSection
+							items={metadataItems}
+							className="mb-2 p-2 bg-black/20 rounded border border-stone-800/30"
+						/>
+					)}
+
+					{/* Etiquetas del prompt */}
+					{formattedTags.length > 0 && (
+						<div className="prompt-tags mb-2 flex flex-wrap gap-1">
+							{formattedTags.slice(0, 3).map((tag: string, index: number) => (
+								<span
+									key={`tag-${index}`}
+									className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary-foreground"
+								>
+									{tag}
+								</span>
+							))}
+							{formattedTags.length > 3 && (
+								<span className="text-[9px] opacity-70">+{formattedTags.length - 3}</span>
+							)}
+						</div>
+					)}
+
+					{/* Footer con rareza y acciones */}
+					<CardFooter
+						className="mt-auto"
+						leftContent={
+							<div className={cn(
+								"prompt-rarity px-3 py-1 rounded-full text-[10px] font-medium",
+								getTypeColor()
+							)}>
+								{promptTypeInfo.label}
+							</div>
+						}
+						rightContent={
+							<div className={cn(
+								"prompt-rarity px-3 py-1 rounded-full text-[10px] font-medium",
+								rarityConfig.rarity === 'legendary' ? "bg-fuchsia-500/20 text-fuchsia-200" :
+									rarityConfig.rarity === 'epic' ? "bg-purple-500/20 text-purple-200" :
+										rarityConfig.rarity === 'rare' ? "bg-blue-500/20 text-blue-200" :
+											rarityConfig.rarity === 'uncommon' ? "bg-indigo-500/20 text-indigo-200" :
+												"bg-gray-500/20 text-gray-200"
+							)}>
+								{rarityConfig.label}
+							</div>
+						}
+					/>
+
+					{/* Botones de acción */}
+					{!isPreview && (onEdit || onDelete) && (
+						<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-50">
 							{onEdit && (
 								<Button
 									size="icon"
 									variant="ghost"
 									className="h-7 w-7 rounded-full bg-background/80 hover:bg-background"
-									onClick={(e) => {
-										e.stopPropagation();
-										onEdit(data.id as string);
-									}}
+									onClick={handleEdit}
 								>
 									<PencilIcon className="h-3.5 w-3.5" />
 								</Button>
@@ -413,10 +727,7 @@ export function PromptCard({
 									size="icon"
 									variant="ghost"
 									className="h-7 w-7 rounded-full bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-									onClick={(e) => {
-										e.stopPropagation();
-										onDelete(data.id as string);
-									}}
+									onClick={handleDelete}
 								>
 									<Trash2 className="h-3.5 w-3.5" />
 								</Button>
@@ -425,6 +736,11 @@ export function PromptCard({
 					)}
 				</div>
 			</EntityCardWrapper>
-		</>
+		</div>
 	);
+}
+
+// Componente público para usar en la aplicación
+export function PromptCard(props: PromptCardProps) {
+	return <PromptCardLayout {...props} />;
 }

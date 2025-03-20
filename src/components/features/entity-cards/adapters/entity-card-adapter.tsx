@@ -13,16 +13,16 @@ import type { WorldItem } from '@/types/entities/world-items';
 
 import { getCardOptionsFromPreset } from '../actions/visual-presets.actions';
 // Importamos todos los adaptadores de tarjeta
-import { AlbumCard } from '../layouts/album-card';
-import { CharacterCard } from '../layouts/character-card';
-import { CollectionCard } from '../layouts/collection-card';
-import { ConceptCard } from '../layouts/concept-card';
-import { FolderCard } from '../layouts/folder-card';
-import { NoteCard } from '../layouts/note-card';
-import { PlaceCard } from '../layouts/place-card';
-import { PromptCard } from '../layouts/prompt-card';
-import { TagCard } from '../layouts/tag-card';
-import { WorldItemCard } from '../layouts/world-item-card';
+import { AlbumCard } from '../layouts/refactored/album-card-layout';
+import { CharacterCard } from '../layouts/refactored/character-card-layout';
+import { CollectionCard } from '../layouts/refactored/collection-card-layout';
+import { ConceptCard } from '../layouts/refactored/concept-card-layout';
+import { FolderCard } from '../layouts/refactored/folder-card-layout';
+import { NoteCard } from '../layouts/refactored/note-card-layout';
+import { PlaceCard } from '../layouts/refactored/place-card-layout';
+import { PromptCard } from '../layouts/refactored/prompt-card-layout';
+import { TagsCard } from '../layouts/refactored/tags-card-layout';
+import { WorldItemCard } from '../layouts/refactored/world-item-card-layout';
 
 import React, { useEffect, useState } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
@@ -202,7 +202,7 @@ export const EntityCardAdapter = React.memo(
 			case 'album':
 				return <AlbumCard album={entity as Album} {...commonProps} />;
 			case 'tag':
-				return <TagCard tag={entity as Tag} {...commonProps} />;
+				return <TagsCard tags={entity as Tag[]} {...commonProps} />;
 			case 'collection':
 				return <CollectionCard collection={entity as Collection} {...commonProps} />;
 			case 'character':
