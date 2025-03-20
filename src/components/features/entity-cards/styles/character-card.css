@@ -1,0 +1,246 @@
+/* Estilos para tarjetas de personaje en estilo TCG */
+
+/* Contenedor principal */
+.character-card-container {
+	transform-style: preserve-3d;
+	transform-origin: center center;
+	will-change: transform;
+	transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.character-card-wrapper {
+	position: relative;
+	overflow: hidden;
+	backface-visibility: hidden;
+	height: 100%;
+	width: 100%;
+}
+
+/* Efectos de rareza para cartas de personaje */
+.character-card-rarity-common {
+	--card-rarity-primary: rgba(156, 163, 175, 0.8);
+	--card-rarity-glow: rgba(156, 163, 175, 0.4);
+	--card-rarity-accent: rgba(156, 163, 175, 1);
+}
+
+.character-card-rarity-uncommon {
+	--card-rarity-primary: rgba(34, 197, 94, 0.8);
+	--card-rarity-glow: rgba(34, 197, 94, 0.5);
+	--card-rarity-accent: rgba(34, 197, 94, 1);
+}
+
+.character-card-rarity-rare {
+	--card-rarity-primary: rgba(59, 130, 246, 0.8);
+	--card-rarity-glow: rgba(59, 130, 246, 0.6);
+	--card-rarity-accent: rgba(59, 130, 246, 1);
+}
+
+.character-card-rarity-epic {
+	--card-rarity-primary: rgba(139, 92, 246, 0.8);
+	--card-rarity-glow: rgba(139, 92, 246, 0.6);
+	--card-rarity-accent: rgba(139, 92, 246, 1);
+}
+
+.character-card-rarity-legendary {
+	--card-rarity-primary: rgba(234, 179, 8, 0.8);
+	--card-rarity-glow: rgba(234, 179, 8, 0.7);
+	--card-rarity-accent: rgba(234, 179, 8, 1);
+}
+
+.character-card-rarity-mythic {
+	--card-rarity-primary: rgba(217, 70, 239, 0.8);
+	--card-rarity-glow: rgba(217, 70, 239, 0.7);
+	--card-rarity-accent: rgba(217, 70, 239, 1);
+}
+
+/* Efectos de hover según rareza */
+.character-card-rarity-common:hover {
+	box-shadow: 0 0 15px 2px var(--card-rarity-glow);
+}
+
+.character-card-rarity-uncommon:hover {
+	box-shadow: 0 0 20px 5px var(--card-rarity-glow);
+}
+
+.character-card-rarity-rare:hover {
+	box-shadow: 0 0 25px 8px var(--card-rarity-glow);
+}
+
+.character-card-rarity-epic:hover {
+	box-shadow: 0 0 28px 9px var(--card-rarity-glow);
+}
+
+.character-card-rarity-legendary:hover {
+	box-shadow: 0 0 30px 10px var(--card-rarity-glow);
+}
+
+.character-card-rarity-mythic:hover {
+	box-shadow: 0 0 35px 12px var(--card-rarity-glow);
+}
+
+/* Animaciones para bordes según rareza */
+@keyframes pulse-border {
+
+	0%,
+	100% {
+		border-color: var(--card-rarity-primary);
+	}
+
+	50% {
+		border-color: var(--card-rarity-accent);
+	}
+}
+
+@keyframes flow-border {
+	0% {
+		border-image: linear-gradient(0deg, var(--card-rarity-primary), var(--card-rarity-accent)) 1;
+	}
+
+	25% {
+		border-image: linear-gradient(90deg, var(--card-rarity-primary), var(--card-rarity-accent)) 1;
+	}
+
+	50% {
+		border-image: linear-gradient(180deg, var(--card-rarity-primary), var(--card-rarity-accent)) 1;
+	}
+
+	75% {
+		border-image: linear-gradient(270deg, var(--card-rarity-primary), var(--card-rarity-accent)) 1;
+	}
+
+	100% {
+		border-image: linear-gradient(360deg, var(--card-rarity-primary), var(--card-rarity-accent)) 1;
+	}
+}
+
+@keyframes rainbow-border {
+	0% {
+		border-image: linear-gradient(0deg, #ff0000, #ff8800, #ffff00, #88ff00, #00ff00, #00ff88, #00ffff, #0088ff, #0000ff, #8800ff, #ff00ff, #ff0088) 1;
+	}
+
+	100% {
+		border-image: linear-gradient(360deg, #ff0000, #ff8800, #ffff00, #88ff00, #00ff00, #00ff88, #00ffff, #0088ff, #0000ff, #8800ff, #ff00ff, #ff0088) 1;
+	}
+}
+
+/* Animación para stats que cambian con la rareza */
+@keyframes stat-pulse {
+
+	0%,
+	100% {
+		background-color: rgba(var(--stat-color-rgb), 0.1);
+	}
+
+	50% {
+		background-color: rgba(var(--stat-color-rgb), 0.2);
+	}
+}
+
+/* Aplicar animaciones de borde según rareza */
+.character-card-rarity-rare .character-portrait {
+	animation: pulse-border 3s infinite;
+}
+
+.character-card-rarity-epic .character-portrait {
+	animation: pulse-border 2s infinite;
+}
+
+.character-card-rarity-legendary .character-portrait {
+	animation: flow-border 5s infinite linear;
+}
+
+.character-card-rarity-mythic .character-portrait {
+	animation: rainbow-border 8s infinite linear;
+}
+
+/* Estilos para texturas de fondo */
+.bg-noise-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.bg-grid-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm1 1v18h18V1H1z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.bg-sparkle-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M10 2l1.5 4.5H16l-3.5 3 1.5 4.5-4-2.5-4 2.5 1.5-4.5-3.5-3h4.5L10 2z'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 30px 30px;
+}
+
+/* Efectos de tarjeta según rareza */
+.character-card-rarity-epic .character-card-content,
+.character-card-rarity-legendary .character-card-content,
+.character-card-rarity-mythic .character-card-content {
+	background-color: rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(5px);
+}
+
+/* Efectos para el icono de clase */
+.character-class-icon {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.character-card-rarity-epic .character-class-icon,
+.character-card-rarity-legendary .character-class-icon,
+.character-card-rarity-mythic .character-class-icon {
+	box-shadow: 0 0 10px var(--card-rarity-glow);
+}
+
+.character-card-container:hover .character-class-icon {
+	transform: scale(1.1) rotate(5deg);
+}
+
+/* Efectos de título según rareza */
+.character-card-rarity-legendary .character-title,
+.character-card-rarity-mythic .character-title {
+	text-shadow: 0 0 5px var(--card-rarity-glow);
+}
+
+/* Efectos para textos de rareza */
+.character-rarity {
+	text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Efectos para estadísticas */
+.character-stats-container {
+	--stat-color-rgb: 59, 130, 246;
+	/* Azul por defecto */
+}
+
+.character-card-rarity-epic .character-stats-container,
+.character-card-rarity-legendary .character-stats-container,
+.character-card-rarity-mythic .character-stats-container {
+	animation: stat-pulse 2s infinite;
+}
+
+/* Efectos para portrait */
+.character-portrait {
+	transform-style: preserve-3d;
+	transform: translateZ(5px);
+}
+
+/* Efectos para descripciones */
+.character-description-container {
+	backdrop-filter: blur(2px);
+	transition: backdrop-filter 0.3s ease;
+}
+
+.character-card-container:hover .character-description-container {
+	backdrop-filter: blur(0px);
+}
+
+/* Optimizaciones para dispositivos móviles */
+@media (max-width: 640px) {
+	.character-card-content {
+		padding: 0.75rem;
+	}
+
+	.character-portrait {
+		height: 100px;
+		margin-bottom: 0.5rem;
+	}
+
+	.character-stats-container {
+		font-size: 0.6rem;
+	}
+}

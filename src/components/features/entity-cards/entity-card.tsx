@@ -9,8 +9,8 @@ import { useAnimationSystem } from './modules/animation';
 import { CoreLayer } from './modules/core';
 import { useDesignSystem } from './modules/design';
 import './styles/card-borders.css';
-// Importar tipos de imagen desde el componente ImageGrid
-import type { ImageGridImage, ImageGridProps } from './layouts/image-grid';
+// Importar tipos de imagen desde el componente ImageGrid refactorizado
+import type { ImageGridImage, ImageGridProps } from './layouts/refactored/base/image-grid';
 // Importar tipo DesignSystem desde el módulo de diseño
 import type { DesignSystem } from './modules/design/types';
 // Importar tipos desde el archivo centralizado

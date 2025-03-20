@@ -1,264 +1,603 @@
 'use client';
 
-import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
-import { EntityCardContent } from '@/components/features/entity-cards/entity-card-content';
-import type {
-	CardDesignPreset,
-	CardOptions,
-	TextureConfig,
-} from '@/components/features/entity-cards/types/shared-card-types';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Note } from '@/types/prisma';
-import { ImageIcon, ScrollText, StarIcon, StickyNote, UsersIcon } from 'lucide-react';
-import type * as React from 'react';
-import { useState } from 'react';
-import { EntityCardWrapper } from '../entity-card-wrapper';
+import {
+	BookMarked,
+	Calendar,
+	FileText,
+	Newspaper,
+	PencilIcon,
+	Pin,
+	Star,
+	Timer,
+	Trash2
+} from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 
-// Opciones visuales optimizadas para tarjetas de notas
+// Importar componentes base
+import {
+	CardDescriptionSection,
+	CardFooter,
+	CardHeader,
+	CardImageSection,
+	CardMetadataSection
+} from '../base';
+
+// Importar tipos y utilidades
+import { EntityCardWrapper } from '../entity-card-wrapper';
+import { usePreset } from '../hooks/use-preset';
+import { adaptCardOptions } from '../types';
+import type { CardOptions } from '../types/unified-card-types';
+
+import '../../styles/note-card.css';
+
+// TIPOS DE DATOS
+// ==============================
+
+// Extender el tipo Note con propiedades adicionales
+interface ExtendedNote extends Note {
+	type?: string;
+	isPinned?: boolean;
+	image?: string;
+}
+
+// Props para NoteCard (componente público)
+export interface NoteCardProps {
+	note: ExtendedNote;
+	options?: Partial<CardOptions>;
+	onClick?: () => void;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
+	onEdit?: (note: ExtendedNote) => void;
+	onDelete?: (id: string) => void;
+}
+
+// SISTEMA DE RAREZA
+// ==============================
+
+// Define niveles de rareza para notas con estilo TCG
+interface NoteRarity {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+	rarity: 'common' | 'uncommon' | 'rare' | 'legendary' | 'mythic';
+	stars: number;
+	textureType: string;
+	glowIntensity: number;
+	textureOpacity: number;
+	holographic?: boolean;
+	borderAnimation?: string;
+}
+
+const NOTE_RARITY: Record<string, NoteRarity> = {
+	common: {
+		color: '#9ca3af',
+		borderColor: 'rgba(156, 163, 175, 0.8)',
+		glowColor: 'rgba(156, 163, 175, 0.6)',
+		label: 'Estándar',
+		rarity: 'common' as const,
+		stars: 1,
+		textureType: 'noise',
+		glowIntensity: 0.4,
+		textureOpacity: 0.15
+	},
+	uncommon: {
+		color: '#22c55e',
+		borderColor: 'rgba(34, 197, 94, 0.8)',
+		glowColor: 'rgba(34, 197, 94, 0.6)',
+		label: 'Inusual',
+		rarity: 'uncommon' as const,
+		stars: 2,
+		textureType: 'dots',
+		glowIntensity: 0.5,
+		textureOpacity: 0.2
+	},
+	rare: {
+		color: '#3b82f6',
+		borderColor: 'rgba(59, 130, 246, 0.8)',
+		glowColor: 'rgba(59, 130, 246, 0.6)',
+		label: 'Relevante',
+		rarity: 'rare' as const,
+		stars: 3,
+		textureType: 'grid',
+		glowIntensity: 0.65,
+		textureOpacity: 0.25,
+		borderAnimation: 'pulse'
+	},
+	legendary: {
+		color: '#eab308',
+		borderColor: 'rgba(234, 179, 8, 0.8)',
+		glowColor: 'rgba(234, 179, 8, 0.7)',
+		label: 'Histórica',
+		rarity: 'legendary' as const,
+		stars: 4,
+		holographic: true,
+		textureType: 'sparkle',
+		glowIntensity: 0.8,
+		textureOpacity: 0.3,
+		borderAnimation: 'flow'
+	},
+	mythic: {
+		color: '#d946ef',
+		borderColor: 'rgba(217, 70, 239, 0.8)',
+		glowColor: 'rgba(217, 70, 239, 0.7)',
+		label: 'Esencial',
+		rarity: 'mythic' as const,
+		stars: 5,
+		holographic: true,
+		textureType: 'rainbow',
+		glowIntensity: 1,
+		textureOpacity: 0.4,
+		borderAnimation: 'rainbow'
+	}
+};
+
+// Configuración visual por defecto para notas en estilo TCG
 const DEFAULT_NOTE_OPTIONS: Partial<CardOptions> = {
+	// Efectos principales
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
+	enableLightHalo: true,
+	enableAnimatedBorder: true,
 	enableGlowEffect: true,
-	enableBorderEffect: true,
-	enableGrainEffect: true,
+	enableGrainEffect: false,
 
-	// Sistema de diseño específico para notas
+	// Sistema de diseño inspirado en cartas coleccionables
 	designSystem: {
-		preset: 'note' as CardDesignPreset,
-		variant: 'default',
-		aspectRatio: '4/3',
+		preset: 'note',
+		variant: 'tcg',
+		aspectRatio: '7/10',
 		cornerStyle: 'rounded',
-		cornerRadius: 8,
-		elevation: 2,
+		cornerRadius: 12,
+		elevation: 3,
 		shadowStyle: 'soft',
 	},
 
-	// Configuración de movimiento
-	hoverLiftHeight: 6,
-	maxRotation: 8,
-	primaryColor: '239, 68, 68', // Un tono rojo
-	secondaryColor: '248, 113, 113', // Un tono rojo claro
-
-	// Opciones de efectos
+	// Efectos holográficos y de brillo
 	holographicOptions: {
-		patternType: 'linear',
-		intensity: 0.5,
-		animationSpeed: 1,
+		patternType: 'geometric',
+		intensity: 0.6,
+		animationSpeed: 1.5,
 		visibleOnHover: true,
 	},
 
+	// Efectos de brillo
 	glowOptions: {
 		intensity: 0.7,
-		size: 15,
-		blurAmount: 10,
+		size: 25,
+		blurAmount: 18,
 		animationType: 'pulse',
-		pulseSpeed: 1.5,
+		pulseSpeed: 2,
+		color: 'auto',
 		visibleOnHover: true,
 	},
 
+	// Bordes animados
 	borderOptions: {
-		width: 2,
-		pattern: 'solid',
-		animationType: 'pulse',
+		width: 2.5,
+		pattern: 'gradient',
+		animationType: 'flow',
 		animation: {
 			type: 'flow',
 			duration: 3000,
 			timing: 'ease-in-out',
 			iteration: 'infinite',
 		},
-		glowIntensity: 0.6,
+		glowIntensity: 0.8,
 	},
 
-	grainOptions: {
-		intensity: 0.12,
-		density: 0.5,
-		contrast: 1.1,
-		noise: 'light',
-		animated: false,
-		visibleOnHover: true,
+	// Textura de fondo
+	textureConfig: {
+		type: 'noise',
+		intensity: 0.15,
+		scale: 1.2,
+		blendMode: 'overlay',
 	},
 
-	// Opciones para imagen
-	useImageGrid: true,
-	imageGridLayout: 'single',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
+	// Rotación máxima
+	maxRotation: 15,
+
+	// Colores base
+	primaryColor: '#3b82f6',
+	secondaryColor: '#1e40af',
+	accentColor: '#60a5fa',
+	backgroundColor: '#1e293b',
 };
 
-// Definición de los tipos de notas
-const NOTE_TYPES = {
-	standard: {
-		label: 'Estándar',
-		icon: <ScrollText className="h-4 w-4" />,
-		primaryColor: '239, 68, 68', // Rojo
-		secondaryColor: '248, 113, 113', // Rojo claro
-		texture: 'standard' as TextureConfig,
-	},
-	important: {
-		label: 'Importante',
-		icon: <StarIcon className="h-4 w-4" />,
-		primaryColor: '168, 85, 247', // Púrpura
-		secondaryColor: '192, 132, 252', // Púrpura claro
-		texture: 'gold' as TextureConfig,
-	},
-	concept: {
-		label: 'Concepto',
-		icon: <UsersIcon className="h-4 w-4" />,
-		primaryColor: '59, 130, 246', // Azul
-		secondaryColor: '96, 165, 250', // Azul claro
-		texture: 'silver' as TextureConfig,
-	},
-	research: {
-		label: 'Investigación',
-		icon: <ImageIcon className="h-4 w-4" />,
-		primaryColor: '34, 197, 94', // Verde
-		secondaryColor: '74, 222, 128', // Verde claro
-		texture: 'bronze' as TextureConfig,
-	},
-};
+// UTILIDADES Y COMPONENTES AUXILIARES
+// ==============================
 
-// Interfaz para las propiedades de la tarjeta de nota
-interface NoteCardProps {
-	note: Note;
-	onEdit?: (note: Note) => void;
-	onDelete?: (id: string) => void;
-	onClick?: () => void;
-	className?: string;
-	visualOptions?: Partial<CardOptions>;
+// Componente para mostrar estrellas de rareza
+function RarityStars({ count }: { count: number }) {
+	return (
+		<div className="flex items-center justify-center mt-1">
+			{Array.from({ length: count }).map((_, i) => (
+				<Star
+					key={`star-${i}-${count}`}
+					className={cn(
+						"h-3 w-3 mx-0.5",
+						count >= 4 ? "text-yellow-400" :
+							count >= 3 ? "text-blue-400" :
+								count >= 2 ? "text-green-400" : "text-gray-400"
+					)}
+					fill="currentColor"
+				/>
+			))}
+		</div>
+	);
 }
 
-// Componente principal para la tarjeta de nota
-export function NoteCard({ note, onEdit, onDelete, onClick, className, visualOptions }: NoteCardProps) {
-	// Verificar si note existe y tiene las propiedades necesarias
-	if (!note) {
-		console.warn('NoteCard: Se recibió un objeto note indefinido');
-		// Crear un note por defecto para evitar errores
-		note = {
-			id: 'placeholder',
-			name: 'Nota sin nombre',
-			content: 'Sin contenido',
-			type: 'text',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		} as Note;
+// Calcula la rareza de una nota basado en varios factores
+function calculateNoteRarity(note: ExtendedNote): keyof typeof NOTE_RARITY {
+	// Si no hay nota válida
+	if (!note || !note.id) {
+		return 'common';
 	}
 
-	// Estado para controlar si el panel de configuración está abierto
-	const [configOpen, setConfigOpen] = useState(false);
+	// Los factores que influyen en la rareza
+	const hasImage = !!note.image;
+	const isLong = (note.content?.length || 0) > 500;
+	const isPinned = !!note.isPinned;
+	const hasType = !!note.type;
+	const contentScore = (note.content?.length || 0) / 200; // 1 punto por cada 200 caracteres
 
-	// Estado para las opciones de la tarjeta
-	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({
-		...DEFAULT_NOTE_OPTIONS,
-		...visualOptions,
-	});
+	// Calcular puntuación total (valores arbitrarios para demostración)
+	let score = 0;
+	if (hasImage) score += 2;
+	if (isLong) score += 1;
+	if (isPinned) score += 1.5;
+	if (hasType) score += 0.5;
+	score += Math.min(contentScore, 3); // Máximo 3 puntos por longitud
 
-	// Función para determinar el tipo de nota según el contenido
-	const determineNoteType = (name: string, description: string) => {
-		// Identificar si es una nota de investigación
-		const isResearch =
-			description?.toLowerCase().includes('investigación') ||
-			description?.toLowerCase().includes('research') ||
-			name?.toLowerCase().includes('investigación') ||
-			name?.toLowerCase().includes('research');
+	// Determinar rareza basada en la puntuación
+	if (score >= 6) return 'mythic';
+	if (score >= 4.5) return 'legendary';
+	if (score >= 3) return 'rare';
+	if (score >= 1.5) return 'uncommon';
+	return 'common';
+}
 
-		// Identificar si es una nota de concepto
-		const isConcept =
-			description?.toLowerCase().includes('concepto') ||
-			description?.toLowerCase().includes('concept') ||
-			name?.toLowerCase().includes('concepto') ||
-			name?.toLowerCase().includes('concept');
+// Genera la configuración de rareza para una nota
+function generateNoteRarityConfig(note: ExtendedNote) {
+	const rarityKey = calculateNoteRarity(note);
+	const rarity = NOTE_RARITY[rarityKey];
 
-		// Identificar si es una nota importante
-		const isImportant =
-			description?.toLowerCase().includes('importante') ||
-			description?.toLowerCase().includes('important') ||
-			description?.toLowerCase().includes('urgente') ||
-			description?.toLowerCase().includes('urgent') ||
-			name?.toLowerCase().includes('importante') ||
-			name?.toLowerCase().includes('important') ||
-			name?.toLowerCase().includes('urgente') ||
-			name?.toLowerCase().includes('urgent');
+	return {
+		enabled: true,
+		rarity: rarityKey,
+		color: rarity.color,
+		borderColor: rarity.borderColor,
+		glowColor: rarity.glowColor,
+		borderStyle: 'solid',
+		borderWidth: 2,
+		frameType: 'standard',
+		label: rarity.label,
+	};
+}
 
-		// Devolver el tipo correspondiente
-		if (isResearch) return 'research';
-		if (isConcept) return 'concept';
-		if (isImportant) return 'important';
-		return 'standard';
+// Obtiene el icono adecuado para el tipo de nota
+function getNoteTypeIcon(type = '') {
+	switch (type?.toLowerCase()) {
+		case 'journal': return <Newspaper className="h-4 w-4" />;
+		case 'documentation': return <FileText className="h-4 w-4" />;
+		case 'log': return <BookMarked className="h-4 w-4" />;
+		default: return <FileText className="h-4 w-4" />;
+	}
+}
+
+// COMPONENTE PRINCIPAL
+// ==============================
+export function NoteCardLayout({
+	note: initialNote,
+	options = {},
+	onClick,
+	showVisualConfig = false,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
+	onEdit,
+	onDelete,
+}: NoteCardProps) {
+	// Garantizar que nunca procesamos una nota undefined
+	const note = initialNote || {
+		id: 'placeholder',
+		title: 'Nota sin título',
+		content: 'Sin contenido',
+		createdAt: new Date(),
+		updatedAt: new Date(),
 	};
 
-	// Obtener el tipo de nota
-	const noteType = note.type || determineNoteType(note.name || '', note.content || '');
-	const typeInfo = NOTE_TYPES[noteType as keyof typeof NOTE_TYPES] || NOTE_TYPES.standard;
+	// Usar el hook para obtener configuración de preset
+	const { cardOptions } = usePreset({
+		entityType: 'note',
+		entityId: note.id as string,
+		presetId: 'presetId' in note && note.presetId ? note.presetId : null,
+		baseOptions: options,
+	});
 
-	// Obtener fecha formateada
-	const formattedDate = note.createdAt
-		? new Date(note.createdAt).toLocaleDateString()
-		: new Date().toLocaleDateString();
+	// Obtener la rareza de la nota
+	const rarityKey = calculateNoteRarity(note);
+	const rarityInfo = NOTE_RARITY[rarityKey];
+	const rarityConfig = generateNoteRarityConfig(note);
+	const rarityClass = `note-card-rarity-${rarityKey}`;
+
+	// Generar opciones de tarjeta mejoradas basadas en rareza
+	const enhancedCardOptions = useMemo(() => {
+		// Valores por defecto
+		const defaults = DEFAULT_NOTE_OPTIONS;
+
+		// Ajustar intensidad de efectos según rareza
+		const intensity = rarityInfo.glowIntensity || 0.5;
+
+		// Habilitar efectos especiales para notas legendarias y míticas
+		const isSpecial = rarityKey === 'legendary' || rarityKey === 'mythic';
+
+		// Crear opciones combinadas con valores específicos de rareza
+		return {
+			...defaults,
+			enableHolographicEffect: isSpecial,
+			enableScanlinesEffect: isSpecial,
+
+			// Configurar glows basados en rareza
+			glowOptions: {
+				...(defaults.glowOptions || {}),
+				intensity: intensity,
+				color: rarityInfo.glowColor,
+				size: 20 + (rarityInfo.stars * 2),
+				visibleOnIdle: rarityKey === 'mythic',
+				animationType: isSpecial ? 'pulse' : 'static',
+			},
+
+			// Configurar bordes animados
+			borderOptions: {
+				...(defaults.borderOptions || {}),
+				width: rarityInfo.stars * 0.5,
+				color: rarityInfo.borderColor,
+				pattern: isSpecial ? 'gradient' : 'solid',
+				animationType: rarityInfo.borderAnimation || 'none',
+				glowIntensity: intensity,
+			},
+
+			// Configurar texturas específicas
+			textureConfig: {
+				type: rarityInfo.textureType || 'noise',
+				intensity: rarityInfo.textureOpacity || 0.15,
+				scale: 1 + (rarityInfo.stars * 0.1),
+				blendMode: 'overlay',
+			},
+
+			// Configuración de rareza
+			rarityConfig,
+
+			// Efectos adicionales
+			effects: {
+				...(defaults.effects || {}),
+				chromaticAberration: {
+					enabled: isSpecial,
+					visibleOnHover: true,
+					intensity: rarityKey === 'mythic' ? 0.4 : 0.2,
+				},
+				noiseTexture: {
+					enabled: true,
+					visibleOnHover: !isSpecial,
+					intensity: rarityInfo.textureOpacity || 0.15,
+				},
+				glitchEffect: {
+					enabled: rarityKey === 'mythic',
+					visibleOnHover: true,
+					intensity: 0.3,
+					frequency: 0.1,
+				},
+			},
+		};
+	}, [rarityKey, rarityInfo, rarityConfig]);
+
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{ id: 'background', label: 'Fondo', icon: <Star className="h-4 w-4" /> },
+		{ id: 'frame', label: 'Marco', icon: <FileText className="h-4 w-4" /> },
+		{ id: 'content', label: 'Contenido', icon: <BookMarked className="h-4 w-4" /> },
+		{ id: 'effects', label: 'Efectos', icon: <Star className="h-4 w-4" /> },
+	];
+
+	// Manejadores de eventos
+	const handleEdit = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onEdit && note) {
+			onEdit(note);
+		}
+	}, [onEdit, note]);
+
+	const handleDelete = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onDelete && note?.id) {
+			onDelete(note.id);
+		}
+	}, [onDelete, note?.id]);
+
+	// Calcular fecha formateada
+	const formattedDate = useMemo(() => {
+		if (!note.createdAt) return '';
+
+		const date = typeof note.createdAt === 'string'
+			? new Date(note.createdAt)
+			: note.createdAt;
+
+		return date.toLocaleDateString();
+	}, [note.createdAt]);
+
+	// Corregir la generación de metadataItems utilizando un enfoque que evite elementos undefined
+	const metadataItems = useMemo(() => {
+		const items: Array<{
+			label: string;
+			value: string;
+			icon: React.ReactNode;
+		}> = [];
+
+		if (note.type) {
+			items.push({
+				label: 'Tipo',
+				value: note.type,
+				icon: getNoteTypeIcon(note.type)
+			});
+		}
+
+		items.push({
+			label: 'Creado',
+			value: formattedDate,
+			icon: <Calendar className="h-3.5 w-3.5 opacity-70" />
+		});
+
+		if (note.updatedAt) {
+			items.push({
+				label: 'Actualizado',
+				value: typeof note.updatedAt === 'string'
+					? new Date(note.updatedAt).toLocaleDateString()
+					: note.updatedAt.toLocaleDateString(),
+				icon: <Timer className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		return items;
+	}, [note.type, formattedDate, note.updatedAt]);
 
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					options={cardOptions}
-					onOptionsChange={setCardOptions}
-					onClose={() => setConfigOpen(false)}
-				/>
-			)}
-
-			<div
-				className={cn('note-card min-h-[250px] w-full relative', className)}
+		<div className={cn(
+			'note-card-container relative w-full h-full group',
+			rarityClass,
+			onClick && 'cursor-pointer',
+			className
+		)}>
+			<EntityCardWrapper
+				title={note.title || 'Nota'}
+				description={note.content || ''}
+				entityId={note.id}
+				entityType="note"
+				className={cn('note-card-wrapper relative w-full h-full', rarityClass)}
+				options={adaptCardOptions(enhancedCardOptions)}
+				showVisualConfig={showVisualConfig}
+				onVisualConfigClick={onVisualConfigClick}
+				enableExplode={enableExplode}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
+				explodeLayers={explodeLayers}
 				onClick={onClick}
-				onKeyDown={(e) => {
-					// Activar el click cuando se presiona Enter o Space
-					if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-						e.preventDefault();
-						onClick();
-					}
-				}}
-				tabIndex={onClick ? 0 : undefined} // Solo es focusable si tiene un onClick
-				role={onClick ? 'button' : undefined} // Asignar rol de botón si es interactivo
-				style={
-					{
-						'--primary-color': typeInfo.primaryColor,
-						'--secondary-color': typeInfo.secondaryColor,
-					} as React.CSSProperties
-				}
 			>
-				<EntityCardWrapper
-					title={note.name || 'Nota sin título'}
-					description={note.content || ''}
-					entityType="note"
-					entityId={note.id}
-					visualOptions={{
-						...cardOptions,
-						primaryColor: typeInfo.primaryColor,
-						secondaryColor: typeInfo.secondaryColor,
-					}}
-					onConfigClick={() => setConfigOpen(true)}
-				>
-					<EntityCardContent
-						title={note.name || 'Nota sin título'}
-						description={note.content}
-						entityId={note.id}
-						onEdit={onEdit ? () => onEdit(note) : undefined}
-						onDelete={onDelete ? () => onDelete(note.id) : undefined}
-						icon={typeInfo.icon || <StickyNote className="h-4 w-4" />}
-						className="p-4"
-						badges={
-							note.tags && Array.isArray(note.tags) && note.tags.length > 0
-								? note.tags.slice(0, 3).map((tag: string) => ({
-										key: `tag-${tag}`,
-										label: `#${tag}`,
-										variant: 'secondary',
-									}))
-								: []
+				<div className="note-card-content flex flex-col h-full w-full relative">
+					{/* Cabecera de la tarjeta con indicador de pin si está destacada */}
+					<CardHeader
+						title={note.title || 'Nota sin título'}
+						entityType="note"
+						showIcon={true}
+						className={cn(
+							"mb-2 relative z-10",
+							note.isPinned && "border-r-[16px] border-r-amber-400/40"
+						)}
+						rightContent={
+							<>
+								{note.isPinned && (
+									<Pin className="h-4 w-4 absolute top-2 right-2 text-amber-400" />
+								)}
+								{(onEdit || onDelete) && (
+									<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+										{onEdit && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80"
+												onClick={handleEdit}
+											>
+												<PencilIcon className="h-3.5 w-3.5" />
+											</Button>
+										)}
+										{onDelete && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80 hover:bg-destructive/20"
+												onClick={handleDelete}
+											>
+												<Trash2 className="h-3.5 w-3.5" />
+											</Button>
+										)}
+									</div>
+								)}
+							</>
 						}
-					>
-						<div className="text-xs text-[--muted-foreground] mt-auto">{formattedDate}</div>
-					</EntityCardContent>
-				</EntityCardWrapper>
-			</div>
-		</>
+					/>
+
+					{/* Indicador de rareza */}
+					<RarityStars count={rarityInfo.stars} />
+
+					{/* Imagen de la nota (si existe) */}
+					{note.image && (
+						<CardImageSection
+							imageUrl={note.image}
+							alt={note.title || 'Nota'}
+							aspectRatio="video"
+							className="mb-3 border border-muted rounded-md overflow-hidden"
+						/>
+					)}
+
+					{/* Contenido de la nota */}
+					<CardDescriptionSection
+						description={note.content || 'Sin contenido'}
+						maxLines={5}
+						className="flex-grow"
+					/>
+
+					{/* Metadatos de la nota */}
+					{metadataItems.length > 0 && (
+						<CardMetadataSection
+							items={metadataItems}
+							className="mt-2 bg-card/80 rounded"
+						/>
+					)}
+
+					{/* Pie de página con indicador de rareza */}
+					<CardFooter
+						className="mt-auto"
+						leftContent={
+							<div className={cn(
+								"note-rarity px-3 py-1 rounded-full text-[10px] font-medium",
+								rarityKey === 'mythic' ? "bg-fuchsia-500/20 text-fuchsia-200" :
+									rarityKey === 'legendary' ? "bg-amber-500/20 text-amber-200" :
+										rarityKey === 'rare' ? "bg-blue-500/20 text-blue-200" :
+											rarityKey === 'uncommon' ? "bg-green-500/20 text-green-200" :
+												"bg-gray-500/20 text-gray-200"
+							)}>
+								{NOTE_RARITY[rarityKey].label}
+							</div>
+						}
+						rightContent={
+							<span className="text-[10px] opacity-70">
+								{note.type ? `#${note.type}` : '#nota'}
+							</span>
+						}
+					/>
+				</div>
+			</EntityCardWrapper>
+		</div>
 	);
+}
+
+// Componente público para usar en la aplicación
+export function NoteCard(props: NoteCardProps) {
+	return <NoteCardLayout {...props} />;
 }

@@ -1,0 +1,335 @@
+/* PROMPT CARD STYLES
+============================================================================= */
+
+/*
+* Contenedor principal - Proporciona el marco para el efecto 3D
+*/
+.prompt-card-container {
+	perspective: 1000px;
+	transition: transform 0.2s ease-out;
+	transform-style: preserve-3d;
+	will-change: transform;
+	position: relative;
+}
+
+.prompt-card-wrapper {
+	transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+	transform-style: preserve-3d;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	backface-visibility: hidden;
+}
+
+/*
+* Efectos de rareza para los prompts - Paleta futurista/tecnológica
+*/
+
+/* COMÚN */
+.prompt-card-rarity-common .prompt-card-wrapper {
+	box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+	border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.prompt-card-rarity-common .prompt-card-wrapper:hover {
+	box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* POCO COMÚN (UNCOMMON) */
+.prompt-card-rarity-uncommon .prompt-card-wrapper {
+	box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+	border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.prompt-card-rarity-uncommon .prompt-card-wrapper:hover {
+	box-shadow: 0 4px 15px rgba(79, 70, 229, 0.5);
+}
+
+/* RARA */
+.prompt-card-rarity-rare .prompt-card-wrapper {
+	box-shadow: 0 2px 12px rgba(124, 58, 237, 0.4);
+	border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+.prompt-card-rarity-rare .prompt-card-wrapper:hover {
+	box-shadow: 0 4px 20px rgba(124, 58, 237, 0.6);
+}
+
+.prompt-card-rarity-rare .prompt-card-wrapper::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border: 2px solid rgba(124, 58, 237, 0.6);
+	border-radius: inherit;
+	animation: promptPulseBorder 2s infinite;
+	pointer-events: none;
+}
+
+/* ÉPICA */
+.prompt-card-rarity-epic .prompt-card-wrapper {
+	box-shadow: 0 2px 15px rgba(168, 85, 247, 0.5);
+	border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.prompt-card-rarity-epic .prompt-card-wrapper:hover {
+	box-shadow: 0 4px 25px rgba(168, 85, 247, 0.7);
+}
+
+.prompt-card-rarity-epic .prompt-card-wrapper::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border: 2px solid rgba(168, 85, 247, 0.6);
+	border-radius: inherit;
+	animation: promptFlowBorder 3s infinite;
+	pointer-events: none;
+}
+
+/* LEGENDARIA */
+.prompt-card-rarity-legendary .prompt-card-wrapper {
+	box-shadow: 0 2px 20px rgba(217, 70, 239, 0.6);
+	border: 1px solid rgba(217, 70, 239, 0.5);
+}
+
+.prompt-card-rarity-legendary .prompt-card-wrapper:hover {
+	box-shadow: 0 4px 30px rgba(217, 70, 239, 0.8);
+}
+
+.prompt-card-rarity-legendary .prompt-card-wrapper::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border: 2px solid rgba(0, 0, 0, 0);
+	border-radius: inherit;
+	animation: promptRainbowBorder 4s infinite;
+	pointer-events: none;
+}
+
+.prompt-card-rarity-legendary .prompt-card-wrapper::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(45deg,
+			rgba(99, 102, 241, 0.1),
+			rgba(79, 70, 229, 0.1),
+			rgba(124, 58, 237, 0.1),
+			rgba(168, 85, 247, 0.1),
+			rgba(217, 70, 239, 0.1),
+			rgba(236, 72, 153, 0.1),
+			rgba(244, 114, 182, 0.1));
+	opacity: 0;
+	border-radius: inherit;
+	transition: opacity 0.3s ease;
+	pointer-events: none;
+	background-size: 400% 400%;
+	animation: promptRainbowGlow 8s linear infinite;
+}
+
+.prompt-card-rarity-legendary:hover .prompt-card-wrapper::before {
+	opacity: 0.4;
+}
+
+/*
+* Animaciones para bordes de rareza (con tonos específicos para prompts)
+*/
+
+/* Pulso para prompts raros */
+@keyframes promptPulseBorder {
+	0% {
+		border-color: rgba(124, 58, 237, 0.4);
+		box-shadow: 0 0 5px rgba(124, 58, 237, 0.4);
+	}
+
+	50% {
+		border-color: rgba(124, 58, 237, 0.8);
+		box-shadow: 0 0 10px rgba(124, 58, 237, 0.6);
+	}
+
+	100% {
+		border-color: rgba(124, 58, 237, 0.4);
+		box-shadow: 0 0 5px rgba(124, 58, 237, 0.4);
+	}
+}
+
+/* Flujo para prompts épicos */
+@keyframes promptFlowBorder {
+	0% {
+		border-width: 1px;
+		border-color: rgba(168, 85, 247, 0.4);
+		box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+	}
+
+	25% {
+		border-width: 2px;
+		border-color: rgba(168, 85, 247, 0.6);
+	}
+
+	50% {
+		border-width: 3px;
+		border-color: rgba(168, 85, 247, 0.8);
+		box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+	}
+
+	75% {
+		border-width: 2px;
+		border-color: rgba(168, 85, 247, 0.6);
+	}
+
+	100% {
+		border-width: 1px;
+		border-color: rgba(168, 85, 247, 0.4);
+		box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+	}
+}
+
+/* Arcoíris para prompts legendarios */
+@keyframes promptRainbowBorder {
+
+	0%,
+	100% {
+		border-color: rgba(99, 102, 241, 0.7);
+		box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+	}
+
+	16% {
+		border-color: rgba(79, 70, 229, 0.7);
+		box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+	}
+
+	33% {
+		border-color: rgba(124, 58, 237, 0.7);
+		box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+	}
+
+	50% {
+		border-color: rgba(168, 85, 247, 0.7);
+		box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+	}
+
+	66% {
+		border-color: rgba(217, 70, 239, 0.7);
+		box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+	}
+
+	83% {
+		border-color: rgba(236, 72, 153, 0.7);
+		box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+	}
+}
+
+@keyframes promptRainbowGlow {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	50% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/*
+* Patrones de fondo específicos para prompts
+*/
+.prompt-noise-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+	opacity: 0.07;
+}
+
+.prompt-circuit-pattern {
+	background-image: linear-gradient(to right, rgba(124, 58, 237, 0.05) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+	background-size: 20px 20px;
+}
+
+.prompt-dot-pattern {
+	background-image:
+		radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.1) 1px, transparent 1px),
+		radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1) 1px, transparent 1px),
+		radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.07) 1px, transparent 1px);
+	background-size: 25px 25px;
+}
+
+/*
+* Contenido específico de tarjetas de prompts
+*/
+.prompt-content {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	font-family: monospace;
+	background-color: rgba(0, 0, 0, 0.2);
+	padding: 0.5rem;
+	border-radius: 0.25rem;
+	border-left: 3px solid rgba(124, 58, 237, 0.5);
+}
+
+.prompt-type-badge {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.65rem;
+	padding: 0.15rem 0.5rem;
+	border-radius: 1rem;
+	background-color: rgba(124, 58, 237, 0.2);
+	color: #ffffff;
+}
+
+.prompt-type-badge svg {
+	width: 0.75rem;
+	height: 0.75rem;
+	margin-right: 0.25rem;
+}
+
+/* Estilos específicos para diferentes tipos de prompts */
+.prompt-type-image {
+	background-color: rgba(244, 114, 182, 0.2);
+}
+
+.prompt-type-code {
+	background-color: rgba(45, 212, 191, 0.2);
+}
+
+.prompt-type-text {
+	background-color: rgba(52, 211, 153, 0.2);
+}
+
+.prompt-type-chat {
+	background-color: rgba(251, 146, 60, 0.2);
+}
+
+/*
+* Efectos de escaneo y tecnología futurista
+*/
+.prompt-scanlines {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: repeating-linear-gradient(to bottom,
+			rgba(0, 0, 0, 0),
+			rgba(0, 0, 0, 0),
+			rgba(0, 0, 0, 0.03) 3px,
+			rgba(0, 0, 0, 0.03) 4px);
+	opacity: 0.3;
+	pointer-events: none;
+	z-index: 5;
+}
+
+/*
+* Media queries para dispositivos móviles
+*/
+@media (max-width: 640px) {
+	.prompt-card-container {
+		perspective: 600px;
+	}
+
+	.prompt-content {
+		-webkit-line-clamp: 2;
+		font-size: 0.75rem;
+	}
+}

@@ -1,624 +1,681 @@
 'use client';
 
-import type { RarityConfig } from '@/components/features/entity-cards/types/base-card-types';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Place } from '@/types/entities/places';
 import {
-	ArrowUpRight,
+	Building2,
+	Calendar,
 	Cloud,
 	Globe,
-	ImageIcon,
+	Home,
+	Landmark,
+	Map,
 	MapPin,
-	PencilIcon,
+	Mountain,
+	Palmtree,
+	Scroll,
+	Shield,
 	Star,
-	Thermometer,
-	Trash2,
-	Users,
+	Swords,
+	Users
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import { VisualizationConfig } from '../config/visualization-config';
+import Image from 'next/image';
+import type * as React from 'react';
+import { useMemo } from 'react';
+
+// Importar componentes base
+import {
+	CardFooter,
+	CardHeader,
+	CardMetadataSection
+} from '../base';
+
+// Importar tipos y utilidades
 import { EntityCardWrapper } from '../entity-card-wrapper';
 import { usePreset } from '../hooks/use-preset';
-import { ImageGrid } from './image-grid';
+import { adaptCardOptions } from '../types';
+import type { CardOptions } from '../types/unified-card-types';
 
-// Opciones visuales optimizadas para lugares
-const DEFAULT_PLACE_OPTIONS = {
+import '../../styles/place-card.css';
+
+// TIPOS DE DATOS
+// ==============================
+
+// Define rarity levels for places with TCG styling
+interface PlaceRarity {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+	rarity: 'common' | 'uncommon' | 'rare' | 'legendary' | 'mythic';
+	stars: number;
+	textureType: string;
+	glowIntensity: number;
+	textureOpacity: number;
+	holographic?: boolean;
+	borderAnimation?: string;
+}
+
+const PLACE_RARITY: Record<string, PlaceRarity> = {
+	common: {
+		color: '#9ca3af',
+		borderColor: 'rgba(156, 163, 175, 0.8)',
+		glowColor: 'rgba(156, 163, 175, 0.6)',
+		label: 'Común',
+		rarity: 'common' as const,
+		stars: 1,
+		textureType: 'noise',
+		glowIntensity: 0.4,
+		textureOpacity: 0.15
+	},
+	uncommon: {
+		color: '#22c55e',
+		borderColor: 'rgba(34, 197, 94, 0.8)',
+		glowColor: 'rgba(34, 197, 94, 0.6)',
+		label: 'Poco Común',
+		rarity: 'uncommon' as const,
+		stars: 2,
+		textureType: 'dots',
+		glowIntensity: 0.5,
+		textureOpacity: 0.2
+	},
+	rare: {
+		color: '#3b82f6',
+		borderColor: 'rgba(59, 130, 246, 0.8)',
+		glowColor: 'rgba(59, 130, 246, 0.6)',
+		label: 'Rara',
+		rarity: 'rare' as const,
+		stars: 3,
+		textureType: 'grid',
+		glowIntensity: 0.65,
+		textureOpacity: 0.25,
+		borderAnimation: 'pulse'
+	},
+	legendary: {
+		color: '#eab308',
+		borderColor: 'rgba(234, 179, 8, 0.8)',
+		glowColor: 'rgba(234, 179, 8, 0.7)',
+		label: 'Legendaria',
+		rarity: 'legendary' as const,
+		stars: 4,
+		holographic: true,
+		textureType: 'sparkle',
+		glowIntensity: 0.8,
+		textureOpacity: 0.3,
+		borderAnimation: 'flow'
+	},
+	mythic: {
+		color: '#d946ef',
+		borderColor: 'rgba(217, 70, 239, 0.8)',
+		glowColor: 'rgba(217, 70, 239, 0.7)',
+		label: 'Mítica',
+		rarity: 'mythic' as const,
+		stars: 5,
+		holographic: true,
+		textureType: 'rainbow',
+		glowIntensity: 1,
+		textureOpacity: 0.35,
+		borderAnimation: 'rainbow'
+	},
+};
+
+// Opciones predeterminadas para la tarjeta de lugar con estilo TCG
+const DEFAULT_PLACE_OPTIONS: Partial<CardOptions> = {
+	// Efectos principales
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
-	enableGrainEffect: false,
+	enableGrainEffect: true,
 
 	// Configuración de diseño específica para lugares
 	designSystem: {
 		preset: 'place',
-		variant: 'default',
-		aspectRatio: '7/10',
+		variant: 'tcg',
+		aspectRatio: '7/10', // Proporción estándar de cartas coleccionables
 		cornerStyle: 'rounded',
 		cornerRadius: 12,
-		elevation: 2,
+		elevation: 3,
 		shadowStyle: 'soft',
 	},
 
-	// Sistema de capas optimizado para lugares
-	layerSystem: {
-		order: ['content', 'holographic', 'border', 'filter'],
-		layerBlending: 'normal',
+	// Efectos específicos para lugares
+	holographicOptions: {
+		patternType: 'geometric',
+		intensity: 0.6,
+		animationSpeed: 1.2,
+		visibleOnHover: true,
 	},
 
-	// Interactividad específica para lugares
+	glowOptions: {
+		intensity: 0.7,
+		size: 20,
+		blurAmount: 15,
+		animationType: 'pulse',
+		pulseSpeed: 2.5,
+		visibleOnHover: true,
+	},
+
+	borderOptions: {
+		width: 2,
+		pattern: 'gradient',
+		animationType: 'pulse',
+		animation: {
+			type: 'flow',
+			duration: 3000,
+			timing: 'ease-in-out',
+			iteration: 'infinite',
+		},
+		glowIntensity: 0.7,
+	},
+
+	grainOptions: {
+		intensity: 0.15,
+		density: 0.6,
+		contrast: 1.2,
+		noise: 'subtle',
+		animated: true,
+		visibleOnHover: true,
+	},
+
+	// Parámetros de interactividad
 	interactivity: {
+		enableHoverEffects: true,
+		enableClickEffects: true,
 		hover: {
-			scale: 1.02,
+			scale: 1.05,
 			rotate: true,
 			lift: true,
 			glow: true,
-		},
-		click: {
-			feedback: 'scale',
-		},
+		}
 	},
 
-	// Estados específicos para lugares
+	// Configuración de estados
 	states: {
-		loading: {
-			skeleton: true,
-			blur: true,
-		},
-		selected: {
-			style: 'border',
-		},
+		enableHover: true,
+		stateDuration: 300,
 	},
 
-	// Rendimiento optimizado
-	performance: {
-		lazyLoad: true,
-		imageOptimization: true,
-		animationOptimization: true,
-		renderQuality: 'high',
-	},
-
-	// Configuración visual básica
-	hoverLiftHeight: 10,
-	maxRotation: 12,
-	primaryColor: '56, 189, 248',
-	secondaryColor: '236, 72, 153',
-
-	// Contenido y estructura
-	contentLayout: 'stats-focus',
-	contentPadding: '1rem',
-	contentSpacing: '0.5rem',
-	contentAlignment: 'start',
+	// Animación
+	maxRotation: 15,
 };
 
-// Tipos de clima con colores personalizados
-const CLIMATE_TYPES = {
-	arctic: {
-		color: 'from-blue-600/20 to-sky-600/20',
-		border: 'border-blue-500/70',
-		label: 'Ártico',
-		badgeClass: 'bg-gradient-to-r from-blue-500 to-sky-500',
-		barClass: 'bg-gradient-to-r from-blue-500 to-sky-500',
-		icon: <Cloud className="h-4 w-4" />,
-	},
-	cold: {
-		color: 'from-cyan-600/20 to-teal-600/20',
-		border: 'border-cyan-500/70',
-		label: 'Frío',
-		badgeClass: 'bg-gradient-to-r from-cyan-500 to-teal-500',
-		barClass: 'bg-gradient-to-r from-cyan-500 to-teal-500',
-		icon: <Cloud className="h-4 w-4" />,
-	},
-	temperate: {
-		color: 'from-emerald-600/20 to-green-600/20',
-		border: 'border-emerald-500/70',
-		label: 'Templado',
-		badgeClass: 'bg-gradient-to-r from-emerald-500 to-green-500',
-		barClass: 'bg-gradient-to-r from-emerald-500 to-green-500',
-		icon: <Thermometer className="h-4 w-4" />,
-	},
-	warm: {
-		color: 'from-yellow-600/20 to-amber-600/20',
-		border: 'border-yellow-500/70',
-		label: 'Cálido',
-		badgeClass: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-		barClass: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-		icon: <Thermometer className="h-4 w-4" />,
-	},
-	hot: {
-		color: 'from-orange-600/20 to-red-600/20',
-		border: 'border-orange-500/70',
-		label: 'Caluroso',
-		badgeClass: 'bg-gradient-to-r from-orange-500 to-red-500',
-		barClass: 'bg-gradient-to-r from-orange-500 to-red-500',
-		icon: <Thermometer className="h-4 w-4" />,
-	},
-	desert: {
-		color: 'from-amber-600/20 to-yellow-600/20',
-		border: 'border-amber-500/70',
-		label: 'Desértico',
-		badgeClass: 'bg-gradient-to-r from-amber-500 to-yellow-500',
-		barClass: 'bg-gradient-to-r from-amber-500 to-yellow-500',
-		icon: <Thermometer className="h-4 w-4" />,
-	},
-	tropical: {
-		color: 'from-lime-600/20 to-green-600/20',
-		border: 'border-lime-500/70',
-		label: 'Tropical',
-		badgeClass: 'bg-gradient-to-r from-lime-500 to-green-500',
-		barClass: 'bg-gradient-to-r from-lime-500 to-green-500',
-		icon: <Cloud className="h-4 w-4" />,
-	},
-	unknown: {
-		color: 'from-slate-500/20 to-gray-600/20',
-		border: 'border-slate-500/50',
-		label: 'Desconocido',
-		badgeClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
-		barClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
-		icon: <Thermometer className="h-4 w-4" />,
-	},
-};
+// Extender la interfaz Place para añadir presetId
+interface ExtendedPlace extends Place {
+	presetId?: string | null;
+}
 
-interface PlaceCardProps {
-	place: Place;
-	onEdit?: (place: Place) => void;
-	onDelete?: (id: string) => void;
+export interface PlaceCardProps {
+	place: ExtendedPlace;
+	options?: Partial<CardOptions>;
 	onClick?: () => void;
-	className?: string;
-	/** Indica si se debe mostrar el botón de configuración visual */
 	showVisualConfig?: boolean;
-	/** Opciones visuales personalizadas, si no se proporcionan se usarán valores predeterminados */
-	visualOptions?: typeof DEFAULT_PLACE_OPTIONS;
-	/** Activa/desactiva la funcionalidad de vista explosionada */
+	onVisualConfigClick?: () => void;
 	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
 }
 
-// Función para obtener el clima del lugar
-function getPlaceClimate(place: Place) {
-	const climateValue = place.climate?.toLowerCase() || 'unknown';
+// UTILIDADES Y COMPONENTES AUXILIARES
+// ==============================
 
-	switch (climateValue) {
-		case 'arctic':
-		case 'polar':
-		case 'freezing':
-			return CLIMATE_TYPES.arctic;
-		case 'cold':
-		case 'cool':
-		case 'chilly':
-			return CLIMATE_TYPES.cold;
-		case 'temperate':
-		case 'moderate':
-		case 'mild':
-			return CLIMATE_TYPES.temperate;
-		case 'warm':
-		case 'pleasant':
-			return CLIMATE_TYPES.warm;
-		case 'hot':
-		case 'scorching':
-		case 'burning':
-			return CLIMATE_TYPES.hot;
-		case 'desert':
-		case 'arid':
-		case 'dry':
-			return CLIMATE_TYPES.desert;
-		case 'tropical':
-		case 'humid':
-		case 'jungle':
-			return CLIMATE_TYPES.tropical;
-		default:
-			return CLIMATE_TYPES.unknown;
-	}
+// Componente para mostrar estrellas de rareza
+function RarityStars({ count }: { count: number }) {
+	return (
+		<div className="flex items-center justify-center mt-1">
+			{Array.from({ length: count }).map((_, i) => (
+				<Star
+					key={`star-${i}-${count}`}
+					className={cn(
+						"h-3 w-3 mx-0.5",
+						count >= 4 ? "text-yellow-400" :
+							count >= 3 ? "text-blue-400" :
+								count >= 2 ? "text-green-400" :
+									"text-gray-400"
+					)}
+					fill="currentColor"
+				/>
+			))}
+		</div>
+	);
 }
 
-// Función para calcular la "importancia" del lugar
-function getPlaceImportance(place: Place) {
-	const imageCount = place._count?.images || 0;
+// Determinar la rareza basada en las características del lugar
+function calculatePlaceRarity(place: Place): keyof typeof PLACE_RARITY {
+	// Determinar rareza basada en población y otros factores
 	const population = place.population || 0;
+	const hasLore = place.lore && place.lore.length > 100;
+	const hasHistory = place.history && place.history.length > 100;
+	const hasDangers = place.dangers && place.dangers !== 'empty_array' && place.dangers !== '[]';
+	const hasResources = place.resources && place.resources !== 'empty_array' && place.resources !== '[]';
 
-	// Valor base por población
-	let baseValue = 1;
-	if (population > 1000000) {
-		baseValue = 8;
-	} else if (population > 100000) {
-		baseValue = 6;
-	} else if (population > 10000) {
-		baseValue = 4;
-	} else if (population > 1000) {
-		baseValue = 2;
-	}
+	// Contar factores especiales
+	let specialFactors = 0;
+	if (hasLore) specialFactors++;
+	if (hasHistory) specialFactors++;
+	if (hasDangers) specialFactors++;
+	if (hasResources) specialFactors++;
 
-	// Recursos y peligros
-	const resources = place.resources ? JSON.parse(place.resources as string) : [];
-	const dangers = place.dangers ? JSON.parse(place.dangers as string) : [];
-
-	const resourceBonus = Math.min(2, Math.floor(resources.length / 2));
-	const dangerBonus = Math.min(2, Math.floor(dangers.length / 2));
-
-	// Bonus por cantidad de imágenes
-	const imageBonus = Math.min(1, Math.floor(imageCount / 3));
-
-	// Valor entre 1-12
-	return Math.max(1, Math.min(12, baseValue + resourceBonus + dangerBonus + imageBonus));
+	// Determinar rareza por población y factores especiales
+	if (population >= 1000000 && specialFactors >= 3) return 'mythic';
+	if (population >= 100000 && specialFactors >= 2) return 'legendary';
+	if (population >= 10000 || specialFactors >= 2) return 'rare';
+	if (population >= 1000 || specialFactors >= 1) return 'uncommon';
+	return 'common';
 }
 
-// Función para formatear población
-function formatPopulation(population: number | undefined) {
-	if (population === undefined || population === null) {
-		return '-';
-	}
-	if (population === 0) {
-		return '0';
-	}
+function generatePlaceRarityConfig(place: Place) {
+	const rarityKey = calculatePlaceRarity(place);
+	const rarity = PLACE_RARITY[rarityKey];
 
-	if (population >= 1000000) {
-		return `${(population / 1000000).toFixed(1)}M`;
-	}
-	if (population >= 1000) {
-		return `${(population / 1000).toFixed(1)}K`;
-	}
-	return population.toString();
+	return {
+		enabled: true,
+		rarity: rarityKey,
+		color: rarity.color,
+		borderColor: rarity.borderColor,
+		glowColor: rarity.glowColor,
+		borderStyle: 'solid',
+		borderWidth: 2,
+		frameType: 'standard',
+	};
 }
 
-export function PlaceCard({
-	place,
-	onEdit,
-	onDelete,
+// Obtener el icono del tipo de lugar
+function getPlaceTypeIcon(placeType = '') {
+	const typeIcons: Record<string, React.ReactNode> = {
+		city: <Building2 className="h-full w-full" />,
+		town: <Home className="h-full w-full" />,
+		village: <Building2 className="h-full w-full" />,
+		forest: <Palmtree className="h-full w-full" />,
+		mountain: <Mountain className="h-full w-full" />,
+		castle: <Landmark className="h-full w-full" />,
+		dungeon: <Swords className="h-full w-full" />,
+		temple: <Landmark className="h-full w-full" />,
+		ruin: <Building2 className="h-full w-full" />,
+		cave: <Mountain className="h-full w-full" />,
+		island: <MapPin className="h-full w-full" />,
+	};
+
+	return typeIcons[placeType.toLowerCase()] || <Map className="h-full w-full" />;
+}
+
+// COMPONENTE PRINCIPAL
+// ==============================
+export function PlaceCardLayout({
+	place: initialPlace,
+	options = {},
 	onClick,
-	className,
 	showVisualConfig = false,
-	visualOptions,
-	enableExplode = true,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
 }: PlaceCardProps) {
-	// Verificar si place existe y tiene las propiedades necesarias
-	if (!place) {
-		console.warn('PlaceCard: Se recibió un objeto place indefinido');
-		// Crear un place por defecto para evitar errores
-		place = {
-			id: 'placeholder',
-			name: 'Lugar sin nombre',
-			description: 'Sin descripción',
-			type: 'Unknown',
-			climate: 'temperate',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		} as Place;
-	}
+	// Adaptar el objeto place para asegurar compatibilidad
+	const place: ExtendedPlace = initialPlace ? {
+		...initialPlace,
+		presetId: initialPlace.presetId || null
+	} : {
+		id: 'placeholder',
+		name: 'Lugar sin nombre',
+		emoji: '📍',
+		color: '#3b82f6',
+		description: 'Sin descripción',
+		region: 'Desconocida',
+		type: 'Desconocido',
+		climate: 'Templado',
+		population: 0,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		presetId: null
+	};
 
 	// Usar el hook para obtener configuración de preset si existe
-	const { cardOptions, setCardOptions } = usePreset({
+	const { cardOptions } = usePreset({
 		entityType: 'place',
 		entityId: place.id,
 		presetId: place.presetId || null,
-		baseOptions: visualOptions,
+		baseOptions: options,
 	});
 
-	// Configurar las capas para el modo explode
-	const explodeLayers = [
-		{
-			id: 'background',
-			label: 'Fondo',
-			icon: <MapPin className="h-4 w-4" />,
-		},
-		{
-			id: 'content',
-			label: 'Contenido',
-			icon: <MapPin className="h-4 w-4" />,
-		},
-		{
-			id: 'frame',
-			label: 'Marco',
-			icon: <Globe className="h-4 w-4" />,
-		},
-	];
+	// Obtener la rareza del lugar
+	const rarityKey = calculatePlaceRarity(place);
+	const rarityInfo = PLACE_RARITY[rarityKey];
+	const rarityConfig = generatePlaceRarityConfig(place);
+	const rarityClass = `place-card-rarity-${rarityKey}`;
 
-	// Estado para la configuración visual
-	const [configOpen, setConfigOpen] = React.useState(false);
-	const [isExploded, setIsExploded] = React.useState(false);
-	const [activeLayer, setActiveLayer] = React.useState<string | null>(null);
-
-	// Crear un objeto compatible usando el patrón de adaptador
-	const {
-		enable3DEffect,
-		enableHolographicEffect,
-		enableScanlinesEffect,
-		enableGlowEffect,
-		enableBorderEffect,
-		enableGrainEffect,
-		designSystem,
-		holographicOptions,
-		glowOptions,
-		borderOptions,
-		grainOptions,
-		useImageGrid,
-		imageGridLayout,
-		imageGridGap,
-		imageGridStyle,
-		...restOptions
-	} = cardOptions;
-
-	// Crear un nuevo objeto compatible
-	const compatibleOptions = {
-		enable3DEffect,
-		enableHolographicEffect,
-		enableScanlinesEffect,
-		enableGlowEffect,
-		enableBorderEffect,
-		enableGrainEffect,
-		designSystem: designSystem
-			? {
-					...designSystem,
-					preset: designSystem.preset,
-				}
-			: undefined,
-		holographicOptions,
-		glowOptions,
-		borderOptions,
-		grainOptions,
-		useImageGrid,
-		imageGridLayout,
-		imageGridGap,
-		imageGridStyle,
-		...restOptions,
-	};
-
-	// Obtener datos de clima y configuración de rareza para el lugar
-	const climate = React.useMemo(() => getPlaceClimate(place), [place]);
-	const importance = React.useMemo(() => getPlaceImportance(place), [place]);
-
-	// Parsear datos JSON
-	const resources = React.useMemo(() => {
+	// Parsear recursos y peligros si están disponibles
+	const resources = useMemo(() => {
+		if (!place.resources || place.resources === 'empty_array') return [];
 		try {
-			return JSON.parse(place.resources || '[]');
+			return JSON.parse(place.resources);
 		} catch {
 			return [];
 		}
 	}, [place.resources]);
 
-	// Generar configuración de rareza basada en el clima
-	const rarityConfig: RarityConfig = {
-		name: climate.label.toLowerCase(),
-		color: climate.badgeClass.split('from-')[1].split(' ')[0],
-		borderWidth: 2,
-		borderEffect: importance > 8 ? 'animated' : 'static',
-		glowColor: importance > 8 ? climate.barClass.split('from-')[1].split(' ')[0] : undefined,
-	};
+	const dangers = useMemo(() => {
+		if (!place.dangers || place.dangers === 'empty_array') return [];
+		try {
+			return JSON.parse(place.dangers);
+		} catch {
+			return [];
+		}
+	}, [place.dangers]);
+
+	// Generar configuración avanzada basada en la rareza
+	const enhancedCardOptions = useMemo(() => {
+		// Valores por defecto
+		const defaults = DEFAULT_PLACE_OPTIONS;
+
+		// Ajustar intensidad de efectos según rareza
+		const intensity = rarityInfo.glowIntensity || 0.5;
+
+		// Habilitar efectos especiales para lugares legendarios y míticos
+		const isSpecial = rarityKey === 'legendary' || rarityKey === 'mythic';
+
+		// Crear opciones combinadas
+		return {
+			...defaults,
+			enableHolographicEffect: isSpecial,
+			enableScanlinesEffect: isSpecial,
+
+			// Configurar glows basados en rareza
+			glowOptions: {
+				...(defaults.glowOptions || {}),
+				intensity: intensity,
+				color: rarityInfo.glowColor,
+				size: 20 + (rarityInfo.stars * 2), // Más estrellas = más grande el glow
+				visibleOnIdle: rarityKey === 'mythic', // Solo visible por defecto en míticas
+				animationType: isSpecial ? 'pulse' : 'static',
+			},
+
+			// Configurar bordes animados
+			borderOptions: {
+				...(defaults.borderOptions || {}),
+				width: rarityInfo.stars * 0.5, // Más estrellas = borde más grueso
+				color: rarityInfo.borderColor,
+				pattern: isSpecial ? 'gradient' : 'solid',
+				animationType: rarityInfo.borderAnimation || 'none',
+				glowIntensity: intensity,
+			},
+
+			// Configurar texturas específicas
+			textureConfig: {
+				type: rarityInfo.textureType || 'noise',
+				intensity: rarityInfo.textureOpacity || 0.15,
+				scale: 1 + (rarityInfo.stars * 0.1), // Escala aumenta con rareza
+				blendMode: 'overlay',
+			},
+
+			// Configuración de rareza
+			rarityConfig,
+
+			// Efectos adicionales
+			effects: {
+				...(defaults.effects || {}),
+				chromaticAberration: {
+					enabled: isSpecial,
+					visibleOnHover: true,
+					intensity: rarityKey === 'mythic' ? 0.4 : 0.2,
+				},
+				noiseTexture: {
+					enabled: true,
+					visibleOnHover: !isSpecial, // Siempre visible en lugares especiales
+					intensity: rarityInfo.textureOpacity || 0.15,
+				},
+				glitchEffect: {
+					enabled: rarityKey === 'mythic',
+					visibleOnHover: true,
+					intensity: 0.3,
+					frequency: 0.1,
+				},
+			},
+		};
+	}, [rarityKey, rarityInfo, rarityConfig]);
+
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{ id: 'background', label: 'Fondo', icon: <Map className="h-4 w-4" /> },
+		{ id: 'frame', label: 'Marco', icon: <Shield className="h-4 w-4" /> },
+		{ id: 'portrait', label: 'Imagen', icon: <MapPin className="h-4 w-4" /> },
+		{ id: 'info', label: 'Información', icon: <Globe className="h-4 w-4" /> },
+		{ id: 'effects', label: 'Efectos', icon: <Star className="h-4 w-4" /> },
+	];
+
+	// Corregir la generación de placeMetadataItems para evitar elementos undefined
+	const placeMetadataItems = useMemo(() => {
+		const items: Array<{
+			label: string;
+			value: string;
+			icon: React.ReactNode;
+		}> = [];
+
+		if (place.type) {
+			items.push({
+				label: 'Tipo',
+				value: place.type,
+				icon: <MapPin className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		if (place.climate) {
+			items.push({
+				label: 'Clima',
+				value: place.climate,
+				icon: <Cloud className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		if (place.population) {
+			items.push({
+				label: 'Población',
+				value: place.population.toString(),
+				icon: <Users className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		return items;
+	}, [place.type, place.climate, place.population]);
+
+	// Formatear fecha
+	const formattedDate = useMemo(() => {
+		if (!place.createdAt) return '';
+
+		const date = typeof place.createdAt === 'string'
+			? new Date(place.createdAt)
+			: place.createdAt;
+
+		return date.toLocaleDateString();
+	}, [place.createdAt]);
 
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					onClose={() => setConfigOpen(false)}
-					options={cardOptions}
-					onOptionsChange={(newOptions) => {
-						setCardOptions((prev) => ({ ...prev, ...newOptions }));
-					}}
-					entityId={place.id}
-					entityType="place"
-				/>
-			)}
+		<div className={cn(
+			'place-card-container relative w-full h-full group',
+			rarityClass,
+			onClick && 'cursor-pointer',
+			className
+		)}>
+			<EntityCardWrapper
+				title={place.name}
+				description={place.description || ''}
+				entityId={place?.id ? String(place.id) : 'unknown'}
+				entityType="place"
+				className={cn('place-card-wrapper relative w-full h-full', rarityClass)}
+				options={adaptCardOptions(enhancedCardOptions)}
+				showVisualConfig={showVisualConfig}
+				onVisualConfigClick={onVisualConfigClick}
+				enableExplode={enableExplode}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
+				explodeLayers={explodeLayers}
+				onClick={onClick}
+			>
+				<div className="place-card-content flex flex-col h-full w-full relative">
+					{/* Cabecera con el emblema y nombre del lugar */}
+					<CardHeader
+						title={place.name}
+						entityType="place"
+						subtitle={place.region || 'Región desconocida'}
+						className="mb-2 relative z-10"
+						showIcon={false}
+						rightContent={
+							<RarityStars count={rarityInfo.stars} />
+						}
+					/>
 
-			<div className={cn('relative', className)}>
-				<EntityCardWrapper
-					className="place-card"
-					entityType="place"
-					options={compatibleOptions}
-					onClick={onClick}
-					showVisualizationConfig={showVisualConfig}
-					onVisualizationConfigClick={() => setConfigOpen(true)}
-					enableExplode={enableExplode}
-					explodeLayers={explodeLayers}
-					isExploded={isExploded}
-					activeLayer={activeLayer}
-					onExplodedChange={setIsExploded}
-					onActiveLayerChange={setActiveLayer}
-				>
-					{/* Estructura principal de la carta de lugar */}
-					<div className="place-card-content">
-						{/* Indicador de clima como círculo en esquina superior izquierda */}
-						<div className="absolute top-3 left-3 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-2 flex items-center justify-center z-10 shadow-lg overflow-hidden">
-							<div className={cn('absolute inset-0 opacity-70', climate.badgeClass)} />
-							{climate.icon}
+					{/* Place icon con emoji */}
+					<div className="flex items-center ml-3 -mt-1 mb-3">
+						<div className={cn(
+							"place-emoji flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 relative",
+							"text-xl bg-background shadow-md",
+							`border-${rarityKey === 'mythic' ? 'fuchsia' :
+								rarityKey === 'legendary' ? 'amber' :
+									rarityKey === 'rare' ? 'blue' :
+										rarityKey === 'uncommon' ? 'green' : 'gray'}-500`
+						)}>
+							{place.emoji || <MapPin className="h-5 w-5" />}
 						</div>
+					</div>
 
-						{/* Nombre del lugar en franja superior */}
-						<div className="relative px-3 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b border-border z-10">
-							<div className="flex items-center gap-1.5">
-								<MapPin className="h-4 w-4 text-primary" />
-								<h3 className="font-bold text-base leading-tight line-clamp-1">{place.name}</h3>
-								{place.isFavorite === true && <Star className="h-4 w-4 text-amber-400 ml-auto" />}
-							</div>
-							<div className="text-xs font-medium text-muted-foreground flex items-center mt-0.5">
-								<span>
-									{place.type || 'Lugar'} • {climate.label}
-								</span>
-							</div>
-						</div>
-
-						{/* Área de ilustración - Imagen destacada o icono */}
-						<div className="flex-1 relative">
-							{useImageGrid ? (
-								<ImageGrid
-									layout={imageGridLayout || 'single'}
-									gap={imageGridGap || 4}
-									style={imageGridStyle || 'standard'}
-									images={[
-										{
-											id: 'place-image',
-											path: place.featuredImage || '',
-											thumbnail: place.featuredImage || '',
-										},
-									]}
+					{/* Imagen o ilustración del lugar */}
+					<div className={cn(
+						"place-card-image relative h-28 mb-3 rounded overflow-hidden border",
+						`border-${rarityKey === 'mythic' ? 'fuchsia' :
+							rarityKey === 'legendary' ? 'amber' :
+								rarityKey === 'rare' ? 'blue' :
+									rarityKey === 'uncommon' ? 'green' : 'gray'}-500`,
+					)}>
+						{place.featuredImage ? (
+							<>
+								<Image
+									src={place.featuredImage}
+									alt={place.name}
+									fill
+									sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+									className="object-cover"
+									priority={false}
 								/>
-							) : (
-								<>
-									{place.featuredImage ? (
-										<div className="absolute inset-0">
-											<img src={place.featuredImage} alt={place.name} className="w-full h-full object-cover" />
-											<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-										</div>
-									) : (
-										<div
-											className={cn(
-												'h-full flex flex-col items-center justify-center',
-												'bg-gradient-to-b from-background to-muted/30'
-											)}
-										>
-											<div className="flex items-center justify-center p-4 rounded-full bg-muted/50">
-												<Globe className="w-16 h-16 text-primary/70" />
-											</div>
-											<div className="mt-3 px-4 text-center">
-												<p className="text-xs text-muted-foreground">
-													{place.description || 'Sin descripción disponible'}
-												</p>
-											</div>
-										</div>
-									)}
-								</>
-							)}
-
-							{/* Región como overlay */}
-							{place.region && (
-								<div className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs flex items-center gap-1 z-10">
-									<Globe className="h-3 w-3" />
-									<span>{place.region}</span>
-								</div>
-							)}
-						</div>
-
-						{/* Panel con recursos */}
-						<div className="text-xs border-t border-b border-border bg-background/80 backdrop-blur-sm py-1.5 px-3">
-							<div className="font-semibold mb-0.5 flex items-center text-[10px] uppercase tracking-wider text-muted-foreground">
-								Recursos
+								<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+							</>
+						) : (
+							<div className={cn(
+								"absolute inset-0 bg-gradient-to-br",
+								rarityKey === 'mythic' ? "from-fuchsia-500/20 to-purple-900/40" :
+									rarityKey === 'legendary' ? "from-amber-500/20 to-yellow-900/40" :
+										rarityKey === 'rare' ? "from-blue-500/20 to-blue-900/40" :
+											rarityKey === 'uncommon' ? "from-green-500/20 to-green-900/40" :
+												"from-gray-500/20 to-gray-900/40"
+							)}>
+								{/* Patrón decorativo según la rareza */}
+								<div className={cn(
+									"absolute inset-0 opacity-10 mix-blend-overlay",
+									rarityKey === 'mythic' || rarityKey === 'legendary' ? "bg-sparkle-pattern" : "bg-noise-pattern"
+								)} />
 							</div>
-							<div className="flex flex-wrap gap-1">
-								{resources.length > 0 ? (
-									resources.slice(0, 3).map((resource: string) => (
-										<span
-											key={`resource-${place.id}-${resource}`}
-											className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]"
-										>
-											{resource}
-										</span>
-									))
-								) : (
-									<span className="text-[10px] text-muted-foreground">Sin recursos disponibles</span>
-								)}
-								{resources.length > 3 && (
-									<span className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]">+{resources.length - 3} más</span>
-								)}
-							</div>
-						</div>
-
-						{/* Área de estadísticas inferior */}
-						<div className="bg-background/90 backdrop-blur-md p-3 flex flex-col gap-2">
-							{/* Estadísticas principales en grid */}
-							<div className="grid grid-cols-3 gap-3">
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{place._count?.images || 0}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<ImageIcon className="h-3 w-3" />
-										Imágenes
-									</div>
-								</div>
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{formatPopulation(place.population)}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<Users className="h-3 w-3" />
-										Población
-									</div>
-								</div>
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{place.government?.substring(0, 4) || '-'}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<Globe className="h-3 w-3" />
-										Gobierno
-									</div>
-								</div>
-							</div>
-
-							{/* Barra de importancia */}
-							<div className="mt-1 flex items-center justify-between">
-								<div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-									<div
-										className={cn('h-full rounded-full', climate.barClass)}
-										style={{ width: `${(importance / 12) * 100}%` }}
-									/>
-								</div>
-								<div className="ml-2 text-xs font-semibold">{importance}/12</div>
-							</div>
-						</div>
-
-						{/* Acciones - botones flotantes */}
-						{(onEdit || onDelete) && (
-							<motion.div
-								className="absolute bottom-2 right-2 flex gap-1 z-50"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: isExploded ? 1 : 0 }}
-								onHoverStart={() => setIsExploded(true)}
-								onHoverEnd={() => setIsExploded(false)}
-								onClick={(e: React.MouseEvent) => {
-									e.stopPropagation();
-								}}
-							>
-								{onEdit && (
-									<Button
-										variant="secondary"
-										size="icon"
-										className="h-8 w-8 shadow-md"
-										onClick={() => {
-											onEdit(place);
-										}}
-									>
-										<PencilIcon className="h-4 w-4" />
-									</Button>
-								)}
-								{onDelete && (
-									<Button
-										variant="secondary"
-										size="icon"
-										className="h-8 w-8 shadow-md text-destructive"
-										onClick={() => {
-											if (place.id) {
-												onDelete(place.id);
-											}
-										}}
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								)}
-							</motion.div>
 						)}
 
-						{/* Botón de explorar en hover */}
-						{onClick && (
-							<motion.div
-								className="absolute inset-0 flex items-center justify-center z-40"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: isExploded ? 1 : 0 }}
-								onHoverStart={() => setIsExploded(true)}
-								onHoverEnd={() => setIsExploded(false)}
-								onClick={(e: React.MouseEvent) => {
-									if ((e.target as HTMLElement).closest('button')) {
-										e.stopPropagation();
-									}
-								}}
-							>
-								<motion.div
-									className="bg-black/60 backdrop-blur-md rounded-full p-4 text-white shadow-lg"
-									initial={{ scale: 0.8 }}
-									animate={{ scale: 1 }}
-									transition={{ duration: 0.2 }}
-								>
-									<ArrowUpRight className="h-8 w-8" />
-								</motion.div>
-							</motion.div>
+						{/* Icono central o tipo de lugar si no hay imagen */}
+						{!place.featuredImage && (
+							<div className="absolute inset-0 flex items-center justify-center">
+								{getPlaceTypeIcon(place.type)}
+							</div>
 						)}
 					</div>
-				</EntityCardWrapper>
-			</div>
-		</>
+
+					{/* Características del lugar - usando CardMetadataSection */}
+					<CardMetadataSection
+						items={placeMetadataItems}
+						className="flex-grow relative p-1.5 bg-card/80 rounded border border-stone-800/30"
+					/>
+
+					{/* Recursos y peligros */}
+					{(resources.length > 0 || dangers.length > 0) && (
+						<div className="mt-2 p-1.5 bg-card/80 rounded border border-stone-800/30 text-xs">
+							{resources.length > 0 && (
+								<div className="flex flex-col gap-0.5 mb-1">
+									<div className="text-[10px] font-medium flex items-center">
+										<Scroll className="h-3 w-3 mr-1 opacity-70" />
+										Recursos:
+									</div>
+									<div className="flex flex-wrap gap-1">
+										{resources.slice(0, 3).map((resource: string, index: number) => (
+											<span
+												key={`resource-${index}`}
+												className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-200"
+											>
+												{resource}
+											</span>
+										))}
+										{resources.length > 3 && (
+											<span className="text-[9px] opacity-70">+{resources.length - 3}</span>
+										)}
+									</div>
+								</div>
+							)}
+
+							{dangers.length > 0 && (
+								<div className="flex flex-col gap-0.5">
+									<div className="text-[10px] font-medium flex items-center">
+										<Swords className="h-3 w-3 mr-1 opacity-70" />
+										Peligros:
+									</div>
+									<div className="flex flex-wrap gap-1">
+										{dangers.slice(0, 3).map((danger: string, index: number) => (
+											<span
+												key={`danger-${index}`}
+												className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-200"
+											>
+												{danger}
+											</span>
+										))}
+										{dangers.length > 3 && (
+											<span className="text-[9px] opacity-70">+{dangers.length - 3}</span>
+										)}
+									</div>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Pie de la tarjeta con sello de rareza */}
+					<CardFooter
+						className="mt-auto"
+						leftContent={
+							<div className={cn(
+								"place-rarity px-3 py-1 rounded-full text-[10px] font-medium",
+								rarityKey === 'mythic' ? "bg-fuchsia-500/20 text-fuchsia-200" :
+									rarityKey === 'legendary' ? "bg-amber-500/20 text-amber-200" :
+										rarityKey === 'rare' ? "bg-blue-500/20 text-blue-200" :
+											rarityKey === 'uncommon' ? "bg-green-500/20 text-green-200" :
+												"bg-gray-500/20 text-gray-200"
+							)}>
+								{PLACE_RARITY[rarityKey].label}
+							</div>
+						}
+						rightContent={
+							<div className="flex items-center gap-1">
+								<Calendar className="h-3 w-3 opacity-70" />
+								<span className="text-[10px] opacity-70">{formattedDate}</span>
+							</div>
+						}
+					/>
+				</div>
+			</EntityCardWrapper>
+		</div>
 	);
+}
+
+// Componente público para usar en la aplicación
+export function PlaceCard(props: PlaceCardProps) {
+	return <PlaceCardLayout {...props} />;
 }

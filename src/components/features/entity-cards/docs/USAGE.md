@@ -4,35 +4,55 @@
 
 El sistema Entity Cards proporciona una forma flexible y potente de mostrar diferentes tipos de entidades en formato de tarjeta con efectos visuales avanzados. Esta guía explica cómo utilizar el sistema en diferentes contextos.
 
+## Importación Correcta de Componentes
+
+Para usar correctamente los componentes de tarjetas, **debe importarlos desde el punto de entrada centralizado**:
+
+```tsx
+// CORRECTO: Importar desde el punto de entrada central
+import {
+	AlbumCard,
+	ConceptCard,
+	NoteCard,
+	TagCard,
+	PlaceCard,
+	// Otros componentes...
+	EntityCardWrapper,
+	adaptCardOptions,
+} from '@/components/features/entity-cards';
+
+// INCORRECTO: No importar directamente desde los archivos de implementación
+// import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card-layout';
+```
+
 ## Uso Básico
 
 ### 1. Renderizar una Tarjeta Simple
 
 ```tsx
-import { EntityCard } from '@/components/features/entity-cards/entity-card';
+import { AlbumCard } from '@/components/features/entity-cards';
 
 function MyComponent() {
-	const entity = {
+	const album = {
 		id: '123',
-		name: 'Mi Entidad',
-		description: 'Descripción de la entidad',
+		name: 'Mi Álbum',
+		description: 'Descripción del álbum',
 		// ... otros campos según el tipo de entidad
 	};
 
 	return (
-		<EntityCard
-			entityType="folder" // Tipo de entidad: folder, album, tag, etc.
-			entity={entity}
+		<AlbumCard
+			data={album}
 			onClick={() => console.log('Tarjeta clickeada')}
 		/>
 	);
 }
 ```
 
-### 2. Personalizar la Apariencia
+### 2. Personalizar la Apariencia con Compatibilidad de Tipos
 
 ```tsx
-import { EntityCardAdapter } from '@/components/features/entity-cards';
+import { AlbumCard, adaptCardOptions, CardOptions } from '@/components/features/entity-cards';
 
 function MyComponent() {
 	const album = {
@@ -42,20 +62,27 @@ function MyComponent() {
 	};
 
 	// Opciones personalizadas
-	const options = {
+	const customOptions: Partial<CardOptions> = {
 		designSystem: {
 			preset: 'modern',
 			cornerRadius: 12,
 			borderWidth: 2,
 		},
-		visualEffects: {
-			enableGlow: true,
-			glowIntensity: 0.7,
-			glowColor: 'primary',
-		},
+		glowOptions: {
+			intensity: 0.7,
+			color: '#3b82f6',
+			visibleOnHover: true,
+		}
 	};
 
-	return <EntityCardAdapter entityType="album" entity={album} options={options} />;
+	return (
+		<AlbumCard
+			data={album}
+			// Usar el adaptador para asegurar compatibilidad
+			options={adaptCardOptions(customOptions)}
+			onClick={() => console.log('Álbum clickeado')}
+		/>
+	);
 }
 ```
 
@@ -233,22 +260,22 @@ Para que las tarjetas se adapten al tamaño completo de su contenedor, asegúrat
 ```tsx
 // Contenedor padre con dimensiones definidas
 <div className="w-64 h-96">
-  <EntityCardAdapter
-    entityType="folder"
-    entity={folder}
-    // Las tarjetas ya incluyen w-full y h-full internamente
-  />
+	<EntityCardAdapter
+		entityType="folder"
+		entity={folder}
+		// Las tarjetas ya incluyen w-full y h-full internamente
+	/>
 </div>
 
 // Para contenedores flexibles
 <div className="grid grid-cols-3 gap-4 h-screen">
-  {folders.map(folder => (
-    <EntityCardAdapter
-      key={folder.id}
-      entityType="folder"
-      entity={folder}
-    />
-  ))}
+	{folders.map(folder => (
+		<EntityCardAdapter
+			key={folder.id}
+			entityType="folder"
+			entity={folder}
+		/>
+	))}
 </div>
 ```
 
