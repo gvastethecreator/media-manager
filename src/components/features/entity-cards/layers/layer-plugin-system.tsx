@@ -1,156 +1,195 @@
+/**
+ * 🔌 Sistema de plugins para capas visuales
+ * @module LayerPluginSystem
+ */
+
 'use client';
 
-import type * as React from 'react';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import type { LayerConfigResponse } from '../types/card-layer-types';
+import type { BaseLayerConfig } from './types';
 
-// Tipo base para la configuración de una capa
-export interface BaseLayerConfig {
-	enabled: boolean;
-	layerIndex: number;
-	[key: string]: unknown;
-}
-
-// Interfaz para el componente de capa
-export interface LayerComponent<T extends BaseLayerConfig = BaseLayerConfig> {
+interface LayerRegistration<T extends BaseLayerConfig = BaseLayerConfig> {
 	type: string;
-	Component: React.ComponentType<LayerComponentProps<T>>;
+	name: string;
+	description?: string;
+	component: React.ComponentType<any>;
+	settings?: React.ComponentType<{
+		config: T;
+		onConfigChange: (config: Partial<T>) => void;
+	}>;
 	defaultConfig: T;
-	SettingsComponent?: React.ComponentType<LayerSettingsProps<T>>;
-	getServerActions?: () => {
-		getConfig: (entityType: string, entityId?: string) => Promise<LayerConfigResponse<T>>;
-		updateConfig: (entityType: string, config: T, entityId?: string) => Promise<LayerConfigResponse<T>>;
-		deleteConfig: (entityType: string, entityId?: string) => Promise<LayerConfigResponse<unknown>>;
-	};
+	icon?: string;
 }
 
-// Props comunes para todos los componentes de capa
-export interface LayerComponentProps<T extends BaseLayerConfig = BaseLayerConfig> {
-	isExploded: boolean;
-	isHovered: boolean;
-	mousePosition: { x: number; y: number };
-	activeLayer: string | null;
-	getExplodeLayerTransform: (index: number) => React.CSSProperties;
-	config: T;
-	entityType: string;
-	entityId?: string;
-}
-
-// Props para componentes de configuración
-export interface LayerSettingsProps<T extends BaseLayerConfig = BaseLayerConfig> {
-	entityType: string;
-	entityId?: string;
-	className?: string;
-	config?: T;
-	onConfigUpdate?: (config: Partial<T>) => void;
-}
-
-// Interfaz extendida para componentes que usan el sistema legacy
-export interface LegacyLayerComponentProps {
-	config: BaseLayerConfig;
-	context: Record<string, unknown>;
-}
-
-// Componente con tipo para componentes legacy
-type LegacyLayerComponent = {
-	type: string;
-	Component: React.ComponentType<LegacyLayerComponentProps>;
-	defaultConfig: BaseLayerConfig;
-	usesLegacyInterface?: boolean;
-};
-
-// Contexto para el sistema de capas
 interface LayerPluginContextType {
-	registerLayer: (layer: LayerComponent) => void;
-	unregisterLayer: (layerType: string) => void;
-	clearLayers: () => void;
-	getLayer: (layerType: string) => LayerComponent | undefined;
-	getLayers: () => LayerComponent[];
-	getOrderedLayers: () => LayerComponent[];
+	layers: Map<string, LayerRegistration>;
+	registerLayer: (layer: LayerRegistration) => void;
+	unregisterLayer: (type: string) => void;
+	getLayer: (type: string) => LayerRegistration | undefined;
+	activeLayer: string | null;
+	setActiveLayer: (type: string | null) => void;
 }
 
-const LayerPluginContext = createContext<LayerPluginContextType | undefined>(undefined);
+const LayerPluginContext = React.createContext<LayerPluginContextType | null>(null);
 
-export function LayerPluginProvider({ children }: { children: React.ReactNode }) {
-	const [layers, setLayers] = useState<Record<string, LayerComponent>>({});
+/**
+ * 🎨 Proveedor del sistema de plugins de capas
+ */
+export function LayerPluginProvider({
+	children,
+}: {
+	children: React.ReactNode;
+}): React.ReactElement {
+	// Estado para almacenar las capas registradas
+	const [layers, setLayers] = React.useState<Map<string, LayerRegistration>>(
+		new Map()
+	);
 
-	// Registrar una nueva capa
-	const registerLayer = useCallback((layer: LayerComponent) => {
-		setLayers((prev) => {
-			// Si la capa ya está registrada, no hacer nada
-			if (prev[layer.type]) {
-				return prev;
-			}
-			// Si no, añadirla
-			return {
-				...prev,
-				[layer.type]: layer,
-			};
-		});
-	}, []);
+	// Estado para la capa activa
+	const [activeLayer, setActiveLayer] = React.useState<string | null>(null);
 
-	// Eliminar una capa
-	const unregisterLayer = useCallback((layerType: string) => {
-		setLayers((prev) => {
-			const newLayers = { ...prev };
-			delete newLayers[layerType];
+	// Función para registrar una nueva capa
+	const registerLayer = React.useCallback((layer: LayerRegistration) => {
+		setLayers(current => {
+			const newLayers = new Map(current);
+			newLayers.set(layer.type, layer);
 			return newLayers;
 		});
+		console.log(`✅ Capa registrada: ${layer.name} (${layer.type})`);
 	}, []);
 
-	// Limpiar todas las capas
-	const clearLayers = useCallback(() => {
-		setLayers(prevLayers => {
-			// Solo actualizar si realmente hay capas para limpiar
-			if (Object.keys(prevLayers).length > 0) {
-				return {};
-			}
-			// Si no hay capas, devolver el mismo objeto para evitar re-renderizados
-			return prevLayers;
+	// Función para eliminar una capa
+	const unregisterLayer = React.useCallback((type: string) => {
+		setLayers(current => {
+			const newLayers = new Map(current);
+			newLayers.delete(type);
+			return newLayers;
 		});
+		console.log(`🗑️ Capa eliminada: ${type}`);
 	}, []);
 
-	// Obtener una capa específica
-	const getLayer = useCallback(
-		(layerType: string) => {
-			return layers[layerType];
-		},
-		[layers]
-	);
-
-	// Obtener todas las capas
-	const getLayers = useCallback(() => {
-		return Object.values(layers);
+	// Función para obtener una capa
+	const getLayer = React.useCallback((type: string) => {
+		return layers.get(type);
 	}, [layers]);
 
-	// Obtener capas ordenadas por índice
-	const getOrderedLayers = useCallback(() => {
-		return Object.values(layers).sort((a, b) => a.defaultConfig.layerIndex - b.defaultConfig.layerIndex);
-	}, [layers]);
+	// Valor del contexto
+	const value = React.useMemo(() => ({
+		layers,
+		registerLayer,
+		unregisterLayer,
+		getLayer,
+		activeLayer,
+		setActiveLayer,
+	}), [layers, registerLayer, unregisterLayer, getLayer, activeLayer]);
 
-	const contextValue = useMemo(
-		() => ({
-			registerLayer,
-			unregisterLayer,
-			clearLayers,
-			getLayer,
-			getLayers,
-			getOrderedLayers,
-		}),
-		[registerLayer, unregisterLayer, clearLayers, getLayer, getLayers, getOrderedLayers]
+	return (
+		<LayerPluginContext.Provider value={value}>
+			{children}
+		</LayerPluginContext.Provider>
 	);
-
-	return <LayerPluginContext.Provider value={contextValue}>{children}</LayerPluginContext.Provider>;
 }
 
-// Hook para utilizar el contexto de capas
-export function useLayerPlugin() {
-	const context = useContext(LayerPluginContext);
+/**
+ * 🎯 Hook para acceder al sistema de plugins de capas
+ */
+export function useLayerPlugin(): LayerPluginContextType {
+	const context = React.useContext(LayerPluginContext);
 	if (!context) {
-		throw new Error('useLayerPlugin debe ser usado dentro de un LayerPluginProvider');
+		throw new Error('useLayerPlugin debe usarse dentro de un LayerPluginProvider');
 	}
 	return context;
+}
+
+/**
+ * 🎨 Componente para renderizar una capa
+ */
+export function LayerRenderer<T extends BaseLayerConfig>({
+	type,
+	config,
+	...props
+}: {
+	type: string;
+	config: T;
+} & Omit<React.ComponentProps<any>, 'config'>): React.ReactElement | null {
+	const { getLayer } = useLayerPlugin();
+	const layer = getLayer(type);
+
+	if (!layer) {
+		console.warn(`⚠️ Capa no encontrada: ${type}`);
+		return null;
+	}
+
+	const { component: Component, defaultConfig } = layer;
+
+	return (
+		<Component
+			{...props}
+			config={config}
+			defaultConfig={defaultConfig}
+		/>
+	);
+}
+
+/**
+ * 🎛️ Componente para renderizar la configuración de una capa
+ */
+export function LayerSettings<T extends BaseLayerConfig>({
+	type,
+	config,
+	onConfigChange,
+}: {
+	type: string;
+	config: T;
+	onConfigChange: (config: Partial<T>) => void;
+}): React.ReactElement | null {
+	const { getLayer } = useLayerPlugin();
+	const layer = getLayer(type);
+
+	if (!layer || !layer.settings) {
+		return null;
+	}
+
+	const Settings = layer.settings;
+
+	return (
+		<Settings
+			config={config}
+			onConfigChange={onConfigChange}
+		/>
+	);
+}
+
+/**
+ * 📋 Componente para listar las capas disponibles
+ */
+export function LayerList({
+	onSelect,
+	selectedType,
+}: {
+	onSelect: (type: string) => void;
+	selectedType?: string;
+}): React.ReactElement {
+	const { layers } = useLayerPlugin();
+
+	return (
+		<div className="space-y-2">
+			{Array.from(layers.values()).map(layer => (
+				<button
+					key={layer.type}
+					onClick={() => onSelect(layer.type)}
+					className={`flex items-center gap-2 p-2 w-full rounded ${selectedType === layer.type
+							? 'bg-primary text-primary-foreground'
+							: 'hover:bg-accent'
+						}`}
+				>
+					{layer.icon && <span>{layer.icon}</span>}
+					<span>{layer.name}</span>
+				</button>
+			))}
+		</div>
+	);
 }
 
 // Componente para renderizar todas las capas ordenadas
@@ -175,103 +214,31 @@ export function LayerRenderer({
 	configs?: Record<string, BaseLayerConfig>;
 	context?: Record<string, unknown>;
 }) {
-	const { getOrderedLayers } = useLayerPlugin();
-	const orderedLayers = getOrderedLayers();
+	const { getLayer } = useLayerPlugin();
+	const layer = getLayer(entityType);
 
-	// Combinar contexto con otras propiedades para compatibilidad con ambas implementaciones
-	const combinedContext = {
-		...context,
-		isExploded,
-		isHovered,
-		mousePosition,
-		activeLayer,
-		entityType,
-		entityId,
-	};
-
-	// Verificar que haya capas para renderizar
-	if (!orderedLayers || orderedLayers.length === 0) {
-		console.log('ℹ️ No hay capas disponibles para renderizar');
+	if (!layer) {
+		console.warn(`⚠️ Capa no encontrada: ${entityType}`);
 		return null;
 	}
 
-	// Antes de renderizar, filtrar las capas inválidas
-	const validLayers = orderedLayers.filter(layer => {
-		if (!layer) {
-			console.warn('⚠️ Se encontró una capa indefinida');
-			return false;
-		}
-
-		if (!layer.Component) {
-			console.error(`❌ La capa ${layer?.type || 'desconocida'} no tiene un componente válido.`);
-			return false;
-		}
-
-		return true;
-	});
+	const { component: Component, defaultConfig } = layer;
 
 	return (
-		<>
-			{validLayers.map((layer) => {
-				// Este punto ya debería ser seguro, pero añadimos una verificación adicional
-				if (!layer || !layer.Component) {
-					return null;
-				}
-
-				const LayerComp = layer.Component;
-				const config = configs[layer.type] || layer.defaultConfig;
-
-				if (!config.enabled) {
-					return null;
-				}
-
-				// Agregar manejo de errores para cada capa individual
-				try {
-					// Verificar si el componente espera la interfaz antigua o nueva
-					// Si el componente tiene una propiedad 'usesLegacyInterface', usar el contexto combinado
-					if ((layer as { usesLegacyInterface?: boolean }).usesLegacyInterface) {
-						// Primero convertimos a unknown y luego al tipo esperado
-						const LegacyComp = (layer.Component as unknown) as React.ComponentType<LegacyLayerComponentProps>;
-						return (
-							<ErrorBoundary
-								key={`layer-${layer.type}`}
-								fallback={<div className="layer-error" data-error-layer={layer.type} />}
-								onError={(error) => console.error(`Error en capa ${layer.type}:`, error)}
-							>
-								<LegacyComp
-									key={`layer-${layer.type}`}
-									config={config}
-									context={combinedContext}
-								/>
-							</ErrorBoundary>
-						);
-					}
-
-					// De lo contrario, usar la interfaz estándar
-					return (
-						<ErrorBoundary
-							key={`layer-${layer.type}`}
-							fallback={<div className="layer-error" data-error-layer={layer.type} />}
-							onError={(error) => console.error(`Error en capa ${layer.type}:`, error)}
-						>
-							<LayerComp
-								key={`layer-${layer.type}`}
-								isExploded={isExploded}
-								isHovered={isHovered}
-								mousePosition={mousePosition}
-								activeLayer={activeLayer}
-								getExplodeLayerTransform={getExplodeLayerTransform}
-								config={config}
-								entityType={entityType}
-								entityId={entityId}
-							/>
-						</ErrorBoundary>
-					);
-				} catch (err) {
-					console.error(`Error renderizando capa ${layer.type}:`, err);
-					return <div key={`layer-error-${layer.type}`} className="layer-error" data-error-layer={layer.type} />;
-				}
-			})}
-		</>
+		<ErrorBoundary
+			fallback={<div className="layer-error" data-error-layer={entityType} />}
+			onError={(error) => console.error(`Error en capa ${entityType}:`, error)}
+		>
+			<Component
+				isExploded={isExploded}
+				isHovered={isHovered}
+				mousePosition={mousePosition}
+				activeLayer={activeLayer}
+				getExplodeLayerTransform={getExplodeLayerTransform}
+				config={configs[entityType] || defaultConfig}
+				entityType={entityType}
+				entityId={entityId}
+			/>
+		</ErrorBoundary>
 	);
 }

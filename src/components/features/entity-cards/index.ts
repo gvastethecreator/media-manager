@@ -41,7 +41,7 @@ export {
 export * from './utils/card-utils';
 
 // Re-exportar tipos principales
-export { type CardPreset } from './types/unified-card-types';
+export type { CardPreset } from './types/unified-card-types';
 
 // Alias para entradas específicas por tipo para facilitar su uso
 export { AlbumCardLayout as AlbumCard } from './layouts/album-card-layout';

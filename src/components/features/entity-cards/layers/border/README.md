@@ -1,218 +1,131 @@
-# Border Layer (Capa de Borde)
+# 🔲 Border Layer
 
-## 📝 Descripción
-La capa de borde proporciona bordes personalizables para Entity Cards, permitiendo definir estilos, colores, animaciones y efectos visuales para los contornos de las tarjetas. Esta implementación ha sido optimizada para rendimiento y reactividad.
+Esta capa añade un borde personalizable a las tarjetas de entidad, con múltiples estilos y efectos visuales.
 
-## 🔧 Configuración
+## 📁 Estructura del Directorio
+
+```typescript
+src/components/features/entity-cards/layers/border/
+├── actions/
+│   └── border-config.action.ts     // Acciones y tipos de configuración
+├── components/
+│   ├── border-layer.tsx           // Componente principal
+│   └── border-settings.tsx        // Panel de configuración
+├── hooks/
+│   └── use-border.ts             // Lógica de renderizado
+├── border-implementation.tsx     // Implementación y presets
+├── index.ts                     // Exportaciones
+└── README.md                    // Documentación
+```
+
+## 🔄 Flujo de Datos
+
+```mermaid
+graph TD
+    A[BorderLayer] --> B[useBorder]
+    B --> C[Style Application]
+    B --> D[Effect Rendering]
+
+    E[BorderSettings] --> F[Config Changes]
+    F --> A
+
+    G[Implementation] --> H[Presets]
+    H --> E
+
+    style A fill:#d4f1f9
+    style B fill:#ffecb3
+    style C fill:#e1bee7
+    style D fill:#c8e6c9
+```
+
+## ⚙️ Configuración
+
+La interfaz `BorderConfig` incluye las siguientes propiedades:
 
 ```typescript
 interface BorderConfig {
-    enabled: boolean;            // Habilitar/deshabilitar la capa
-    layerIndex: number;          // Posición en el stack de capas
-    width: number;               // Ancho del borde en píxeles (0-20)
-    style: 'solid' | 'dashed' | 'dotted' | 'double';  // Estilo del borde
-    color: string;               // Color del borde (hex, rgba, etc.)
-    radius?: number;             // Radio de las esquinas en píxeles (0-50)
-    animated?: boolean;          // Si el borde tiene animación
-    animationType?: 'none' | 'pulse' | 'flow' | 'rainbow';  // Tipo de animación
-    animationSpeed?: number;     // Velocidad de la animación (0.1-5)
-    glowAmount?: number;         // Intensidad del brillo del borde (0-50)
-    opacity?: number;            // Opacidad del borde (0-1)
-    gradient?: string[];         // Colores para gradiente (mínimo 2)
-    dashPattern?: number[];      // Patrón para bordes discontinuos
-    cornerStyle?: 'round' | 'bevel' | 'miter';  // Estilo de las esquinas
-    borderImage?: string;        // URL de imagen para borde
+  enabled: boolean;           // Activar/desactivar el borde
+  visibleOnHover: boolean;   // Mostrar solo en hover
+  layerIndex: number;        // Orden de la capa
+  opacity: number;           // Opacidad del borde
+  color: string;            // Color del borde
+  width: number;           // Ancho del borde
+  style: string;          // Estilo del borde (solid, dashed, etc.)
+  radius: number;        // Radio de las esquinas
+  blendMode: string;    // Modo de mezcla
+  glow: boolean;       // Activar efecto de brillo
+  glowColor: string;  // Color del brillo
+  glowRadius: number; // Radio del brillo
+  gradient: boolean;  // Activar gradiente
+  gradientAngle: number;    // Ángulo del gradiente
+  gradientColors: string[]; // Colores del gradiente
 }
 ```
 
 ## 🎨 Características Principales
 
-1. **Estilos de Borde**
-   - Sólido: Borde continuo
-   - Discontinuo: Líneas discontinuas
-   - Punteado: Puntos equiespaciados
-   - Doble: Borde con doble línea
+1. **Estilos Personalizables**: Múltiples estilos de borde (sólido, punteado, etc.)
+2. **Efectos Visuales**: Soporte para brillo y gradientes
+3. **Modos de Mezcla**: Integración con diferentes modos de mezcla
+4. **Presets**: Configuraciones predefinidas para efectos comunes
+5. **Responsive**: Se adapta automáticamente al tamaño de la tarjeta
 
-2. **Efectos Visuales**
-   - Glow: Efecto de brillo alrededor del borde
-   - Gradient: Degradado de colores
-   - Opacity: Control de transparencia
-   - Esquinas configurables
+## 📝 Ejemplos de Uso
 
-3. **Animaciones**
-   - Pulse: Efecto de pulsación
-   - Flow: Flujo de color
-   - Rainbow: Ciclo de colores del arcoíris
-
-## ⚡ Optimizaciones de Rendimiento
-
-1. **Memoización**
-   - Componentes envueltos en React.memo
-   - Estilos calculados memoizados
-   - Configuración y props memoizadas
-
-2. **Gestión de Recursos**
-   - Limpieza de efectos y listeners
-   - Optimización de rerenderings
-   - Validación eficiente de configuración
-
-3. **Animaciones**
-   - Uso de GPU acceleration
-   - Throttling de animaciones
-   - Optimización de transiciones
-
-## 🚀 Uso
-
-```typescript
-import { borderLayerImplementation } from './border';
-
-// Configuración básica
-const basicConfig = {
+```tsx
+// Uso básico
+<BorderLayer
+  config={{
     enabled: true,
-    layerIndex: 2,
+    color: '#ffffff',
+    width: 2,
+    style: 'solid'
+  }}
+  isHovered={false}
+  isExploded={false}
+/>
+
+// Con preset
+<BorderLayer
+  config={borderImplementation.presets[0].config}
+  isHovered={true}
+  isExploded={false}
+/>
+
+// Con efectos avanzados
+<BorderLayer
+  config={{
+    enabled: true,
+    color: '#00ff00',
     width: 2,
     style: 'solid',
-    color: '#3B82F6',
-    radius: 8
-};
-
-// Configuración con animación
-const animatedConfig = {
-    enabled: true,
-    layerIndex: 2,
-    width: 3,
-    style: 'solid',
-    color: '#3B82F6',
-    radius: 12,
-    animated: true,
-    animationType: 'pulse',
-    animationSpeed: 1.5,
-    glowAmount: 5
-};
-
-// Uso en EntityCard
-<EntityCard
-    layerConfigs={{
-        border: basicConfig
-    }}
+    glow: true,
+    glowColor: '#00ff00',
+    glowRadius: 15,
+    gradient: true,
+    gradientColors: ['#ff0000', '#00ff00', '#0000ff']
+  }}
+  isHovered={true}
+  isExploded={false}
 />
 ```
 
-## 🔄 Integración con otras capas
+## 🔧 Optimizaciones
 
-La capa de borde trabaja en conjunto con:
-- Container Layer
-- Content Layer
-- Image Layer
-- Glow Layer
-- Holographic Layer
+1. **Memoización**: Uso de `useMemo` para cálculos costosos
+2. **Style Caching**: Cacheo de estilos para mejor rendimiento
+3. **Conditional Rendering**: Renderizado condicional para optimizar recursos
 
-## ⚠️ Validaciones y Restricciones
+## 🤝 Integración con Otros Sistemas
 
-1. **Validaciones de Configuración**
-   ```typescript
-   // Ejemplo de validaciones implementadas
-   if (width < 0 || width > 20) {
-       throw new Error('El ancho del borde debe estar entre 0 y 20px');
-   }
-   if (radius < 0 || radius > 50) {
-       throw new Error('El radio de las esquinas debe estar entre 0 y 50px');
-   }
-   if (opacity < 0 || opacity > 1) {
-       throw new Error('La opacidad debe estar entre 0 y 1');
-   }
-   ```
+- Compatible con el sistema de capas de la tarjeta
+- Interactúa con el sistema de explosión de capas
+- Se integra con el sistema de configuración global
 
-2. **Restricciones de Rendimiento**
-   - Límites en el número de gradientes
-   - Control de animaciones simultáneas
-   - Optimización de efectos visuales
+## 📈 Planes Futuros
 
-## 📊 Diagrama de Flujo
-
-```mermaid
-graph TD
-    A[Border Layer] --> B{Está habilitado?}
-    B -->|No| C[No renderizar]
-    B -->|Sí| D[Validar configuración]
-
-    D -->|Válida| E[Generar estilos]
-    D -->|Inválida| F[Usar config por defecto]
-
-    E --> G{Tiene animación?}
-    G -->|Sí| H[Aplicar clases de animación]
-    G -->|No| I[Renderizar borde estático]
-
-    H --> J[Optimizar rendimiento]
-    I --> J
-
-    J --> K[Renderizar componente]
-
-    style A fill:#d4f1f9
-    style D fill:#ffecb3
-    style G fill:#e1bee7
-    style K fill:#c8e6c9
-```
-
-## 🔍 Notas de Implementación
-
-1. **Gestión de Estado**
-   - Uso de React.memo para optimización
-   - Memoización de cálculos costosos
-   - Validación eficiente de props
-
-2. **Optimizaciones**
-   - Cálculo eficiente de estilos
-   - Reutilización de valores memoizados
-   - Minimización de rerenderings
-
-3. **Mantenimiento**
-   - Tests unitarios completos
-   - Documentación actualizada
-   - Código modular y limpio
-
-## 🎯 Ejemplos Avanzados
-
-### Borde con Gradiente Animado
-```typescript
-const gradientConfig = {
-    enabled: true,
-    width: 3,
-    style: 'solid',
-    radius: 12,
-    gradient: ['#3B82F6', '#8B5CF6', '#EC4899'],
-    animated: true,
-    animationType: 'flow',
-    animationSpeed: 1.2
-};
-```
-
-### Borde con Efecto Glow
-```typescript
-const glowConfig = {
-    enabled: true,
-    width: 4,
-    style: 'solid',
-    color: '#3B82F6',
-    radius: 10,
-    glowAmount: 8,
-    opacity: 0.9
-};
-```
-
-## 📝 Mejoras Futuras
-
-1. **Rendimiento**
-   - Implementar Web Workers para cálculos complejos
-   - Optimizar más las animaciones
-   - Mejorar la gestión de memoria
-
-2. **Funcionalidades**
-   - Soporte para patrones SVG
-   - Más tipos de animaciones
-   - Efectos 3D avanzados
-
-3. **Accesibilidad**
-   - Mejorar soporte para temas
-   - Opciones de alto contraste
-   - Reducción de movimiento
+1. Añadir más estilos de borde personalizados
+2. Implementar animaciones de borde
+3. Mejorar el rendimiento en dispositivos móviles
+4. Añadir más presets personalizados
+5. Implementar patrones de borde personalizados

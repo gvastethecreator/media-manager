@@ -179,4 +179,8 @@ export const imageLayerImplementation: LayerImplementation = {
 };
 
 // Exportar tipos y componentes
+export { useImageStore } from './actions/image-config.action';
+export { ImageConfig } from './components/image-config';
+export { ImageLayer } from './components/image-layer';
 export * from './image-layer-implementation';
+

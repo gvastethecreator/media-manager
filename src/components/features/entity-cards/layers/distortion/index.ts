@@ -16,3 +16,7 @@ export * from './distortion-effects-panel';
 export * from './types';
 export * from './use-distortion-effects';
 
+export { useDistortionStore } from './actions/distortion-config.action';
+export { DistortionConfig } from './components/distortion-config';
+export { DistortionLayer } from './components/distortion-layer';
+

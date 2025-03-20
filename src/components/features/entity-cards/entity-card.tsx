@@ -1,230 +1,225 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
-import type { CardOptions } from './types/unified-card-types';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { effectsStore, EFFECT_MODULES } from './store/effects-store';
+import type { EntityBasicInfo } from './types/unified-types';
 
-// Definir un tipo simplificado de CardOptions
-export interface EntityCardOptions {
-	designSystem?: {
-		preset?: string;
-		cornerRadius?: number;
-		borderWidth?: number;
-		shadowStyle?: string;
-	};
-	primaryColor?: string;
-	secondaryColor?: string;
-	// Añadir opciones para efectos visuales
-	enable3DEffect?: boolean;
-	enableHolographicEffect?: boolean;
-	enableGlowEffect?: boolean;
-	enableScanlines?: boolean;
-	enableAnimatedBorder?: boolean;
-	enableGrainEffect?: boolean;
-}
-
-export interface BaseCardProps {
-	children: React.ReactNode;
-	className?: string;
-	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-
-// Componente base simplificado
-export function BaseCard({
-	children,
-	className,
-	onClick,
-}: BaseCardProps) {
-	return (
-		<button
-			tabIndex={0}
-			type="button"
-			className={cn(
-				'relative w-full h-full bg-background border border-border overflow-hidden rounded-lg transition-all duration-200',
-				className,
-				onClick ? 'cursor-pointer' : 'cursor-default'
-			)}
-			onClick={onClick}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter' || e.key === ' ') {
-					e.preventDefault();
-					if (onClick) {
-						// Crear un evento sintético de clic
-						const syntheticEvent = {
-							currentTarget: e.currentTarget,
-							preventDefault: () => { },
-							stopPropagation: () => { },
-						} as React.MouseEvent<HTMLButtonElement>;
-						onClick(syntheticEvent);
-					}
-				}
-			}}
-		>
-			{children}
-		</button>
-	);
-}
-
-// Propiedades para el EntityCard simplificado
-export interface EntityCardProps {
-	title: string;
-	description?: string;
-	image?: string;
-	options?: Partial<CardOptions>;
-	className?: string;
-	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-	children?: React.ReactNode;
+export interface EntityCardProps extends EntityBasicInfo {
+  className?: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  children?: React.ReactNode;
+  debug?: boolean;
 }
 
 /**
- * Tarjeta de entidad básica
- * Esta versión es la más simple y debería tener el mejor rendimiento
+ * Tarjeta de entidad básica en formato portrait
+ * Esta versión es la más simple y mantiene solo la funcionalidad core
+ * Optimizada para trabajar con el almacén centralizado de efectos
  */
 export function EntityCard({
-	title,
-	description,
-	image,
-	options = {},
-	className,
-	onClick,
-	children,
+  id,
+  title,
+  description,
+  image,
+  metadata,
+  className,
+  onClick,
+  children,
+  debug = false,
 }: EntityCardProps) {
-	// Contador de renderizados para depuración
-	const [renderCount, setRenderCount] = useState(0);
-	// Estado para controlar errores
-	const [hasError, setHasError] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
+  const [debugState, setDebugState] = useState({
+    visualEnabled: false,
+    advancedEnabled: false,
+    effects: effectsStore.getEffects()
+  });
 
-	// Incrementar contador de renderizados en desarrollo
-	useEffect(() => {
-		if (process.env.NODE_ENV === 'development') {
-			setRenderCount(prev => prev + 1);
-		}
-	}, []);
+  // Efecto para sincronizar el estado con el store cuando está en modo debug
+  useEffect(() => {
+    if (debug && process.env.NODE_ENV === 'development') {
+      // Función para actualizar el estado desde el store
+      const updateDebugState = () => {
+        setDebugState({
+          visualEnabled: effectsStore.isModuleEnabled(EFFECT_MODULES.VISUAL),
+          advancedEnabled: effectsStore.isModuleEnabled(EFFECT_MODULES.ADVANCED),
+          effects: effectsStore.getEffects()
+        });
+      };
 
-	// Verificar y registrar opciones y rendimiento en desarrollo
-	useEffect(() => {
-		if (process.env.NODE_ENV === 'development') {
-			// Crear un grupo para la información de depuración
-			console.group(`🎴 EntityCard: ${title}`);
-			console.info('🔄 Renderizado:', renderCount);
+      // Estado inicial
+      updateDebugState();
 
-			// Verificar opciones avanzadas
-			const advancedOptions = options && Object.entries(options)
-				.filter(([key, value]) => key.startsWith('enable') && Boolean(value))
-				.map(([key]) => key);
+      // Suscripción a cambios usando el sistema de suscripción del store
+      const unsubscribe = effectsStore.subscribe(updateDebugState);
+      
+      return () => unsubscribe();
+    }
+  }, [debug]);
 
-			if (advancedOptions && advancedOptions.length > 0) {
-				console.warn('⚠️ Se han detectado opciones avanzadas en modo simple:', advancedOptions);
-				console.info('💡 Estas opciones solo funcionan en modo complex o skeleton');
-			}
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      // Creamos un evento sintético que contenga la información relevante
+      const syntheticEvent = {
+        currentTarget: e.currentTarget,
+        target: e.target,
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      } as React.MouseEvent<HTMLButtonElement>;
+      
+      onClick(syntheticEvent);
+    }
+  }, [onClick]);
 
-			console.groupEnd();
-		}
-	}, [options, renderCount, title]);
+  // Aplicar efectos visuales si están habilitados
+  const effectClasses = useMemo(() => {
+    if (!debug || !debugState.visualEnabled) return '';
+    
+    const { visual } = debugState.effects;
+    if (!visual) return '';
 
-	// Manejador de errores
-	const handleError = (error: unknown) => {
-		setHasError(true);
-		setErrorMessage(error instanceof Error ? error.message : 'Error desconocido');
-		if (process.env.NODE_ENV === 'development') {
-			console.error('❌ Error en EntityCard:', error);
-		}
-	};
+    const classes = [];
 
-	// Renderizar la tarjeta con manejo de errores
-	try {
-		// Obtener la información de diseño
-		const designSystem = options?.designSystem || {
-			preset: 'default',
-			cornerRadius: 8,
-			borderWidth: 1,
-		};
+    if (visual.holographic?.enabled) {
+      classes.push('card-effect-holographic');
+    }
+    if (visual.scanlines?.enabled) {
+      classes.push('card-effect-scanlines');
+    }
+    if (visual.glow?.enabled) {
+      classes.push('card-effect-glow');
+    }
+    if (visual.grain?.enabled) {
+      classes.push('card-effect-grain');
+    }
+    if (visual.border?.enabled) {
+      classes.push('card-effect-border');
+    }
 
-		return (
-			<div
-				onClick={onClick}
-				className={cn(
-					'relative overflow-hidden transition-all duration-200',
-					'bg-card border rounded-lg p-4 h-52',
-					'hover:shadow-md cursor-pointer',
-					className
-				)}
-				style={{
-					borderRadius: `${designSystem.cornerRadius}px`,
-					borderWidth: `${designSystem.borderWidth}px`,
-				}}
-			>
-				{/* Si hay un error, mostrar un indicador */}
-				{hasError && (
-					<div className="absolute inset-0 flex items-center justify-center bg-red-500/10 z-10">
-						<div className="bg-card p-3 rounded shadow-lg text-center max-w-[80%]">
-							<p className="text-red-500 font-semibold text-sm">Error</p>
-							<p className="text-muted-foreground text-xs">{errorMessage || 'Error al renderizar'}</p>
-						</div>
-					</div>
-				)}
+    return classes.join(' ');
+  }, [debug, debugState.visualEnabled, debugState.effects]);
 
-				{/* Contenido principal */}
-				<div className="flex flex-col h-full">
-					{/* Imagen */}
-					{image && (
-						<div className="relative w-full aspect-[4/3] mb-3">
-							<img
-								src={image}
-								alt={title || 'Imagen de tarjeta'}
-								className="object-cover w-full h-full rounded-md"
-								onError={() => handleError('Error al cargar la imagen')}
-							/>
-						</div>
-					)}
+  // Aplicar efectos avanzados si están habilitados
+  const advancedStyles = useMemo(() => {
+    if (!debug || !debugState.advancedEnabled) return {};
+    
+    const { advanced } = debugState.effects;
+    if (!advanced) return {};
 
-					{/* Título */}
-					<h3 className="text-base font-medium truncate">{title}</h3>
+    const styles: React.CSSProperties = {};
 
-					{/* Descripción */}
-					{description && (
-						<p className="text-sm text-muted-foreground line-clamp-3 mt-1">
-							{description}
-						</p>
-					)}
+    if (advanced.filter?.enabled) {
+      styles.filter = `
+        brightness(${advanced.filter.brightness}%)
+        contrast(${advanced.filter.contrast}%)
+        saturate(${advanced.filter.saturation}%)
+        hue-rotate(${advanced.filter.hueRotate}deg)
+        blur(${advanced.filter.blur}px)
+        sepia(${advanced.filter.sepia}%)
+      `;
+    }
 
-					{/* Contenido adicional */}
-					{children}
+    if (advanced.shadow?.enabled) {
+      const { offsetX, offsetY, blur, spread, color, opacity, inset } = advanced.shadow;
+      const shadowColor = color.replace(/^#/, '');
+      const rgba = `rgba(${Number.parseInt(shadowColor.slice(0, 2), 16)}, ${Number.parseInt(shadowColor.slice(2, 4), 16)}, ${Number.parseInt(shadowColor.slice(4, 6), 16)}, ${opacity})`;
+      styles.boxShadow = `${inset ? 'inset ' : ''}${offsetX}px ${offsetY}px ${blur}px ${spread}px ${rgba}`;
+    }
 
-					{/* Indicador de mode en desarrollo */}
-					{process.env.NODE_ENV === 'development' && (
-						<div className="absolute top-1 right-1 flex text-[9px] gap-1">
-							<span className="px-1 py-0.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded">simple</span>
-							<span className="px-1 py-0.5 bg-gray-500/20 text-gray-700 dark:text-gray-300 rounded">{renderCount}</span>
-						</div>
-					)}
-				</div>
-			</div>
-		);
-	} catch (error) {
-		// En caso de error en el renderizado, mostrar un fallback
-		handleError(error);
+    // Aplicar distorsión si está habilitada
+    if (advanced.distortion?.enabled) {
+      const { intensity, type } = advanced.distortion;
+      
+      if (type !== 'none') {
+        styles.transform = `${type}(${intensity}%)`;
+      }
+    }
 
-		return (
-			<div className="bg-card border border-red-500 rounded-lg p-4 h-52 relative overflow-hidden">
-				<div className="flex flex-col h-full items-center justify-center">
-					<p className="text-red-500 font-medium text-sm">Error al renderizar tarjeta</p>
-					<p className="text-xs text-muted-foreground mt-1">
-						{errorMessage || 'Error desconocido'}
-					</p>
-					<div className="mt-3 text-xs">
-						<p className="font-medium">Información:</p>
-						<p>Título: {title || 'No disponible'}</p>
-						{process.env.NODE_ENV === 'development' && (
-							<p className="mt-2 text-[10px] text-muted-foreground">
-								Modo: simple | Renderizados: {renderCount}
-							</p>
-						)}
-					</div>
-				</div>
-			</div>
-		);
-	}
+    return styles;
+  }, [debug, debugState.advancedEnabled, debugState.effects]);
+
+  const CardContent = useCallback(() => (
+    <>
+      {/* Contenido principal */}
+      <div className="flex flex-col h-full">
+        {/* Imagen */}
+        {image && (
+          <div className="relative w-full aspect-[3/4]">
+            <img
+              src={image}
+              alt={title}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        )}
+
+        {/* Información */}
+        <div className="p-3 flex flex-col flex-grow">
+          <h3 className="text-base font-medium truncate">{title}</h3>
+          
+          {description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+              {description}
+            </p>
+          )}
+
+          {/* Metadata */}
+          {metadata && Object.keys(metadata).length > 0 && (
+            <div className="mt-2 space-y-1">
+              {Object.entries(metadata).map(([key, value]) => (
+                <div key={key} className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">{key}</span>
+                  <span className="font-medium">{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Contenido adicional */}
+          {children && <div className="mt-auto pt-3">{children}</div>}
+        </div>
+      </div>
+
+      {/* Modo debug */}
+      {debug && process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-0 right-0 bg-black/80 text-white text-[10px] p-1 rounded-bl-md">
+          <div>ID: {id}</div>
+          <div>
+            Efectos: 
+            <span className={debugState.visualEnabled ? "text-green-400" : "text-red-400"}>
+              {debugState.visualEnabled ? " ✓" : " ✗"} Visual
+            </span>
+            <span className={debugState.advancedEnabled ? "text-green-400" : "text-red-400"}>
+              {debugState.advancedEnabled ? " ✓" : " ✗"} Avanzado
+            </span>
+          </div>
+        </div>
+      )}
+    </>
+  ), [title, description, image, metadata, children, debug, id, debugState]);
+
+  return (
+    <button
+      type="button"
+      className={cn(
+        // Base
+        'relative bg-white text-left',
+        'w-[240px] h-[320px] rounded-lg shadow-sm overflow-hidden',
+        'transition-all duration-300 ease-in-out',
+        'outline-none focus:ring-2 focus:ring-primary/50',
+        // Hover
+        'hover:shadow-md',
+        // Efectos visuales
+        effectClasses,
+        // Clase personalizada
+        className,
+      )}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label={`Tarjeta: ${title}`}
+      style={advancedStyles}
+    >
+      <CardContent />
+    </button>
+  );
 }

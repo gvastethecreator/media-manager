@@ -1,14 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import type { LayerComponent } from '../layer-plugin-system';
-import { deletePatternConfig, getPatternConfig, updatePatternConfig } from './actions/pattern-config.action';
 import type { PatternConfig } from './actions/pattern-config.action';
-import { BasePattern } from './base-pattern';
-import { DotsPattern } from './dots-pattern';
-import { GridPattern } from './grid-pattern';
-import { HexagonPattern } from './hexagon-pattern';
-import { LinesPattern } from './lines-pattern';
+import { deletePatternConfig, getPatternConfig, updatePatternConfig } from './actions/pattern-config.action';
 import PatternEffectLayerWithStyles from './pattern-effect-layer';
 import { PatternSettings } from './pattern-settings';
 
@@ -48,7 +42,15 @@ export const patternLayer: LayerComponent<PatternConfig> = {
 };
 
 // Exportar componentes principales y acciones
+export { deletePatternConfig, getPatternConfig, updatePatternConfig } from './actions/pattern-config.action';
+export type { PatternConfig } from './actions/pattern-config.action';
 export { default as PatternEffectLayer } from './pattern-effect-layer';
 export { PatternSettings } from './pattern-settings';
-export { getPatternConfig, updatePatternConfig, deletePatternConfig } from './actions/pattern-config.action';
-export type { PatternConfig } from './actions/pattern-config.action';
+
+export * from './actions/pattern-config.action';
+export * from './components/pattern-layer';
+export * from './components/pattern-settings';
+export * from './hooks/use-pattern';
+export { patternImplementation } from './pattern-implementation';
+export * from './utils/pattern-generators';
+

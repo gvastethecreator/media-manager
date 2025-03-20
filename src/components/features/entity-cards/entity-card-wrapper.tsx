@@ -86,7 +86,7 @@ export function EntityCardWrapper(props: EntityCardWrapperProps) {
 
 	// Log de información después del renderizado
 	useEffect(() => {
-		const warnings = [];
+		const warnings: string[] = [];
 		const errors = [];
 
 		// Verificar posibles problemas en base al modo
