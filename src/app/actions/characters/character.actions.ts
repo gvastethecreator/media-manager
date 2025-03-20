@@ -31,7 +31,24 @@ const createCharacterError = (
 };
 
 // Interfaces
-export interface CharacterWithStats extends Character {
+export interface CharacterWithStats {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	class: string | null;
+	race: string | null;
+	level: number | null;
+	alignment: string | null;
+	stats: string | null;
+	shortcut: string | null;
+	backstory: string | null;
+	filters: string | null;
+	sortBy: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	_count: {
 		images: number;
 	};

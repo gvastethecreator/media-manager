@@ -1,13 +1,15 @@
 'use server';
 
+import type { Album } from '@/types/entities/albums';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Album as PrismaAlbum } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
-
+import { convertServerImageToFileItem } from '@/services/image-converter.service';
+import type { Image } from '@/types/entities/images';
+import type { ServerImage } from '@/services/image-converter.service';
 // Configuración y utilidades
 const albumLogger = serverLogger.withContext('AlbumActions');
 const REVALIDATE_PATHS = ['/settings', '/albums', '/albums/[id]'] as const;
@@ -36,17 +38,14 @@ export interface AlbumCreate {
 	shortcut?: string | null;
 	sortBy?: string;
 	filters?: string;
+	presetId?: string;
 }
 
 export interface AlbumUpdate extends Partial<AlbumCreate> {
 	id: string;
 }
 
-export interface Album extends PrismaAlbum {
-	count?: number;
-}
-
-export interface AlbumWithStats extends PrismaAlbum {
+export interface AlbumWithStats extends Album {
 	_count: {
 		images: number;
 	};
@@ -56,11 +55,9 @@ export interface AlbumWithStats extends PrismaAlbum {
 		name: string;
 		count: number;
 	}>;
+	presetId?: string;
 }
 
-export interface AlbumWithImages extends Album {
-	images: FileItem[];
-}
 
 // Utilitarias funcionales
 const revalidateAllPaths = async () => {
@@ -115,7 +112,7 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 
 		// Calcular estadísticas adicionales
 		const albumsWithStats = await Promise.all(
-			albums.map(async (album) => {
+			albums.map(async (album: Album) => {
 				// Calcular tamaño total
 				const totalSize = await prisma.image.aggregate({
 					where: {
@@ -163,8 +160,8 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 					...album,
 					_count: album._count,
 					totalSize: totalSize._sum.size || 0,
-					lastUpdated: album.images[0]?.updatedAt || album.updatedAt,
-					distribution: distribution.map((d) => ({
+					lastUpdated: album.images?.[0]?.updatedAt || album.updatedAt,
+					distribution: distribution.map((d: any) => ({
 						name: d.name,
 						count: d._count.images,
 					})),
@@ -231,6 +228,7 @@ export async function createAlbum(data: AlbumCreate): Promise<Album> {
 				shortcut: data.shortcut || null,
 				sortBy: data.sortBy || 'name',
 				filters: data.filters || '[]',
+				presetId: data.presetId,
 			},
 		});
 
@@ -365,7 +363,7 @@ export async function getAlbumImages(id: string): Promise<FileItem[]> {
 		}
 
 		albumLogger.info(`✅ ${images.length} imágenes obtenidas`);
-		return images.map((img) => convertServerImageToFileItem(img as ServerImage));
+		return images.map((img: Image) => convertServerImageToFileItem(img as ServerImage));
 	} catch (error) {
 		albumLogger.error('❌ Error al obtener imágenes del álbum:', error);
 		// Preservar el error si ya es un AlbumError

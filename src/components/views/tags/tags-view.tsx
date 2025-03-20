@@ -1,6 +1,6 @@
 'use client';
 
-import { getTags } from '@/app/actions/tags/tag.actions';
+import { getTags, type TagWithStats } from '@/app/actions/tags/tag.actions';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { EntityView } from '@/components/views/base/entity-view-template';
@@ -9,56 +9,14 @@ import { TagIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import type { ViewProps } from '../types';
 
-// Configuración visual predeterminada para etiquetas
+// Configuración visual simplificada para etiquetas
 const DEFAULT_TAG_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'tag',
-		variant: 'default',
-		aspectRatio: '4/3',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 2,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
 	primaryColor: '#3b82f6',
 	secondaryColor: '#10b981',
-	hoverLiftHeight: 8,
-	maxRotation: 12,
 };
 
 // Definir los tipos de etiquetas permitidos
 type TagType = 'normal' | 'trap' | 'spell' | 'effect' | 'ritual';
-
-// Extender el tipo Tag para incluir campos adicionales
-interface TagWithDetails {
-	id: string;
-	name: string;
-	description?: string | null;
-	type?: string | null;
-	category?: string | null;
-	color?: string | null;
-	_count?: { images: number };
-	count?: number;
-	recentImages?: string[];
-	createdAt: Date;
-	updatedAt: Date;
-}
 
 // Función para determinar el tipo de etiqueta basado en categoría o alguna propiedad
 const getTagType = (category?: string | null): TagType => {
@@ -106,26 +64,21 @@ export function TagsView(props: ViewProps) {
 
 		// Transformar los datos para adaptarlos al formato esperado
 		return data.map((tagData) => {
-			// Filtrar valores nulos en recentImages
-			const recentImages = tagData.recentImages
-				? tagData.recentImages.filter((img): img is string => img !== null)
-				: [];
-
+			// La TagWithStats de la API ya tiene todas las propiedades necesarias
+			// Asumiendo que el objeto ya tiene la estructura correcta, solo convertimos
+			// las fechas si es necesario
 			return {
 				...tagData,
-				recentImages,
-				_count: tagData._count || { images: tagData.count || 0 },
-				// Usar la función para determinar el tipo de etiqueta
-				type: getTagType(tagData.category),
-				createdAt: new Date(tagData.createdAt),
-				updatedAt: new Date(tagData.updatedAt),
-			} as TagWithDetails;
+				createdAt: tagData.createdAt instanceof Date ? tagData.createdAt : new Date(tagData.createdAt),
+				updatedAt: tagData.updatedAt instanceof Date ? tagData.updatedAt : new Date(tagData.updatedAt),
+				lastUpdated: tagData.lastUpdated instanceof Date ? tagData.lastUpdated : new Date(tagData.lastUpdated),
+			};
 		});
 	}, []);
 
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
-		(tag: TagWithDetails) => {
+		(tag: TagWithStats) => {
 			setCurrentView('tag-content');
 			setCurrentTag(tag.id);
 			// Actualizar la información completa de la etiqueta en el store
@@ -133,13 +86,8 @@ export function TagsView(props: ViewProps) {
 				currentTag: {
 					id: tag.id,
 					name: tag.name,
-					description: tag.description,
-					type: tag.type,
-					category: tag.category,
-					color: tag.color,
-					_count: tag._count,
-					createdAt: tag.createdAt,
-					updatedAt: tag.updatedAt,
+					color: tag.color || '',
+					count: tag._count?.images || 0
 				},
 			});
 		},
@@ -147,7 +95,7 @@ export function TagsView(props: ViewProps) {
 	);
 
 	return (
-		<EntityView<TagWithDetails>
+		<EntityView<TagWithStats>
 			{...props}
 			title="Etiquetas"
 			description="Organiza y filtra tus imágenes con etiquetas personalizadas"

@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { EntityCardWrapper, useCardDisplay } from '@/components/features/entity-cards';
 import { getCardOptionsFromPreset } from '@/components/features/entity-cards/actions/visual-presets.actions';
 import { createDebugger } from '@/components/features/entity-cards/debug/render-debug';
-import type { CardDesignPreset, CardOptions, CornerStyle } from '@/components/features/entity-cards/types/base-card-types';
+import type { CardOptions } from '@/components/features/entity-cards/types/base-card-types';
 import { normalizeEntityData } from '@/components/features/entity-cards/utils/data-validator';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
@@ -27,68 +27,8 @@ const debug = createDebugger('FoldersView', process.env.NODE_ENV === 'developmen
 
 // Configuración visual mejorada para carpetas tipo TCG (Trading Card Game)
 const DEFAULT_FOLDER_OPTIONS: CardOptions = {
-	// Efectos principales - todos desactivados por defecto para mejor rendimiento
-	enable3DEffect: false,
-	enableHolographicEffect: false,
-	enableScanlines: false,
-	enableLightHalo: false,
-	enableAnimatedBorder: false,
-	enableGlowEffect: false,
-	enableGrainEffect: false,
-
-	// Sistema de diseño inspirado en cartas coleccionables
-	designSystem: {
-		preset: 'folder' as CardDesignPreset,
-		variant: 'tcg',
-		aspectRatio: '7/10', // Proporción estándar de cartas coleccionables
-		cornerStyle: 'rounded' as CornerStyle,
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'dramatic',
-	},
-
-	// Efectos holográficos y de brillo - desactivados
-	holographicOptions: {
-		enabled: false,
-		intensity: 0.5,
-		speed: 1.0,
-		colorRange: 'rainbow',
-	},
-
-	// Sistema de capas simplificado
-	layerSystem: {
-		order: ['background', 'content', 'border'],
-		layerBlending: 'normal',
-		layerSpacing: 0,
-		explodeView: false,
-	},
-
-	// Configuración del borde
-	borderSystem: {
-		enabled: true,
-		width: 1,
-		style: 'solid',
-		color: 'var(--border)',
-		radius: 12,
-		glow: false,
-		frameType: 'standard',
-	},
-
-	// Configuración de animación - simplificada
-	animation: {
-		hoverEffect: 'lift',
-		entranceAnimation: 'fade-in',
-		hoverScale: 1.05,
-		hoverRotation: false,
-		hoverLightEffect: false,
-		maxRotation: 0,
-	},
-
-	// Colores base
 	primaryColor: '#3b82f6',
 	secondaryColor: '#1e40af',
-	accentColor: '#60a5fa',
-	backgroundColor: '#1e293b',
 };
 
 // Componente memoizado para cada tarjeta de carpeta
@@ -190,7 +130,7 @@ export function FoldersView(_props: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await getFolders();
-			const transformedData = data.map((folderData) => {
+			const transformedData = data.map((folderData: any) => {
 				return {
 					...folderData,
 					lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
@@ -206,13 +146,13 @@ export function FoldersView(_props: ViewProps) {
 
 			// Cargar presets para carpetas que tengan presetId
 			const presets: Record<string, CardOptions> = {};
-			const presetsToLoad = transformedData.filter(folder => folder.presetId);
+			const presetsToLoad = transformedData.filter((folder: any) => folder.presetId);
 
 			if (presetsToLoad.length > 0) {
 				viewLogger.info(`🔄 Cargando ${presetsToLoad.length} presets para carpetas...`);
 
 				// Cargar presets en paralelo
-				const presetPromises = presetsToLoad.map(async (folder) => {
+				const presetPromises = presetsToLoad.map(async (folder: any) => {
 					if (folder.presetId) {
 						const presetOptions = await loadPresetConfig(folder.presetId);
 						if (presetOptions) {
@@ -297,13 +237,8 @@ export function FoldersView(_props: ViewProps) {
 					currentItem: {
 						id: folder.id,
 						name: folder.name,
-						path: folder.path || '',
-						description: folder.description || '',
 						emoji: folder.emoji || '',
-						_count: folder._count || { images: folder.imageCount || 0 },
-						totalSize: folder.totalSize,
-						lastIndexed: folder.lastIndexed,
-						createdAt: folder.createdAt,
+						count: folder._count?.images || folder.imageCount || 0,
 						itemType: 'folder',
 					},
 					navigationDirection: 1, // Indicar navegación hacia adelante
@@ -314,14 +249,7 @@ export function FoldersView(_props: ViewProps) {
 					currentFolder: {
 						id: folder.id,
 						name: folder.name,
-						path: folder.path || '',
-						description: folder.description || '',
-						emoji: folder.emoji || '',
-						_count: folder._count || { images: folder.imageCount || 0 },
-						totalSize: folder.totalSize,
-						lastIndexed: folder.lastIndexed,
-						createdAt: folder.createdAt,
-						updatedAt: folder.updatedAt,
+						count: folder._count?.images || folder.imageCount || 0
 					},
 					currentFolderId: folder.id,
 					currentView: 'folder-content',

@@ -6,7 +6,6 @@ import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Image, Tag as PrismaTag } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
@@ -52,17 +51,32 @@ export interface TagUpdate {
 	emoji?: string;
 }
 
-export interface Tag extends PrismaTag {
-	count?: number;
+export interface Tag {
+    id: string;
+    name: string;
+    color: string;
+    emoji: string | null;
+    description: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    shortcut: string | null;
+    count?: number;
 }
 
-export interface TagWithStats extends Omit<PrismaTag, 'emoji' | 'isFavorite'> {
+export interface TagWithStats {
+    id: string;
+    name: string;
+    color: string;
+    emoji: string | null;
+    description: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    shortcut: string | null;
 	_count: {
 		images: number;
 	};
 	totalSize: number;
 	lastUpdated: Date;
-	emoji?: string;
 	isFavorite?: boolean;
 	isArchived?: boolean;
 	distribution?: Array<{
@@ -71,7 +85,16 @@ export interface TagWithStats extends Omit<PrismaTag, 'emoji' | 'isFavorite'> {
 	}>;
 }
 
-export interface TagWithImages extends Tag {
+export interface TagWithImages {
+    id: string;
+    name: string;
+    color: string;
+    emoji: string | null;
+    description: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    shortcut: string | null;
+    count?: number;
 	images: FileItem[];
 }
 
@@ -130,7 +153,7 @@ export async function getTags(): Promise<TagWithStats[]> {
 
 		// Calcular estadísticas adicionales
 		const tagsWithStats = await Promise.all(
-			tags.map(async (tag) => {
+			tags.map(async (tag: any) => {
 				// Calcular tamaño total
 				const totalSize = await prisma.image.aggregate({
 					where: {
@@ -216,7 +239,7 @@ export async function getTag(id: string): Promise<Tag> {
 			throw createTagError('Etiqueta no encontrada', TagErrorCode.NOT_FOUND);
 		}
 
-		const totalSize = tag.images.reduce((acc, img) => acc + img.size, 0);
+		const totalSize = tag.images.reduce((acc: number, img: any) => acc + img.size, 0);
 		const result = {
 			...tag,
 			count: tag._count.images,
