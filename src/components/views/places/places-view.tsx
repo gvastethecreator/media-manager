@@ -1,53 +1,26 @@
 'use client';
 
-import { type PlaceWithStats, getPlaces } from '@/app/actions/places/place.actions';
+import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
-import { MapPin } from 'lucide-react';
+import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('PlacesView');
 
-// Configuración visual predeterminada para lugares
+// Configuración visual simplificada para lugares
 const DEFAULT_PLACE_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'place',
-		variant: 'default',
-		aspectRatio: '3/2',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
-	primaryColor: '#0ea5e9',
-	secondaryColor: '#06b6d4',
-	hoverLiftHeight: 10,
-	maxRotation: 15,
+	primaryColor: '#10b981',
+	secondaryColor: '#0ea5e9',
 };
 
 export function PlacesView(_props: ViewProps) {
@@ -61,33 +34,23 @@ export function PlacesView(_props: ViewProps) {
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticPlaces, _addEvent] = clientEvents.useEvents<PlaceWithStats[]>(places);
 
-	const fetchPlaces = useCallback(async () => {
+	const loadPlaces = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando lugares...');
 			const data = await getPlaces();
-
-			// Transformar los datos para cumplir con PlaceWithStats
-			const transformedData = data.map((place) => {
-				// Calcular tamaño total si no existe
-				let size = 0;
-				if ('totalSize' in place) {
-					size = (place.totalSize as number) || 0;
-				}
-
-				return {
-					...place,
-					totalSize: size,
-					lastUpdated: place.updatedAt,
-					recentImages: place.images?.map((img) => img.id) || [],
-				};
-			});
-
-			setPlaces(transformedData as PlaceWithStats[]);
+			// Transformar los datos de la API al formato que necesitamos
+			const placesWithStats = data.map((place: any) => ({
+				...place,
+				totalSize: 0, // Valor por defecto
+				lastUpdated: place.updatedAt,
+				recentImages: [] // No tenemos imágenes recientes por ahora
+			}));
+			setPlaces(placesWithStats);
 			viewLogger.info(`✅ ${data.length} lugares cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando lugares:', err);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			viewLogger.error('❌ Error cargando lugares:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -95,8 +58,8 @@ export function PlacesView(_props: ViewProps) {
 	}, []);
 
 	useEffect(() => {
-		fetchPlaces();
-	}, [fetchPlaces]);
+		loadPlaces();
+	}, [loadPlaces]);
 
 	useEffect(() => {
 		const loadVisualConfig = async () => {
@@ -109,16 +72,7 @@ export function PlacesView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_PLACE_OPTIONS,
-					...config,
-					// Asegurar que las propiedades anidadas se combinen correctamente
-					designSystem: {
-						...(DEFAULT_PLACE_OPTIONS.designSystem || {}),
-						...(config.designSystem || {}),
-					},
-					layerSystem: {
-						...(DEFAULT_PLACE_OPTIONS.layerSystem || {}),
-						...(config.layerSystem || {}),
-					},
+					...config
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -139,12 +93,8 @@ export function PlacesView(_props: ViewProps) {
 				currentPlace: {
 					id: place.id,
 					name: place.name,
-					description: place.description,
-					emoji: place.emoji,
-					color: place.color,
-					_count: place._count,
-					createdAt: place.createdAt,
-					updatedAt: place.updatedAt,
+					emoji: place.emoji || '🏔️',
+					count: place._count?.images || 0
 				},
 			});
 		},
@@ -166,9 +116,9 @@ export function PlacesView(_props: ViewProps) {
 	if (!optimisticPlaces || optimisticPlaces.length === 0) {
 		return (
 			<EmptyState
-				icon={MapPin}
-				title="No hay lugares"
-				description="Los lugares te ayudan a organizar tus imágenes. Crea un nuevo lugar desde el panel de configuración."
+				icon={LandPlot}
+				title="No hay lugares creados"
+				description="Crea lugares para organizar tus imágenes por locación."
 			/>
 		);
 	}
@@ -176,22 +126,20 @@ export function PlacesView(_props: ViewProps) {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{optimisticPlaces.map((place, index) => (
 						<motion.div
 							key={place.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
-							className="cursor-pointer"
 						>
 							<EntityCardAdapter
 								entityType="place"
 								entity={place}
 								onClick={() => handlePlaceClick(place)}
-								showVisualConfig={true}
-								enableExplode={true}
 								options={visualConfig}
+								className="h-full"
 							/>
 						</motion.div>
 					))}

@@ -11,7 +11,13 @@
     "usernamehw.errorlens",
     "wix.vscode-import-cost",
     "DavidAnson.vscode-markdownlint",
-    "ms-vscode.vscode-typescript-next"
+    "ms-vscode.vscode-typescript-next",
+    "beardedbear.beardedtheme",
+    "kevinkern.instructa-ai-prompts",
+    "beardedbear.beardedicons",
+    "alefragnani.bookmarks",
+    "rphlmr.vscode-drizzle-orm",
+    "biomejs.biome"
   ],
-  "unwantedRecommendations": ["biomejs.biome"]
+  "unwantedRecommendations": []
 }

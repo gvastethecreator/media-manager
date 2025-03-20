@@ -1,9 +1,9 @@
 'use client';
 
-import { getCharacters } from '@/app/actions/characters/character.actions';
+import { type CharacterWithStats, getCharacters } from '@/app/actions/characters/character.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,86 +17,29 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('CharactersView');
 
-// Configuración visual predeterminada para personajes
+// Configuración visual simplificada para personajes
 const DEFAULT_CHARACTER_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'character',
-		variant: 'default',
-		aspectRatio: '2/3',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
 	primaryColor: '#f59e0b',
 	secondaryColor: '#ef4444',
-	hoverLiftHeight: 15,
-	maxRotation: 18,
 };
-
-// Extender el tipo Character para incluir los campos adicionales
-interface CharacterWithDetails {
-	id: string;
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	class?: string | null;
-	_count?: { images: number };
-	recentImages?: string[];
-	createdAt: Date;
-	updatedAt: Date;
-}
 
 export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCharacter } = useFileManager();
-	const [characters, setCharacters] = useState<CharacterWithDetails[]>([]);
+	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CHARACTER_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithDetails[]>(characters);
+	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
 
 	const loadCharacters = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando personajes...');
 			const data = await getCharacters();
-			const transformedData = data.map((characterData) => {
-				// Filtrar valores nulos en recentImages
-				const recentImages = characterData.recentImages
-					? characterData.recentImages.filter((img): img is string => img !== null)
-					: [];
-
-				return {
-					...characterData,
-					recentImages,
-					_count: characterData._count || { images: 0 },
-					createdAt: new Date(characterData.createdAt),
-					updatedAt: new Date(characterData.updatedAt),
-				} as CharacterWithDetails;
-			});
-
-			setCharacters(transformedData);
+			setCharacters(data);
 			viewLogger.info(`✅ ${data.length} personajes cargados`);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -122,16 +65,7 @@ export function CharactersView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_CHARACTER_OPTIONS,
-					...config,
-					// Asegurar que las propiedades anidadas se combinen correctamente
-					designSystem: {
-						...(DEFAULT_CHARACTER_OPTIONS.designSystem || {}),
-						...(config.designSystem || {}),
-					},
-					layerSystem: {
-						...(DEFAULT_CHARACTER_OPTIONS.layerSystem || {}),
-						...(config.layerSystem || {}),
-					},
+					...config
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -143,7 +77,7 @@ export function CharactersView(_props: ViewProps) {
 	}, []);
 
 	const handleCharacterClick = useCallback(
-		(character: CharacterWithDetails) => {
+		(character: CharacterWithStats) => {
 			viewLogger.info('🖱️ Click en personaje:', character.name);
 			setCurrentView('character-content');
 			setCurrentCharacter(character.id);
@@ -152,14 +86,8 @@ export function CharactersView(_props: ViewProps) {
 				currentCharacter: {
 					id: character.id,
 					name: character.name,
-					description: character.description,
-					emoji: character.emoji,
-					color: character.color,
-					category: character.category,
-					class: character.class,
-					_count: character._count,
-					createdAt: character.createdAt,
-					updatedAt: character.updatedAt,
+					emoji: character.emoji || '👤',
+					count: character._count?.images || 0
 				},
 			});
 		},
@@ -203,9 +131,8 @@ export function CharactersView(_props: ViewProps) {
 								entityType="character"
 								entity={character}
 								onClick={() => handleCharacterClick(character)}
-								showVisualConfig={true}
-								enableExplode={true}
 								options={visualConfig}
+								className="h-full"
 							/>
 						</motion.div>
 					))}

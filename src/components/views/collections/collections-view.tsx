@@ -3,14 +3,13 @@
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
-import type { Collection } from '@prisma/client';
 import { BookMarked } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -18,41 +17,18 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('CollectionsView');
 
-// Configuración visual predeterminada para colecciones
+// Configuración visual simplificada para colecciones
 const DEFAULT_COLLECTION_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'collection',
-		variant: 'default',
-		aspectRatio: '1/1',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
 	primaryColor: '#9333ea',
 	secondaryColor: '#6366f1',
-	hoverLiftHeight: 12,
-	maxRotation: 15,
 };
 
-// Extender el tipo Collection para incluir los campos adicionales
-interface CollectionWithDetails extends Collection {
+// Definir la interfaz para colecciones
+interface CollectionWithDetails {
+	id: string;
+	name: string;
+	description?: string | null;
+	type?: string | null;
 	_count?: { images: number };
 	totalSize?: number;
 	recentImages?: string[];
@@ -76,19 +52,27 @@ export function CollectionsView(_props: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando colecciones...');
 			const data = await getCollections();
-			const transformedData = data.map((collectionData) => {
+			const transformedData = data.map((collectionData: any) => {
 				// Filtrar valores nulos en recentImages
 				const recentImages = collectionData.recentImages
-					? collectionData.recentImages.filter((img): img is string => img !== null)
+					? collectionData.recentImages.filter((img: unknown): img is string =>
+						typeof img === 'string' && img !== null)
 					: [];
 
-				return {
-					...collectionData,
-					recentImages,
+				// Crear un objeto explícito para evitar errores de tipo
+				const collection: CollectionWithDetails = {
+					id: collectionData.id,
+					name: collectionData.name,
+					description: collectionData.description,
+					type: collectionData.type,
 					_count: collectionData._count || { images: 0 },
+					totalSize: collectionData.totalSize,
+					recentImages,
 					createdAt: new Date(collectionData.createdAt),
 					updatedAt: new Date(collectionData.updatedAt),
-				} as CollectionWithDetails;
+				};
+
+				return collection;
 			});
 
 			setCollections(transformedData);
@@ -117,16 +101,7 @@ export function CollectionsView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_COLLECTION_OPTIONS,
-					...config,
-					// Asegurar que las propiedades anidadas se combinen correctamente
-					designSystem: {
-						...(DEFAULT_COLLECTION_OPTIONS.designSystem || {}),
-						...(config.designSystem || {}),
-					},
-					layerSystem: {
-						...(DEFAULT_COLLECTION_OPTIONS.layerSystem || {}),
-						...(config.layerSystem || {}),
-					},
+					...config
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -147,12 +122,7 @@ export function CollectionsView(_props: ViewProps) {
 				currentCollection: {
 					id: collection.id,
 					name: collection.name,
-					description: collection.description,
-					type: collection.type,
-					_count: collection._count,
-					totalSize: collection.totalSize,
-					createdAt: collection.createdAt,
-					updatedAt: collection.updatedAt,
+					count: collection._count?.images || 0,
 				},
 			});
 		},
@@ -196,9 +166,8 @@ export function CollectionsView(_props: ViewProps) {
 								entityType="collection"
 								entity={collection}
 								onClick={() => handleCollectionClick(collection)}
-								showVisualConfig={true}
-								enableExplode={true}
 								options={visualConfig}
+								className="h-full"
 							/>
 						</motion.div>
 					))}

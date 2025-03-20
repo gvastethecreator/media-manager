@@ -1,8 +1,6 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { Image } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 
 export interface RandomImage {
 	id: string;

@@ -1,8 +1,8 @@
-import { LayerImplementation } from '@/types/entity-card';
+import type { LayerImplementation } from '@/types/entity-card';
 import { SlidersHorizontal } from 'lucide-react';
 import { FilterLayer } from './components/filter-layer';
 import { FilterSettings } from './components/filter-settings';
-import { createDefaultFilterConfig, FilterConfig } from './filter-schema';
+import { createDefaultFilterConfig, type FilterConfig } from './filter-schema';
 
 /**
  * 🎨 Implementación de la capa de filtros

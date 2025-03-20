@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { GlitchConfig, glitchConfigSchema } from '../glitch-schema';
+import { type GlitchConfig, glitchConfigSchema } from '../glitch-schema';
 
 /**
  * 📥 Obtiene la configuración de glitch para una entidad

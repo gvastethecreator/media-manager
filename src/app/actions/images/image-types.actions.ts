@@ -1,5 +1,4 @@
 import { ThumbnailQuality } from '@/types/thumbnails';
-import type { Image } from '@prisma/client';
 
 /**
  * Datos de entrada para crear una imagen
