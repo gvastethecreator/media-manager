@@ -93,3 +93,15 @@ export function createCustomCardAdapter<T, P extends object, EntityKey extends s
  * }
  * ```
  */
+
+/**
+ * Ejemplo de uso con WorldItem:
+ *
+ * ```tsx
+ * // Crear adaptador para WorldItem
+ * const WorldItemCardAdapter = createCardAdapter(WorldItemCardLayout, 'item');
+ *
+ * // Uso del adaptador
+ * <WorldItemCardAdapter item={worldItemData} options={cardOptions} onClick={handleClick} />
+ * ```
+ */

@@ -31,7 +31,7 @@ import { usePreset } from '../hooks/use-preset';
 import { adaptCardOptions } from '../types';
 import type { CardOptions } from '../types/unified-card-types';
 
-import '../../styles/prompt-card.css';
+import '../styles/prompt-card.css';
 
 // TIPOS DE DATOS
 // ==============================

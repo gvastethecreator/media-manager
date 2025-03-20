@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { EntityType } from '../adapters/preset-adapter';
 import { presetService } from '../adapters/preset-adapter';
-import type { CardOptions } from '../types/card-settings-types';
+import type { CardOptions, LayersConfig } from '../types/unified-card-types';
 
 // Definir interfaz para el preset visual (usar la misma que en adaptadores)
 export interface VisualPreset {
 	id?: string;
 	name: string;
-	description?: string;
+	description?: string | null;
 	category: string;
 	isDefault?: boolean;
 	isPublic?: boolean;
@@ -18,33 +18,33 @@ export interface VisualPreset {
 	metadata?: Record<string, unknown>;
 
 	// Configuraciones serializadas
-	coreConfig?: string;
-	designConfig?: string;
-	animationConfig?: string;
-	layerConfig?: string;
-	backsideConfig?: string;
-	effectsConfig?: string;
-	performanceConfig?: string;
-	colorConfig?: string;
-	imageGridConfig?: string;
-	layoutConfig?: string;
-	explodeConfig?: string;
-	previewConfig?: string;
-	rarityConfig?: string;
+	coreConfig?: string | null;
+	designConfig?: string | null;
+	animationConfig?: string | null;
+	layerConfig?: string | null;
+	backsideConfig?: string | null;
+	effectsConfig?: string | null;
+	performanceConfig?: string | null;
+	colorConfig?: string | null;
+	imageGridConfig?: string | null;
+	layoutConfig?: string | null;
+	explodeConfig?: string | null;
+	previewConfig?: string | null;
+	rarityConfig?: string | null;
 
 	// Configuraciones específicas por tipo de entidad
-	folderConfig?: string;
-	imageConfig?: string;
-	videoConfig?: string;
-	albumConfig?: string;
-	tagConfig?: string;
-	collectionConfig?: string;
-	characterConfig?: string;
-	placeConfig?: string;
-	worldItemConfig?: string;
-	conceptConfig?: string;
-	promptConfig?: string;
-	noteConfig?: string;
+	folderConfig?: string | null;
+	imageConfig?: string | null;
+	videoConfig?: string | null;
+	albumConfig?: string | null;
+	tagConfig?: string | null;
+	collectionConfig?: string | null;
+	characterConfig?: string | null;
+	placeConfig?: string | null;
+	worldItemConfig?: string | null;
+	conceptConfig?: string | null;
+	promptConfig?: string | null;
+	noteConfig?: string | null;
 }
 
 export interface UsePresetOptions {
@@ -82,7 +82,41 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 
 		const cachedPreset = presetService.getPreset(presetId);
 		if (cachedPreset) {
-			setPreset(cachedPreset);
+			// Convertir el preset a formato compatible con VisualPreset
+			const adaptedPreset: VisualPreset = {
+				id: cachedPreset.id,
+				name: cachedPreset.name,
+				description: cachedPreset.description,
+				category: cachedPreset.category,
+				// Añadir el resto de propiedades según sea necesario
+				coreConfig: cachedPreset.coreConfig || null,
+				designConfig: cachedPreset.designConfig || null,
+				animationConfig: cachedPreset.animationConfig || null,
+				layerConfig: cachedPreset.layerConfig || null,
+				backsideConfig: cachedPreset.backsideConfig || null,
+				effectsConfig: cachedPreset.effectsConfig || null,
+				performanceConfig: cachedPreset.performanceConfig || null,
+				colorConfig: cachedPreset.colorConfig || null,
+				imageGridConfig: cachedPreset.imageGridConfig || null,
+				layoutConfig: cachedPreset.layoutConfig || null,
+				explodeConfig: cachedPreset.explodeConfig || null,
+				previewConfig: cachedPreset.previewConfig || null,
+				rarityConfig: cachedPreset.rarityConfig || null,
+				folderConfig: cachedPreset.folderConfig || null,
+				imageConfig: cachedPreset.imageConfig || null,
+				videoConfig: cachedPreset.videoConfig || null,
+				albumConfig: cachedPreset.albumConfig || null,
+				tagConfig: cachedPreset.tagConfig || null,
+				collectionConfig: cachedPreset.collectionConfig || null,
+				characterConfig: cachedPreset.characterConfig || null,
+				placeConfig: cachedPreset.placeConfig || null,
+				worldItemConfig: cachedPreset.worldItemConfig || null,
+				conceptConfig: cachedPreset.conceptConfig || null,
+				promptConfig: cachedPreset.promptConfig || null,
+				noteConfig: cachedPreset.noteConfig || null,
+			};
+
+			setPreset(adaptedPreset);
 			return;
 		}
 
@@ -125,7 +159,7 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 					elevation: 2,
 					shadowStyle: 'soft',
 				},
-				layerSystem: {
+				layers: {
 					order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
 					layerBlending: 'screen',
 					layerSpacing: 2,
@@ -166,23 +200,31 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 				...(baseOptions.designSystem || {}),
 			},
 			colors: {
-				...(presetOptions.colors || {}),
-				...(baseOptions.colors || {}),
+				...((presetOptions.colors as Record<string, unknown>) || {}),
+				...((baseOptions.colors as Record<string, unknown>) || {}),
 			},
 			effects: {
-				...(presetOptions.effects || {}),
-				...(baseOptions.effects || {}),
+				...((presetOptions.effects as Record<string, unknown>) || {}),
+				...((baseOptions.effects as Record<string, unknown>) || {}),
 			},
 			// Asegurar que las opciones de capas específicas se combinen correctamente
 			layers: {
-				...(typeDefaults.layerSystem || {}),
-				...(presetOptions.layers || {}),
-				...(baseOptions.layers || {}),
-				items: [...(presetOptions.layers?.items || []), ...(baseOptions.layers?.items || [])].filter(
-					(item, index, self) =>
-						// Eliminar duplicados usando el id como criterio
-						index === self.findIndex((t) => t.id === item.id)
-				),
+				...(typeDefaults.layers || {}),
+				...((presetOptions.layers || {}) as Partial<LayersConfig>),
+				...((baseOptions.layers || {}) as Partial<LayersConfig>),
+				// Combinamos items si existen en ambas configuraciones
+				...(presetOptions.layers?.items || baseOptions.layers?.items
+					? {
+							items: [
+								...((presetOptions.layers?.items as any[]) || []),
+								...((baseOptions.layers?.items as any[]) || []),
+							].filter(
+								(item, index, self) =>
+									// Eliminar duplicados usando el id como criterio
+									index === self.findIndex((t) => t.id === item.id)
+							),
+					  }
+					: {}),
 			},
 		} as CardOptions;
 	}, [entityType, presetId, baseOptions]);
