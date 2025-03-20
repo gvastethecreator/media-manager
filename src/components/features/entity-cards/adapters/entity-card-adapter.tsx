@@ -13,22 +13,60 @@ import type { WorldItem } from '@/types/entities/world-items';
 
 import { getCardOptionsFromPreset } from '../actions/visual-presets.actions';
 // Importamos todos los adaptadores de tarjeta
-import { AlbumCard } from '../layouts/refactored/album-card-layout';
-import { CharacterCard } from '../layouts/refactored/character-card-layout';
-import { CollectionCard } from '../layouts/refactored/collection-card-layout';
-import { ConceptCard } from '../layouts/refactored/concept-card-layout';
-import { FolderCard } from '../layouts/refactored/folder-card-layout';
-import { NoteCard } from '../layouts/refactored/note-card-layout';
-import { PlaceCard } from '../layouts/refactored/place-card-layout';
-import { PromptCard } from '../layouts/refactored/prompt-card-layout';
-import { TagsCard } from '../layouts/refactored/tags-card-layout';
-import { WorldItemCard } from '../layouts/refactored/world-item-card-layout';
+import { AlbumCard } from '../layouts/album-card-layout';
+import { CharacterCard } from '../layouts/character-card-layout';
+import { CollectionCard } from '../layouts/collection-card-layout';
+import { ConceptCard } from '../layouts/concept-card-layout';
+import { FolderCard } from '../layouts/folder-card-layout';
+import { NoteCard } from '../layouts/note-card-layout';
+import { PlaceCard } from '../layouts/place-card-layout';
+import { PromptCard } from '../layouts/prompt-card-layout';
+import { TagsCard } from '../layouts/tags-card-layout';
+import { WorldItemAdapter } from './world-item-adapter';
 
 import React, { useEffect, useState } from 'react';
 import type { CardOptions } from '../types/unified-card-types';
 
-// Tipo de unión para todas las entidades posibles
-export type Entity = Folder | Album | Tag | Collection | Character | Place | WorldItem | Concept | Prompt | Note;
+// Extendemos los tipos base para incluir presetId
+interface EntityBase {
+	presetId?: string;
+}
+
+// Tipo de unión para todas las entidades posibles con presetId opcional
+export type Entity = (Folder | Album | Tag | Collection | Character | Place | WorldItem | Concept | Prompt | Note) & EntityBase;
+
+// Tipo extendido para tipos específicos que necesitan más propiedades
+export interface CharacterExtended extends Character {
+	stats: CharacterStats | undefined;
+	presetId?: string;
+}
+
+export interface ExtendedConcept extends Concept {
+	presetId: string;
+}
+
+export interface ExtendedNote extends Note {
+	presetId: string;
+}
+
+export interface ExtendedPrompt extends Prompt {
+	_count: {
+		uses: number;
+	} | undefined;
+	presetId?: string;
+}
+
+// Estructura para las estadísticas de personajes
+export interface CharacterStats {
+	// Define aquí la estructura de stats para Character
+	strength?: number;
+	dexterity?: number;
+	constitution?: number;
+	intelligence?: number;
+	wisdom?: number;
+	charisma?: number;
+	// otros stats...
+}
 
 export interface EntityCardAdapterProps {
 	entityType: string;
@@ -200,24 +238,63 @@ export const EntityCardAdapter = React.memo(
 			case 'folder':
 				return <FolderCard folder={entity as Folder} {...commonProps} />;
 			case 'album':
-				return <AlbumCard album={entity as Album} {...commonProps} />;
+				return <AlbumCard data={entity as Album} {...commonProps} />;
 			case 'tag':
-				return <TagsCard tags={entity as Tag[]} {...commonProps} />;
+				return <TagsCard tag={entity as Tag} {...commonProps} />;
 			case 'collection':
 				return <CollectionCard collection={entity as Collection} {...commonProps} />;
-			case 'character':
-				return <CharacterCard character={entity as Character} {...commonProps} />;
+			case 'character': {
+				// Convertimos stats de string a objeto si es necesario
+				const characterWithStats = entity as Character;
+				let parsedStats: CharacterStats | undefined;
+
+				if (typeof characterWithStats.stats === 'string') {
+					try {
+						parsedStats = JSON.parse(characterWithStats.stats);
+					} catch (e) {
+						console.error('Error al parsear stats del personaje:', e);
+						parsedStats = undefined;
+					}
+				}
+
+				const extendedCharacter: CharacterExtended = {
+					...characterWithStats,
+					stats: parsedStats,
+					presetId: entity.presetId
+				};
+
+				return <CharacterCard character={extendedCharacter} {...commonProps} />;
+			}
 			case 'place':
 				return <PlaceCard place={entity as Place} {...commonProps} />;
 			case 'world-item':
 			case 'worldItem':
-				return <WorldItemCard worldItem={entity as WorldItem} {...commonProps} />;
-			case 'concept':
-				return <ConceptCard concept={entity as Concept} {...commonProps} />;
-			case 'prompt':
-				return <PromptCard prompt={entity as Prompt} {...commonProps} />;
-			case 'note':
-				return <NoteCard note={entity as Note} {...commonProps} />;
+				return <WorldItemAdapter worldItem={entity as WorldItem} {...commonProps} />;
+			case 'concept': {
+				const extendedConcept: ExtendedConcept = {
+					...(entity as Concept),
+					presetId: entity.presetId || ''
+				};
+				return <ConceptCard concept={extendedConcept} {...commonProps} />;
+			}
+			case 'prompt': {
+				const promptEntity = entity as Prompt;
+				const extendedPrompt: ExtendedPrompt = {
+					...promptEntity,
+					_count: {
+						uses: promptEntity._count?.prompts || 0
+					},
+					presetId: entity.presetId
+				};
+				return <PromptCard prompt={extendedPrompt} {...commonProps} />;
+			}
+			case 'note': {
+				const extendedNote: ExtendedNote = {
+					...(entity as Note),
+					presetId: entity.presetId || ''
+				};
+				return <NoteCard note={extendedNote} {...commonProps} />;
+			}
 			default:
 				console.warn(`No se ha implementado todavía un layout para el tipo de entidad: ${entityType}`);
 				return (

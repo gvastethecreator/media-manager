@@ -36,7 +36,7 @@ import { usePreset } from '../hooks/use-preset';
 import { adaptCardOptions } from '../types';
 import type { CardOptions } from '../types/unified-card-types';
 
-import '../../styles/collection-card.css';
+import '../styles/collection-card.css';
 
 // TIPOS DE DATOS
 // ==============================

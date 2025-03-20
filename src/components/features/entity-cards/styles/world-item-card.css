@@ -1,0 +1,281 @@
+/*
+* Estilos para tarjetas de objetos en estilo RPG/TCG
+* 🎮 Componente visuales para objetos de mundo/juegos
+*/
+
+/*
+* Configuración de variables de tarjeta
+*/
+.world-item-card-container {
+	--card-rarity-color: #9ca3af;
+	--card-rarity-border: rgba(156, 163, 175, 0.8);
+	--card-rarity-glow: rgba(156, 163, 175, 0.6);
+	--card-base-text: #e2e8f0;
+	--card-muted-text: #94a3b8;
+	--card-highlight: #f8fafc;
+	perspective: 1000px;
+}
+
+/* Variables específicas según rareza */
+.world-item-card-rarity-common {
+	--card-rarity-color: #9ca3af;
+	--card-rarity-border: rgba(156, 163, 175, 0.8);
+	--card-rarity-glow: rgba(156, 163, 175, 0.6);
+}
+
+.world-item-card-rarity-uncommon {
+	--card-rarity-color: #22c55e;
+	--card-rarity-border: rgba(34, 197, 94, 0.8);
+	--card-rarity-glow: rgba(34, 197, 94, 0.6);
+}
+
+.world-item-card-rarity-rare {
+	--card-rarity-color: #3b82f6;
+	--card-rarity-border: rgba(59, 130, 246, 0.8);
+	--card-rarity-glow: rgba(59, 130, 246, 0.6);
+}
+
+.world-item-card-rarity-epic {
+	--card-rarity-color: #8b5cf6;
+	--card-rarity-border: rgba(139, 92, 246, 0.8);
+	--card-rarity-glow: rgba(139, 92, 246, 0.7);
+}
+
+.world-item-card-rarity-legendary {
+	--card-rarity-color: #eab308;
+	--card-rarity-border: rgba(234, 179, 8, 0.8);
+	--card-rarity-glow: rgba(234, 179, 8, 0.7);
+}
+
+.world-item-card-rarity-artifact {
+	--card-rarity-color: #d946ef;
+	--card-rarity-border: rgba(217, 70, 239, 0.8);
+	--card-rarity-glow: rgba(217, 70, 239, 0.7);
+}
+
+/* Animaciones para efectos de borde */
+@keyframes pulseBorder {
+	0% {
+		border-width: 1px;
+		border-color: var(--card-rarity-border);
+		box-shadow: 0 0 5px var(--card-rarity-glow);
+	}
+
+	25% {
+		border-width: 2px;
+		border-color: var(--card-rarity-border);
+	}
+
+	50% {
+		border-width: 3px;
+		border-color: var(--card-rarity-border);
+		box-shadow: 0 0 10px var(--card-rarity-glow);
+	}
+
+	75% {
+		border-width: 2px;
+		border-color: var(--card-rarity-border);
+	}
+
+	100% {
+		border-width: 1px;
+		border-color: var(--card-rarity-border);
+		box-shadow: 0 0 5px var(--card-rarity-glow);
+	}
+}
+
+/* Animación de flujo para bordes */
+@keyframes flowBorder {
+	0% {
+		border-image: linear-gradient(0deg, var(--card-rarity-color), var(--card-rarity-border)) 1;
+		box-shadow: 0 0 5px var(--card-rarity-glow);
+	}
+
+	25% {
+		border-image: linear-gradient(90deg, var(--card-rarity-color), var(--card-rarity-border)) 1;
+		box-shadow: 0 0 8px var(--card-rarity-glow);
+	}
+
+	50% {
+		border-image: linear-gradient(180deg, var(--card-rarity-color), var(--card-rarity-border)) 1;
+		box-shadow: 0 0 12px var(--card-rarity-glow);
+	}
+
+	75% {
+		border-image: linear-gradient(270deg, var(--card-rarity-color), var(--card-rarity-border)) 1;
+		box-shadow: 0 0 8px var(--card-rarity-glow);
+	}
+
+	100% {
+		border-image: linear-gradient(360deg, var(--card-rarity-color), var(--card-rarity-border)) 1;
+		box-shadow: 0 0 5px var(--card-rarity-glow);
+	}
+}
+
+/* Arcoíris para artefactos */
+@keyframes rainbowBorder {
+
+	0%,
+	100% {
+		border-color: rgba(255, 0, 0, 0.7);
+		box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+	}
+
+	14% {
+		border-color: rgba(255, 127, 0, 0.7);
+		box-shadow: 0 0 10px rgba(255, 127, 0, 0.5);
+	}
+
+	28% {
+		border-color: rgba(255, 255, 0, 0.7);
+		box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+	}
+
+	42% {
+		border-color: rgba(0, 255, 0, 0.7);
+		box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+	}
+
+	57% {
+		border-color: rgba(0, 0, 255, 0.7);
+		box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+	}
+
+	71% {
+		border-color: rgba(75, 0, 130, 0.7);
+		box-shadow: 0 0 10px rgba(75, 0, 130, 0.5);
+	}
+
+	85% {
+		border-color: rgba(148, 0, 211, 0.7);
+		box-shadow: 0 0 10px rgba(148, 0, 211, 0.5);
+	}
+}
+
+@keyframes rainbowGlow {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	50% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/*
+* Patrones de fondo
+*/
+.bg-noise-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.bg-grid-pattern {
+	background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+	background-size: 10px 10px;
+}
+
+.bg-dots-pattern {
+	background-image:
+		radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.15) 2px, transparent 0),
+		radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
+	background-size: 30px 30px;
+}
+
+.bg-sparkle-pattern {
+	background-image:
+		radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+		radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 2px, transparent 2px);
+	background-size: 20px 20px;
+}
+
+/*
+* Efectos según rareza
+*/
+
+/* Aplicar animaciones de borde según rareza */
+.world-item-card-rarity-rare .item-image {
+	animation: pulseBorder 3s infinite;
+}
+
+.world-item-card-rarity-epic .item-image {
+	animation: pulseBorder 2.5s infinite;
+}
+
+.world-item-card-rarity-legendary .item-image {
+	animation: flowBorder 5s infinite linear;
+}
+
+.world-item-card-rarity-artifact .item-image {
+	animation: rainbowBorder 8s infinite linear;
+}
+
+/* Efectos holográficos para objetos legendarios y artefactos */
+.world-item-card-rarity-legendary .world-item-card-content::before,
+.world-item-card-rarity-artifact .world-item-card-content::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(45deg,
+			rgba(255, 0, 0, 0.05),
+			rgba(255, 255, 0, 0.05),
+			rgba(0, 255, 0, 0.05),
+			rgba(0, 255, 255, 0.05),
+			rgba(0, 0, 255, 0.05),
+			rgba(255, 0, 255, 0.05),
+			rgba(255, 0, 0, 0.05));
+	background-size: 400% 400%;
+	mix-blend-mode: overlay;
+	pointer-events: none;
+	animation: rainbowGlow 5s infinite linear;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	z-index: 5;
+	border-radius: inherit;
+}
+
+.world-item-card-container:hover .world-item-card-rarity-legendary .world-item-card-content::before,
+.world-item-card-container:hover .world-item-card-rarity-artifact .world-item-card-content::before {
+	opacity: 1;
+}
+
+/* Efectos de texto según rareza */
+.world-item-card-rarity-legendary .item-card-title,
+.world-item-card-rarity-artifact .item-card-title {
+	text-shadow: 0 0 5px var(--card-rarity-glow);
+}
+
+/* Efectos para iconos de tipo */
+.item-type-icon {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.world-item-card-rarity-epic .item-type-icon,
+.world-item-card-rarity-legendary .item-type-icon,
+.world-item-card-rarity-artifact .item-type-icon {
+	box-shadow: 0 0 10px var(--card-rarity-glow);
+}
+
+.world-item-card-container:hover .item-type-icon {
+	transform: scale(1.1) rotate(5deg);
+}
+
+/* Optimizaciones para móvil */
+@media (max-width: 640px) {
+	.world-item-card-container {
+		perspective: 600px;
+	}
+
+	.world-item-card-content {
+		padding: 0.5rem;
+	}
+
+	.item-stats-container {
+		margin-bottom: 0.5rem;
+	}
+}

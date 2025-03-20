@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
-import { ImageGrid, type ImageGridImage } from './layouts/refactored/base/image-grid';
+import { ImageGrid, type ImageGridImage } from './layouts/base/image-grid';
 import type { CardOptions } from './types/unified-card-types';
 
 export interface EntityCardContentProps {

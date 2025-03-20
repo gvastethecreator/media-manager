@@ -31,7 +31,7 @@ import { adaptCardOptions } from '../types';
 import type { CardOptions } from '../types/unified-card-types';
 import type { AlbumFormData } from './forms/entity-types';
 
-import '../../styles/album-card.css';
+import '../styles/album-card.css';
 
 // TIPOS DE DATOS
 // ==============================
