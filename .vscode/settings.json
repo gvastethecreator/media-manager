@@ -57,7 +57,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Cursor Dark",
+  "workbench.preferredDarkColorTheme": "Bearded Theme feat. Will",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,
@@ -79,7 +79,7 @@
   "debug.console.fontSize": 12,
   "scm.inputFontSize": 12,
   "workbench.colorCustomizations": {},
-  "workbench.panel.showLabels": false,
+  "workbench.panel.showLabels": true,
   "editor.codeActions.triggerOnFocusChange": true,
   "editor.experimentalEditContextEnabled": true,
   "diffEditor.experimental.showMoves": true,
@@ -87,7 +87,7 @@
   "workbench.commandPalette.experimental.suggestCommands": true,
   "workbench.panel.defaultLocation": "right",
   "workbench.startupEditor": "none",
-  "workbench.iconTheme": "vscode-icons",
+  "workbench.iconTheme": "material-icon-theme",
   "workbench.view.showQuietly": {
     "workbench.panel.output": true
   },

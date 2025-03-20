@@ -2,12 +2,15 @@
  * Tipos para el módulo de colores
  */
 
+import { DEFAULT_COLOR_PALETTES } from './color-palette';
+
 /**
  * Paleta de colores
  */
 export interface ColorPalette {
 	id: string;
 	name: string;
+	description?: string;
 	primaryColor: string;
 	secondaryColor: string;
 	accentColor: string;
@@ -59,61 +62,6 @@ export interface ColorsModuleProps {
 
 /**
  * Paletas de colores predefinidas
+ * @deprecated Usar DEFAULT_COLOR_PALETTES de color-palette.tsx
  */
-export const COLOR_PALETTES: ColorPalette[] = [
-	{
-		id: 'modern-blue',
-		name: 'Azul Moderno',
-		primaryColor: '59, 130, 246',
-		secondaryColor: '37, 99, 235',
-		accentColor: '245, 158, 11',
-		backgroundStart: '249, 250, 251',
-		backgroundEnd: '243, 244, 246',
-		textColor: '31, 41, 55',
-		borderColor: '209, 213, 219',
-	},
-	{
-		id: 'dark-elegance',
-		name: 'Elegancia Oscura',
-		primaryColor: '75, 85, 99',
-		secondaryColor: '55, 65, 81',
-		accentColor: '220, 38, 38',
-		backgroundStart: '31, 41, 55',
-		backgroundEnd: '17, 24, 39',
-		textColor: '243, 244, 246',
-		borderColor: '75, 85, 99',
-	},
-	{
-		id: 'nature-green',
-		name: 'Verde Natural',
-		primaryColor: '16, 185, 129',
-		secondaryColor: '5, 150, 105',
-		accentColor: '245, 158, 11',
-		backgroundStart: '236, 253, 245',
-		backgroundEnd: '209, 250, 229',
-		textColor: '6, 95, 70',
-		borderColor: '167, 243, 208',
-	},
-	{
-		id: 'vibrant-purple',
-		name: 'Púrpura Vibrante',
-		primaryColor: '139, 92, 246',
-		secondaryColor: '124, 58, 237',
-		accentColor: '236, 72, 153',
-		backgroundStart: '245, 243, 255',
-		backgroundEnd: '237, 233, 254',
-		textColor: '91, 33, 182',
-		borderColor: '196, 181, 253',
-	},
-	{
-		id: 'sunset-orange',
-		name: 'Naranja Atardecer',
-		primaryColor: '249, 115, 22',
-		secondaryColor: '234, 88, 12',
-		accentColor: '2, 132, 199',
-		backgroundStart: '255, 247, 237',
-		backgroundEnd: '254, 215, 170',
-		textColor: '154, 52, 18',
-		borderColor: '251, 146, 60',
-	},
-];
+export const COLOR_PALETTES = DEFAULT_COLOR_PALETTES;

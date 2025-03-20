@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext, useState } from 'react';
-import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../../layers/types';
+import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../layers/types';
 import { DEFAULT_LAYERS_CONFIG, type LayersContextType, type LayersModuleConfig } from './types';
 
 // Crear contexto para el sistema de capas

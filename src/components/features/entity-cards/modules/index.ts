@@ -9,14 +9,11 @@ export * from './core';
 // Módulos de Raridades
 export * from './rarities';
 
-// Módulos de Capas
-export * from './layers-module';
 
 // Módulos de Efectos
 export * from './effects';
 
 // Módulos de Imagen
-export * from './image';
 export * from './image-grid';
 
 // Módulos de Diseño

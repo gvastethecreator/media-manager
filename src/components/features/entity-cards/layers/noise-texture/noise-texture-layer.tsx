@@ -1,17 +1,26 @@
+/**
+ * 🌫️ Componente que renderiza una capa de textura de ruido
+ * @component
+ */
 'use client';
 
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ExplodeLayerTransformFunction } from '../../types/base-card-types';
 import type { NoiseTextureConfig } from './actions/noise-texture-config.action';
 import { noiseCache, noiseMapToImageData } from './utils/noise-algorithms';
 
 interface NoiseTextureLayerProps {
+	/** Estado de explosión de la capa */
 	isExploded: boolean;
+	/** Estado de hover de la capa */
 	isHovered: boolean;
+	/** Capa actualmente activa */
 	activeLayer: string | null;
+	/** Función para obtener la transformación de explosión */
 	getExplodeLayerTransform: ExplodeLayerTransformFunction;
+	/** Configuración de la textura de ruido */
 	config: NoiseTextureConfig;
 }
 
@@ -23,11 +32,12 @@ export function NoiseTextureLayer({
 	config,
 }: NoiseTextureLayerProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const [_isMounted, setIsMounted] = useState(false);
+	const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 	const animationRef = useRef<number>();
+	const [error, setError] = useState<string | null>(null);
 	const [shouldRender, setShouldRender] = useState(true);
 
-	// Extraer configuración
+	// Extraer configuración con valores por defecto
 	const {
 		enabled = true,
 		visibleOnHover = true,
@@ -46,59 +56,52 @@ export function NoiseTextureLayer({
 
 	// Determinar si debemos renderizar el componente
 	useEffect(() => {
-		if (!enabled) {
-			setShouldRender(false);
-			return;
-		}
-
-		if (visibleOnHover && !isHovered) {
-			setShouldRender(false);
-			return;
-		}
-
-		setShouldRender(true);
+		setShouldRender(enabled && (!visibleOnHover || isHovered));
 	}, [enabled, visibleOnHover, isHovered]);
 
-	// Renderizar el ruido en el canvas cuando cambie la configuración
-	useEffect(() => {
-		if (!canvasRef.current || !shouldRender) {
-			return;
+	// Inicializar contexto del canvas
+	const initializeCanvas = useCallback(() => {
+		if (!canvasRef.current) {
+			setError('Canvas no disponible');
+			return false;
 		}
 
-		const canvas = canvasRef.current;
-		const ctx = canvas.getContext('2d');
+		const ctx = canvasRef.current.getContext('2d');
 		if (!ctx) {
+			setError('Contexto 2D no disponible');
+			return false;
+		}
+
+		const dpr = window.devicePixelRatio || 1;
+		const rect = canvasRef.current.getBoundingClientRect();
+
+		canvasRef.current.width = rect.width * dpr;
+		canvasRef.current.height = rect.height * dpr;
+
+		ctx.scale(dpr, dpr);
+		contextRef.current = ctx;
+		return true;
+	}, []);
+
+	// Renderizar el ruido
+	const renderNoise = useCallback((time = 0) => {
+		const ctx = contextRef.current;
+		const canvas = canvasRef.current;
+
+		if (!ctx || !canvas) {
+			setError('Contexto o canvas no disponible');
 			return;
 		}
 
-		// Ajustar tamaño del canvas
-		const updateCanvasSize = () => {
-			const rect = canvas.getBoundingClientRect();
-			const dpr = window.devicePixelRatio || 1;
-			canvas.width = rect.width * dpr;
-			canvas.height = rect.height * dpr;
-
-			// Escalar contexto para alta resolución
-			ctx.scale(dpr, dpr);
-		};
-
-		updateCanvasSize();
-		setIsMounted(true);
-
-		// Renderizar el ruido
-		const renderNoise = (time = 0) => {
-			if (!ctx || !canvas) {
-				return;
-			}
-
-			// Tamaño del mapa de ruido (optimizado para rendimiento)
+		try {
+			// Tamaño optimizado del mapa de ruido
 			const mapWidth = Math.ceil(canvas.width / 4);
 			const mapHeight = Math.ceil(canvas.height / 4);
 
-			// Usar semilla animada si está activado
+			// Semilla animada si está activado
 			const animatedSeed = animated ? seed + time * animationSpeed * 0.001 : seed;
 
-			// Obtener mapa de ruido del caché o generarlo
+			// Generar o recuperar mapa de ruido
 			const noiseMap = noiseCache.get(mapWidth, mapHeight, pattern as 'perlin' | 'simplex' | 'fractalNoise', {
 				seed: animatedSeed,
 				scale,
@@ -106,23 +109,34 @@ export function NoiseTextureLayer({
 				persistence: density,
 			});
 
-			// Convertir a ImageData
+			// Convertir a ImageData y renderizar
 			const imageData = noiseMapToImageData(noiseMap, color, intensity);
+			createImageBitmap(imageData)
+				.then((bitmap) => {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.globalAlpha = opacity;
+					ctx.globalCompositeOperation = blendMode as GlobalCompositeOperation;
+					ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, canvas.width, canvas.height);
+					bitmap.close();
 
-			// Crear un bitmap temporal y dibujarlo en el canvas
-			createImageBitmap(imageData).then((bitmap) => {
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.globalAlpha = opacity;
-				ctx.globalCompositeOperation = blendMode as GlobalCompositeOperation;
-				ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, canvas.width, canvas.height);
-				bitmap.close();
+					if (animated) {
+						animationRef.current = requestAnimationFrame(renderNoise);
+					}
+				})
+				.catch((err) => {
+					setError(`Error al crear bitmap: ${err.message}`);
+				});
+		} catch (err) {
+			setError(`Error al generar ruido: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+		}
+	}, [animated, animationSpeed, blendMode, color, density, intensity, opacity, pattern, scale, octaves, seed]);
 
-				// Si es animado, continuar animación
-				if (animated) {
-					animationRef.current = requestAnimationFrame(renderNoise);
-				}
-			});
-		};
+	// Efecto principal de renderizado
+	useEffect(() => {
+		if (!shouldRender) return;
+
+		const success = initializeCanvas();
+		if (!success) return;
 
 		if (animated) {
 			animationRef.current = requestAnimationFrame(renderNoise);
@@ -130,42 +144,29 @@ export function NoiseTextureLayer({
 			renderNoise();
 		}
 
-		// Limpiar animación al desmontar
 		return () => {
 			if (animationRef.current) {
 				cancelAnimationFrame(animationRef.current);
 			}
 		};
-	}, [
-		density,
-		opacity,
-		pattern,
-		scale,
-		octaves,
-		seed,
-		animated,
-		animationSpeed,
-		color,
-		intensity,
-		blendMode,
-		shouldRender,
-	]);
+	}, [shouldRender, initializeCanvas, renderNoise, animated]);
 
-	// Ajustar tamaño cuando cambie la ventana
+	// Manejar redimensionamiento
 	useEffect(() => {
 		const handleResize = () => {
-			setIsMounted(false);
-			setTimeout(() => setIsMounted(true), 0);
+			const success = initializeCanvas();
+			if (success) {
+				renderNoise();
+			}
 		};
 
 		window.addEventListener('resize', handleResize);
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
-	}, []);
+		return () => window.removeEventListener('resize', handleResize);
+	}, [initializeCanvas, renderNoise]);
 
-	// Si no debemos renderizar, retornar null
-	if (!shouldRender) {
+	if (!shouldRender) return null;
+	if (error) {
+		console.error('NoiseTextureLayer Error:', error);
 		return null;
 	}
 

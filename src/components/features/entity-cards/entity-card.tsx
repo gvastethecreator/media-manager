@@ -1,602 +1,230 @@
 'use client';
 
-import { cn, deepMerge } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { EntityCardContent } from './entity-card-content';
-import { LayerPluginProvider, LayerRenderer } from './layers/layer-plugin-system';
-import { useAnimationSystem } from './modules/animation';
-import { CoreLayer } from './modules/core';
-import { useDesignSystem } from './modules/design';
-import './styles/card-borders.css';
-// Importar tipos de imagen desde el componente ImageGrid refactorizado
-import type { ImageGridImage, ImageGridProps } from './layouts/base/image-grid';
-// Importar tipo DesignSystem desde el módulo de diseño
-import type { DesignSystem } from './modules/design/types';
-// Importar tipos desde el archivo centralizado
-import type { AnimationSystemType, BacksideOptionsType, CardOptions } from './types';
-// Tipo de alias para compatibilidad
-type ImageGridLayout = ImageGridProps['layout'];
-type ImageGridStyle = ImageGridProps['style'];
-// Importar sistema de manejo de errores
-// Importar CoreConfig desde el módulo core
-import { ErrorBoundary } from 'react-error-boundary';
-import type { CoreConfig } from './modules/core/core-config';
-import { type CardError, CardErrorDisplay, createErrorHandler } from './utils/error-handler';
-// Importaciones para el sistema de depuración
-import { useCardDebug } from './debug/card-debug-toolbar';
-import { RegisterLayersForEntity } from './layers/unified-layer-registration';
+import { useEffect, useState } from 'react';
+import type { CardOptions } from './types/unified-card-types';
 
-// Definir un tipo extendido de CardOptions para resolver los problemas de tipo
-export interface EntityCardOptions extends CardOptions {
-	entityType?: string;
-	backside?: { enabled?: boolean };
-	textureConfig?: any;
-	rarityConfig?: any;
-	layerConfigs?: Record<string, any>;
-	hoverScale?: number;
-	enableGlowEffect?: boolean;
-	enableHolographicEffect?: boolean;
-	enableGrainEffect?: boolean;
-	enableScanlinesEffect?: boolean;
-	layerSystem?: {
-		order?: string[];
-		layerBlending?: string;
-		layerSpacing?: number;
+// Definir un tipo simplificado de CardOptions
+export interface EntityCardOptions {
+	designSystem?: {
+		preset?: string;
+		cornerRadius?: number;
+		borderWidth?: number;
+		shadowStyle?: string;
 	};
-	glowOptions?: any;
-	holographicOptions?: any;
-	grainOptions?: any;
+	primaryColor?: string;
+	secondaryColor?: string;
+	// Añadir opciones para efectos visuales
+	enable3DEffect?: boolean;
+	enableHolographicEffect?: boolean;
+	enableGlowEffect?: boolean;
+	enableScanlines?: boolean;
+	enableAnimatedBorder?: boolean;
+	enableGrainEffect?: boolean;
 }
 
 export interface BaseCardProps {
 	children: React.ReactNode;
 	className?: string;
-	// Propiedades específicas de Backside
-	enableBackside?: boolean;
-	backsideContent?: React.ReactNode;
-	backsideOptions?: {
-		layoutType?: string;
-		colorMode?: string;
-		customColor?: string;
-		opacity?: number;
-		blurBackground?: boolean;
-		blurAmount?: number;
-		animation?: string;
-		animationDuration?: number;
-		showBackContent?: boolean;
-	};
-	// Propiedades específicas de Core
-	coreConfig?: CoreConfig;
-	enableCore?: boolean;
-	// Manejador de eventos de clic
-	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
+// Componente base simplificado
 export function BaseCard({
 	children,
 	className,
-	enableBackside = false,
-	backsideContent,
-	backsideOptions,
-	enableCore = false,
-	coreConfig,
 	onClick,
 }: BaseCardProps) {
-	// Estado para el flip de la tarjeta
-	const [isFlipped, setIsFlipped] = useState(false);
-
-	// Función para voltear la tarjeta
-	const handleFlip = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>) => {
-			// Si hay un manejador onClick externo, priorizar ese
-			if (onClick) {
-				// Convertir el tipo para que sea compatible
-				onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
-				return;
-			}
-
-			// Si no hay onClick externo y está habilitado el backside, manejar flip
-			if (enableBackside) {
-				setIsFlipped(!isFlipped);
-				e.stopPropagation(); // Evitar propagación adicional
-			}
-		},
-		[enableBackside, isFlipped, onClick]
-	);
-
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLButtonElement>) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				if (onClick) {
-					// Simular un evento de clic para el manejador onClick
-					const syntheticEvent = new MouseEvent('click', {
-						bubbles: true,
-						cancelable: true,
-						view: window,
-					}) as unknown as React.MouseEvent<HTMLDivElement>;
-					onClick(syntheticEvent);
-				} else if (enableBackside) {
-					setIsFlipped(!isFlipped);
-				}
-				e.preventDefault();
-			}
-		},
-		[enableBackside, isFlipped, onClick]
-	);
-
 	return (
 		<button
 			tabIndex={0}
 			type="button"
 			className={cn(
-				'relative w-full h-full perspective-1000 bg-transparent border-0 p-0',
+				'relative w-full h-full bg-background border border-border overflow-hidden rounded-lg transition-all duration-200',
 				className,
-				onClick || enableBackside ? 'cursor-pointer' : 'cursor-default'
+				onClick ? 'cursor-pointer' : 'cursor-default'
 			)}
-			onClick={handleFlip}
-			onKeyDown={handleKeyDown}
-			aria-pressed={isFlipped}
+			onClick={onClick}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					if (onClick) {
+						// Crear un evento sintético de clic
+						const syntheticEvent = {
+							currentTarget: e.currentTarget,
+							preventDefault: () => { },
+							stopPropagation: () => { },
+						} as React.MouseEvent<HTMLButtonElement>;
+						onClick(syntheticEvent);
+					}
+				}
+			}}
 		>
-			{/* Contenedor para el efecto 3D */}
-			<div className={cn('relative w-full h-full transition-transform duration-500', isFlipped && 'rotateY-180')}>
-				{/* Cara Frontal */}
-				<div
-					className={cn('absolute inset-0 backface-hidden', isFlipped ? 'pointer-events-none' : 'pointer-events-auto')}
-				>
-					{/* Core Layer - Se incluye solo si está habilitado */}
-					{enableCore && <CoreLayer entityData={{ id: 'core-layer', name: 'Core Layer' }} config={coreConfig} />}
-
-					{/* Contenido principal de la tarjeta */}
-					{children}
-				</div>
-
-				{/* Cara Posterior - Solo se muestra si backside está habilitado */}
-				{enableBackside && (
-					<div
-						className={cn(
-							'absolute inset-0 backface-hidden rotateY-180',
-							!isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
-						)}
-					>
-						<div className="backside-content p-4">{backsideContent}</div>
-					</div>
-				)}
-			</div>
+			{children}
 		</button>
 	);
 }
 
-// Propiedades para el nuevo componente EntityCard que aprovecha todos los módulos
+// Propiedades para el EntityCard simplificado
 export interface EntityCardProps {
-	id?: string;
-	className?: string;
-	children?: React.ReactNode;
-	options?: CardOptions;
-	// Contenido específico para módulos
-	title?: string;
+	title: string;
 	description?: string;
-	image?: string | ImageGridImage[];
-	imageLayout?: ImageGridLayout;
-	imageStyle?: ImageGridStyle;
-	backsideContent?: React.ReactNode;
-	design?: Partial<DesignSystem>;
-	animation?: AnimationSystemType;
-	backside?: BacksideOptionsType;
-	// Flags para habilitar/deshabilitar módulos
-	enableLayers?: boolean;
-	enableDesign?: boolean;
-	enableAnimation?: boolean;
-	enableBackside?: boolean;
-	// Manejadores de eventos
+	image?: string;
+	options?: Partial<CardOptions>;
+	className?: string;
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-	onError?: (error: CardError) => void;
+	children?: React.ReactNode;
 }
 
 /**
- * Componente EntityCard que aprovecha todos los módulos migrados
- * Esta implementación integra todos los sistemas modulares desarrollados
- * 🚀 Versión optimizada con separación de responsabilidades
+ * Tarjeta de entidad básica
+ * Esta versión es la más simple y debería tener el mejor rendimiento
  */
 export function EntityCard({
-	id,
-	className,
-	children,
-	options = {},
-	// Contenido específico
 	title,
 	description,
 	image,
-	imageLayout = 'single',
-	imageStyle = 'standard',
-	backsideContent,
-	design,
-	animation,
-	backside,
-	// Flags de módulos
-	enableLayers = true,
-	enableDesign = true,
-	enableAnimation = true,
-	enableBackside = false,
-	// Manejadores de eventos
+	options = {},
+	className,
 	onClick,
-	onError,
+	children,
 }: EntityCardProps) {
-	// Estado para el flip de la tarjeta
-	const [isFlipped, setIsFlipped] = useState(false);
-	const [error, setError] = useState<CardError | null>(null);
+	// Contador de renderizados para depuración
+	const [renderCount, setRenderCount] = useState(0);
+	// Estado para controlar errores
+	const [hasError, setHasError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
 
-	// Estados para interacción con capas
-	const [isHovered, setIsHovered] = useState(false);
-	const [isExploded, setIsExploded] = useState(false);
-	const [activeLayer, setActiveLayer] = useState<string | null>(null);
-	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+	// Incrementar contador de renderizados en desarrollo
+	useEffect(() => {
+		if (process.env.NODE_ENV === 'development') {
+			setRenderCount(prev => prev + 1);
+		}
+	}, []);
 
-	// Referencia al contenedor para calcular posición del mouse
-	const containerRef = useRef<HTMLButtonElement>(null);
+	// Verificar y registrar opciones y rendimiento en desarrollo
+	useEffect(() => {
+		if (process.env.NODE_ENV === 'development') {
+			// Crear un grupo para la información de depuración
+			console.group(`🎴 EntityCard: ${title}`);
+			console.info('🔄 Renderizado:', renderCount);
 
-	// Crear manejador de errores
-	const errorHandler = createErrorHandler({
-		onError: (err) => {
-			setError(err);
-			onError?.(err);
-		},
-		logErrors: true,
-	});
+			// Verificar opciones avanzadas
+			const advancedOptions = options && Object.entries(options)
+				.filter(([key, value]) => key.startsWith('enable') && Boolean(value))
+				.map(([key]) => key);
 
-	// Obtener configuración de depuración
-	const { debugState, isDebugEnabled, shouldRenderLayer } = useCardDebug();
+			if (advancedOptions && advancedOptions.length > 0) {
+				console.warn('⚠️ Se han detectado opciones avanzadas en modo simple:', advancedOptions);
+				console.info('💡 Estas opciones solo funcionan en modo complex o skeleton');
+			}
 
-	// Opciones por defecto para asegurar que siempre haya valores válidos
-	const defaultOptions: EntityCardOptions = {
-		layerSystem: {
-			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-			layerBlending: 'normal',
-			layerSpacing: 2,
-		},
-		designSystem: {
-			preset: 'default',
-			variant: 'default',
-			aspectRatio: '1/1',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 2,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#3b82f6',
-		secondaryColor: '#1d4ed8',
-		hoverLiftHeight: 10,
-		maxRotation: 15,
+			console.groupEnd();
+		}
+	}, [options, renderCount, title]);
+
+	// Manejador de errores
+	const handleError = (error: unknown) => {
+		setHasError(true);
+		setErrorMessage(error instanceof Error ? error.message : 'Error desconocido');
+		if (process.env.NODE_ENV === 'development') {
+			console.error('❌ Error en EntityCard:', error);
+		}
 	};
 
-	// Combinar opciones por defecto con las proporcionadas
-	const mergedOptions = useMemo(() => {
-		return deepMerge(defaultOptions, options) as EntityCardOptions;
-	}, [options]);
-
-	// Corregir el tipo para useDesignSystem
-	const { designSystem, generateCssStyles } = useDesignSystem(mergedOptions.designSystem as any);
-
-	// Obtener clases y estilos del sistema de animación
-	const { getAnimationStyles } = useAnimationSystem({
-		enabled: enableAnimation && (!isDebugEnabled || shouldRenderLayer('animation')),
-		hoverEffect: true,
-		clickEffect: true,
-		entranceAnimation: 'fade-in',
-		exitAnimation: 'fade-out',
-		transitionDuration: 300,
-		timingFunction: 'ease-in-out',
-		hoverScale: mergedOptions.hoverScale || 1.05,
-		liftHeight: Number(mergedOptions.hoverLiftHeight) || 10,
-		maxRotation: Number(mergedOptions.maxRotation) || 15,
-	});
-
-	// Clase específica para el tipo de entidad
-	const entityTypeClass = useMemo(() => {
-		return mergedOptions.entityType ? `entity-type-${mergedOptions.entityType}` : '';
-	}, [mergedOptions.entityType]);
-
-	// Manejar eventos de mouse para efectos de hover
-	const handleMouseEnter = useCallback(() => {
-		setIsHovered(true);
-	}, []);
-
-	const handleMouseLeave = useCallback(() => {
-		setIsHovered(false);
-		setMousePosition({ x: 0, y: 0 });
-	}, []);
-
-	// Añadir una referencia para throttling de actualizaciones
-	const lastUpdateRef = useRef<number>(0);
-	// Añadir referencia para almacenar la última posición
-	const lastPositionRef = useRef({ x: 0, y: 0 });
-
-	const handleMouseMove = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>) => {
-			if (!containerRef.current) return;
-
-			// Implementar throttling para evitar demasiadas actualizaciones
-			const now = Date.now();
-			if (now - lastUpdateRef.current < 33) { // ~30 fps (1000ms / 30 = 33.33ms)
-				return;
-			}
-
-			// Obtener coordenadas relativas al contenedor
-			const rect = containerRef.current.getBoundingClientRect();
-			const x = ((e.clientX - rect.left) / rect.width) * 100;
-			const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-			// Comprobar si hay un cambio significativo en la posición
-			const deltaX = Math.abs(x - lastPositionRef.current.x);
-			const deltaY = Math.abs(y - lastPositionRef.current.y);
-
-			// Solo actualizar si hay un cambio notable en la posición (más de 1%)
-			if (deltaX > 1 || deltaY > 1) {
-				lastPositionRef.current = { x, y };
-				lastUpdateRef.current = now;
-				setMousePosition({ x, y });
-			}
-		},
-		[containerRef]
-	);
-
-	// Manejar flip de la tarjeta
-	const handleFlip = useCallback(() => {
-		if (enableBackside || mergedOptions.backside?.enabled) {
-			setIsFlipped((prev) => !prev);
-		}
-	}, [enableBackside, mergedOptions.backside?.enabled]);
-
-	// Manejar navegación por teclado
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLButtonElement>) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				if (enableBackside && mergedOptions.backside?.enabled) {
-					handleFlip();
-				} else if (onClick) {
-					// Creamos un evento sintético compatible con el tipo esperado
-					const syntheticEvent = new MouseEvent('click', {
-						bubbles: true,
-						cancelable: true,
-						view: window,
-					}) as unknown as React.MouseEvent<HTMLDivElement>;
-					onClick(syntheticEvent);
-				}
-			}
-
-			// Agregar lógica para que Escape cierre la carta si está volteada
-			if (e.key === 'Escape' && isFlipped) {
-				handleFlip();
-			}
-		},
-		[enableBackside, mergedOptions.backside?.enabled, onClick, isFlipped, handleFlip]
-	);
-
-	// Manejar clic en la tarjeta
-	const handleClick = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>) => {
-			// Si hay un manejador de onClick, llamarlo directamente
-			if (onClick) {
-				// Convertir el tipo para que sea compatible
-				onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
-				// No llamar a handleFlip si hay un onClick para evitar comportamiento dual
-				return;
-			}
-
-			// Si no hay onClick, manejar el flip si está habilitado
-			if (enableBackside || mergedOptions.backside?.enabled) {
-				handleFlip();
-			}
-		},
-		[onClick, enableBackside, mergedOptions.backside?.enabled, handleFlip]
-	);
-
-	// Calcular transformación para modo explodido
-	const getExplodeLayerTransform = useCallback(
-		(index: number) => {
-			if (!isExploded) return {};
-
-			const spacing = mergedOptions.layerSystem?.layerSpacing || 2;
-			const offset = index * spacing;
-			const perspective = 800;
-
-			return {
-				transform: `translateZ(${offset}px)`,
-				zIndex: index,
-				transition: 'transform 0.3s ease-out',
-				perspective: `${perspective}px`,
-			};
-		},
-		[isExploded, mergedOptions.layerSystem?.layerSpacing]
-	);
-
-	// Obtener capas configuradas con comprobación adicional de undefined
-	const layers = useMemo(() => {
-		if (!enableLayers) return [];
-
-		// Asegurarnos de tener un orden de capas válido
-		const defaultLayerOrder = ['background', 'content', 'effects', 'holographic', 'border', 'filter'];
-		const layerOrder = mergedOptions.layerSystem?.order ?? defaultLayerOrder;
-
-		// Verificar que layerOrder es un array
-		if (!Array.isArray(layerOrder)) {
-			return defaultLayerOrder;
-		}
-
-		// Filtrar capas habilitadas
-		return layerOrder.filter((layerId) => {
-			const layerConfig = mergedOptions.layerConfigs?.[layerId];
-			return layerConfig?.enabled !== false;
-		});
-	}, [enableLayers, mergedOptions.layerSystem?.order, mergedOptions.layerConfigs]);
-
-	// Si hay un error, mostrar mensaje utilizando CardErrorDisplay
-	if (error) {
-		return <CardErrorDisplay error={error} className="w-full h-full" onRetry={() => setError(null)} />;
-	}
-
-	// Renderizar tarjeta
+	// Renderizar la tarjeta con manejo de errores
 	try {
-		// Configuraciones para las capas
-		const layerConfigs = {
-			container: {
-				enabled: true,
-				layerIndex: 0,
-			},
-			texture: {
-				enabled: !!mergedOptions.textureConfig?.enabled,
-				layerIndex: 1,
-				textureConfig: mergedOptions.textureConfig,
-			},
-			border: {
-				enabled: !!mergedOptions.rarityConfig?.enabled,
-				layerIndex: 2,
-				borderConfig: mergedOptions.rarityConfig,
-			},
-			glow: {
-				enabled: !!mergedOptions.enableGlowEffect,
-				layerIndex: 3,
-				glowOptions: mergedOptions.glowOptions,
-			},
-			grain: {
-				enabled: !!mergedOptions.enableGrainEffect,
-				layerIndex: 4,
-				grainOptions: mergedOptions.grainOptions,
-			},
-			holographic: {
-				enabled: !!mergedOptions.enableHolographicEffect,
-				layerIndex: 5,
-				holographicOptions: mergedOptions.holographicOptions,
-			},
-			scanlines: {
-				enabled: !!mergedOptions.enableScanlinesEffect,
-				layerIndex: 6,
-			},
-			explode: {
-				enabled: enableLayers,
-				layerIndex: 7,
-			},
-			...mergedOptions.layerConfigs,
+		// Obtener la información de diseño
+		const designSystem = options?.designSystem || {
+			preset: 'default',
+			cornerRadius: 8,
+			borderWidth: 1,
 		};
 
-		// Obtener estilos a aplicar
-		const designStyles = generateCssStyles ? generateCssStyles() : {};
-
 		return (
-			<button
-				ref={containerRef}
-				type="button"
-				onClick={handleClick}
-				onKeyDown={handleKeyDown}
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}
-				onMouseMove={handleMouseMove}
-				tabIndex={0}
-				aria-pressed={isFlipped}
+			<div
+				onClick={onClick}
 				className={cn(
-					'entity-card-container w-full h-full relative',
-					entityTypeClass,
-					className,
-					onClick ? 'cursor-pointer' : enableBackside ? 'cursor-pointer' : 'cursor-default'
+					'relative overflow-hidden transition-all duration-200',
+					'bg-card border rounded-lg p-4 h-52',
+					'hover:shadow-md cursor-pointer',
+					className
 				)}
 				style={{
-					...getAnimationStyles(),
-					...designStyles,
+					borderRadius: `${designSystem.cornerRadius}px`,
+					borderWidth: `${designSystem.borderWidth}px`,
 				}}
 			>
-				<div
-					className={cn('entity-card w-full h-full', entityTypeClass)}
-				>
-					{/* Cara Frontal */}
-					<div className="entity-card-front w-full h-full">
-						{/* Sistema de capas - Sólo se muestra si está habilitado en la depuración */}
-						{enableLayers && layers.length > 0 && (!isDebugEnabled || shouldRenderLayer('layers')) && (
-							<LayerPluginProvider>
-								{/* Registrar las capas necesarias */}
-								<RegisterLayersForEntity
-									entityType={mergedOptions.entityType || 'default'}
-									debug={false}
-								/>
-
-								{/* Renderizar las capas */}
-								<ErrorBoundary fallback={<div className="bg-destructive/10 rounded p-2 text-xs">Error en efectos</div>}>
-									<LayerRenderer
-										isExploded={isExploded}
-										isHovered={isHovered}
-										mousePosition={mousePosition}
-										activeLayer={activeLayer}
-										getExplodeLayerTransform={getExplodeLayerTransform}
-										entityType={mergedOptions.entityType || 'default'}
-										entityId={id}
-										configs={{
-											// Filtrar configuraciones basadas en el estado de depuración
-											container: layerConfigs.container,
-											texture: isDebugEnabled && !shouldRenderLayer('design') ? { ...layerConfigs.texture, enabled: false } : layerConfigs.texture,
-											border: isDebugEnabled && !shouldRenderLayer('border') ? { ...layerConfigs.border, enabled: false } : layerConfigs.border,
-											glow: isDebugEnabled && !shouldRenderLayer('glow') ? { ...layerConfigs.glow, enabled: false } : layerConfigs.glow,
-											grain: isDebugEnabled && !shouldRenderLayer('grain') ? { ...layerConfigs.grain, enabled: false } : layerConfigs.grain,
-											holographic: isDebugEnabled && !shouldRenderLayer('holographic') ? { ...layerConfigs.holographic, enabled: false } : layerConfigs.holographic,
-											scanlines: isDebugEnabled && !shouldRenderLayer('scanlines') ? { ...layerConfigs.scanlines, enabled: false } : layerConfigs.scanlines,
-											explode: layerConfigs.explode,
-											pixelate: isDebugEnabled && !shouldRenderLayer('pixelate') ?
-												{ ...mergedOptions.layerConfigs?.pixelate, enabled: false } :
-												mergedOptions.layerConfigs?.pixelate,
-											...Object.fromEntries(
-												Object.entries(mergedOptions.layerConfigs || {})
-													.filter(([key]) => !['container', 'texture', 'border', 'glow', 'grain', 'holographic', 'scanlines', 'explode', 'pixelate'].includes(key))
-											)
-										}}
-										context={{
-											title,
-											description,
-											image,
-											options: mergedOptions,
-										}}
-									/>
-								</ErrorBoundary>
-							</LayerPluginProvider>
-						)}
-
-						{/* Contenido de la tarjeta usando el componente separado */}
-						<EntityCardContent
-							title={title}
-							description={description}
-							image={typeof image === 'string' ? image : undefined}
-							images={Array.isArray(image) ? image as any : []}
-							imageLayout={imageLayout as any}
-							imageStyle={imageStyle as any}
-							options={mergedOptions as any}
-						>
-							{children}
-						</EntityCardContent>
+				{/* Si hay un error, mostrar un indicador */}
+				{hasError && (
+					<div className="absolute inset-0 flex items-center justify-center bg-red-500/10 z-10">
+						<div className="bg-card p-3 rounded shadow-lg text-center max-w-[80%]">
+							<p className="text-red-500 font-semibold text-sm">Error</p>
+							<p className="text-muted-foreground text-xs">{errorMessage || 'Error al renderizar'}</p>
+						</div>
 					</div>
+				)}
 
-					{/* Cara Posterior */}
-					{(enableBackside || mergedOptions.backside?.enabled) &&
-						(!isDebugEnabled || shouldRenderLayer('backsideEnabled')) &&
-						isFlipped && (
-							<div className="entity-card-back w-full h-full">
-								<div className="backside-content w-full h-full">{backsideContent}</div>
-							</div>
-						)}
+				{/* Contenido principal */}
+				<div className="flex flex-col h-full">
+					{/* Imagen */}
+					{image && (
+						<div className="relative w-full aspect-[4/3] mb-3">
+							<img
+								src={image}
+								alt={title || 'Imagen de tarjeta'}
+								className="object-cover w-full h-full rounded-md"
+								onError={() => handleError('Error al cargar la imagen')}
+							/>
+						</div>
+					)}
+
+					{/* Título */}
+					<h3 className="text-base font-medium truncate">{title}</h3>
+
+					{/* Descripción */}
+					{description && (
+						<p className="text-sm text-muted-foreground line-clamp-3 mt-1">
+							{description}
+						</p>
+					)}
+
+					{/* Contenido adicional */}
+					{children}
+
+					{/* Indicador de mode en desarrollo */}
+					{process.env.NODE_ENV === 'development' && (
+						<div className="absolute top-1 right-1 flex text-[9px] gap-1">
+							<span className="px-1 py-0.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded">simple</span>
+							<span className="px-1 py-0.5 bg-gray-500/20 text-gray-700 dark:text-gray-300 rounded">{renderCount}</span>
+						</div>
+					)}
 				</div>
-			</button>
+			</div>
 		);
-	} catch (err) {
-		// Capturar errores durante el renderizado
-		if (errorHandler) {
-			if (typeof errorHandler === 'function') {
-				(errorHandler as (err: Error) => void)(err as Error);
-			} else if (typeof (errorHandler as any).handleError === 'function') {
-				(errorHandler as any).handleError(err as Error);
-			} else {
-				console.error('Error al renderizar EntityCard:', err);
-			}
-		} else {
-			console.error('Error al renderizar EntityCard:', err);
-		}
-		return null;
+	} catch (error) {
+		// En caso de error en el renderizado, mostrar un fallback
+		handleError(error);
+
+		return (
+			<div className="bg-card border border-red-500 rounded-lg p-4 h-52 relative overflow-hidden">
+				<div className="flex flex-col h-full items-center justify-center">
+					<p className="text-red-500 font-medium text-sm">Error al renderizar tarjeta</p>
+					<p className="text-xs text-muted-foreground mt-1">
+						{errorMessage || 'Error desconocido'}
+					</p>
+					<div className="mt-3 text-xs">
+						<p className="font-medium">Información:</p>
+						<p>Título: {title || 'No disponible'}</p>
+						{process.env.NODE_ENV === 'development' && (
+							<p className="mt-2 text-[10px] text-muted-foreground">
+								Modo: simple | Renderizados: {renderCount}
+							</p>
+						)}
+					</div>
+				</div>
+			</div>
+		);
 	}
 }

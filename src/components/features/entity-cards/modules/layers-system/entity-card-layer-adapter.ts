@@ -7,9 +7,9 @@
  * y la configuración del sistema de capas, permitiendo una integración fluida.
  */
 
-import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../../layers/types';
-import { DEFAULT_LAYER_SYSTEM } from '../../settings/layer-settings-config';
-import type { CardOptions } from '../../types/card-settings-types';
+import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../layers/types';
+import { DEFAULT_LAYER_SYSTEM } from '../settings/layer-settings-config';
+import type { CardOptions } from '../types/card-settings-types';
 import type { LayersModuleConfig } from './types';
 
 // Interfaces auxiliares para tipar correctamente las opciones

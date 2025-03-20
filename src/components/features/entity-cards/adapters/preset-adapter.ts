@@ -94,24 +94,24 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 
 	try {
 		// Parsear configuraciones base
-		const coreConfig = parseJsonConfig(preset.coreConfig);
-		const designConfig = parseJsonConfig(preset.designConfig);
-		const animationConfig = parseJsonConfig(preset.animationConfig);
-		const layerConfig = parseJsonConfig(preset.layerConfig);
-		const backsideConfig = parseJsonConfig(preset.backsideConfig);
-		const effectsConfig = parseJsonConfig(preset.effectsConfig);
-		const performanceConfig = parseJsonConfig(preset.performanceConfig);
+		const coreConfig = parseJsonConfig(preset.coreConfig) || {};
+		const designConfig = parseJsonConfig(preset.designConfig) || {};
+		const animationConfig = parseJsonConfig(preset.animationConfig) || {};
+		const layerConfig = parseJsonConfig(preset.layerConfig) || {};
+		const backsideConfig = parseJsonConfig(preset.backsideConfig) || {};
+		const effectsConfig = parseJsonConfig(preset.effectsConfig) || {};
+		const performanceConfig = parseJsonConfig(preset.performanceConfig) || {};
 
 		// Parsear configuraciones comunes
-		const colorConfig = parseJsonConfig<Partial<ColorPalette>>(preset.colorConfig);
-		const imageGridConfig = parseJsonConfig(preset.imageGridConfig);
-		const layoutConfig = parseJsonConfig(preset.layoutConfig);
-		const explodeConfig = parseJsonConfig(preset.explodeConfig);
-		const previewConfig = parseJsonConfig(preset.previewConfig);
-		const rarityConfig = parseJsonConfig(preset.rarityConfig);
+		const colorConfig = parseJsonConfig<Partial<ColorPalette>>(preset.colorConfig) || {};
+		const imageGridConfig = parseJsonConfig(preset.imageGridConfig) || {};
+		const layoutConfig = parseJsonConfig(preset.layoutConfig) || {};
+		const explodeConfig = parseJsonConfig(preset.explodeConfig) || {};
+		const previewConfig = parseJsonConfig(preset.previewConfig) || {};
+		const rarityConfig = parseJsonConfig(preset.rarityConfig) || {};
 
 		// Parsear configuración de estilo Magic Card
-		const magicCardBase = parseJsonConfig(preset.magicCardBase);
+		const magicCardBase = parseJsonConfig(preset.magicCardBase) || {};
 
 		// Obtener configuración específica según el tipo de entidad
 		let entityConfig = null;
@@ -161,7 +161,7 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 
 		// Configurar el diseño de la tarjeta Magic
 		const magicCard = magicCardBase || {};
-		const frameColor = entityConfig?.frameColor || defaultOptions.primaryColor || '#3b82f6';
+		const frameColor = (entityConfig as any)?.frameColor || defaultOptions.primaryColor || '#3b82f6';
 
 		// Construir las opciones de tarjeta combinando todas las configuraciones
 		const cardOptions: CardOptions = {
@@ -170,68 +170,70 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 
 			// Sistema core
 			core: {
-				...defaultOptions.core,
+				...(defaultOptions.core || {}),
 				...coreConfig,
 			},
 
 			// Sistema de diseño
 			designSystem: {
-				...defaultOptions.designSystem,
-				...(designConfig || {}),
+				...(defaultOptions.designSystem || {}),
+				...designConfig,
 				preset: entityType as unknown as CardPreset,
 				...magicCard,
 			},
 
 			// Animación
 			animation: {
-				...defaultOptions.animation,
-				...(animationConfig || {}),
+				...(defaultOptions.animation || {}),
+				...animationConfig,
 			},
 
 			// Capas y efectos
 			layers: {
-				...defaultOptions.layers,
-				...(layerConfig || {}),
+				...(defaultOptions.layers || {}),
+				...layerConfig,
 			},
 			effects: {
-				...defaultOptions.effects,
-				...(effectsConfig || {}),
+				...(defaultOptions.effects || {}),
+				...effectsConfig,
 				frameColor,
 			},
 
 			// Configuración de backside
 			backside: {
-				...defaultOptions.backside,
-				...(backsideConfig || {}),
+				...(defaultOptions.backside || {}),
+				...backsideConfig,
 			},
 
 			// Rendimiento
 			performance: {
-				...defaultOptions.performance,
-				...(performanceConfig || {}),
+				...(defaultOptions.performance || {}),
+				...performanceConfig,
 			},
 
 			// Configuración de colores
-			colors: {
-				primary: frameColor,
-				secondary: defaultOptions.secondaryColor || '#1d4ed8',
-				accent: colorConfig?.accent || '#4f46e5',
-				background: colorConfig?.background || '#ffffff',
-				text: colorConfig?.text || '#111827',
-				border: colorConfig?.border || '#e5e7eb',
-			},
+			colors: typeof defaultOptions.colors === 'string'
+				? defaultOptions.colors
+				: {
+					primary: frameColor,
+					secondary: typeof defaultOptions.colors === 'object' ? defaultOptions.colors.secondary || '#1d4ed8' : '#1d4ed8',
+					accent: colorConfig.accent || '#4f46e5',
+					background: colorConfig.background || '#ffffff',
+					text: colorConfig.text || '#111827',
+					border: colorConfig.border || '#e5e7eb',
+				},
 
 			// Configuración del grid de imágenes
 			imageGrid: {
-				...defaultOptions.imageGrid,
-				...(imageGridConfig || {}),
+				...(defaultOptions.imageGrid || {}),
+				...imageGridConfig,
 			},
 
 			// Layout
 			layout: {
-				...defaultOptions.layout,
-				...(layoutConfig || {}),
-				type: entityConfig?.layout || defaultOptions.layout?.type || 'standard',
+				...(defaultOptions.layout || {}),
+				...layoutConfig,
+				type: (entityConfig as any)?.layout || ((defaultOptions.layout || {}) as any).type || 'standard',
 			},
 
 			// Configuración específica por entidad
@@ -239,18 +241,18 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 
 			// Explode y preview
 			explode: {
-				...defaultOptions.explode,
-				...(explodeConfig || {}),
+				...(defaultOptions.explode || {}),
+				...explodeConfig,
 			},
 			preview: {
-				...defaultOptions.preview,
-				...(previewConfig || {}),
+				...(defaultOptions.preview || {}),
+				...previewConfig,
 			},
 
 			// Sistema de rareza
 			raritySystem: {
-				...defaultOptions.raritySystem,
-				...(rarityConfig || {}),
+				...(defaultOptions.raritySystem || {}),
+				...rarityConfig,
 			},
 		};
 
@@ -292,6 +294,17 @@ function getDefaultOptionsForEntityType(entityType: EntityType): CardOptions {
 		secondaryColor: '#1d4ed8',
 		hoverLiftHeight: 10,
 		maxRotation: 15,
+		// Inicializar campos que podrían ser utilizados en spread
+		core: {},
+		animation: {},
+		effects: {},
+		backside: {},
+		performance: {},
+		imageGrid: {},
+		layout: {},
+		explode: {},
+		preview: {},
+		raritySystem: {},
 	};
 
 	// Opciones específicas por tipo

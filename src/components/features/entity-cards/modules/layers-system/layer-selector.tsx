@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
 import { useLayerPlugin } from '../../layers/layer-plugin-system';
-import type { LayerImplementation } from '../../layers/types';
+import type { LayerImplementation } from '../layers/types';
 
 export interface LayerSelectorProps {
 	/** ID de la capa a configurar */

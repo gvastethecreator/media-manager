@@ -1,18 +1,23 @@
-'use client';
-
 /**
  * 🎨 Implementación de capa para filtros visuales
- *
- * Este archivo define la implementación de la capa de filtros siguiendo
- * la interfaz LayerImplementation definida en el sistema de capas.
+ * @module FilterLayerImplementation
  */
 
+'use client';
+
 import { SlidersHorizontal } from 'lucide-react';
+import * as React from 'react';
 import type { LayerImplementation } from '../types';
 import type { FilterConfig } from './actions/filter-config.action';
 import { deleteFilterConfig, getFilterConfig, updateFilterConfig } from './actions/filter-config.action';
 import { FilterEffectLayer } from './filter-effect-layer';
 import { FilterSettings } from './filter-settings';
+import { useVisualEffects } from './use-visual-effects';
+
+/**
+ * Tipos de presets disponibles para filtros
+ */
+export type FilterPreset = 'none' | 'vintage' | 'cool' | 'warm' | 'bw' | 'sepia' | 'sharp' | 'soft' | 'dramatic' | 'muted' | 'vibrant';
 
 /**
  * Configuración por defecto de la capa de filtros
@@ -29,57 +34,63 @@ const defaultConfig: FilterConfig = {
 	sepia: 0,
 	invert: 0,
 	opacity: 100,
-	preset: 'none',
+	preset: 'none' as FilterPreset,
 	customCSS: '',
 };
 
 /**
  * Implementación de la capa de filtros
+ * @type {LayerImplementation}
  */
 export const filterLayerImplementation: LayerImplementation = {
-	// Identificador único de la capa
 	type: 'filter',
-
-	// Nombre amigable para mostrar en la UI
 	name: 'Filtros',
-
-	// Descripción de la funcionalidad
 	description: 'Aplica filtros y efectos visuales a la tarjeta',
-
-	// Categoría a la que pertenece
 	category: 'effects',
-
-	// Configuración por defecto
 	defaultConfig,
-
-	// Icono para representar la capa en la UI
 	icon: <SlidersHorizontal size={16} />,
-
-	// Tipos de entidad compatibles
 	compatibleEntityTypes: ['image', 'album', 'folder', 'tag', 'collection'],
 
-	// Componente para renderizar la capa
-	render: ({ config, isHovered, isActive }) => {
+	render: React.memo(({ config, isHovered, isActive }) => {
+		// Procesar y validar configuración
+		const processedConfig = React.useMemo(() => ({
+			...defaultConfig,
+			...(config as FilterConfig),
+		}), [config]);
+
+		// Usar hook personalizado para efectos visuales
+		const { getFilterStyle } = useVisualEffects();
+
+		// Calcular estilos de filtro
+		const filterStyle = React.useMemo(() =>
+			getFilterStyle(processedConfig),
+			[getFilterStyle, processedConfig]);
+
 		return (
 			<FilterEffectLayer
-				config={config as FilterConfig}
+				config={processedConfig}
 				isHovered={isHovered || false}
 				isActive={isActive || false}
+				style={filterStyle}
 			/>
 		);
-	},
+	}),
 
-	// Componente para configurar la capa
-	Settings: ({ config, onChange, entityType, entityId }) => {
+	Settings: React.memo(({ config, onChange, entityType, entityId }) => {
+		// Manejar cambios de configuración de forma optimizada
+		const handleConfigChange = React.useCallback((newConfig: FilterConfig) => {
+			onChange(newConfig);
+		}, [onChange]);
+
 		return (
 			<FilterSettings
 				entityType={entityType}
 				entityId={entityId}
 				initialConfig={config as FilterConfig}
-				onConfigChange={(newConfig: FilterConfig) => onChange(newConfig)}
+				onConfigChange={handleConfigChange}
 			/>
 		);
-	},
+	}),
 
 	// Funciones de servidor asociadas a la capa
 	serverActions: {
@@ -89,4 +100,7 @@ export const filterLayerImplementation: LayerImplementation = {
 	},
 };
 
+// Exportar tipos y configuración por defecto
+export { defaultConfig as defaultFilterConfig };
+export type { FilterConfig };
 export default filterLayerImplementation;

@@ -8,7 +8,7 @@
  */
 
 import type { LayerComponent } from '../../layers/layer-plugin-system';
-import type { LayerConfig, LayerImplementation, LayerRenderProps, LayerSettingsProps } from '../../layers/types';
+import type { LayerConfig, LayerImplementation, LayerRenderProps, LayerSettingsProps } from '../layers/types';
 
 /**
  * Adapta un componente de capa al formato requerido por el sistema de módulos

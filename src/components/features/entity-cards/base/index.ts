@@ -18,5 +18,3 @@ export type {
     CardMetadataSectionProps, MetadataItem
 } from './card-sections';
 
-// Re-exportar otros componentes base según sea necesario
-export { default as CardAdapter } from './card-adapter';

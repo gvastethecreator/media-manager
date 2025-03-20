@@ -4,20 +4,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Check, Plus } from 'lucide-react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
-
-export interface ColorPalette {
-	id: string;
-	name: string;
-	description?: string;
-	primaryColor: string;
-	secondaryColor: string;
-	accentColor: string;
-	backgroundStart: string;
-	backgroundEnd: string;
-	textColor: string;
-	borderColor: string;
-}
+import { useState, useMemo } from 'react';
+import { CustomPaletteModal } from './custom-palette-modal';
+import type { ColorPalette } from './types';
 
 // Paletas de colores predefinidas
 export const DEFAULT_COLOR_PALETTES: ColorPalette[] = [
@@ -179,44 +168,59 @@ const ColorPaletteCard: React.FC<ColorPaletteCardProps> = ({ palette, isSelected
 interface ColorPaletteSelectorProps {
 	selectedPaletteId?: string;
 	onSelectPalette: (palette: ColorPalette) => void;
-	customPalettes?: ColorPalette[];
+	palettes?: ColorPalette[];
 	allowCustom?: boolean;
+	className?: string;
 }
 
-export const ColorPaletteSelector: React.FC<ColorPaletteSelectorProps> = ({
+export function ColorPaletteSelector({
 	selectedPaletteId,
 	onSelectPalette,
-	customPalettes = [],
+	palettes = DEFAULT_COLOR_PALETTES,
 	allowCustom = false,
-}) => {
-	const [selectedId, setSelectedId] = useState<string | undefined>(selectedPaletteId);
-	const [palettes, setPalettes] = useState<ColorPalette[]>([...DEFAULT_COLOR_PALETTES, ...customPalettes]);
+	className,
+}: ColorPaletteSelectorProps) {
+	const [customPalettes, setCustomPalettes] = useState<ColorPalette[]>([]);
+	const [showCustomModal, setShowCustomModal] = useState(false);
 
-	// Actualizar las paletas cuando cambien las props
-	useEffect(() => {
-		setPalettes([...DEFAULT_COLOR_PALETTES, ...customPalettes]);
-	}, [customPalettes]);
+	// Combinar paletas predefinidas con paletas personalizadas
+	const allPalettes = useMemo(() => {
+		return [...palettes, ...customPalettes];
+	}, [palettes, customPalettes]);
 
-	// Actualizar el ID seleccionado cuando cambie la prop
-	useEffect(() => {
-		setSelectedId(selectedPaletteId);
-	}, [selectedPaletteId]);
+	const selectedPalette = allPalettes.find((p) => p.id === selectedPaletteId);
 
 	const handleSelectPalette = (palette: ColorPalette) => {
-		setSelectedId(palette.id);
-		onSelectPalette(palette);
+		onSelectPalette?.(palette);
+	};
+
+	const handleSaveCustomPalette = (newPalette: ColorPalette) => {
+		setCustomPalettes((prev) => {
+			// Reemplazar si ya existe una paleta con el mismo ID
+			const exists = prev.findIndex((p) => p.id === newPalette.id);
+			if (exists >= 0) {
+				const updated = [...prev];
+				updated[exists] = newPalette;
+				return updated;
+			}
+			// Agregar nueva paleta
+			return [...prev, newPalette];
+		});
+		handleSelectPalette(newPalette);
+		setShowCustomModal(false);
 	};
 
 	return (
-		<div className="space-y-3">
-			<div className="flex justify-between items-center">
-				<h3 className="text-sm font-medium">Paleta de colores</h3>
+		<div className={cn('flex flex-col space-y-2', className)}>
+			<div className="flex items-center justify-between">
+				<div className="text-sm font-medium">Paleta de colores</div>
 				{allowCustom && (
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
 						className="h-7 text-xs"
+						onClick={() => setShowCustomModal(true)}
 					>
 						<Plus className="h-3.5 w-3.5 mr-1" />
 						Personalizada
@@ -225,18 +229,56 @@ export const ColorPaletteSelector: React.FC<ColorPaletteSelectorProps> = ({
 			</div>
 
 			<div className="grid grid-cols-2 gap-2">
-				{palettes.map((palette) => (
-					<ColorPaletteCard
+				{allPalettes.map((palette) => (
+					<button
 						key={palette.id}
-						palette={palette}
-						isSelected={selectedId === palette.id}
+						type="button"
+						className={cn(
+							'flex items-center space-x-2 rounded-md border p-2 text-left text-sm transition-colors',
+							selectedPaletteId === palette.id
+								? 'border-primary bg-primary/5'
+								: 'hover:bg-muted/50'
+						)}
 						onClick={() => handleSelectPalette(palette)}
-					/>
+					>
+						<div className="flex flex-1 flex-col">
+							<span className="font-medium">{palette.name}</span>
+							{palette.description && (
+								<span className="text-xs text-muted-foreground line-clamp-1">
+									{palette.description}
+								</span>
+							)}
+						</div>
+						<div className="flex items-center space-x-1">
+							<div
+								className="h-4 w-4 rounded-full border"
+								style={{ backgroundColor: `rgb(${palette.primaryColor})` }}
+							/>
+							<div
+								className="h-4 w-4 rounded-full border"
+								style={{ backgroundColor: `rgb(${palette.secondaryColor})` }}
+							/>
+							<div
+								className="h-4 w-4 rounded-full border"
+								style={{ backgroundColor: `rgb(${palette.accentColor})` }}
+							/>
+							{selectedPaletteId === palette.id && (
+								<Check className="h-4 w-4 text-primary ml-1" />
+							)}
+						</div>
+					</button>
 				))}
 			</div>
+
+			{showCustomModal && (
+				<CustomPaletteModal
+					onClose={() => setShowCustomModal(false)}
+					onSave={handleSaveCustomPalette}
+				/>
+			)}
 		</div>
 	);
-};
+}
 
 interface ColorPaletteApplierProps {
 	palette: ColorPalette;

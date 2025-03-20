@@ -37,6 +37,7 @@ export interface DesignSystem {
 	aspectRatio?: string;
 	cornerStyle?: CornerStyle;
 	cornerRadius?: number;
+	borderWidth?: number;
 	elevation?: number;
 	shadowStyle?: ShadowStyle;
 }
@@ -168,6 +169,11 @@ export interface LayersConfig {
 	spacing?: number;
 	explodeView?: boolean;
 	explodeDistance?: number;
+	items?: Array<{
+		id: string;
+		type: string;
+		[key: string]: any;
+	}>;
 }
 
 // Paleta de colores

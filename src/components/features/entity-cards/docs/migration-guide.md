@@ -1,296 +1,391 @@
-# Guía de Migración a Componentes Entity Cards Refactorizados
+# Guía de Migración a Entity Cards v2.0
 
-Esta guía proporciona instrucciones detalladas para migrar desde los componentes antiguos de tarjetas de entidades a la nueva arquitectura basada en componentes base.
+## Resumen de Cambios
 
-## Beneficios de la Migración
+La versión 2.0 introduce cambios significativos en la arquitectura del sistema de capas y la gestión de efectos visuales. Esta guía te ayudará a migrar desde la versión 1.x a la 2.0.
 
-- **Reducción de código**: Los nuevos componentes son más concisos (~60% menos código)
-- **Mejor tipado**: Props tipadas y adaptadores mejorados
-- **Mayor consistencia**: Interfaz común entre diferentes tipos de tarjetas
-- **Mejor rendimiento**: Componentes optimizados con memoización
-- **Mantenimiento simplificado**: Arquitectura modular y coherente
+## Cambios Principales
 
-## Visión General de Cambios
+### 1. Sistema de Plugins de Capas
 
-### 1. Estructura de Componentes
+#### Antes (v1.x)
+```typescript
+// Definición de capa antigua
+const MyLayer: LayerComponent = {
+  name: 'myLayer',
+  render: ({ config }) => {
+    return <div className="my-layer" />;
+  }
+};
 
-```
-// ANTES: Componentes monolíticos grandes
-src/components/features/entity-cards/layouts/
-  ├── album-card-layout.tsx (~700 líneas)
-  ├── note-card-layout.tsx (~700 líneas)
-  └── ...
-```
-
-```
-// DESPUÉS: Arquitectura basada en componentes
-src/components/features/entity-cards/
-  ├── base/ (componentes fundamentales)
-  │   ├── base-card-layout.tsx
-  │   ├── card-sections.tsx (Header, Footer, etc.)
-  │   └── ...
-  ├── layouts/refactored/ (nuevos layouts más ligeros)
-  │   ├── album-card-layout.tsx (~300 líneas)
-  │   ├── note-card-layout.tsx (~300 líneas)
-  │   └── ...
-  └── ...
+// Registro de capa
+layers.register('myLayer', MyLayer);
 ```
 
-### 2. API de Componentes
+#### Ahora (v2.0)
+```typescript
+// Definición de capa nueva
+const MyLayer: LayerPlugin<MyLayerConfig> = {
+  type: 'my-layer',
+  Component: MyLayerComponent,
+  SettingsComponent: MyLayerSettings,
+  defaultConfig: {
+    enabled: true,
+    layerIndex: 5
+  },
+  getServerActions: () => ({
+    getConfig: getMyLayerConfig,
+    updateConfig: updateMyLayerConfig,
+    deleteConfig: deleteMyLayerConfig
+  })
+};
 
-```tsx
-// ANTES: Mezcla de propiedades específicas y generales
-<AlbumCard
-  data={album}
-  onClick={handleClick}
-  showVisualizationConfig={showConfig}
-  className="my-custom-class"
-  // Muchas otras props específicas...
-/>
+// Registro de capa
+registerLayer(MyLayer);
 ```
 
-```tsx
-// DESPUÉS: API más clara y tipada
-<AlbumCard
-  data={album}
-  onClick={handleClick}
+### 2. Configuración de Capas
+
+#### Antes (v1.x)
+```typescript
+<EntityCard
   options={{
-    // Opciones visuales tipadas
-    designSystem: { preset: 'modern' },
-    enableGlowEffect: true,
-  }}
-  className="my-custom-class"
-/>
-```
-
-## Guía de Migración Paso a Paso
-
-### Para Desarrolladores de Aplicaciones
-
-Si utilizas tarjetas de entidades en tu aplicación:
-
-1. **Actualiza tus importaciones**:
-
-```tsx
-// ANTES
-import { AlbumCard } from '@/components/features/entity-cards';
-
-// DESPUÉS
-import { AlbumCard } from '@/components/features/entity-cards/layouts/refactored';
-// O sigue usando la misma importación ya que será actualizada automáticamente:
-import { AlbumCard } from '@/components/features/entity-cards';
-```
-
-2. **Ajusta las opciones visuales**:
-
-```tsx
-// ANTES
-<AlbumCard
-  data={album}
-  showGlow={true}
-  shadowStyle="soft"
-  borderWidth={2}
-  // Props separadas para configuración visual
-/>
-
-// DESPUÉS
-<AlbumCard
-  data={album}
-  options={{
-    enableGlowEffect: true,
-    designSystem: {
-      shadowStyle: 'soft',
-      borderWidth: 2,
+    layers: {
+      glow: {
+        enabled: true,
+        intensity: 0.5
+      }
     }
   }}
 />
 ```
 
-3. **Verifica tipos de datos**:
+#### Ahora (v2.0)
+```typescript
+<EntityCard
+  layers={{
+    glow: {
+      enabled: true,
+      intensity: 0.5
+    }
+  }}
+  options={{
+    renderQuality: 'high',
+    interactive: true
+  }}
+/>
+```
 
-Los nuevos componentes tienen mejor tipado, por lo que TypeScript puede detectar problemas que antes pasaban desapercibidos.
+### 3. Sistema de Presets
 
-### Para Desarrolladores de Componentes
+#### Antes (v1.x)
+```typescript
+<EntityCard
+  preset="legendary"
+  options={{
+    ...customOptions
+  }}
+/>
+```
 
-Si trabajas en la implementación de componentes de tarjetas:
+#### Ahora (v2.0)
+```typescript
+const { preset } = useCardPreset('legendary');
 
-1. **Usa componentes base para nuevas tarjetas**:
+<EntityCard
+  layers={preset.layers}
+  options={{
+    ...customOptions
+  }}
+/>
+```
 
-```tsx
+## Pasos de Migración
+
+### 1. Actualizar Dependencias
+
+```bash
+pnpm update @components/entity-cards@2.0.0
+```
+
+### 2. Envolver la Aplicación con el Proveedor
+
+```typescript
+// En tu _app.tsx o layout.tsx
+import { EntityCardProvider } from '@/components/features/entity-cards';
+import { RegisterLayers } from '@/components/features/entity-cards/layers';
+
+export default function App({ Component, pageProps }) {
+  return (
+    <EntityCardProvider>
+      <RegisterLayers />
+      <Component {...pageProps} />
+    </EntityCardProvider>
+  );
+}
+```
+
+### 3. Migrar Capas Personalizadas
+
+1. Crear nueva estructura de archivos:
+```
+my-layer/
+├── actions/
+│   ├── my-layer-config.action.ts
+│   └── index.ts
+├── my-layer-effect.tsx
+├── my-layer-settings.tsx
+└── index.ts
+```
+
+2. Implementar acciones del servidor:
+```typescript
+// actions/my-layer-config.action.ts
+'use server';
+
+export interface MyLayerConfig extends BaseLayerConfig {
+  intensity: number;
+  color: string;
+}
+
+export async function getMyLayerConfig(entityType: string, entityId?: string) {
+  // Implementar
+}
+
+export async function updateMyLayerConfig(
+  entityType: string,
+  config: MyLayerConfig,
+  entityId?: string
+) {
+  // Implementar
+}
+
+export async function deleteMyLayerConfig(entityType: string, entityId?: string) {
+  // Implementar
+}
+```
+
+3. Implementar componente de capa:
+```typescript
+// my-layer-effect.tsx
+'use client';
+
+export function MyLayerEffect({
+  config,
+  isExploded,
+  getExplodeLayerTransform
+}: LayerComponentProps<MyLayerConfig>) {
+  return (
+    <div
+      className={cn(
+        'absolute inset-0',
+        isExploded && 'exploded-layer'
+      )}
+      style={{
+        ...(isExploded ? getExplodeLayerTransform(config.layerIndex) : {})
+      }}
+    />
+  );
+}
+```
+
+4. Implementar componente de configuración:
+```typescript
+// my-layer-settings.tsx
+'use client';
+
+export function MyLayerSettings({
+  config,
+  onConfigUpdate
+}: LayerSettingsProps<MyLayerConfig>) {
+  return (
+    <div className="layer-settings">
+      {/* Implementar UI de configuración */}
+    </div>
+  );
+}
+```
+
+5. Exportar plugin:
+```typescript
+// index.ts
+import type { LayerPlugin } from '../layer-plugin-system';
+import { MyLayerEffect } from './my-layer-effect';
+import { MyLayerSettings } from './my-layer-settings';
 import {
-  BaseCardLayout,
-  CardHeader,
-  CardFooter,
-  CardImageSection,
-  CardMetadataSection,
-} from '@/components/features/entity-cards/base';
+  getMyLayerConfig,
+  updateMyLayerConfig,
+  deleteMyLayerConfig
+} from './actions';
 
-export function MyNewCardLayout() {
-  return (
-    <BaseCardLayout data={...} options={...}>
-      <CardHeader title="..." />
-      <CardImageSection imageUrl="..." />
-      <CardMetadataSection items={...} />
-      <CardFooter {...} />
-    </BaseCardLayout>
-  );
+export const myLayerPlugin: LayerPlugin<MyLayerConfig> = {
+  type: 'my-layer',
+  Component: MyLayerEffect,
+  SettingsComponent: MyLayerSettings,
+  defaultConfig: {
+    enabled: true,
+    layerIndex: 5,
+    intensity: 0.5,
+    color: '#000000'
+  },
+  getServerActions: () => ({
+    getConfig: getMyLayerConfig,
+    updateConfig: updateMyLayerConfig,
+    deleteConfig: deleteMyLayerConfig
+  })
+};
+```
+
+### 4. Actualizar Uso de Componentes
+
+#### Componentes Existentes
+
+```typescript
+// Antes
+<EntityCard
+  entityType="folder"
+  options={{
+    layers: {
+      glow: { enabled: true },
+      border: { enabled: true }
+    }
+  }}
+/>
+
+// Después
+<EntityCard
+  entityType="folder"
+  layers={{
+    glow: { enabled: true },
+    border: { enabled: true }
+  }}
+/>
+```
+
+#### Hooks Actualizados
+
+```typescript
+// Antes
+const { cardConfig } = useCardConfig(entityType);
+
+// Después
+const { config, updateConfig } = useLayerConfig('holographic');
+```
+
+### 5. Migrar Presets
+
+```typescript
+// Antes
+const preset = {
+  name: 'legendary',
+  config: {
+    // ...
+  }
+};
+
+// Después
+const preset: LayerPreset = {
+  id: 'legendary',
+  name: 'Legendario',
+  layers: {
+    holographic: {
+      enabled: true,
+      pattern: 'rainbow',
+      intensity: 1
+    },
+    glow: {
+      enabled: true,
+      color: '#ffd700',
+      spread: 30
+    }
+  }
+};
+```
+
+## Breaking Changes
+
+1. **Nombres de Propiedades**
+   - `options.layers` → `layers`
+   - `options.displayMode` → `options.renderMode`
+   - `options.performanceMode` → `options.renderQuality`
+
+2. **Tipos**
+   - `LayerComponent` → `LayerPlugin<T>`
+   - `LayerConfig` → `BaseLayerConfig`
+   - `CardOptions` → `EntityCardOptions`
+
+3. **Hooks**
+   - `useCardConfig` → `useLayerConfig`
+   - `usePreset` → `useCardPreset`
+   - `useLayers` → `useLayerPlugin`
+
+4. **Métodos**
+   - `layers.register()` → `registerLayer()`
+   - `layers.get()` → `useLayerPlugin().getLayer()`
+   - `layers.update()` → `useLayerPlugin().updateLayer()`
+
+## Verificación de Migración
+
+Lista de verificación para asegurar una migración exitosa:
+
+1. [ ] Actualizar todas las dependencias
+2. [ ] Implementar EntityCardProvider
+3. [ ] Registrar capas con el nuevo sistema
+4. [ ] Actualizar configuraciones de capas
+5. [ ] Migrar presets al nuevo formato
+6. [ ] Actualizar hooks y métodos
+7. [ ] Verificar tipos TypeScript
+8. [ ] Probar renderizado de capas
+9. [ ] Verificar funcionamiento de efectos
+10. [ ] Validar rendimiento
+
+## Solución de Problemas
+
+### Capas no Visibles
+```typescript
+// Verificar registro
+console.log(useLayerPlugin().getRegisteredLayers());
+
+// Verificar configuración
+console.log(useLayerConfig('myLayer').config);
+```
+
+### Errores de Tipos
+```typescript
+// Asegurar que las configuraciones extienden BaseLayerConfig
+interface MyConfig extends BaseLayerConfig {
+  // Propiedades específicas
 }
+
+// Usar tipos genéricos correctamente
+const MyLayer: LayerPlugin<MyConfig> = {
+  // ...
+};
 ```
 
-2. **Refactoriza tarjetas existentes**:
-
-- Examina el componente `AlbumCardLayout` refactorizado como ejemplo
-- Extrae secciones comunes a componentes reutilizables
-- Usa los tipos base para una interfaz coherente
-
-3. **Migra los controles específicos del dominio**:
-
-```tsx
-// ANTES: Lógica específica directamente en el componente
-function renderMetadataSection() {
-  return (
-    <div className="album-stats">
-      // Muchas líneas de HTML/JSX específico
-    </div>
-  );
-}
-
-// DESPUÉS: Usa los componentes base con lógica específica adaptada
-const metadataItems = [
-  { label: 'Imágenes', value: imageCount, icon: <Images /> },
-  { label: 'Categoría', value: category, icon: <Tag /> },
-  // ...otros metadatos
-];
-
-return <CardMetadataSection items={metadataItems} />;
+### Problemas de Rendimiento
+```typescript
+// Usar modo de desarrollo
+<EntityCard
+  debug={true}
+  onLayerRender={(layer, time) => {
+    console.log(`${layer}: ${time}ms`);
+  }}
+/>
 ```
 
-## Ejemplo de Migración Paso a Paso
+## Recursos Adicionales
 
-Veamos un ejemplo completo de migración de uso de `AlbumCard`:
+1. [Documentación API v2.0](/docs/api-reference.md)
+2. [Guía de Capas](/docs/layers-guide.md)
+3. [Ejemplos Actualizados](/examples)
+4. [TypeScript Tipos](/types)
 
-```tsx
-// ANTES
-import { AlbumCard } from '@/components/features/entity-cards';
+## Soporte
 
-function MyComponent() {
-  return (
-    <div className="gallery">
-      {albums.map(album => (
-        <AlbumCard
-          key={album.id}
-          data={album}
-          onClick={() => selectAlbum(album.id)}
-          onEdit={() => editAlbum(album.id)}
-          onDelete={() => deleteAlbum(album.id)}
-          showGlow={true}
-          borderWidth={2}
-          cornerRadius={8}
-          shadowStyle="soft"
-        />
-      ))}
-    </div>
-  );
-}
-```
+Si encuentras problemas durante la migración:
 
-```tsx
-// DESPUÉS
-import { AlbumCard } from '@/components/features/entity-cards';
-// La importación no cambia gracias al punto de entrada centralizado
-
-function MyComponent() {
-  return (
-    <div className="gallery">
-      {albums.map(album => (
-        <AlbumCard
-          key={album.id}
-          data={album}
-          onClick={() => selectAlbum(album.id)}
-          onEdit={() => editAlbum(album.id)}
-          onDelete={() => deleteAlbum(album.id)}
-          options={{
-            enableGlowEffect: true,
-            designSystem: {
-              borderWidth: 2,
-              cornerRadius: 8,
-              shadowStyle: 'soft',
-            }
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-```
-
-## Escenario de Migración Gradual
-
-Puedes migrar gradualmente a los nuevos componentes:
-
-1. Los componentes antiguos seguirán funcionando
-2. Los nuevos componentes se implementarán bajo `layouts/refactored/`
-3. A medida que se completen, se actualizarán las exportaciones en `index.ts`
-4. Eventualmente, todos los componentes serán reemplazados sin cambios en las importaciones para los consumidores
-
-## Compatibilidad con Tipos Antiguos
-
-Para mantener compatibilidad con código existente, usamos adaptadores de tipo:
-
-```tsx
-// El adaptador garantiza compatibilidad entre versiones de tipos
-import { adaptCardOptions } from '@/components/features/entity-cards';
-
-// Uso en componentes para asegurar compatibilidad
-const options = adaptCardOptions({
-  shadowStyle: 'none', // Valor antiguo
-  // otras opciones...
-});
-```
-
-## Solución de Problemas Comunes
-
-### Error: "Property 'X' does not exist on type..."
-
-Los nuevos componentes utilizan interfaces más estrictas. Verifica que estés usando la estructura correcta de opciones:
-
-```tsx
-// INCORRECTO
-<AlbumCard shadowStyle="soft" />
-
-// CORRECTO
-<AlbumCard options={{ designSystem: { shadowStyle: 'soft' } }} />
-```
-
-### Error: "No overload matches this call..."
-
-Las props han sido reestructuradas para mayor coherencia:
-
-```tsx
-// INCORRECTO
-<AlbumCard album={myAlbum} />
-
-// CORRECTO
-<AlbumCard data={myAlbum} />
-```
-
-## Preguntas Frecuentes
-
-1. **¿Tengo que migrar inmediatamente?**
-   - No, puedes seguir usando los componentes antiguos mientras implementamos la migración gradual.
-
-2. **¿Cambiarán las API de los componentes?**
-   - Hemos diseñado la nueva API para ser más consistente y tipada, pero mantenemos compatibilidad con patrones de uso comunes.
-
-3. **¿Cómo puedo contribuir a la migración?**
-   - Revisa los PRs etiquetados con `refactor/entity-cards`
-   - Sigue los patrones establecidos en los componentes ya refactorizados
-   - Añade pruebas para validar comportamiento equivalente
-
-4. **¿Hay cambios visuales?**
-   - No, los componentes refactorizados mantienen la misma apariencia visual
-   - Solo cambia la estructura interna y API de los componentes
-
-## Próximos Pasos
-
-Consulta el archivo `progress.md` para ver el estado actual de la refactorización y los próximos componentes a migrar.
+1. Revisa la [documentación completa](/docs)
+2. Consulta los [ejemplos](/examples)
+3. Abre un issue en el repositorio
+4. Contacta al equipo de desarrollo

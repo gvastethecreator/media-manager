@@ -13,7 +13,7 @@
 
 // Importar desde la implementación principal
 import { RegisterLayers as MainRegisterLayers } from '../../layers/register-layers';
-import type { LayerImplementation } from '../../layers/types';
+import type { LayerImplementation } from '../layers/types';
 
 // Re-exportar con los mismos nombres para mantener compatibilidad
 export { RegisterAllLayers, RegisterLayersByEntityType } from '../../layers/register-all-layers';

@@ -3,7 +3,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { EntityType } from '../adapters/preset-adapter';
 import { presetService } from '../adapters/preset-adapter';
-import type { CardOptions, LayersConfig } from '../types/unified-card-types';
+import type { CardOptions } from '../types/unified-card-types';
+
+// Interfaz para las capas de la tarjeta
+interface LayerOptions {
+	items?: Array<{
+		id: string;
+		[key: string]: unknown;
+	}>;
+	order?: string[];
+	layerBlending?: string;
+	layerSpacing?: number;
+	[key: string]: unknown;
+}
+
+// Tipo genérico para el deepMerge
+type GenericRecord = Record<string, unknown>;
 
 // Definir interfaz para el preset visual (usar la misma que en adaptadores)
 export interface VisualPreset {
@@ -145,7 +160,7 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 	// Componer las opciones de la tarjeta
 	const cardOptions = useMemo(() => {
 		// Obtener opciones del preset
-		const presetOptions = presetService.getCardOptions(presetId || null, entityType);
+		const presetOptions = presetService.getCardOptions(presetId || null, entityType) || {};
 
 		// Opciones por defecto específicas para el tipo de entidad
 		const defaultTypeOptions = {
@@ -185,54 +200,83 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 		// Obtener opciones por defecto para el tipo de entidad actual
 		const typeDefaults = defaultTypeOptions[entityType as keyof typeof defaultTypeOptions] || {};
 
-		// Combinar con las opciones base de manera profunda
-		return {
-			// Primero las opciones por defecto del tipo
-			...typeDefaults,
-			// Luego las opciones del preset
-			...presetOptions,
-			// Finalmente las opciones base proporcionadas
-			...baseOptions,
-			// Asegurar que las opciones anidadas se combinen correctamente
-			designSystem: {
-				...(typeDefaults.designSystem || {}),
-				...(presetOptions.designSystem || {}),
-				...(baseOptions.designSystem || {}),
-			},
-			colors: {
-				...((presetOptions.colors as Record<string, unknown>) || {}),
-				...((baseOptions.colors as Record<string, unknown>) || {}),
-			},
-			effects: {
-				...((presetOptions.effects as Record<string, unknown>) || {}),
-				...((baseOptions.effects as Record<string, unknown>) || {}),
-			},
-			// Asegurar que las opciones de capas específicas se combinen correctamente
-			layers: {
-				...(typeDefaults.layers || {}),
-				...((presetOptions.layers || {}) as Partial<LayersConfig>),
-				...((baseOptions.layers || {}) as Partial<LayersConfig>),
-				// Combinamos items si existen en ambas configuraciones
-				...(presetOptions.layers?.items || baseOptions.layers?.items
-					? {
-							items: [
-								...((presetOptions.layers?.items as any[]) || []),
-								...((baseOptions.layers?.items as any[]) || []),
-							].filter(
-								(item, index, self) =>
-									// Eliminar duplicados usando el id como criterio
-									index === self.findIndex((t) => t.id === item.id)
-							),
-					  }
-					: {}),
-			},
-		} as CardOptions;
-	}, [entityType, presetId, baseOptions]);
+		// Para evitar errores de tipo, hacemos deep clone de los objetos
+		const safeTypeDefaults = structuredClone(typeDefaults);
+		const safePresetOptions = structuredClone(presetOptions);
+		const safeBaseOptions = structuredClone(baseOptions || {});
+
+		// Crear una función segura para combinar objetos profundos
+		const deepMerge = (target: GenericRecord, source: GenericRecord): GenericRecord => {
+			const output = { ...target };
+
+			if (source === null || source === undefined) {
+				return output;
+			}
+
+			// Usar for...of en lugar de forEach
+			for (const key of Object.keys(source)) {
+				const sourceValue = source[key];
+				if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
+					if (!output[key] || typeof output[key] !== 'object') {
+						output[key] = {};
+					}
+					output[key] = deepMerge(output[key] as GenericRecord, sourceValue as GenericRecord);
+				} else if (sourceValue !== undefined) {
+					output[key] = sourceValue;
+				}
+			}
+
+			return output;
+		};
+
+		// Combinar los objetos de manera segura
+		const combinedOptions = deepMerge(
+			deepMerge(safeTypeDefaults, safePresetOptions),
+			safeBaseOptions
+		);
+
+		// Manejar capas de manera especial
+		if (safePresetOptions.layers?.items || safeBaseOptions.layers?.items) {
+			// Normalizar para evitar acceso a propiedades de undefined
+			if (!combinedOptions.layers) {
+				combinedOptions.layers = {} as LayerOptions;
+			}
+
+			// Inicializar array vacío si no existe
+			const layersObj = combinedOptions.layers as LayerOptions;
+			if (!Array.isArray(layersObj.items)) {
+				layersObj.items = [];
+			}
+
+			// Añadir items del preset si existen
+			const presetLayers = safePresetOptions.layers as LayerOptions | undefined;
+			if (presetLayers && Array.isArray(presetLayers.items)) {
+				layersObj.items.push(...presetLayers.items);
+			}
+
+			// Añadir items de las opciones base si existen
+			const baseLayers = safeBaseOptions.layers as LayerOptions | undefined;
+			if (baseLayers && Array.isArray(baseLayers.items)) {
+				layersObj.items.push(...baseLayers.items);
+			}
+
+			// Eliminar duplicados usando el id como criterio
+			if (layersObj.items.length > 0) {
+				layersObj.items = layersObj.items.filter(
+					(item, index, self) =>
+						item && // Asegurar que el item no es null/undefined
+						index === self.findIndex((t) => t && t.id === item.id)
+				);
+			}
+		}
+
+		return combinedOptions as CardOptions;
+	}, [baseOptions, entityType, presetId]);
 
 	return {
 		cardOptions,
 		preset,
 		isLoading,
-		error,
+		error
 	};
 }

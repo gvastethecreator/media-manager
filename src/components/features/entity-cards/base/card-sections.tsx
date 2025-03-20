@@ -173,6 +173,7 @@ export interface MetadataItem {
 	label: string;
 	value: string | number | React.ReactNode;
 	icon?: React.ReactNode;
+	id?: string;
 }
 
 export interface CardMetadataSectionProps {
@@ -187,7 +188,10 @@ export function CardMetadataSection({ items = [], className }: CardMetadataSecti
 		<div className={cn('card-metadata-section p-2 border-t text-xs', className)}>
 			<ul className="grid grid-cols-2 gap-2">
 				{items.map((item, index) => (
-					<li key={index} className="flex items-center gap-1 overflow-hidden">
+					<li
+						key={item.id || `${item.label}-${index}`}
+						className="flex items-center gap-1 overflow-hidden"
+					>
 						{item.icon && <span className="flex-shrink-0">{item.icon}</span>}
 						<span className="font-medium text-muted-foreground">{item.label}:</span>
 						<span className="truncate">{item.value}</span>

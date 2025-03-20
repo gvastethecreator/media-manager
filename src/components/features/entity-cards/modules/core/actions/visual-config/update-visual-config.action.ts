@@ -1,140 +1,162 @@
-'use server';
-
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import {
-	type ActionResponse,
-	type BaseVisualConfig,
-	actionResponseSchema,
-	baseVisualConfigSchema,
-	entityParamsSchema,
-} from './schemas';
+import type { ActionResponse, BaseVisualConfig, VisualConfigType } from '../../../types';
+import type { DesignSystemConfig, VisualConfigBase } from '../../../types/visual-config.types';
 
-// Schema para la validación de la actualización
-const updateVisualConfigSchema = z.object({
-	entityType: z.string(),
-	entityId: z.string().optional(),
-	config: baseVisualConfigSchema.partial(),
+const designSystemSchema = z.object({
+    preset: z.string(),
+    cornerStyle: z.string(),
+    elevation: z.number(),
+});
+
+const visualConfigSchema = z.object({
+    enable3DEffect: z.boolean(),
+    designSystem: designSystemSchema,
+    enableHolographicEffect: z.boolean(),
+    enableGlowEffect: z.boolean(),
+    enableAnimatedBorder: z.boolean(),
+    enableLightHalo: z.boolean(),
+    effects: z.string().nullable(),
+    layerSystem: z.object({
+        layers: z.array(z.object({
+            id: z.string(),
+            type: z.string(),
+            visible: z.boolean(),
+            opacity: z.number(),
+        })),
+    }),
+    states: z.object({
+        hover: z.boolean(),
+        focus: z.boolean(),
+        active: z.boolean(),
+    }),
 });
 
 /**
  * Actualiza la configuración visual para una entidad
  */
 export async function updateVisualConfig(
-	entityType: string,
-	config: Partial<BaseVisualConfig>,
-	entityId?: string
-): Promise<ActionResponse> {
-	try {
-		// Validar parámetros
-		const validation = updateVisualConfigSchema.safeParse({
-			entityType,
-			entityId,
-			config,
-		});
+    entityType: VisualConfigType,
+    entityId: string,
+    config: Partial<VisualConfigBase>
+): Promise<ActionResponse<BaseVisualConfig>> {
+    const validation = visualConfigSchema.partial().safeParse(config);
 
-		if (!validation.success) {
-			return {
-				success: false,
-				message: 'Parámetros inválidos',
-				data: validation.error,
-			};
-		}
+    if (!validation.success) {
+        return {
+            success: false,
+            message: 'Error de validación',
+            data: validation.error,
+        };
+    }
 
-		// Si tenemos un ID específico, actualizar esa configuración
-		if (entityId) {
-			switch (entityType) {
-				case 'folders':
-					await prisma.folderVisualConfig.upsert({
-						where: {
-							folderId: entityId,
-						},
-						update: {
-							...config,
-						},
-						create: {
-							folderId: entityId,
-							...config,
-						},
-					});
-					break;
-				case 'images':
-					await prisma.imageVisualConfig.upsert({
-						where: {
-							imageId: entityId,
-						},
-						update: {
-							...config,
-						},
-						create: {
-							imageId: entityId,
-							...config,
-						},
-					});
-					break;
-				case 'videos':
-					await prisma.videoVisualConfig.upsert({
-						where: {
-							videoId: entityId,
-						},
-						update: {
-							...config,
-						},
-						create: {
-							videoId: entityId,
-							...config,
-						},
-					});
-					break;
-				default:
-					return {
-						success: false,
-						message: 'Tipo de entidad no válido',
-					};
-			}
-		} else {
-			// Si no hay ID, actualizar la configuración por defecto del tipo de entidad
-			await prisma.cardConfiguration.upsert({
-				where: {
-					entityType,
-				},
-				update: {
-					...config,
-				},
-				create: {
-					entityType,
-					...config,
-				},
-			});
-		}
+    try {
+        let updatedConfig: BaseVisualConfig;
 
-		// Revalidar las rutas necesarias
-		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
-		if (entityId) {
-			revalidatePath(`/${entityType}/${entityId}`);
-		}
+        switch (entityType) {
+            case 'folder': {
+                const existingConfig = await prisma.folderVisualConfig.findUnique({
+                    where: { folder: entityId },
+                });
 
-		return {
-			success: true,
-			message: 'Configuración visual actualizada correctamente',
-		};
-	} catch (error) {
-		console.error('Error al actualizar la configuración visual:', error);
+                if (existingConfig) {
+                    updatedConfig = await prisma.folderVisualConfig.update({
+                        where: { folder: entityId },
+                        data: {
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : undefined,
+                        },
+                    });
+                } else {
+                    updatedConfig = await prisma.folderVisualConfig.create({
+                        data: {
+                            folder: entityId,
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : null,
+                        },
+                    });
+                }
+                break;
+            }
+            case 'image': {
+                const existingConfig = await prisma.imageVisualConfig.findUnique({
+                    where: { image: entityId },
+                });
 
-		if (error instanceof z.ZodError) {
-			return {
-				success: false,
-				message: 'Error de validación en la configuración visual',
-				data: error.errors,
-			};
-		}
+                if (existingConfig) {
+                    updatedConfig = await prisma.imageVisualConfig.update({
+                        where: { image: entityId },
+                        data: {
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : undefined,
+                        },
+                    });
+                } else {
+                    updatedConfig = await prisma.imageVisualConfig.create({
+                        data: {
+                            image: entityId,
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : null,
+                        },
+                    });
+                }
+                break;
+            }
+            case 'video': {
+                const existingConfig = await prisma.videoVisualConfig.findUnique({
+                    where: { video: entityId },
+                });
 
-		return {
-			success: false,
-			message: 'Error al actualizar la configuración visual',
-			data: error instanceof Error ? error.message : 'Error desconocido',
-		};
-	}
+                if (existingConfig) {
+                    updatedConfig = await prisma.videoVisualConfig.update({
+                        where: { video: entityId },
+                        data: {
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : undefined,
+                        },
+                    });
+                } else {
+                    updatedConfig = await prisma.videoVisualConfig.create({
+                        data: {
+                            video: entityId,
+                            ...config,
+                            designSystem: config.designSystem ? JSON.stringify(config.designSystem) : null,
+                        },
+                    });
+                }
+                break;
+            }
+            default:
+                throw new Error(`Tipo de entidad no soportado: ${entityType}`);
+        }
+
+        revalidatePath('/');
+
+        return {
+            success: true,
+            message: 'Configuración visual actualizada correctamente',
+            data: {
+                ...updatedConfig,
+                designSystem: updatedConfig.designSystem ? JSON.parse(updatedConfig.designSystem) : null,
+            },
+        };
+    } catch (error) {
+        logger.error('Error al actualizar la configuración visual:', error);
+
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                message: 'Error de validación',
+                data: error.errors,
+            };
+        }
+
+        return {
+            success: false,
+            message: 'Error al actualizar la configuración visual',
+            data: error instanceof Error ? error.message : 'Error desconocido',
+        };
+    }
 }

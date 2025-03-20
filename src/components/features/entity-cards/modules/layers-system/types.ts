@@ -2,8 +2,8 @@
  * 🌈 Tipos para el módulo de capas
  */
 
-import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../../layers/types';
-import type { CardOptions } from '../../types/card-settings-types';
+import type { LayerConfig, LayerImplementation, LayerSystemConfig } from '../layers/types';
+import type { CardOptions } from '../types/card-settings-types';
 
 /**
  * Configuración del sistema de capas extendida

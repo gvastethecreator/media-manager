@@ -1,179 +1,24 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { useCallback, useRef, useState } from 'react';
+/**
+ * ARCHIVO MODIFICADO PARA SOPORTAR MODOS DE VISUALIZACIÓN
+ *
+ * Esta versión permite cambiar dinámicamente entre diferentes modos de visualización:
+ * - simple: versión básica para rendimiento
+ * - complex: versión completa con todas las características
+ * - skeleton: versión completa pero con efectos desactivados para pruebas modulares
+ * - json: visualización de datos en formato JSON
+ */
+
+import { useEffect } from 'react';
+import { EntityCardAdapter } from './adapters/entity-card-adapter';
+import { useCardDisplay } from './context/card-display-context';
+import { useCardControl } from './debug/card-control-context';
 import { EntityCard } from './entity-card';
+import { JsonEntityCard } from './json-entity-card';
 import type { CardOptions } from './types/unified-card-types';
-import type { CardError } from './utils/error-handler';
 
-// Opciones por defecto para todas las tarjetas
-const DEFAULT_CARD_OPTIONS: Partial<CardOptions> = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	designSystem: {
-		preset: 'default',
-		variant: 'default',
-		aspectRatio: '1/1',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 2,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'normal',
-		layerSpacing: 2,
-	},
-	primaryColor: '#3b82f6',
-	secondaryColor: '#1d4ed8',
-	hoverLiftHeight: 10,
-	maxRotation: 15,
-};
-
-// Opciones específicas por tipo de entidad
-const ENTITY_TYPE_OPTIONS: Record<string, Partial<CardOptions>> = {
-	folder: {
-		designSystem: {
-			preset: 'folder',
-			variant: 'default',
-			aspectRatio: '7/10',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 2,
-			shadowStyle: 'soft',
-		},
-		layerSystem: {
-			order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-			layerBlending: 'screen',
-			layerSpacing: 2,
-		},
-		primaryColor: '#3b82f6',
-		secondaryColor: '#1d4ed8',
-	},
-	album: {
-		designSystem: {
-			preset: 'album',
-			variant: 'default',
-			aspectRatio: '1/1',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 2,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#ec4899',
-		secondaryColor: '#db2777',
-	},
-	tag: {
-		designSystem: {
-			preset: 'tag',
-			variant: 'default',
-			aspectRatio: '3/1',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 1,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#8b5cf6',
-		secondaryColor: '#7c3aed',
-	},
-	collection: {
-		designSystem: {
-			preset: 'collection',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#f97316',
-		secondaryColor: '#ea580c',
-	},
-	character: {
-		designSystem: {
-			preset: 'character',
-			variant: 'default',
-			aspectRatio: '3/4',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#ef4444',
-		secondaryColor: '#dc2626',
-	},
-	place: {
-		designSystem: {
-			preset: 'place',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#0ea5e9',
-		secondaryColor: '#06b6d4',
-	},
-	worldItem: {
-		designSystem: {
-			preset: 'worldItem',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#f59e0b',
-		secondaryColor: '#d97706',
-	},
-	concept: {
-		designSystem: {
-			preset: 'concept',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#a855f7',
-		secondaryColor: '#8b5cf6',
-	},
-	prompt: {
-		designSystem: {
-			preset: 'prompt',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#10b981',
-		secondaryColor: '#059669',
-	},
-	note: {
-		designSystem: {
-			preset: 'note',
-			variant: 'default',
-			aspectRatio: '3/2',
-			cornerStyle: 'rounded',
-			cornerRadius: 12,
-			elevation: 3,
-			shadowStyle: 'soft',
-		},
-		primaryColor: '#ec4899',
-		secondaryColor: '#db2777',
-	},
-};
-
+// Re-exportar el tipo EntityCardWrapperProps para compatibilidad
 export interface EntityCardWrapperProps {
 	entityType: string;
 	entityId?: string;
@@ -184,149 +29,243 @@ export interface EntityCardWrapperProps {
 	className?: string;
 	children?: React.ReactNode;
 	onClick?: () => void;
-	showVisualConfig?: boolean;
-	onVisualConfigClick?: () => void;
-	enableExplode?: boolean;
-	isExploded?: boolean;
-	activeLayer?: string | null;
-	onExplodedChange?: (isExploded: boolean) => void;
-	onActiveLayerChange?: (layerId: string | null) => void;
-	explodeLayers?: Array<{ id: string; label: string; icon?: React.ReactNode }>;
+	entity?: any; // Agregar soporte para entidad completa para modo JSON
 }
 
 /**
- * Wrapper para EntityCard que maneja opciones por defecto según el tipo de entidad
+ * Componente wrapper para mostrar tarjetas de entidades con soporte para diferentes modos
  */
-export function EntityCardWrapper({
-	entityType,
-	entityId,
-	title,
-	description,
-	image,
-	options = {},
-	className,
-	children,
-	onClick,
-	showVisualConfig = false,
-	onVisualConfigClick,
-	enableExplode = false,
-	isExploded = false,
-	activeLayer = null,
-	onExplodedChange,
-	onActiveLayerChange,
-	explodeLayers,
-}: EntityCardWrapperProps) {
-	// Estado para controlar la explosión de capas
-	const [internalIsExploded, setInternalIsExploded] = useState(isExploded);
-	const [internalActiveLayer, setInternalActiveLayer] = useState<string | null>(activeLayer);
+export function EntityCardWrapper(props: EntityCardWrapperProps) {
+	const { displayMode } = useCardDisplay();
+	const { state: controlState } = useCardControl();
 
-	// Manejar cambios en el estado de explosión
-	const handleExplodedChange = useCallback(
-		(newIsExploded: boolean) => {
-			setInternalIsExploded(newIsExploded);
-			onExplodedChange?.(newIsExploded);
-		},
-		[onExplodedChange]
-	);
+	// Extraer propiedades
+	const {
+		entityType,
+		entityId,
+		title,
+		description,
+		image,
+		options,
+		className,
+		children,
+		onClick,
+		entity,
+	} = props;
 
-	// Manejar cambios en la capa activa
-	const handleActiveLayerChange = useCallback(
-		(layerId: string | null) => {
-			setInternalActiveLayer(layerId);
-			onActiveLayerChange?.(layerId);
-		},
-		[onActiveLayerChange]
-	);
+	// Función para imprimir información de depuración sobre la tarjeta
+	const logCardDebugInfo = (mode: string, details: Record<string, any>) => {
+		if (process.env.NODE_ENV === 'development') {
+			console.group(`🔄 EntityCardWrapper [${entityType}] - Modo: ${mode}`);
+			console.info(`📋 Entidad: ${title || entityId || 'Sin identificador'}`);
 
-	// Combinar opciones por defecto con opciones específicas del tipo y opciones proporcionadas
-	const typeOptions = ENTITY_TYPE_OPTIONS[entityType] || {};
-	const mergedOptions = {
-		...DEFAULT_CARD_OPTIONS,
-		...typeOptions,
+			// Mostrar qué efectos están activos
+			if (details.options) {
+				console.info('✨ Efectos activos:', Object.entries(details.options)
+					.filter(([key, value]) => key.startsWith('enable') && Boolean(value))
+					.map(([key]) => key.replace('enable', '').replace('Effect', ''))
+					.join(', ') || 'ninguno');
+			}
+
+			// Mostrar qué módulos/componentes se están utilizando
+			console.info('🧩 Componentes cargados:', details.components || []);
+
+			// Mostrar advertencias si las hay
+			if (details.warnings && details.warnings.length > 0) {
+				console.warn('⚠️ Advertencias:', details.warnings);
+			}
+
+			// Mostrar cualquier error si lo hay
+			if (details.errors && details.errors.length > 0) {
+				console.error('❌ Errores:', details.errors);
+			}
+
+			console.groupEnd();
+		}
+	};
+
+	// Log de información después del renderizado
+	useEffect(() => {
+		const warnings = [];
+		const errors = [];
+
+		// Verificar posibles problemas en base al modo
+		if (displayMode === 'complex') {
+			if (!controlState) {
+				errors.push('Estado de control no disponible');
+			} else {
+				// Comprobar si hay propiedades faltantes en controlState
+				const requiredProps = [
+					'enable3DEffect',
+					'enableHolographicEffect',
+					'enableGlowEffect',
+					'enableScanlines',
+					'enableAnimatedBorder',
+					'enableGrainEffect'
+				];
+
+				const missingProps = requiredProps.filter(prop => controlState[prop as keyof typeof controlState] === undefined);
+				if (missingProps.length > 0) {
+					errors.push(`Propiedades faltantes en controlState: ${missingProps.join(', ')}`);
+				}
+			}
+		}
+
+		// Información específica según el modo
+		switch (displayMode) {
+			case 'json':
+				logCardDebugInfo('JSON', {
+					components: ['JsonEntityCard'],
+					options: null,
+					warnings,
+					errors
+				});
+				break;
+			case 'complex':
+				logCardDebugInfo('Completo', {
+					components: ['EntityCardAdapter', 'ComplexLayers', 'EffectsSystem'],
+					options: controlState,
+					warnings,
+					errors
+				});
+				break;
+			case 'skeleton':
+				logCardDebugInfo('Esqueleto', {
+					components: ['EntityCardAdapter', 'SkeletonLayers'],
+					options: skeletonOptions,
+					warnings,
+					errors
+				});
+				break;
+			case 'simple':
+			default:
+				logCardDebugInfo('Simple', {
+					components: ['EntityCard', 'BasicLayers'],
+					options: { showImages: controlState?.showImages },
+					warnings,
+					errors
+				});
+		}
+	}, [displayMode, entityType, entityId, title, controlState]);
+
+	// Preparar la entidad para el modo JSON
+	const jsonEntity = entity || {
+		id: entityId,
+		name: title,
+		description,
+		image,
+		...props,
+	};
+
+	// Preparar opciones para modo skeleton
+	const skeletonOptions: Partial<CardOptions> = {
 		...options,
-		// Asegurar que las propiedades anidadas se combinen correctamente
-		designSystem: {
-			...(DEFAULT_CARD_OPTIONS.designSystem || {}),
-			...(typeOptions.designSystem || {}),
-			...(options.designSystem || {}),
-		},
-		layerSystem: {
-			...(DEFAULT_CARD_OPTIONS.layerSystem || {}),
-			...(typeOptions.layerSystem || {}),
-			...(options.layerSystem || {}),
+		enable3DEffect: false,
+		enableHolographicEffect: false,
+		enableGlowEffect: false,
+		enableScanlines: false,
+		enableAnimatedBorder: false,
+		enableGrainEffect: false,
+		// Mantener opciones de diseño base
+		designSystem: options?.designSystem || {
+			preset: 'default',
+			cornerRadius: 8,
+			borderWidth: 1,
 		},
 	};
 
-	// Agregar un manejo de errores
-	const [hasRenderError, setHasRenderError] = useState(false);
-	const errorRef = useRef<CardError | null>(null);
+	// Renderizar según el modo seleccionado
+	switch (displayMode) {
+		case 'json':
+			return (
+				<JsonEntityCard
+					entity={jsonEntity}
+					entityType={entityType}
+					className={className}
+					onClick={onClick ? (e) => onClick() : undefined}
+				/>
+			);
 
-	// Función para manejar errores de renderizado
-	const handleRenderError = useCallback((error: CardError) => {
-		console.error('Error de renderizado en EntityCard:', error);
-		errorRef.current = error;
-		setHasRenderError(true);
-	}, []);
+		case 'complex':
+			try {
+				// Aplicar configuración de control para el modo complejo
+				const complexOptions = {
+					...options,
+					enable3DEffect: options?.enable3DEffect !== undefined ?
+						options.enable3DEffect : controlState.enable3DEffect,
+					enableHolographicEffect: options?.enableHolographicEffect !== undefined ?
+						options.enableHolographicEffect : controlState.enableHolographicEffect,
+					enableGlowEffect: options?.enableGlowEffect !== undefined ?
+						options.enableGlowEffect : controlState.enableGlowEffect,
+					enableScanlines: options?.enableScanlines !== undefined ?
+						options.enableScanlines : controlState.enableScanlines,
+					enableAnimatedBorder: options?.enableAnimatedBorder !== undefined ?
+						options.enableAnimatedBorder : controlState.enableAnimatedBorder,
+					enableGrainEffect: options?.enableGrainEffect !== undefined ?
+						options.enableGrainEffect : controlState.enableGrainEffect,
+				};
 
-	// Si hay un error, mostrar una versión simplificada
-	if (hasRenderError) {
-		return (
-			<div className="entity-card-error p-4 border border-destructive/50 rounded-lg flex flex-col h-full shadow-lg">
-				<div className="text-destructive text-sm font-medium mb-2">
-					Error de renderizado
-				</div>
-				<div className="text-xs text-muted-foreground mb-4">
-					{errorRef.current?.message || 'Error desconocido'}
-				</div>
-				<div className="flex-1 flex items-center justify-center rounded bg-muted/30 overflow-hidden">
-					{image ? (
-						typeof image === 'string' ? (
-							<img
-								src={image}
-								alt={title || 'Imagen'}
-								className="object-cover h-full w-full"
-							/>
-						) : (
-							<div className="grid grid-cols-2 gap-1 p-1 h-full w-full">
-								{(image as Array<{ src?: string } | string>).slice(0, 4).map((img, idx) => (
-									<img
-										key={`img-${entityId || ''}-${idx}`}
-										src={typeof img === 'string' ? img : img.src || ''}
-										alt={`Imagen ${idx + 1}`}
-										className="object-cover h-full w-full rounded-sm"
-									/>
-								))}
+				return (
+					<EntityCardAdapter
+						entityType={entityType}
+						entity={jsonEntity}
+						options={complexOptions}
+						className={className}
+						onClick={onClick}
+					/>
+				);
+			} catch (error) {
+				if (process.env.NODE_ENV === 'development') {
+					console.error('❌ Error en modo complejo:', error);
+				}
+				// Fallback al modo simple si hay error
+				return (
+					<EntityCard
+						title={title || 'Sin título'}
+						description={description}
+						image={controlState?.showImages ? image : undefined}
+						className={`${className} border-red-500 border-2`} // Indicador visual de error
+						options={options as any}
+						onClick={onClick ? (e) => onClick() : undefined}
+					>
+						{children}
+						{process.env.NODE_ENV === 'development' && (
+							<div className="absolute bottom-0 left-0 right-0 bg-red-500/70 text-white text-xs p-1 text-center">
+								Error en modo complejo
 							</div>
-						)
-					) : (
-						<div className="text-muted-foreground">Sin imagen</div>
-					)}
-				</div>
-				<div className="mt-2 text-sm font-medium truncate">{title || 'Sin título'}</div>
-				{description && (
-					<div className="text-xs text-muted-foreground line-clamp-2 mt-1">{description}</div>
-				)}
-			</div>
-		);
-	}
+						)}
+					</EntityCard>
+				);
+			}
 
-	// Renderizado normal
-	return (
-		<EntityCard
-			id={entityId}
-			className={cn('entity-card-wrapper w-full h-full', className)}
-			title={title}
-			description={description}
-			image={image}
-			options={mergedOptions}
-			enableLayers={enableExplode}
-			enableDesign={true}
-			enableAnimation={true}
-			enableBackside={false}
-			onClick={onClick}
-			onError={handleRenderError}
-		>
-			{children}
-		</EntityCard>
-	);
+		case 'skeleton':
+			// Usar adaptador complejo pero con efectos desactivados
+			return (
+				<EntityCardAdapter
+					entityType={entityType}
+					entity={jsonEntity}
+					options={skeletonOptions}
+					className={className}
+					onClick={onClick}
+				/>
+			);
+
+		case 'simple':
+		default:
+			return (
+				<EntityCard
+					title={title || 'Sin título'}
+					description={description}
+					image={controlState?.showImages ? image : undefined}
+					className={className}
+					options={options as any}
+					onClick={onClick ? (e) => onClick() : undefined}
+				>
+					{children}
+				</EntityCard>
+			);
+	}
 }
+
+// Exportar como componente por defecto para mantener compatibilidad
+export default EntityCardWrapper;

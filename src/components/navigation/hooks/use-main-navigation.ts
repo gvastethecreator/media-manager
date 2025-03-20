@@ -20,6 +20,10 @@ export function useMainNavigation() {
 		setCurrentView('development');
 	}, [setCurrentView]);
 
+	const handleOpenEntityCards = useCallback(() => {
+		setCurrentView('entity-cards');
+	}, [setCurrentView]);
+
 	const handleMainNavigate = useCallback(
 		(id: ViewType) => {
 			setCurrentView(id);
@@ -30,6 +34,7 @@ export function useMainNavigation() {
 	return {
 		handleOpenSettings,
 		handleOpenDevelopment,
+		handleOpenEntityCards,
 		handleMainNavigate,
 	};
 }

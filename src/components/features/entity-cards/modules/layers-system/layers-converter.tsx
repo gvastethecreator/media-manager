@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import type { LayerComponent } from '../../layers/layer-plugin-system';
-import type { LayerConfig, LayerImplementation } from '../../layers/types';
+import type { LayerConfig, LayerImplementation } from '../layers/types';
 
 /**
  * Convierte un LayerComponent (formato antiguo) a LayerImplementation (formato nuevo)

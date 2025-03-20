@@ -1,3 +1,7 @@
+/**
+ * 🎨 Componente que renderiza una capa de efectos de patrón
+ * @component
+ */
 'use client';
 
 import * as React from 'react';
@@ -10,14 +14,19 @@ import { HexagonPattern } from './hexagon-pattern';
 import { LinesPattern } from './lines-pattern';
 
 interface PatternEffectLayerProps {
+	/** Estado de explosión de la capa */
 	isExploded: boolean;
+	/** Estado de hover de la capa */
 	isHovered: boolean;
+	/** Capa actualmente activa */
 	activeLayer: string | null;
+	/** Función para obtener la transformación de explosión */
 	getExplodeLayerTransform: ExplodeLayerTransformFunction;
+	/** Configuración del patrón */
 	config?: PatternConfig;
 }
 
-export function PatternEffectLayer({
+export const PatternEffectLayer = React.memo(function PatternEffectLayer({
 	isExploded,
 	isHovered,
 	activeLayer,
@@ -30,15 +39,18 @@ export function PatternEffectLayer({
 	}
 
 	// Opciones base para patrones
-	const baseOptions = {
-		visibleOnHover: config.visibleOnHover || false,
-		opacity: config.opacity || 0.15,
-		animated: config.animated || false,
-		animationSpeed: config.animationSpeed || 1,
-	};
+	const baseOptions = React.useMemo(
+		() => ({
+			visibleOnHover: config.visibleOnHover || false,
+			opacity: config.opacity || 0.15,
+			animated: config.animated || false,
+			animationSpeed: config.animationSpeed || 1,
+		}),
+		[config.visibleOnHover, config.opacity, config.animated, config.animationSpeed]
+	);
 
 	// Mapear tipo de patrón a componente correspondiente
-	const renderPattern = () => {
+	const renderPattern = React.useCallback(() => {
 		const commonProps = {
 			color: config.color || 'rgba(255, 255, 255, 0.15)',
 			secondaryColor: config.secondaryColor,
@@ -62,7 +74,17 @@ export function PatternEffectLayer({
 			default:
 				return <DotsPattern {...commonProps} />;
 		}
-	};
+	}, [
+		config.color,
+		config.secondaryColor,
+		config.size,
+		config.spacing,
+		config.rotation,
+		config.blendMode,
+		config.density,
+		config.strokeWidth,
+		config.patternType,
+	]);
 
 	return (
 		<BasePattern
@@ -78,9 +100,12 @@ export function PatternEffectLayer({
 			{renderPattern()}
 		</BasePattern>
 	);
-}
+});
 
-// Versión con estilos preconfigurados para el export
+/**
+ * 🎨 Versión con estilos preconfigurados del PatternEffectLayer
+ * @component
+ */
 export default function PatternEffectLayerWithStyles(props: PatternEffectLayerProps) {
 	return (
 		<div className="pattern-effect-container">
