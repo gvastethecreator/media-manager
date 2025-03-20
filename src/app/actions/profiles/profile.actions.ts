@@ -3,7 +3,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { ProfileCreate, ProfileUpdate } from '@/services/profile.service';
-import type { Profile } from '@prisma/client';
+import type { Profile } from '@/types/settings';
 import { revalidatePath } from 'next/cache';
 
 const profileLogger = serverLogger.withContext('ProfileActions');
@@ -47,7 +47,7 @@ export async function getProfiles() {
 		const profiles = await prisma.profile.findMany();
 
 		// Si no hay ningún perfil activo, activar el primero por defecto
-		const activeProfile = profiles.find((p) => p.isActive);
+		const activeProfile = profiles.find((p: Profile) => p.isActive);
 		if (!activeProfile && profiles.length > 0) {
 			await activateProfile(profiles[0].id);
 			// Volver a obtener los perfiles con el perfil activo

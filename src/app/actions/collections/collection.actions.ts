@@ -3,16 +3,14 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { COLLECTION_EVENTS, collectionEventsService } from '@/services/collection-events.service';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Collection } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const collectionLogger = serverLogger.withContext('CollectionActions');
-const REVALIDATE_PATHS = ['/settings', '/collections', '/collections/[id]', '/images/[id]'] as const;
+const REVALIDATE_PATHS = ['/settings', '/collections', '/collections/[id]'] as const;
 
 // Códigos de error
 enum CollectionErrorCode {
@@ -34,13 +32,52 @@ const createCollectionError = (
 };
 
 // Interfaces
+export interface Collection {
+	id: string;
+	name: string;
+	color: string;
+	emoji: string | null;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
+	sortBy: string;
+	filters: string;
+	url: string | null;
+	alternativeUrl: string | null;
+	sourceImage: string | null;
+	platform: string | null;
+	price: number | null;
+	editions: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+}
+
 export interface CollectionStats {
 	count: number;
 	size: number;
 	lastUpdated?: Date;
 }
 
-export interface CollectionWithStats extends Collection {
+export interface CollectionWithStats {
+	id: string;
+	name: string;
+	color: string;
+	emoji: string | null;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
+	sortBy: string;
+	filters: string;
+	url: string | null;
+	alternativeUrl: string | null;
+	sourceImage: string | null;
+	platform: string | null;
+	price: number | null;
+	editions: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
 	_count: {
 		images: number;
 	};
@@ -50,11 +87,28 @@ export interface CollectionWithStats extends Collection {
 		name: string;
 		count: number;
 	}>;
-	featuredImage: string | null;
 	recentImages: string[];
 }
 
-export interface CollectionWithImages extends Collection {
+export interface CollectionWithImages {
+	id: string;
+	name: string;
+	color: string;
+	emoji: string | null;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
+	sortBy: string;
+	filters: string;
+	url: string | null;
+	alternativeUrl: string | null;
+	sourceImage: string | null;
+	platform: string | null;
+	price: number | null;
+	editions: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
 	images: FileItem[];
 }
 
@@ -80,7 +134,6 @@ export interface CollectionUpdate extends Partial<CollectionCreate> {
 	id: string;
 }
 
-// Funciones utilitarias
 const revalidateAllPaths = async () => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
@@ -94,72 +147,44 @@ const notifyCollectionChange = async (
 	collection?: Collection,
 	imageId?: string
 ) => {
-	// Emitir eventos generales
+	// Emitir eventos usando el nuevo sistema del servidor
 	if (action === 'create' || action === 'update' || action === 'delete') {
 		await emit({
 			type: 'collections:modified',
-			data: { action, ...(collection ? { collection } : { id: collectionId }) },
+			data: { action, collectionId, collection },
 		});
-
-		// Emitir eventos específicos del servicio
-		if (collection) {
-			if (action === 'create') {
-				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_CREATED, {
-					collectionId,
-					collection,
-				});
-			} else if (action === 'update') {
-				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_UPDATED, {
-					collectionId,
-					collection,
-				});
-			} else if (action === 'delete') {
-				collectionEventsService.emit(COLLECTION_EVENTS.COLLECTION_DELETED, {
-					collectionId,
-					collection,
-				});
-			}
-		}
-	}
-
-	// Para acciones de imágenes
-	if (imageId) {
+	} else if (action === 'addImage' || action === 'removeImage') {
 		await emit({
 			type: 'collections:modified',
 			data: { action, collectionId, imageId },
 		});
-
-		if (action === 'addImage') {
-			collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_ADDED, { collectionId, imageId });
-		} else if (action === 'removeImage') {
-			collectionEventsService.emit(COLLECTION_EVENTS.IMAGE_REMOVED, { collectionId, imageId });
-		}
 	}
 
-	// Actualizar estadísticas
-	statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATED);
+	// Emitir evento de estadísticas
+	statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
 };
 
-// Acciones del servidor
+// Funciones del servidor
 export async function getCollections(): Promise<CollectionWithStats[]> {
 	try {
-		collectionLogger.info('🎯 Obteniendo colecciones');
+		collectionLogger.info('📚 Obteniendo colecciones con estadísticas');
+
+		// Obtener colecciones con conteos y estadísticas
 		const collections = await prisma.collection.findMany({
 			include: {
 				_count: {
 					select: { images: true },
 				},
 				images: {
-					take: 9,
-					orderBy: { createdAt: 'desc' },
+					take: 5,
+					orderBy: {
+						createdAt: 'desc',
+					},
 					select: {
 						id: true,
 						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
 						thumbnailSize: true,
 						isFavorite: true,
-						createdAt: true,
 						folder: {
 							select: {
 								name: true,
@@ -168,11 +193,24 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
 					},
 				},
 			},
-			orderBy: { name: 'asc' },
+			orderBy: [
+				{
+					isFavorite: 'desc',
+				},
+				{
+					images: {
+						_count: 'desc',
+					},
+				},
+				{
+					name: 'asc',
+				},
+			],
 		});
 
+		// Calcular estadísticas adicionales
 		const collectionsWithStats = await Promise.all(
-			collections.map(async (collection) => {
+			collections.map(async (collection: any) => {
 				const totalSize = await prisma.image.aggregate({
 					where: {
 						collections: {
@@ -186,51 +224,44 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
 					},
 				});
 
-				const lastImage = collection.images?.[0];
-				const lastUpdated = lastImage?.createdAt || collection.updatedAt;
-
+				// Obtener estadísticas de imágenes por carpeta
 				const folderDistribution = collection.images?.reduce(
-					(acc, img) => {
+					(acc: any, img: any) => {
 						const folderName = img.folder?.name || 'Sin carpeta';
 						acc[folderName] = (acc[folderName] || 0) + 1;
 						return acc;
 					},
-					{} as Record<string, number>
+					{}
 				);
 
+				// Convertir el objeto de distribución a un array para la API
 				const distribution = Object.entries(folderDistribution || {})
 					.map(([name, count]) => ({
 						name,
 						count,
 					}))
-					.sort((a, b) => b.count - a.count);
+					.sort((a, b) => (b.count as number) - (a.count as number));
 
-				const featuredImage = collection.images?.find((img) => img.isFavorite)?.thumbnail;
+				const featuredImage = collection.images?.find((img: any) => img.isFavorite)?.thumbnail;
 				const recentImages = collection.images
-					?.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-					.map((img) => {
+					?.filter((img: any) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+					.map((img: any) => {
 						if (img.thumbnail) {
 							return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
 						}
-						return '';
+						return null;
 					})
 					.filter(Boolean);
 
-				const result: CollectionWithStats = {
+				return {
 					...collection,
-					_count: {
-						images: collection._count?.images || 0,
-					},
+					_count: collection._count,
 					totalSize: totalSize._sum.size || 0,
-					lastUpdated,
 					distribution,
-					featuredImage: featuredImage
-						? `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}`
-						: null,
+					featuredImage,
 					recentImages: recentImages || [],
+					images: undefined, // No devolver las imágenes completas
 				};
-
-				return result;
 			})
 		);
 
@@ -295,7 +326,7 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 		const lastUpdated = lastImage?.createdAt || collection.updatedAt;
 
 		const folderDistribution = collection.images?.reduce(
-			(acc, img) => {
+			(acc: any, img: any) => {
 				const folderName = img.folder?.name || 'Sin carpeta';
 				acc[folderName] = (acc[folderName] || 0) + 1;
 				return acc;
@@ -308,12 +339,12 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 				name,
 				count,
 			}))
-			.sort((a, b) => b.count - a.count);
+			.sort((a, b) => (b.count as number) - (a.count as number));
 
-		const featuredImage = collection.images?.find((img) => img.isFavorite)?.thumbnail;
+		const featuredImage = collection.images?.find((img: any) => img.isFavorite)?.thumbnail;
 		const recentImages = collection.images
-			?.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-			.map((img) => {
+			?.filter((img: any) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+			.map((img: any) => {
 				if (img.thumbnail) {
 					return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
 				}
@@ -329,7 +360,9 @@ export async function getCollection(id: string): Promise<CollectionWithStats> {
 			totalSize: totalSize._sum.size || 0,
 			lastUpdated,
 			distribution,
-			featuredImage: featuredImage ? `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}` : null,
+			featuredImage: featuredImage
+				? `data:image/jpeg;base64,${Buffer.from(featuredImage).toString('base64')}`
+				: null,
 			recentImages: recentImages || [],
 		};
 
@@ -450,7 +483,7 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 			return [];
 		}
 
-		const images = collection.images.map((img) => convertServerImageToFileItem(img as ServerImage));
+		const images = collection.images.map((img: any) => convertServerImageToFileItem(img as ServerImage));
 
 		collectionLogger.info(`✅ ${images.length} imágenes obtenidas`);
 		return images;
@@ -547,7 +580,7 @@ export async function getCollectionStats(id: string): Promise<CollectionStats> {
 			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
-		const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
+		const totalSize = collection.images.reduce((acc: any, img: any) => acc + img.size, 0);
 		const stats = {
 			count: collection._count.images,
 			size: totalSize,
@@ -585,7 +618,7 @@ export async function updateCollectionStats(id: string, stats: Partial<Collectio
 			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
-		const totalSize = collection.images.reduce((acc, img) => acc + img.size, 0);
+		const totalSize = collection.images.reduce((acc: any, img: any) => acc + img.size, 0);
 		const updatedStats = {
 			count: collection._count.images,
 			size: totalSize,

@@ -1,6 +1,5 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
@@ -8,6 +7,7 @@ import { generateThumbnail } from '@/lib/thumbnail';
 import type { ProcessOptions } from '@/services/thumbnail.service';
 import { thumbnailService } from '@/services/thumbnail.service';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
+import { existsSync } from 'fs';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
@@ -227,7 +227,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 			},
 		});
 
-		return images.map((image) => ({
+		return images.map((image: any) => ({
 			id: image.id,
 			path: image.path,
 			processedAt: image.updatedAt.toISOString(),
@@ -292,7 +292,7 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 			pending,
 			processed: withThumbnail,
 			totalSize: totalSize._sum.thumbnailSize || 0,
-			errors: errors.map((error) => ({
+			errors: errors.map((error: any) => ({
 				imageId: error.id,
 				imagePath: error.path,
 				error: error.thumbnailError || 'Error desconocido',
