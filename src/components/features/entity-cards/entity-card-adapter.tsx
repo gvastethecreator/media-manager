@@ -83,9 +83,6 @@ export function EntityCardAdapter({
 		<EntityCard
 			id={entityInfo.id}
 			title={entityInfo.title}
-			description={entityInfo.description}
-			image={entityInfo.image}
-			metadata={entityInfo.metadata}
 			className={className}
 			onClick={onClick ? (e) => onClick() : undefined}
 			options={entityCardOptions}

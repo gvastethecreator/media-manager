@@ -1,5 +1,5 @@
 import type { ExtendedProcessStatus, ProcessStatus } from '@/types/process';
-import type { Prisma } from '@prisma/client';
+import type { Folder as PrismaFolder } from '@prisma/client';
 
 export interface FolderStats {
 	totalFolders: number;
@@ -13,7 +13,7 @@ export interface FolderStats {
 /**
  * Representación de una carpeta en el sistema
  */
-export type Folder = Prisma.FolderGetPayload<Record<string, never>> & {
+export type Folder = PrismaFolder & {
 	totalFiles?: number;
 	totalSize?: number;
 	imageCount?: number;
