@@ -96,7 +96,7 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 			},
 		});
 
-		return notes.map((note) => ({
+		return notes.map((note: any) => ({
 			...note,
 			lastUpdated: note.updatedAt,
 		}));
