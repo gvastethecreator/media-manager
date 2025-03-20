@@ -3,12 +3,41 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 import type { CreateImageInput, GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
 const imageLogger = serverLogger.withContext('ImageCRUD');
+
+// Definir la interfaz Image para no depender de Prisma
+export interface Image {
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
+	hash: string | null;
+	metadata: string | null;
+	folderId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	isPublic: boolean;
+	isFavorite: boolean;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	tags?: { id: string; name: string; color: string }[];
+	collections?: { id: string; name: string; color: string; emoji: string }[];
+	albums?: { id: string; name: string; emoji: string }[];
+	characters?: { id: string; name: string; emoji: string }[];
+	places?: { id: string; name: string; emoji: string }[];
+	worldItems?: { id: string; name: string; emoji: string }[];
+	stats?: any;
+	folder?: { id: string; name: string; path: string };
+}
 
 /**
  * Obtiene una imagen por su ID
@@ -47,7 +76,7 @@ export async function getImage(id: string): Promise<Image | null> {
 			return null;
 		}
 
-		return image;
+		return image as unknown as Image;
 	} catch (error) {
 		imageLogger.error('Error al obtener la imagen:', error);
 		throw new Error('No se pudo obtener la imagen');
@@ -112,7 +141,7 @@ export async function updateImage(id: string, data: Partial<Image>): Promise<Ima
 		revalidatePath('/');
 		revalidatePath(`/images/${id}`);
 
-		return updated;
+		return updated as unknown as Image;
 	} catch (error) {
 		imageLogger.error('Error al actualizar la imagen:', error);
 		throw new Error('No se pudo actualizar la imagen');
@@ -164,7 +193,7 @@ export async function getFavoriteImages(): Promise<Image[]> {
 			},
 		});
 
-		return favorites;
+		return favorites as unknown as Image[];
 	} catch (error) {
 		imageLogger.error('Error al obtener imágenes favoritas:', error);
 		throw new Error('No se pudieron obtener las imágenes favoritas');

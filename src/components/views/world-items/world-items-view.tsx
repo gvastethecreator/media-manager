@@ -4,7 +4,7 @@ import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.ac
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,37 +18,10 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('WorldItemsView');
 
-// Configuración visual predeterminada para objetos del mundo
+// Configuración visual simplificada para objetos del mundo
 const DEFAULT_WORLD_ITEM_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'world-item',
-		variant: 'default',
-		aspectRatio: '3/2',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
 	primaryColor: '#f59e0b',
 	secondaryColor: '#d97706',
-	hoverLiftHeight: 10,
-	maxRotation: 15,
 };
 
 export function WorldItemsView(_props: ViewProps) {
@@ -159,9 +132,8 @@ export function WorldItemsView(_props: ViewProps) {
 								entityType="worldItem"
 								entity={worldItem}
 								onClick={() => handleWorldItemClick(worldItem)}
-								showVisualConfig={true}
-								enableExplode={true}
 								options={visualConfig}
+								className="h-full"
 							/>
 						</motion.div>
 					))}

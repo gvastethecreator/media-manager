@@ -48,11 +48,11 @@ export async function getFolders() {
 		});
 
 		folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
-		return folders.map((folder) => ({
+		return folders.map((folder: any) => ({
 			...folder,
 			recentImages: Array(9)
 				.fill(null)
-				.map((_, index) => {
+				.map((_, index: number) => {
 					const img = folder.images[index];
 					if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
 						try {
@@ -261,7 +261,7 @@ export async function getFolderImages(id: string) {
 		}
 
 		// Uso de Promise.all para esperar a que todas las promesas se resuelvan
-		const transformPromises = folder.images.map((image) =>
+		const transformPromises = folder.images.map((image: any) =>
 			transformImageToFileItem(image as unknown as ImageWithRelations)
 		);
 

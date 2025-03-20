@@ -36,7 +36,7 @@ export async function getLatestFolderImages(
 		});
 
 		// Transformar a FileItem
-		const fileItems: FileItem[] = images.map((image) => ({
+		const fileItems: FileItem[] = images.map((image: any) => ({
 			id: image.id,
 			name: image.name || 'Untitled',
 			path: image.path,
