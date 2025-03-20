@@ -35,7 +35,7 @@ import { adaptCardOptions } from '../types';
 import type { BorderOptions } from '../types/shared-card-types';
 import type { CardOptions } from '../types/unified-card-types';
 
-import '../../styles/concept-card.css';
+import '../styles/concept-card.css';
 
 // TIPOS DE DATOS
 // ==============================
