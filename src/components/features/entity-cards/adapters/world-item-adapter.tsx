@@ -2,7 +2,7 @@
 
 import type { WorldItem } from '@/types/entities/world-items';
 import { usePreset } from '../hooks/use-preset';
-import { WorldItemCard } from '../modules/layout-system/layouts/world-item-card-layout';
+import { WorldItemCard } from '../modules/layouts/world-item-card-layout';
 import type { CardOptions } from '../types/unified-card-types';
 
 /**

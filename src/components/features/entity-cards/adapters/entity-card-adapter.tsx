@@ -12,23 +12,23 @@ import type { WorldItem } from '@/types/entities/world-items';
 
 import { getCardOptionsFromPreset } from '../actions/visual-presets.actions';
 // Importamos todos los adaptadores de tarjeta
-import { AlbumCard } from '../modules/layout-system/layouts/album-card-layout';
-import { CharacterCard } from '../modules/layout-system/layouts/character-card-layout';
-import { CollectionCard } from '../modules/layout-system/layouts/collection-card-layout';
-import { ConceptCard } from '../modules/layout-system/layouts/concept-card-layout';
-import { FolderCard } from '../modules/layout-system/layouts/folder-card-layout';
-import { NoteCard } from '../modules/layout-system/layouts/note-card-layout';
-import { PlaceCard } from '../modules/layout-system/layouts/place-card-layout';
-import { PromptCard } from '../modules/layout-system/layouts/prompt-card-layout';
-import { TagsCard } from '../modules/layout-system/layouts/tags-card-layout';
+import { AlbumCard } from '../modules/layouts/album-card-layout';
+import { CharacterCard } from '../modules/layouts/character-card-layout';
+import { CollectionCard } from '../modules/layouts/collection-card-layout';
+import { ConceptCard } from '../modules/layouts/concept-card-layout';
+import { FolderCard } from '../modules/layouts/folder-card-layout';
+import { NoteCard } from '../modules/layouts/note-card-layout';
+import { PlaceCard } from '../modules/layouts/place-card-layout';
+import { PromptCard } from '../modules/layouts/prompt-card-layout';
+import { TagsCard } from '../modules/layouts/tags-card-layout';
 import { WorldItemAdapter } from './world-item-adapter';
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { CardData } from '../modules/layout-system/layouts/album-card-layout';
-import type { CharacterCardProps } from '../modules/layout-system/layouts/character-card-layout';
-import type { ConceptCardProps } from '../modules/layout-system/layouts/concept-card-layout';
-import type { NoteCardProps } from '../modules/layout-system/layouts/note-card-layout';
-import type { PromptCardProps } from '../modules/layout-system/layouts/prompt-card-layout';
+import type { CardData } from '../modules/layouts/album-card-layout';
+import type { CharacterCardProps } from '../modules/layouts/character-card-layout';
+import type { ConceptCardProps } from '../modules/layouts/concept-card-layout';
+import type { NoteCardProps } from '../modules/layouts/note-card-layout';
+import type { PromptCardProps } from '../modules/layouts/prompt-card-layout';
 import type { CardOptions } from '../types/unified-card-types';
 
 // Importar nuestras nuevas herramientas de depuración
