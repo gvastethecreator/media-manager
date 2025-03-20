@@ -1,8 +1,8 @@
-import { LayerImplementation } from '@/types/entity-card';
+import type { LayerImplementation } from '@/types/entity-card';
 import { ZapIcon } from 'lucide-react';
 import { GlitchLayer } from './components/glitch-layer';
 import { GlitchSettings } from './components/glitch-settings';
-import { createDefaultGlitchConfig, GlitchConfig } from './glitch-schema';
+import { createDefaultGlitchConfig, type GlitchConfig } from './glitch-schema';
 
 /**
  * ⚡ Implementación de la capa de glitch

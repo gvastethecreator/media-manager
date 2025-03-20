@@ -1,4 +1,4 @@
-import { GlitchConfig, GlitchZone } from '../glitch-schema';
+import type { GlitchConfig, GlitchZone } from '../glitch-schema';
 
 /**
  * 🎲 Generador de números aleatorios con semilla
@@ -171,7 +171,7 @@ function applyCompression(imageData: ImageData, amount: number): void {
 export function generateGlitch(
   imageData: ImageData,
   config: GlitchConfig,
-  time: number = 0
+  time = 0
 ): ImageData {
   const { width, height } = imageData;
   const result = new ImageData(new Uint8ClampedArray(imageData.data), width, height);

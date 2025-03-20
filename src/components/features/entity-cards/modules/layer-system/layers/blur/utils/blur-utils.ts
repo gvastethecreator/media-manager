@@ -1,4 +1,4 @@
-import { BlurConfig } from '../blur-schema';
+import type { BlurConfig } from '../blur-schema';
 
 interface BlurEffectOptions extends Omit<BlurConfig, 'type'> {
   time: number;

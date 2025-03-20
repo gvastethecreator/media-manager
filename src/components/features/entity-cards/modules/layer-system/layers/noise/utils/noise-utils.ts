@@ -1,4 +1,4 @@
-import { NoiseConfig, NoiseZone } from '../noise-schema';
+import type { NoiseConfig, NoiseZone } from '../noise-schema';
 
 /**
  * 🎲 Generador de números aleatorios con semilla
@@ -145,7 +145,7 @@ function generateWorleyNoise(x: number, y: number, seed: number): number {
 
   const xi = Math.floor(x / cellSize);
   const yi = Math.floor(y / cellSize);
-  let minDist = Infinity;
+  let minDist = Number.POSITIVE_INFINITY;
 
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
@@ -272,7 +272,7 @@ function applyZone(x: number, y: number, zone: NoiseZone): number {
 export function generateNoise(
   imageData: ImageData,
   config: NoiseConfig,
-  time: number = 0
+  time = 0
 ): ImageData {
   const { width, height } = imageData;
   const result = new ImageData(new Uint8ClampedArray(imageData.data), width, height);

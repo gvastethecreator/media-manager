@@ -1,4 +1,4 @@
-import { FilterConfig } from '../filter-schema';
+import type { FilterConfig } from '../filter-schema';
 
 /**
  * 🎨 Genera los estilos CSS para los filtros básicos

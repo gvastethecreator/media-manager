@@ -1,8 +1,8 @@
-import { LayerImplementation } from '@/types/entity-card';
+import type { LayerImplementation } from '@/types/entity-card';
 import { WavesIcon } from 'lucide-react';
 import { NoiseLayer } from './components/noise-layer';
 import { NoiseSettings } from './components/noise-settings';
-import { createDefaultNoiseConfig, NoiseConfig } from './noise-schema';
+import { createDefaultNoiseConfig, type NoiseConfig } from './noise-schema';
 
 /**
  * 🌊 Implementación de la capa de ruido
