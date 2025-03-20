@@ -94,7 +94,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 			},
 		});
 
-		return prompts.map((prompt) => ({
+		return prompts.map((prompt: any) => ({
 			...prompt,
 			lastUpdated: prompt.updatedAt,
 		}));
