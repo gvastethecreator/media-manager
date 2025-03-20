@@ -1,19 +1,19 @@
 import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
 import type {
-	BorderOptions,
-	GlowEffectOptions,
-	GrainEffectOptions,
-	HolographicEffectOptions,
-	RarityConfig,
-	ScanlinesOptions,
-	TextureConfig,
-	TextureSystem,
+    BorderOptions,
+    GlowEffectOptions,
+    GrainEffectOptions,
+    HolographicEffectOptions,
+    RarityConfig,
+    ScanlinesOptions,
+    TextureConfig,
+    TextureSystem,
 } from '@/components/features/entity-cards/types/base-card-types';
 import type * as React from 'react';
-import type { BaseLayerConfig } from '../layers/layer-plugin-system';
 import type { AnimationSystem } from '../modules/animation';
 import type { DesignSystem } from '../modules/design/types';
 import type { ExplodeSystem } from '../modules/explode';
+import type { BaseLayerConfig } from '../modules/layer-system/layers/layer-plugin-system';
 
 // Tipo para la configuración del grid de imágenes
 export type ImageGridLayout = 'single' | 'dual' | 'quad' | 'six';

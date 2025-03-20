@@ -10,7 +10,7 @@ export * from './card-layer-types';
 export * from './central-types';
 export * from './character-card-types';
 export * from './unified-card-types';
-export * from './unified-types';  // Exportación adicional de los tipos unificados
+export * from './unified-types'; // Exportación adicional de los tipos unificados
 
 // Exportar adaptador de opciones
 export { toSharedCardOptions, toUnifiedCardOptions } from './card-options-adapter';
@@ -52,7 +52,7 @@ export type {
 } from './unified-card-types';
 
 // Re-exportar tipos de capas
-export type { BaseLayerConfig, LayerComponentProps, LayerSettingsProps } from '../layers/layer-plugin-system';
+export type { BaseLayerConfig, LayerComponentProps, LayerSettingsProps } from '../modules/layer-system/layers/layer-plugin-system';
 
 // Re-exportar tipos de módulos
 export type { AnimationSystem as AnimationSystemType } from '../modules/animation/types';

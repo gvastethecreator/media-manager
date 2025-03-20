@@ -1,11 +1,10 @@
 'use server';
 
 import {
-	type ShaderConfig,
-	entityParamsSchema,
-	shaderConfigResponseSchema,
-	shaderConfigSchema,
-} from '@/components/features/entity-cards/layers/shaders/shader-config-schema';
+    type ShaderConfig,
+    entityParamsSchema,
+    shaderConfigSchema
+} from '@/components/features/entity-cards/modules/layer-system/layers/shaders/shader-config-schema';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 

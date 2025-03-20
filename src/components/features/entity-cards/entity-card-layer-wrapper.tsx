@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useRef, useState } from 'react';
-import { LayerPluginProvider, LayerRenderer } from './layers/layer-plugin-system';
+import { LayerPluginProvider, LayerRenderer } from './modules/layer-system/layers/layer-plugin-system';
 
 interface EntityCardLayerWrapperProps {
 	title: string;
