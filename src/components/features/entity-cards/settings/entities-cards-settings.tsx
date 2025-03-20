@@ -6,6 +6,8 @@ import {
 import type { EntityType } from '@/components/features/entity-cards/adapters/preset-adapter';
 import { adaptBaseToSettingsOptions } from '@/components/features/entity-cards/base/card-adapter';
 import { DEFAULT_SETTINGS_OPTIONS } from '@/components/features/entity-cards/config/card-config-defaults';
+import { DesignPanel } from '@/components/features/entity-cards/modules/design';
+import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layer-system/layer-management-dialog';
 import {
 	adaptCardOptionsToLayersConfig,
 	adaptEntityCardToLayerSystem,
@@ -14,9 +16,7 @@ import {
 	LayersPanel,
 	LayersProvider,
 	RegisterAllLayers,
-} from '@/components/features/entity-cards/layers';
-import { DesignPanel } from '@/components/features/entity-cards/modules/design';
-import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-system/layer-management-dialog';
+} from '@/components/features/entity-cards/modules/layer-system/layers';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import { PresetsPanel } from '@/components/features/entity-cards/settings/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
