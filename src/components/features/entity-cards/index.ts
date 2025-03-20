@@ -1,13 +1,35 @@
+'use client';
+
 /**
- * 🎴 Sistema de Entity Cards - Versión Simplificada
+ * 🎴 Sistema de Entity Cards
  *
- * Este archivo proporciona un punto de entrada centralizado para los componentes
- * básicos del sistema de tarjetas de entidades.
+ * Este módulo proporciona componentes para renderizar y gestionar tarjetas de entidades
+ * con soporte para capas visuales y efectos.
  */
 
-// Componentes principales
+// Componente principal
 export { EntityCard } from './entity-card';
 export { EntityCardAdapter } from './entity-card-adapter';
+
+// Tipos
+export type { EntityCardProps } from './entity-card';
+export type { EntityBasicInfo } from './types/unified-types';
+
+// Sistema de capas
+export {
+    EntityCardLayers,
+    EntityCardLayersProvider,
+    LayerRenderer,
+    RegisterAllLayers,
+    RegisterLayersByEntityType
+} from './modules/layers';
+
+// Tipos de capas
+export type {
+    BaseLayerConfig,
+    CommonLayerProps,
+    LayerImplementation
+} from './modules/layers';
 
 // Contextos y Providers
 export { CardDisplayProvider, useCardDisplay } from './context/card-display-context';

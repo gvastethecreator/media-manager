@@ -3,7 +3,7 @@
  * Reexporta los tipos de formularios que se utilizan en múltiples componentes
  */
 
-import type { CollectionFormData } from '../modules/layout-system/layouts/forms/entity-types';
+import type { CollectionFormData } from '../modules/layouts/forms/entity-types';
 
 export type { CollectionFormData };
 
