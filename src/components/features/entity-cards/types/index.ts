@@ -6,10 +6,11 @@
 // Exportar tipos desde archivos específicos, evitando ambigüedades
 export type { BaseCardProps } from './base-card-types';
 export * from './card-layer-types';
-export * from './card-settings-types';
+// Eliminada exportación de card-settings-types, ahora unificado en unified-types
 export * from './central-types';
 export * from './character-card-types';
 export * from './unified-card-types';
+export * from './unified-types';  // Exportación adicional de los tipos unificados
 
 // Exportar adaptador de opciones
 export { toSharedCardOptions, toUnifiedCardOptions } from './card-options-adapter';

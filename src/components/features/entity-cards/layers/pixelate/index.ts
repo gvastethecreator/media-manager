@@ -35,3 +35,14 @@ export type { PixelateConfig } from './pixelate-schema';
 
 // Acciones del servidor
 export { getPixelateConfig, updatePixelateConfig, deletePixelateConfig } from './actions';
+
+// Componentes
+export { PixelateLayer } from './components/pixelate-layer';
+export { PixelateConfig } from './components/pixelate-config';
+
+// Store y tipos
+export { usePixelateStore } from './actions/pixelate-config.action';
+export type { PixelateConfig } from './actions/pixelate-config.action';
+
+// Utilidades
+export { applyPixelateEffect, generateAnimationPattern } from './utils/pixelate-utils';

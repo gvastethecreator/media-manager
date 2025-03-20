@@ -1,141 +1,147 @@
-# 🌾 Capa de Efecto Grain
+# 🌾 Grain Layer
 
-## Descripción
-La capa Grain añade efectos de textura y grano a las tarjetas de entidad, simulando efectos visuales como papel, película o ruido digital.
+El Grain Layer es un componente avanzado que permite aplicar efectos de grano a las imágenes de las tarjetas. Este efecto puede utilizarse para crear texturas nostálgicas, efectos de película, o simplemente añadir ruido artístico a las imágenes.
 
-## Estructura
+## 📁 Estructura del Directorio
+
+```
+grain/
+├── actions/
+│   └── grain-config.action.ts    # Configuración y store con Zustand
+├── components/
+│   ├── grain-layer.tsx           # Componente principal del efecto
+│   └── grain-config.tsx          # Controles de configuración
+├── utils/
+│   └── grain-utils.ts            # Utilidades para generar patrones
+├── __tests__/
+│   ├── grain-layer.test.tsx      # Tests del componente principal
+│   └── grain-config.test.tsx     # Tests de la configuración
+└── index.ts                      # Exportaciones del módulo
+```
+
+## 🔄 Diagrama de Flujo de Datos
 
 ```mermaid
 graph TD
-    A[GrainEffectWrapper] --> B[GrainEffectLayer]
-    B --> C[SVG Noise Generator]
-    B --> D[CSS Classes]
-    E[GrainSettings] --> F[Form Controls]
-    F --> G[Server Actions]
-
-    style A fill:#d4f1f9
-    style B fill:#ffecb3
-    style C fill:#e1bee7
-    style D fill:#c8e6c9
+    A[GrainConfig] -->|Actualiza configuración| B[useGrainStore]
+    B -->|Estado actual| C[GrainLayer]
+    C -->|Genera patrón| D[Canvas]
+    D -->|Renderiza| E[Efecto Final]
+    F[grain-utils] -->|Funciones de generación| C
 ```
 
-## Componentes Principales
-
-### 1. GrainEffectWrapper
-- Adapta la capa al sistema de plugins
-- Maneja la configuración inicial
-- Convierte la configuración al formato esperado
-
-### 2. GrainEffectLayer
-- Implementa el efecto visual de grano
-- Soporta diferentes tipos de ruido
-- Maneja animaciones y estados de hover
-
-### 3. GrainSettings
-- Panel de configuración del efecto
-- Controles para ajustar parámetros
-- Validación con Zod
-
-## Configuración
+## ⚙️ Opciones de Configuración
 
 ```typescript
 interface GrainConfig {
-    enabled: boolean;
-    intensity: number;    // 0-1
-    size: number;        // > 0.1
-    animated: boolean;
-    speed: number;       // opcional
-    colorMode: 'monochrome' | 'color';
-    opacity: number;     // 0-1
-    blend: 'normal' | 'overlay' | 'multiply' | 'screen';
-    seed: number;       // entero >= 0
+  enabled: boolean;           // Habilitar/deshabilitar el efecto
+  intensity: number;         // Intensidad del grano (0-1)
+  size: number;             // Tamaño de los granos (1-10)
+  animated: boolean;        // Animación del grano
+  speed: number;           // Velocidad de animación (0.1-5)
+  colorMode: 'monochrome' | 'rgb' | 'hsl';  // Modo de color
+  opacity: number;         // Opacidad del efecto (0-1)
+  blend: string;          // Modo de mezcla
+  seed: number;           // Semilla para generación de ruido
+  pattern: 'perlin' | 'simplex' | 'worley' | 'value' | 'cellular';  // Tipo de patrón
+  fractalNoise: boolean;  // Habilitar ruido fractal
+  roughness: number;      // Rugosidad del ruido fractal (0-1)
+  distribution: 'uniform' | 'gaussian' | 'exponential';  // Distribución del ruido
 }
 ```
 
-## Uso
+## 🎯 Características Principales
+
+- Generación de patrones de grano personalizables
+- Animación fluida del efecto
+- Múltiples tipos de ruido y distribuciones
+- Control preciso sobre la intensidad y tamaño
+- Modos de color y mezcla configurables
+- Ruido fractal para texturas más complejas
+
+## 📝 Ejemplo de Uso
 
 ```tsx
-<GrainEffectLayer
-    isExploded={false}
-    isHovered={true}
-    activeLayer="grain"
-    options={{
-        intensity: 0.3,
-        density: 0.6,
-        animated: true,
-        animationSpeed: 1
-    }}
+// Uso básico del componente
+<GrainLayer
+  width={800}
+  height={600}
+  isHovered={false}
+  isExploded={false}
 />
+
+// Configuración del efecto
+<GrainConfig className="w-full max-w-sm" />
 ```
 
-## Optimizaciones
-- Memoización de cálculos costosos
-- Lazy loading de texturas
-- Throttling de eventos de mouse
-- Generación eficiente de SVG
+## 🚀 Optimizaciones
 
-## Rendimiento
+- Uso de `requestAnimationFrame` para animaciones suaves
+- Generación eficiente de patrones de ruido
+- Renderizado condicional basado en el estado `enabled`
+- Reutilización de patrones para mejorar el rendimiento
+- Limpieza de recursos al desmontar el componente
 
-| Métrica | Valor |
-|---------|-------|
-| Tiempo de renderizado | ~2ms |
-| Memoria utilizada | ~500KB |
-| CPU (idle) | <1% |
-| CPU (animado) | ~3-5% |
+## 🔌 Integración
 
-## Mejores Prácticas
-1. Usar valores de intensidad moderados (0.15-0.3)
-2. Evitar animaciones en dispositivos de bajo rendimiento
-3. Preferir texturas predefinidas sobre SVG generado
-4. Implementar lazy loading para texturas personalizadas
+El Grain Layer está diseñado para integrarse perfectamente con el sistema de capas de las tarjetas:
 
-## Ejemplos
+- Compatible con el sistema de eventos hover/explode
+- Se ajusta automáticamente al tamaño de la tarjeta
+- Soporta modos de mezcla para combinar con otras capas
+- Mantiene la consistencia visual con otros efectos
 
-### Efecto Papel
-```tsx
-<GrainEffectLayer
-    options={{
-        intensity: 0.2,
-        density: 0.8,
-        noise: 'film',
-        animated: false
-    }}
-/>
+## 🎨 Presets Recomendados
+
+### Efecto de Película Clásica
+```typescript
+{
+  intensity: 0.4,
+  size: 2,
+  colorMode: 'monochrome',
+  blend: 'overlay',
+  pattern: 'perlin',
+  distribution: 'gaussian'
+}
 ```
 
-### Efecto Digital
-```tsx
-<GrainEffectLayer
-    options={{
-        intensity: 0.3,
-        density: 0.4,
-        noise: 'digital',
-        animated: true,
-        animationSpeed: 2
-    }}
-/>
+### Ruido Digital
+```typescript
+{
+  intensity: 0.6,
+  size: 1,
+  animated: true,
+  speed: 2,
+  colorMode: 'rgb',
+  pattern: 'cellular',
+  distribution: 'uniform'
+}
 ```
 
-## Integración con Otros Sistemas
+### Textura Orgánica
+```typescript
+{
+  intensity: 0.3,
+  size: 3,
+  pattern: 'worley',
+  fractalNoise: true,
+  roughness: 0.7,
+  distribution: 'exponential'
+}
+```
 
-### Sistema de Capas
-- Índice Z: 15
-- Prioridad de renderizado: Media
-- Compatibilidad: Todas las entidades
+## 🔜 Planes Futuros
 
-### Sistema de Temas
-- Soporta modo oscuro/claro
-- Adaptable a diferentes esquemas de color
-- Personalizable por tema
+- Implementación de más patrones de ruido
+- Optimización para dispositivos móviles
+- Soporte para máscaras y áreas selectivas
+- Presets guardables y compartibles
+- Mejoras en el rendimiento de la animación
 
-## Mantenimiento
-- Actualizar patrones de ruido periódicamente
-- Optimizar generación SVG
-- Monitorear rendimiento
-- Actualizar compatibilidad con nuevos navegadores
+## 🛠️ Consideraciones Técnicas
 
-## Roadmap
-1. [ ] Implementar nuevos patrones de ruido
-2. [ ] Mejorar rendimiento en móviles
-3. [ ] Añadir más opciones de personalización
-4. [ ] Implementar caché de texturas
+- Requiere soporte de Canvas 2D
+- Optimizado para navegadores modernos
+- Rendimiento adaptativo según la capacidad del dispositivo
+- Manejo eficiente de memoria en animaciones
+- Compatibilidad con WebGL para casos específicos

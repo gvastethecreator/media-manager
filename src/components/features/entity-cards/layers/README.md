@@ -1,189 +1,165 @@
-# Sistema de Capas para Entity Cards
+# 🎨 Sistema de Capas para Entity Cards
 
-Este módulo proporciona un sistema completo para gestionar capas visuales en las tarjetas de entidad, ofreciendo una arquitectura extensible basada en plugins.
+## Descripción
+El sistema de capas proporciona una arquitectura modular y extensible para agregar efectos visuales y funcionalidades a las tarjetas de entidades. Cada capa puede ser activada, configurada y animada de forma independiente.
 
-## Arquitectura
+## Estructura del Sistema
 
-El sistema de capas se basa en un patrón de plugins que permite:
+```mermaid
+graph TD
+    A[LayerPluginSystem] --> B[BaseLayer]
+    B --> C[useBaseLayer]
+    B --> D[visualEffects]
+    C --> E[Hooks Comunes]
+    D --> F[Utilidades Visuales]
 
-1. **Registro centralizado**: Todas las capas se registran en un único sistema
-2. **Configuración independiente**: Cada capa gestiona su propia configuración
-3. **Renderizado ordenado**: Las capas se renderizan en un orden específico
-4. **Interacciones**: Soporte para hover, exploded view y capas activas
+    subgraph "Capas Implementadas"
+        G[GlowLayer]
+        H[FilterLayer]
+        I[NoiseLayer]
+        J[PatternLayer]
+    end
 
-### Componentes clave
+    B --> G
+    B --> H
+    B --> I
+    B --> J
+```
 
-- `LayerPluginProvider`: Contexto para proporcionar el sistema de plugins
-- `useLayerPlugin`: Hook para acceder al registro de plugins de capas
-- `LayerRenderer`: Componente para renderizar capas en el orden correcto
-- `RegisterLayers`: Registra todas las capas disponibles en el sistema
+## Componentes Principales
 
-## Cómo implementar una nueva capa
+### 🔌 LayerPluginSystem
+- Gestiona el registro y renderizado de capas
+- Proporciona contexto global para las capas
+- Maneja la activación y desactivación de capas
 
-Para añadir una nueva capa al sistema, sigue estos pasos:
+### 🎭 BaseLayer
+- Componente base para todas las capas
+- Maneja estados comunes (hover, explosión)
+- Proporciona animaciones base con Framer Motion
+- Gestiona transformaciones 3D
 
-1. **Crear la estructura de carpetas**:
+### 🎨 Hooks y Utilidades
 
-   ```
-   layers/
-   └── mi-capa/
-       ├── actions/
-       │   ├── mi-capa-config.action.ts
-       │   └── index.ts
-       ├── mi-capa-effect-layer.tsx
-       ├── mi-capa-settings.tsx
-       └── index.ts
-   ```
+#### useBaseLayer
+- Procesa configuraciones de capa
+- Maneja visibilidad y estados
+- Calcula transformaciones
+- Gestiona posición del mouse
 
-2. **Implementar las acciones del servidor**:
+#### visualEffects
+- Generación de filtros CSS
+- Manejo de blend modes
+- Efectos de brillo
+- Transformaciones 3D
+- Gradientes dinámicos
+- Animaciones
 
-   ```typescript
-   // mi-capa-config.action.ts
-   'use server';
+## Uso
 
-   export interface MiCapaConfig extends BaseLayerConfig {
-     // Propiedades específicas de tu capa
-     color: string;
-     intensity: number;
-   }
-
-   export async function getMiCapaConfig(entityType: string, entityId?: string) {
-     // Implementar lógica para obtener configuración
-     return {
-       success: true,
-       message: 'Configuración obtenida',
-       data: {
-         enabled: true,
-         layerIndex: 5,
-         color: '#ffffff',
-         intensity: 0.5
-       } as MiCapaConfig
-     };
-   }
-
-   export async function updateMiCapaConfig(...) { /* ... */ }
-   export async function deleteMiCapaConfig(...) { /* ... */ }
-   ```
-
-3. **Implementar el componente de capa**:
+### Crear una Nueva Capa
 
    ```typescript
-   // mi-capa-effect-layer.tsx
-   'use client';
+import { withBaseLayer } from './components/base-layer';
+import type { BaseLayerConfig } from './types';
 
-   import { cn } from '@/lib/utils';
-   import type { LayerComponentProps } from '../layer-plugin-system';
-   import type { MiCapaConfig } from './actions/mi-capa-config.action';
+interface MyLayerConfig extends BaseLayerConfig {
+    // Configuración específica de la capa
+    customProperty: string;
+}
 
-   export function MiCapaEffectLayer({
-     isExploded,
-     isHovered,
-     activeLayer,
-     getExplodeLayerTransform,
-     config,
-   }: LayerComponentProps<MiCapaConfig>) {
-     // Implementar renderizado de la capa
+const MyLayer = withBaseLayer<MyLayerConfig>((props) => {
+    const { processedConfig, isVisible, style } = props;
 
      return (
-       <div
-         className={cn(
-           'absolute inset-0',
-           isExploded ? 'exploded-layer layer-mi-capa' : ''
-         )}
-         style={{
-           // Estilos específicos
-           ...(isExploded ? getExplodeLayerTransform(config.layerIndex) : {})
-         }}
-         data-layer-active={activeLayer === 'mi-capa' || null}
-       />
+        <div style={style}>
+            {/* Implementación de la capa */}
+        </div>
      );
-   }
+});
    ```
 
-4. **Implementar el componente de configuración**:
+### Registrar una Capa
 
    ```typescript
-   // mi-capa-settings.tsx
-   'use client';
+import { useLayerPlugin } from './layer-plugin-system';
 
-   import { Button, Input, Slider } from '@/components/ui';
-   import { FormGroup } from '@/components/features/entity-cards/settings/panels/shared';
-   import type { LayerSettingsProps } from '../layer-plugin-system';
-   import type { MiCapaConfig } from './actions/mi-capa-config.action';
+function MyComponent() {
+    const { registerLayer } = useLayerPlugin();
 
-   export function MiCapaSettings({
-   	entityType,
-   	entityId,
-   	className,
-   	onConfigUpdate,
-   }: LayerSettingsProps<MiCapaConfig>) {
-   	// Implementar formulario de configuración
-   }
-   ```
-
-5. **Exportar la capa en el índice**:
-
-   ```typescript
-   // index.ts
-   import type { LayerComponent } from '../layer-plugin-system';
-   import { getMiCapaConfig, updateMiCapaConfig, deleteMiCapaConfig } from './actions';
-   import { MiCapaEffectLayer } from './mi-capa-effect-layer';
-   import { MiCapaSettings } from './mi-capa-settings';
-
-   export const miCapaLayer: LayerComponent<MiCapaConfig> = {
-   	type: 'mi-capa',
-   	Component: MiCapaEffectLayer,
-   	SettingsComponent: MiCapaSettings,
+    React.useEffect(() => {
+        registerLayer({
+            type: 'my-layer',
+            name: 'Mi Capa',
+            component: MyLayer,
    	defaultConfig: {
    		enabled: true,
-   		layerIndex: 5,
-   		color: '#ffffff',
-   		intensity: 0.5,
-   	},
-   	getServerActions: () => ({
-   		getConfig: getMiCapaConfig,
-   		updateConfig: updateMiCapaConfig,
-   		deleteConfig: deleteMiCapaConfig,
-   	}),
-   };
-   ```
-
-6. **Registrar la capa**:
-
-   ```typescript
-   // Añadir en register-layers.tsx
-   import { miCapaLayer } from './mi-capa';
-
-   export function RegisterLayers() {
-   	const { registerLayer } = useLayerPlugin();
-
-   	useEffect(() => {
-   		// ... otras capas
-   		registerLayer(miCapaLayer);
-   	}, [registerLayer]);
+                layerIndex: 0,
+                customProperty: 'valor'
+            }
+        });
+    }, []);
 
    	return null;
    }
    ```
 
-## Consejos para implementar capas eficientes
+## Optimizaciones de Rendimiento
 
-1. **Minimiza las operaciones costosas**: Evita cálculos intensivos en el renderizado.
-2. **Optimiza las animaciones**: Usa `transform` y `opacity` para mejor rendimiento.
-3. **Separa la lógica de renderizado de la lógica de configuración**.
-4. **Utiliza el sistema de capas existente** para basarte en patrones probados.
-5. **Maneja adecuadamente los estados de hover y activo** para interactividad.
-6. **Respeta el índice de capa** para mantener el orden de renderizado correcto.
+- Uso extensivo de `React.memo` para prevenir re-renders innecesarios
+- Memoización de cálculos costosos con `useMemo`
+- Callbacks memoizados con `useCallback`
+- Transformaciones hardware-accelerated
+- Lazy loading de capas
 
-## Integración con el sistema de presets
+## Mejores Prácticas
 
-Las capas pueden guardarse como parte de presets visuales. Asegúrate de que tu capa:
+1. **Composición de Capas**
+   - Usar el HOC `withBaseLayer` para nueva funcionalidad
+   - Extender `BaseLayerConfig` para configuraciones específicas
+   - Mantener la lógica de renderizado separada de la lógica de estado
 
-1. Serialice correctamente su configuración
-2. Maneje valores por defecto adecuadamente
-3. Deserialice adecuadamente las configuraciones almacenadas
+2. **Optimización**
+   - Memoizar valores calculados
+   - Usar transformaciones CSS eficientes
+   - Minimizar cambios de estado
 
-## Depuración
+3. **Mantenibilidad**
+   - Documentar configuraciones de capa
+   - Usar tipos TypeScript
+   - Seguir el patrón de diseño establecido
 
-Para depurar tu capa, utiliza la vista "explode" que muestra cada capa separada espacialmente.
-Esto te ayudará a identificar problemas de renderizado y z-index.
+## Ejemplos de Uso
+
+### Capa de Brillo
+```typescript
+const GlowLayer = withBaseLayer<GlowConfig>((props) => {
+    const { processedConfig, safeMousePosition } = props;
+    const glowStyle = useGlowEffect(processedConfig, safeMousePosition);
+    return <div style={glowStyle} />;
+});
+```
+
+### Capa de Filtros
+```typescript
+const FilterLayer = withBaseLayer<FilterConfig>((props) => {
+    const { processedConfig } = props;
+    const filterStyle = generateFilterStyles(processedConfig);
+    return <div style={filterStyle} />;
+});
+```
+
+## Flujo de Datos
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant LayerPlugin
+    participant BaseLayer
+    participant SpecificLayer
+
+    User->>LayerPlugin: Interactúa con la tarjeta
+    LayerPlugin->>BaseLayer: Propaga eventos y estado
+    BaseLayer->>SpecificLayer: Proporciona props procesados
+    SpecificLayer->>User: Renderiza efecto visual
+```

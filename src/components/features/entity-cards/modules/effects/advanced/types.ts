@@ -1,92 +1,137 @@
+import type { BaseEffectOptions, ColorEffectOptions, DimensionalEffectOptions } from '../shared';
+
 /**
- * 🎨 Tipos para el módulo de efectos avanzados
- * @typedef {Object} AdvancedEffectsOptions
+ * 🔍 Opciones para efectos de escaneo
  */
-export interface AdvancedEffectsOptions {
-	// Efectos de Escaneo
-	scanlines?: boolean;
-	scanlinesDensity?: number;
-	scanlinesOpacity?: number;
-
-	// Efectos de Textura
-	grain?: boolean;
-	grainDensity?: number;
-	grainOpacity?: number;
-	noiseTexture?: boolean;
-	noiseTextureDensity?: number;
-	noiseTextureOpacity?: number;
-
-	// Efectos de Borde
-	borderGlow?: boolean;
-	borderGlowColor?: string;
-	borderGlowWidth?: number;
-	borderGlowSpread?: number;
-	borderGlowIntensity?: number;
-
-	// Efectos Holográficos
-	holographicEffect?: boolean;
-	holographicRainbowMode?: boolean;
-	holographicEffectColor?: string;
-	holographicEffectIntensity?: number;
-
-	// Efectos de Distorsión
-	chromaticAberration?: boolean;
-	chromaticAberrationOffset?: number;
-	chromaticAberrationIntensity?: number;
-	glitchEffect?: boolean;
-	glitchEffectIntensity?: number;
-	glitchEffectFrequency?: number;
-	pixelate?: boolean;
-	pixelateSize?: number;
+export interface ScanEffectOptions extends BaseEffectOptions {
+  density: number;
+  opacity: number;
 }
 
 /**
- * Valores predeterminados para efectos avanzados
+ * 🎨 Opciones para efectos de textura
  */
-export const DEFAULT_ADVANCED_EFFECTS: AdvancedEffectsOptions = {
-	// Efectos de Escaneo
-	scanlines: false,
-	scanlinesDensity: 2,
-	scanlinesOpacity: 0.3,
+export interface TextureEffectOptions extends BaseEffectOptions {
+  density: number;
+  opacity: number;
+  noiseEnabled: boolean;
+  noiseDensity: number;
+  noiseOpacity: number;
+}
 
-	// Efectos de Textura
-	grain: false,
-	grainDensity: 30,
-	grainOpacity: 0.2,
-	noiseTexture: false,
-	noiseTextureDensity: 40,
-	noiseTextureOpacity: 0.15,
+/**
+ * ✨ Opciones para efectos de borde
+ */
+export interface BorderEffectOptions extends ColorEffectOptions, DimensionalEffectOptions {
+  glowEnabled: boolean;
+  glowSpread: number;
+}
 
-	// Efectos de Borde
-	borderGlow: false,
-	borderGlowColor: '#00ffff',
-	borderGlowWidth: 3,
-	borderGlowSpread: 10,
-	borderGlowIntensity: 0.7,
+/**
+ * 🌈 Opciones para efectos holográficos
+ */
+export interface HolographicEffectOptions extends ColorEffectOptions {
+  rainbowMode: boolean;
+}
 
-	// Efectos Holográficos
-	holographicEffect: false,
-	holographicRainbowMode: false,
-	holographicEffectColor: '#ff00ff',
-	holographicEffectIntensity: 0.5,
+/**
+ * 🎭 Opciones para efectos de distorsión
+ */
+export interface DistortionEffectOptions extends BaseEffectOptions {
+  chromaticAberration: {
+    enabled: boolean;
+    offset: number;
+    intensity: number;
+  };
+  glitch: {
+    enabled: boolean;
+    intensity: number;
+    frequency: number;
+  };
+  pixelate: {
+    enabled: boolean;
+    size: number;
+  };
+}
 
-	// Efectos de Distorsión
-	chromaticAberration: false,
-	chromaticAberrationOffset: 2,
-	chromaticAberrationIntensity: 0.5,
-	glitchEffect: false,
-	glitchEffectIntensity: 0.3,
-	glitchEffectFrequency: 0.5,
-	pixelate: false,
-	pixelateSize: 5,
+/**
+ * 🎨 Configuración completa de efectos avanzados
+ */
+export interface AdvancedEffectsConfig {
+  scan: ScanEffectOptions;
+  texture: TextureEffectOptions;
+  border: BorderEffectOptions;
+  holographic: HolographicEffectOptions;
+  distortion: DistortionEffectOptions;
+}
+
+/**
+ * 🎛️ Props para secciones de efectos
+ */
+export interface EffectSectionProps<T extends BaseEffectOptions> {
+  effect: T;
+  onChange: (effect: Partial<T>) => void;
+  disabled?: boolean;
+}
+
+/**
+ * 🔧 Valores por defecto
+ */
+export const DEFAULT_ADVANCED_EFFECTS: AdvancedEffectsConfig = {
+  scan: {
+    enabled: false,
+    density: 2,
+    opacity: 0.3
+  },
+  texture: {
+    enabled: false,
+    density: 2,
+    opacity: 0.3,
+    noiseEnabled: false,
+    noiseDensity: 2,
+    noiseOpacity: 0.3
+  },
+  border: {
+    enabled: false,
+    color: '#ffffff',
+    width: 2,
+    spread: 0,
+    intensity: 50,
+    glowEnabled: false,
+    glowSpread: 0
+  },
+  holographic: {
+    enabled: false,
+    color: '#00ff00',
+    intensity: 50,
+    rainbowMode: false
+  },
+  distortion: {
+    enabled: false,
+    intensity: 50,
+    chromaticAberration: {
+      enabled: false,
+      offset: 2,
+      intensity: 50
+    },
+    glitch: {
+      enabled: false,
+      intensity: 50,
+      frequency: 1
+    },
+    pixelate: {
+      enabled: false,
+      size: 8
+    }
+  }
 };
 
 /**
  * Props para el componente de efectos avanzados
  */
 export interface AdvancedEffectsProps {
-	initialOptions?: Partial<AdvancedEffectsOptions>;
-	onChange?: (options: AdvancedEffectsOptions) => void;
-	disabled?: boolean;
-	className?: string;
+  initialOptions?: Partial<AdvancedEffectsConfig>;
+  onChange?: (options: AdvancedEffectsConfig) => void;
+  disabled?: boolean;
+  className?: string;
 }

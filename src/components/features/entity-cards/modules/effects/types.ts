@@ -2,7 +2,7 @@
  * 🎨 Tipos para el módulo de efectos
  */
 
-import type { CardOptions } from '../../types/card-settings-types';
+import type { CardOptions } from '../../types/unified-card-types';
 
 /**
  * Opciones de efectos visuales
@@ -95,30 +95,49 @@ export interface EffectsPanelProps {
  */
 export const DEFAULT_VISUAL_EFFECTS: VisualEffectsOptions = {
 	holographic: {
+		enabled: true,
 		intensity: 0.5,
-		colorShift: 5,
-		animated: true,
+		animationSpeed: 5,
+		patternType: 'rainbow',
+		primaryColor: '#3b82f6',
+		secondaryColor: '#22d3ee',
+		visibleOnHover: false,
 	},
 	scanlines: {
+		enabled: true,
 		opacity: 0.1,
 		spacing: 5,
-		width: 1,
 		color: 'rgba(255, 255, 255, 0.1)',
+		density: 1,
+		animated: true,
+		direction: 'horizontal',
+		animationSpeed: 1,
 	},
 	glow: {
+		enabled: true,
 		intensity: 3,
 		color: '#3b82f6',
+		size: 10,
+		blurAmount: 5,
+		animationType: 'static',
 	},
 	grain: {
+		enabled: true,
 		intensity: 0.05,
 		animated: true,
+		density: 1,
+		contrast: 0.5,
+		noise: 'subtle',
 	},
 	border: {
+		enabled: true,
 		width: 2,
 		color: '#3b82f6',
-		style: 'solid',
-		glow: true,
-		radius: 12,
+		pattern: 'solid',
+		glowOnHover: true,
+		glowIntensity: 0.5,
+		glowColor: '#3b82f6',
+		opacity: 1,
 	},
 };
 

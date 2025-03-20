@@ -3,24 +3,143 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { create } from 'zustand';
 
-const grainConfigSchema = z.object({
-	entityType: z.string(),
-	entityId: z.string().optional(),
-	config: z.object({
-		enabled: z.boolean(),
-		intensity: z.number().min(0).max(1),
-		size: z.number().min(0.1),
-		animated: z.boolean().optional(),
-		speed: z.number().min(0).optional(),
-		colorMode: z.enum(['monochrome', 'color']).optional(),
-		opacity: z.number().min(0).max(1).optional(),
-		blend: z.enum(['normal', 'overlay', 'multiply', 'screen']).optional(),
-		seed: z.number().int().min(0).optional(),
-	}),
+// Schema de configuración
+export const grainConfigSchema = z.object({
+	enabled: z.boolean(),
+	intensity: z.number().min(0).max(1),
+	size: z.number().min(0.1),
+	animated: z.boolean(),
+	speed: z.number().min(0).max(10),
+	colorMode: z.enum(['monochrome', 'color']),
+	opacity: z.number().min(0).max(1),
+	blend: z.enum(['normal', 'overlay', 'multiply', 'screen']),
+	seed: z.number().int().min(0),
+	pattern: z.enum(['perlin', 'simplex', 'worley']),
+	fractalNoise: z.boolean(),
+	roughness: z.number().min(0).max(1),
+	distribution: z.enum(['gaussian', 'uniform']),
+	layerIndex: z.number().min(0),
 });
 
-export type GrainConfig = z.infer<typeof grainConfigSchema>['config'];
+// Tipo de configuración
+export type GrainConfig = z.infer<typeof grainConfigSchema>;
+
+// Configuración por defecto
+const defaultConfig: GrainConfig = {
+	enabled: true,
+	intensity: 0.15,
+	size: 1,
+	animated: false,
+	speed: 5,
+	colorMode: 'monochrome',
+	opacity: 0.5,
+	blend: 'overlay',
+	seed: 42,
+	pattern: 'perlin',
+	fractalNoise: false,
+	roughness: 0.5,
+	distribution: 'gaussian',
+	layerIndex: 6,
+};
+
+// Interface del store
+interface GrainStore {
+	config: GrainConfig;
+	updateConfig: (config: Partial<GrainConfig>) => void;
+	resetConfig: () => void;
+	toggleEnabled: () => void;
+	setIntensity: (intensity: number) => void;
+	setSize: (size: number) => void;
+	toggleAnimated: () => void;
+	setSpeed: (speed: number) => void;
+	setColorMode: (mode: GrainConfig['colorMode']) => void;
+	setOpacity: (opacity: number) => void;
+	setBlend: (blend: GrainConfig['blend']) => void;
+	setSeed: (seed: number) => void;
+	setPattern: (pattern: GrainConfig['pattern']) => void;
+	toggleFractalNoise: () => void;
+	setRoughness: (roughness: number) => void;
+	setDistribution: (distribution: GrainConfig['distribution']) => void;
+}
+
+// Crear store con Zustand
+export const useGrainStore = create<GrainStore>((set) => ({
+	config: defaultConfig,
+
+	updateConfig: (newConfig) =>
+		set((state) => ({
+			config: { ...state.config, ...newConfig },
+		})),
+
+	resetConfig: () => set({ config: defaultConfig }),
+
+	toggleEnabled: () =>
+		set((state) => ({
+			config: { ...state.config, enabled: !state.config.enabled },
+		})),
+
+	setIntensity: (intensity) =>
+		set((state) => ({
+			config: { ...state.config, intensity },
+		})),
+
+	setSize: (size) =>
+		set((state) => ({
+			config: { ...state.config, size },
+		})),
+
+	toggleAnimated: () =>
+		set((state) => ({
+			config: { ...state.config, animated: !state.config.animated },
+		})),
+
+	setSpeed: (speed) =>
+		set((state) => ({
+			config: { ...state.config, speed },
+		})),
+
+	setColorMode: (colorMode) =>
+		set((state) => ({
+			config: { ...state.config, colorMode },
+		})),
+
+	setOpacity: (opacity) =>
+		set((state) => ({
+			config: { ...state.config, opacity },
+		})),
+
+	setBlend: (blend) =>
+		set((state) => ({
+			config: { ...state.config, blend },
+		})),
+
+	setSeed: (seed) =>
+		set((state) => ({
+			config: { ...state.config, seed },
+		})),
+
+	setPattern: (pattern) =>
+		set((state) => ({
+			config: { ...state.config, pattern },
+		})),
+
+	toggleFractalNoise: () =>
+		set((state) => ({
+			config: { ...state.config, fractalNoise: !state.config.fractalNoise },
+		})),
+
+	setRoughness: (roughness) =>
+		set((state) => ({
+			config: { ...state.config, roughness },
+		})),
+
+	setDistribution: (distribution) =>
+		set((state) => ({
+			config: { ...state.config, distribution },
+		})),
+}));
 
 interface GrainConfigResponse {
 	success: boolean;
@@ -67,17 +186,7 @@ export async function getGrainConfig(entityType: string, entityId?: string): Pro
 			return {
 				success: true,
 				message: 'Usando configuración por defecto',
-				data: {
-					enabled: true,
-					intensity: 0.3,
-					size: 1,
-					animated: true,
-					speed: 1,
-					colorMode: 'monochrome',
-					opacity: 0.2,
-					blend: 'overlay',
-					seed: 12345,
-				},
+				data: defaultConfig,
 			};
 		}
 
