@@ -1,0 +1,10 @@
+/* Importar estilos de tarjetas de entidades */
+@import "../components/features/entity-cards/styles/character-card.css";
+@import "../components/features/entity-cards/styles/place-card.css";
+@import "../components/features/entity-cards/styles/note-card.css";
+@import "../components/features/entity-cards/styles/concept-card.css";
+@import "../components/features/entity-cards/styles/collection-card.css";
+@import "../components/features/entity-cards/styles/prompt-card.css";
+@import "../components/features/entity-cards/styles/tag-card.css";
+@import "../components/features/entity-cards/styles/album-card.css";
+@import "../components/features/entity-cards/styles/folder-card.css";

@@ -1,592 +1,772 @@
 'use client';
 
-import { VisualizationConfig } from '@/components/features/entity-cards/config/visualization-config';
-import type { CardDesignPreset, CardOptions } from '@/components/features/entity-cards/types/base-card-types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { WorldItem } from '@/types/entities/world-items';
-import { ArrowUpRight, Box, Gem, Globe, ImageIcon, PencilIcon, Star, Tag, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import * as React from 'react';
-import { EntityCard } from '../entity-card';
-import { usePreset } from '../hooks/use-preset';
-import type { AnimationSystem } from '../modules/animation/types';
-import type { DesignSystem } from '../modules/design/types';
-import type { ImageGridImage } from '../modules/image-grid/image-grid';
-import { ImageGrid } from './image-grid';
+import {
+	Backpack,
+	BookOpen,
+	Box,
+	Calendar,
+	Gem,
+	GripVertical,
+	HeartPulse,
+	PencilIcon,
+	Scroll,
+	Shield,
+	Sparkles,
+	Star,
+	Swords,
+	Trash2
+} from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 
-// Opciones visuales optimizadas para objetos del mundo
+// Importar componentes base
+import {
+	CardDescriptionSection,
+	CardFooter,
+	CardHeader,
+	CardImageSection,
+	CardMetadataSection
+} from '../base';
+
+// Importar tipos y utilidades
+import { EntityCardWrapper } from '../entity-card-wrapper';
+import { usePreset } from '../hooks/use-preset';
+import { adaptCardOptions } from '../types';
+import type { CardOptions } from '../types/unified-card-types';
+
+import '../styles/world-item-card.css';
+
+// TIPOS DE DATOS
+// ==============================
+
+// Define niveles de rareza para objetos con estilo RPG
+interface ItemRarity {
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	label: string;
+	rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'artifact';
+	stars: number;
+	textureType: string;
+	glowIntensity: number;
+	textureOpacity: number;
+	holographic?: boolean;
+	borderAnimation?: string;
+}
+
+const ITEM_RARITY: Record<string, ItemRarity> = {
+	common: {
+		color: '#9ca3af',
+		borderColor: 'rgba(156, 163, 175, 0.8)',
+		glowColor: 'rgba(156, 163, 175, 0.6)',
+		label: 'Común',
+		rarity: 'common' as const,
+		stars: 1,
+		textureType: 'noise',
+		glowIntensity: 0.4,
+		textureOpacity: 0.15
+	},
+	uncommon: {
+		color: '#22c55e',
+		borderColor: 'rgba(34, 197, 94, 0.8)',
+		glowColor: 'rgba(34, 197, 94, 0.6)',
+		label: 'Poco Común',
+		rarity: 'uncommon' as const,
+		stars: 2,
+		textureType: 'dots',
+		glowIntensity: 0.5,
+		textureOpacity: 0.2
+	},
+	rare: {
+		color: '#3b82f6',
+		borderColor: 'rgba(59, 130, 246, 0.8)',
+		glowColor: 'rgba(59, 130, 246, 0.6)',
+		label: 'Raro',
+		rarity: 'rare' as const,
+		stars: 3,
+		textureType: 'grid',
+		glowIntensity: 0.65,
+		textureOpacity: 0.25,
+		borderAnimation: 'pulse'
+	},
+	epic: {
+		color: '#8b5cf6',
+		borderColor: 'rgba(139, 92, 246, 0.8)',
+		glowColor: 'rgba(139, 92, 246, 0.6)',
+		label: 'Épico',
+		rarity: 'epic' as const,
+		stars: 4,
+		textureType: 'sparkle',
+		glowIntensity: 0.8,
+		textureOpacity: 0.3,
+		borderAnimation: 'pulse'
+	},
+	legendary: {
+		color: '#eab308',
+		borderColor: 'rgba(234, 179, 8, 0.8)',
+		glowColor: 'rgba(234, 179, 8, 0.7)',
+		label: 'Legendario',
+		rarity: 'legendary' as const,
+		stars: 5,
+		holographic: true,
+		textureType: 'sparkle',
+		glowIntensity: 0.9,
+		textureOpacity: 0.35,
+		borderAnimation: 'flow'
+	},
+	artifact: {
+		color: '#d946ef',
+		borderColor: 'rgba(217, 70, 239, 0.8)',
+		glowColor: 'rgba(217, 70, 239, 0.7)',
+		label: 'Artefacto',
+		rarity: 'artifact' as const,
+		stars: 6,
+		holographic: true,
+		textureType: 'rainbow',
+		glowIntensity: 1,
+		textureOpacity: 0.4,
+		borderAnimation: 'rainbow'
+	},
+};
+
+// Tipos de objetos con sus iconos y colores
+interface ItemType {
+	type: string;
+	icon: React.ReactNode;
+	color: string;
+	className: string;
+}
+
+const ITEM_TYPES: Record<string, ItemType> = {
+	weapon: {
+		type: 'weapon',
+		icon: <Swords className="h-5 w-5" />,
+		color: '#ef4444',
+		className: 'item-type-weapon'
+	},
+	armor: {
+		type: 'armor',
+		icon: <Shield className="h-5 w-5" />,
+		color: '#3b82f6',
+		className: 'item-type-armor'
+	},
+	consumable: {
+		type: 'consumable',
+		icon: <HeartPulse className="h-5 w-5" />,
+		color: '#22c55e',
+		className: 'item-type-consumable'
+	},
+	accessory: {
+		type: 'accessory',
+		icon: <Gem className="h-5 w-5" />,
+		color: '#8b5cf6',
+		className: 'item-type-accessory'
+	},
+	quest: {
+		type: 'quest',
+		icon: <Scroll className="h-5 w-5" />,
+		color: '#eab308',
+		className: 'item-type-quest'
+	},
+	book: {
+		type: 'book',
+		icon: <BookOpen className="h-5 w-5" />,
+		color: '#10b981',
+		className: 'item-type-book'
+	},
+	container: {
+		type: 'container',
+		icon: <Backpack className="h-5 w-5" />,
+		color: '#f59e0b',
+		className: 'item-type-container'
+	},
+	miscellaneous: {
+		type: 'miscellaneous',
+		icon: <Box className="h-5 w-5" />,
+		color: '#6b7280',
+		className: 'item-type-miscellaneous'
+	},
+};
+
+// Configuración predeterminada para tarjetas de objetos
 const DEFAULT_WORLD_ITEM_OPTIONS: Partial<CardOptions> = {
+	// Efectos principales
 	enable3DEffect: true,
 	enableHolographicEffect: true,
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
-	enableGrainEffect: false,
+	enableGrainEffect: true,
 
-	// Configuración de diseño específica para objetos del mundo
+	// Configuración de diseño específica para objetos
 	designSystem: {
-		preset: 'item' as CardDesignPreset,
-		variant: 'default',
-		aspectRatio: '7/10',
+		preset: 'worldItem',
+		variant: 'rpg',
+		aspectRatio: '3/4', // Proporción similar a cartas de objetos en RPGs
 		cornerStyle: 'rounded',
 		cornerRadius: 12,
-		elevation: 2,
+		elevation: 3,
 		shadowStyle: 'soft',
 	},
 
-	// Sistema de capas optimizado para objetos del mundo
-	layerSystem: {
-		order: ['content', 'holographic', 'border', 'filter'],
-		blendMode: 'normal',
+	// Efectos específicos para objetos
+	holographicOptions: {
+		patternType: 'geometric',
+		intensity: 0.6,
+		animationSpeed: 1.2,
+		visibleOnHover: true,
 	},
 
-	// Interactividad específica para objetos del mundo
+	glowOptions: {
+		intensity: 0.7,
+		size: 20,
+		blurAmount: 15,
+		animationType: 'pulse',
+		pulseSpeed: 2.5,
+		visibleOnHover: true,
+	},
+
+	borderOptions: {
+		width: 2,
+		pattern: 'gradient',
+		animationType: 'pulse',
+		animation: {
+			type: 'flow',
+			duration: 3000,
+			timing: 'ease-in-out',
+			iteration: 'infinite',
+		},
+		glowIntensity: 0.7,
+	},
+
+	grainOptions: {
+		intensity: 0.15,
+		density: 0.6,
+		contrast: 1.2,
+		noise: 'subtle',
+		animated: true,
+		visibleOnHover: true,
+	},
+
+	// Parámetros de interactividad
 	interactivity: {
+		enableHoverEffects: true,
+		enableClickEffects: true,
 		hover: {
-			scale: 1.02,
+			scale: 1.05,
 			rotate: true,
 			lift: true,
 			glow: true,
-		},
-		click: {
-			feedback: 'scale',
-		},
+		}
 	},
 
-	// Estados específicos para objetos del mundo
+	// Configuración de estados
 	states: {
-		loading: {
-			skeleton: true,
-			blur: true,
-		},
-		selected: {
-			style: 'border',
-		},
+		enableHover: true,
+		stateDuration: 300,
 	},
 
-	// Rendimiento optimizado
-	performance: {
-		lazyLoad: true,
-		imageOptimization: true,
-		animationOptimization: true,
-		renderQuality: 'high',
-	},
-
-	// Configuración visual básica
-	hoverLiftHeight: 10,
-	maxRotation: 12,
-	primaryColor: '0, 153, 255',
-	secondaryColor: '128, 0, 255',
-
-	// Contenido y estructura
-	contentLayout: 'default',
-	contentPadding: 1,
-	contentSpacing: 0.5,
-	contentAlignment: 'start',
+	// Animación
+	maxRotation: 15,
 };
 
-// Tipos de rareza para objetos del mundo
-const RARITY_TYPES = {
-	legendary: {
-		min: 90,
-		color: 'from-purple-600/20 to-indigo-600/20',
-		border: 'border-purple-500/70',
-		label: 'Legendario',
-		badgeClass: 'bg-gradient-to-r from-purple-500 to-indigo-500',
-		barClass: 'bg-gradient-to-r from-purple-500 to-indigo-500',
-	},
-	epic: {
-		min: 70,
-		color: 'from-fuchsia-600/20 to-pink-600/20',
-		border: 'border-fuchsia-500/70',
-		label: 'Épico',
-		badgeClass: 'bg-gradient-to-r from-fuchsia-500 to-pink-500',
-		barClass: 'bg-gradient-to-r from-fuchsia-500 to-pink-500',
-	},
-	rare: {
-		min: 50,
-		color: 'from-sky-500/20 to-blue-600/20',
-		border: 'border-sky-500/70',
-		label: 'Raro',
-		badgeClass: 'bg-gradient-to-r from-sky-500 to-blue-500',
-		barClass: 'bg-gradient-to-r from-sky-500 to-blue-500',
-	},
-	uncommon: {
-		min: 20,
-		color: 'from-emerald-500/20 to-teal-600/20',
-		border: 'border-emerald-500/70',
-		label: 'Poco común',
-		badgeClass: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-		barClass: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-	},
-	common: {
-		min: 1,
-		color: 'from-stone-500/20 to-gray-600/20',
-		border: 'border-stone-500/70',
-		label: 'Común',
-		badgeClass: 'bg-gradient-to-r from-stone-500 to-gray-500',
-		barClass: 'bg-gradient-to-r from-stone-500 to-gray-500',
-	},
-	unknown: {
-		min: 0,
-		color: 'from-slate-500/20 to-gray-600/20',
-		border: 'border-slate-500/50',
-		label: 'Desconocido',
-		badgeClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
-		barClass: 'bg-gradient-to-r from-slate-500 to-gray-500',
-	},
-};
+// Add PropertyItem type
+interface PropertyItem {
+	name: string;
+	value?: string | number;
+	isSpecial?: boolean;
+}
 
-interface WorldItemCardProps {
-	worldItem: WorldItem;
-	onEdit?: (worldItem: WorldItem) => void;
-	onDelete?: (id: string) => void;
+// Add WorldItemExtended type that extends WorldItem with properties we need
+interface WorldItemExtended extends Omit<WorldItem, 'properties' | 'stats' | 'requirements'> {
+	level?: number;
+	weight?: number;
+	value?: number;
+	image?: string;
+	isArtifact?: boolean;
+	isUnique?: boolean;
+	properties?: PropertyItem[];
+	imageCount?: number;
+	presetId?: string;
+}
+
+// Update props to use the extended type
+export interface WorldItemCardProps {
+	item: WorldItemExtended;
+	options?: Partial<CardOptions>;
 	onClick?: () => void;
-	className?: string;
-	/** Indica si se debe mostrar el botón de configuración visual */
 	showVisualConfig?: boolean;
-	/** Opciones visuales personalizadas, si no se proporcionan se usarán valores predeterminados */
-	visualOptions?: typeof DEFAULT_WORLD_ITEM_OPTIONS;
-	/** Activa/desactiva la funcionalidad de vista explosionada */
+	onVisualConfigClick?: () => void;
 	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
+	onEdit?: (item: WorldItemExtended) => void;
+	onDelete?: (id: string) => void;
 }
 
-// Función para obtener la rareza basada en el tipo de rareza del objeto
-function getWorldItemRarity(worldItem: WorldItem) {
-	const rarityValue = worldItem.rarity?.toLowerCase() || 'common';
+// UTILIDADES Y COMPONENTES AUXILIARES
+// ==============================
 
-	switch (rarityValue) {
-		case 'legendary':
-			return RARITY_TYPES.legendary;
-		case 'epic':
-			return RARITY_TYPES.epic;
-		case 'rare':
-			return RARITY_TYPES.rare;
-		case 'uncommon':
-			return RARITY_TYPES.uncommon;
-		case 'common':
-			return RARITY_TYPES.common;
-		default:
-			return RARITY_TYPES.unknown;
-	}
+// Componente para mostrar estrellas de rareza
+function RarityStars({ count }: { count: number }) {
+	return (
+		<div className="flex items-center justify-center mt-1">
+			{Array.from({ length: count }).map((_, i) => (
+				<Star
+					key={`star-${i}-${count}`}
+					className={cn(
+						"h-3 w-3 mx-0.5",
+						count >= 6 ? "text-fuchsia-400" :
+							count >= 5 ? "text-yellow-400" :
+								count >= 4 ? "text-purple-400" :
+									count >= 3 ? "text-blue-400" :
+										count >= 2 ? "text-green-400" :
+											"text-gray-400"
+					)}
+					fill="currentColor"
+				/>
+			))}
+		</div>
+	);
 }
 
-// Función para determinar el nivel de potencia del objeto del mundo
-function getWorldItemPower(worldItem: WorldItem) {
-	const imageCount = worldItem._count?.images || 0;
-	const properties = worldItem.properties ? JSON.parse(worldItem.properties as string) : [];
-	const stats = worldItem.stats ? JSON.parse(worldItem.stats as string) : {};
+// Determinar la rareza basada en el nivel y las propiedades del objeto
+function calculateItemRarity(item: WorldItemExtended): keyof typeof ITEM_RARITY {
+	const level = item.level || 1;
+	const value = item.value || 0;
 
-	// Valor base según rareza
-	let baseValue = 1;
-	switch (worldItem.rarity?.toLowerCase()) {
-		case 'legendary':
-			baseValue = 8;
-			break;
-		case 'epic':
-			baseValue = 6;
-			break;
-		case 'rare':
-			baseValue = 4;
-			break;
-		case 'uncommon':
-			baseValue = 2;
-			break;
-		default:
-			baseValue = 1;
-	}
+	// Considerar otros atributos que podrían indicar la rareza del objeto
+	const isArtifact = item.isArtifact || false;
+	const isUnique = item.isUnique || false;
+	const hasSpecialProperties = item.properties?.some(p => p.isSpecial) || false;
 
-	// Bonus por propiedades y stats
-	const propertyBonus = Math.min(3, properties.length);
-	const statsBonus = Object.keys(stats).length > 0 ? 1 : 0;
-
-	// Bonus por imágenes
-	const imageBonus = Math.min(2, Math.floor(imageCount / 5));
-
-	// Valor entre 1-12
-	return Math.max(1, Math.min(12, baseValue + propertyBonus + statsBonus + imageBonus));
+	if (isArtifact) return 'artifact';
+	if (level >= 80 || isUnique) return 'legendary';
+	if (level >= 60 || (hasSpecialProperties && level >= 40)) return 'epic';
+	if (level >= 40 || (hasSpecialProperties && level >= 20)) return 'rare';
+	if (level >= 20 || value >= 500) return 'uncommon';
+	return 'common';
 }
 
-export function WorldItemCard({
-	worldItem,
+// Generar configuración de rareza para un objeto
+function generateItemRarityConfig(item: WorldItemExtended) {
+	const rarityKey = calculateItemRarity(item);
+	const rarity = ITEM_RARITY[rarityKey];
+
+	return {
+		enabled: true,
+		rarity: rarityKey,
+		color: rarity.color,
+		borderColor: rarity.borderColor,
+		glowColor: rarity.glowColor,
+		borderStyle: 'solid',
+		borderWidth: 2,
+		frameType: 'standard',
+	};
+}
+
+// Determinar el tipo de objeto y obtener su información
+function getItemTypeInfo(item: WorldItemExtended): ItemType {
+	const type = item.type?.toLowerCase() || 'miscellaneous';
+	return ITEM_TYPES[type] || ITEM_TYPES.miscellaneous;
+}
+
+// COMPONENTE PRINCIPAL
+// ==============================
+export function WorldItemCardLayout({
+	item: initialItem,
+	options = {},
+	onClick,
+	showVisualConfig = false,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
 	onEdit,
 	onDelete,
-	onClick,
-	className,
-	showVisualConfig = false,
-	visualOptions,
-	enableExplode = true,
 }: WorldItemCardProps) {
-	// Verificar si worldItem existe y tiene las propiedades necesarias
-	if (!worldItem) {
-		console.warn('WorldItemCard: Se recibió un objeto worldItem indefinido');
-		// Crear un worldItem por defecto para evitar errores
-		worldItem = {
-			id: 'placeholder',
-			name: 'Objeto sin nombre',
-			description: 'Sin descripción',
-			type: 'Unknown',
-			rarity: 'common',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		} as WorldItem;
-	}
+	// Garantizar que nunca procesamos un objeto undefined
+	const item = initialItem || {
+		id: 'placeholder',
+		name: 'Objeto sin nombre',
+		emoji: '',
+		color: '#6b7280',
+		description: 'Sin descripción',
+		type: 'miscellaneous',
+		level: 1,
+		weight: 0,
+		value: 0,
+		properties: [],
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	} as WorldItemExtended;
 
-	// Usar el hook para obtener configuración de preset si existe
+	// Usar el hook para obtener configuración de preset
 	const { cardOptions } = usePreset({
 		entityType: 'worldItem',
-		entityId: worldItem.id,
-		presetId: worldItem.presetId || null,
-		baseOptions: visualOptions,
+		entityId: item.id,
+		presetId: 'presetId' in item && item.presetId ? item.presetId : null,
+		baseOptions: options,
 	});
 
-	// Estados necesarios
-	const [configOpen, setConfigOpen] = React.useState(false);
-	const [isExploded, setIsExploded] = React.useState(false);
-	const [activeLayer, setActiveLayer] = React.useState<string | null>(null);
-	const [isHovered, setIsHovered] = React.useState(false);
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{ id: 'background', label: 'Fondo', icon: <Backpack className="h-4 w-4" /> },
+		{ id: 'frame', label: 'Marco', icon: <Box className="h-4 w-4" /> },
+		{ id: 'image', label: 'Imagen', icon: <Gem className="h-4 w-4" /> },
+		{ id: 'stats', label: 'Estadísticas', icon: <GripVertical className="h-4 w-4" /> },
+		{ id: 'effects', label: 'Efectos', icon: <Sparkles className="h-4 w-4" /> },
+	];
 
-	// Crear un objeto compatible usando el patrón de adaptador
-	const {
-		enable3DEffect,
-		enableHolographicEffect,
-		enableScanlinesEffect,
-		enableGlowEffect,
-		enableBorderEffect,
-		enableGrainEffect,
-		designSystem,
-		holographicOptions,
-		glowOptions,
-		borderOptions,
-		grainOptions,
-		useImageGrid,
-		imageGridLayout,
-		imageGridGap,
-		imageGridStyle,
-		...restOptions
-	} = cardOptions;
+	// Obtener la rareza del objeto
+	const rarityKey = calculateItemRarity(item);
+	const rarityInfo = ITEM_RARITY[rarityKey];
+	const rarityConfig = generateItemRarityConfig(item);
+	const rarityClass = `item-card-rarity-${rarityKey}`;
 
-	// Crear un nuevo objeto compatible
-	const compatibleOptions = {
-		enable3DEffect,
-		enableHolographicEffect,
-		enableScanlinesEffect,
-		enableGlowEffect,
-		enableBorderEffect,
-		enableGrainEffect,
-		designSystem: designSystem
-			? {
-					...designSystem,
-					preset: designSystem.preset as CardDesignPreset,
-				}
-			: undefined,
-		holographicOptions,
-		glowOptions,
-		borderOptions,
-		grainOptions,
-		useImageGrid,
-		imageGridLayout,
-		imageGridGap,
-		imageGridStyle,
-		...restOptions,
-	};
+	// Obtener información sobre el tipo de objeto
+	const itemTypeInfo = getItemTypeInfo(item);
 
-	// Obtener datos de rareza para el objeto
-	const rarityConfig = getWorldItemRarity(worldItem);
-	const powerDisplayData = getWorldItemPower(worldItem);
+	// Manejadores de eventos
+	const handleEdit = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onEdit && item) {
+			onEdit(item);
+		}
+	}, [onEdit, item]);
 
-	// Preparamos un array de imágenes compatible con ImageGridImage
-	const images: ImageGridImage[] = worldItem.featuredImage
-		? [
-				{
-					id: 'world-item-image',
-					src: worldItem.featuredImage,
-					alt: worldItem.name,
+	const handleDelete = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onDelete && item?.id) {
+			onDelete(item.id);
+		}
+	}, [onDelete, item?.id]);
+
+	// Generar configuración avanzada basada en la rareza
+	const enhancedCardOptions = useMemo(() => {
+		// Valores por defecto
+		const defaults = DEFAULT_WORLD_ITEM_OPTIONS;
+
+		// Ajustar intensidad de efectos según rareza
+		const intensity = rarityInfo.glowIntensity || 0.5;
+
+		// Habilitar efectos especiales para objetos especiales
+		const isSpecial = rarityKey === 'legendary' || rarityKey === 'artifact' || rarityKey === 'epic';
+
+		// Crear opciones combinadas
+		return {
+			...defaults,
+			enableHolographicEffect: isSpecial,
+			enableScanlinesEffect: isSpecial,
+
+			// Configurar glows basados en rareza
+			glowOptions: {
+				...(defaults.glowOptions || {}),
+				intensity: intensity,
+				color: rarityInfo.glowColor,
+				size: 20 + (rarityInfo.stars * 2),
+				visibleOnIdle: rarityKey === 'artifact',
+				animationType: isSpecial ? 'pulse' : 'static',
+			},
+
+			// Configurar bordes animados
+			borderOptions: {
+				...(defaults.borderOptions || {}),
+				width: rarityInfo.stars * 0.5,
+				color: rarityInfo.borderColor,
+				pattern: isSpecial ? 'gradient' : 'solid',
+				animationType: rarityInfo.borderAnimation || 'none',
+				glowIntensity: intensity,
+			},
+
+			// Configurar texturas específicas
+			textureConfig: {
+				type: rarityInfo.textureType || 'noise',
+				intensity: rarityInfo.textureOpacity || 0.15,
+				scale: 1 + (rarityInfo.stars * 0.1),
+				blendMode: 'overlay',
+			},
+
+			// Configuración de rareza
+			rarityConfig,
+
+			// Efectos adicionales
+			effects: {
+				...(defaults.effects || {}),
+				chromaticAberration: {
+					enabled: isSpecial,
+					visibleOnHover: true,
+					intensity: rarityKey === 'artifact' ? 0.4 : 0.2,
 				},
-			]
-		: [];
+				noiseTexture: {
+					enabled: true,
+					visibleOnHover: !isSpecial,
+					intensity: rarityInfo.textureOpacity || 0.15,
+				},
+				glitchEffect: {
+					enabled: rarityKey === 'artifact',
+					visibleOnHover: true,
+					intensity: 0.3,
+					frequency: 0.1,
+				},
+			},
+		};
+	}, [rarityKey, rarityInfo, rarityConfig]);
 
-	// Convertimos el designSystem a un formato compatible con el nuevo EntityCard
-	const designConfig: DesignSystem = {
-		preset: designSystem?.preset || 'worldItem',
-		variant: designSystem?.variant || 'default',
-		aspectRatio: designSystem?.aspectRatio || '7/10',
-		cornerStyle: designSystem?.cornerStyle || 'rounded',
-		cornerRadius: designSystem?.cornerRadius || 12,
-		elevation: designSystem?.elevation || 2,
-		shadowStyle: designSystem?.shadowStyle || 'soft',
-		// Propiedades adicionales requeridas
-		padding: 'md',
-		maxWidth: '100%',
-		shadowColor: 'rgba(0,0,0,0.2)',
-		shadowOffset: { x: 0, y: 4 },
-		shadowBlur: 8,
-		borderWidth: 0,
-		borderColor: 'transparent',
-		backgroundColor: 'transparent',
-		backgroundOpacity: 1,
-		glassmorphism: false,
-		glassmorphismBlur: 0,
-	};
+	// Formatear fecha
+	const formattedDate = useMemo(() => {
+		if (!item.createdAt) return '';
 
-	// Convertimos la animación a un formato compatible
-	const animationConfig: AnimationSystem = {
-		enabled: true,
-		reducedMotion: false,
-		transitionDuration: 0.3,
-		timingFunction: 'ease',
-		entranceAnimation: 'fade',
-		exitAnimation: 'fade',
-		entranceDelay: 0,
-		loopAnimations: false,
-		hoverEffect: true,
-		hoverScale: 1.02,
-		hoverRotate: true,
-		hoverLift: true,
-		liftHeight: 10,
-		maxRotation: 5,
-		clickEffect: true,
-		activeScale: 0.98,
-		activeBrightness: 1.1,
-	};
+		const date = typeof item.createdAt === 'string'
+			? new Date(item.createdAt)
+			: item.createdAt;
+
+		return date.toLocaleDateString();
+	}, [item.createdAt]);
+
+	// Procesar las estadísticas y propiedades del objeto
+	const itemStats = useMemo(() => {
+		const stats = [];
+
+		if (item.level !== undefined) {
+			stats.push({
+				label: 'Nivel',
+				value: item.level.toString(),
+				icon: <Star className="h-3.5 w-3.5 text-yellow-400" />
+			});
+		}
+
+		if (item.value !== undefined) {
+			stats.push({
+				label: 'Valor',
+				value: item.value.toString(),
+				icon: <Gem className="h-3.5 w-3.5 text-purple-400" />
+			});
+		}
+
+		if (item.weight !== undefined) {
+			stats.push({
+				label: 'Peso',
+				value: item.weight.toString(),
+				icon: <GripVertical className="h-3.5 w-3.5 text-gray-400" />
+			});
+		}
+
+		return stats;
+	}, [item.level, item.value, item.weight]);
+
+	// Obtener las propiedades especiales del objeto
+	const itemProperties = useMemo(() => {
+		if (!item.properties || !item.properties.length) return [];
+
+		return item.properties.map(prop => ({
+			label: prop.name,
+			value: prop.value?.toString() || '',
+			icon: <Sparkles className={cn(
+				"h-3.5 w-3.5",
+				prop.isSpecial ? "text-yellow-400" : "text-blue-400"
+			)} />
+		}));
+	}, [item.properties]);
 
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					onClose={() => setConfigOpen(false)}
-					options={cardOptions}
-					onOptionsChange={(newOptions) => {
-						// No es necesario para la integración inicial
-					}}
-					entityId={worldItem.id}
-					entityType="worldItem"
-				/>
-			)}
+		<div className={cn(
+			'world-item-card-container relative w-full h-full group',
+			rarityClass,
+			onClick && 'cursor-pointer',
+			className
+		)}>
+			<EntityCardWrapper
+				title={item.name}
+				description={item.description || ''}
+				entityId={item.id}
+				entityType="worldItem"
+				className={cn('world-item-card-wrapper relative w-full h-full', rarityClass)}
+				options={adaptCardOptions(enhancedCardOptions)}
+				showVisualConfig={showVisualConfig}
+				onVisualConfigClick={onVisualConfigClick}
+				enableExplode={enableExplode}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
+				explodeLayers={explodeLayers}
+				onClick={onClick}
+			>
+				<div className="world-item-card-content flex flex-col h-full w-full relative">
+					{/* Cabecera con el tipo y nombre del objeto */}
+					<CardHeader
+						title={item.name}
+						entityType="worldItem"
+						className="mb-2 relative z-10"
+						showIcon={false}
+						rightContent={
+							<>
+								<div className={cn(
+									"item-rarity px-2 py-0.5 rounded-full text-[10px] font-medium",
+									rarityKey === 'artifact' ? "bg-fuchsia-500/20 text-fuchsia-200" :
+										rarityKey === 'legendary' ? "bg-amber-500/20 text-amber-200" :
+											rarityKey === 'epic' ? "bg-purple-500/20 text-purple-200" :
+												rarityKey === 'rare' ? "bg-blue-500/20 text-blue-200" :
+													rarityKey === 'uncommon' ? "bg-green-500/20 text-green-200" :
+														"bg-gray-500/20 text-gray-200"
+								)}>
+									{ITEM_RARITY[rarityKey].label}
+								</div>
 
-			<div className={cn('relative', className)}>
-				<EntityCard
-					id={worldItem.id || ''}
-					className="world-item-card"
-					options={{}}
-					title={worldItem.name}
-					description={worldItem.description || ''}
-					image={images}
-					imageLayout={'single'}
-					imageStyle={'standard'}
-					design={designConfig}
-					animation={animationConfig}
-					enableLayers={true}
-					enableDesign={true}
-					enableAnimation={true}
-					onClick={onClick}
-				>
-					{/* Estructura principal de la carta de objeto */}
-					<div
-						className={cn(
-							'relative h-full flex flex-col',
-							cardOptions.contentLayout === 'default' && 'justify-between',
-							typeof cardOptions.contentPadding === 'number' && `p-${cardOptions.contentPadding}`,
-							typeof cardOptions.contentSpacing === 'number' && `gap-${cardOptions.contentSpacing}`
+								<RarityStars count={rarityInfo.stars} />
+
+								{/* Botones de acción */}
+								{(onEdit || onDelete) && (
+									<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto z-50">
+										{onEdit && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80"
+												onClick={handleEdit}
+											>
+												<PencilIcon className="h-3.5 w-3.5" />
+											</Button>
+										)}
+										{onDelete && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80 hover:bg-destructive/20"
+												onClick={handleDelete}
+											>
+												<Trash2 className="h-3.5 w-3.5" />
+											</Button>
+										)}
+									</div>
+								)}
+							</>
+						}
+					/>
+
+					{/* Item type icon */}
+					<div className="flex items-center ml-3 -mt-2 mb-2">
+						<div className={cn(
+							"item-type-icon flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background shadow-md"
 						)}
-					>
-						{/* Medidor de rareza como círculo en esquina superior izquierda */}
-						<div className="absolute top-3 left-3 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-2 flex items-center justify-center z-10 shadow-lg overflow-hidden">
-							<div className={cn('absolute inset-0 opacity-70', rarityConfig.badgeClass)} />
-							<Gem className="relative w-6 h-6 text-white drop-shadow-sm" />
-						</div>
-
-						{/* Nombre del objeto en franja superior */}
-						<div className="relative px-3 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b border-border z-10">
-							<div className="flex items-center gap-1.5">
-								<Box className="h-4 w-4 text-primary" />
-								<h3 className="font-bold text-base leading-tight line-clamp-1">{worldItem.name}</h3>
-								{worldItem.isFavorite === true && <Star className="h-4 w-4 text-amber-400 ml-auto" />}
-							</div>
-							<div className="text-xs font-medium text-muted-foreground flex items-center mt-0.5">
-								<span>Objeto • {rarityConfig.label}</span>
-								{worldItem.type && <span className="ml-1">• {worldItem.type}</span>}
+							style={{ borderColor: itemTypeInfo.color }}>
+							<div style={{ color: itemTypeInfo.color }}>
+								{itemTypeInfo.icon}
 							</div>
 						</div>
+					</div>
 
-						{/* Área de ilustración - Imagen destacada o icono */}
-						<div className="flex-1 relative">
-							{cardOptions.useImageGrid ? (
-								<ImageGrid
-									layout={'single'}
-									gap={4}
-									style={'standard'}
-									images={[
-										{
-											id: 'world-item-image',
-											src: worldItem.featuredImage || '',
-											alt: worldItem.name,
-										},
-									]}
-								/>
-							) : (
-								<>
-									{worldItem.featuredImage ? (
-										<div className="absolute inset-0">
-											<img src={worldItem.featuredImage} alt={worldItem.name} className="w-full h-full object-cover" />
-											<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-										</div>
-									) : (
-										<div
-											className={cn(
-												'h-full flex flex-col items-center justify-center',
-												'bg-gradient-to-b from-background to-muted/30'
-											)}
-										>
-											<div className="flex items-center justify-center p-4 rounded-full bg-muted/50">
-												<Box className="w-16 h-16 text-primary/70" />
-											</div>
-										</div>
-									)}
-								</>
-							)}
-
-							{/* Categoría como overlay */}
-							{worldItem.category && (
-								<div className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs flex items-center gap-1 z-10">
-									<Tag className="h-3 w-3" />
-									<span>{worldItem.category}</span>
-								</div>
-							)}
-						</div>
-
-						{/* Panel con propiedades */}
-						<div className="text-xs border-t border-b border-border bg-background/80 backdrop-blur-sm py-1.5 px-3">
-							<div className="font-semibold mb-0.5 flex items-center text-[10px] uppercase tracking-wider text-muted-foreground">
-								Propiedades
+					{/* Imagen del objeto */}
+					<div className={cn(
+						"item-image relative h-32 mb-3 rounded overflow-hidden border",
+						`border-${rarityKey === 'artifact' ? 'fuchsia' :
+							rarityKey === 'legendary' ? 'amber' :
+								rarityKey === 'epic' ? 'purple' :
+									rarityKey === 'rare' ? 'blue' :
+										rarityKey === 'uncommon' ? 'green' : 'gray'}-500`,
+					)}>
+						{item.image ? (
+							<CardImageSection
+								imageUrl={item.image}
+								alt={item.name}
+								aspectRatio="wide"
+								overlayContent={
+									<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+								}
+							/>
+						) : (
+							<div className={cn(
+								"absolute inset-0 bg-gradient-to-br",
+								rarityKey === 'artifact' ? "from-fuchsia-500/20 to-purple-900/40" :
+									rarityKey === 'legendary' ? "from-amber-500/20 to-yellow-900/40" :
+										rarityKey === 'epic' ? "from-purple-500/20 to-purple-900/40" :
+											rarityKey === 'rare' ? "from-blue-500/20 to-blue-900/40" :
+												rarityKey === 'uncommon' ? "from-green-500/20 to-green-900/40" :
+													"from-gray-500/20 to-gray-900/40"
+							)}>
+								{/* Patrón decorativo según la rareza */}
+								<div className={cn(
+									"absolute inset-0 opacity-10 mix-blend-overlay",
+									rarityKey === 'artifact' || rarityKey === 'legendary' ? "bg-sparkle-pattern" : "bg-noise-pattern"
+								)} />
 							</div>
-							<div className="flex flex-wrap gap-1">
-								{properties.length > 0 ? (
-									properties.slice(0, 3).map((prop: string) => (
-										<span
-											key={`prop-${worldItem.id}-${prop}`}
-											className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]"
-										>
-											{prop}
-										</span>
-									))
-								) : (
-									<span className="text-[10px] text-muted-foreground">Sin propiedades</span>
-								)}
-								{properties.length > 3 && (
-									<span className="px-1.5 py-0.5 bg-muted rounded-sm text-[10px]">+{properties.length - 3} más</span>
-								)}
-							</div>
-						</div>
-
-						{/* Área de estadísticas inferior */}
-						<div className="bg-background/90 backdrop-blur-md p-3 flex flex-col gap-2">
-							{/* Estadísticas principales en grid */}
-							<div className="grid grid-cols-3 gap-3">
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{worldItem._count?.images || 0}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<ImageIcon className="h-3 w-3" />
-										Imágenes
-									</div>
-								</div>
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{worldItem.type?.substring(0, 4) || '-'}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<Box className="h-3 w-3" />
-										Tipo
-									</div>
-								</div>
-								<div className="flex flex-col items-center">
-									<div className="text-2xl font-bold">{worldItem.origin?.substring(0, 4) || '-'}</div>
-									<div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-										<Globe className="h-3 w-3" />
-										Origen
-									</div>
-								</div>
-							</div>
-
-							{/* Barra de poder */}
-							<div className="mt-1 flex items-center justify-between">
-								<div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-									<div
-										className={cn('h-full rounded-full', rarityConfig.barClass)}
-										style={{ width: `${(powerDisplayData / 12) * 100}%` }}
-									/>
-								</div>
-								<div className="ml-2 text-xs font-semibold">{powerDisplayData}/12</div>
-							</div>
-						</div>
-
-						{/* Acciones - botones flotantes */}
-						{(onEdit || onDelete) && (
-							<motion.div
-								className="absolute bottom-2 right-2 flex gap-1 z-50"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: isHovered ? 1 : 0 }}
-								onHoverStart={() => setIsHovered(true)}
-								onHoverEnd={() => setIsHovered(false)}
-								onClick={(e: React.MouseEvent) => {
-									e.stopPropagation();
-								}}
-							>
-								{onEdit && (
-									<Button
-										variant="secondary"
-										size="icon"
-										className="h-8 w-8 shadow-md"
-										onClick={() => {
-											onEdit(worldItem);
-										}}
-									>
-										<PencilIcon className="h-4 w-4" />
-									</Button>
-								)}
-								{onDelete && (
-									<Button
-										variant="secondary"
-										size="icon"
-										className="h-8 w-8 shadow-md text-destructive"
-										onClick={() => {
-											if (worldItem.id) {
-												onDelete(worldItem.id);
-											}
-										}}
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								)}
-							</motion.div>
 						)}
 
-						{/* Botón de explorar en hover */}
-						{onClick && (
-							<motion.div
-								className="absolute inset-0 flex items-center justify-center z-40"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: isHovered ? 1 : 0 }}
-								onHoverStart={() => setIsHovered(true)}
-								onHoverEnd={() => setIsHovered(false)}
-								onClick={(e: React.MouseEvent) => {
-									if ((e.target as HTMLElement).closest('button')) {
-										e.stopPropagation();
-									}
-								}}
-							>
-								<motion.div
-									className="bg-black/60 backdrop-blur-md rounded-full p-4 text-white shadow-lg"
-									initial={{ scale: 0.8 }}
-									animate={{ scale: 1 }}
-									transition={{ duration: 0.2 }}
-								>
-									<ArrowUpRight className="h-8 w-8" />
-								</motion.div>
-							</motion.div>
+						{/* Icono central si no hay imagen */}
+						{!item.image && (
+							<div className="absolute inset-0 flex items-center justify-center">
+								{itemTypeInfo.icon}
+							</div>
 						)}
 					</div>
-				</EntityCard>
-			</div>
-		</>
+
+					{/* Estadísticas del objeto */}
+					<div className="item-stats-container mb-2">
+						<div className="text-xs font-medium mb-1 flex items-center">
+							<GripVertical className="h-3 w-3 mr-1" />
+							Estadísticas
+						</div>
+						<CardMetadataSection
+							items={itemStats}
+							className="grid-cols-3 gap-1 text-xs"
+						/>
+					</div>
+
+					{/* Propiedades especiales del objeto */}
+					{itemProperties.length > 0 && (
+						<div className="item-properties-container mb-2">
+							<div className="text-xs font-medium mb-1 flex items-center">
+								<Sparkles className="h-3 w-3 mr-1" />
+								Propiedades
+							</div>
+							<CardMetadataSection
+								items={itemProperties}
+								className="grid-cols-2 gap-1 text-xs"
+							/>
+						</div>
+					)}
+
+					{/* Descripción del objeto */}
+					<CardDescriptionSection
+						description={item.description || 'Sin descripción disponible'}
+						maxLines={4}
+						className="flex-grow relative p-1.5 text-xs border border-stone-800/30 rounded bg-card/80"
+					/>
+
+					{/* Pie de la tarjeta con información adicional */}
+					<CardFooter
+						className="mt-2 text-xs"
+						leftContent={
+							<div className={cn(
+								"item-type px-3 py-1 rounded-full text-[10px] font-medium",
+								"bg-indigo-500/10 text-indigo-100"
+							)}>
+								{item.type || 'Misceláneo'}
+							</div>
+						}
+						rightContent={
+							<div className="flex items-center gap-1">
+								<Calendar className="h-3 w-3 opacity-70" />
+								<span className="text-[10px] opacity-70">{formattedDate}</span>
+							</div>
+						}
+					/>
+				</div>
+			</EntityCardWrapper>
+		</div>
 	);
+}
+
+// Componente público para usar en la aplicación
+export function WorldItemCard(props: WorldItemCardProps) {
+	return <WorldItemCardLayout {...props} />;
 }

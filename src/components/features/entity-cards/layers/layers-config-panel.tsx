@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,10 +10,9 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toastService } from '@/lib/services/toast.service';
 import { cn } from '@/lib/utils';
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
-import { ArrowDownUp, ArrowUpDown, Eye, EyeOff, GripVertical, Layers } from 'lucide-react';
+import { Eye, GripVertical, Layers } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults, type LayerSystemConfig } from '../settings/layer-settings-config';
 import type { CardOptions } from '../types/card-settings-types';
