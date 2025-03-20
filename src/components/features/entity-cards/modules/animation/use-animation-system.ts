@@ -2,17 +2,32 @@
 
 import { useCallback, useState } from 'react';
 import { DEFAULT_ANIMATION_SYSTEM } from './animation-module';
-import { generateAnimationClasses, generateAnimationStyles, generateAnimationVariables } from './css-generator';
+import { generateAnimationClasses, generateAnimationVariables } from './css-generator';
 import type { AnimationSystem } from './types';
 
 /**
  * Hook personalizado para gestionar el sistema de animación
  */
-export function useAnimationSystem(initialSystem?: Partial<AnimationSystem>) {
+export function useAnimationSystem(options: AnimationOptions = {}): AnimationSystemResult {
+	const {
+		enabled = true,
+		hoverEffect = true,
+		clickEffect = true,
+		entranceAnimation = 'none',
+		exitAnimation = 'none',
+		transitionDuration = 300,
+		timingFunction = 'ease',
+		hoverScale = 1.05,
+		hoverRotation = true,
+		liftHeight = 5,
+		maxRotation = 10,
+		disableAnimations = false,
+	} = options;
+
 	// Inicializar el estado con los valores predeterminados combinados con los proporcionados
 	const [animationSystem, setAnimationSystem] = useState<AnimationSystem>({
 		...DEFAULT_ANIMATION_SYSTEM,
-		...initialSystem,
+		...options,
 	});
 
 	/**
@@ -31,9 +46,9 @@ export function useAnimationSystem(initialSystem?: Partial<AnimationSystem>) {
 	const resetAnimationSystem = useCallback(() => {
 		setAnimationSystem({
 			...DEFAULT_ANIMATION_SYSTEM,
-			...initialSystem,
+			...options,
 		});
-	}, [initialSystem]);
+	}, [options]);
 
 	/**
 	 * Aplicar una función de temporización personalizada
@@ -64,8 +79,57 @@ export function useAnimationSystem(initialSystem?: Partial<AnimationSystem>) {
 	 * Generar estilos CSS en línea basados en la configuración de animación
 	 */
 	const getAnimationStyles = useCallback(() => {
-		return generateAnimationStyles(animationSystem);
-	}, [animationSystem]);
+		if (!enabled || disableAnimations) {
+			return {};
+		}
+
+		const styles: Record<string, any> = {
+			transition: `transform ${transitionDuration}ms ${timingFunction},
+        box-shadow ${transitionDuration}ms ${timingFunction}`,
+		};
+
+		if (entranceAnimation !== 'none') {
+			styles.animation = `${entranceAnimation} ${transitionDuration}ms ${timingFunction}`;
+		}
+
+		return styles;
+	}, [
+		enabled,
+		entranceAnimation,
+		exitAnimation,
+		transitionDuration,
+		timingFunction,
+		disableAnimations,
+	]);
+
+	/**
+	 * Generar estilos de hover
+	 */
+	const getHoverStyles = useCallback(
+		(isHovered: boolean) => {
+			if (!enabled || !hoverEffect || disableAnimations) {
+				return {};
+			}
+
+			const hoverStyles: Record<string, any> = {};
+
+			if (isHovered) {
+				if (hoverScale !== 1) {
+					hoverStyles.transform = `scale(${hoverScale})`;
+				}
+
+				if (liftHeight > 0) {
+					hoverStyles.transform = hoverStyles.transform
+						? `${hoverStyles.transform} translateY(-${liftHeight}px)`
+						: `translateY(-${liftHeight}px)`;
+					hoverStyles.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+				}
+			}
+
+			return hoverStyles;
+		},
+		[enabled, hoverEffect, hoverScale, liftHeight, disableAnimations]
+	);
 
 	return {
 		animationSystem,
@@ -75,5 +139,6 @@ export function useAnimationSystem(initialSystem?: Partial<AnimationSystem>) {
 		getAnimationClasses,
 		getAnimationVariables,
 		getAnimationStyles,
+		getHoverStyles,
 	};
 }

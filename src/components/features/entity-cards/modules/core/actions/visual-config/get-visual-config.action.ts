@@ -1,112 +1,138 @@
-'use server';
-
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import {
-	type ActionResponse,
-	type BaseVisualConfig,
-	actionResponseSchema,
-	baseVisualConfigSchema,
-	entityParamsSchema,
-} from './schemas';
+    type ActionResponse,
+    type BaseVisualConfig,
+    type VisualConfigType,
+} from '../../../types';
+import { 
+    type DesignSystemConfig,
+    type VisualConfigBase
+} from '../../../types/visual-config.types';
+
+const designSystemSchema = z.object({
+    preset: z.string(),
+    cornerStyle: z.string(),
+    elevation: z.number(),
+});
+
+const visualConfigSchema = z.object({
+    enable3DEffect: z.boolean(),
+    designSystem: designSystemSchema,
+    enableHolographicEffect: z.boolean(),
+    enableGlowEffect: z.boolean(),
+    enableAnimatedBorder: z.boolean(),
+    enableLightHalo: z.boolean(),
+    effects: z.string().nullable(),
+    layerSystem: z.object({
+        layers: z.array(z.object({
+            id: z.string(),
+            type: z.string(),
+            visible: z.boolean(),
+            opacity: z.number(),
+        })),
+    }),
+    states: z.object({
+        hover: z.boolean(),
+        focus: z.boolean(),
+        active: z.boolean(),
+    }),
+});
 
 /**
  * Obtiene la configuración visual para una entidad
  */
-export async function getVisualConfig(entityType: string, entityId?: string): Promise<ActionResponse> {
-	try {
-		// Validar parámetros
-		const validation = entityParamsSchema.safeParse({ entityType, entityId });
-		if (!validation.success) {
-			return {
-				success: false,
-				message: 'Parámetros inválidos',
-				data: validation.error,
-			};
-		}
+export async function getVisualConfig(
+    entityType: VisualConfigType,
+    entityId: string
+): Promise<ActionResponse<BaseVisualConfig>> {
+    try {
+        let config: BaseVisualConfig | null = null;
 
-		let visualConfig: BaseVisualConfig | null = null;
+        switch (entityType) {
+            case 'folder': {
+                const folderConfig = await prisma.folderVisualConfig.findUnique({
+                    where: { folder: entityId },
+                });
 
-		// Si tenemos un ID específico, buscar esa configuración
-		if (entityId) {
-			switch (entityType) {
-				case 'folders':
-					visualConfig = await prisma.folderVisualConfig.findFirst({
-						where: {
-							folder: {
-								id: entityId,
-							},
-						},
-					});
-					break;
-				case 'images':
-					visualConfig = await prisma.imageVisualConfig.findFirst({
-						where: {
-							image: {
-								id: entityId,
-							},
-						},
-					});
-					break;
-				case 'videos':
-					visualConfig = await prisma.videoVisualConfig.findFirst({
-						where: {
-							video: {
-								id: entityId,
-							},
-						},
-					});
-					break;
-				default:
-					return {
-						success: false,
-						message: 'Tipo de entidad no válido',
-					};
-			}
-		}
+                if (folderConfig) {
+                    config = {
+                        ...folderConfig,
+                        designSystem: folderConfig.designSystem ? JSON.parse(folderConfig.designSystem) : null,
+                    } as BaseVisualConfig;
+                }
+                break;
+            }
+            case 'image': {
+                const imageConfig = await prisma.imageVisualConfig.findUnique({
+                    where: { image: entityId },
+                });
 
-		// Si no hay configuración específica o no se proporcionó ID,
-		// obtener la configuración por defecto del tipo de entidad
-		if (!visualConfig) {
-			visualConfig = await prisma.cardConfiguration.findFirst({
-				where: { entityType },
-			});
-		}
+                if (imageConfig) {
+                    config = {
+                        ...imageConfig,
+                        designSystem: imageConfig.designSystem ? JSON.parse(imageConfig.designSystem) : null,
+                    } as BaseVisualConfig;
+                }
+                break;
+            }
+            case 'video': {
+                const videoConfig = await prisma.videoVisualConfig.findUnique({
+                    where: { video: entityId },
+                });
 
-		// Si no hay ninguna configuración, devolver valores por defecto
-		if (!visualConfig) {
-			const defaultConfig = baseVisualConfigSchema.parse({});
-			return {
-				success: true,
-				message: 'Usando configuración por defecto',
-				data: defaultConfig,
-			};
-		}
+                if (videoConfig) {
+                    config = {
+                        ...videoConfig,
+                        designSystem: videoConfig.designSystem ? JSON.parse(videoConfig.designSystem) : null,
+                    } as BaseVisualConfig;
+                }
+                break;
+            }
+            default:
+                throw new Error(`Tipo de entidad no soportado: ${entityType}`);
+        }
 
-		// Validar y transformar la configuración
-		const validatedConfig = baseVisualConfigSchema.parse(visualConfig);
+        if (!config) {
+            return {
+                success: false,
+                message: 'No se encontró la configuración visual',
+                data: null,
+            };
+        }
 
-		return {
-			success: true,
-			message: 'Configuración visual obtenida correctamente',
-			data: validatedConfig,
-		};
-	} catch (error) {
-		console.error('Error al obtener la configuración visual:', error);
+        const validation = visualConfigSchema.safeParse(config);
 
-		if (error instanceof z.ZodError) {
-			return {
-				success: false,
-				message: 'Error de validación en la configuración visual',
-				data: error.errors,
-			};
-		}
+        if (!validation.success) {
+            return {
+                success: false,
+                message: 'Error de validación',
+                data: validation.error,
+            };
+        }
 
-		return {
-			success: false,
-			message: 'Error al obtener la configuración visual',
-			data: error instanceof Error ? error.message : 'Error desconocido',
-		};
-	}
+        return {
+            success: true,
+            message: 'Configuración visual obtenida correctamente',
+            data: config,
+        };
+    } catch (error) {
+        logger.error('Error al obtener la configuración visual:', error);
+
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                message: 'Error de validación',
+                data: error.errors,
+            };
+        }
+
+        return {
+            success: false,
+            message: 'Error al obtener la configuración visual',
+            data: error instanceof Error ? error.message : 'Error desconocido',
+        };
+    }
 }

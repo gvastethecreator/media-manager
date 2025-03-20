@@ -9,6 +9,11 @@ import type { CardOptions } from '../types/unified-card-types';
  * Adaptador específico para transformar WorldItem a las props esperadas por WorldItemCard
  */
 
+// Tipo para worldItem con presetId opcional
+interface WorldItemWithPreset extends WorldItem {
+	presetId?: string | null;
+}
+
 export interface WorldItemAdapterProps {
 	worldItem: WorldItem;
 	options?: Partial<CardOptions>;
@@ -44,7 +49,7 @@ export function WorldItemAdapter({
 	const { cardOptions } = usePreset({
 		entityType: 'worldItem',
 		entityId: worldItem.id,
-		presetId: 'presetId' in worldItem ? (worldItem as any).presetId : null,
+		presetId: 'presetId' in worldItem ? (worldItem as WorldItemWithPreset).presetId : null,
 		baseOptions: options,
 	});
 

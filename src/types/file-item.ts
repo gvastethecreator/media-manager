@@ -25,7 +25,8 @@ export type ViewType =
 	| 'prompts'
 	| 'prompt-content'
 	| 'notes'
-	| 'note-content';
+	| 'note-content'
+	| 'entity-cards';
 
 export interface BaseItem {
 	id: string;

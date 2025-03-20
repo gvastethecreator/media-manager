@@ -44,6 +44,29 @@ const defaultConfig: HolographicConfig = {
 	interactiveMode: 'mouse',
 };
 
+// Función auxiliar para validar la configuración
+const validateHolographicConfig = (config: Partial<HolographicConfig>): string[] => {
+	const errors: string[] = [];
+
+	if (config.intensity !== undefined && (config.intensity < 0 || config.intensity > 1)) {
+		errors.push('La intensidad debe estar entre 0 y 1');
+	}
+	if (config.speed !== undefined && (config.speed < 0.1 || config.speed > 5)) {
+		errors.push('La velocidad debe estar entre 0.1 y 5');
+	}
+	if (config.scale !== undefined && (config.scale < 0.1 || config.scale > 3)) {
+		errors.push('La escala debe estar entre 0.1 y 3');
+	}
+	if (config.angle !== undefined && (config.angle < -180 || config.angle > 180)) {
+		errors.push('El ángulo debe estar entre -180 y 180 grados');
+	}
+	if (config.colors && (!Array.isArray(config.colors) || config.colors.length < 1)) {
+		errors.push('Debe especificar al menos un color');
+	}
+
+	return errors;
+};
+
 /**
  * Implementación de la capa holográfica
  */
@@ -77,21 +100,33 @@ export const holographicLayerImplementation: LayerImplementation = {
 	render: (props: LayerRenderProps) => {
 		const { config, isHovered, isActive, isExploded, mousePosition } = props;
 
+		// Validar configuración
+		const errors = validateHolographicConfig(config as HolographicConfig);
+		if (errors.length > 0) {
+			console.warn('Errores en la configuración holográfica:', errors);
+			// Usar configuración por defecto si hay errores
+			config = defaultConfig;
+		}
+
 		// Combinar la configuración por defecto con la configuración personalizada
 		const effectConfig = {
 			...defaultConfig,
 			...config
 		} as HolographicConfig;
 
+		// Optimización de rendimiento
+		const memoizedConfig = React.useMemo(() => effectConfig, [JSON.stringify(effectConfig)]);
+		const memoizedMousePosition = React.useMemo(() => mousePosition, [mousePosition?.x, mousePosition?.y]);
+
 		// Pasar la configuración al componente de efecto
 		return (
 			<HolographicEffectWrapper
-				config={effectConfig}
+				config={memoizedConfig}
 				isHovered={!!isHovered}
 				isExploded={!!isExploded}
 				activeLayer={isActive ? 'holographic' : null}
 				getExplodeLayerTransform={getExplodeTransform}
-				mousePosition={mousePosition}
+				mousePosition={memoizedMousePosition}
 			/>
 		);
 	},

@@ -16,7 +16,7 @@ import {
 	RegisterAllLayers,
 } from '@/components/features/entity-cards/layers';
 import { DesignPanel } from '@/components/features/entity-cards/modules/design';
-import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-module/layer-management-dialog';
+import { LayerManagementDialog } from '@/components/features/entity-cards/modules/layers-system/layer-management-dialog';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import { PresetsPanel } from '@/components/features/entity-cards/settings/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';

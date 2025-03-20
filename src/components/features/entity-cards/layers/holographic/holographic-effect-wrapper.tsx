@@ -16,11 +16,13 @@ export function HolographicEffectWrapper({
 	getExplodeLayerTransform,
 	config,
 }: LayerComponentProps<HolographicConfig>) {
-	// Estado para rastrear la posición del ratón
+	// Estado para rastrear la posición del ratón con throttling
 	const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+	const lastUpdateRef = React.useRef<number>(0);
+	const THROTTLE_MS = 16; // ~60fps
 
 	// Valores por defecto
-	const defaultConfig: HolographicConfig = {
+	const defaultConfig = React.useMemo<HolographicConfig>(() => ({
 		enabled: true,
 		intensity: 0.7,
 		pattern: 'rainbow',
@@ -31,39 +33,38 @@ export function HolographicEffectWrapper({
 		blend: 'overlay',
 		animated: true,
 		interactiveMode: 'mouse',
-	};
+	}), []);
 
-	// Combinar configuración
-	const mergedConfig = { ...defaultConfig, ...config };
+	// Combinar configuración con memo
+	const mergedConfig = React.useMemo(
+		() => ({ ...defaultConfig, ...config }),
+		[defaultConfig, config]
+	);
 
-	// Actualizar posición del ratón
+	// Función throttled para actualizar la posición del ratón
+	const handleMouseMove = React.useCallback((event: MouseEvent) => {
+		const now = Date.now();
+		if (now - lastUpdateRef.current >= THROTTLE_MS) {
+			setMousePosition({
+				x: event.clientX / window.innerWidth,
+				y: event.clientY / window.innerHeight,
+			});
+			lastUpdateRef.current = now;
+		}
+	}, []);
+
+	// Cleanup y setup de event listeners
 	React.useEffect(() => {
-		// Si no está habilitado, no hay necesidad de actualizar posición del ratón
-		if (!mergedConfig.enabled) {
+		if (!mergedConfig.enabled || mergedConfig.interactiveMode !== 'mouse') {
 			return;
 		}
 
-		// Función para manejar el movimiento del ratón
-		const handleMouseMove = (event: MouseEvent) => {
-			setMousePosition({
-				x: event.clientX,
-				y: event.clientY,
-			});
+		window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+		return () => {
+			window.removeEventListener('mousemove', handleMouseMove);
 		};
-
-		// Solo agregar listener si el modo interactivo es "mouse"
-		if (mergedConfig.interactiveMode === 'mouse') {
-			window.addEventListener('mousemove', handleMouseMove);
-
-			// Limpiar el evento cuando se desmonta el componente
-			return () => {
-				window.removeEventListener('mousemove', handleMouseMove);
-			};
-		}
-
-		// Devolver una función de limpieza vacía si no hay listener
-		return () => {};
-	}, [mergedConfig.enabled, mergedConfig.interactiveMode]);
+	}, [mergedConfig.enabled, mergedConfig.interactiveMode, handleMouseMove]);
 
 	// Si no está habilitado, no renderizar nada
 	if (!mergedConfig.enabled) {
@@ -74,7 +75,7 @@ export function HolographicEffectWrapper({
 	const primaryColor = mergedConfig.colors[0] || 'rgba(0, 153, 255, 0.2)';
 	const secondaryColor = mergedConfig.colors[1] || 'rgba(128, 0, 255, 0.2)';
 
-	const holographicOptions = {
+	const holographicOptions = React.useMemo(() => ({
 		intensity: mergedConfig.intensity,
 		pattern: mergedConfig.pattern,
 		colors: mergedConfig.colors,
@@ -85,7 +86,7 @@ export function HolographicEffectWrapper({
 		animated: mergedConfig.animated || false,
 		interactiveMode: mergedConfig.interactiveMode || 'none',
 		layerIndex: 4,
-	};
+	}), [mergedConfig]);
 
 	return (
 		<HolographicLayer
@@ -102,4 +103,4 @@ export function HolographicEffectWrapper({
 	);
 }
 
-export default HolographicEffectWrapper;
+export default React.memo(HolographicEffectWrapper);

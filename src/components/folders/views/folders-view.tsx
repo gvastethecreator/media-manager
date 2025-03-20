@@ -3,31 +3,37 @@
 import { getFolders } from '@/app/actions/folders/folder-crud.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { EntityCardWrapper, useCardDisplay } from '@/components/features/entity-cards';
 import { getCardOptionsFromPreset } from '@/components/features/entity-cards/actions/visual-presets.actions';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { createDebugger } from '@/components/features/entity-cards/debug/render-debug';
 import type { CardDesignPreset, CardOptions, CornerStyle } from '@/components/features/entity-cards/types/base-card-types';
+import { normalizeEntityData } from '@/components/features/entity-cards/utils/data-validator';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
 import type { Folder } from '@/types/entities/folders';
-import { FolderIcon } from 'lucide-react';
+import { FolderIcon, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = serverLogger.withContext('FoldersView');
 
+// Crear un debugger para este componente
+const debug = createDebugger('FoldersView', process.env.NODE_ENV === 'development');
+
 // Configuración visual mejorada para carpetas tipo TCG (Trading Card Game)
 const DEFAULT_FOLDER_OPTIONS: CardOptions = {
-	// Efectos principales
-	enable3DEffect: true,
-	enableHolographicEffect: true,
+	// Efectos principales - todos desactivados por defecto para mejor rendimiento
+	enable3DEffect: false,
+	enableHolographicEffect: false,
 	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
+	enableLightHalo: false,
+	enableAnimatedBorder: false,
+	enableGlowEffect: false,
 	enableGrainEffect: false,
 
 	// Sistema de diseño inspirado en cartas coleccionables
@@ -41,67 +47,41 @@ const DEFAULT_FOLDER_OPTIONS: CardOptions = {
 		shadowStyle: 'dramatic',
 	},
 
-	// Efectos holográficos y de brillo
+	// Efectos holográficos y de brillo - desactivados
 	holographicOptions: {
-		patternType: 'rainbow',
-		intensity: 0.6,
-		animationSpeed: 1.5,
-		visibleOnHover: true,
+		enabled: false,
+		intensity: 0.5,
+		speed: 1.0,
+		colorRange: 'rainbow',
 	},
 
-	// Efectos de brillo
-	glowOptions: {
-		intensity: 0.7,
-		size: 25,
-		blurAmount: 18,
-		animationType: 'pulse',
-		pulseSpeed: 2,
-		color: 'auto', // Toma el color de la rareza
-		visibleOnHover: true,
+	// Sistema de capas simplificado
+	layerSystem: {
+		order: ['background', 'content', 'border'],
+		layerBlending: 'normal',
+		layerSpacing: 0,
+		explodeView: false,
 	},
 
-	// Bordes animados
-	borderOptions: {
-		width: 2.5,
-		pattern: 'gradient',
-		animationType: 'flow',
-		animation: {
-			type: 'flow',
-			duration: 3000,
-			timing: 'ease-in-out',
-			iteration: 'infinite',
-		},
-		glowIntensity: 0.8,
-	},
-
-	// Textura de fondo
-	textureConfig: {
-		type: 'noise',
-		intensity: 0.15,
-		scale: 1.2,
-		blendMode: 'overlay',
-	},
-
-	// Rareza - será sobrescrita por cada carpeta
-	rarityConfig: {
+	// Configuración del borde
+	borderSystem: {
 		enabled: true,
-		rarity: 'common',
-		color: '#4b5563',
-		borderColor: 'rgba(75, 85, 99, 0.7)',
-		glowColor: 'rgba(75, 85, 99, 0.5)',
-		borderStyle: 'solid',
-		borderWidth: 2,
+		width: 1,
+		style: 'solid',
+		color: 'var(--border)',
+		radius: 12,
+		glow: false,
 		frameType: 'standard',
 	},
 
-	// Configuración de animación
+	// Configuración de animación - simplificada
 	animation: {
 		hoverEffect: 'lift',
 		entranceAnimation: 'fade-in',
 		hoverScale: 1.05,
-		hoverRotation: true,
-		hoverLightEffect: true,
-		maxRotation: 15,
+		hoverRotation: false,
+		hoverLightEffect: false,
+		maxRotation: 0,
 	},
 
 	// Colores base
@@ -122,27 +102,56 @@ const MemoizedFolderCard = React.memo(
 		cardOptions: CardOptions;
 		onFolderClick: () => void;
 	}) => {
+		// Debug de renderizados
+		if (process.env.NODE_ENV === 'development') {
+			debug.logRender({
+				message: 'Renderizando MemoizedFolderCard',
+				folderId: folder.id,
+				folderName: folder.name
+			});
+		}
+
+		// Normalizar los datos de la carpeta
+		const normalizedFolder = normalizeEntityData(folder, 'folder') as Folder;
+
 		return (
-			<EntityCardAdapter
-				key={`folder-card-${folder.id}`}
+			<EntityCardWrapper
+				key={`folder-card-${normalizedFolder.id}`}
 				entityType="folder"
-				entity={folder}
+				entity={normalizedFolder}
+				entityId={normalizedFolder.id}
+				title={normalizedFolder.name}
+				description={normalizedFolder.description || ''}
+				image={normalizedFolder.featuredImage}
 				onClick={onFolderClick}
-				showVisualConfig={true}
-				enableExplode={true}
 				options={cardOptions}
+				className="h-full"
 			/>
 		);
 	},
 	(prevProps, nextProps) => {
 		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
-		return (
+		const result =
 			prevProps.folder.id === nextProps.folder.id &&
 			prevProps.folder.name === nextProps.folder.name &&
 			prevProps.folder.emoji === nextProps.folder.emoji &&
 			prevProps.folder.imageCount === nextProps.folder.imageCount &&
-			JSON.stringify(prevProps.cardOptions) === JSON.stringify(nextProps.cardOptions)
-		);
+			JSON.stringify(prevProps.cardOptions) === JSON.stringify(nextProps.cardOptions);
+
+		// Log de re-renderizados para depuración
+		if (!result && process.env.NODE_ENV === 'development') {
+			debug.logRender({
+				message: 'Re-renderizado MemoizedFolderCard',
+				folderId: nextProps.folder.id,
+				reason: prevProps.folder.id !== nextProps.folder.id
+					? 'Cambio de ID'
+					: prevProps.folder.name !== nextProps.folder.name
+						? 'Cambio de nombre'
+						: 'Otros cambios'
+			});
+		}
+
+		return result;
 	}
 );
 
@@ -155,6 +164,9 @@ export function FoldersView(_props: ViewProps) {
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_FOLDER_OPTIONS);
 	// Nuevo estado para almacenar presets de carpetas
 	const [folderPresets, setFolderPresets] = useState<Record<string, CardOptions>>({});
+
+	// Obtener el modo de visualización actual del contexto
+	const { displayMode } = useCardDisplay();
 
 	// Usar el nuevo hook de eventos optimistas del cliente
 	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
@@ -224,6 +236,11 @@ export function FoldersView(_props: ViewProps) {
 	}, [loadPresetConfig]);
 
 	useEffect(() => {
+		// Log de inicio de carga
+		if (process.env.NODE_ENV === 'development') {
+			debug.logEffect('loadFolders', []);
+		}
+
 		loadFolders();
 	}, [loadFolders]);
 
@@ -250,9 +267,11 @@ export function FoldersView(_props: ViewProps) {
 	const getFolderCardOptions = useCallback((folderId: string): CardOptions => {
 		// Si la carpeta tiene un preset personalizado, usarlo
 		if (folderPresets[folderId]) {
+			// Evitar recrear el objeto en cada llamada
 			return folderPresets[folderId];
 		}
 		// Si no, usar la configuración por defecto
+		// (referencia estable que no cambia en cada renderizado)
 		return visualConfig;
 	}, [folderPresets, visualConfig]);
 
@@ -345,57 +364,82 @@ export function FoldersView(_props: ViewProps) {
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				{/* Título estilo TCG */}
-				<div className="text-center mb-8">
-					<h1 className="text-3xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 text-transparent bg-clip-text drop-shadow-md">
-						Colección de Carpetas
-					</h1>
-					<p className="text-muted-foreground mt-2">Explora tu colección de carpetas y descubre tus imágenes</p>
-				</div>
+		<>
+			<ScrollArea className="h-full">
+				<div className="container mx-auto p-6">
+					{/* Título estilo TCG con indicador del modo actual */}
+					<div className="text-center mb-8">
+						<h1 className="text-3xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 text-transparent bg-clip-text drop-shadow-md">
+							Colección de Carpetas
+						</h1>
+						<p className="text-muted-foreground mt-2">Explora tu colección de carpetas y descubre tus imágenes</p>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-					{optimisticFolders.map((folder, index) => {
-						// Verificar que la carpeta tenga un id válido
-						if (!folder || !folder.id) {
-							console.error('Carpeta sin id válido:', folder);
-							return null;
-						}
-
-						// Crear una función de clic específica para esta carpeta
-						const onFolderClick = () => handleFolderClick(folder);
-
-						return (
-							<motion.div
-								key={folder.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{
-									delay: index * 0.1,
-									duration: 0.4,
-									type: "spring",
-									stiffness: 100,
-									damping: 12
-								}}
-								className="cursor-pointer perspective-1000"
-								onClick={onFolderClick}
+						{/* Indicador del modo de visualización */}
+						<div className="mt-4 flex items-center justify-center gap-2">
+							<Info className="h-4 w-4 text-muted-foreground" />
+							<p className="text-sm text-muted-foreground">Modo de visualización actual:</p>
+							<Badge
+								variant="outline"
+								className={`
+									${displayMode === 'simple' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
+									${displayMode === 'complex' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : ''}
+									${displayMode === 'skeleton' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''}
+									${displayMode === 'json' ? 'bg-teal-500/10 text-teal-500 border-teal-500/20' : ''}
+								`}
 							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-folder-id={folder.id}
+								{displayMode === 'simple' && 'Simple'}
+								{displayMode === 'complex' && 'Completo'}
+								{displayMode === 'skeleton' && 'Esqueleto'}
+								{displayMode === 'json' && 'JSON'}
+							</Badge>
+							<p className="text-xs text-muted-foreground">
+								(Puedes cambiar el modo desde el panel flotante)
+							</p>
+						</div>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+						{optimisticFolders.map((folder, index) => {
+							// Verificar que la carpeta tenga un id válido
+							if (!folder || !folder.id) {
+								console.error('Carpeta sin id válido:', folder);
+								return null;
+							}
+
+							// Crear una función de clic específica para esta carpeta
+							const onFolderClick = () => handleFolderClick(folder);
+
+							return (
+								<motion.div
+									key={folder.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{
+										delay: index * 0.1,
+										duration: 0.4,
+										type: "spring",
+										stiffness: 100,
+										damping: 12
+									}}
+									className="cursor-pointer perspective-1000"
+									onClick={onFolderClick}
 								>
-									<MemoizedFolderCard
-										folder={folder}
-										cardOptions={getFolderCardOptions(folder.id)}
-										onFolderClick={onFolderClick}
-									/>
-								</div>
-							</motion.div>
-						);
-					})}
+									<div
+										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										data-folder-id={folder.id}
+									>
+										<MemoizedFolderCard
+											folder={folder}
+											cardOptions={getFolderCardOptions(folder.id)}
+											onFolderClick={onFolderClick}
+										/>
+									</div>
+								</motion.div>
+							);
+						})}
+					</div>
 				</div>
-			</div>
-		</ScrollArea>
+			</ScrollArea>
+		</>
 	);
 }

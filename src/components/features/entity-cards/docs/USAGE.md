@@ -1,289 +1,451 @@
-# Guía de Uso del Sistema Entity Cards
+# Guía de Uso: Entity Cards v2.0
 
 ## Introducción
 
-El sistema Entity Cards proporciona una forma flexible y potente de mostrar diferentes tipos de entidades en formato de tarjeta con efectos visuales avanzados. Esta guía explica cómo utilizar el sistema en diferentes contextos.
+Esta guía proporciona ejemplos detallados y casos de uso para implementar y personalizar Entity Cards en tu aplicación.
 
-## Importación Correcta de Componentes
+## Instalación y Setup
 
-Para usar correctamente los componentes de tarjetas, **debe importarlos desde el punto de entrada centralizado**:
+```typescript
+// En tu componente principal
+import { EntityCardProvider } from '@/components/features/entity-cards';
+import { RegisterLayers } from '@/components/features/entity-cards/layers';
 
-```tsx
-// CORRECTO: Importar desde el punto de entrada central
-import {
-	AlbumCard,
-	ConceptCard,
-	NoteCard,
-	TagCard,
-	PlaceCard,
-	// Otros componentes...
-	EntityCardWrapper,
-	adaptCardOptions,
-} from '@/components/features/entity-cards';
-
-// INCORRECTO: No importar directamente desde los archivos de implementación
-// import { AlbumCard } from '@/components/features/entity-cards/layouts/album-card-layout';
+export function App() {
+  return (
+    <EntityCardProvider>
+      <RegisterLayers />
+      {/* Tu aplicación */}
+    </EntityCardProvider>
+  );
+}
 ```
 
-## Uso Básico
+## Ejemplos de Uso
 
-### 1. Renderizar una Tarjeta Simple
+### 1. Tarjeta Básica
 
-```tsx
-import { AlbumCard } from '@/components/features/entity-cards';
+```typescript
+import { EntityCard } from '@/components/features/entity-cards';
+
+export function SimpleCard() {
+  return (
+    <EntityCard
+      entityType="image"
+      entityId="img-1"
+      title="Mi Imagen"
+      description="Una descripción simple"
+      imageUrl="/path/to/image.jpg"
+    />
+  );
+}
+```
+
+### 2. Tarjeta con Efectos Visuales
+
+```typescript
+import { EntityCard } from '@/components/features/entity-cards';
+
+export function FancyCard() {
+  return (
+    <EntityCard
+      entityType="world-item"
+      entityId="item-1"
+      title="Objeto Especial"
+      rarity="legendary"
+      layers={{
+        holographic: {
+          enabled: true,
+          intensity: 0.8,
+          pattern: 'rainbow'
+        },
+        glow: {
+          enabled: true,
+          color: '#ff00ff',
+          spread: 20
+        },
+        border: {
+          enabled: true,
+          style: 'animated',
+          width: 2
+        }
+      }}
+    />
+  );
+}
+```
+
+### 3. Tarjeta con Configuración Avanzada
+
+```typescript
+import { EntityCard } from '@/components/features/entity-cards';
+import { useEntityCardConfig } from '@/components/features/entity-cards/hooks';
+
+export function AdvancedCard() {
+  const config = useEntityCardConfig({
+    entityType: 'folder',
+    presetId: 'special-folder'
+  });
+
+  return (
+    <EntityCard
+      entityType="folder"
+      entityId="folder-1"
+      title="Carpeta Especial"
+      layers={config.layers}
+      options={{
+        interactive: true,
+        animationPreset: 'smooth',
+        renderQuality: 'high'
+      }}
+      onLayerClick={(layerName) => {
+        console.log(`Capa clickeada: ${layerName}`);
+      }}
+    />
+  );
+}
+```
+
+### 4. Tarjeta con Capas Personalizadas
+
+```typescript
+import { EntityCard, registerLayer } from '@/components/features/entity-cards';
+import { MyCustomLayer } from './my-custom-layer';
+
+// Registrar capa personalizada
+registerLayer({
+  type: 'custom-effect',
+  Component: MyCustomLayer,
+  defaultConfig: {
+    enabled: true,
+    layerIndex: 10,
+    // Configuración específica
+    intensity: 0.5,
+    color: '#000000'
+  }
+});
+
+export function CustomCard() {
+  return (
+    <EntityCard
+      entityType="custom"
+      entityId="custom-1"
+      title="Tarjeta Personalizada"
+      layers={{
+        'custom-effect': {
+          enabled: true,
+          intensity: 0.8,
+          color: '#ff0000'
+        }
+      }}
+    />
+  );
+}
+```
+
+## Hooks Disponibles
+
+### useEntityCard
+
+```typescript
+import { useEntityCard } from '@/components/features/entity-cards/hooks';
 
 function MyComponent() {
-	const album = {
-		id: '123',
-		name: 'Mi Álbum',
-		description: 'Descripción del álbum',
-		// ... otros campos según el tipo de entidad
-	};
+  const { card, loading, error } = useEntityCard({
+    entityType: 'image',
+    entityId: 'img-1'
+  });
 
-	return (
-		<AlbumCard
-			data={album}
-			onClick={() => console.log('Tarjeta clickeada')}
-		/>
-	);
+  if (loading) return <CardSkeleton />;
+  if (error) return <ErrorCard error={error} />;
+
+  return <EntityCard {...card} />;
 }
 ```
 
-### 2. Personalizar la Apariencia con Compatibilidad de Tipos
+### useLayerConfig
 
-```tsx
-import { AlbumCard, adaptCardOptions, CardOptions } from '@/components/features/entity-cards';
+```typescript
+import { useLayerConfig } from '@/components/features/entity-cards/hooks';
 
-function MyComponent() {
-	const album = {
-		id: '456',
-		name: 'Mi Álbum',
-		// ... otras propiedades
-	};
+function ConfigurableCard() {
+  const { config, updateConfig } = useLayerConfig('holographic');
 
-	// Opciones personalizadas
-	const customOptions: Partial<CardOptions> = {
-		designSystem: {
-			preset: 'modern',
-			cornerRadius: 12,
-			borderWidth: 2,
-		},
-		glowOptions: {
-			intensity: 0.7,
-			color: '#3b82f6',
-			visibleOnHover: true,
-		}
-	};
-
-	return (
-		<AlbumCard
-			data={album}
-			// Usar el adaptador para asegurar compatibilidad
-			options={adaptCardOptions(customOptions)}
-			onClick={() => console.log('Álbum clickeado')}
-		/>
-	);
+  return (
+    <div>
+      <EntityCard
+        entityType="image"
+        entityId="img-1"
+        layers={{ holographic: config }}
+      />
+      <input
+        type="range"
+        value={config.intensity}
+        onChange={(e) => updateConfig({ intensity: e.target.value })}
+      />
+    </div>
+  );
 }
 ```
 
-## Uso Avanzado
+### useCardPreset
 
-### 1. Usar el Adaptador Directamente
+```typescript
+import { useCardPreset } from '@/components/features/entity-cards/hooks';
 
-```tsx
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
+function PresetCard() {
+  const { preset, applyPreset } = useCardPreset('legendary');
 
-function AdvancedUsage() {
-	const [isExploded, setIsExploded] = useState(false);
-	const [activeLayer, setActiveLayer] = useState(null);
-
-	return (
-		<EntityCardAdapter
-			entityType="character"
-			entity={characterData}
-			enableExplode={true}
-			isExploded={isExploded}
-			activeLayer={activeLayer}
-			onExplodedChange={setIsExploded}
-			onActiveLayerChange={setActiveLayer}
-			showVisualConfig={true}
-			onVisualConfigClick={() => console.log('Abrir configuración')}
-		/>
-	);
+  return (
+    <EntityCard
+      entityType="world-item"
+      entityId="item-1"
+      layers={preset.layers}
+      onPresetChange={(newPreset) => applyPreset(newPreset)}
+    />
+  );
 }
 ```
 
-### 2. Trabajar con Presets Visuales
+## Presets Predefinidos
 
-```tsx
-import {
-	applyVisualPresetToEntity,
-	getVisualPresetsByEntityType,
-} from '@/components/features/entity-cards/actions/visual-presets.actions';
+### Rareza Legendaria
 
-// En un componente con 'use client'
-async function handleApplyPreset(entityType, entityId, presetId) {
-	const result = await applyVisualPresetToEntity(entityType, entityId, presetId);
-	if (result.success) {
-		// Manejar éxito
-	} else {
-		// Manejar error
-	}
-}
-
-// Para obtener presets disponibles
-async function loadPresets(entityType) {
-	const result = await getVisualPresetsByEntityType(entityType);
-	if (result.success) {
-		return result.data;
-	}
-	return [];
-}
-```
-
-### 3. Configuración del Panel de Settings
-
-```tsx
-import { EntitiesCardsSettings } from '@/components/features/entity-cards/settings/entities-cards-settings';
-
-function SettingsPanel() {
-	return (
-		<div className="settings-container">
-			<h2>Configuración de Tarjetas</h2>
-			<EntitiesCardsSettings />
-		</div>
-	);
-}
-```
-
-## Sistema de Capas
-
-El sistema de capas permite aplicar efectos visuales a las tarjetas. Cada capa se puede configurar individualmente.
-
-### Ejemplo de Uso de Capas
-
-```tsx
-import { EntityCardLayerWrapper } from '@/components/features/entity-cards/entity-card-layer-wrapper';
-
-function CardWithLayers() {
-	return (
-		<EntityCardLayerWrapper
-			entityType="folder"
-			entityId="123"
-			isExploded={true}
-			activeLayer="glow"
-			layerOrder={['background', 'content', 'glow', 'border', 'holographic']}
-		>
-			{/* Contenido de la tarjeta */}
-			<div className="card-content">
-				<h3>Título de la Tarjeta</h3>
-				<p>Contenido de la tarjeta</p>
-			</div>
-		</EntityCardLayerWrapper>
-	);
-}
-```
-
-## Integración con Otros Sistemas
-
-### 1. Integración con Sistema de Entidades
-
-```tsx
-import { useEntity } from '@/hooks/use-entity';
-import { EntityCard } from '@/components/features/entity-cards/entity-card';
-
-function EntityDisplay({ entityId, entityType }) {
-	const { entity, isLoading, error } = useEntity(entityType, entityId);
-
-	if (isLoading) return <div>Cargando...</div>;
-	if (error) return <div>Error: {error.message}</div>;
-
-	return <EntityCard entityType={entityType} entity={entity} />;
-}
-```
-
-### 2. Integración con Sistema de Navegación
-
-```tsx
-import { useRouter } from 'next/navigation';
-import { EntityCard } from '@/components/features/entity-cards/entity-card';
-
-function NavigableCard({ entity, entityType }) {
-	const router = useRouter();
-
-	const handleClick = () => {
-		router.push(`/${entityType}s/${entity.id}`);
-	};
-
-	return <EntityCard entityType={entityType} entity={entity} onClick={handleClick} />;
-}
-```
-
-## Solución de Problemas Comunes
-
-### 1. La tarjeta no muestra el contenido correcto
-
-Asegúrate de que el tipo de entidad (`entityType`) coincida con el tipo real de la entidad que estás pasando. Cada tipo de entidad espera una estructura específica.
-
-### 2. Los efectos visuales no funcionan
-
-Verifica que las opciones de efectos estén habilitadas correctamente:
-
-```tsx
-const options = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableGlowEffect: true,
-	// ... otras opciones
+```typescript
+const legendaryPreset = {
+  id: 'legendary',
+  name: 'Legendario',
+  layers: {
+    holographic: {
+      enabled: true,
+      pattern: 'rainbow',
+      intensity: 1
+    },
+    glow: {
+      enabled: true,
+      color: '#ffd700',
+      spread: 30
+    },
+    border: {
+      enabled: true,
+      style: 'animated-gold',
+      width: 3
+    }
+  }
 };
 ```
 
-### 3. Problemas de rendimiento
+### Efecto Cyberpunk
 
-Si experimentas problemas de rendimiento con muchas tarjetas, considera usar las opciones de rendimiento:
-
-```tsx
-const performanceOptions = {
-	performance: {
-		lazyLoad: true,
-		imageOptimization: true,
-		reducedMotion: true,
-		// ... otras opciones de rendimiento
-	},
+```typescript
+const cyberpunkPreset = {
+  id: 'cyberpunk',
+  name: 'Cyberpunk',
+  layers: {
+    glitch: {
+      enabled: true,
+      intensity: 0.7,
+      frequency: 0.2
+    },
+    scanlines: {
+      enabled: true,
+      opacity: 0.3,
+      color: '#00ff00'
+    },
+    chromaticAberration: {
+      enabled: true,
+      offset: 2
+    }
+  }
 };
 ```
 
-### 4. Adaptación al tamaño completo del contenedor
+## Optimización de Rendimiento
 
-Para que las tarjetas se adapten al tamaño completo de su contenedor, asegúrate de que el contenedor padre tenga dimensiones definidas y utiliza las clases `w-full` y `h-full`:
+### Lazy Loading de Capas
 
-```tsx
-// Contenedor padre con dimensiones definidas
-<div className="w-64 h-96">
-	<EntityCardAdapter
-		entityType="folder"
-		entity={folder}
-		// Las tarjetas ya incluyen w-full y h-full internamente
-	/>
-</div>
+```typescript
+import dynamic from 'next/dynamic';
 
-// Para contenedores flexibles
-<div className="grid grid-cols-3 gap-4 h-screen">
-	{folders.map(folder => (
-		<EntityCardAdapter
-			key={folder.id}
-			entityType="folder"
-			entity={folder}
-		/>
-	))}
-</div>
+const HolographicLayer = dynamic(
+  () => import('@/components/features/entity-cards/layers/holographic'),
+  { ssr: false }
+);
+
+registerLayer({
+  type: 'holographic',
+  Component: HolographicLayer,
+  // ...
+});
 ```
 
-Los componentes `EntityCard`, `EntityCardWrapper` y layouts específicos como `FolderCardLayout` ya incluyen las clases necesarias para adaptarse al tamaño completo de su contenedor.
+### Memorización de Componentes
+
+```typescript
+import { memo } from 'react';
+
+const OptimizedCard = memo(function OptimizedCard({
+  entityType,
+  entityId,
+  layers
+}: EntityCardProps) {
+  return (
+    <EntityCard
+      entityType={entityType}
+      entityId={entityId}
+      layers={layers}
+      options={{ optimizeRendering: true }}
+    />
+  );
+});
+```
+
+### Renderizado Condicional
+
+```typescript
+function ConditionalCard({ isVisible, ...props }) {
+  if (!isVisible) return null;
+
+  return (
+    <EntityCard
+      {...props}
+      options={{
+        ...props.options,
+        suspendEffects: !isVisible
+      }}
+    />
+  );
+}
+```
+
+## Depuración
+
+### Modo Debug
+
+```typescript
+<EntityCard
+  debug={true}
+  onLayerRender={(layerName, renderTime) => {
+    console.log(`Capa ${layerName} renderizada en ${renderTime}ms`);
+  }}
+  onError={(error) => {
+    console.error('Error en EntityCard:', error);
+  }}
+/>
+```
+
+### Vista Explodida
+
+```typescript
+<EntityCard
+  isExploded={true}
+  layerSpacing={20}
+  onLayerHover={(layerName) => {
+    console.log(`Hover en capa: ${layerName}`);
+  }}
+/>
+```
+
+## Integración con el Sistema de Diseño
+
+### Tema Personalizado
+
+```typescript
+<EntityCard
+  theme={{
+    colors: {
+      primary: 'var(--primary)',
+      secondary: 'var(--secondary)',
+      accent: 'var(--accent)'
+    },
+    borderRadius: 'var(--radius)',
+    shadows: {
+      normal: 'var(--shadow)',
+      hover: 'var(--shadow-lg)'
+    }
+  }}
+/>
+```
+
+### Animaciones Personalizadas
+
+```typescript
+<EntityCard
+  animations={{
+    enter: {
+      type: 'spring',
+      stiffness: 100,
+      damping: 10
+    },
+    hover: {
+      scale: 1.05,
+      transition: {
+        type: 'tween',
+        duration: 0.2
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.95
+    }
+  }}
+/>
+```
+
+## Mejores Prácticas
+
+1. **Optimización de Rendimiento**
+   - Usar `memo` para componentes estáticos
+   - Implementar lazy loading para efectos pesados
+   - Utilizar la opción `optimizeRendering`
+
+2. **Gestión de Estado**
+   - Mantener la configuración de capas en el nivel más alto posible
+   - Usar los hooks proporcionados para gestionar el estado
+   - Implementar memorización de configuraciones
+
+3. **Accesibilidad**
+   - Proporcionar textos alternativos
+   - Mantener ratios de contraste adecuados
+   - Implementar controles de movimiento reducido
+
+4. **Mantenibilidad**
+   - Seguir el patrón de componentes establecido
+   - Documentar configuraciones personalizadas
+   - Mantener las capas modulares
+
+## Solución de Problemas
+
+### Problemas Comunes
+
+1. **Capas no visibles**
+   - Verificar que la capa está habilitada
+   - Comprobar el orden de las capas
+   - Validar la configuración
+
+2. **Rendimiento Lento**
+   - Reducir el número de capas activas
+   - Implementar lazy loading
+   - Usar la opción `optimizeRendering`
+
+3. **Efectos no Funcionan**
+   - Verificar soporte del navegador
+   - Comprobar conflictos de CSS
+   - Validar configuración de efectos
 
 ## Recursos Adicionales
 
-- Consulta `ARCHITECTURE.md` para entender la estructura interna del sistema
-- Revisa los ejemplos en `entity-card-example.tsx`
-- Explora los diferentes módulos en la carpeta `modules/` para funcionalidades específicas
-- Consulta los diagramas en `ARCHITECTURE.md` para visualizar el flujo de datos y la estructura de componentes
+1. **Documentación API Completa**
+   - [Referencia de Props](/docs/api-reference.md)
+   - [Guía de Capas](/docs/layers-guide.md)
+   - [Sistema de Plugins](/docs/plugin-system.md)
+
+2. **Ejemplos y Templates**
+   - [Galería de Ejemplos](/examples)
+   - [Templates Predefinidos](/templates)
+   - [Playground](/playground)
+
+3. **Recursos de Desarrollo**
+   - [Guía de Contribución](/CONTRIBUTING.md)
+   - [Changelog](/CHANGELOG.md)
+   - [Roadmap](/ROADMAP.md)

@@ -24,7 +24,7 @@ export function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }:
 	const { isCategoryCollapsed, handleCollapseToggle } = useCategoryCollapse();
 	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId } = useCategoryHandlers();
 	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
-	const { handleOpenSettings, handleOpenDevelopment, handleMainNavigate } = useMainNavigation();
+	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
 
 	return (
 		<div
@@ -37,6 +37,7 @@ export function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }:
 				totalImages={stats.totalImages}
 				onOpenSettings={handleOpenSettings}
 				onOpenDevelopment={handleOpenDevelopment}
+				onOpenEntityCards={handleOpenEntityCards}
 				isCollapsed={isCollapsed}
 				onToggleCollapse={onToggleCollapse}
 			/>
