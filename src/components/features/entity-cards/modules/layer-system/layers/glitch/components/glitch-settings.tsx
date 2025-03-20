@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { SettingsSection } from '../../components/settings-section';
 import { ZoneSelector } from '../../components/zone-selector';
-import { GlitchConfig } from '../glitch-schema';
+import type { GlitchConfig } from '../glitch-schema';
 
 interface GlitchSettingsProps {
 	config: GlitchConfig;

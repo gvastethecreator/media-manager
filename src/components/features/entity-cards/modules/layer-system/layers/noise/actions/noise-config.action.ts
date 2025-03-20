@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { NoiseConfig, noiseConfigSchema } from '../noise-schema';
+import { type NoiseConfig, noiseConfigSchema } from '../noise-schema';
 
 /**
  * 📥 Obtiene la configuración de ruido para una entidad
