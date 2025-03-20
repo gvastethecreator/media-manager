@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { EntityCardLayerIntegration } from '../modules/layers-system/entity-card-layer-integration';
+import { EntityCardLayerIntegration } from '../modules/layer-system/entity-card-layer-integration';
 
 // Interfaz para las propiedades del componente
 interface OptimizedCardWithLayersProps {

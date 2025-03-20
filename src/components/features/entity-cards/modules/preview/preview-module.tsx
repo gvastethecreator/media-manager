@@ -1,6 +1,6 @@
 'use client';
 
-import { LayerPluginProvider, LayerRenderer, RegisterAllLayers, useLayerPlugin } from '@/components/features/entity-cards/layers';
+import { LayerPluginProvider, LayerRenderer, RegisterAllLayers, useLayerPlugin } from '@/components/features/entity-cards/modules/layer-system/layers';
 import {
 	FormGroup,
 	FormInput,
