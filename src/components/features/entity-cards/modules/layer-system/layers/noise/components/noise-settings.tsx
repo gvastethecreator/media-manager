@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { SettingsSection } from '../../components/settings-section';
 import { ZoneSelector } from '../../components/zone-selector';
-import { NoiseConfig } from '../noise-schema';
+import type { NoiseConfig } from '../noise-schema';
 
 interface NoiseSettingsProps {
 	config: NoiseConfig;

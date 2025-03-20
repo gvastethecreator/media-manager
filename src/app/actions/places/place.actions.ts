@@ -6,7 +6,6 @@ import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Image, Place } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const placeLogger = serverLogger.withContext('PlaceActions');
@@ -30,7 +29,51 @@ class PlaceError extends Error {
 	}
 }
 
-export interface PlaceWithStats extends Omit<Place, 'featuredImage'> {
+export interface Place {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	shortcut: string | null;
+	region: string | null;
+	type: string | null;
+	climate: string | null;
+	population: number | null;
+	government: string | null;
+	dangers: string | null;
+	resources: string | null;
+	lore: string | null;
+	history: string | null;
+	stats: string | null;
+	sortBy: string | null;
+	filters: string | null;
+	featuredImage: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface PlaceWithStats {
+	id: string;
+	name: string;
+	emoji: string | null;
+	description: string | null;
+	color: string | null;
+	shortcut: string | null;
+	region: string | null;
+	type: string | null;
+	climate: string | null;
+	population: number | null;
+	government: string | null;
+	dangers: string | null;
+	resources: string | null;
+	lore: string | null;
+	history: string | null;
+	stats: string | null;
+	sortBy: string | null;
+	filters: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	_count: {
 		images: number;
 	};
@@ -68,12 +111,33 @@ export interface PlaceUpdate extends Partial<PlaceCreate> {
 	id: string;
 }
 
-export interface PlaceWithImages extends Place {
+export interface PlaceWithImages {
+	id: string;
+	name: string;
+	emoji: string | null;
+	description: string | null;
+	color: string | null;
+	shortcut: string | null;
+	region: string | null;
+	type: string | null;
+	climate: string | null;
+	population: number | null;
+	government: string | null;
+	dangers: string | null;
+	resources: string | null;
+	lore: string | null;
+	history: string | null;
+	stats: string | null;
+	sortBy: string | null;
+	filters: string | null;
+	featuredImage: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	images: FileItem[];
 }
 
 export interface ExtendedPlace extends Place {
-	images: Image[];
+	images: FileItem[];
 }
 
 export async function getPlaces() {
@@ -227,14 +291,14 @@ export async function getPlaceImages(id: string) {
 					},
 				},
 			},
-		})) as ExtendedPlace | null;
+		}));
 
 		if (!place) {
 			placeLogger.warn('ℹ️ Lugar no encontrado, retornando array vacío:', id);
 			return [];
 		}
 
-		const images = place.images.map((img) => convertServerImageToFileItem(img as ServerImage));
+		const images = place.images.map((img: any) => convertServerImageToFileItem(img as unknown as ServerImage));
 
 		placeLogger.info(`✅ ${images.length} imágenes obtenidas`);
 		return images;

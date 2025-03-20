@@ -1,6 +1,6 @@
-import { LayerImplementation } from '@/types/entity-card';
+import type { LayerImplementation } from '@/types/entity-card';
 import { BlurIcon } from 'lucide-react';
-import { BlurConfig, createDefaultBlurConfig } from './blur-schema';
+import { type BlurConfig, createDefaultBlurConfig } from './blur-schema';
 import { BlurLayer } from './components/blur-layer';
 import { BlurSettings } from './components/blur-settings';
 
