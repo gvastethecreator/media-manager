@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { ColorPicker } from '../../components/color-picker';
 import { SettingsSection } from '../../components/settings-section';
-import { FilterConfig, FilterType } from '../filter-schema';
+import type { FilterConfig, FilterType } from '../filter-schema';
 
 interface FilterSettingsProps {
 	config: FilterConfig;

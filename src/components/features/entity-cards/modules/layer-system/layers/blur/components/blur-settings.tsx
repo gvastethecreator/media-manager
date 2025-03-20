@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { MotionControls } from '../../components/motion-controls';
 import { SettingsSection } from '../../components/settings-section';
 import { ZoneSelector } from '../../components/zone-selector';
-import { BlurConfig } from '../blur-schema';
+import type { BlurConfig } from '../blur-schema';
 
 interface BlurSettingsProps {
 	config: BlurConfig;
