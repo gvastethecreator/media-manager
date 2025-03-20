@@ -2,6 +2,7 @@ import '@/app/globals.css';
 import { GlobalErrorHandler } from '@/components/core/global-error-handler';
 import { ServerInitializer } from '@/components/server/server-initializer';
 import { cn } from '@/lib/utils';
+import { ReactScanProvider } from '@/lib/react-scan';
 import { AppProvider } from '@/providers/app-provider';
 import '@/styles/form-animations.css';
 import type { Metadata } from 'next';
@@ -41,9 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<Providers>
 					<ServerInitializer />
 					<AppProvider>
-						<div className="relative min-h-screen w-full">
-							<GlobalErrorHandler>{children}</GlobalErrorHandler>
-						</div>
+						<ReactScanProvider>
+							<div className="relative min-h-screen w-full">
+								<GlobalErrorHandler>{children}</GlobalErrorHandler>
+							</div>
+						</ReactScanProvider>
 					</AppProvider>
 				</Providers>
 			</body>

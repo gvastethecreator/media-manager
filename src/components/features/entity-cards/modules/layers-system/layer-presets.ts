@@ -7,8 +7,8 @@
  * y tipos de entidades, permitiendo aplicar rápidamente conjuntos de capas.
  */
 
-import type { LayerConfig } from '../../layers/types';
 import { DEFAULT_LAYER_SYSTEM } from '../../settings/layer-settings-config';
+import type { LayerConfig } from '../layers/types';
 import type { EntityCardLayerSystemConfig } from './entity-card-layer-adapter';
 
 /**

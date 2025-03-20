@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion, useAnimate } from 'framer-motion';
+import { motion, useAnimate } from 'motion/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { type GlitchEffectConfig, getGlitchEffectConfig } from './actions/glitch-effect-config.action';

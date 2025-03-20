@@ -3,83 +3,148 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { CardContent } from '../card-content';
-import type { LayerComponentProps } from '../layer-plugin-system';
+import type { LayerConfig, LayerRenderProps } from '../types';
 
 /**
- * Props para el componente ContentLayerComponent
+ * 📝 Configuración de la capa de contenido
  */
-export interface ContentLayerConfig {
-	enabled: boolean;
-	layerIndex: number;
+export interface ContentLayerConfig extends LayerConfig {
+	/** Espaciado interno en píxeles */
 	padding: number;
+	/** Tipo de layout para el contenido */
 	layout: 'standard' | 'grid' | 'masonry' | 'carousel';
+	/** Espaciado entre elementos */
 	spacing: number;
+	/** Alineación del contenido */
 	alignment: 'left' | 'center' | 'right';
+	/** Número de columnas para grid y masonry */
+	columns?: number;
+	/** Altura máxima para carousel */
+	maxHeight?: number;
+	/** Opciones de accesibilidad */
+	accessibility?: {
+		/** Texto alternativo para lectores de pantalla */
+		ariaLabel?: string;
+		/** Descripción extendida del contenido */
+		ariaDescription?: string;
+	};
 }
 
 /**
- * Componente para la capa de contenido
+ * 🧩 Componente para la capa de contenido
  * Muestra el contenido principal de la entidad con diferentes layouts y estilos
  */
 export function ContentLayerComponent({
-	entity,
 	config,
-	cardOptions,
 	children,
-}: LayerComponentProps<ContentLayerConfig>) {
-	if (!config.enabled) {
+	isHovered,
+	isActive,
+	isExploded,
+	mousePosition,
+	entityType,
+	entityId,
+}: LayerRenderProps) {
+	const safeConfig = config as ContentLayerConfig;
+
+	if (!safeConfig.enabled) {
 		return null;
 	}
 
 	// Función para obtener las clases de layout
 	const getLayoutClasses = () => {
-		switch (config.layout) {
+		const baseClasses = 'relative w-full transition-all duration-200';
+		const columns = safeConfig.columns || 2;
+
+		switch (safeConfig.layout) {
 			case 'grid':
-				return 'grid grid-cols-2 gap-4';
+				return cn(baseClasses, `grid grid-cols-${columns} gap-${safeConfig.spacing / 4}`);
 			case 'masonry':
-				return 'columns-2 gap-4';
+				return cn(baseClasses, `columns-${columns} gap-${safeConfig.spacing / 4}`);
 			case 'carousel':
-				return 'flex overflow-x-auto gap-4';
+				return cn(
+					baseClasses,
+					'flex overflow-x-auto snap-x snap-mandatory',
+					`gap-${safeConfig.spacing / 4}`,
+					safeConfig.maxHeight && `max-h-[${safeConfig.maxHeight}px]`
+				);
 			default:
-				return 'flex flex-col';
+				return cn(baseClasses, 'flex flex-col');
 		}
 	};
 
 	// Función para obtener las clases de alineación
 	const getAlignmentClasses = () => {
-		switch (config.alignment) {
+		switch (safeConfig.alignment) {
 			case 'left':
-				return 'items-start text-left';
+				return 'items-start text-left justify-start';
 			case 'right':
-				return 'items-end text-right';
+				return 'items-end text-right justify-end';
 			default:
-				return 'items-center text-center';
+				return 'items-center text-center justify-center';
 		}
 	};
+
+	// Función para obtener las propiedades de accesibilidad
+	const getAccessibilityProps = () => ({
+		role: safeConfig.layout === 'carousel' ? 'list' : 'region',
+		'aria-label': safeConfig.accessibility?.ariaLabel || `Contenido de la tarjeta ${entityType}${entityId ? ` #${entityId}` : ''}`,
+		'aria-description': safeConfig.accessibility?.ariaDescription,
+		'aria-expanded': isExploded ? 'true' : 'false',
+		'aria-haspopup': 'false',
+		'aria-live': 'polite',
+		tabIndex: 0,
+	});
 
 	return (
 		<motion.div
 			className={cn(
-				'card-content relative',
+				'card-content',
 				getLayoutClasses(),
 				getAlignmentClasses(),
-				`p-${config.padding / 4}`, // Convertimos el padding a clases de Tailwind
-				`space-y-${config.spacing / 4}`, // Convertimos el spacing a clases de Tailwind
+				`p-${safeConfig.padding / 4}`,
+				isHovered && 'content-hovered',
+				isActive && 'content-active',
+				isExploded && 'content-exploded'
 			)}
 			style={{
-				zIndex: config.layerIndex,
+				zIndex: safeConfig.layerIndex,
+				...(isExploded ? {
+					transform: `translate3d(${20 * safeConfig.layerIndex}px, ${20 * safeConfig.layerIndex}px, 0)`,
+					transition: 'transform 0.3s ease-in-out'
+				} : {}),
+			}}
+			{...getAccessibilityProps()}
+			initial={false}
+			animate={{
+				scale: isHovered ? 1.02 : 1,
+				transition: { duration: 0.2 }
 			}}
 		>
-			{/* Si hay hijos, renderizarlos directamente */}
 			{children || (
-				<CardContent options={cardOptions} className="w-full">
-					{/* Contenido predeterminado */}
-					<div className="card-title font-medium mb-2">{entity?.title || 'Sin título'}</div>
-					<div className="card-description text-sm text-muted-foreground">
-						{entity?.description || 'Sin descripción'}
+				<CardContent
+					className={cn(
+						"w-full",
+						safeConfig.layout === 'carousel' && 'snap-start'
+					)}
+				>
+					<div
+						className="card-title font-medium mb-2"
+						role="heading"
+						aria-level={2}
+					>
+						Sin contenido
+					</div>
+					<div
+						className="card-description text-sm text-muted-foreground"
+						role="contentinfo"
+					>
+						Esta tarjeta no tiene contenido definido
 					</div>
 				</CardContent>
 			)}
 		</motion.div>
 	);
 }
+
+// Asignar displayName para DevTools
+ContentLayerComponent.displayName = 'ContentLayer';

@@ -49,7 +49,7 @@ export function MessageCard({ data, onClick, className, options }: MessageCardPr
 		>
 			<CardHeader
 				title={data.author}
-				subtitle={'@' + data.author.toLowerCase().replace(/\s+/g, '')}
+				subtitle={`@${data.author.toLowerCase().replace(/\s+/g, '')}`}
 				rightContent={<Clock className="h-4 w-4 text-muted-foreground" />}
 			/>
 
@@ -225,8 +225,15 @@ export function CustomCard({
 		<div
 			className={`custom-card relative w-full h-full rounded-lg overflow-hidden border border-muted ${className || ''}`}
 			onClick={onClick}
+			onKeyDown={onClick ? (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					onClick();
+				}
+			} : undefined}
 			role={onClick ? 'button' : undefined}
 			tabIndex={onClick ? 0 : undefined}
+			aria-label={title}
 		>
 			{/* Estructura personalizada usando algunos componentes base */}
 			<div className="flex flex-col h-full">
@@ -311,7 +318,10 @@ export function ImplementNewCardExample() {
 					content={
 						<div className="space-y-2">
 							<p>Este es un ejemplo de contenido personalizado.</p>
-							<button className="px-3 py-1 bg-primary text-primary-foreground rounded">
+							<button
+								type="button"
+								className="px-3 py-1 bg-primary text-primary-foreground rounded"
+							>
 								Acción
 							</button>
 						</div>

@@ -3,16 +3,16 @@
  * Resuelve problemas de compatibilidad entre tipos
  */
 
-import type { Album } from '@prisma/client';
+import { Album } from '@prisma/client';
 import type { CardOptions } from './unified-card-types';
 
 /**
  * Extiende el tipo Album con propiedades adicionales
  */
-export interface ExtendedAlbum extends Album {
-    presetId?: string | null;
-    imageCount?: number;
-    category?: string;
+export interface ExtendedAlbum extends Omit<Album, '_count' | 'presetId' | 'category'> {
+    presetId: string | null;
+    imageCount: number;
+    category: string | null;
     rating?: number;
     _count?: {
         images?: number;
@@ -22,16 +22,29 @@ export interface ExtendedAlbum extends Album {
 /**
  * Adapta un Album para ser compatible con AlbumCardLayout
  */
-export function adaptAlbumForCard(album: Album): ExtendedAlbum {
-    if (!album) return null as any;
+export function adaptAlbumForCard(album: Album & { _count: { images: number } }): ExtendedAlbum {
+    if (!album) {
+        throw new Error('El álbum no puede ser nulo');
+    }
 
-    // Calcular el conteo de imágenes si está disponible en _count
     const imageCount = album._count?.images || 0;
 
     return {
-        ...album,
-        presetId: (album as any).presetId || null,
-        imageCount: imageCount
+        id: album.id,
+        color: album.color,
+        name: album.name,
+        emoji: album.emoji,
+        description: album.description,
+        shortcut: album.shortcut,
+        sortBy: album.sortBy,
+        filters: album.filters,
+        createdAt: album.createdAt,
+        updatedAt: album.updatedAt,
+        category: album.category,
+        rarity: album.rarity,
+        texture: album.texture,
+        presetId: album.presetId,
+        imageCount
     };
 }
 
@@ -84,4 +97,8 @@ export function adaptAlbumCardOptions(options: Partial<CardOptions>): Partial<Ca
             selected: { style: 'border' }
         }
     };
+}
+
+export interface AlbumCardProps {
+    album: ExtendedAlbum;
 }

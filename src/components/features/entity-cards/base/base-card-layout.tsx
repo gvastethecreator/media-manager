@@ -16,7 +16,8 @@ export interface BaseEntityCardProps {
 	updatedAt?: Date | string;
 	imageUrl?: string;
 	thumbnailUrl?: string;
-	[key: string]: any; // Para propiedades específicas de entidad
+	// Utilizamos Record<string, unknown> en lugar de any
+	[key: string]: unknown;
 }
 
 export interface BaseCardLayoutProps<T extends BaseEntityCardProps = BaseEntityCardProps> {
@@ -48,8 +49,8 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 	className,
 	children,
 }: BaseCardLayoutProps<T>) {
-	// Opciones por defecto para la tarjeta
-	const defaultOptions: Partial<CardOptions> = {
+	// Opciones por defecto para la tarjeta - Envuelto en useMemo para evitar regeneración
+	const defaultOptions = useMemo(() => ({
 		designSystem: {
 			preset: 'modern',
 			cornerRadius: 8,
@@ -58,7 +59,7 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 		},
 		enableHover: true,
 		enableClick: !disabled,
-	};
+	}), [disabled]); // Solo depende de disabled que puede cambiar
 
 	// Mezclar opciones por defecto con las proporcionadas
 	const mergedOptions = useMemo(() => {
@@ -66,7 +67,7 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 			...defaultOptions,
 			...options,
 		});
-	}, [options]);
+	}, [options, defaultOptions]); // Ahora defaultOptions es estable
 
 	// Determinar clases CSS basadas en las opciones y estado
 	const cardClasses = useMemo(() => {
@@ -98,17 +99,28 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 		}
 	};
 
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+			e.preventDefault();
+			if (onClick) {
+				onClick();
+			}
+		}
+	};
+
+	// Usar button en lugar de div con role="button" para mejor accesibilidad
 	return (
-		<div
+		<button
 			className={cardClasses}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
-			role="button"
-			tabIndex={disabled ? -1 : 0}
-			aria-disabled={disabled}
+			onKeyDown={handleKeyDown}
+			disabled={disabled}
+			type="button"
 			style={{
 				borderRadius: `${mergedOptions.designSystem?.cornerRadius || 8}px`,
 				borderWidth: `${mergedOptions.designSystem?.borderWidth || 1}px`,
+				textAlign: 'left', // Para que el contenido se alinee a la izquierda
 			}}
 		>
 			{children || (
@@ -142,6 +154,6 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 					</div>
 				</div>
 			)}
-		</div>
+		</button>
 	);
 }

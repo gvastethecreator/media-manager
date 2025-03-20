@@ -103,7 +103,7 @@ export function EffectsPanel({ config, onChange, cardOptions, onCardOptionsChang
 
 					<TabsContent value="advanced" className="mt-4">
 						<AdvancedEffectsPanel
-							distortion={config.advanced.distortion}
+							distortion={config.advanced.distortion} 
 							filter={config.advanced.filter}
 							shadow={config.advanced.shadow}
 							onDistortionChange={(distortion) => handleAdvancedEffectsChange({ distortion })}
