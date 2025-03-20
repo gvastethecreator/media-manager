@@ -3,7 +3,7 @@
  * Resuelve problemas de compatibilidad entre tipos
  */
 
-import { Album } from '@prisma/client';
+import type { Album } from '@prisma/client';
 import type { CardOptions } from './unified-card-types';
 
 /**

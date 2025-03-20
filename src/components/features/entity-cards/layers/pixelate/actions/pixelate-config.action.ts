@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { create } from 'zustand';
 import { type PixelateConfig, type PixelateConfigResponse, pixelateConfigSchema } from '../pixelate-schema';
 
 // Definir el tipo para la configuración en la base de datos
@@ -20,6 +21,169 @@ type DbPixelateConfig = {
 	colorLevels: number | null;
 	[key: string]: unknown;
 };
+
+// Configuración del efecto de pixelado
+export interface PixelateConfig {
+	enabled: boolean;
+	pixelSize: number;
+	opacity: number;
+	blendMode: string;
+	animated: boolean;
+	animationSpeed: number;
+	animationPattern: 'random' | 'wave' | 'spiral' | 'none';
+	colorQuantization: boolean;
+	colorLevels: number;
+	preserveAlpha: boolean;
+	threshold: number;
+	edgeDetection: boolean;
+	edgeColor: [number, number, number];
+	edgeThickness: number;
+	noiseAmount: number;
+	glitchIntensity: number;
+	glitchFrequency: number;
+}
+
+// Estado inicial
+const initialConfig: PixelateConfig = {
+	enabled: false,
+	pixelSize: 8,
+	opacity: 1,
+	blendMode: 'normal',
+	animated: false,
+	animationSpeed: 1,
+	animationPattern: 'none',
+	colorQuantization: false,
+	colorLevels: 8,
+	preserveAlpha: true,
+	threshold: 0.5,
+	edgeDetection: false,
+	edgeColor: [0, 0, 0],
+	edgeThickness: 1,
+	noiseAmount: 0,
+	glitchIntensity: 0,
+	glitchFrequency: 0,
+};
+
+// Interface del store
+interface PixelateStore {
+	config: PixelateConfig;
+	updateConfig: (config: Partial<PixelateConfig>) => void;
+	resetConfig: () => void;
+	toggleEnabled: () => void;
+	setPixelSize: (size: number) => void;
+	setOpacity: (opacity: number) => void;
+	setBlendMode: (mode: string) => void;
+	toggleAnimation: () => void;
+	setAnimationSpeed: (speed: number) => void;
+	setAnimationPattern: (pattern: PixelateConfig['animationPattern']) => void;
+	toggleColorQuantization: () => void;
+	setColorLevels: (levels: number) => void;
+	togglePreserveAlpha: () => void;
+	setThreshold: (threshold: number) => void;
+	toggleEdgeDetection: () => void;
+	setEdgeColor: (color: [number, number, number]) => void;
+	setEdgeThickness: (thickness: number) => void;
+	setNoiseAmount: (amount: number) => void;
+	setGlitchIntensity: (intensity: number) => void;
+	setGlitchFrequency: (frequency: number) => void;
+}
+
+// Crear store con Zustand
+export const usePixelateStore = create<PixelateStore>((set) => ({
+	config: initialConfig,
+
+	updateConfig: (newConfig) =>
+		set((state) => ({
+			config: { ...state.config, ...newConfig },
+		})),
+
+	resetConfig: () => set({ config: initialConfig }),
+
+	toggleEnabled: () =>
+		set((state) => ({
+			config: { ...state.config, enabled: !state.config.enabled },
+		})),
+
+	setPixelSize: (size) =>
+		set((state) => ({
+			config: { ...state.config, pixelSize: size },
+		})),
+
+	setOpacity: (opacity) =>
+		set((state) => ({
+			config: { ...state.config, opacity },
+		})),
+
+	setBlendMode: (mode) =>
+		set((state) => ({
+			config: { ...state.config, blendMode: mode },
+		})),
+
+	toggleAnimation: () =>
+		set((state) => ({
+			config: { ...state.config, animated: !state.config.animated },
+		})),
+
+	setAnimationSpeed: (speed) =>
+		set((state) => ({
+			config: { ...state.config, animationSpeed: speed },
+		})),
+
+	setAnimationPattern: (pattern) =>
+		set((state) => ({
+			config: { ...state.config, animationPattern: pattern },
+		})),
+
+	toggleColorQuantization: () =>
+		set((state) => ({
+			config: { ...state.config, colorQuantization: !state.config.colorQuantization },
+		})),
+
+	setColorLevels: (levels) =>
+		set((state) => ({
+			config: { ...state.config, colorLevels: levels },
+		})),
+
+	togglePreserveAlpha: () =>
+		set((state) => ({
+			config: { ...state.config, preserveAlpha: !state.config.preserveAlpha },
+		})),
+
+	setThreshold: (threshold) =>
+		set((state) => ({
+			config: { ...state.config, threshold },
+		})),
+
+	toggleEdgeDetection: () =>
+		set((state) => ({
+			config: { ...state.config, edgeDetection: !state.config.edgeDetection },
+		})),
+
+	setEdgeColor: (color) =>
+		set((state) => ({
+			config: { ...state.config, edgeColor: color },
+		})),
+
+	setEdgeThickness: (thickness) =>
+		set((state) => ({
+			config: { ...state.config, edgeThickness: thickness },
+		})),
+
+	setNoiseAmount: (amount) =>
+		set((state) => ({
+			config: { ...state.config, noiseAmount: amount },
+		})),
+
+	setGlitchIntensity: (intensity) =>
+		set((state) => ({
+			config: { ...state.config, glitchIntensity: intensity },
+		})),
+
+	setGlitchFrequency: (frequency) =>
+		set((state) => ({
+			config: { ...state.config, glitchFrequency: frequency },
+		})),
+}));
 
 /**
  * Obtiene la configuración del efecto pixelate para una entidad

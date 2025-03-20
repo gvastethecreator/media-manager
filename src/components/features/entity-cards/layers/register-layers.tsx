@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useLayerPlugin } from './layer-plugin-system';
 import type { LayerImplementation } from './types';
 
@@ -33,87 +32,69 @@ const VERIFIED_LAYERS: Record<string, LayerImplementation> = {
 };
 
 /**
- * Componente que registra automáticamente las capas disponibles en el sistema de plugins.
- * Debe ser incluido en la aplicación en un nivel alto para que las capas estén disponibles globalmente.
+ * 🔌 Registro de capas del sistema
+ * @module RegisterLayers
  */
-export function RegisterLayers({
-	entityType,
-	additionalLayers
-}: {
-	entityType?: string;
-	additionalLayers?: Record<string, LayerImplementation>;
-}) {
-	// Obtenemos tanto registerLayer como clearLayers del hook
-	const { registerLayer, clearLayers } = useLayerPlugin();
 
-	useEffect(() => {
-		// Intentamos limpiar capas solo si clearLayers existe
-		if (typeof clearLayers === 'function') {
-			clearLayers();
-			console.log('🧹 Capas existentes limpiadas');
-		} else {
-			console.warn('⚠️ clearLayers no está disponible, omitiendo limpieza');
-		}
-		console.log('⚙️ Iniciando registro de capas...');
+import * as React from 'react';
 
-		// Definimos un helper para registrar capas de forma segura
-		const safeRegister = (implementation: LayerImplementation | undefined, name: string) => {
-			try {
-				if (!implementation) {
-					console.warn(`⚠️ Capa ${name} no disponible o indefinida`);
-					return false;
-				}
+// Importar capas
+import { FilterLayer, FilterSettings, defaultFilterConfig } from './filters/filter-layer-implementation';
+import { GlowLayer, GlowSettings, defaultGlowConfig } from './glow/glow-layer-implementation';
+import { NoiseLayer, NoiseSettings, defaultNoiseConfig } from './noise/noise-layer-implementation';
+import { PatternLayer, PatternSettings, defaultPatternConfig } from './patterns/pattern-layer-implementation';
 
-				// Verificar que la implementación tenga propiedades básicas válidas
-				if (!implementation.type || typeof implementation.render !== 'function') {
-					console.error(`❌ Capa ${name} inválida: falta tipo o función render`, implementation);
-					return false;
-				}
+/**
+ * 🎨 Componente para registrar todas las capas disponibles
+ */
+export function RegisterLayers(): null {
+	const { registerLayer } = useLayerPlugin();
 
-				registerLayer(implementation);
-				console.log(`✅ Capa registrada: ${name}`);
-				return true;
-			} catch (error) {
-				console.error(`❌ Error al registrar capa ${name}:`, error);
-				return false;
-			}
-		};
+	React.useEffect(() => {
+		// Registrar capa de filtros
+		registerLayer({
+			type: 'filter',
+			name: 'Filtros',
+			description: 'Aplica efectos de filtro a la tarjeta',
+			component: FilterLayer,
+			settings: FilterSettings,
+			defaultConfig: defaultFilterConfig,
+			icon: '🎨',
+		});
 
-		// Registrar capas principales que sabemos que funcionan
-		let successCount = 0;
-		let failCount = 0;
+		// Registrar capa de brillo
+		registerLayer({
+			type: 'glow',
+			name: 'Brillo',
+			description: 'Añade un efecto de brillo interactivo',
+			component: GlowLayer,
+			settings: GlowSettings,
+			defaultConfig: defaultGlowConfig,
+			icon: '✨',
+		});
 
-		for (const [name, layer] of Object.entries(VERIFIED_LAYERS)) {
-			if (safeRegister(layer, name)) {
-				successCount++;
-			} else {
-				failCount++;
-			}
-		}
+		// Registrar capa de ruido
+		registerLayer({
+			type: 'noise',
+			name: 'Ruido',
+			description: 'Agrega textura de ruido visual',
+			component: NoiseLayer,
+			settings: NoiseSettings,
+			defaultConfig: defaultNoiseConfig,
+			icon: '🌫️',
+		});
 
-		// Registrar capas adicionales si se proporcionan
-		if (additionalLayers) {
-			for (const [name, layer] of Object.entries(additionalLayers)) {
-				if (safeRegister(layer, name)) {
-					successCount++;
-				} else {
-					failCount++;
-				}
-			}
-		}
+		// Registrar capa de patrones
+		registerLayer({
+			type: 'pattern',
+			name: 'Patrones',
+			description: 'Aplica patrones decorativos',
+			component: PatternLayer,
+			settings: PatternSettings,
+			defaultConfig: defaultPatternConfig,
+			icon: '🔲',
+		});
+	}, [registerLayer]);
 
-		console.log(`📊 Registro de capas completado: ${successCount} exitosas, ${failCount} fallidas`);
-
-		// Función de limpieza al desmontar
-		return () => {
-			// También verificamos si existe clearLayers antes de llamarlo
-			if (typeof clearLayers === 'function') {
-				clearLayers();
-				console.log('🧹 Limpiando registro de capas...');
-			}
-		};
-	}, [registerLayer, clearLayers, additionalLayers]);
-
-	// Este componente no renderiza nada
 	return null;
 }

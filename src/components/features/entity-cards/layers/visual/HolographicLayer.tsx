@@ -106,12 +106,12 @@ export const HolographicLayer: React.FC<HolographicLayerProps> = ({
 		transition: {
 			y: {
 				duration: 2 / mergedConfig.scanlineSpeed!,
-				repeat: Infinity,
+				repeat: Number.POSITIVE_INFINITY,
 				ease: 'linear'
 			},
 			opacity: {
 				duration: 1 / mergedConfig.scanlineSpeed!,
-				repeat: Infinity,
+				repeat: Number.POSITIVE_INFINITY,
 				ease: 'linear'
 			}
 		}
@@ -123,7 +123,7 @@ export const HolographicLayer: React.FC<HolographicLayerProps> = ({
 		x: [0, mergedConfig.distortionAmount! * 2],
 		transition: {
 			duration: 0.2,
-			repeat: Infinity,
+			repeat: Number.POSITIVE_INFINITY,
 			repeatType: 'reverse' as const
 		}
 	};
@@ -134,7 +134,7 @@ export const HolographicLayer: React.FC<HolographicLayerProps> = ({
 			opacity: [1, 0.95, 1],
 			transition: {
 				duration: 1 / mergedConfig.flickerFrequency!,
-				repeat: Infinity,
+				repeat: Number.POSITIVE_INFINITY,
 				repeatType: 'reverse' as const
 			}
 		}

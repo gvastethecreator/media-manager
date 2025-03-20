@@ -1,9 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import type { LayerComponent } from '../layer-plugin-system';
-import { deleteGrainConfig, getGrainConfig, updateGrainConfig } from './actions/grain-config.action';
 import type { GrainConfig } from './actions/grain-config.action';
+import { deleteGrainConfig, getGrainConfig, updateGrainConfig } from './actions/grain-config.action';
 import GrainEffectWrapper from './grain-effect-wrapper';
 import { GrainSettings } from './grain-settings';
 
@@ -31,7 +30,18 @@ export const grainLayer: LayerComponent<GrainConfig> = {
 };
 
 // Exportaciones adicionales
+export { deleteGrainConfig, getGrainConfig, updateGrainConfig } from './actions/grain-config.action';
+export type { GrainConfig } from './actions/grain-config.action';
 export { GrainEffectLayer } from './grain-effect-layer';
 export { GrainSettings } from './grain-settings';
-export { getGrainConfig, updateGrainConfig, deleteGrainConfig } from './actions/grain-config.action';
+
+// 🌾 Exportación de componentes principales
+export { GrainConfig } from './components/grain-config';
+export { GrainLayer } from './components/grain-layer';
+
+// 🎛️ Exportación de store y tipos
+export { useGrainStore } from './actions/grain-config.action';
 export type { GrainConfig } from './actions/grain-config.action';
+
+// 🛠️ Exportación de utilidades
+export { generateGrainPattern } from './utils/grain-utils';

@@ -1,169 +1,144 @@
-# Image Layer (Capa de Imagen)
+# Módulo de Imagen
 
-## 📝 Descripción
-La capa de imagen es una capa fundamental que se encarga de renderizar y gestionar las imágenes en las Entity Cards. Proporciona funcionalidades avanzadas para el manejo de imágenes, incluyendo lazy loading, fallbacks, y optimizaciones de rendimiento.
+Este módulo proporciona una capa de imagen altamente configurable para las tarjetas de entidad, con soporte para efectos visuales, optimizaciones de rendimiento y accesibilidad.
 
-## 🔧 Configuración
-
-```typescript
-interface ImageLayerConfig {
-  enabled: boolean;        // Habilitar/deshabilitar la capa
-  layerIndex: number;      // Posición en el stack de capas
-  fit: 'cover' | 'contain' | 'fill' | 'none';  // Modo de ajuste de imagen
-  position: 'center' | 'top' | 'bottom' | 'left' | 'right';  // Posición de la imagen
-  quality: number;         // Calidad de la imagen (1-100)
-  blur: number;           // Nivel de desenfoque (0-20)
-  opacity: number;        // Opacidad de la imagen (0-1)
-  rounded: boolean;       // Bordes redondeados
-  aspectRatio?: string;   // Relación de aspecto (ej: "16:9")
-  loading: 'eager' | 'lazy';  // Estrategia de carga
-  placeholder: 'blur' | 'empty' | 'shimmer';  // Tipo de placeholder
-}
-```
-
-## 🎨 Características Principales
-
-1. **Optimización de Imágenes**
-   - Lazy loading automático
-   - Carga progresiva
-   - Placeholders personalizables
-   - Compresión y optimización automática
-
-2. **Modos de Ajuste**
-   - Cover: Cubre todo el contenedor
-   - Contain: Mantiene proporciones
-   - Fill: Estira para llenar
-   - None: Sin ajuste
-
-3. **Efectos y Transformaciones**
-   - Desenfoque configurable
-   - Control de opacidad
-   - Bordes redondeados
-   - Posicionamiento flexible
-
-## 🚀 Uso
-
-```typescript
-import { imageLayerImplementation } from './image';
-
-// Configuración básica
-const basicConfig = {
-  enabled: true,
-  layerIndex: 10,
-  fit: 'cover',
-  position: 'center',
-  quality: 85,
-  blur: 0,
-  opacity: 1,
-  rounded: true,
-  loading: 'lazy',
-  placeholder: 'blur'
-};
-
-// Uso en EntityCard
-<EntityCard
-  layerConfigs={{
-    image: basicConfig
-  }}
-/>
-```
-
-## 🔄 Integración con otras capas
-
-La capa de imagen trabaja en conjunto con:
-- Content Layer
-- Border Layer
-- Filter Layer
-- Effects Layer
-
-## ⚠️ Consideraciones y Mejoras Pendientes
-
-1. **Rendimiento**
-   - Implementar formato WebP automático
-   - Mejorar la estrategia de caching
-   - Optimizar la carga progresiva
-
-2. **Accesibilidad**
-   - Mejorar el soporte de alt text
-   - Añadir descripciones detalladas
-   - Soporte para lectores de pantalla
-
-3. **Funcionalidades**
-   - Soporte para múltiples imágenes
-   - Zoom y pan interactivo
-   - Recorte dinámico
-
-## 🎯 Ejemplos
-
-### Imagen de Alta Calidad
-```typescript
-const highQualityConfig = {
-  enabled: true,
-  quality: 100,
-  fit: 'cover',
-  loading: 'eager',
-  placeholder: 'blur'
-};
-```
-
-### Imagen con Efectos
-```typescript
-const effectsConfig = {
-  enabled: true,
-  blur: 5,
-  opacity: 0.8,
-  rounded: true,
-  position: 'center'
-};
-```
-
-### Imagen Optimizada para Rendimiento
-```typescript
-const performanceConfig = {
-  enabled: true,
-  quality: 75,
-  loading: 'lazy',
-  placeholder: 'shimmer'
-};
-```
-
-## 📊 Diagrama de Flujo
+## Estructura del Módulo
 
 ```mermaid
 graph TD
-    A[Image Layer] --> B{Image Loaded?}
-    B -->|No| C[Show Placeholder]
-    B -->|Yes| D[Apply Optimizations]
-
-    C --> E[Blur/Shimmer]
-    C --> F[Progressive Load]
-
-    D --> G[Apply Fit Mode]
-    D --> H[Apply Position]
-    D --> I[Apply Effects]
-
-    G --> J[Render Image]
-    H --> J
-    I --> J
-
-    F --> J
+    A[image/] --> B[components/]
+    A --> C[actions/]
+    B --> D[image-layer.tsx]
+    B --> E[image-config.tsx]
+    C --> F[image-config.action.ts]
 ```
 
-## 🔍 Debugging
+## Componentes Principales
 
-Para depurar problemas comunes:
+### ImageLayer
+Componente principal que renderiza la imagen con efectos y optimizaciones.
 
-1. **Imagen no carga**
-   - Verificar URL de la imagen
-   - Comprobar permisos CORS
-   - Revisar configuración de lazy loading
+```tsx
+import { ImageLayer } from '@/components/features/entity-cards/layers/image';
 
-2. **Problemas de rendimiento**
-   - Ajustar calidad de imagen
-   - Verificar tamaño de imagen
-   - Optimizar formato de imagen
+<ImageLayer
+  width={300}
+  height={200}
+  imageUrl="/path/to/image.jpg"
+  title="Mi imagen"
+  isExploded={false}
+  isHovered={false}
+  activeLayer={0}
+/>
+```
 
-3. **Problemas visuales**
-   - Revisar modo de ajuste
-   - Verificar posicionamiento
-   - Comprobar relación de aspecto
+### ImageConfig
+Panel de configuración que permite ajustar todos los parámetros de la imagen.
+
+```tsx
+import { ImageConfig } from '@/components/features/entity-cards/layers/image';
+
+<ImageConfig />
+```
+
+## Estado Global
+
+El módulo utiliza Zustand para gestionar el estado de la configuración:
+
+```tsx
+import { useImageStore } from '@/components/features/entity-cards/layers/image';
+
+const { config, updateConfig, resetConfig } = useImageStore();
+```
+
+## Características
+
+### 1. Ajustes Básicos
+- Ajuste de imagen (cover, contain, fill, none)
+- Relación de aspecto (1:1, 4:3, 3:4, 16:9, auto)
+- Bordes redondeados (none, sm, md, lg, full)
+
+### 2. Filtros
+- Desenfoque (0-10px)
+- Escala de grises (0-100%)
+- Brillo (50-150%)
+- Contraste (50-150%)
+- Saturación (0-200%)
+
+### 3. Rendimiento
+- Estrategia de carga (lazy, eager)
+- Placeholders (shimmer, blur, empty)
+- Optimización automática de calidad
+
+### 4. Accesibilidad
+- Texto alternativo
+- Descripción larga
+- Soporte para lectores de pantalla
+
+## Flujo de Datos
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant C as ImageConfig
+    participant S as Store
+    participant L as ImageLayer
+    participant R as Render
+
+    U->>C: Ajusta configuración
+    C->>S: updateConfig()
+    S->>L: Nuevo estado
+    L->>L: Aplica efectos
+    L->>R: Renderiza imagen
+```
+
+## Ejemplo de Uso Completo
+
+```tsx
+import { ImageLayer, ImageConfig, useImageStore } from '@/components/features/entity-cards/layers/image';
+
+export const MyComponent = () => {
+  const { config } = useImageStore();
+
+  return (
+    <div>
+      <ImageLayer
+        width={400}
+        height={300}
+        imageUrl="/my-image.jpg"
+        title="Mi imagen"
+        isExploded={false}
+        isHovered={false}
+        activeLayer={0}
+      />
+
+      <ImageConfig />
+    </div>
+  );
+};
+```
+
+## Mejores Prácticas
+
+1. **Rendimiento**
+   - Usar lazy loading para imágenes fuera de la vista
+   - Optimizar el tamaño y formato de las imágenes
+   - Utilizar placeholders para mejorar la UX
+
+2. **Accesibilidad**
+   - Siempre proporcionar texto alternativo descriptivo
+   - Usar descripciones largas para imágenes complejas
+   - Mantener suficiente contraste en los controles
+
+3. **Mantenimiento**
+   - Seguir las convenciones de nombres
+   - Documentar cambios significativos
+   - Mantener la configuración organizada
+
+## Notas Técnicas
+
+- Utiliza Next.js Image para optimización automática
+- Implementa lazy loading nativo
+- Soporta formatos modernos (WebP, AVIF)
+- Compatible con modo oscuro/claro
+- Optimizado para dispositivos móviles
