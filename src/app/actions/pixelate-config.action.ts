@@ -1,11 +1,10 @@
 'use server';
 
 import {
-	type PixelateConfig,
-	entityParamsSchema,
-	pixelateConfigResponseSchema,
-	pixelateConfigSchema,
-} from '@/components/features/entity-cards/layers/pixelate/pixelate-schema';
+    type PixelateConfig,
+    entityParamsSchema,
+    pixelateConfigSchema
+} from '@/components/features/entity-cards/modules/layer-system/layers/pixelate/pixelate-schema';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 

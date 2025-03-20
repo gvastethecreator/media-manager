@@ -44,16 +44,16 @@ export * from './utils/card-utils';
 export type { CardPreset } from './types/unified-card-types';
 
 // Alias para entradas específicas por tipo para facilitar su uso
-export { AlbumCardLayout as AlbumCard } from './layouts/album-card-layout';
-export { CharacterCardLayout as CharacterCard } from './layouts/character-card-layout';
-export { CollectionCardLayout as CollectionCard } from './layouts/collection-card-layout';
-export { ConceptCardLayout as ConceptCard } from './layouts/concept-card-layout';
-export { FolderCardLayout as FolderCard } from './layouts/folder-card-layout';
-export { NoteCardLayout as NoteCard } from './layouts/note-card-layout';
-export { PlaceCardLayout as PlaceCard } from './layouts/place-card-layout';
-export { PromptCardLayout as PromptCard } from './layouts/prompt-card-layout';
-export { TagsCardLayout as TagCard } from './layouts/tags-card-layout';
-export { WorldItemCardLayout as WorldItemCard } from './layouts/world-item-card-layout';
+export { AlbumCardLayout as AlbumCard } from './modules/layout-system/layouts/album-card-layout';
+export { CharacterCardLayout as CharacterCard } from './modules/layout-system/layouts/character-card-layout';
+export { CollectionCardLayout as CollectionCard } from './modules/layout-system/layouts/collection-card-layout';
+export { ConceptCardLayout as ConceptCard } from './modules/layout-system/layouts/concept-card-layout';
+export { FolderCardLayout as FolderCard } from './modules/layout-system/layouts/folder-card-layout';
+export { NoteCardLayout as NoteCard } from './modules/layout-system/layouts/note-card-layout';
+export { PlaceCardLayout as PlaceCard } from './modules/layout-system/layouts/place-card-layout';
+export { PromptCardLayout as PromptCard } from './modules/layout-system/layouts/prompt-card-layout';
+export { TagsCardLayout as TagCard } from './modules/layout-system/layouts/tags-card-layout';
+export { WorldItemCardLayout as WorldItemCard } from './modules/layout-system/layouts/world-item-card-layout';
 
 // Mensaje informativo
 if (process.env.NODE_ENV === 'development') {

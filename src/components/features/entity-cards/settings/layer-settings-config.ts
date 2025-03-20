@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import type { BaseLayerConfig } from '../layers/layer-plugin-system';
+import type { BaseLayerConfig } from '../modules/layer-system/layers/layer-plugin-system';
 
 // Configuración predeterminada para el sistema de capas
 export const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {

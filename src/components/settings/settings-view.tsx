@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
-import { LayerPluginProvider } from '@/components/features/entity-cards/layers/layer-plugin-system';
+import { LayerPluginProvider } from '@/components/features/entity-cards/modules/layer-system/layers/layer-plugin-system';
 import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings/entities-cards-settings';
 import { AlbumsSettings } from './albums/albums-settings';

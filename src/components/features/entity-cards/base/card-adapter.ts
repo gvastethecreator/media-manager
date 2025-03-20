@@ -3,7 +3,7 @@
  * Este archivo proporciona funciones para adaptar opciones entre diferentes sistemas
  */
 
-import type { BaseLayerConfig } from '../layers/layer-plugin-system';
+import type { BaseLayerConfig } from '../modules/layer-system/layers/layer-plugin-system';
 import type { CardOptions } from '../types/card-settings-types';
 
 /**
