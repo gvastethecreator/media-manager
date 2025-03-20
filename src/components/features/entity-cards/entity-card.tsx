@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { EntityCardLayers, EntityCardLayersProvider } from './modules/layers/entity-card-layers';
 import type { EntityBasicInfo } from './types/unified-types';
 
 export interface EntityCardProps extends EntityBasicInfo {
@@ -10,6 +11,9 @@ export interface EntityCardProps extends EntityBasicInfo {
   options?: {
     primaryColor?: string;
     secondaryColor?: string;
+    enableLayers?: boolean;
+    explodeLayers?: boolean;
+    activeLayer?: string | null;
   };
 }
 
@@ -28,6 +32,11 @@ export function EntityCard({
   children,
   options = {},
 }: EntityCardProps) {
+  // Estado para el sistema de capas
+  const [activeLayer, setActiveLayer] = useState<string | null>(options.activeLayer || null);
+  const [isExploded, setIsExploded] = useState<boolean>(options.explodeLayers || false);
+  const enableLayers = options.enableLayers !== false;
+
   // Manejo de eventos de teclado para accesibilidad
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -44,22 +53,38 @@ export function EntityCard({
     }
   }, [onClick]);
 
+  // Manejador para clics en las capas
+  const handleLayerClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Evitar propagar el clic cuando se interactúa con las capas
+    e.stopPropagation();
+  }, []);
+
   // Contenido de la tarjeta memoizado para evitar re-renderizados innecesarios
   const CardContent = useCallback(() => (
     <>
       {/* Contenido principal */}
       <div className="flex flex-col h-full">
-        {/* Imagen */}
-        {image && (
-          <div className="relative w-full aspect-[3/4]">
+        {/* Imagen o Capas */}
+        <div className="relative w-full aspect-[3/4]">
+          {enableLayers ? (
+            <EntityCardLayers
+              entity={{ id, title, description, image, metadata }}
+              entityType="entity-card"
+              entityId={id}
+              activeLayer={activeLayer}
+              isExploded={isExploded}
+              className="rounded-t-lg overflow-hidden"
+              onClick={handleLayerClick}
+            />
+          ) : image ? (
             <img
               src={image}
               alt={title}
               className="object-cover w-full h-full rounded-t-lg"
               loading="lazy"
             />
-          </div>
-        )}
+          ) : null}
+        </div>
 
         {/* Información */}
         <div className="p-3 flex flex-col flex-grow">
@@ -88,7 +113,7 @@ export function EntityCard({
         </div>
       </div>
     </>
-  ), [title, description, image, metadata, children]);
+  ), [title, description, image, metadata, children, enableLayers, activeLayer, isExploded, id, handleLayerClick]);
 
   // Estilos personalizados
   const customStyle = useMemo(() => {
@@ -102,28 +127,30 @@ export function EntityCard({
   }, [options]);
 
   return (
-    <button
-      type="button"
-      className={cn(
-        // Base
-        'relative bg-card text-left',
-        'w-[240px] h-[320px] rounded-lg shadow-sm overflow-hidden border',
-        'transition-all duration-300 ease-in-out',
-        'outline-none focus:ring-2 focus:ring-primary/50',
-        // Hover
-        'hover:shadow-md hover:scale-[1.02]',
-        // Clase personalizada
-        className,
-      )}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      aria-label={`Tarjeta: ${title}`}
-      style={customStyle}
-      data-entity-id={id}
-      data-entity-type="basic-card"
-    >
-      <CardContent />
-    </button>
+    <EntityCardLayersProvider>
+      <button
+        type="button"
+        className={cn(
+          // Base
+          'relative bg-card text-left',
+          'w-[240px] h-[320px] rounded-lg shadow-sm overflow-hidden border',
+          'transition-all duration-300 ease-in-out',
+          'outline-none focus:ring-2 focus:ring-primary/50',
+          // Hover
+          'hover:shadow-md hover:scale-[1.02]',
+          // Clase personalizada
+          className,
+        )}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-label={`Tarjeta: ${title}`}
+        style={customStyle}
+        data-entity-id={id}
+        data-entity-type="basic-card"
+      >
+        <CardContent />
+      </button>
+    </EntityCardLayersProvider>
   );
 }
