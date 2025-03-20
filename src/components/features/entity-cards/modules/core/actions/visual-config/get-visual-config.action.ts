@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { logger } from '@/lib/logger';
-import type { LogMessage } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ActionResponse } from '@/types/actions';
 import { visualConfigSchema } from '../../../types/visual-config.types';
 import type { VisualConfig } from '../../../types/visual-config.types';
@@ -63,15 +62,11 @@ export async function getVisualConfig(entityId: string, entityType: 'folder' | '
 
         const validation = visualConfigSchema.safeParse(config);
         if (!validation.success) {
-            const errorMessage: LogMessage = {
-                message: 'Error de validación en configuración visual',
+            serverLogger.error('Error de validación en configuración visual', {
                 error: validation.error,
-                context: {
-                    entityId,
-                    entityType
-                }
-            };
-            logger.error(errorMessage);
+                entityId,
+                entityType
+            });
             return {
                 success: false,
                 message: 'Error de validación',
@@ -85,15 +80,11 @@ export async function getVisualConfig(entityId: string, entityType: 'folder' | '
             data: validation.data
         };
     } catch (error) {
-        const errorMessage: LogMessage = {
-            message: 'Error al obtener configuración visual',
+        serverLogger.error('Error al obtener configuración visual', {
             error,
-            context: {
-                entityId,
-                entityType
-            }
-        };
-        logger.error(errorMessage);
+            entityId,
+            entityType
+        });
         return {
             success: false,
             message: 'Error al obtener configuración visual',

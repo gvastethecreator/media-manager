@@ -1,7 +1,3 @@
-/**
- * Servicio centralizado de notificaciones utilizando sonner
- * Este servicio proporciona una interfaz unificada para mostrar notificaciones en toda la aplicación
- */
 
 import type * as React from 'react';
 import { type ExternalToast, type ToastT, toast } from 'sonner';

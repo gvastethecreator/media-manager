@@ -21,6 +21,16 @@ export function formatBytes(bytes: number, decimals = 2): string {
 }
 
 /**
+ * Alias de formatBytes para mantener compatibilidad con código existente
+ * @param bytes - Tamaño en bytes
+ * @param decimals - Número de decimales (por defecto 2)
+ * @returns Tamaño formateado (ej: "1.5 MB")
+ */
+export function formatFileSize(bytes: number, decimals = 2): string {
+	return formatBytes(bytes, decimals);
+}
+
+/**
  * Formatea un número con separadores de miles
  * @param num - Número a formatear
  * @param locale - Configuración regional (por defecto 'es-ES')

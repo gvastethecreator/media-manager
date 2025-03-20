@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { logger } from '@/lib/logger';
-import type { LogMessage } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ActionResponse } from '@/types/actions';
 import { visualConfigSchema } from '../../../types/visual-config.types';
 import type { VisualConfig } from '../../../types/visual-config.types';
@@ -19,16 +18,12 @@ export async function updateVisualConfig(
     try {
         const validation = visualConfigSchema.safeParse(config);
         if (!validation.success) {
-            const errorMessage: LogMessage = {
-                message: 'Error de validación en configuración visual',
+            serverLogger.error('Error de validación en configuración visual', {
                 error: validation.error,
-                context: {
-                    entityId,
-                    entityType,
-                    config
-                }
-            };
-            logger.error(errorMessage);
+                entityId,
+                entityType,
+                config
+            });
             return {
                 success: false,
                 message: 'Error de validación',
@@ -100,16 +95,12 @@ export async function updateVisualConfig(
         }
 
         if (!updatedConfig) {
-            const errorMessage: LogMessage = {
-                message: 'Error al actualizar configuración visual',
+            serverLogger.error('Error al actualizar configuración visual', {
                 error: 'No se pudo actualizar la configuración',
-                context: {
-                    entityId,
-                    entityType,
-                    config
-                }
-            };
-            logger.error(errorMessage);
+                entityId,
+                entityType,
+                config
+            });
             return {
                 success: false,
                 message: 'Error al actualizar configuración visual',
@@ -123,16 +114,12 @@ export async function updateVisualConfig(
             data: updatedConfig
         };
     } catch (error) {
-        const errorMessage: LogMessage = {
-            message: 'Error al actualizar configuración visual',
+        serverLogger.error('Error al actualizar configuración visual', {
             error,
-            context: {
-                entityId,
-                entityType,
-                config
-            }
-        };
-        logger.error(errorMessage);
+            entityId,
+            entityType,
+            config
+        });
         return {
             success: false,
             message: 'Error al actualizar configuración visual',

@@ -2,7 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fileOperationsService } from '@/lib/services/file-operations.service';
-import { toastService } from '@/lib/toast';
+import { toastService } from '@/lib/services/toast.service';
 import { useFavoritesStore } from '@/store/entities/favorites.store';
 import { usePlacesStore } from '@/store/entities/places.store';
 import { usePromptStore } from '@/store/entities/prompt.store';
