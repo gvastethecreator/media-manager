@@ -1,11 +1,22 @@
 export { BaseShader } from './base-shader';
 export { DistortionShader } from './distortion-shader';
-export { ParticleShader } from './particle-shader';
-export { WaveShader } from './wave-shader';
 export { HologramShader } from './hologram-shader';
-export { ShaderEffectLayer } from './shader-effect-layer';
+export { ParticleShader } from './particle-shader';
 export * from './shader-config-schema';
+export { ShaderEffectLayer } from './shader-effect-layer';
 export { ShaderSettings } from './shader-settings';
+export { WaveShader } from './wave-shader';
+
+// Componentes
+export { ShaderConfig } from './components/shader-config';
+export { ShaderLayer } from './components/shader-layer';
+
+// Store y tipos
+export { useShaderStore } from './actions/shader-config.action';
+export type { ShaderConfig, ShaderType } from './actions/shader-config.action';
+
+// Utilidades
+export { initializeShader, updateShaderUniforms } from './utils/shader-utils';
 
 import { deleteShaderConfig, getShaderConfig, updateShaderConfig } from '@/app/actions/shader-config.action';
 import type { LayerComponent } from '../layer-plugin-system';

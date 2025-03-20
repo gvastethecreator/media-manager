@@ -8,7 +8,7 @@
  */
 
 import { BorderIcon } from '@/components/icons/layers';
-import { LayerImplementation } from '../types';
+import type { LayerImplementation } from '../types';
 import { BorderEffectLayer } from './border-effect-layer';
 
 export const borderLayerImplementation: LayerImplementation = {
@@ -44,3 +44,10 @@ export { BorderSettings } from './border-settings';
 
 // Exportar acciones para uso directo
 export * from './actions';
+
+export * from './actions/border-config.action';
+export { borderImplementation } from './border-implementation';
+export * from './components/border-layer';
+export * from './components/border-settings';
+export * from './hooks/use-border';
+
