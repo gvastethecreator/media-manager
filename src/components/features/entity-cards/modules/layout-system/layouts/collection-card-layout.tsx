@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatFileSize } from '@/lib/utils/format';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type { Collection } from '@/types/entities/collections';
 import {
 	Calendar,
