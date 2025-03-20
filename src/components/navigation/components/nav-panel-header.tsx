@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
-import { Bug, ChevronLeft, ChevronRight, Moon, Settings2, Sun } from 'lucide-react';
+import { Bug, ChevronLeft, ChevronRight, IdCard, Moon, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 
@@ -12,6 +12,7 @@ interface NavPanelHeaderProps {
 	totalImages: number;
 	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
+	onOpenEntityCards: () => void;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
 }
@@ -20,6 +21,7 @@ export function NavPanelHeader({
 	totalImages,
 	onOpenSettings,
 	onOpenDevelopment,
+	onOpenEntityCards,
 	isCollapsed = false,
 	onToggleCollapse,
 }: NavPanelHeaderProps) {
@@ -94,6 +96,23 @@ export function NavPanelHeader({
 							</TooltipTrigger>
 							<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs">
 								<p className="font-medium text-amber-400">{isCollapsed ? 'Expandir' : 'Colapsar'} Panel</p>
+							</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+									onClick={onOpenEntityCards}
+								>
+									<IdCard className="h-3.5 w-3.5" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs">
+								<p className="font-medium text-amber-400">Entity Cards</p>
+								<p>Visualizador y herramientas para tarjetas de entidades</p>
 							</TooltipContent>
 						</Tooltip>
 

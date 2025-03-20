@@ -2,10 +2,10 @@
 
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import type { LayerComponentProps } from '../layer-plugin-system';
+import { memo, useMemo } from 'react';
+import type { LayerConfig, LayerRenderProps } from '../types';
 
-export interface BorderConfig {
-	enabled: boolean;
+export interface BorderConfig extends LayerConfig {
 	width: number;
 	style: 'solid' | 'dashed' | 'dotted' | 'double';
 	color: string;
@@ -19,26 +19,23 @@ export interface BorderConfig {
 	dashPattern?: number[];
 	cornerStyle?: 'round' | 'bevel' | 'miter';
 	borderImage?: string;
-	layerIndex: number;
-	[key: string]: unknown; // Añadido para permitir índices de string
 }
 
 /**
  * BorderEffectLayer - Componente que añade un borde personalizable a la tarjeta.
  * Soporta diferentes estilos, animaciones y efectos.
  */
-export function BorderEffectLayer({
+export const BorderEffectLayer = memo(function BorderEffectLayer({
 	isExploded,
 	isHovered = false,
 	mousePosition = { x: 0, y: 0 },
-	activeLayer,
-	getExplodeLayerTransform,
+	isActive,
 	config,
 	entityType,
 	entityId,
-}: LayerComponentProps<BorderConfig>) {
+}: LayerRenderProps) {
 	// Valores por defecto
-	const defaultConfig: BorderConfig = {
+	const defaultConfig: BorderConfig = useMemo(() => ({
 		enabled: true,
 		width: 2,
 		style: 'solid',
@@ -51,10 +48,10 @@ export function BorderEffectLayer({
 		opacity: 1,
 		cornerStyle: 'round',
 		layerIndex: 2,
-	};
+	}), []);
 
 	// Combinar configuración con valores por defecto
-	const mergedConfig = { ...defaultConfig, ...config };
+	const mergedConfig = useMemo(() => ({ ...defaultConfig, ...config }) as BorderConfig, [defaultConfig, config]);
 
 	// Si no está habilitado, no renderizar nada
 	if (!mergedConfig.enabled) {
@@ -62,7 +59,7 @@ export function BorderEffectLayer({
 	}
 
 	// Generar estilos CSS para el borde
-	const getBorderStyles = () => {
+	const borderStyles = useMemo(() => {
 		const styles: React.CSSProperties = {
 			borderWidth: `${mergedConfig.width}px`,
 			borderStyle: mergedConfig.style,
@@ -98,10 +95,10 @@ export function BorderEffectLayer({
 		}
 
 		return styles;
-	};
+	}, [mergedConfig]);
 
 	// Generar clases CSS para animaciones
-	const getAnimationClasses = () => {
+	const animationClasses = useMemo(() => {
 		if (!mergedConfig.animated || mergedConfig.animationType === 'none') {
 			return '';
 		}
@@ -116,23 +113,33 @@ export function BorderEffectLayer({
 			default:
 				return '';
 		}
-	};
+	}, [mergedConfig.animated, mergedConfig.animationType]);
+
+	// Calcular transformación para modo explotado
+	const explodedStyles = useMemo(() => {
+		if (!isExploded) return {};
+		return {
+			transform: `translate3d(${20 * mergedConfig.layerIndex}px, ${20 * mergedConfig.layerIndex}px, 0)`,
+			transition: 'transform 0.3s ease-in-out'
+		};
+	}, [isExploded, mergedConfig.layerIndex]);
 
 	return (
 		<div
 			className={cn(
 				'absolute inset-0 pointer-events-none z-10',
-				getAnimationClasses(),
+				animationClasses,
 				isExploded ? 'exploded-layer layer-border' : ''
 			)}
 			style={{
-				...getBorderStyles(),
-				...(isExploded ? getExplodeLayerTransform(mergedConfig.layerIndex) : {}),
+				...borderStyles,
+				...explodedStyles,
 			}}
-			data-layer-active={activeLayer === 'border' || null}
+			data-layer-active={isActive || null}
+			data-testid="border-effect-layer"
 		/>
 	);
-}
+});
 
 // Estilos globales necesarios para las animaciones
 const GlobalStyles = () => (
@@ -199,11 +206,11 @@ const GlobalStyles = () => (
 );
 
 // Exportar el componente con los estilos globales
-export default function BorderEffectLayerWithStyles(props: LayerComponentProps<BorderConfig>) {
+export default memo(function BorderEffectLayerWithStyles(props: LayerRenderProps) {
 	return (
 		<>
 			<GlobalStyles />
 			<BorderEffectLayer {...props} />
 		</>
 	);
-}
+});

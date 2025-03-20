@@ -51,7 +51,7 @@ export * from './textures';
 export {
     LayersProvider,
     useLayers
-} from '../modules/layers-module/use-layers';
+} from '../modules/layers-system/use-layers';
 
 export {
     LayersPanel
@@ -69,9 +69,9 @@ export {
 export {
     adaptEntityCardToLayerSystem,
     adaptLayerSystemToEntityCard
-} from '../modules/layers-module/entity-card-layer-adapter';
+} from '../modules/layers-system/entity-card-layer-adapter';
 
 export {
     adaptCardOptionsToLayersConfig
-} from '../modules/layers-module/use-layers';
+} from '../modules/layers-system/use-layers';
 

@@ -18,6 +18,7 @@ import { CollectionsView } from './collections/collections-view';
 import { ConceptContentView } from './concepts/concept-content-view';
 import { ConceptsView } from './concepts/concepts-view';
 import { DevelopmentView } from './development/development-view';
+import { EntityCardsView } from './entity-cards/entity-cards-view';
 import { FavoritesView } from './favorites/favorites-view';
 import { NoteContentView } from './notes/note-content-view';
 import { NotesView } from './notes/notes-view';
@@ -106,6 +107,8 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 			return <NotesView />;
 		case 'note-content':
 			return <NoteContentView />;
+		case 'entity-cards':
+			return <EntityCardsView />;
 		default:
 			return <DevelopmentView />;
 	}

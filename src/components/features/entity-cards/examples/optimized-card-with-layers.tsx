@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { EntityCardLayersIntegration } from '../modules/layers-module/entity-card-layers-integration';
+import { EntityCardLayerIntegration } from '../modules/layers-system/entity-card-layer-integration';
 
 // Interfaz para las propiedades del componente
 interface OptimizedCardWithLayersProps {
@@ -130,7 +130,7 @@ export function OptimizedCardWithLayers({
 			onMouseMove={handleMouseMove}
 			onClick={handleClick}
 		>
-			<EntityCardLayersIntegration
+			<EntityCardLayerIntegration
 				entityType={entityType}
 				entityId={entityId}
 				cardOptions={memoizedCardOptions}
@@ -141,7 +141,7 @@ export function OptimizedCardWithLayers({
 				className="h-full"
 			>
 				{baseContent}
-			</EntityCardLayersIntegration>
+			</EntityCardLayerIntegration>
 		</Card>
 	);
 }
