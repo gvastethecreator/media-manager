@@ -2,458 +2,557 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Collection } from '@prisma/client';
+import { formatFileSize } from '@/lib/utils/format';
+import type { Collection } from '@/types/entities/collections';
 import {
-	BookOpen,
-	Clock,
-	FolderIcon,
-	Globe,
-	Grid3x3,
-	ImageIcon,
-	Layers,
+	Calendar,
+	FileImage,
+	FolderLock,
+	GridIcon,
+	Image as ImageIcon,
+	Images,
+	LibraryIcon,
 	PencilIcon,
+	Share2,
 	Star,
-	TagIcon,
+	Tag as TagIcon,
 	Trash2,
+	Users
 } from 'lucide-react';
-import Image from 'next/image';
-import type * as React from 'react';
-import { useState } from 'react';
-import { VisualizationConfig } from '../config/visualization-config';
-import { EntityCardLayerWrapper } from '../entity-card-layer-wrapper';
-import type { CollectionFormData } from '../types/forms-types';
-import type { CardDesignPreset, CardOptions, RarityConfig, TextureConfig } from '../types/shared-card-types';
-import { ImageGrid } from './image-grid';
+import { useCallback, useMemo } from 'react';
 
-// Definimos un tipo para los datos de la colección más específico
-type CardData =
-	| (Collection & {
-			_count?: { images: number };
-			totalSize?: number;
-			recentImages?: string[];
-			topTags?: { name: string; count: number }[];
-			rating?: number; // Añadimos explícitamente rating aquí
-	  })
-	| CollectionFormData;
+// Importar componentes base
+import {
+	CardDescriptionSection,
+	CardFooter,
+	CardHeader,
+	CardImageSection,
+	CardMetadataSection
+} from '../base';
 
-// Opciones visuales optimizadas para tarjetas de colecciones inspiradas en Magic
+// Importar tipos y utilidades
+import { EntityCardWrapper } from '../entity-card-wrapper';
+import { usePreset } from '../hooks/use-preset';
+import { adaptCardOptions } from '../types';
+import type { CardOptions } from '../types/unified-card-types';
+
+import '../../styles/collection-card.css';
+
+// TIPOS DE DATOS
+// ==============================
+
+// Tipos de colecciones
+interface CollectionType {
+	type: string;
+	icon: React.ReactNode;
+	color: string;
+	label: string;
+	className: string;
+}
+
+const COLLECTION_TYPES: Record<string, CollectionType> = {
+	gallery: {
+		type: 'gallery',
+		icon: <Images className="h-5 w-5" />,
+		color: '#3b82f6',
+		label: 'Galería',
+		className: 'collection-type-gallery'
+	},
+	album: {
+		type: 'album',
+		icon: <GridIcon className="h-5 w-5" />,
+		color: '#22c55e',
+		label: 'Álbum',
+		className: 'collection-type-album'
+	},
+	project: {
+		type: 'project',
+		icon: <FileImage className="h-5 w-5" />,
+		color: '#f97316',
+		label: 'Proyecto',
+		className: 'collection-type-project'
+	},
+	shared: {
+		type: 'shared',
+		icon: <Share2 className="h-5 w-5" />,
+		color: '#8b5cf6',
+		label: 'Compartida',
+		className: 'collection-type-shared'
+	},
+	curated: {
+		type: 'curated',
+		icon: <Star className="h-5 w-5" />,
+		color: '#eab308',
+		label: 'Curada',
+		className: 'collection-type-curated'
+	},
+	private: {
+		type: 'private',
+		icon: <FolderLock className="h-5 w-5" />,
+		color: '#ec4899',
+		label: 'Privada',
+		className: 'collection-type-private'
+	},
+	library: {
+		type: 'library',
+		icon: <LibraryIcon className="h-5 w-5" />,
+		color: '#06b6d4',
+		label: 'Biblioteca',
+		className: 'collection-type-library'
+	},
+	default: {
+		type: 'default',
+		icon: <Images className="h-5 w-5" />,
+		color: '#6b7280',
+		label: 'Colección',
+		className: 'collection-type-default'
+	}
+};
+
+// Configuración predeterminada para tarjetas de colecciones
 const DEFAULT_COLLECTION_OPTIONS: Partial<CardOptions> = {
+	// Efectos principales
 	enable3DEffect: true,
-	enableHolographicEffect: true,
+	enableHolographicEffect: false,
 	enableScanlinesEffect: false,
 	enableGlowEffect: true,
 	enableBorderEffect: true,
-	enableGrainEffect: false,
+	enableGrainEffect: true,
 
-	// Sistema de diseño específico para colecciones
+	// Configuración de diseño específica para colecciones
 	designSystem: {
-		preset: 'collection' as CardDesignPreset,
-		variant: 'default',
-		aspectRatio: '16/9',
+		preset: 'collection',
+		variant: 'gallery',
+		aspectRatio: '3/4',
 		cornerStyle: 'rounded',
 		cornerRadius: 8,
 		elevation: 2,
 		shadowStyle: 'soft',
 	},
 
-	// Configuración de movimiento
-	hoverLiftHeight: 6,
-	maxRotation: 8,
-	primaryColor: '22, 163, 74', // Un tono verde
-	secondaryColor: '34, 197, 94', // Un tono verde claro
-
-	// Opciones de efectos
-	holographicOptions: {
-		patternType: 'linear',
-		intensity: 0.5,
-		animationSpeed: 1,
-		visibleOnHover: true,
-	},
-
+	// Efectos específicos para colecciones
 	glowOptions: {
-		intensity: 0.7,
+		intensity: 0.6,
 		size: 15,
-		blurAmount: 10,
+		blurAmount: 12,
 		animationType: 'pulse',
-		pulseSpeed: 1.5,
+		pulseSpeed: 2.5,
 		visibleOnHover: true,
 	},
 
 	borderOptions: {
-		width: 2,
+		width: 1.5,
 		pattern: 'solid',
-		animationType: 'pulse',
 		animation: {
-			type: 'flow',
+			type: 'none',
 			duration: 3000,
 			timing: 'ease-in-out',
 			iteration: 'infinite',
 		},
-		glowIntensity: 0.6,
+		glowIntensity: 0.5,
 	},
 
 	grainOptions: {
-		intensity: 0.12,
-		density: 0.5,
-		contrast: 1.1,
-		noise: 'light',
+		intensity: 0.15,
+		density: 0.6,
+		contrast: 1,
+		noise: 'subtle',
 		animated: false,
-		visibleOnHover: true,
 	},
 
-	// Opciones de imagen
-	useImageGrid: false, // Por defecto no usamos grid
-	imageGridLayout: 'grid',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
+	// Parámetros de interactividad
+	interactivity: {
+		enableHoverEffects: true,
+		enableClickEffects: true,
+		hover: {
+			scale: 1.03,
+			rotate: false,
+			lift: true,
+			glow: true,
+		}
+	},
+
+	// Configuración de estados
+	states: {
+		enableHover: true,
+		stateDuration: 200,
+	},
+
+	// Animación
+	maxRotation: 5,
 };
 
-// Define rarity levels for collections
-const COLLECTION_RARITY = {
-	common: {
-		color: '#9ca3af',
-		borderColor: 'rgba(156, 163, 175, 0.5)',
-		glowColor: 'rgba(156, 163, 175, 0.5)',
-		label: 'Común',
-	},
-	uncommon: {
-		color: '#22c55e',
-		borderColor: 'rgba(34, 197, 94, 0.5)',
-		glowColor: 'rgba(34, 197, 94, 0.5)',
-		label: 'Poco común',
-	},
-	rare: {
-		color: '#3b82f6',
-		borderColor: 'rgba(59, 130, 246, 0.5)',
-		glowColor: 'rgba(59, 130, 246, 0.5)',
-		label: 'Raro',
-	},
-	mythic: {
-		color: '#db2777',
-		borderColor: 'rgba(219, 39, 119, 0.5)',
-		glowColor: 'rgba(219, 39, 119, 0.5)',
-		label: 'Mítico',
-	},
-	legendary: {
-		color: '#eab308',
-		borderColor: 'rgba(234, 179, 8, 0.7)',
-		glowColor: 'rgba(234, 179, 8, 0.7)',
-		label: 'Legendario',
-	},
-};
-
-// Helper to determine collection rarity based on image count
-function determineCollectionRarity(imageCount: number, _totalSize = 0): keyof typeof COLLECTION_RARITY {
-	// Determinate based on image count
-	if (imageCount >= 500) {
-		return 'legendary';
-	}
-	if (imageCount >= 200) {
-		return 'mythic';
-	}
-	if (imageCount >= 100) {
-		return 'rare';
-	}
-	if (imageCount >= 20) {
-		return 'uncommon';
-	}
-	return 'common';
+// Añadir esta interfaz antes de CollectionCardProps (alrededor de la línea 146)
+interface CollectionExtended extends Collection {
+	type?: string;
+	isShared?: boolean;
+	isPrivate?: boolean;
+	isCurated?: boolean;
+	presetId?: string;
+	imageCount?: number;
+	totalSize?: number;
+	memberCount?: number;
+	tagCount?: number;
+	coverImage?: string;
 }
 
-// Helper to generate a RarityConfig from a rarity key
-function generateRarityConfig(rarityKey: keyof typeof COLLECTION_RARITY): RarityConfig {
-	const rarity = COLLECTION_RARITY[rarityKey];
+// Actualizar la interfaz de props
+export interface CollectionCardProps {
+	collection: CollectionExtended;
+	options?: Partial<CardOptions>;
+	onClick?: () => void;
+	showVisualConfig?: boolean;
+	onVisualConfigClick?: () => void;
+	enableExplode?: boolean;
+	isExploded?: boolean;
+	activeLayer?: string | null;
+	onExplodedChange?: (isExploded: boolean) => void;
+	onActiveLayerChange?: (layerId: string | null) => void;
+	className?: string;
+	onEdit?: (collection: CollectionExtended) => void;
+	onDelete?: (id: string) => void;
+}
+
+// UTILIDADES Y COMPONENTES AUXILIARES
+// ==============================
+
+// Obtener el tipo de colección
+function getCollectionType(collection: CollectionExtended): keyof typeof COLLECTION_TYPES {
+	if (collection.isShared) return 'shared';
+	if (collection.isPrivate) return 'private';
+	if (collection.isCurated) return 'curated';
+
+	const type = collection.type?.toLowerCase() || 'default';
+	return type in COLLECTION_TYPES ? (type as keyof typeof COLLECTION_TYPES) : 'default';
+}
+
+// Generar configuración de color para una colección
+function generateCollectionColorConfig(collection: CollectionExtended) {
+	const typeKey = getCollectionType(collection);
+	const typeInfo = COLLECTION_TYPES[typeKey];
+	const customColor = collection.color || typeInfo.color;
+
 	return {
-		color: rarity.color,
-		borderColor: rarity.borderColor,
-		glowColor: rarity.glowColor,
-		label: rarity.label,
-		rarity: rarityKey,
+		enabled: true,
+		type: typeKey,
+		color: customColor,
+		borderColor: customColor,
+		glowColor: customColor,
+		borderStyle: 'solid',
+		borderWidth: 2,
 	};
 }
 
-interface CollectionCardProps {
-	data: CardData;
-	isPreview?: boolean;
-	onEdit?: (id: string) => void;
-	onDelete?: (id: string) => void;
-	onClick?: (e?: React.MouseEvent<HTMLDivElement>) => void;
-	className?: string;
-	showVisualizationConfig?: boolean;
-	options?: Partial<CardOptions>;
-	rarity?: RarityConfig | null;
-	texture?: TextureConfig | null;
-}
-
-/**
- * Componente CollectionCard - Diseñado con inspiración en cartas de colección de juegos
- *
- * Características:
- * - Diseño con marco ornamentado y elementos decorativos
- * - Visualización de imagen de portada con efectos
- * - Información sobre el número de elementos en la colección
- * - Soporte para efectos visuales y rareza
- */
-export function CollectionCard({
-	data,
-	isPreview = false,
+// COMPONENTE PRINCIPAL
+// ==============================
+export function CollectionCardLayout({
+	collection: initialCollection,
+	options = {},
+	onClick,
+	showVisualConfig = false,
+	onVisualConfigClick,
+	enableExplode = false,
+	isExploded,
+	activeLayer,
+	onExplodedChange,
+	onActiveLayerChange,
+	className,
 	onEdit,
 	onDelete,
-	onClick,
-	className,
-	showVisualizationConfig = false,
-	options,
-	rarity: initialRarity,
-	texture: initialTexture,
 }: CollectionCardProps) {
-	// Verificar si data existe y tiene las propiedades necesarias
-	if (!data) {
-		console.warn('CollectionCard: Se recibió un objeto data indefinido');
-		// Crear un data por defecto para evitar errores
-		data = {
-			id: 'placeholder',
-			name: 'Colección sin nombre',
-			description: 'Sin descripción',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-			_count: { images: 0 },
-		} as CardData;
-	}
+	// Garantizar que nunca procesamos una colección undefined
+	const collection = initialCollection || {
+		id: 'placeholder',
+		name: 'Colección sin nombre',
+		emoji: '📁',
+		color: '#6b7280',
+		description: 'Sin descripción',
+		type: 'default',
+		imageCount: 0,
+		totalSize: 0,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	} as CollectionExtended;
 
-	const [isHovered, _setIsHovered] = useState(false);
-	const [configOpen, setConfigOpen] = useState(false);
-	const [cardOptions, setCardOptions] = useState<Partial<CardOptions>>({
-		...DEFAULT_COLLECTION_OPTIONS,
-		...options,
+	// Usar el hook para obtener configuración de preset
+	const { cardOptions } = usePreset({
+		entityType: 'collection',
+		entityId: collection.id,
+		presetId: typeof collection.presetId === 'string' ? collection.presetId : null,
+		baseOptions: options,
 	});
 
-	// Get image count and size from data or defaults
-	const imageCount = '_count' in data && data._count ? data._count.images || 0 : 0;
-	const totalSize = 'totalSize' in data ? data.totalSize || 0 : 0;
+	// Configurar las capas para el modo explode
+	const explodeLayers = [
+		{ id: 'background', label: 'Fondo', icon: <GridIcon className="h-4 w-4" /> },
+		{ id: 'coverImage', label: 'Portada', icon: <ImageIcon className="h-4 w-4" /> },
+		{ id: 'content', label: 'Contenido', icon: <LibraryIcon className="h-4 w-4" /> },
+		{ id: 'effects', label: 'Efectos', icon: <Star className="h-4 w-4" /> },
+	];
 
-	// Determine collection rarity based on data
-	const rarityKey = determineCollectionRarity(imageCount, totalSize);
+	// Obtener la información de tipo
+	const typeKey = getCollectionType(collection);
+	const typeInfo = COLLECTION_TYPES[typeKey];
+	const colorConfig = generateCollectionColorConfig(collection);
+	const collectionClassName = `collection-card-type-${typeKey}`;
 
-	// Generate rarity config
-	const rarityConfig = initialRarity || generateRarityConfig(rarityKey);
+	// Procesar el color personalizado si existe
+	const collectionColor = collection.color || typeInfo.color;
 
-	// Get featured image if available
-	const featuredImage =
-		'recentImages' in data && data.recentImages && data.recentImages.length > 0
-			? data.recentImages[0]
-			: 'featuredImage' in data && data.featuredImage
-				? data.featuredImage
-				: null;
-
-	// Helper to determine the collection type icon
-	const determineCollectionType = () => {
-		const name = data.name?.toLowerCase() || '';
-		const desc = 'description' in data ? data.description?.toLowerCase() || '' : '';
-
-		if (name.includes('folder') || desc.includes('folder')) {
-			return <FolderIcon />;
+	// Manejadores de eventos
+	const handleEdit = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onEdit && collection) {
+			onEdit(collection);
 		}
-		if (name.includes('tag') || desc.includes('tag') || desc.includes('etiqueta')) {
-			return <TagIcon />;
+	}, [onEdit, collection]);
+
+	const handleDelete = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (onDelete && collection?.id) {
+			onDelete(collection.id);
 		}
-		if (name.includes('book') || desc.includes('book') || desc.includes('libro')) {
-			return <BookOpen />;
-		}
-		if (name.includes('world') || desc.includes('world') || desc.includes('mundo')) {
-			return <Globe />;
-		}
-		if (name.includes('grid') || desc.includes('grid') || desc.includes('cuadrícula')) {
-			return <Grid3x3 />;
+	}, [onDelete, collection?.id]);
+
+	// Generar configuración avanzada basada en el tipo
+	const enhancedCardOptions = useMemo(() => {
+		// Valores por defecto
+		const defaults = DEFAULT_COLLECTION_OPTIONS;
+
+		// Crear opciones combinadas
+		return {
+			...defaults,
+
+			// Configurar glows basados en tipo
+			glowOptions: {
+				...(defaults.glowOptions || {}),
+				color: colorConfig.glowColor,
+				intensity: 0.6,
+			},
+
+			// Configurar bordes
+			borderOptions: {
+				...(defaults.borderOptions || {}),
+				color: colorConfig.borderColor,
+			},
+
+			// Configuración de color
+			colorConfig,
+
+			// Color primario personalizado
+			primaryColor: collectionColor,
+		};
+	}, [colorConfig, collectionColor]);
+
+	// Formatear fecha
+	const formattedDate = useMemo(() => {
+		if (!collection.createdAt) return '';
+
+		const date = typeof collection.createdAt === 'string'
+			? new Date(collection.createdAt)
+			: collection.createdAt;
+
+		return date.toLocaleDateString();
+	}, [collection.createdAt]);
+
+	// Procesar los metadatos de la colección
+	const collectionMetadata = useMemo(() => {
+		const metadata = [];
+
+		if (collection.imageCount !== undefined) {
+			metadata.push({
+				label: 'Imágenes',
+				value: collection.imageCount.toString(),
+				icon: <ImageIcon className="h-3.5 w-3.5 opacity-70" />
+			});
 		}
 
-		// Default icon
-		return <Layers />;
-	};
+		if (collection.totalSize !== undefined) {
+			metadata.push({
+				label: 'Tamaño',
+				value: formatFileSize(collection.totalSize),
+				icon: <FileImage className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
 
-	// Get collection name or default
-	const collectionName = data.name || 'Colección sin nombre';
+		if (collection.memberCount !== undefined) {
+			metadata.push({
+				label: 'Miembros',
+				value: collection.memberCount.toString(),
+				icon: <Users className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
 
-	// Format date if available
-	const formattedDate = 'createdAt' in data && data.createdAt ? new Date(data.createdAt).toLocaleDateString() : null;
+		if (collection.tagCount !== undefined) {
+			metadata.push({
+				label: 'Etiquetas',
+				value: collection.tagCount.toString(),
+				icon: <TagIcon className="h-3.5 w-3.5 opacity-70" />
+			});
+		}
+
+		return metadata;
+	}, [collection.imageCount, collection.totalSize, collection.memberCount, collection.tagCount]);
 
 	return (
-		<>
-			{configOpen && (
-				<VisualizationConfig
-					onClose={() => setConfigOpen(false)}
-					options={cardOptions}
-					onOptionsChange={(newOptions) => setCardOptions(newOptions)}
-					entityId={data.id as string}
-					entityType="collection"
-				/>
-			)}
-
-			<div className={cn('min-h-[250px] relative', className)}>
-				{/* Capa base con EntityCardLayerWrapper */}
-				<EntityCardLayerWrapper
-					title={collectionName}
-					description={'description' in data ? data.description || 'Sin descripción' : 'Sin descripción'}
-					onClick={onClick}
-					showVisualConfig={showVisualizationConfig}
-					visualOptions={{
-						...cardOptions,
-						rarityConfig,
-						textureConfig: initialTexture || undefined,
-					}}
-					entityType="collection"
-					entityId={data.id}
-				/>
-
-				{/* Contenido de la tarjeta */}
-				<div className="relative z-20 h-full p-4 flex flex-col pointer-events-none">
-					{/* Cabecera con título y tipo */}
-					<div className="flex items-center justify-between mb-3">
-						<div className="flex items-center">
-							<div
-								className={cn(
-									'w-10 h-10 rounded-lg flex items-center justify-center',
-									'bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-sm'
+		<div className={cn(
+			'collection-card-container relative w-full h-full group',
+			collectionClassName,
+			onClick && 'cursor-pointer',
+			className
+		)}>
+			<EntityCardWrapper
+				title={collection.name}
+				description={collection.description || ''}
+				entityId={collection.id}
+				entityType="collection"
+				className={cn('collection-card-wrapper relative w-full h-full', collectionClassName)}
+				options={adaptCardOptions(enhancedCardOptions)}
+				showVisualConfig={showVisualConfig}
+				onVisualConfigClick={onVisualConfigClick}
+				enableExplode={enableExplode}
+				isExploded={isExploded}
+				activeLayer={activeLayer}
+				onExplodedChange={onExplodedChange}
+				onActiveLayerChange={onActiveLayerChange}
+				explodeLayers={explodeLayers}
+				onClick={onClick}
+			>
+				<div className="collection-card-content flex flex-col h-full w-full relative">
+					{/* Cabecera con ícono y nombre de la colección */}
+					<CardHeader
+						title={collection.name}
+						entityType="collection"
+						className="mb-2 relative z-10"
+						showIcon={false}
+						rightContent={
+							<>
+								<div className={cn(
+									"collection-type px-2 py-0.5 rounded-full text-[10px] font-medium",
 								)}
-								style={{ borderColor: rarityConfig.color }}
-							>
-								{determineCollectionType()}
-							</div>
-							<div className="ml-3">
-								<h3 className="font-bold text-lg truncate">{collectionName}</h3>
-								<div className="flex items-center text-muted-foreground text-xs">
-									{formattedDate && (
-										<span className="flex items-center">
-											<Clock className="h-3 w-3 mr-1" />
-											{formattedDate}
-										</span>
-									)}
+									style={{
+										backgroundColor: `${collectionColor}20`,
+										color: collectionColor
+									}}>
+									{typeInfo.label}
 								</div>
-							</div>
-						</div>
 
-						{/* Estrellas de rating */}
-						<div className="flex">
-							{[1, 2, 3, 4, 5].map((starPosition) => (
-								<Star
-									key={`rating-star-${starPosition}`}
-									className={cn(
-										'h-4 w-4',
-										starPosition <= (('rating' in data ? data.rating : 0) || 0)
-											? 'text-yellow-400 fill-yellow-400'
-											: 'text-muted-foreground'
-									)}
-								/>
-							))}
+								{/* Botones de acción */}
+								{(onEdit || onDelete) && (
+									<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto z-50">
+										{onEdit && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80"
+												onClick={handleEdit}
+											>
+												<PencilIcon className="h-3.5 w-3.5" />
+											</Button>
+										)}
+										{onDelete && (
+											<Button
+												size="icon"
+												variant="ghost"
+												className="h-7 w-7 p-0 bg-background/80 hover:bg-destructive/20"
+												onClick={handleDelete}
+											>
+												<Trash2 className="h-3.5 w-3.5" />
+											</Button>
+										)}
+									</div>
+								)}
+							</>
+						}
+					/>
+
+					{/* Collection icon */}
+					<div className="flex items-center ml-3 -mt-1 mb-3">
+						<div className={cn(
+							"collection-icon flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background shadow-md"
+						)}
+							style={{ borderColor: collectionColor }}>
+							<div style={{ color: collectionColor }}>
+								{typeInfo.icon}
+							</div>
 						</div>
 					</div>
 
-					{/* Imagen destacada o grid de imágenes */}
-					<div className="flex-1 rounded-lg overflow-hidden bg-muted/20 mb-3 min-h-[120px]">
-						{'recentImages' in data && data.recentImages && data.recentImages.length > 0 && cardOptions.useImageGrid ? (
-							<ImageGrid
-								layout={
-									cardOptions.imageGridLayout === 'grid' || cardOptions.imageGridLayout === 'masonry'
-										? 'quad'
-										: 'single'
+					{/* Imagen de portada */}
+					<div className={cn(
+						"collection-cover-image relative h-40 mb-3 rounded overflow-hidden border",
+					)}
+						style={{ borderColor: `${collectionColor}40` }}>
+						{collection.coverImage ? (
+							<CardImageSection
+								imageUrl={collection.coverImage}
+								alt={collection.name}
+								aspectRatio="wide"
+								overlayContent={
+									<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 								}
-								gap={cardOptions.imageGridGap || 4}
-								style={
-									cardOptions.imageGridStyle === 'standard' || cardOptions.imageGridStyle === 'polaroid'
-										? cardOptions.imageGridStyle
-										: 'standard'
-								}
-								images={data.recentImages.map((path: string, idx: number) => ({
-									id: `img-${idx}`,
-									path,
-									thumbnail: path,
-								}))}
-							/>
-						) : featuredImage ? (
-							<Image
-								src={featuredImage}
-								alt={collectionName}
-								fill
-								sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-								className="object-cover"
-								priority={false}
 							/>
 						) : (
-							<div className="w-full h-full flex items-center justify-center">
-								<ImageIcon className="h-16 w-16 opacity-20" />
+							<div className={cn(
+								"absolute inset-0 bg-gradient-to-br",
+							)}
+								style={{
+									background: `linear-gradient(to bottom right, ${collectionColor}20, ${collectionColor}05)`
+								}}>
+								{/* Patrón decorativo */}
+								<div className="absolute inset-0 opacity-10 mix-blend-overlay bg-noise-pattern" />
+							</div>
+						)}
+
+						{/* Icono central si no hay imagen */}
+						{!collection.coverImage && (
+							<div className="absolute inset-0 flex items-center justify-center">
+								<Images className="h-16 w-16 opacity-30" style={{ color: collectionColor }} />
 							</div>
 						)}
 					</div>
 
-					{/* Metadata */}
-					<div className="mt-auto">
-						{/* Tags principales */}
-						{'topTags' in data && data.topTags && data.topTags.length > 0 && (
-							<div className="flex flex-wrap gap-1 mb-2">
-								{data.topTags.slice(0, 3).map((tag: { name: string; count: number }) => (
-									<span key={tag.name} className="px-1.5 py-0.5 bg-background/40 backdrop-blur-sm text-xs rounded">
-										#{tag.name} ({tag.count})
-									</span>
-								))}
-							</div>
-						)}
-
-						{/* Footer con estadísticas */}
-						<div className="flex justify-between items-center">
-							<p className="text-sm flex items-center">
-								<ImageIcon className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-								{imageCount} {imageCount === 1 ? 'elemento' : 'elementos'}
-							</p>
-
-							{/* Sello de rareza */}
-							<div
-								className={cn(
-									'px-2 py-0.5 text-xs rounded-sm',
-									'border border-white/30',
-									'bg-black/30 backdrop-blur-sm'
-								)}
-							>
-								{COLLECTION_RARITY[rarityKey].label.toUpperCase()}
-							</div>
-						</div>
-
-						{'description' in data && data.description && (
-							<p className={cn('text-xs mt-2 line-clamp-2 opacity-80')}>{data.description}</p>
-						)}
-					</div>
-
-					{/* Botones de edición/eliminación */}
-					{!isPreview && isHovered && 'id' in data && data.id && (
-						<div className="absolute top-2 right-2 flex gap-1 pointer-events-auto">
-							{onEdit && (
-								<Button
-									size="icon"
-									variant="ghost"
-									className="h-7 w-7 rounded-full bg-background/80 hover:bg-background"
-									onClick={(e) => {
-										e.stopPropagation();
-										onEdit(data.id as string);
-									}}
-								>
-									<PencilIcon className="h-3.5 w-3.5" />
-								</Button>
-							)}
-							{onDelete && (
-								<Button
-									size="icon"
-									variant="ghost"
-									className="h-7 w-7 rounded-full bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-									onClick={(e) => {
-										e.stopPropagation();
-										onDelete(data.id as string);
-									}}
-								>
-									<Trash2 className="h-3.5 w-3.5" />
-								</Button>
-							)}
-						</div>
+					{/* Descripción de la colección */}
+					{collection.description && (
+						<CardDescriptionSection
+							description={collection.description}
+							maxLines={3}
+							className="mb-3 text-sm"
+						/>
 					)}
+
+					{/* Metadatos de la colección */}
+					{collectionMetadata.length > 0 && (
+						<CardMetadataSection
+							items={collectionMetadata}
+							className="flex-grow grid-cols-2 gap-2"
+						/>
+					)}
+
+					{/* Pie de la tarjeta con fecha y estado */}
+					<CardFooter
+						className="mt-auto"
+						leftContent={
+							<div className="flex items-center gap-1">
+								{collection.isPrivate && <FolderLock className="h-3 w-3 opacity-70" />}
+								{collection.isShared && <Share2 className="h-3 w-3 opacity-70" />}
+								{collection.isCurated && <Star className="h-3 w-3 opacity-70" />}
+							</div>
+						}
+						rightContent={
+							<div className="flex items-center gap-1">
+								<Calendar className="h-3 w-3 opacity-70" />
+								<span className="text-[10px] opacity-70">{formattedDate}</span>
+							</div>
+						}
+					/>
 				</div>
-			</div>
-		</>
+			</EntityCardWrapper>
+		</div>
 	);
+}
+
+// Componente público para usar en la aplicación
+export function CollectionCard(props: CollectionCardProps) {
+	return <CollectionCardLayout {...props} />;
 }

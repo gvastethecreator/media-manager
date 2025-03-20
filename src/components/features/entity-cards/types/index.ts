@@ -11,32 +11,43 @@ export * from './central-types';
 export * from './character-card-types';
 export * from './unified-card-types';
 
+// Exportar adaptador de opciones
+export { toSharedCardOptions, toUnifiedCardOptions } from './card-options-adapter';
+
 // Exportar selectivamente de base-card-types para evitar ambigüedades
 import type * as BaseCardTypes from './base-card-types';
 
 // Exportar selectivamente de shared-card-types
 import type * as SharedCardTypes from './shared-card-types';
 
+/**
+ * Adaptador de tipos para convertir entre diferentes sistemas de tipos de CardOptions
+ * Esta utilidad permite resolver incompatibilidades entre distintas versiones
+ */
+export const adaptCardOptions = <T = any>(options: any): T => {
+	return options as T;
+};
+
 // Re-exportar interfaces comunes para facilitar su uso
 export type {
-	AnimationSystem,
-	BacksideOptions,
-	BorderOptions,
-	CardInteractivity,
-	CardOptions,
-	CardPreset,
-	CardStates,
-	CardVariant,
-	ColorPalette,
-	CornerStyle,
-	DesignSystem,
-	GlowOptions,
-	GrainOptions,
-	HolographicOptions,
-	LayersConfig,
-	PerformanceOptions,
-	ScanlinesOptions,
-	ShadowStyle,
+    AnimationSystem,
+    BacksideOptions,
+    BorderOptions,
+    CardInteractivity,
+    CardOptions,
+    CardPreset,
+    CardStates,
+    CardVariant,
+    ColorPalette,
+    CornerStyle,
+    DesignSystem,
+    GlowOptions,
+    GrainOptions,
+    HolographicOptions,
+    LayersConfig,
+    PerformanceOptions,
+    ScanlinesOptions,
+    ShadowStyle
 } from './unified-card-types';
 
 // Re-exportar tipos de capas

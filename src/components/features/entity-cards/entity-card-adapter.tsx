@@ -11,47 +11,40 @@ interface Entity {
 import { useEffect, useState } from 'react';
 import type { CardOptions } from './types';
 
+// Importamos los componentes refactorizados
+import {
+	AlbumCard,
+	CharacterCard,
+	CollectionCard,
+	ConceptCard,
+	FolderCard,
+	NoteCard,
+	PlaceCard,
+	PromptCard,
+	TagsCard,
+	WorldItemCard
+} from './layouts/refactored';
+
 // Importamos la función de utilidad para generar configuración de rareza
 import { generateRarityConfig } from './utils/rarity-utils';
 
 // Definir un tipo para los componentes de tarjeta
 type CardComponent = (props: Record<string, unknown>) => JSX.Element;
 
-// Definición simplificada para el registro de componentes de tarjeta
-const ENTITY_ADAPTERS: Record<string, CardComponent> = {};
-
-// Función para cargar dinámicamente los adaptadores
-const loadAdapters = async () => {
-	// Importamos los adaptadores de tarjeta dinámicamente
-	const folderModule = await import('./layouts/folder-card');
-	const albumModule = await import('./layouts/album-card');
-	const tagModule = await import('./layouts/tag-card');
-	const collectionModule = await import('./layouts/collection-card');
-	const characterModule = await import('./layouts/character-card');
-	const placeModule = await import('./layouts/place-card');
-	const worldItemModule = await import('./layouts/world-item-card');
-	const conceptModule = await import('./layouts/concept-card');
-	const promptModule = await import('./layouts/prompt-card');
-	const noteModule = await import('./layouts/note-card');
-
-	// Asignamos los adaptadores al objeto
-	ENTITY_ADAPTERS.folder = folderModule.FolderCard;
-	ENTITY_ADAPTERS.album = albumModule.AlbumCard;
-	ENTITY_ADAPTERS.tag = tagModule.TagCard;
-	ENTITY_ADAPTERS.collection = collectionModule.CollectionCard;
-	ENTITY_ADAPTERS.character = characterModule.CharacterCard;
-	ENTITY_ADAPTERS.place = placeModule.PlaceCard;
-	ENTITY_ADAPTERS['world-item'] = worldItemModule.WorldItemCard;
-	ENTITY_ADAPTERS.worldItem = worldItemModule.WorldItemCard;
-	ENTITY_ADAPTERS.concept = conceptModule.ConceptCard;
-	ENTITY_ADAPTERS.prompt = promptModule.PromptCard;
-	ENTITY_ADAPTERS.note = noteModule.NoteCard;
+// Definición del registro de componentes de tarjeta usando los componentes refactorizados
+const ENTITY_ADAPTERS: Record<string, CardComponent> = {
+	folder: FolderCard,
+	album: AlbumCard,
+	tag: TagsCard,
+	collection: CollectionCard,
+	character: CharacterCard,
+	place: PlaceCard,
+	'world-item': WorldItemCard,
+	worldItem: WorldItemCard,
+	concept: ConceptCard,
+	prompt: PromptCard,
+	note: NoteCard
 };
-
-// Cargar los adaptadores al inicializar
-loadAdapters().catch((error) => {
-	console.error('Error al cargar adaptadores de tarjeta:', error);
-});
 
 export interface EntityCardAdapterProps {
 	entityType: string;
@@ -91,23 +84,6 @@ export function EntityCardAdapter({
 }: EntityCardAdapterProps) {
 	// Estado para manejar la carga de datos adicionales si es necesario
 	const [enhancedEntity, setEnhancedEntity] = useState<Entity>(entity);
-	// Estado para controlar si los adaptadores están cargados
-	const [adaptersLoaded, setAdaptersLoaded] = useState(false);
-
-	// Efecto para verificar si los adaptadores están cargados
-	useEffect(() => {
-		// Verificar si los adaptadores están cargados
-		if (Object.keys(ENTITY_ADAPTERS).length > 0) {
-			setAdaptersLoaded(true);
-		} else {
-			// Si no están cargados, intentar cargarlos de nuevo
-			loadAdapters()
-				.then(() => setAdaptersLoaded(true))
-				.catch((error) => {
-					console.error('Error al cargar adaptadores de tarjeta:', error);
-				});
-		}
-	}, []);
 
 	// Efecto para cargar datos adicionales según el tipo de entidad
 	useEffect(() => {
@@ -140,15 +116,6 @@ export function EntityCardAdapter({
 
 		// Para otros tipos de entidad, podríamos añadir más lógica aquí
 	}, [entityType, entity]);
-
-	// Si los adaptadores no están cargados, mostrar un indicador de carga
-	if (!adaptersLoaded) {
-		return (
-			<div className="loading-card p-4 border border-gray-200 rounded-md">
-				<p className="text-sm text-gray-500">Cargando componente de tarjeta...</p>
-			</div>
-		);
-	}
 
 	// Propiedades comunes para todos los tipos de tarjetas
 	const commonProps = {
