@@ -3,7 +3,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import type { Activity } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const activityLogger = serverLogger.withContext('ActivityActions');

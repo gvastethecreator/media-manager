@@ -3,19 +3,30 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import type { ImageMetadata } from '@/lib/types';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/files';
-import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 const favoriteLogger = serverLogger.withContext('FavoriteActions');
 
-// Definir interfaces para los  tipos relacionados
-interface ImageWithRelations extends Image {
+// Definir interfaces para los tipos relacionados
+interface ImageWithRelations {
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
+	metadata: string | Record<string, unknown> | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 	collections?: Array<{ id: string; name: string; emoji?: string; color?: string }>;
 	tags?: Array<{ id: string; name: string; color?: string }>;
-	updatedAt: Date;
 }
 
 // Interfaces internas
@@ -231,13 +242,13 @@ export async function getFavorites(): Promise<FavoriteWithImage[]> {
 		});
 
 		const transformedFavorites = await Promise.all(
-			favoriteImages.map(async (image) => {
+			favoriteImages.map(async (image: any) => {
 				return {
 					id: image.id,
 					entityId: image.id,
 					entityType: 'image',
 					createdAt: image.createdAt,
-					image: await transformImageToFileItem(image as ImageWithRelations),
+					image: await transformImageToFileItem(image as unknown as ImageWithRelations),
 				};
 			})
 		);
@@ -300,13 +311,13 @@ export async function getRecentFavorites(limit = 10): Promise<FavoriteWithImage[
 		});
 
 		const transformedFavorites = await Promise.all(
-			favoriteImages.map(async (image) => {
+			favoriteImages.map(async (image: any) => {
 				return {
 					id: image.id,
 					entityId: image.id,
 					entityType: 'image',
 					createdAt: image.createdAt,
-					image: await transformImageToFileItem(image as ImageWithRelations),
+					image: await transformImageToFileItem(image as unknown as ImageWithRelations),
 				};
 			})
 		);

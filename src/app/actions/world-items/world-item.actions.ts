@@ -3,12 +3,11 @@
 import { worldItemsCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
 import type { EventType } from '@/lib/server/events.server';
+import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
-import type { Image, WorldItem as PrismaWorldItem } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -35,7 +34,39 @@ const createWorldItemError = (
 };
 
 // Interfaces
-export interface WorldItemWithStats extends Omit<PrismaWorldItem, 'featuredImage'> {
+export interface WorldItem {
+	id: string;
+	name: string;
+	emoji: string | null;
+	color: string | null;
+	description: string | null;
+	category: string | null;
+	properties: string | null;
+	rarity: string | null;
+	origin: string | null;
+	stats: string | null;
+	requirements: string | null;
+	type: string | null;
+	featuredImage: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface WorldItemWithStats {
+	id: string;
+	name: string;
+	emoji: string | null;
+	color: string | null;
+	description: string | null;
+	category: string | null;
+	properties: string | null;
+	rarity: string | null;
+	origin: string | null;
+	stats: string | null;
+	requirements: string | null;
+	type: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	_count: {
 		images: number;
 	};
@@ -80,12 +111,26 @@ export interface WorldItemUpdate {
 	featuredImage?: string | null;
 }
 
-export interface WorldItemWithImages extends PrismaWorldItem {
+export interface WorldItemWithImages {
+	id: string;
+	name: string;
+	emoji: string | null;
+	color: string | null;
+	description: string | null;
+	category: string | null;
+	properties: string | null;
+	rarity: string | null;
+	origin: string | null;
+	stats: string | null;
+	requirements: string | null;
+	type: string | null;
+	featuredImage: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	images: FileItem[];
 }
-
-export interface ExtendedWorldItem extends PrismaWorldItem {
-	images: Image[];
+export interface ExtendedWorldItem extends WorldItem {
+	images: typeof Image[];
 }
 
 // Funciones utilitarias
@@ -99,7 +144,7 @@ const revalidateAllPaths = async () => {
 const notifyWorldItemChange = async (
 	action: 'create' | 'update' | 'delete' | 'addImage' | 'removeImage',
 	worldItemId: string,
-	worldItem?: PrismaWorldItem,
+	worldItem?: WorldItem,
 	imageId?: string
 ) => {
 	// Emitir eventos generales
@@ -135,7 +180,7 @@ const notifyWorldItemChange = async (
  * Obtiene todos los objetos del mundo
  */
 export async function getWorldItems() {
-	const transformWorldItem = (worldItem: PrismaWorldItem & { _count: { images: number } }): WorldItemWithStats => ({
+	const transformWorldItem = (worldItem: WorldItem & { _count: { images: number } }): WorldItemWithStats => ({
 		...worldItem,
 		totalSize: 0, // Valor por defecto, reemplazar si es necesario
 		lastUpdated: new Date(worldItem.updatedAt || worldItem.createdAt), // Usamos updatedAt si existe
@@ -151,7 +196,7 @@ export async function getWorldItems() {
 			createdAt: new Date(item.createdAt as string),
 			updatedAt: new Date(item.updatedAt as string),
 			_count: { images: (item.imageCount as number) || 0 },
-		})) as Array<PrismaWorldItem & { _count: { images: number } }>;
+		})) as Array<WorldItem & { _count: { images: number } }>;
 		return items.map(transformWorldItem);
 	}
 
@@ -169,7 +214,7 @@ export async function getWorldItems() {
 	});
 
 	// Convertir a formato compatible con el caché
-	const dataToCache = worldItems.map((item) => ({
+	const dataToCache = worldItems.map((item: any) => ({
 		id: item.id,
 		name: item.name,
 		emoji: item.emoji,
@@ -201,7 +246,7 @@ export async function getWorldItemById(id: string) {
 		const cached = await worldItemsCache.get(id);
 		if (cached) {
 			worldItemLogger.info('✅ Objeto del mundo obtenido de caché');
-			return cached as unknown as PrismaWorldItem & {
+			return cached as unknown as WorldItem & {
 				_count: { images: number };
 				images: { id: string; name: string }[];
 			};
@@ -247,7 +292,7 @@ export async function getWorldItemById(id: string) {
 /**
  * Crea un nuevo objeto del mundo
  */
-export async function createWorldItem(data: WorldItemCreate): Promise<PrismaWorldItem> {
+	export async function createWorldItem(data: WorldItemCreate): Promise<WorldItem> {
 	try {
 		worldItemLogger.info('🆕 Creando nuevo objeto del mundo:', data);
 
@@ -368,7 +413,7 @@ export async function deleteWorldItem(id: string) {
 				where: { id },
 				data: {
 					images: {
-						disconnect: existingWorldItem.images.map((image) => ({ id: image.id })),
+						disconnect: existingWorldItem.images.map((image: any) => ({ id: image.id })),
 					},
 				},
 			});
@@ -403,7 +448,7 @@ export async function deleteWorldItem(id: string) {
 export async function getWorldItemImages(id: string) {
 	try {
 		worldItemLogger.info('🖼️ Obteniendo imágenes del objeto del mundo:', id);
-		const worldItem = (await prisma.worldItem.findUnique({
+		const worldItem = await prisma.worldItem.findUnique({
 			where: { id },
 			include: {
 				images: {
@@ -413,27 +458,19 @@ export async function getWorldItemImages(id: string) {
 					},
 				},
 			},
-		})) as ExtendedWorldItem | null;
+		});
 
 		if (!worldItem) {
 			throw createWorldItemError('Objeto del mundo no encontrado', WorldItemErrorCode.NOT_FOUND);
 		}
 
-		const images = worldItem.images.map((img) => convertServerImageToFileItem(img as ServerImage));
+		const images = worldItem.images.map((img: any) => convertServerImageToFileItem(img as unknown as ServerImage));
 
 		worldItemLogger.info(`✅ ${images.length} imágenes obtenidas`);
 		return images;
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener imágenes del objeto del mundo:', error);
-		// Preservar el error si ya es un WorldItemError
-		if (error instanceof Error && error.name === 'WorldItemError') {
-			throw error;
-		}
-		throw createWorldItemError(
-			'No se pudieron obtener las imágenes del objeto del mundo',
-			WorldItemErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createWorldItemError('No se pudieron obtener las imágenes', WorldItemErrorCode.OPERATION_FAILED, error);
 	}
 }
 

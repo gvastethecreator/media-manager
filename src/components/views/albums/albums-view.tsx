@@ -1,17 +1,16 @@
 'use client';
 
-import { getAlbums } from '@/app/actions/albums/album.actions';
+import { getAlbums, type AlbumWithStats } from '@/app/actions/albums/album.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { getCardOptionsFromPreset } from '@/components/features/entity-cards/actions/visual-presets.actions';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/file-manager.store';
-import type { Album } from '@prisma/client';
 import { Album as AlbumIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -19,60 +18,23 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('AlbumsView');
 
-// Configuración visual predeterminada para álbumes
+// Configuración visual simplificada para álbumes
 const DEFAULT_ALBUM_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'album',
-		variant: 'default',
-		aspectRatio: '5/7',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 2,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
-	// Añadir propiedades necesarias para evitar errores de tipo
 	primaryColor: '#3b82f6',
 	secondaryColor: '#8b5cf6',
-	hoverLiftHeight: 10,
-	maxRotation: 15,
 };
-
-// Extender el tipo Album para incluir los campos adicionales
-interface AlbumWithDetails extends Album {
-	_count?: { images: number };
-	totalSize?: number;
-	recentImages?: string[];
-	createdAt: Date;
-	updatedAt: Date;
-}
 
 export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentAlbum } = useFileManager();
-	const [albums, setAlbums] = useState<AlbumWithDetails[]>([]);
+	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_ALBUM_OPTIONS);
 	const [albumPresets, setAlbumPresets] = useState<Record<string, CardOptions>>({});
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithDetails[]>(albums);
+	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithStats[]>(albums);
 
 	// Función para cargar la configuración de un preset
 	const loadPresetConfig = useCallback(async (presetId: string): Promise<CardOptions | null> => {
@@ -93,27 +55,14 @@ export function AlbumsView(_props: ViewProps) {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando álbumes...');
 			const data = await getAlbums();
-			const transformedData = data.map((albumData) => {
-				// Filtrar valores nulos en recentImages
-				const recentImages = albumData.recentImages
-					? albumData.recentImages.filter((img): img is string => img !== null)
-					: [];
 
-				return {
-					...albumData,
-					recentImages,
-					_count: albumData._count || { images: 0 },
-					createdAt: new Date(albumData.createdAt),
-					updatedAt: new Date(albumData.updatedAt),
-				} as AlbumWithDetails;
-			});
-
-			setAlbums(transformedData);
+			// Establecer los álbumes tal como vienen de la API
+			setAlbums(data);
 			viewLogger.info(`✅ ${data.length} álbumes cargados`);
 
 			// Cargar presets para cada álbum que tenga presetId
 			const presets: Record<string, CardOptions> = {};
-			const presetsToLoad = transformedData.filter(album => album.presetId);
+			const presetsToLoad = data.filter(album => album.presetId);
 
 			if (presetsToLoad.length > 0) {
 				viewLogger.info(`🔄 Cargando ${presetsToLoad.length} presets para álbumes...`);
@@ -123,7 +72,8 @@ export function AlbumsView(_props: ViewProps) {
 					if (album.presetId) {
 						const presetOptions = await loadPresetConfig(album.presetId);
 						if (presetOptions) {
-							presets[album.id] = presetOptions;
+							// En AlbumWithStats, sabemos que existe una propiedad 'id' desde PrismaAlbum
+							presets[(album as any).id] = presetOptions;
 						}
 					}
 				});
@@ -157,16 +107,7 @@ export function AlbumsView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_ALBUM_OPTIONS,
-					...config,
-					// Asegurar que las propiedades anidadas se combinen correctamente
-					designSystem: {
-						...(DEFAULT_ALBUM_OPTIONS.designSystem || {}),
-						...(config.designSystem || {}),
-					},
-					layerSystem: {
-						...(DEFAULT_ALBUM_OPTIONS.layerSystem || {}),
-						...(config.layerSystem || {}),
-					},
+					...config
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -178,21 +119,20 @@ export function AlbumsView(_props: ViewProps) {
 	}, []);
 
 	const handleAlbumClick = useCallback(
-		(album: AlbumWithDetails) => {
-			viewLogger.info('🖱️ Click en álbum:', album.name);
+		(album: AlbumWithStats) => {
+			// Usando type assertion para acceder a propiedades que sabemos que existen
+			// pero TypeScript no puede inferir del tipo
+			const albumData = album as any;
+			viewLogger.info('🖱️ Click en álbum:', albumData.name);
 			setCurrentView('album-content');
-			setCurrentAlbum(album.id);
+			setCurrentAlbum(albumData.id);
 			// Actualizar la información completa del álbum en el store
 			useFileManager.setState({
 				currentAlbum: {
-					id: album.id,
-					name: album.name,
-					description: album.description,
-					emoji: album.emoji,
-					color: album.color,
-					_count: album._count,
-					createdAt: album.createdAt,
-					updatedAt: album.updatedAt,
+					id: albumData.id,
+					name: albumData.name,
+					emoji: albumData.emoji || '📔',
+					count: album._count?.images || 0
 				},
 			});
 		},
@@ -235,23 +175,26 @@ export function AlbumsView(_props: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticAlbums.map((album, index) => (
-						<motion.div
-							key={album.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.1 }}
-						>
-							<EntityCardAdapter
-								entityType="album"
-								entity={album}
-								onClick={() => handleAlbumClick(album)}
-								showVisualConfig={true}
-								enableExplode={true}
-								options={getAlbumCardOptions(album.id)}
-							/>
-						</motion.div>
-					))}
+					{optimisticAlbums.map((album, index) => {
+						// Usar type assertion para acceder a propiedades que sabemos que existen
+						const albumData = album as any;
+						return (
+							<motion.div
+								key={albumData.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: index * 0.1 }}
+							>
+								<EntityCardAdapter
+									entityType="album"
+									entity={album}
+									onClick={() => handleAlbumClick(album)}
+									options={getAlbumCardOptions(albumData.id)}
+									className="h-full"
+								/>
+							</motion.div>
+						);
+					})}
 				</div>
 			</div>
 		</ScrollArea>

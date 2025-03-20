@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { FilterConfig, filterConfigSchema } from '../filter-schema';
+import { type FilterConfig, filterConfigSchema } from '../filter-schema';
 
 /**
  * 📥 Obtiene la configuración de filtros para una entidad

@@ -18,7 +18,7 @@ import { CollectionsView } from './collections/collections-view';
 import { ConceptContentView } from './concepts/concept-content-view';
 import { ConceptsView } from './concepts/concepts-view';
 import { DevelopmentView } from './development/development-view';
-import { EntityCardsView } from './entity-cards/entity-cards-view';
+import { EntityCardsView } from '@/components/features/entity-cards/views/entity-cards-view';
 import { FavoritesView } from './favorites/favorites-view';
 import { NoteContentView } from './notes/note-content-view';
 import { NotesView } from './notes/notes-view';

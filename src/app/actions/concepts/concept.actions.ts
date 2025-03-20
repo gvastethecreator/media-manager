@@ -5,9 +5,7 @@ import { prisma } from '@/lib/prisma';
 import type { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { Concept } from '@/types/entities/concepts';
 import type { FileItem } from '@/types/file-item';
-import type { Concept as PrismaConcept } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -34,6 +32,20 @@ const createConceptError = (
 };
 
 // Interfaces
+export interface Concept {
+	id: string;
+	name: string;
+	emoji: string | null;
+	description: string | null;
+	color: string | null;
+	content: string | null;
+	category: string | null;
+	tags: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	featuredImage: string | null;
+}
+
 export interface ConceptCreate {
 	name: string;
 	emoji?: string;
@@ -60,11 +72,22 @@ export interface ConceptWithStats extends Concept {
 	lastUpdated: Date;
 }
 
-export interface ConceptWithImages extends PrismaConcept {
+export interface ConceptWithImages {
+	id: string;
+	name: string;
+	emoji: string | null;
+	description: string | null;
+	color: string | null;
+	content: string | null;
+	category: string | null;
+	tags: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	featuredImage: string | null;
 	images: FileItem[];
 }
 
-export interface ExtendedConcept extends Omit<Concept, 'characters' | 'places' | 'worldItems' | 'notes' | 'prompts'> {
+export interface ExtendedConcept extends Concept {
 	prompts?: { id: string; name: string }[];
 	notes?: { id: string; title: string }[];
 	characters?: { id: string; name: string }[];
@@ -82,7 +105,7 @@ const revalidateAllPaths = async () => {
 
 const notifyConceptChange = async (
 	action: 'create' | 'update' | 'delete',
-	concept: PrismaConcept | { id: string },
+	concept: Concept | { id: string },
 	imageId?: string
 ) => {
 	// Definir el evento y payload correctamente
@@ -130,7 +153,7 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 			},
 		});
 
-		return concepts.map((concept) => ({
+		return concepts.map((concept: any) => ({
 			...concept,
 			lastUpdated: concept.updatedAt,
 		}));

@@ -4,7 +4,7 @@ import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/adapters/entity-card-adapter';
+import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,37 +19,10 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('ConceptsView');
 
-// Configuración visual predeterminada para conceptos
+// Configuración visual simplificada para conceptos
 const DEFAULT_CONCEPT_OPTIONS: CardOptions = {
-	enable3DEffect: true,
-	enableHolographicEffect: true,
-	enableScanlines: false,
-	enableLightHalo: true,
-	enableAnimatedBorder: true,
-	enableGlowEffect: true,
-	enableGrainEffect: false,
-	useImageGrid: true,
-	imageGridLayout: 'quad',
-	imageGridGap: 4,
-	imageGridStyle: 'standard',
-	designSystem: {
-		preset: 'concept',
-		variant: 'default',
-		aspectRatio: '3/2',
-		cornerStyle: 'rounded',
-		cornerRadius: 12,
-		elevation: 3,
-		shadowStyle: 'soft',
-	},
-	layerSystem: {
-		order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-		layerBlending: 'screen',
-		layerSpacing: 2,
-	},
 	primaryColor: '#a855f7',
 	secondaryColor: '#8b5cf6',
-	hoverLiftHeight: 10,
-	maxRotation: 15,
 };
 
 export function ConceptsView(_props: ViewProps) {
@@ -164,9 +137,8 @@ export function ConceptsView(_props: ViewProps) {
 								entityType="concept"
 								entity={concept}
 								onClick={() => handleConceptClick(concept)}
-								showVisualConfig={true}
-								enableExplode={true}
 								options={visualConfig}
+								className="h-full"
 							/>
 						</motion.div>
 					))}
