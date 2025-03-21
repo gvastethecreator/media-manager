@@ -8,7 +8,7 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '@/components/features/entity-cards/settingsold/panels/shared';
+} from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FlipHorizontalIcon } from 'lucide-react';

@@ -1,6 +1,6 @@
 'use client';
 
-import { FormInput } from '@/components/features/entity-cards/settingsold/panels/shared';
+import { FormInput } from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { nanoid } from 'nanoid';

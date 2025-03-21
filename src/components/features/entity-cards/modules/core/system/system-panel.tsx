@@ -1,6 +1,6 @@
 'use client';
 
-import { FormToggle } from '@/components/features/entity-cards/settingsold/panels/shared';
+import { FormToggle } from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';

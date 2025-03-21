@@ -9,7 +9,7 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '@/components/features/entity-cards/settingsold/panels/shared';
+} from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
