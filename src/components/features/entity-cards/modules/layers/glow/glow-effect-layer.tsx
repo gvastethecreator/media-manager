@@ -1,140 +1,170 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import * as React from 'react';
-import type { ExplodeLayerTransformFunction, GlowEffectOptions } from '../../../../types/base-card-types';
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { GlowAnimationType } from './glow-layer-implementation';
+import { generateGlowStyles } from './glow-utils';
 
-export interface GlowEffectLayerProps {
-	isExploded: boolean;
-	isHovered: boolean;
-	mousePosition: { x: number; y: number };
-	activeLayer: string | null;
-	getExplodeLayerTransform: ExplodeLayerTransformFunction;
-	glowConfig?: GlowEffectOptions;
-	options?: GlowEffectOptions;
+interface GlowEffectLayerProps {
+	children: React.ReactNode;
+	color: string;
+	intensity: number;
+	size?: number;
+	blurAmount: number;
+	animationType: GlowAnimationType;
+	pulseSpeed?: number;
+	isHovered?: boolean;
+	mousePosition?: { x: number; y: number };
+	visible?: boolean;
+	layerIndex?: number;
+	opacity?: number;
+	blendMode?: string;
 }
 
 /**
- * GlowEffectLayer - Componente que añade un efecto de halo luminoso a la tarjeta.
- * Puede ser estático, pulsante o seguir la posición del ratón.
+ * Componente que crea un efecto de brillo alrededor de su contenido
  */
-export function GlowEffectLayer({
-	isExploded,
-	isHovered,
-	mousePosition,
-	activeLayer,
-	getExplodeLayerTransform,
-	glowConfig,
-	options,
-}: GlowEffectLayerProps) {
-	// Valores por defecto
-	const defaultOptions: GlowEffectOptions = {
-		color: 'rgba(0, 153, 255, 0.35)',
-		intensity: 1,
-		size: 100,
-		blurAmount: 30,
-		animationType: 'follow-mouse',
-		pulseSpeed: 1.5,
-		visibleOnHover: true,
-		layerIndex: 4,
-	};
+export const GlowEffectLayer: React.FC<GlowEffectLayerProps> = ({
+	children,
+	color,
+	intensity,
+	size = 100,
+	blurAmount,
+	animationType,
+	pulseSpeed = 1.5,
+	isHovered = false,
+	mousePosition = { x: 50, y: 50 },
+	visible = true,
+	layerIndex = 10,
+	opacity = 1,
+	blendMode = 'normal'
+}) => {
+	const [time, setTime] = useState(0);
 
-	// Prioridad: options > glowConfig > defaultOptions
-	const mergedOptions = { ...defaultOptions, ...glowConfig, ...options };
+	// Animar el tiempo cuando sea necesario
+	useEffect(() => {
+		if (animationType === 'none' || animationType === 'static') return;
 
-	// Calcular opacidad basada en configuración
-	const opacity = mergedOptions.visibleOnHover ? (isHovered ? mergedOptions.intensity : 0) : mergedOptions.intensity;
+		let frameId: number;
+		let lastTime = 0;
 
-	// Posición y tamaño del brillo
-	const [glowPosition, setGlowPosition] = React.useState({ x: 50, y: 50 });
-	const [glowSize, setGlowSize] = React.useState(mergedOptions.size || 100);
+		const animate = (timestamp: number) => {
+			if (lastTime === 0) lastTime = timestamp;
+			const delta = (timestamp - lastTime) / 1000;
+			lastTime = timestamp;
 
-	// Animar tamaño del brillo si el tipo es "pulse"
-	React.useEffect(() => {
-		if (mergedOptions.animationType !== 'pulse') {
-			return;
-		}
-
-		const pulseSpeed = mergedOptions.pulseSpeed || 1.5;
-		const baseSize = mergedOptions.size || 100;
-		const minSize = baseSize * 0.7;
-		const maxSize = baseSize * 1.3;
-
-		let animationFrame: number;
-		const startTime = Date.now();
-
-		const animate = () => {
-			const elapsed = (Date.now() - startTime) * pulseSpeed * 0.001;
-			const size = minSize + Math.abs(Math.sin(elapsed * Math.PI)) * (maxSize - minSize);
-			setGlowSize(size);
-			animationFrame = requestAnimationFrame(animate);
+			setTime(prevTime => prevTime + delta * pulseSpeed);
+			frameId = requestAnimationFrame(animate);
 		};
 
-		animationFrame = requestAnimationFrame(animate);
-		return () => cancelAnimationFrame(animationFrame);
-	}, [mergedOptions.animationType, mergedOptions.size, mergedOptions.pulseSpeed]);
+		frameId = requestAnimationFrame(animate);
 
-	// Actualizar posición del brillo basado en el tipo de animación
-	React.useEffect(() => {
-		if (mergedOptions.animationType !== 'follow-mouse') {
-			return;
-		}
+		return () => {
+			cancelAnimationFrame(frameId);
+		};
+	}, [animationType, pulseSpeed]);
 
-		setGlowPosition({
-			x: mousePosition.x,
-			y: mousePosition.y,
-		});
-	}, [mousePosition, mergedOptions.animationType]);
+	// Calcular las propiedades CSS para el efecto de brillo
+	const glowStyles = useMemo(() => {
+		// Calcular la posición en función del tipo de animación
+		let x = 50;
+		let y = 50;
+		let scale = 1;
 
-	// Calcular la posición del brillo basada en la configuración
-	const getGlowPosition = () => {
-		switch (mergedOptions.animationType) {
+		switch (animationType) {
 			case 'follow-mouse':
-				return {
-					left: `${glowPosition.x}%`,
-					top: `${glowPosition.y}%`,
-				};
-			case 'static':
-				return {
-					left: '50%',
-					top: '50%',
-				};
+				x = mousePosition.x;
+				y = mousePosition.y;
+				break;
+			case 'pulse':
+				// Escala que varía con el tiempo para crear pulso
+				scale = 0.8 + Math.sin(time * Math.PI) * 0.2;
+				break;
+			case 'radial-pulse':
+				// Cambiar la posición en un patrón circular
+				x = 50 + Math.sin(time * 2) * 25;
+				y = 50 + Math.cos(time * 2) * 25;
+				break;
 			default:
-				return {
-					left: '50%',
-					top: '50%',
-				};
+				break;
 		}
-	};
 
-	// Si el tipo de animación es "none", no mostramos nada
-	if (mergedOptions.animationType === 'none') {
-		return null;
-	}
+		// Obtener el color ajustado por la intensidad para el brillo
+		const currentIntensity = intensity * (animationType === 'pulse' ? scale : 1);
 
+		// Generar los estilos base
+		const baseStyles = generateGlowStyles(color, currentIntensity, size);
+
+		// Combinar con estilos de posicionamiento
+		return {
+			...baseStyles,
+			'--glow-x': `${x}%`,
+			'--glow-y': `${y}%`,
+			'--glow-opacity': visible ? opacity : 0,
+			'--glow-blur': `${blurAmount}px`,
+			'--glow-blend-mode': blendMode,
+
+			// Ajustar el z-index según la posición en el stack de capas
+			zIndex: layerIndex,
+
+			// Transición para cuando cambie la visibilidad
+			transition: 'opacity 0.3s ease-in-out',
+		};
+	}, [
+		animationType,
+		color,
+		intensity,
+		size,
+		mousePosition,
+		time,
+		visible,
+		opacity,
+		blurAmount,
+		blendMode,
+		layerIndex
+	]);
+
+	// Renderizar el efecto de brillo
 	return (
-		<div
-			className={cn(
-				'absolute inset-0 z-40 overflow-hidden pointer-events-none',
-				isExploded ? 'exploded-layer layer-glow' : ''
-			)}
-			style={isExploded ? getExplodeLayerTransform(mergedOptions.layerIndex || 4) : {}}
-			data-layer-active={activeLayer === 'glow' || null}
-		>
+		<div className="glow-effect-container relative w-full h-full">
+			{/* Capa de brillo */}
 			<div
-				className={cn(
-					'absolute -translate-x-1/2 -translate-y-1/2 rounded-full blur-xl',
-					mergedOptions.animationType === 'pulse' ? 'animate-pulse-slow' : ''
-				)}
+				className="glow-effect absolute inset-0 rounded-inherit pointer-events-none overflow-hidden"
 				style={{
-					...getGlowPosition(),
-					width: `${glowSize}px`,
-					height: `${glowSize}px`,
-					background: mergedOptions.color,
-					opacity,
-					filter: `blur(${mergedOptions.blurAmount}px)`,
+					opacity: visible ? 1 : 0,
+					...glowStyles as any
 				}}
-			/>
+			>
+				<div className="glow-radial-gradient absolute inset-0" />
+			</div>
+
+			{/* Contenido que recibe el brillo */}
+			<div className="glow-content relative z-10">
+				{children}
+			</div>
+
+			<style jsx>{`
+				.glow-effect-container {
+					isolation: isolate;
+				}
+
+				.glow-effect {
+					mix-blend-mode: var(--glow-blend-mode, normal);
+					opacity: var(--glow-opacity, 1);
+				}
+
+				.glow-radial-gradient {
+					background: radial-gradient(
+						circle at var(--glow-x) var(--glow-y),
+						var(--glow-color-bright) 0%,
+						var(--glow-color-mid) 40%,
+						var(--glow-color-dim) 70%,
+						transparent 100%
+					);
+					filter: blur(var(--glow-blur, 20px));
+					transform: scale(1.2);
+				}
+			`}</style>
 		</div>
 	);
-}
+};

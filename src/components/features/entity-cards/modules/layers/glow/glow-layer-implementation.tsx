@@ -6,38 +6,54 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
-import * as React from 'react';
-import { withBaseLayer } from '../components/base-layer';
-import type { BaseLayerConfig, LayerImplementation } from '../types';
-import { generateGlowStyles } from '../utils/visual-effects';
-import { deleteGlowConfig, getGlowConfig, updateGlowConfig } from './actions';
+import React from 'react';
+import type { BaseLayerConfig } from '../layer-config-base';
+import type { LayerImplementation } from '../types';
 import { GlowEffectLayer } from './glow-effect-layer';
-import { GlowSettings } from './glow-settings';
+import { generateGlowStyles } from './glow-utils';
 
 /**
  * Tipos de animación disponibles para el efecto de brillo
  */
-export type GlowAnimationType = 'follow-mouse' | 'pulse' | 'static';
+export type GlowAnimationType =
+    | 'none'
+    | 'pulse'
+    | 'follow-mouse'
+    | 'radial-pulse'
+    | 'static';
 
+/**
+ * Interfaz de configuración para la capa de brillo
+ */
 export interface GlowConfig extends BaseLayerConfig {
     color: string;
     intensity: number;
-    spread: number;
-    followMouse: boolean;
-    animationType: 'none' | 'pulse' | 'follow-mouse';
-    animationSpeed: number;
+    size?: number;
+    blurAmount: number;
+    animationType: GlowAnimationType;
+    pulseSpeed: number;
+    visibleOnHover: boolean;
+    spread?: number;
+    followMouse?: boolean;
+    animationSpeed?: number;
+    blendMode?: string;
 }
 
+/**
+ * Configuración predeterminada para la capa de brillo
+ */
 export const defaultGlowConfig: GlowConfig = {
     enabled: true,
-    layerIndex: 2,
-    visibleOnHover: true,
-    color: '#00ff00',
-    intensity: 1,
-    spread: 20,
-    followMouse: true,
+    color: 'rgba(0, 153, 255, 0.35)',
+    intensity: 0.5,
+    size: 100,
+    blurAmount: 30,
     animationType: 'follow-mouse',
-    animationSpeed: 1,
+    pulseSpeed: 1.5,
+    visibleOnHover: true,
+    layerIndex: 4,
+    opacity: 1,
+    blendMode: 'normal'
 };
 
 /**
@@ -67,7 +83,7 @@ const GlowLayerComponent = React.memo(function GlowLayerComponent({
         ...generateGlowStyles(
             processedConfig.color,
             processedConfig.intensity,
-            processedConfig.spread
+            processedConfig.spread as number
         ),
         transform: `translate(${glowPosition.x}%, ${glowPosition.y}%)`,
         transition: processedConfig.followMouse ? 'transform 0.2s ease-out' : undefined,
@@ -86,7 +102,7 @@ const GlowLayerComponent = React.memo(function GlowLayerComponent({
 /**
  * ✨ Capa de brillo con funcionalidad base
  */
-export const GlowLayer = withBaseLayer<GlowConfig>(GlowLayerComponent);
+export const GlowLayer = React.memo(GlowLayerComponent);
 
 /**
  * 🎛️ Componente de configuración de brillo
@@ -139,7 +155,7 @@ export function GlowSettings({
                         type="range"
                         min="0"
                         max="50"
-                        value={config.spread}
+                        value={config.spread || 0}
                         onChange={handleChange('spread')}
                     />
                 </label>
@@ -147,7 +163,7 @@ export function GlowSettings({
                 <label className="flex items-center gap-2">
                     <input
                         type="checkbox"
-                        checked={config.followMouse}
+                        checked={config.followMouse || false}
                         onChange={handleChange('followMouse')}
                     />
                     <span>Seguir el cursor</span>
@@ -157,11 +173,12 @@ export function GlowSettings({
                     <span>Tipo de Animación</span>
                     <select
                         value={config.animationType}
-                        onChange={(e) => onConfigChange({ animationType: e.target.value as GlowConfig['animationType'] })}
+                        onChange={(e) => onConfigChange({ animationType: e.target.value as GlowAnimationType })}
                     >
                         <option value="none">Ninguna</option>
                         <option value="pulse">Pulso</option>
                         <option value="follow-mouse">Seguir Cursor</option>
+                        <option value="static">Estático</option>
                     </select>
                 </label>
 
@@ -172,7 +189,7 @@ export function GlowSettings({
                         min="0.1"
                         max="2"
                         step="0.1"
-                        value={config.animationSpeed}
+                        value={config.animationSpeed || 1}
                         onChange={handleChange('animationSpeed')}
                     />
                 </label>
@@ -183,88 +200,211 @@ export function GlowSettings({
 
 /**
  * Implementación de la capa de brillo
- * @type {LayerImplementation}
  */
-export const glowLayerImplementation: LayerImplementation = {
-    // Identificador único de la capa
+export const glowLayerImplementation: LayerImplementation<GlowConfig> = {
     type: 'glow',
-
-    // Nombre amigable para mostrar en la UI
-    name: 'Brillo',
-
-    // Descripción de la funcionalidad
-    description: 'Añade efectos de brillo y resplandor a la tarjeta',
-
-    // Categoría a la que pertenece
+    name: 'Glow',
+    description: 'Add a glowing effect to your card',
     category: 'effects',
-
-    // Configuración por defecto
+    icon: Sparkles,
     defaultConfig: defaultGlowConfig,
 
-    // Icono para representar la capa en la UI
-    icon: <Sparkles size={16} />,
+    presets: [
+        {
+            name: 'Subtle Blue',
+            description: 'A subtle blue glow effect',
+            config: {
+                ...defaultGlowConfig,
+                color: 'rgba(0, 123, 255, 0.25)',
+                intensity: 0.3,
+                blurAmount: 20
+            }
+        },
+        {
+            name: 'Intense Purple',
+            description: 'A vibrant purple glow effect',
+            config: {
+                ...defaultGlowConfig,
+                color: 'rgba(123, 31, 162, 0.5)',
+                intensity: 0.7,
+                blurAmount: 40
+            }
+        },
+        {
+            name: 'Hover Only',
+            description: 'Glow appears only on hover',
+            config: {
+                ...defaultGlowConfig,
+                visibleOnHover: true,
+                animationType: 'pulse'
+            }
+        }
+    ],
 
-    // Tipos de entidad compatibles
-    compatibleEntityTypes: ['image', 'album', 'folder'],
+    render: (props) => {
+        const { config, children, isHovered, mousePosition } = props;
 
-    // Función para renderizar la capa
-    render: React.memo(({ config, isHovered, mousePosition, isActive, isExploded, entityType }) => {
-        // Validar y procesar la configuración
-        const processedConfig = React.useMemo(() => ({
-            ...defaultGlowConfig,
-            ...(config || {}),
-        }), [config]);
+        if (!config.enabled) {
+            return children;
+        }
 
-        // Calcular posición del mouse con valores por defecto
-        const safeMousePosition = React.useMemo(() => ({
-            x: mousePosition?.x ?? 50,
-            y: mousePosition?.y ?? 50,
-        }), [mousePosition?.x, mousePosition?.y]);
+        // Solo mostrar en hover si está configurado así
+        const visible = config.visibleOnHover ? isHovered : true;
 
-        // Función memoizada para transformación
-        const getTransform = React.useCallback((index: number) => ({
-            transform: `translateZ(${index * 10}px)`,
-            zIndex: 100 - index,
-        }), []);
+        // Prepara las opciones para el componente GlowEffectLayer
+        const options = {
+            color: config.color,
+            intensity: config.intensity,
+            size: config.size,
+            blurAmount: config.blurAmount,
+            animationType: config.animationType,
+            pulseSpeed: config.pulseSpeed,
+            visibleOnHover: config.visibleOnHover,
+            layerIndex: config.layerIndex,
+            opacity: config.opacity || 1,
+            blendMode: config.blendMode || 'normal'
+        };
 
         return (
             <GlowEffectLayer
-                isExploded={isExploded || false}
-                isHovered={isHovered || false}
-                mousePosition={safeMousePosition}
-                activeLayer={isActive ? 'glow' : null}
-                getExplodeLayerTransform={getTransform}
-                options={processedConfig}
-            />
+                {...options}
+                isHovered={isHovered}
+                mousePosition={mousePosition}
+                visible={visible}
+            >
+                {children}
+            </GlowEffectLayer>
         );
-    }),
+    },
 
-    // Componente para configurar la capa
-    Settings: React.memo(({ config, onChange, entityType, entityId }) => {
-        // Manejar cambios de configuración de forma optimizada
-        const handleConfigChange = React.useCallback((newConfig: GlowConfig) => {
-            onChange(newConfig as unknown as Record<string, unknown>);
-        }, [onChange]);
-
+    settings: (props) => {
+        const { config, onConfigChange } = props;
         return (
-            <GlowSettings
-                entityType={entityType}
-                entityId={entityId}
-                className="w-full"
-                onConfigChange={handleConfigChange}
-            />
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                        Enabled
+                        <input
+                            type="checkbox"
+                            checked={config.enabled}
+                            onChange={(e) => onConfigChange({ enabled: e.target.checked })}
+                            className="ml-2"
+                        />
+                    </label>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Color</label>
+                    <input
+                        type="color"
+                        value={config.color.startsWith('rgba')
+                            ? '#' + config.color.replace(/rgba\((\d+), (\d+), (\d+).*/, (_, r, g, b) =>
+                                ((1 << 24) + (Number.parseInt(r) << 16) + (Number.parseInt(g) << 8) + Number.parseInt(b)).toString(16).slice(1))
+                            : config.color
+                        }
+                        onChange={(e) => onConfigChange({ color: e.target.value })}
+                        className="w-full h-8"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Intensity</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={config.intensity}
+                        onChange={(e) => onConfigChange({ intensity: Number.parseFloat(e.target.value) })}
+                        className="w-full"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Size</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        step="1"
+                        value={config.size}
+                        onChange={(e) => onConfigChange({ size: Number.parseInt(e.target.value) })}
+                        className="w-full"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Blur Amount</label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={config.blurAmount}
+                        onChange={(e) => onConfigChange({ blurAmount: Number.parseInt(e.target.value) })}
+                        className="w-full"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Animation Type</label>
+                    <select
+                        value={config.animationType}
+                        onChange={(e) => onConfigChange({ animationType: e.target.value as GlowAnimationType })}
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="none">None</option>
+                        <option value="pulse">Pulse</option>
+                        <option value="follow-mouse">Follow Mouse</option>
+                        <option value="radial-pulse">Radial Pulse</option>
+                        <option value="static">Static</option>
+                    </select>
+                </div>
+
+                {config.animationType === 'pulse' && (
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium">Pulse Speed</label>
+                        <input
+                            type="range"
+                            min="0.1"
+                            max="3"
+                            step="0.1"
+                            value={config.pulseSpeed}
+                            onChange={(e) => onConfigChange({ pulseSpeed: Number.parseFloat(e.target.value) })}
+                            className="w-full"
+                        />
+                    </div>
+                )}
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                        Visible on Hover Only
+                        <input
+                            type="checkbox"
+                            checked={config.visibleOnHover}
+                            onChange={(e) => onConfigChange({ visibleOnHover: e.target.checked })}
+                            className="ml-2"
+                        />
+                    </label>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium">Blend Mode</label>
+                    <select
+                        value={config.blendMode || 'normal'}
+                        onChange={(e) => onConfigChange({ blendMode: e.target.value })}
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="normal">Normal</option>
+                        <option value="screen">Screen</option>
+                        <option value="multiply">Multiply</option>
+                        <option value="overlay">Overlay</option>
+                        <option value="darken">Darken</option>
+                        <option value="lighten">Lighten</option>
+                    </select>
+                </div>
+            </div>
         );
-    }),
+    }
 };
-
-// Funciones de servidor asociadas a la capa
-export const glowServerActions = {
-    getConfig: getGlowConfig,
-    updateConfig: updateGlowConfig,
-    deleteConfig: deleteGlowConfig
-};
-
-// Exportar tipos y configuración por defecto
-export { defaultGlowConfig };
-export type { GlowConfig };
 

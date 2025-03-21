@@ -2,13 +2,11 @@
 
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ExplodeLayerTransformFunction } from '../../../../types/base-card-types';
 
 interface ParticleShaderProps {
 	isExploded?: boolean;
 	isHovered?: boolean;
 	activeLayer?: string | null;
-	getExplodeLayerTransform?: ExplodeLayerTransformFunction;
 	options?: {
 		visibleOnHover?: boolean;
 		intensity?: number;
@@ -87,7 +85,6 @@ export function ParticleShader({
 	isExploded,
 	isHovered,
 	activeLayer,
-	getExplodeLayerTransform,
 	options = {},
 	uniforms = {},
 }: ParticleShaderProps) {
@@ -156,14 +153,6 @@ export function ParticleShader({
 				isExploded ? 'exploded-layer layer-particles' : '',
 				isHovered ? 'opacity-100' : 'opacity-0'
 			)}
-			style={
-				isExploded && getExplodeLayerTransform
-					? {
-						...getExplodeLayerTransform(6),
-						transitionDuration: `${duration}s`,
-					}
-					: { transitionDuration: `${duration}s` }
-			}
 			data-layer-active={activeLayer === 'particles' || null}
 		/>
 	);

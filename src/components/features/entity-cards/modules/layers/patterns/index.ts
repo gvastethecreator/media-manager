@@ -5,6 +5,7 @@ import type { PatternConfig } from './actions/pattern-config.action';
 import { deletePatternConfig, getPatternConfig, updatePatternConfig } from './actions/pattern-config.action';
 import PatternEffectLayerWithStyles from './pattern-effect-layer';
 import { PatternSettings } from './pattern-settings';
+import type { LayerImplementation } from '../types';
 
 // Exportar componentes base
 export { BasePattern } from './base-pattern';
@@ -51,6 +52,25 @@ export * from './actions/pattern-config.action';
 export * from './components/pattern-layer';
 export * from './components/pattern-settings';
 export * from './hooks/use-pattern';
-export { patternImplementation } from './pattern-implementation';
-export * from './utils/pattern-generators';
+
+/**
+ * 🔄 Implementación de la capa de patrones
+ */
+export const patternImplementation: LayerImplementation = {
+	type: 'pattern',
+	name: 'Patrón',
+	description: 'Añade un patrón decorativo a la tarjeta',
+	defaultConfig: {
+		enabled: true,
+		layerIndex: 2,
+		patternType: 'dots',
+		size: 10,
+		color: '#000000',
+		opacity: 0.5,
+		blendMode: 'overlay',
+	},
+	render: () => null, // Stub implementation
+	settings: () => null, // Stub implementation
+	icon: 'grid',
+};
 

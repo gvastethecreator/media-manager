@@ -1,18 +1,67 @@
 'use client';
 
 import {
-	EntityCard,
 	EntityCardLayersProvider,
-	LayersConfigPanel,
-	LayersPanel,
 	RegisterAllLayers
-} from '@/components/features/entity-cards';
+} from '@/components/features/entity-cards/modules/layers';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
+
+// Componente provisional de EntityCard hasta que se implemente completamente
+const EntityCard = (props: any) => (
+	<div className="w-64 h-96 border rounded-lg overflow-hidden flex flex-col">
+		<div className="h-48 bg-slate-200 relative">
+			{props.image && <img src={props.image} className="h-full w-full object-cover" alt={props.title} />}
+		</div>
+		<div className="p-4 flex-1">
+			<h3 className="font-bold text-lg">{props.title}</h3>
+			<p className="text-sm text-muted-foreground mt-1">{props.description}</p>
+			{props.metadata && (
+				<div className="mt-3 border-t pt-2">
+					{Object.entries(props.metadata).map(([key, value]: [string, any]) => (
+						<div key={key} className="flex justify-between text-xs">
+							<span className="text-muted-foreground">{key}:</span>
+							<span>{value}</span>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	</div>
+);
+
+// Componente simplificado de LayersPanel para la demostración
+const LayersPanel = ({ onLayerSelect, activeLayer }: { onLayerSelect: (layer: string | null) => void, activeLayer: string | null }) => (
+	<div className="space-y-4">
+		<div className="grid grid-cols-2 gap-2">
+			{['image', 'metadata', 'border', 'glow', 'scanlines', 'texture'].map(layer => (
+				<Button
+					key={layer}
+					variant={activeLayer === layer ? "default" : "outline"}
+					onClick={() => onLayerSelect(layer)}
+					className="justify-start text-left"
+				>
+					{layer.charAt(0).toUpperCase() + layer.slice(1)}
+				</Button>
+			))}
+		</div>
+	</div>
+);
+
+// Componente simplificado de LayersConfigPanel
+const LayersConfigPanel = ({ options, onOptionsChange, entityType, entityId, activeLayer }: any) => (
+	<div className="p-4 border rounded-md">
+		<h3 className="font-medium mb-2">Configuración de la capa: {activeLayer}</h3>
+		<p className="text-sm text-muted-foreground">
+			Este es un componente de configuración simplificado para la demostración.
+			En una implementación real, aquí se mostrarían los controles específicos para cada capa.
+		</p>
+	</div>
+);
 
 export function IntegratedLayersExample() {
 	// Estado para controlar las opciones de capas
@@ -108,7 +157,11 @@ export function IntegratedLayersExample() {
 											options={{
 												enableLayers,
 												explodeLayers,
-												activeLayer
+												activeLayer,
+												layerSystem: {
+													explodeView: explodeLayers,
+													order: ['image', 'content', 'border', 'glow']
+												}
 											}}
 										/>
 									))}

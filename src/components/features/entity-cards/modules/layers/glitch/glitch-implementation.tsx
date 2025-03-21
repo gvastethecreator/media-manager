@@ -1,7 +1,7 @@
-import type { LayerImplementation } from '@/types/entity-card';
+import type { LayerImplementation } from '../types';
 import { ZapIcon } from 'lucide-react';
 import { GlitchLayer } from './components/glitch-layer';
-import { GlitchSettings } from './components/glitch-settings';
+
 import { createDefaultGlitchConfig, type GlitchConfig } from './glitch-schema';
 
 /**
@@ -14,7 +14,6 @@ export const glitchImplementation: LayerImplementation<GlitchConfig> = {
 	icon: ZapIcon,
 	defaultConfig: createDefaultGlitchConfig(),
 	render: GlitchLayer,
-	settings: GlitchSettings,
 	presets: [
 		{
 			name: 'Glitch Digital',

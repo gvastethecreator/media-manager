@@ -14,15 +14,58 @@ import { cn } from '@/lib/utils';
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { Eye, GripVertical, Layers } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults, type LayerSystemConfig } from '../../../settings/layer-settings-config';
-import type { CardOptions } from '../types/card-settings-types';
 import { useLayerPlugin } from './layer-plugin-system';
+
+// Definición de la estructura de datos para sistema de capas
+interface LayerSystemConfig {
+	order: string[];
+	explodeView: boolean;
+	explodeDistance: number;
+	layerBlending: string;
+	layerSpacing: number;
+}
+
+// Valores predeterminados para configuración de capas
+const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
+	order: [],
+	explodeView: false,
+	explodeDistance: 10,
+	layerBlending: 'normal',
+	layerSpacing: 2
+};
+
+// Función para asegurar que se tengan valores predeterminados
+const getLayerSystemWithDefaults = (config: Partial<LayerSystemConfig> = {}): LayerSystemConfig => {
+	return {
+		order: config.order || DEFAULT_LAYER_SYSTEM.order,
+		explodeView: config.explodeView ?? DEFAULT_LAYER_SYSTEM.explodeView,
+		explodeDistance: config.explodeDistance ?? DEFAULT_LAYER_SYSTEM.explodeDistance,
+		layerBlending: config.layerBlending || DEFAULT_LAYER_SYSTEM.layerBlending,
+		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing
+	};
+};
+
+// Interfaz para opciones de tarjeta
+interface CardOptions {
+	layerSystem?: Partial<LayerSystemConfig>;
+	layerConfigs?: Record<string, any>;
+	[key: string]: any;
+}
 
 interface LayersConfigPanelProps {
 	cardOptions: CardOptions;
 	onCardOptionsChange: (options: CardOptions) => void;
 	entityType: string;
 	entityId?: string;
+}
+
+// Interfaz de capa para tipado en la renderización
+interface Layer {
+	type: string;
+	name: string;
+	description?: string;
+	defaultConfig: any;
+	[key: string]: any;
 }
 
 export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType, entityId }: LayersConfigPanelProps) {
@@ -226,7 +269,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 									{(provided) => (
 										<div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
 											{layerOrder.map((layerId, index) => {
-												const layer = availableLayers.find((l) => l.type === layerId);
+												const layer = availableLayers.find((l: Layer) => l.type === layerId);
 												if (!layer) {
 													return null;
 												}
@@ -293,7 +336,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 											</TableRow>
 										</TableHeader>
 										<TableBody>
-											{availableLayers.map((layer) => {
+											{availableLayers.map((layer: Layer) => {
 												const layerConfig = (cardOptions.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
 												return (
 													<TableRow key={layer.type}>

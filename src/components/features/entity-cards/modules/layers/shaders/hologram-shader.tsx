@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { ExplodeLayerTransformFunction } from '../../../../types/base-card-types';
 import { BaseShader } from './base-shader';
 
 const vertexShader = `
@@ -79,7 +78,6 @@ interface HologramShaderProps {
     isExploded: boolean;
     isHovered: boolean;
     activeLayer: string | null;
-    getExplodeLayerTransform: ExplodeLayerTransformFunction;
     options?: {
         visibleOnHover?: boolean;
         intensity?: number;

@@ -2,12 +2,15 @@
 
 import { cn } from '@/lib/utils';
 import { useCallback, useState, type MouseEvent } from 'react';
-import type { EntityBasicInfo } from '../../types/unified-types';
 import { LayerPluginProvider, useLayerPlugin } from './layer-plugin-system';
 import { RegisterLayers } from './register-layers';
 
 interface EntityCardLayersProps {
-	entity: EntityBasicInfo;
+	entity: {
+		id: string;
+		title: string;
+		type: string;
+	};
 	entityType: string;
 	entityId?: string;
 	activeLayer?: string | null;
@@ -39,7 +42,7 @@ export function LayerRenderer({
 	onClick?: (layerId: string) => void;
 	className?: string;
 }) {
-	const { layers } = useLayerPlugin();
+	const { layers, getLayers } = useLayerPlugin();
 
 	// Transformación para capas en vista explotada
 	const getExplodeTransform = (index: number) => {
@@ -97,11 +100,11 @@ export function LayerRenderer({
 					>
 						{layer.component && (
 							<layer.component
-								isHovered={isHovered}
-								isExploded={isExploded}
+								isHovered={!!isHovered}
+								isExploded={!!isExploded}
 								mousePosition={mousePosition}
 								activeLayer={activeLayer}
-								style={style}
+								getExplodeLayerTransform={getExplodeTransform}
 								config={layer.defaultConfig}
 								entityType={entityType}
 								entityId={entityId}

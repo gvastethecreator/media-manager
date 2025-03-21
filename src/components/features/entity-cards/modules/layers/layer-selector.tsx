@@ -7,11 +7,12 @@
  * basada en su tipo y configuración.
  */
 
-import { useLayerPlugin, type BaseLayerConfig } from '@/components/features/entity-cards/modules/layer-system/layers/layer-plugin-system';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
+import type { BaseLayerConfig } from './layer-config-base';
+import { useLayerPlugin } from './layer-plugin-system';
 
 interface LayerSelectorProps {
 	/**
@@ -67,16 +68,13 @@ export function LayerSelector({
 	}
 
 	// Si hay un componente de configuración, lo renderizamos
-	if (layerPlugin.SettingsComponent) {
-		const SettingsComponent = layerPlugin.SettingsComponent;
+	if (layerPlugin.settings) {
+		const SettingsComponent = layerPlugin.settings;
 
 		return (
 			<SettingsComponent
-				entityType={entityType || 'generic'}
-				entityId={entityId}
-				className="w-full"
-				config={config as BaseLayerConfig}
-				onConfigUpdate={(updatedConfig) => onChange(updatedConfig)}
+				config={config as any}
+				onConfigChange={(updatedConfig: Partial<BaseLayerConfig>) => onChange(updatedConfig)}
 			/>
 		);
 	}

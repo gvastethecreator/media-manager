@@ -1,4 +1,5 @@
 import type * as React from 'react';
+import type { ReactNode } from "react";
 
 /**
  * Re-exportar los tipos desde unified-card-types.ts para mantener la compatibilidad con código existente
@@ -230,11 +231,11 @@ export interface HolographicEffectOptions {
 
 // Opciones para efecto de brillo
 export interface GlowEffectOptions {
-	color?: string;
-	intensity?: number;
+	color: string;
+	intensity: number;
 	size?: number;
 	blurAmount?: number;
-	animationType?: string | 'static' | 'pulse' | 'follow-mouse' | 'none';
+	animationType?: 'follow-mouse' | 'pulse' | 'static' | 'none';
 	pulseSpeed?: number;
 	visibleOnHover?: boolean;
 	layerIndex?: number;
@@ -414,8 +415,15 @@ export interface CardDesignData {
 	};
 }
 
-// Funciones para cambios en la vista explosionada
-export type ExplodeLayerTransformFunction = (layerIndex: number) => React.CSSProperties;
+/**
+ * Tipos compartidos para las funciones de Entity Cards
+ */
+
+/**
+ * Tipo de función para transformar capas en modo explotado
+ * Recibe un índice de capa y devuelve un objeto con propiedades CSS para la transformación
+ */
+export type ExplodeLayerTransformFunction = (layerIndex: number) => Record<string, string | number>;
 
 // Estados para las tarjetas
 export interface CardStates {
@@ -645,4 +653,66 @@ interface EffectsOptions {
 
 	// Filtros
 	filters?: FilterOptions;
+}
+
+/**
+ * 🗃️ Tipos base para las tarjetas de entidades
+ * Este archivo define los tipos comunes utilizados en los componentes de tarjetas.
+ */
+
+/**
+ * Propiedades base para todas las capas
+ */
+export interface CommonLayerProps {
+	isExploded?: boolean;
+	isHovered?: boolean;
+	mousePosition?: { x: number; y: number };
+	children?: ReactNode;
+	entityType?: string;
+	entityId?: string;
+	isActive?: boolean;
+}
+
+/**
+ * Propiedades para capas de base con configuración genérica
+ */
+export interface BaseLayerProps<T = Record<string, unknown>> extends CommonLayerProps {
+	config?: T;
+	layerId?: string;
+	defaultConfig?: T;
+	children?: ReactNode;
+}
+
+/**
+ * Propiedades para componentes que muestran una tarjeta de entidad
+ */
+export interface EntityCardProps {
+	id: string;
+	type: string;
+	title?: string;
+	thumbnail?: string;
+	aspectRatio?: number;
+	isSelected?: boolean;
+	onSelect?: (id: string) => void;
+	layers?: Record<string, unknown>;
+}
+
+/**
+ * Configuración global para las capas de una tarjeta
+ */
+export interface LayersConfigBase {
+	order?: string[];
+	explodeView?: boolean;
+	explodeDistance?: number;
+}
+
+/**
+ * Propiedades para un componente que recibe una configuración de capa
+ */
+export interface LayerComponentProps<T = Record<string, unknown>> {
+	config: T;
+	children?: ReactNode;
+	isExploded?: boolean;
+	isHovered?: boolean;
+	mousePosition?: { x: number; y: number };
 }

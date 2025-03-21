@@ -38,21 +38,21 @@ export function EntityCardAdapter({
 		const metadata: Record<string, string | number> = {};
 
 		switch (entityType) {
-			case 'folder':
+			case 'folder': {
 				const folder = entity as Folder;
 				if (folder._count?.images || folder.imageCount) {
-					metadata['Imágenes'] = folder._count?.images || folder.imageCount || 0;
+					metadata.Imágenes = folder._count?.images || folder.imageCount || 0;
 				}
 				if (folder.totalSize) {
-					metadata['Tamaño'] = formatBytes(folder.totalSize);
+					metadata.Tamaño = formatBytes(folder.totalSize);
 				}
 				break;
+			}
 
 			// Se pueden añadir más casos para otros tipos de entidades
-
 			default:
 				// Para tipos desconocidos, mostrar ID como metadata
-				metadata['ID'] = entity.id || 'unknown';
+				metadata.ID = entity.id || 'unknown';
 		}
 
 		return {
@@ -62,12 +62,13 @@ export function EntityCardAdapter({
 	};
 
 	// Función auxiliar para formatear bytes
-	function formatBytes(bytes: number, decimals = 2) {
+	function formatBytes(bytes: number, decimals = 2): string {
 		if (bytes === 0) return '0 Bytes';
+
 		const k = 1024;
 		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+		return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
 	}
 
 	// Extraer información de la entidad

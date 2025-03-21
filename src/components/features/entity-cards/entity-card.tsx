@@ -68,7 +68,7 @@ export function EntityCard({
         <div className="relative w-full aspect-[3/4]">
           {enableLayers ? (
             <EntityCardLayers
-              entity={{ id, title, description, image, metadata }}
+              entity={{ id, title, type: 'entity-card' }}
               entityType="entity-card"
               entityId={id}
               activeLayer={activeLayer}

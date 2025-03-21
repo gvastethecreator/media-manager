@@ -94,12 +94,11 @@ export function useAnimationSystem(options: AnimationOptions = {}): AnimationSys
 
 		return styles;
 	}, [
+		disableAnimations,
 		enabled,
 		entranceAnimation,
-		exitAnimation,
 		transitionDuration,
 		timingFunction,
-		disableAnimations,
 	]);
 
 	/**

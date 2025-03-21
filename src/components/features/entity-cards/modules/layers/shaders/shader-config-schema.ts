@@ -39,15 +39,23 @@ export const entityParamsSchema = z.object({
 	entityId: z.string().optional(),
 });
 
+/**
+ * 🎨 Crea una configuración por defecto para los shaders
+ */
+export function createDefaultShaderConfig(): ShaderConfig {
+	return {
+		enabled: true,
+		layerIndex: 5,
+		type: 'base',
+		intensity: 0.5,
+		speed: 1,
+		color: '#00aaff',
+		blendMode: 'screen',
+		visibleOnHover: false,
+		animated: true,
+		opacity: 1,
+	};
+}
+
 // Configuración por defecto para shaders
-export const defaultShaderConfig: ShaderConfig = {
-	enabled: true,
-	layerIndex: 5,
-	type: 'base',
-	intensity: 0.5,
-	speed: 1,
-	color: '#00aaff',
-	blendMode: 'screen',
-	visibleOnHover: false,
-	animated: true,
-};
+export const defaultShaderConfig: ShaderConfig = createDefaultShaderConfig();

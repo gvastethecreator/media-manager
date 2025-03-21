@@ -1,4 +1,4 @@
-import { BorderAllIcon } from 'lucide-react';
+import { Square } from 'lucide-react';
 import { BorderLayer } from './components/border-layer';
 import { BorderSettings } from './components/border-settings';
 
@@ -6,7 +6,7 @@ export const borderImplementation = {
 	type: 'border',
 	name: 'Borde',
 	description: 'Añade un borde personalizable a la tarjeta con efectos y estilos',
-	icon: BorderAllIcon,
+	icon: Square,
 	defaultConfig: {
 		enabled: true,
 		visibleOnHover: false,

@@ -278,9 +278,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Layers className="h-4 w-4 text-primary" />
-											<label className="text-sm">Sistema de Capas</label>
+											<label htmlFor="toggleLayerSystem" className="text-sm">Sistema de Capas</label>
 										</div>
 										<Switch
+											id="toggleLayerSystem"
 											checked={controlState.systems.layerSystem}
 											onCheckedChange={() => toggleSystem('layerSystem')}
 										/>
@@ -289,9 +290,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Palette className="h-4 w-4 text-primary" />
-											<label className="text-sm">Sistema de Diseño</label>
+											<label htmlFor="toggleDesignSystem" className="text-sm">Sistema de Diseño</label>
 										</div>
 										<Switch
+											id="toggleDesignSystem"
 											checked={controlState.systems.designSystem}
 											onCheckedChange={() => toggleSystem('designSystem')}
 										/>
@@ -300,22 +302,24 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label className="text-sm">Sistema de Animación</label>
+											<label htmlFor="toggleAnimationSystem" className="text-sm">Sistema de Animación</label>
 										</div>
 										<Switch
+											id="toggleAnimationSystem"
 											checked={controlState.systems.animationSystem}
 											onCheckedChange={() => toggleSystem('animationSystem')}
 										/>
 									</div>
 
-									<div className="border-t my-2 pt-2 border-border/30"></div>
+									<div className="border-t my-2 pt-2 border-border/30" />
 
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Circle className="h-4 w-4 text-primary" />
-											<label className="text-sm">Backside</label>
+											<label htmlFor="toggleBackside" className="text-sm">Backside</label>
 										</div>
 										<Switch
+											id="toggleBackside"
 											checked={controlState.features.backside}
 											onCheckedChange={() => toggleFeature('backside')}
 										/>
@@ -324,9 +328,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Layers className="h-4 w-4 text-primary" />
-											<label className="text-sm">Modo Exploded View</label>
+											<label htmlFor="toggleExplodedView" className="text-sm">Modo Exploded View</label>
 										</div>
 										<Switch
+											id="toggleExplodedView"
 											checked={controlState.features.explode}
 											onCheckedChange={() => toggleFeature('explode')}
 										/>
@@ -335,9 +340,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Bug className="h-4 w-4 text-warning" />
-											<label className="text-sm">Modo Debug</label>
+											<label htmlFor="toggleDebugMode" className="text-sm">Modo Debug</label>
 										</div>
 										<Switch
+											id="toggleDebugMode"
 											checked={controlState.features.debug}
 											onCheckedChange={() => toggleFeature('debug')}
 										/>
@@ -351,9 +357,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Sparkles className="h-4 w-4 text-primary" />
-											<label className="text-sm">Efecto Holográfico</label>
+											<label htmlFor="toggleHolographicEffect" className="text-sm">Efecto Holográfico</label>
 										</div>
 										<Switch
+											id="toggleHolographicEffect"
 											checked={controlState.effects.holographic}
 											onCheckedChange={() => toggleEffect('holographic')}
 										/>
@@ -362,9 +369,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Lightbulb className="h-4 w-4 text-primary" />
-											<label className="text-sm">Efecto Glow</label>
+											<label htmlFor="toggleGlowEffect" className="text-sm">Efecto Glow</label>
 										</div>
 										<Switch
+											id="toggleGlowEffect"
 											checked={controlState.effects.glow}
 											onCheckedChange={() => toggleEffect('glow')}
 										/>
@@ -373,9 +381,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Circle className="h-4 w-4 text-primary" />
-											<label className="text-sm">Bordes Animados</label>
+											<label htmlFor="toggleAnimatedBorders" className="text-sm">Bordes Animados</label>
 										</div>
 										<Switch
+											id="toggleAnimatedBorders"
 											checked={controlState.effects.border}
 											onCheckedChange={() => toggleEffect('border')}
 										/>

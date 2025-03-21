@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { useGrainStore } from "../actions/grain-config.action";
+import { useGrainStore, type GrainConfig as GrainConfigType } from "../actions/grain-config.action";
 
 interface GrainConfigProps {
 	className?: string;
@@ -14,56 +14,49 @@ const blendModes = [
 	"multiply",
 	"screen",
 	"overlay",
-	"darken",
-	"lighten",
-	"color-dodge",
-	"color-burn",
-	"hard-light",
-	"soft-light",
-	"difference",
-	"exclusion",
 ] as const;
 
 const patterns = [
 	"perlin",
 	"simplex",
 	"worley",
-	"value",
-	"cellular",
 ] as const;
 
 const distributions = [
 	"uniform",
 	"gaussian",
-	"exponential",
 ] as const;
 
 const colorModes = [
 	"monochrome",
-	"rgb",
-	"hsl",
+	"color",
 ] as const;
 
 export function GrainConfig({ className }: GrainConfigProps) {
+	const {
+		config,
+		toggleEnabled,
+		toggleAnimated,
+		toggleFractalNoise,
+		updateConfig,
+	} = useGrainStore();
+
+	// Extraer valores del config para facilitar su uso
 	const {
 		enabled,
 		intensity,
 		size,
 		animated,
 		speed,
-		colorMode,
 		opacity,
-		blend,
-		seed,
 		pattern,
 		fractalNoise,
 		roughness,
 		distribution,
-		toggleEnabled,
-		toggleAnimated,
-		toggleFractalNoise,
-		updateConfig,
-	} = useGrainStore();
+		colorMode,
+		blend,
+		seed
+	} = config;
 
 	return (
 		<div className={cn("space-y-4", className)}>
@@ -146,7 +139,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 							<Label>Patrón</Label>
 							<Select
 								value={pattern}
-								onValueChange={(value) => updateConfig({ pattern: value as typeof pattern })}
+								onValueChange={(value) => updateConfig({ pattern: value as GrainConfigType['pattern'] })}
 							>
 								<SelectTrigger>
 									<SelectValue placeholder="Selecciona un patrón" />
@@ -190,7 +183,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 							<Label>Distribución</Label>
 							<Select
 								value={distribution}
-								onValueChange={(value) => updateConfig({ distribution: value as typeof distribution })}
+								onValueChange={(value) => updateConfig({ distribution: value as GrainConfigType['distribution'] })}
 							>
 								<SelectTrigger>
 									<SelectValue placeholder="Selecciona una distribución" />
@@ -209,7 +202,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 							<Label>Modo de color</Label>
 							<Select
 								value={colorMode}
-								onValueChange={(value) => updateConfig({ colorMode: value as typeof colorMode })}
+								onValueChange={(value) => updateConfig({ colorMode: value as GrainConfigType['colorMode'] })}
 							>
 								<SelectTrigger>
 									<SelectValue placeholder="Selecciona un modo de color" />
@@ -228,7 +221,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 							<Label>Modo de mezcla</Label>
 							<Select
 								value={blend}
-								onValueChange={(value) => updateConfig({ blend: value as typeof blend })}
+								onValueChange={(value) => updateConfig({ blend: value as GrainConfigType['blend'] })}
 							>
 								<SelectTrigger>
 									<SelectValue placeholder="Selecciona un modo de mezcla" />

@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import type { BlurConfig } from '../blur-schema';
 import { blurConfigSchema } from '../blur-schema';
@@ -17,7 +17,7 @@ export async function getBlurConfig({
 }): Promise<BlurConfig | null> {
   try {
     // Buscar configuración en la base de datos
-    const config = await db.layerConfig.findUnique({
+    const config = await prisma.layerBlurConfig.findUnique({
       where: {
         entityType_entityId_layerType: {
           entityType,
@@ -57,7 +57,7 @@ export async function updateBlurConfig({
     const validatedConfig = blurConfigSchema.partial().parse(config);
 
     // Actualizar o crear configuración
-    const updatedConfig = await db.layerConfig.upsert({
+    const updatedConfig = await prisma.layerBlurConfig.upsert({
       where: {
         entityType_entityId_layerType: {
           entityType,
@@ -102,7 +102,7 @@ export async function deleteBlurConfig({
 }): Promise<boolean> {
   try {
     // Eliminar configuración
-    await db.layerConfig.delete({
+    await prisma.layerBlurConfig.delete({
       where: {
         entityType_entityId_layerType: {
           entityType,

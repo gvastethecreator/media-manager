@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * 🌈 Sistema de capas para Entity Cards
  *
@@ -14,16 +12,27 @@
  * para simplificar las importaciones en otros archivos.
  */
 
+/**
+ * Módulos de capas para entidades
+ *
+ * Este archivo exporta todos los módulos de capas disponibles para el sistema de tarjetas.
+ * Cada capa proporciona diferentes efectos visuales que se pueden aplicar a las tarjetas.
+ */
+
+'use client';
+
+// Importaciones necesarias
+import * as React from 'react';
+import { RegisterLayers } from './register-layers';
+
 // Tipos básicos
 export * from './types';
 
 // Core del sistema de capas
-export {
-    LayerRenderer as BaseLayerRenderer, LayerPluginProvider, useLayerPlugin
-} from './layer-plugin-system';
+export { LayerPluginProvider, SingleLayerRenderer, useLayerPlugin } from './layer-plugin-system';
 
 // Componentes de registro de capas
-export { RegisterAllLayers, RegisterLayersByEntityType } from './register-all-layers';
+// Exportar RegisterLayers disponible, otros serán implementados posteriormente
 export { RegisterLayers } from './register-layers';
 
 // Componentes de integración con EntityCard
@@ -39,34 +48,30 @@ export { LayerSelector } from './layer-selector';
 export { LayersConfigPanel } from './layers-config-panel';
 export { LayersPanel } from './layers-panel';
 
-// Componentes de capa específicos
+// Exportar todas las capas individuales
+export * from './animated-border';
+export * from './blur';
 export * from './border';
-export * from './chromatic-aberration';
-export * from './content';
+export * from './glitch';
 export * from './glow';
+export * from './grain';
 export * from './image';
-export * from './metadata';
-export * from './scanlines';
-export * from './textures';
+export * from './patterns';
+export { scanlinesImplementation } from './scanlines';
+export { textureImplementation } from './textures';
 
-// Re-exportar módulos relacionados con capas desde layers-module si están disponibles
-try {
-    // Importaciones opcionales que pueden no estar disponibles aún
-    export {
-        LayersProvider,
-        useLayers
-    } from '../use-layers';
-
-    export {
-        adaptEntityCardToLayerSystem,
-        adaptLayerSystemToEntityCard
-    } from '../entity-card-layer-adapter';
-
-    export {
-        adaptCardOptionsToLayersConfig
-    } from '../use-layers';
-} catch (error) {
-    // Estos módulos pueden no estar disponibles todavía,
-    // se implementarán en futuras iteraciones
+// Crear un RegisterAllLayers provisional hasta que se implemente completamente
+export function RegisterAllLayers(): React.ReactElement {
+    return React.createElement(RegisterLayers);
 }
+
+// Alias para registro de capas por tipo de entidad
+export function RegisterLayersByEntityType(): React.ReactElement {
+    return React.createElement(RegisterLayers);
+}
+
+// Estos módulos serán implementados en futuras iteraciones:
+// - LayersProvider y useLayers de '../use-layers'
+// - adaptEntityCardToLayerSystem y adaptLayerSystemToEntityCard de '../entity-card-layer-adapter'
+// - adaptCardOptionsToLayersConfig de '../use-layers'
 

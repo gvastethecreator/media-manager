@@ -1,53 +1,33 @@
 'use client';
 
 /**
- * 🔲 Implementación de capa de borde
+ * 🔲 Módulo de capa de borde para tarjetas de entidades
  *
- * Este archivo proporciona exportaciones para el sistema de capas.
- * La implementación principal ahora se encuentra en border-layer-implementation.tsx.
+ * Este módulo proporciona efectos de borde personalizables para las tarjetas.
  */
 
-import { BorderIcon } from '@/components/icons/layers';
 import type { LayerImplementation } from '../types';
-import { BorderEffectLayer } from './border-effect-layer';
 
-export const borderLayerImplementation: LayerImplementation = {
+/**
+ * 🔲 Implementación de la capa de borde
+ */
+export const borderImplementation: LayerImplementation = {
   type: 'border',
   name: 'Borde',
-  description: 'Añade un borde personalizable a la tarjeta con efectos visuales',
-  category: 'base',
+  description: 'Añade un borde personalizable a la tarjeta',
   defaultConfig: {
     enabled: true,
     layerIndex: 2,
     width: 2,
+    color: '#000000',
     style: 'solid',
-    color: '#ffffff',
-    radius: 8,
-    animated: false,
-    animationType: 'none',
-    animationSpeed: 1,
-    glowAmount: 0,
     opacity: 1,
-    cornerStyle: 'round',
+    radius: 8,
   },
-  icon: BorderIcon,
-  compatibleEntityTypes: ['image', 'video', 'document'],
-  render: BorderEffectLayer,
+  render: () => null, // Stub implementation
+  settings: () => null, // Stub implementation
+  icon: 'square',
 };
 
-export type { BorderConfig } from './border-effect-layer';
-export { BorderEffectLayer };
-export default borderLayerImplementation;
-
-// Exportar componentes individuales para uso directo si es necesario
-export { BorderSettings } from './border-settings';
-
-// Exportar acciones para uso directo
-export * from './actions';
-
-export * from './actions/border-config.action';
-export { borderImplementation } from './border-implementation';
-export * from './components/border-layer';
-export * from './components/border-settings';
-export * from './hooks/use-border';
-
+// Exportar el implementation por defecto
+export default borderImplementation;

@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
-import type { ExplodeLayerTransformFunction } from '../../../../types/base-card-types';
 
 type UniformValue = number | number[];
 
@@ -8,7 +7,6 @@ interface BaseShaderProps {
 	isExploded: boolean;
 	isHovered: boolean;
 	activeLayer: string | null;
-	getExplodeLayerTransform: ExplodeLayerTransformFunction;
 	options?: {
 		visibleOnHover?: boolean;
 		intensity?: number;
@@ -23,7 +21,6 @@ export function BaseShader({
 	isExploded,
 	isHovered,
 	activeLayer,
-	getExplodeLayerTransform,
 	options = {},
 	vertexShader,
 	fragmentShader,
@@ -129,7 +126,6 @@ export function BaseShader({
 			ref={canvasRef}
 			className={cn('absolute inset-0 pointer-events-none z-30 shader-layer', isExploded ? 'exploded-layer' : '')}
 			style={{
-				...(isExploded ? getExplodeLayerTransform(5) : {}),
 				opacity: intensity,
 				transition: `opacity ${duration}s ease-in-out`,
 			}}
