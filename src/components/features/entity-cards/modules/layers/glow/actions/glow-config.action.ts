@@ -4,6 +4,44 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
+// Caché simple para almacenar configuraciones y reducir llamadas a la base de datos
+// Estructura: entityType_entityId -> config
+const configCache = new Map<string, {
+	data: any;
+	timestamp: number;
+	ttl: number;
+}>();
+
+// Tiempo de vida de la caché en ms (5 minutos)
+const CACHE_TTL = 5 * 60 * 1000;
+
+// Función auxiliar para obtener clave de caché
+const getCacheKey = (entityType: string, entityId?: string) =>
+	`glow_${entityType}_${entityId || 'default'}`;
+
+// Función para obtener datos de caché
+const getFromCache = (key: string) => {
+	const cached = configCache.get(key);
+	if (!cached) return null;
+
+	// Comprobar si ha expirado
+	if (Date.now() - cached.timestamp > cached.ttl) {
+		configCache.delete(key);
+		return null;
+	}
+
+	return cached.data;
+};
+
+// Función para guardar en caché
+const saveToCache = (key: string, data: any, ttl = CACHE_TTL) => {
+	configCache.set(key, {
+		data,
+		timestamp: Date.now(),
+		ttl
+	});
+};
+
 // Schema de validación para la configuración del glow
 const glowConfigSchema = z.object({
 	entityType: z.string(),
@@ -17,6 +55,7 @@ const glowConfigSchema = z.object({
 		animationType: z.enum(['none', 'pulse', 'wave', 'sparkle']).optional(),
 		pulseSpeed: z.number().min(0).optional(),
 		visibleOnHover: z.boolean().optional(),
+		layerIndex: z.number().optional(),
 	}),
 });
 
@@ -28,6 +67,7 @@ interface GlowConfigResponse {
 	success: boolean;
 	message: string;
 	data?: GlowConfig;
+	error?: string;
 }
 
 /**
@@ -46,6 +86,19 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
+				error: validation.error.message
+			};
+		}
+
+		// Intentar obtener de la caché
+		const cacheKey = getCacheKey(entityType, entityId);
+		const cachedConfig = getFromCache(cacheKey);
+
+		if (cachedConfig) {
+			return {
+				success: true,
+				message: 'Configuración de glow obtenida de caché',
+				data: cachedConfig,
 			};
 		}
 
@@ -73,21 +126,30 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 
 		// Si no hay configuración, devolver valores por defecto
 		if (!config) {
+			const defaultConfig = {
+				enabled: true,
+				intensity: 0.5,
+				color: '#ffffff',
+				size: 20,
+				blurAmount: 10,
+				animationType: 'none',
+				pulseSpeed: 1,
+				visibleOnHover: false,
+				layerIndex: 2,
+			};
+
+			// Guardar en caché los valores por defecto
+			saveToCache(cacheKey, defaultConfig);
+
 			return {
 				success: true,
 				message: 'Usando configuración por defecto',
-				data: {
-					enabled: true,
-					intensity: 0.5,
-					color: '#ffffff',
-					size: 20,
-					blurAmount: 10,
-					animationType: 'none',
-					pulseSpeed: 1,
-					visibleOnHover: false,
-				},
+				data: defaultConfig,
 			};
 		}
+
+		// Guardar en caché
+		saveToCache(cacheKey, config);
 
 		return {
 			success: true,
@@ -99,6 +161,7 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 		return {
 			success: false,
 			message: 'Error al obtener la configuración de glow',
+			error: error instanceof Error ? error.message : String(error)
 		};
 	}
 }
@@ -108,8 +171,8 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
  */
 export async function updateGlowConfig(
 	entityType: string,
-	config: GlowConfig,
-	entityId?: string
+	entityId: string,
+	config: GlowConfig
 ): Promise<GlowConfigResponse> {
 	try {
 		// Validar parámetros
@@ -123,6 +186,7 @@ export async function updateGlowConfig(
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
+				error: validation.error.message
 			};
 		}
 
@@ -146,6 +210,10 @@ export async function updateGlowConfig(
 			},
 		});
 
+		// Actualizar la caché con los nuevos datos
+		const cacheKey = getCacheKey(entityType, entityId);
+		saveToCache(cacheKey, updatedConfig);
+
 		// Revalidar las rutas necesarias
 		revalidatePath('/settings');
 		revalidatePath(`/${entityType}`);
@@ -163,6 +231,7 @@ export async function updateGlowConfig(
 		return {
 			success: false,
 			message: 'Error al actualizar la configuración de glow',
+			error: error instanceof Error ? error.message : String(error)
 		};
 	}
 }
@@ -183,6 +252,7 @@ export async function deleteGlowConfig(entityType: string, entityId?: string): P
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
+				error: validation.error.message
 			};
 		}
 
@@ -195,6 +265,10 @@ export async function deleteGlowConfig(entityType: string, entityId?: string): P
 				},
 			},
 		});
+
+		// Eliminar de la caché
+		const cacheKey = getCacheKey(entityType, entityId);
+		configCache.delete(cacheKey);
 
 		// Revalidar las rutas necesarias
 		revalidatePath('/settings');
@@ -212,6 +286,7 @@ export async function deleteGlowConfig(entityType: string, entityId?: string): P
 		return {
 			success: false,
 			message: 'Error al eliminar la configuración de glow',
+			error: error instanceof Error ? error.message : String(error)
 		};
 	}
 }

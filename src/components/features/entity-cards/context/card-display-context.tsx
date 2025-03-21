@@ -121,13 +121,14 @@ export function CardDisplayProvider({ children }: { children: React.ReactNode })
 			console.info('ℹ️ Modos disponibles:', Object.keys(DISPLAY_MODE_INFO).join(', '));
 
 			// Describir los módulos por modo
-			Object.entries(DISPLAY_MODE_INFO).forEach(([mode, info]) => {
+			for (const [mode, info] of Object.entries(DISPLAY_MODE_INFO)) {
 				console.info(`📋 Modo ${info.name}:`, {
-					componentes: info.components.join(', '),
+					description: info.description,
+					capacidades: info.features,
 					rendimiento: info.performance,
-					riesgo: info.riskLevel
+					complejidad: info.complexity
 				});
-			});
+			}
 
 			console.info('⚠️ Nota: El modo "complex" puede causar problemas de rendimiento');
 			console.groupEnd();

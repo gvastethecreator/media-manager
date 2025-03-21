@@ -1,4 +1,7 @@
+'use server';
+
 import { create } from 'zustand';
+import type { ShaderConfig } from '../shader-config-schema';
 
 // Tipos de shaders disponibles
 export type ShaderType = 'distortion' | 'hologram' | 'wave' | 'particle';
@@ -69,42 +72,106 @@ const initialConfigs: Record<ShaderType, Omit<ShaderConfig, 'type'>> = {
   },
 };
 
-// Interface del store
-interface ShaderStore {
-  configs: Record<ShaderType, ShaderConfig>;
-  activeType: ShaderType | null;
-  setActiveType: (type: ShaderType | null) => void;
-  updateConfig: <T extends ShaderType>(type: T, config: Partial<ShaderConfig>) => void;
-  resetConfig: (type: ShaderType) => void;
+// Estado para el store de shaders
+interface ShaderState {
+	activeType: string | null;
+	configs: Record<string, ShaderConfig>;
+	setActiveType: (type: string | null) => void;
+	updateConfig: (type: string, config: Partial<ShaderConfig>) => void;
 }
 
-// Crear store con Zustand
-export const useShaderStore = create<ShaderStore>((set) => ({
-  // Estado inicial
-  configs: Object.fromEntries(
-    Object.entries(initialConfigs).map(([type, config]) => [
-      type,
-      { ...config, type: type as ShaderType },
-    ])
-  ) as Record<ShaderType, ShaderConfig>,
-  activeType: null,
-
-  // Acciones
-  setActiveType: (type) => set({ activeType: type }),
-
-  updateConfig: (type, config) =>
-    set((state) => ({
-      configs: {
-        ...state.configs,
-        [type]: { ...state.configs[type], ...config },
-      },
-    })),
-
-  resetConfig: (type) =>
-    set((state) => ({
-      configs: {
-        ...state.configs,
-        [type]: { ...initialConfigs[type], type },
-      },
-    })),
+// Store para manejar el estado de los shaders
+export const useShaderStore = create<ShaderState>((set) => ({
+	activeType: null,
+	configs: {},
+	setActiveType: (type) => set({ activeType: type }),
+	updateConfig: (type, config) => set((state) => ({
+		configs: {
+			...state.configs,
+			[type]: {
+				...state.configs[type],
+				...config,
+			},
+		},
+	})),
 }));
+
+// Tipos exportados
+export type { ShaderConfig, ShaderState };
+
+/**
+ * Obtiene la configuración de shader para una entidad
+ */
+export async function getShaderConfig(entityType: string, entityId?: string) {
+	try {
+		// Aquí se implementaría la consulta a la base de datos
+		// Por ahora, retornamos una respuesta simulada para pruebas
+		return {
+			success: true,
+			data: {
+				enabled: true,
+				layerIndex: 5,
+				type: 'wave',
+				intensity: 0.5,
+				speed: 1.0,
+				color: '#00aaff',
+				blendMode: 'screen',
+				visibleOnHover: false,
+				animated: true,
+			} as ShaderConfig,
+		};
+	} catch (error) {
+		console.error('Error al obtener la configuración de shader:', error);
+		return {
+			success: false,
+			error: 'Error al obtener la configuración de shader',
+		};
+	}
+}
+
+/**
+ * Actualiza la configuración de shader para una entidad
+ */
+export async function updateShaderConfig(
+	config: ShaderConfig,
+	entityType: string,
+	entityId?: string
+) {
+	try {
+		// Aquí se implementaría la actualización en la base de datos
+		// Por ahora, retornamos una respuesta simulada para pruebas
+		console.log('Actualizando configuración de shader:', { config, entityType, entityId });
+
+		return {
+			success: true,
+			data: config,
+		};
+	} catch (error) {
+		console.error('Error al actualizar la configuración de shader:', error);
+		return {
+			success: false,
+			error: 'Error al actualizar la configuración de shader',
+		};
+	}
+}
+
+/**
+ * Elimina la configuración de shader para una entidad
+ */
+export async function deleteShaderConfig(entityType: string, entityId?: string) {
+	try {
+		// Aquí se implementaría la eliminación en la base de datos
+		// Por ahora, retornamos una respuesta simulada para pruebas
+		console.log('Eliminando configuración de shader:', { entityType, entityId });
+
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error('Error al eliminar la configuración de shader:', error);
+		return {
+			success: false,
+			error: 'Error al eliminar la configuración de shader',
+		};
+	}
+}

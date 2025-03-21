@@ -1,6 +1,6 @@
 'use client';
 
-import type { CardOptions } from '../../settings/types';
+import type { CardOptions } from '../../settingsold/types';
 import { legacyToPerformanceOptions, updateCardWithPerformanceOptions } from './performance-adapter';
 import { PerformanceModule } from './performance-module';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import type { CardOptions } from '../../settings/types';
+import type { CardOptions } from '../../settingsold/types';
 import { cardToColorsOptions, updateCardWithColorsOptions } from './colors-adapter';
 import { ColorsModule } from './colors-module';
 

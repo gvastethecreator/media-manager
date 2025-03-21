@@ -1,11 +1,11 @@
 'use client';
 
+import { FormInput } from '@/components/features/entity-cards/settingsold/panels/shared';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FormInput } from '@/components/features/entity-cards/settings/panels/shared';
+import { nanoid } from 'nanoid';
 import { useState } from 'react';
 import type { ColorPalette } from './types';
-import { nanoid } from 'nanoid';
 
 interface CustomPaletteModalProps {
   onClose: () => void;

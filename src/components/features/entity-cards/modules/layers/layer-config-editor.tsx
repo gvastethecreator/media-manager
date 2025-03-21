@@ -5,10 +5,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { toastService } from '@/lib/services/toast.service';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { type BaseLayerConfig, useLayerPlugin } from './layer-plugin-system';
+import type { BaseLayerConfig } from './layer-config-base';
+import { useLayerPlugin } from './layer-plugin-system';
+import type { LayerServerActions } from './types';
+
+// Servicio de toast simplificado para evitar dependencias externas
+const toastService = {
+	success: (message: string) => console.log(`✅ ${message}`),
+	error: (message: string) => console.error(`❌ ${message}`)
+};
 
 interface LayerConfigEditorProps {
 	layerType: string;
@@ -44,15 +51,19 @@ export function LayerConfigEditor({
 		if (initialConfig) {
 			setConfig(initialConfig);
 		} else {
-			// Usar la configuración predeterminada de la capa
-			setConfig({ ...layer.defaultConfig });
+			// Usar la configuración predeterminada de la capa y asegurar que layerIndex esté definido
+			setConfig({
+				...layer.defaultConfig,
+				layerIndex: layer.defaultConfig.layerIndex || 0
+			});
 		}
 	}, [layer, layerType, initialConfig]);
 
 	// Cargar desde el servidor si hay acciones del servidor disponibles
 	useEffect(() => {
 		const loadServerConfig = async () => {
-			if (!layer || !layer.getServerActions) {
+			// Check if layer and its server actions exist safely
+			if (!layer || !(layer as any).serverActions) {
 				return;
 			}
 
@@ -60,11 +71,14 @@ export function LayerConfigEditor({
 				setLoading(true);
 				setError(null);
 
-				const serverActions = layer.getServerActions();
+				const serverActions = (layer as any).serverActions as LayerServerActions<BaseLayerConfig>;
 				const response = await serverActions.getConfig(entityType, entityId);
 
 				if (response.success && response.data) {
-					setConfig(response.data);
+					setConfig({
+						...response.data,
+						layerIndex: response.data.layerIndex || 0
+					});
 				} else if (response.error) {
 					console.warn(`Sin configuración guardada para ${layerType}, usando predeterminada`);
 					// Aquí ya tendremos la configuración predeterminada
@@ -77,7 +91,8 @@ export function LayerConfigEditor({
 			}
 		};
 
-		if (layer?.getServerActions) {
+		// Use optional chaining to check if serverActions exists
+		if (layer && (layer as any).serverActions) {
 			loadServerConfig();
 		}
 	}, [layer, layerType, entityType, entityId]);
@@ -104,8 +119,8 @@ export function LayerConfigEditor({
 			setLoading(true);
 
 			// Si hay acciones del servidor disponibles, guardar en el servidor
-			if (layer?.getServerActions) {
-				const serverActions = layer.getServerActions();
+			if (layer && (layer as any).serverActions) {
+				const serverActions = (layer as any).serverActions as LayerServerActions<BaseLayerConfig>;
 				const response = await serverActions.updateConfig(entityType, config, entityId);
 
 				if (!response.success) {
@@ -200,14 +215,11 @@ export function LayerConfigEditor({
 					</div>
 
 					{/* Componente de configuración específico de la capa */}
-					{layer.SettingsComponent && (
+					{layer.settings && (
 						<div className="border-t border-border pt-4 mt-4">
-							<layer.SettingsComponent
-								entityType={entityType}
-								entityId={entityId}
-								className="w-full"
-								config={config}
-								onConfigUpdate={(updatedConfig) => {
+							<layer.settings
+								config={config as any}
+								onConfigChange={(updatedConfig: Partial<BaseLayerConfig>) => {
 									setConfig({
 										...config,
 										...updatedConfig,

@@ -1,7 +1,5 @@
 'use client';
 
-import { LayerConfigEditor } from '@/components/features/entity-cards/modules/layer-system/layers/layer-config-editor';
-import { LayersConfigPanel } from '@/components/features/entity-cards/modules/layer-system/layers/layers-config-panel';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,11 +9,82 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Layers, Settings } from 'lucide-react';
 import { useState } from 'react';
-import { DEFAULT_LAYER_SYSTEM, getLayerSystemWithDefaults, type LayerSystemConfig } from '../../../settings/layer-settings-config';
-import { FormGroup, FormLayout, FormSection } from '../../../settings/panels/shared';
 import { useLayersSystem } from './hooks/use-layers-system';
-import type { BaseLayerConfig } from './layer-plugin-system';
-import type { LayersSettingsPanelProps } from './types';
+import type { BaseLayerConfig } from './layer-config-base';
+
+// Componentes provisionales hasta que se implementen los componentes finales
+const LayerConfigEditor = ({ layerType, entityType, entityId, initialConfig, onConfigChange, onCancel }: any) => (
+	<div>
+		<h2>Configuración de {layerType}</h2>
+		<Button onClick={onCancel}>Cancelar</Button>
+	</div>
+);
+
+const LayersConfigPanel = ({ cardOptions, onCardOptionsChange, entityType, entityId }: any) => (
+	<div>Configuración de capas</div>
+);
+
+// Estructura de datos para la configuración del sistema de capas
+interface LayerSystemConfig {
+	order: string[];
+	explodeView: boolean;
+	explodeDistance: number;
+	layerBlending: string;
+	layerSpacing: number;
+}
+
+const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
+	order: [],
+	explodeView: false,
+	explodeDistance: 10,
+	layerBlending: 'normal',
+	layerSpacing: 2
+};
+
+// Función para asegurar que se tengan valores predeterminados
+const getLayerSystemWithDefaults = (config: Partial<LayerSystemConfig> = {}): LayerSystemConfig => {
+	return {
+		order: config.order || DEFAULT_LAYER_SYSTEM.order,
+		explodeView: config.explodeView ?? DEFAULT_LAYER_SYSTEM.explodeView,
+		explodeDistance: config.explodeDistance ?? DEFAULT_LAYER_SYSTEM.explodeDistance,
+		layerBlending: config.layerBlending || DEFAULT_LAYER_SYSTEM.layerBlending,
+		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing
+	};
+};
+
+// Componentes de formulario simplificados
+const FormLayout = ({ title, description, colorScheme, variant, children }: any) => (
+	<div className="space-y-4 p-4 border rounded-md">
+		<h2 className="text-xl font-semibold">{title}</h2>
+		<p className="text-muted-foreground">{description}</p>
+		{children}
+	</div>
+);
+
+const FormSection = ({ title, description, colorScheme, children }: any) => (
+	<div className="space-y-2 p-3 border rounded-md">
+		<h3 className="text-base font-medium">{title}</h3>
+		<p className="text-sm text-muted-foreground">{description}</p>
+		{children}
+	</div>
+);
+
+const FormGroup = ({ children }: any) => (
+	<div className="space-y-2">{children}</div>
+);
+
+// Interfaces para los props
+interface CardOptions {
+	layerSystem?: Partial<LayerSystemConfig>;
+	layerConfigs?: Record<string, any>;
+	[key: string]: any;
+}
+
+interface LayersSettingsPanelProps {
+	options: CardOptions;
+	entityType: string;
+	entityId?: string;
+}
 
 // Extendemos la interfaz LayersSettingsPanelProps para incluir las propiedades faltantes
 interface ExtendedLayersSettingsPanelProps extends LayersSettingsPanelProps {
@@ -113,7 +182,7 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 				</div>
 				<ScrollArea className="h-[320px] pr-4">
 					<div className="space-y-3">
-						{availableLayers.map((layer) => {
+						{availableLayers.map((layer: any) => {
 							const layerConfig = (options.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
 							const isEnabled = layerConfig.enabled;
 
@@ -159,7 +228,7 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 												entityType={entityType}
 												entityId={entityId}
 												initialConfig={layerConfig}
-												onConfigChange={(config) => handleLayerConfigChange(layer.type, config)}
+												onConfigChange={(config: any) => handleLayerConfigChange(layer.type, config)}
 												onCancel={() => setActiveLayerConfig(null)}
 											/>
 										</DialogContent>

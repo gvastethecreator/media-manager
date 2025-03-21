@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import type { BaseLayerConfig } from '../../types';
+import type { BaseLayerConfig } from '../../layer-config-base';
 
 // 🎨 Constantes
 export const BLEND_MODES = [

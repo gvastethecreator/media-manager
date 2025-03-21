@@ -1,35 +1,35 @@
 /**
- * 🌈 Tipos para el módulo de capas
- */
-
-/**
- * 📝 Tipos compartidos para el sistema de capas
+ * @file Este archivo define los tipos básicos para el sistema de capas
  * @module LayerTypes
  */
 
-import type { CSSProperties } from 'react';
-import type { CardOptions } from '../types/card-settings-types';
-import type { ActionResponse, BaseLayerConfig } from '../types/central-types';
-import type { DistortionEffectsSystem } from '../types/distortion-effects-types';
+import type { ComponentType, ReactNode } from 'react';
+import type { BaseLayerProps } from '../../types/base-card-types';
+import type { BaseLayerConfig, BaseLayerResponse } from "./layer-config-base";
 
 /**
- * 🔧 Configuración base para todas las capas
+ * Propiedades base para todas las capas
  */
-export interface BaseLayerConfig {
-	enabled: boolean;
-	layerIndex: number;
-	visibleOnHover?: boolean;
+export interface CommonLayerProps {
+	isExploded?: boolean;
+	isHovered?: boolean;
+	mousePosition?: { x: number; y: number };
+	children?: ReactNode;
+	entityType?: string;
+	entityId?: string;
+	isActive?: boolean;
+	processedConfig: BaseLayerConfig;
+	style: React.CSSProperties;
+	isVisible: boolean;
 }
 
 /**
- * 🎨 Props comunes para todas las capas
+ * 🎨 Preset para una capa específica
  */
-export interface CommonLayerProps {
-	isHovered: boolean;
-	isExploded: boolean;
-	mousePosition: { x: number; y: number };
-	activeLayer: string | null;
-	style: CSSProperties;
+export interface LayerPreset<T = Record<string, unknown>> {
+	name: string;
+	description?: string;
+	config: T;
 }
 
 /**
@@ -38,25 +38,26 @@ export interface CommonLayerProps {
 export interface LayerSettingsProps<T extends BaseLayerConfig> {
 	config: T;
 	onConfigChange: (config: Partial<T>) => void;
+	entityType?: string;
+	entityId?: string;
+}
+
+/**
+ * 📃 Respuesta de configuración de capa
+ */
+export interface LayerConfigResponse<T = unknown> {
+	success: boolean;
+	data?: T;
+	error?: string;
 }
 
 /**
  * 🔌 Acciones del servidor para las capas
  */
-export interface LayerServerActions<T extends BaseLayerConfig> {
-	getConfig: (entityType: string, entityId?: string) => Promise<LayerConfigResponse<T>>;
-	updateConfig: (entityType: string, config: T, entityId?: string) => Promise<LayerConfigResponse<T>>;
-	deleteConfig: (entityType: string, entityId?: string) => Promise<LayerConfigResponse<unknown>>;
-}
-
-/**
- * 📊 Respuesta de configuración de capa
- */
-export interface LayerConfigResponse<T> {
-	success: boolean;
-	message: string;
-	data?: T;
-	error?: string;
+export interface LayerServerActions<T extends BaseLayerConfig = BaseLayerConfig> {
+	getConfig: (entityType: string, entityId?: string) => Promise<BaseLayerResponse<T>>;
+	updateConfig: (entityType: string, config: T, entityId?: string) => Promise<BaseLayerResponse>;
+	deleteConfig: (entityType: string, entityId?: string) => Promise<BaseLayerResponse>;
 }
 
 /**
@@ -66,19 +67,20 @@ export interface LayerImplementation<T extends BaseLayerConfig = BaseLayerConfig
 	type: string;
 	name: string;
 	description?: string;
+	category?: string;
 	defaultConfig: T;
-	render: React.ComponentType<CommonLayerProps & { config: T }>;
-	settings?: React.ComponentType<LayerSettingsProps<T>>;
+	render: ComponentType<CommonLayerProps & { config: T }>;
+	settings?: ComponentType<LayerSettingsProps<T>>;
 	serverActions?: LayerServerActions<T>;
-	icon?: string;
+	icon: ComponentType<any> | string;
+	compatibleEntityTypes?: string[];
+	presets?: LayerPreset<T>[];
 }
 
 /**
  * 🎨 Tipos de efectos visuales comunes
  */
 export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'color-dodge' | 'color-burn' | 'hard-light' | 'soft-light' | 'difference' | 'exclusion';
-
-export type AnimationType = 'none' | 'pulse' | 'follow-mouse' | 'static';
 
 /**
  * 🎨 Tipos de filtros visuales
@@ -131,29 +133,71 @@ export interface PatternStyles {
 }
 
 /**
- * 🎨 Tipos de presets
+ * 🎚️ Opciones para la configuración de una capa
  */
-export interface LayerPreset<T extends BaseLayerConfig> {
-	id: string;
-	name: string;
-	description?: string;
-	config: T;
-	thumbnail?: string;
-	tags?: string[];
+export interface LayerEditorOptions {
+	layerType: string;
+	entityType: string;
+	entityId?: string;
+	initialConfig?: Record<string, unknown>;
+	onConfigChange: (config: Record<string, unknown>) => void;
+	onCancel?: () => void;
 }
 
 /**
- * 🔄 Estado de animación
+ * 📊 Estado de una capa
  */
-export interface AnimationState {
-	phase: number;
-	speed: number;
+export interface LayerState<T extends BaseLayerConfig = BaseLayerConfig> {
+	type: string;
 	enabled: boolean;
-	type: AnimationType;
+	component: ComponentType<BaseLayerProps<T>>;
+	config: T;
 }
 
 /**
- * 🖱️ Estado del mouse
+ * 🧩 Contexto para el sistema de capas
+ */
+export interface LayerPluginContext {
+	layers: LayerImplementation[];
+	registerLayer: (layer: LayerImplementation) => void;
+	getLayer: (type: string) => LayerImplementation | undefined;
+	getLayers: () => LayerImplementation[];
+	hasLayer: (type: string) => boolean;
+}
+
+/**
+ * 🔄 Props para cambiar entre capas
+ */
+export interface LayerSwitcherProps {
+	currentType: string;
+	onTypeChange: (type: string) => void;
+	availableLayers?: LayerImplementation[];
+}
+
+/**
+ * 🖼️ Estructura de datos para configuración de capas de una tarjeta
+ */
+export interface CardLayersConfig {
+	[layerType: string]: Record<string, unknown>;
+}
+
+/**
+ * 🛠️ Props para renderizar una capa
+ */
+export interface LayerRenderProps<T extends BaseLayerConfig = BaseLayerConfig> {
+	layer: LayerImplementation<T>;
+	config: T;
+	isExploded?: boolean;
+	isHovered?: boolean;
+	mousePosition?: { x: number; y: number };
+	children: ReactNode;
+	isActive?: boolean;
+	entityType?: string;
+	entityId?: string;
+}
+
+/**
+ * 🖱️ Estado del mouse para interacciones
  */
 export interface MouseState {
 	position: { x: number; y: number };
@@ -162,213 +206,39 @@ export interface MouseState {
 }
 
 /**
- * 🎯 Estado de la capa
+ * Estructura de datos para la configuración del sistema de capas
  */
-export interface LayerState<T extends BaseLayerConfig> {
+export interface LayerSystemConfig {
+	order: string[];
+	explodeView: boolean;
+	explodeDistance: number;
+	layerBlending: string;
+	layerSpacing: number;
+}
+
+/**
+ * 🧠 Estado del sistema de capas
+ */
+export interface LayersState {
+	activeLayerIndex: number;
+	explodeView: boolean;
+	config: LayerSystemConfig;
+	updateConfig: (config: Partial<LayerSystemConfig>) => void;
+	setActiveLayerIndex: (index: number) => void;
+	toggleExplodeView: () => void;
+	reorderLayers: (order: string[]) => void;
+}
+
+/**
+ * 🎨 Tipos de animación
+ */
+export type AnimationType = 'none' | 'pulse' | 'breathe' | 'bounce' | 'float' | 'custom';
+
+/**
+ * Props comunes para los formularios de configuración de capas
+ */
+export interface CommonLayerFormProps<T extends BaseLayerConfig> {
 	config: T;
-	isVisible: boolean;
-	isActive: boolean;
-	animation: AnimationState;
-	mouse: MouseState;
-}
-
-/**
- * 🔄 Transformaciones
- */
-export interface LayerTransform {
-	translate: { x: number; y: number; z: number };
-	rotate: { x: number; y: number; z: number };
-	scale: { x: number; y: number; z: number };
-}
-
-/**
- * 🎨 Contexto de renderizado
- */
-export interface RenderContext {
-	canvas: HTMLCanvasElement;
-	ctx: CanvasRenderingContext2D;
-	width: number;
-	height: number;
-	pixelRatio: number;
-}
-
-/**
- * 🔧 Utilidades de capa
- */
-export interface LayerUtils {
-	generateId: () => string;
-	clamp: (value: number, min: number, max: number) => number;
-	lerp: (start: number, end: number, t: number) => number;
-	random: (min: number, max: number) => number;
-	map: (value: number, inMin: number, inMax: number, outMin: number, outMax: number) => number;
-}
-
-/**
- * Funciones de servidor para una capa
- */
-export interface LayerServerActions<T extends BaseLayerConfig = BaseLayerConfig> {
-	getConfig: (entityType: string, entityId?: string) => Promise<ActionResponse>;
-	updateConfig: (entityType: string, config: T, entityId?: string) => Promise<ActionResponse>;
-	deleteConfig: (entityType: string, entityId?: string) => Promise<ActionResponse>;
-}
-
-/**
- * Propiedades comunes para todos los componentes de capa
- */
-export interface CommonLayerProps {
-	entityType: string;
-	entityId?: string;
-	isExploded?: boolean;
-	isHovered?: boolean;
-	activeLayer?: string | null;
-}
-
-/**
- * Función para transformar una capa en la vista explotada
- */
-export type ExplodeLayerTransformFunction = (index: number) => React.CSSProperties;
-
-/**
- * Propiedades para el panel de configuración de capas
- */
-export interface LayersSettingsPanelProps {
-	options: CardOptions;
-	onOptionsChange: (options: CardOptions) => void;
-	entityType: string;
-	entityId?: string;
-	className?: string;
-	showPresets?: boolean;
-}
-
-/**
- * Opciones de configuración global para capas
- */
-export interface LayersGlobalOptions {
-	renderStrategy: 'stacked' | 'composed' | 'dynamic';
-	compositionMode: 'normal' | 'overlay' | 'screen' | 'multiply';
-	enableHoverEffects: boolean;
-	enableActiveLayerHighlight: boolean;
-	explodeSpacing: number;
-}
-
-/**
- * Información de una capa para el selector
- */
-export interface LayerInfo {
-	id: string;
-	name: string;
-	description?: string;
-	icon?: React.ReactNode;
-	category?: string;
-	isEnabled: boolean;
-	layerIndex: number;
-}
-
-/**
- * Estado del sistema de capas
- */
-export interface LayersSystemState {
-	activeLayers: string[];
-	explodedView: boolean;
-	selectedLayer: string | null;
-	globalOptions: LayersGlobalOptions;
-	layerConfigs: Record<string, BaseLayerConfig>;
-}
-
-/**
- * Evento de cambio de capa
- */
-export interface LayerChangeEvent {
-	layerId: string;
-	enabled: boolean;
-	config: BaseLayerConfig;
-}
-
-/**
- * Resultado del hook useLayersSystem
- */
-export interface LayersSystemResult {
-	layersSystem: {
-		isReady: boolean;
-		getLayers: () => LayerInfo[];
-		getLayerConfig: (layerId: string) => BaseLayerConfig | null;
-		updateLayerConfig: (layerId: string, config: Partial<BaseLayerConfig>) => void;
-		enableLayer: (layerId: string, enabled: boolean) => void;
-		setActiveLayer: (layerId: string | null) => void;
-		toggleExplodedView: () => void;
-		isExploded: boolean;
-		activeLayer: string | null;
-		reset: () => void;
-	};
-}
-
-/**
- * Configuración para una capa específica
- */
-export interface LayerConfig {
-	/**
-	 * Indica si la capa está habilitada
-	 */
-	enabled: boolean;
-
-	/**
-	 * Índice de la capa que determina su posición de renderizado
-	 */
-	layerIndex: number;
-
-	/**
-	 * Propiedades adicionales específicas de cada tipo de capa
-	 */
-	[key: string]: unknown;
-}
-
-/**
- * Configuración para la capa de distorsión
- */
-export interface DistortionConfig extends BaseLayerConfig, DistortionEffectsSystem {
-	layerIndex: number;
-	[key: string]: unknown;
-}
-
-/**
- * Configuración para la capa de filtros
- */
-export interface FilterLayerConfig extends BaseLayerConfig {
-	// Configuración básica de filtros
-	visibleOnHover: boolean;
-	opacity: number;
-	intensity: number;
-
-	// Configuración de efectos específicos
-	glow?: {
-		enabled: boolean;
-		color: string;
-		radius: number;
-		intensity: number;
-		animated?: boolean;
-		animationSpeed?: number;
-		visibleOnHover?: boolean;
-	};
-
-	shadow?: {
-		enabled: boolean;
-		color: string;
-		blur: number;
-		offsetX: number;
-		offsetY: number;
-		inset?: boolean;
-		visibleOnHover?: boolean;
-	};
-
-	distortion?: {
-		enabled: boolean;
-		type: string;
-		amount: number;
-		speed: number;
-		animated?: boolean;
-		frequency?: number;
-		visibleOnHover?: boolean;
-	};
-
-	[key: string]: unknown;
+	onUpdate: (config: T) => void;
+	onDelete?: () => void;
 }

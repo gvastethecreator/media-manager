@@ -1,6 +1,6 @@
 'use client';
 
-import { ColorPicker } from '@/components/features/entity-cards/settings/panels/shared/color-picker';
+import { ColorPicker } from '@/components/features/entity-cards/settingsold/panels/shared/color-picker';
 import type { CardOptions } from '@/components/features/entity-cards/types/card-settings-types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';

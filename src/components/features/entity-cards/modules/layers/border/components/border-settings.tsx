@@ -7,19 +7,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BLEND_MODES, BORDER_STYLES } from '@/config/constants';
 import { useCallback } from 'react';
 import type { BorderConfig } from '../actions/border-config.action';
 
+// Constantes para opciones de selección
+const BORDER_STYLES = ['solid', 'dashed', 'dotted', 'double'];
+const BLEND_MODES = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion'];
+
+// Extender la interfaz BorderConfig para incluir propiedades adicionales
+interface ExtendedBorderConfig extends BorderConfig {
+	visibleOnHover?: boolean;
+	layerIndex?: number;
+	glow?: boolean;
+	glowColor?: string;
+	glowRadius?: number;
+	gradient?: boolean;
+	gradientAngle?: number;
+	gradientColors?: string[];
+	blendMode?: string;
+}
+
 interface BorderSettingsProps {
-	config: BorderConfig;
-	onConfigChange: (config: Partial<BorderConfig>) => void;
+	config: ExtendedBorderConfig;
+	onConfigChange: (config: Partial<ExtendedBorderConfig>) => void;
 }
 
 export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) {
 	// Manejador genérico de cambios
 	const handleChange = useCallback(
-		(key: keyof BorderConfig, value: any) => {
+		(key: keyof ExtendedBorderConfig, value: any) => {
 			onConfigChange({ [key]: value });
 		},
 		[onConfigChange]
@@ -42,7 +58,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 					<Label htmlFor="visibleOnHover">Visible en Hover</Label>
 					<Switch
 						id="visibleOnHover"
-						checked={config.visibleOnHover}
+						checked={config.visibleOnHover || false}
 						onCheckedChange={(checked) => handleChange('visibleOnHover', checked)}
 					/>
 				</div>
@@ -52,7 +68,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 					<Input
 						id="layerIndex"
 						type="number"
-						value={config.layerIndex}
+						value={config.layerIndex || 1}
 						onChange={(e) => handleChange('layerIndex', Number.parseInt(e.target.value))}
 						className="w-20"
 					/>
@@ -129,7 +145,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 							<Label htmlFor="glow">Efecto Brillo</Label>
 							<Switch
 								id="glow"
-								checked={config.glow}
+								checked={config.glow || false}
 								onCheckedChange={(checked) => handleChange('glow', checked)}
 							/>
 						</div>
@@ -162,7 +178,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 							<Label htmlFor="gradient">Gradiente</Label>
 							<Switch
 								id="gradient"
-								checked={config.gradient}
+								checked={config.gradient || false}
 								onCheckedChange={(checked) => handleChange('gradient', checked)}
 							/>
 						</div>

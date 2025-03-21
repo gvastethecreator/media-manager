@@ -4,9 +4,43 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { ColorPicker } from '../../components/color-picker';
-import { SettingsSection } from '../../components/settings-section';
 import type { FilterConfig, FilterType } from '../filter-schema';
+
+// Componente ColorPicker simplificado para reemplazar la importación que falta
+const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => (
+	<div className="flex items-center gap-2">
+		<div
+			className="w-8 h-8 rounded-md border"
+			style={{ backgroundColor: color }}
+		/>
+		<input
+			type="color"
+			value={color}
+			onChange={(e) => onChange(e.target.value)}
+			className="w-12 h-8"
+		/>
+		<input
+			type="text"
+			value={color}
+			onChange={(e) => onChange(e.target.value)}
+			className="flex-1 rounded-md border px-2 py-1 text-sm"
+		/>
+	</div>
+);
+
+// Componente SettingsSection simplificado para reemplazar la importación que falta
+const SettingsSection = ({
+	title,
+	children
+}: {
+	title: string;
+	children: React.ReactNode
+}) => (
+	<div className="space-y-3 py-2">
+		<h3 className="text-sm font-medium">{title}</h3>
+		<div className="space-y-2">{children}</div>
+	</div>
+);
 
 interface FilterSettingsProps {
 	config: FilterConfig;

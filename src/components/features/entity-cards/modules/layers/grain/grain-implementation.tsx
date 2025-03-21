@@ -1,7 +1,6 @@
 import type { LayerImplementation } from '../types';
 import type { GrainConfig } from './actions/grain-config.action';
 import { GrainLayer } from './components/grain-layer';
-import { GrainSettings } from './components/grain-settings';
 
 /**
  * 🌾 Implementación de la capa de grano
@@ -29,7 +28,6 @@ export const grainImplementation: LayerImplementation<GrainConfig> = {
 		layerIndex: 6,
 	},
 	render: GrainLayer,
-	settings: GrainSettings,
 	presets: [
 		{
 			name: 'Película Clásica',
@@ -122,7 +120,7 @@ export const grainImplementation: LayerImplementation<GrainConfig> = {
 				speed: 0,
 				colorMode: 'monochrome',
 				opacity: 0.2,
-				blend: 'soft-light',
+				blend: 'normal',
 				seed: 999,
 				pattern: 'simplex',
 				fractalNoise: false,

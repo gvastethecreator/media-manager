@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import type { BaseLayerConfig } from './types';
+import type { BaseLayerConfig } from './layer-config-base';
 
 interface LayerRegistration<T extends BaseLayerConfig = BaseLayerConfig> {
 	type: string;
@@ -29,6 +29,8 @@ interface LayerPluginContextType {
 	getLayer: (type: string) => LayerRegistration | undefined;
 	activeLayer: string | null;
 	setActiveLayer: (type: string | null) => void;
+	getLayers: () => LayerRegistration[];
+	getOrderedLayers: (order?: string[]) => LayerRegistration[];
 }
 
 const LayerPluginContext = React.createContext<LayerPluginContextType | null>(null);
@@ -74,30 +76,71 @@ export function LayerPluginProvider({
 		return layers.get(type);
 	}, [layers]);
 
-	// Valor del contexto
-	const value = React.useMemo(() => ({
-		layers,
-		registerLayer,
-		unregisterLayer,
-		getLayer,
-		activeLayer,
-		setActiveLayer,
-	}), [layers, registerLayer, unregisterLayer, getLayer, activeLayer]);
+	// Función para obtener todas las capas
+	const getLayers = React.useCallback(() => {
+		return Array.from(layers.values());
+	}, [layers]);
+
+	// Función para obtener capas ordenadas
+	const getOrderedLayers = React.useCallback((order?: string[]) => {
+		const allLayers = Array.from(layers.values());
+		if (!order || order.length === 0) return allLayers;
+
+		const orderedLayers: LayerRegistration[] = [];
+		// Primero agregamos las capas en el orden especificado
+		order.forEach(type => {
+			const layer = layers.get(type);
+			if (layer) orderedLayers.push(layer);
+		});
+
+		// Luego agregamos las capas restantes que no estaban en el orden
+		allLayers.forEach(layer => {
+			if (!order.includes(layer.type)) {
+				orderedLayers.push(layer);
+			}
+		});
+
+		return orderedLayers;
+	}, [layers]);
+
+	// Crear el valor del contexto
+	const contextValue = React.useMemo(
+		() => ({
+			layers,
+			registerLayer,
+			unregisterLayer,
+			getLayer,
+			activeLayer,
+			setActiveLayer,
+			getLayers,
+			getOrderedLayers,
+		}),
+		[
+			layers,
+			registerLayer,
+			unregisterLayer,
+			getLayer,
+			activeLayer,
+			setActiveLayer,
+			getLayers,
+			getOrderedLayers,
+		]
+	);
 
 	return (
-		<LayerPluginContext.Provider value={value}>
+		<LayerPluginContext.Provider value={contextValue}>
 			{children}
 		</LayerPluginContext.Provider>
 	);
 }
 
 /**
- * 🎯 Hook para acceder al sistema de plugins de capas
+ * 🔌 Hook para usar el sistema de plugins de capas
  */
 export function useLayerPlugin(): LayerPluginContextType {
 	const context = React.useContext(LayerPluginContext);
 	if (!context) {
-		throw new Error('useLayerPlugin debe usarse dentro de un LayerPluginProvider');
+		throw new Error('useLayerPlugin debe ser usado dentro de un LayerPluginProvider');
 	}
 	return context;
 }
@@ -105,7 +148,7 @@ export function useLayerPlugin(): LayerPluginContextType {
 /**
  * 🎨 Componente para renderizar una capa
  */
-export function LayerRenderer<T extends BaseLayerConfig>({
+export function SingleLayerRenderer<T extends BaseLayerConfig>({
 	type,
 	config,
 	...props
@@ -156,7 +199,7 @@ export function LayerSettings<T extends BaseLayerConfig>({
 	return (
 		<Settings
 			config={config}
-			onConfigChange={onConfigChange}
+			onConfigChange={onConfigChange as (config: Partial<BaseLayerConfig>) => void}
 		/>
 	);
 }
@@ -175,13 +218,13 @@ export function LayerList({
 
 	return (
 		<div className="space-y-2">
-			{Array.from(layers.values()).map(layer => (
+			{Array.from(layers.values()).map((layer) => (
 				<button
 					key={layer.type}
 					onClick={() => onSelect(layer.type)}
 					className={`flex items-center gap-2 p-2 w-full rounded ${selectedType === layer.type
-							? 'bg-primary text-primary-foreground'
-							: 'hover:bg-accent'
+						? 'bg-primary text-primary-foreground'
+						: 'hover:bg-accent'
 						}`}
 				>
 					{layer.icon && <span>{layer.icon}</span>}
