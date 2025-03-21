@@ -11,11 +11,11 @@ import { GridLayer } from './components/grid-layer';
 /**
  * 📏 Implementación de la capa de grid
  */
-export const gridImplementation: LayerImplementation = {
+  export const gridImplementation: LayerImplementation = {
   type: 'grid',
   name: 'Cuadrícula',
   description: 'Añade un patrón de cuadrícula a la tarjeta',
-  defaultConfig: createDefaultGridConfig(),
+  defaultConfig: await createDefaultGridConfig(),
   render: GridLayer,
   settings: GridConfigForm,
   serverActions: {

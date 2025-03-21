@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import type { BaseLayerConfig } from '../types';
+import type { BaseLayerConfig } from '../layer-config-base';
 
 interface UseBaseLayerProps<T extends BaseLayerConfig> {
     config: T;

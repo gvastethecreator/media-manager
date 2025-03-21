@@ -1,6 +1,6 @@
 'use client';
 
-import type { CardOptions } from '../../settingsold/types';
+import type { CardOptions } from '../../settings-old/types';
 import type { PerformanceOptions } from './types';
 
 /**

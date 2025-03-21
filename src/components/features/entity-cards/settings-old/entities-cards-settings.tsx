@@ -14,7 +14,7 @@ import {
 	RegisterAllLayers
 } from '@/components/features/entity-cards/modules/layers';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
-import { PresetsPanel } from '@/components/features/entity-cards/settingsold/panels/presets-panel';
+import { PresetsPanel } from '@/components/features/entity-cards/settings-old/panels/presets-panel';
 import type { RarityConfig, TextureConfig } from '@/components/features/entity-cards/types/base-card-types';
 import type {
 	CardConfigurationDto,

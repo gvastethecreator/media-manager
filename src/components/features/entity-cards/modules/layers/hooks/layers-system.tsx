@@ -4,12 +4,13 @@
  */
 
 import { useState } from 'react';
-import type { LayersConfig } from '../../../../types/unified-card-types';
+import type { CardOptions } from '../../../types/card-settings-types';
+import { LayersConfig } from '../../../types/unified-card-types';
 
 /**
  * Hook para gestionar el sistema de capas
  */
-export function useLayersSystem({ layers }: { layers?: LayersConfig }) {
+export function useLayersSystem({ layers }: { layers?: CardOptions }) {
 	const [config, setConfig] = useState(layers || {});
 
 	// Obtener el orden de capas según la configuración
@@ -21,7 +22,7 @@ export function useLayersSystem({ layers }: { layers?: LayersConfig }) {
 		const order = config.order || defaultOrder;
 
 		// Filtrar capas deshabilitadas
-		return order.filter((layer) => {
+		return order.filter((layer: string) => {
 			// Capas específicas
 			if (layer === 'background' && config.background?.enabled === false) return false;
 			if (layer === 'frame' && config.frame?.enabled === false) return false;
@@ -32,7 +33,7 @@ export function useLayersSystem({ layers }: { layers?: LayersConfig }) {
 
 	// Actualizar la configuración de capas
 	const updateLayersConfig = (newConfig: Partial<LayersConfig>) => {
-		setConfig((current) => ({
+		setConfig((current: LayersConfig	) => ({
 			...current,
 			...newConfig,
 		}));
@@ -40,7 +41,7 @@ export function useLayersSystem({ layers }: { layers?: LayersConfig }) {
 
 	// Establecer la configuración de una capa específica
 	const setLayerConfig = (layerId: string, layerConfig: Record<string, unknown>) => {
-		setConfig((current) => ({
+		setConfig((current: LayersConfig) => ({
 			...current,
 			[layerId]: {
 				...((current[layerId as keyof LayersConfig] as Record<string, unknown>) || {}),

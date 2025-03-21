@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import type { BaseLayerConfig } from '../../types';
+import type { BaseLayerConfig } from '../../layer-config-base';
 
 // 🎨 Constantes
 export const GRID_TYPES = ['lines', 'dots', 'squares', 'hexagons', 'diamonds'] as const;
@@ -120,7 +120,7 @@ interface GridConfigResponse {
 /**
  * Crea una configuración predeterminada para la capa grid
  */
-export function createDefaultGridConfig(): GridConfig {
+export async function createDefaultGridConfig(): Promise<GridConfig> {
     return {
         enabled: true,
         visibleOnHover: false,
@@ -151,7 +151,7 @@ export async function getGridConfig(entityType: string, entityId?: string): Prom
             return {
                 success: true,
                 message: 'Configuración predeterminada cargada',
-                data: createDefaultGridConfig(),
+                data: await createDefaultGridConfig(),
             };
         }
 
@@ -177,7 +177,7 @@ export async function getGridConfig(entityType: string, entityId?: string): Prom
         return {
             success: true,
             message: 'Configuración predeterminada cargada',
-            data: createDefaultGridConfig(),
+            data: await createDefaultGridConfig(),
         };
     } catch (error) {
         console.error('Error al obtener configuración de grid:', error);

@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallback } from 'react';
-import type { BaseLayerConfig } from '../../layer-config-base';
+import type { AnimatedBorderConfig } from '../actions/animated-border-config.action';
 
 // Definir los modos de mezcla disponibles
 const BLEND_MODES = [
@@ -18,26 +18,7 @@ const BLEND_MODES = [
 	'overlay',
 	'darken',
 	'lighten',
-	'color-dodge',
-	'color-burn',
-	'hard-light',
-	'soft-light',
-	'difference',
-	'exclusion',
 ];
-
-// Definir la configuración específica para bordes animados
-export interface AnimatedBorderConfig extends BaseLayerConfig {
-	enabled: boolean;
-	layerIndex: number;
-	visibleOnHover?: boolean;
-	color: string;
-	width: number;
-	opacity: number;
-	blendMode?: string;
-	speed?: number;
-	segments?: number;
-}
 
 interface AnimatedBorderSettingsProps {
 	config: AnimatedBorderConfig;
@@ -101,11 +82,11 @@ export function AnimatedBorderSettings({ config, onConfigChange }: AnimatedBorde
 						<div className="space-y-2">
 							<Label>Velocidad</Label>
 							<Slider
-								value={[config.speed || 0.001]}
-								onValueChange={([value]) => handleChange('speed', value)}
-								min={0.0001}
-								max={0.01}
-								step={0.0001}
+								value={[config.animationSpeed || 1]}
+								onValueChange={([value]) => handleChange('animationSpeed', value)}
+								min={0.1}
+								max={10}
+								step={0.1}
 							/>
 						</div>
 
