@@ -9,13 +9,16 @@ import {
 	FormSelect,
 	FormSlider,
 	FormToggle,
-} from '@/components/features/entity-cards/settings/panels/shared';
+} from '@/components/features/entity-cards/settingsold/panels/shared';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Eye, Info, Layers, LayoutGrid, Maximize2, RotateCw, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
+import { RegisterAllLayers } from '../layers';
+import { LayerRenderer } from '../layers/entity-card-layers';
+import { LayerPluginProvider, useLayerPlugin } from '../layers/layer-plugin-system';
 import type { PreviewModuleProps } from './types';
 import { usePreview } from './use-preview';
 
@@ -81,7 +84,6 @@ function CardPreview({
 				isExploded={isExploded}
 				isHovered={isHovered}
 				mousePosition={mousePosition}
-				getExplodeLayerTransform={getExplodeTransform}
 				onClick={onLayerSelect ? (layerId) => onLayerSelect(layerId) : undefined}
 			/>
 
@@ -264,7 +266,11 @@ export function PreviewModule({
 										<FormRow>
 											<div className="flex flex-col space-y-1.5 w-full">
 												<div className="text-sm font-medium">Rareza</div>
-												<div className="text-xs text-muted-foreground">{rarity.name || 'No especificada'}</div>
+												<div className="text-xs text-muted-foreground">
+													{(rarity as any)?.name ||
+														(rarity as any)?.label ||
+														'No especificada'}
+												</div>
 											</div>
 										</FormRow>
 									)}
@@ -272,7 +278,11 @@ export function PreviewModule({
 										<FormRow>
 											<div className="flex flex-col space-y-1.5 w-full">
 												<div className="text-sm font-medium">Textura</div>
-												<div className="text-xs text-muted-foreground">{texture.name || 'No especificada'}</div>
+												<div className="text-xs text-muted-foreground">
+													{(texture as any)?.name ||
+														(texture as any)?.label ||
+														'No especificada'}
+												</div>
 											</div>
 										</FormRow>
 									)}

@@ -1,20 +1,54 @@
 'use client';
 
-import { getGlowConfig, updateGlowConfig } from '@/components/features/entity-cards/modules/layer-system/layers/glow/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+
+// Servicio de toast simplificado
+const toast = {
+	success: (params: { title: string; description: string }) => {
+		console.log(`✅ ${params.title}: ${params.description}`);
+	},
+	error: (params: { title: string; description: string; variant?: string }) => {
+		console.error(`❌ ${params.title}: ${params.description}`);
+	}
+};
+
+// Mock para las acciones del servidor
+const mockServerActions = {
+	getGlowConfig: async (entityType: string, entityId?: string) => {
+		// Retorna una respuesta simulada
+		return {
+			success: true,
+			data: {
+				enabled: true,
+				intensity: 0.5,
+				color: '#ffffff',
+				size: 20,
+				blurAmount: 10,
+				animationType: 'none' as const,
+				pulseSpeed: 1,
+				visibleOnHover: false,
+				layerIndex: 2,
+			},
+			message: 'Configuración cargada exitosamente'
+		};
+	},
+	updateGlowConfig: async (entityType: string, entityId: string, config: any) => {
+		// Simula una actualización exitosa
+		return { success: true };
+	}
+};
 
 const glowFormSchema = z.object({
 	enabled: z.boolean(),
@@ -25,23 +59,23 @@ const glowFormSchema = z.object({
 	animationType: z.enum(['none', 'pulse', 'wave', 'sparkle']),
 	pulseSpeed: z.number().min(0),
 	visibleOnHover: z.boolean(),
+	layerIndex: z.number().optional(),
 });
 
 type GlowFormValues = z.infer<typeof glowFormSchema>;
 
 interface GlowSettingsProps {
-	entityType: string;
-	entityId?: string;
+	config: GlowFormValues;
+	onConfigChange: (config: Partial<GlowFormValues>) => void;
 	className?: string;
-	onConfigChange?: (config: GlowFormValues) => void;
 }
 
-export function GlowSettings({ entityType, entityId, className, onConfigChange }: GlowSettingsProps) {
+export function GlowSettings({ config, onConfigChange, className }: GlowSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm<GlowFormValues>({
 		resolver: zodResolver(glowFormSchema),
-		defaultValues: {
+		defaultValues: config || {
 			enabled: true,
 			intensity: 0.5,
 			color: '#ffffff',
@@ -50,82 +84,32 @@ export function GlowSettings({ entityType, entityId, className, onConfigChange }
 			animationType: 'none',
 			pulseSpeed: 1,
 			visibleOnHover: false,
+			layerIndex: 2,
 		},
 	});
 
+	// Actualizar el formulario cuando cambia la configuración externa
 	useEffect(() => {
-		const loadConfig = async () => {
-			try {
-				setIsLoading(true);
-				const response = await getGlowConfig(entityType, entityId);
-
-				if (response.success && response.data) {
-					form.reset({
-						enabled: response.data.enabled,
-						intensity: response.data.intensity,
-						color: response.data.color,
-						size: response.data.size,
-						blurAmount: response.data.blurAmount,
-						animationType: response.data.animationType || 'none',
-						pulseSpeed: response.data.pulseSpeed || 1,
-						visibleOnHover: response.data.visibleOnHover || false,
-					});
-				} else {
-					toast({
-						title: 'Error',
-						description: response.message,
-						variant: 'destructive',
-					});
-				}
-			} catch (error) {
-				console.error('Error al cargar la configuración de glow:', error);
-				toast({
-					title: 'Error',
-					description: 'No se pudo cargar la configuración de glow.',
-					variant: 'destructive',
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadConfig();
-	}, [entityType, entityId, form]);
+		if (config) {
+			form.reset(config);
+		}
+	}, [config, form]);
 
 	const onSubmit = async (values: GlowFormValues) => {
 		setIsLoading(true);
 
 		try {
-			// Si hay una función onConfigChange, la llamamos con los valores
-			if (onConfigChange) {
-				onConfigChange(values);
-				toast({
-					title: "Configuración actualizada",
-					description: "La configuración de brillo ha sido actualizada.",
-				});
-			}
-			// Si no hay onConfigChange, usamos la acción de servidor
-			else if (entityId) {
-				const result = await updateGlowConfig(entityType, entityId, values);
-
-				if (result.success) {
-					toast({
-						title: "Configuración guardada",
-						description: "La configuración de brillo ha sido guardada.",
-					});
-				} else {
-					toast({
-						title: "Error al guardar",
-						description: result.error || "Ha ocurrido un error al guardar la configuración.",
-						variant: "destructive",
-					});
-				}
-			}
+			// Llamar a la función onConfigChange para actualizar la configuración
+			onConfigChange(values);
+			toast.success({
+				title: "Configuración actualizada",
+				description: "La configuración de brillo ha sido actualizada.",
+			});
 		} catch (error) {
-			console.error("Error al guardar la configuración:", error);
-			toast({
+			console.error("Error al actualizar la configuración:", error);
+			toast.error({
 				title: "Error",
-				description: "Ha ocurrido un error al guardar la configuración.",
+				description: "Ha ocurrido un error al actualizar la configuración.",
 				variant: "destructive",
 			});
 		} finally {
@@ -169,10 +153,10 @@ export function GlowSettings({ entityType, entityId, className, onConfigChange }
 										<FormItem>
 											<FormLabel>Color del Glow</FormLabel>
 											<FormControl>
-												<div className="flex gap-2">
-													<Input {...field} type="color" className="w-12 h-12 p-1" />
-													<Input {...field} placeholder="#ffffff" className="flex-1" />
-												</div>
+												<ColorPicker
+													value={field.value}
+													onChange={field.onChange}
+												/>
 											</FormControl>
 											<FormDescription>Selecciona el color del efecto glow.</FormDescription>
 										</FormItem>

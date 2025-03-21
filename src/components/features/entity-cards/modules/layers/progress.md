@@ -146,7 +146,7 @@ src/components/features/entity-cards/layers/{layer-name}/
 - [ ] Completar chromatic-aberration
 - [ ] Implementar distortion
 - [ ] Implementar noise-texture
-- [ ] Implementar shaders
+- [x] Implementar shaders
 
 ### 3. Prioridad Baja - Optimizaciones
 - [ ] Revisar y optimizar las capas ya implementadas

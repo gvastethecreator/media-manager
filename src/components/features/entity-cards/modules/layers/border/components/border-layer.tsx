@@ -3,12 +3,23 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useMemo } from 'react';
-import type { CommonLayerProps } from '../../../types/card-layer-types';
 import type { BorderConfig } from '../actions/border-config.action';
 import { useBorder } from '../hooks/use-border';
 
+// Define la interfaz de propiedades comunes para capas
+interface CommonLayerProps {
+	isExploded: boolean;
+	isHovered: boolean;
+	activeLayer: string | null;
+	getExplodeLayerTransform: (index: number) => any;
+}
+
 interface BorderLayerProps extends CommonLayerProps {
-	config: BorderConfig;
+	config: BorderConfig & {
+		visibleOnHover?: boolean;
+		layerIndex?: number;
+		blendMode?: string;
+	};
 }
 
 export function BorderLayer({

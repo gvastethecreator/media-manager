@@ -7,9 +7,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BLEND_MODES } from '@/config/constants';
 import { useCallback } from 'react';
-import type { AnimatedBorderConfig } from '@/components/features/entity-cards/modules/layers/animated-border/actions/animated-border-config.action';
+import type { BaseLayerConfig } from '../../layer-config-base';
+
+// Definir los modos de mezcla disponibles
+const BLEND_MODES = [
+	'normal',
+	'multiply',
+	'screen',
+	'overlay',
+	'darken',
+	'lighten',
+	'color-dodge',
+	'color-burn',
+	'hard-light',
+	'soft-light',
+	'difference',
+	'exclusion',
+];
+
+// Definir la configuración específica para bordes animados
+export interface AnimatedBorderConfig extends BaseLayerConfig {
+	enabled: boolean;
+	layerIndex: number;
+	visibleOnHover?: boolean;
+	color: string;
+	width: number;
+	opacity: number;
+	blendMode?: string;
+	speed?: number;
+	segments?: number;
+}
 
 interface AnimatedBorderSettingsProps {
 	config: AnimatedBorderConfig;
@@ -143,7 +171,7 @@ export function AnimatedBorderSettings({ config, onConfigChange }: AnimatedBorde
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									{BLEND_MODES.map((mode) => (
+									{BLEND_MODES.map((mode: string) => (
 										<SelectItem key={mode} value={mode}>
 											{mode}
 										</SelectItem>

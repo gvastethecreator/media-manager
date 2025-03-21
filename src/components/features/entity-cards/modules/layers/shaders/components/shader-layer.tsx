@@ -1,108 +1,216 @@
-import { cn } from '@/lib/utils';
+'use client';
+
 import { motion } from 'motion/react';
-import type React from 'react';
-import { useEffect, useRef } from 'react';
-import { useShaderStore } from '../actions/shader-config.action';
-import { initializeShader, updateShaderUniforms } from '../utils/shader-utils';
+import { useCallback, useEffect, useState } from 'react';
+import { withBaseLayer } from '../../components/base-layer';
+import { BaseShader } from '../base-shader';
+import { DistortionShader } from '../distortion-shader';
+import { HologramShader } from '../hologram-shader';
+import { ParticleShader } from '../particle-shader';
+import type { ShaderConfig } from '../shader-config-schema';
+import { WaveShader } from '../wave-shader';
 
 interface ShaderLayerProps {
-  className?: string;
-  width: number;
-  height: number;
+  processedConfig: ShaderConfig;
+  style: React.CSSProperties;
+  isVisible: boolean;
+  isActive: boolean;
+  safeMousePosition: { x: number; y: number };
 }
 
-export const ShaderLayer: React.FC<ShaderLayerProps> = ({ className, width, height }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const glRef = useRef<WebGLRenderingContext | null>(null);
-  const programRef = useRef<WebGLProgram | null>(null);
-  const animationFrameRef = useRef<number>(0);
+/**
+ * 🌟 Componente interno de shader
+ */
+const ShaderLayerComponent = ({
+  processedConfig,
+  style,
+  isVisible,
+  isActive,
+  safeMousePosition,
+}: ShaderLayerProps) => {
+  const [time, setTime] = useState(0);
+  const [animationFrame, setAnimationFrame] = useState<number | null>(null);
 
-  const { configs, activeType } = useShaderStore();
-  const activeConfig = activeType ? configs[activeType] : null;
-
-  // Inicializar WebGL y shaders
+  // Efecto para animar el shader si está habilitado
   useEffect(() => {
-    if (!canvasRef.current || !activeType || !activeConfig?.enabled) return;
+    if (processedConfig.animated && isVisible) {
+      let frame: number;
 
-    const canvas = canvasRef.current;
-    const gl = canvas.getContext('webgl');
+      const animate = () => {
+        setTime((prevTime) => prevTime + 0.01 * processedConfig.speed);
+        frame = requestAnimationFrame(animate);
+        return frame;
+      };
 
-    if (!gl) {
-      console.error('WebGL no está disponible');
-      return;
+      frame = requestAnimationFrame(animate);
+
+      return () => {
+        if (frame) {
+          cancelAnimationFrame(frame);
+        }
+      };
     }
+  }, [processedConfig.animated, processedConfig.speed, isVisible]);
 
-    glRef.current = gl;
-    programRef.current = initializeShader(gl, activeType);
+  // Configuración base para todos los shaders
+  const baseOptions = {
+    visibleOnHover: processedConfig.visibleOnHover,
+    intensity: processedConfig.intensity,
+    duration: 0.3,
+  };
 
-    return () => {
-      if (programRef.current) {
-        gl.deleteProgram(programRef.current);
+  // Uniforms comunes para todos los shaders
+  const commonUniforms = {
+    time: time,
+    resolution: [window.innerWidth, window.innerHeight],
+    mousePos: [safeMousePosition.x, safeMousePosition.y],
+    intensity: processedConfig.intensity,
+  };
+
+  // Renderizar el shader según el tipo seleccionado
+  const renderShader = useCallback(() => {
+    switch (processedConfig.type) {
+      case 'distortion':
+        return (
+          <DistortionShader
+            isExploded={isActive}
+            isHovered={isVisible}
+            activeLayer={isActive ? 'shader' : null}
+            getExplodeLayerTransform={() => ({})}
+            options={baseOptions}
+            uniforms={{
+              ...commonUniforms,
+              distortionAmount: processedConfig.intensity * 0.1,
+              distortionSpeed: processedConfig.speed,
+            }}
+          />
+        );
+
+      case 'hologram':
+        return (
+          <HologramShader
+            isExploded={isActive}
+            isHovered={isVisible}
+            activeLayer={isActive ? 'shader' : null}
+            getExplodeLayerTransform={() => ({})}
+            options={baseOptions}
+            uniforms={{
+              ...commonUniforms,
+              scanlineFrequency: 50.0,
+              scanlineIntensity: processedConfig.intensity * 0.5,
+              hologramColor: [0.0, 0.8, 1.0, 1.0],
+            }}
+          />
+        );
+
+      case 'wave':
+        return (
+          <WaveShader
+            isExploded={isActive}
+            isHovered={isVisible}
+            activeLayer={isActive ? 'shader' : null}
+            getExplodeLayerTransform={() => ({})}
+            options={baseOptions}
+            uniforms={{
+              ...commonUniforms,
+              waveAmplitude: processedConfig.intensity * 0.05,
+              waveFrequency: 10.0 * processedConfig.speed,
+            }}
+          />
+        );
+
+      case 'particle':
+        return (
+          <ParticleShader
+            isExploded={isActive}
+            isHovered={isVisible}
+            activeLayer={isActive ? 'shader' : null}
+            getExplodeLayerTransform={() => ({})}
+            options={baseOptions}
+            uniforms={{
+              ...commonUniforms,
+              particleCount: 100,
+              particleSize: processedConfig.intensity * 5.0,
+              particleSpeed: processedConfig.speed,
+            }}
+          />
+        );
+
+      // Caso por defecto: shader base personalizado
+      default: {
+        // Si hay shaders personalizados definidos en configuración avanzada, los usamos
+        if (processedConfig.advanced?.fragmentShader && processedConfig.advanced?.vertexShader) {
+          return (
+            <BaseShader
+              isExploded={isActive}
+              isHovered={isVisible}
+              activeLayer={isActive ? 'shader' : null}
+              getExplodeLayerTransform={() => ({})}
+              options={baseOptions}
+              vertexShader={processedConfig.advanced.vertexShader}
+              fragmentShader={processedConfig.advanced.fragmentShader}
+              uniforms={{
+                ...commonUniforms,
+                ...(processedConfig.advanced.uniforms || {}),
+              }}
+            />
+          );
+        }
+
+        // Shader básico por defecto
+        const defaultVertexShader = `
+			attribute vec2 position;
+			varying vec2 vUv;
+			void main() {
+			vUv = 0.5 * (position + 1.0);
+			gl_Position = vec4(position, 0.0, 1.0);
+			}
+		`;
+
+        const defaultFragmentShader = `
+			precision mediump float;
+			varying vec2 vUv;
+			uniform float time;
+			uniform vec2 resolution;
+			uniform float intensity;
+
+			void main() {
+			vec2 uv = vUv;
+			vec3 color = 0.5 + 0.5 * cos(time + uv.xyx + vec3(0, 2, 4));
+			gl_FragColor = vec4(color * intensity, 1.0);
+			}
+		`;
+
+        return (
+          <BaseShader
+            isExploded={isActive}
+            isHovered={isVisible}
+            activeLayer={isActive ? 'shader' : null}
+            getExplodeLayerTransform={() => ({})}
+            options={baseOptions}
+            vertexShader={defaultVertexShader}
+            fragmentShader={defaultFragmentShader}
+            uniforms={commonUniforms}
+          />
+        );
       }
-      glRef.current = null;
-      programRef.current = null;
-    };
-  }, [activeType, activeConfig?.enabled]);
-
-  // Manejar cambios de tamaño
-  useEffect(() => {
-    if (!canvasRef.current || !glRef.current) return;
-
-    const canvas = canvasRef.current;
-    const gl = glRef.current;
-
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, width, height);
-  }, [width, height]);
-
-  // Loop de renderizado
-  useEffect(() => {
-    if (!glRef.current || !programRef.current || !activeConfig?.enabled) return;
-
-    const gl = glRef.current;
-    const program = programRef.current;
-
-    const render = () => {
-      if (!gl || !program || !activeConfig?.enabled) return;
-
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      updateShaderUniforms(gl, program, activeConfig);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-      animationFrameRef.current = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, [activeConfig]);
-
-  // Si no hay shader activo o está deshabilitado, no renderizar nada
-  if (!activeType || !activeConfig?.enabled) return null;
+    }
+  }, [processedConfig, isVisible, isActive, safeMousePosition, time]);
 
   return (
-    <motion.canvas
-      ref={canvasRef}
-      className={cn(
-        'absolute inset-0 pointer-events-none',
-        {
-          'mix-blend-normal': activeConfig.blendMode === 'normal',
-          'mix-blend-multiply': activeConfig.blendMode === 'multiply',
-          'mix-blend-screen': activeConfig.blendMode === 'screen',
-          'mix-blend-overlay': activeConfig.blendMode === 'overlay',
-        },
-        className
-      )}
+    <motion.div
+      style={style}
+      className="absolute inset-0 pointer-events-none"
       initial={{ opacity: 0 }}
-      animate={{ opacity: activeConfig.opacity }}
+      animate={{ opacity: isVisible ? processedConfig.opacity || 1 : 0 }}
       transition={{ duration: 0.3 }}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    />
+    >
+      {renderShader()}
+    </motion.div>
   );
 };
+
+/**
+ * 🌟 Capa de shader con funcionalidad base
+ */
+export const ShaderLayer = withBaseLayer<ShaderConfig>(ShaderLayerComponent);

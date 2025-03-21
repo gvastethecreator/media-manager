@@ -1,5 +1,4 @@
 import type { KeyboardEvent } from 'react';
-import type { AnimationPresets, DesignSystem, VisualSystem } from '../base-card';
 
 /**
  * Opciones de efectos visuales para las tarjetas
