@@ -20,7 +20,7 @@ import * as React from 'react';
 
 import { LayerPluginProvider } from '@/components/features/entity-cards/modules/layer-system/layers/layer-plugin-system';
 import { cn } from '@/lib/utils';
-import { EntitiesCardsSection } from '../features/entity-cards/settingsold/entities-cards-settings';
+import { EntitiesCardsSection } from '../features/entity-cards/settings-old/entities-cards-settings';
 import { AlbumsSettings } from './albums/albums-settings';
 import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';

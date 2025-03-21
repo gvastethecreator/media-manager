@@ -1,6 +1,6 @@
 'use client';
 
-import { FormLayout, FormToggle } from '@/components/features/entity-cards/settingsold/panels/shared';
+import { FormLayout, FormToggle } from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutGrid, Settings2, Volume2, Zap } from 'lucide-react';
 import { useState } from 'react';
