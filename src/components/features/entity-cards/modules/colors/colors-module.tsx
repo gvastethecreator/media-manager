@@ -1,6 +1,6 @@
 'use client';
 
-import { FormGroup, FormInput, FormLayout, FormRow, FormSection, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
+import { FormGroup, FormInput, FormLayout, FormRow, FormSection, FormToggle } from '@/components/features/entity-cards/settingsold/panels/shared';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ColorPaletteSelector } from './color-palette-selector';

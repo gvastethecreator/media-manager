@@ -1,36 +1,37 @@
 'use client';
 
-import type { GlowEffectOptions } from '../../../../types/base-card-types';
-import type { LayerComponent } from '../layer-plugin-system';
-import { deleteGlowConfig, getGlowConfig, updateGlowConfig } from './actions';
-import { GlowEffectLayer } from './glow-effect-layer';
-import { GlowSettings } from './glow-settings';
+/**
+ * ✨ Módulo de capa de brillo para tarjetas de entidades
+ *
+ * Este módulo proporciona efectos de brillo y resplandor para las tarjetas.
+ */
 
-// Registrar la capa para el sistema de plugins
-export const glowLayer: LayerComponent<GlowEffectOptions> = {
-	type: 'glow',
-	Component: GlowEffectLayer,
-	SettingsComponent: GlowSettings,
-	defaultConfig: {
-		enabled: true,
-		intensity: 0.5,
-		color: 'rgba(0, 153, 255, 0.35)',
-		size: 100,
-		blurAmount: 30,
-		animationType: 'follow-mouse',
-		pulseSpeed: 1.5,
-		visibleOnHover: true,
-		layerIndex: 4,
-	},
-	getServerActions: () => ({
-		getConfig: getGlowConfig,
-		updateConfig: updateGlowConfig,
-		deleteConfig: deleteGlowConfig,
-	}),
+import { GlowEffectLayer } from './glow-effect-layer';
+import { type GlowConfig, defaultGlowConfig, glowLayerImplementation } from './glow-layer-implementation';
+import type { LayerImplementation } from '../types';
+
+export { GlowEffectLayer, defaultGlowConfig, glowLayerImplementation };
+export type { GlowConfig };
+
+/**
+ * 🌟 Implementación de la capa de resplandor
+ */
+const glowLayer: LayerImplementation = {
+  type: 'glow',
+  name: 'Resplandor',
+  description: 'Añade un efecto de resplandor alrededor de la tarjeta',
+  defaultConfig: {
+    enabled: true,
+    layerIndex: 4,
+    color: '#00aaff',
+    size: 10,
+    intensity: 0.5,
+    blendMode: 'screen',
+  },
+  render: () => null, // Stub implementation
+  settings: () => null, // Stub implementation
+  icon: 'sun',
 };
 
-// Exportaciones adicionales
-export * from './actions';
-export { GlowEffectLayer } from './glow-effect-layer';
-export { GlowSettings } from './glow-settings';
+export default glowLayer;
 

@@ -12,6 +12,7 @@ import { createDebugger } from '../debug/render-debug';
 import { EntityCard } from '../entity-card';
 import { JsonEntityCard } from '../json-entity-card';
 import type { CardOptions } from '../types/unified-card-types';
+import { cn } from '../utils/cn';
 import { normalizeEntityData } from '../utils/data-validator';
 
 // Crear debugger para el adaptador
@@ -110,7 +111,20 @@ export function SimpleCardAdapter({
 				/>
 			);
 
-		case 'simple':
+		case 'compact':
+			return (
+				<CompactCard
+					name={title}
+					description={description}
+					image={displayImage}
+					icon={icon}
+					metadata={metadata}
+					badges={badges}
+					className={cn('compact-card', className)}
+					onClick={onClick ? () => onClick() : undefined}
+				/>
+			);
+
 		default:
 			return (
 				<EntityCard
@@ -120,7 +134,7 @@ export function SimpleCardAdapter({
 					image={displayImage}
 					options={options as any}
 					onClick={onClick ? () => onClick() : undefined}
-					className={className}
+					className={cn('simple-card', className)}
 				/>
 			);
 	}

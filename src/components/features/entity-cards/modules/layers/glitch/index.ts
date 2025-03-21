@@ -1,12 +1,16 @@
-// 🎨 Componentes
-export { GlitchConfig } from './components/glitch-config';
-export { GlitchLayer } from './components/glitch-layer';
+'use client';
 
-// 🔄 Store y tipos
-export { useGlitchStore, type GlitchConfig } from './actions/glitch-config.action';
+/**
+ * 🔧 Módulo de capa de glitch para tarjetas de entidades
+ *
+ * Este módulo proporciona efectos de glitch y distorsión para las tarjetas.
+ */
 
-// 🛠️ Utilidades
-export { generateGlitchEffect } from './utils/glitch-utils';
+import { GlitchLayer } from './components/glitch-layer';
+import { glitchImplementation } from './glitch-implementation';
+import { type GlitchConfig, createDefaultGlitchConfig } from './glitch-schema';
 
-// 🌐 Server Actions
-export { deleteGlitchConfig, getGlitchConfig, updateGlitchConfig } from './actions/glitch-config.action';
+export { GlitchLayer, createDefaultGlitchConfig as defaultGlitchConfig, glitchImplementation };
+export type { GlitchConfig };
+
+export default glitchImplementation;

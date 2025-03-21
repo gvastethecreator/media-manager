@@ -1,6 +1,6 @@
 'use client';
 
-import { FormGroup, FormRow, FormSection, FormSelect, FormSlider, FormToggle } from '@/components/features/entity-cards/settings/panels/shared';
+import { FormGroup, FormRow, FormSection, FormSelect, FormSlider, FormToggle } from '@/components/features/entity-cards/settingsold/panels/shared';
 import { Cpu, Layers3, MousePointer, Smile, SpeakerIcon } from 'lucide-react';
 import {
 	type CoreOptions,

@@ -4,9 +4,150 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { SettingsSection } from '../../components/settings-section';
-import { ZoneSelector } from '../../components/zone-selector';
 import type { GlitchConfig } from '../glitch-schema';
+
+// Componente de sección de configuración simplificado
+const SettingsSection = ({
+	title,
+	children
+}: {
+	title: string;
+	children: React.ReactNode
+}) => (
+	<div className="space-y-3 py-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
+		<h3 className="text-sm font-medium">{title}</h3>
+		<div className="space-y-2">{children}</div>
+	</div>
+);
+
+// Componente selector de zona simplificado
+const ZoneSelector = ({
+	zone,
+	onChange
+}: {
+	zone: any;
+	onChange: (zone: any) => void
+}) => {
+	return (
+		<div className="space-y-4">
+			<div className="space-y-2">
+				<Label>Tipo de Zona</Label>
+				<Select
+					value={zone?.type || "fullscreen"}
+					onValueChange={(type) => onChange({ ...zone, type })}
+				>
+					<SelectTrigger>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="fullscreen">Pantalla completa</SelectItem>
+						<SelectItem value="circle">Círculo</SelectItem>
+						<SelectItem value="rectangle">Rectángulo</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
+
+			{zone?.type === 'circle' && (
+				<>
+					<div className="space-y-2">
+						<Label>Radio</Label>
+						<Slider
+							value={[zone.radius || 0.5]}
+							onValueChange={([radius]) => onChange({ ...zone, radius })}
+							min={0}
+							max={1}
+							step={0.01}
+						/>
+					</div>
+					<div className="grid grid-cols-2 gap-2">
+						<div className="space-y-2">
+							<Label>Posición X</Label>
+							<Slider
+								value={[(zone.center?.x || 0.5) * 100]}
+								onValueChange={([x]) => onChange({
+									...zone,
+									center: {
+										...zone.center,
+										x: x / 100
+									}
+								})}
+								min={0}
+								max={100}
+								step={1}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label>Posición Y</Label>
+							<Slider
+								value={[(zone.center?.y || 0.5) * 100]}
+								onValueChange={([y]) => onChange({
+									...zone,
+									center: {
+										...zone.center,
+										y: y / 100
+									}
+								})}
+								min={0}
+								max={100}
+								step={1}
+							/>
+						</div>
+					</div>
+				</>
+			)}
+
+			{zone?.type === 'rectangle' && (
+				<>
+					<div className="grid grid-cols-2 gap-2">
+						<div className="space-y-2">
+							<Label>Ancho</Label>
+							<Slider
+								value={[zone.size?.width || 0.5]}
+								onValueChange={([width]) => onChange({
+									...zone,
+									size: {
+										...zone.size,
+										width
+									}
+								})}
+								min={0}
+								max={1}
+								step={0.01}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label>Alto</Label>
+							<Slider
+								value={[zone.size?.height || 0.5]}
+								onValueChange={([height]) => onChange({
+									...zone,
+									size: {
+										...zone.size,
+										height
+									}
+								})}
+								min={0}
+								max={1}
+								step={0.01}
+							/>
+						</div>
+					</div>
+				</>
+			)}
+
+			<div className="space-y-2">
+				<Label>Suavizado de bordes</Label>
+				<Slider
+					value={[zone.feather || 0]}
+					onValueChange={([feather]) => onChange({ ...zone, feather })}
+					min={0}
+					max={0.5}
+					step={0.01}
+				/>
+			</div>
+		</div>
+	);
+};
 
 interface GlitchSettingsProps {
 	config: GlitchConfig;

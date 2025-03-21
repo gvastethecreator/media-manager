@@ -3,10 +3,16 @@
  * @module BaseLayer
  */
 
+'use client';
+
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useBaseLayer } from '../hooks/use-base-layer';
-import type { BaseLayerConfig } from '../types';
+import type { BaseLayerConfig } from '../layer-config-base';
+import { cn } from '@/lib/utils';
+import { useEffect, useMemo, useState } from 'react';
+import type { CommonLayerProps } from '../types';
+import type { ExplodeLayerTransformFunction } from '../../../types/base-card-types';
 
 interface BaseLayerProps<T extends BaseLayerConfig> {
 	config: T;
@@ -66,8 +72,8 @@ export function BaseLayer<T extends BaseLayerConfig>({
 	});
 
 	// Calcular estilos base
-	const baseStyle = React.useMemo(() => ({
-		position: 'absolute' as const,
+	const baseStyle: React.CSSProperties = React.useMemo(() => ({
+		position: 'absolute',
 		top: 0,
 		left: 0,
 		width: '100%',
@@ -76,7 +82,7 @@ export function BaseLayer<T extends BaseLayerConfig>({
 		opacity: isVisible ? 1 : 0,
 		...getTransform(processedConfig.layerIndex),
 		...style,
-	}), [isVisible, processedConfig.layerIndex, style]);
+	}), [isVisible, processedConfig.layerIndex, style, getTransform]);
 
 	// Configurar animaciones con Framer Motion
 	const variants = {
@@ -124,22 +130,93 @@ export function BaseLayer<T extends BaseLayerConfig>({
 	);
 }
 
-// HOC para crear capas con el componente base
-export function withBaseLayer<T extends BaseLayerConfig, P extends object>(
-	WrappedComponent: React.ComponentType<P & {
-		isVisible: boolean;
-		safeMousePosition: { x: number; y: number };
+interface WithBaseLayerProps {
+	config: BaseLayerConfig;
+	isExploded?: boolean;
+	isHovered?: boolean;
+	getExplodeLayerTransform?: ExplodeLayerTransformFunction;
+	activeLayer?: string | null;
+	className?: string;
+}
+
+/**
+ * 🧩 High Order Component para añadir funcionalidad base a cualquier capa
+ */
+export function withBaseLayer<T extends BaseLayerConfig>(
+	Component: React.ComponentType<{
 		processedConfig: T;
-		isActive: boolean;
 		style: React.CSSProperties;
+		isVisible: boolean;
 	}>
 ) {
-	return function WithBaseLayerComponent(props: P & BaseLayerProps<T>) {
-		const { children, ...rest } = props;
+	return function BaseLayerWrapper({
+		config,
+		isExploded = false,
+		isHovered = false,
+		getExplodeLayerTransform,
+		activeLayer,
+		className,
+	}: WithBaseLayerProps) {
+		// Estado para procesar la configuración
+		const [processedConfig, setProcessedConfig] = useState<T>(config as T);
+
+		// Efecto para procesar la configuración cuando cambia
+		useEffect(() => {
+			setProcessedConfig(config as T);
+		}, [config]);
+
+		// Si la capa no está habilitada, no renderizar nada
+		if (!processedConfig.enabled) {
+			return null;
+		}
+
+		// Determinar si la capa debe ser visible
+		const shouldBeVisible = useMemo(() => {
+			// Si es visible solo al hover, verificar el estado de hover
+			if (processedConfig.visibleOnHover) {
+				return isHovered;
+			}
+
+			// En caso contrario, siempre visible
+			return true;
+		}, [processedConfig.visibleOnHover, isHovered]);
+
+		// Calcular el estilo según el modo explotado y la configuración
+		const layerStyle = useMemo(() => {
+			const style: React.CSSProperties = {
+				position: 'absolute',
+				inset: 0,
+				zIndex: processedConfig.layerIndex || 0,
+				opacity: processedConfig.opacity,
+				pointerEvents: 'none',
+			};
+
+			// Si está en modo explotado y existe la función para obtener el transform, aplicarlo
+			if (isExploded && getExplodeLayerTransform) {
+				const explodeTransform = getExplodeLayerTransform(processedConfig.layerIndex || 0);
+				return { ...style, ...explodeTransform };
+			}
+
+			return style;
+		}, [isExploded, getExplodeLayerTransform, processedConfig]);
+
 		return (
-			<BaseLayer {...rest}>
-				{(layerProps) => <WrappedComponent {...props} {...layerProps} />}
-			</BaseLayer>
+			<div
+				className={cn(
+					'layer',
+					isExploded && 'exploded-layer',
+					activeLayer === (processedConfig as any).type && 'active-layer',
+					className
+				)}
+				data-layer-type={(processedConfig as any).type}
+				data-layer-index={processedConfig.layerIndex}
+			>
+				<Component
+					processedConfig={processedConfig}
+					style={layerStyle}
+					isVisible={shouldBeVisible}
+				/>
+			</div>
 		);
 	};
 }

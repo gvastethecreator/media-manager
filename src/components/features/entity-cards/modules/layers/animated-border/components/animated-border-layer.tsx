@@ -2,26 +2,29 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import type { CSSProperties } from 'react';
 import { useMemo } from 'react';
-import type { CommonLayerProps } from '../../../types/card-layer-types';
-import type { AnimatedBorderConfig } from '../actions/animated-border-config.action';
+import type { BlendMode, CommonLayerProps } from '../../types';
 import { useAnimatedBorder } from '../hooks/use-animated-border';
+import type { AnimatedBorderConfig } from './animated-border-settings';
 
 interface AnimatedBorderLayerProps extends CommonLayerProps {
   config: AnimatedBorderConfig;
+  isHovered: boolean;
+  activeLayer: string;
+  isExploded?: boolean;
 }
 
 export function AnimatedBorderLayer({
-  isExploded,
   isHovered,
   activeLayer,
-  getExplodeLayerTransform,
   config,
+  isExploded,
 }: AnimatedBorderLayerProps) {
   // Determinar si se debe renderizar
   const shouldRender = useMemo(() => {
-    return config.enabled && (isHovered || !config.visibleOnHover || (activeLayer === 'animated-border' && isExploded));
-  }, [config.enabled, config.visibleOnHover, isHovered, activeLayer, isExploded]);
+    return config.enabled && (isHovered || !config.visibleOnHover || (activeLayer === 'animated-border'));
+  }, [config.enabled, config.visibleOnHover, isHovered, activeLayer]);
 
   // Usar el hook de borde animado
   const { canvasRef, error, initializeCanvas } = useAnimatedBorder({
@@ -40,21 +43,20 @@ export function AnimatedBorderLayer({
     animate: { opacity: config.opacity || 1 },
     transition: { duration: 0.3 },
     style: {
-      ...getExplodeLayerTransform(config.layerIndex || 1),
-      ...(isExploded ? { zIndex: config.layerIndex || 1 } : {}),
+      zIndex: config.layerIndex || 1
     },
   };
 
   // Estilos del canvas
-  const canvasStyle = {
+  const canvasStyle: CSSProperties = {
     width: '100%',
     height: '100%',
-    mixBlendMode: config.blendMode || 'normal',
+    mixBlendMode: (config.blendMode || 'normal') as BlendMode,
     position: 'absolute',
     top: 0,
     left: 0,
     pointerEvents: 'none',
-  } as const;
+  };
 
   return (
     <motion.div
