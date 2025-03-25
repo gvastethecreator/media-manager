@@ -1,32 +1,14 @@
 import type { LayerImplementation } from '../types';
-import { TEXTURE_PRESETS, type TextureConfig } from './actions/texture-config.action';
 import { TextureLayer } from './components/texture-layer';
 import { TextureSettings } from './components/texture-settings';
+import { DEFAULT_CONFIG, TEXTURE_PRESETS, type TextureConfig } from './texture-config-types';
 
 export const textureImplementation: LayerImplementation<TextureConfig> = {
 	type: 'texture',
 	name: 'Textura',
 	description: 'Añade texturas personalizables a la tarjeta',
-	icon: '🖼️',
-	defaultConfig: {
-		enabled: true,
-		visibleOnHover: false,
-		layerIndex: 2,
-		textureUrl: TEXTURE_PRESETS.PAPER.url,
-		opacity: 0.15,
-		scale: 1,
-		rotation: 0,
-		blendMode: 'multiply',
-		offsetX: 0,
-		offsetY: 0,
-		tileMode: 'repeat',
-		filters: {
-			brightness: 100,
-			contrast: 100,
-			saturation: 100,
-			blur: 0,
-		},
-	},
+	icon: '��️',
+	defaultConfig: DEFAULT_CONFIG,
 	render: TextureLayer,
 	settings: TextureSettings,
 	presets: [

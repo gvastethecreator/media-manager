@@ -4,8 +4,8 @@ import { motion } from 'motion/react';
 import { useEffect, useMemo } from 'react';
 import { withBaseLayer } from '../../components/base-layer';
 import type { CommonLayerProps } from '../../types';
-import type { TextureConfig } from '../actions/texture-config.action';
 import { useTexture } from '../hooks/use-texture';
+import type { TextureConfig } from '../texture-config-types';
 
 interface TextureLayerProps extends CommonLayerProps {
 	config: TextureConfig;

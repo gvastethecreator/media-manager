@@ -3,7 +3,7 @@
 import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import { useCallback } from 'react';
 
 const operationsLogger = serverLogger.withContext('FoldersOperations');

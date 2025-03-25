@@ -5,7 +5,7 @@ import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { existsSync } from 'fs';
-import { FolderError, type FolderUpdate, type ImageWithRelations } from './folder-types.actions';
+import { FolderError, type FolderUpdate, type ImageWithRelations } from './folder-types';
 import { revalidateAllPaths } from './folder-utils.actions';
 
 const folderLogger = serverLogger.withContext('FolderCRUD');

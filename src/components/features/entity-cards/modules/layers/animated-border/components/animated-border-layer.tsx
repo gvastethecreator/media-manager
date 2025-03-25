@@ -5,8 +5,8 @@ import { motion } from 'motion/react';
 import type { CSSProperties } from 'react';
 import { useMemo } from 'react';
 import type { BlendMode, CommonLayerProps } from '../../types';
+import type { AnimatedBorderConfig } from '../actions/animated-border-config.action';
 import { useAnimatedBorder } from '../hooks/use-animated-border';
-import type { AnimatedBorderConfig } from './animated-border-settings';
 
 interface AnimatedBorderLayerProps extends CommonLayerProps {
   config: AnimatedBorderConfig;

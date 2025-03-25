@@ -15,7 +15,7 @@ import type {
 	RelatedWorldItem,
 } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
-import type { ImageWithRelations } from './folder-types.actions';
+import type { ImageWithRelations } from './folder-types';
 
 const folderLogger = serverLogger.withContext('FolderUtils');
 

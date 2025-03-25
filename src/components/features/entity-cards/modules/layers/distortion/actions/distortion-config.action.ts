@@ -1,7 +1,5 @@
-'use server';
+'use client';
 
-import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { create } from 'zustand';
 
@@ -21,48 +19,66 @@ export const distortionConfigSchema = z.object({
     enabled: z.boolean(),
     visibleOnHover: z.boolean(),
     intensity: z.number().min(0).max(1),
-    offset: z.number().min(0).max(10),
+    offsetX: z.number().min(-50).max(50),
+    offsetY: z.number().min(-50).max(50),
   }),
   pixelate: z.object({
     enabled: z.boolean(),
     visibleOnHover: z.boolean(),
+    pixelSize: z.number().min(1).max(50),
+    animated: z.boolean(),
+    animationSpeed: z.number().min(0).max(10),
+  }),
+  noiseAmount: z.number().min(0).max(1),
+  scanlines: z.object({
+    enabled: z.boolean(),
+    visibleOnHover: z.boolean(),
     intensity: z.number().min(0).max(1),
-    blockSize: z.number().min(1).max(50),
+    speed: z.number().min(0).max(10),
   }),
   layerIndex: z.number().min(0).max(10),
 });
 
-// 📝 Tipo de configuración
+// 📝 Tipo inferido del schema
 export type DistortionConfig = z.infer<typeof distortionConfigSchema>;
 
-// ⚙️ Configuración por defecto
-const defaultConfig: DistortionConfig = {
-  enabled: true,
-  visibleOnHover: true,
-  intensity: 0.5,
+// 🏭 Configuración por defecto
+export const defaultDistortionConfig: DistortionConfig = {
+  enabled: false,
+  visibleOnHover: false,
+  intensity: 0.2,
   glitchEffect: {
-    enabled: true,
-    visibleOnHover: true,
+    enabled: false,
+    visibleOnHover: false,
     intensity: 0.3,
-    frequency: 0.05,
-    duration: 0.2,
+    frequency: 0.2,
+    duration: 0.5,
   },
   chromaticAberration: {
-    enabled: true,
-    visibleOnHover: true,
-    intensity: 0.5,
-    offset: 2,
+    enabled: false,
+    visibleOnHover: false,
+    intensity: 0.2,
+    offsetX: 5,
+    offsetY: 3,
   },
   pixelate: {
-    enabled: true,
-    visibleOnHover: true,
-    intensity: 0.5,
-    blockSize: 8,
+    enabled: false,
+    visibleOnHover: false,
+    pixelSize: 4,
+    animated: false,
+    animationSpeed: 1,
   },
-  layerIndex: 5,
+  noiseAmount: 0.05,
+  scanlines: {
+    enabled: false,
+    visibleOnHover: false,
+    intensity: 0.3,
+    speed: 1,
+  },
+  layerIndex: 6,
 };
 
-// 🏪 Interface del store
+// 🏪 Interfaz del store
 interface DistortionStore {
   config: DistortionConfig;
   updateConfig: (config: Partial<DistortionConfig>) => void;
@@ -76,16 +92,16 @@ interface DistortionStore {
   updatePixelate: (config: Partial<DistortionConfig['pixelate']>) => void;
 }
 
-// 🎯 Crear store con Zustand
+// 🎯 Creación del store
 export const useDistortionStore = create<DistortionStore>((set) => ({
-  config: defaultConfig,
+  config: defaultDistortionConfig,
 
   updateConfig: (newConfig) =>
     set((state) => ({
       config: { ...state.config, ...newConfig },
     })),
 
-  resetConfig: () => set({ config: defaultConfig }),
+  resetConfig: () => set({ config: defaultDistortionConfig }),
 
   toggleEnabled: () =>
     set((state) => ({
@@ -158,174 +174,3 @@ export const useDistortionStore = create<DistortionStore>((set) => ({
       },
     })),
 }));
-
-// 🌐 Server Actions
-interface DistortionConfigResponse {
-  success: boolean;
-  message: string;
-  data?: DistortionConfig;
-}
-
-export async function getDistortionConfig(
-  entityType: string,
-  entityId?: string
-): Promise<DistortionConfigResponse> {
-  try {
-    const validation = distortionConfigSchema.safeParse({
-      entityType,
-      entityId,
-      config: {},
-    });
-
-    if (!validation.success) {
-      return {
-        success: false,
-        message: 'Parámetros inválidos',
-      };
-    }
-
-    let config: DistortionConfig | null = null;
-
-    if (entityId) {
-      config = await prisma.layerDistortionConfig.findFirst({
-        where: {
-          entityType,
-          entityId,
-        },
-      });
-    }
-
-    if (!config) {
-      config = await prisma.layerDistortionConfig.findFirst({
-        where: {
-          entityType,
-          isDefault: true,
-        },
-      });
-    }
-
-    if (!config) {
-      return {
-        success: true,
-        message: 'Usando configuración por defecto',
-        data: defaultConfig,
-      };
-    }
-
-    return {
-      success: true,
-      message: 'Configuración de distorsión obtenida correctamente',
-      data: config as DistortionConfig,
-    };
-  } catch (error) {
-    console.error('Error al obtener la configuración de distorsión:', error);
-    return {
-      success: false,
-      message: 'Error al obtener la configuración de distorsión',
-    };
-  }
-}
-
-export async function updateDistortionConfig(
-  entityType: string,
-  config: DistortionConfig,
-  entityId?: string
-): Promise<DistortionConfigResponse> {
-  try {
-    const validation = distortionConfigSchema.safeParse({
-      entityType,
-      entityId,
-      config,
-    });
-
-    if (!validation.success) {
-      return {
-        success: false,
-        message: 'Parámetros inválidos',
-      };
-    }
-
-    const updatedConfig = await prisma.layerDistortionConfig.upsert({
-      where: {
-        entityType_entityId: {
-          entityType,
-          entityId: entityId || 'default',
-        },
-      },
-      update: {
-        ...config,
-        isDefault: !entityId,
-      },
-      create: {
-        entityType,
-        entityId: entityId || 'default',
-        isDefault: !entityId,
-        ...config,
-      },
-    });
-
-    revalidatePath('/settings');
-    revalidatePath(`/${entityType}`);
-    if (entityId) {
-      revalidatePath(`/${entityType}/${entityId}`);
-    }
-
-    return {
-      success: true,
-      message: 'Configuración de distorsión actualizada correctamente',
-      data: updatedConfig as DistortionConfig,
-    };
-  } catch (error) {
-    console.error('Error al actualizar la configuración de distorsión:', error);
-    return {
-      success: false,
-      message: 'Error al actualizar la configuración de distorsión',
-    };
-  }
-}
-
-export async function deleteDistortionConfig(
-  entityType: string,
-  entityId?: string
-): Promise<DistortionConfigResponse> {
-  try {
-    const validation = distortionConfigSchema.safeParse({
-      entityType,
-      entityId,
-      config: {},
-    });
-
-    if (!validation.success) {
-      return {
-        success: false,
-        message: 'Parámetros inválidos',
-      };
-    }
-
-    await prisma.layerDistortionConfig.delete({
-      where: {
-        entityType_entityId: {
-          entityType,
-          entityId: entityId || 'default',
-        },
-      },
-    });
-
-    revalidatePath('/settings');
-    revalidatePath(`/${entityType}`);
-    if (entityId) {
-      revalidatePath(`/${entityType}/${entityId}`);
-    }
-
-    return {
-      success: true,
-      message: 'Configuración de distorsión eliminada correctamente',
-    };
-  } catch (error) {
-    console.error('Error al eliminar la configuración de distorsión:', error);
-    return {
-      success: false,
-      message: 'Error al eliminar la configuración de distorsión',
-    };
-  }
-}
