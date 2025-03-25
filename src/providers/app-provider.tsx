@@ -7,26 +7,29 @@ import { UnifiedDebugMenu } from '@/components/features/entity-cards/ui/unified-
 import { Toaster } from '@/components/ui/sonner';
 import { FileProvider, SettingsProvider } from '@/lib/contexts';
 import { CacheProvider } from '@/providers/cache-provider';
-import { ThemeProvider } from 'next-themes';
+import { QueryProvider } from '@/providers/query-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import type { ReactNode } from 'react';
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	return (
 		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
 			<SettingsProvider>
-				<CacheProvider>
-					<FileProvider>
-						<CardDebugProvider>
-							<CardControlProvider>
-								<CardDisplayProvider>
-									<Toaster position="bottom-right" richColors closeButton />
-									{children}
-									<UnifiedDebugMenu />
-								</CardDisplayProvider>
-							</CardControlProvider>
-						</CardDebugProvider>
-					</FileProvider>
-				</CacheProvider>
+				<QueryProvider>
+					<CacheProvider>
+						<FileProvider>
+							<CardDebugProvider>
+								<CardControlProvider>
+									<CardDisplayProvider>
+										<Toaster position="bottom-right" richColors closeButton />
+										{children}
+										<UnifiedDebugMenu />
+									</CardDisplayProvider>
+								</CardControlProvider>
+							</CardDebugProvider>
+						</FileProvider>
+					</CacheProvider>
+				</QueryProvider>
 			</SettingsProvider>
 		</ThemeProvider>
 	);

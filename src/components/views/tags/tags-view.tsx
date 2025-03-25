@@ -3,8 +3,8 @@
 import { getTags, type TagWithStats } from '@/app/actions/tags/tag.actions';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { useFileManager } from '@/store/file-manager.store';
-import { TagIcon } from 'lucide-react';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { useCallback } from 'react';
 import type { ViewProps } from '../types';
 
@@ -78,17 +78,31 @@ export function TagsView(props: ViewProps) {
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
 		(tag: TagWithStats) => {
-			setCurrentView('tag-content');
-			setCurrentTag(tag.id);
-			// Actualizar la información completa de la etiqueta en el store
+			if (!tag || !tag.id) {
+				console.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
+				return;
+			}
+
+			// Comprobar que la etiqueta tiene todos los datos necesarios
+			if (!tag.name) {
+				console.warn('⚠️ Advertencia: La etiqueta no tiene un nombre definido');
+			}
+
+			serverLogger.info('🔍 Seleccionando etiqueta:', tag.id, tag.name);
+
+			// Primero actualizar el estado con la información completa
 			useFileManager.setState({
 				currentTag: {
 					id: tag.id,
-					name: tag.name,
-					color: tag.color || '',
+					name: tag.name || 'Sin nombre',
+					color: tag.color || '#cccccc',
 					count: tag._count?.images || 0
 				},
 			});
+
+			// Luego cambiar la vista y cargar el contenido
+			setCurrentView('tag-content');
+			setCurrentTag(tag.id);
 		},
 		[setCurrentView, setCurrentTag]
 	);

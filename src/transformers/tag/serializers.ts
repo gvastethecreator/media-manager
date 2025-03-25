@@ -9,7 +9,7 @@ import {
     type TagWithStats,
     TagCategory,
     TagRarity
-} from '../../types/entities/tag';
+} from '../../types/entities/tag/index';
 
 /**
  * Convierte una etiqueta básica en una etiqueta extendida

@@ -31,3 +31,6 @@ export interface CategoryChild {
 		tags?: number;
 	};
 }
+
+// Tipo para vista de elementos en el panel de navegación
+export type ViewMode = 'list' | 'grid';

@@ -3,14 +3,14 @@
 import { getCollectionImages, removeImageFromCollection } from '@/app/actions/collections/collection.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
-import { useCollectionsStore } from '@/store/entities/collections.store';
+import { useCollectionStore } from '@/store/entities/collection';
 import type { FileItem } from '@/types/file-item';
 import type { Collection } from '@prisma/client';
 import { Library } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function CollectionContentView() {
-	const { selectedItem: currentCollection, addImageToCollection, selectItem, isLoading } = useCollectionsStore();
+	const { selectedItem: currentCollection, addImageToCollection, selectItem, isLoading } = useCollectionStore();
 
 	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
 	const [error, setError] = useState<string | null>(null);

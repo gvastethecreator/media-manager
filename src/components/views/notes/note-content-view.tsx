@@ -1,11 +1,10 @@
 'use client';
 
 import { getNoteImages } from '@/app/actions/notes/note.actions';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useFileManager } from '@/store/file-manager.store';
-import type { Note } from '@/types/entities/notes';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { ScrollText } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -59,9 +58,8 @@ export function NoteContentView() {
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',
-			description: `No se encontraron imágenes en ${
-				currentNote?.title ?? currentNote?.name ?? 'esta nota'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${currentNote?.title ?? currentNote?.name ?? 'esta nota'
+				}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadNoteImages,
 	};

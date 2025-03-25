@@ -6,8 +6,8 @@ import { CardErrorDisplay } from '@/components/features/entity-cards/utils/error
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFolderImages } from '@/hooks/use-folder-images';
-import type { FileManagerState } from '@/store/file-manager.store';
-import { useFileManager } from '@/store/file-manager.store';
+import type { FileManagerState } from '@/store/files/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 

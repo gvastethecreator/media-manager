@@ -1,10 +1,10 @@
 'use client';
 
 import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { Terminal } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -58,9 +58,8 @@ export function PromptContentView() {
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${
-				currentPrompt?.name || 'este prompt'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${currentPrompt?.name || 'este prompt'
+				}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadPromptImages,
 	};

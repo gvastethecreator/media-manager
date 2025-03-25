@@ -80,24 +80,30 @@ export function serializeImageVisualConfig(
  * @returns Imagen extendida con propiedades adicionales
  */
 export function extendImage(image: ImageBase): ImageExtended {
-  const extended: ImageExtended = {
-    ...image,
-    hasMetadata: !!image.metadata,
+  // Crear una copia de la imagen base para modificarla
+  const { metadata: rawMetadata, ...rest } = image;
+
+  // Base para la imagen extendida
+  const extended: Omit<ImageExtended, 'metadata'> & { metadata?: ImageMetadata } = {
+    ...rest,
+    hasMetadata: !!rawMetadata,
     hasThumbnail: !!image.thumbnail,
     hasError: !!image.thumbnailError,
     aspectRatio: image.width / image.height,
+    // Inicialmente sin metadatos procesados
+    metadata: undefined
   };
 
   // Procesar metadatos si existen
-  if (image.metadata) {
-    extended.metadata = serializeImageMetadata(image.metadata);
+  if (rawMetadata) {
+    extended.metadata = serializeImageMetadata(rawMetadata);
   }
 
   // Generar URLs para acceso a recursos
   extended.thumbnailUrl = `/api/images/${image.id}/thumbnail`;
   extended.fullUrl = `/api/images/${image.id}/full`;
 
-  return extended;
+  return extended as ImageExtended;
 }
 
 /**

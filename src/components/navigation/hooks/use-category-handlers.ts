@@ -1,5 +1,5 @@
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import type { ViewType } from '@/types/file-item';
 import { useCallback } from 'react';
 
