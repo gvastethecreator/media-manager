@@ -1,11 +1,11 @@
 'use client';
 
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Album } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -58,15 +58,15 @@ export function AlbumContentView() {
 		currentContainerId: currentAlbumId ?? null,
 		emptyState: !currentAlbumId
 			? {
-					icon: Album,
-					title: 'No hay álbum seleccionado',
-					description: 'Selecciona un álbum para ver su contenido.',
-				}
+				icon: Album,
+				title: 'No hay álbum seleccionado',
+				description: 'Selecciona un álbum para ver su contenido.',
+			}
 			: {
-					icon: Album,
-					title: 'Álbum sin imágenes',
-					description: 'Este álbum no tiene imágenes asociadas.',
-				},
+				icon: Album,
+				title: 'Álbum sin imágenes',
+				description: 'Este álbum no tiene imágenes asociadas.',
+			},
 	};
 
 	return (

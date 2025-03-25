@@ -3,9 +3,9 @@
  * @module store/entities/tag/slices/filters
  */
 
+import { TagCategory, TagRarity, TagSortCriteria } from '@/types/entities/tag/enums';
+import { searchTags, sortTags } from '@/utils/tag/helpers';
 import { type StateCreator } from 'zustand';
-import { TagCategory, TagRarity, TagSortCriteria } from '../../../../types/entities/tag';
-import { searchTags, sortTags } from '../../../../utils/tag/helpers';
 import { type TagFiltersState, type TagState } from '../types';
 
 export interface TagFiltersSlice {
@@ -203,13 +203,13 @@ export const createTagFiltersSlice: StateCreator<
 
     // Aplicar filtro de favoritos
     let filteredTags = filters.showOnlyFavorites
-      ? allTags.filter((tag) => tag.isFavorite)
+      ? allTags.filter((tag) => (tag as any).isFavorite)
       : allTags;
 
     // Aplicar filtro de categorías
     if (filters.categories.length > 0) {
       filteredTags = filteredTags.filter((tag) => {
-        const category = tag.category || TagCategory.OTHER;
+        const category = (tag as any).category || TagCategory.OTHER;
         return filters.categories.includes(category);
       });
     }
@@ -217,7 +217,7 @@ export const createTagFiltersSlice: StateCreator<
     // Aplicar filtro de rarezas
     if (filters.rarities.length > 0) {
       filteredTags = filteredTags.filter((tag) => {
-        const rarity = tag.rarity || TagRarity.COMMON;
+        const rarity = (tag as any).rarity || TagRarity.COMMON;
         return filters.rarities.includes(rarity);
       });
     }

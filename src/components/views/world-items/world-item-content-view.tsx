@@ -1,11 +1,11 @@
 'use client';
 
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
+import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Box } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -58,15 +58,15 @@ export function WorldItemContentView() {
 		currentContainerId: currentWorldItemId ?? null,
 		emptyState: !currentWorldItemId
 			? {
-					icon: Box,
-					title: 'No hay objeto del mundo seleccionado',
-					description: 'Selecciona un objeto del mundo para ver su contenido.',
-				}
+				icon: Box,
+				title: 'No hay objeto del mundo seleccionado',
+				description: 'Selecciona un objeto del mundo para ver su contenido.',
+			}
 			: {
-					icon: Box,
-					title: 'Objeto del mundo sin imágenes',
-					description: 'Este objeto del mundo no tiene imágenes asociadas.',
-				},
+				icon: Box,
+				title: 'Objeto del mundo sin imágenes',
+				description: 'Este objeto del mundo no tiene imágenes asociadas.',
+			},
 	};
 
 	return (

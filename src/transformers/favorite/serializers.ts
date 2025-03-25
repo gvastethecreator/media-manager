@@ -11,6 +11,27 @@ import type { FileItem } from '@/types/file-item';
 
 const serializersLogger = serverLogger.withContext('Favorite:Serializers');
 
+interface MetadataContent {
+    dimensions: {
+        width: number;
+        height: number;
+    };
+    exif?: {
+        make?: string;
+        model?: string;
+        dateTime?: string;
+        exposureTime?: number;
+        fNumber?: number;
+        iso?: number;
+        focalLength?: number;
+        gps?: {
+            latitude: number;
+            longitude: number;
+            altitude?: number;
+        };
+    };
+}
+
 /**
  * Transforma una imagen para ser utilizada en un favorito
  * @param image Imagen con datos básicos
@@ -18,12 +39,12 @@ const serializersLogger = serverLogger.withContext('Favorite:Serializers');
  */
 export function transformImageToFileItem(image: any): FileItem {
     try {
-        // Extraer dimensiones de metadata si existe
-        let metadataObj: FileItem['metadata'] = {
+        // Preparar el objeto de metadatos como string JSON
+        let metadataContent: MetadataContent = {
             dimensions: {
                 width: image.width || 0,
                 height: image.height || 0,
-            },
+            }
         };
 
         // Si la metadata existe, intentamos procesar información adicional
@@ -46,7 +67,7 @@ export function transformImageToFileItem(image: any): FileItem {
                 // Procesar exif data
                 if (parsedData.exif && typeof parsedData.exif === 'object') {
                     const exifData = parsedData.exif as Record<string, unknown>;
-                    metadataObj.exif = {
+                    metadataContent.exif = {
                         make: exifData.make as string,
                         model: exifData.model as string,
                         dateTime: exifData.dateTime as string,
@@ -63,7 +84,7 @@ export function transformImageToFileItem(image: any): FileItem {
                     // Añadir GPS si existe
                     if (exifData.gps && typeof exifData.gps === 'object') {
                         const gpsData = exifData.gps as Record<string, unknown>;
-                        metadataObj.exif.gps = {
+                        metadataContent.exif.gps = {
                             latitude: gpsData.latitude as number,
                             longitude: gpsData.longitude as number,
                             altitude: gpsData.altitude as number,
@@ -73,24 +94,41 @@ export function transformImageToFileItem(image: any): FileItem {
             }
         }
 
+        // Convertir el metadataContent a string JSON para FileItem
+        const metadataString = JSON.stringify(metadataContent);
+
+        const stats = image.stats ? image.stats : {
+            id: `stats-${image.id || Date.now()}`,
+            imageId: image.id,
+            views: 0,
+            downloads: 0,
+            lastViewed: image.updatedAt || new Date(),
+            createdAt: image.createdAt || new Date(),
+            updatedAt: image.updatedAt || new Date()
+        };
+
         return {
             id: image.id,
+            hash: image.hash || '',
             name: image.name,
             path: image.path,
             type: 'image',
             size: image.size,
             width: image.width || 0,
             height: image.height || 0,
-            metadata: metadataObj,
-            thumbnail: '',
-            thumbnailSize: image.thumbnailSize || 0,
-            thumbnailWidth: image.thumbnailWidth || 0,
-            thumbnailHeight: image.thumbnailHeight || 0,
-            src: `api/images/${image.id}`,
-            isPublic: image.isPublic,
-            isFavorite: image.isFavorite,
-            createdAt: image.createdAt,
-            updatedAt: image.updatedAt,
+            metadata: metadataString,
+            thumbnail: image.thumbnail || null,
+            thumbnailSize: image.thumbnailSize || null,
+            thumbnailWidth: image.thumbnailWidth || null,
+            thumbnailHeight: image.thumbnailHeight || null,
+            thumbnailError: null,
+            thumbnailErrorAt: null,
+            thumbnailOptimizedAt: null,
+            isPublic: image.isPublic || false,
+            isFavorite: image.isFavorite || false,
+            folderId: image.folderId || '',
+            createdAt: image.createdAt || new Date(),
+            updatedAt: image.updatedAt || new Date(),
             collections:
                 image.collections?.map((c: { id: string; name: string; emoji?: string; color?: string }) => ({
                     id: c.id,
@@ -104,26 +142,59 @@ export function transformImageToFileItem(image: any): FileItem {
                     name: t.name,
                     color: t.color || '#cccccc',
                 })) ?? [],
-            stats: {
-                views: 0,
-                downloads: 0,
-                lastViewed: image.updatedAt,
-            },
+            albums: image.albums || [],
+            characters: image.characters || [],
+            places: image.places || [],
+            worldItems: image.worldItems || [],
+            concepts: image.concepts || [],
+            prompts: image.prompts || [],
+            notes: image.notes || [],
+            stats
         };
     } catch (error) {
         serializersLogger.error('Error transformando imagen para favorito:', error);
+        // Retornar una versión mínima como fallback
         return {
             id: image.id || 'unknown',
+            hash: '',
             name: image.name || 'Unknown Image',
             path: image.path || '',
             type: 'image',
             size: image.size || 0,
             width: image.width || 0,
             height: image.height || 0,
-            src: image.id ? `api/images/${image.id}` : '',
+            metadata: null,
+            thumbnail: null,
+            thumbnailSize: null,
+            thumbnailWidth: null,
+            thumbnailHeight: null,
+            thumbnailError: null,
+            thumbnailErrorAt: null,
+            thumbnailOptimizedAt: null,
+            isPublic: false,
+            isFavorite: false,
+            folderId: '',
             createdAt: image.createdAt || new Date(),
             updatedAt: image.updatedAt || new Date(),
-        } as FileItem;
+            collections: [],
+            tags: [],
+            albums: [],
+            characters: [],
+            places: [],
+            worldItems: [],
+            concepts: [],
+            prompts: [],
+            notes: [],
+            stats: {
+                id: `stats-fallback-${Date.now()}`,
+                imageId: image.id || 'unknown',
+                views: 0,
+                downloads: 0,
+                lastViewed: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date()
+            }
+        };
     }
 }
 

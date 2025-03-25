@@ -7,9 +7,8 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { useFavoritesStore } from '@/store/entities/favorites.store';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFavoriteStore } from '@/store/entities/favorite';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -31,7 +30,7 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 	// Estado para controlar si el menú está abierto (necesario para ContextMenu)
 
 	const [, setIsMenuOpen] = useState(false);
-	const { toggleFavorite, isFavorited } = useFavoritesStore();
+	const { toggleFavorite, isFavorited } = useFavoriteStore();
 	const { loadingStates, handleOpenChange } = useEntityLoader();
 	const { selectedItems } = useFileManager();
 
@@ -166,3 +165,4 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 // Exportar también las acciones desde types.ts
 export type { ContextMenuAction } from './types';
+

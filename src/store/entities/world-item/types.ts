@@ -3,6 +3,7 @@
  * @module store/entities/world-item/types
  */
 
+import type { WorldItem as PrismaWorldItem } from '@prisma/client';
 import {
     ParsedWorldItemVisualConfig,
     WorldItem,
@@ -36,12 +37,15 @@ export interface WorldItemState {
   isCreatingItem: boolean;
   isEditingItem: boolean;
   isProcessingAction: boolean;
+
+  // Nuevo estado para el store de WorldItem basado en Prisma
+  ui: WorldItemUIState;
 }
 
 /**
  * Tipo completo del store
  */
-export type WorldItemStore = WorldItemCoreSlice & WorldItemUISlice & WorldItemFiltersSlice;
+export type WorldItemStore = WorldItemCoreSlice & WorldItemUISlice & WorldItemFiltersSlice & WorldItemActions;
 
 /**
  * Opciones para el servicio de API para la entidad WorldItem
@@ -126,4 +130,65 @@ export interface WorldItemBatchOptions {
    * Datos para la operación (solo para update, changeType, changeCategory)
    */
   data?: Partial<WorldItem> | { [key: string]: any };
+}
+
+// 🎯 Estado de UI
+export interface WorldItemUIState {
+	selectedId: string | null;
+	editingId: string | null;
+	highlightedId: string | null;
+	viewMode: WorldItemViewMode;
+}
+
+// 🔍 Filtros
+export interface WorldItemFilters {
+	sortBy: WorldItemSortCriteria;
+	searchTerm: string;
+	category: string | null;
+	rarity: string | null;
+	type: string | null;
+}
+
+// 🔄 Acciones del store
+export interface WorldItemActions {
+	// Carga de items
+	loadWorldItems: () => Promise<void>;
+
+	// Gestión de items
+	createWorldItem: (item: Partial<PrismaWorldItem>) => Promise<void>;
+	updateWorldItem: (id: string, item: Partial<PrismaWorldItem>) => Promise<void>;
+	deleteWorldItem: (id: string) => Promise<void>;
+
+	// Acciones de UI
+	selectWorldItem: (id: string | null) => void;
+	startEditing: (id: string | null) => void;
+	highlightWorldItem: (id: string | null) => void;
+	setViewMode: (mode: WorldItemViewMode) => void;
+
+	// Filtros
+	updateFilters: (filters: Partial<WorldItemFilters>) => void;
+	clearFilters: () => void;
+
+	// Selectores
+	getWorldItemById: (id: string) => WorldItem | undefined;
+	getFilteredWorldItems: () => WorldItem[];
+	getSortedWorldItems: () => WorldItem[];
+}
+
+// 📊 Enums para vistas y ordenamiento
+export enum WorldItemViewMode {
+	LIST = 'list',
+	GRID = 'grid',
+	COMPACT = 'compact',
+}
+
+export enum WorldItemSortCriteria {
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+	CREATED_AT_ASC = 'created_at_asc',
+	CREATED_AT_DESC = 'created_at_desc',
+	UPDATED_AT_ASC = 'updated_at_asc',
+	UPDATED_AT_DESC = 'updated_at_desc',
+	RARITY_ASC = 'rarity_asc',
+	RARITY_DESC = 'rarity_desc',
 }

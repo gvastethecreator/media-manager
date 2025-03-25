@@ -11,18 +11,9 @@ import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	FileItem,
-	ImageStats,
-	RelatedAlbum,
-	RelatedCharacter,
-	RelatedCollection,
-	RelatedConcept,
-	RelatedNote,
-	RelatedPlace,
-	RelatedPrompt,
-	RelatedTag,
-	RelatedWorldItem,
-	ViewType,
+    FileItem,
+    ImageStats,
+    ViewType
 } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import { create } from 'zustand';
@@ -885,9 +876,27 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 	setCurrentTag: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de etiqueta no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('🏷️ Cambiando a tag:', id);
 			const state = get();
-			const tag = state.tags.find((t) => t.id === id) || null;
+			const tag = state.tags.find((t) => t.id === id);
+
+			if (!tag) {
+				fileManagerLogger.info('⚠️ Etiqueta no encontrada en el estado:', id);
+				// No lanzar error, simplemente actualizar el estado con valores nulos
+				set({
+					currentTagId: id,
+					currentTag: null,
+					isLoading: false,
+					error: 'Etiqueta no encontrada',
+				});
+				return;
+			}
+
 			state.clearSelection();
 
 			set({
@@ -1372,4 +1381,5 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 }));
 
 // Tipos exportados para uso en componentes
-export type { FileManagerState, BaseEntity, CollectionEntity, TagEntity, EntityWithEmoji };
+export type { BaseEntity, CollectionEntity, EntityWithEmoji, FileManagerState, TagEntity };
+

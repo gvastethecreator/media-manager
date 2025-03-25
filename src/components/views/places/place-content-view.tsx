@@ -2,7 +2,7 @@
 
 import { getPlaceImages } from '@/app/actions/places/place.actions';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';

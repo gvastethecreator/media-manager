@@ -9,7 +9,7 @@ import {
     type ActivityMetadata,
     ActivityCategory,
     ActivityType
-} from '../../types/entities/activity';
+} from '../../types/entities/activity/index';
 
 /**
  * Convierte una actividad básica en una actividad extendida con información adicional

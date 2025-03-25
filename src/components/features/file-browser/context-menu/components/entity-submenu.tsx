@@ -10,6 +10,7 @@ import {
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import type { SubMenuProps } from '../types';
 
 // Tipo para entidades con id
@@ -28,6 +29,35 @@ export function EntitySubMenu<T>({
 	onCreate,
 	renderItem,
 }: SubMenuProps<T>) {
+	// Memoizar las funciones de callback para evitar recreaciones en cada renderizado
+	const handleCreate = useCallback(() => {
+		onCreate();
+	}, [onCreate]);
+
+	// Memoizar los elementos renderizados
+	const renderedItems = useMemo(() => {
+		if (!entities || entities.length === 0) {
+			return (
+				<ContextMenuItem disabled>
+					<span className="text-muted-foreground">No hay {entityName}s disponibles</span>
+				</ContextMenuItem>
+			);
+		}
+
+		return entities.map((entity, index) => {
+			const key = `entity-${entity && typeof entity === 'object' && 'id' in entity ? (entity as EntityWithId).id : index
+				}`;
+
+			const handleClick = () => onSelect(entity);
+
+			return (
+				<ContextMenuItem key={key} onClick={handleClick}>
+					{renderItem(entity)}
+				</ContextMenuItem>
+			);
+		});
+	}, [entities, entityName, onSelect, renderItem]);
+
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -42,7 +72,7 @@ export function EntitySubMenu<T>({
 					</div>
 				) : (
 					<>
-						<ContextMenuItem onClick={onCreate} className="text-primary">
+						<ContextMenuItem onClick={handleCreate} className="text-primary">
 							<Plus className="mr-2 h-4 w-4" />
 							<span>Nuevo {entityName}</span>
 						</ContextMenuItem>
@@ -51,16 +81,7 @@ export function EntitySubMenu<T>({
 
 						{entities && entities.length > 0 ? (
 							<ScrollArea className={entities.length > 10 ? 'h-[300px]' : ''}>
-								{entities.map((entity, index) => (
-									<ContextMenuItem
-										key={`entity-${
-											entity && typeof entity === 'object' && 'id' in entity ? (entity as EntityWithId).id : index
-										}`}
-										onClick={() => onSelect(entity)}
-									>
-										{renderItem(entity)}
-									</ContextMenuItem>
-								))}
+								{renderedItems}
 							</ScrollArea>
 						) : (
 							<ContextMenuItem disabled>

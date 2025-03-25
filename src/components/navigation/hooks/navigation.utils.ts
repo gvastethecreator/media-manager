@@ -1,4 +1,4 @@
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { useNavigationStore } from '@/store/navigation.store';
 import type { ViewType } from '@/types/file-item';
 import { useCallback } from 'react';

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
 import { Pin, PinOff, X } from 'lucide-react';
@@ -133,7 +133,6 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 	// Sincronizar nuestra ref local con la ref del hook
 	useEffect(() => {
 		if (gridParentRef.current) {
-			// @ts-expect-error - Sabemos que es seguro asignar esto
 			parentRef.current = gridParentRef.current;
 		}
 	}, [parentRef]);
@@ -232,9 +231,8 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 								position: 'absolute',
 								top: 0,
 								left: 0,
-								transform: `translate3d(${
-									viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
-								}px, ${virtualItem.start}px, 0)`,
+								transform: `translate3d(${viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
+									}px, ${virtualItem.start}px, 0)`,
 								width: viewMode === 'list' ? '100%' : itemSize,
 								height:
 									viewMode === 'masonry'

@@ -7,7 +7,7 @@ import {
     type CreateTagData,
     type TagFilters,
     type UpdateTagData
-} from '../../types/entities/tag';
+} from '../../types/entities/tag/index';
 import { generateTagColor, generateTagEmoji } from './serializers';
 
 /**
@@ -18,7 +18,7 @@ import { generateTagColor, generateTagEmoji } from './serializers';
 export function mapCreateTagDataToPrisma(data: CreateTagData) {
   // Generar color y emoji si no se proporcionan
   const color = data.color || generateTagColor(data.name);
-  const emoji = data.emoji || generateTagEmoji(data.name, data.category);
+  const emoji = data.emoji || generateTagEmoji(data.name, data.category || undefined);
 
   return {
     name: data.name,

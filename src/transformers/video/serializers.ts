@@ -7,20 +7,28 @@ import {
     type Video,
     type VideoBase,
     type VideoMetadata,
+    type VideoPrivacyLevel,
     type VideoVisualConfig
 } from '../../types/entities/video';
+
+// Define interfaces adicionales para extender VideoBase
+interface VideoData {
+  metadata?: string | VideoMetadata;
+}
 
 /**
  * Convierte un objeto VideoBase a Video con propiedades extendidas
  * @param video Objeto básico de video
  * @returns Objeto Video completo
  */
-export function extendVideo(video: VideoBase): Video {
+export function extendVideo(video: VideoBase & VideoData): Video {
+  // Asegurarse de que todas las propiedades requeridas por Video están presentes
   return {
     ...video,
     metadata: parseVideoMetadata(video),
-    isPublic: false,
-    isFavorite: false,
+    tags: [], // Propiedad requerida por Video, inicializada como array vacío
+    privacyLevel: 'PRIVATE' as VideoPrivacyLevel, // Valor por defecto para privacyLevel
+    isFavorite: false, // Valor por defecto para isFavorite
   };
 }
 
@@ -29,7 +37,7 @@ export function extendVideo(video: VideoBase): Video {
  * @param videos Array de objetos básicos de video
  * @returns Array de objetos Video completos
  */
-export function extendVideos(videos: VideoBase[]): Video[] {
+export function extendVideos(videos: (VideoBase & VideoData)[]): Video[] {
   return videos.map(extendVideo);
 }
 
@@ -38,7 +46,7 @@ export function extendVideos(videos: VideoBase[]): Video[] {
  * @param video Objeto de video
  * @returns Metadatos parseados o undefined
  */
-export function parseVideoMetadata(video: VideoBase): VideoMetadata | undefined {
+export function parseVideoMetadata(video: VideoData): VideoMetadata | undefined {
   if (!video.metadata) return undefined;
 
   if (typeof video.metadata === 'string') {
@@ -50,7 +58,7 @@ export function parseVideoMetadata(video: VideoBase): VideoMetadata | undefined 
     }
   }
 
-  return video.metadata as unknown as VideoMetadata;
+  return video.metadata as VideoMetadata;
 }
 
 /**

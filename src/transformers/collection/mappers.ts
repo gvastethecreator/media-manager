@@ -60,8 +60,8 @@ export function mapCollectionsToSummary(collections: CollectionExtended[]): Coll
     emoji: collection.emoji || '🌟',
     color: collection.color || '#3b82f6',
     imageCount: collection.imageCount || 0,
-    category: collection.category,
-    rarity: collection.rarity,
+    category: collection.category || undefined,
+    rarity: collection.rarity || undefined,
   }));
 }
 

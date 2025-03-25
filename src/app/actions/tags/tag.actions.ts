@@ -13,11 +13,11 @@ import {
     mapUpdateTagDataToPrisma
 } from '@/transformers/tag';
 import {
-    CreateTagData,
+    TagCreate as CreateTagData,
     Tag,
-    TagBase,
-    UpdateTagData
+    TagUpdate as UpdateTagData
 } from '@/types/entities/tag';
+import { TagBase } from '@/types/entities/tag/types';
 
 // Utilidades y logging
 const tagLogger = serverLogger.withContext('TagActions');
@@ -321,6 +321,10 @@ export async function deleteTag(id: string): Promise<void> {
 
 export async function getTagImages(id: string): Promise<FileItem[]> {
 	try {
+		if (!id) {
+			throw createTagError('ID de etiqueta no proporcionado', TagErrorCode.VALIDATION_ERROR);
+		}
+
 		tagLogger.info('🖼️ Obteniendo imágenes de la etiqueta:', id);
 
 		// Verificar si la etiqueta existe y obtener imágenes
@@ -345,7 +349,8 @@ export async function getTagImages(id: string): Promise<FileItem[]> {
 		});
 
 		if (!tag) {
-			throw createTagError('Etiqueta no encontrada', TagErrorCode.NOT_FOUND);
+			tagLogger.error(`❌ Etiqueta con ID '${id}' no encontrada`);
+			throw createTagError(`Etiqueta no encontrada`, TagErrorCode.NOT_FOUND);
 		}
 
 		// Convertir imágenes al formato FileItem
