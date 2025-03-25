@@ -4,16 +4,37 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
+import {
+    CreateFolderData,
+    FolderBase,
+    FolderExtended,
+    UpdateFolderData
+} from '@/types/entities/folder';
 import { existsSync } from 'fs';
-import { FolderError, type FolderUpdate, type ImageWithRelations } from './folder-types';
 import { revalidateAllPaths } from './folder-utils.actions';
 
 const folderLogger = serverLogger.withContext('FolderCRUD');
 
+// Clase de error para carpetas
+class FolderError extends Error {
+	constructor(message: string | { message: string, code: string }, context?: unknown) {
+		const msg = typeof message === 'string' ? message : message.message;
+		const code = typeof message === 'string' ? 'FOLDER_ERROR' : message.code;
+
+		super(msg);
+		this.name = 'FolderError';
+		Object.defineProperty(this, 'code', { value: code });
+
+		if (context) {
+			Object.defineProperty(this, 'cause', { value: context });
+		}
+	}
+}
+
 /**
  * Obtiene todas las carpetas registradas
  */
-export async function getFolders() {
+export async function getFolders(): Promise<FolderExtended[]> {
 	try {
 		folderLogger.info('📁 Iniciando obtención de carpetas');
 		const folders = await prisma.folder.findMany({
@@ -43,6 +64,7 @@ export async function getFolders() {
 						updatedAt: true,
 					},
 				},
+				visualConfig: true,
 			},
 			orderBy: { name: 'asc' },
 		});
@@ -68,14 +90,14 @@ export async function getFolders() {
 		}));
 	} catch (error) {
 		folderLogger.error('❌ Error al obtener carpetas', error);
-		throw new FolderError('No se pudieron obtener las carpetas', { cause: error });
+		throw new FolderError('No se pudieron obtener las carpetas', error);
 	}
 }
 
 /**
  * Obtiene una carpeta específica por su ID
  */
-export async function getFolder(id: string) {
+export async function getFolder(id: string): Promise<FolderExtended | null> {
 	try {
 		folderLogger.info('🔍 Obteniendo carpeta:', id);
 		const folder = await prisma.folder.findUnique({
@@ -86,6 +108,7 @@ export async function getFolder(id: string) {
 						images: true,
 					},
 				},
+				visualConfig: true,
 			},
 		});
 
@@ -95,7 +118,7 @@ export async function getFolder(id: string) {
 		}
 
 		folderLogger.info('✅ Carpeta obtenida:', folder.name);
-		return folder;
+		return folder as FolderExtended;
 	} catch (error) {
 		folderLogger.error('❌ Error al obtener carpeta:', error);
 		if (error instanceof FolderError) {
@@ -108,12 +131,12 @@ export async function getFolder(id: string) {
 /**
  * Crea una nueva carpeta
  */
-export async function createFolder(path: string) {
+export async function createFolder(path: string): Promise<FolderBase> {
 	try {
 		folderLogger.info('📁 Agregando nueva carpeta:', path);
 
 		if (!path) {
-			throw new FolderError('PATH_REQUIRED');
+			throw new FolderError({ message: 'La ruta es requerida', code: 'PATH_REQUIRED' });
 		}
 
 		// Validar y normalizar la ruta
@@ -121,7 +144,7 @@ export async function createFolder(path: string) {
 		folderLogger.info('Path normalizado:', { original: path, normalized: normalizedPath });
 
 		if (!existsSync(normalizedPath)) {
-			throw new FolderError('PATH_NOT_FOUND');
+			throw new FolderError({ message: 'La ruta no existe', code: 'PATH_NOT_FOUND' });
 		}
 
 		// Verificar si la carpeta ya existe
@@ -130,14 +153,18 @@ export async function createFolder(path: string) {
 		});
 
 		if (existingFolder) {
-			throw new FolderError('FOLDER_EXISTS');
+			throw new FolderError({ message: 'La carpeta ya existe en la base de datos', code: 'FOLDER_EXISTS' });
 		}
 
 		// Crear carpeta en la base de datos
+		const folderData: CreateFolderData = {
+			path: normalizedPath,
+			name: normalizedPath.split('\\').pop() || normalizedPath,
+		};
+
 		const folder = await prisma.folder.create({
 			data: {
-				path: normalizedPath,
-				name: normalizedPath.split('\\').pop() || normalizedPath,
+				...folderData,
 				lastIndexed: new Date(),
 			},
 		});
@@ -165,7 +192,7 @@ export async function createFolder(path: string) {
 /**
  * Actualiza una carpeta existente
  */
-export async function updateFolder(id: string, data: FolderUpdate) {
+export async function updateFolder(id: string, data: UpdateFolderData): Promise<FolderBase> {
 	try {
 		folderLogger.info('📝 Actualizando carpeta:', { id, data });
 
@@ -194,25 +221,23 @@ export async function updateFolder(id: string, data: FolderUpdate) {
 /**
  * Elimina una carpeta
  */
-export async function deleteFolder(id: string) {
+export async function deleteFolder(id: string): Promise<void> {
 	try {
 		folderLogger.info('🗑️ Eliminando carpeta:', id);
 
-		const folder = await prisma.folder.delete({
+		await prisma.folder.delete({
 			where: { id },
 		});
 
-		folderLogger.info('✅ Carpeta eliminada:', folder);
+		folderLogger.info('✅ Carpeta eliminada');
 
 		// Emitir eventos usando el nuevo sistema del servidor
 		await emit({
 			type: 'folders:modified',
-			data: { action: 'delete', folder },
+			data: { action: 'delete', id },
 		});
 
 		await revalidateAllPaths();
-
-		return folder;
 	} catch (error) {
 		folderLogger.error('❌ Error al eliminar carpeta:', error);
 		throw new FolderError('No se pudo eliminar la carpeta', error);
@@ -224,114 +249,58 @@ export async function deleteFolder(id: string) {
  */
 export async function getFolderImages(id: string) {
 	try {
-		folderLogger.info('🔍 Buscando imágenes de la carpeta:', id);
-
-		const folder = await prisma.folder.findUnique({
-			where: { id },
+		folderLogger.info('🖼️ Obteniendo imágenes de carpeta:', id);
+		const images = await prisma.image.findMany({
+			where: { folderId: id },
 			include: {
-				images: {
-					orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
-					include: {
-						collections: {
-							select: { id: true, name: true },
-						},
-						tags: {
-							select: { id: true, name: true },
-						},
-						albums: {
-							select: { id: true, name: true },
-						},
-						characters: {
-							select: { id: true, name: true },
-						},
-						places: {
-							select: { id: true, name: true },
-						},
-						worldItems: {
-							select: { id: true, name: true },
-						},
-					},
+				tags: {
+					select: { id: true, name: true, color: true },
 				},
+				collections: {
+					select: { id: true, name: true, color: true, emoji: true },
+				},
+				stats: true,
 			},
+			orderBy: { name: 'asc' },
 		});
 
-		if (!folder) {
-			folderLogger.warn('ℹ️ Carpeta no encontrada, retornando array vacío:', id);
-			return [];
-		}
-
-		// Uso de Promise.all para esperar a que todas las promesas se resuelvan
-		const transformPromises = folder.images.map((image: any) =>
-			transformImageToFileItem(image as unknown as ImageWithRelations)
-		);
-
-		const transformedImages = await Promise.all(transformPromises);
-
-		folderLogger.info('✅ Imágenes obtenidas:', transformedImages.length);
-		return transformedImages;
+		folderLogger.info('✅ Imágenes obtenidas:', images.length);
+		return images;
 	} catch (error) {
-		folderLogger.error('Error obteniendo imágenes:', error);
-		if (error instanceof FolderError) {
-			throw error;
-		}
-		throw new FolderError('Error al obtener las imágenes', error);
+		folderLogger.error('❌ Error al obtener imágenes de carpeta:', error);
+		throw new FolderError('No se pudieron obtener las imágenes de la carpeta', error);
 	}
 }
 
 /**
- * Actualiza el estado de auto-reindexado de una carpeta
+ * Actualiza la configuración de reindexación automática
  */
-export async function updateFolderAutoReindex(id: string, autoReindex: boolean) {
-	folderLogger.info(`Actualizando auto-reindexado para carpeta ${id}: ${autoReindex}`);
-
+export async function updateFolderAutoReindex(id: string, autoReindex: boolean): Promise<FolderBase> {
 	try {
+		folderLogger.info('⚙️ Actualizando configuración de reindexación automática:', {
+			id,
+			autoReindex,
+		});
+
 		const folder = await prisma.folder.update({
 			where: { id },
 			data: { autoReindex },
 		});
 
-		// Emitir evento de modificación de carpeta
-		emit({
+		folderLogger.info('✅ Configuración actualizada');
+
+		// Emitir eventos usando el nuevo sistema del servidor
+		await emit({
 			type: 'folders:modified',
-			data: {
-				action: 'update',
-				folder: {
-					id: folder.id,
-					name: folder.name,
-					path: folder.path,
-					totalFiles: folder.totalFiles,
-					totalSize: Number(folder.totalSize),
-					lastIndexed: folder.lastIndexed?.toISOString() || null,
-					createdAt: folder.createdAt.toISOString(),
-					updatedAt: folder.updatedAt.toISOString(),
-					autoReindex: folder.autoReindex,
-				},
-			},
+			data: { action: 'update', folder },
 		});
 
-		// Revalidar rutas
 		await revalidateAllPaths();
 
-		return {
-			folder: {
-				id: folder.id,
-				name: folder.name,
-				path: folder.path,
-				totalFiles: folder.totalFiles,
-				totalSize: Number(folder.totalSize),
-				lastIndexed: folder.lastIndexed?.toISOString() || null,
-				createdAt: folder.createdAt.toISOString(),
-				updatedAt: folder.updatedAt.toISOString(),
-				autoReindex: folder.autoReindex,
-			},
-			timestamp: Date.now(),
-		};
+		return folder;
 	} catch (error) {
-		folderLogger.error('Error actualizando auto-reindexado de carpeta:', error);
-		throw new FolderError('No se pudo actualizar la configuración de auto-reindexado de la carpeta', error);
+		folderLogger.error('❌ Error al actualizar configuración:', error);
+		throw new FolderError('No se pudo actualizar la configuración', error);
 	}
 }
-
-// Importamos esta función del archivo folder-utils
-import { transformImageToFileItem } from './folder-utils.actions';
 
