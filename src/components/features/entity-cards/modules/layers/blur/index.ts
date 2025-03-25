@@ -1,7 +1,7 @@
 'use client';
 
 import { blurImplementation as blurLayerImplementation } from "./blur-implementation";
-import { BlurConfig, defaultBlurConfig } from "./blur-schema";
+import { type BlurConfig, defaultBlurConfig } from "./blur-schema";
 import { BlurLayer as BlurEffectLayer } from "./components/blur-layer";
 
 /**

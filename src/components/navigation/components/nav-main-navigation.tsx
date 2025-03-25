@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
-import { Image as ImageIcon, Search, Star, UploadCloud } from 'lucide-react';
+import { Image as ImageIcon, Layers, MessageSquare, Search, Star, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface NavMainNavigationProps {
@@ -38,6 +38,18 @@ const navigationItems: NavigationItem[] = [
 		label: 'Favoritos',
 		icon: Star,
 		description: 'Imágenes favoritas',
+	},
+	{
+		id: 'folders' as ViewType,
+		label: 'Canvas',
+		icon: Layers,
+		description: 'Espacio de trabajo visual (próximamente)',
+	},
+	{
+		id: 'folders' as ViewType,
+		label: 'Chat',
+		icon: MessageSquare,
+		description: 'Conversaciones inteligentes (próximamente)',
 	},
 	{
 		id: 'search' as ViewType,

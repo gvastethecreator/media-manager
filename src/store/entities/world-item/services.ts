@@ -3,9 +3,9 @@
  * @module store/entities/world-item/services
  */
 
-import { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '../../../types/entities/world-item';
+import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '../../../types/entities/world-item';
 import { worldItemApi } from './index';
-import { WorldItemApiOptions, WorldItemBatchOptions, WorldItemExportOptions, WorldItemSearchResult } from './types';
+import type { WorldItemApiOptions, WorldItemBatchOptions, WorldItemExportOptions, WorldItemSearchResult } from './types';
 
 /**
  * Clase de servicio para interactuar con la API de WorldItem

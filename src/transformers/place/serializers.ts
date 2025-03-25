@@ -3,15 +3,15 @@
  * @module transformers/place/serializers
  */
 
-import {
-    type ParsedPlaceVisualConfig,
-    type Place,
-    type PlaceBase,
-    type PlaceDanger,
-    type PlaceFilters,
-    type PlaceResource,
-    type PlaceStats,
-    type PlaceVisualConfig
+import type {
+    ParsedPlaceVisualConfig,
+    Place,
+    PlaceBase,
+    PlaceDanger,
+    PlaceFilters,
+    PlaceResource,
+    PlaceStats,
+    PlaceVisualConfig
 } from '../../types/entities/place';
 
 /**

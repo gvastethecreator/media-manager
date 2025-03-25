@@ -3,7 +3,7 @@
  * @module types/entities/album/types
  */
 
-import { AlbumPrivacyLevel, AlbumType } from './enums';
+import type { AlbumPrivacyLevel, AlbumType } from './enums';
 
 /**
  * Interfaz base para álbum

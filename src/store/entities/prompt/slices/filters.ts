@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type PromptSortOption } from '@/types/entities/prompt/enums';
-import { type PromptFilters } from '@/types/entities/prompt/extended';
-import { StateCreator } from 'zustand';
+import type { PromptSortOption } from '@/types/entities/prompt/enums';
+import type { PromptFilters } from '@/types/entities/prompt/extended';
+import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const filtersLogger = serverLogger.withContext('PromptStore:Filters');

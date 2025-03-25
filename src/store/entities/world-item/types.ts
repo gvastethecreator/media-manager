@@ -4,15 +4,15 @@
  */
 
 import type { WorldItem as PrismaWorldItem } from '@prisma/client';
-import {
+import type {
     ParsedWorldItemVisualConfig,
     WorldItem,
     WorldItemFilters,
     WorldItemViewMode
 } from '../../../types/entities/world-item';
-import { WorldItemCoreSlice } from './slices/core';
-import { WorldItemFiltersSlice } from './slices/filters';
-import { WorldItemUISlice } from './slices/ui';
+import type { WorldItemCoreSlice } from './slices/core';
+import type { WorldItemFiltersSlice } from './slices/filters';
+import type { WorldItemUISlice } from './slices/ui';
 
 /**
  * Estado global del store

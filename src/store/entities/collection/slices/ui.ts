@@ -4,8 +4,8 @@
  */
 
 import type { CollectionViewConfig } from '@/types/entities/collection';
-import { StateCreator } from 'zustand';
-import { CollectionState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { CollectionState } from '../types';
 
 /**
  * Slice con operaciones relacionadas con la UI para colecciones

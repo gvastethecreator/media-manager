@@ -56,18 +56,18 @@ export const NavCategoryChildren = forwardRef<CategoryChildrenRef, NavCategoryCh
 		getViewMode: () => viewMode
 	}));
 
-	// Si no hay elementos o está colapsado, no renderizar nada
-	if (items.length === 0) {
-		return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
-	}
-
-	// Si está colapsado, no mostrar nada
-	if (isCollapsed) {
-		return null;
-	}
-
 	// Usar useMemo para optimizar el renderizado de componentes
 	const renderContent = useMemo(() => {
+		// Si no hay elementos, devolver mensaje
+		if (items.length === 0) {
+			return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
+		}
+
+		// Si está colapsado, no mostrar nada
+		if (isCollapsed) {
+			return null;
+		}
+
 		// Renderizar elementos especiales para etiquetas
 		if (categoryId === 'tags') {
 			return (
@@ -364,7 +364,7 @@ export const NavCategoryChildren = forwardRef<CategoryChildrenRef, NavCategoryCh
 				</div>
 			</>
 		);
-	}, [categoryId, currentView, items, onItemClick, selectedChildId, viewMode]);
+	}, [categoryId, currentView, items, onItemClick, selectedChildId, viewMode, isCollapsed]);
 
 	return renderContent;
 });

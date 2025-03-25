@@ -52,9 +52,9 @@ export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuPro
 			entityName="colección"
 			entities={collections}
 			isLoading={loadingStates.collections.loading}
-			onSelect={(collection) => onAction('collection-add', file, { id: collection.id })}
-			onCreate={() => onAction('collection-create', file)}
-			renderItem={(collection) => (
+			onSelectAction={(collection) => onAction('collection-add', file, { id: collection.id })}
+			onCreateAction={() => onAction('collection-create', file)}
+			renderItemAction={(collection) => (
 				<div className="flex items-center gap-2 w-full">
 					<div className="w-3 h-3 rounded" style={{ backgroundColor: collection.color || '#888' }} />
 					<span className="flex-1">{collection.name}</span>
@@ -76,9 +76,9 @@ export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="etiqueta"
 			entities={tagsList}
 			isLoading={loadingStates.tags.loading}
-			onSelect={(tag) => onAction('tag-add', file, { id: tag.id })}
-			onCreate={() => onAction('tag-create', file)}
-			renderItem={(tag) => (
+			onSelectAction={(tag) => onAction('tag-add', file, { id: tag.id })}
+			onCreateAction={() => onAction('tag-create', file)}
+			renderItemAction={(tag) => (
 				<div className="flex items-center gap-2 w-full">
 					<div className="w-3 h-3 rounded" style={{ backgroundColor: tag.color }} />
 					<span className="flex-1">{tag.name}</span>
@@ -105,9 +105,9 @@ export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="álbum"
 			entities={albumsList}
 			isLoading={loadingStates.albums.loading}
-			onSelect={(album) => onAction('album-add', file, { id: album.id })}
-			onCreate={() => onAction('album-create', file)}
-			renderItem={(album) => (
+			onSelectAction={(album) => onAction('album-add', file, { id: album.id })}
+			onCreateAction={() => onAction('album-create', file)}
+			renderItemAction={(album) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>📷</span>
 					<span className="flex-1">{album.name}</span>
@@ -128,9 +128,9 @@ export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProp
 			entityName="personaje"
 			entities={characters}
 			isLoading={loadingStates.characters.loading}
-			onSelect={(character) => onAction('character-add', file, { id: character.id })}
-			onCreate={() => onAction('character-create', file)}
-			renderItem={(character) => (
+			onSelectAction={(character) => onAction('character-add', file, { id: character.id })}
+			onCreateAction={() => onAction('character-create', file)}
+			renderItemAction={(character) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>{character.emoji || '👤'}</span>
 					<span className="flex-1">{character.name}</span>
@@ -151,9 +151,9 @@ export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="lugar"
 			entities={places}
 			isLoading={loadingStates.places.loading}
-			onSelect={(place) => onAction('place-add', file, { id: place.id })}
-			onCreate={() => onAction('place-create', file)}
-			renderItem={(place) => (
+			onSelectAction={(place) => onAction('place-add', file, { id: place.id })}
+			onCreateAction={() => onAction('place-create', file)}
+			renderItemAction={(place) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>{place.emoji || '📍'}</span>
 					<span className="flex-1">{place.name}</span>
@@ -174,9 +174,9 @@ export function WorldItemsSubmenu({ file, onAction, loadingStates }: SubmenuProp
 			entityName="objeto del mundo"
 			entities={worldItems}
 			isLoading={loadingStates.worldItems.loading}
-			onSelect={(worldItem) => onAction('world-item-add', file, { id: worldItem.id })}
-			onCreate={() => onAction('world-item-create', file)}
-			renderItem={(worldItem) => (
+			onSelectAction={(worldItem) => onAction('world-item-add', file, { id: worldItem.id })}
+			onCreateAction={() => onAction('world-item-create', file)}
+			renderItemAction={(worldItem) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>{worldItem.emoji || '📦'}</span>
 					<span className="flex-1">{worldItem.name}</span>
@@ -197,9 +197,9 @@ export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) 
 			entityName="prompt"
 			entities={prompts}
 			isLoading={loadingStates.prompts.loading}
-			onSelect={(prompt) => onAction('prompt-add', file, { id: prompt.id })}
-			onCreate={() => onAction('prompt-create', file)}
-			renderItem={(prompt) => (
+			onSelectAction={(prompt) => onAction('prompt-add', file, { id: prompt.id })}
+			onCreateAction={() => onAction('prompt-create', file)}
+			renderItemAction={(prompt) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>{prompt.emoji || '💬'}</span>
 					<span className="flex-1">{prompt.name}</span>
@@ -226,9 +226,9 @@ export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 			entityName="nota"
 			entities={notesList}
 			isLoading={loadingStates.notes.loading}
-			onSelect={(note) => onAction('note-add', file, { id: note.id })}
-			onCreate={() => onAction('note-create', file)}
-			renderItem={(note) => (
+			onSelectAction={(note) => onAction('note-add', file, { id: note.id })}
+			onCreateAction={() => onAction('note-create', file)}
+			renderItemAction={(note) => (
 				<div className="flex items-center gap-2 w-full">
 					<span className="flex-1">{note.title || note.name}</span>
 				</div>
@@ -248,9 +248,9 @@ export function ConceptsSubmenu({ file, onAction, loadingStates }: SubmenuProps)
 			entityName="concepto"
 			entities={concepts}
 			isLoading={loadingStates.concepts.loading}
-			onSelect={(concept) => onAction('concept-add', file, { id: concept.id })}
-			onCreate={() => onAction('concept-create', file)}
-			renderItem={(concept) => (
+			onSelectAction={(concept) => onAction('concept-add', file, { id: concept.id })}
+			onCreateAction={() => onAction('concept-create', file)}
+			renderItemAction={(concept) => (
 				<div className="flex items-center gap-2 w-full">
 					<span>{concept.emoji || '💡'}</span>
 					<span className="flex-1">{concept.name}</span>

@@ -71,6 +71,13 @@ export function NavCategoryItem({
 				<div
 					className="flex h-5 w-5 shrink-0 items-center justify-center hover:bg-gray-100/10 border-0 bg-transparent p-0 transition-colors cursor-pointer"
 					onClick={onToggleCollapse}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							onToggleCollapse(e);
+						}
+					}}
+					role="button"
+					tabIndex={0}
 					aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
 				>
 					<motion.div initial={false} animate={{ rotate: isCollapsed ? 0 : 90 }} transition={{ duration: 0.15 }}>
@@ -83,7 +90,7 @@ export function NavCategoryItem({
 			<Button
 				variant="ghost"
 				className={cn(
-					'flex-1 justify-start gap-2 h-7 px-2 py-0 text-sm transition-all text-xs rounded-none cursor-pointer',
+					'flex-1 justify-start gap-2 h-7 px-2 py-0 transition-all text-xs rounded-none cursor-pointer',
 					!showLabel && 'justify-center px-1 w-full',
 					isCurrent ? 'bg-secondary/30' : 'hover:bg-secondary/10'
 				)}

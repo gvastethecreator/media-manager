@@ -92,7 +92,7 @@ export function groupTagsByCategory(tags: Tag[]): Record<string, Tag[]> {
  * @param limit Límite de etiquetas a devolver
  * @returns Lista de etiquetas más usadas
  */
-export function getMostUsedTags(tags: Tag[], limit: number = 10): Tag[] {
+export function getMostUsedTags(tags: Tag[], limit = 10): Tag[] {
   return [...tags]
     .sort((a, b) => (b._count?.images || 0) - (a._count?.images || 0))
     .slice(0, limit);

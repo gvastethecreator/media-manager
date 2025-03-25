@@ -13,12 +13,12 @@ export {
 } from './enums';
 
 // Reexportar tipos explícitamente
-export {
-    type CreatePlaceData, type PlaceBase,
-    type PlaceWithRelations, type UpdatePlaceData
+export type {
+    CreatePlaceData, PlaceBase,
+    PlaceWithRelations, UpdatePlaceData
 } from './base';
 
-export {
-    type ParsedPlace, type ParsedPlaceVisualConfig, type ParsedPlaceWithRelations, type Place,
-    type PlaceFilters, type PlaceVisualConfig, type PlaceVisualConfigUpdateData
+export type {
+    ParsedPlace, ParsedPlaceVisualConfig, ParsedPlaceWithRelations, Place,
+    PlaceFilters, PlaceVisualConfig, PlaceVisualConfigUpdateData
 } from './extended';

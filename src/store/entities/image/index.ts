@@ -9,7 +9,7 @@ import { ImageSortCriteria, ImageViewMode } from '../../../types/entities/image'
 import { type ImageCoreSlice, createImageCoreSlice } from './slices/core';
 import { type ImageFiltersSlice, createImageFiltersSlice } from './slices/filters';
 import { type ImageUISlice, createImageUISlice } from './slices/ui';
-import { type ImageState } from './types';
+import type { ImageState } from './types';
 
 // Tipo del store completo
 export type ImageStore = ImageCoreSlice & ImageUISlice & ImageFiltersSlice;

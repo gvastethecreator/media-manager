@@ -4,7 +4,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import {
+import type {
     CreateFolderData,
     FolderBase,
     FolderExtended,

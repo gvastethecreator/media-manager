@@ -3,10 +3,10 @@
  * @module transformers/tag/mappers
  */
 
-import {
-    type CreateTagData,
-    type TagFilters,
-    type UpdateTagData
+import type {
+    CreateTagData,
+    TagFilters,
+    UpdateTagData
 } from '../../types/entities/tag/index';
 import { generateTagColor, generateTagEmoji } from './serializers';
 

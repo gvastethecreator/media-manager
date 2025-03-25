@@ -3,10 +3,10 @@
  * @module utils/image/helpers
  */
 
-import {
-    type Image,
-    type ImageFormat,
-    type ImageMetadata
+import type {
+    Image,
+    ImageFormat,
+    ImageMetadata
 } from '../../types/entities/image';
 import { isValidImageFormat } from './validators';
 

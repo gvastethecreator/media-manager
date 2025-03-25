@@ -4,9 +4,9 @@
  */
 
 import { extendTag, extendTags } from '@/transformers/tag';
-import { type Tag } from '@/types/entities/tag';
-import { type StateCreator } from 'zustand';
-import { type TagCoreState, type TagState } from '../types';
+import type { Tag } from '@/types/entities/tag';
+import type { StateCreator } from 'zustand';
+import type { TagCoreState, TagState } from '../types';
 
 export interface TagCoreSlice {
   // Estado

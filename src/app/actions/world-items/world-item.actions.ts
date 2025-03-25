@@ -18,10 +18,10 @@ import {
 	prepareUpdateWorldItemData
 } from '@/transformers/world-item';
 import {
-	CreateWorldItemData,
-	UpdateWorldItemData,
-	WorldItem,
-	WorldItemBase,
+	type CreateWorldItemData,
+	type UpdateWorldItemData,
+	type WorldItem,
+	type WorldItemBase,
 	WorldItemWithRelations
 } from '@/types/entities/world-item';
 

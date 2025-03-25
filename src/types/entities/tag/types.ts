@@ -2,8 +2,8 @@
  * @file Tipos para la entidad Tag
  * @module types/entities/tag/types
  */
-import { type Image } from '../image';
-import { TagRarity } from './enums';
+import type { Image } from '../image';
+import type { TagRarity } from './enums';
 
 /**
  * Interfaz base para etiquetas

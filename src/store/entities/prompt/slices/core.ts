@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { toPromptWithStats } from '@/transformers/prompt';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const coreLogger = serverLogger.withContext('PromptStore:Core');

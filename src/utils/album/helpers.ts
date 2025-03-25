@@ -3,10 +3,10 @@
  * @module utils/album/helpers
  */
 
-import {
-    type Album,
-    type AlbumMetadata,
-    type AlbumType
+import type {
+    Album,
+    AlbumMetadata,
+    AlbumType
 } from '../../types/entities/album';
 import { formatImageSize } from '../image/helpers';
 
@@ -23,7 +23,7 @@ export function generateAlbumThumbnailUrl(
   height?: number
 ): string {
   const albumId = typeof album === 'string' ? album : album.id;
-  let url = `/api/albums/${albumId}/thumbnail`;
+  const url = `/api/albums/${albumId}/thumbnail`;
 
   // Añadir parámetros
   const params = new URLSearchParams();

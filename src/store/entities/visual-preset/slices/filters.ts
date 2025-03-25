@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { VisualPresetFiltersActions, VisualPresetFiltersState, VisualPresetStore } from '../types';
 
 const filtersLogger = serverLogger.withContext('VisualPresetStore:Filters');
