@@ -3,92 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import type { BaseLayerConfig } from '../../layer-config-base';
-
-// 🎨 Constantes
-export const GRID_TYPES = ['lines', 'dots', 'squares', 'hexagons', 'diamonds'] as const;
-export const GRID_COLORS = ['auto', 'primary', 'secondary', 'custom'] as const;
-
-export const BLEND_MODES = [
-    'normal',
-    'multiply',
-    'screen',
-    'overlay',
-    'darken',
-    'lighten',
-    'color-dodge',
-    'color-burn',
-    'hard-light',
-    'soft-light',
-    'difference',
-    'exclusion',
-] as const;
-
-// 🧩 Presets de grids
-export const GRID_PRESETS = {
-    BLUEPRINT: {
-        name: 'Plano técnico',
-        description: 'Grid de estilo plano arquitectónico',
-        type: 'lines',
-        spacing: 20,
-        thickness: 1,
-        color: '#1a73e8',
-        opacity: 0.15,
-    },
-    GRAPH_PAPER: {
-        name: 'Papel cuadriculado',
-        description: 'Grid de cuadros estilo papel de matemáticas',
-        type: 'squares',
-        spacing: 15,
-        thickness: 1,
-        color: '#202124',
-        opacity: 0.08,
-    },
-    DOT_MATRIX: {
-        name: 'Matriz de puntos',
-        description: 'Patrón de puntos equidistantes',
-        type: 'dots',
-        spacing: 20,
-        thickness: 2,
-        color: '#5f6368',
-        opacity: 0.12,
-    },
-    ISOMETRIC: {
-        name: 'Isométrico',
-        description: 'Patrón de diamantes para diseño 3D',
-        type: 'diamonds',
-        spacing: 25,
-        thickness: 1,
-        color: '#4285f4',
-        opacity: 0.1,
-    },
-    HEXAGONAL: {
-        name: 'Panal',
-        description: 'Patrón de hexágonos tipo panal',
-        type: 'hexagons',
-        spacing: 30,
-        thickness: 1.5,
-        color: '#34a853',
-        opacity: 0.12,
-    },
-};
-
-// 🔄 Interfaz de la configuración
-export interface GridConfig extends BaseLayerConfig {
-    gridType: typeof GRID_TYPES[number];
-    spacing: number;
-    thickness: number;
-    color: string;
-    opacity: number;
-    blendMode: typeof BLEND_MODES[number];
-    angle: number;
-    showSubgrid: boolean;
-    subgridDivisions: number;
-    subgridOpacity: number;
-    animateOnHover: boolean;
-    animationSpeed: number;
-    colorMode: typeof GRID_COLORS[number];
-}
+import { BLEND_MODES, GRID_COLORS, GRID_TYPES, type GridConfig } from '../grid-config-types';
 
 // ✅ Esquema de validación
 const gridConfigSchema = z.object({
@@ -250,7 +165,7 @@ export async function updateGridConfig(
             data: config,
         };
     } catch (error) {
-        console.error('Error al guardar configuración de grid:', error);
+        console.error('Error al actualizar configuración de grid:', error);
         return {
             success: false,
             message: 'Error al guardar la configuración',
@@ -263,21 +178,32 @@ export async function updateGridConfig(
  */
 export async function deleteGridConfig(entityType: string, entityId?: string): Promise<GridConfigResponse> {
     try {
-        // Si no hay ID de entidad, devolver éxito (no había nada que eliminar)
+        // Si no hay ID de entidad, no se puede eliminar
         if (!entityId) {
             return {
-                success: true,
-                message: 'Configuración eliminada (sólo cliente)',
+                success: false,
+                message: 'No se especificó el ID de la entidad',
             };
         }
 
-        // Eliminar la configuración
-        await prisma.layerConfig.deleteMany({
+        // Buscar y eliminar la configuración
+        const existingConfig = await prisma.layerConfig.findFirst({
             where: {
                 entityType,
                 entityId,
                 layerType: 'grid',
             },
+        });
+
+        if (!existingConfig) {
+            return {
+                success: false,
+                message: 'La configuración no existe',
+            };
+        }
+
+        await prisma.layerConfig.delete({
+            where: { id: existingConfig.id },
         });
 
         // Revalidar la ruta
