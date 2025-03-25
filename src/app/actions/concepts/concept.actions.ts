@@ -8,6 +8,18 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
+// Importar tipos y transformers actualizados
+import {
+    toConceptWithStats
+} from '@/transformers/concept';
+import {
+    ConceptBase,
+    ConceptCreateInput,
+    ConceptExtended,
+    ConceptUpdateInput,
+    ConceptWithStats
+} from '@/types/entities/concept';
+
 // Configuración y utilidades
 const conceptLogger = serverLogger.withContext('ConceptActions');
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
@@ -31,68 +43,9 @@ const createConceptError = (
 	return error;
 };
 
-// Interfaces
-export interface Concept {
-	id: string;
-	name: string;
-	emoji: string | null;
-	description: string | null;
-	color: string | null;
-	content: string | null;
-	category: string | null;
-	tags: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	featuredImage: string | null;
-}
-
-export interface ConceptCreate {
-	name: string;
-	emoji?: string;
-	description?: string | null;
-	color?: string;
-	content?: string;
-	category?: string;
-	tags?: string;
-	featuredImage?: string | null;
-}
-
-export interface ConceptUpdate extends Partial<ConceptCreate> {
-	id: string;
-}
-
-export interface ConceptWithStats extends Concept {
-	_count: {
-		prompts: number;
-		notes: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-	};
-	lastUpdated: Date;
-}
-
-export interface ConceptWithImages {
-	id: string;
-	name: string;
-	emoji: string | null;
-	description: string | null;
-	color: string | null;
-	content: string | null;
-	category: string | null;
-	tags: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	featuredImage: string | null;
+// Interfaces adicionales para compatibilidad
+export interface ConceptWithImages extends ConceptBase {
 	images: FileItem[];
-}
-
-export interface ExtendedConcept extends Concept {
-	prompts?: { id: string; name: string }[];
-	notes?: { id: string; title: string }[];
-	characters?: { id: string; name: string }[];
-	places?: { id: string; name: string }[];
-	worldItems?: { id: string; name: string }[];
 }
 
 // Funciones utilitarias
@@ -105,7 +58,7 @@ const revalidateAllPaths = async () => {
 
 const notifyConceptChange = async (
 	action: 'create' | 'update' | 'delete',
-	concept: Concept | { id: string },
+	concept: ConceptBase | { id: string },
 	imageId?: string
 ) => {
 	// Definir el evento y payload correctamente
@@ -134,6 +87,9 @@ const notifyConceptChange = async (
 };
 
 // Acciones del servidor
+/**
+ * Obtiene todos los conceptos con estadísticas
+ */
 export async function getConcepts(): Promise<ConceptWithStats[]> {
 	try {
 		const concepts = await prisma.concept.findMany({
@@ -145,6 +101,7 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 						characters: true,
 						places: true,
 						worldItems: true,
+						images: true
 					},
 				},
 			},
@@ -153,17 +110,17 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 			},
 		});
 
-		return concepts.map((concept: any) => ({
-			...concept,
-			lastUpdated: concept.updatedAt,
-		}));
+		return concepts.map(toConceptWithStats);
 	} catch (error) {
-		console.error('Error al obtener conceptos:', error);
-		throw new Error('Error al obtener conceptos');
+		conceptLogger.error('Error al obtener conceptos:', error);
+		throw createConceptError('Error al obtener conceptos', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getConcept(id: string): Promise<Concept> {
+/**
+ * Obtiene un concepto específico por su ID
+ */
+export async function getConcept(id: string): Promise<ConceptExtended> {
 	try {
 		conceptLogger.info('🔍 Obteniendo concepto:', id);
 		const concept = await prisma.concept.findUnique({
@@ -176,6 +133,7 @@ export async function getConcept(id: string): Promise<Concept> {
 						characters: true,
 						places: true,
 						worldItems: true,
+						images: true
 					},
 				},
 			},
@@ -186,10 +144,7 @@ export async function getConcept(id: string): Promise<Concept> {
 		}
 
 		conceptLogger.info('✅ Concepto obtenido:', concept.name);
-		return {
-			...concept,
-			_count: concept._count,
-		};
+		return toConceptWithStats(concept);
 	} catch (error) {
 		conceptLogger.error('❌ Error al obtener concepto:', error);
 		// Preservar el error si ya es un ConceptError
@@ -200,15 +155,80 @@ export async function getConcept(id: string): Promise<Concept> {
 	}
 }
 
-export async function createConcept(data: ConceptCreate): Promise<Concept> {
+/**
+ * Obtiene un concepto con todas sus relaciones
+ */
+export async function getConceptWithRelations(id: string): Promise<ConceptExtended> {
 	try {
-		conceptLogger.info('📝 Creando concepto:', data.name);
+		conceptLogger.info('🔍 Obteniendo concepto con relaciones:', id);
+		const concept = await prisma.concept.findUnique({
+			where: { id },
+			include: {
+				_count: {
+					select: {
+						prompts: true,
+						notes: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						images: true
+					},
+				},
+				prompts: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				notes: {
+					select: {
+						id: true,
+						title: true,
+					},
+				},
+				characters: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				places: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				worldItems: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		});
 
-		// Validación de entrada
-		if (!data.name?.trim()) {
-			throw createConceptError('El nombre del concepto es requerido', ConceptErrorCode.VALIDATION_ERROR);
+		if (!concept) {
+			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
 		}
 
+		conceptLogger.info('✅ Concepto con relaciones obtenido:', concept.name);
+		return toConceptWithStats(concept);
+	} catch (error) {
+		conceptLogger.error('❌ Error al obtener concepto con relaciones:', error);
+		// Preservar el error si ya es un ConceptError
+		if (error instanceof Error && error.name === 'ConceptError') {
+			throw error;
+		}
+		throw createConceptError('No se pudo obtener el concepto con relaciones', ConceptErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Crea un nuevo concepto
+ */
+export async function createConcept(data: ConceptCreateInput): Promise<ConceptBase> {
+	try {
+		conceptLogger.info('📝 Creando concepto:', data.name);
 		const concept = await prisma.concept.create({
 			data: {
 				name: data.name,
@@ -219,170 +239,354 @@ export async function createConcept(data: ConceptCreate): Promise<Concept> {
 				category: data.category || 'general',
 				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
 			},
 		});
 
-		await notifyConceptChange('create', concept);
+		await emit({
+			type: 'concepts:modified',
+			data: { action: 'create', concept },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto creado:', concept.name);
 		await revalidateAllPaths();
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al crear concepto:', error);
-		// Preservar el error si ya es un ConceptError
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
-		}
 		throw createConceptError('No se pudo crear el concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function updateConcept(id: string, data: ConceptUpdate): Promise<Concept> {
+/**
+ * Actualiza un concepto existente
+ */
+export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptBase> {
 	try {
 		conceptLogger.info('📝 Actualizando concepto:', id);
-
-		// Validación de entrada
-		if (data.name === '') {
-			throw createConceptError('El nombre del concepto no puede estar vacío', ConceptErrorCode.VALIDATION_ERROR);
-		}
-
 		const concept = await prisma.concept.update({
 			where: { id },
 			data,
 		});
 
-		await notifyConceptChange('update', concept);
+		await emit({
+			type: 'concepts:modified',
+			id,
+			data: { action: 'update', concept },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 
 		conceptLogger.info('✅ Concepto actualizado:', concept.name);
 		await revalidateAllPaths();
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al actualizar concepto:', error);
-		// Preservar el error si ya es un ConceptError
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
-		}
 		throw createConceptError('No se pudo actualizar el concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function deleteConcept(id: string): Promise<void> {
+/**
+ * Elimina un concepto
+ */
+export async function deleteConcept(id: string): Promise<{ success: boolean }> {
 	try {
 		conceptLogger.info('🗑️ Eliminando concepto:', id);
-		// No necesitamos almacenar el concepto eliminado
-		await prisma.concept.delete({
+		const concept = await prisma.concept.findUnique({
 			where: { id },
+			select: { id: true, name: true },
 		});
 
-		await notifyConceptChange('delete', { id });
+		if (!concept) {
+			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+		}
 
-		conceptLogger.info('✅ Concepto eliminado');
+		// Primero desconectar todas las relaciones
+		await prisma.$transaction([
+			prisma.concept.update({
+				where: { id },
+				data: {
+					prompts: { set: [] },
+					notes: { set: [] },
+					characters: { set: [] },
+					places: { set: [] },
+					worldItems: { set: [] },
+					images: { set: [] },
+				},
+			}),
+			prisma.concept.delete({
+				where: { id },
+			}),
+		]);
+
+		await emit({
+			type: 'concepts:modified',
+			id,
+			data: { action: 'delete', id },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
+
+		conceptLogger.info('✅ Concepto eliminado:', id);
 		await revalidateAllPaths();
+		return { success: true };
 	} catch (error) {
 		conceptLogger.error('❌ Error al eliminar concepto:', error);
-		// Preservar el error si ya es un ConceptError
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
-		}
 		throw createConceptError('No se pudo eliminar el concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getConceptImages(conceptId: string): Promise<FileItem[]> {
+/**
+ * Asocia una entidad con un concepto
+ */
+export async function linkEntityToConcept(
+	conceptId: string,
+	entityId: string,
+	entityType: string
+): Promise<{ success: boolean }> {
 	try {
-		conceptLogger.info('🔍 Obteniendo imágenes del concepto:', conceptId);
+		conceptLogger.info('🔗 Vinculando entidad con concepto', { conceptId, entityId, entityType });
 
-		// Verificar que el concepto existe
+		// Validar que el concepto existe
 		const concept = await prisma.concept.findUnique({
 			where: { id: conceptId },
+			select: { id: true },
 		});
 
 		if (!concept) {
-			// Cambiar de lanzar error a simplemente registrar un mensaje informativo
-			conceptLogger.warn('ℹ️ Concepto no encontrado, retornando array vacío:', conceptId);
-			return [];
+			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
 		}
 
-		// Solución temporal hasta que se implementen las relaciones correctamente
-		conceptLogger.info('✅ Este concepto no tiene imágenes definidas aún en el esquema');
-		return [];
-	} catch (error) {
-		conceptLogger.error('❌ Error al obtener imágenes del concepto:', error);
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
+		// Vincular basado en el tipo de entidad
+		switch (entityType) {
+			case 'image':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						images: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'character':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						characters: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'place':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						places: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'worldItem':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						worldItems: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'note':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						notes: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'prompt':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						prompts: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			default:
+				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, ConceptErrorCode.VALIDATION_ERROR);
 		}
-		throw createConceptError('No se pudo obtener las imágenes del concepto', ConceptErrorCode.OPERATION_FAILED, error);
+
+		emit({
+			type: 'concepts:relation',
+			data: {
+				action: 'link',
+				conceptId,
+				entityId,
+				entityType,
+			},
+		});
+
+		conceptLogger.info('✅ Entidad vinculada con concepto');
+		await revalidateAllPaths();
+		return { success: true };
+	} catch (error) {
+		conceptLogger.error('❌ Error al vincular entidad con concepto:', error);
+		throw createConceptError('No se pudo vincular la entidad con el concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function addConceptToImage(conceptId: string, imageId: string): Promise<void> {
+/**
+ * Desasocia una entidad de un concepto
+ */
+export async function unlinkEntityFromConcept(
+	conceptId: string,
+	entityId: string,
+	entityType: string
+): Promise<{ success: boolean }> {
 	try {
-		conceptLogger.info('➕ Agregando concepto a imagen:', { conceptId, imageId });
+		conceptLogger.info('🔗 Desvinculando entidad de concepto', { conceptId, entityId, entityType });
 
-		// Actualizar relaciones
-		// Verificamos que el concepto existe
-		const conceptExists = await prisma.concept.findUnique({
+		// Validar que el concepto existe
+		const concept = await prisma.concept.findUnique({
 			where: { id: conceptId },
 			select: { id: true },
 		});
 
-		if (!conceptExists) {
+		if (!concept) {
 			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
 		}
 
-		// En lugar de actualizar directamente, usamos la API de Prisma para gestionar la relación
-		// Actualizamos la tabla de unión entre imágenes y conceptos
-		await prisma.$executeRaw`
-			INSERT INTO _ConceptToImage (A, B)
-			VALUES (${conceptId}, ${imageId})
-			ON CONFLICT DO NOTHING
-		`;
-
-		await notifyConceptChange('update', { id: conceptId }, imageId);
-
-		conceptLogger.info('✅ Concepto agregado a imagen');
-		await revalidateAllPaths();
-	} catch (error) {
-		conceptLogger.error('❌ Error al agregar concepto a imagen:', error);
-		// Preservar el error si ya es un ConceptError
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
+		// Desvincular basado en el tipo de entidad
+		switch (entityType) {
+			case 'image':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						images: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'character':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						characters: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'place':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						places: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'worldItem':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						worldItems: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'note':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						notes: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'prompt':
+				await prisma.concept.update({
+					where: { id: conceptId },
+					data: {
+						prompts: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			default:
+				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, ConceptErrorCode.VALIDATION_ERROR);
 		}
-		throw createConceptError('No se pudo agregar el concepto a la imagen', ConceptErrorCode.OPERATION_FAILED, error);
+
+		emit({
+			type: 'concepts:relation',
+			data: {
+				action: 'unlink',
+				conceptId,
+				entityId,
+				entityType,
+			},
+		});
+
+		conceptLogger.info('✅ Entidad desvinculada de concepto');
+		await revalidateAllPaths();
+		return { success: true };
+	} catch (error) {
+		conceptLogger.error('❌ Error al desvincular entidad de concepto:', error);
+		throw createConceptError('No se pudo desvincular la entidad del concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function removeConceptFromImage(conceptId: string, imageId: string): Promise<void> {
+/**
+ * Obtiene las imágenes asociadas a un concepto
+ */
+export async function getConceptImages(conceptId: string): Promise<{ images: FileItem[] }> {
 	try {
-		conceptLogger.info('➖ Removiendo concepto de imagen:', { conceptId, imageId });
-
-		// Verificamos que el concepto existe
-		const conceptExists = await prisma.concept.findUnique({
+		conceptLogger.info('🖼️ Obteniendo imágenes para concepto:', conceptId);
+		const concept = await prisma.concept.findUnique({
 			where: { id: conceptId },
-			select: { id: true },
+			include: {
+				images: true,
+			},
 		});
 
-		if (!conceptExists) {
+		if (!concept) {
 			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
 		}
 
-		// En lugar de actualizar directamente, usamos la API de Prisma para gestionar la relación
-		// Eliminamos la relación de la tabla de unión
-		await prisma.$executeRaw`
-			DELETE FROM _ConceptToImage
-			WHERE A = ${conceptId} AND B = ${imageId}
-		`;
+		// Adaptar imágenes al formato FileItem
+		const images = concept.images.map((image) => {
+			return {
+				id: image.id,
+				name: image.name,
+				path: image.path,
+				type: 'image',
+				size: image.size,
+				width: image.width || 0,
+				height: image.height || 0,
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+				thumbnail: '',
+				thumbnailSize: image.thumbnailSize || 0,
+				thumbnailWidth: image.thumbnailWidth || 0,
+				thumbnailHeight: image.thumbnailHeight || 0,
+				src: `/api/images/${image.id}`,
+			} as FileItem;
+		});
 
-		await notifyConceptChange('update', { id: conceptId }, imageId);
-
-		conceptLogger.info('✅ Concepto removido de imagen');
-		await revalidateAllPaths();
+		conceptLogger.info('✅ Imágenes obtenidas para concepto', { count: images.length });
+		return { images };
 	} catch (error) {
-		conceptLogger.error('❌ Error al remover concepto de imagen:', error);
-		// Preservar el error si ya es un ConceptError
-		if (error instanceof Error && error.name === 'ConceptError') {
-			throw error;
-		}
-		throw createConceptError('No se pudo remover el concepto de la imagen', ConceptErrorCode.OPERATION_FAILED, error);
+		conceptLogger.error('❌ Error al obtener imágenes para concepto:', error);
+		throw createConceptError('No se pudieron obtener las imágenes para el concepto', ConceptErrorCode.OPERATION_FAILED, error);
 	}
 }

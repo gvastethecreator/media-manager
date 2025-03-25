@@ -5,44 +5,27 @@ import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 
-import type { CreateImageInput, GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
+// Importamos los nuevos tipos y transformers
+import {
+    getDerivedImageProperties,
+    mapCreateImageDataToPrisma,
+    mapUpdateImageDataToPrisma
+} from '@/transformers/image';
+import {
+    CreateImageData,
+    ImageBase,
+    ImageExtended,
+    UpdateImageData
+} from '@/types/entities/image';
+
+import type { GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
 const imageLogger = serverLogger.withContext('ImageCRUD');
-
-// Definir la interfaz Image para no depender de Prisma
-export interface Image {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	width: number | null;
-	height: number | null;
-	hash: string | null;
-	metadata: string | null;
-	folderId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	isPublic: boolean;
-	isFavorite: boolean;
-	thumbnail: Buffer | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	thumbnailError: string | null;
-	tags?: { id: string; name: string; color: string }[];
-	collections?: { id: string; name: string; color: string; emoji: string }[];
-	albums?: { id: string; name: string; emoji: string }[];
-	characters?: { id: string; name: string; emoji: string }[];
-	places?: { id: string; name: string; emoji: string }[];
-	worldItems?: { id: string; name: string; emoji: string }[];
-	stats?: any;
-	folder?: { id: string; name: string; path: string };
-}
 
 /**
  * Obtiene una imagen por su ID
  */
-export async function getImage(id: string): Promise<Image | null> {
+export async function getImage(id: string): Promise<ImageExtended | null> {
 	try {
 		const image = await prisma.image.findUnique({
 			where: { id },
@@ -69,6 +52,7 @@ export async function getImage(id: string): Promise<Image | null> {
 				folder: {
 					select: { id: true, name: true, path: true },
 				},
+				visualConfig: true,
 			},
 		});
 
@@ -76,7 +60,14 @@ export async function getImage(id: string): Promise<Image | null> {
 			return null;
 		}
 
-		return image as unknown as Image;
+		// Añadir propiedades derivadas
+		const derivedProperties = getDerivedImageProperties(image);
+		const result: ImageExtended = {
+			...image as unknown as ImageBase,
+			...derivedProperties
+		};
+
+		return result;
 	} catch (error) {
 		imageLogger.error('Error al obtener la imagen:', error);
 		throw new Error('No se pudo obtener la imagen');
@@ -86,21 +77,17 @@ export async function getImage(id: string): Promise<Image | null> {
 /**
  * Crea una nueva imagen
  */
-export async function createImage(data: CreateImageInput) {
+export async function createImage(data: CreateImageData): Promise<ImageBase> {
 	try {
+		// Usar el mapper para preparar los datos para Prisma
+		const prismaData = mapCreateImageDataToPrisma(data);
+
 		const image = await prisma.image.create({
 			data: {
-				name: data.name,
-				path: data.path,
-				size: data.size,
-				width: data.width,
-				height: data.height,
-				hash: data.hash,
-				metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-				isPublic: data.isPublic ?? false,
-				folder: {
+				...prismaData,
+				folder: data.folderId ? {
 					connect: { id: data.folderId },
-				},
+				} : undefined,
 			},
 			include: {
 				tags: true,
@@ -130,18 +117,21 @@ export async function createImage(data: CreateImageInput) {
 /**
  * Actualiza una imagen existente
  */
-export async function updateImage(id: string, data: Partial<Image>): Promise<Image> {
+export async function updateImage(id: string, data: UpdateImageData): Promise<ImageBase> {
 	try {
+		// Usar el mapper para preparar los datos para Prisma
+		const prismaData = mapUpdateImageDataToPrisma(data);
+
 		const updated = await prisma.image.update({
 			where: { id },
-			data,
+			data: prismaData,
 		});
 
 		// Revalidar rutas
 		revalidatePath('/');
 		revalidatePath(`/images/${id}`);
 
-		return updated as unknown as Image;
+		return updated;
 	} catch (error) {
 		imageLogger.error('Error al actualizar la imagen:', error);
 		throw new Error('No se pudo actualizar la imagen');
@@ -154,7 +144,7 @@ export async function updateImage(id: string, data: Partial<Image>): Promise<Ima
 export async function updateFavoriteStatus(
 	id: string,
 	isFavorite: boolean
-): Promise<Pick<Image, 'id' | 'name' | 'isFavorite'>> {
+): Promise<Pick<ImageBase, 'id' | 'name' | 'isFavorite'>> {
 	try {
 		const updated = await prisma.image.update({
 			where: { id },
@@ -177,7 +167,7 @@ export async function updateFavoriteStatus(
 /**
  * Obtiene todas las imágenes marcadas como favoritas
  */
-export async function getFavoriteImages(): Promise<Image[]> {
+export async function getFavoriteImages(): Promise<ImageExtended[]> {
 	try {
 		const favorites = await prisma.image.findMany({
 			where: { isFavorite: true },
@@ -190,10 +180,18 @@ export async function getFavoriteImages(): Promise<Image[]> {
 					select: { id: true, name: true, color: true, emoji: true },
 				},
 				stats: true,
+				visualConfig: true,
 			},
 		});
 
-		return favorites as unknown as Image[];
+		// Añadir propiedades derivadas a cada imagen
+		return favorites.map(img => {
+			const derivedProps = getDerivedImageProperties(img);
+			return {
+				...img,
+				...derivedProps
+			} as ImageExtended;
+		});
 	} catch (error) {
 		imageLogger.error('Error al obtener imágenes favoritas:', error);
 		throw new Error('No se pudieron obtener las imágenes favoritas');
@@ -291,11 +289,21 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 					select: { id: true, name: true, emoji: true },
 				},
 				stats: true,
+				visualConfig: true,
 			},
 		});
 
+		// Transformar imágenes y añadir propiedades derivadas
+		const processedImages = images.map(img => {
+			const derivedProps = getDerivedImageProperties(img);
+			return {
+				...img,
+				...derivedProps
+			} as ImageExtended;
+		});
+
 		return {
-			images: images as unknown as ImageResult[],
+			images: processedImages as unknown as ImageResult[],
 			total,
 			page,
 			pageSize,
@@ -303,5 +311,26 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 	} catch (error) {
 		imageLogger.error('Error al obtener imágenes:', error);
 		throw new Error('No se pudieron obtener las imágenes');
+	}
+}
+
+/**
+ * Elimina una imagen
+ */
+export async function deleteImage(id: string): Promise<void> {
+	try {
+		await prisma.image.delete({
+			where: { id },
+		});
+
+		// Revalidar rutas
+		revalidatePath('/');
+		revalidatePath('/images');
+
+		// Emitir eventos
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
+	} catch (error) {
+		imageLogger.error('Error al eliminar la imagen:', error);
+		throw new Error('No se pudo eliminar la imagen');
 	}
 }

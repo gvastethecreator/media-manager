@@ -1,4 +1,9 @@
-import { ThumbnailQuality } from '@/types/thumbnails';
+import { CreateImageData, ImageExtended } from '@/types/entities/image';
+
+/**
+ * Re-exportamos los tipos principales desde el módulo de tipos
+ */
+export type { CreateImageData };
 
 /**
  * Datos de entrada para crear una imagen
@@ -44,28 +49,9 @@ export type GetImagesOptions = {
 
 /**
  * Resultados de una imagen con sus relaciones
+ * Usamos ImageExtended para mantener la compatibilidad con tipos existentes
  */
-export interface ImageResult {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	width: number;
-	height: number;
-	hash: string;
-	folderId: string;
-	isPublic: boolean;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	metadata?: Record<string, unknown>;
-	thumbnail?: Buffer | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	tags?: Array<{ id: string; name: string }>;
-	collections?: Array<{ id: string; name: string }>;
-}
+export type ImageResult = ImageExtended;
 
 /**
  * Resultado de la operación de obtener imágenes

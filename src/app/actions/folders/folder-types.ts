@@ -1,27 +1,24 @@
-export class FolderError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'FolderError';
-	}
-}
+import {
+    CreateFolderData,
+    FolderBase,
+    FolderExtended,
+    FolderStats,
+    FolderSummary,
+    UpdateFolderData
+} from '@/types/entities/folder';
 
-export interface FolderCreate {
-	name: string;
-	path: string;
-	totalFiles?: number;
-	totalSize?: number;
-	lastIndexed?: Date;
-}
+// Re-exportamos los tipos principales
+export type {
+    CreateFolderData, FolderBase,
+    FolderExtended, FolderStats, FolderSummary, UpdateFolderData
+};
 
-export interface FolderUpdate extends Partial<Omit<FolderCreate, 'path'>> {
-	id: string;
-	path?: string;
-	autoReindex?: boolean;
-}
+// Estos tipos son específicos de las operaciones de procesamiento
+// y no forman parte del modelo de datos central
 
+/**
+ * Estado del proceso de indexación
+ */
 export interface ProcessStatus {
 	status?: string;
 	current?: number;
@@ -65,6 +62,9 @@ export interface ProcessStatus {
 	estimatedTimeRemaining?: number;
 }
 
+/**
+ * Respuesta de operaciones de carpeta
+ */
 export interface FolderResponse {
 	id: string;
 	name: string;
@@ -102,6 +102,54 @@ export interface FolderResponse {
 	size?: number;
 }
 
+// Constantes
+export const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+
+/**
+ * Respuesta de error en operaciones
+ */
+export interface ErrorResponse {
+	message: string;
+	details?: string;
+	folderId?: string;
+	phase?: string;
+	timestamp: number;
+	type?: string;
+}
+
+/**
+ * Callbacks para operaciones de indexación
+ */
+export interface IndexCallbacks {
+	onProgress?: (status: ProcessStatus) => void;
+	onError?: (error: ErrorResponse) => void;
+	onComplete?: (data: FolderResponse) => void;
+}
+
+export class FolderError extends Error {
+	constructor(
+		message: string,
+		public cause?: unknown
+	) {
+		super(message);
+		this.name = 'FolderError';
+	}
+}
+
+export interface FolderCreate {
+	name: string;
+	path: string;
+	totalFiles?: number;
+	totalSize?: number;
+	lastIndexed?: Date;
+}
+
+export interface FolderUpdate extends Partial<Omit<FolderCreate, 'path'>> {
+	id: string;
+	path?: string;
+	autoReindex?: boolean;
+}
+
 // Definición de las interfaces relacionadas con imágenes
 export interface ImageEntity {
 	id: string;
@@ -131,22 +179,4 @@ export interface ImageWithRelations {
 	characters?: ImageEntity[];
 	places?: ImageEntity[];
 	worldItems?: ImageEntity[];
-}
-
-// Constantes
-export const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-
-export interface ErrorResponse {
-	message: string;
-	details?: string;
-	folderId?: string;
-	phase?: string;
-	timestamp: number;
-	type?: string;
-}
-
-export interface IndexCallbacks {
-	onProgress?: (status: ProcessStatus) => void;
-	onError?: (error: ErrorResponse) => void;
-	onComplete?: (data: FolderResponse) => void;
 }

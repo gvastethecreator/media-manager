@@ -4,8 +4,19 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { Character } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
+import {
+	CharacterBase,
+	CreateCharacterData,
+	UpdateCharacterData,
+	CharacterFilter
+} from '@/types/entities/character';
+import {
+	mapCreateCharacterDataToPrisma,
+	mapUpdateCharacterDataToPrisma,
+	toCharacterListItem,
+	toCharacterCard
+} from '@/transformers/character';
 
 // Configuración y utilidades
 const characterLogger = serverLogger.withContext('CharacterActions');
@@ -30,29 +41,38 @@ const createCharacterError = (
 	return error;
 };
 
-// Interfaces
-export interface CharacterWithStats {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	class: string | null;
-	race: string | null;
-	level: number | null;
-	alignment: string | null;
-	stats: string | null;
-	shortcut: string | null;
-	backstory: string | null;
-	filters: string | null;
-	sortBy: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+/**
+ * Revalida todas las rutas relacionadas con personajes
+ */
+const revalidateAllPaths = async () => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	characterLogger.info('🔄 Rutas revalidadas');
+};
+
+/**
+ * Notifica cambios en un personaje a través del sistema de eventos
+ */
+const notifyCharacterChange = async (action: 'create' | 'update' | 'delete', character: CharacterBase | { id: string }) => {
+	// Emitir eventos usando el sistema de servidor
+	await emit({
+		type: 'characters:modified',
+		data: { action, character },
+	});
+	statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
+};
+
+// Interfaces extendidas
+export interface CharacterWithStats extends CharacterBase {
 	_count: {
 		images: number;
 	};
 	totalSize: number;
+	imageCount?: number;
+}
+
+export interface CharacterWithImages extends CharacterBase {
 	images?: {
 		id: string;
 		thumbnail: Buffer | null;
@@ -64,44 +84,9 @@ export interface CharacterWithStats {
 	recentImages?: (string | null)[];
 }
 
-export interface CharacterCreate {
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string | null;
-	shortcut?: string | null;
-	level: number;
-	class: string;
-	race: string;
-	alignment: string;
-	backstory: string;
-	stats: string;
-	sortBy: string;
-	filters: string;
-}
-
-export interface CharacterUpdate extends Partial<CharacterCreate> {
-	id: string;
-}
-
-// Funciones utilitarias
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-	}
-	characterLogger.info('🔄 Rutas revalidadas');
-};
-
-const notifyCharacterChange = async (action: 'create' | 'update' | 'delete', character: Character | { id: string }) => {
-	// Emitir eventos usando el nuevo sistema de servidor
-	await emit({
-		type: 'characters:modified',
-		data: { action, character },
-	});
-	statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
-};
-
-// Acciones del servidor
+/**
+ * Obtiene todos los personajes con estadísticas
+ */
 export async function getCharacters(): Promise<CharacterWithStats[]> {
 	try {
 		characterLogger.info('👤 Obteniendo personajes');
@@ -143,6 +128,7 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 				return {
 					...character,
 					totalSize: totalSize._sum.size || 0,
+					imageCount: character._count.images,
 					recentImages: character.images
 						.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
 						.map((img) => {
@@ -164,7 +150,10 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 	}
 }
 
-export async function getCharacter(id: string) {
+/**
+ * Obtiene un personaje específico por su ID
+ */
+export async function getCharacter(id: string): Promise<CharacterWithStats> {
 	try {
 		characterLogger.info('🔍 Obteniendo personaje:', id);
 		const character = await prisma.character.findUnique({
@@ -198,164 +187,214 @@ export async function getCharacter(id: string) {
 		const result = {
 			...character,
 			totalSize: totalSize._sum.size || 0,
+			imageCount: character._count.images,
 		};
 
-		characterLogger.info('✅ Personaje obtenido:', character.name);
+		characterLogger.info('✅ Personaje obtenido:', id);
 		return result;
 	} catch (error) {
-		characterLogger.error('❌ Error al obtener personaje:', error);
-		// Preservar el error si ya es un CharacterError
-		if (error instanceof Error && error.name === 'CharacterError') {
-			throw error;
-		}
-		throw createCharacterError('No se pudo obtener el personaje', CharacterErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-export async function createCharacter(data: CharacterCreate) {
-	try {
-		characterLogger.info('📝 Creando nuevo personaje:', data.name);
-
-		// Validación de entrada
-		if (!data.name?.trim()) {
-			throw createCharacterError('El nombre del personaje es requerido', CharacterErrorCode.VALIDATION_ERROR);
-		}
-
-		const character = await prisma.character.create({
-			data: {
-				...data,
-				stats: data.stats || '{}',
-				filters: data.filters || '[]',
-			},
-		});
-
-		await notifyCharacterChange('create', character);
-
-		characterLogger.info('✅ Personaje creado:', character.name);
-		await revalidateAllPaths();
-		return character;
-	} catch (error) {
-		characterLogger.error('❌ Error al crear personaje:', error);
-		// Preservar el error si ya es un CharacterError
-		if (error instanceof Error && error.name === 'CharacterError') {
-			throw error;
-		}
-		throw createCharacterError('No se pudo crear el personaje', CharacterErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-export async function updateCharacter(id: string, data: CharacterUpdate) {
-	try {
-		characterLogger.info('📝 Actualizando personaje:', id);
-
-		// Validación de entrada
-		if (data.name === '') {
-			throw createCharacterError('El nombre del personaje no puede estar vacío', CharacterErrorCode.VALIDATION_ERROR);
-		}
-
-		const character = await prisma.character.update({
-			where: { id },
-			data: {
-				...data,
-				stats: data.stats || undefined,
-				filters: data.filters || undefined,
-			},
-		});
-
-		await notifyCharacterChange('update', character);
-
-		characterLogger.info('✅ Personaje actualizado:', character.name);
-		await revalidateAllPaths();
-		return character;
-	} catch (error) {
-		characterLogger.error('❌ Error al actualizar personaje:', error);
-		// Preservar el error si ya es un CharacterError
-		if (error instanceof Error && error.name === 'CharacterError') {
-			throw error;
-		}
-		throw createCharacterError('No se pudo actualizar el personaje', CharacterErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-export async function deleteCharacter(id: string) {
-	try {
-		characterLogger.info('🗑️ Eliminando personaje:', id);
-		await prisma.character.delete({
-			where: { id },
-		});
-
-		await notifyCharacterChange('delete', { id });
-
-		characterLogger.info('✅ Personaje eliminado');
-		await revalidateAllPaths();
-	} catch (error) {
-		characterLogger.error('❌ Error al eliminar personaje:', error);
-		throw createCharacterError('No se pudo eliminar el personaje', CharacterErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-export async function getCharacterImages(id: string) {
-	try {
-		characterLogger.info('🖼️ Obteniendo imágenes del personaje:', id);
-
-		// Verificar primero si el personaje existe
-		const character = await prisma.character.findUnique({
-			where: { id },
-			select: { id: true }
-		});
-
-		if (!character) {
-			characterLogger.warn('ℹ️ Personaje no encontrado, retornando array vacío:', id);
-			return [];
-		}
-
-		const images = await prisma.image.findMany({
-			where: {
-				characters: {
-					some: {
-						id,
-					},
-				},
-			},
-			select: {
-				id: true,
-				name: true,
-				path: true,
-				size: true,
-				createdAt: true,
-				updatedAt: true,
-				hash: true,
-				width: true,
-				height: true,
-				metadata: true,
-				thumbnail: true,
-				thumbnailSize: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				folderId: true,
-				isPublic: true,
-				isFavorite: true,
-			},
-		});
-
-		characterLogger.info(`✅ ${images.length} imágenes obtenidas`);
-		return images.map((image) => ({
-			...image,
-			type: 'image',
-		}));
-	} catch (error) {
-		characterLogger.error('❌ Error al obtener imágenes del personaje:', error);
+		characterLogger.error('❌ Error al obtener personaje', { id, error });
 		throw createCharacterError(
-			'No se pudieron obtener las imágenes del personaje',
-			CharacterErrorCode.OPERATION_FAILED,
+			'No se pudo obtener el personaje',
+			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
 }
 
+/**
+ * Crea un nuevo personaje
+ */
+export async function createCharacter(data: CreateCharacterData): Promise<CharacterBase> {
+	try {
+		characterLogger.info('➕ Creando personaje', { name: data.name });
+
+		// Utilizar el transformer para mapear datos de creación
+		const createData = mapCreateCharacterDataToPrisma(data);
+
+		const character = await prisma.character.create({
+			data: createData,
+		});
+
+		await revalidateAllPaths();
+		await notifyCharacterChange('create', character);
+
+		characterLogger.info('✅ Personaje creado', { id: character.id, name: character.name });
+		return character;
+	} catch (error) {
+		characterLogger.error('❌ Error al crear personaje', { error, data });
+		throw createCharacterError('No se pudo crear el personaje', CharacterErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Actualiza un personaje existente
+ */
+export async function updateCharacter(id: string, data: UpdateCharacterData): Promise<CharacterBase> {
+	try {
+		characterLogger.info('🔄 Actualizando personaje', { id });
+
+		// Comprobar que el personaje existe
+		const existingCharacter = await prisma.character.findUnique({
+			where: { id },
+		});
+
+		if (!existingCharacter) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		// Utilizar el transformer para mapear datos de actualización
+		const updateData = mapUpdateCharacterDataToPrisma(data);
+
+		const updatedCharacter = await prisma.character.update({
+			where: { id },
+			data: updateData,
+		});
+
+		await revalidateAllPaths();
+		await notifyCharacterChange('update', updatedCharacter);
+
+		characterLogger.info('✅ Personaje actualizado', { id });
+		return updatedCharacter;
+	} catch (error) {
+		characterLogger.error('❌ Error al actualizar personaje', { id, error });
+		throw createCharacterError(
+			'No se pudo actualizar el personaje',
+			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
+			error
+		);
+	}
+}
+
+/**
+ * Elimina un personaje por su ID
+ */
+export async function deleteCharacter(id: string): Promise<{ id: string }> {
+	try {
+		characterLogger.info('🗑️ Eliminando personaje', { id });
+
+		// Comprobar que el personaje existe
+		const character = await prisma.character.findUnique({
+			where: { id },
+		});
+
+		if (!character) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		await prisma.character.delete({
+			where: { id },
+		});
+
+		await revalidateAllPaths();
+		await notifyCharacterChange('delete', { id });
+
+		characterLogger.info('✅ Personaje eliminado', { id });
+		return { id };
+	} catch (error) {
+		characterLogger.error('❌ Error al eliminar personaje', { id, error });
+		throw createCharacterError(
+			'No se pudo eliminar el personaje',
+			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
+			error
+		);
+	}
+}
+
+/**
+ * Obtiene las imágenes asociadas a un personaje
+ */
+export async function getCharacterImages(id: string) {
+	try {
+		characterLogger.info('🖼️ Obteniendo imágenes del personaje', { id });
+
+		// Comprobar que el personaje existe
+		const character = await prisma.character.findUnique({
+			where: { id },
+		});
+
+		if (!character) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		const characterWithImages = await prisma.character.findUnique({
+			where: { id },
+			include: {
+				images: {
+					orderBy: { createdAt: 'desc' },
+					select: {
+						id: true,
+						name: true,
+						description: true,
+						width: true,
+						height: true,
+						size: true,
+						aspectRatio: true,
+						blurhash: true,
+						palette: true,
+						format: true,
+						focalPoint: true,
+						thumbnail: true,
+						thumbnailWidth: true,
+						thumbnailHeight: true,
+						thumbnailSize: true,
+						createdAt: true,
+						updatedAt: true,
+					},
+				},
+			},
+		});
+
+		if (!characterWithImages) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		const images = characterWithImages.images.map((image) => {
+			const thumbnailUrl = image.thumbnail
+				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
+				: null;
+
+			return {
+				...image,
+				thumbnail: undefined,
+				thumbnailUrl,
+			};
+		});
+
+		characterLogger.info('✅ Imágenes del personaje obtenidas', { id, count: images.length });
+		return images;
+	} catch (error) {
+		characterLogger.error('❌ Error al obtener imágenes del personaje', { id, error });
+		throw createCharacterError('No se pudieron obtener las imágenes del personaje', CharacterErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Asocia una imagen a un personaje
+ */
 export async function addImageToCharacter(characterId: string, imageId: string) {
 	try {
-		characterLogger.info('🖼️ Agregando imagen a personaje:', { characterId, imageId });
+		characterLogger.info('🔗 Añadiendo imagen a personaje', { characterId, imageId });
+
+		// Comprobar que el personaje existe
+		const character = await prisma.character.findUnique({
+			where: { id: characterId },
+		});
+
+		if (!character) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		// Comprobar que la imagen existe
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+		});
+
+		if (!image) {
+			throw createCharacterError('Imagen no encontrada', CharacterErrorCode.NOT_FOUND);
+		}
+
+		// Añadir relación
 		await prisma.character.update({
 			where: { id: characterId },
 			data: {
@@ -365,25 +404,41 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 			},
 		});
 
-		// Emitir eventos usando el nuevo sistema de servidor
-		await emit({
-			type: 'characters:modified',
-			id: characterId,
-			imageId,
-			data: { action: 'addImage' },
-		});
-
-		characterLogger.info('✅ Imagen agregada al personaje');
 		await revalidateAllPaths();
+		characterLogger.info('✅ Imagen añadida a personaje', { characterId, imageId });
+		return { success: true };
 	} catch (error) {
-		characterLogger.error('❌ Error al agregar imagen al personaje:', error);
-		throw createCharacterError('No se pudo agregar la imagen al personaje', CharacterErrorCode.OPERATION_FAILED, error);
+		characterLogger.error('❌ Error al añadir imagen a personaje', { characterId, imageId, error });
+		throw createCharacterError('No se pudo añadir la imagen al personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
 
+/**
+ * Elimina la asociación entre una imagen y un personaje
+ */
 export async function removeImageFromCharacter(characterId: string, imageId: string) {
 	try {
-		characterLogger.info('🖼️ Eliminando imagen de personaje:', { characterId, imageId });
+		characterLogger.info('🔗 Eliminando imagen de personaje', { characterId, imageId });
+
+		// Comprobar que el personaje existe
+		const character = await prisma.character.findUnique({
+			where: { id: characterId },
+		});
+
+		if (!character) {
+			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+		}
+
+		// Comprobar que la imagen existe
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+		});
+
+		if (!image) {
+			throw createCharacterError('Imagen no encontrada', CharacterErrorCode.NOT_FOUND);
+		}
+
+		// Eliminar relación
 		await prisma.character.update({
 			where: { id: characterId },
 			data: {
@@ -393,22 +448,11 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 			},
 		});
 
-		// Emitir eventos usando el nuevo sistema de servidor
-		await emit({
-			type: 'characters:modified',
-			id: characterId,
-			imageId,
-			data: { action: 'removeImage' },
-		});
-
-		characterLogger.info('✅ Imagen eliminada del personaje');
 		await revalidateAllPaths();
+		characterLogger.info('✅ Imagen eliminada de personaje', { characterId, imageId });
+		return { success: true };
 	} catch (error) {
-		characterLogger.error('❌ Error al eliminar imagen del personaje:', error);
-		throw createCharacterError(
-			'No se pudo eliminar la imagen del personaje',
-			CharacterErrorCode.OPERATION_FAILED,
-			error
-		);
+		characterLogger.error('❌ Error al eliminar imagen de personaje', { characterId, imageId, error });
+		throw createCharacterError('No se pudo eliminar la imagen del personaje', CharacterErrorCode.OPERATION_FAILED, error);
 	}
 }
