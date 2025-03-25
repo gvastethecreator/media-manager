@@ -14,7 +14,7 @@ import { type VideoCoreSlice, createVideoCoreSlice } from './slices/core';
 import { type VideoFiltersSlice, createVideoFiltersSlice } from './slices/filters';
 import { type VideoPlayerSlice, createVideoPlayerSlice } from './slices/player';
 import { type VideoUISlice, createVideoUISlice } from './slices/ui';
-import { type VideoState } from './types';
+import type { VideoState } from './types';
 
 // Tipo del store completo
 export type VideoStore = VideoCoreSlice & VideoUISlice & VideoFiltersSlice & VideoPlayerSlice;

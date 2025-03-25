@@ -1,4 +1,4 @@
-import { QueueJob } from "@prisma/client";
+import type { QueueJob } from "@prisma/client";
 
 // Enums para estados del trabajo en cola
 export enum QueueJobStatus {

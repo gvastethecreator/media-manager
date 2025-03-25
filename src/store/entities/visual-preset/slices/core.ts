@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VisualPresetExtended } from '@/types/entities/visual-preset';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { VisualPresetCoreActions, VisualPresetCoreState, VisualPresetStore } from '../types';
 
 // Mock de API para pruebas - Reemplazar con llamadas reales a server actions

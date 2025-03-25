@@ -3,9 +3,9 @@
  * @module store/entities/world-item/slices/ui
  */
 
-import { StateCreator } from 'zustand';
-import { WorldItemFilters, WorldItemViewMode } from '../../../../types/entities/world-item';
-import { WorldItemStore } from '../index';
+import type { StateCreator } from 'zustand';
+import { type WorldItemFilters, WorldItemViewMode } from '../../../../types/entities/world-item';
+import type { WorldItemStore } from '../index';
 
 export interface WorldItemUISlice {
   // Estado de visualización

@@ -40,7 +40,7 @@ interface MetadataContent {
 export function transformImageToFileItem(image: any): FileItem {
     try {
         // Preparar el objeto de metadatos como string JSON
-        let metadataContent: MetadataContent = {
+        const metadataContent: MetadataContent = {
             dimensions: {
                 width: image.width || 0,
                 height: image.height || 0,

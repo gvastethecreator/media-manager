@@ -1,20 +1,16 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
-import { Pin, PinOff, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import type { ContextMenuAction } from './context-menu/context-menu';
-import { DetailsPanel } from './details/details-panel';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
 import { CardsView } from './views/cards-view';
@@ -57,25 +53,8 @@ export interface FileBrowserProps {
 export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) {
 	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
 	const imageResources = useImageResources();
-	const { isVisible, isFixed, toggleVisibility, toggleFixed } = useDetailsPanel();
-	const [position, setPosition] = useState({ x: 0, y: 0 });
+	const { setVisible, setSelectedItems } = useDetailsPanel();
 	const constraintsRef = useRef<HTMLDivElement>(null);
-	const panelRef = useRef<HTMLDivElement>(null);
-
-	// Convertir FileItem[] a ImageItem[] para el panel de detalles
-	const mappedItems = selectedItems.map((item) => ({
-		id: item.id,
-		name: item.name,
-		path: item.path,
-		url: item.thumbnail || undefined,
-		metadata: item.metadata === null ? undefined : item.metadata,
-		fileSize: item.size,
-		width: item.width,
-		height: item.height,
-		tags: item.tags?.map((tag) => tag.name),
-		createdAt: item.createdAt,
-		updatedAt: item.updatedAt,
-	}));
 
 	// Crear una referencia local para el div parent
 	const gridParentRef = useRef<HTMLDivElement>(null);
@@ -103,6 +82,52 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 			virtualizer.scrollToIndex(0);
 		}
 	}, [virtualizer]);
+
+	// Mantener el panel de detalles actualizado con los elementos seleccionados
+	useEffect(() => {
+		// Convertir FileItem[] a ImageItem[] para el panel de detalles
+		const mappedItems = selectedItems.map((item) => ({
+			id: item.id,
+			name: item.name,
+			path: item.path,
+			url: item.thumbnail || undefined,
+			metadata: item.metadata === null ? undefined : item.metadata,
+			fileSize: item.size,
+			width: item.width,
+			height: item.height,
+			tags: item.tags?.map((tag) => tag.name),
+			createdAt: item.createdAt,
+			updatedAt: item.updatedAt,
+		}));
+
+		// Actualizar el store de detalles con los items mapeados
+		setSelectedItems(mappedItems);
+	}, [selectedItems, setSelectedItems]);
+
+	// Manejador personalizado para el clic en ítems
+	const handleItemClick = useCallback(
+		(item: FileItem) => {
+			// Seleccionar el ítem (reemplaza la selección actual sin multi-selección)
+			toggleItemSelection(item, false);
+
+			// Mostrar el panel de detalles con el ítem seleccionado
+			setVisible(true);
+
+			// Asegurarnos de que el panel no esté colapsado
+			const isRightPanelCollapsed = localStorage.getItem('right-panel-collapsed') === 'true';
+			if (isRightPanelCollapsed) {
+				localStorage.setItem('right-panel-collapsed', 'false');
+				// Provocar un refresco de la UI para expandir el panel
+				window.dispatchEvent(new Event('storage'));
+			}
+
+			// Llamar al callback onItemClick si existe
+			if (onItemClick) {
+				onItemClick(item);
+			}
+		},
+		[toggleItemSelection, setVisible, onItemClick]
+	);
 
 	// Manejador de acciones contextuales
 	const handleContextMenuAction = useCallback(
@@ -137,21 +162,6 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 		}
 	}, [parentRef]);
 
-	// Efecto para ajustar la posición inicial cuando está fijo
-	useEffect(() => {
-		if (panelRef.current && constraintsRef.current && isFixed) {
-			const container = constraintsRef.current;
-			const panel = panelRef.current;
-			const containerWidth = container.offsetWidth;
-			const panelWidth = panel.offsetWidth;
-
-			setPosition({
-				x: containerWidth - panelWidth - 20,
-				y: 20,
-			});
-		}
-	}, [isFixed]);
-
 	return (
 		<div ref={constraintsRef} className="relative h-full w-full">
 			<div
@@ -159,8 +169,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				className={cn(
 					'h-full w-full overflow-auto relative transition-all duration-200',
 					viewMode === 'list' && 'px-2 py-1',
-					isTransitioning && 'opacity-0 transition-opacity duration-50',
-					isFixed && 'pr-[320px]'
+					isTransitioning && 'opacity-0 transition-opacity duration-50'
 				)}
 				onScroll={handleScroll}
 				style={{
@@ -188,7 +197,6 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 							}
 
 							// Manejar el caso especial de ReactPromise
-
 							let processedItem = item;
 
 							// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
@@ -262,7 +270,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 								>
 									<ViewComponent
 										item={processedItem}
-										onClick={onItemClick}
+										onClick={handleItemClick}
 										onDoubleClick={onItemDoubleClick}
 										onContextAction={handleContextMenuAction}
 										shouldLoad={true}
@@ -280,62 +288,6 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				</div>
 				<div ref={loadMoreRef} className="h-px w-full" />
 			</div>
-
-			<AnimatePresence mode="wait">
-				{selectedItems.length > 0 && isVisible && (
-					<motion.div
-						ref={panelRef}
-						initial={{ opacity: 0, scale: 0.95 }}
-						animate={{ opacity: 1, scale: 1 }}
-						exit={{ opacity: 0, scale: 0.95 }}
-						transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-						drag={!isFixed}
-						dragMomentum={false}
-						dragElastic={0.1}
-						dragConstraints={constraintsRef}
-						style={{
-							position: 'fixed',
-							top: position.y,
-							left: position.x,
-							width: '320px',
-							height: 'calc(100vh - 40px)',
-							zIndex: isFixed ? 100 : 50,
-							cursor: isFixed ? 'default' : 'move',
-						}}
-						className={cn(
-							'bg-background-primary border rounded-lg shadow-lg overflow-hidden',
-							!isFixed && 'hover:shadow-xl transition-shadow duration-200',
-							isFixed && 'fixed right-5 top-5'
-						)}
-					>
-						<div className="flex items-center justify-between p-2 border-b">
-							<h3 className="text-sm font-medium">Detalles</h3>
-							<div className="flex items-center gap-1">
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-8 w-8 cursor-pointer"
-									onClick={() => toggleFixed()}
-									title={isFixed ? 'Desfijar panel' : 'Fijar panel'}
-								>
-									{isFixed ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-8 w-8 cursor-pointer"
-									onClick={() => toggleVisibility()}
-								>
-									<X className="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-						<div className="h-[calc(100%-40px)] overflow-auto">
-							<DetailsPanel selectedItems={mappedItems} />
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
 		</div>
 	);
 }

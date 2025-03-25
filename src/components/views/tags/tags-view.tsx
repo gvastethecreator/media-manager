@@ -53,7 +53,7 @@ const getTagType = (category?: string | null): TagType => {
  *
  * Muestra todas las etiquetas disponibles en el sistema utilizando el componente EntityCard
  */
-export function TagsView(props: ViewProps) {
+export function TagsView({ className }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentTag } = useFileManager();
 
@@ -107,4 +107,19 @@ export function TagsView(props: ViewProps) {
 		[setCurrentView, setCurrentTag]
 	);
 
+	// Renderizar el componente adecuadamente
+	return (
+		<div className="flex flex-col h-full w-full p-4">
+			<h1 className="text-2xl font-bold mb-4">Lista de Etiquetas</h1>
+			<p className="text-muted-foreground mb-6">
+				Todas las etiquetas disponibles en el sistema. Haz clic en una etiqueta para ver las imágenes asociadas.
+			</p>
+
+			<div className="text-center mt-8">
+				<p className="text-muted-foreground">
+					Componente TagsView en desarrollo. Próximamente disponible.
+				</p>
+			</div>
+		</div>
+	);
 }

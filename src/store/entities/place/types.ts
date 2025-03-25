@@ -3,9 +3,9 @@
  * @module store/entities/place/types
  */
 
-import { StateCreator } from 'zustand';
-import { Place, PlaceFilters } from '../../../types/entities/place';
-import { PlaceCategory, PlaceType, PlaceViewMode } from '../../../types/entities/place/enums';
+import type { StateCreator } from 'zustand';
+import type { Place, PlaceFilters } from '../../../types/entities/place';
+import type { PlaceCategory, PlaceType, PlaceViewMode } from '../../../types/entities/place/enums';
 
 /**
  * Estado base del store de Place

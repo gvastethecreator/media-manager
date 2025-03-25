@@ -3,7 +3,7 @@
  * @module store/entities/world-item/transformers
  */
 
-import { CreateWorldItemData, ParsedWorldItemVisualConfig, UpdateWorldItemData, WorldItem, WorldItemFilters } from '../../../types/entities/world-item';
+import type { CreateWorldItemData, ParsedWorldItemVisualConfig, UpdateWorldItemData, WorldItem, WorldItemFilters } from '../../../types/entities/world-item';
 import { generateWorldItemId, parseWorldItemStats } from './utils';
 
 /**

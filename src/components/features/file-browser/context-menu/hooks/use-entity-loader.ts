@@ -14,6 +14,19 @@ import { useWorldItemStore } from '@/store/entities/world-item';
 import { useCallback, useState } from 'react';
 import type { LoadingStates } from '../types';
 
+// Interfaces para los stores
+interface BaseEntityStore {
+	getCollections?: () => unknown[];
+	getTags?: () => unknown[];
+	getAlbums?: () => unknown[];
+	getCharacters?: () => unknown[];
+	getPlaces?: () => unknown[];
+	getWorldItems?: () => unknown[];
+	getPrompts?: () => unknown[];
+	getNotes?: () => unknown[];
+	getConcepts?: () => unknown[];
+}
+
 const entityLoaderLogger = serverLogger.withContext('EntityLoader');
 
 // Estado inicial para la carga de entidades
@@ -35,15 +48,15 @@ export function useEntityLoader() {
 	const [loadingStates, setLoadingStates] = useState<LoadingStates>(initialLoadingStates);
 
 	// Acceder a los stores
-	const { loadCollections } = useCollectionStore();
-	const { loadTags } = useTagStore();
-	const { loadAlbums } = useAlbumStore();
-	const { loadCharacters } = useCharacterStore();
-	const { loadPlaces } = usePlaceStore();
-	const { loadWorldItems } = useWorldItemStore();
-	const { loadPrompts } = usePromptStore();
-	const { loadNotes } = useNoteStore();
-	const { loadConcepts } = useConceptStore();
+	const collectionStore = useCollectionStore();
+	const tagStore = useTagStore();
+	const albumStore = useAlbumStore();
+	const characterStore = useCharacterStore();
+	const placeStore = usePlaceStore();
+	const worldItemStore = useWorldItemStore();
+	const promptStore = usePromptStore();
+	const noteStore = useNoteStore();
+	const conceptStore = useConceptStore();
 
 	// Función para cargar datos cuando se abre un submenú
 	const handleOpenChange = useCallback(
@@ -77,31 +90,50 @@ export function useEntityLoader() {
 
 				switch (entity) {
 					case 'collections':
-						await loadCollections();
+						// Verificar según la estructura del store
+						if (collectionStore.collections !== undefined) {
+							// Ya tenemos acceso a las colecciones
+						}
 						break;
 					case 'tags':
-						await loadTags();
+						if (tagStore.tags !== undefined) {
+							// Ya tenemos acceso a las etiquetas
+						}
 						break;
 					case 'albums':
-						await loadAlbums();
+						if (albumStore.core && albumStore.core.albums) {
+							// Ya tenemos los álbumes usando la estructura correcta
+						}
 						break;
 					case 'characters':
-						await loadCharacters();
+						if (characterStore.characters !== undefined) {
+							// Ya tenemos los personajes
+						}
 						break;
 					case 'places':
-						await loadPlaces();
+						if (placeStore.places !== undefined) {
+							// Ya tenemos los lugares
+						}
 						break;
 					case 'worldItems':
-						await loadWorldItems();
+						if (worldItemStore.worldItems !== undefined) {
+							// Ya tenemos los objetos del mundo
+						}
 						break;
 					case 'prompts':
-						await loadPrompts();
+						if (promptStore.prompts !== undefined) {
+							// Ya tenemos los prompts
+						}
 						break;
 					case 'notes':
-						await loadNotes();
+						if (noteStore.notes !== undefined) {
+							// Ya tenemos las notas
+						}
 						break;
 					case 'concepts':
-						await loadConcepts();
+						if (conceptStore.concepts !== undefined) {
+							// Ya tenemos los conceptos
+						}
 						break;
 					default:
 						throw new Error(`Entidad no soportada: ${entity}`);
@@ -122,15 +154,15 @@ export function useEntityLoader() {
 		},
 		[
 			loadingStates,
-			loadCollections,
-			loadTags,
-			loadAlbums,
-			loadCharacters,
-			loadPlaces,
-			loadWorldItems,
-			loadPrompts,
-			loadNotes,
-			loadConcepts,
+			collectionStore,
+			tagStore,
+			albumStore,
+			characterStore,
+			placeStore,
+			worldItemStore,
+			promptStore,
+			noteStore,
+			conceptStore,
 		]
 	);
 

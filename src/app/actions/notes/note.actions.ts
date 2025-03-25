@@ -8,7 +8,7 @@ import {
 	processNoteFields,
 	serializeTags
 } from '@/transformers/note';
-import {
+import type {
 	NoteBase,
 	NoteCreateInput,
 	NoteUpdateInput,

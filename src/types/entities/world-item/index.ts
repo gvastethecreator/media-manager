@@ -13,12 +13,12 @@ export {
 } from './enums';
 
 // Reexportar tipos explícitamente
-export {
-    type CreateWorldItemData, type UpdateWorldItemData, type WorldItemBase,
-    type WorldItemWithRelations
+export type {
+    CreateWorldItemData, UpdateWorldItemData, WorldItemBase,
+    WorldItemWithRelations
 } from './base';
 
-export {
-    type ParsedWorldItem, type ParsedWorldItemVisualConfig, type ParsedWorldItemWithRelations, type WorldItem,
-    type WorldItemFilters, type WorldItemVisualConfig, type WorldItemVisualConfigUpdateData
+export type {
+    ParsedWorldItem, ParsedWorldItemVisualConfig, ParsedWorldItemWithRelations, WorldItem,
+    WorldItemFilters, WorldItemVisualConfig, WorldItemVisualConfigUpdateData
 } from './extended';

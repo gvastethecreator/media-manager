@@ -9,15 +9,15 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import {
-    mapCreateTagDataToPrisma,
-    mapUpdateTagDataToPrisma
+	mapCreateTagDataToPrisma,
+	mapUpdateTagDataToPrisma
 } from '@/transformers/tag';
-import {
-    TagCreate as CreateTagData,
-    Tag,
-    TagUpdate as UpdateTagData
+import type {
+	TagCreate as CreateTagData,
+	Tag,
+	TagUpdate as UpdateTagData
 } from '@/types/entities/tag';
-import { TagBase } from '@/types/entities/tag/types';
+import type { TagBase } from '@/types/entities/tag/types';
 
 // Utilidades y logging
 const tagLogger = serverLogger.withContext('TagActions');
@@ -257,7 +257,7 @@ export async function createTag(data: CreateTagData): Promise<Tag> {
 
 export async function updateTag(id: string, data: UpdateTagData): Promise<Tag> {
 	try {
-		tagLogger.info('📝 Actualizando etiqueta:', { id, ...data });
+		tagLogger.info('📝 Actualizando etiqueta:', { tagId: id, ...data });
 
 		// Verificar si la etiqueta existe
 		const existingTag = await prisma.tag.findUnique({
@@ -350,7 +350,7 @@ export async function getTagImages(id: string): Promise<FileItem[]> {
 
 		if (!tag) {
 			tagLogger.error(`❌ Etiqueta con ID '${id}' no encontrada`);
-			throw createTagError(`Etiqueta no encontrada`, TagErrorCode.NOT_FOUND);
+			throw createTagError('Etiqueta no encontrada', TagErrorCode.NOT_FOUND);
 		}
 
 		// Convertir imágenes al formato FileItem

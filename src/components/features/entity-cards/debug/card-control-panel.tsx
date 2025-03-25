@@ -393,9 +393,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Dices className="h-4 w-4 text-primary" />
-											<label className="text-sm">Efecto Pixelado</label>
+											<label htmlFor="pixelate-switch" className="text-sm">Efecto Pixelado</label>
 										</div>
 										<Switch
+											id="pixelate-switch"
 											checked={controlState.effects.pixelate}
 											onCheckedChange={() => toggleEffect('pixelate')}
 										/>
@@ -404,9 +405,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<span className="text-xs">⦙</span>
-											<label className="text-sm">Efecto Grano</label>
+											<label htmlFor="grain-switch" className="text-sm">Efecto Grano</label>
 										</div>
 										<Switch
+											id="grain-switch"
 											checked={controlState.effects.grain}
 											onCheckedChange={() => toggleEffect('grain')}
 										/>
@@ -415,9 +417,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label className="text-sm">Scanlines</label>
+											<label htmlFor="scanlines-switch" className="text-sm">Scanlines</label>
 										</div>
 										<Switch
+											id="scanlines-switch"
 											checked={controlState.effects.scanlines}
 											onCheckedChange={() => toggleEffect('scanlines')}
 										/>
@@ -429,11 +432,12 @@ export function CardControlPanel({
 							<TabsContent value="performance" className="space-y-3">
 								<div className="space-y-4">
 									<div className="space-y-2">
-										<label className="text-sm flex items-center gap-2">
+										<label htmlFor="render-quality-select" className="text-sm flex items-center gap-2">
 											<Cpu className="h-4 w-4 text-primary" />
 											Calidad de Renderizado
 										</label>
 										<Select
+											id="render-quality-select"
 											value={controlState.performance.renderQuality}
 											onValueChange={(val) => setRenderQuality(val as any)}
 										>
@@ -451,9 +455,10 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label className="text-sm">Deshabilitar Animaciones</label>
+											<label htmlFor="disable-animations-switch" className="text-sm">Deshabilitar Animaciones</label>
 										</div>
 										<Switch
+											id="disable-animations-switch"
 											checked={controlState.performance.disableAnimations}
 											onCheckedChange={toggleAnimations}
 										/>

@@ -11,7 +11,7 @@ import {
     mapCreateImageDataToPrisma,
     mapUpdateImageDataToPrisma
 } from '@/transformers/image';
-import {
+import type {
     CreateImageData,
     ImageBase,
     ImageExtended,

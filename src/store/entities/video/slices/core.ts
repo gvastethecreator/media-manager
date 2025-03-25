@@ -3,7 +3,7 @@
  * @module store/entities/video/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
     mapCreateVideoDataToPrisma,
     mapVideoVisualConfigToPrisma,
@@ -13,14 +13,14 @@ import {
     extendVideo,
     extendVideos
 } from '../../../../transformers/video/serializers';
-import {
-    type CreateVideoData,
-    type UpdateVideoData,
-    type Video,
-    type VideoBase,
-    type VideoVisualConfig
+import type {
+    CreateVideoData,
+    UpdateVideoData,
+    Video,
+    VideoBase,
+    VideoVisualConfig
 } from '../../../../types/entities/video';
-import { VideoState } from '../types';
+import type { VideoState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface VideoCoreSlice {

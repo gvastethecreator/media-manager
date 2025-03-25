@@ -12,7 +12,7 @@ import {
     toExtendedPrompt,
     toPromptWithStats
 } from '@/transformers/prompt';
-import {
+import type {
     PromptBase,
     PromptCreateInput,
     PromptExtended,

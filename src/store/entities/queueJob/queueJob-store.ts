@@ -10,12 +10,12 @@ import {
     transformQueueJob
 } from "@/transformers/queueJob/queueJob-transformers";
 import {
-    CreateQueueJobInput,
-    QueueJobExtended,
-    QueueJobFilters,
-    QueueJobPaginationOptions,
+    type CreateQueueJobInput,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
     QueueJobStatus,
-    UpdateQueueJobInput
+    type UpdateQueueJobInput
 } from "@/types/entities/queueJob/queueJob-types";
 import { create } from "zustand";
 

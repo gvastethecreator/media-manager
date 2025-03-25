@@ -3,8 +3,8 @@
  * @module types/entities/place/extended
  */
 
-import { PlaceBase, PlaceWithRelations } from './base';
-import {
+import type { PlaceBase, PlaceWithRelations } from './base';
+import type {
     PlaceDanger,
     PlaceResource,
     PlaceStats

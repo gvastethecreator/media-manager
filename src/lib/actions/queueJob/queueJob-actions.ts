@@ -14,11 +14,11 @@ import {
     transformQueueJob
 } from "@/transformers/queueJob/queueJob-transformers";
 import {
-    CreateQueueJobInput,
-    QueueJobFilters,
-    QueueJobPaginationOptions,
+    type CreateQueueJobInput,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
     QueueJobStatus,
-    UpdateQueueJobInput
+    type UpdateQueueJobInput
 } from "@/types/entities/queueJob/queueJob-types";
 import { revalidatePath } from "next/cache";
 

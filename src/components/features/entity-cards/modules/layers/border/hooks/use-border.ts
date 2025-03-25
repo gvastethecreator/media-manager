@@ -17,23 +17,8 @@ export function useBorder({ config, shouldRender }: UseBorderProps): UseBorderRe
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Inicializar el borde
-  const initializeBorder = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) {
-      setError('Contenedor no disponible');
-      return;
-    }
-
-    // Aplicar estilos iniciales
-    updateBorder();
-  }, []);
-
-  // Actualizar estilos del borde
-  const updateBorder = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
+  // Función para aplicar estilos al borde según la configuración
+  const applyBorderStyles = useCallback((container: HTMLDivElement) => {
     // Aplicar estilos según la configuración
     container.style.borderStyle = config.style || 'solid';
     container.style.borderWidth = `${config.width || 1}px`;
@@ -56,6 +41,25 @@ export function useBorder({ config, shouldRender }: UseBorderProps): UseBorderRe
     }
   }, [config]);
 
+  // Inicializar el borde
+  const initializeBorder = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) {
+      setError('Contenedor no disponible');
+      return;
+    }
+
+    applyBorderStyles(container);
+  }, [applyBorderStyles]);
+
+  // Actualizar estilos del borde
+  const updateBorder = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    applyBorderStyles(container);
+  }, [applyBorderStyles]);
+
   // Efecto para inicializar
   useEffect(() => {
     if (shouldRender) {
@@ -68,7 +72,7 @@ export function useBorder({ config, shouldRender }: UseBorderProps): UseBorderRe
     if (shouldRender) {
       updateBorder();
     }
-  }, [config, shouldRender, updateBorder]);
+  }, [shouldRender, updateBorder]);
 
   return {
     containerRef,

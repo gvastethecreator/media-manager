@@ -10,10 +10,10 @@ export * from './types';
 export { ActivityCategory, ActivitySortCriteria, ActivityType } from './enums';
 
 // Reexportar tipos explícitamente
-export {
-    type Activity,
-    type ActivityBase, type ActivityFilters,
-    type ActivityListResponse,
-    type ActivityMetadata, type ActivityWithImage,
-    type CreateActivityData
+export type {
+    Activity,
+    ActivityBase, ActivityFilters,
+    ActivityListResponse,
+    ActivityMetadata, ActivityWithImage,
+    CreateActivityData
 } from './types';

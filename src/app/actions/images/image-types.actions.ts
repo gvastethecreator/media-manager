@@ -1,4 +1,4 @@
-import { CreateImageData, ImageExtended } from '@/types/entities/image';
+import type { CreateImageData, ImageExtended } from '@/types/entities/image';
 
 /**
  * Re-exportamos los tipos principales desde el módulo de tipos
