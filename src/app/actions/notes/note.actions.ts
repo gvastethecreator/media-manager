@@ -4,8 +4,21 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { Note } from '@/types/entities/notes';
+import {
+	processNoteFields,
+	serializeTags
+} from '@/transformers/note';
+import {
+	NoteBase,
+	NoteCreateInput,
+	NoteUpdateInput,
+	NoteWithStats
+} from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
+import {
+	createNoteSchema,
+	updateNoteSchema
+} from '@/utils/note/validators';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
@@ -34,44 +47,9 @@ const createNoteError = (message: string, code: NoteErrorCode = NoteErrorCode.OP
 	return error;
 };
 
-// Tipos e interfaces
-export interface NoteCreate {
-	title: string;
-	content?: string;
-	category?: string;
-	priority?: number;
-	status?: string;
-	tags?: string;
-	featuredImage?: string | null;
-}
-
-export interface NoteUpdate extends Partial<NoteCreate> {
-	id: string;
-}
-
-export interface NoteWithImages extends Note {
+// Interfaz para notas con imágenes (mantenemos para compatibilidad)
+export interface NoteWithImages extends NoteBase {
 	images: FileItem[];
-}
-
-// Interfaces actualizadas para coincidir con el esquema de Prisma
-export interface ExtendedNote extends Omit<Note, 'characters' | 'places' | 'worldItems' | 'concepts' | 'prompts'> {
-	concepts?: { id: string; name: string }[];
-	prompts?: { id: string; name: string }[];
-	characters?: { id: string; name: string }[];
-	places?: { id: string; name: string }[];
-	worldItems?: { id: string; name: string }[];
-}
-
-// Ajustado para coincidir con las propiedades disponibles en el esquema
-export interface NoteWithStats extends Note {
-	_count: {
-		concepts: number;
-		prompts: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-	};
-	lastUpdated: Date;
 }
 
 // Funciones exportadas
@@ -96,8 +74,14 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 			},
 		});
 
-		return notes.map((note: any) => ({
+		// Procesamos los campos serializados
+		return notes.map((note) => ({
 			...note,
+			_count: {
+				...note._count,
+				images: 0 // Añadimos este campo para cumplir con NoteStats
+			},
+			// Mantenemos lastUpdated para compatibilidad
 			lastUpdated: note.updatedAt,
 		}));
 	} catch (error) {
@@ -106,7 +90,7 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 	}
 }
 
-export async function getNote(id: string): Promise<Note> {
+export async function getNote(id: string): Promise<NoteBase> {
 	try {
 		noteLogger.info('🔍 Obteniendo nota:', id);
 		const note = await prisma.note.findUnique({
@@ -128,17 +112,32 @@ export async function getNote(id: string): Promise<Note> {
 	}
 }
 
-export async function createNote(data: NoteCreate): Promise<Note> {
+export async function createNote(data: NoteCreateInput): Promise<NoteBase> {
 	try {
 		noteLogger.info('📝 Creando nota:', data.title);
+
+		// Validar datos de entrada
+		const validationResult = createNoteSchema.safeParse(data);
+		if (!validationResult.success) {
+			const errorMessage = validationResult.error.errors.map(e => e.message).join(', ');
+			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
+		}
+
+		// Preparar datos y serializar tags si es necesario
+		const { tags, ...otherData } = data;
+		const serializedTags = Array.isArray(tags)
+			? serializeTags(tags)
+			: (typeof tags === 'string' ? tags : serializeTags([]));
+
+		// Crear la nota
 		const note = await prisma.note.create({
 			data: {
-				title: data.title,
+				...otherData,
+				tags: serializedTags,
 				content: data.content || '',
 				category: data.category || 'general',
 				priority: data.priority || 0,
 				status: data.status || 'active',
-				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
 			},
 		});
@@ -158,12 +157,32 @@ export async function createNote(data: NoteCreate): Promise<Note> {
 	}
 }
 
-export async function updateNote(id: string, data: NoteUpdate): Promise<Note> {
+export async function updateNote(id: string, data: NoteUpdateInput): Promise<NoteBase> {
 	try {
 		noteLogger.info('📝 Actualizando nota:', id);
+
+		// Validar datos de entrada
+		const validationData = { ...data, id };
+		const validationResult = updateNoteSchema.safeParse(validationData);
+		if (!validationResult.success) {
+			const errorMessage = validationResult.error.errors.map(e => e.message).join(', ');
+			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
+		}
+
+		// Crear objeto de actualización
+		const updateData: Record<string, any> = { ...data };
+
+		// Manejar tags especialmente
+		if ('tags' in data && data.tags !== undefined) {
+			const tags = data.tags;
+			updateData.tags = Array.isArray(tags)
+				? serializeTags(tags)
+				: (typeof tags === 'string' ? tags : serializeTags([]));
+		}
+
 		const note = await prisma.note.update({
 			where: { id },
-			data,
+			data: updateData,
 		});
 
 		await emit({
@@ -204,6 +223,25 @@ export async function deleteNote(id: string): Promise<void> {
 	}
 }
 
+/**
+ * Obtiene una nota con los campos procesados (tags deserializados)
+ */
+export async function getNoteWithProcessedFields(id: string): Promise<NoteBase & { parsedTags: string[] }> {
+	const note = await getNote(id);
+	return processNoteFields(note);
+}
+
+/**
+ * Obtiene todas las notas con campos procesados
+ */
+export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
+	const notes = await getNotes();
+	return notes.map(note => processNoteFields(note));
+}
+
+/**
+ * Obtiene las imágenes relacionadas con una nota
+ */
 export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 	try {
 		noteLogger.info('🖼️ Obteniendo imágenes relacionadas con la nota:', noteId);
@@ -229,11 +267,9 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 	}
 }
 
-// En el esquema, no hay una relación directa images en Note
-// Esta implementación usa una estrategia alternativa
-export async function addNoteToImage(noteId: string, imageId: string): Promise<void> {
+export async function addImageToNote(noteId: string, imageId: string): Promise<void> {
 	try {
-		noteLogger.info('➕ Conectando imagen con nota a través de entidad intermedia');
+		noteLogger.info('➕ Conectando imagen a nota a través de entidad intermedia');
 
 		// Verificar si la nota existe
 		const note = await prisma.note.findUnique({
