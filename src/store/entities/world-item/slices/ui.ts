@@ -1,0 +1,136 @@
+/**
+ * @file Slice UI para el store de WorldItem
+ * @module store/entities/world-item/slices/ui
+ */
+
+import { StateCreator } from 'zustand';
+import { WorldItemFilters, WorldItemViewMode } from '../../../../types/entities/world-item';
+import { WorldItemStore } from '../index';
+
+export interface WorldItemUISlice {
+  // Estado de visualización
+  viewMode: WorldItemViewMode;
+  sortBy: string;
+  filters: WorldItemFilters;
+  expandedIds: string[];
+  selectedIds: string[];
+  currentItemId: string | null;
+
+  // UI control
+  isCreatingItem: boolean;
+  isEditingItem: boolean;
+  isProcessingAction: boolean;
+  searchQuery: string;
+
+  // Acciones
+  setViewMode: (mode: WorldItemViewMode) => void;
+  setSortBy: (sortBy: string) => void;
+  setFilters: (filters: Partial<WorldItemFilters>) => void;
+  resetFilters: () => void;
+  toggleExpanded: (id: string) => void;
+  toggleSelected: (id: string) => void;
+  selectItems: (ids: string[]) => void;
+  clearSelection: () => void;
+  setCurrentItemId: (id: string | null) => void;
+  setIsCreatingItem: (isCreating: boolean) => void;
+  setIsEditingItem: (isEditing: boolean) => void;
+  setIsProcessingAction: (isProcessing: boolean) => void;
+  setSearchQuery: (query: string) => void;
+}
+
+export const createWorldItemUISlice: StateCreator<
+  WorldItemStore,
+  [],
+  [],
+  WorldItemUISlice
+> = (set, get) => ({
+  // Estado inicial
+  viewMode: WorldItemViewMode.GRID,
+  sortBy: 'name_asc',
+  filters: {},
+  expandedIds: [],
+  selectedIds: [],
+  currentItemId: null,
+  isCreatingItem: false,
+  isEditingItem: false,
+  isProcessingAction: false,
+  searchQuery: '',
+
+  // Acciones
+  setViewMode: (mode) => {
+    set({ viewMode: mode });
+  },
+
+  setSortBy: (sortBy) => {
+    set({ sortBy });
+  },
+
+  setFilters: (filters) => {
+    set((state) => ({
+      filters: { ...state.filters, ...filters }
+    }));
+  },
+
+  resetFilters: () => {
+    set({ filters: {} });
+  },
+
+  toggleExpanded: (id) => {
+    set((state) => {
+      if (state.expandedIds.includes(id)) {
+        return {
+          expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id)
+        };
+      } else {
+        return {
+          expandedIds: [...state.expandedIds, id]
+        };
+      }
+    });
+  },
+
+  toggleSelected: (id) => {
+    set((state) => {
+      if (state.selectedIds.includes(id)) {
+        return {
+          selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id)
+        };
+      } else {
+        return {
+          selectedIds: [...state.selectedIds, id]
+        };
+      }
+    });
+  },
+
+  selectItems: (ids) => {
+    set({ selectedIds: ids });
+  },
+
+  clearSelection: () => {
+    set({ selectedIds: [] });
+  },
+
+  setCurrentItemId: (id) => {
+    set({ currentItemId: id });
+  },
+
+  setIsCreatingItem: (isCreating) => {
+    set({ isCreatingItem });
+  },
+
+  setIsEditingItem: (isEditing) => {
+    set({ isEditingItem });
+  },
+
+  setIsProcessingAction: (isProcessing) => {
+    set({ isProcessingAction });
+  },
+
+  setSearchQuery: (query) => {
+    set({
+      searchQuery: query,
+      filters: { ...get().filters, searchQuery: query }
+    });
+  }
+});

@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ProcessOptions } from '@/services/thumbnail.service';

@@ -1,6 +1,5 @@
-'use server';
+'use client';
 
-import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { create } from 'zustand';
 
@@ -130,87 +129,3 @@ export const useImageStore = create<ImageStore>((set) => ({
       },
     })),
 }));
-
-// 🔄 Funciones del servidor
-export async function getImageConfig(entityType: string, entityId: string) {
-  try {
-    const config = await prisma.layerConfig.findUnique({
-      where: {
-        entityType_entityId_layerType: {
-          entityType,
-          entityId,
-          layerType: 'image',
-        },
-      },
-    });
-
-    if (!config) {
-      return defaultConfig;
-    }
-
-    const parsedConfig = imageConfigSchema.safeParse(config.config);
-    return parsedConfig.success ? parsedConfig.data : defaultConfig;
-  } catch (error) {
-    console.error('Error al obtener la configuración de imagen:', error);
-    return defaultConfig;
-  }
-}
-
-export async function updateImageConfig(
-  entityType: string,
-  entityId: string,
-  config: Partial<ImageConfig>
-) {
-  try {
-    const currentConfig = await getImageConfig(entityType, entityId);
-    const newConfig = { ...currentConfig, ...config };
-    const validatedConfig = imageConfigSchema.parse(newConfig);
-
-    await prisma.layerConfig.upsert({
-      where: {
-        entityType_entityId_layerType: {
-          entityType,
-          entityId,
-          layerType: 'image',
-        },
-      },
-      update: {
-        config: validatedConfig,
-      },
-      create: {
-        entityType,
-        entityId,
-        layerType: 'image',
-        config: validatedConfig,
-      },
-    });
-
-    revalidatePath(`/settings/${entityType}/${entityId}`);
-    revalidatePath(`/${entityType}/${entityId}`);
-
-    return validatedConfig;
-  } catch (error) {
-    console.error('Error al actualizar la configuración de imagen:', error);
-    throw error;
-  }
-}
-
-export async function deleteImageConfig(entityType: string, entityId: string) {
-  try {
-    await prisma.layerConfig.delete({
-      where: {
-        entityType_entityId_layerType: {
-          entityType,
-          entityId,
-          layerType: 'image',
-        },
-      },
-    });
-
-    revalidatePath(`/settings/${entityType}/${entityId}`);
-    revalidatePath(`/${entityType}/${entityId}`);
-  } catch (error) {
-    console.error('Error al eliminar la configuración de imagen:', error);
-    throw error;
-  }
-}

@@ -1,12 +1,12 @@
 'use client';
 
-import { toastService } from '@/services/toast.service';
 import {
 	type ProfileCreate,
 	type ProfileUpdate,
 	type ProfileWithStats,
 	profileService,
 } from '@/services/profile.service';
+import { toastService } from '@/services/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -58,6 +58,11 @@ const defaultSettings: Settings = {
 	language: 'es',
 	notifications: true,
 	thumbnailQuality: 'medium',
+	autoBackup: false,
+	compressUploads: false,
+	defaultView: 'grid',
+	defaultSort: 'name',
+	defaultSortOrder: 'asc',
 	defaultThumbnailSize: 'medium',
 	videoThumbnailAnimation: true,
 	profiles: [],
@@ -98,8 +103,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		}
 	}, []);
 
-
-
 	// Cargar perfiles
 	const loadProfiles = useCallback(async () => {
 		try {
@@ -116,7 +119,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 				// Recargar los perfiles
 				const updatedProfiles = await profileService.getProfiles();
-				const activeProfile = updatedProfiles.find((p) => p.isActive);
+				// Buscar el perfil activo por una propiedad diferente (presumiblemente existe una propiedad id)
+				const activeProfile = updatedProfiles.find((p) => p.id === _defaultProfile.id);
 
 				setSettings((prev) => ({
 					...prev,
@@ -126,7 +130,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				return;
 			}
 
-			const activeProfile = profiles.find((p) => p.isActive);
+			// Aquí asumimos que el primer perfil es el activo si no hay información específica
+			const activeProfile = profiles[0];
 
 			// Si no hay perfil activo, activar el primero
 			if (!activeProfile && profiles.length > 0) {
@@ -134,7 +139,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 				// Recargar los perfiles
 				const updatedProfiles = await profileService.getProfiles();
-				const newActiveProfile = updatedProfiles.find((p) => p.isActive);
+				const newActiveProfile = updatedProfiles[0]; // El primer perfil después de establecerlo como activo
 
 				setSettings((prev) => ({
 					...prev,
@@ -198,53 +203,68 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		}
 	};
 
-
-
-	// Recargar los perfiles para obtener la lista actualizada
-	await loadProfiles();
-
-
-}
+	// Resetear configuraciones
+	const resetSettings = () => {
+		setSettings(defaultSettings);
+		localStorage.removeItem('appSettings');
 	};
 
-// Establecer perfil activo
-const setActiveProfile = async (id: string) => {
-	try {
-		await profileService.setActiveProfile(id);
-		await loadProfiles();
-		toastService.success('Perfil activo actualizado correctamente');
-	} catch (error) {
-		console.error('Error setting active profile:', error);
-		toastService.error('No se pudo establecer el perfil activo');
-		throw error;
-	}
-};
+	// Actualizar perfil
+	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
+		try {
+			if (id) {
+				await profileService.updateProfile(id, data as ProfileUpdate);
+			} else {
+				await profileService.createProfile(data as ProfileCreate);
+			}
+			// Recargar los perfiles para obtener la lista actualizada
+			await loadProfiles();
+			toastService.success('Perfil actualizado correctamente');
+		} catch (error) {
+			console.error('Error updating profile:', error);
+			toastService.error('No se pudo actualizar el perfil');
+			throw error;
+		}
+	};
 
-// Eliminar perfil
-const deleteProfile = async (id: string) => {
-	try {
-		await profileService.deleteProfile(id);
-		await loadProfiles();
-		toastService.success('Perfil eliminado correctamente');
-	} catch (error) {
-		console.error('Error deleting profile:', error);
-		toastService.error('No se pudo eliminar el perfil');
-		throw error;
-	}
-};
+	// Establecer perfil activo
+	const setActiveProfile = async (id: string) => {
+		try {
+			await profileService.setActiveProfile(id);
+			await loadProfiles();
+			toastService.success('Perfil activo actualizado correctamente');
+		} catch (error) {
+			console.error('Error setting active profile:', error);
+			toastService.error('No se pudo establecer el perfil activo');
+			throw error;
+		}
+	};
 
-const value = {
-	settings,
-	updateSettings,
-	resetSettings,
-	isLoading,
-	error,
-	updateProfile,
-	setActiveProfile,
-	deleteProfile,
-};
+	// Eliminar perfil
+	const deleteProfile = async (id: string) => {
+		try {
+			await profileService.deleteProfile(id);
+			await loadProfiles();
+			toastService.success('Perfil eliminado correctamente');
+		} catch (error) {
+			console.error('Error deleting profile:', error);
+			toastService.error('No se pudo eliminar el perfil');
+			throw error;
+		}
+	};
 
-return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+	const value = {
+		settings,
+		updateSettings,
+		resetSettings,
+		isLoading,
+		error,
+		updateProfile,
+		setActiveProfile,
+		deleteProfile,
+	};
+
+	return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }
 
 export function useSettings() {

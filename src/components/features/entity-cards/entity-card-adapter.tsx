@@ -1,7 +1,8 @@
 'use client';
 
 import type { Folder } from '@/types/entities/folders';
-import { EntityCard } from './entity-card';
+import { EntityCardDev } from './entity-card-dev';
+import type { EntityBasicInfo } from './types/unified-types';
 
 export interface EntityCardAdapterProps {
 	entityType: string;
@@ -12,8 +13,11 @@ export interface EntityCardAdapterProps {
 }
 
 /**
- * Adaptador que mapea entidades a la estructura que espera EntityCard
+ * Adaptador que mapea entidades a la estructura que espera EntityCardDev
  * Versión simplificada para la refactorización
+ *
+ * IMPORTANTE: Este componente mantiene la misma API que antes pero ahora utiliza
+ * internamente EntityCardDev, lo que simplifica el renderizado
  */
 export function EntityCardAdapter({
 	entityType,
@@ -23,15 +27,20 @@ export function EntityCardAdapter({
 	onClick,
 }: EntityCardAdapterProps) {
 	// Extraer información básica de la entidad según su tipo
-	const extractEntityInfo = () => {
-		if (!entity) return { id: 'unknown', title: 'Entidad desconocida' };
+	const extractEntityInfo = (): EntityBasicInfo => {
+		if (!entity) return {
+			id: 'unknown',
+			title: 'Entidad desconocida',
+			description: '',
+			metadata: {}
+		};
 
 		// Datos comunes para todos los tipos
 		const baseInfo = {
 			id: entity.id || 'unknown',
 			title: entity.name || entity.title || 'Sin título',
 			description: entity.description || '',
-			image: entity.featuredImage || entity.image || null,
+			image: entity.featuredImage || entity.image || entity.thumbnail,
 		};
 
 		// Metadata según el tipo de entidad
@@ -49,10 +58,39 @@ export function EntityCardAdapter({
 				break;
 			}
 
-			// Se pueden añadir más casos para otros tipos de entidades
+			case 'collection':
+			case 'album': {
+				if (entity._count?.images || entity.imageCount) {
+					metadata.Imágenes = entity._count?.images || entity.imageCount || 0;
+				}
+				if (entity.createdAt) {
+					metadata.Creado = formatDate(entity.createdAt);
+				}
+				break;
+			}
+
+			case 'character':
+			case 'place':
+			case 'concept':
+			case 'world-item':
+			case 'prompt':
+			case 'note': {
+				// Metadatos genéricos para estos tipos
+				if (entity.createdAt) {
+					metadata.Creado = formatDate(entity.createdAt);
+				}
+				if (entity.type) {
+					metadata.Tipo = entity.type;
+				}
+				break;
+			}
+
+			// Para tipos desconocidos, mostrar ID como metadata
 			default:
-				// Para tipos desconocidos, mostrar ID como metadata
 				metadata.ID = entity.id || 'unknown';
+				if (entity.type) {
+					metadata.Tipo = entity.type;
+				}
 		}
 
 		return {
@@ -71,19 +109,29 @@ export function EntityCardAdapter({
 		return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
 	}
 
+	// Función auxiliar para formatear fechas
+	function formatDate(date: Date | string): string {
+		if (!date) return '';
+		const d = new Date(date);
+		return d.toLocaleDateString();
+	}
+
 	// Extraer información de la entidad
 	const entityInfo = extractEntityInfo();
 
-	// Transformar opciones recibidas al formato que espera EntityCard
+	// Transformar opciones recibidas al formato que espera EntityCardDev
 	const entityCardOptions = {
 		primaryColor: options.primaryColor || '#3b82f6',
 		secondaryColor: options.secondaryColor || '#1e40af',
 	};
 
 	return (
-		<EntityCard
+		<EntityCardDev
 			id={entityInfo.id}
 			title={entityInfo.title}
+			description={entityInfo.description}
+			image={entityInfo.image}
+			metadata={entityInfo.metadata}
 			className={className}
 			onClick={onClick ? (e) => onClick() : undefined}
 			options={entityCardOptions}

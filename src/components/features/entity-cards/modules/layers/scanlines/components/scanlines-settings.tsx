@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCallback } from 'react';
 import type { LayerSettingsProps } from '../../types';
-import { BLEND_MODES, LINE_DIRECTIONS, PRESET_COLORS, type ScanlinesConfig } from '../actions/scanlines-config.action';
+import { BLEND_MODES, LINE_DIRECTIONS, PRESET_COLORS, type ScanlinesConfig } from '../scanlines-config-types';
 
 /**
  * 📺 Componente de configuración para la capa de líneas de escaneo

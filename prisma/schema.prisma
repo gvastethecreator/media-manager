@@ -1237,3 +1237,18 @@ model VisualPreset {
   @@index([isDefault])
   @@index([isPublic])
 }
+
+// Modelo para configuración de capas
+model LayerConfig {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String?
+  layerType  String
+  config     Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([entityType, entityId, layerType])
+  @@index([entityType])
+  @@index([layerType])
+}

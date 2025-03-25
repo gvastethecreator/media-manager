@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
-import { LayerPluginProvider } from '@/components/features/entity-cards/modules/layer-system/layers/layer-plugin-system';
+
 import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings-old/entities-cards-settings';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -184,11 +184,7 @@ export function SettingsView() {
 
 				{/* Contenido de los tabs */}
 				<div className="flex-1 overflow-hidden">
-					<TabsContent value="entities-cards" className="px-1 h-full overflow-auto">
-						<LayerPluginProvider>
-							<EntitiesCardsSection />
-						</LayerPluginProvider>
-					</TabsContent>
+				
 
 					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">
 						<div className="grid grid-cols-2 gap-1 w-full">

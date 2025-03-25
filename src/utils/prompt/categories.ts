@@ -1,0 +1,206 @@
+import { serverLogger } from '@/lib/logger/server-logger';
+import { PromptCategory } from '@/types/entities/prompt/enums';
+
+const categoriesLogger = serverLogger.withContext('PromptCategories');
+
+/**
+ * Interfaz para metadatos de categoría de prompt
+ */
+export interface PromptCategoryMetadata {
+  id: PromptCategory;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  order: number;
+}
+
+/**
+ * Metadatos completos para las categorías de prompts
+ */
+export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> = {
+  [PromptCategory.GENERAL]: {
+    id: PromptCategory.GENERAL,
+    name: 'General',
+    description: 'Prompts de propósito general y uso común',
+    icon: '🌐',
+    color: '#6366f1',
+    order: 0
+  },
+  [PromptCategory.TEXT]: {
+    id: PromptCategory.TEXT,
+    name: 'Texto',
+    description: 'Generación y manipulación de texto, resúmenes, reescritura',
+    icon: '📝',
+    color: '#22c55e',
+    order: 1
+  },
+  [PromptCategory.IMAGE]: {
+    id: PromptCategory.IMAGE,
+    name: 'Imagen',
+    description: 'Prompts para describir y analizar imágenes',
+    icon: '🖼️',
+    color: '#ef4444',
+    order: 2
+  },
+  [PromptCategory.CODE]: {
+    id: PromptCategory.CODE,
+    name: 'Código',
+    description: 'Generación y análisis de código de programación',
+    icon: '👨‍💻',
+    color: '#3b82f6',
+    order: 3
+  },
+  [PromptCategory.CREATIVE]: {
+    id: PromptCategory.CREATIVE,
+    name: 'Creativo',
+    description: 'Prompts para creación de contenido creativo y storytelling',
+    icon: '🎨',
+    color: '#ec4899',
+    order: 4
+  },
+  [PromptCategory.CHARACTER]: {
+    id: PromptCategory.CHARACTER,
+    name: 'Personajes',
+    description: 'Creación y desarrollo de personajes',
+    icon: '👤',
+    color: '#f97316',
+    order: 5
+  },
+  [PromptCategory.WORLDBUILDING]: {
+    id: PromptCategory.WORLDBUILDING,
+    name: 'Worldbuilding',
+    description: 'Creación de mundos, escenarios y ambientación',
+    icon: '🌍',
+    color: '#8b5cf6',
+    order: 6
+  },
+  [PromptCategory.ASSISTANT]: {
+    id: PromptCategory.ASSISTANT,
+    name: 'Asistente',
+    description: 'Prompts para crear asistentes virtuales especializados',
+    icon: '🤖',
+    color: '#0ea5e9',
+    order: 7
+  },
+  [PromptCategory.SYSTEM]: {
+    id: PromptCategory.SYSTEM,
+    name: 'Sistema',
+    description: 'Prompts reservados para uso del sistema',
+    icon: '⚙️',
+    color: '#6b7280',
+    order: 8
+  }
+};
+
+/**
+ * Obtiene metadatos de una categoría por su ID
+ * @param categoryId ID de la categoría
+ * @returns Metadatos de la categoría o undefined si no existe
+ */
+export function getCategoryMetadata(categoryId: PromptCategory | string): PromptCategoryMetadata | undefined {
+  try {
+    return PROMPT_CATEGORIES[categoryId as PromptCategory];
+  } catch (error) {
+    categoriesLogger.error('❌ Error al obtener metadatos de categoría:', error);
+    return undefined;
+  }
+}
+
+/**
+ * Obtiene todas las categorías ordenadas
+ * @returns Array de categorías ordenadas
+ */
+export function getAllCategories(): PromptCategoryMetadata[] {
+  try {
+    return Object.values(PROMPT_CATEGORIES).sort((a, b) => a.order - b.order);
+  } catch (error) {
+    categoriesLogger.error('❌ Error al obtener todas las categorías:', error);
+    return [];
+  }
+}
+
+/**
+ * Obtiene las categorías visibles para el usuario final
+ * (excluyendo categorías de sistema u otras ocultas)
+ * @returns Array de categorías visibles ordenadas
+ */
+export function getUserVisibleCategories(): PromptCategoryMetadata[] {
+  try {
+    return Object.values(PROMPT_CATEGORIES)
+      .filter(category => category.id !== PromptCategory.SYSTEM)
+      .sort((a, b) => a.order - b.order);
+  } catch (error) {
+    categoriesLogger.error('❌ Error al obtener categorías visibles:', error);
+    return [];
+  }
+}
+
+/**
+ * Determina si una categoría es válida
+ * @param categoryId ID de la categoría a validar
+ * @returns true si la categoría existe
+ */
+export function isValidCategory(categoryId: string | PromptCategory): boolean {
+  try {
+    return Object.values(PromptCategory).includes(categoryId as PromptCategory);
+  } catch (error) {
+    categoriesLogger.error('❌ Error al validar categoría:', error);
+    return false;
+  }
+}
+
+/**
+ * Obtiene una categoría por defecto
+ * @returns Categoría general como valor por defecto
+ */
+export function getDefaultCategory(): PromptCategory {
+  return PromptCategory.GENERAL;
+}
+
+/**
+ * Obtiene el nombre legible de una categoría
+ * @param categoryId ID de la categoría
+ * @returns Nombre legible o el mismo ID si no se encuentra
+ */
+export function getCategoryName(categoryId: string | PromptCategory): string {
+  try {
+    const category = getCategoryMetadata(categoryId);
+    return category?.name || String(categoryId);
+  } catch (error) {
+    categoriesLogger.error('❌ Error al obtener nombre de categoría:', error);
+    return String(categoryId);
+  }
+}
+
+/**
+ * Agrupa prompts por categoría
+ * @param prompts Array de prompts a agrupar
+ * @returns Mapa de prompts agrupados por categoría
+ */
+export function groupPromptsByCategory<T extends { category: string | PromptCategory }>(
+  prompts: T[]
+): Record<string, T[]> {
+  try {
+    const grouped: Record<string, T[]> = {};
+
+    // Inicializar con categorías vacías
+    Object.values(PromptCategory).forEach(category => {
+      grouped[category] = [];
+    });
+
+    // Agrupar prompts
+    prompts.forEach(prompt => {
+      const category = prompt.category as string;
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(prompt);
+    });
+
+    return grouped;
+  } catch (error) {
+    categoriesLogger.error('❌ Error al agrupar prompts por categoría:', error);
+    return {};
+  }
+}

@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
 import type { UploadedImageType } from '@/types/entities/entities';
 import type { UploadedImageStats } from '@/types/uploaded-images';

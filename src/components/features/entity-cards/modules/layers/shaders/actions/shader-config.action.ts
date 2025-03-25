@@ -1,4 +1,4 @@
-'use server';
+'use client';
 
 import { create } from 'zustand';
 import type { ShaderConfig } from '../shader-config-schema';
@@ -41,32 +41,36 @@ interface ParticleConfig extends BaseShaderConfig {
 // Tipo unión para todas las configuraciones posibles
 export type ShaderConfig = DistortionConfig | HologramConfig | WaveConfig | ParticleConfig;
 
-// Estado inicial por tipo de shader
-const initialConfigs: Record<ShaderType, Omit<ShaderConfig, 'type'>> = {
+// Configuraciones por defecto
+export const defaultShaders = {
   distortion: {
-    enabled: false,
-    opacity: 1,
-    blendMode: 'normal',
-    intensity: 0.1,
+    enabled: true,
+    type: 'distortion' as const,
+    opacity: 0.5,
+    blendMode: 'overlay',
+    intensity: 0.5,
   },
   hologram: {
-    enabled: false,
-    opacity: 1,
+    enabled: true,
+    type: 'hologram' as const,
+    opacity: 0.7,
     blendMode: 'screen',
-    color: [0, 1, 1],
-    scanlineIntensity: 0.1,
+    color: [0, 0.5, 1] as [number, number, number],
+    scanlineIntensity: 0.5,
   },
   wave: {
-    enabled: false,
-    opacity: 1,
+    enabled: true,
+    type: 'wave' as const,
+    opacity: 0.6,
     blendMode: 'normal',
-    amplitude: 0.1,
-    frequency: 10.0,
+    amplitude: 0.5,
+    frequency: 0.5,
   },
   particle: {
-    enabled: false,
-    opacity: 1,
-    blendMode: 'screen',
+    enabled: true,
+    type: 'particle' as const,
+    opacity: 0.8,
+    blendMode: 'lighten',
     particleSize: 0.5,
     particleDensity: 0.5,
   },
@@ -97,7 +101,7 @@ export const useShaderStore = create<ShaderState>((set) => ({
 }));
 
 // Tipos exportados
-export type { ShaderConfig, ShaderState };
+export type { ShaderState };
 
 /**
  * Obtiene la configuración de shader para una entidad

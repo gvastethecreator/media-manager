@@ -9,20 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Layers, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { LayerConfigEditor } from './components/layer-config-editor';
+import { LayersConfigPanel } from './components/layers-config-panel';
 import { useLayersSystem } from './hooks/use-layers-system';
 import type { BaseLayerConfig } from './layer-config-base';
-
-// Componentes provisionales hasta que se implementen los componentes finales
-const LayerConfigEditor = ({ layerType, entityType, entityId, initialConfig, onConfigChange, onCancel }: any) => (
-	<div>
-		<h2>Configuración de {layerType}</h2>
-		<Button onClick={onCancel}>Cancelar</Button>
-	</div>
-);
-
-const LayersConfigPanel = ({ cardOptions, onCardOptionsChange, entityType, entityId }: any) => (
-	<div>Configuración de capas</div>
-);
 
 // Estructura de datos para la configuración del sistema de capas
 interface LayerSystemConfig {

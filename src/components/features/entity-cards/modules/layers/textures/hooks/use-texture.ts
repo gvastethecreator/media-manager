@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { TextureConfig } from '../actions/texture-config.action';
+import type { TextureConfig } from '../texture-config-types';
 
 interface UseTextureProps {
   config: TextureConfig;

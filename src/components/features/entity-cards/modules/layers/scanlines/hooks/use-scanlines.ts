@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ScanlinesConfig } from '../actions/scanlines-config.action';
+import type { ScanlinesConfig } from '../scanlines-config-types';
 
 interface UseScanlinesProps {
   config: ScanlinesConfig;

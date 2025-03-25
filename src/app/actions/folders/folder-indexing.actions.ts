@@ -1,6 +1,5 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
@@ -8,7 +7,7 @@ import { emit, emitProgress } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { ReindexAllCompleteData, ReindexAllProgressData } from '@/types/process';
 import { processDirectory, processDirectoryForReindex } from './folder-processing.actions';
-import { FolderError, type FolderResponse } from './folder-types.actions';
+import { FolderError, type FolderResponse } from './folder-types';
 import { revalidateAllPaths, verifyPathExists } from './folder-utils.actions';
 
 const folderLogger = serverLogger.withContext('FolderIndexing');
