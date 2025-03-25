@@ -6,9 +6,9 @@ import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 import {
-	CharacterBase,
-	CreateCharacterData,
-	UpdateCharacterData,
+	type CharacterBase,
+	type CreateCharacterData,
+	type UpdateCharacterData,
 	CharacterFilter
 } from '@/types/entities/character';
 import {

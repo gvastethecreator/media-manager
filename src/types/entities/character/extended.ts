@@ -3,8 +3,8 @@
  * @module types/entities/character/extended
  */
 
-import { type Concept, type Image, type Note, type Prompt } from '@prisma/client';
-import { type CharacterBase, type CharacterFilter, type CharacterRelationship, type CharacterStats } from './base';
+import type { Concept, Image, Note, Prompt } from '@prisma/client';
+import type { CharacterBase, CharacterFilter, CharacterRelationship, CharacterStats } from './base';
 
 /**
  * Tipo extendido para Character con propiedades adicionales de UI

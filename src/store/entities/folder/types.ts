@@ -4,7 +4,7 @@
  */
 
 import type { CreateFolderData, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 
 /**
  * Estado base del store

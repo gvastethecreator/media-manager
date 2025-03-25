@@ -4,7 +4,7 @@
  */
 
 import type { CollectionExtended, CollectionSummary } from '@/types/entities/collection';
-import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory, CollectionRarity } from '@/types/entities/collection';
+import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, type CollectionCategory, CollectionRarity } from '@/types/entities/collection';
 import type { Image, Collection as PrismaCollection } from '@prisma/client';
 import { parseCollectionFilters } from './serializers';
 
@@ -81,7 +81,7 @@ export function mapFormToCollection(formData: Record<string, any>): Partial<Pris
     url: formData.url || null,
     alternativeUrl: formData.alternativeUrl || null,
     platform: formData.platform || null,
-    price: formData.price ? parseFloat(formData.price) : null,
+    price: formData.price ? Number.parseFloat(formData.price) : null,
     isFavorite: Boolean(formData.isFavorite),
     presetId: formData.presetId || null,
     texture: formData.texture || null,

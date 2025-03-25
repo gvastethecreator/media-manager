@@ -3,13 +3,13 @@
  * @module transformers/image/mappers
  */
 
-import {
-    type CreateImageData,
-    type ImageBase,
-    type ImageExtended,
-    type ImageMetadata,
-    type ImageSummary,
-    type UpdateImageData
+import type {
+    CreateImageData,
+    ImageBase,
+    ImageExtended,
+    ImageMetadata,
+    ImageSummary,
+    UpdateImageData
 } from '../../types/entities/image';
 import { deserializeImageMetadata, serializeImageMetadata } from './serializers';
 

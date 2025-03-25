@@ -132,7 +132,7 @@ export async function getEntityCardConfig(entityType: string): Promise<ActionRes
 		if (!config) {
 			return {
 				success: false,
-				message: `No se encontró configuración para el tipo de entidad: ${entityType}`,
+				message: 'No se encontró configuración para el tipo de entidad: ' + entityType,
 			};
 		}
 
@@ -176,7 +176,7 @@ export async function saveEntityCardConfig(
 
 		// Revalidar rutas relevantes
 		revalidatePath('/settings');
-		revalidatePath(`/api/entities/${entityType}/visual-config`);
+		revalidatePath('/api/entities/' + entityType + '/visual-config');
 
 		return {
 			success: true,
@@ -252,7 +252,7 @@ export async function getEntityRaritySystem(entityType: string): Promise<ActionR
 
 			return {
 				success: true,
-				message: `Sistema de rarezas por defecto para ${entityType}`,
+				message: 'Sistema de rarezas por defecto para ' + entityType,
 				data: raritySystem,
 			};
 		}
@@ -266,7 +266,7 @@ export async function getEntityRaritySystem(entityType: string): Promise<ActionR
 
 		return {
 			success: true,
-			message: `Sistema de rarezas cargado para ${entityType}`,
+			message: 'Sistema de rarezas cargado para ' + entityType,
 			data: raritySystem,
 		};
 	} catch (error) {
@@ -297,11 +297,11 @@ export async function saveEntityRaritySystem(entityType: string, raritySystem: R
 		if (!raritySystem.enabled) {
 			// Revalidar las rutas que usan esta configuración
 			revalidatePath('/settings');
-			revalidatePath(`/${entityType}`);
+			revalidatePath('/' + entityType);
 
 			return {
 				success: true,
-				message: `Sistema de rarezas deshabilitado para ${entityType}`,
+				message: 'Sistema de rarezas deshabilitado para ' + entityType,
 			};
 		}
 
@@ -332,11 +332,11 @@ export async function saveEntityRaritySystem(entityType: string, raritySystem: R
 
 		// Revalidar las rutas que usan esta configuración
 		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
+		revalidatePath('/' + entityType);
 
 		return {
 			success: true,
-			message: `Sistema de rarezas guardado para ${entityType}`,
+			message: 'Sistema de rarezas guardado para ' + entityType,
 		};
 	} catch (error) {
 		console.error('Error al guardar el sistema de rarezas:', error);
@@ -445,7 +445,7 @@ export async function getEntityTextureSystem(entityType: string): Promise<Action
 
 			return {
 				success: true,
-				message: `Sistema de texturas por defecto para ${entityType}`,
+				message: 'Sistema de texturas por defecto para ' + entityType,
 				data: textureSystem,
 			};
 		}
@@ -459,7 +459,7 @@ export async function getEntityTextureSystem(entityType: string): Promise<Action
 
 		return {
 			success: true,
-			message: `Sistema de texturas cargado para ${entityType}`,
+			message: 'Sistema de texturas cargado para ' + entityType,
 			data: textureSystem,
 		};
 	} catch (error) {
@@ -493,11 +493,11 @@ export async function saveEntityTextureSystem(
 		if (!textureSystem.enabled) {
 			// Revalidar las rutas que usan esta configuración
 			revalidatePath('/settings');
-			revalidatePath(`/${entityType}`);
+			revalidatePath('/' + entityType);
 
 			return {
 				success: true,
-				message: `Sistema de texturas deshabilitado para ${entityType}`,
+				message: 'Sistema de texturas deshabilitado para ' + entityType,
 			};
 		}
 
@@ -527,11 +527,11 @@ export async function saveEntityTextureSystem(
 
 		// Revalidar las rutas que usan esta configuración
 		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
+		revalidatePath('/' + entityType);
 
 		return {
 			success: true,
-			message: `Sistema de texturas guardado para ${entityType}`,
+			message: 'Sistema de texturas guardado para ' + entityType,
 		};
 	} catch (error) {
 		console.error('Error al guardar el sistema de texturas:', error);
@@ -567,7 +567,7 @@ export async function getBacksideConfig(entityType: string, entityId?: string): 
 			if (defaultConfig) {
 				return {
 					success: true,
-					message: `Usando configuración por defecto para backside de ${entityType}`,
+					message: 'Usando configuración por defecto para backside de ' + entityType,
 					data: defaultConfig,
 				};
 			}
@@ -604,14 +604,14 @@ export async function getBacksideConfig(entityType: string, entityId?: string): 
 
 			return {
 				success: true,
-				message: `Configuración por defecto para backside de ${entityType}`,
+				message: 'Configuración por defecto para backside de ' + entityType,
 				data: defaultBacksideConfig,
 			};
 		}
 
 		return {
 			success: true,
-			message: `Configuración de backside cargada para ${entityType}`,
+			message: 'Configuración de backside cargada para ' + entityType,
 			data: config,
 		};
 	} catch (error) {
@@ -707,14 +707,14 @@ export async function saveBacksideConfig(
 
 		// Revalidar las rutas que usan esta configuración
 		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
+		revalidatePath('/' + entityType);
 		if (entityId) {
-			revalidatePath(`/${entityType}/${entityId}`);
+			revalidatePath('/' + entityType + '/' + entityId);
 		}
 
 		return {
 			success: true,
-			message: `Configuración de backside guardada para ${entityType}`,
+			message: 'Configuración de backside guardada para ' + entityType,
 		};
 	} catch (error) {
 		console.error('Error al guardar la configuración de backside:', error);
@@ -750,7 +750,7 @@ export async function getCoreConfig(entityType: string, entityId?: string): Prom
 			if (defaultConfig) {
 				return {
 					success: true,
-					message: `Usando configuración core por defecto para ${entityType}`,
+					message: 'Usando configuración core por defecto para ' + entityType,
 					data: defaultConfig,
 				};
 			}
@@ -789,7 +789,7 @@ export async function getCoreConfig(entityType: string, entityId?: string): Prom
 
 			return {
 				success: true,
-				message: `Configuración core por defecto para ${entityType}`,
+				message: 'Configuración core por defecto para ' + entityType,
 				data: defaultCoreConfig,
 			};
 		}
@@ -802,7 +802,7 @@ export async function getCoreConfig(entityType: string, entityId?: string): Prom
 
 		return {
 			success: true,
-			message: `Configuración core cargada para ${entityType}`,
+			message: 'Configuración core cargada para ' + entityType,
 			data: processedConfig,
 		};
 	} catch (error) {
@@ -915,14 +915,14 @@ export async function saveCoreConfig(
 
 		// Revalidar las rutas que usan esta configuración
 		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
+		revalidatePath('/' + entityType);
 		if (entityId) {
-			revalidatePath(`/${entityType}/${entityId}`);
+			revalidatePath('/' + entityType + '/' + entityId);
 		}
 
 		return {
 			success: true,
-			message: `Configuración core guardada para ${entityType}`,
+			message: 'Configuración core guardada para ' + entityType,
 		};
 	} catch (error) {
 		console.error('Error al guardar la configuración core:', error);
@@ -953,7 +953,7 @@ export async function applyPresetToEntity(
 			};
 		}
 
-		logger.info(`🔄 Aplicando preset ${presetId || 'ninguno'} a ${entityType} con ID ${entityId}`);
+		logger.info('🔄 Aplicando preset ' + (presetId || 'ninguno') + ' a ' + entityType + ' con ID ' + entityId);
 
 		// Objeto para almacenar la entidad actualizada
 		let updatedEntity: unknown = null;
@@ -1023,30 +1023,30 @@ export async function applyPresetToEntity(
 			default:
 				return {
 					success: false,
-					message: `Tipo de entidad no soportado: ${entityType}`,
+					message: 'Tipo de entidad no soportado: ' + entityType,
 				};
 		}
 
 		// Revalidar todas las rutas relevantes
-		revalidatePath(`/${entityType}s`);
-		revalidatePath(`/${entityType}/${entityId}`);
-		revalidatePath(`/api/entities/${entityType}s`);
-		revalidatePath(`/api/entities/${entityType}/${entityId}`);
+		revalidatePath('/' + entityType + 's');
+		revalidatePath('/' + entityType + '/' + entityId);
+		revalidatePath('/api/entities/' + entityType + 's');
+		revalidatePath('/api/entities/' + entityType + '/' + entityId);
 
-		logger.info(`✅ Preset aplicado correctamente a ${entityType} con ID ${entityId}`);
+		logger.info('✅ Preset aplicado correctamente a ' + entityType + ' con ID ' + entityId);
 
 		return {
 			success: true,
 			message: presetId
-				? `Preset aplicado correctamente a ${entityType}`
-				: `Preset removido de ${entityType}`,
+				? 'Preset aplicado correctamente a ' + entityType
+				: 'Preset removido de ' + entityType,
 			data: updatedEntity,
 		};
 	} catch (error) {
-		logger.error(`❌ Error al aplicar preset a ${entityType}:`, error);
+		logger.error('❌ Error al aplicar preset a ' + entityType + ':', error);
 		return {
 			success: false,
-			message: `Error al aplicar preset a ${entityType}`,
+			message: 'Error al aplicar preset a ' + entityType,
 		};
 	}
 }

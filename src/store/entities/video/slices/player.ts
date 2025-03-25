@@ -3,9 +3,9 @@
  * @module store/entities/video/slices/player
  */
 
-import { StateCreator } from 'zustand';
-import { type VideoPlayState } from '../../../../types/entities/video';
-import { VideoState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { VideoPlayState } from '../../../../types/entities/video';
+import type { VideoState } from '../types';
 
 // Slice para el reproductor de video
 export interface VideoPlayerSlice {

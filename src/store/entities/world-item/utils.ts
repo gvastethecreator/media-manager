@@ -3,7 +3,7 @@
  * @module store/entities/world-item/utils
  */
 
-import { WorldItem, WorldItemFilters } from '../../../types/entities/world-item';
+import type { WorldItem, WorldItemFilters } from '../../../types/entities/world-item';
 import { WORLD_ITEM_ID_PREFIX, WORLD_ITEM_RARITY_COLORS } from './constants';
 
 /**
@@ -24,7 +24,7 @@ export const generateWorldItemId = (): string => {
 export const filterWorldItems = (
   items: WorldItem[],
   filters: WorldItemFilters,
-  searchQuery: string = ''
+  searchQuery = ''
 ): WorldItem[] => {
   if (!items || items.length === 0) return [];
 

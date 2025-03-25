@@ -13,7 +13,7 @@ import {
     toPrismaCreateInput,
     toPrismaUpdateInput
 } from '@/transformers/visual-preset';
-import {
+import type {
     VisualPresetBase,
     VisualPresetCreateInput,
     VisualPresetExtended,
@@ -255,23 +255,23 @@ export async function saveVisualPreset(preset: VisualPresetCreateInput | VisualP
 
 			await revalidateAllPaths();
 			return updatedPreset;
-		} else {
-			// Es una creación
-			const createData = toPrismaCreateInput(preset as VisualPresetCreateInput);
-
-			const newPreset = await prisma.visualPreset.create({
-				data: createData
-			});
-
-			// Emitir evento de creación
-			await emit({
-				type: 'visualPresets:modified',
-				data: { action: 'create', preset: newPreset }
-			});
-
-			await revalidateAllPaths();
-			return newPreset;
 		}
+
+		// Es una creación
+		const createData = toPrismaCreateInput(preset as VisualPresetCreateInput);
+
+		const newPreset = await prisma.visualPreset.create({
+			data: createData
+		});
+
+		// Emitir evento de creación
+		await emit({
+			type: 'visualPresets:modified',
+			data: { action: 'create', preset: newPreset }
+		});
+
+		await revalidateAllPaths();
+		return newPreset;
 	} catch (error) {
 		logger.error('❌ Error al guardar preset visual:', error);
 		if (error instanceof Error && error.name === 'VisualPresetError') {

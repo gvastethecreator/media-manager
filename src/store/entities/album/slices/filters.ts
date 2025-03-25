@@ -3,13 +3,13 @@
  * @module store/entities/album/slices/filters
  */
 
-import { StateCreator } from 'zustand';
-import {
-    type Album,
-    type AlbumSortCriteria,
-    type AlbumType
+import type { StateCreator } from 'zustand';
+import type {
+    Album,
+    AlbumSortCriteria,
+    AlbumType
 } from '../../../../types/entities/album';
-import { AlbumState } from '../types';
+import type { AlbumState } from '../types';
 
 // Slice para filtrado y ordenación
 export interface AlbumFiltersSlice {

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
 import CardDebugToolbar from '../features/entity-cards/debug/card-debug-toolbar';
+import { EntityCardsView } from '../features/entity-cards/views/entity-cards-view';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
@@ -115,7 +116,11 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 
 MemoizedViewContent.displayName = 'MemoizedViewContent';
 
-export function ViewContainer() {
+interface ViewContainerProps {
+	isResizing?: boolean;
+}
+
+export function ViewContainer({ isResizing }: ViewContainerProps) {
 	const { currentView, navigationDirection } = useNavigationStore();
 
 	return (

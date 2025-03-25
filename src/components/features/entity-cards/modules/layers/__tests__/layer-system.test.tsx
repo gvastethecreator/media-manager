@@ -35,6 +35,7 @@ function TestComponent() {
 	return (
 		<div>
 			<button
+				type="button"
 				onClick={() => updateLayer('mock-layer', { enabled: true })}
 				data-testid="enable-button"
 			>
@@ -344,6 +345,7 @@ describe('Layer System', () => {
 			Component: ({ enabled, config, onInteraction }) => (
 				enabled ? (
 					<button
+						type="button"
 						data-testid="interactive-layer"
 						onClick={() => onInteraction?.('click')}
 					>

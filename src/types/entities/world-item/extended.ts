@@ -3,8 +3,8 @@
  * @module types/entities/world-item/extended
  */
 
-import { WorldItemBase, WorldItemWithRelations } from './base';
-import {
+import type { WorldItemBase, WorldItemWithRelations } from './base';
+import type {
     WorldItemProperty,
     WorldItemRequirement,
     WorldItemStats

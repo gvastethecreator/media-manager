@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { shallow } from 'zustand/shallow';
 
 import { useNoteStore } from '@/store/entities/note';
-import { NoteViewMode } from '@/types/entities/note/enums';
-import { NoteFilters } from '@/types/entities/note/extended';
+import type { NoteViewMode } from '@/types/entities/note/enums';
+import type { NoteFilters } from '@/types/entities/note/extended';
 
 /**
  * Hook para acceder al estado y acciones relacionadas con las notas

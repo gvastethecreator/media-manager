@@ -3,7 +3,7 @@
  * @module types/entities/video/types
  */
 
-import { VideoFormat, VideoPrivacyLevel, VideoType } from './enums';
+import type { VideoFormat, VideoPrivacyLevel, VideoType } from './enums';
 
 /**
  * Interfaz base para video

@@ -3,7 +3,7 @@
  * @module store/entities/image/types
  */
 
-import { type Image, type ImageSortCriteria, type ImageViewMode } from '../../../types/entities/image';
+import type { Image, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image';
 
 /**
  * Estado principal del store de imágenes

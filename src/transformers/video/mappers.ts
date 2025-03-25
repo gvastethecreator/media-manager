@@ -3,7 +3,7 @@
  * @module transformers/video/mappers
  */
 
-import {
+import type {
     CreateVideoData,
     VideoMetadata,
     VideoVisualConfig

@@ -10,9 +10,9 @@ export * from './types';
 export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums';
 
 // Reexportar tipos explícitamente
-export {
-    type CreateVideoData, type Video,
-    type VideoBase, type VideoChapter, type VideoMetadata,
-    type VideoPlayState, type VideoVisualConfig
+export type {
+    CreateVideoData, Video,
+    VideoBase, VideoChapter, VideoMetadata,
+    VideoPlayState, VideoVisualConfig
 } from './types';
 

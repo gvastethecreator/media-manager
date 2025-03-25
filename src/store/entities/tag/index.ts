@@ -194,7 +194,7 @@ export const useTagStore = create<TagStore>()(
 		{
 			name: 'tag-store',
 			storage: createJSONStorage(() => localStorage),
-			version: parseInt(VERSIONING.STORE),
+			version: Number.parseInt(VERSIONING.STORE),
 		}
 	)
 );

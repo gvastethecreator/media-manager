@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PromptViewMode } from '@/types/entities/prompt';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const uiLogger = serverLogger.withContext('PromptStore:UI');

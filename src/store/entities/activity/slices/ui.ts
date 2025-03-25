@@ -3,8 +3,8 @@
  * @module store/entities/activity/slices/ui
  */
 
-import { StateCreator } from 'zustand';
-import { ActivityState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { ActivityState } from '../types';
 
 /**
  * Slice para controlar el estado de la UI

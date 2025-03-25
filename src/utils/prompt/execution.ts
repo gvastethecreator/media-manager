@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptBase, PromptExecutionResult } from '@/types/entities/prompt';
-import { PromptModel } from '@/types/entities/prompt/enums';
+import type { PromptModel } from '@/types/entities/prompt/enums';
 import { replaceVariablesInContent } from './helpers';
 import { estimateTokenCount } from './usage';
 

@@ -3,12 +3,12 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { Profile } from '@prisma/client';
 import {
-  ProfileExtended,
-  ProfileFilters,
-  ProfilePaginationOptions,
-  PaginatedProfiles,
+  type ProfileExtended,
+  type ProfileFilters,
+  type ProfilePaginationOptions,
+  type PaginatedProfiles,
   ThemeMode,
-  ProfilePreferences
+  type ProfilePreferences
 } from '@/types/entities/profile/profile-types';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { transformProfile } from '@/transformers/profile/profile-transformers';

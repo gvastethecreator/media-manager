@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { VisualPresetStore, VisualPresetUIActions, VisualPresetUIState } from '../types';
 
 const uiLogger = serverLogger.withContext('VisualPresetStore:UI');

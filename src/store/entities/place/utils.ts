@@ -3,7 +3,7 @@
  * @module store/entities/place/utils
  */
 
-import { Place, PlaceFilters } from '../../../types/entities/place';
+import type { Place, PlaceFilters } from '../../../types/entities/place';
 import { PLACE_ID_PREFIX, PLACE_TYPE_COLORS } from './constants';
 
 /**
@@ -24,7 +24,7 @@ export const generatePlaceId = (): string => {
 export const filterPlaces = (
   places: Place[],
   filters: PlaceFilters,
-  searchQuery: string = ''
+  searchQuery = ''
 ): Place[] => {
   if (!places || places.length === 0) return [];
 

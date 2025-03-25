@@ -3,13 +3,13 @@
  * @module store/entities/activity/slices/filters
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
-    ActivityCategory,
+    type ActivityCategory,
     type ActivityFilters,
     ActivitySortCriteria
 } from '../../../../types/entities/activity';
-import { ActivityState } from '../types';
+import type { ActivityState } from '../types';
 
 /**
  * Slice para controlar el estado de filtros

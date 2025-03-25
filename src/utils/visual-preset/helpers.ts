@@ -1,7 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { serializeTags } from '@/transformers/visual-preset';
-import type { VisualPresetExtended } from '@/types/entities/visual-preset';
-import { VisualPresetCategory } from '@/types/entities/visual-preset';
+import type { VisualPresetCategory, VisualPresetExtended } from '@/types/entities/visual-preset';
 import {
     createVisualPresetSchema,
     updateVisualPresetSchema
@@ -85,7 +84,7 @@ export function searchPresets(
   const term = searchTerm.toLowerCase();
   return presets.filter(preset =>
     preset.name.toLowerCase().includes(term) ||
-    (preset.description && preset.description.toLowerCase().includes(term))
+    preset.description?.toLowerCase().includes(term)
   );
 }
 

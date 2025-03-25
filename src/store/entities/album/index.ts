@@ -12,7 +12,7 @@ import {
 import { type AlbumCoreSlice, createAlbumCoreSlice } from './slices/core';
 import { type AlbumFiltersSlice, createAlbumFiltersSlice } from './slices/filters';
 import { type AlbumUISlice, createAlbumUISlice } from './slices/ui';
-import { type AlbumState } from './types';
+import type { AlbumState } from './types';
 
 // Combinación de todos los slices
 export type AlbumStore = AlbumState & AlbumCoreSlice & AlbumUISlice & AlbumFiltersSlice;

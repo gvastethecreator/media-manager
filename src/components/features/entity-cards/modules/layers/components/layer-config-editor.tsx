@@ -82,7 +82,7 @@ export function LayerConfigEditor({
 						min="0"
 						max="10"
 						value={config.layerIndex}
-						onChange={(e) => handlePropertyChange('layerIndex', parseInt(e.target.value))}
+						onChange={(e) => handlePropertyChange('layerIndex', Number.parseInt(e.target.value))}
 						className="w-20 p-2 border rounded-md"
 					/>
 				</div>

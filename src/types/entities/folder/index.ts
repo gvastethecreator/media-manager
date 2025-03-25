@@ -13,5 +13,5 @@ export * from './extended';
 export * from './enums';
 
 // Alias común para el tipo principal (usado frecuentemente)
-import { FolderExtended } from './extended';
+import type { FolderExtended } from './extended';
 export type Folder = FolderExtended;

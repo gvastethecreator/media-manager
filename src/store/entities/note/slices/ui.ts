@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { NoteViewMode } from '@/types/entities/note/enums';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const uiLogger = serverLogger.withContext('NoteStore:UI');

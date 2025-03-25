@@ -5,8 +5,8 @@
 
 import type { CollectionExtended, CollectionFilter } from '@/types/entities/collection';
 import { groupCollections, sortCollections } from '@/utils/collection';
-import { StateCreator } from 'zustand';
-import { CollectionState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { CollectionState } from '../types';
 
 /**
  * Slice con operaciones relacionadas con filtrado y ordenación para colecciones

@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import { CollectionState } from './types';
+import type { CollectionState } from './types';
 import { createCollectionCoreSlice, type CollectionCoreSlice } from './slices/core';
 import { createCollectionUISlice, type CollectionUISlice } from './slices/ui';
 import { createCollectionFiltersSlice, type CollectionFiltersSlice } from './slices/filters';

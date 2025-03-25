@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    DirectoryReadResult,
-    FileBase,
-    FileListItem,
-    FileOperationResult,
+    type DirectoryReadResult,
+    type FileBase,
+    type FileListItem,
+    type FileOperationResult,
     FileType
 } from '@/types/entities/file';
 import { toFileListItem } from './mappers';
@@ -21,14 +21,14 @@ const serializersLogger = serverLogger.withContext('File:Serializers');
  * @param decimals Decimales a mostrar
  * @returns String con tamaño formateado
  */
-export function formatFileSize(bytes: number, decimals: number = 2): string {
+export function formatFileSize(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
 }
 
 /**

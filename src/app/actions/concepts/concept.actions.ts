@@ -12,7 +12,7 @@ import { revalidatePath } from 'next/cache';
 import {
     toConceptWithStats
 } from '@/transformers/concept';
-import {
+import type {
     ConceptBase,
     ConceptCreateInput,
     ConceptExtended,

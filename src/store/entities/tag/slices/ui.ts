@@ -4,8 +4,8 @@
  */
 
 import { TagViewMode } from '@/types/entities/tag/enums';
-import { type StateCreator } from 'zustand';
-import { type TagState, type TagUIState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { TagState, TagUIState } from '../types';
 
 export interface TagUISlice {
   // Estado

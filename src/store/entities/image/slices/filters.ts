@@ -3,9 +3,9 @@
  * @module store/entities/image/slices/filters
  */
 
-import { StateCreator } from 'zustand';
-import { type Image, type ImageSortCriteria } from '../../../../types/entities/image';
-import { ImageState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { Image, ImageSortCriteria } from '../../../../types/entities/image';
+import type { ImageState } from '../types';
 
 // Slice para filtrado y ordenación
 export interface ImageFiltersSlice {

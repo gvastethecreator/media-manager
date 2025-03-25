@@ -3,9 +3,9 @@
  * @module store/entities/video/slices/ui
  */
 
-import { StateCreator } from 'zustand';
-import { type VideoViewMode } from '../../../../types/entities/video';
-import { VideoState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { VideoViewMode } from '../../../../types/entities/video';
+import type { VideoState } from '../types';
 
 // Slice para estado de UI
 export interface VideoUISlice {

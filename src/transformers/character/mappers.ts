@@ -120,7 +120,7 @@ export function mapPrimaryStats(character: CharacterExtended): CharacterAttribut
             if (key.toLowerCase() === statKey) {
                 const value = typeof stats[key] === 'number'
                     ? stats[key]
-                    : parseInt(stats[key], 10) || 0;
+                    : Number.parseInt(stats[key], 10) || 0;
 
                 // Usar abreviaturas estándar
                 let displayName = key;
@@ -151,7 +151,7 @@ export function mapPrimaryStats(character: CharacterExtended): CharacterAttribut
             if (!isPrimary && otherStats < remainingSlots) {
                 const value = typeof stats[key] === 'number'
                     ? stats[key]
-                    : parseInt(stats[key], 10) || 0;
+                    : Number.parseInt(stats[key], 10) || 0;
 
                 // Limitar a 4 caracteres para el nombre
                 const displayName = key.length > 4

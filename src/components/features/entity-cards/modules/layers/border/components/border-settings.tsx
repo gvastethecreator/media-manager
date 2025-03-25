@@ -201,7 +201,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 									<div className="flex gap-2">
 										{(config.gradientColors || ['#ffffff', '#000000']).map((color, index) => (
 											<Input
-												key={index}
+												key={`color-${color}-${index}`}
 												type="color"
 												value={color}
 												onChange={(e) => {

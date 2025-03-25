@@ -3,7 +3,7 @@
  * @module store/entities/album/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
     mapCreateAlbumDataToPrisma
 } from '../../../../transformers/album/mappers';
@@ -11,14 +11,14 @@ import {
     extendAlbum,
     extendAlbums
 } from '../../../../transformers/album/serializers';
-import {
-    type Album,
-    type AlbumBase,
-    type CreateAlbumData,
-    type UpdateAlbumData,
-    type UpdateAlbumItemsData
+import type {
+    Album,
+    AlbumBase,
+    CreateAlbumData,
+    UpdateAlbumData,
+    UpdateAlbumItemsData
 } from '../../../../types/entities/album';
-import { AlbumState } from '../types';
+import type { AlbumState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface AlbumCoreSlice {

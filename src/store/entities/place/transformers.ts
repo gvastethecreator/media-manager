@@ -3,7 +3,7 @@
  * @module store/entities/place/transformers
  */
 
-import { CreatePlaceData, ParsedPlaceVisualConfig, Place, PlaceFilters, UpdatePlaceData } from '../../../types/entities/place';
+import type { CreatePlaceData, ParsedPlaceVisualConfig, Place, PlaceFilters, UpdatePlaceData } from '../../../types/entities/place';
 import { PLACE_TYPE_EMOJIS } from './constants';
 import { generatePlaceId, parsePlaceStats } from './utils';
 

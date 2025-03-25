@@ -15,13 +15,13 @@ export {
 } from './enums';
 
 // Reexportar tipos explícitamente
-export {
-    type CreateTagData,
-    type RelatedTag,
-    type Tag,
-    type TagBase,
-    type TagFilters,
-    type TagImageRelationResponse,
-    type TagWithStats,
-    type UpdateTagData
+export type {
+    CreateTagData,
+    RelatedTag,
+    Tag,
+    TagBase,
+    TagFilters,
+    TagImageRelationResponse,
+    TagWithStats,
+    UpdateTagData
 } from './types';

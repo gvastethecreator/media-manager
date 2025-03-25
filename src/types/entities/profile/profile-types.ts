@@ -1,4 +1,4 @@
-import { Profile } from "@prisma/client";
+import type { Profile } from "@prisma/client";
 
 // Enums para temas
 export enum ThemeMode {

@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { toConceptWithStats } from '@/transformers/concept';
 import type { ConceptBase, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
 const coreLogger = serverLogger.withContext('ConceptStore:Core');

@@ -13,5 +13,5 @@ export * from './extended';
 export * from './enums';
 
 // Alias común para el tipo principal (usado frecuentemente)
-import { ImageExtended } from './extended';
+import type { ImageExtended } from './extended';
 export type Image = ImageExtended;
