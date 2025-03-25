@@ -3,9 +3,9 @@
  * @module store/entities/tag/slices/core
  */
 
+import { extendTag, extendTags } from '@/transformers/tag';
+import { type Tag } from '@/types/entities/tag';
 import { type StateCreator } from 'zustand';
-import { extendTag, extendTags } from '../../../../transformers/tag';
-import { type Tag } from '../../../../types/entities/tag';
 import { type TagCoreState, type TagState } from '../types';
 
 export interface TagCoreSlice {

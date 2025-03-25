@@ -139,7 +139,7 @@ export function deserializePlaceFilters(filtersJson: string | null): PlaceFilter
  * @param place Objeto base del lugar
  * @returns Lugar con campos JSON parseados
  */
-export function parseJsonFields(place: PlaceBase): Place {
+export function parseJsonFields(place: PlaceBase & { _count?: { images?: number; notes?: number; concepts?: number; prompts?: number } }): Place {
   return {
     ...place,
     dangersArray: deserializePlaceDangers(place.dangers),

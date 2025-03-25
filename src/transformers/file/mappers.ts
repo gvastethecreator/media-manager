@@ -5,16 +5,15 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    DirectoryInfo,
-    EnhancedDirectory,
-    EnhancedImageFile,
-    FILE_EXTENSION_GROUPS,
-    FileBase,
-    FileFilterOptions,
-    FileInfo,
-    FileListItem,
-    FileType
-} from '@/types/entities/file';
+  type DirectoryInfo,
+  type EnhancedDirectory,
+  type EnhancedImageFile,
+  FILE_EXTENSION_GROUPS,
+  type FileBase,
+  type FileFilterOptions,
+  type FileInfo,
+  FileType
+} from '@/types/entities/file/index';
 import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
@@ -52,15 +51,15 @@ export function determineFileType(extension: string): FileType {
   const normalizedExt = extension.toLowerCase();
 
   // Comprobar por tipo usando las constantes predefinidas
-  if (FILE_EXTENSION_GROUPS.IMAGE.includes(normalizedExt)) {
+  if (FILE_EXTENSION_GROUPS.IMAGE.includes(normalizedExt as any)) {
     return FileType.IMAGE;
-  } else if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt)) {
+  } else if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt as any)) {
     return FileType.VIDEO;
-  } else if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt)) {
+  } else if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt as any)) {
     return FileType.AUDIO;
-  } else if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt)) {
+  } else if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt as any)) {
     return FileType.DOCUMENT;
-  } else if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt)) {
+  } else if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt as any)) {
     return FileType.ARCHIVE;
   }
 
@@ -147,7 +146,7 @@ export function mapStatsToFileInfo(filePath: string, stats: any): FileInfo {
  * @param fileInfo Información del archivo
  * @returns Representación del archivo para listados UI
  */
-export function toFileListItem(fileInfo: FileInfo): FileListItem {
+export function toFileListItem(fileInfo: FileInfo): any /* FileListItem */ {
   return {
     id: fileInfo.id,
     path: fileInfo.path,
@@ -334,7 +333,7 @@ export function toEnhancedImageFile(fileInfo: FileInfo, imageMetadata?: any): En
 
   try {
     // Crear objeto base de imagen
-    const baseImageFile: ImageFileInfo = {
+    const baseImageFile = {
       ...fileInfo,
       width: imageMetadata?.width || 0,
       height: imageMetadata?.height || 0,

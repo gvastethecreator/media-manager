@@ -3,8 +3,8 @@
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { memo } from 'react';
-import { NavCategoryChildren } from './components/nav-category-children';
+import { memo, useRef, useState } from 'react';
+import { NavCategoryChildren, type CategoryChildrenRef } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
@@ -25,6 +25,12 @@ export function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }:
 	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId } = useCategoryHandlers();
 	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
 	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
+
+	// Mantener la referencia del modo de vista por categoría
+	const [categoryViewModes, setCategoryViewModes] = useState<Record<string, 'list' | 'grid'>>({});
+
+	// Guardar referencias a los componentes hijos
+	const childrenRefs = useRef<Record<string, CategoryChildrenRef | null>>({});
 
 	return (
 		<div
@@ -49,34 +55,50 @@ export function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }:
 
 					{/* Categorías con Listas */}
 					<div className="mt-0 space-y-0.5">
-						{NAVIGATION_CATEGORIES.map(({ id, icon, label, color }) => (
-							<div key={id}>
-								<NavCategoryItem
-									id={id}
-									label={label}
-									color={color}
-									icon={icon}
-									isCollapsed={isCollapsed || isCategoryCollapsed(id)}
-									isCurrent={currentView === id}
-									itemCount={getCategoryItemCount(id)}
-									imageCount={getImagesForCategory(id)}
-									onClick={() => handleCategoryClick(id)}
-									onToggleCollapse={(e) => handleCollapseToggle(id, e)}
-									showLabel={!isCollapsed}
-								/>
+						{NAVIGATION_CATEGORIES.map(({ id, icon, label, color }) => {
+							const viewMode = categoryViewModes[id] || 'list';
 
-								{!isCollapsed && (
+							const handleCategoryToggleViewMode = () => {
+								// Llamar al método del componente hijo cuando se hace clic en el botón
+								if (childrenRefs.current[id]) {
+									childrenRefs.current[id]?.toggleViewMode();
+								}
+							};
+
+							return (
+								<div key={id}>
+									<NavCategoryItem
+										id={id}
+										label={label}
+										color={color}
+										icon={icon}
+										isCollapsed={isCollapsed || isCategoryCollapsed(id)}
+										isCurrent={currentView === id}
+										itemCount={getCategoryItemCount(id)}
+										imageCount={getImagesForCategory(id)}
+										onClick={() => handleCategoryClick(id)}
+										onToggleCollapse={(e) => handleCollapseToggle(id, e)}
+										showLabel={!isCollapsed}
+										onToggleViewMode={handleCategoryToggleViewMode}
+										viewMode={viewMode}
+									/>
+
 									<MemoizedNavCategoryChildren
+										key={`${id}-children`}
+										ref={(instance) => { childrenRefs.current[id] = instance; }}
 										categoryId={id}
-										isCollapsed={isCategoryCollapsed(id)}
+										isCollapsed={isCollapsed || isCategoryCollapsed(id)}
 										selectedChildId={getSelectedChildId(id)}
 										currentView={currentView}
 										items={getCategoryItems(id)}
 										onItemClick={getItemClickHandler(id)}
+										onToggleViewMode={(mode) => {
+											setCategoryViewModes(prev => ({ ...prev, [id]: mode }));
+										}}
 									/>
-								)}
-							</div>
-						))}
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			</ScrollArea>

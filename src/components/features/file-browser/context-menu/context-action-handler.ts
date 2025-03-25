@@ -4,12 +4,12 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/services/toast.service';
 
 // Importaciones de stores en entidades
-import { useAlbumsStore } from '@/store/entities/albums.store';
-import { useCharactersStore } from '@/store/entities/characters.store';
-import { useCollectionsStore } from '@/store/entities/collections.store';
-import { useConceptStore } from '@/store/entities/concept.store';
-import { useNoteStore } from '@/store/entities/note.store';
-import { useTagsStore } from '@/store/entities/tags.store';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCharacterStore } from '@/store/entities/character';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useConceptStore } from '@/store/entities/concept';
+import { useNoteStore } from '@/store/entities/note';
+import { useTagStore } from '@/store/entities/tag';
 
 import type { ContextMenuAction, ContextMenuActionData } from '@/types/context-menu-actions';
 import type { FileItem } from '@/types/file-item';
@@ -227,9 +227,9 @@ export function handleContextAction(
 			if (actionData?.id) {
 				const collectionId = actionData.id as string;
 				// Buscar la colección en el store para obtener el nombre
-				const collection = useCollectionsStore.getState().collections.find((c) => c.id === collectionId);
+				const collection = useCollectionStore.getState().collections.find((c) => c.id === collectionId);
 				try {
-					useCollectionsStore.getState().addImageToCollection(collectionId, item.id);
+					useCollectionStore.getState().addImageToCollection(collectionId, item.id);
 					toastService.collection.imageAdded(collection?.name);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a colección:', error);
@@ -241,9 +241,9 @@ export function handleContextAction(
 			actionLogger.info('➕ Añadiendo etiqueta a imagen', actionData);
 			if (actionData?.id) {
 				const tagId = actionData.id as string;
-				const tag = useTagsStore.getState().tags.find((t) => t.id === tagId);
+				const tag = useTagStore.getState().tags.find((t) => t.id === tagId);
 				try {
-					useTagsStore.getState().addTagToImage(tagId, item.id);
+					useTagStore.getState().addTagToImage(tagId, item.id);
 					toastService.tag.imageAdded(tag?.name);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir etiqueta a imagen:', error);
@@ -255,9 +255,9 @@ export function handleContextAction(
 			actionLogger.info('➕ Añadiendo imagen a álbum', actionData);
 			if (actionData?.id) {
 				const albumId = actionData.id as string;
-				const album = useAlbumsStore.getState().albums.find((a) => a.id === albumId);
+				const album = useAlbumStore.getState().albums.find((a) => a.id === albumId);
 				try {
-					useAlbumsStore.getState().addImageToAlbum(albumId, item.id);
+					useAlbumStore.getState().addImageToAlbum(albumId, item.id);
 					toastService.system.success(`Imagen añadida al álbum "${album?.name || ''}"`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a álbum:', error);
@@ -269,9 +269,9 @@ export function handleContextAction(
 			actionLogger.info('➕ Añadiendo imagen a personaje', actionData);
 			if (actionData?.id) {
 				const characterId = actionData.id as string;
-				const character = useCharactersStore.getState().characters.find((c) => c.id === characterId);
+				const character = useCharacterStore.getState().characters.find((c) => c.id === characterId);
 				try {
-					useCharactersStore.getState().addImageToCharacter(characterId, item.id);
+					useCharacterStore.getState().addImageToCharacter(characterId, item.id);
 					toastService.system.success(`Imagen añadida al personaje "${character?.name || ''}"`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a personaje:', error);

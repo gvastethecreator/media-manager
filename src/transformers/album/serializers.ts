@@ -1,5 +1,5 @@
 /**
- * @file Funciones para serializar y deserializar datos de álbumes
+ * @file Funciones para serializar y deserializar datos de ?lbumes
  * @module transformers/album/serializers
  */
 
@@ -9,11 +9,11 @@ import {
     type AlbumMetadata,
     type AlbumViewConfig,
     AlbumPrivacyLevel
-} from '../../types/entities/album';
+} from '../../types/entities/album/index';
 
 /**
  * Convierte un objeto AlbumBase a Album con propiedades extendidas
- * @param album Objeto básico de álbum
+ * @param album Objeto b?sico de ?lbum
  * @returns Objeto Album completo
  */
 export function extendAlbum(album: AlbumBase): Album {
@@ -27,7 +27,7 @@ export function extendAlbum(album: AlbumBase): Album {
 
 /**
  * Convierte un array de objetos AlbumBase a array de Album con propiedades extendidas
- * @param albums Array de objetos básicos de álbum
+ * @param albums Array de objetos b?sicos de ?lbum
  * @returns Array de objetos Album completos
  */
 export function extendAlbums(albums: AlbumBase[]): Album[] {
@@ -35,11 +35,11 @@ export function extendAlbums(albums: AlbumBase[]): Album[] {
 }
 
 /**
- * Parsea los metadatos de un álbum si están en formato string
- * @param album Objeto de álbum
+ * Parsea los metadatos de un ?lbum si est?n en formato string
+ * @param album Objeto de ?lbum con propiedad metadata
  * @returns Metadatos parseados o undefined
  */
-export function parseAlbumMetadata(album: AlbumBase): AlbumMetadata | undefined {
+export function parseAlbumMetadata(album: {metadata?: string | AlbumMetadata}): AlbumMetadata | undefined {
   if (!album.metadata) return undefined;
 
   if (typeof album.metadata === 'string') {
@@ -51,12 +51,12 @@ export function parseAlbumMetadata(album: AlbumBase): AlbumMetadata | undefined 
     }
   }
 
-  return album.metadata as unknown as AlbumMetadata;
+  return album.metadata as AlbumMetadata;
 }
 
 /**
- * Serializa los metadatos de un álbum para guardarlos
- * @param metadata Objeto de metadatos de álbum
+ * Serializa los metadatos de un ?lbum para guardarlos
+ * @param metadata Objeto de metadatos de ?lbum
  * @returns String serializado o undefined
  */
 export function serializeAlbumMetadata(metadata?: AlbumMetadata): string | undefined {
@@ -71,11 +71,11 @@ export function serializeAlbumMetadata(metadata?: AlbumMetadata): string | undef
 }
 
 /**
- * Parsea la configuración de visualización de un álbum si está en formato string
- * @param album Objeto de álbum
- * @returns Configuración parseada o undefined
+ * Parsea la configuraci?n de visualizaci?n de un ?lbum si est? en formato string
+ * @param album Objeto de ?lbum con propiedad viewConfig
+ * @returns Configuraci?n parseada o undefined
  */
-export function parseAlbumViewConfig(album: AlbumBase): AlbumViewConfig | undefined {
+export function parseAlbumViewConfig(album: {viewConfig?: string | AlbumViewConfig}): AlbumViewConfig | undefined {
   if (!album.viewConfig) return undefined;
 
   if (typeof album.viewConfig === 'string') {
@@ -87,12 +87,12 @@ export function parseAlbumViewConfig(album: AlbumBase): AlbumViewConfig | undefi
     }
   }
 
-  return album.viewConfig as unknown as AlbumViewConfig;
+  return album.viewConfig as AlbumViewConfig;
 }
 
 /**
- * Serializa la configuración de visualización de un álbum para guardarla
- * @param viewConfig Objeto de configuración de visualización
+ * Serializa la configuraci?n de visualizaci?n de un ?lbum para guardarla
+ * @param viewConfig Objeto de configuraci?n de visualizaci?n
  * @returns String serializado o undefined
  */
 export function serializeAlbumViewConfig(viewConfig?: AlbumViewConfig): string | undefined {
@@ -107,13 +107,13 @@ export function serializeAlbumViewConfig(viewConfig?: AlbumViewConfig): string |
 }
 
 /**
- * Genera una URL amigable (slug) para el álbum
- * @param name Nombre del álbum
- * @param id ID del álbum (opcional, para garantizar unicidad)
+ * Genera una URL amigable (slug) para el ?lbum
+ * @param name Nombre del ?lbum
+ * @param id ID del ?lbum (opcional, para garantizar unicidad)
  * @returns Slug generado
  */
 export function generateAlbumSlug(name: string, id?: string): string {
-  // Convertir a minúsculas y reemplazar espacios y caracteres especiales
+  // Convertir a min?sculas y reemplazar espacios y caracteres especiales
   const baseSlug = name
     .toLowerCase()
     .trim()
@@ -121,7 +121,7 @@ export function generateAlbumSlug(name: string, id?: string): string {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-  // Si se proporciona ID, añadir un fragmento al final para garantizar unicidad
+  // Si se proporciona ID, a?adir un fragmento al final para garantizar unicidad
   if (id) {
     const shortId = id.substring(0, 8);
     return `${baseSlug}-${shortId}`;
