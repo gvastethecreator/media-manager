@@ -7,7 +7,7 @@ import {
     type ActivityFilters,
     ActivityType,
     type CreateActivityData
-} from '../../types/entities/activity';
+} from '../../types/entities/activity/index';
 
 /**
  * Mapea datos de creación de actividad a formato compatible con Prisma

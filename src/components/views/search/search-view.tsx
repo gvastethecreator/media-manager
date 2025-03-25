@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
 import { Search } from 'lucide-react';

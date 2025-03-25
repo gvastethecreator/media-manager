@@ -1,16 +1,16 @@
 'use client';
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useAlbumsStore } from '@/store/entities/albums.store';
-import { useCharactersStore } from '@/store/entities/characters.store';
-import { useCollectionsStore } from '@/store/entities/collections.store';
-import { useConceptStore } from '@/store/entities/concept.store';
-import { useNoteStore } from '@/store/entities/note.store';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCharacterStore } from '@/store/entities/character';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useConceptStore } from '@/store/entities/concept';
+import { useNoteStore } from '@/store/entities/note';
+import { usePlaceStore } from '@/store/entities/place';
+import { usePromptStore } from '@/store/entities/prompt';
+import { useTagStore } from '@/store/entities/tag';
+import { useWorldItemStore } from '@/store/entities/world-item';
 // import { useObjectsStore } from '@/store/objects.store'; // Eliminado - Legacy
-import { usePlacesStore } from '@/store/entities/places.store';
-import { usePromptStore } from '@/store/entities/prompt.store';
-import { useTagsStore } from '@/store/entities/tags.store';
-import { useWorldItemsStore } from '@/store/entities/world-items.store';
 import { useCallback, useState } from 'react';
 import type { LoadingStates } from '../types';
 
@@ -35,12 +35,12 @@ export function useEntityLoader() {
 	const [loadingStates, setLoadingStates] = useState<LoadingStates>(initialLoadingStates);
 
 	// Acceder a los stores
-	const { loadCollections } = useCollectionsStore();
-	const { loadTags } = useTagsStore();
-	const { loadAlbums } = useAlbumsStore();
-	const { loadCharacters } = useCharactersStore();
-	const { loadPlaces } = usePlacesStore();
-	const { loadWorldItems } = useWorldItemsStore();
+	const { loadCollections } = useCollectionStore();
+	const { loadTags } = useTagStore();
+	const { loadAlbums } = useAlbumStore();
+	const { loadCharacters } = useCharacterStore();
+	const { loadPlaces } = usePlaceStore();
+	const { loadWorldItems } = useWorldItemStore();
 	const { loadPrompts } = usePromptStore();
 	const { loadNotes } = useNoteStore();
 	const { loadConcepts } = useConceptStore();

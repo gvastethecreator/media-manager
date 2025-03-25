@@ -1,16 +1,15 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { useAlbumsStore } from '@/store/entities/albums.store';
-import { useCharactersStore } from '@/store/entities/characters.store';
-import { useCollectionsStore } from '@/store/entities/collections.store';
-import { useConceptStore } from '@/store/entities/concept.store';
-import { useNoteStore } from '@/store/entities/note.store';
-import { usePlacesStore } from '@/store/entities/places.store';
-import { usePromptStore } from '@/store/entities/prompt.store';
-import { useTagsStore } from '@/store/entities/tags.store';
-import { useWorldItemsStore } from '@/store/entities/world-items.store';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCharacterStore } from '@/store/entities/character';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useConceptStore } from '@/store/entities/concept';
+import { useNoteStore } from '@/store/entities/note';
+import { usePlaceStore } from '@/store/entities/place';
+import { usePromptStore } from '@/store/entities/prompt';
+import { useTagStore } from '@/store/entities/tag';
+import { useWorldItemStore } from '@/store/entities/world-item';
 import type { FileItem } from '@/types/file-item';
 import {
 	BookmarkPlus,
@@ -20,10 +19,10 @@ import {
 	Lightbulb,
 	MapPin,
 	MessageSquare,
-	Palette,
 	Tag as TagIcon,
-	User,
+	User
 } from 'lucide-react';
+import React from 'react';
 import type { ContextMenuAction, LoadingStates } from '../types';
 import { EntitySubMenu } from './entity-submenu';
 
@@ -35,12 +34,19 @@ interface SubmenuProps {
 	onOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
 
+// Interfaz base para entidades con nombre e ID
+interface EntityWithNameAndId {
+	id: string;
+	name: string;
+	[key: string]: any;
+}
+
 // Componente para el submenú de colecciones
 export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { collections } = useCollectionsStore();
+	const collections = useCollectionStore(state => state.collections || []) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir a colección"
 			icon={<BookmarkPlus className="mr-2 h-4 w-4" />}
 			entityName="colección"
@@ -60,14 +66,15 @@ export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuPro
 
 // Componente para el submenú de etiquetas
 export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { tags } = useTagsStore();
+	const tags = useTagStore(state => state.tags || {});
+	const tagsList = React.useMemo(() => Object.values(tags) as EntityWithNameAndId[], [tags]);
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir etiqueta"
 			icon={<TagIcon className="mr-2 h-4 w-4" />}
 			entityName="etiqueta"
-			entities={tags}
+			entities={tagsList}
 			isLoading={loadingStates.tags.loading}
 			onSelect={(tag) => onAction('tag-add', file, { id: tag.id })}
 			onCreate={() => onAction('tag-create', file)}
@@ -88,20 +95,21 @@ export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 
 // Componente para el submenú de álbumes
 export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { albums } = useAlbumsStore();
+	const albums = useAlbumStore(state => state.core.albums || {});
+	const albumsList = React.useMemo(() => Object.values(albums) as EntityWithNameAndId[], [albums]);
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir a álbum"
 			icon={<Heart className="mr-2 h-4 w-4" />}
 			entityName="álbum"
-			entities={albums}
+			entities={albumsList}
 			isLoading={loadingStates.albums.loading}
 			onSelect={(album) => onAction('album-add', file, { id: album.id })}
 			onCreate={() => onAction('album-create', file)}
 			renderItem={(album) => (
 				<div className="flex items-center gap-2 w-full">
-					<span>{album.emoji || '📷'}</span>
+					<span>📷</span>
 					<span className="flex-1">{album.name}</span>
 				</div>
 			)}
@@ -111,10 +119,10 @@ export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 
 // Componente para el submenú de personajes
 export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { characters } = useCharactersStore();
+	const characters = useCharacterStore(state => Object.values(state.characters)) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir a personaje"
 			icon={<User className="mr-2 h-4 w-4" />}
 			entityName="personaje"
@@ -134,10 +142,10 @@ export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProp
 
 // Componente para el submenú de lugares
 export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { places } = usePlacesStore();
+	const places = usePlaceStore(state => state.places) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir a lugar"
 			icon={<MapPin className="mr-2 h-4 w-4" />}
 			entityName="lugar"
@@ -157,10 +165,10 @@ export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 
 // Componente para el submenú de objetos del mundo
 export function WorldItemsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { worldItems } = useWorldItemsStore();
+	const worldItems = useWorldItemStore(state => Object.values(state.worldItems || {})) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir a objeto"
 			icon={<Box className="mr-2 h-4 w-4" />}
 			entityName="objeto del mundo"
@@ -180,10 +188,10 @@ export function WorldItemsSubmenu({ file, onAction, loadingStates }: SubmenuProp
 
 // Componente para el submenú de prompts
 export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { prompts } = usePromptStore();
+	const prompts = usePromptStore(state => Object.values(state.prompts || {})) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir prompt"
 			icon={<MessageSquare className="mr-2 h-4 w-4" />}
 			entityName="prompt"
@@ -203,20 +211,26 @@ export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) 
 
 // Componente para el submenú de notas
 export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { notes } = useNoteStore();
+	const notes = useNoteStore(state => state.notes || []);
+	const notesList = React.useMemo(() =>
+		notes.map(note => ({
+			name: note.title || 'Sin título',
+			...note
+		})) as EntityWithNameAndId[],
+		[notes]);
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir nota"
 			icon={<FileText className="mr-2 h-4 w-4" />}
 			entityName="nota"
-			entities={notes}
+			entities={notesList}
 			isLoading={loadingStates.notes.loading}
 			onSelect={(note) => onAction('note-add', file, { id: note.id })}
 			onCreate={() => onAction('note-create', file)}
 			renderItem={(note) => (
 				<div className="flex items-center gap-2 w-full">
-					<span className="flex-1">{note.title}</span>
+					<span className="flex-1">{note.title || note.name}</span>
 				</div>
 			)}
 		/>
@@ -225,10 +239,10 @@ export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 
 // Componente para el submenú de conceptos
 export function ConceptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
-	const { concepts } = useConceptStore();
+	const concepts = useConceptStore(state => Object.values(state.concepts || {})) as EntityWithNameAndId[];
 
 	return (
-		<EntitySubMenu
+		<EntitySubMenu<EntityWithNameAndId>
 			title="Añadir concepto"
 			icon={<Lightbulb className="mr-2 h-4 w-4" />}
 			entityName="concepto"

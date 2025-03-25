@@ -9,13 +9,12 @@ import { createDebugger } from '@/components/features/entity-cards/debug/render-
 import type { CardOptions } from '@/components/features/entity-cards/types/base-card-types';
 import { normalizeEntityData } from '@/components/features/entity-cards/utils/data-validator';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { useFileManager } from '@/store/file-manager.store';
+import { useFileManager } from '@/store/files/file-manager.store';
 import type { Folder } from '@/types/entities/folders';
-import { FolderIcon, Info } from 'lucide-react';
+import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
@@ -31,6 +30,13 @@ const DEFAULT_FOLDER_OPTIONS: CardOptions = {
 	secondaryColor: '#1e40af',
 };
 
+// Actualizar la definición de tipo para Folder para incluir _count
+type FolderWithCount = Folder & {
+	_count?: {
+		images: number
+	}
+};
+
 // Componente memoizado para cada tarjeta de carpeta
 const MemoizedFolderCard = React.memo(
 	({
@@ -38,7 +44,7 @@ const MemoizedFolderCard = React.memo(
 		cardOptions,
 		onFolderClick,
 	}: {
-		folder: Folder;
+		folder: FolderWithCount;
 		cardOptions: CardOptions;
 		onFolderClick: () => void;
 	}) => {
@@ -52,7 +58,7 @@ const MemoizedFolderCard = React.memo(
 		}
 
 		// Normalizar los datos de la carpeta
-		const normalizedFolder = normalizeEntityData(folder, 'folder') as Folder;
+		const normalizedFolder = normalizeEntityData(folder, 'folder') as FolderWithCount;
 
 		return (
 			<EntityCardDev
@@ -60,7 +66,7 @@ const MemoizedFolderCard = React.memo(
 				id={normalizedFolder.id}
 				title={normalizedFolder.name}
 				description={normalizedFolder.description || ''}
-				image={normalizedFolder.featuredImage}
+				image={normalizedFolder.featuredImage || undefined}
 				metadata={{
 					Imágenes: normalizedFolder._count?.images || normalizedFolder.imageCount || 0,
 					...(normalizedFolder.totalSize ? { Tamaño: formatBytes(normalizedFolder.totalSize) } : {})
@@ -110,7 +116,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentFolder, clearSelection } = useFileManager();
-	const [folders, setFolders] = useState<Folder[]>([]);
+	const [folders, setFolders] = useState<FolderWithCount[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_FOLDER_OPTIONS);
@@ -228,7 +234,7 @@ export function FoldersView(_props: ViewProps) {
 	}, [folderPresets, visualConfig]);
 
 	const handleFolderClick = useCallback(
-		async (folder: Folder) => {
+		async (folder: FolderWithCount) => {
 			try {
 				viewLogger.info('🖱️ Click en carpeta:', folder.name);
 
@@ -307,36 +313,6 @@ export function FoldersView(_props: ViewProps) {
 		<>
 			<ScrollArea className="h-full">
 				<div className="container mx-auto p-6">
-					{/* Título estilo TCG con indicador del modo actual */}
-					<div className="text-center mb-8">
-						<h1 className="text-3xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 text-transparent bg-clip-text drop-shadow-md">
-							Colección de Carpetas
-						</h1>
-						<p className="text-muted-foreground mt-2">Explora tu colección de carpetas y descubre tus imágenes</p>
-
-						{/* Indicador del modo de visualización */}
-						<div className="mt-4 flex items-center justify-center gap-2">
-							<Info className="h-4 w-4 text-muted-foreground" />
-							<p className="text-sm text-muted-foreground">Modo de visualización actual:</p>
-							<Badge
-								variant="outline"
-								className={`
-									${displayMode === 'simple' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
-									${displayMode === 'complex' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : ''}
-									${displayMode === 'skeleton' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''}
-									${displayMode === 'json' ? 'bg-teal-500/10 text-teal-500 border-teal-500/20' : ''}
-								`}
-							>
-								{displayMode === 'simple' && 'Simple'}
-								{displayMode === 'complex' && 'Completo'}
-								{displayMode === 'skeleton' && 'Esqueleto'}
-								{displayMode === 'json' && 'JSON'}
-							</Badge>
-							<p className="text-xs text-muted-foreground">
-								(Puedes cambiar el modo desde el panel flotante)
-							</p>
-						</div>
-					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 						{optimisticFolders.map((folder, index) => {

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
-import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useMemo } from 'react';
@@ -21,6 +21,8 @@ interface NavCategoryItemProps {
 	onClick: () => void;
 	onToggleCollapse: (event: React.MouseEvent | React.KeyboardEvent) => void;
 	showLabel?: boolean;
+	onToggleViewMode?: () => void;
+	viewMode?: 'list' | 'grid';
 }
 
 export function NavCategoryItem({
@@ -35,6 +37,8 @@ export function NavCategoryItem({
 	onClick,
 	onToggleCollapse,
 	showLabel = true,
+	onToggleViewMode,
+	viewMode = 'list'
 }: NavCategoryItemProps) {
 	const colorWithOpacity = useMemo(() => {
 		// Convertir el color a rgba con una opacidad de 0.2
@@ -64,8 +68,7 @@ export function NavCategoryItem({
 		>
 			{/* Botón específico para colapsar/expandir - solo visible cuando se muestran las etiquetas */}
 			{showLabel && (
-				<button
-					type="button"
+				<div
 					className="flex h-5 w-5 shrink-0 items-center justify-center hover:bg-gray-100/10 border-0 bg-transparent p-0 transition-colors cursor-pointer"
 					onClick={onToggleCollapse}
 					aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
@@ -73,7 +76,7 @@ export function NavCategoryItem({
 					<motion.div initial={false} animate={{ rotate: isCollapsed ? 0 : 90 }} transition={{ duration: 0.15 }}>
 						<ChevronRight className="h-3 w-3 text-foreground/60" />
 					</motion.div>
-				</button>
+				</div>
 			)}
 
 			{/* Botón de categoría */}
@@ -103,6 +106,30 @@ export function NavCategoryItem({
 							<div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/30 text-muted-foreground min-w-[24px] nav-count-badge">
 								{imageCount}
 							</div>
+
+							{/* Botón para cambiar de vista - a la derecha de los badges */}
+							{!isCollapsed && onToggleViewMode && (
+								<Button
+									asChild
+									variant="ghost"
+									size="sm"
+									className="h-5 w-5 p-0 bg-background/50 hover:bg-secondary/60 rounded text-muted-foreground hover:text-foreground transition-all ml-1"
+									title={viewMode === 'list' ? 'Cambiar a vista de cuadrícula' : 'Cambiar a vista de lista'}
+								>
+									<div
+										onClick={(e) => {
+											e.stopPropagation();
+											onToggleViewMode();
+										}}
+									>
+										{viewMode === 'list' ? (
+											<Grid className="h-3 w-3" />
+										) : (
+											<List className="h-3 w-3" />
+										)}
+									</div>
+								</Button>
+							)}
 						</div>
 					</>
 				)}

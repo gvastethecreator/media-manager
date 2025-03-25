@@ -36,7 +36,7 @@ export function mapCreateVideoDataToPrisma(data: CreateVideoData) {
  * @param metadata Metadatos del video
  * @returns Duración formateada (HH:MM:SS)
  */
-export function extractVideoDuration(metadata?: VideoMetadata): string {
+export function extractVideoDuration(metadata?: Partial<VideoMetadata>): string {
   if (!metadata || !metadata.duration) return '--:--';
 
   const totalSeconds = Math.floor(metadata.duration);

@@ -1,8 +1,8 @@
 import {
-    QueueJobData,
-    QueueJobExtended,
-    QueueJobPriority,
-    QueueJobStatus
+  QueueJobData,
+  QueueJobExtended,
+  QueueJobPriority,
+  QueueJobStatus
 } from "@/types/entities/queueJob/queueJob-types";
 import { QueueJob } from "@prisma/client";
 import { differenceInSeconds, format, formatDistanceToNow } from "date-fns";
@@ -91,8 +91,8 @@ export function calculateElapsedTime(startDate: Date | null, endDate: Date | nul
 /**
  * Estima el tiempo restante basado en el progreso actual
  */
-export function estimateTimeRemaining(startDate: Date | null, progress: number): number | null {
-  if (!startDate || progress <= 0) return null;
+export function estimateTimeRemaining(startDate: Date | null, progress: number): number | undefined {
+  if (!startDate || progress <= 0) return undefined;
 
   const elapsed = calculateElapsedTime(startDate);
   if (elapsed <= 0 || progress >= 100) return 0;
@@ -132,7 +132,7 @@ export function transformQueueJob(job: QueueJob): QueueJobExtended {
   const elapsed = startedAt ? calculateElapsedTime(startedAt, finishedAt) : 0;
   const remaining = (startedAt && !finishedAt && job.progress > 0)
     ? estimateTimeRemaining(startedAt, job.progress)
-    : null;
+    : undefined;
 
   return {
     ...job,

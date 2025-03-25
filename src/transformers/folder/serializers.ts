@@ -85,7 +85,7 @@ export function toFolderSummary(folder: PrismaFolder | FolderExtended): FolderSu
     path: folder.path,
     imageCount: folder.totalFiles || 0,
     totalSize: folder.totalSize || 0,
-    lastIndexed: folder.lastIndexed || null,
+    lastIndexed: folder.lastIndexed instanceof Date ? folder.lastIndexed : null,
   };
 }
 
