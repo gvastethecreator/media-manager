@@ -13,12 +13,12 @@ import {
 	mapUpdateAlbumDataToPrisma
 } from '@/transformers/album';
 import {
-	Album,
-	AlbumBase,
+	type Album,
+	type AlbumBase,
 	AlbumPrivacyLevel,
 	AlbumType,
-	CreateAlbumData,
-	UpdateAlbumData
+	type CreateAlbumData,
+	type UpdateAlbumData
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 

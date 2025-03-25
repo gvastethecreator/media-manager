@@ -4,8 +4,8 @@
  */
 
 import type { CollectionExtended } from '@/types/entities/collection';
-import { StateCreator } from 'zustand';
-import { CollectionState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { CollectionState } from '../types';
 
 /**
  * Slice principal con operaciones CRUD básicas para colecciones

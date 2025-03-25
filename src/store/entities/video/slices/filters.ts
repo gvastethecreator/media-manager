@@ -3,9 +3,9 @@
  * @module store/entities/video/slices/filters
  */
 
-import { StateCreator } from 'zustand';
-import { type Video, type VideoSortCriteria } from '../../../../types/entities/video';
-import { VideoState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { Video, VideoSortCriteria } from '../../../../types/entities/video';
+import type { VideoState } from '../types';
 
 // Slice para filtrado y ordenación
 export interface VideoFiltersSlice {

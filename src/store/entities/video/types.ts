@@ -3,7 +3,7 @@
  * @module store/entities/video/types
  */
 
-import { type Video, type VideoPlayState, type VideoSortCriteria, type VideoViewMode } from '../../../types/entities/video';
+import type { Video, VideoPlayState, VideoSortCriteria, VideoViewMode } from '../../../types/entities/video';
 
 /**
  * Estado principal del store de videos

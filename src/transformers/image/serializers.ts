@@ -3,12 +3,12 @@
  * @module transformers/image/serializers
  */
 
-import {
-    type ImageBase,
-    type ImageExtended,
-    type ImageMetadata,
-    type ImageVisualConfigBase,
-    type ImageVisualConfigExtended
+import type {
+    ImageBase,
+    ImageExtended,
+    ImageMetadata,
+    ImageVisualConfigBase,
+    ImageVisualConfigExtended
 } from '../../types/entities/image';
 
 /**

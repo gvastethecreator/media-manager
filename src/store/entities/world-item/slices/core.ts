@@ -3,16 +3,16 @@
  * @module store/entities/world-item/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
     extendWorldItem,
     extendWorldItems
 } from '../../../../transformers/world-item';
-import {
+import type {
     ParsedWorldItemVisualConfig,
     WorldItem
 } from '../../../../types/entities/world-item';
-import { WorldItemStore } from '../index';
+import type { WorldItemStore } from '../index';
 
 export interface WorldItemCoreSlice {
   // Estado

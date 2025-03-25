@@ -62,18 +62,21 @@ function TestPresetComponent() {
 	return (
 		<div>
 			<button
+				type="button"
 				onClick={() => applyPreset(legendaryPreset)}
 				data-testid="apply-legendary"
 			>
 				Apply Legendary
 			</button>
 			<button
+				type="button"
 				onClick={() => applyPreset(rarePreset)}
 				data-testid="apply-rare"
 			>
 				Apply Rare
 			</button>
 			<button
+				type="button"
 				onClick={() => removePreset()}
 				data-testid="remove-preset"
 			>
@@ -242,6 +245,7 @@ describe('Preset System', () => {
 			Component: ({ enabled, config, onInteraction }) => (
 				enabled ? (
 					<button
+						type="button"
 						data-testid="interactive-layer"
 						onClick={() => onInteraction?.(config?.action || 'default')}
 					>

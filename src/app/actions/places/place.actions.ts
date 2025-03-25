@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
-import {
+import type {
 	PlaceBase,
 	CreatePlaceData,
 	UpdatePlaceData

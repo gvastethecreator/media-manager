@@ -3,10 +3,10 @@
  * @module store/entities/world-item/slices/filters
  */
 
-import { StateCreator } from 'zustand';
-import { WorldItem } from '../../../../types/entities/world-item';
+import type { StateCreator } from 'zustand';
+import type { WorldItem } from '../../../../types/entities/world-item';
 import { compareWorldItems, filterWorldItems } from '../../../../utils/world-item';
-import { WorldItemStore } from '../index';
+import type { WorldItemStore } from '../index';
 
 export interface WorldItemFiltersSlice {
   // Propiedades computadas

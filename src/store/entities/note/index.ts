@@ -9,7 +9,7 @@ import { createFiltersSlice } from './slices/filters';
 import { createRelationsSlice } from './slices/relations';
 import { createSelectionSlice } from './slices/selection';
 import { createUISlice } from './slices/ui';
-import { NoteStore } from './types';
+import type { NoteStore } from './types';
 
 const storeLogger = serverLogger.withContext('NoteStore');
 

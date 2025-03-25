@@ -46,8 +46,8 @@ export function extendTags(tags: TagBase[]): Tag[] {
  */
 export function tagToTagWithStats(
   tag: TagBase,
-  imageCount: number = 0,
-  totalSize: number = 0
+  imageCount = 0,
+  totalSize = 0
 ): TagWithStats {
   return {
     ...tag,
@@ -68,7 +68,7 @@ export function formatSize(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 /**

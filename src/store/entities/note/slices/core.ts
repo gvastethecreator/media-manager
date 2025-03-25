@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { toNoteWithStats } from '@/transformers/note';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = serverLogger.withContext('NoteStore:Core');

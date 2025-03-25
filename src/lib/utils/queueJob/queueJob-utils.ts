@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { transformQueueJobs } from "@/transformers/queueJob/queueJob-transformers";
 import {
-	PaginatedQueueJobs,
-	QueueJobFilters,
-	QueueJobPaginationOptions,
+	type PaginatedQueueJobs,
+	type QueueJobFilters,
+	type QueueJobPaginationOptions,
 	QueueJobStatus
 } from "@/types/entities/queueJob/queueJob-types";
-import { QueueJob } from "@prisma/client";
+import type { QueueJob } from "@prisma/client";
 
 /**
  * Comprueba si un trabajo ha excedido su número máximo de intentos

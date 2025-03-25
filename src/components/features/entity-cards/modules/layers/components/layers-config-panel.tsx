@@ -57,7 +57,7 @@ export function LayersConfigPanel({
 	// Actualizar estado cuando cambian las opciones
 	useEffect(() => {
 		setConfig(getConfigWithDefaults());
-	}, [cardOptions]);
+	}, [getConfigWithDefaults]);
 
 	// Manejar cambios y actualizar las opciones
 	const handleConfigChange = (key: keyof LayerSystemConfig, value: any) => {

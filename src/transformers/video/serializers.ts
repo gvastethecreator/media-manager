@@ -3,12 +3,12 @@
  * @module transformers/video/serializers
  */
 
-import {
-    type Video,
-    type VideoBase,
-    type VideoMetadata,
-    type VideoPrivacyLevel,
-    type VideoVisualConfig
+import type {
+    Video,
+    VideoBase,
+    VideoMetadata,
+    VideoPrivacyLevel,
+    VideoVisualConfig
 } from '../../types/entities/video';
 
 // Define interfaces adicionales para extender VideoBase

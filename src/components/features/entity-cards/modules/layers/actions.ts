@@ -74,7 +74,7 @@ export async function updateLayerConfig({
     // Invalidar las rutas relacionadas para refrescar los datos
     revalidatePath(`/cards/${validatedData.cardId}`);
     revalidatePath(`/cards/${validatedData.cardId}/edit`);
-    revalidatePath(`/dashboard`);
+    revalidatePath('/dashboard');
 
     // Devolver respuesta exitosa
     return {

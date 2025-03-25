@@ -11,14 +11,14 @@ import {
     serializeFileOperationResult
 } from '@/transformers/file';
 import {
-    DirectoryReadResult,
-    FileBase,
-    FileCopyMoveResult,
+    type DirectoryReadResult,
+    type FileBase,
+    type FileCopyMoveResult,
     FileErrorCode,
     FileEventType,
-    FileInfo,
-    FileOperationOptions,
-    FileOperationResult,
+    type FileInfo,
+    type FileOperationOptions,
+    type FileOperationResult,
     FileType
 } from '@/types/entities/file';
 import fs, { stat } from 'fs/promises';

@@ -67,9 +67,9 @@ export interface SubMenuProps<T> {
 	entityName: string;
 	entities: T[];
 	isLoading: boolean;
-	onSelect: (entity: T) => void;
-	onCreate: () => void;
-	renderItem: (entity: T) => React.ReactNode;
+	onSelectAction: (entity: T) => void;
+	onCreateAction: () => void;
+	renderItemAction: (entity: T) => React.ReactNode;
 }
 
 // Función auxiliar para parsear metadata

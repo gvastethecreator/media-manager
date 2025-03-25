@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { WorldItem } from '../../../types/entities/world-item';
+import type { WorldItem } from '../../../types/entities/world-item';
 import { WORLD_ITEM_SORT_OPTIONS } from './constants';
 import { useWorldItemStore } from './index';
 

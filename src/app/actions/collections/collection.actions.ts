@@ -12,7 +12,7 @@ import {
     mapCreateCollectionDataToPrisma,
     mapUpdateCollectionDataToPrisma,
 } from '@/transformers/collection';
-import {
+import type {
     CollectionBase,
     CollectionExtended,
     CreateCollectionData,

@@ -3,20 +3,20 @@
  * @module store/entities/activity/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
     extendActivities,
     extendActivity,
     mapCreateActivityDataToPrisma
 } from '../../../../transformers/activity';
-import {
-    type Activity,
-    type ActivityBase,
-    type ActivityFilters,
-    type ActivityListResponse,
-    type CreateActivityData
+import type {
+    Activity,
+    ActivityBase,
+    ActivityFilters,
+    ActivityListResponse,
+    CreateActivityData
 } from '../../../../types/entities/activity';
-import { ActivityState } from '../types';
+import type { ActivityState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface ActivityCoreSlice {

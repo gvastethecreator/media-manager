@@ -14,12 +14,12 @@ import {
     mapCreateActivityDataToPrisma
 } from '@/transformers/activity';
 import {
-    Activity,
+    type Activity,
     ActivityEventType,
-    ActivityFilters,
-    ActivityListResponse,
-    ActivityType,
-    CreateActivityData
+    type ActivityFilters,
+    type ActivityListResponse,
+    type ActivityType,
+    type CreateActivityData
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityActions');

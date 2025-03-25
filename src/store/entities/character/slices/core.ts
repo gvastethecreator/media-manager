@@ -265,7 +265,7 @@ export const createCharacterCoreSlice: StateCreator<
 
             const currentLevel = typeof character.level === 'number'
                 ? character.level
-                : parseInt(character.level || '1', 10) || 1;
+                : Number.parseInt(character.level || '1', 10) || 1;
 
             return {
                 characters: {
@@ -294,7 +294,7 @@ export const createCharacterCoreSlice: StateCreator<
 
             const currentLevel = typeof character.level === 'number'
                 ? character.level
-                : parseInt(character.level || '1', 10) || 1;
+                : Number.parseInt(character.level || '1', 10) || 1;
 
             return {
                 characters: {

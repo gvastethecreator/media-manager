@@ -3,7 +3,7 @@
  * @module store/entities/tag/types
  */
 
-import { type Tag } from '@/types/entities/tag';
+import type { Tag } from '@/types/entities/tag';
 import { TagSortCriteria, TagViewMode } from '@/types/entities/tag/enums';
 
 /**

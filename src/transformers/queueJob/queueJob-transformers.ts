@@ -1,10 +1,10 @@
 import {
-  QueueJobData,
-  QueueJobExtended,
+  type QueueJobData,
+  type QueueJobExtended,
   QueueJobPriority,
   QueueJobStatus
 } from "@/types/entities/queueJob/queueJob-types";
-import { QueueJob } from "@prisma/client";
+import type { QueueJob } from "@prisma/client";
 import { differenceInSeconds, format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 

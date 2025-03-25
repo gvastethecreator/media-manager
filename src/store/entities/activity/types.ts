@@ -3,10 +3,10 @@
  * @module store/entities/activity/types
  */
 
-import {
-    type Activity,
-    type ActivityCategory,
-    type ActivitySortCriteria
+import type {
+    Activity,
+    ActivityCategory,
+    ActivitySortCriteria
 } from '../../../types/entities/activity';
 
 /**

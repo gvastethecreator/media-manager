@@ -73,6 +73,14 @@ const StatefulPlugin = {
 			<div
 				data-testid="stateful-plugin"
 				onClick={handleClick}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						handleClick();
+					}
+				}}
+				tabIndex={0}
+				role="button"
+				aria-label="Stateful plugin button"
 				style={{
 					backgroundColor: state?.isActive ? 'green' : 'red',
 					cursor: 'pointer'
@@ -313,6 +321,7 @@ describe('Plugin System', () => {
 				<div>
 					{plugin && <div data-testid="plugin-registered" />}
 					<button
+						type="button"
 						onClick={() => unregisterPlugin('test')}
 						data-testid="unregister-button"
 					>

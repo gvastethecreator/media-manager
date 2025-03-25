@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import type { CardOptions } from '../../../types/card-settings-types';
-import { LayersConfig } from '../../../types/unified-card-types';
+import type { LayersConfig } from '../../../types/unified-card-types';
 
 /**
  * Hook para gestionar el sistema de capas

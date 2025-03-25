@@ -2,7 +2,7 @@ import { Grid } from 'lucide-react';
 import type { LayerImplementation } from '../types';
 import { GridConfigForm } from './components/grid-config-form';
 import { GridLayer } from './components/grid-layer';
-import { GRID_PRESETS, GRID_TYPES, type GridConfig } from './grid-config-types';
+import { GRID_PRESETS, type GRID_TYPES, type GridConfig } from './grid-config-types';
 
 // Configuración por defecto
 const DEFAULT_GRID_CONFIG: GridConfig = {

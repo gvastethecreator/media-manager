@@ -12,12 +12,12 @@ import {
 import { transformImageToFileItem } from '@/transformers/favorite/serializers';
 import {
     FavoriteAction,
-    FavoriteBase,
-    FavoriteCreateInput,
+    type FavoriteBase,
+    type FavoriteCreateInput,
     FavoriteEntityType,
     FavoriteErrorCode,
     FavoriteEventType,
-    FavoriteWithImage
+    type FavoriteWithImage
 } from '@/types/entities/favorite';
 import { revalidatePath } from 'next/cache';
 

@@ -3,16 +3,19 @@
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { NavPanel } from '@/components/navigation/navigation-panel';
+import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ViewContainer } from '@/components/views/view-container';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageViewer } from '@/store/image-viewer.store';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Estilos para el panel colapsado
 import './nav-panel-collapsed.css';
+import './right-panel-collapsed.css';
 
 export function MainLayout() {
 	const [isResizing, setIsResizing] = useState(false);
@@ -20,10 +23,14 @@ export function MainLayout() {
 	const [navData, setNavData] = useState<Awaited<ReturnType<typeof getNavigationData>> | null>(null);
 	const contentWrapperRef = useRef<HTMLDivElement>(null);
 	const navPanelRef = useRef<React.ElementRef<typeof ResizablePanel>>(null);
+	const rightPanelRef = useRef<React.ElementRef<typeof ResizablePanel>>(null);
+	const { isVisible } = useDetailsPanel();
 
-	// Estado para el panel colapsable
+	// Estado para los paneles colapsables
 	const [isNavPanelCollapsed, setIsNavPanelCollapsed] = useLocalStorage('nav-panel-collapsed', false);
+	const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useLocalStorage('right-panel-collapsed', false);
 	const [navPanelSize, setNavPanelSize] = useLocalStorage('nav-panel-size', 20);
+	const [rightPanelSize, setRightPanelSize] = useLocalStorage('right-panel-size', 30);
 
 	// Cargar datos de navegación
 	useEffect(() => {
@@ -51,12 +58,26 @@ export function MainLayout() {
 		setIsNavPanelCollapsed(false);
 	}, [setIsNavPanelCollapsed]);
 
-	// Función para alternar el colapso del panel
+	// Función para alternar el colapso del panel de navegación
 	const toggleNavPanelCollapse = useCallback(() => {
 		setIsNavPanelCollapsed(prev => !prev);
 	}, [setIsNavPanelCollapsed]);
 
-	// Mantener el tamaño del panel al redimensionar
+	// Funciones para el panel derecho
+	const handleRightPanelCollapse = useCallback(() => {
+		setIsRightPanelCollapsed(true);
+	}, [setIsRightPanelCollapsed]);
+
+	const handleRightPanelExpand = useCallback(() => {
+		setIsRightPanelCollapsed(false);
+	}, [setIsRightPanelCollapsed]);
+
+	// Función para alternar el colapso del panel derecho
+	const toggleRightPanelCollapse = useCallback(() => {
+		setIsRightPanelCollapsed(prev => !prev);
+	}, [setIsRightPanelCollapsed]);
+
+	// Mantener el tamaño de los paneles al redimensionar
 	const handleNavPanelResize = useCallback(
 		(size: number) => {
 			if (size > 0) {
@@ -66,13 +87,59 @@ export function MainLayout() {
 		[setNavPanelSize]
 	);
 
+	const handleRightPanelResize = useCallback(
+		(size: number) => {
+			if (size > 0) {
+				setRightPanelSize(size);
+			}
+		},
+		[setRightPanelSize]
+	);
+
+	// Escuchar cambios en localStorage para actualizar el estado de los paneles
+	useEffect(() => {
+		const handleStorageChange = () => {
+			const rightPanelCollapsed = localStorage.getItem('right-panel-collapsed') === 'true';
+			const navPanelCollapsed = localStorage.getItem('nav-panel-collapsed') === 'true';
+
+			// Solo actualizamos si hay un cambio real
+			if (rightPanelCollapsed !== isRightPanelCollapsed) {
+				setIsRightPanelCollapsed(rightPanelCollapsed);
+			}
+
+			if (navPanelCollapsed !== isNavPanelCollapsed) {
+				setIsNavPanelCollapsed(navPanelCollapsed);
+			}
+		};
+
+		// Escuchar el evento storage
+		window.addEventListener('storage', handleStorageChange);
+
+		// Limpiar el evento al desmontar
+		return () => {
+			window.removeEventListener('storage', handleStorageChange);
+		};
+	}, [isRightPanelCollapsed, setIsRightPanelCollapsed, isNavPanelCollapsed, setIsNavPanelCollapsed]);
+
+	// Calcular tamaños por defecto para los paneles
+	const getDefaultSizes = () => {
+		const navDefault = isNavPanelCollapsed ? 4 : navPanelSize;
+		const rightDefault = isVisible ? (isRightPanelCollapsed ? 4 : rightPanelSize) : 0;
+		const centerDefault = 100 - navDefault - (isVisible ? rightDefault : 0);
+
+		return [navDefault, centerDefault, rightDefault];
+	};
+
+	const defaultSizes = getDefaultSizes();
+
 	return (
 		<div className="flex h-screen w-full bg-background">
 			<ResizablePanelGroup direction="horizontal" className="h-full w-full">
+				{/* Panel de navegación */}
 				<ResizablePanel
 					ref={navPanelRef}
-					defaultSize={navPanelSize}
-					minSize={isNavPanelCollapsed ? 0 : 15}
+					defaultSize={defaultSizes[0]}
+					minSize={isNavPanelCollapsed ? 4 : 15}
 					maxSize={30}
 					className={cn('bg-background-primary transition-all', isNavPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
 					style={{
@@ -94,6 +161,7 @@ export function MainLayout() {
 					)}
 				</ResizablePanel>
 
+				{/* Separador para panel de navegación */}
 				<ResizableHandle
 					withHandle
 					className={cn(
@@ -103,9 +171,18 @@ export function MainLayout() {
 					onDragging={handleDragging}
 				/>
 
-				<ResizablePanel defaultSize={80} minSize={70} className="h-full w-full">
+				{/* Panel central */}
+				<ResizablePanel
+					defaultSize={defaultSizes[1]}
+					minSize={50}
+					className="h-full w-full"
+				>
 					<div className="flex flex-col h-full">
-						<ViewToolbar />
+						<ViewToolbar
+							isRightPanelCollapsed={isRightPanelCollapsed}
+							toggleRightPanelCollapse={toggleRightPanelCollapse}
+							isRightPanelVisible={isVisible}
+						/>
 						<div ref={contentWrapperRef} className="flex-1 relative resize-container">
 							<div
 								className="absolute inset-0 w-full h-full view-container-transition"
@@ -115,7 +192,7 @@ export function MainLayout() {
 									transition: 'opacity 0.2s ease-in-out'
 								}}
 							>
-								<ViewContainer />
+								<ViewContainer isResizing={isResizing} />
 							</div>
 
 							{isResizing && (
@@ -130,6 +207,38 @@ export function MainLayout() {
 						</div>
 					</div>
 				</ResizablePanel>
+
+				{/* Panel derecho (solo se renderiza si está visible) */}
+				{isVisible && (
+					<>
+						<ResizableHandle
+							withHandle
+							className={cn(
+								'cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+								isRightPanelCollapsed ? 'right-panel-collapsed-handle' : ''
+							)}
+							onDragging={handleDragging}
+						/>
+						<ResizablePanel
+							ref={rightPanelRef}
+							defaultSize={defaultSizes[2]}
+							minSize={isRightPanelCollapsed ? 4 : 20}
+							maxSize={40}
+							className={cn('bg-background-primary transition-all', isRightPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
+							style={{
+								transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
+							}}
+							collapsible
+							collapsedSize={4}
+							isCollapsed={isRightPanelCollapsed}
+							onCollapse={handleRightPanelCollapse}
+							onExpand={handleRightPanelExpand}
+							onResize={handleRightPanelResize}
+						>
+							<RightPanel isCollapsed={isRightPanelCollapsed} onToggleCollapse={toggleRightPanelCollapse} />
+						</ResizablePanel>
+					</>
+				)}
 			</ResizablePanelGroup>
 
 			<FileViewer

@@ -25,14 +25,14 @@ export function EntitySubMenu<T>({
 	entityName,
 	entities,
 	isLoading,
-	onSelect,
-	onCreate,
-	renderItem,
+	onSelectAction,
+	onCreateAction,
+	renderItemAction,
 }: SubMenuProps<T>) {
 	// Memoizar las funciones de callback para evitar recreaciones en cada renderizado
 	const handleCreate = useCallback(() => {
-		onCreate();
-	}, [onCreate]);
+		onCreateAction();
+	}, [onCreateAction]);
 
 	// Memoizar los elementos renderizados
 	const renderedItems = useMemo(() => {
@@ -45,18 +45,27 @@ export function EntitySubMenu<T>({
 		}
 
 		return entities.map((entity, index) => {
-			const key = `entity-${entity && typeof entity === 'object' && 'id' in entity ? (entity as EntityWithId).id : index
-				}`;
+			// Mejorar la extracción de ID para evitar errores de tipado
+			let itemKey = `entity-${index}`;
 
-			const handleClick = () => onSelect(entity);
+			if (entity && typeof entity === 'object') {
+				// Verificar si la entidad tiene un id y es string o número
+				if ('id' in entity &&
+					(typeof (entity as EntityWithId).id === 'string' ||
+						typeof (entity as EntityWithId).id === 'number')) {
+					itemKey = `entity-${String((entity as EntityWithId).id)}`;
+				}
+			}
+
+			const handleClick = () => onSelectAction(entity);
 
 			return (
-				<ContextMenuItem key={key} onClick={handleClick}>
-					{renderItem(entity)}
+				<ContextMenuItem key={itemKey} onClick={handleClick}>
+					{renderItemAction(entity)}
 				</ContextMenuItem>
 			);
 		});
-	}, [entities, entityName, onSelect, renderItem]);
+	}, [entities, entityName, onSelectAction, renderItemAction]);
 
 	return (
 		<ContextMenuSub>

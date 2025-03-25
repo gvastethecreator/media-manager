@@ -3,9 +3,9 @@
  * @module store/entities/image/slices/ui
  */
 
-import { StateCreator } from 'zustand';
-import { type ImageViewMode } from '../../../../types/entities/image';
-import { ImageState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { ImageViewMode } from '../../../../types/entities/image';
+import type { ImageState } from '../types';
 
 // Slice para estado de UI
 export interface ImageUISlice {

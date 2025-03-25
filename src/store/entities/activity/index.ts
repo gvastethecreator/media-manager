@@ -9,7 +9,7 @@ import { ActivitySortCriteria } from '../../../types/entities/activity';
 import { type ActivityCoreSlice, createActivityCoreSlice } from './slices/core';
 import { type ActivityFiltersSlice, createActivityFiltersSlice } from './slices/filters';
 import { type ActivityUISlice, createActivityUISlice } from './slices/ui';
-import { type ActivityState } from './types';
+import type { ActivityState } from './types';
 
 // Tipo del store completo
 export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;

@@ -10,6 +10,8 @@ import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
 	ArrowDown,
+	ArrowLeft,
+	ArrowRight,
 	ArrowUp,
 	BookImage,
 	Box,
@@ -42,7 +44,13 @@ import { useCallback } from 'react';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 import { EntityDetails } from './entity-details';
 
-export function ViewToolbar() {
+export interface ViewToolbarProps {
+	isRightPanelCollapsed?: boolean;
+	toggleRightPanelCollapse?: () => void;
+	isRightPanelVisible?: boolean;
+}
+
+export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, isRightPanelVisible }: ViewToolbarProps) {
 	const { currentView, getCurrentItem } = useNavigationStore();
 	const { viewMode, setViewMode, selectedItems, clearSelection, sortBy, setSortBy, sortOrder, setSortOrder } =
 		useFileManager();
@@ -290,6 +298,22 @@ export function ViewToolbar() {
 					>
 						<X className="h-4 w-4" />
 					</Button>
+					{/* Botón para colapsar/expandir el panel derecho */}
+					{isVisible && toggleRightPanelCollapse && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8 hover:bg-accent"
+							title={isRightPanelCollapsed ? 'Expandir panel de detalles' : 'Colapsar panel de detalles'}
+							onClick={toggleRightPanelCollapse}
+						>
+							{isRightPanelCollapsed ? (
+								<ArrowLeft className="h-4 w-4" />
+							) : (
+								<ArrowRight className="h-4 w-4" />
+							)}
+						</Button>
+					)}
 				</div>
 			</div>
 		);

@@ -44,7 +44,7 @@ export function generateVideoThumbnailUrl(
 	timestamp?: number
 ): string {
 	const videoId = typeof video === 'string' ? video : video.id;
-	let url = `/api/videos/${videoId}/thumbnail`;
+	const url = `/api/videos/${videoId}/thumbnail`;
 
 	// Añadir parámetros
 	const params = new URLSearchParams();

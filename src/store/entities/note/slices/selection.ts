@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const selectionLogger = serverLogger.withContext('NoteStore:Selection');

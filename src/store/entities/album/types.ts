@@ -3,12 +3,12 @@
  * @module store/entities/album/types
  */
 
-import {
-    type Album,
-    type AlbumDisplayState,
-    type AlbumSortCriteria,
-    type AlbumType,
-    type AlbumViewMode
+import type {
+    Album,
+    AlbumDisplayState,
+    AlbumSortCriteria,
+    AlbumType,
+    AlbumViewMode
 } from '../../../types/entities/album';
 
 /**

@@ -3,12 +3,12 @@
  * @module store/entities/album/slices/ui
  */
 
-import { StateCreator } from 'zustand';
-import {
-    type AlbumDisplayState,
-    type AlbumViewMode
+import type { StateCreator } from 'zustand';
+import type {
+    AlbumDisplayState,
+    AlbumViewMode
 } from '../../../../types/entities/album';
-import { AlbumState } from '../types';
+import type { AlbumState } from '../types';
 
 // Slice para estado de UI
 export interface AlbumUISlice {

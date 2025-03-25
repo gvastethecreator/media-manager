@@ -3,7 +3,7 @@
  * @module store/entities/image/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import type { StateCreator } from 'zustand';
 import {
     mapCreateImageDataToPrisma
 } from '../../../../transformers/image/mappers';
@@ -11,13 +11,13 @@ import {
     extendImage,
     extendImages
 } from '../../../../transformers/image/serializers';
-import {
-    type CreateImageData,
-    type Image,
-    type ImageBase,
-    type UpdateImageData
+import type {
+    CreateImageData,
+    Image,
+    ImageBase,
+    UpdateImageData
 } from '../../../../types/entities/image';
-import { ImageState } from '../types';
+import type { ImageState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface ImageCoreSlice {

@@ -5,8 +5,8 @@
 
 import { TagCategory, TagRarity, TagSortCriteria } from '@/types/entities/tag/enums';
 import { searchTags, sortTags } from '@/utils/tag/helpers';
-import { type StateCreator } from 'zustand';
-import { type TagFiltersState, type TagState } from '../types';
+import type { StateCreator } from 'zustand';
+import type { TagFiltersState, TagState } from '../types';
 
 export interface TagFiltersSlice {
   // Estado

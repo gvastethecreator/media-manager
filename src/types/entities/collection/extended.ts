@@ -3,8 +3,8 @@
  * @module types/entities/collection/extended
  */
 
-import { type Image } from '@prisma/client';
-import { type CollectionBase, type CollectionFilter } from './base';
+import type { Image } from '@prisma/client';
+import type { CollectionBase, CollectionFilter } from './base';
 
 /**
  * Tipo extendido para Collection con propiedades adicionales de UI

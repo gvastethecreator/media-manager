@@ -29,6 +29,7 @@ const ClickLayer = {
 	Component: ({ enabled, config, onInteraction }) => (
 		enabled ? (
 			<button
+				type="button"
 				data-testid="click-layer"
 				onClick={() => onInteraction?.('click', { x: 0, y: 0 })}
 			>
@@ -233,6 +234,7 @@ describe('Interactive Layers', () => {
 				Component: ({ enabled, onInteraction }) => (
 					enabled ? (
 						<button
+							type="button"
 							data-testid="invalid-layer"
 							onClick={() => onInteraction?.('invalid:type')}
 						>

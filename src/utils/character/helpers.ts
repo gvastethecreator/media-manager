@@ -124,7 +124,7 @@ export function getCharacterLevelAsNumber(character: CharacterExtended | Charact
     }
 
     if (typeof character.level === 'string') {
-        const parsedLevel = parseInt(character.level, 10);
+        const parsedLevel = Number.parseInt(character.level, 10);
         return isNaN(parsedLevel) ? 1 : parsedLevel;
     }
 
@@ -264,7 +264,7 @@ export function createCharacterRelationship(
     targetCharacterId: string,
     targetCharacterName: string,
     type: string = CharacterRelationshipTypeEnum.ALLY,
-    strength: number = 50
+    strength = 50
 ): CharacterRelationship {
     return {
         characterId: targetCharacterId,
@@ -294,7 +294,7 @@ export function prepareInitialStats(characterClass: CharacterClass): string {
         speed: 30
     };
 
-    let modifiedStats = { ...baseStats };
+    const modifiedStats = { ...baseStats };
 
     // Modificar estadísticas según la clase
     switch (characterClass.toLowerCase()) {

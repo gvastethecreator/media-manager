@@ -3,7 +3,7 @@
  * @module utils/world-item/helpers
  */
 
-import {
+import type {
     RarityLevel,
     WorldItem,
     WorldItemProperty,
