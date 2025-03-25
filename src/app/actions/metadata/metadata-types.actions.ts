@@ -1,4 +1,5 @@
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
+import type { Image } from '@prisma/client';
 import type sharp from 'sharp';
 
 // Configuración de retry
@@ -76,3 +77,49 @@ export interface MetadataWithCamera extends Partial<FileMetadata> {
 
 // Otras interfaces y tipos exportados
 export type { AIMetadata, FileMetadata };
+
+// Tipos para las operaciones de metadatos
+export type ImageMetadata = {
+	format?: string;
+	colorSpace?: string;
+	hasAlpha?: boolean;
+	orientation?: number;
+	exif?: {
+		make?: string;
+		model?: string;
+		exposureTime?: string;
+		fNumber?: number;
+		iso?: number;
+		focalLength?: string;
+		lensModel?: string;
+		dateTimeOriginal?: string;
+		gpsLatitude?: number;
+		gpsLongitude?: number;
+	};
+};
+
+export type ImageWithMetadata = Image & {
+	parsedMetadata?: ImageMetadata;
+};
+
+export type UpdateMetadataInput = {
+	format?: string;
+	width?: number;
+	height?: number;
+	size?: number;
+	colorSpace?: string;
+	hasAlpha?: boolean;
+	orientation?: number;
+	exif?: {
+		make?: string;
+		model?: string;
+		exposureTime?: string;
+		fNumber?: number;
+		iso?: number;
+		focalLength?: string;
+		lensModel?: string;
+		dateTimeOriginal?: string;
+		gpsLatitude?: number;
+		gpsLongitude?: number;
+	};
+};

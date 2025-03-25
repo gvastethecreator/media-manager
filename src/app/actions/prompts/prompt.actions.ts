@@ -4,9 +4,21 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { Prompt } from '@/types/entities/prompts';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
+
+// Importar tipos y transformers actualizados
+import {
+    toExtendedPrompt,
+    toPromptWithStats
+} from '@/transformers/prompt';
+import {
+    PromptBase,
+    PromptCreateInput,
+    PromptExtended,
+    PromptUpdateInput,
+    PromptWithStats
+} from '@/types/entities/prompt';
 
 const promptLogger = serverLogger.withContext('PromptActions');
 
@@ -36,45 +48,14 @@ const createPromptError = (
 	return error;
 };
 
-export interface PromptCreate {
-	name: string;
-	emoji?: string;
-	description?: string | null;
-	color?: string;
-	content?: string;
-	category?: string;
-	parameters?: string;
-	tags?: string;
-	featuredImage?: string | null;
-}
-
-export interface PromptUpdate extends Partial<PromptCreate> {
-	id: string;
-}
-
-export interface PromptWithStats extends Prompt {
-	_count: {
-		concepts: number;
-		notes: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-	};
-	lastUpdated: Date;
-}
-
-export interface PromptWithImages extends Prompt {
+// Interfaces adicionales para compatibilidad
+export interface PromptWithImages extends PromptBase {
 	images: FileItem[];
 }
 
-export interface ExtendedPrompt extends Omit<Prompt, 'characters' | 'places' | 'worldItems' | 'notes' | 'concepts'> {
-	concepts?: { id: string; name: string }[];
-	notes?: { id: string; title: string }[];
-	characters?: { id: string; name: string }[];
-	places?: { id: string; name: string }[];
-	worldItems?: { id: string; name: string }[];
-}
-
+/**
+ * Obtiene todos los prompts con estadísticas
+ */
 export async function getPrompts(): Promise<PromptWithStats[]> {
 	try {
 		const prompts = await prisma.prompt.findMany({
@@ -86,6 +67,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 						characters: true,
 						places: true,
 						worldItems: true,
+						images: true
 					},
 				},
 			},
@@ -94,17 +76,17 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 			},
 		});
 
-		return prompts.map((prompt: any) => ({
-			...prompt,
-			lastUpdated: prompt.updatedAt,
-		}));
+		return prompts.map(toPromptWithStats);
 	} catch (error) {
-		console.error('Error al obtener prompts:', error);
-		throw new Error('Error al obtener prompts');
+		promptLogger.error('Error al obtener prompts:', error);
+		throw createPromptError('Error al obtener prompts', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getPrompt(id: string): Promise<Prompt> {
+/**
+ * Obtiene un prompt específico por su ID
+ */
+export async function getPrompt(id: string): Promise<PromptExtended> {
 	try {
 		promptLogger.info('🔍 Obteniendo prompt:', id);
 		const prompt = await prisma.prompt.findUnique({
@@ -116,6 +98,8 @@ export async function getPrompt(id: string): Promise<Prompt> {
 						notes: true,
 						characters: true,
 						places: true,
+						worldItems: true,
+						images: true
 					},
 				},
 			},
@@ -126,7 +110,7 @@ export async function getPrompt(id: string): Promise<Prompt> {
 		}
 
 		promptLogger.info('✅ Prompt obtenido:', prompt.name);
-		return prompt as Prompt;
+		return toExtendedPrompt(prompt);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
 		if (error instanceof Error && error.name === 'PromptError') {
@@ -136,7 +120,77 @@ export async function getPrompt(id: string): Promise<Prompt> {
 	}
 }
 
-export async function createPrompt(data: PromptCreate): Promise<Prompt> {
+/**
+ * Obtiene un prompt con todas sus relaciones
+ */
+export async function getPromptWithRelations(id: string): Promise<PromptExtended> {
+	try {
+		promptLogger.info('🔍 Obteniendo prompt con relaciones:', id);
+		const prompt = await prisma.prompt.findUnique({
+			where: { id },
+			include: {
+				_count: {
+					select: {
+						concepts: true,
+						notes: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						images: true
+					},
+				},
+				concepts: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				notes: {
+					select: {
+						id: true,
+						title: true,
+					},
+				},
+				characters: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				places: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				worldItems: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		});
+
+		if (!prompt) {
+			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+		}
+
+		promptLogger.info('✅ Prompt con relaciones obtenido:', prompt.name);
+		return toExtendedPrompt(prompt);
+	} catch (error) {
+		promptLogger.error('❌ Error al obtener prompt con relaciones:', error);
+		if (error instanceof Error && error.name === 'PromptError') {
+			throw error;
+		}
+		throw createPromptError('No se pudo obtener el prompt con relaciones', PromptErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Crea un nuevo prompt
+ */
+export async function createPrompt(data: PromptCreateInput): Promise<PromptBase> {
 	try {
 		promptLogger.info('📝 Creando prompt:', data.name);
 		const prompt = await prisma.prompt.create({
@@ -150,6 +204,7 @@ export async function createPrompt(data: PromptCreate): Promise<Prompt> {
 				parameters: data.parameters || '{}',
 				tags: data.tags || '[]',
 				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
 			},
 		});
 
@@ -168,7 +223,10 @@ export async function createPrompt(data: PromptCreate): Promise<Prompt> {
 	}
 }
 
-export async function updatePrompt(id: string, data: PromptUpdate): Promise<Prompt> {
+/**
+ * Actualiza un prompt existente
+ */
+export async function updatePrompt(id: string, data: PromptUpdateInput): Promise<PromptBase> {
 	try {
 		promptLogger.info('📝 Actualizando prompt:', id);
 		const prompt = await prisma.prompt.update({
@@ -192,12 +250,38 @@ export async function updatePrompt(id: string, data: PromptUpdate): Promise<Prom
 	}
 }
 
-export async function deletePrompt(id: string): Promise<void> {
+/**
+ * Elimina un prompt
+ */
+export async function deletePrompt(id: string): Promise<{ success: boolean }> {
 	try {
 		promptLogger.info('🗑️ Eliminando prompt:', id);
-		await prisma.prompt.delete({
+		const prompt = await prisma.prompt.findUnique({
 			where: { id },
+			select: { id: true, name: true },
 		});
+
+		if (!prompt) {
+			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+		}
+
+		// Primero desconectar todas las relaciones
+		await prisma.$transaction([
+			prisma.prompt.update({
+				where: { id },
+				data: {
+					concepts: { set: [] },
+					notes: { set: [] },
+					characters: { set: [] },
+					places: { set: [] },
+					worldItems: { set: [] },
+					images: { set: [] },
+				},
+			}),
+			prisma.prompt.delete({
+				where: { id },
+			}),
+		]);
 
 		await emit({
 			type: 'prompts:modified',
@@ -206,74 +290,268 @@ export async function deletePrompt(id: string): Promise<void> {
 		});
 		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
-		promptLogger.info('✅ Prompt eliminado');
+		promptLogger.info('✅ Prompt eliminado:', id);
 		await revalidateAllPaths();
+		return { success: true };
 	} catch (error) {
 		promptLogger.error('❌ Error al eliminar prompt:', error);
 		throw createPromptError('No se pudo eliminar el prompt', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getPromptImages(promptId: string): Promise<FileItem[]> {
+/**
+ * Asocia una entidad con un prompt
+ */
+export async function linkEntityToPrompt(
+	promptId: string,
+	entityId: string,
+	entityType: string
+): Promise<{ success: boolean }> {
 	try {
-		promptLogger.info('🔍 Obteniendo imágenes del prompt:', promptId);
+		promptLogger.info('🔗 Vinculando entidad con prompt', { promptId, entityId, entityType });
+
+		// Validar que el prompt existe
 		const prompt = await prisma.prompt.findUnique({
 			where: { id: promptId },
+			select: { id: true },
 		});
 
 		if (!prompt) {
-			promptLogger.warn('ℹ️ Prompt no encontrado, retornando array vacío:', promptId);
-			return [];
+			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
 		}
 
-		// Solución temporal hasta que se implementen las relaciones correctamente
-		promptLogger.info('✅ Este prompt no tiene imágenes definidas aún en el esquema');
-		return [];
-	} catch (error) {
-		promptLogger.error('❌ Error al obtener imágenes del prompt:', error);
-		if (error instanceof Error && error.name === 'PromptError') {
-			throw error;
+		// Vincular basado en el tipo de entidad
+		switch (entityType) {
+			case 'image':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						images: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'character':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						characters: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'place':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						places: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'worldItem':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						worldItems: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'note':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						notes: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'concept':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						concepts: {
+							connect: { id: entityId },
+						},
+					},
+				});
+				break;
+			default:
+				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, PromptErrorCode.VALIDATION_ERROR);
 		}
-		throw createPromptError('No se pudo obtener las imágenes del prompt', PromptErrorCode.OPERATION_FAILED, error);
+
+		emit({
+			type: 'prompts:relation',
+			data: {
+				action: 'link',
+				promptId,
+				entityId,
+				entityType,
+			},
+		});
+
+		promptLogger.info('✅ Entidad vinculada con prompt');
+		await revalidateAllPaths();
+		return { success: true };
+	} catch (error) {
+		promptLogger.error('❌ Error al vincular entidad con prompt:', error);
+		throw createPromptError('No se pudo vincular la entidad con el prompt', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function addPromptToImage(promptId: string, imageId: string): Promise<void> {
+/**
+ * Desasocia una entidad de un prompt
+ */
+export async function unlinkEntityFromPrompt(
+	promptId: string,
+	entityId: string,
+	entityType: string
+): Promise<{ success: boolean }> {
 	try {
-		promptLogger.info('➕ Esta funcionalidad necesita reimplementación según el esquema actual');
+		promptLogger.info('🔗 Desvinculando entidad de prompt', { promptId, entityId, entityType });
 
-		await emit({
-			type: 'prompts:modified',
-			id: promptId,
-			imageId,
-			data: { action: 'addImage' },
+		// Validar que el prompt existe
+		const prompt = await prisma.prompt.findUnique({
+			where: { id: promptId },
+			select: { id: true },
 		});
-		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
-		promptLogger.info('✅ Por favor, revisa la implementación según el esquema de datos');
+		if (!prompt) {
+			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+		}
+
+		// Desvincular basado en el tipo de entidad
+		switch (entityType) {
+			case 'image':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						images: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'character':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						characters: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'place':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						places: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'worldItem':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						worldItems: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'note':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						notes: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			case 'concept':
+				await prisma.prompt.update({
+					where: { id: promptId },
+					data: {
+						concepts: {
+							disconnect: { id: entityId },
+						},
+					},
+				});
+				break;
+			default:
+				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, PromptErrorCode.VALIDATION_ERROR);
+		}
+
+		emit({
+			type: 'prompts:relation',
+			data: {
+				action: 'unlink',
+				promptId,
+				entityId,
+				entityType,
+			},
+		});
+
+		promptLogger.info('✅ Entidad desvinculada de prompt');
 		await revalidateAllPaths();
+		return { success: true };
 	} catch (error) {
-		promptLogger.error('❌ Error:', error);
-		throw createPromptError('Operación no implementada correctamente', PromptErrorCode.OPERATION_FAILED, error);
+		promptLogger.error('❌ Error al desvincular entidad de prompt:', error);
+		throw createPromptError('No se pudo desvincular la entidad del prompt', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function removePromptFromImage(promptId: string, imageId: string): Promise<void> {
+/**
+ * Obtiene las imágenes asociadas a un prompt
+ */
+export async function getPromptImages(promptId: string): Promise<{ images: FileItem[] }> {
 	try {
-		promptLogger.info('➖ Esta funcionalidad necesita reimplementación según el esquema actual');
-
-		await emit({
-			type: 'prompts:modified',
-			id: promptId,
-			imageId,
-			data: { action: 'removeImage' },
+		promptLogger.info('🖼️ Obteniendo imágenes para prompt:', promptId);
+		const prompt = await prisma.prompt.findUnique({
+			where: { id: promptId },
+			include: {
+				images: true,
+			},
 		});
-		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
 
-		promptLogger.info('✅ Por favor, revisa la implementación según el esquema de datos');
-		await revalidateAllPaths();
+		if (!prompt) {
+			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+		}
+
+		// Adaptar imágenes al formato FileItem
+		const images = prompt.images.map((image) => {
+			return {
+				id: image.id,
+				name: image.name,
+				path: image.path,
+				type: 'image',
+				size: image.size,
+				width: image.width || 0,
+				height: image.height || 0,
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+				thumbnail: '',
+				thumbnailSize: image.thumbnailSize || 0,
+				thumbnailWidth: image.thumbnailWidth || 0,
+				thumbnailHeight: image.thumbnailHeight || 0,
+				src: `/api/images/${image.id}`,
+			} as FileItem;
+		});
+
+		promptLogger.info('✅ Imágenes obtenidas para prompt', { count: images.length });
+		return { images };
 	} catch (error) {
-		promptLogger.error('❌ Error:', error);
-		throw createPromptError('Operación no implementada correctamente', PromptErrorCode.OPERATION_FAILED, error);
+		promptLogger.error('❌ Error al obtener imágenes para prompt:', error);
+		throw createPromptError('No se pudieron obtener las imágenes para el prompt', PromptErrorCode.OPERATION_FAILED, error);
 	}
 }
