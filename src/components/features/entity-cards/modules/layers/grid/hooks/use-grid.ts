@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { GridConfig } from '../actions/grid-config.action';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { GridConfig } from '../grid-config-types';
 
 interface UseGridProps {
     config: GridConfig;
@@ -20,7 +20,7 @@ interface UseGridReturn {
  */
 export function useGrid({ config, shouldRender }: UseGridProps): UseGridReturn {
     // Referencias y estado
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null) as React.RefObject<HTMLCanvasElement>;
     const [error, setError] = useState<string | null>(null);
     const requestRef = useRef<number | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -342,26 +342,21 @@ export function useGrid({ config, shouldRender }: UseGridProps): UseGridReturn {
         }
     };
 
-    // Efecto para inicializar y renderizar cuando cambia shouldRender
-    useEffect(() => {
-        if (shouldRender) {
-            initializeCanvas();
-        }
-
-        return () => {
-            if (requestRef.current !== null) {
-                cancelAnimationFrame(requestRef.current);
-                requestRef.current = null;
-            }
-        };
-    }, [shouldRender, initializeCanvas]);
-
-    // Efecto para renderizar cuando cambia la configuración
+    // Renderizar cuando cambia la configuración o el estado de renderizado
     useEffect(() => {
         if (shouldRender) {
             renderGrid();
         }
     }, [config, shouldRender, renderGrid]);
+
+    // Limpiar al desmontar
+    useEffect(() => {
+        return () => {
+            if (requestRef.current !== null) {
+                cancelAnimationFrame(requestRef.current);
+            }
+        };
+    }, []);
 
     return {
         canvasRef,

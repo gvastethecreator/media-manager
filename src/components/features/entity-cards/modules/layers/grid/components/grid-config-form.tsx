@@ -1,25 +1,25 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { LayerConfigFormWrapper } from '../../components/layer-config-form-wrapper';
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { LayerSettingsProps } from '../../types';
 import {
   BLEND_MODES,
   GRID_COLORS,
   GRID_PRESETS,
   GRID_TYPES,
   type GridConfig,
-} from '../actions/grid-config.action';
-import { useCallback } from 'react';
-import type { CommonLayerFormProps } from '../../types';
-import { Button } from '@/components/ui/button';
+} from '../grid-config-types';
 
 // Esquema de validación
 const gridConfigSchema = z.object({
@@ -43,7 +43,7 @@ const gridConfigSchema = z.object({
 
 type GridFormValues = z.infer<typeof gridConfigSchema>;
 
-export function GridConfigForm({ config, onUpdate, onDelete }: CommonLayerFormProps<GridConfig>) {
+export function GridConfigForm({ config, onConfigChange }: LayerSettingsProps<GridConfig>) {
   // Configurar formulario
   const form = useForm<GridFormValues>({
     resolver: zodResolver(gridConfigSchema),
@@ -70,12 +70,12 @@ export function GridConfigForm({ config, onUpdate, onDelete }: CommonLayerFormPr
   // Manejar envío
   const handleSubmit = useCallback(
     (values: GridFormValues) => {
-      onUpdate({
+      onConfigChange({
         ...config,
         ...values,
       });
     },
-    [config, onUpdate]
+    [config, onConfigChange]
   );
 
   // Aplicar preset
@@ -97,7 +97,6 @@ export function GridConfigForm({ config, onUpdate, onDelete }: CommonLayerFormPr
       description="Ajusta el patrón de cuadrícula"
       form={form}
       onSubmit={handleSubmit}
-      onDelete={onDelete}
     >
       {/* Configuración básica */}
       <div className="space-y-4">

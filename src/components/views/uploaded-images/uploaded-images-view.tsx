@@ -29,7 +29,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
 import type { UploadedImageType } from '@/types/entities/entities';
 import type { FileItem } from '@/types/file-item';

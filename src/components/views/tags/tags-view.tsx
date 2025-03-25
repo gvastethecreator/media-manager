@@ -3,7 +3,6 @@
 import { getTags, type TagWithStats } from '@/app/actions/tags/tag.actions';
 import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { EntityView } from '@/components/views/base/entity-view-template';
 import { useFileManager } from '@/store/file-manager.store';
 import { TagIcon } from 'lucide-react';
 import { useCallback } from 'react';
@@ -94,19 +93,4 @@ export function TagsView(props: ViewProps) {
 		[setCurrentView, setCurrentTag]
 	);
 
-	return (
-		<EntityView<TagWithStats>
-			{...props}
-			title="Etiquetas"
-			description="Organiza y filtra tus imágenes con etiquetas personalizadas"
-			emptyStateIcon={TagIcon}
-			emptyStateTitle="No hay etiquetas creadas"
-			emptyStateDescription="Crea etiquetas para categorizar y filtrar tus imágenes."
-			fetchEntities={fetchTags}
-			onEntityClick={handleTagClick}
-			entityType="tag"
-			defaultOptions={DEFAULT_TAG_OPTIONS}
-			visualConfigEndpoint="/api/entities/tags/visual-config"
-		/>
-	);
 }

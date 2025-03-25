@@ -4,7 +4,7 @@ import { getImageUrl } from '@/app/actions/images';
 import { Button } from '@/components/ui/button';
 import { ImageFallback } from '@/components/ui/image-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
 import { useImageResources } from '@/store/image-resources.store';
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';

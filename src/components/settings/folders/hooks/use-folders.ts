@@ -3,7 +3,7 @@
 import { reindexAllFolders } from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/lib/services/toast.service';
+import { toastService } from '@/services/toast.service';
 import type {
 	ErrorResponse,
 	ExtendedProcessStatus,

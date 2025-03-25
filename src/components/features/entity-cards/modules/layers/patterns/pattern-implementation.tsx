@@ -2,8 +2,8 @@
 
 import type { LayerImplementation } from '../types';
 import type { PatternConfig } from './actions/pattern-config.action';
-import { PatternLayer } from './components/pattern-layer';
-import { PatternSettings } from './components/pattern-settings';
+import { defaultPatternConfig } from './actions/pattern-config.action';
+import { deletePatternConfig, getPatternConfig, updatePatternConfig } from './actions/pattern-server-actions';
 
 /**
  * 🔲 Implementación de la capa de patrones geométricos
@@ -14,21 +14,14 @@ export const patternImplementation: LayerImplementation<PatternConfig> = {
 	name: 'Pattern',
 	description: 'Añade patrones geométricos a las tarjetas',
 	icon: '🔲',
-	defaultConfig: {
-		enabled: true,
-		visibleOnHover: false,
-		layerIndex: 2,
-		opacity: 0.15,
-		scale: 1,
-		color: '#ffffff',
-		patternType: 'grid',
-		spacing: 20,
-		lineWidth: 1,
-		rotation: 0,
-		blendMode: 'overlay',
+	defaultConfig: defaultPatternConfig,
+	render: () => null, // Implementación provisional
+	settings: () => null, // Pendiente de implementación
+	serverActions: {
+		getConfig: getPatternConfig,
+		updateConfig: updatePatternConfig,
+		deleteConfig: deletePatternConfig,
 	},
-	component: PatternLayer,
-	settings: PatternSettings,
 	presets: [
 		{
 			name: 'Grid Clásico',
@@ -38,13 +31,16 @@ export const patternImplementation: LayerImplementation<PatternConfig> = {
 				visibleOnHover: false,
 				layerIndex: 2,
 				opacity: 0.15,
-				scale: 1,
+				size: 5,
+				spacing: 20,
+				rotation: 0,
 				color: '#ffffff',
 				patternType: 'grid',
-				spacing: 20,
-				lineWidth: 1,
-				rotation: 0,
+				animated: false,
+				animationSpeed: 1,
 				blendMode: 'overlay',
+				density: 1,
+				strokeWidth: 1,
 			},
 		},
 		{
@@ -55,13 +51,16 @@ export const patternImplementation: LayerImplementation<PatternConfig> = {
 				visibleOnHover: false,
 				layerIndex: 2,
 				opacity: 0.2,
-				scale: 1.2,
+				size: 5,
+				spacing: 25,
+				rotation: 45,
 				color: '#ffffff',
 				patternType: 'dots',
-				spacing: 25,
-				lineWidth: 2,
-				rotation: 45,
+				animated: false,
+				animationSpeed: 1,
 				blendMode: 'overlay',
+				density: 1.2,
+				strokeWidth: 2,
 			},
 		},
 		{
@@ -72,13 +71,16 @@ export const patternImplementation: LayerImplementation<PatternConfig> = {
 				visibleOnHover: false,
 				layerIndex: 2,
 				opacity: 0.25,
-				scale: 0.8,
+				size: 5,
+				spacing: 30,
+				rotation: 0,
 				color: '#ffffff',
 				patternType: 'hexagon',
-				spacing: 30,
-				lineWidth: 1.5,
-				rotation: 0,
+				animated: false,
+				animationSpeed: 1,
 				blendMode: 'overlay',
+				density: 0.8,
+				strokeWidth: 1.5,
 			},
 		},
 		{
@@ -89,13 +91,16 @@ export const patternImplementation: LayerImplementation<PatternConfig> = {
 				visibleOnHover: false,
 				layerIndex: 2,
 				opacity: 0.2,
-				scale: 1,
+				size: 5,
+				spacing: 15,
+				rotation: -45,
 				color: '#ffffff',
 				patternType: 'lines',
-				spacing: 15,
-				lineWidth: 1,
-				rotation: -45,
+				animated: false,
+				animationSpeed: 1,
 				blendMode: 'overlay',
+				density: 1,
+				strokeWidth: 1,
 			},
 		},
 	],

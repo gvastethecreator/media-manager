@@ -11,7 +11,7 @@ import type { FileMetadata } from '@/types/metadata';
 import { readdir, stat } from 'fs/promises';
 import * as path from 'path';
 import { extname, join } from 'path';
-import { FolderError, type ProcessStatus, SUPPORTED_FORMATS } from './folder-types.actions';
+import { FolderError, type ProcessStatus, SUPPORTED_FORMATS } from './folder-types';
 import { verifyPathExists } from './folder-utils.actions';
 
 const folderLogger = serverLogger.withContext('FolderProcessing');

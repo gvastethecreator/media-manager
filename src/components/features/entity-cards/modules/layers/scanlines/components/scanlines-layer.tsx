@@ -3,8 +3,8 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo } from 'react';
 import { withBaseLayer } from '../../components/base-layer';
-import type { ScanlinesConfig } from '../actions/scanlines-config.action';
 import { useScanlines } from '../hooks/use-scanlines';
+import type { ScanlinesConfig } from '../scanlines-config-types';
 
 /**
  * 📺 Componente interno de líneas de escaneo

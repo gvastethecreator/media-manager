@@ -3,7 +3,7 @@
 import { getFolders } from '@/app/actions/folders/folder-crud.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardWrapper, useCardDisplay } from '@/components/features/entity-cards';
+import { EntityCardDev, useCardDisplay } from '@/components/features/entity-cards';
 import { getCardOptionsFromPreset } from '@/components/features/entity-cards/actions/visual-presets.actions';
 import { createDebugger } from '@/components/features/entity-cards/debug/render-debug';
 import type { CardOptions } from '@/components/features/entity-cards/types/base-card-types';
@@ -55,14 +55,16 @@ const MemoizedFolderCard = React.memo(
 		const normalizedFolder = normalizeEntityData(folder, 'folder') as Folder;
 
 		return (
-			<EntityCardWrapper
+			<EntityCardDev
 				key={`folder-card-${normalizedFolder.id}`}
-				entityType="folder"
-				entity={normalizedFolder}
-				entityId={normalizedFolder.id}
+				id={normalizedFolder.id}
 				title={normalizedFolder.name}
 				description={normalizedFolder.description || ''}
 				image={normalizedFolder.featuredImage}
+				metadata={{
+					Imágenes: normalizedFolder._count?.images || normalizedFolder.imageCount || 0,
+					...(normalizedFolder.totalSize ? { Tamaño: formatBytes(normalizedFolder.totalSize) } : {})
+				}}
 				onClick={onFolderClick}
 				options={cardOptions}
 				className="h-full"
@@ -94,6 +96,16 @@ const MemoizedFolderCard = React.memo(
 		return result;
 	}
 );
+
+// Función auxiliar para formatear bytes
+function formatBytes(bytes: number, decimals = 2): string {
+	if (bytes === 0) return '0 Bytes';
+
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
+}
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();

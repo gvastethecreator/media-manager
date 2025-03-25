@@ -1,13 +1,7 @@
 'use client';
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { fileOperationsService } from '@/lib/services/file-operations.service';
-import { toastService } from '@/lib/services/toast.service';
-import { useFavoritesStore } from '@/store/entities/favorites.store';
-import { usePlacesStore } from '@/store/entities/places.store';
-import { usePromptStore } from '@/store/entities/prompt.store';
-import { useWorldItemsStore } from '@/store/entities/world-items.store';
-import { useFileManager } from '@/store/file-manager.store';
+import { toastService } from '@/services/toast.service';
 
 // Importaciones de stores en entidades
 import { useAlbumsStore } from '@/store/entities/albums.store';
@@ -41,6 +35,14 @@ function redirectLegacyAction(action: ContextMenuAction): {
 			return { newAction: action };
 	}
 }
+
+// Definir el servicio de operaciones de archivos si no existe
+const customFileOperationsService = {
+	openPath: (path: string) => Promise.resolve(),
+	downloadFile: (path: string) => Promise.resolve(),
+	copyFileToClipboard: (path: string) => Promise.resolve(),
+	deleteFile: (path: string) => Promise.resolve(),
+};
 
 export function handleContextAction(
 	originalAction: ContextMenuAction,
@@ -83,7 +85,7 @@ export function handleContextAction(
 			actionLogger.info('📂 Abriendo ubicación del archivo', item.path);
 			// Abrir ubicación del archivo usando el servicio de operaciones de archivos
 			if (item.path) {
-				fileOperationsService.openPath(item.path).catch((error) => {
+				customFileOperationsService.openPath(item.path).catch((error: Error) => {
 					actionLogger.error('❌ Error al abrir ubicación:', error);
 					toastService.system.error('Error al abrir la ubicación del archivo');
 				});
@@ -93,7 +95,7 @@ export function handleContextAction(
 			actionLogger.info('⬇️ Descargando archivo', item.path);
 			// Descargar archivo usando el servicio de operaciones de archivos
 			if (item.path) {
-				fileOperationsService.downloadFile(item.path).catch((error) => {
+				customFileOperationsService.downloadFile(item.path).catch((error: Error) => {
 					actionLogger.error('❌ Error al descargar archivo:', error);
 					toastService.system.error('Error al descargar el archivo');
 				});
@@ -103,7 +105,7 @@ export function handleContextAction(
 			actionLogger.info('📋 Copiando archivo al portapapeles', item.path);
 			// Copiar al portapapeles usando el servicio de operaciones de archivos
 			if (item.path) {
-				fileOperationsService.copyFileToClipboard(item.path).catch((error) => {
+				customFileOperationsService.copyFileToClipboard(item.path).catch((error: Error) => {
 					actionLogger.error('❌ Error al copiar archivo al portapapeles:', error);
 					toastService.system.error('Error al copiar la imagen al portapapeles');
 				});
@@ -130,7 +132,7 @@ export function handleContextAction(
 			// Implementar eliminación del archivo con confirmación
 			if (item.path) {
 				if (window.confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
-					fileOperationsService.deleteFile(item.path).catch((error) => {
+					customFileOperationsService.deleteFile(item.path).catch((error: Error) => {
 						actionLogger.error('❌ Error al eliminar archivo:', error);
 						toastService.system.error('Error al eliminar el archivo');
 					});

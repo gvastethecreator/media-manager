@@ -3,7 +3,6 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import type { ExplodeLayerTransformFunction } from '../../../../../types/base-card-types';
 import type { PatternConfig } from '../actions/pattern-config.action';
 import { usePattern } from '../hooks/use-pattern';
 
@@ -14,8 +13,6 @@ interface PatternLayerProps {
 	isHovered: boolean;
 	/** Capa actualmente activa */
 	activeLayer: string | null;
-	/** Función para obtener la transformación de explosión */
-	getExplodeLayerTransform: ExplodeLayerTransformFunction;
 	/** Configuración del patrón */
 	config: PatternConfig;
 }
@@ -28,7 +25,6 @@ export function PatternLayer({
 	isExploded,
 	isHovered,
 	activeLayer,
-	getExplodeLayerTransform,
 	config,
 }: PatternLayerProps) {
 	const [shouldRender, setShouldRender] = useState(true);
@@ -56,10 +52,7 @@ export function PatternLayer({
 	return (
 		<motion.div
 			className={cn('absolute inset-0 pointer-events-none', isExploded ? 'exploded-layer' : '')}
-			style={{
-				...(isExploded ? getExplodeLayerTransform(2) : {}),
-				zIndex: 10,
-			}}
+
 			initial={{ opacity: 0 }}
 			animate={{
 				opacity: 1,

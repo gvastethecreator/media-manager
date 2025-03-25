@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallback } from 'react';
 import type { LayerSettingsProps } from '../../types';
-import { BLEND_MODES, TEXTURE_PRESETS, TILE_MODES, type TextureConfig } from '../actions/texture-config.action';
+import { BLEND_MODES, TEXTURE_PRESETS, TILE_MODES, type TextureConfig } from '../texture-config-types';
 
 export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 	config,

@@ -1,7 +1,7 @@
 'use client';
 
 import type { LayerImplementation } from '../types';
-import { ImageLayerComponent } from './image-layer-implementation';
+  ;
 
 /**
  * 🎨 Implementación de la capa de imagen para entidades
@@ -29,5 +29,4 @@ export const imageLayerImplementation: LayerImplementation = {
 export { useImageStore } from './actions/image-config.action';
 export { ImageConfig } from './components/image-config';
 export { ImageLayer } from './components/image-layer';
-export * from './image-layer-implementation';
 

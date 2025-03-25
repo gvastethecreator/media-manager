@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
-import type { ReactNode } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface LayerConfigFormWrapperProps {
@@ -12,8 +11,7 @@ interface LayerConfigFormWrapperProps {
   description?: string;
   form: UseFormReturn<any>;
   onSubmit: (values: any) => void;
-  onDelete?: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
   isSubmitting?: boolean;
 }
 
@@ -22,7 +20,6 @@ export function LayerConfigFormWrapper({
   description,
   form,
   onSubmit,
-  onDelete,
   children,
   isSubmitting = false,
 }: LayerConfigFormWrapperProps) {
@@ -41,41 +38,28 @@ export function LayerConfigFormWrapper({
               {children}
             </div>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            {onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={onDelete}
-                disabled={isSubmitting}
-                size="sm"
-              >
-                Eliminar
-              </Button>
-            )}
-            <div className="flex gap-2 ml-auto">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => form.reset()}
-                disabled={isSubmitting}
-                size="sm"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                size="sm"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : 'Guardar'}
-              </Button>
-            </div>
+          <CardFooter className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => form.reset()}
+              disabled={isSubmitting}
+              size="sm"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              size="sm"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : 'Guardar'}
+            </Button>
           </CardFooter>
         </form>
       </Form>

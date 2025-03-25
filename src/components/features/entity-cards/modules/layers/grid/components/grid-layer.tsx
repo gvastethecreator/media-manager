@@ -3,12 +3,13 @@
 import { motion } from 'motion/react';
 import { useEffect, useMemo } from 'react';
 import { withBaseLayer } from '../../components/base-layer';
-import type { CommonLayerProps } from '../../types';
-import type { GridConfig } from '../actions/grid-config.action';
+import type { GridConfig } from '../grid-config-types';
 import { useGrid } from '../hooks/use-grid';
 
-interface GridLayerProps extends CommonLayerProps {
-    config: GridConfig;
+interface GridLayerComponentProps {
+    processedConfig: GridConfig;
+    style: React.CSSProperties;
+    isVisible: boolean;
 }
 
 /**
@@ -18,11 +19,7 @@ const GridLayerComponent = ({
     processedConfig,
     style,
     isVisible,
-}: {
-    processedConfig: GridConfig;
-    style: React.CSSProperties;
-    isVisible: boolean;
-}) => {
+}: GridLayerComponentProps) => {
     // 🎨 Usar el hook de grid
     const { canvasRef, error, initializeCanvas, renderGrid } = useGrid({
         config: processedConfig,

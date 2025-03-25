@@ -1,7 +1,5 @@
-'use server';
+'use client';
 
-import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { create } from 'zustand';
 
@@ -20,19 +18,20 @@ export const grainConfigSchema = z.object({
 	fractalNoise: z.boolean(),
 	roughness: z.number().min(0).max(1),
 	distribution: z.enum(['gaussian', 'uniform']),
-	layerIndex: z.number().min(0),
+	octaves: z.number().int().min(1).max(10),
+	layerIndex: z.number().min(0).max(10),
 });
 
-// Tipo de configuración
+// Tipo inferido del schema
 export type GrainConfig = z.infer<typeof grainConfigSchema>;
 
 // Configuración por defecto
-const defaultConfig: GrainConfig = {
+export const defaultGrainConfig: GrainConfig = {
 	enabled: true,
-	intensity: 0.15,
-	size: 1,
+	intensity: 0.3,
+	size: 1.0,
 	animated: false,
-	speed: 5,
+	speed: 1.0,
 	colorMode: 'monochrome',
 	opacity: 0.5,
 	blend: 'overlay',
@@ -41,20 +40,21 @@ const defaultConfig: GrainConfig = {
 	fractalNoise: false,
 	roughness: 0.5,
 	distribution: 'gaussian',
-	layerIndex: 6,
+	octaves: 3,
+	layerIndex: 4,
 };
 
-// Interface del store
+// Interfaz del store
 interface GrainStore {
 	config: GrainConfig;
-	updateConfig: (config: Partial<GrainConfig>) => void;
 	resetConfig: () => void;
+	updateConfig: (config: Partial<GrainConfig>) => void;
 	toggleEnabled: () => void;
 	setIntensity: (intensity: number) => void;
 	setSize: (size: number) => void;
 	toggleAnimated: () => void;
 	setSpeed: (speed: number) => void;
-	setColorMode: (mode: GrainConfig['colorMode']) => void;
+	setColorMode: (colorMode: GrainConfig['colorMode']) => void;
 	setOpacity: (opacity: number) => void;
 	setBlend: (blend: GrainConfig['blend']) => void;
 	setSeed: (seed: number) => void;
@@ -62,18 +62,20 @@ interface GrainStore {
 	toggleFractalNoise: () => void;
 	setRoughness: (roughness: number) => void;
 	setDistribution: (distribution: GrainConfig['distribution']) => void;
+	setOctaves: (octaves: number) => void;
+	setLayerIndex: (layerIndex: number) => void;
 }
 
-// Crear store con Zustand
+// Creación del store
 export const useGrainStore = create<GrainStore>((set) => ({
-	config: defaultConfig,
+	config: defaultGrainConfig,
+
+	resetConfig: () => set({ config: defaultGrainConfig }),
 
 	updateConfig: (newConfig) =>
 		set((state) => ({
 			config: { ...state.config, ...newConfig },
 		})),
-
-	resetConfig: () => set({ config: defaultConfig }),
 
 	toggleEnabled: () =>
 		set((state) => ({
@@ -139,168 +141,14 @@ export const useGrainStore = create<GrainStore>((set) => ({
 		set((state) => ({
 			config: { ...state.config, distribution },
 		})),
+
+	setOctaves: (octaves) =>
+		set((state) => ({
+			config: { ...state.config, octaves },
+		})),
+
+	setLayerIndex: (layerIndex) =>
+		set((state) => ({
+			config: { ...state.config, layerIndex },
+		})),
 }));
-
-interface GrainConfigResponse {
-	success: boolean;
-	message: string;
-	data?: GrainConfig;
-}
-
-export async function getGrainConfig(entityType: string, entityId?: string): Promise<GrainConfigResponse> {
-	try {
-		const validation = grainConfigSchema.safeParse({
-			entityType,
-			entityId,
-			config: {},
-		});
-
-		if (!validation.success) {
-			return {
-				success: false,
-				message: 'Parámetros inválidos',
-			};
-		}
-
-		let config: GrainConfig | null = null;
-
-		if (entityId) {
-			config = await prisma.layerGrainConfig.findFirst({
-				where: {
-					entityType,
-					entityId,
-				},
-			});
-		}
-
-		if (!config) {
-			config = await prisma.layerGrainConfig.findFirst({
-				where: {
-					entityType,
-					isDefault: true,
-				},
-			});
-		}
-
-		if (!config) {
-			return {
-				success: true,
-				message: 'Usando configuración por defecto',
-				data: defaultConfig,
-			};
-		}
-
-		return {
-			success: true,
-			message: 'Configuración de grain obtenida correctamente',
-			data: config as GrainConfig,
-		};
-	} catch (error) {
-		console.error('Error al obtener la configuración de grain:', error);
-		return {
-			success: false,
-			message: 'Error al obtener la configuración de grain',
-		};
-	}
-}
-
-export async function updateGrainConfig(
-	entityType: string,
-	config: GrainConfig,
-	entityId?: string
-): Promise<GrainConfigResponse> {
-	try {
-		const validation = grainConfigSchema.safeParse({
-			entityType,
-			entityId,
-			config,
-		});
-
-		if (!validation.success) {
-			return {
-				success: false,
-				message: 'Parámetros inválidos',
-			};
-		}
-
-		const updatedConfig = await prisma.layerGrainConfig.upsert({
-			where: {
-				entityType_entityId: {
-					entityType,
-					entityId: entityId || 'default',
-				},
-			},
-			update: {
-				...config,
-				isDefault: !entityId,
-			},
-			create: {
-				entityType,
-				entityId: entityId || 'default',
-				isDefault: !entityId,
-				...config,
-			},
-		});
-
-		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
-		if (entityId) {
-			revalidatePath(`/${entityType}/${entityId}`);
-		}
-
-		return {
-			success: true,
-			message: 'Configuración de grain actualizada correctamente',
-			data: updatedConfig as GrainConfig,
-		};
-	} catch (error) {
-		console.error('Error al actualizar la configuración de grain:', error);
-		return {
-			success: false,
-			message: 'Error al actualizar la configuración de grain',
-		};
-	}
-}
-
-export async function deleteGrainConfig(entityType: string, entityId?: string): Promise<GrainConfigResponse> {
-	try {
-		const validation = grainConfigSchema.safeParse({
-			entityType,
-			entityId,
-			config: {},
-		});
-
-		if (!validation.success) {
-			return {
-				success: false,
-				message: 'Parámetros inválidos',
-			};
-		}
-
-		await prisma.layerGrainConfig.delete({
-			where: {
-				entityType_entityId: {
-					entityType,
-					entityId: entityId || 'default',
-				},
-			},
-		});
-
-		revalidatePath('/settings');
-		revalidatePath(`/${entityType}`);
-		if (entityId) {
-			revalidatePath(`/${entityType}/${entityId}`);
-		}
-
-		return {
-			success: true,
-			message: 'Configuración de grain eliminada correctamente',
-		};
-	} catch (error) {
-		console.error('Error al eliminar la configuración de grain:', error);
-		return {
-			success: false,
-			message: 'Error al eliminar la configuración de grain',
-		};
-	}
-}
