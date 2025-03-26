@@ -19,9 +19,9 @@ import {
 	Wand2,
 } from 'lucide-react';
 import type * as React from 'react';
-import { memo } from 'react';
-import { FileContextMenu } from '../context-menu/context-menu';
+import { memo, useEffect, useRef } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
+import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
 
 interface ListViewProps {
@@ -69,6 +69,23 @@ export const ListView = memo(function ListView({
 	style,
 }: ListViewProps) {
 	const metadata = getMetadata(item.metadata);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+
+	// Añadir logging para depuración
+	useEffect(() => {
+		// Registrar eventos de contexto
+		const button = buttonRef.current;
+		if (button) {
+			const handleContextMenuNative = (e: MouseEvent) => {
+				console.log('Evento contextmenu nativo en ListView para:', item.name);
+			};
+
+			button.addEventListener('contextmenu', handleContextMenuNative);
+			return () => {
+				button.removeEventListener('contextmenu', handleContextMenuNative);
+			};
+		}
+	}, [item]);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' || e.key === ' ') {
@@ -78,8 +95,9 @@ export const ListView = memo(function ListView({
 	};
 
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
+		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
 			<button
+				ref={buttonRef}
 				type="button"
 				className={cn(
 					'flex items-center gap-4 w-full hover:bg-accent/50 rounded-sm group px-2 text-left',
@@ -90,11 +108,13 @@ export const ListView = memo(function ListView({
 				onClick={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+					console.log('Click en ListView para:', item.name);
 					onClick?.(item);
 				}}
 				onDoubleClick={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+					console.log('Double click en ListView para:', item.name);
 					onDoubleClick?.(item);
 				}}
 				onKeyDown={handleKeyDown}
