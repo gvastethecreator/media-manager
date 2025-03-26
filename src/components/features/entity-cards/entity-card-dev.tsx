@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import type { EntityBasicInfo } from './types/unified-types';
 
 export interface EntityCardDevProps extends EntityBasicInfo {
@@ -13,39 +13,21 @@ export interface EntityCardDevProps extends EntityBasicInfo {
 	};
 }
 
-/**
- * Versión simplificada para desarrollo de EntityCard
- * Sin implementación de capas ni otros elementos complejos
- */
-export function EntityCardDev({
-	id,
+// Componente memoizado para el contenido de la tarjeta
+const CardContent = memo(function CardContent({
 	title,
 	description,
 	image,
 	metadata,
-	className,
-	onClick,
-	children,
-	options = {},
-}: EntityCardDevProps) {
-	// Manejo de eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
-		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			// Creamos un evento sintético que contenga la información relevante
-			const syntheticEvent = {
-				currentTarget: e.currentTarget,
-				target: e.target,
-				preventDefault: () => { },
-				stopPropagation: () => { },
-			} as React.MouseEvent<HTMLButtonElement>;
-
-			onClick(syntheticEvent);
-		}
-	}, [onClick]);
-
-	// Contenido de la tarjeta memoizado para evitar re-renderizados innecesarios
-	const CardContent = useCallback(() => (
+	children
+}: {
+	title: string;
+	description?: string;
+	image?: string;
+	metadata?: Record<string, string | number>;
+	children?: React.ReactNode;
+}) {
+	return (
 		<>
 			{/* Contenido principal */}
 			<div className="flex flex-col h-full">
@@ -92,7 +74,39 @@ export function EntityCardDev({
 				</div>
 			</div>
 		</>
-	), [title, description, image, metadata, children]);
+	);
+});
+
+/**
+ * Versión simplificada para desarrollo de EntityCard
+ * Sin implementación de capas ni otros elementos complejos
+ */
+export const EntityCardDev = memo(function EntityCardDev({
+	id,
+	title,
+	description,
+	image,
+	metadata,
+	className,
+	onClick,
+	children,
+	options = {},
+}: EntityCardDevProps) {
+	// Manejo de eventos de teclado para accesibilidad
+	const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
+		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			e.preventDefault();
+			// Creamos un evento sintético que contenga la información relevante
+			const syntheticEvent = {
+				currentTarget: e.currentTarget,
+				target: e.target,
+				preventDefault: () => { },
+				stopPropagation: () => { },
+			} as React.MouseEvent<HTMLButtonElement>;
+
+			onClick(syntheticEvent);
+		}
+	}, [onClick]);
 
 	// Estilos personalizados
 	const customStyle = useMemo(() => {
@@ -103,7 +117,7 @@ export function EntityCardDev({
 		}
 
 		return style;
-	}, [options]);
+	}, [options?.primaryColor]);
 
 	return (
 		<button
@@ -127,7 +141,13 @@ export function EntityCardDev({
 			data-entity-id={id}
 			data-entity-type="basic-card"
 		>
-			<CardContent />
+			<CardContent
+				title={title}
+				description={description}
+				image={image}
+				metadata={metadata}
+				children={children}
+			/>
 		</button>
 	);
-}
+});

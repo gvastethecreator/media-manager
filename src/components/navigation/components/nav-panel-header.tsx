@@ -2,11 +2,12 @@
 
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
 import { Bug, ChevronLeft, ChevronRight, Home, IdCard, Moon, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
+import { memo, useCallback, useMemo } from 'react';
 
 interface NavPanelHeaderProps {
 	totalImages: number;
@@ -17,7 +18,68 @@ interface NavPanelHeaderProps {
 	onToggleCollapse?: () => void;
 }
 
-export function NavPanelHeader({
+// Componente de botón memoizado para evitar re-renderizados
+const MemoizedHeaderButton = memo(function HeaderButton({
+	icon,
+	onClick,
+	tooltipContent,
+	tooltipTitle,
+	tooltipNote,
+	tooltipSide = 'bottom',
+}: {
+	icon: React.ReactNode;
+	onClick: () => void;
+	tooltipContent: string;
+	tooltipTitle: string;
+	tooltipNote?: string;
+	tooltipSide?: 'bottom' | 'right' | 'left' | 'top';
+}) {
+	return (
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+					onClick={onClick}
+				>
+					{icon}
+				</Button>
+			</TooltipTrigger>
+			<TooltipContent side={tooltipSide} className="text-xs">
+				<p className="font-medium text-amber-400">{tooltipTitle}</p>
+				<p>{tooltipContent}</p>
+				{tooltipNote && <p className="text-[10px] text-zinc-400 mt-1.5">{tooltipNote}</p>}
+			</TooltipContent>
+		</Tooltip>
+	);
+});
+
+// Componente de avatar memoizado
+const MemoizedAvatar = memo(function Avatar({
+	color,
+	emoji,
+}: {
+	color: string;
+	emoji: string;
+}) {
+	return (
+		<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
+			<div
+				className="h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 overflow-hidden group-hover:brightness-110 cursor-pointer"
+				style={{
+					backgroundColor: color,
+					boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
+				}}
+			>
+				<span className="text-sm font-large">{emoji}</span>
+			</div>
+		</motion.div>
+	);
+});
+
+// Componente principal memoizado
+export const NavPanelHeader = memo(function NavPanelHeader({
 	totalImages,
 	onOpenSettings,
 	onOpenDevelopment,
@@ -27,23 +89,26 @@ export function NavPanelHeader({
 }: NavPanelHeaderProps) {
 	const { settings } = useProfileContext();
 	const { profiles = [], activeProfile } = settings;
-	const activeProfileData = profiles.find((p) => p.id === activeProfile) ||
+
+	const activeProfileData = useMemo(() => {
+		return profiles.find((p) => p.id === activeProfile) ||
 		profiles[0] || {
-		name: 'Default',
-		emoji: '👤',
-		color: '#3b82f6',
-	};
+			name: 'Default',
+			emoji: '👤',
+			color: '#3b82f6',
+		};
+	}, [profiles, activeProfile]);
 
 	const { theme, setTheme } = useTheme();
 	const { setCurrentView } = useNavigationStore();
 
-	const handleThemeToggle = () => {
+	const handleThemeToggle = useCallback(() => {
 		setTheme(theme === 'light' ? 'dark' : 'light');
-	};
+	}, [theme, setTheme]);
 
-	const handleHomeClick = () => {
+	const handleHomeClick = useCallback(() => {
 		setCurrentView('folders');
-	};
+	}, [setCurrentView]);
 
 	return (
 		<motion.div
@@ -56,136 +121,58 @@ export function NavPanelHeader({
 			{isCollapsed ? (
 				<div className="flex flex-col items-center gap-3 pt-1 pb-2">
 					{/* Avatar */}
-					<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
-						<div
-							className="h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 overflow-hidden group-hover:brightness-110 cursor-pointer"
-							style={{
-								backgroundColor: activeProfileData?.color,
-								boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
-							}}
-						>
-							<span className="text-sm font-large">{activeProfileData?.emoji}</span>
-						</div>
-					</motion.div>
+					<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 					{/* Controles en vertical */}
 					<div className="flex flex-col gap-2">
-						<TooltipProvider delayDuration={150}>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onToggleCollapse}
-									>
-										<ChevronRight className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Expandir Panel</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<ChevronRight className="h-3.5 w-3.5" />}
+							onClick={onToggleCollapse || (() => {})}
+							tooltipTitle="Expandir Panel"
+							tooltipContent=""
+							tooltipSide="right"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={handleHomeClick}
-									>
-										<Home className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Inicio</p>
-									<p>Volver a la vista de carpetas</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<Home className="h-3.5 w-3.5" />}
+							onClick={handleHomeClick}
+							tooltipTitle="Inicio"
+							tooltipContent="Volver a la vista de carpetas"
+							tooltipSide="right"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenEntityCards}
-									>
-										<IdCard className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Entity Cards</p>
-									<p>Visualizador y herramientas para tarjetas de entidades</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<IdCard className="h-3.5 w-3.5" />}
+							onClick={onOpenEntityCards}
+							tooltipTitle="Entity Cards"
+							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
+							tooltipSide="right"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenDevelopment}
-									>
-										<Bug className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Modo Desarrollador</p>
-									<p>Accede a herramientas de desarrollo y depuración</p>
-									<p className="text-[10px] text-zinc-400 mt-1.5">Solo para administradores</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<Bug className="h-3.5 w-3.5" />}
+							onClick={onOpenDevelopment}
+							tooltipTitle="Modo Desarrollador"
+							tooltipContent="Accede a herramientas de desarrollo y depuración"
+							tooltipNote="Solo para administradores"
+							tooltipSide="right"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={handleThemeToggle}
-									>
-										<motion.div
-											initial={false}
-											animate={{ rotate: theme === 'light' ? 0 : 180 }}
-											transition={{
-												duration: 0.3,
-												type: 'spring',
-												stiffness: 200,
-											}}
-										>
-											{theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-										</motion.div>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Cambiar Tema</p>
-									<p>Modo {theme === 'light' ? 'oscuro' : 'claro'}</p>
-									<p className="text-[10px] text-zinc-400 mt-1.5">
-										Acceso rápido con <span className="px-1 py-0.5 bg-zinc-800 rounded text-[9px]">Ctrl+T</span>
-									</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+							onClick={handleThemeToggle}
+							tooltipTitle="Cambiar Tema"
+							tooltipContent={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
+							tooltipSide="right"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenSettings}
-									>
-										<Settings2 className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right" className="text-xs">
-									<p className="font-medium text-amber-400">Configuración</p>
-									<p>Personaliza tu experiencia</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
+						<MemoizedHeaderButton
+							icon={<Settings2 className="h-3.5 w-3.5" />}
+							onClick={onOpenSettings}
+							tooltipTitle="Configuración"
+							tooltipContent="Personaliza tu experiencia"
+							tooltipSide="right"
+						/>
 					</div>
 				</div>
 			) : (
@@ -193,17 +180,7 @@ export function NavPanelHeader({
 				<div className="flex items-center justify-between px-3">
 					{/* Perfil y estadísticas */}
 					<div className="flex items-center gap-2">
-						<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
-							<div
-								className="h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 overflow-hidden group-hover:brightness-110 cursor-pointer "
-								style={{
-									backgroundColor: activeProfileData?.color,
-									boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
-								}}
-							>
-								<span className="text-sm font-large">{activeProfileData?.emoji}</span>
-							</div>
-						</motion.div>
+						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						<div className="flex flex-col">
 							<motion.div
@@ -222,126 +199,51 @@ export function NavPanelHeader({
 
 					{/* Controles y acciones */}
 					<div className="flex items-center gap-1">
-						<TooltipProvider delayDuration={150}>
-							{/* Botón para colapsar/expandir */}
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onToggleCollapse}
-									>
-										<ChevronLeft className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Colapsar Panel</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<ChevronLeft className="h-3.5 w-3.5" />}
+							onClick={onToggleCollapse || (() => {})}
+							tooltipTitle="Colapsar Panel"
+							tooltipContent=""
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={handleHomeClick}
-									>
-										<Home className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Inicio</p>
-									<p>Volver a la vista de carpetas</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<Home className="h-3.5 w-3.5" />}
+							onClick={handleHomeClick}
+							tooltipTitle="Inicio"
+							tooltipContent="Volver a la vista de carpetas"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenEntityCards}
-									>
-										<IdCard className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Entity Cards</p>
-									<p>Visualizador y herramientas para tarjetas de entidades</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<IdCard className="h-3.5 w-3.5" />}
+							onClick={onOpenEntityCards}
+							tooltipTitle="Entity Cards"
+							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenDevelopment}
-									>
-										<Bug className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Modo Desarrollador</p>
-									<p>Accede a herramientas de desarrollo y depuración</p>
-									<p className="text-[10px] text-zinc-400 mt-1.5">Solo para administradores</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={<Bug className="h-3.5 w-3.5" />}
+							onClick={onOpenDevelopment}
+							tooltipTitle="Modo Desarrollador"
+							tooltipContent="Accede a herramientas de desarrollo y depuración"
+							tooltipNote="Solo para administradores"
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={handleThemeToggle}
-									>
-										<motion.div
-											initial={false}
-											animate={{ rotate: theme === 'light' ? 0 : 180 }}
-											transition={{
-												duration: 0.3,
-												type: 'spring',
-												stiffness: 200,
-											}}
-										>
-											{theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-										</motion.div>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Cambiar Tema</p>
-									<p>Modo {theme === 'light' ? 'oscuro' : 'claro'}</p>
-									<p className="text-[10px] text-zinc-400 mt-1.5">
-										Acceso rápido con <span className="px-1 py-0.5 bg-zinc-800 rounded text-[9px]">Ctrl+T</span>
-									</p>
-								</TooltipContent>
-							</Tooltip>
+						<MemoizedHeaderButton
+							icon={theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+							onClick={handleThemeToggle}
+							tooltipTitle="Cambiar Tema"
+							tooltipContent={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
+						/>
 
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-										onClick={onOpenSettings}
-									>
-										<Settings2 className="h-3.5 w-3.5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="bottom" className="text-xs">
-									<p className="font-medium text-amber-400">Configuración</p>
-									<p>Personaliza tu experiencia</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
+						<MemoizedHeaderButton
+							icon={<Settings2 className="h-3.5 w-3.5" />}
+							onClick={onOpenSettings}
+							tooltipTitle="Configuración"
+							tooltipContent="Personaliza tu experiencia"
+						/>
 					</div>
 				</div>
 			)}
 		</motion.div>
 	);
-}
+});

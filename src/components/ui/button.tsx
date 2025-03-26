@@ -1,6 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
 import { type VariantProps, cva } from 'class-variance-authority';
 import type * as React from 'react';
+import { memo, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -32,7 +33,11 @@ const buttonVariants = cva(
 	}
 );
 
-function Button({
+const OptimizedSlot = memo(function OptimizedSlot(props: React.ComponentProps<typeof Slot>) {
+	return <Slot {...props} />;
+});
+
+const Button = memo(function Button({
 	className,
 	variant,
 	size,
@@ -43,10 +48,18 @@ function Button({
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
 	}) {
-	const Comp = asChild ? Slot : 'button';
+	const buttonClassName = useMemo(
+		() => cn(buttonVariants({ variant, size, className })),
+		[variant, size, className]
+	);
 
-	return <Comp data-slot="button" type={type} className={cn(buttonVariants({ variant, size, className }))} {...props} />;
-}
+	if (asChild) {
+		return <OptimizedSlot data-slot="button" type={type} className={buttonClassName} {...props} />;
+	}
+
+	return <button data-slot="button" type={type} className={buttonClassName} {...props} />;
+});
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };
 

@@ -7,7 +7,44 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import type { ImageItem } from '@/types/image-item';
 import { PanelRightClose, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { memo, Suspense, useCallback, useEffect, useState } from 'react';
+
+// Lazy load del StatsPanel para reducir carga inicial
+const StatsPanel = dynamic(
+	() => import('../stats/stats-panel'),
+	{
+		ssr: false,
+		loading: () => <div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>
+	}
+);
+
+// Componente para manejar la carga perezosa del StatsPanel
+const LazyStatsPanel = memo(function LazyStatsPanel() {
+	// Usamos un estado para controlar si el panel ha sido visible por suficiente tiempo
+	const [shouldRender, setShouldRender] = useState(false);
+
+	useEffect(() => {
+		// Solo renderizamos después de un breve retraso
+		const timer = setTimeout(() => {
+			setShouldRender(true);
+		}, 300);
+
+		return () => clearTimeout(timer);
+	}, []);
+
+	if (!shouldRender) {
+		return <div className="flex items-center justify-center w-full h-full">
+			<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
+		</div>;
+	}
+
+	return (
+		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
+			<StatsPanel />
+		</Suspense>
+	);
+});
 
 interface RightPanelProps {
 	className?: string;
@@ -20,11 +57,17 @@ interface RightPanelProps {
  *
  * Este componente funciona como contenedor para diferentes tipos de contenido
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
- * Actualmente admite mostrar los detalles de las imágenes seleccionadas.
+ * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
 export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
-	const { isVisible, setVisible, selectedItems } = useDetailsPanel();
+	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const [mounted, setMounted] = useState(false);
+	const hasSelectedItems = selectedItems && selectedItems.length > 0;
+
+	// Determina si debemos mostrar el panel
+	const shouldShowPanel = isVisible || hasSelectedItems;
+	// Determina si debemos mostrar las estadísticas
+	const shouldShowStats = !hasSelectedItems && showStatsWhenEmpty;
 
 	// Al montar el componente, marcamos que estamos listos para renderizar
 	useEffect(() => {
@@ -43,8 +86,11 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 		setVisible(false);
 	}, [setVisible]);
 
-	// Si no hay elementos seleccionados o el panel no debería ser visible
-	if (!isVisible || !selectedItems || selectedItems.length === 0) {
+	// Determinamos el título según el contenido actual
+	const panelTitle = hasSelectedItems ? 'Detalles' : 'Estadísticas';
+
+	// No mostramos nada si no hay razón para mostrar el panel
+	if (!shouldShowPanel && !shouldShowStats) {
 		return null;
 	}
 
@@ -56,7 +102,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 			)}
 		>
 			<div className="flex items-center justify-between p-2 border-b">
-				<h3 className="text-sm font-medium">Detalles</h3>
+				<h3 className="text-sm font-medium">{panelTitle}</h3>
 				<div className="flex items-center gap-1">
 					{onToggleCollapse && (
 						<Button
@@ -80,11 +126,17 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 			</div>
 
 			{!isCollapsed && (
-				<ScrollArea className="flex-1">
-					<div className="p-2">
-						<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
-					</div>
-				</ScrollArea>
+				<>
+					{hasSelectedItems ? (
+						<ScrollArea className="flex-1">
+							<div className="p-2">
+								<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
+							</div>
+						</ScrollArea>
+					) : shouldShowStats && (
+						<LazyStatsPanel />
+					)}
+				</>
 			)}
 		</div>
 	);
