@@ -15,10 +15,7 @@ import type {
     CharacterSummary
 } from '@/types/entities/character';
 import {
-    CharacterCategoryEnum,
-    CharacterClassEnum,
-    CharacterRaceEnum,
-    CharacterRelationshipTypeEnum
+    CharacterRelationshipType
 } from '@/types/entities/character/enums';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -182,7 +179,7 @@ export function groupCharactersByCategory(
     const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
     // Inicializar todas las categorías
-    Object.values(CharacterCategoryEnum).forEach(category => {
+    Object.values(CharacterCategory).forEach(category => {
         groups[category] = [];
     });
 
@@ -209,7 +206,7 @@ export function groupCharactersByClass(
     const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
     // Inicializar todas las clases
-    Object.values(CharacterClassEnum).forEach(characterClass => {
+    Object.values(CharacterClass).forEach(characterClass => {
         groups[characterClass] = [];
     });
 
@@ -236,7 +233,7 @@ export function groupCharactersByRace(
     const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
     // Inicializar todas las razas
-    Object.values(CharacterRaceEnum).forEach(race => {
+    Object.values(CharacterRace).forEach(race => {
         groups[race] = [];
     });
 
@@ -263,7 +260,7 @@ export function groupCharactersByRace(
 export function createCharacterRelationship(
     targetCharacterId: string,
     targetCharacterName: string,
-    type: string = CharacterRelationshipTypeEnum.ALLY,
+    type: string = CharacterRelationshipType.ALLY,
     strength = 50
 ): CharacterRelationship {
     return {

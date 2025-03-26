@@ -1,13 +1,13 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
-import { unstable_cache } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 
 // Constantes para caché
 const STATS_CACHE_TAG = 'stats';
-const STATS_REVALIDATE_SECONDS = 60; // 1 minuto
+const STATS_REVALIDATE_SECONDS = 300; // 5 minutos en lugar de 1 minuto
 
 // Logger para estadísticas
 const statsLogger = serverLogger.withContext('StatsActions');
@@ -115,134 +115,141 @@ interface TopTag {
 	};
 }
 
+// Función privada para obtener las estadísticas en caché
+const getCachedStats = unstable_cache(
+	async (): Promise<GeneralStats | null> => {
+		// Si estamos en desarrollo y USE_MOCK_STATS está activado, devolver datos simulados
+		if (USE_MOCK_STATS) {
+			statsLogger.info('📊 Usando estadísticas simuladas para desarrollo');
+			return MOCK_STATS;
+		}
+
+		try {
+			statsLogger.info('📊 Obteniendo estadísticas del sistema');
+
+			const [
+				totalImages,
+				totalFolders,
+				totalCollections,
+				totalTags,
+				totalAlbums,
+				totalCharacters,
+				totalPlaces,
+				totalWorldItems,
+				totalActivities,
+				totalSize,
+				totalViews,
+				totalDownloads,
+				topTags,
+				recentActivity,
+			] = await Promise.all([
+				prisma.image.count(),
+				prisma.folder.count(),
+				prisma.collection.count(),
+				prisma.tag.count(),
+				prisma.album.count(),
+				prisma.character.count(),
+				prisma.place.count(),
+				prisma.worldItem.count(),
+				prisma.activity.count(),
+				prisma.folder.aggregate({
+					_sum: {
+						totalSize: true,
+					},
+				}),
+				prisma.imageStats.aggregate({
+					_sum: {
+						views: true,
+					},
+				}),
+				prisma.imageStats.aggregate({
+					_sum: {
+						downloads: true,
+					},
+				}),
+				prisma.tag.findMany({
+					select: {
+						id: true,
+						name: true,
+						color: true,
+						_count: {
+							select: {
+								images: true,
+							},
+						},
+					},
+					orderBy: {
+						images: {
+							_count: 'desc',
+						},
+					},
+					take: 5,
+				}) as Promise<TopTag[]>,
+				prisma.activity.findMany({
+					select: {
+						id: true,
+						type: true,
+						description: true,
+						createdAt: true,
+						image: {
+							select: {
+								id: true,
+								name: true,
+								thumbnail: true,
+							},
+						},
+					},
+					orderBy: {
+						createdAt: 'desc',
+					},
+					take: 5,
+				}),
+			]);
+
+			// Calcular total de favoritos
+			const totalFavorites = await prisma.image.count({
+				where: {
+					isFavorite: true,
+				},
+			});
+
+			statsLogger.info('✅ Estadísticas del sistema obtenidas');
+
+			return {
+				totalImages,
+				totalFolders,
+				totalCollections,
+				totalTags,
+				totalAlbums,
+				totalCharacters,
+				totalPlaces,
+				totalWorldItems,
+				totalFavorites,
+				totalActivities,
+				totalSize: totalSize._sum.totalSize || 0,
+				totalViews: totalViews._sum.views || 0,
+				totalDownloads: totalDownloads._sum.downloads || 0,
+				topTags: topTags.map((tag: TopTag) => ({
+					...tag,
+					count: tag._count.images,
+				})),
+				recentActivity,
+			} satisfies GeneralStats;
+		} catch (error) {
+			statsLogger.error('❌ Error al obtener las estadísticas del sistema:', error);
+			return null;
+		}
+	},
+	['system-stats'],
+	{
+		revalidate: STATS_REVALIDATE_SECONDS,
+		tags: [STATS_CACHE_TAG],
+	}
+);
+
 // Funciones exportadas
 export async function getSystemStats(): Promise<GeneralStats | null> {
-	const cachedStats = unstable_cache(
-		async () => {
-			try {
-				statsLogger.info('📊 Obteniendo estadísticas del sistema');
-
-				const [
-					totalImages,
-					totalFolders,
-					totalCollections,
-					totalTags,
-					totalAlbums,
-					totalCharacters,
-					totalPlaces,
-					totalWorldItems,
-					totalActivities,
-					totalSize,
-					totalViews,
-					totalDownloads,
-					topTags,
-					recentActivity,
-				] = await Promise.all([
-					prisma.image.count(),
-					prisma.folder.count(),
-					prisma.collection.count(),
-					prisma.tag.count(),
-					prisma.album.count(),
-					prisma.character.count(),
-					prisma.place.count(),
-					prisma.worldItem.count(),
-					prisma.activity.count(),
-					prisma.folder.aggregate({
-						_sum: {
-							totalSize: true,
-						},
-					}),
-					prisma.imageStats.aggregate({
-						_sum: {
-							views: true,
-						},
-					}),
-					prisma.imageStats.aggregate({
-						_sum: {
-							downloads: true,
-						},
-					}),
-					prisma.tag.findMany({
-						select: {
-							id: true,
-							name: true,
-							color: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
-						},
-						orderBy: {
-							images: {
-								_count: 'desc',
-							},
-						},
-						take: 5,
-					}) as Promise<TopTag[]>,
-					prisma.activity.findMany({
-						select: {
-							id: true,
-							type: true,
-							description: true,
-							createdAt: true,
-							image: {
-								select: {
-									id: true,
-									name: true,
-									thumbnail: true,
-								},
-							},
-						},
-						orderBy: {
-							createdAt: 'desc',
-						},
-						take: 5,
-					}),
-				]);
-
-				// Calcular total de favoritos
-				const totalFavorites = await prisma.image.count({
-					where: {
-						isFavorite: true,
-					},
-				});
-
-				statsLogger.info('✅ Estadísticas del sistema obtenidas');
-
-				return {
-					totalImages,
-					totalFolders,
-					totalCollections,
-					totalTags,
-					totalAlbums,
-					totalCharacters,
-					totalPlaces,
-					totalWorldItems,
-					totalFavorites,
-					totalActivities,
-					totalSize: totalSize._sum.totalSize || 0,
-					totalViews: totalViews._sum.views || 0,
-					totalDownloads: totalDownloads._sum.downloads || 0,
-					topTags: topTags.map((tag: TopTag) => ({
-						...tag,
-						count: tag._count.images,
-					})),
-					recentActivity,
-				} satisfies GeneralStats;
-			} catch (error) {
-				statsLogger.error('❌ Error al obtener las estadísticas del sistema:', error);
-				return null;
-			}
-		},
-		['system-stats'],
-		{
-			revalidate: STATS_REVALIDATE_SECONDS,
-			tags: [STATS_CACHE_TAG],
-		}
-	);
-
-	return cachedStats();
+	return getCachedStats();
 }
 
 // Interfaces para los mapeos de datos

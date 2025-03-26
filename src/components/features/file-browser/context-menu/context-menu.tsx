@@ -10,7 +10,7 @@ import {
 import { useFavoriteStore } from '@/store/entities/favorite';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import {
 	AlbumsSubmenu,
@@ -26,43 +26,31 @@ import {
 import { useEntityLoader } from './hooks/use-entity-loader';
 import type { FileContextMenuProps } from './types';
 
-export function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
-	// Estado para controlar si el menú está abierto (necesario para ContextMenu)
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+// Memoizamos el componente FileContextMenu para evitar renderizaciones innecesarias
+export const FileContextMenu = memo(function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
 	const { toggleFavorite, isFavorited } = useFavoriteStore();
 	const { loadingStates, handleOpenChange } = useEntityLoader();
 	const { selectedItems } = useFileManager();
 
-	// Añadir logging para depuración
-	useEffect(() => {
-		console.log('FileContextMenu renderizado para:', file.name, file.id);
-	}, [file]);
-
+	// Memoizamos la función handleFavoriteToggle
 	const handleFavoriteToggle = useCallback(() => {
 		toggleFavorite(file.id);
 		onAction('favorite-toggle', file);
 	}, [file, toggleFavorite, onAction]);
 
-	// Determinar si el archivo está seleccionado
-	const getMarkToggleText = useCallback(() => {
+	// Memoizamos el texto del botón de marcar
+	const markToggleText = useMemo(() => {
 		const isSelected = selectedItems.some((item) => item.id === file.id);
 		return isSelected ? 'Desmarcar' : 'Marcar';
 	}, [selectedItems, file.id]);
 
-	// Logging para eventos de apertura/cierre del menú
-	const handleMenuOpenChange = useCallback((open: boolean) => {
-		console.log('Menú contextual cambió estado a:', open ? 'abierto' : 'cerrado', 'para:', file.name);
-		setIsMenuOpen(open);
-	}, [file.name]);
-
 	return (
-		<ContextMenu onOpenChange={handleMenuOpenChange}>
+		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent className="w-64">
 				{/* Acciones principales */}
 				<ContextMenuItem
 					onClick={() => {
-						console.log('Acción de menú: preview para', file.name);
 						onAction('preview', file);
 					}}
 				>
@@ -72,7 +60,7 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 
 				<ContextMenuItem onClick={() => onAction('mark-toggle', file)}>
 					<Flag className="mr-2 h-4 w-4" />
-					{getMarkToggleText()}
+					{markToggleText}
 				</ContextMenuItem>
 
 				<ContextMenuItem onClick={handleFavoriteToggle}>
@@ -176,7 +164,7 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 			</ContextMenuContent>
 		</ContextMenu>
 	);
-}
+});
 
 // Exportar también las acciones desde types.ts
 export type { ContextMenuAction } from './types';

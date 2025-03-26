@@ -2,6 +2,7 @@
 
 import { GripVerticalIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from 'lucide-react';
 import * as React from 'react';
+import { memo } from 'react';
 import * as ResizablePrimitive from 'react-resizable-panels';
 
 import { cn } from '@/lib/utils';
@@ -10,7 +11,11 @@ interface ResizablePanelGroupProps extends React.ComponentProps<typeof Resizable
 	onToggleCollapse?: (collapsed: boolean) => void;
 }
 
-function ResizablePanelGroup({ className, onToggleCollapse, ...props }: ResizablePanelGroupProps) {
+const ResizablePanelGroup = memo(function ResizablePanelGroup({
+	className,
+	onToggleCollapse,
+	...props
+}: ResizablePanelGroupProps) {
 	return (
 		<ResizablePrimitive.PanelGroup
 			data-slot="resizable-panel-group"
@@ -18,7 +23,8 @@ function ResizablePanelGroup({ className, onToggleCollapse, ...props }: Resizabl
 			{...props}
 		/>
 	);
-}
+});
+ResizablePanelGroup.displayName = 'ResizablePanelGroup';
 
 interface ResizablePanelProps extends React.ComponentProps<typeof ResizablePrimitive.Panel> {
 	isCollapsed?: boolean;
@@ -29,7 +35,7 @@ interface ResizablePanelProps extends React.ComponentProps<typeof ResizablePrimi
 	toggleButtonClassName?: string;
 }
 
-const ResizablePanel = React.forwardRef<React.ElementRef<typeof ResizablePrimitive.Panel>, ResizablePanelProps>(
+const ResizablePanel = memo(React.forwardRef<React.ElementRef<typeof ResizablePrimitive.Panel>, ResizablePanelProps>(
 	(
 		{
 			className,
@@ -77,10 +83,10 @@ const ResizablePanel = React.forwardRef<React.ElementRef<typeof ResizablePrimiti
 			</ResizablePrimitive.Panel>
 		);
 	}
-);
+));
 ResizablePanel.displayName = 'ResizablePanel';
 
-function ResizableHandle({
+const ResizableHandle = memo(function ResizableHandle({
 	withHandle,
 	className,
 	...props
@@ -103,6 +109,8 @@ function ResizableHandle({
 			)}
 		</ResizablePrimitive.PanelResizeHandle>
 	);
-}
+});
+ResizableHandle.displayName = 'ResizableHandle';
 
 export { ResizableHandle, ResizablePanel, ResizablePanelGroup };
+

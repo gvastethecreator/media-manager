@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import type { FileItem } from '@/types/file-item';
 import { Meh, Star } from 'lucide-react';
 import type * as React from 'react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
@@ -34,77 +34,59 @@ export const GridView = memo(function GridView({
 	onContextAction,
 	style,
 }: GridViewProps) {
-	const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+	// Eliminamos el estado que no es necesario
+	// const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
 	// Usamos un ref para capturar el botón
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
+	// Memoizamos los handlers para evitar recreaciones
+	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			onClick?.(item);
 		}
-	};
+	}, [onClick, item]);
 
-	const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-		const { currentTarget } = e;
-		const rect = currentTarget.getBoundingClientRect();
-		const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
-		const y = ((e.clientY - rect.top) / rect.height - 0.5) * -20;
-		setMousePosition({ x, y });
-	};
+	// Simplificamos la función de manejo de mouse
+	const handleClick = useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onClick?.(item);
+	}, [onClick, item]);
 
-	const handleMouseLeave = () => {
-		setMousePosition({ x: 0, y: 0 });
-	};
+	const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onDoubleClick?.(item);
+	}, [onDoubleClick, item]);
 
-	// Verificar si hay acciones de contexto disponibles
-	useEffect(() => {
-		// Registrar el elemento para eventos de contexto nativo si es necesario
-		const button = buttonRef.current;
-		if (button) {
-			// Solo para propósitos de depuración - comprobar que se detectan los eventos
-			const handleContextMenuNative = (e: MouseEvent) => {
-				console.log('Evento contextmenu nativo en GridView para:', item.name);
-			};
+	// Memoizamos la clase para evitar recálculos
+	const buttonClassName = useMemo(() => {
+		return cn(
+			'relative w-full h-full overflow-hidden group text-left',
+			isSelected && 'ring-2 ring-primary ring-offset-2',
+			isScrolling && 'opacity-50'
+		);
+	}, [isSelected, isScrolling]);
 
-			button.addEventListener('contextmenu', handleContextMenuNative);
-			return () => {
-				button.removeEventListener('contextmenu', handleContextMenuNative);
-			};
-		}
-	}, [item]);
+	// Calculamos si debemos mostrar el contenido real
+	const shouldShowContent = shouldLoad && thumbnail;
 
 	return (
 		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
 			<button
 				ref={buttonRef}
 				type="button"
-				className={cn(
-					'relative w-full h-full overflow-hidden group text-left',
-					isSelected && 'ring-2 ring-primary ring-offset-2',
-					isScrolling && 'opacity-50'
-				)}
+				className={buttonClassName}
 				style={style}
-				onClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Click en GridView para:', item.name);
-					onClick?.(item);
-				}}
-				onDoubleClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Double click en GridView para:', item.name);
-					onDoubleClick?.(item);
-				}}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
 				onKeyDown={handleKeyDown}
-				onMouseMove={handleMouseMove}
-				onMouseLeave={handleMouseLeave}
 				aria-pressed={isSelected}
 			>
 				<div className="w-full h-full bg-muted/30 cursor-pointer">
-					{shouldLoad && thumbnail ? (
+					{shouldShowContent ? (
 						<div className="relative w-full h-full p-2">
 							<div
 								className="absolute inset-0 bg-cover bg-center blur-lg opacity-80 brightness-20"
@@ -117,7 +99,7 @@ export const GridView = memo(function GridView({
 									src={thumbnail}
 									alt={item.name}
 									objectFit="contain"
-									className={cn('h-full w-full rounded-sm transition-all duration-200 ease-out')}
+									className="h-full w-full rounded-sm transition-all duration-200 ease-out"
 								/>
 							</div>
 						</div>

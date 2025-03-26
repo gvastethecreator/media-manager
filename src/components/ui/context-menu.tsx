@@ -69,16 +69,14 @@ function ContextMenuSubContent({ className, ...props }: React.ComponentProps<typ
 
 function ContextMenuContent({ className, ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Content>) {
 	return (
-		<ContextMenuPrimitive.Portal>
-			<ContextMenuPrimitive.Content
-				data-slot="context-menu-content"
-				className={cn(
-					'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-context-menu-content-available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',
-					className
-				)}
-				{...props}
-			/>
-		</ContextMenuPrimitive.Portal>
+		<ContextMenuPrimitive.Content
+			data-slot="context-menu-content"
+			className={cn(
+				'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-context-menu-content-available-height) min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',
+				className
+			)}
+			{...props}
+		/>
 	);
 }
 
@@ -193,19 +191,9 @@ function ContextMenuShortcut({ className, ...props }: React.ComponentProps<'span
 }
 
 export {
-	ContextMenu,
-	ContextMenuTrigger,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuCheckboxItem,
-	ContextMenuRadioItem,
-	ContextMenuLabel,
-	ContextMenuSeparator,
-	ContextMenuShortcut,
-	ContextMenuGroup,
-	ContextMenuPortal,
-	ContextMenuSub,
+	ContextMenu, ContextMenuCheckboxItem, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuLabel, ContextMenuPortal, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuSeparator,
+	ContextMenuShortcut, ContextMenuSub,
 	ContextMenuSubContent,
-	ContextMenuSubTrigger,
-	ContextMenuRadioGroup,
+	ContextMenuSubTrigger, ContextMenuTrigger
 };
+

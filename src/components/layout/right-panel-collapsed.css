@@ -5,7 +5,8 @@
 	right: 0;
 	background-color: transparent;
 	opacity: 0.8;
-	transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+	will-change: opacity, background-color;
 }
 
 .right-panel-collapsed-handle:hover {
@@ -28,6 +29,7 @@
 	-webkit-mask-size: contain;
 	mask-repeat: no-repeat;
 	-webkit-mask-repeat: no-repeat;
+	will-change: transform;
 }
 
 /* Estilos para el panel derecho colapsado */
@@ -36,14 +38,22 @@
 	min-width: 60px !important;
 	max-width: 60px !important;
 	overflow: hidden;
+	transform: translateZ(0);
+	will-change: width;
 }
 
 .right-panel-collapsed h3 {
-	display: none;
+	opacity: 0;
+	visibility: hidden;
+	position: absolute;
+	pointer-events: none;
 }
 
 .right-panel-collapsed .scrollbar {
-	display: none;
+	opacity: 0;
+	visibility: hidden;
+	position: absolute;
+	pointer-events: none;
 }
 
 .right-panel-collapsed button {
@@ -53,5 +63,8 @@
 }
 
 .right-panel-collapsed button span {
-	display: none;
+	opacity: 0;
+	visibility: hidden;
+	position: absolute;
+	pointer-events: none;
 }

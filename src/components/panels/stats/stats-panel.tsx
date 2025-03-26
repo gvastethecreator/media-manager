@@ -6,13 +6,23 @@
 
 'use client';
 
-import { StatsContainer } from './base/stats-view';
-import { StatsContent } from './stats-content';
+import { memo } from 'react';
+import StatsClientWrapper from './stats-client';
 
-export function StatsPanel() {
+// Importamos el wrapper de estadísticas de manera estática ya que ahora es un componente cliente
+import StatsWrapper from './components/stats-wrapper';
+
+// Componente optimizado con memo para estadísticas
+const StatsPanel = memo(function StatsPanel() {
 	return (
-		<StatsContainer>
-			<StatsContent />
-		</StatsContainer>
+		<StatsClientWrapper>
+			<StatsWrapper />
+		</StatsClientWrapper>
 	);
-}
+});
+
+// Exportación por defecto
+export default StatsPanel;
+
+// También exportamos versión con nombre
+export { StatsPanel };
