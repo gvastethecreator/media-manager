@@ -40,13 +40,13 @@ const navigationItems: NavigationItem[] = [
 		description: 'Imágenes favoritas',
 	},
 	{
-		id: 'folders' as ViewType,
+		id: 'canvas' as ViewType,
 		label: 'Canvas',
 		icon: Layers,
 		description: 'Espacio de trabajo visual (próximamente)',
 	},
 	{
-		id: 'folders' as ViewType,
+		id: 'chat' as ViewType,
 		label: 'Chat',
 		icon: MessageSquare,
 		description: 'Conversaciones inteligentes (próximamente)',
@@ -71,9 +71,10 @@ export function NavMainNavigation({ currentView, onNavigate, isCollapsed = false
 				<div className={cn('flex', isCollapsed ? 'flex-col gap-2' : 'justify-between gap-1')}>
 					{navigationItems.map(({ id, icon: Icon, label, description }, index) => {
 						const isActive = currentView === id;
+						const uniqueKey = `${id}-${label.toLowerCase()}`;
 
 						return (
-							<TooltipProvider key={id} delayDuration={isCollapsed ? 200 : 1000}>
+							<TooltipProvider key={uniqueKey} delayDuration={isCollapsed ? 200 : 1000}>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<motion.div

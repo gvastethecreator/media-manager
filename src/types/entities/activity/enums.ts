@@ -93,3 +93,14 @@ export enum ActivitySortCriteria {
   TYPE_ASC = 'type_asc',
   TYPE_DESC = 'type_desc'
 }
+
+/**
+ * Tipos de eventos de actividad para el sistema de eventos
+ */
+export enum ActivityEventType {
+  CREATED = 'activity.created',
+  UPDATED = 'activity.updated',
+  DELETED = 'activity.deleted',
+  MODIFIED = 'activity.modified',
+  CLEARED = 'activity.cleared'
+}
