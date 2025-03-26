@@ -12,7 +12,7 @@ import type {
     CharacterInventoryItem,
     CharacterListItem
 } from '@/types/entities/character';
-import { SUGGESTED_COLORS, SUGGESTED_EMOJIS } from '@/types/entities/character/enums';
+import { CHARACTER_CLASS_COLORS as SUGGESTED_COLORS, CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS } from '@/types/entities/character/enums';
 import type { Character as PrismaCharacter } from '@prisma/client';
 import { toCharacterExtended, toCharacterSummary } from './serializers';
 
@@ -286,4 +286,73 @@ export function charactersToCards(
     characters: (PrismaCharacter | CharacterExtended)[]
 ): CharacterCard[] {
     return characters.map(character => toCharacterCard(character));
+}
+
+/**
+ * Mapea datos de creación de personaje a formato Prisma
+ * @param data Datos para crear un personaje
+ * @returns Objeto con formato para Prisma
+ */
+export function mapCreateCharacterDataToPrisma(data: any): any {
+    // Asegurarse de que stats sea string si viene como objeto
+    const stats = typeof data.stats === 'object'
+        ? JSON.stringify(data.stats)
+        : data.stats;
+
+    return {
+        name: data.name,
+        emoji: data.emoji || null,
+        color: data.color || null,
+        description: data.description || null,
+        shortcut: data.shortcut || null,
+        level: data.level || 1,
+        class: data.class || null,
+        race: data.race || null,
+        alignment: data.alignment || null,
+        backstory: data.backstory || null,
+        stats: stats || null,
+        psychologicalProfile: data.psychologicalProfile || null,
+        socialProfile: data.socialProfile || null,
+        featuredImageId: data.featuredImage || null,
+        isFavorite: data.isFavorite || false,
+        category: data.category || null,
+        presetId: data.presetId || null,
+    };
+}
+
+/**
+ * Mapea datos de actualización de personaje a formato Prisma
+ * @param data Datos para actualizar un personaje
+ * @returns Objeto con formato para Prisma
+ */
+export function mapUpdateCharacterDataToPrisma(data: any): any {
+    const updateData: any = {};
+
+    // Solo incluir campos que estén presentes en los datos
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.emoji !== undefined) updateData.emoji = data.emoji;
+    if (data.color !== undefined) updateData.color = data.color;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+    if (data.level !== undefined) updateData.level = data.level;
+    if (data.class !== undefined) updateData.class = data.class;
+    if (data.race !== undefined) updateData.race = data.race;
+    if (data.alignment !== undefined) updateData.alignment = data.alignment;
+    if (data.backstory !== undefined) updateData.backstory = data.backstory;
+
+    // Convertir stats a string si es un objeto
+    if (data.stats !== undefined) {
+        updateData.stats = typeof data.stats === 'object'
+            ? JSON.stringify(data.stats)
+            : data.stats;
+    }
+
+    if (data.psychologicalProfile !== undefined) updateData.psychologicalProfile = data.psychologicalProfile;
+    if (data.socialProfile !== undefined) updateData.socialProfile = data.socialProfile;
+    if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.presetId !== undefined) updateData.presetId = data.presetId;
+
+    return updateData;
 }

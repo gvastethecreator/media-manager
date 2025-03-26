@@ -1,5 +1,6 @@
 'use client';
 
+import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -7,7 +8,7 @@ import { useFileManager } from '@/store/files/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
 import type * as React from 'react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import type { ContextMenuAction } from './context-menu/context-menu';
@@ -55,6 +56,11 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 	const imageResources = useImageResources();
 	const { setVisible, setSelectedItems } = useDetailsPanel();
 	const constraintsRef = useRef<HTMLDivElement>(null);
+
+	// Estados para el visor de imágenes
+	const [isViewerOpen, setIsViewerOpen] = useState(false);
+	const [viewerImages, setViewerImages] = useState<ImageItem[]>([]);
+	const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
 
 	// Crear una referencia local para el div parent
 	const gridParentRef = useRef<HTMLDivElement>(null);
@@ -129,6 +135,51 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 		[toggleItemSelection, setVisible, onItemClick]
 	);
 
+	// Manejador personalizado para el doble clic en ítems
+	const handleItemDoubleClick = useCallback(
+		(item: FileItem) => {
+			// Verificar que sea una imagen
+			if (item && item.type === 'image') {
+				// Convertir FileItem a ImageItem (según la interfaz de FileViewer.tsx)
+				const imageItems = items
+					.filter(item => item.type === 'image')
+					.map(item => ({
+						id: item.id,
+						name: item.name,
+						type: item.type,
+						path: item.path,
+						size: item.size,
+						width: item.width || null,
+						height: item.height || null,
+						url: undefined, // Se llenará en el visor
+						thumbnail: item.thumbnail,
+						src: undefined, // Se llenará en el visor
+						alt: item.name,
+						mimeType: undefined, // Se extraerá del metadata
+						metadata: item.metadata,
+						parsedMetadata: undefined // Se extraerá del metadata en el visor
+					}));
+
+				// Encontrar el índice del elemento seleccionado
+				const initialIndex = imageItems.findIndex(img => img.id === item.id);
+
+				if (initialIndex !== -1) {
+					// Establecer los datos del visor
+					setViewerImages(imageItems);
+					setViewerInitialIndex(initialIndex);
+					// Abrir el visor
+					setIsViewerOpen(true);
+				}
+			}
+
+			// Llamar al callback externo si existe
+			if (onItemDoubleClick) {
+				onItemDoubleClick(item);
+			}
+		},
+		[items, onItemDoubleClick]
+	);
+
 	// Manejador de acciones contextuales
 	const handleContextMenuAction = useCallback(
 		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
@@ -137,9 +188,9 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				toggleItemSelection(fileItem, isMultiSelect);
 			};
 
-			handleContextAction(action, item, data, onItemDoubleClick, toggleItemSelectionWrapper);
+			handleContextAction(action, item, data, handleItemDoubleClick, toggleItemSelectionWrapper);
 		},
-		[onItemDoubleClick, toggleItemSelection]
+		[handleItemDoubleClick, toggleItemSelection]
 	);
 
 	// Efecto para cargar thumbnails visibles cuando cambia la lista
@@ -271,7 +322,7 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 									<ViewComponent
 										item={processedItem}
 										onClick={handleItemClick}
-										onDoubleClick={onItemDoubleClick}
+										onDoubleClick={handleItemDoubleClick}
 										onContextAction={handleContextMenuAction}
 										shouldLoad={true}
 										isSelected={selectedItems.some((selected) => selected.id === processedItem.id)}
@@ -288,6 +339,14 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				</div>
 				<div ref={loadMoreRef} className="h-px w-full" />
 			</div>
+
+			{/* Visor de imágenes */}
+			<FileViewer
+				images={viewerImages}
+				initialIndex={viewerInitialIndex}
+				isOpen={isViewerOpen}
+				onClose={() => setIsViewerOpen(false)}
+			/>
 		</div>
 	);
 }

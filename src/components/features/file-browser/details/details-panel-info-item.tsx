@@ -18,12 +18,12 @@ export function InfoItem({ icon, label, value, className }: InfoItemProps) {
 		typeof value === 'number' ? value.toString() : value instanceof Date ? value.toLocaleString() : value;
 
 	return (
-		<div className={`flex items-center justify-between gap-2 ${className}`}>
-			<div className="flex items-center gap-1.5">
+		<div className={`flex items-center justify-between gap-1 py-0.5 ${className}`}>
+			<div className="flex items-center gap-1">
 				{icon}
-				<span className="text-xs text-muted-foreground">{label}</span>
+				<span className="text-[10px] text-muted-foreground">{label}</span>
 			</div>
-			<span className="text-xs font-medium truncate max-w-[60%] text-right">{displayValue}</span>
+			<span className="text-[10px] font-medium truncate max-w-[65%] text-right">{displayValue}</span>
 		</div>
 	);
 }

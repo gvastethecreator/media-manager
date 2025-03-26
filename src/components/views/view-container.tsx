@@ -75,6 +75,10 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 			return <FoldersView />;
 		case 'folder-content':
 			return <FolderContentView />;
+		case 'canvas':
+			return <FoldersView />;
+		case 'chat':
+			return <FoldersView />;
 		case 'tags':
 			return <TagsView />;
 		case 'tag-content':

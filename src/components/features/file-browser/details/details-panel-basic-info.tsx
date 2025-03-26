@@ -1,10 +1,8 @@
 'use client';
 
-import { formatBytes, formatDate } from '@/lib/utils/format.utils';
-import type { ImageItem } from '@/types/image-item';
-import { Calendar, FileImage, FileText, Folder, HardDrive, ImageIcon, Layers } from 'lucide-react';
+import { formatBytes } from '@/lib/utils/format.utils';
+import { Calendar, FileImage, Folder, HardDrive, ImageIcon } from 'lucide-react';
 import { InfoItem } from './details-panel-info-item';
-import type { MetadataComponentProps } from './details-panel-types';
 import type { BasicInfoProps } from './details-panel-types';
 
 /**
@@ -45,15 +43,15 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 	};
 
 	return (
-		<div className="space-y-2">
-			<div className="grid grid-cols-2 gap-2">
+		<div className="space-y-1.5">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
 				{item.path && (
-					<InfoItem icon={<Folder className="h-4 w-4 text-blue-400" />} label="Ubicación" value={item.path} />
+					<InfoItem icon={<Folder className="h-3 w-3 text-blue-400" />} label="Ubicación" value={item.path} />
 				)}
 
 				{hasResolution && (
 					<InfoItem
-						icon={<ImageIcon className="h-4 w-4 text-green-400" />}
+						icon={<ImageIcon className="h-3 w-3 text-green-400" />}
 						label="Resolución"
 						value={`${width} x ${height}`}
 					/>
@@ -61,7 +59,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 				{item.fileSize && (
 					<InfoItem
-						icon={<HardDrive className="h-4 w-4 text-amber-400" />}
+						icon={<HardDrive className="h-3 w-3 text-amber-400" />}
 						label="Tamaño"
 						value={formatBytes(item.fileSize)}
 					/>
@@ -69,7 +67,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 				{item.createdAt && (
 					<InfoItem
-						icon={<Calendar className="h-4 w-4 text-indigo-400" />}
+						icon={<Calendar className="h-3 w-3 text-indigo-400" />}
 						label="Fecha"
 						value={formatDate(item.createdAt)}
 					/>
@@ -77,24 +75,24 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 				{metadata?.mimeType && (
 					<InfoItem
-						icon={<FileImage className="h-4 w-4 text-purple-400" />}
-						label="Tipo MIME"
-						value={metadata.mimeType}
+						icon={<FileImage className="h-3 w-3 text-purple-400" />}
+						label="Tipo"
+						value={metadata.mimeType.split('/')[1]?.toUpperCase() || metadata.mimeType}
 					/>
 				)}
 
 				{metadata?.colorSpace && (
 					<InfoItem
-						icon={<FileImage className="h-4 w-4 text-rose-400" />}
-						label="Espacio de color"
+						icon={<FileImage className="h-3 w-3 text-rose-400" />}
+						label="Color"
 						value={metadata.colorSpace}
 					/>
 				)}
 			</div>
 
 			{!hasResolution && !item.fileSize && !item.path && !metadata?.mimeType && (
-				<div className="p-3 border border-dashed border-muted-foreground/30 rounded-md">
-					<p className="text-xs text-muted-foreground text-center">
+				<div className="p-2 border border-dashed border-muted-foreground/30 rounded-md">
+					<p className="text-[10px] text-muted-foreground text-center">
 						No se encontró información básica para esta imagen.
 					</p>
 				</div>

@@ -137,3 +137,50 @@ export function extractFeaturedImages(
 
   return [...featuredImages, ...remainingImages.map(img => img.path)];
 }
+
+/**
+ * Mapea datos de creación de colección a formato Prisma
+ * @param data Datos para crear una colección
+ * @returns Objeto con formato para Prisma
+ */
+export function mapCreateCollectionDataToPrisma(data: any): any {
+    return {
+        name: data.name,
+        emoji: data.emoji || null,
+        color: data.color || null,
+        description: data.description || null,
+        isPrivate: data.isPrivate || false,
+        isFavorite: data.isFavorite || false,
+        featuredImageId: data.featuredImage || null,
+        parentId: data.parentId || null,
+        settings: typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings,
+    };
+}
+
+/**
+ * Mapea datos de actualización de colección a formato Prisma
+ * @param data Datos para actualizar una colección
+ * @returns Objeto con formato para Prisma
+ */
+export function mapUpdateCollectionDataToPrisma(data: any): any {
+    const updateData: any = {};
+
+    // Solo incluir campos que estén presentes en los datos
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.emoji !== undefined) updateData.emoji = data.emoji;
+    if (data.color !== undefined) updateData.color = data.color;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
+    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+    if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+    if (data.parentId !== undefined) updateData.parentId = data.parentId;
+
+    // Convertir settings a string si es un objeto
+    if (data.settings !== undefined) {
+        updateData.settings = typeof data.settings === 'object'
+            ? JSON.stringify(data.settings)
+            : data.settings;
+    }
+
+    return updateData;
+}

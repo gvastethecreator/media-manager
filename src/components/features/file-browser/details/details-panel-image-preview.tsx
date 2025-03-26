@@ -4,7 +4,7 @@ import { getImageUrl } from '@/app/actions/images';
 import { cn } from '@/lib/utils';
 import { useImageViewer } from '@/store/image-viewer.store';
 import { Loader2, XCircle } from 'lucide-react';
-import Image from 'next/image';
+// No importamos Image de Next.js ya que está causando problemas
 import * as React from 'react';
 import type { ItemComponentProps } from './details-panel-types';
 
@@ -41,25 +41,39 @@ export function ImagePreview({ item }: ItemComponentProps) {
 					return;
 				}
 
-				// Intentar obtener la URL con un timeout
-				const url = await Promise.race([
-					getImageUrl(item.id),
-					new Promise<null>((_, reject) => {
-						setTimeout(() => {
-							reject(new Error('Timeout al cargar la imagen'));
-						}, 5000);
-					}),
-				]);
+				// Intentar obtener la URL sin timeout
+				try {
+					const url = await getImageUrl(item.id, { signal: abortController.signal });
 
-				if (!mounted) {
-					return;
-				}
+					if (!mounted) {
+						return;
+					}
 
-				if (url) {
-					setImageUrl(url);
-					setIsLoading(false);
-				} else {
-					throw new Error('No se pudo obtener la URL de la imagen');
+					if (url) {
+						// Verificar si la URL es válida haciendo una precarga
+						const img = new window.Image(); // Usar el constructor nativo del navegador
+						img.onload = () => {
+							if (mounted) {
+								setImageUrl(url);
+								setIsLoading(false);
+							}
+						};
+						img.onerror = () => {
+							if (mounted) {
+								console.error('❌ URL obtenida pero imagen no cargable:', url);
+								setError('La imagen no se puede cargar correctamente');
+								setIsLoading(false);
+							}
+						};
+						img.src = url;
+					} else {
+						throw new Error('No se pudo obtener la URL de la imagen');
+					}
+				} catch (error) {
+					if (!mounted) {
+						return;
+					}
+					throw error; // Propagar el error para ser manejado en el bloque catch principal
 				}
 			} catch (error) {
 				if (!mounted) {
@@ -118,49 +132,71 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	}, [loadImage]);
 
 	const handleClick = React.useCallback(() => {
-		openViewer([item], 0);
-	}, [item, openViewer]);
+		if (imageUrl) {
+			openViewer([item], 0);
+		}
+	}, [item, openViewer, imageUrl]);
+
+	// Usar el thumbnail existente mientras se carga la imagen completa
+	const hasThumbnail = !!item.url;
 
 	return (
-		<div className="relative w-full h-full overflow-hidden rounded-md aspect-video group">
-			{isLoading && !imageUrl && (
-				<div className="absolute inset-0 flex items-center justify-center bg-muted">
-					<div className="text-center">
-						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
-						<p className="text-xs text-muted-foreground">Cargando imagen...</p>
+		<div className="relative w-full overflow-hidden rounded-md aspect-square sm:aspect-video group">
+			{/* Mostrar thumbnail mientras carga si está disponible */}
+			{isLoading && hasThumbnail && (
+				<div className="absolute inset-0">
+					<img
+						src={item.url}
+						alt={item.name || 'Miniatura de la imagen'}
+						className="w-full h-full object-contain bg-background/50 filter blur-[1px] brightness-75"
+					/>
+					<div className="absolute top-2 right-2 bg-background/70 rounded-full p-1">
+						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
 					</div>
 				</div>
 			)}
 
+			{/* Indicador de carga si no hay thumbnail */}
+			{isLoading && !hasThumbnail && !imageUrl && (
+				<div className="absolute inset-0 flex items-center justify-center bg-muted/80">
+					<div className="text-center">
+						<Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto mb-1" />
+						<p className="text-[10px] text-muted-foreground">Cargando...</p>
+					</div>
+				</div>
+			)}
+
+			{/* Mensaje de error */}
 			{error && !imageUrl && (
 				<div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-					<div className="text-center p-4 max-w-xs">
-						<XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-						<p className="text-sm text-destructive font-medium mb-1">Error al cargar la imagen</p>
-						<p className="text-xs text-muted-foreground">{error}</p>
+					<div className="text-center p-2 max-w-[200px]">
+						<XCircle className="w-5 h-5 text-destructive mx-auto mb-1" />
+						<p className="text-[11px] text-destructive font-medium mb-0.5">Error al cargar</p>
+						<p className="text-[9px] text-muted-foreground leading-tight">{error}</p>
 					</div>
 				</div>
 			)}
 
+			{/* Imagen completa */}
 			{imageUrl && (
-				<Image
-					src={imageUrl}
-					alt={item.name || 'Vista previa de imagen'}
-					fill
-					className={cn(
-						'object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]',
-						isLoading && 'opacity-0',
-						!isLoading && 'opacity-100'
-					)}
-					onClick={handleClick}
-					sizes="(max-width: 640px) 100vw, 640px"
-					priority
-					onLoad={() => setIsLoading(false)}
-					onError={() => {
-						setIsLoading(false);
-						setError('Error al mostrar la imagen. Formato no soportado por el navegador.');
-					}}
-				/>
+				<div className="relative w-full h-full">
+					<img
+						src={imageUrl}
+						alt={item.name || 'Vista previa de imagen'}
+						className={cn(
+							'w-full h-full object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]',
+							isLoading && 'opacity-0',
+							!isLoading && 'opacity-100'
+						)}
+						onClick={handleClick}
+						onLoad={() => setIsLoading(false)}
+						onError={() => {
+							console.error('❌ Error al renderizar imagen en el DOM:', imageUrl);
+							setIsLoading(false);
+							setError('Error al mostrar la imagen');
+						}}
+					/>
+				</div>
 			)}
 		</div>
 	);
