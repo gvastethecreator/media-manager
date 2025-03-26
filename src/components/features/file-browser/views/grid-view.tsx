@@ -1,11 +1,10 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { FileItem } from '@/types/file-item';
-import { ImageIcon, Meh, Star } from 'lucide-react';
+import { Meh, Star } from 'lucide-react';
 import type * as React from 'react';
-import { memo, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
@@ -37,6 +36,9 @@ export const GridView = memo(function GridView({
 }: GridViewProps) {
 	const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
+	// Usamos un ref para capturar el botón
+	const buttonRef = useRef<HTMLButtonElement>(null);
+
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
@@ -56,9 +58,27 @@ export const GridView = memo(function GridView({
 		setMousePosition({ x: 0, y: 0 });
 	};
 
+	// Verificar si hay acciones de contexto disponibles
+	useEffect(() => {
+		// Registrar el elemento para eventos de contexto nativo si es necesario
+		const button = buttonRef.current;
+		if (button) {
+			// Solo para propósitos de depuración - comprobar que se detectan los eventos
+			const handleContextMenuNative = (e: MouseEvent) => {
+				console.log('Evento contextmenu nativo en GridView para:', item.name);
+			};
+
+			button.addEventListener('contextmenu', handleContextMenuNative);
+			return () => {
+				button.removeEventListener('contextmenu', handleContextMenuNative);
+			};
+		}
+	}, [item]);
+
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
+		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
 			<button
+				ref={buttonRef}
 				type="button"
 				className={cn(
 					'relative w-full h-full overflow-hidden group text-left',
@@ -69,11 +89,13 @@ export const GridView = memo(function GridView({
 				onClick={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+					console.log('Click en GridView para:', item.name);
 					onClick?.(item);
 				}}
 				onDoubleClick={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+					console.log('Double click en GridView para:', item.name);
 					onDoubleClick?.(item);
 				}}
 				onKeyDown={handleKeyDown}

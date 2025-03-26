@@ -138,32 +138,35 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 	// Manejador personalizado para el doble clic en ítems
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
+			console.log('Double click en item:', item.id, item.name, item.type);
+
 			// Verificar que sea una imagen
 			if (item && item.type === 'image') {
 				// Convertir FileItem a ImageItem (según la interfaz de FileViewer.tsx)
 				const imageItems = items
-					.filter(item => item.type === 'image')
-					.map(item => ({
-						id: item.id,
-						name: item.name,
-						type: item.type,
-						path: item.path,
-						size: item.size,
-						width: item.width || null,
-						height: item.height || null,
-						url: undefined, // Se llenará en el visor
-						thumbnail: item.thumbnail,
-						src: undefined, // Se llenará en el visor
-						alt: item.name,
-						mimeType: undefined, // Se extraerá del metadata
-						metadata: item.metadata,
-						parsedMetadata: undefined // Se extraerá del metadata en el visor
+					.filter(fileItem => fileItem.type === 'image')
+					.map(fileItem => ({
+						id: fileItem.id,
+						name: fileItem.name,
+						type: fileItem.type,
+						path: fileItem.path,
+						size: fileItem.size,
+						width: fileItem.width || null,
+						height: fileItem.height || null,
+						url: fileItem.thumbnail || undefined,
+						thumbnail: fileItem.thumbnail,
+						src: fileItem.thumbnail || undefined,
+						alt: fileItem.name,
+						mimeType: undefined,
+						metadata: fileItem.metadata,
+						parsedMetadata: undefined
 					}));
 
 				// Encontrar el índice del elemento seleccionado
 				const initialIndex = imageItems.findIndex(img => img.id === item.id);
 
 				if (initialIndex !== -1) {
+					console.log('Abriendo visor con', imageItems.length, 'imágenes, índice inicial:', initialIndex);
 					// Establecer los datos del visor
 					setViewerImages(imageItems);
 					setViewerInitialIndex(initialIndex);
