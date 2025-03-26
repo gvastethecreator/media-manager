@@ -4,12 +4,12 @@
  */
 
 import {
-    CharacterAlignmentEnum,
-    CharacterCategoryEnum,
-    CharacterClassEnum,
-    CharacterRaceEnum,
-    CharacterRelationshipTypeEnum,
-    CharacterSortOptionEnum,
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterRelationshipType,
+    CharacterSortOption,
 } from '@/types/entities/character/enums';
 import * as z from 'zod';
 
@@ -47,7 +47,7 @@ export const characterFilterSchema = z.object({
 export const characterRelationshipSchema = z.object({
     characterId: z.string().uuid(),
     name: z.string().min(1),
-    type: z.nativeEnum(CharacterRelationshipTypeEnum),
+    type: z.nativeEnum(CharacterRelationshipType),
     strength: z.number().int().min(0).max(100),
     notes: z.string().optional(),
 });
@@ -62,17 +62,17 @@ export const createCharacterSchema = z.object({
     description: z.string().max(500).nullable().optional(),
     shortcut: z.string().max(20).nullable().optional(),
     level: z.union([z.number().int().positive(), z.string().min(1)]).optional(),
-    class: z.nativeEnum(CharacterClassEnum).nullable().optional(),
-    race: z.nativeEnum(CharacterRaceEnum).nullable().optional(),
-    alignment: z.nativeEnum(CharacterAlignmentEnum).nullable().optional(),
+    class: z.nativeEnum(CharacterClass).nullable().optional(),
+    race: z.nativeEnum(CharacterRace).nullable().optional(),
+    alignment: z.nativeEnum(CharacterAlignment).nullable().optional(),
     backstory: z.string().max(5000).nullable().optional(),
     stats: z.string().or(characterStatsSchema).optional(),
-    sortBy: z.nativeEnum(CharacterSortOptionEnum).nullable().optional(),
+    sortBy: z.nativeEnum(CharacterSortOption).nullable().optional(),
     psychologicalProfile: z.string().max(1000).nullable().optional(),
     socialProfile: z.string().max(1000).nullable().optional(),
     featuredImage: z.string().uuid().nullable().optional(),
     isFavorite: z.boolean().optional(),
-    category: z.nativeEnum(CharacterCategoryEnum).nullable().optional(),
+    category: z.nativeEnum(CharacterCategory).nullable().optional(),
     presetId: z.string().uuid().nullable().optional(),
 });
 
@@ -88,13 +88,13 @@ export const updateCharacterSchema = createCharacterSchema.partial().extend({
  */
 export const characterSearchSchema = z.object({
     term: z.string().optional(),
-    class: z.nativeEnum(CharacterClassEnum).optional(),
-    race: z.nativeEnum(CharacterRaceEnum).optional(),
-    alignment: z.nativeEnum(CharacterAlignmentEnum).optional(),
-    category: z.nativeEnum(CharacterCategoryEnum).optional(),
+    class: z.nativeEnum(CharacterClass).optional(),
+    race: z.nativeEnum(CharacterRace).optional(),
+    alignment: z.nativeEnum(CharacterAlignment).optional(),
+    category: z.nativeEnum(CharacterCategory).optional(),
     levelMin: z.number().int().positive().optional(),
     levelMax: z.number().int().positive().optional(),
-    sortBy: z.nativeEnum(CharacterSortOptionEnum).optional(),
+    sortBy: z.nativeEnum(CharacterSortOption).optional(),
     isFavorite: z.boolean().optional(),
     limit: z.number().int().positive().optional(),
     offset: z.number().int().min(0).optional(),
