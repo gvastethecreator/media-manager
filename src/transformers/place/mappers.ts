@@ -246,3 +246,60 @@ export function prepareVisualConfigUpdateData(data: PlaceVisualConfigUpdateData)
 export function mapVisualConfig(config: PlaceVisualConfig) {
   return parseVisualConfig(config);
 }
+
+/**
+ * Mapea datos de creación de lugar a formato Prisma
+ * @param data Datos para crear un lugar
+ * @returns Objeto con formato para Prisma
+ */
+export function mapCreatePlaceDataToPrisma(data: any): any {
+    return {
+        name: data.name,
+        emoji: data.emoji || null,
+        color: data.color || null,
+        description: data.description || null,
+        type: data.type || null,
+        location: data.location || null,
+        coordinates: data.coordinates || null,
+        tags: Array.isArray(data.tags) ? data.tags.join(',') : data.tags || null,
+        isFavorite: data.isFavorite || false,
+        featuredImageId: data.featuredImage || null,
+        parentId: data.parentId || null,
+        details: typeof data.details === 'object' ? JSON.stringify(data.details) : data.details,
+    };
+}
+
+/**
+ * Mapea datos de actualización de lugar a formato Prisma
+ * @param data Datos para actualizar un lugar
+ * @returns Objeto con formato para Prisma
+ */
+export function mapUpdatePlaceDataToPrisma(data: any): any {
+    const updateData: any = {};
+
+    // Solo incluir campos que estén presentes en los datos
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.emoji !== undefined) updateData.emoji = data.emoji;
+    if (data.color !== undefined) updateData.color = data.color;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.coordinates !== undefined) updateData.coordinates = data.coordinates;
+
+    if (data.tags !== undefined) {
+        updateData.tags = Array.isArray(data.tags) ? data.tags.join(',') : data.tags;
+    }
+
+    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+    if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+    if (data.parentId !== undefined) updateData.parentId = data.parentId;
+
+    // Convertir details a string si es un objeto
+    if (data.details !== undefined) {
+        updateData.details = typeof data.details === 'object'
+            ? JSON.stringify(data.details)
+            : data.details;
+    }
+
+    return updateData;
+}

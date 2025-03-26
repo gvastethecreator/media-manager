@@ -5,19 +5,18 @@ import { parseMetadata } from '@/app/actions/metadata';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
-import type { ImageItem } from '@/types/image-item';
 import type { FileMetadata } from '@/types/metadata.types';
-import { Bug, Camera, FileImage, Info, Loader2, MapPin as MapIcon, Settings2, Sparkles } from 'lucide-react';
+import { Bug, FileImage, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
-import { ExifInfo, GPSInfo, IPTCInfo, TechnicalInfo, XMPInfo } from './details-panel-metadata-sections';
+import { ImagePreview } from './details-panel-image-preview';
+import { TechnicalInfo } from './details-panel-metadata-sections';
 import type { DetailsPanelProps } from './details-panel-types';
 import { getMetadata } from './details-panel-utils';
 
@@ -27,19 +26,6 @@ const detailsLogger = {
 	warn: (message: string, data?: unknown) => console.warn(`[DetailsPanel] ${message}`, data || ''),
 	error: (message: string, data?: unknown) => console.error(`[DetailsPanel] ${message}`, data || ''),
 };
-
-// Componente para previsualización de imagen
-function ImagePreview({ item }: { item: ImageItem }) {
-	return (
-		<div className="w-full h-full flex items-center justify-center bg-black/30">
-			{item.url ? (
-				<img src={item.url} alt={item.name} className="max-h-full max-w-full object-contain" />
-			) : (
-				<FileImage className="h-12 w-12 text-muted" />
-			)}
-		</div>
-	);
-}
 
 // Componente temporal para secciones que faltan
 function RelatedEntities() {
@@ -320,244 +306,111 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	const hasGPS = metadata?.exif?.gps !== undefined;
 
 	return (
-		<div className="flex flex-col h-full bg-background">
-			{/* Cabecera con vista previa */}
-			<div className="p-3 pb-0">
-				<Card className="overflow-hidden">
-					<div className="aspect-video bg-black">
-						<ImagePreview item={item} />
+		<Card className="h-full flex flex-col border-border/30 rounded-md">
+			{/* Header del panel */}
+			<CardHeader className="p-3 pb-2 border-b border-border/10 space-y-1">
+				<CardTitle className="flex justify-between items-center">
+					<span className="text-sm font-medium">Detalles</span>
+					{item && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-6 w-6 rounded-md hover:bg-secondary/50"
+							onClick={handleDebug}
+						>
+							<Bug className="h-3.5 w-3.5 text-muted-foreground" />
+						</Button>
+					)}
+				</CardTitle>
+			</CardHeader>
+
+			{/* Contenido condicional */}
+			{!item ? (
+				// Mensaje cuando no hay ítem seleccionado
+				<div className="flex-1 flex items-center justify-center p-4">
+					<div className="text-center">
+						<FileImage className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+						<h3 className="text-sm font-medium mb-1">Sin selección</h3>
+						<p className="text-xs text-muted-foreground">Selecciona un archivo para ver sus detalles</p>
 					</div>
-					<CardContent className="p-2 bg-muted/30">
-						<h2 className="text-sm font-medium truncate">{item.name}</h2>
-						<p className="text-xs text-muted-foreground truncate">{item.path || 'Sin ruta especificada'}</p>
-						{hasAIGeneration && metadata?.generation && (
-							<div className="mt-1">
-								<Badge
-									variant="outline"
-									className={cn(
-										'text-[10px] h-5 px-2 py-0 inline-flex items-center',
-										metadata.generation.type?.toLowerCase().includes('stable') && 'bg-blue-500/10 text-blue-500',
-										metadata.generation.type?.toLowerCase().includes('comfy') && 'bg-green-500/10 text-green-500',
-										metadata.generation.type?.toLowerCase().includes('invoke') && 'bg-purple-500/10 text-purple-500',
-										metadata.generation.type?.toLowerCase().includes('novel') && 'bg-pink-500/10 text-pink-500',
-										metadata.generation.type?.toLowerCase().includes('midjourney') &&
-											'bg-indigo-500/10 text-indigo-500',
-										metadata.generation.type?.toLowerCase().includes('dall') && 'bg-orange-500/10 text-orange-500'
-									)}
+				</div>
+			) : isProcessing ? (
+				// Estado de carga
+				<div className="flex-1 flex items-center justify-center p-4">
+					<div className="text-center">
+						<Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto mb-2" />
+						<p className="text-xs text-muted-foreground">Cargando información...</p>
+					</div>
+				</div>
+			) : (
+				// Panel de detalles para el ítem seleccionado
+				<div className="flex-1 flex flex-col overflow-hidden">
+					{/* Tabs de navegación */}
+					<div className="px-3 pt-1">
+						<Tabs
+							value={activeTab}
+							onValueChange={setActiveTab}
+							className="w-full"
+						>
+							<TabsList className="h-7 p-0.5 bg-muted/50 w-full grid grid-cols-4">
+								<TabsTrigger
+									value="info"
+									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
 								>
-									<Sparkles className="h-3 w-3 mr-1" />
-									Generada con {getGeneratorType(metadata.generation as unknown)}
-								</Badge>
-							</div>
-						)}
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* Tabs de navegación */}
-			<div className="px-3 pt-3">
-				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-					<TabsList className="w-full grid grid-cols-4 h-9">
-						<TabsTrigger value="info" className="text-xs">
-							<Info className="h-3.5 w-3.5 mr-1.5" />
-							Básica
-						</TabsTrigger>
-						<TabsTrigger
-							value="ai"
-							className={cn('text-xs', !hasAIGeneration && 'text-muted-foreground/70')}
-							disabled={!hasAIGeneration}
-						>
-							<Sparkles className="h-3.5 w-3.5 mr-1.5" />
-							IA
-						</TabsTrigger>
-						<TabsTrigger value="tech" className="text-xs">
-							<Settings2 className="h-3.5 w-3.5 mr-1.5" />
-							Técnica
-						</TabsTrigger>
-						<TabsTrigger
-							value="geo"
-							className={cn('text-xs', !hasGPS && 'text-muted-foreground/70')}
-							disabled={!hasGPS}
-						>
-							<MapIcon className="h-3.5 w-3.5 mr-1.5" />
-							Geo
-						</TabsTrigger>
-					</TabsList>
-				</Tabs>
-			</div>
-
-			{/* Botón de depuración */}
-			<div className="px-3 pt-2">
-				<Button
-					variant="outline"
-					size="sm"
-					className="w-full text-xs bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-700"
-					onClick={handleDebug}
-				>
-					<Bug className="h-4 w-4 mr-2" />
-					Depurar datos en consola (F12)
-				</Button>
-			</div>
-
-			{/* Contenido principal */}
-			<ScrollArea className="flex-1 px-3 pt-3">
-				{isProcessing ? (
-					<div className="flex flex-col items-center justify-center py-8">
-						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
-						<p className="text-sm text-muted-foreground">Cargando información...</p>
-					</div>
-				) : (
-					<div className="space-y-4 pb-4">
-						{activeTab === 'info' && (
-							<div className="space-y-4">
-								<Card>
-									<CardHeader className="p-3 pb-1">
-										<CardTitle className="text-sm flex items-center">
-											<Info className="h-4 w-4 mr-2 text-blue-500" />
-											Información Básica
-										</CardTitle>
-									</CardHeader>
-									<CardContent className="p-3 pt-1">
-										<BasicInfo item={item} metadata={metadata} />
-									</CardContent>
-								</Card>
-
-								<Card>
-									<CardHeader className="p-3 pb-1">
-										<CardTitle className="text-sm flex items-center">
-											<Camera className="h-4 w-4 mr-2 text-purple-500" />
-											Entidades Relacionadas
-										</CardTitle>
-									</CardHeader>
-									<CardContent className="p-3 pt-1">
-										<RelatedEntities />
-									</CardContent>
-								</Card>
-							</div>
-						)}
-
-						{activeTab === 'ai' && (
-							<Card>
-								<CardHeader className="p-3 pb-1">
-									<CardTitle className="text-sm flex items-center">
-										<Sparkles className="h-4 w-4 mr-2 text-amber-500" />
-										Generación por IA
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="p-3 pt-1">
-									{metadata ? (
-										<AIGenerationInfo metadata={metadata} />
-									) : (
-										<div className="p-3 border border-dashed border-amber-500/50 rounded-md">
-											<p className="text-xs text-muted-foreground">
-												No se encontró información de generación por IA para esta imagen.
-											</p>
-										</div>
-									)}
-								</CardContent>
-							</Card>
-						)}
-
-						{activeTab === 'tech' && (
-							<div className="space-y-4">
-								{metadata ? (
-									<>
-										<Card>
-											<CardHeader className="p-3 pb-1">
-												<CardTitle className="text-sm flex items-center">
-													<Settings2 className="h-4 w-4 mr-2 text-green-500" />
-													Información Técnica
-												</CardTitle>
-											</CardHeader>
-											<CardContent className="p-3 pt-1">
-												<TechnicalInfo metadata={metadata} />
-											</CardContent>
-										</Card>
-
-										{metadata.exif && (
-											<Card>
-												<CardHeader className="p-3 pb-1">
-													<CardTitle className="text-sm flex items-center">
-														<Camera className="h-4 w-4 mr-2 text-indigo-500" />
-														Información EXIF
-													</CardTitle>
-												</CardHeader>
-												<CardContent className="p-3 pt-1">
-													<ExifInfo metadata={metadata} />
-												</CardContent>
-											</Card>
+									General
+								</TabsTrigger>
+								<TabsTrigger
+									value="exif"
+									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
+								>
+									Técnica
+								</TabsTrigger>
+								<TabsTrigger
+									value="generation"
+									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
+									disabled={!metadata?.generation}
+								>
+									<div className="flex items-center gap-1">
+										IA
+										{metadata?.generation && (
+											<Badge
+												variant="outline"
+												className="h-3 px-1 text-[8px] bg-primary/5 hover:bg-primary/5 text-primary"
+											>
+												{getGeneratorType(metadata.generation)}
+											</Badge>
 										)}
-
-										{metadata.xmp && (
-											<Card>
-												<CardHeader className="p-3 pb-1">
-													<CardTitle className="text-sm flex items-center">
-														<FileImage className="h-4 w-4 mr-2 text-cyan-500" />
-														Información XMP
-													</CardTitle>
-												</CardHeader>
-												<CardContent className="p-3 pt-1">
-													<XMPInfo metadata={metadata} />
-												</CardContent>
-											</Card>
-										)}
-
-										{metadata.iptc && (
-											<Card>
-												<CardHeader className="p-3 pb-1">
-													<CardTitle className="text-sm flex items-center">
-														<FileImage className="h-4 w-4 mr-2 text-rose-500" />
-														Información IPTC
-													</CardTitle>
-												</CardHeader>
-												<CardContent className="p-3 pt-1">
-													<IPTCInfo metadata={metadata} />
-												</CardContent>
-											</Card>
-										)}
-									</>
-								) : (
-									<div className="p-4 border border-dashed border-muted-foreground/30 rounded-md">
-										<p className="text-sm text-muted-foreground text-center">
-											No se encontró información técnica para esta imagen.
-										</p>
 									</div>
-								)}
-							</div>
-						)}
-
-						{activeTab === 'geo' && (
-							<Card>
-								<CardHeader className="p-3 pb-1">
-									<CardTitle className="text-sm flex items-center">
-										<MapIcon className="h-4 w-4 mr-2 text-teal-500" />
-										Información Geográfica
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="p-3 pt-1">
-									{metadata?.exif?.gps ? (
-										<GPSInfo metadata={metadata} />
-									) : (
-										<div className="p-3 border border-dashed border-muted-foreground/30 rounded-md">
-											<p className="text-xs text-muted-foreground">
-												Esta imagen no contiene información de ubicación GPS.
-											</p>
-										</div>
-									)}
-								</CardContent>
-							</Card>
-						)}
-
-						{!metadata && !isProcessing && activeTab !== 'info' && (
-							<div className="p-4 border border-dashed border-amber-500/50 rounded-md">
-								<p className="text-sm text-muted-foreground text-center">
-									No se encontró información de metadatos para esta imagen.
-								</p>
-							</div>
-						)}
+								</TabsTrigger>
+								<TabsTrigger
+									value="related"
+									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
+								>
+									Relacionados
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</div>
-				)}
-			</ScrollArea>
-		</div>
+
+					{/* Contenedor de scroll para el contenido */}
+					<ScrollArea className="flex-1 overflow-auto">
+						<div className="p-3 pb-6 space-y-3">
+							{/* Vista previa de imagen - usar el componente importado */}
+							<div className="w-full aspect-square sm:aspect-video bg-muted/30 rounded-md overflow-hidden">
+								<ImagePreview item={item} />
+							</div>
+
+							{/* Contenido según la pestaña activa */}
+							{activeTab === 'info' && <BasicInfo item={item} metadata={metadata} />}
+							{activeTab === 'exif' && <TechnicalInfo metadata={metadata} />}
+							{activeTab === 'generation' && metadata?.generation && (
+								<AIGenerationInfo generation={metadata.generation} />
+							)}
+							{activeTab === 'related' && <RelatedEntities />}
+						</div>
+					</ScrollArea>
+				</div>
+			)}
+		</Card>
 	);
 }
