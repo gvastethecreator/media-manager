@@ -19,6 +19,14 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	const loadAttemptRef = React.useRef(0);
 	const MAX_ATTEMPTS = 3;
 
+	// Añadir logging para depuración
+	React.useEffect(() => {
+		console.log('ImagePreview renderizado para:', item.id, 'URL actual:', imageUrl, 'Thumbnail inicial:', item.url);
+	}, [item, imageUrl]);
+
+	// Verificar si hay una URL válida en el item
+	const hasThumbnail = React.useMemo(() => !!item.url && typeof item.url === 'string', [item.url]);
+
 	// Usar useCallback para la función de carga para evitar recreaciones innecesarias
 	const loadImage = React.useCallback(
 		async (attemptOverride?: number) => {
@@ -28,6 +36,12 @@ export function ImagePreview({ item }: ItemComponentProps) {
 			try {
 				setIsLoading(true);
 				setError(null);
+
+				// Si ya tenemos un thumbnail, usarlo como fallback mientras cargamos
+				if (hasThumbnail && !imageUrl) {
+					console.log('Usando thumbnail existente como fallback mientras carga la imagen completa:', item.url);
+					// No cambiamos isLoading aquí para seguir mostrando el indicador
+				}
 
 				// Incrementar contador de intentos
 				const currentAttempt = attemptOverride ?? loadAttemptRef.current + 1;
@@ -43,6 +57,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 				// Intentar obtener la URL sin timeout
 				try {
+					console.log(`⏳ Intentando cargar imagen (intento ${currentAttempt}/${MAX_ATTEMPTS}):`, item.id);
 					const url = await getImageUrl(item.id, { signal: abortController.signal });
 
 					if (!mounted) {
@@ -50,10 +65,12 @@ export function ImagePreview({ item }: ItemComponentProps) {
 					}
 
 					if (url) {
+						console.log('✅ URL obtenida:', url);
 						// Verificar si la URL es válida haciendo una precarga
 						const img = new window.Image(); // Usar el constructor nativo del navegador
 						img.onload = () => {
 							if (mounted) {
+								console.log('✅ Imagen precargada correctamente');
 								setImageUrl(url);
 								setIsLoading(false);
 							}
@@ -101,7 +118,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				abortController.abort();
 			};
 		},
-		[item.id]
+		[item.id, imageUrl, hasThumbnail]
 	);
 
 	// Efecto para cargar la imagen cuando cambia el ID
@@ -110,6 +127,12 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		setError(null);
 		setIsLoading(true);
 		loadAttemptRef.current = 0;
+
+		// Si hay un thumbnail en el item, establecerlo como URL inicial
+		if (hasThumbnail) {
+			// Establecer el thumbnail como URL inicial mientras cargamos la imagen completa
+			setImageUrl(item.url || null);
+		}
 
 		// Iniciar carga directamente desde aquí
 		let cleanupFn: (() => void) | undefined;
@@ -129,17 +152,16 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				cleanupFn();
 			}
 		};
-	}, [loadImage]);
+	}, [loadImage, item.url, hasThumbnail]);
 
 	const handleClick = React.useCallback(() => {
 		if (imageUrl) {
+			console.log('Click en ImagePreview, abriendo visor para:', item.id);
 			openViewer([item], 0);
 		}
 	}, [item, openViewer, imageUrl]);
 
-	// Usar el thumbnail existente mientras se carga la imagen completa
-	const hasThumbnail = !!item.url;
-
+	// Simplificamos la renderización para claridad
 	return (
 		<div className="relative w-full overflow-hidden rounded-md aspect-square sm:aspect-video group">
 			{/* Mostrar thumbnail mientras carga si está disponible */}
@@ -177,7 +199,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				</div>
 			)}
 
-			{/* Imagen completa */}
+			{/* Imagen completa o thumbnail */}
 			{imageUrl && (
 				<div className="relative w-full h-full">
 					<img
@@ -185,11 +207,14 @@ export function ImagePreview({ item }: ItemComponentProps) {
 						alt={item.name || 'Vista previa de imagen'}
 						className={cn(
 							'w-full h-full object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]',
-							isLoading && 'opacity-0',
+							isLoading && !hasThumbnail && 'opacity-0',
 							!isLoading && 'opacity-100'
 						)}
 						onClick={handleClick}
-						onLoad={() => setIsLoading(false)}
+						onLoad={() => {
+							console.log('Imagen cargada en el DOM');
+							setIsLoading(false);
+						}}
 						onError={() => {
 							console.error('❌ Error al renderizar imagen en el DOM:', imageUrl);
 							setIsLoading(false);

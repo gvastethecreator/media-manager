@@ -10,7 +10,7 @@ import {
 import { useFavoriteStore } from '@/store/entities/favorite';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
 	AlbumsSubmenu,
@@ -28,11 +28,15 @@ import type { FileContextMenuProps } from './types';
 
 export function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
 	// Estado para controlar si el menú está abierto (necesario para ContextMenu)
-
-	const [, setIsMenuOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const { toggleFavorite, isFavorited } = useFavoriteStore();
 	const { loadingStates, handleOpenChange } = useEntityLoader();
 	const { selectedItems } = useFileManager();
+
+	// Añadir logging para depuración
+	useEffect(() => {
+		console.log('FileContextMenu renderizado para:', file.name, file.id);
+	}, [file]);
 
 	const handleFavoriteToggle = useCallback(() => {
 		toggleFavorite(file.id);
@@ -45,12 +49,23 @@ export function FileContextMenu({ file, children, onAction }: FileContextMenuPro
 		return isSelected ? 'Desmarcar' : 'Marcar';
 	}, [selectedItems, file.id]);
 
+	// Logging para eventos de apertura/cierre del menú
+	const handleMenuOpenChange = useCallback((open: boolean) => {
+		console.log('Menú contextual cambió estado a:', open ? 'abierto' : 'cerrado', 'para:', file.name);
+		setIsMenuOpen(open);
+	}, [file.name]);
+
 	return (
-		<ContextMenu onOpenChange={setIsMenuOpen}>
+		<ContextMenu onOpenChange={handleMenuOpenChange}>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent className="w-64">
 				{/* Acciones principales */}
-				<ContextMenuItem onClick={() => onAction('preview', file)}>
+				<ContextMenuItem
+					onClick={() => {
+						console.log('Acción de menú: preview para', file.name);
+						onAction('preview', file);
+					}}
+				>
 					<ImageIcon className="mr-2 h-4 w-4" />
 					Ver imagen
 				</ContextMenuItem>
