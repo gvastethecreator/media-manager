@@ -8,8 +8,8 @@ export {
     extendPlace,
     extendPlaces,
     generatePlaceColor,
-    generatePlaceEmoji,
-    mapVisualConfig,
+    generatePlaceEmoji, mapCreatePlaceDataToPrisma,
+    mapUpdatePlaceDataToPrisma, mapVisualConfig,
     prepareCreatePlaceData,
     prepareUpdatePlaceData,
     prepareVisualConfigUpdateData

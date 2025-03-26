@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Meteors } from '@/components/ui/meteors';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type React from 'react';
@@ -38,7 +37,6 @@ export function StatsContainer({ children }: { children: React.ReactNode }) {
 	return (
 		<ScrollArea className="h-full w-full p-0">
 			<div className="p-0 w-full h-full">
-				<Meteors />
 				<Card className="border-none rounded-none">
 					<CardContent className="p-0">{children}</CardContent>
 				</Card>

@@ -11,11 +11,17 @@ import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageViewer } from '@/store/image-viewer.store';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Estilos para el panel colapsado
 import './nav-panel-collapsed.css';
 import './right-panel-collapsed.css';
+
+// Componentes memoizados para reducir renderizados
+const MemoizedNavPanel = React.memo(NavPanel);
+const MemoizedRightPanel = React.memo(RightPanel);
+const MemoizedViewContainer = React.memo(ViewContainer);
+const MemoizedViewToolbar = React.memo(ViewToolbar);
 
 export function MainLayout() {
 	const [isResizing, setIsResizing] = useState(false);
@@ -121,16 +127,42 @@ export function MainLayout() {
 		};
 	}, [isRightPanelCollapsed, setIsRightPanelCollapsed, isNavPanelCollapsed, setIsNavPanelCollapsed]);
 
-	// Calcular tamaños por defecto para los paneles
-	const getDefaultSizes = () => {
+	// Calcular tamaños por defecto para los paneles usando useMemo para evitar recálculos innecesarios
+	const defaultSizes = useMemo(() => {
 		const navDefault = isNavPanelCollapsed ? 4 : navPanelSize;
 		const rightDefault = isVisible ? (isRightPanelCollapsed ? 4 : rightPanelSize) : 0;
 		const centerDefault = 100 - navDefault - (isVisible ? rightDefault : 0);
 
 		return [navDefault, centerDefault, rightDefault];
-	};
+	}, [isNavPanelCollapsed, navPanelSize, isRightPanelCollapsed, rightPanelSize, isVisible]);
 
-	const defaultSizes = getDefaultSizes();
+	// Estilos memorizados para evitar recálculos
+	const navPanelStyle = useMemo(() => ({
+		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
+	}), [isResizing]);
+
+	const rightPanelStyle = useMemo(() => ({
+		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
+	}), [isResizing]);
+
+	const contentStyle = useMemo(() => ({
+		opacity: isResizing ? 0 : 1,
+		visibility: isResizing ? 'hidden' as const : 'visible' as const,
+		transition: 'opacity 0.2s ease-in-out'
+	}), [isResizing]);
+
+	const resizingOverlayStyle = useMemo(() => ({
+		backdropFilter: 'blur(2px)',
+		WebkitBackdropFilter: 'blur(2px)',
+	}), []);
+
+	// Datos de imagen procesados para evitar procesarlos en cada renderizado
+	const processedImages = useMemo(() => {
+		return images.map((img) => ({
+			...img,
+			parsedMetadata: img.metadata ? JSON.parse(img.metadata) : undefined,
+		}));
+	}, [images]);
 
 	return (
 		<div className="flex h-screen w-full bg-background">
@@ -142,9 +174,7 @@ export function MainLayout() {
 					minSize={isNavPanelCollapsed ? 4 : 15}
 					maxSize={30}
 					className={cn('bg-background-primary transition-all', isNavPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
-					style={{
-						transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
-					}}
+					style={navPanelStyle}
 					collapsible
 					collapsedSize={4}
 					isCollapsed={isNavPanelCollapsed}
@@ -153,7 +183,7 @@ export function MainLayout() {
 					onResize={handleNavPanelResize}
 				>
 					{navData && (
-						<NavPanel
+						<MemoizedNavPanel
 							initialData={navData}
 							isCollapsed={isNavPanelCollapsed}
 							onToggleCollapse={toggleNavPanelCollapse}
@@ -178,7 +208,7 @@ export function MainLayout() {
 					className="h-full w-full"
 				>
 					<div className="flex flex-col h-full">
-						<ViewToolbar
+						<MemoizedViewToolbar
 							isRightPanelCollapsed={isRightPanelCollapsed}
 							toggleRightPanelCollapse={toggleRightPanelCollapse}
 							isRightPanelVisible={isVisible}
@@ -186,22 +216,15 @@ export function MainLayout() {
 						<div ref={contentWrapperRef} className="flex-1 relative resize-container">
 							<div
 								className="absolute inset-0 w-full h-full view-container-transition"
-								style={{
-									opacity: isResizing ? 0 : 1,
-									visibility: isResizing ? 'hidden' : 'visible',
-									transition: 'opacity 0.2s ease-in-out'
-								}}
+								style={contentStyle}
 							>
-								<ViewContainer isResizing={isResizing} />
+								<MemoizedViewContainer isResizing={isResizing} />
 							</div>
 
 							{isResizing && (
 								<div
 									className="absolute inset-0 w-full h-full"
-									style={{
-										backdropFilter: 'blur(2px)',
-										WebkitBackdropFilter: 'blur(2px)',
-									}}
+									style={resizingOverlayStyle}
 								/>
 							)}
 						</div>
@@ -225,9 +248,7 @@ export function MainLayout() {
 							minSize={isRightPanelCollapsed ? 4 : 20}
 							maxSize={40}
 							className={cn('bg-background-primary transition-all', isRightPanelCollapsed && 'min-w-[60px] max-w-[60px]')}
-							style={{
-								transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
-							}}
+							style={rightPanelStyle}
 							collapsible
 							collapsedSize={4}
 							isCollapsed={isRightPanelCollapsed}
@@ -235,17 +256,14 @@ export function MainLayout() {
 							onExpand={handleRightPanelExpand}
 							onResize={handleRightPanelResize}
 						>
-							<RightPanel isCollapsed={isRightPanelCollapsed} onToggleCollapse={toggleRightPanelCollapse} />
+							<MemoizedRightPanel isCollapsed={isRightPanelCollapsed} onToggleCollapse={toggleRightPanelCollapse} />
 						</ResizablePanel>
 					</>
 				)}
 			</ResizablePanelGroup>
 
 			<FileViewer
-				images={images.map((img) => ({
-					...img,
-					parsedMetadata: img.metadata ? JSON.parse(img.metadata) : undefined,
-				}))}
+				images={processedImages}
 				initialIndex={currentIndex}
 				isOpen={isOpen}
 				onClose={closeViewer}
